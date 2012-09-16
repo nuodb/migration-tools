@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+           targetNamespace="http://nuodb.com/schema/migration" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:migration="http://nuodb.com/schema/migration">
+    <xs:element name="migration" type="migration:migration"/>
+    <xs:complexType name="output">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute type="xs:string" name="type" use="optional"/>
+                <xs:attribute type="xs:string" name="path" use="optional"/>
+                <xs:anyAttribute processContents="lax" namespace="##other"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="table">
+        <xs:sequence>
+            <xs:element type="migration:column" name="column" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="filter" use="optional"/>
+        <xs:attribute type="xs:boolean" name="include" use="optional"/>
+        <xs:attribute type="xs:string" name="type" use="optional" default="true"/>
+    </xs:complexType>
+    <xs:complexType name="connection">
+        <xs:sequence>
+            <xs:element type="xs:string" name="catalog" minOccurs="0"/>
+            <xs:element type="xs:string" name="schema" minOccurs="0"/>
+            <xs:element type="xs:string" name="driver"/>
+            <xs:element type="xs:string" name="url"/>
+            <xs:element type="xs:string" name="username" minOccurs="0"/>
+            <xs:element type="xs:string" name="password" minOccurs="0"/>
+            <xs:element type="migration:property" name="property" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:ID" name="id"/>
+        <xs:attribute type="xs:string" name="type" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="migration">
+        <xs:sequence>
+            <xs:element type="migration:connection" name="connection" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="migration:dump" name="dump" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="dump">
+        <xs:sequence>
+            <xs:element type="migration:table" name="table" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="migration:query" name="query" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="migration:output" name="output" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:ID" name="id" use="optional"/>
+        <xs:attribute type="xs:IDREF" name="connection" use="required"/>
+    </xs:complexType>
+    <xs:complexType name="column">
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:boolean" name="include" use="optional" default="true"/>
+    </xs:complexType>
+    <xs:complexType name="property">
+        <xs:sequence>
+            <xs:element type="xs:string" name="name"/>
+            <xs:element type="xs:string" name="value"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="query">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute type="xs:string" name="name" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+</xs:schema>

@@ -135,7 +135,7 @@ public class NuoDBDialect extends Dialect {
 
     @Override
     public boolean supportsVariableLimit() {
-        return false; // we can't bind offset or limit params
+        return false; // we can't define offset or limit params
     }
 
     @Override
