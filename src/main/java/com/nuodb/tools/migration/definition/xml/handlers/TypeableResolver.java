@@ -2,6 +2,7 @@ package com.nuodb.tools.migration.definition.xml.handlers;
 
 import com.nuodb.tools.migration.definition.Typeable;
 import com.nuodb.tools.migration.definition.xml.XmlConstants;
+import com.nuodb.tools.migration.definition.xml.XmlPersisterException;
 import com.nuodb.tools.migration.definition.xml.XmlReadContext;
 import com.nuodb.tools.migration.definition.xml.XmlReadHandler;
 import org.simpleframework.xml.stream.InputNode;
@@ -27,8 +28,12 @@ public class TypeableResolver implements XmlReadHandler<Typeable>, XmlConstants 
 
     @Override
     public Typeable read(InputNode input, Class<? extends Typeable> type, XmlReadContext context) {
-        return context.read(input, resolve(
-                input.getReference(), input.getName(), AttributesAccessor.get(input, TYPE_ATTRIBUTE)));
+        String alias = AttributesAccessor.get(input, TYPE_ATTRIBUTE);
+        Class<? extends Typeable> typeable = resolve(input.getReference(), input.getName(), alias);
+        if (typeable == null) {
+            throw new XmlPersisterException(String.format("Unable to resolve %1$s alias to class", alias));
+        }
+        return context.read(input, typeable);
     }
 
     protected Class<? extends Typeable> resolve(String namespace, String element, String alias) {

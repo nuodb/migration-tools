@@ -55,6 +55,7 @@ public class XmlPersisterBuilder implements XmlConstants {
                 new ByteArrayInputStream((
                         "<?xml version=\"1.0\"?>\n" +
                         "<migration xmlns=\"http://nuodb.com/schema/migration\">\n" +
+                        "   <task type=\"dump\"/>\n" +
                         "   <connection id=\"mysql\" type=\"jdbc\"/>\n" +
                         "   <connection id=\"\" type=\"jdbc\"/>\n" +
                         "</migration>").getBytes()));

@@ -1,7 +1,9 @@
 package com.nuodb.tools.migration.definition.xml.handlers;
 
 import com.nuodb.tools.migration.definition.JdbcConnection;
+import com.nuodb.tools.migration.definition.xml.XmlReadContext;
 import com.nuodb.tools.migration.definition.xml.XmlWriteContext;
+import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Map;
@@ -27,5 +29,11 @@ public class JdbcConnectionHandler extends DefinitionHandler<JdbcConnection> {
             property.getChild("value").setValue(entry.getValue());
         }
         return true;
+    }
+
+    @Override
+    protected void read(InputNode input, JdbcConnection connection, XmlReadContext context) throws Exception {
+        super.read(input, connection, context);
+        // TODO: implement
     }
 }

@@ -39,10 +39,4 @@ public class XmlPersister {
             throw new XmlPersisterException(e);
         }
     }
-
-    public static void main(String[] args) throws Exception {
-
-
-
-    }
 }

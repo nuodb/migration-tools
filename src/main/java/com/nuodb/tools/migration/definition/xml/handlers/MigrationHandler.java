@@ -36,6 +36,7 @@ public class MigrationHandler extends XmlReadWriteAdapter<Migration> implements 
         List<Connection> connections = new ArrayList<Connection>();
         List<Task> tasks = new ArrayList<Task>();
         InputNode node;
+
         while ((node = input.getNext()) != null) {
             String name = node.getName();
             if (CONNECTION_ELEMENT.equals(name)) {
