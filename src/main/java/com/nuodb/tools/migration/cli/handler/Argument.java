@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * An option that can process values passed on the command line in the form "--file readme.txt".
+ * An option that can execute values passed on the executable line in the form "--file readme.txt".
  */
 public interface Argument extends Option {
 
@@ -31,9 +31,9 @@ public interface Argument extends Option {
     List<Object> getDefaultValues();
 
     /**
-     * Adds defaults to a command line.
+     * Adds defaults to a executable line.
      *
-     * @param commandLine the command line object to store defaults in.
+     * @param commandLine the executable line object to store defaults in.
      * @param option      the option to store the defaults against.
      */
     void defaults(CommandLine commandLine, Option option);
@@ -41,20 +41,20 @@ public interface Argument extends Option {
     /**
      * Processes the style element of the argument.
      * <p/>
-     * Values identified should be added to the command line object in association with this argument.
+     * Values identified should be added to the executable line object in association with this argument.
      *
-     * @param commandLine the command line object to store results in.
-     * @param arguments   the arguments to process.
+     * @param commandLine the executable line object to store results in.
+     * @param arguments   the arguments.properties to execute.
      * @param option      the option to register value against.
      */
     void process(CommandLine commandLine, ListIterator<String> arguments, Option option);
 
     /**
-     * Performs any post process logic on the values added to the command line.
+     * Performs any post execute logic on the values added to the executable line.
      * <p/>
      *
-     * @param commandLine the command line object to query.
+     * @param commandLine the executable line object to query.
      * @param option      the option to lookup values with.
      */
-    void postProcess(CommandLine commandLine, Option option);
+    void validate(CommandLine commandLine, Option option);
 }

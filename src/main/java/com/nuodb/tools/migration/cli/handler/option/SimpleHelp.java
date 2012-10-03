@@ -16,9 +16,9 @@
  */
 package com.nuodb.tools.migration.cli.handler.option;
 
+import com.nuodb.tools.migration.cli.handler.Help;
 import com.nuodb.tools.migration.cli.handler.HelpHint;
 import com.nuodb.tools.migration.cli.handler.Option;
-import com.nuodb.tools.migration.cli.handler.Help;
 
 import java.util.Comparator;
 import java.util.Set;

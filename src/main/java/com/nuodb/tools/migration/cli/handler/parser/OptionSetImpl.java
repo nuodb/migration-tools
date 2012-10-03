@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Instances of CommandLine represent a command line that has been processed according to the definition supplied to the
+ * Instances of CommandLine represent a executable line that has been processed according to the spec supplied to the
  * parser.
  */
 public abstract class OptionSetImpl implements OptionSet {
@@ -49,22 +49,23 @@ public abstract class OptionSetImpl implements OptionSet {
     }
 
     @Override
-    public Object getValue(String trigger) {
+    public <T> T getValue(String trigger) {
         return getValue(getOption(trigger), null);
     }
 
     @Override
-    public Object getValue(String trigger, Object defaultValue) {
+    public <T> T getValue(String trigger, Object defaultValue) {
         return getValue(getOption(trigger), defaultValue);
     }
 
     @Override
-    public Object getValue(Option option) {
+    public <T> T getValue(Option option) {
         return getValue(option, null);
     }
 
     @Override
-    public Object getValue(Option option, Object defaultValue) {
+    @SuppressWarnings("unchecked")
+    public <T> T getValue(Option option, Object defaultValue) {
         List<Object> values;
         if (defaultValue == null) {
             values = getValues(option);
@@ -72,9 +73,9 @@ public abstract class OptionSetImpl implements OptionSet {
             values = getValues(option, Collections.singletonList(defaultValue));
         }
         if (values.isEmpty()) {
-            return defaultValue;
+            return (T) defaultValue;
         }
-        return values.get(0);
+        return (T) values.get(0);
     }
 
     @Override

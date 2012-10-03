@@ -18,18 +18,17 @@ package com.nuodb.tools.migration.cli.handler.parser;
 
 import com.nuodb.tools.migration.cli.handler.CommandLine;
 import com.nuodb.tools.migration.cli.handler.Option;
-import com.nuodb.tools.migration.cli.handler.option.SimpleProperty;
+import com.nuodb.tools.migration.cli.handler.option.Property;
 
 import java.util.*;
 
 /**
- * A command line implementation allowing options to write their processed information to a CommandLine.
+ * A executable line implementation allowing options to write their processed information to a CommandLine.
  */
 public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     private List<String> arguments;
     private List<Option> options = new ArrayList<Option>();
-    private Map<String, Option> triggers = new HashMap<String, Option>();
     private Map<Option, List<Object>> values = new HashMap<Option, List<Object>>();
     private Map<Option, Boolean> switches = new HashMap<Option, Boolean>();
     private Map<Option, List<Object>> defaultValues = new HashMap<Option, List<Object>>();
@@ -39,15 +38,15 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     private Option current;
 
     /**
-     * Creates a new WriteableCommandLineImpl rooted on the specified option, to hold the parsed arguments.
+     * Creates a new WriteableCommandLineImpl rooted on the specified option, to hold the parsed arguments.properties.
      *
-     * @param root the command line's root option
-     * @param arguments  the arguments this command line represents
+     * @param root      the executable line's root option
+     * @param arguments the arguments.properties this executable line represents
      */
     public CommandLineImpl(Option root, List<String> arguments) {
         this.root = root;
         this.arguments = arguments;
-        setCurrent(root);
+        this.current = root;
     }
 
     @Override
@@ -58,10 +57,6 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     @Override
     public void addOption(Option option) {
         options.add(option);
-        triggers.put(option.getName(), option);
-        for (String trigger : option.getTriggers()) {
-            triggers.put(trigger, option);
-        }
     }
 
     @Override
@@ -93,7 +88,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     @Override
     public void addProperty(String property, String value) {
-        addProperty(new SimpleProperty(), property, value);
+        addProperty(new Property(), property, value);
     }
 
     @Override
@@ -116,7 +111,18 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     @Override
     public Option getOption(String trigger) {
-        return this.triggers.get(trigger);
+        return getTriggers().get(trigger);
+    }
+
+    protected Map<String, Option> getTriggers() {
+        Map<String, Option> triggers = new HashMap<String, Option>();
+        for (Option option : options) {
+            triggers.put(option.getName(), option);
+            for (String trigger : option.getTriggers()) {
+                triggers.put(trigger, option);
+            }
+        }
+        return triggers;
     }
 
     @Override
@@ -152,7 +158,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     @Override
     public String getProperty(String property) {
-        return getProperty(new SimpleProperty(), property);
+        return getProperty(new Property(), property);
     }
 
     @SuppressWarnings("unchecked")
@@ -165,7 +171,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     @Override
     public Set<String> getProperties() {
-        return getProperties(new SimpleProperty());
+        return getProperties(new Property());
     }
 
     @Override
@@ -183,11 +189,6 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     @Override
     public List<Option> getOptions() {
         return Collections.unmodifiableList(options);
-    }
-
-    @Override
-    public Set<String> getTriggers() {
-        return Collections.unmodifiableSet(triggers.keySet());
     }
 
     @Override

@@ -98,22 +98,21 @@ public class NuoDBDialect extends Dialect {
     }
 
     /**
-     * Register a function that takes arguments and has a variable return type.
+     * Register a function that takes arguments.properties and has a variable return type.
      */
     private void registerFunction(String name) {
         registerFunction(name, new StandardSQLFunction(name));
     }
 
     /**
-     * Register a function that takes arguments and has a static return type.
+     * Register a function that takes arguments.properties and has a static return type.
      */
     private void registerFunction(String name, Type returnType) {
         registerFunction(name, new StandardSQLFunction(name, returnType));
     }
 
     /**
-     * Register a function that does not take arguments and has a static return
-     * type.
+     * Register a function that does not take arguments.properties and has a static return type.
      */
     private void registerNoArgFunction(String name, Type returnType) {
         registerFunction(name, new NoArgSQLFunction(name, returnType));

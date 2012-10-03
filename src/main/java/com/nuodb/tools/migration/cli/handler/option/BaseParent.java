@@ -36,26 +36,30 @@ import java.util.*;
  */
 public abstract class BaseParent extends BaseOption {
 
+    private Group group;
     private Argument argument;
-    private Group children;
     private String argumentSeparator;
 
-    protected BaseParent(int id, String name, String description, boolean required,
-                         Argument argument, Group children, String argumentSeparator) {
+    protected BaseParent(int id, String name, String description, boolean required) {
         super(id, name, description, required);
+    }
+
+    protected BaseParent(int id, String name, String description, boolean required,
+                         Group group, Argument argument, String argumentSeparator) {
+        super(id, name, description, required);
+        this.group = group;
         this.argument = argument;
-        this.children = children;
         this.argumentSeparator = argumentSeparator;
     }
 
     @Override
     public Set<String> getPrefixes() {
-        return (children == null) ? Collections.<String>emptySet() : children.getPrefixes();
+        return (group == null) ? Collections.<String>emptySet() : group.getPrefixes();
     }
 
     @Override
     public Set<String> getTriggers() {
-        return (children == null) ? Collections.<String>emptySet() : children.getTriggers();
+        return (group == null) ? Collections.<String>emptySet() : group.getTriggers();
     }
 
     @Override
@@ -77,8 +81,8 @@ public abstract class BaseParent extends BaseOption {
         if (argument != null) {
             argument.defaults(commandLine, this);
         }
-        if (children != null) {
-            children.defaults(commandLine);
+        if (group != null) {
+            group.defaults(commandLine);
         }
     }
 
@@ -87,7 +91,7 @@ public abstract class BaseParent extends BaseOption {
         prepareArgument(arguments);
         processParent(commandLine, arguments);
         processArgument(commandLine, argument, arguments);
-        processChildren(commandLine, children, arguments);
+        processGroup(commandLine, group, arguments);
     }
 
     protected void prepareArgument(ListIterator<String> arguments) {
@@ -131,42 +135,43 @@ public abstract class BaseParent extends BaseOption {
         return argument.substring(1, argument.length() - 1);
     }
 
-    protected void processChildren(CommandLine commandLine, Group children, ListIterator<String> arguments) {
+    protected void processGroup(CommandLine commandLine, Group children, ListIterator<String> arguments) {
         if ((children != null) && children.canProcess(commandLine, arguments)) {
             children.process(commandLine, arguments);
         }
     }
 
-    public void postProcess(CommandLine commandLine) throws OptionException {
+    public void validate(CommandLine commandLine) throws OptionException {
+        super.validate(commandLine);
         if (commandLine.hasOption(this)) {
-            postProcessArgument(commandLine, argument);
-            postProcessChildren(commandLine, children);
+            validateGroup(commandLine, group);
+            validateArgument(commandLine, argument);
         }
     }
 
-    protected void postProcessArgument(CommandLine commandLine, Argument argument) {
+    protected void validateArgument(CommandLine commandLine, Argument argument) {
         if (argument != null) {
-            argument.postProcess(commandLine);
+            argument.validate(commandLine);
         }
     }
 
-    protected void postProcessChildren(CommandLine commandLine, Group children) {
+    protected void validateGroup(CommandLine commandLine, Group children) {
         if (children != null) {
-            children.postProcess(commandLine);
+            children.validate(commandLine);
         }
     }
 
     @Override
     public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator) {
         boolean displayArgument = (this.argument != null) && hints.contains(HelpHint.PARENT_ARGUMENT);
-        boolean displayChildren = (this.children != null) && hints.contains(HelpHint.PARENT_CHILDREN);
+        boolean displayChildren = (this.group != null) && hints.contains(HelpHint.PARENT_CHILDREN);
         if (displayArgument) {
             buffer.append(' ');
             argument.help(buffer, hints, comparator);
         }
         if (displayChildren) {
             buffer.append(' ');
-            children.help(buffer, hints, comparator);
+            group.help(buffer, hints, comparator);
         }
     }
 
@@ -178,7 +183,7 @@ public abstract class BaseParent extends BaseOption {
         if (hints.contains(HelpHint.PARENT_ARGUMENT) && (argument != null)) {
             help.addAll(argument.help(indent + 1, hints, comparator));
         }
-        Group children = getChildren();
+        Group children = getGroup();
         if (hints.contains(HelpHint.PARENT_CHILDREN) && (children != null)) {
             help.addAll(children.help(indent + 1, hints, comparator));
         }
@@ -189,11 +194,23 @@ public abstract class BaseParent extends BaseOption {
         return argument;
     }
 
-    public Group getChildren() {
-        return children;
+    public void setArgument(Argument argument) {
+        this.argument = argument;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
     }
 
     public String getArgumentSeparator() {
         return argumentSeparator;
+    }
+
+    public void setArgumentSeparator(String argumentSeparator) {
+        this.argumentSeparator = argumentSeparator;
     }
 }

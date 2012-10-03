@@ -56,10 +56,10 @@ public interface Group extends Option {
     /**
      * Appends help information to the specified buffer
      *
-     * @param buffer     the buffer to append to
-     * @param hints      a set of display hints
-     * @param comparator a comparator used to sort the options
-     * @param optionSeparator  the string used to separate member options
+     * @param buffer          the buffer to append to
+     * @param hints           a set of display hints
+     * @param comparator      a comparator used to sort the options
+     * @param optionSeparator the string used to separate member options
      */
     void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator, String optionSeparator);
 }

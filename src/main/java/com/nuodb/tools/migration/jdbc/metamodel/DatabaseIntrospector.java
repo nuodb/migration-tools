@@ -27,9 +27,9 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import com.nuodb.tools.migration.definition.JdbcConnection;
 import com.nuodb.tools.migration.jdbc.connection.JdbcConnectionProvider;
 import com.nuodb.tools.migration.jdbc.connection.JdbcConnectionProviderImpl;
+import com.nuodb.tools.migration.spec.JdbcConnectionSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -71,7 +71,7 @@ public class DatabaseIntrospector {
         return this;
     }
 
-    public DatabaseIntrospector withConnection(JdbcConnection connection) {
+    public DatabaseIntrospector withConnection(JdbcConnectionSpec connection) {
         this.catalog = connection.getCatalog();
         this.schema = connection.getSchema();
         this.connectionProvider = new JdbcConnectionProviderImpl(connection);
@@ -218,12 +218,12 @@ public class DatabaseIntrospector {
     }
 
     public static void main(String[] args) throws Exception {
-        JdbcConnection mysql = new JdbcConnection();
+        JdbcConnectionSpec mysql = new JdbcConnectionSpec();
         mysql.setDriver("com.mysql.jdbc.Driver");
         mysql.setUrl("jdbc:mysql://localhost:3306/test");
         mysql.setUsername("root");
 
-        JdbcConnection nuodb = new JdbcConnection();
+        JdbcConnectionSpec nuodb = new JdbcConnectionSpec();
         nuodb.setDriver("com.nuodb.jdbc.Driver");
         nuodb.setUrl("jdbc:com.nuodb://localhost/test");
         nuodb.setUsername("dba");

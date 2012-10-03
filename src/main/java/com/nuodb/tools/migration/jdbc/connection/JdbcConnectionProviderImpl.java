@@ -27,7 +27,7 @@
  */
 package com.nuodb.tools.migration.jdbc.connection;
 
-import com.nuodb.tools.migration.definition.JdbcConnection;
+import com.nuodb.tools.migration.spec.JdbcConnectionSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -42,9 +42,9 @@ public class JdbcConnectionProviderImpl implements JdbcConnectionProvider {
 
     private transient final Log log = LogFactory.getLog(this.getClass());
 
-    private JdbcConnection connection;
+    private JdbcConnectionSpec connection;
 
-    public JdbcConnectionProviderImpl(JdbcConnection connection) {
+    public JdbcConnectionProviderImpl(JdbcConnectionSpec connection) {
         this.connection = connection;
     }
 

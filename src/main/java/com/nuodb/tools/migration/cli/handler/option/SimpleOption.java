@@ -42,9 +42,9 @@ public class SimpleOption extends BaseParent {
     private Set<String> aliases;
 
     public SimpleOption(int id, String name, String description, boolean required,
-                        Argument argument, Group children, String argumentSeparator,
+                        Group children, Argument argument, String argumentSeparator,
                         Set<String> prefixes, Set<String> aliases) {
-        super(id, name, description, required, argument, children, argumentSeparator);
+        super(id, name, description, required, children, argument, argumentSeparator);
         this.prefixes = prefixes;
         this.aliases = aliases;
     }
@@ -69,14 +69,14 @@ public class SimpleOption extends BaseParent {
     public Set<String> getTriggers() {
         Set<String> triggers = new HashSet<String>();
         Set<String> prefixes = getPrefixes();
-        buildTriggers(triggers, prefixes, getName());
+        addTriggers(triggers, prefixes, getName());
         for (String alias : this.aliases) {
-            buildTriggers(triggers, prefixes, alias);
+            addTriggers(triggers, prefixes, alias);
         }
         return triggers;
     }
 
-    protected void buildTriggers(Set<String> triggers, Set<String> prefixes, String trigger) {
+    protected void addTriggers(Set<String> triggers, Set<String> prefixes, String trigger) {
         for (String prefix : prefixes) {
             triggers.add(prefix + trigger);
         }
@@ -89,7 +89,7 @@ public class SimpleOption extends BaseParent {
             line.addOption(this);
             arguments.set(getName());
         } else {
-            throw new OptionException(this, "Unexpected token " + argument);
+            throw new OptionException(this, String.format("Unexpected token %1$s", argument));
         }
     }
 
@@ -102,7 +102,7 @@ public class SimpleOption extends BaseParent {
         }
         Set<String> prefixes = getPrefixes();
         Set<String> triggers = new HashSet<String>();
-        buildTriggers(triggers, prefixes, getName());
+        addTriggers(triggers, prefixes, getName());
         joinTriggers(help, triggers);
         if (displayAliases && !this.aliases.isEmpty()) {
             help.append(" (");
@@ -111,7 +111,7 @@ public class SimpleOption extends BaseParent {
             for (Iterator<String> i = list.iterator(); i.hasNext(); ) {
                 String alias = i.next();
                 triggers = new HashSet<String>();
-                buildTriggers(triggers, prefixes, alias);
+                addTriggers(triggers, prefixes, alias);
                 joinTriggers(help, triggers);
                 if (i.hasNext()) {
                     help.append(',');
@@ -121,7 +121,7 @@ public class SimpleOption extends BaseParent {
         }
         Argument argument = getArgument();
         boolean displayArgument = argument != null && hints.contains(PARENT_ARGUMENT);
-        Group children = getChildren();
+        Group children = getGroup();
         boolean displayChildren = children != null && hints.contains(PARENT_CHILDREN);
         if (displayArgument) {
             help.append(getArgumentSeparator());

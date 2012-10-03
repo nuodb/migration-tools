@@ -18,17 +18,7 @@ package com.nuodb.tools.migration.cli.handler.option;
 
 import com.nuodb.tools.migration.cli.handler.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import static com.nuodb.tools.migration.cli.handler.HelpHint.*;
 
@@ -51,6 +41,10 @@ public class SimpleGroup extends BaseOption implements Group {
     private List<Argument> arguments = new ArrayList<Argument>();
     private SortedMap<String, Option> triggers = new TreeMap<String, Option>(new DescOrder());
     private Set<String> prefixes = new HashSet<String>();
+
+    public SimpleGroup(int id, String name, String description, boolean required) {
+        super(id, name, description, required);
+    }
 
     public SimpleGroup(int id, String name, String description, boolean required,
                        int minimum, int maximum, List<Option> options) {
@@ -141,7 +135,7 @@ public class SimpleGroup extends BaseOption implements Group {
      */
     @Override
     public boolean isRequired() {
-        return super.isRequired() && getMinimum() > 0;
+        return super.isRequired() || getMinimum() > 0;
     }
 
     @Override
@@ -158,12 +152,12 @@ public class SimpleGroup extends BaseOption implements Group {
     @SuppressWarnings("StringEquality")
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
         String previous = null;
-        // start process each command line token
+        // start execute each executable line token
         while (arguments.hasNext()) {
             // grab the next argument
             String argument = arguments.next();
             arguments.previous();
-            // if we have just tried to process this instance
+            // if we have just tried to execute this instance
             if (argument == previous) {
                 // rollback and abort
                 break;
@@ -197,32 +191,33 @@ public class SimpleGroup extends BaseOption implements Group {
     }
 
     @Override
-    public void postProcess(CommandLine commandLine) {
+    public void validate(CommandLine commandLine) {
         // number of options found
         int present = 0;
         // reference to first unexpected option
         Option unexpected = null;
         for (Option option : this.options) {
-            // if the child option is present then postProcess it
+            // if the child option is present then validate it
             if (commandLine.hasOption(option)) {
-                if (++present > this.maximum) {
+                present++;
+                if (maximum != 0 && present > this.maximum) {
                     unexpected = option;
                     break;
                 }
             }
-            option.postProcess(commandLine);
+            option.validate(commandLine);
         }
         // too many options
         if (unexpected != null) {
-            throw new OptionException(this, "Unexpected option " + unexpected.getName());
+            throw new OptionException(this, String.format("Unexpected option %1$s", unexpected.getName()));
         }
         // too few options
         if (present < this.minimum) {
             throw new OptionException(this, "Missing option");
         }
-        // post process each arguments argument
+        // post execute each arguments.properties argument
         for (Argument argument : arguments) {
-            argument.postProcess(commandLine);
+            argument.validate(commandLine);
         }
     }
 
@@ -276,7 +271,7 @@ public class SimpleGroup extends BaseOption implements Group {
                 // append help information
                 option.help(buffer, optionHints, comparator);
 
-                // add separators as needed
+                // registerCommandExecutor separators as needed
                 if (i.hasNext()) {
                     buffer.append(optionSeparator);
                 }

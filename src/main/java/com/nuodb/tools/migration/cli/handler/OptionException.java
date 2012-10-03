@@ -19,7 +19,7 @@ package com.nuodb.tools.migration.cli.handler;
 import com.nuodb.tools.migration.MigrationException;
 
 /**
- * A problem found while dealing with command line options.
+ * A problem found while dealing with executable line options.
  */
 public class OptionException extends MigrationException {
 

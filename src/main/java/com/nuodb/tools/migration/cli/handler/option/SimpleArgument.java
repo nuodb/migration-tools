@@ -16,19 +16,9 @@
  */
 package com.nuodb.tools.migration.cli.handler.option;
 
-import com.nuodb.tools.migration.cli.handler.Argument;
-import com.nuodb.tools.migration.cli.handler.CommandLine;
-import com.nuodb.tools.migration.cli.handler.Help;
-import com.nuodb.tools.migration.cli.handler.HelpHint;
-import com.nuodb.tools.migration.cli.handler.Option;
-import com.nuodb.tools.migration.cli.handler.OptionException;
+import com.nuodb.tools.migration.cli.handler.*;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * An implementation of an argument
@@ -41,6 +31,12 @@ public class SimpleArgument extends BaseOption implements Argument {
     private int maximum;
     private List<Object> defaultValues;
     private String valuesSeparator;
+
+    public SimpleArgument(int id, String name, String description, boolean required) {
+        super(id, name, description, required);
+        this.minimum = 0;
+        this.maximum = 1;
+    }
 
     public SimpleArgument(int id, String name, String description,
                           int minimum, int maximum, List<Object> defaultValues, String valuesSeparator) {
@@ -92,11 +88,6 @@ public class SimpleArgument extends BaseOption implements Argument {
     }
 
     @Override
-    public Option findOption(String trigger) {
-        return null;
-    }
-
-    @Override
     public boolean canProcess(CommandLine commandLine, String argument) {
         return true;
     }
@@ -125,7 +116,7 @@ public class SimpleArgument extends BaseOption implements Argument {
                     arguments.add(value);
                 }
                 if (values.hasMoreTokens()) {
-                    throw new OptionException(this, "Unexpected value " + values.nextToken());
+                    throw new OptionException(this, String.format("Unexpected token %1$s", values.nextToken()));
                 }
             } else {
                 valuesCount++;
@@ -135,20 +126,20 @@ public class SimpleArgument extends BaseOption implements Argument {
     }
 
     @Override
-    public void postProcess(CommandLine commandLine) throws OptionException {
-        postProcess(commandLine, this);
+    public void validate(CommandLine commandLine) throws OptionException {
+        validate(commandLine, this);
     }
 
     @Override
-    public void postProcess(CommandLine commandLine, Option option) throws OptionException {
+    public void validate(CommandLine commandLine, Option option) throws OptionException {
         List values = commandLine.getValues(option);
         int minimum = getMinimum();
         if (values.size() < minimum) {
-            throw new OptionException(option, String.format("Minimum number of %d arguments is expected", minimum));
+            throw new OptionException(option, String.format("Minimum number of %d arguments.properties is expected", minimum));
         }
         int maximum = getMaximum();
         if (values.size() > maximum) {
-            throw new OptionException(option, String.format("Maximum number of %d arguments is expected", maximum));
+            throw new OptionException(option, String.format("Maximum number of %d arguments.properties is expected", maximum));
         }
     }
 
@@ -165,7 +156,7 @@ public class SimpleArgument extends BaseOption implements Argument {
 
         // for each argument
         while (i < max) {
-            // if we're past the first add a space
+            // if we're past the first registerCommandExecutor a space
             if (i > 0) {
                 buffer.append(' ');
             }
@@ -176,7 +167,7 @@ public class SimpleArgument extends BaseOption implements Argument {
             if (bracketed) {
                 buffer.append('<');
             }
-            // add name
+            // registerCommandExecutor name
             buffer.append(getName());
             ++i;
             // if numbering

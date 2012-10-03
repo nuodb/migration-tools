@@ -26,10 +26,10 @@ import java.util.ListIterator;
 public class ParserImpl implements Parser {
 
     /**
-     * Parse the arguments according to the specified options and properties.
+     * Parse the arguments.properties according to the specified options and properties.
      *
      * @param arguments to parse.
-     * @param option sets the option to parse against.
+     * @param option    sets the option to parse against.
      * @return the option set object.
      */
     public OptionSet parse(String[] arguments, Option option) throws OptionException {
@@ -38,14 +38,14 @@ public class ParserImpl implements Parser {
         CommandLine commandLine = new CommandLineImpl(option, list);
         // pick up any defaults from the model
         option.defaults(commandLine);
-        // process the options as far as possible
+        // execute the options as far as possible
         ListIterator<String> iterator = list.listIterator();
         Object previous = null;
         while (option.canProcess(commandLine, iterator)) {
             // peek at the next item and backtrack
             String current = iterator.next();
             iterator.previous();
-            // if we have just tried to process this instance
+            // if we have just tried to execute this instance
             if (current == previous) {
                 // abort
                 break;
@@ -53,7 +53,10 @@ public class ParserImpl implements Parser {
             previous = current;
             option.process(commandLine, iterator);
         }
-        option.postProcess(commandLine);
+        if (iterator.hasNext()) {
+            throw new OptionException(option, String.format("Unexpected argument %1$s", iterator.next()));
+        }
+        option.validate(commandLine);
         return commandLine;
     }
 }

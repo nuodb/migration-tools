@@ -16,7 +16,10 @@
  */
 package com.nuodb.tools.migration.cli.handler.help;
 
-import com.nuodb.tools.migration.cli.handler.*;
+import com.nuodb.tools.migration.cli.handler.Help;
+import com.nuodb.tools.migration.cli.handler.HelpHint;
+import com.nuodb.tools.migration.cli.handler.Option;
+import com.nuodb.tools.migration.cli.handler.OptionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -84,7 +87,7 @@ public class HelpFormatter {
     protected Set<HelpHint> helpOutputHints = new HashSet<HelpHint>(HELP_OUTPUT_HINTS);
     protected Set<HelpHint> optionOutputHints = new HashSet<HelpHint>(OPTION_OUTPUT_HINTS);
 
-    protected String command;
+    protected String executable;
     protected String header;
     protected String divider;
     protected String gutter = GUTTER;
@@ -135,12 +138,14 @@ public class HelpFormatter {
     protected void usage(Writer writer) throws IOException {
         divider(writer);
         StringBuilder usage = new StringBuilder("Usage:\n");
-        usage.append(command).append(" ");
-        if (option instanceof Group) {
-            ((Group) option).help(usage, usageOutputHints, comparator, " ");
+        usage.append(executable).append(" ");
+        Option option;
+        if ((exception != null) && (exception.getOption() != null)) {
+            option = exception.getOption();
         } else {
-            option.help(usage, usageOutputHints, comparator);
+            option = this.option;
         }
+        option.help(usage, usageOutputHints, comparator);
         line(writer, usage.toString());
     }
 
@@ -230,8 +235,8 @@ public class HelpFormatter {
         this.footer = footer;
     }
 
-    public void setCommand(String command) {
-        this.command = command;
+    public void setExecutable(String executable) {
+        this.executable = executable;
     }
 
     public void setGutter(String gutter) {

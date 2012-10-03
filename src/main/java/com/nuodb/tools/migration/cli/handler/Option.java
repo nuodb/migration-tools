@@ -22,7 +22,7 @@ import java.util.ListIterator;
 import java.util.Set;
 
 /**
- * The super type of all options representing a particular element of the command line interface.
+ * The super type of all options representing a particular element of the executable line interface.
  */
 public interface Option {
 
@@ -38,11 +38,25 @@ public interface Option {
     int getId();
 
     /**
-     * The name of an option is used for generating help and help information.
+     * Changes the id of the option.
+     *
+     * @param id new identifiers of the option.
+     */
+    void setId(int id);
+
+    /**
+     * The name of the option is used for generating help and help information.
      *
      * @return The name of the option
      */
     String getName();
+
+    /**
+     * Changes the name of the option.
+     *
+     * @param name of the option.
+     */
+    void setName(String name);
 
     /**
      * Returns a description of the option. This string is used to build help messages as in the help formatter.
@@ -52,11 +66,25 @@ public interface Option {
     String getDescription();
 
     /**
+     * Changes the description of the option.
+     *
+     * @param description of the option.
+     */
+    void setDescription(String description);
+
+    /**
      * Indicates whether this option is required to be present.
      *
-     * @return true if the command line will be invalid without this option
+     * @return true if the executable line will be invalid without this option
      */
     boolean isRequired();
+
+    /**
+     * Changes the indication flag of whether option is required or not.
+     *
+     * @param required the required value for the option.
+     */
+    void setRequired(boolean required);
 
     /**
      * Identifies the argument prefixes that should be considered options. This is used to identify whether a given
@@ -70,12 +98,12 @@ public interface Option {
     Set<String> getPrefixes();
 
     /**
-     * Identifies the argument prefixes that should trigger this option. This is used to decide which of many Options
+     * Identifies the argument prefixes that should trigger this option. This is used to decide which of many options
      * should be tried when processing a given argument string.
      * <p/>
-     * The returned Set must not be null.
+     * The returned set must not be null.
      *
-     * @return The set of triggers for this Option
+     * @return The set of triggers for this option
      */
     Set<String> getTriggers();
 
@@ -92,48 +120,48 @@ public interface Option {
      * <p/>
      * Any defaults for this option are applied as well as the defaults for any contained options
      *
-     * @param commandLine command line object to store defaults in
+     * @param commandLine executable line object to store defaults in
      */
     void defaults(CommandLine commandLine);
 
     /**
-     * Indicates whether this Option will be able to process the particular argument.
+     * Indicates whether this Option will be able to execute the particular argument.
      *
-     * @param commandLine command line to check
+     * @param commandLine executable line to check
      * @param argument    The argument to be tested
      * @return true if the argument can be processed by this Option
      */
     boolean canProcess(CommandLine commandLine, String argument);
 
     /**
-     * Indicates whether this Option will be able to process the particular argument. The list iterator must be restored
+     * Indicates whether this Option will be able to execute the particular argument. The list iterator must be restored
      * to the initial state before returning the boolean.
      *
-     * @param commandLine the command line to check
-     * @param arguments   the list iterator over String arguments
+     * @param commandLine the executable line to check
+     * @param arguments   the list iterator over String arguments.properties
      * @return true if the argument can be processed by this Option
      * @see #canProcess(CommandLine, String)
      */
     boolean canProcess(CommandLine commandLine, ListIterator<String> arguments);
 
     /**
-     * Processes String arguments into a command line.
+     * Processes String arguments.properties into a executable line.
      * <p/>
      * The iterator will initially point at the first argument to be processed and at the end of the method should point
-     * to the first argument not processed. This method must process at least one argument from the list iterator.
+     * to the first argument not processed. This method must execute at least one argument from the list iterator.
      *
-     * @param commandLine the command line object to store results in
-     * @param arguments   the arguments to process.
+     * @param commandLine the executable line object to store results in
+     * @param arguments   the arguments.properties to execute.
      */
     void process(CommandLine commandLine, ListIterator<String> arguments);
 
     /**
-     * Performs any required post processing, such as validation & value conversion.
+     * Performs any required post processing, such as validation & values conversion.
      *
-     * @param commandLine command line to check.
-     * @throws OptionException if the command line is not valid.
+     * @param commandLine executable line to check.
+     * @throws OptionException if the executable line is not valid.
      */
-    void postProcess(CommandLine commandLine);
+    void validate(CommandLine commandLine);
 
     /**
      * Appends help to the specified buffer

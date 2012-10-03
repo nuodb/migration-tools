@@ -19,6 +19,7 @@ package com.nuodb.tools.migration.cli.handler.option;
 import com.nuodb.tools.migration.cli.handler.CommandLine;
 import com.nuodb.tools.migration.cli.handler.HelpHint;
 import com.nuodb.tools.migration.cli.handler.Option;
+import com.nuodb.tools.migration.cli.handler.OptionException;
 
 import java.util.ListIterator;
 
@@ -51,6 +52,7 @@ public abstract class BaseOption implements Option {
         return id;
     }
 
+    @Override
     public void setId(int id) {
         this.id = id;
     }
@@ -60,6 +62,7 @@ public abstract class BaseOption implements Option {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -69,6 +72,7 @@ public abstract class BaseOption implements Option {
         return description;
     }
 
+    @Override
     public void setDescription(String description) {
         this.description = description;
     }
@@ -78,6 +82,7 @@ public abstract class BaseOption implements Option {
         return required;
     }
 
+    @Override
     public void setRequired(boolean required) {
         this.required = required;
     }
@@ -98,6 +103,13 @@ public abstract class BaseOption implements Option {
             }
         } else {
             return false;
+        }
+    }
+
+    @Override
+    public void validate(CommandLine commandLine) {
+        if (isRequired() && !commandLine.hasOption(this)) {
+            throw new OptionException(this, String.format("Missing required option %1$s", getName()));
         }
     }
 
