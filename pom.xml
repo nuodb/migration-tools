@@ -44,8 +44,7 @@
             <artifactId>hibernate-core</artifactId>
             <version>4.1.6.Final</version>
         </dependency>
-<<<<<<< HEAD
-=======
+
 
         <dependency>
             <groupId>org.mockito</groupId>
@@ -60,7 +59,5 @@
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
-
->>>>>>> Introspector test added
     </dependencies>
 </project>
