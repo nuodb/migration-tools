@@ -12,15 +12,18 @@ import java.util.Map;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class DatabaseIntrospectorTest extends DatabaseIntrospector {
+public class DatabaseIntrospectorTest {
     Database database;
     DatabaseMetaData mockMetaData;
+    DatabaseIntrospector databaseIntrospector;
 
     final String TEST_CATALOG_NAME = "TEST_CATALOG";
     final String TEST_SCHEMA_NAME = "TEST_SCHEMA";
 
     @Before
     public void setUp() throws Exception {
+         databaseIntrospector =
+                new DatabaseIntrospector();
 
         mockMetaData = mock(DatabaseMetaData.class);
         database = new Database(); // mock(Database.class);
@@ -39,14 +42,13 @@ public class DatabaseIntrospectorTest extends DatabaseIntrospector {
 
     @Test
     public void testWithConnection() throws Exception {
-        final DatabaseIntrospector databaseIntrospector =
-                withConnection(mock(JdbcConnectionSpec.class));
-        Assert.assertNotNull(databaseIntrospector);
+        databaseIntrospector.withConnection(mock(JdbcConnectionSpec.class));
+        Assert.assertNotNull(databaseIntrospector.getConnectionProvider());
     }
 
     @Test
     public void testReadCatalogs() throws Exception {
-        readCatalogs(mockMetaData, database);
+        databaseIntrospector.readCatalogs(mockMetaData, database);
         final Map<Name, Catalog> catalogs = database.getCatalogs();
         Assert.assertNotNull(catalogs);
         Assert.assertFalse(catalogs.isEmpty());
@@ -57,7 +59,7 @@ public class DatabaseIntrospectorTest extends DatabaseIntrospector {
 
     @Test
     public void testReadSchemas() throws Exception {
-        readSchemas(mockMetaData, database);
+        databaseIntrospector.readSchemas(mockMetaData, database);
         final Name schemaName = Name.valueOf(TEST_SCHEMA_NAME);
         final Schema schema =
                 database.getSchema(Name.valueOf(TEST_CATALOG_NAME), schemaName);
