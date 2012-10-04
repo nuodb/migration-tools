@@ -25,36 +25,30 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.parse.option;
 
-import java.util.List;
+import com.nuodb.tools.migration.cli.parse.Argument;
+import com.nuodb.tools.migration.cli.parse.Group;
+import com.nuodb.tools.migration.cli.parse.Option;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String condition;
+/**
+ * @author Sergey Bushik
+ */
+public interface OptionBuilder {
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
-    }
+    OptionBuilder withId(int id);
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
-    }
+    OptionBuilder withName(String name);
 
-    public String getName() {
-        return name;
-    }
+    OptionBuilder withDescription(String description);
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    OptionBuilder withRequired(boolean required);
 
-    public String getCondition() {
-        return condition;
-    }
+    OptionBuilder withAlias(String alias);
 
-    public void setCondition(String condition) {
-        this.condition = condition;
-    }
+    OptionBuilder withChildren(Group children);
+
+    OptionBuilder withArgument(Argument argument);
+
+    Option build();
 }

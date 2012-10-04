@@ -25,36 +25,71 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.parse.option;
 
+import com.nuodb.tools.migration.cli.parse.Group;
+import com.nuodb.tools.migration.cli.parse.Option;
+
+import java.util.ArrayList;
 import java.util.List;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
+/**
+ * @author Sergey Bushik
+ */
+public class GroupBuilderImpl implements GroupBuilder {
+
+    private int id;
     private String name;
-    private String condition;
+    private String description;
+    private int minimum = 0;
+    private int maximum = 0;
+    private boolean required;
+    private List<Option> options = new ArrayList<Option>();
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
+    @Override
+    public GroupBuilder withId(int id) {
+        this.id = id;
+        return this;
     }
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    @Override
+    public GroupBuilder withName(String name) {
         this.name = name;
+        return this;
     }
 
-    public String getCondition() {
-        return condition;
+    @Override
+    public GroupBuilder withDescription(String description) {
+        this.description = description;
+        return this;
     }
 
-    public void setCondition(String condition) {
-        this.condition = condition;
+    @Override
+    public GroupBuilder withMinimum(int minimum) {
+        this.minimum = minimum;
+        return this;
+    }
+
+    @Override
+    public GroupBuilder withMaximum(int maximum) {
+        this.maximum = maximum;
+        return this;
+    }
+
+    @Override
+    public GroupBuilder withOption(Option option) {
+        this.options.add(option);
+        return this;
+    }
+
+    @Override
+    public GroupBuilder withRequired(boolean required) {
+        this.required = required;
+        return this;
+    }
+
+    @Override
+    public Group build() {
+        return new GroupImpl(id, name, description, required, minimum, maximum, options);
     }
 }

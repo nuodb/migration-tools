@@ -32,22 +32,22 @@ import java.util.List;
 
 public class MigrationSpec {
 
-    private List<? extends ConnectionSpec> connections = new ArrayList<ConnectionSpec>();
-    private List<? extends TaskSpec> tasks = new ArrayList<TaskSpec>();
+    private List<? extends ConnectionSpec> connectionSpecs = new ArrayList<ConnectionSpec>();
+    private List<? extends TaskSpec> taskSpecs = new ArrayList<TaskSpec>();
 
-    public List<? extends ConnectionSpec> getConnections() {
-        return connections;
+    public List<? extends ConnectionSpec> getConnectionSpecs() {
+        return connectionSpecs;
     }
 
-    public void setConnections(List<? extends ConnectionSpec> connections) {
-        this.connections = connections;
+    public void setConnectionSpecs(List<? extends ConnectionSpec> connectionSpecs) {
+        this.connectionSpecs = connectionSpecs;
     }
 
-    public List<? extends TaskSpec> getTasks() {
-        return tasks;
+    public List<? extends TaskSpec> getTaskSpecs() {
+        return taskSpecs;
     }
 
-    public void setTasks(List<? extends TaskSpec> tasks) {
-        this.tasks = tasks;
+    public void setTaskSpecs(List<? extends TaskSpec> taskSpecs) {
+        this.taskSpecs = taskSpecs;
     }
 }

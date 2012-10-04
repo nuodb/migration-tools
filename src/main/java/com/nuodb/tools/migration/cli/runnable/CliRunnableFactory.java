@@ -25,36 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.runnable;
 
-import java.util.List;
+import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String condition;
+/**
+ * @author Sergey Bushik
+ */
+public interface CliRunnableFactory {
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
-    }
+    String getCommand();
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCondition() {
-        return condition;
-    }
-
-    public void setCondition(String condition) {
-        this.condition = condition;
-    }
+    CliRunnable createRunnable(OptionToolkit optionToolkit);
 }

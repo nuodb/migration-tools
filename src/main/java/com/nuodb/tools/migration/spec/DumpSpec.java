@@ -2,10 +2,10 @@
  * Copyright (c) 2012, NuoDB, Inc.
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution and use in sourceSpec and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *     * Redistributions of source code must retain the above copyright
+ *     * Redistributions of sourceSpec code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
@@ -27,44 +27,45 @@
  */
 package com.nuodb.tools.migration.spec;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class DumpSpec extends TaskSpecBase {
 
-    private ConnectionSpec source;
-    private Collection<TableSpec> tables;
-    private Collection<QuerySpec> queries;
-    private Collection<OutputSpec> outputs;
+    private ConnectionSpec sourceSpec;
+    private Collection<TableSpec> tableSpecs = new ArrayList<TableSpec>();
+    private Collection<QuerySpec> querySpecs = new ArrayList<QuerySpec>();
+    private OutputSpec outputSpec;
 
-    public ConnectionSpec getSource() {
-        return source;
+    public ConnectionSpec getSourceSpec() {
+        return sourceSpec;
     }
 
-    public void setSource(ConnectionSpec source) {
-        this.source = source;
+    public void setSourceSpec(ConnectionSpec sourceSpec) {
+        this.sourceSpec = sourceSpec;
     }
 
-    public Collection<TableSpec> getTables() {
-        return tables;
+    public Collection<TableSpec> getTableSpecs() {
+        return tableSpecs;
     }
 
-    public void setTables(Collection<TableSpec> tables) {
-        this.tables = tables;
+    public void setTableSpecs(Collection<TableSpec> tableSpecs) {
+        this.tableSpecs = tableSpecs;
     }
 
-    public Collection<QuerySpec> getQueries() {
-        return queries;
+    public Collection<QuerySpec> getQuerySpecs() {
+        return querySpecs;
     }
 
-    public void setQueries(Collection<QuerySpec> queries) {
-        this.queries = queries;
+    public void setQuerySpecs(Collection<QuerySpec> querySpecs) {
+        this.querySpecs = querySpecs;
     }
 
-    public Collection<OutputSpec> getOutputs() {
-        return outputs;
+    public OutputSpec getOutputSpec() {
+        return outputSpec;
     }
 
-    public void setOutputs(Collection<OutputSpec> outputs) {
-        this.outputs = outputs;
+    public void setOutputSpec(OutputSpec outputSpec) {
+        this.outputSpec = outputSpec;
     }
 }

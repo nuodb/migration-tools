@@ -1,10 +1,10 @@
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import com.nuodb.tools.migration.spec.JdbcConnectionSpec;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.Map;
@@ -38,9 +38,8 @@ public class DatabaseIntrospectorTest extends DatabaseIntrospector {
 
 
     @Test
-    public void testWithConnection() throws Exception {
-        final DatabaseIntrospector databaseIntrospector =
-                withConnection(mock(JdbcConnectionSpec.class));
+    public void testWithConnectionProvider() throws Exception {
+        final DatabaseIntrospector databaseIntrospector = withConnection(mock(Connection.class));
         Assert.assertNotNull(databaseIntrospector);
     }
 

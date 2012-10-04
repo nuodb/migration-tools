@@ -25,36 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.runnable;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String condition;
+/**
+ * @author Sergey Bushik
+ */
+public class CliRunnableFactoryLookup {
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
+    private Map<String, CliRunnableFactory> factories = new HashMap<String, CliRunnableFactory>();
+
+    public CliRunnableFactoryLookup() {
+        register(new CliDumpFactory());
     }
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
+    public Collection<? extends String> getCommands() {
+        return factories.keySet();
     }
 
-    public String getName() {
-        return name;
+    public CliRunnableFactory lookup(String command) {
+        return factories.get(command);
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCondition() {
-        return condition;
-    }
-
-    public void setCondition(String condition) {
-        this.condition = condition;
+    public void register(CliRunnableFactory factory) {
+        factories.put(factory.getCommand(), factory);
     }
 }

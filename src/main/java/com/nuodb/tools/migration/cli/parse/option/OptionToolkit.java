@@ -25,36 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.parse.option;
 
-import java.util.List;
+/**
+ * @author Sergey Bushik
+ */
+public class OptionToolkit {
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String condition;
+    private OptionFormat optionFormat;
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
+    public OptionToolkit() {
+        this(OptionFormat.DEFAULT_FORMAT);
     }
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
+    public OptionToolkit(OptionFormat optionFormat) {
+        this.optionFormat = optionFormat;
     }
 
-    public String getName() {
-        return name;
+    public OptionBuilder newOption() {
+        return new OptionBuilderImpl(optionFormat);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public ArgumentBuilder newArgument() {
+        return new ArgumentBuilderImpl(optionFormat);
     }
 
-    public String getCondition() {
-        return condition;
-    }
-
-    public void setCondition(String condition) {
-        this.condition = condition;
+    public GroupBuilder newGroup() {
+        return new GroupBuilderImpl();
     }
 }

@@ -25,36 +25,66 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.dump.query;
 
-import java.util.List;
+import com.nuodb.tools.migration.jdbc.metamodel.Column;
+import com.nuodb.tools.migration.jdbc.metamodel.Table;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String condition;
+/**
+ * @author Sergey Bushik
+ */
+public class SelectQuery implements Query {
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
+    private StringBuilder select = new StringBuilder();
+    private StringBuilder from = new StringBuilder();
+    private StringBuilder where = new StringBuilder();
+
+    public void addColumn(String column) {
+        if (select.length() > 0) {
+            select.append(", ");
+        }
+        select.append(column);
     }
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
+    public void addColumn(Column column) {
+        addColumn(column.getName().value());
     }
 
-    public String getName() {
-        return name;
+    public void addTable(Table table) {
+        addTable(table.getName().value());
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void addTable(String table) {
+        if (from.length() > 0) {
+            from.append(", ");
+        }
+        from.append(table);
     }
 
-    public String getCondition() {
-        return condition;
+    public void addCondition(String condition) {
+        if (where.length() > 0) {
+            where.append(" and ").append(condition);
+        } else {
+            where.append(condition);
+        }
     }
 
-    public void setCondition(String condition) {
-        this.condition = condition;
+    @Override
+    public String toQueryString() {
+        StringBuilder query = new StringBuilder();
+        query.append("select ");
+        query.append(select);
+        query.append(" from ");
+        query.append(from);
+        if (where.length() > 0) {
+            query.append(" where ");
+            query.append(where);
+        }
+        return query.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toQueryString();
     }
 }

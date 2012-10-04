@@ -27,8 +27,7 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Database {
 
@@ -96,5 +95,27 @@ public class Database {
 
     public Schema createSchema(Name catalog, Name schema) {
         return getCatalog(catalog).createSchema(schema);
+    }
+
+    public Collection<Catalog> listCatalogs() {
+        return new ArrayList<Catalog>(catalogs.values());
+    }
+
+    public Collection<Schema> listSchemas() {
+        Collection<Catalog> catalogs = listCatalogs();
+        List<Schema> schemas = new ArrayList<Schema>();
+        for (Catalog catalog : catalogs) {
+            schemas.addAll(catalog.listSchemas());
+        }
+        return schemas;
+    }
+
+    public Collection<Table> listTables() {
+        Collection<Schema> schemas = listSchemas();
+        List<Table> tables = new ArrayList<Table>();
+        for (Schema schema : schemas) {
+            tables.addAll(schema.listTables());
+        }
+        return tables;
     }
 }

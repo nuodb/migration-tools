@@ -30,7 +30,7 @@ package com.nuodb.tools.migration.spec;
 public class QuerySpec {
 
     private String name;
-    private String value;
+    private String statement;
 
     public String getName() {
         return name;
@@ -40,11 +40,11 @@ public class QuerySpec {
         this.name = name;
     }
 
-    public String getValue() {
-        return value;
+    public String getStatement() {
+        return statement;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setStatement(String statement) {
+        this.statement = statement;
     }
 }

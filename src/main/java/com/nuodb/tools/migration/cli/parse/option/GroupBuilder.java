@@ -25,36 +25,29 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.parse.option;
 
-import java.util.List;
+import com.nuodb.tools.migration.cli.parse.Group;
+import com.nuodb.tools.migration.cli.parse.Option;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String condition;
+/**
+ * @author Sergey Bushik
+ */
+public interface GroupBuilder {
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
-    }
+    GroupBuilder withId(int id);
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
-    }
+    GroupBuilder withName(String name);
 
-    public String getName() {
-        return name;
-    }
+    GroupBuilder withDescription(String description);
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    GroupBuilder withMinimum(int minimum);
 
-    public String getCondition() {
-        return condition;
-    }
+    GroupBuilder withMaximum(int maximum);
 
-    public void setCondition(String condition) {
-        this.condition = condition;
-    }
+    GroupBuilder withOption(Option option);
+
+    GroupBuilder withRequired(boolean required);
+
+    Group build();
 }

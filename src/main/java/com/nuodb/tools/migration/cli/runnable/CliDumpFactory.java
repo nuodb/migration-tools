@@ -25,44 +25,56 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.metamodel;
+package com.nuodb.tools.migration.cli.runnable;
 
-import java.util.*;
+import com.nuodb.tools.migration.cli.CliResources;
+import com.nuodb.tools.migration.cli.parse.CommandLine;
+import com.nuodb.tools.migration.cli.parse.Option;
+import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
+import com.nuodb.tools.migration.dump.DumpExecutor;
+import com.nuodb.tools.migration.spec.DumpSpec;
 
-public class Catalog {
+/**
+ * @author Sergey Bushik
+ */
+public class CliDumpFactory extends CliOptionsSupport implements CliRunnableFactory, CliResources {
 
-    private Map<Name, Schema> schemas = new HashMap<Name, Schema>();
-    private Database database;
-    private Name name;
+    public static final String DUMP_COMMAND = "dump";
 
-    public Catalog(Database database, Name name) {
-        this.database = database;
-        this.name = name;
+    @Override
+    public String getCommand() {
+        return DUMP_COMMAND;
     }
 
-    public Database getDatabase() {
-        return database;
+    @Override
+    public CliRunnable createRunnable(OptionToolkit optionToolkit) {
+        return new CliDump(
+                optionToolkit.newGroup().
+                        withName(resources.getMessage(DUMP_GROUP_NAME)).
+                        withOption(createSourceGroup(optionToolkit)).
+                        withOption(createOutputGroup(optionToolkit)).
+                        withRequired(true).build()
+        );
     }
 
-    public Name getName() {
-        return name;
-    }
+    class CliDump extends CliRunnableOption {
 
-    public Schema getSchema(Name name) {
-        Schema schema = schemas.get(name);
-        if (schema == null) {
-            schema = createSchema(name);
+        private DumpSpec dump;
+
+        public CliDump(Option option) {
+            super(option, DUMP_COMMAND);
         }
-        return schema;
-    }
 
-    protected Schema createSchema(Name name) {
-        Schema schema = new Schema(this, name);
-        schemas.put(name, schema);
-        return schema;
-    }
+        @Override
+        protected void bind(CommandLine commandLine, Option option) {
+            dump = new DumpSpec();
+            dump.setSourceSpec(createSource(commandLine, option));
+            dump.setOutputSpec(createOutput(commandLine, option));
+        }
 
-    public Collection<Schema> listSchemas() {
-        return new ArrayList<Schema>(schemas.values());
+        @Override
+        public void run() {
+            new DumpExecutor(dump).execute();
+        }
     }
 }

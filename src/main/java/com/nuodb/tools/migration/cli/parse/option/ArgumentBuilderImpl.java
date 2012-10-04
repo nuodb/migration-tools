@@ -25,36 +25,74 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.parse.option;
 
+/**
+ * @author Sergey Bushik
+ */
+
+import com.nuodb.tools.migration.cli.parse.Argument;
+
+import java.util.ArrayList;
 import java.util.List;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
+/**
+ * @author Sergey Bushik
+ */
+public class ArgumentBuilderImpl implements ArgumentBuilder {
+
+    private int id;
     private String name;
-    private String condition;
+    private String description;
+    private int minimum = 0;
+    private int maximum = 1;
+    private List<Object> defaultValues = new ArrayList<Object>();
+    private OptionFormat optionFormat;
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
+    public ArgumentBuilderImpl(OptionFormat optionFormat) {
+        this.optionFormat = optionFormat;
     }
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
+    @Override
+    public ArgumentBuilder withId(int id) {
+        this.id = id;
+        return this;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    @Override
+    public ArgumentBuilder withName(String name) {
         this.name = name;
+        return this;
     }
 
-    public String getCondition() {
-        return condition;
+    @Override
+    public ArgumentBuilder withDescription(String description) {
+        this.description = description;
+        return this;
     }
 
-    public void setCondition(String condition) {
-        this.condition = condition;
+    @Override
+    public ArgumentBuilder withMinimum(int minimum) {
+        this.minimum = minimum;
+        return this;
+    }
+
+    @Override
+    public ArgumentBuilder withMaximum(int maximum) {
+        this.maximum = maximum;
+        return this;
+    }
+
+    @Override
+    public ArgumentBuilder withDefaultValue(Object defaultValue) {
+        this.defaultValues.add(defaultValue);
+        return this;
+    }
+
+    @Override
+    public Argument build() {
+        return new ArgumentImpl(id, name, description,
+                minimum, maximum, defaultValues, optionFormat.getArgumentValuesSeparator());
     }
 }
+

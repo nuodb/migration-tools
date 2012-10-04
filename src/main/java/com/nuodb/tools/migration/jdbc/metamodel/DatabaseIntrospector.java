@@ -27,9 +27,8 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import com.nuodb.tools.migration.jdbc.connection.JdbcConnectionProvider;
-import com.nuodb.tools.migration.jdbc.connection.JdbcConnectionProviderImpl;
-import com.nuodb.tools.migration.spec.JdbcConnectionSpec;
+import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
+import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -53,13 +52,17 @@ public class DatabaseIntrospector {
 
     private transient final Log log = LogFactory.getLog(getClass());
 
-    private JdbcConnectionProvider connectionProvider;
+    protected String catalog;
+    protected String schema;
+    protected String table;
+    protected List<ObjectType> objectTypes = OBJECT_TYPES_ALL;
+    protected String[] tableTypes = TABLE_TYPES;
+    protected Connection connection;
 
-    private String catalog;
-    private String schema;
-    private String table;
-    private String[] tableTypes = TABLE_TYPES;
-    private List<ObjectType> objectTypes = OBJECT_TYPES_ALL;
+    public DatabaseIntrospector withObjectTypes(ObjectType... types) {
+        this.objectTypes = Arrays.asList(types);
+        return this;
+    }
 
     public DatabaseIntrospector withCatalog(String catalog) {
         this.catalog = catalog;
@@ -71,52 +74,23 @@ public class DatabaseIntrospector {
         return this;
     }
 
-    public DatabaseIntrospector withConnection(JdbcConnectionSpec connection) {
-        this.catalog = connection.getCatalog();
-        this.schema = connection.getSchema();
-        this.connectionProvider = new JdbcConnectionProviderImpl(connection);
-        return this;
-    }
-
-    public DatabaseIntrospector withConnectionProvider(JdbcConnectionProvider connectionProvider) {
-        this.connectionProvider = connectionProvider;
-        return this;
-    }
-
-    public DatabaseIntrospector withObjectTypes(ObjectType... types) {
-        this.objectTypes = Arrays.asList(types);
-        return this;
-    }
-
-    public DatabaseIntrospector withTables(String tables, String... tableTypes) {
-        this.table = tables;
+    public DatabaseIntrospector withTables(String table, String... tableTypes) {
+        this.table = table;
         this.tableTypes = tableTypes;
         return this;
     }
 
-    public String getCatalog() {
-        return this.catalog;
-    }
-
-    public String getSchema() {
-        return this.schema;
+    public DatabaseIntrospector withConnection(Connection connection) {
+        this.connection = connection;
+        return this;
     }
 
     public Database introspect() throws SQLException {
-        JdbcConnectionProvider provider = getConnectionProvider();
-        Connection connection = provider.getConnection();
-        DatabaseMetaData meta = connection.getMetaData();
-
         Database database = createDatabase();
+        DatabaseMetaData meta = connection.getMetaData();
         readInfo(meta, database);
         readObjects(meta, database);
-
-        provider.closeConnection(connection);
         return database;
-    }
-
-    protected JdbcConnectionProvider getConnectionProvider() {
-        return connectionProvider;
     }
 
     protected Database createDatabase() {
@@ -169,7 +143,6 @@ public class DatabaseIntrospector {
     }
 
     protected void readSchemas(DatabaseMetaData meta, Database database) throws SQLException {
-        String catalog = getCatalog();
         ResultSet schemas = catalog != null ? meta.getSchemas(catalog, null) : meta.getSchemas();
         try {
             while (schemas.next()) {
@@ -181,7 +154,7 @@ public class DatabaseIntrospector {
     }
 
     protected void readTables(DatabaseMetaData meta, Database database) throws SQLException {
-        ResultSet tables = meta.getTables(getCatalog(), getSchema(), this.table, this.tableTypes);
+        ResultSet tables = meta.getTables(catalog, schema, table, tableTypes);
         try {
             while (tables.next()) {
                 Schema schema = database.getSchema(tables.getString("TABLE_CAT"), tables.getString("TABLE_SCHEM"));
@@ -196,7 +169,7 @@ public class DatabaseIntrospector {
     }
 
     protected void readTableColumns(DatabaseMetaData meta, Table table) throws SQLException {
-        ResultSet columns = meta.getColumns(getCatalog(), getSchema(), table.getName().value(), null);
+        ResultSet columns = meta.getColumns(catalog, schema, table.getName().value(), null);
         try {
             ResultSetMetaModel model = new ResultSetMetaModel(columns.getMetaData());
             while (columns.next()) {
@@ -218,20 +191,26 @@ public class DatabaseIntrospector {
     }
 
     public static void main(String[] args) throws Exception {
-        JdbcConnectionSpec mysql = new JdbcConnectionSpec();
+        DriverManagerConnectionSpec mysql = new DriverManagerConnectionSpec();
         mysql.setDriver("com.mysql.jdbc.Driver");
         mysql.setUrl("jdbc:mysql://localhost:3306/test");
         mysql.setUsername("root");
 
-        JdbcConnectionSpec nuodb = new JdbcConnectionSpec();
+        DriverManagerConnectionSpec nuodb = new DriverManagerConnectionSpec();
         nuodb.setDriver("com.nuodb.jdbc.Driver");
         nuodb.setUrl("jdbc:com.nuodb://localhost/test");
         nuodb.setUsername("dba");
         nuodb.setPassword("goalie");
 
-        DatabaseIntrospector introspector = new DatabaseIntrospector();
-        introspector.withConnection(nuodb);
-        Database database = introspector.introspect();
-        System.out.println(database);
+        DriverManagerConnectionProvider connectionProvider = new DriverManagerConnectionProvider(nuodb);
+        Connection connection = connectionProvider.getConnection();
+        try {
+            DatabaseIntrospector introspector = new DatabaseIntrospector();
+            introspector.withConnection(connection);
+            Database database = introspector.introspect();
+            System.out.println(database);
+        } finally {
+            connectionProvider.closeConnection(connection);
+        }
     }
 }

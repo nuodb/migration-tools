@@ -27,6 +27,8 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,5 +71,9 @@ public class Schema {
         Table table = new Table(this, name, type);
         tables.put(name, table);
         return table;
+    }
+
+    public Collection<Table> listTables() {
+        return new ArrayList<Table>(tables.values());
     }
 }

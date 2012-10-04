@@ -28,9 +28,7 @@
 package com.nuodb.tools.migration.spec;
 
 public class ColumnSpec {
-
     protected String name;
-    protected boolean include;
 
     public String getName() {
         return name;
@@ -38,13 +36,5 @@ public class ColumnSpec {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isInclude() {
-        return include;
-    }
-
-    public void setInclude(boolean include) {
-        this.include = include;
     }
 }

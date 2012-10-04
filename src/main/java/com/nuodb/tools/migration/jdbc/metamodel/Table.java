@@ -27,10 +27,7 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Table {
     public static final String TABLE = "TABLE";
@@ -88,5 +85,9 @@ public class Table {
         Column column = new Column(this, name);
         columns.put(name, column);
         return column;
+    }
+
+    public Collection<Column> listColumns() {
+        return new ArrayList<Column>(columns.values());
     }
 }

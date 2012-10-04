@@ -27,15 +27,15 @@
  */
 package com.nuodb.tools.migration.cli;
 
-import com.nuodb.tools.migration.cli.command.CliRunnable;
-import com.nuodb.tools.migration.cli.command.CliRunnableFactoryLookup;
-import com.nuodb.tools.migration.cli.handler.Group;
-import com.nuodb.tools.migration.cli.handler.Option;
-import com.nuodb.tools.migration.cli.handler.OptionException;
-import com.nuodb.tools.migration.cli.handler.OptionSet;
-import com.nuodb.tools.migration.cli.handler.help.HelpFormatter;
-import com.nuodb.tools.migration.cli.handler.option.OptionToolkit;
-import com.nuodb.tools.migration.cli.handler.parser.ParserImpl;
+import com.nuodb.tools.migration.cli.runnable.CliRunnable;
+import com.nuodb.tools.migration.cli.runnable.CliRunnableFactoryLookup;
+import com.nuodb.tools.migration.cli.parse.Group;
+import com.nuodb.tools.migration.cli.parse.Option;
+import com.nuodb.tools.migration.cli.parse.OptionException;
+import com.nuodb.tools.migration.cli.parse.OptionSet;
+import com.nuodb.tools.migration.cli.parse.help.HelpFormatter;
+import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
+import com.nuodb.tools.migration.cli.parse.parser.ParserImpl;
 import com.nuodb.tools.migration.i18n.Resources;
 
 import java.io.BufferedReader;

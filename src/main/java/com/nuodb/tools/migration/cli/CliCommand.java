@@ -27,13 +27,13 @@
  */
 package com.nuodb.tools.migration.cli;
 
-import com.nuodb.tools.migration.cli.command.CliRunnable;
-import com.nuodb.tools.migration.cli.command.CliRunnableFactory;
-import com.nuodb.tools.migration.cli.command.CliRunnableFactoryLookup;
-import com.nuodb.tools.migration.cli.handler.CommandLine;
-import com.nuodb.tools.migration.cli.handler.OptionException;
-import com.nuodb.tools.migration.cli.handler.option.OptionToolkit;
-import com.nuodb.tools.migration.cli.handler.option.SimpleArgument;
+import com.nuodb.tools.migration.cli.parse.option.ArgumentImpl;
+import com.nuodb.tools.migration.cli.runnable.CliRunnable;
+import com.nuodb.tools.migration.cli.runnable.CliRunnableFactory;
+import com.nuodb.tools.migration.cli.runnable.CliRunnableFactoryLookup;
+import com.nuodb.tools.migration.cli.parse.CommandLine;
+import com.nuodb.tools.migration.cli.parse.OptionException;
+import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 
 import java.util.HashSet;
 import java.util.ListIterator;
@@ -42,7 +42,7 @@ import java.util.Set;
 /**
  * @author Sergey Bushik
  */
-public class CliCommand extends SimpleArgument {
+public class CliCommand extends ArgumentImpl {
 
     private CliRunnableFactoryLookup runnableFactoryLookup;
     private OptionToolkit optionToolkit;

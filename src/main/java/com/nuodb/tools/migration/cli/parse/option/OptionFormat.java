@@ -25,36 +25,42 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.parse.option;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String condition;
+/**
+ * @author Sergey Bushik
+ */
+public class OptionFormat {
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
+    public static final OptionFormat DEFAULT_FORMAT = new OptionFormat("--", "=", ",");
+
+    private final Set<String> optionPrefixes;
+    private final String argumentSeparator;
+    private final String argumentValuesSeparator;
+
+    public OptionFormat(String optionPrefix, String argumentSeparator, String argumentValuesSeparator) {
+        this(new HashSet<String>(Arrays.asList(optionPrefix)), argumentSeparator, argumentValuesSeparator);
     }
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
+    public OptionFormat(Set<String> optionPrefixes, String argumentSeparator, String argumentValuesSeparator) {
+        this.optionPrefixes = optionPrefixes;
+        this.argumentSeparator = argumentSeparator;
+        this.argumentValuesSeparator = argumentValuesSeparator;
     }
 
-    public String getName() {
-        return name;
+    public Set<String> getOptionPrefixes() {
+        return optionPrefixes;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getArgumentSeparator() {
+        return argumentSeparator;
     }
 
-    public String getCondition() {
-        return condition;
-    }
-
-    public void setCondition(String condition) {
-        this.condition = condition;
+    public String getArgumentValuesSeparator() {
+        return argumentValuesSeparator;
     }
 }

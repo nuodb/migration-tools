@@ -27,34 +27,76 @@
  */
 package com.nuodb.tools.migration.spec;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String condition;
+public class DriverManagerConnectionSpec extends ConnectionSpecBase {
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
+    private String catalog;
+    private String schema;
+    private String driver;
+    private String url;
+    private String username;
+    private String password;
+    private Map<String, String> properties = new HashMap<String, String>();
+
+    public String getCatalog() {
+        return catalog;
     }
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
+    public void setCatalog(String catalog) {
+        this.catalog = catalog;
     }
 
-    public String getName() {
-        return name;
+    public String getSchema() {
+        return schema;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setSchema(String schema) {
+        this.schema = schema;
     }
 
-    public String getCondition() {
-        return condition;
+    public String getDriver() {
+        return driver;
     }
 
-    public void setCondition(String condition) {
-        this.condition = condition;
+    public void setDriver(String driver) {
+        this.driver = driver;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void addProperty(String property, String value) {
+        properties.put(property, value);
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 }

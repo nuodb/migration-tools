@@ -25,36 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.runnable;
 
-import java.util.List;
+/**
+ * @author Sergey Bushik
+ */
+public interface CliOptions {
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String condition;
+    final String SOURCE_DRIVER_OPTION = "source.driver";
+    final String SOURCE_URL_OPTION = "source.url";
+    final String SOURCE_USERNAME_OPTION = "source.username";
+    final String SOURCE_PASSWORD_OPTION = "source.password";
+    final String SOURCE_PROPERTIES_OPTION = "source.properties";
+    final String SOURCE_CATALOG_OPTION = "source.catalog";
+    final String SOURCE_SCHEMA_OPTION = "source.schema";
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
-    }
-
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCondition() {
-        return condition;
-    }
-
-    public void setCondition(String condition) {
-        this.condition = condition;
-    }
+    final String OUTPUT_TYPE_OPTION = "output.type";
+    final String OUTPUT_PATH_OPTION = "output.path";
 }
