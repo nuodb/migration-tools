@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -20,6 +21,7 @@ public class DatabaseIntrospectorTest {
     final String TEST_CATALOG_NAME = "TEST_CATALOG";
     final String TEST_TABLE_NAME = "TEST_TABLE";
     final String TEST_SCHEMA_NAME = "TEST_SCHEMA";
+    final String TEST_DRIVER_NAME = "TestDriver";
 
     @Before
     public void setUp() throws Exception {
@@ -36,9 +38,13 @@ public class DatabaseIntrospectorTest {
         when(mockResultSet.getString("TABLE_CATALOG")).thenReturn(TEST_CATALOG_NAME);
         when(mockResultSet.getString("TABLE_SCHEM")).thenReturn(TEST_CATALOG_NAME);
         when(mockResultSet.getString("TABLE_NAME")).thenReturn(TEST_CATALOG_NAME);
+
+
         when(mockResultSet.getMetaData()).thenReturn(mockMetaDataResultSet);
 
 
+
+        when(mockMetaData.getDriverName()).thenReturn(TEST_DRIVER_NAME);
         when(mockMetaData.getCatalogs()).thenReturn(mockResultSet);
         when(mockMetaData.getSchemas()).thenReturn(mockResultSet);
         when(mockMetaData.getTables(null, null, null, null)).thenReturn(mockResultSet);
@@ -88,4 +94,27 @@ public class DatabaseIntrospectorTest {
         Assert.assertNotNull(schema);
         Assert.assertEquals(schema.getName(), schemaName);
     }
+
+    @Test
+    public void testReadInfo() throws Exception {
+
+
+        databaseIntrospector.readInfo(mockMetaData, database);
+
+        final DriverInfo databaseInfo = database.getDriverInfo();
+        Assert.assertNotNull(databaseInfo);
+        Assert.assertEquals(databaseInfo.getName(), TEST_DRIVER_NAME);
+
+    }
+
+    @Test
+    public void testIntrospect() throws Exception {
+        final Connection mock = mock(Connection.class);
+        when(mock.getMetaData()).thenReturn(mockMetaData);
+        databaseIntrospector.withConnection(mock);
+        final Database introspectResult = databaseIntrospector.introspect();
+
+    }
+
+
 }
