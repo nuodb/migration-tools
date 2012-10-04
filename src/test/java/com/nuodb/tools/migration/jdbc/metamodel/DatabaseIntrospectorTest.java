@@ -113,6 +113,7 @@ public class DatabaseIntrospectorTest {
         when(mock.getMetaData()).thenReturn(mockMetaData);
         databaseIntrospector.withConnection(mock);
         final Database introspectResult = databaseIntrospector.introspect();
+        //TODO Add result check
 
     }
 
