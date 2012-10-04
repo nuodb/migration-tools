@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.Map;
@@ -12,15 +11,17 @@ import java.util.Map;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class DatabaseIntrospectorTest extends DatabaseIntrospector {
-    Database database;
-    DatabaseMetaData mockMetaData;
+public class DatabaseIntrospectorTest {
+    private static final String TEST_CATALOG_NAME = "TEST_CATALOG";
+    private static final String TEST_SCHEMA_NAME = "TEST_SCHEMA";
 
-    final String TEST_CATALOG_NAME = "TEST_CATALOG";
-    final String TEST_SCHEMA_NAME = "TEST_SCHEMA";
+    private Database database;
+    private DatabaseMetaData mockMetaData;
+    private DatabaseIntrospector databaseIntrospector;
 
     @Before
     public void setUp() throws Exception {
+        databaseIntrospector = new DatabaseIntrospector();
 
         mockMetaData = mock(DatabaseMetaData.class);
         database = new Database(); // mock(Database.class);
@@ -36,33 +37,22 @@ public class DatabaseIntrospectorTest extends DatabaseIntrospector {
         when(mockMetaData.getSchemas()).thenReturn(mockResultSet);
     }
 
-
-    @Test
-    public void testWithConnectionProvider() throws Exception {
-        final DatabaseIntrospector databaseIntrospector = withConnection(mock(Connection.class));
-        Assert.assertNotNull(databaseIntrospector);
-    }
-
     @Test
     public void testReadCatalogs() throws Exception {
-        readCatalogs(mockMetaData, database);
+        databaseIntrospector.readCatalogs(mockMetaData, database);
         final Map<Name, Catalog> catalogs = database.getCatalogs();
         Assert.assertNotNull(catalogs);
         Assert.assertFalse(catalogs.isEmpty());
         Assert.assertTrue(catalogs.containsKey(Name.valueOf(TEST_CATALOG_NAME)));
         Assert.assertEquals(catalogs.size(), 1);
-
     }
 
     @Test
     public void testReadSchemas() throws Exception {
-        readSchemas(mockMetaData, database);
+        databaseIntrospector.readSchemas(mockMetaData, database);
         final Name schemaName = Name.valueOf(TEST_SCHEMA_NAME);
-        final Schema schema =
-                database.getSchema(Name.valueOf(TEST_CATALOG_NAME), schemaName);
+        final Schema schema = database.getSchema(Name.valueOf(TEST_CATALOG_NAME), schemaName);
         Assert.assertNotNull(schema);
         Assert.assertEquals(schema.getName(), schemaName);
     }
-
-
 }
