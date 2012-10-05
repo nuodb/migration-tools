@@ -30,8 +30,8 @@ package com.nuodb.tools.migration.jdbc.metamodel;
 public class DriverInfo {
     private String name;
     private String version;
-    private String minorVersion;
-    private String majorVersion;
+    private int minorVersion;
+    private int majorVersion;
 
     public String getName() {
         return name;
@@ -49,19 +49,19 @@ public class DriverInfo {
         this.version = version;
     }
 
-    public String getMinorVersion() {
+    public int getMinorVersion() {
         return minorVersion;
     }
 
-    public void setMinorVersion(String minorVersion) {
+    public void setMinorVersion(int minorVersion) {
         this.minorVersion = minorVersion;
     }
 
-    public String getMajorVersion() {
+    public int getMajorVersion() {
         return majorVersion;
     }
 
-    public void setMajorVersion(String majorVersion) {
+    public void setMajorVersion(int majorVersion) {
         this.majorVersion = majorVersion;
     }
 
@@ -78,8 +78,8 @@ public class DriverInfo {
 
         DriverInfo that = (DriverInfo) o;
 
-        if (majorVersion != null ? !majorVersion.equals(that.majorVersion) : that.majorVersion != null) return false;
-        if (minorVersion != null ? !minorVersion.equals(that.minorVersion) : that.minorVersion != null) return false;
+        if (majorVersion != that.majorVersion) return false;
+        if (minorVersion != that.minorVersion) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (version != null ? !version.equals(that.version) : that.version != null) return false;
 
@@ -90,8 +90,8 @@ public class DriverInfo {
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (version != null ? version.hashCode() : 0);
-        result = 31 * result + (minorVersion != null ? minorVersion.hashCode() : 0);
-        result = 31 * result + (majorVersion != null ? majorVersion.hashCode() : 0);
+        result = 31 * result + minorVersion;
+        result = 31 * result + majorVersion;
         return result;
     }
 }

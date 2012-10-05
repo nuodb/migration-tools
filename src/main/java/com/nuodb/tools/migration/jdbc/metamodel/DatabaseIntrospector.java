@@ -112,9 +112,9 @@ public class DatabaseIntrospector {
     protected void readInfo(DatabaseMetaData meta, Database database) throws SQLException {
         DriverInfo driverInfo = new DriverInfo();
         driverInfo.setName(meta.getDriverName());
-        driverInfo.setVersion(meta.getDriverName());
-        driverInfo.setMinorVersion(meta.getDriverName());
-        driverInfo.setMajorVersion(meta.getDriverName());
+        driverInfo.setVersion(meta.getDriverVersion());
+        driverInfo.setMinorVersion(meta.getDriverMinorVersion());
+        driverInfo.setMajorVersion(meta.getDriverMajorVersion());
         if (log.isDebugEnabled()) {
             log.debug(String.format("DriverInfo: %s", driverInfo));
         }

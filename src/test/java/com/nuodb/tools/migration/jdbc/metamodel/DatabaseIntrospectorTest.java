@@ -25,6 +25,7 @@ public class DatabaseIntrospectorTest {
     final String TEST_SCHEMA_NAME = "TEST_SCHEMA";
     final String TEST_DRIVER_NAME = "TEST_DRIVER";
     final String TEST_TABLE_TYPE = "TEST_TABLE_TYPE";
+    final String TEST_COLUMN_NAME = "TEST_COLUMN_NAME";
 
     @Before
     public void setUp() throws Exception {
@@ -45,6 +46,7 @@ public class DatabaseIntrospectorTest {
         when(mockResultSet.getString("TABLE_SCHEM")).thenReturn(TEST_SCHEMA_NAME);
         when(mockResultSet.getString("TABLE_NAME")).thenReturn(TEST_TABLE_NAME);
         when(mockResultSet.getString("TABLE_TYPE")).thenReturn(TEST_TABLE_TYPE);
+        when(mockResultSet.getString("COLUMN_NAME")).thenReturn(TEST_COLUMN_NAME);
         when(mockResultSet.getMetaData()).thenReturn(mockMetaDataResultSet);
 
 
@@ -96,6 +98,18 @@ public class DatabaseIntrospectorTest {
     }
 
     @Test
+    public void testReadTableColumns() throws Exception {
+        final Column mockColumn = mock(Column.class);
+        stub(mockTable.createColumn(TEST_COLUMN_NAME)).toReturn(mockColumn);
+
+        databaseIntrospector.readTableColumns(mockMetaData, mockTable);
+
+        verify(mockTable, times(1)).createColumn(TEST_COLUMN_NAME);
+
+
+    }
+
+    @Test
     public void testReadInfo() throws Exception {
         final DatabaseIntrospector spyIntrospector = spy(databaseIntrospector);
         spyIntrospector.readInfo(mockMetaData, mockDatabase);
@@ -103,16 +117,28 @@ public class DatabaseIntrospectorTest {
         verify(mockDatabase, times(1)).setDatabaseInfo(any(DatabaseInfo.class));
         verify(mockMetaData, times(1)).getDriverName();
         verify(mockMetaData, times(1)).getDriverVersion();
+        verify(mockMetaData, times(1)).getDatabaseMajorVersion();
+        verify(mockMetaData, times(1)).getDriverMajorVersion();
+        verify(mockMetaData, times(1)).getDatabaseMinorVersion();
+        verify(mockMetaData, times(1)).getDriverMinorVersion();
+        verify(mockMetaData, times(1)).getDatabaseProductName();
+        verify(mockMetaData, times(1)).getDatabaseProductVersion();
 
     }
 
     @Test
     public void testIntrospect() throws Exception {
-        final Connection mock = mock(Connection.class);
-        when(mock.getMetaData()).thenReturn(mockMetaData);
-        databaseIntrospector.withConnection(mock);
-        final Database introspectResult = databaseIntrospector.introspect();
-        //TODO Add result check
+        final Connection mockConnection = mock(Connection.class);
+        when(mockConnection.getMetaData()).thenReturn(mockMetaData);
+        databaseIntrospector.withConnection(mockConnection);
+
+        final DatabaseIntrospector spy = spy(databaseIntrospector);
+
+        spy.introspect();
+        verify(mockConnection, times(1)).getMetaData();
+        verify(spy, times(1)).readInfo(eq(mockMetaData), any(Database.class));
+        verify(spy, times(1)).readObjects(eq(mockMetaData), any(Database.class));
+
 
     }
 
