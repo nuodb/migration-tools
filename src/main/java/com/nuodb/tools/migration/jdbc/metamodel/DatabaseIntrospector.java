@@ -40,7 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Reads database meta data and creates its meta model. Root meta model object is {@link Database} containing set of
+ * Reads mockDatabase meta data and creates its meta model. Root meta model object is {@link Database} containing set of
  * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
  *
  * @author Sergey Bushik
