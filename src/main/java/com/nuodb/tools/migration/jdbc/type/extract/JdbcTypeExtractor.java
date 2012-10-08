@@ -25,24 +25,15 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.type;
+package com.nuodb.tools.migration.jdbc.type.extract;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  * @author Sergey Bushik
  */
-public class BitTypeExtractor extends ValueExtractorBase<Boolean> {
+public interface JdbcTypeExtractor {
 
-    public int getType() {
-        return Types.BIT;
-    }
-
-    @Override
-    protected Boolean doExtract(ResultSet resultSet, int column) throws SQLException {
-        boolean value = resultSet.getBoolean(column);
-        return resultSet.wasNull() ? null : value;
-    }
+    void extract(ResultSet resultSet, int column, JdbcTypeAcceptor acceptor) throws SQLException;
 }

@@ -27,22 +27,55 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.MigrationException;
+import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
+
+import java.io.OutputStream;
+import java.io.Writer;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class OutputFormatException extends MigrationException {
+public abstract class DumpOutputBase implements DumpOutput {
 
-    public OutputFormatException(String message) {
-        super(message);
+    private Writer writer;
+    private OutputStream outputStream;
+    private Map<String, String> attributes;
+    private JdbcTypeExtractor jdbcTypeExtractor;
+
+    public Writer getWriter() {
+        return writer;
     }
 
-    public OutputFormatException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public void setWriter(Writer writer) {
+        this.writer = writer;
     }
 
-    public OutputFormatException(Throwable cause) {
-        super(cause);
+    public OutputStream getOutputStream() {
+        return outputStream;
+    }
+
+    @Override
+    public void setOutputStream(OutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    @Override
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
+    public JdbcTypeExtractor getJdbcTypeExtractor() {
+        return jdbcTypeExtractor;
+    }
+
+    @Override
+    public void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor) {
+        this.jdbcTypeExtractor = jdbcTypeExtractor;
     }
 }

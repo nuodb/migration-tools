@@ -25,24 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.type;
+package com.nuodb.tools.migration.jdbc.type.extract;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  * @author Sergey Bushik
  */
-public class IntegerTypeExtractor extends ValueExtractorBase<Integer> {
-    @Override
-    public int getType() {
-        return Types.INTEGER;
-    }
+public abstract class JdbcTypeExtractorBase implements JdbcTypeExtractor {
 
     @Override
-    protected Integer doExtract(ResultSet resultSet, int column) throws SQLException {
-        int value = resultSet.getInt(column);
-        return resultSet.wasNull() ? null : value;
+    public void extract(ResultSet resultSet, int column, JdbcTypeAcceptor acceptor) throws SQLException {
+        int columnType = resultSet.getMetaData().getColumnType(column);
+        extract(resultSet, column, columnType, acceptor);
     }
+
+    protected abstract void extract(ResultSet resultSet, int column, int columnType, JdbcTypeAcceptor acceptor) throws SQLException;
 }

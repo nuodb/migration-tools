@@ -50,17 +50,17 @@ import java.util.List;
  */
 public class CliHandler implements CliResources {
 
-    private static final int HELP_OPTION_ID = 1;
-    private static final int LIST_OPTION_ID = 2;
-    private static final int CONFIG_OPTION_ID = 3;
-    private static final int COMMAND_OPTION_ID = 4;
+    public static final int HELP_OPTION_ID = 1;
+    public static final int LIST_OPTION_ID = 2;
+    public static final int CONFIG_OPTION_ID = 3;
+    public static final int COMMAND_OPTION_ID = 4;
 
-    private static final String HELP_OPTION = "help";
-    private static final String LIST_OPTION = "list";
-    private static final String CONFIG_OPTION = "config";
-    private static final String COMMAND_OPTION = "command";
+    public static final String HELP_OPTION = "help";
+    public static final String LIST_OPTION = "list";
+    public static final String CONFIG_OPTION = "config";
+    public static final String COMMAND_OPTION = "command";
 
-    private static final String MIGRATION_EXECUTABLE = "migration";
+    public static final String MIGRATION_EXECUTABLE = "migration";
 
     public void handle(String[] arguments) throws OptionException {
         Option root = createOption();

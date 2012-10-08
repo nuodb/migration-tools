@@ -25,24 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.type;
+package com.nuodb.tools.migration.dump.output;
 
+import com.nuodb.tools.migration.jdbc.metamodel.ResultSetMetaModel;
+import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class VarcharTypeExtractor extends ValueExtractorBase<String> {
+public interface DumpOutput {
 
-    @Override
-    public int getType() {
-        return Types.VARCHAR;
-    }
+    void init();
 
-    @Override
-    protected String doExtract(ResultSet resultSet, int column) throws SQLException {
-        return resultSet.getString(column);
-    }
+    void dumpBegin(ResultSet resultSet) throws IOException, SQLException;
+
+    void dumpRow(ResultSet resultSet) throws IOException, SQLException;
+
+    void dumpEnd(ResultSet resultSet) throws IOException, SQLException;
+
+    void setWriter(Writer writer);
+
+    void setOutputStream(OutputStream outputStream);
+
+    void setAttributes(Map<String, String> attributes);
+
+    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
 }

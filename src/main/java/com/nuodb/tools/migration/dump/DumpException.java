@@ -25,23 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.type;
+package com.nuodb.tools.migration.dump;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.nuodb.tools.migration.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public class TypeExtractorLookup {
+public class DumpException extends MigrationException {
 
-    private Map<Integer, ValueExtractor<?>> extractors = new HashMap<Integer, ValueExtractor<?>>();
-
-    public void register(ValueExtractor<?> extractor) {
-        extractors.put(extractor.getType(), extractor);
+    public DumpException(String message) {
+        super(message);
     }
 
-    public ValueExtractor<?> lookup(int type) {
-        return extractors.get(type);
+    public DumpException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public DumpException(Throwable cause) {
+        super(cause);
     }
 }

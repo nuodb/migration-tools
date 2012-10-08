@@ -25,12 +25,28 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.type;
+package com.nuodb.tools.migration.jdbc.type.extract;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * @author Sergey Bushik
  */
-public interface ValueAcceptor<T> {
+public class Jdbc3TypeExtractor extends Jdbc2TypeExtractor {
 
-    void accept(T value, int type);
+    @Override
+    protected void extract(ResultSet resultSet, int column, int columnType, JdbcTypeAcceptor acceptor) throws SQLException {
+        switch (columnType) {
+            case Types.DATALINK:
+                acceptor.accept(resultSet.getURL(column), columnType);
+                break;
+            case Types.BOOLEAN:
+                boolean booleanValue = resultSet.getBoolean(column);
+                acceptor.accept(resultSet.wasNull() ? null : booleanValue, columnType);
+            default:
+                super.extract(resultSet, column, columnType, acceptor);
+        }
+    }
 }

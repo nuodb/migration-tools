@@ -25,37 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.jdbc.type.extract;
 
-import java.util.Map;
+import java.sql.SQLException;
 
-public class SpecBase implements Spec {
+/**
+ * @author Sergey Bushik
+ */
+public interface JdbcTypeAcceptor {
 
-    private String id;
-    private String type;
-    private Map<String, String> attributes;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
-    }
+    void accept(Object value, int type) throws SQLException;
 }

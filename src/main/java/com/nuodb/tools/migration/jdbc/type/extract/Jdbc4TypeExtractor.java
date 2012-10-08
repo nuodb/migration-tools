@@ -25,16 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.type;
+package com.nuodb.tools.migration.jdbc.type.extract;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 
 /**
  * @author Sergey Bushik
  */
-public class LongVarcharTypeExtractor extends VarcharTypeExtractor {
+public class Jdbc4TypeExtractor extends Jdbc3TypeExtractor {
+
     @Override
-    public int getType() {
-        return Types.LONGNVARCHAR;
+    protected void extract(ResultSet resultSet, int column, int columnType, JdbcTypeAcceptor acceptor) throws SQLException {
+        switch (columnType) {
+            case Types.ROWID:
+                acceptor.accept(resultSet.getRowId(column), columnType);
+                break;
+            case Types.NCHAR:
+                acceptor.accept(resultSet.getNClob(column), columnType);
+                break;
+            case Types.NVARCHAR:
+            case Types.LONGNVARCHAR:
+                acceptor.accept(resultSet.getNString(column), columnType);
+                break;
+            case Types.SQLXML:
+                acceptor.accept(resultSet.getSQLXML(column), columnType);
+            default:
+                super.extract(resultSet, column, columnType, acceptor);
+        }
     }
 }

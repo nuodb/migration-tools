@@ -31,7 +31,7 @@ import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.dump.DumpWriter;
+import com.nuodb.tools.migration.dump.Dump;
 import com.nuodb.tools.migration.spec.DumpSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,7 +80,7 @@ public class CliDumpFactory extends CliOptionsSupport implements CliRunnableFact
         @Override
         public void run() {
             try {
-                new DumpWriter().write(dump);
+                new Dump().write(dump);
             } catch (SQLException e) {
                 if (log.isWarnEnabled()) {
                     log.warn(e);

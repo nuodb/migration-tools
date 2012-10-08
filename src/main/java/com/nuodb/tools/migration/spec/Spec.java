@@ -27,6 +27,8 @@
  */
 package com.nuodb.tools.migration.spec;
 
+import java.util.Map;
+
 public interface Spec {
 
     String getId();
@@ -36,4 +38,8 @@ public interface Spec {
     String getType();
 
     void setType(String type);
+
+    Map<String, String> getAttributes();
+
+    void setAttributes(Map<String, String> attributes);
 }

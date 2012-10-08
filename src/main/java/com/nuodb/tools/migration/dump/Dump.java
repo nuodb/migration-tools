@@ -27,18 +27,21 @@
  */
 package com.nuodb.tools.migration.dump;
 
-import com.nuodb.tools.migration.dump.output.CsvOutputFormat;
-import com.nuodb.tools.migration.dump.output.OutputFormat;
+import com.nuodb.tools.migration.dump.output.CsvDumpOutput;
+import com.nuodb.tools.migration.dump.output.DumpOutput;
 import com.nuodb.tools.migration.dump.query.Query;
 import com.nuodb.tools.migration.dump.query.SelectQuery;
 import com.nuodb.tools.migration.dump.query.StatementQuery;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.tools.migration.jdbc.metamodel.*;
+import com.nuodb.tools.migration.jdbc.type.extract.Jdbc4TypeExtractor;
+import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
 import com.nuodb.tools.migration.spec.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,7 +56,7 @@ import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DumpWriter {
+public class Dump {
 
     private final Log log = LogFactory.getLog(getClass());
 
@@ -84,20 +87,31 @@ public class DumpWriter {
                 log.debug(String.format("Executing statement %1$s", query.toQueryString()));
             }
             ResultSet resultSet = statement.executeQuery();
-            // TODO: create output based on output spec
-            OutputFormat output = new CsvOutputFormat();
-            output.open(System.out);
-            output.init(resultSet);
-            while (resultSet.next()) {
-                output.row(resultSet);
+            // TODO: create & configure dump output based on the provided output spec
+            DumpOutput output = new CsvDumpOutput();
+            output.setOutputStream(System.out);
+            output.setAttributes(dump.getOutputSpec().getAttributes());
+            output.setJdbcTypeExtractor(getJdbcTypeExtractor());
+            output.init();
+            try {
+                output.dumpBegin(resultSet);
+                while (resultSet.next()) {
+                    output.dumpRow(resultSet);
+                }
+                output.dumpEnd(resultSet);
+            } catch (IOException e) {
+                throw new DumpException(e);
             }
-            output.end();
         }
     }
 
     protected ConnectionProvider getConnectionProvider(ConnectionSpec spec) {
         DriverManagerConnectionSpec driverManagerConnectionSpec = (DriverManagerConnectionSpec) spec;
         return new DriverManagerConnectionProvider(driverManagerConnectionSpec, false, Connection.TRANSACTION_READ_COMMITTED);
+    }
+
+    protected JdbcTypeExtractor getJdbcTypeExtractor() {
+        return new Jdbc4TypeExtractor();
     }
 
     protected List<Query> createQueries(Database database, DumpSpec dump) {

@@ -27,15 +27,9 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.MigrationException;
+import com.nuodb.tools.migration.dump.DumpException;
 import com.nuodb.tools.migration.jdbc.metamodel.ResultSetMetaModel;
-import com.nuodb.tools.migration.jdbc.type.BitTypeExtractor;
-import com.nuodb.tools.migration.jdbc.type.IntegerTypeExtractor;
-import com.nuodb.tools.migration.jdbc.type.LongVarcharTypeExtractor;
-import com.nuodb.tools.migration.jdbc.type.TypeExtractorLookup;
-import com.nuodb.tools.migration.jdbc.type.ValueAcceptor;
-import com.nuodb.tools.migration.jdbc.type.ValueExtractor;
-import com.nuodb.tools.migration.jdbc.type.VarcharTypeExtractor;
+import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeAcceptor;
 import org.supercsv.io.CsvListWriter;
 import org.supercsv.prefs.CsvPreference;
 
@@ -46,107 +40,50 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class CsvOutputFormat implements OutputFormat {
+public class CsvDumpOutput extends DumpOutputBase {
 
-    private ResultSetMetaModel metaModel;
-
-    private CsvListWriter csvWriter;
-    private TypeExtractorLookup typeExtractorLookup;
+    private CsvListWriter output;
+    private ResultSetMetaModel resultSetMetaModel;
 
     @Override
-    public void open(Writer writer) {
-        this.csvWriter = new CsvListWriter(writer, CsvPreference.STANDARD_PREFERENCE);
-    }
-
-    @Override
-    public void open(OutputStream output) {
-        this.csvWriter = new CsvListWriter(new PrintWriter(output), CsvPreference.STANDARD_PREFERENCE);
-    }
-
-    @Override
-    public void init(ResultSet resultSet) throws SQLException {
-        this.metaModel = new ResultSetMetaModel(resultSet);
-        try {
-            this.csvWriter.writeHeader(metaModel.getColumns());
-        } catch (IOException e) {
-            handleIOException(e);
-        }
-        this.typeExtractorLookup = createTypeExtractorLookup();
-    }
-
-    protected TypeExtractorLookup createTypeExtractorLookup() {
-        TypeExtractorLookup typeExtractorLookup = new TypeExtractorLookup();
-        typeExtractorLookup.register(new VarcharTypeExtractor());
-        typeExtractorLookup.register(new LongVarcharTypeExtractor());
-        typeExtractorLookup.register(new BitTypeExtractor());
-        typeExtractorLookup.register(new IntegerTypeExtractor());
-        return typeExtractorLookup;
-    }
-
-    @Override
-    public void row(ResultSet resultSet) throws SQLException {
-        int count = metaModel.getColumnCount();
-        String[] columns = new String[count];
-        CsvValueAcceptor acceptor = new CsvValueAcceptor();
-        for (int index = 0; index < count; index++) {
-            final int type = metaModel.getColumnType(index);
-            ValueExtractor<Object> extractor = (ValueExtractor<Object>) typeExtractorLookup.lookup(type);
-            if (extractor == null) {
-                throw new MigrationException(String.format("Type extractor for java.sql.Types type %1$d not implemented/registered", type));
-            }
-            int column = index + 1;
-            extractor.extract(resultSet, column, acceptor);
-            columns[index] = acceptor.getValue();
-        }
-        try {
-            csvWriter.write(columns);
-        } catch (IOException e) {
-            handleIOException(e);
+    public void init() {
+        Writer writer = getWriter();
+        OutputStream outputStream = getOutputStream();
+        // TODO: process extra getAttributes() and configure CSV preference
+        CsvPreference preference = CsvPreference.STANDARD_PREFERENCE;
+        if (writer != null) {
+            output = new CsvListWriter(writer, preference);
+        } else if (outputStream != null) {
+            output = new CsvListWriter(new PrintWriter(outputStream), preference);
         }
     }
 
     @Override
-    public void end() {
-        try {
-            csvWriter.flush();
-            csvWriter.close();
-        } catch (IOException e) {
-            handleIOException(e);
-        }
+    public void dumpBegin(ResultSet resultSet) throws IOException, SQLException {
+        resultSetMetaModel = new ResultSetMetaModel(resultSet);
+        output.writeHeader(resultSetMetaModel.getColumns());
     }
 
-    protected void handleIOException(IOException e) {
-        throw new OutputFormatException(e);
-    }
-
-    class CsvValueAcceptor implements ValueAcceptor<Object> {
-
-        private String value;
-
-        @Override
-        public void accept(Object value, int type) {
-            switch (type) {
-                case Types.BIT:
-                case Types.INTEGER:
-                case Types.VARCHAR:
-                    this.value = value != null ? value.toString() : "";
-                    break;
-                default:
-                    throw new MigrationException(String.format("Type unhandled for type %1$d not implemented/registered", type));
-            }
+    @Override
+    public void dumpRow(ResultSet resultSet) throws IOException, SQLException {
+        final List<String> columns = new ArrayList<String>();
+        for (int column = 0; column < resultSetMetaModel.getColumnCount(); column++) {
+            getJdbcTypeExtractor().extract(resultSet, column + 1, new JdbcTypeAcceptor() {
+                @Override
+                public void accept(Object value, int type) throws SQLException {
+                    columns.add(format(value, type));
+                }
+            });
         }
-
-        public String getValue() {
-            return value;
-        }
+        output.write(columns);
     }
-
-
 
 //    private static String getColumnValue(ResultSet rs, int colType, int colIndex)
 //            throws SQLException {
@@ -252,4 +189,24 @@ public class CsvOutputFormat implements OutputFormat {
 //        }
 //        return sb.toString();
 //    }
+
+    protected String format(Object value, int type) {
+        String result;
+        switch (type) {
+            case Types.BIT:
+            case Types.INTEGER:
+            case Types.VARCHAR:
+                result = value != null ? value.toString() : "";
+                break;
+            default:
+                throw new DumpException(String.format("Jdbc type %1$d is unsupported", type));
+        }
+        return result;
+    }
+
+    @Override
+    public void dumpEnd(ResultSet resultSet) throws IOException {
+        output.flush();
+        output.close();
+    }
 }
