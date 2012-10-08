@@ -28,4 +28,12 @@
 package com.nuodb.tools.migration.spec;
 
 public interface ConnectionSpec extends Spec {
+
+    String getCatalog();
+
+    void setCatalog(String catalog);
+
+    String getSchema();
+
+    void setSchema(String schema);
 }

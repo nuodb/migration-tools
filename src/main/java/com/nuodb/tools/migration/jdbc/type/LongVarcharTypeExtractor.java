@@ -25,16 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.runnable;
+package com.nuodb.tools.migration.jdbc.type;
 
-import com.nuodb.tools.migration.cli.parse.Option;
+import java.sql.Types;
 
 /**
  * @author Sergey Bushik
  */
-public interface CliRunnable extends Option {
-
-    void run();
-
-    String getCommand();
+public class LongVarcharTypeExtractor extends VarcharTypeExtractor {
+    @Override
+    public int getType() {
+        return Types.LONGNVARCHAR;
+    }
 }

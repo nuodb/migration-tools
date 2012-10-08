@@ -25,21 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.runnable;
+package com.nuodb.tools.migration.jdbc.type;
 
 /**
  * @author Sergey Bushik
  */
-public interface CliOptions {
+public interface ValueAcceptor<T> {
 
-    final String SOURCE_DRIVER_OPTION = "source.driver";
-    final String SOURCE_URL_OPTION = "source.url";
-    final String SOURCE_USERNAME_OPTION = "source.username";
-    final String SOURCE_PASSWORD_OPTION = "source.password";
-    final String SOURCE_PROPERTIES_OPTION = "source.properties";
-    final String SOURCE_CATALOG_OPTION = "source.catalog";
-    final String SOURCE_SCHEMA_OPTION = "source.schema";
-
-    final String OUTPUT_TYPE_OPTION = "output.type";
-    final String OUTPUT_PATH_OPTION = "output.path";
+    void accept(T value, int type);
 }

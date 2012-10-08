@@ -44,6 +44,7 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
     private int id;
     private String name;
     private String description;
+    private boolean required;
     private int minimum = 0;
     private int maximum = 1;
     private List<Object> defaultValues = new ArrayList<Object>();
@@ -72,6 +73,12 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
     }
 
     @Override
+    public ArgumentBuilder withRequired(boolean required) {
+        this.required = required;
+        return this;
+    }
+
+    @Override
     public ArgumentBuilder withMinimum(int minimum) {
         this.minimum = minimum;
         return this;
@@ -91,7 +98,7 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
 
     @Override
     public Argument build() {
-        return new ArgumentImpl(id, name, description,
+        return new ArgumentImpl(id, name, description, required,
                 minimum, maximum, defaultValues, optionFormat.getArgumentValuesSeparator());
     }
 }

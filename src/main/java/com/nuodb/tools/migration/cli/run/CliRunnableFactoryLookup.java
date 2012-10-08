@@ -2,10 +2,10 @@
  * Copyright (c) 2012, NuoDB, Inc.
  * All rights reserved.
  *
- * Redistribution and use in connectionSpec and binary forms, with or without
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *     * Redistributions of connectionSpec code must retain the above copyright
+ *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
@@ -25,47 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.run;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-public class DumpSpec extends TaskSpecBase {
+/**
+ * @author Sergey Bushik
+ */
+public class CliRunnableFactoryLookup {
 
-    private ConnectionSpec connectionSpec;
-    private Collection<TableSpec> tableSpecs = new ArrayList<TableSpec>();
-    private Collection<QuerySpec> querySpecs = new ArrayList<QuerySpec>();
-    private OutputSpec outputSpec;
+    private Map<String, CliRunnableFactory> factories = new HashMap<String, CliRunnableFactory>();
 
-    public ConnectionSpec getConnectionSpec() {
-        return connectionSpec;
+    public CliRunnableFactoryLookup() {
+        register(new CliDumpFactory());
     }
 
-    public void setConnectionSpec(ConnectionSpec connectionSpec) {
-        this.connectionSpec = connectionSpec;
+    public Collection<? extends String> getCommands() {
+        return factories.keySet();
     }
 
-    public Collection<TableSpec> getTableSpecs() {
-        return tableSpecs;
+    public CliRunnableFactory lookup(String command) {
+        return factories.get(command);
     }
 
-    public void setTableSpecs(Collection<TableSpec> tableSpecs) {
-        this.tableSpecs = tableSpecs;
-    }
-
-    public Collection<QuerySpec> getQuerySpecs() {
-        return querySpecs;
-    }
-
-    public void setQuerySpecs(Collection<QuerySpec> querySpecs) {
-        this.querySpecs = querySpecs;
-    }
-
-    public OutputSpec getOutputSpec() {
-        return outputSpec;
-    }
-
-    public void setOutputSpec(OutputSpec outputSpec) {
-        this.outputSpec = outputSpec;
+    public void register(CliRunnableFactory factory) {
+        factories.put(factory.getCommand(), factory);
     }
 }

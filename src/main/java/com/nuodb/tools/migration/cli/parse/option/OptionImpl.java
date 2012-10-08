@@ -59,8 +59,7 @@ public class OptionImpl extends BaseParent {
 
     @Override
     public Set<String> getPrefixes() {
-        Set<String> prefixes = new HashSet<String>();
-        prefixes.addAll(super.getPrefixes());
+        Set<String> prefixes = new HashSet<String>(super.getPrefixes());
         prefixes.addAll(this.prefixes);
         return prefixes;
     }

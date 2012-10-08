@@ -151,7 +151,7 @@ public abstract class BaseParent extends BaseOption {
 
     protected void validateArgument(CommandLine commandLine, Argument argument) {
         if (argument != null) {
-            argument.validate(commandLine);
+            argument.validate(commandLine, this);
         }
     }
 

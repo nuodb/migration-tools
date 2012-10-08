@@ -40,6 +40,8 @@ public interface ArgumentBuilder {
 
     ArgumentBuilder withDescription(String description);
 
+    ArgumentBuilder withRequired(boolean required);
+
     ArgumentBuilder withMinimum(int minimum);
 
     ArgumentBuilder withMaximum(int maximum);

@@ -27,13 +27,13 @@
  */
 package com.nuodb.tools.migration.cli;
 
-import com.nuodb.tools.migration.cli.parse.option.ArgumentImpl;
-import com.nuodb.tools.migration.cli.runnable.CliRunnable;
-import com.nuodb.tools.migration.cli.runnable.CliRunnableFactory;
-import com.nuodb.tools.migration.cli.runnable.CliRunnableFactoryLookup;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.OptionException;
+import com.nuodb.tools.migration.cli.parse.option.ArgumentImpl;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
+import com.nuodb.tools.migration.cli.run.CliRunnable;
+import com.nuodb.tools.migration.cli.run.CliRunnableFactory;
+import com.nuodb.tools.migration.cli.run.CliRunnableFactoryLookup;
 
 import java.util.HashSet;
 import java.util.ListIterator;
@@ -76,9 +76,10 @@ public class CliCommand extends ArgumentImpl {
     public void validate(CommandLine commandLine) {
         CliRunnable command = commandLine.getValue(this);
         try {
-            command.validate(commandLine);
+            if (command != null) {
+                command.validate(commandLine);
+            }
         } catch (OptionException exception) {
-            exception.printStackTrace();
             throw new OptionException(command, exception.getMessage());
         }
     }

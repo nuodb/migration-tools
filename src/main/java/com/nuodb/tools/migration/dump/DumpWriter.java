@@ -27,65 +27,77 @@
  */
 package com.nuodb.tools.migration.dump;
 
+import com.nuodb.tools.migration.dump.output.CsvOutputFormat;
+import com.nuodb.tools.migration.dump.output.OutputFormat;
 import com.nuodb.tools.migration.dump.query.Query;
 import com.nuodb.tools.migration.dump.query.SelectQuery;
 import com.nuodb.tools.migration.dump.query.StatementQuery;
+import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
-import com.nuodb.tools.migration.jdbc.metamodel.Column;
-import com.nuodb.tools.migration.jdbc.metamodel.Database;
-import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
-import com.nuodb.tools.migration.jdbc.metamodel.Table;
+import com.nuodb.tools.migration.jdbc.metamodel.*;
 import com.nuodb.tools.migration.spec.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
+
 /**
  * @author Sergey Bushik
  */
-public class DumpExecutor {
+@SuppressWarnings("unchecked")
+public class DumpWriter {
 
     private final Log log = LogFactory.getLog(getClass());
-    private DumpSpec dump;
 
-    public DumpExecutor(DumpSpec dump) {
-        this.dump = dump;
-    }
-
-    public void execute() {
-        try {
-            doExecute();
-        } catch (SQLException e) {
-            if (log.isWarnEnabled()) {
-                log.warn("SQL exception", e);
-            }
-        }
-    }
-
-    protected void doExecute() throws SQLException {
+    public void write(DumpSpec dump) throws SQLException {
         // TODO: 1) transaction context should be created / obtained ?
         // TODO: 2) statistics event listener reference to publish events to
-        DriverManagerConnectionSpec sourceSpec = (DriverManagerConnectionSpec) dump.getSourceSpec();
-        DriverManagerConnectionProvider connectionProvider =
-                new DriverManagerConnectionProvider(sourceSpec, false);
-        Connection connection = connectionProvider.getConnection();
-
+        ConnectionSpec spec = dump.getConnectionSpec();
+        ConnectionProvider provider = getConnectionProvider(spec);
+        Connection connection = provider.getConnection();
         try {
-            DatabaseIntrospector introspector = new DatabaseIntrospector();
-            introspector.withCatalog(sourceSpec.getCatalog());
-            introspector.withSchema(sourceSpec.getSchema());
-            introspector.withConnection(connection);
-            Database database = introspector.introspect();
-            List<Query> queries = createQueries(database, dump);
-            System.out.println("DumpExecutor.doExecute: " + queries);
+            write(dump, connection, spec.getCatalog(), spec.getSchema());
         } finally {
-            connectionProvider.closeConnection(connection);
+            provider.closeConnection(connection);
         }
+    }
+
+    public void write(DumpSpec dump, Connection connection, String catalog, String schema) throws SQLException {
+        DatabaseIntrospector introspector = new DatabaseIntrospector();
+        introspector.withCatalog(catalog);
+        introspector.withSchema(schema);
+        introspector.withConnection(connection);
+        introspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+        Database database = introspector.introspect();
+        List<Query> queries = createQueries(database, dump);
+        for (Query query : queries) {
+            PreparedStatement statement = connection.prepareStatement(query.toQueryString());
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Executing statement %1$s", query.toQueryString()));
+            }
+            ResultSet resultSet = statement.executeQuery();
+            // TODO: create output based on output spec
+            OutputFormat output = new CsvOutputFormat();
+            output.open(System.out);
+            output.init(resultSet);
+            while (resultSet.next()) {
+                output.row(resultSet);
+            }
+            output.end();
+        }
+    }
+
+    protected ConnectionProvider getConnectionProvider(ConnectionSpec spec) {
+        DriverManagerConnectionSpec driverManagerConnectionSpec = (DriverManagerConnectionSpec) spec;
+        return new DriverManagerConnectionProvider(driverManagerConnectionSpec, false, Connection.TRANSACTION_READ_COMMITTED);
     }
 
     protected List<Query> createQueries(Database database, DumpSpec dump) {
@@ -103,15 +115,15 @@ public class DumpExecutor {
         }
         Collection<QuerySpec> querySpecs = dump.getQuerySpecs();
         if (querySpecs != null) {
-            for (QuerySpec query : querySpecs) {
-                queries.add(new StatementQuery(query.getStatement()));
+            for (QuerySpec querySpec : querySpecs) {
+                queries.add(createStatementQuery(querySpec));
             }
         }
         return queries;
     }
 
-    protected List<SelectQuery> createSelectQueries(Collection<Table> tables, TableSpec tableSpec) {
-        List<SelectQuery> selectQueries = new ArrayList<SelectQuery>();
+    protected List<Query> createSelectQueries(Collection<Table> tables, TableSpec tableSpec) {
+        List<Query> selectQueries = new ArrayList<Query>();
         String tableName = tableSpec != null ? tableSpec.getName() : null;
         for (Table table : tables) {
             if (tableName == null || tableName.equals(table.getName().value())) {
@@ -121,7 +133,7 @@ public class DumpExecutor {
         return selectQueries;
     }
 
-    protected SelectQuery createSelectQuery(Table table, TableSpec tableSpec) {
+    protected Query createSelectQuery(Table table, TableSpec tableSpec) {
         SelectQuery selectQuery = new SelectQuery();
         List<ColumnSpec> columnSpecs = tableSpec != null ? tableSpec.getColumnSpecs() : null;
         Collection<Column> columns;
@@ -145,5 +157,9 @@ public class DumpExecutor {
             selectQuery.addCondition(tableSpec.getCondition());
         }
         return selectQuery;
+    }
+
+    protected Query createStatementQuery(QuerySpec querySpec) {
+        return new StatementQuery(querySpec.getStatement());
     }
 }

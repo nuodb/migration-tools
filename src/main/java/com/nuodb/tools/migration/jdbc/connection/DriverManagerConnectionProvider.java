@@ -43,28 +43,28 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
 
     private transient final Log log = LogFactory.getLog(this.getClass());
     
-    private DriverManagerConnectionSpec connection;
+    private DriverManagerConnectionSpec driverManagerConnectionSpec;
     private Boolean autoCommit = Boolean.FALSE;
     private Integer transactionIsolation;
 
-    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connection) {
-        this.connection = connection;
+    public DriverManagerConnectionProvider(DriverManagerConnectionSpec driverManagerConnectionSpec) {
+        this.driverManagerConnectionSpec = driverManagerConnectionSpec;
     }
 
-    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connection, Boolean autoCommit) {
-        this.connection = connection;
+    public DriverManagerConnectionProvider(DriverManagerConnectionSpec driverManagerConnectionSpec, Boolean autoCommit) {
+        this.driverManagerConnectionSpec = driverManagerConnectionSpec;
         this.autoCommit = autoCommit;
     }
 
-    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connection, Boolean autoCommit, Integer transactionIsolation) {
-        this.connection = connection;
+    public DriverManagerConnectionProvider(DriverManagerConnectionSpec driverManagerConnectionSpec, Boolean autoCommit, Integer transactionIsolation) {
+        this.driverManagerConnectionSpec = driverManagerConnectionSpec;
         this.autoCommit = autoCommit;
         this.transactionIsolation = transactionIsolation;
     }
 
     public Connection getConnection() throws SQLException {
         try {
-            String driver = connection.getDriver();
+            String driver = driverManagerConnectionSpec.getDriver();
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Loading driver %s", driver));
             }
@@ -78,13 +78,13 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
     }
 
     protected Connection createConnection() throws SQLException {
-        String url = connection.getUrl();
+        String url = driverManagerConnectionSpec.getUrl();
         Properties properties = new Properties();
-        if (connection.getProperties() != null) {
-            properties.putAll(connection.getProperties());
+        if (driverManagerConnectionSpec.getProperties() != null) {
+            properties.putAll(driverManagerConnectionSpec.getProperties());
         }
-        String username = connection.getUsername();
-        String password = connection.getPassword();
+        String username = driverManagerConnectionSpec.getUsername();
+        String password = driverManagerConnectionSpec.getPassword();
         if (username != null) {
             properties.setProperty(USER_PROPERTY, username);
         }

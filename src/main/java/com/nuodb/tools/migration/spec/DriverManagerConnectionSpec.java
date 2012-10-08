@@ -32,29 +32,11 @@ import java.util.Map;
 
 public class DriverManagerConnectionSpec extends ConnectionSpecBase {
 
-    private String catalog;
-    private String schema;
     private String driver;
     private String url;
     private String username;
     private String password;
     private Map<String, String> properties = new HashMap<String, String>();
-
-    public String getCatalog() {
-        return catalog;
-    }
-
-    public void setCatalog(String catalog) {
-        this.catalog = catalog;
-    }
-
-    public String getSchema() {
-        return schema;
-    }
-
-    public void setSchema(String schema) {
-        this.schema = schema;
-    }
 
     public String getDriver() {
         return driver;

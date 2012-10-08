@@ -27,8 +27,8 @@
  */
 package com.nuodb.tools.migration.cli;
 
-import com.nuodb.tools.migration.cli.runnable.CliRunnable;
-import com.nuodb.tools.migration.cli.runnable.CliRunnableFactoryLookup;
+import com.nuodb.tools.migration.cli.run.CliRunnable;
+import com.nuodb.tools.migration.cli.run.CliRunnableFactoryLookup;
 import com.nuodb.tools.migration.cli.parse.Group;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.OptionException;
@@ -48,7 +48,7 @@ import java.util.List;
 /**
  * @author Sergey Bushik
  */
-public class CliMigrationHandler implements CliResources {
+public class CliHandler implements CliResources {
 
     private static final int HELP_OPTION_ID = 1;
     private static final int LIST_OPTION_ID = 2;
@@ -141,12 +141,12 @@ public class CliMigrationHandler implements CliResources {
     }
 
     public static void main(String[] args) throws IOException {
-        CliMigrationHandler handler = new CliMigrationHandler();
+        CliHandler handler = new CliHandler();
         handler.handle(loadArguments("arguments.properties"));
     }
 
     private static String[] loadArguments(String resource) throws IOException {
-        InputStream input = CliMigrationHandler.class.getResourceAsStream(resource);
+        InputStream input = CliHandler.class.getResourceAsStream(resource);
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         List<String> arguments = new ArrayList<String>();
         String line;

@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.runnable;
+package com.nuodb.tools.migration.cli.run;
 
 import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
@@ -62,7 +62,9 @@ public class CliOptionsSupport implements CliResources, CliOptions {
                 withRequired(true).
                 withArgument(
                         optionToolkit.newArgument().
-                                withName(resources.getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).build()
+                                withName(resources.getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).
+                                withRequired(true).
+                                withMinimum(1).build()
                 ).build();
         Option url = optionToolkit.newOption().
                 withName(SOURCE_URL_OPTION).
@@ -70,7 +72,9 @@ public class CliOptionsSupport implements CliResources, CliOptions {
                 withRequired(true).
                 withArgument(
                         optionToolkit.newArgument().
-                                withName(resources.getMessage(SOURCE_URL_ARGUMENT_NAME)).build()
+                                withName(resources.getMessage(SOURCE_URL_ARGUMENT_NAME)).
+                                withRequired(true).
+                                withMinimum(1).build()
                 ).build();
         Option username = optionToolkit.newOption().
                 withName(SOURCE_USERNAME_OPTION).
@@ -128,7 +132,9 @@ public class CliOptionsSupport implements CliResources, CliOptions {
                 withRequired(true).
                 withArgument(
                         optionToolkit.newArgument().
-                                withName(resources.getMessage(OUTPUT_TYPE_ARGUMENT_NAME)).build()
+                                withName(resources.getMessage(OUTPUT_TYPE_ARGUMENT_NAME)).
+                                withRequired(true).
+                                withMinimum(1).build()
                 ).build();
         Option path = optionToolkit.newOption().
                 withName(OUTPUT_PATH_OPTION).
@@ -136,7 +142,9 @@ public class CliOptionsSupport implements CliResources, CliOptions {
                 withRequired(true).
                 withArgument(
                         optionToolkit.newArgument().
-                                withName(resources.getMessage(OUTPUT_PATH_ARGUMENT_NAME)).build()
+                                withName(resources.getMessage(OUTPUT_PATH_ARGUMENT_NAME)).
+                                withRequired(true).
+                                withMinimum(1).build()
                 ).build();
         return optionToolkit.newGroup().
                 withName(resources.getMessage(OUTPUT_GROUP_NAME)).

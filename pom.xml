@@ -57,8 +57,12 @@
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>net.sf.supercsv</groupId>
+            <artifactId>super-csv</artifactId>
+            <version>2.0.0-beta-1</version>
+        </dependency>
     </dependencies>
-
     <reporting>
         <plugins>
             <plugin>
@@ -66,7 +70,6 @@
                 <artifactId>cobertura-maven-plugin</artifactId>
                 <version>2.4</version>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
@@ -92,5 +95,4 @@
             </plugin>
         </plugins>
     </reporting>
-
 </project>

@@ -25,32 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.runnable;
+package com.nuodb.tools.migration.jdbc.type;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * @author Sergey Bushik
  */
-public class CliRunnableFactoryLookup {
+public class BitTypeExtractor extends ValueExtractorBase<Boolean> {
 
-    private Map<String, CliRunnableFactory> factories = new HashMap<String, CliRunnableFactory>();
-
-    public CliRunnableFactoryLookup() {
-        register(new CliDumpFactory());
+    public int getType() {
+        return Types.BIT;
     }
 
-    public Collection<? extends String> getCommands() {
-        return factories.keySet();
-    }
-
-    public CliRunnableFactory lookup(String command) {
-        return factories.get(command);
-    }
-
-    public void register(CliRunnableFactory factory) {
-        factories.put(factory.getCommand(), factory);
+    @Override
+    protected Boolean doExtract(ResultSet resultSet, int column) throws SQLException {
+        boolean value = resultSet.getBoolean(column);
+        return resultSet.wasNull() ? null : value;
     }
 }

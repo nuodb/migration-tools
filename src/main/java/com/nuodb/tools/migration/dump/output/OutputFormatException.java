@@ -2,10 +2,10 @@
  * Copyright (c) 2012, NuoDB, Inc.
  * All rights reserved.
  *
- * Redistribution and use in connectionSpec and binary forms, with or without
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *     * Redistributions of connectionSpec code must retain the above copyright
+ *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
@@ -25,47 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.dump.output;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.nuodb.tools.migration.MigrationException;
 
-public class DumpSpec extends TaskSpecBase {
+/**
+ * @author Sergey Bushik
+ */
+public class OutputFormatException extends MigrationException {
 
-    private ConnectionSpec connectionSpec;
-    private Collection<TableSpec> tableSpecs = new ArrayList<TableSpec>();
-    private Collection<QuerySpec> querySpecs = new ArrayList<QuerySpec>();
-    private OutputSpec outputSpec;
-
-    public ConnectionSpec getConnectionSpec() {
-        return connectionSpec;
+    public OutputFormatException(String message) {
+        super(message);
     }
 
-    public void setConnectionSpec(ConnectionSpec connectionSpec) {
-        this.connectionSpec = connectionSpec;
+    public OutputFormatException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public Collection<TableSpec> getTableSpecs() {
-        return tableSpecs;
-    }
-
-    public void setTableSpecs(Collection<TableSpec> tableSpecs) {
-        this.tableSpecs = tableSpecs;
-    }
-
-    public Collection<QuerySpec> getQuerySpecs() {
-        return querySpecs;
-    }
-
-    public void setQuerySpecs(Collection<QuerySpec> querySpecs) {
-        this.querySpecs = querySpecs;
-    }
-
-    public OutputSpec getOutputSpec() {
-        return outputSpec;
-    }
-
-    public void setOutputSpec(OutputSpec outputSpec) {
-        this.outputSpec = outputSpec;
+    public OutputFormatException(Throwable cause) {
+        super(cause);
     }
 }

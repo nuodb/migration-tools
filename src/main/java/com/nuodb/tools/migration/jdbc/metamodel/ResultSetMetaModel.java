@@ -27,56 +27,60 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ResultSetMetaModel {
 
     private int columnCount;
-    private List<String> columns;
-    private List<Integer> columnTypes;
+    private int[] columnTypes;
+    private String[] columns;
+    private List<String> columnsList;
 
-    public ResultSetMetaModel(ResultSetMetaData meta) throws SQLException {
-        int columnCount = meta.getColumnCount();
+    public ResultSetMetaModel(ResultSet resultSet) throws SQLException {
+        this(resultSet.getMetaData());
+    }
 
-        List<String> columns = new ArrayList<String>();
-        List<Integer> columnTypes = new ArrayList<Integer>();
-        for (int i = 1; i <= columnCount; i++) {
-            columns.add(meta.getColumnLabel(i));
-            columnTypes.add(meta.getColumnType(i));
+    public ResultSetMetaModel(ResultSetMetaData metaData) throws SQLException {
+        int columnCount = metaData.getColumnCount();
+
+        String[] columns = new String[columnCount];
+        int[] columnTypes = new int[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            int column = i + 1;
+            columns[i] = metaData.getColumnLabel(column);
+            columnTypes[i] = metaData.getColumnType(column);
         }
-        this.columnCount = columnCount;
         this.columns = columns;
+        this.columnsList = Arrays.asList(columns);
         this.columnTypes = columnTypes;
+        this.columnCount = columnCount;
     }
 
     public int getColumnCount() {
         return columnCount;
     }
 
-    public void setColumnCount(int columnCount) {
-        this.columnCount = columnCount;
-    }
-
-    public List<String> getColumns() {
+    public String[] getColumns() {
         return columns;
     }
 
-    public void setColumns(List<String> columns) {
-        this.columns = columns;
-    }
-
     public boolean hasColumn(String column) {
-        return columns.contains(column);
+        return columnsList.contains(column);
     }
 
-    public List<Integer> getColumnTypes() {
+    public int getColumnType(int column) {
+        return columnTypes[column];
+    }
+
+    public int[] getColumnTypes() {
         return columnTypes;
     }
 
-    public void setColumnTypes(List<Integer> columnTypes) {
-        this.columnTypes = columnTypes;
+    public String getColumn(int column) {
+        return columns[column];
     }
 }

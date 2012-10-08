@@ -23,7 +23,7 @@ import com.nuodb.tools.migration.cli.parse.option.Property;
 import java.util.*;
 
 /**
- * A executable line implementation allowing options to write their processed information to a CommandLine.
+ * A executable line implementation allowing options to row their processed information to a CommandLine.
  */
 public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 

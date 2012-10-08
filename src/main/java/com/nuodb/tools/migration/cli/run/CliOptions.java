@@ -25,56 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.runnable;
-
-import com.nuodb.tools.migration.cli.CliResources;
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Option;
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.dump.DumpExecutor;
-import com.nuodb.tools.migration.spec.DumpSpec;
+package com.nuodb.tools.migration.cli.run;
 
 /**
  * @author Sergey Bushik
  */
-public class CliDumpFactory extends CliOptionsSupport implements CliRunnableFactory, CliResources {
+public interface CliOptions {
 
-    public static final String DUMP_COMMAND = "dump";
+    final String SOURCE_DRIVER_OPTION = "source.driver";
+    final String SOURCE_URL_OPTION = "source.url";
+    final String SOURCE_USERNAME_OPTION = "source.username";
+    final String SOURCE_PASSWORD_OPTION = "source.password";
+    final String SOURCE_PROPERTIES_OPTION = "source.properties";
+    final String SOURCE_CATALOG_OPTION = "source.catalog";
+    final String SOURCE_SCHEMA_OPTION = "source.schema";
 
-    @Override
-    public String getCommand() {
-        return DUMP_COMMAND;
-    }
-
-    @Override
-    public CliRunnable createRunnable(OptionToolkit optionToolkit) {
-        return new CliDump(
-                optionToolkit.newGroup().
-                        withName(resources.getMessage(DUMP_GROUP_NAME)).
-                        withOption(createSourceGroup(optionToolkit)).
-                        withOption(createOutputGroup(optionToolkit)).
-                        withRequired(true).build()
-        );
-    }
-
-    class CliDump extends CliRunnableOption {
-
-        private DumpSpec dump;
-
-        public CliDump(Option option) {
-            super(option, DUMP_COMMAND);
-        }
-
-        @Override
-        protected void bind(CommandLine commandLine, Option option) {
-            dump = new DumpSpec();
-            dump.setSourceSpec(createSource(commandLine, option));
-            dump.setOutputSpec(createOutput(commandLine, option));
-        }
-
-        @Override
-        public void run() {
-            new DumpExecutor(dump).execute();
-        }
-    }
+    final String OUTPUT_TYPE_OPTION = "output.type";
+    final String OUTPUT_PATH_OPTION = "output.path";
 }

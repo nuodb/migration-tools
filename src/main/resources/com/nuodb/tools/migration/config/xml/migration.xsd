@@ -21,7 +21,7 @@
         <xs:attribute type="xs:boolean" name="include" use="optional"/>
         <xs:attribute type="xs:string" name="type" use="optional" default="true"/>
     </xs:complexType>
-    <xs:complexType name="sourceSpec">
+    <xs:complexType name="connectionSpec">
         <xs:sequence>
             <xs:element type="xs:string" name="catalog" minOccurs="0"/>
             <xs:element type="xs:string" name="schema" minOccurs="0"/>

@@ -25,16 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.runnable;
+package com.nuodb.tools.migration.cli.run;
 
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
+import com.nuodb.tools.migration.cli.parse.Option;
 
 /**
  * @author Sergey Bushik
  */
-public interface CliRunnableFactory {
+public interface CliRunnable extends Option {
+
+    void run();
 
     String getCommand();
-
-    CliRunnable createRunnable(OptionToolkit optionToolkit);
 }

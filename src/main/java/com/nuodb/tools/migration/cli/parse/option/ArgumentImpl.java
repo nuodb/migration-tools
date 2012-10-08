@@ -38,9 +38,9 @@ public class ArgumentImpl extends BaseOption implements Argument {
         this.maximum = 1;
     }
 
-    public ArgumentImpl(int id, String name, String description,
+    public ArgumentImpl(int id, String name, String description, boolean required,
                         int minimum, int maximum, List<Object> defaultValues, String valuesSeparator) {
-        super(id, name != null ? name : NAME, description);
+        super(id, name != null ? name : NAME, description, required);
         this.minimum = minimum;
         this.maximum = maximum;
         this.defaultValues = defaultValues;
@@ -135,11 +135,11 @@ public class ArgumentImpl extends BaseOption implements Argument {
         List values = commandLine.getValues(option);
         int minimum = getMinimum();
         if (values.size() < minimum) {
-            throw new OptionException(option, String.format("Minimum number of %d arguments.properties is expected", minimum));
+            throw new OptionException(option, String.format("Missing value for %1$s argument", getName()));
         }
         int maximum = getMaximum();
         if (values.size() > maximum) {
-            throw new OptionException(option, String.format("Maximum number of %d arguments.properties is expected", maximum));
+            throw new OptionException(option, String.format("Too many arguments for %1$s", getName()));
         }
     }
 
@@ -156,7 +156,7 @@ public class ArgumentImpl extends BaseOption implements Argument {
 
         // for each argument
         while (i < max) {
-            // if we're past the first registerCommandExecutor a space
+            // if we're past the first append a space
             if (i > 0) {
                 buffer.append(' ');
             }
@@ -167,7 +167,7 @@ public class ArgumentImpl extends BaseOption implements Argument {
             if (bracketed) {
                 buffer.append('<');
             }
-            // registerCommandExecutor name
+            // append name
             buffer.append(getName());
             ++i;
             // if numbering
