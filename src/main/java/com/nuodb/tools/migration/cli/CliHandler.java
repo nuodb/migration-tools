@@ -67,7 +67,7 @@ public class CliHandler implements CliResources {
     public static final String MIGRATION_EXECUTABLE = "migration";
 
     public void handle(String[] arguments) throws OptionException {
-        Option root = createOption();
+        Option root = createOption(new OptionToolkit());
         try {
             OptionSet options = new ParserImpl().parse(arguments, root);
             handleOptionSet(options, root);
@@ -76,8 +76,8 @@ public class CliHandler implements CliResources {
         }
     }
 
-    protected Group createOption() {
-        OptionToolkit optionToolkit = new OptionToolkit();
+    protected Group createOption(OptionToolkit optionToolkit) {
+        //OptionToolkit optionToolkit = new OptionToolkit();
         Resources resources = Resources.getResources();
         Option help = optionToolkit.newOption().
                 withId(HELP_OPTION_ID).
