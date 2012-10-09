@@ -13,7 +13,7 @@
             <url>file://${basedir}/.m2</url>
         </repository>
     </repositories>
-    
+
     <url>https://github.com/nuodb/migration-tools</url>
     <description>NuoDB Customer Data Migration Tools</description>
 
@@ -121,13 +121,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <developers>
-        <developer>
-            <name>Various</name>
-            <organization>NuoDB, Inc</organization>
-            <url>http://www.nuodb.com</url>
-        </developer>
-    </developers>
-
 </project>
