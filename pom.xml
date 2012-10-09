@@ -3,6 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <name>NuoDB Customer Data Migration Tools</name>
     <groupId>com.nuodb</groupId>
     <artifactId>data-migration-tool</artifactId>
     <version>1.0</version>
@@ -12,6 +13,13 @@
             <url>file://${basedir}/.m2</url>
         </repository>
     </repositories>
+    
+    <url>https://github.com/nuodb/migration-tools</url>
+    <description>NuoDB Customer Data Migration Tools</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -100,4 +108,26 @@
             </plugin>
         </plugins>
     </reporting>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0.2</version>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <developers>
+        <developer>
+            <name>Various</name>
+            <organization>NuoDB, Inc</organization>
+            <url>http://www.nuodb.com</url>
+        </developer>
+    </developers>
+
 </project>

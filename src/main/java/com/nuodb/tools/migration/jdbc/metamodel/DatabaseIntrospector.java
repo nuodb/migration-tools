@@ -40,7 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Reads database meta data and creates its meta model. Root meta model object is {@link Database} containing set of
+ * Reads mockDatabase meta data and creates its meta model. Root meta model object is {@link Database} containing set of
  * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
  *
  * @author Sergey Bushik
@@ -112,9 +112,9 @@ public class DatabaseIntrospector {
     protected void readInfo(DatabaseMetaData meta, Database database) throws SQLException {
         DriverInfo driverInfo = new DriverInfo();
         driverInfo.setName(meta.getDriverName());
-        driverInfo.setVersion(meta.getDriverName());
-        driverInfo.setMinorVersion(meta.getDriverName());
-        driverInfo.setMajorVersion(meta.getDriverName());
+        driverInfo.setVersion(meta.getDriverVersion());
+        driverInfo.setMinorVersion(meta.getDriverMinorVersion());
+        driverInfo.setMajorVersion(meta.getDriverMajorVersion());
         if (log.isDebugEnabled()) {
             log.debug(String.format("DriverInfo: %s", driverInfo));
         }
