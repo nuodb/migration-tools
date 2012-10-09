@@ -5,6 +5,7 @@ import com.nuodb.tools.migration.TestUtils;
 import com.nuodb.tools.migration.cli.parse.Argument;
 import com.nuodb.tools.migration.cli.parse.Group;
 import com.nuodb.tools.migration.cli.parse.Option;
+import com.nuodb.tools.migration.cli.parse.OptionSet;
 import com.nuodb.tools.migration.cli.parse.option.ArgumentBuilder;
 import com.nuodb.tools.migration.cli.parse.option.GroupBuilder;
 import com.nuodb.tools.migration.cli.parse.option.OptionBuilder;
@@ -72,6 +73,16 @@ public class CliMigrationHandlerTest {
         verify(groupBuilder, times(1)).build();
 
 
+    }
+
+    @Test
+    public void testHandleOptionSet() throws Exception {
+        OptionSet optionSet = mock(OptionSet.class);
+        Option option = mock(Option.class);
+        handler.handleOptionSet(optionSet, option);
+        verify(optionSet).hasOption(CliHandler.HELP_OPTION);
+        verify(optionSet).hasOption(CliHandler.COMMAND_OPTION);
+        verify(optionSet).hasOption(CliHandler.CONFIG_OPTION);
     }
 
     @Test
