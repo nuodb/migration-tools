@@ -27,41 +27,10 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public interface JdbcTypeFormatter {
 
-    void init();
-
-    void outputBegin(ResultSet resultSet) throws IOException, SQLException;
-
-    void outputRow(ResultSet resultSet) throws IOException, SQLException;
-
-    void outputEnd(ResultSet resultSet) throws IOException, SQLException;
-
-    void setWriter(Writer writer);
-
-    void setOutputStream(OutputStream outputStream);
-
-    void setAttributes(Map<String, String> attributes);
-
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(int type, JdbcTypeFormatter jdbcTypeFormatter);
-
-    JdbcTypeFormatter getJdbcTypeFormatter(int type);
-
-    JdbcTypeFormatter getDefaultJdbcTypeFormatter();
-
-    void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter);
+    String format(Object value, int type);
 }

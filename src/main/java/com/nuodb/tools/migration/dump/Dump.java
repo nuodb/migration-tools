@@ -27,8 +27,8 @@
  */
 package com.nuodb.tools.migration.dump;
 
-import com.nuodb.tools.migration.dump.output.CsvDumpOutput;
-import com.nuodb.tools.migration.dump.output.DumpOutput;
+import com.nuodb.tools.migration.dump.output.CsvOutputFormat;
+import com.nuodb.tools.migration.dump.output.OutputFormat;
 import com.nuodb.tools.migration.dump.query.Query;
 import com.nuodb.tools.migration.dump.query.SelectQuery;
 import com.nuodb.tools.migration.dump.query.StatementQuery;
@@ -60,27 +60,27 @@ public class Dump {
 
     private final Log log = LogFactory.getLog(getClass());
 
-    public void write(DumpSpec dump) throws SQLException {
+    public void write(DumpSpec dumpSpec) throws SQLException {
         // TODO: 1) transaction context should be created / obtained ?
         // TODO: 2) statistics event listener reference to publish events to
-        ConnectionSpec spec = dump.getConnectionSpec();
+        ConnectionSpec spec = dumpSpec.getConnectionSpec();
         ConnectionProvider provider = getConnectionProvider(spec);
         Connection connection = provider.getConnection();
         try {
-            write(dump, connection, spec.getCatalog(), spec.getSchema());
+            write(dumpSpec, connection, spec.getCatalog(), spec.getSchema());
         } finally {
             provider.closeConnection(connection);
         }
     }
 
-    public void write(DumpSpec dump, Connection connection, String catalog, String schema) throws SQLException {
+    public void write(DumpSpec dumpSpec, Connection connection, String catalog, String schema) throws SQLException {
         DatabaseIntrospector introspector = new DatabaseIntrospector();
         introspector.withCatalog(catalog);
         introspector.withSchema(schema);
         introspector.withConnection(connection);
         introspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
         Database database = introspector.introspect();
-        List<Query> queries = createQueries(database, dump);
+        List<Query> queries = createQueries(database, dumpSpec);
         for (Query query : queries) {
             PreparedStatement statement = connection.prepareStatement(query.toQueryString());
             if (log.isDebugEnabled()) {
@@ -88,17 +88,17 @@ public class Dump {
             }
             ResultSet resultSet = statement.executeQuery();
             // TODO: create & configure dump output based on the provided output spec
-            DumpOutput output = new CsvDumpOutput();
-            output.setOutputStream(System.out);
-            output.setAttributes(dump.getOutputSpec().getAttributes());
-            output.setJdbcTypeExtractor(getJdbcTypeExtractor());
-            output.init();
+            OutputFormat format = new CsvOutputFormat();
+            format.setOutputStream(System.out);
+            format.setAttributes(dumpSpec.getOutputSpec().getAttributes());
+            format.setJdbcTypeExtractor(getJdbcTypeExtractor());
+            format.init();
             try {
-                output.dumpBegin(resultSet);
+                format.outputBegin(resultSet);
                 while (resultSet.next()) {
-                    output.dumpRow(resultSet);
+                    format.outputRow(resultSet);
                 }
-                output.dumpEnd(resultSet);
+                format.outputEnd(resultSet);
             } catch (IOException e) {
                 throw new DumpException(e);
             }
@@ -114,10 +114,10 @@ public class Dump {
         return new Jdbc4TypeExtractor();
     }
 
-    protected List<Query> createQueries(Database database, DumpSpec dump) {
+    protected List<Query> createQueries(Database database, DumpSpec dumpSpec) {
         Collection<Table> tables = database.listTables();
         List<Query> queries = new ArrayList<Query>();
-        Collection<TableSpec> tableSpecs = dump.getTableSpecs();
+        Collection<TableSpec> tableSpecs = dumpSpec.getTableSpecs();
         if (tableSpecs != null) {
             if (tableSpecs.isEmpty()) {
                 queries.addAll(createSelectQueries(tables, null));
@@ -127,7 +127,7 @@ public class Dump {
                 }
             }
         }
-        Collection<QuerySpec> querySpecs = dump.getQuerySpecs();
+        Collection<QuerySpec> querySpecs = dumpSpec.getQuerySpecs();
         if (querySpecs != null) {
             for (QuerySpec querySpec : querySpecs) {
                 queries.add(createStatementQuery(querySpec));

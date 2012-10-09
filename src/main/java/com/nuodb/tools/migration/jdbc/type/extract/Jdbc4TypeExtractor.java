@@ -51,6 +51,7 @@ public class Jdbc4TypeExtractor extends Jdbc3TypeExtractor {
                 break;
             case Types.SQLXML:
                 acceptor.accept(resultSet.getSQLXML(column), columnType);
+                break;
             default:
                 super.extract(resultSet, column, columnType, acceptor);
         }

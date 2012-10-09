@@ -27,34 +27,48 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.jdbc.metamodel.ResultSetMetaModel;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
+import org.supercsv.io.CsvListWriter;
+import org.supercsv.prefs.CsvPreference;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface DumpOutput {
+@SuppressWarnings("unchecked")
+public class CsvOutputFormat extends OutputFormatBase {
 
-    void init();
+    private CsvListWriter output;
 
-    void dumpBegin(ResultSet resultSet) throws IOException, SQLException;
+    @Override
+    public void init() {
+        Writer writer = getWriter();
+        OutputStream outputStream = getOutputStream();
+        CsvPreference preference = CsvPreference.STANDARD_PREFERENCE;
+        if (writer != null) {
+            output = new CsvListWriter(writer, preference);
+        } else if (outputStream != null) {
+            output = new CsvListWriter(new PrintWriter(outputStream), preference);
+        }
+    }
 
-    void dumpRow(ResultSet resultSet) throws IOException, SQLException;
+    @Override
+    protected void doOutputBegin(ResultSet resultSet) throws IOException, SQLException {
+        output.writeHeader(getResultSetMetaModel().getColumns());
+    }
 
-    void dumpEnd(ResultSet resultSet) throws IOException, SQLException;
+    @Override
+    public void outputRow(ResultSet resultSet) throws IOException, SQLException {
+        output.write(formatColumns(resultSet));
+    }
 
-    void setWriter(Writer writer);
-
-    void setOutputStream(OutputStream outputStream);
-
-    void setAttributes(Map<String, String> attributes);
-
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
+    @Override
+    protected void doOutputEnd(ResultSet resultSet) throws IOException, SQLException {
+        output.flush();
+    }
 }

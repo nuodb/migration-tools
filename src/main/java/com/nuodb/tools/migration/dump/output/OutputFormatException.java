@@ -27,41 +27,22 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
+import com.nuodb.tools.migration.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public class OutputFormatException extends MigrationException {
 
-    void init();
+    public OutputFormatException(String message) {
+        super(message);
+    }
 
-    void outputBegin(ResultSet resultSet) throws IOException, SQLException;
+    public OutputFormatException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    void outputRow(ResultSet resultSet) throws IOException, SQLException;
-
-    void outputEnd(ResultSet resultSet) throws IOException, SQLException;
-
-    void setWriter(Writer writer);
-
-    void setOutputStream(OutputStream outputStream);
-
-    void setAttributes(Map<String, String> attributes);
-
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(int type, JdbcTypeFormatter jdbcTypeFormatter);
-
-    JdbcTypeFormatter getJdbcTypeFormatter(int type);
-
-    JdbcTypeFormatter getDefaultJdbcTypeFormatter();
-
-    void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter);
+    public OutputFormatException(Throwable cause) {
+        super(cause);
+    }
 }

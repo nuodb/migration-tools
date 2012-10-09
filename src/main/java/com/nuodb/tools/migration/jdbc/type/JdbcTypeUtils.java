@@ -25,57 +25,43 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.jdbc.type;
 
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
-
-import java.io.OutputStream;
-import java.io.Writer;
-import java.util.Map;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
+import java.sql.SQLXML;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class DumpOutputBase implements DumpOutput {
+public class JdbcTypeUtils {
 
-    private Writer writer;
-    private OutputStream outputStream;
-    private Map<String, String> attributes;
-    private JdbcTypeExtractor jdbcTypeExtractor;
-
-    public Writer getWriter() {
-        return writer;
+    public static byte[] read(Blob blob) throws IOException, SQLException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream((int) blob.length());
+        InputStream input = blob.getBinaryStream();
+        byte[] buffer = new byte[2048];
+        int count;
+        while ((count = input.read(buffer)) != -1) {
+            output.write(buffer, 0, count);
+        }
+        return output.toByteArray();
     }
 
-    @Override
-    public void setWriter(Writer writer) {
-        this.writer = writer;
-    }
-
-    public OutputStream getOutputStream() {
-        return outputStream;
-    }
-
-    @Override
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
-    }
-
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
-    @Override
-    public void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
-    }
-
-    public JdbcTypeExtractor getJdbcTypeExtractor() {
-        return jdbcTypeExtractor;
-    }
-
-    @Override
-    public void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor) {
-        this.jdbcTypeExtractor = jdbcTypeExtractor;
+    public static String read(Clob clob) throws SQLException, IOException {
+        StringBuilder builder = new StringBuilder((int) clob.length());
+        Reader reader = clob.getCharacterStream();
+        char[] buffer = new char[2048];
+        int count;
+        while ((count = reader.read(buffer, 0, buffer.length)) != -1) {
+            if (count > 0) {
+                builder.append(buffer, 0, count);
+            }
+        }
+        return builder.toString();
     }
 }

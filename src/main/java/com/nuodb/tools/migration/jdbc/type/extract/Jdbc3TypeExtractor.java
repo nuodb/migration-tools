@@ -45,6 +45,7 @@ public class Jdbc3TypeExtractor extends Jdbc2TypeExtractor {
             case Types.BOOLEAN:
                 boolean booleanValue = resultSet.getBoolean(column);
                 acceptor.accept(resultSet.wasNull() ? null : booleanValue, columnType);
+                break;
             default:
                 super.extract(resultSet, column, columnType, acceptor);
         }
