@@ -27,8 +27,6 @@
  */
 package com.nuodb.tools.migration.cli;
 
-import com.nuodb.tools.migration.cli.run.CliRunnable;
-import com.nuodb.tools.migration.cli.run.CliRunnableFactoryLookup;
 import com.nuodb.tools.migration.cli.parse.Group;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.OptionException;
@@ -36,7 +34,11 @@ import com.nuodb.tools.migration.cli.parse.OptionSet;
 import com.nuodb.tools.migration.cli.parse.help.HelpFormatter;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.cli.parse.parser.ParserImpl;
+import com.nuodb.tools.migration.cli.run.CliRunnable;
+import com.nuodb.tools.migration.cli.run.CliRunnableFactoryLookup;
 import com.nuodb.tools.migration.i18n.Resources;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,6 +51,8 @@ import java.util.List;
  * @author Sergey Bushik
  */
 public class CliHandler implements CliResources {
+
+    private transient final Log log = LogFactory.getLog(getClass());
 
     public static final int HELP_OPTION_ID = 1;
     public static final int LIST_OPTION_ID = 2;
@@ -111,17 +115,23 @@ public class CliHandler implements CliResources {
 
     protected void handleOptionSet(OptionSet options, Option root) {
         if (options.hasOption(HELP_OPTION)) {
-            System.out.println("Handling --help");
+            if (log.isTraceEnabled()) {
+                log.trace("Handling --help");
+            }
             HelpFormatter formatter = new HelpFormatter();
             formatter.setOption(root);
             formatter.setExecutable(MIGRATION_EXECUTABLE);
             formatter.format(System.out);
         } else if (options.hasOption(COMMAND_OPTION)) {
             CliRunnable runnable = options.getValue(COMMAND_OPTION);
-            System.out.println(String.format("Handling --command %1$s", runnable.getCommand()));
+            if (log.isTraceEnabled()) {
+                log.trace(String.format("Handling %1$s", runnable.getCommand()));
+            }
             runnable.run();
         } else if (options.hasOption(CONFIG_OPTION)) {
-            System.out.println(String.format("Handling --config %1$s", options.getValue("config")));
+            if (log.isTraceEnabled()) {
+                log.trace(String.format("Handling --config %1$s", options.getValue("config")));
+            }
         }
     }
 

@@ -105,9 +105,9 @@ public class Dump {
         }
     }
 
-    protected ConnectionProvider getConnectionProvider(ConnectionSpec spec) {
-        DriverManagerConnectionSpec driverManagerConnectionSpec = (DriverManagerConnectionSpec) spec;
-        return new DriverManagerConnectionProvider(driverManagerConnectionSpec, false, Connection.TRANSACTION_READ_COMMITTED);
+    protected ConnectionProvider getConnectionProvider(ConnectionSpec connectionSpec) {
+        return new DriverManagerConnectionProvider(
+                (DriverManagerConnectionSpec) connectionSpec, false, Connection.TRANSACTION_READ_COMMITTED);
     }
 
     protected JdbcTypeExtractor getJdbcTypeExtractor() {

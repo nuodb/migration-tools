@@ -64,7 +64,7 @@ public class CliDumpFactory extends CliOptionsSupport implements CliRunnableFact
 
     class CliDump extends CliRunnableOption {
 
-        private DumpSpec dump;
+        private DumpSpec dumpSpec;
 
         public CliDump(Option option) {
             super(option, DUMP_COMMAND);
@@ -72,15 +72,15 @@ public class CliDumpFactory extends CliOptionsSupport implements CliRunnableFact
 
         @Override
         protected void bind(CommandLine commandLine, Option option) {
-            dump = new DumpSpec();
-            dump.setConnectionSpec(createSource(commandLine, option));
-            dump.setOutputSpec(createOutput(commandLine, option));
+            dumpSpec = new DumpSpec();
+            dumpSpec.setConnectionSpec(createSource(commandLine, option));
+            dumpSpec.setOutputSpec(createOutput(commandLine, option));
         }
 
         @Override
         public void run() {
             try {
-                new Dump().write(dump);
+                new Dump().write(dumpSpec);
             } catch (SQLException e) {
                 if (log.isWarnEnabled()) {
                     log.warn(e);
