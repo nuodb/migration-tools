@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.cli.run;
 
+import com.nuodb.tools.migration.MigrationException;
 import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
@@ -44,7 +45,6 @@ import java.sql.SQLException;
 public class CliDumpFactory extends CliOptionsSupport implements CliRunnableFactory, CliResources {
 
     public static final String DUMP_COMMAND = "dump";
-    private transient final Log log = LogFactory.getLog(getClass());
 
     @Override
     public String getCommand() {
@@ -82,9 +82,7 @@ public class CliDumpFactory extends CliOptionsSupport implements CliRunnableFact
             try {
                 new Dump().write(dumpSpec);
             } catch (SQLException e) {
-                if (log.isWarnEnabled()) {
-                    log.warn(e);
-                }
+                throw new MigrationException(e);
             }
         }
     }
