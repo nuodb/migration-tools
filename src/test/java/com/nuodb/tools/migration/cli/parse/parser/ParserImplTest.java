@@ -8,6 +8,8 @@ import com.nuodb.tools.migration.cli.parse.option.Property;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.mockito.Mockito.mock;
+
 public class ParserImplTest {
     Parser parser = new ParserImpl();
     Group build;
@@ -15,14 +17,8 @@ public class ParserImplTest {
     @Before
     public void setUp() throws Exception {
         parser = new ParserImpl();
+        build = mock(Group.class);
 
-
-    }
-
-
-    @Test
-    public void testParseGroup() {
-        parser.parse(TestUtils.testArguments, build);
     }
 
     @Test(expected = OptionException.class)

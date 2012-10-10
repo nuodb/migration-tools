@@ -1,23 +1,26 @@
 package com.nuodb.tools.migration.cli.parse.option;
 
-import com.nuodb.tools.migration.TestUtils;
+import com.nuodb.tools.migration.cli.parse.CommandLine;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 
 public class CommandTest {
-    Command mock;
+    Command command;
 
     @Before
     public void setUp() throws Exception {
-        mock = mock(Command.class);
+        command = new Command(1, "TEST_NAME", "DESC", true);
 
     }
 
     @Test
-    public void testName() throws Exception {
-        //mock.process(TestUtils.testArguments);
+    public void testCanProcess() throws Exception {
+        CommandLine commandLine = mock(CommandLine.class);
+        command.canProcess(commandLine, "");
+
 
     }
 }

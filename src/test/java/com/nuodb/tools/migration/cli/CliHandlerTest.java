@@ -1,7 +1,6 @@
 package com.nuodb.tools.migration.cli;
 
 
-import com.nuodb.tools.migration.TestUtils;
 import com.nuodb.tools.migration.cli.parse.Argument;
 import com.nuodb.tools.migration.cli.parse.Group;
 import com.nuodb.tools.migration.cli.parse.Option;
@@ -19,7 +18,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
-public class CliMigrationHandlerTest {
+public class CliHandlerTest {
 
     CliHandler handler;
     OptionToolkit optionToolkitMock;
@@ -83,11 +82,5 @@ public class CliMigrationHandlerTest {
         verify(optionSet).hasOption(CliHandler.HELP_OPTION);
         verify(optionSet).hasOption(CliHandler.COMMAND_OPTION);
         verify(optionSet).hasOption(CliHandler.CONFIG_OPTION);
-    }
-
-    @Test
-    public void testHandler() throws Exception {
-
-        handler.handle(TestUtils.testArguments);
     }
 }
