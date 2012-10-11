@@ -4,11 +4,11 @@ import com.nuodb.tools.migration.TestUtils;
 import com.nuodb.tools.migration.cli.parse.Group;
 import com.nuodb.tools.migration.cli.parse.OptionException;
 import com.nuodb.tools.migration.cli.parse.Parser;
-import com.nuodb.tools.migration.cli.parse.option.GroupBuilderImpl;
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.cli.parse.option.Property;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.mockito.Mockito.mock;
 
 public class ParserImplTest {
     Parser parser = new ParserImpl();
@@ -17,17 +17,8 @@ public class ParserImplTest {
     @Before
     public void setUp() throws Exception {
         parser = new ParserImpl();
+        build = mock(Group.class);
 
-        OptionToolkit optionToolkit = new OptionToolkit();
-        build = optionToolkit.newGroup().withName("dump").build();
-
-
-    }
-
-
-    @Test
-    public void testParseGroup(){
-        parser.parse(TestUtils.testArguments, build);
     }
 
     @Test(expected = OptionException.class)
