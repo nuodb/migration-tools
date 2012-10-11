@@ -1,6 +1,5 @@
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,20 +11,20 @@ import java.sql.ResultSetMetaData;
 import static org.mockito.Mockito.*;
 
 public class DatabaseIntrospectorTest {
-    Database mockDatabase;
-    DatabaseMetaData mockMetaData;
-    DatabaseIntrospector databaseIntrospector;
 
+    private Database mockDatabase;
+    private DatabaseMetaData mockMetaData;
+    private DatabaseIntrospector databaseIntrospector;
 
-    Schema mockSchema;
-    Table mockTable;
+    private Schema mockSchema;
+    private Table mockTable;
 
-    final String TEST_CATALOG_NAME = "TEST_CATALOG";
-    final String TEST_TABLE_NAME = "TEST_TABLE";
-    final String TEST_SCHEMA_NAME = "TEST_SCHEMA";
-    final String TEST_DRIVER_NAME = "TEST_DRIVER";
-    final String TEST_TABLE_TYPE = "TEST_TABLE_TYPE";
-    final String TEST_COLUMN_NAME = "TEST_COLUMN_NAME";
+    private final String TEST_CATALOG_NAME = "TEST_CATALOG";
+    private final String TEST_TABLE_NAME = "TEST_TABLE";
+    private final String TEST_SCHEMA_NAME = "TEST_SCHEMA";
+    private final String TEST_DRIVER_NAME = "TEST_DRIVER";
+    private final String TEST_TABLE_TYPE = "TEST_TABLE_TYPE";
+    private final String TEST_COLUMN_NAME = "TEST_COLUMN_NAME";
 
     @Before
     public void setUp() throws Exception {
@@ -60,8 +59,6 @@ public class DatabaseIntrospectorTest {
         when(mockDatabase.getSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME)).thenReturn(mockSchema);
         when(mockSchema.createTable(TEST_TABLE_NAME, TEST_TABLE_TYPE)).thenReturn(mockTable);
         when(mockTable.getName()).thenReturn(Name.valueOf(TEST_TABLE_NAME));
-
-
     }
 
     @Test
@@ -78,12 +75,9 @@ public class DatabaseIntrospectorTest {
 
     @Test
     public void testReadTables() throws Exception {
-
-
         databaseIntrospector.readTables(mockMetaData, mockDatabase);
         verify(mockDatabase, times(1)).getSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME);
         verify(mockSchema, times(1)).createTable(TEST_TABLE_NAME, TEST_TABLE_TYPE);
-
     }
 
     @Test
@@ -94,7 +88,6 @@ public class DatabaseIntrospectorTest {
         verify(spyIntrospector, times(1)).readCatalogs(mockMetaData, mockDatabase);
         verify(spyIntrospector, times(1)).readSchemas(mockMetaData, mockDatabase);
         verify(spyIntrospector, times(1)).readTables(mockMetaData, mockDatabase);
-
     }
 
     @Test
@@ -103,10 +96,7 @@ public class DatabaseIntrospectorTest {
         stub(mockTable.createColumn(TEST_COLUMN_NAME)).toReturn(mockColumn);
 
         databaseIntrospector.readTableColumns(mockMetaData, mockTable);
-
         verify(mockTable, times(1)).createColumn(TEST_COLUMN_NAME);
-
-
     }
 
     @Test
@@ -123,7 +113,6 @@ public class DatabaseIntrospectorTest {
         verify(mockMetaData, times(1)).getDriverMinorVersion();
         verify(mockMetaData, times(1)).getDatabaseProductName();
         verify(mockMetaData, times(1)).getDatabaseProductVersion();
-
     }
 
     @Test
@@ -138,9 +127,5 @@ public class DatabaseIntrospectorTest {
         verify(mockConnection, times(1)).getMetaData();
         verify(spy, times(1)).readInfo(eq(mockMetaData), any(Database.class));
         verify(spy, times(1)).readObjects(eq(mockMetaData), any(Database.class));
-
-
     }
-
-
 }

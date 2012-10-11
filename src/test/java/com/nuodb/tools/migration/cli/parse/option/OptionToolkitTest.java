@@ -11,13 +11,12 @@ import static org.mockito.Mockito.*;
 
 public class OptionToolkitTest {
 
-    OptionToolkit toolkit;
-    OptionFormat optionFormat;
+    private OptionToolkit toolkit;
+    private OptionFormat optionFormat;
 
-    final int testID = 1;
-    private int testMin = 0;
-    final int testMax = 1;
-
+    private final int testID = 1;
+    private final int testMin = 0;
+    private final int testMax = 1;
 
 
     @Before
@@ -43,7 +42,6 @@ public class OptionToolkitTest {
         Assert.assertEquals(argument.getId(), testID);
         Assert.assertEquals(argument.getMinimum(), testMin);
         Assert.assertEquals(argument.getMaximum(), testMax);
-
     }
 
     @Test
@@ -60,16 +58,11 @@ public class OptionToolkitTest {
     @Test
     public void testGroupBuilder() throws Exception {
         final GroupBuilder groupBuilder = toolkit.newGroup();
-        groupBuilder.withMaximum(testMax).withMinimum(testMin).withId(testID);
-
+        groupBuilder.withId(testID).withMaximum(testMax).withMinimum(testMin);
 
         final Group group = groupBuilder.build();
         Assert.assertEquals(group.getId(), testID);
         Assert.assertEquals(group.getMinimum(), testMin);
         Assert.assertEquals(group.getMaximum(), testMax);
-
-
     }
-
-
 }

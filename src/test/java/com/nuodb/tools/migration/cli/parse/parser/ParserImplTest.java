@@ -23,6 +23,6 @@ public class ParserImplTest {
 
     @Test(expected = OptionException.class)
     public void testParseError() throws Exception {
-        parser.parse(TestUtils.testArguments, new Property());
+        parser.parse(TestUtils.ARGUMENTS, new Property());
     }
 }
