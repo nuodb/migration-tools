@@ -27,15 +27,13 @@ public class ArgumentImpl extends BaseOption implements Argument {
 
     public static final String NAME = "arg";
 
-    private int minimum;
-    private int maximum;
+    private int minimum = 0;
+    private int maximum = 1;
     private List<Object> defaultValues;
     private String valuesSeparator;
 
     public ArgumentImpl(int id, String name, String description, boolean required) {
         super(id, name, description, required);
-        this.minimum = 0;
-        this.maximum = 1;
     }
 
     public ArgumentImpl(int id, String name, String description, boolean required,

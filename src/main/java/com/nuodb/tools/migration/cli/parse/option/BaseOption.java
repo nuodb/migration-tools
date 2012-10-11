@@ -30,13 +30,6 @@ public abstract class BaseOption implements Option {
     private String description;
     private boolean required;
 
-    protected BaseOption() {
-    }
-
-    protected BaseOption(int id, String name, String description) {
-        this(id, name, description, false);
-    }
-
     protected BaseOption(int id, String name, String description, boolean required) {
         this.id = id;
         this.name = name;

@@ -25,18 +25,30 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.match.ant;
+package com.nuodb.tools.migration.match;
 
-import com.nuodb.tools.migration.match.Regex;
-import com.nuodb.tools.migration.match.RegexCompiler;
+import java.util.regex.Pattern;
 
 /**
  * @author Sergey Bushik
  */
-public class AntRegexCompiler implements RegexCompiler {
+public class PatternRegex extends RegexBase {
+
+    private final Pattern pattern;
+    private final String regex;
+
+    public PatternRegex(String regex, Pattern pattern) {
+        this.regex = regex;
+        this.pattern = pattern;
+    }
 
     @Override
-    public Regex compile(String regex) {
-        return new AntRegex(regex);
+    public String regex() {
+        return regex;
+    }
+
+    @Override
+    public Match exec(String input) {
+        return new PatternMatch(pattern, input);
     }
 }

@@ -25,11 +25,9 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.match.ant;
+package com.nuodb.tools.migration.match;
 
-import com.nuodb.tools.migration.match.Match;
-import com.nuodb.tools.migration.match.RegexBase;
-
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,21 +37,14 @@ import java.util.regex.Pattern;
  *
  * @author Sergey Bushik
  */
-public class AntRegex extends RegexBase {
+public class AntRegexCompiler extends PatternCompilerBase {
 
     private static final Pattern ANT_PATTERN = Pattern.compile("\\?|\\*|\\{([^/]+?)\\}");
 
     private static final String EMPTY = "";
 
-    private final Pattern pattern;
-    private final String regex;
-
-    public AntRegex(String regex) {
-        this.regex = regex;
-        this.pattern = compile(regex);
-    }
-
-    private static Pattern compile(String regex) {
+    @Override
+    protected Pattern pattern(String regex) {
         if (regex == null) {
             return null;
         }
@@ -64,9 +55,11 @@ public class AntRegex extends RegexBase {
             builder.append(quote(regex, end, matcher.start()));
             String match = matcher.group();
             if ("?".equals(match)) {
-                builder.append('.');
+                builder.append("(.)");
             } else if ("*".equals(match)) {
-                builder.append(".*");
+                builder.append("(.*)");
+            } else {
+                builder.append(matcher.group());
             }
             end = matcher.end();
         }
@@ -74,42 +67,14 @@ public class AntRegex extends RegexBase {
         return Pattern.compile(builder.toString());
     }
 
-    private static String quote(String pattern, int start, int end) {
+    protected String quote(String pattern, int start, int end) {
         return start == end ? EMPTY :
                 Pattern.quote(pattern.substring(start, end));
     }
 
-    @Override
-    public String regex() {
-        return regex;
-    }
-
-    @Override
-    public Match exec(String input) {
-        return new MatchImpl(pattern, input);
-    }
-
-    class MatchImpl implements Match {
-
-        private Matcher matcher;
-
-        public MatchImpl(Pattern pattern, String input) {
-            matcher = pattern.matcher(input);
-        }
-
-        @Override
-        public boolean test() {
-            return matcher.matches();
-        }
-
-        @Override
-        public String[] matches() {
-            int count = matcher.groupCount();
-            String[] match = new String[count];
-            for (int index = 0; index < count; index++) {
-                match[index] = matcher.group(index);
-            }
-            return match;
-        }
+    public static void main(String[] args) {
+        RegexCompiler compiler = new AntRegexCompiler();
+        Regex regex = compiler.compile("-table.*.filter");
+        System.out.println(Arrays.asList(regex.matches("-table.users.filter")));
     }
 }
