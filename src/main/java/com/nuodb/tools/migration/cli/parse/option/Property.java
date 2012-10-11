@@ -48,8 +48,8 @@ public class Property extends BaseOption {
     }
 
     @Override
-    public Set<String> getTriggers() {
-        return Collections.singleton(prefix);
+    public Set<Trigger> getTriggers() {
+        return Collections.singleton((Trigger) new TriggerImpl(prefix));
     }
 
     @Override

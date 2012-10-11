@@ -25,16 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.run;
+package com.nuodb.tools.migration.match.ant;
 
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
+import com.nuodb.tools.migration.match.Regex;
+import com.nuodb.tools.migration.match.RegexCompiler;
 
 /**
  * @author Sergey Bushik
  */
-public interface CliRunnableFactory {
+public class AntRegexCompiler implements RegexCompiler {
 
-    String getCommand();
-
-    CliRunnable createRunnable(OptionToolkit optionToolkit);
+    @Override
+    public Regex compile(String regex) {
+        return new AntRegex(regex);
+    }
 }

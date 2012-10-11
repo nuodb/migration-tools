@@ -27,23 +27,18 @@
  */
 package com.nuodb.tools.migration.match;
 
-import java.util.regex.Pattern;
+/**
+ * @author Sergey Bushik
+ */
+public abstract class RegexBase implements Regex {
 
-public class RegexMatcher implements Matcher {
-
-    private String pattern;
-    private Pattern regex;
-
-    public RegexMatcher(String pattern, Pattern regex) {
-        this.pattern = pattern;
-        this.regex = regex;
+    @Override
+    public boolean test(String input) {
+        return exec(input).test();
     }
 
-    public String pattern() {
-        return pattern;
-    }
-
-    public boolean matches(String value) {
-        return value == null ? regex == null : regex.matcher(value).matches();
+    @Override
+    public String[] matches(String input) {
+        return exec(input).matches();
     }
 }

@@ -32,7 +32,7 @@ import com.nuodb.tools.migration.cli.parse.Option;
 /**
  * @author Sergey Bushik
  */
-public interface CliRunnable extends Option {
+public interface CliRun extends Option {
 
     void run();
 

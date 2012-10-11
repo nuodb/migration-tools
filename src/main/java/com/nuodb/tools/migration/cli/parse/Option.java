@@ -98,14 +98,14 @@ public interface Option {
     Set<String> getPrefixes();
 
     /**
-     * Identifies the argument prefixes that should trigger this option. This is used to decide which of many options
+     * Identifies the argument triggers that should fire this option. This is used to decide which of many options
      * should be tried when processing a given argument string.
      * <p/>
      * The returned set must not be null.
      *
      * @return The set of triggers for this option
      */
-    Set<String> getTriggers();
+    Set<Trigger> getTriggers();
 
     /**
      * Recursively searches for an option with the supplied trigger.
@@ -114,6 +114,14 @@ public interface Option {
      * @return the matching option or null.
      */
     Option findOption(String trigger);
+
+    /**
+     * Recursively searches for an option with the supplied trigger.
+     *
+     * @param trigger the trigger to search for.
+     * @return the matching option or null.
+     */
+    Option findOption(Trigger trigger);
 
     /**
      * Adds defaults to a CommandLine.

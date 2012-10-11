@@ -29,11 +29,13 @@ package com.nuodb.tools.migration.cli;
 
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.OptionException;
+import com.nuodb.tools.migration.cli.parse.Trigger;
 import com.nuodb.tools.migration.cli.parse.option.ArgumentImpl;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.cli.run.CliRunnable;
-import com.nuodb.tools.migration.cli.run.CliRunnableFactory;
-import com.nuodb.tools.migration.cli.run.CliRunnableFactoryLookup;
+import com.nuodb.tools.migration.cli.parse.option.TriggerImpl;
+import com.nuodb.tools.migration.cli.run.CliRun;
+import com.nuodb.tools.migration.cli.run.CliRunFactory;
+import com.nuodb.tools.migration.cli.run.CliRunFactoryLookup;
 
 import java.util.HashSet;
 import java.util.ListIterator;
@@ -44,37 +46,41 @@ import java.util.Set;
  */
 public class CliCommand extends ArgumentImpl {
 
-    private CliRunnableFactoryLookup runnableFactoryLookup;
+    private CliRunFactoryLookup runFactoryLookup;
     private OptionToolkit optionToolkit;
 
     public CliCommand(int id, String name, String description, boolean required,
-                      CliRunnableFactoryLookup runnableFactoryLookup, OptionToolkit optionToolkit) {
+                      CliRunFactoryLookup runFactoryLookup, OptionToolkit optionToolkit) {
         super(id, name, description, required);
-        this.runnableFactoryLookup = runnableFactoryLookup;
+        this.runFactoryLookup = runFactoryLookup;
         this.optionToolkit = optionToolkit;
     }
 
     @Override
-    public Set<String> getTriggers() {
-        return new HashSet<String>(runnableFactoryLookup.getCommands());
+    public Set<Trigger> getTriggers() {
+        Set<Trigger> triggers = new HashSet<Trigger>();
+        for (String command : runFactoryLookup.getCommands()) {
+            triggers.add(new TriggerImpl(command));
+        }
+        return triggers;
     }
 
     @Override
     public boolean canProcess(CommandLine commandLine, String argument) {
-        return runnableFactoryLookup.lookup(argument) != null;
+        return runFactoryLookup.lookup(argument) != null;
     }
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        CliRunnableFactory commandFactory = runnableFactoryLookup.lookup(arguments.next());
-        CliRunnable command = commandFactory.createRunnable(optionToolkit);
-        command.process(commandLine, arguments);
-        commandLine.addValue(this, command);
+        CliRunFactory cliRunFactory = runFactoryLookup.lookup(arguments.next());
+        CliRun cliRun = cliRunFactory.createCliRun(optionToolkit);
+        cliRun.process(commandLine, arguments);
+        commandLine.addValue(this, cliRun);
     }
 
     @Override
     public void validate(CommandLine commandLine) {
-        CliRunnable command = commandLine.getValue(this);
+        CliRun command = commandLine.getValue(this);
         try {
             if (command != null) {
                 command.validate(commandLine);

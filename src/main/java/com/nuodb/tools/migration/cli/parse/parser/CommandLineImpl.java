@@ -18,7 +18,9 @@ package com.nuodb.tools.migration.cli.parse.parser;
 
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
+import com.nuodb.tools.migration.cli.parse.Trigger;
 import com.nuodb.tools.migration.cli.parse.option.Property;
+import com.nuodb.tools.migration.cli.parse.option.TriggerImpl;
 
 import java.util.*;
 
@@ -111,14 +113,14 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     @Override
     public Option getOption(String trigger) {
-        return getTriggers().get(trigger);
+        return getTriggers().get(new TriggerImpl(trigger));
     }
 
-    protected Map<String, Option> getTriggers() {
-        Map<String, Option> triggers = new HashMap<String, Option>();
+    protected Map<Trigger, Option> getTriggers() {
+        Map<Trigger, Option> triggers = new HashMap<Trigger, Option>();
         for (Option option : options) {
-            triggers.put(option.getName(), option);
-            for (String trigger : option.getTriggers()) {
+            triggers.put(new TriggerImpl(option.getName()), option);
+            for (Trigger trigger : option.getTriggers()) {
                 triggers.put(trigger, option);
             }
         }

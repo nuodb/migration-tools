@@ -57,11 +57,11 @@ public class Command extends BaseParent {
     }
 
     @Override
-    public Set<String> getTriggers() {
-        Set<String> triggers = new HashSet<String>();
-        triggers.add(getName());
-        if (aliases != null) {
-            triggers.addAll(aliases);
+    public Set<Trigger> getTriggers() {
+        Set<Trigger> triggers = new HashSet<Trigger>();
+        triggers.add(new TriggerImpl(getName()));
+        for (String alias : aliases) {
+            triggers.add(new TriggerImpl(alias));
         }
         return Collections.unmodifiableSet(triggers);
     }

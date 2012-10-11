@@ -58,31 +58,40 @@ public abstract class BaseParent extends BaseOption {
     }
 
     @Override
-    public Set<String> getTriggers() {
-        return (group == null) ? Collections.<String>emptySet() : group.getTriggers();
+    public Set<Trigger> getTriggers() {
+        return (group == null) ? Collections.<Trigger>emptySet() : group.getTriggers();
     }
 
     @Override
     public boolean canProcess(CommandLine commandLine, String argument) {
-        Set<String> triggers = getTriggers();
+        Set<Trigger> triggers = getTriggers();
         if (this.argument != null) {
-            if (argumentSeparator != null) {
-                int index = argument.indexOf(argumentSeparator);
+            if (this.argumentSeparator != null) {
+                int index = argument.indexOf(this.argumentSeparator);
                 if (index > 0) {
-                    return triggers.contains(argument.substring(0, index));
+                    return fire(triggers, argument.substring(0, index));
                 }
             }
         }
-        return triggers.contains(argument);
+        return fire(triggers, argument);
+    }
+
+    protected boolean fire(Set<Trigger> triggers, String argument)  {
+        for (Trigger trigger : triggers) {
+            if (trigger.fire(argument)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public void defaults(CommandLine commandLine) {
-        if (argument != null) {
-            argument.defaults(commandLine, this);
+        if (this.argument != null) {
+            this.argument.defaults(commandLine, this);
         }
-        if (group != null) {
-            group.defaults(commandLine);
+        if (this.group != null) {
+            this.group.defaults(commandLine);
         }
     }
 
@@ -90,14 +99,14 @@ public abstract class BaseParent extends BaseOption {
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
         prepareArgument(arguments);
         processParent(commandLine, arguments);
-        processArgument(commandLine, argument, arguments);
-        processGroup(commandLine, group, arguments);
+        processArgument(commandLine, this.argument, arguments);
+        processGroup(commandLine, this.group, arguments);
     }
 
     protected void prepareArgument(ListIterator<String> arguments) {
-        if (argumentSeparator != null) {
+        if (this.argumentSeparator != null) {
             String value = arguments.next();
-            int index = value.indexOf(argumentSeparator);
+            int index = value.indexOf(this.argumentSeparator);
             if (index > 0) {
                 arguments.remove();
                 arguments.add(value.substring(0, index));
@@ -144,8 +153,8 @@ public abstract class BaseParent extends BaseOption {
     public void validate(CommandLine commandLine) throws OptionException {
         super.validate(commandLine);
         if (commandLine.hasOption(this)) {
-            validateGroup(commandLine, group);
-            validateArgument(commandLine, argument);
+            validateGroup(commandLine, this.group);
+            validateArgument(commandLine, this.argument);
         }
     }
 
@@ -167,11 +176,11 @@ public abstract class BaseParent extends BaseOption {
         boolean displayChildren = (this.group != null) && hints.contains(HelpHint.PARENT_CHILDREN);
         if (displayArgument) {
             buffer.append(' ');
-            argument.help(buffer, hints, comparator);
+            this.argument.help(buffer, hints, comparator);
         }
         if (displayChildren) {
             buffer.append(' ');
-            group.help(buffer, hints, comparator);
+            this.group.help(buffer, hints, comparator);
         }
     }
 

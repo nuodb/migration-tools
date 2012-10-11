@@ -34,8 +34,8 @@ import com.nuodb.tools.migration.cli.parse.OptionSet;
 import com.nuodb.tools.migration.cli.parse.help.HelpFormatter;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.cli.parse.parser.ParserImpl;
-import com.nuodb.tools.migration.cli.run.CliRunnable;
-import com.nuodb.tools.migration.cli.run.CliRunnableFactoryLookup;
+import com.nuodb.tools.migration.cli.run.CliRun;
+import com.nuodb.tools.migration.cli.run.CliRunFactoryLookup;
 import com.nuodb.tools.migration.i18n.Resources;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -103,7 +103,7 @@ public class CliHandler implements CliResources {
                 ).build();
         Option command = new CliCommand(
                 COMMAND_OPTION_ID, COMMAND_OPTION, resources.getMessage(COMMAND_OPTION_DESCRIPTION), false,
-                new CliRunnableFactoryLookup(), optionToolkit);
+                new CliRunFactoryLookup(), optionToolkit);
         return optionToolkit.newGroup().
                 withName(resources.getMessage(MIGRATION_GROUP_NAME)).
                 withOption(help).
@@ -123,7 +123,7 @@ public class CliHandler implements CliResources {
             formatter.setExecutable(MIGRATION_EXECUTABLE);
             formatter.format(System.out);
         } else if (options.hasOption(COMMAND_OPTION)) {
-            CliRunnable runnable = options.getValue(COMMAND_OPTION);
+            CliRun runnable = options.getValue(COMMAND_OPTION);
             if (log.isTraceEnabled()) {
                 log.trace(String.format("Handling %1$s", runnable.getCommand()));
             }
@@ -140,8 +140,8 @@ public class CliHandler implements CliResources {
         formatter.setException(exception);
         Option option = exception.getOption();
         String executable;
-        if (option instanceof CliRunnable) {
-            String command = ((CliRunnable) option).getCommand();
+        if (option instanceof CliRun) {
+            String command = ((CliRun) option).getCommand();
             executable = MIGRATION_EXECUTABLE + " " + command;
         } else {
             executable = MIGRATION_EXECUTABLE;

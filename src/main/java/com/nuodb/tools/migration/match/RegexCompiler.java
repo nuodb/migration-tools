@@ -25,32 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.run;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+package com.nuodb.tools.migration.match;
 
 /**
  * @author Sergey Bushik
  */
-public class CliRunnableFactoryLookup {
+public interface RegexCompiler {
 
-    private Map<String, CliRunnableFactory> factories = new HashMap<String, CliRunnableFactory>();
-
-    public CliRunnableFactoryLookup() {
-        register(new CliDumpFactory());
-    }
-
-    public Collection<? extends String> getCommands() {
-        return factories.keySet();
-    }
-
-    public CliRunnableFactory lookup(String command) {
-        return factories.get(command);
-    }
-
-    public void register(CliRunnableFactory factory) {
-        factories.put(factory.getCommand(), factory);
-    }
+    Regex compile(String regex);
 }

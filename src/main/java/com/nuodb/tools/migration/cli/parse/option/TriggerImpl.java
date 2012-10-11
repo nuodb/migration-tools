@@ -25,36 +25,42 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.cli.parse.option;
 
-import java.util.List;
+import com.nuodb.tools.migration.cli.parse.Trigger;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String filter;
+/**
+ * @author Sergey Bushik
+ */
+public class TriggerImpl implements Trigger {
 
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
+    private String trigger;
+
+    public TriggerImpl(String trigger) {
+        this.trigger = trigger;
     }
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
+    @Override
+    public boolean fire(String argument) {
+        return this.trigger.equals(argument);
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TriggerImpl trigger = (TriggerImpl) o;
+        if (this.trigger != null ? !this.trigger.equals(trigger.trigger) : trigger.trigger != null) return false;
+        return true;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public int hashCode() {
+        return trigger != null ? trigger.hashCode() : 0;
     }
 
-    public String getFilter() {
-        return filter;
-    }
-
-    public void setFilter(String filter) {
-        this.filter = filter;
+    @Override
+    public String toString() {
+        return trigger;
     }
 }

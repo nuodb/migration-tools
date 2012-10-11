@@ -27,10 +27,7 @@
  */
 package com.nuodb.tools.migration.cli.run;
 
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Help;
-import com.nuodb.tools.migration.cli.parse.HelpHint;
-import com.nuodb.tools.migration.cli.parse.Option;
+import com.nuodb.tools.migration.cli.parse.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -40,12 +37,12 @@ import java.util.Set;
 /**
  * @author Sergey Bushik
  */
-public abstract class CliRunnableOption implements CliRunnable {
+public abstract class CliRunAdapter implements CliRun {
 
     private Option option;
     private String command;
 
-    protected CliRunnableOption(Option option, String command) {
+    protected CliRunAdapter(Option option, String command) {
         this.option = option;
         this.command = command;
     }
@@ -96,12 +93,17 @@ public abstract class CliRunnableOption implements CliRunnable {
     }
 
     @Override
-    public Set<String> getTriggers() {
+    public Set<Trigger> getTriggers() {
         return option.getTriggers();
     }
 
     @Override
     public Option findOption(String trigger) {
+        return option.findOption(trigger);
+    }
+
+    @Override
+    public Option findOption(Trigger trigger) {
         return option.findOption(trigger);
     }
 
@@ -145,6 +147,7 @@ public abstract class CliRunnableOption implements CliRunnable {
     public String getCommand() {
         return command;
     }
+
 
     protected abstract void bind(CommandLine commandLine, Option option);
 }

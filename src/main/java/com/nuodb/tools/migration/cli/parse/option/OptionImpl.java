@@ -65,8 +65,8 @@ public class OptionImpl extends BaseParent {
     }
 
     @Override
-    public Set<String> getTriggers() {
-        Set<String> triggers = new HashSet<String>();
+    public Set<Trigger> getTriggers() {
+        Set<Trigger> triggers = new HashSet<Trigger>();
         Set<String> prefixes = getPrefixes();
         addTriggers(triggers, prefixes, getName());
         for (String alias : this.aliases) {
@@ -75,16 +75,16 @@ public class OptionImpl extends BaseParent {
         return triggers;
     }
 
-    protected void addTriggers(Set<String> triggers, Set<String> prefixes, String trigger) {
+    protected void addTriggers(Set<Trigger> triggers, Set<String> prefixes, String trigger) {
         for (String prefix : prefixes) {
-            triggers.add(prefix + trigger);
+            triggers.add(new TriggerImpl(prefix + trigger));
         }
     }
 
     @Override
     public void processParent(CommandLine line, ListIterator<String> arguments) {
         String argument = arguments.next();
-        if (getTriggers().contains(argument)) {
+        if (fire(getTriggers(), argument)) {
             line.addOption(this);
             arguments.set(getName());
         } else {
@@ -100,7 +100,7 @@ public class OptionImpl extends BaseParent {
             help.append('[');
         }
         Set<String> prefixes = getPrefixes();
-        Set<String> triggers = new HashSet<String>();
+        Set<Trigger> triggers = new HashSet<Trigger>();
         addTriggers(triggers, prefixes, getName());
         joinTriggers(help, triggers);
         if (displayAliases && !this.aliases.isEmpty()) {
@@ -109,7 +109,7 @@ public class OptionImpl extends BaseParent {
             Collections.sort(list);
             for (Iterator<String> i = list.iterator(); i.hasNext(); ) {
                 String alias = i.next();
-                triggers = new HashSet<String>();
+                triggers = new HashSet<Trigger>();
                 addTriggers(triggers, prefixes, alias);
                 joinTriggers(help, triggers);
                 if (i.hasNext()) {
@@ -136,8 +136,8 @@ public class OptionImpl extends BaseParent {
         }
     }
 
-    protected void joinTriggers(StringBuilder help, Set<String> triggers) {
-        for (Iterator<String> iterator = triggers.iterator(); iterator.hasNext(); ) {
+    protected void joinTriggers(StringBuilder help, Set<Trigger> triggers) {
+        for (Iterator<Trigger> iterator = triggers.iterator(); iterator.hasNext(); ) {
             help.append(iterator.next());
             if (iterator.hasNext()) {
                 help.append(",");

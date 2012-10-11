@@ -73,7 +73,7 @@ public class ArgumentImpl extends BaseOption implements Argument {
     }
 
     @Override
-    public Set<String> getTriggers() {
+    public Set<Trigger> getTriggers() {
         return Collections.emptySet();
     }
 

@@ -34,15 +34,13 @@ import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.dump.Dump;
 import com.nuodb.tools.migration.spec.DumpSpec;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public class CliDumpFactory extends CliOptionsSupport implements CliRunnableFactory, CliResources {
+public class CliDumpFactory extends CliOptionsSupport implements CliRunFactory, CliResources {
 
     public static final String DUMP_COMMAND = "dump";
 
@@ -52,7 +50,7 @@ public class CliDumpFactory extends CliOptionsSupport implements CliRunnableFact
     }
 
     @Override
-    public CliRunnable createRunnable(OptionToolkit optionToolkit) {
+    public CliRun createCliRun(OptionToolkit optionToolkit) {
         return new CliDump(
                 optionToolkit.newGroup().
                         withName(resources.getMessage(DUMP_GROUP_NAME)).
@@ -62,7 +60,7 @@ public class CliDumpFactory extends CliOptionsSupport implements CliRunnableFact
         );
     }
 
-    class CliDump extends CliRunnableOption {
+    class CliDump extends CliRunAdapter {
 
         private DumpSpec dumpSpec;
 

@@ -25,11 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.match;
+package com.nuodb.tools.migration.cli.run;
 
-public interface Matcher {
+import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 
-    String pattern();
+/**
+ * @author Sergey Bushik
+ */
+public interface CliRunFactory {
 
-    boolean matches(String value);
+    String getCommand();
+
+    CliRun createCliRun(OptionToolkit optionToolkit);
 }

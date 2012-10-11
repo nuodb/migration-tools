@@ -27,7 +27,13 @@
  */
 package com.nuodb.tools.migration.match;
 
-public interface PatternCompiler {
+public interface Regex {
 
-    public Matcher matcher(String pattern);
+    String regex();
+
+    Match exec(String input);
+
+    boolean test(String input);
+
+    String[] matches(String input);
 }

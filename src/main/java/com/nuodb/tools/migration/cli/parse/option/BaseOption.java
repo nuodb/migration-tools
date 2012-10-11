@@ -16,10 +16,7 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.HelpHint;
-import com.nuodb.tools.migration.cli.parse.Option;
-import com.nuodb.tools.migration.cli.parse.OptionException;
+import com.nuodb.tools.migration.cli.parse.*;
 
 import java.util.ListIterator;
 
@@ -89,6 +86,10 @@ public abstract class BaseOption implements Option {
 
     @Override
     public Option findOption(String trigger) {
+        return findOption(new TriggerImpl(trigger));
+    }
+
+    public Option findOption(Trigger trigger) {
         return getTriggers().contains(trigger) ? this : null;
     }
 

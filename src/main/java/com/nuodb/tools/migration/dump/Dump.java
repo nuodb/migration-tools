@@ -86,6 +86,10 @@ public class Dump {
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Executing statement %1$s", query.toQueryString()));
             }
+            // -table.(*)
+            // -table.(*).filter=<argument>
+            // -column.(*).(*)=<argument>
+
             ResultSet resultSet = statement.executeQuery();
             // TODO: create & configure dump output based on the provided output spec
             OutputFormat format = new CsvOutputFormat();
@@ -167,8 +171,8 @@ public class Dump {
             selectQuery.addColumn(column);
         }
         selectQuery.addTable(table);
-        if (tableSpec != null && tableSpec.getCondition() != null) {
-            selectQuery.addCondition(tableSpec.getCondition());
+        if (tableSpec != null && tableSpec.getFilter() != null) {
+            selectQuery.addCondition(tableSpec.getFilter());
         }
         return selectQuery;
     }

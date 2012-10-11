@@ -29,17 +29,11 @@ public class GroupImpl extends BaseOption implements Group {
 
     public static final String OPTION_SEPARATOR = "|";
 
-    class DescOrder implements Comparator<String> {
-        public int compare(String o1, String o2) {
-            return -(o1.compareTo(o2));
-        }
-    }
-
     private int minimum;
     private int maximum;
     private List<Option> options = new ArrayList<Option>();
     private List<Argument> arguments = new ArrayList<Argument>();
-    private SortedMap<String, Option> triggers = new TreeMap<String, Option>(new DescOrder());
+    private Map<Trigger, Option> triggers = new HashMap<Trigger, Option>();
     private Set<String> prefixes = new HashSet<String>();
 
     public GroupImpl(int id, String name, String description, boolean required) {
@@ -70,7 +64,7 @@ public class GroupImpl extends BaseOption implements Group {
             arguments.add((Argument) option);
         } else {
             options.add(option);
-            for (String trigger : option.getTriggers()) {
+            for (Trigger trigger : option.getTriggers()) {
                 triggers.put(trigger, option);
             }
             prefixes.addAll(option.getPrefixes());
@@ -88,12 +82,11 @@ public class GroupImpl extends BaseOption implements Group {
         if (argument == null) {
             return false;
         }
-        // if arg does not require bursting
-        if (triggers.containsKey(argument)) {
+        Trigger trigger = new TriggerImpl(argument);
+        if (triggers.containsKey(trigger)) {
             return true;
         }
-        Map<String, Option> tailMap = triggers.tailMap(argument);
-        for (Option option : tailMap.values()) {
+        for (Option option : triggers.values()) {
             if (option.canProcess(commandLine, argument)) {
                 return true;
             }
@@ -123,7 +116,7 @@ public class GroupImpl extends BaseOption implements Group {
     }
 
     @Override
-    public Set<String> getTriggers() {
+    public Set<Trigger> getTriggers() {
         return triggers.keySet();
     }
 
@@ -173,7 +166,7 @@ public class GroupImpl extends BaseOption implements Group {
     }
 
     protected void processOption(CommandLine commandLine, ListIterator<String> arguments, String argument) {
-        for (Option option : this.triggers.tailMap(argument).values()) {
+        for (Option option : this.triggers.values()) {
             if (option.canProcess(commandLine, argument)) {
                 option.process(commandLine, arguments);
                 break;

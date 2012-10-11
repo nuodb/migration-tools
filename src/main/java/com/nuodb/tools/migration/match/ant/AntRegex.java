@@ -25,8 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.match;
+package com.nuodb.tools.migration.match.ant;
 
+import com.nuodb.tools.migration.match.Match;
+import com.nuodb.tools.migration.match.RegexBase;
+
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -35,25 +39,29 @@ import java.util.regex.Pattern;
  *
  * @author Sergey Bushik
  */
-public class AntPatternCompiler implements PatternCompiler {
+public class AntRegex extends RegexBase {
 
     private static final Pattern ANT_PATTERN = Pattern.compile("\\?|\\*|\\{([^/]+?)\\}");
 
     private static final String EMPTY = "";
 
-    public Matcher matcher(String pattern) {
-        return new RegexMatcher(pattern, compile(pattern));
+    private final Pattern pattern;
+    private final String regex;
+
+    public AntRegex(String regex) {
+        this.regex = regex;
+        this.pattern = compile(regex);
     }
 
-    public static Pattern compile(String pattern) {
-        if (pattern == null) {
+    private static Pattern compile(String regex) {
+        if (regex == null) {
             return null;
         }
         StringBuilder builder = new StringBuilder();
-        java.util.regex.Matcher matcher = ANT_PATTERN.matcher(pattern);
+        Matcher matcher = ANT_PATTERN.matcher(regex);
         int end = 0;
         while (matcher.find()) {
-            builder.append(quote(pattern, end, matcher.start()));
+            builder.append(quote(regex, end, matcher.start()));
             String match = matcher.group();
             if ("?".equals(match)) {
                 builder.append('.');
@@ -62,11 +70,46 @@ public class AntPatternCompiler implements PatternCompiler {
             }
             end = matcher.end();
         }
-        builder.append(quote(pattern, end, pattern.length()));
+        builder.append(quote(regex, end, regex.length()));
         return Pattern.compile(builder.toString());
     }
 
-    public static String quote(String pattern, int start, int end) {
-        return start == end ? EMPTY : Pattern.quote(pattern.substring(start, end));
+    private static String quote(String pattern, int start, int end) {
+        return start == end ? EMPTY :
+                Pattern.quote(pattern.substring(start, end));
+    }
+
+    @Override
+    public String regex() {
+        return regex;
+    }
+
+    @Override
+    public Match exec(String input) {
+        return new MatchImpl(pattern, input);
+    }
+
+    class MatchImpl implements Match {
+
+        private Matcher matcher;
+
+        public MatchImpl(Pattern pattern, String input) {
+            matcher = pattern.matcher(input);
+        }
+
+        @Override
+        public boolean test() {
+            return matcher.matches();
+        }
+
+        @Override
+        public String[] matches() {
+            int count = matcher.groupCount();
+            String[] match = new String[count];
+            for (int index = 0; index < count; index++) {
+                match[index] = matcher.group(index);
+            }
+            return match;
+        }
     }
 }

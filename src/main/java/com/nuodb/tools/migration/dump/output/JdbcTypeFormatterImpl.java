@@ -27,14 +27,20 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.dump.DumpException;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeUtils;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Ref;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLXML;
+import java.sql.Types;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 
