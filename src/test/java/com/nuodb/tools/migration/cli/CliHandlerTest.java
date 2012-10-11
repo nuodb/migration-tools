@@ -20,8 +20,8 @@ import static org.mockito.Mockito.*;
 
 public class CliHandlerTest {
 
-    CliHandler handler;
-    OptionToolkit optionToolkitMock;
+    private CliHandler handler;
+    private OptionToolkit optionToolkitMock;
 
     @Before
     public void setUp() throws Exception {
