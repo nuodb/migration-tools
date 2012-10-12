@@ -51,6 +51,7 @@ public class XmlHandlerRegistryTest {
         when(mock.canRead(any(InputNode.class),
                 eq(XmlJdbcConnectionHandler.class),
                 any(XmlReadContext.class))).thenReturn(true);
+
         xmlHandlerRegistry.register(mock);
 
         xmlReadHandler = xmlHandlerRegistry.lookupReader(
@@ -63,7 +64,6 @@ public class XmlHandlerRegistryTest {
         Assert.assertTrue(xmlReadHandler == mock);
         verify(xmlReadHandler).canRead(any(InputNode.class),
                 eq(XmlJdbcConnectionHandler.class), any(XmlReadContext.class));
-
     }
 
 
@@ -98,5 +98,10 @@ public class XmlHandlerRegistryTest {
         verify(xmlWriteHandler).canWrite(anyObject(),
                 eq(XmlJdbcConnectionHandler.class),
                 any(OutputNode.class), any(XmlWriteContext.class));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testRegisterWrongType() throws Exception {
+        xmlHandlerRegistry.register(mock(XmlHandler.class));
     }
 }

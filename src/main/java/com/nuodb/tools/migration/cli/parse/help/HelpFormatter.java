@@ -27,12 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class HelpFormatter extends HelpHint {
@@ -160,6 +155,7 @@ public class HelpFormatter extends HelpHint {
         } else {
             option = this.option;
         }
+        assert option != null;
         List<Help> helps = option.help(0, optionOutputHints, comparator);
         int usageWidth = 0;
         for (Help help : helps) {

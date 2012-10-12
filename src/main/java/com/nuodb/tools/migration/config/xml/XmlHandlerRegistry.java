@@ -48,6 +48,8 @@ public class XmlHandlerRegistry {
 
     //TODO handler type and priority check
     public XmlHandlerRegistry register(XmlHandler handler, int priority) {
+        assert (handler instanceof XmlReadHandler || handler instanceof XmlWriteHandler);
+
         if (handler instanceof XmlWriteHandler) {
             writers.add((XmlWriteHandler) handler, priority);
         }
