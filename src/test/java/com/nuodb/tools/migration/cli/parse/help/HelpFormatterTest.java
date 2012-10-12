@@ -1,5 +1,6 @@
 package com.nuodb.tools.migration.cli.parse.help;
 
+import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.OptionException;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,14 +67,14 @@ public class HelpFormatterTest {
         spy.setDivider(divider);
 
         final OptionException exception = mock(OptionException.class);
+        when(exception.getOption()).thenReturn(mock(Option.class));
         spy.setException(exception);
 
         final Writer writer = mock(Writer.class);
 
         spy.help(writer);
 
-        verify(spy).line(writer, footer);
-        verify(spy).line(writer, divider);
-        verify(exception).getOption();
+        verify(spy, times(2)).line(writer, divider);
+        verify(exception, times(2)).getOption();
     }
 }
