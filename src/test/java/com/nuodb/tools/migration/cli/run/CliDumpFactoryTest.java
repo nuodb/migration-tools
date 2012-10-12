@@ -58,7 +58,5 @@ public class CliDumpFactoryTest {
         spy.createCliRun(optionToolkitMock);
         verify(spy, times(1)).createOutputGroup(optionToolkitMock);
         verify(spy, times(1)).createSourceGroup(optionToolkitMock);
-
-
     }
 }

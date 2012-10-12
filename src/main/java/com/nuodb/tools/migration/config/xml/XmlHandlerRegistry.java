@@ -34,6 +34,7 @@ import org.simpleframework.xml.stream.OutputNode;
 @SuppressWarnings("unchecked")
 public class XmlHandlerRegistry {
 
+    //TODO convert to enum?
     public static final int PRIORITY_HIGH = 1;
     public static final int PRIORITY_NORMAL = 0;
     public static final int PRIORITY_LOW = -1;
@@ -45,6 +46,7 @@ public class XmlHandlerRegistry {
         return register(handler, PRIORITY_NORMAL);
     }
 
+    //TODO handler type and priority check
     public XmlHandlerRegistry register(XmlHandler handler, int priority) {
         if (handler instanceof XmlWriteHandler) {
             writers.add((XmlWriteHandler) handler, priority);

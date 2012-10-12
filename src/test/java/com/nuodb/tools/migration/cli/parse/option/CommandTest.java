@@ -15,9 +15,5 @@ public class CommandTest {
         command = new Command(1, "TEST_NAME", "DESC", true);
     }
 
-    @Test
-    public void testCanProcess() throws Exception {
-        CommandLine commandLine = mock(CommandLine.class);
-        command.canProcess(commandLine, "");
-    }
+
 }
