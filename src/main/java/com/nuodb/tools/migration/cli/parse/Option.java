@@ -87,6 +87,20 @@ public interface Option {
     void setRequired(boolean required);
 
     /**
+     * Returns option processor associated with this option.
+     *
+     * @return option processor associated with the option.
+     */
+    OptionProcessor getOptionProcessor();
+
+    /**
+     * Associates option processor with this option.
+     *
+     * @param optionProcessor to be associated.
+     */
+    void setOptionProcessor(OptionProcessor optionProcessor);
+
+    /**
      * Identifies the argument prefixes that should be considered options. This is used to identify whether a given
      * string looks like an option or an argument value. Typically an option would return the set [--,-] while switches
      * might offer [-,+].

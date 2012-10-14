@@ -39,7 +39,7 @@ import java.sql.SQLException;
 /**
  * The Factory instantiates a {@link CliDump} which is a set of groups of options for source database connection spec
  * {@link #createSourceGroup}, spec of output format & type via {@link #createOutputGroup}, table option {@link
- * #createTableGroup} and after a validation is passed assembles command line option arguments into a {@link DumpSpec}
+ * #createSelectQueryGroup} and after a validation is passed assembles command line option arguments into a {@link DumpSpec}
  * object.
  *
  * @author Sergey Bushik
@@ -75,9 +75,8 @@ public class CliDumpFactory extends CliOptionsSupport implements CliRunFactory, 
                     .withName(resources.getMessage(DUMP_GROUP_NAME))
                     .withOption(createSourceGroup(optionToolkit))
                     .withOption(createOutputGroup(optionToolkit))
-                    .withOption(createTableGroup(optionToolkit))
-                    .withRequired(true).build(),
-                    COMMAND);
+                    .withOption(createSelectQueryGroup(optionToolkit))
+                    .withRequired(true).build(), COMMAND);
         }
 
         @Override
@@ -85,7 +84,7 @@ public class CliDumpFactory extends CliOptionsSupport implements CliRunFactory, 
             dumpSpec = new DumpSpec();
             dumpSpec.setConnectionSpec(parseSourceGroup(commandLine, this));
             dumpSpec.setOutputSpec(parseOutputGroup(commandLine, this));
-            dumpSpec.setTableSpecs(parseTableGroup(commandLine, this));
+            dumpSpec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
         }
 
         /**

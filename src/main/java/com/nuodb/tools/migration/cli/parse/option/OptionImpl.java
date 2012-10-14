@@ -97,17 +97,17 @@ public class OptionImpl extends BaseContainer {
     }
 
     @Override
-    protected void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void processInternal(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
         Trigger trigger = fire(getTriggers(), argument);
         if (trigger != null) {
-            doProcess(commandLine, trigger, argument);
+            processInternal(commandLine, trigger, argument);
         } else {
             throw new OptionException(this, String.format("Unexpected token %1$s", argument));
         }
     }
 
-    protected void doProcess(CommandLine commandLine, Trigger trigger, String argument) {
+    protected void processInternal(CommandLine commandLine, Trigger trigger, String argument) {
         commandLine.addOption(this);
     }
 

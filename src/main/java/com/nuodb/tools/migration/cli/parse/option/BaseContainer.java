@@ -126,7 +126,7 @@ public abstract class BaseContainer extends BaseOption implements Container {
     }
 
     @Override
-    public void preProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void preProcessInternal(CommandLine commandLine, ListIterator<String> arguments) {
         if (this.argumentSeparator != null) {
             String value = arguments.next();
             int index = value.indexOf(this.argumentSeparator);
@@ -147,7 +147,16 @@ public abstract class BaseContainer extends BaseOption implements Container {
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        doProcess(commandLine, arguments);
+        processInternal(commandLine, arguments);
+        OptionProcessor optionProcessor = getOptionProcessor();
+        if (optionProcessor != null) {
+            optionProcessor.process(commandLine, this, arguments);
+        }
+        processArgument(commandLine, arguments);
+        processGroup(commandLine, arguments);
+    }
+
+    protected void processArgument(CommandLine commandLine, ListIterator<String> arguments) {
         if (argument != null && arguments.hasNext()) {
             String value = arguments.next();
             String unquoted = unquote(value);
@@ -158,12 +167,13 @@ public abstract class BaseContainer extends BaseOption implements Container {
             arguments.previous();
             argument.process(commandLine, arguments, this);
         }
+    }
+
+    protected void processGroup(CommandLine commandLine, ListIterator<String> arguments) {
         if ((group != null) && group.canProcess(commandLine, arguments)) {
             group.process(commandLine, arguments);
         }
     }
-
-    protected abstract void doProcess(CommandLine commandLine, ListIterator<String> arguments);
 
     public static String unquote(String argument) {
         if (!argument.startsWith("\"") || !argument.endsWith("\"")) {
@@ -174,14 +184,26 @@ public abstract class BaseContainer extends BaseOption implements Container {
 
     @Override
     public void postProcess(CommandLine commandLine) throws OptionException {
-        super.postProcess(commandLine);
+        OptionProcessor optionProcessor = getOptionProcessor();
+        if (optionProcessor != null) {
+            optionProcessor.postProcess(commandLine, this);
+        }
+        postProcessInternal(commandLine);
         if (commandLine.hasOption(this)) {
-            if (argument != null) {
-                argument.postProcess(commandLine, this);
-            }
-            if (group != null) {
-                group.postProcess(commandLine);
-            }
+            postProcessArgument(commandLine);
+            postProcessGroup(commandLine);
+        }
+    }
+
+    protected void postProcessArgument(CommandLine commandLine) {
+        if (argument != null) {
+            argument.postProcess(commandLine, this);
+        }
+    }
+
+    protected void postProcessGroup(CommandLine commandLine) {
+        if (group != null) {
+            group.postProcess(commandLine);
         }
     }
 

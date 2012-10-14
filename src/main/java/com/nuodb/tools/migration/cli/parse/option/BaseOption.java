@@ -31,6 +31,7 @@ public abstract class BaseOption implements Option {
     private String name;
     private String description;
     private boolean required;
+    private OptionProcessor optionProcessor;
     private Set<Trigger> triggers = new HashSet<Trigger>();
 
     protected BaseOption() {
@@ -84,6 +85,16 @@ public abstract class BaseOption implements Option {
     }
 
     @Override
+    public OptionProcessor getOptionProcessor() {
+        return optionProcessor;
+    }
+
+    @Override
+    public void setOptionProcessor(OptionProcessor optionProcessor) {
+        this.optionProcessor = optionProcessor;
+    }
+
+    @Override
     public void addTrigger(Trigger trigger) {
         triggers.add(trigger);
     }
@@ -118,18 +129,38 @@ public abstract class BaseOption implements Option {
 
     @Override
     public void preProcess(CommandLine commandLine, ListIterator<String> arguments) {
+        preProcessInternal(commandLine, arguments);
+        OptionProcessor optionProcessor = getOptionProcessor();
+        if (optionProcessor != null) {
+            optionProcessor.preProcess(commandLine, this, arguments);
+        }
+    }
+
+    protected void preProcessInternal(CommandLine commandLine, ListIterator<String> arguments) {
+    }
+
+    @Override
+    public void process(CommandLine commandLine, ListIterator<String> arguments) {
+        processInternal(commandLine, arguments);
+        OptionProcessor optionProcessor = getOptionProcessor();
+        if (optionProcessor != null) {
+            optionProcessor.process(commandLine, this, arguments);
+        }
+    }
+
+    protected void processInternal(CommandLine commandLine, ListIterator<String> arguments) {
     }
 
     @Override
     public void postProcess(CommandLine commandLine) {
-        doBind(commandLine);
-        doValidate(commandLine);
+        postProcessInternal(commandLine);
+        OptionProcessor optionProcessor = getOptionProcessor();
+        if (optionProcessor != null) {
+            optionProcessor.postProcess(commandLine, this);
+        }
     }
 
-    protected void doBind(CommandLine commandLine) {
-    }
-
-    protected void doValidate(CommandLine commandLine) {
+    protected void postProcessInternal(CommandLine commandLine) {
         if (isRequired() && !commandLine.hasOption(this)) {
             throw new OptionException(this, String.format("Missing required option %1$s", getName()));
         }

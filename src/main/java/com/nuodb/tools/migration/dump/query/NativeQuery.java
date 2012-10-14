@@ -25,26 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.dump.query;
 
-public class QuerySpec {
+/**
+ * @author Sergey Bushik
+ */
+public class NativeQuery implements Query {
 
-    private String name;
-    private String statement;
+    private String query;
 
-    public String getName() {
-        return name;
+    public NativeQuery(String query) {
+        this.query = query;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public String toQueryString() {
+        return query;
     }
 
-    public String getStatement() {
-        return statement;
-    }
-
-    public void setStatement(String statement) {
-        this.statement = statement;
+    @Override
+    public String toString() {
+        return toQueryString();
     }
 }

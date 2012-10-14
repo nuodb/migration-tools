@@ -77,7 +77,7 @@ public class Command extends BaseContainer {
     }
 
     @Override
-    public void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    public void processInternal(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
         if (canProcess(commandLine, argument)) {
             commandLine.addOption(this);

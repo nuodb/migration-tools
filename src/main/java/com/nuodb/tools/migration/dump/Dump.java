@@ -29,12 +29,12 @@ package com.nuodb.tools.migration.dump;
 
 import com.nuodb.tools.migration.dump.output.OutputFormat;
 import com.nuodb.tools.migration.dump.output.XmlOutputFormat;
+import com.nuodb.tools.migration.dump.query.NativeQueryBuilder;
 import com.nuodb.tools.migration.dump.query.Query;
 import com.nuodb.tools.migration.dump.query.SelectQuery;
-import com.nuodb.tools.migration.dump.query.StatementQuery;
+import com.nuodb.tools.migration.dump.query.SelectQueryBuilder;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
-import com.nuodb.tools.migration.jdbc.metamodel.Column;
 import com.nuodb.tools.migration.jdbc.metamodel.Database;
 import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
@@ -66,13 +66,13 @@ public class Dump {
     public void write(DumpSpec dumpSpec) throws SQLException {
         // TODO: 1) transaction context should be created / obtained ?
         // TODO: 2) statistics event listener reference to publish events to
-        ConnectionSpec spec = dumpSpec.getConnectionSpec();
-        ConnectionProvider provider = getConnectionProvider(spec);
-        Connection connection = provider.getConnection();
+        ConnectionSpec connectionSpec = dumpSpec.getConnectionSpec();
+        ConnectionProvider connectionProvider = getConnectionProvider(connectionSpec);
+        Connection connection = connectionProvider.getConnection();
         try {
-            write(dumpSpec, connection, spec.getCatalog(), spec.getSchema());
+            write(dumpSpec, connection, connectionSpec.getCatalog(), connectionSpec.getSchema());
         } finally {
-            provider.closeConnection(connection);
+            connectionProvider.closeConnection(connection);
         }
     }
 
@@ -85,20 +85,20 @@ public class Dump {
         Database database = introspector.introspect();
         List<Query> queries = createQueries(database, dumpSpec);
         for (Query query : queries) {
-            PreparedStatement statement = connection.prepareStatement(query.toQueryString());
-            if (log.isDebugEnabled()) {
-                log.debug(String.format("Executing statement %1$s", query.toQueryString()));
-            }
-            // -table.(*)
-            // -table.(*).filter=<argument>
-            // -column.(*).(*)=<argument>
-            ResultSet resultSet = statement.executeQuery();
             // TODO: create & configure dump output based on the provided output spec
             OutputFormat format = new XmlOutputFormat();
+            if (log.isTraceEnabled()) {
+                log.trace(String.format("Writing dump with %1$s", format.getClass().getName()));
+            }
             format.setOutputStream(System.out);
             format.setAttributes(dumpSpec.getOutputSpec().getAttributes());
             format.setJdbcTypeExtractor(getJdbcTypeExtractor());
             format.init();
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Preparing SQL query %1$s", query.toQueryString()));
+            }
+            PreparedStatement statement = connection.prepareStatement(query.toQueryString());
+            ResultSet resultSet = statement.executeQuery();
             try {
                 format.outputBegin(resultSet);
                 while (resultSet.next()) {
@@ -121,65 +121,43 @@ public class Dump {
     }
 
     protected List<Query> createQueries(Database database, DumpSpec dumpSpec) {
-        Collection<Table> tables = database.listTables();
         List<Query> queries = new ArrayList<Query>();
-        Collection<TableSpec> tableSpecs = dumpSpec.getTableSpecs();
-        if (tableSpecs != null) {
-            if (tableSpecs.isEmpty()) {
+        Collection<SelectQuerySpec> selectQuerySpecs = dumpSpec.getSelectQuerySpecs();
+        if (selectQuerySpecs != null) {
+            Collection<Table> tables = database.listTables();
+            if (selectQuerySpecs.isEmpty()) {
                 queries.addAll(createSelectQueries(tables, null));
             } else {
-                for (TableSpec tableSpec : tableSpecs) {
-                    queries.addAll(createSelectQueries(tables, tableSpec));
+                for (SelectQuerySpec selectQuerySpec : selectQuerySpecs) {
+                    queries.addAll(createSelectQueries(tables, selectQuerySpec));
                 }
             }
         }
-        Collection<QuerySpec> querySpecs = dumpSpec.getQuerySpecs();
-        if (querySpecs != null) {
-            for (QuerySpec querySpec : querySpecs) {
-                queries.add(createStatementQuery(querySpec));
+        Collection<NativeQuerySpec> nativeQuerySpecs = dumpSpec.getNativeQuerySpecs();
+        if (nativeQuerySpecs != null) {
+            for (NativeQuerySpec nativeQuerySpec : nativeQuerySpecs) {
+                NativeQueryBuilder nativeQueryBuilder = new NativeQueryBuilder();
+                nativeQueryBuilder.setQuery(nativeQuerySpec.getQuery());
+                queries.add(nativeQueryBuilder.build());
             }
         }
         return queries;
     }
 
-    protected List<Query> createSelectQueries(Collection<Table> tables, TableSpec tableSpec) {
-        List<Query> selectQueries = new ArrayList<Query>();
-        String tableName = tableSpec != null ? tableSpec.getName() : null;
+    protected List<SelectQuery> createSelectQueries(Collection<Table> tables, SelectQuerySpec selectQuerySpec) {
+        List<SelectQuery> selectQueries = new ArrayList<SelectQuery>();
+        String tableName = selectQuerySpec != null ? selectQuerySpec.getTable() : null;
         for (Table table : tables) {
             if (tableName == null || tableName.equals(table.getName().value())) {
-                selectQueries.add(createSelectQuery(table, tableSpec));
+                SelectQueryBuilder selectQueryBuilder = new SelectQueryBuilder();
+                selectQueryBuilder.setTable(table);
+                if (selectQuerySpec != null) {
+                    selectQueryBuilder.setColumns(selectQuerySpec.getColumns());
+                    selectQueryBuilder.setFilter(selectQuerySpec.getFilter());
+                }
+                selectQueries.add(selectQueryBuilder.build());
             }
         }
         return selectQueries;
-    }
-
-    protected Query createSelectQuery(Table table, TableSpec tableSpec) {
-        SelectQuery selectQuery = new SelectQuery();
-        List<ColumnSpec> columnSpecs = tableSpec != null ? tableSpec.getColumnSpecs() : null;
-        Collection<Column> columns;
-        if (columnSpecs == null || columnSpecs.isEmpty()) {
-            columns = table.listColumns();
-        } else {
-            columns = new ArrayList<Column>();
-            for (ColumnSpec columnSpec : columnSpecs) {
-                for (Column column : table.listColumns()) {
-                    if (columnSpec.getName().equals(column.getName().value())) {
-                        columns.add(column);
-                    }
-                }
-            }
-        }
-        for (Column column : columns) {
-            selectQuery.addColumn(column);
-        }
-        selectQuery.addTable(table);
-        if (tableSpec != null && tableSpec.getFilter() != null) {
-            selectQuery.addCondition(tableSpec.getFilter());
-        }
-        return selectQuery;
-    }
-
-    protected Query createStatementQuery(QuerySpec querySpec) {
-        return new StatementQuery(querySpec.getStatement());
     }
 }

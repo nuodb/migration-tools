@@ -65,21 +65,21 @@ public class XmlPersisterBuilder implements XmlConstants {
         builder.addRegistry(HANDLERS_REGISTRY);
         XmlPersister persister = builder.build();
 
-        MigrationSpec migration = new MigrationSpec();
+        MigrationSpec migrationSpec = new MigrationSpec();
         DriverManagerConnectionSpec connection = new DriverManagerConnectionSpec();
         connection.setId("mysql");
         connection.setDriver("com.mysql.jdbc.Driver");
         connection.setUrl("jdbc:mysql://localhost:3306/test");
         connection.setUsername("root");
-        migration.setConnectionSpecs(Arrays.asList(connection));
+        migrationSpec.setConnectionSpecs(Arrays.asList(connection));
 
 
         System.out.println("Writing migration:");
-        persister.write(migration, System.out);
+        persister.write(migrationSpec, System.out);
 
         System.out.println("\n");
         System.out.println("Reading migration:");
-        migration = persister.read(MigrationSpec.class,
+        migrationSpec = persister.read(MigrationSpec.class,
                 new ByteArrayInputStream((
                         "<?xml version=\"1.0\"?>\n" +
                                 "<migration xmlns=\"http://nuodb.com/schema/migration\">\n" +
@@ -87,6 +87,6 @@ public class XmlPersisterBuilder implements XmlConstants {
                                 "   <connection id=\"mysql\" type=\"jdbc\"/>\n" +
                                 "   <connection id=\"\" type=\"jdbc\"/>\n" +
                                 "</migration>").getBytes()));
-        System.out.println(migration);
+        System.out.println(migrationSpec);
     }
 }

@@ -120,6 +120,14 @@ public class ArgumentImpl extends BaseOption implements Argument {
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments, Option option) {
+        processInternal(commandLine, arguments, option);
+        OptionProcessor optionProcessor = getOptionProcessor();
+        if (optionProcessor != null) {
+            optionProcessor.process(commandLine, this, arguments);
+        }
+    }
+
+    protected void processInternal(CommandLine commandLine, ListIterator<String> arguments, Option option) {
         int count = commandLine.getOptionValues(option).size();
         while (arguments.hasNext() && (count < maximum)) {
             String value = arguments.next();
@@ -153,24 +161,19 @@ public class ArgumentImpl extends BaseOption implements Argument {
 
     @Override
     public void postProcess(CommandLine commandLine, Option option) throws OptionException {
-        doBind(commandLine, option);
-        doValidate(commandLine, option);
+        postProcessInternal(commandLine, option);
+        OptionProcessor optionProcessor = getOptionProcessor();
+        if (optionProcessor != null) {
+            optionProcessor.postProcess(commandLine, this);
+        }
     }
 
     @Override
-    protected void doBind(CommandLine commandLine) {
-        doBind(commandLine, this);
+    protected void postProcessInternal(CommandLine commandLine) {
+        postProcessInternal(commandLine, this);
     }
 
-    protected void doBind(CommandLine commandLine, Option option) {
-    }
-
-    @Override
-    protected void doValidate(CommandLine commandLine) {
-        doValidate(commandLine, this);
-    }
-
-    protected void doValidate(CommandLine commandLine, Option option) {
+    protected void postProcessInternal(CommandLine commandLine, Option option) {
         List values = commandLine.getValues(option);
         int minimum = getMinimum();
         if (values.size() < minimum) {

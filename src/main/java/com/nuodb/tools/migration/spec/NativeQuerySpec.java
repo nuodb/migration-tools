@@ -2,10 +2,10 @@
  * Copyright (c) 2012, NuoDB, Inc.
  * All rights reserved.
  *
- * Redistribution and use in connectionSpec and binary forms, with or without
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *     * Redistributions of connectionSpec code must retain the above copyright
+ *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
@@ -27,48 +27,18 @@
  */
 package com.nuodb.tools.migration.spec;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 /**
  * @author Sergey Bushik
  */
-public class DumpSpec extends TaskSpecBase {
+public class NativeQuerySpec {
+    
+    private String query;
 
-    private ConnectionSpec connectionSpec;
-    private Collection<SelectQuerySpec> selectQuerySpecs = new ArrayList<SelectQuerySpec>();
-    private Collection<NativeQuerySpec> nativeQuerySpecs = new ArrayList<NativeQuerySpec>();
-    private OutputSpec outputSpec;
-
-    public ConnectionSpec getConnectionSpec() {
-        return connectionSpec;
+    public String getQuery() {
+        return query;
     }
 
-    public void setConnectionSpec(ConnectionSpec connectionSpec) {
-        this.connectionSpec = connectionSpec;
-    }
-
-    public Collection<SelectQuerySpec> getSelectQuerySpecs() {
-        return selectQuerySpecs;
-    }
-
-    public void setSelectQuerySpecs(Collection<SelectQuerySpec> selectQuerySpecs) {
-        this.selectQuerySpecs = selectQuerySpecs;
-    }
-
-    public Collection<NativeQuerySpec> getNativeQuerySpecs() {
-        return nativeQuerySpecs;
-    }
-
-    public void setNativeQuerySpecs(Collection<NativeQuerySpec> nativeQuerySpecs) {
-        this.nativeQuerySpecs = nativeQuerySpecs;
-    }
-
-    public OutputSpec getOutputSpec() {
-        return outputSpec;
-    }
-
-    public void setOutputSpec(OutputSpec outputSpec) {
-        this.outputSpec = outputSpec;
+    public void setQuery(String query) {
+        this.query = query;
     }
 }

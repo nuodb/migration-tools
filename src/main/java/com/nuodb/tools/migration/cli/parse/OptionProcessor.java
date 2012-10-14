@@ -25,26 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.query;
+package com.nuodb.tools.migration.cli.parse;
+
+import java.util.ListIterator;
 
 /**
  * @author Sergey Bushik
  */
-public class StatementQuery implements Query {
+public interface OptionProcessor {
 
-    private String statement;
+    void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments);
 
-    public StatementQuery(String statement) {
-        this.statement = statement;
-    }
+    void process(CommandLine commandLine, Option option, ListIterator<String> arguments);
 
-    @Override
-    public String toQueryString() {
-        return statement;
-    }
-
-    @Override
-    public String toString() {
-        return toQueryString();
-    }
+    void postProcess(CommandLine commandLine, Option option);
 }

@@ -29,13 +29,10 @@ package com.nuodb.tools.migration.cli.run;
 
 import com.nuodb.tools.migration.cli.CliOptions;
 import com.nuodb.tools.migration.cli.CliResources;
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Option;
-import com.nuodb.tools.migration.cli.parse.OptionException;
+import com.nuodb.tools.migration.cli.parse.*;
 import com.nuodb.tools.migration.cli.parse.option.OptionFormat;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.cli.parse.option.RegexOption;
-import com.nuodb.tools.migration.cli.parse.option.RegexTrigger;
 import com.nuodb.tools.migration.i18n.Resources;
 import com.nuodb.tools.migration.spec.*;
 
@@ -157,7 +154,7 @@ public class CliOptionsSupport implements CliResources, CliOptions {
     /**
      * Table option handles -table=users, -table=roles and stores it values the option in the  command line.
      */
-    public Option createTableGroup(OptionToolkit optionToolkit) {
+    public Option createSelectQueryGroup(OptionToolkit optionToolkit) {
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
         Option table = optionToolkit.newOption().
                 withName(TABLE_OPTION).
@@ -169,12 +166,13 @@ public class CliOptionsSupport implements CliResources, CliOptions {
                                 withRequired(true).build()
                 ).build();
 
-        TableFilterOption tableFilter = new TableFilterOption();
+        RegexOption tableFilter = new RegexOption();
         tableFilter.setName(TABLE_FILTER_OPTION);
         tableFilter.setDescription(resources.getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
         tableFilter.setPrefixes(optionFormat.getOptionPrefixes());
         tableFilter.setArgumentSeparator(optionFormat.getArgumentSeparator());
         tableFilter.addRegex(TABLE_FILTER_OPTION, 1);
+        tableFilter.setOptionProcessor(new ContainerArgumentUpdater());
         tableFilter.setArgument(
                 optionToolkit.newArgument().
                         withName(resources.getMessage(TABLE_FILTER_ARGUMENT_NAME)).
@@ -213,20 +211,20 @@ public class CliOptionsSupport implements CliResources, CliOptions {
         return output;
     }
 
-    public Collection<TableSpec> parseTableGroup(CommandLine commandLine, Option option) {
-        Map<String, TableSpec> tableSpecsMapping = new HashMap<String, TableSpec>();
+    public Collection<SelectQuerySpec> parseSelectQueryGroup(CommandLine commandLine, Option option) {
+        Map<String, SelectQuerySpec> tableQueryMapping = new HashMap<String, SelectQuerySpec>();
         for (String table : commandLine.<String>getValues(TABLE_OPTION)) {
-            tableSpecsMapping.put(table, new TableSpec(table));
+            tableQueryMapping.put(table, new SelectQuerySpec(table));
         }
         for (Iterator<String> iterator = commandLine.<String>getValues(TABLE_FILTER_OPTION).iterator(); iterator.hasNext(); ) {
             String name = iterator.next();
-            TableSpec tableSpec = tableSpecsMapping.get(name);
-            if (tableSpec == null) {
-                tableSpecsMapping.put(name, tableSpec = new TableSpec(name));
+            SelectQuerySpec selectQuerySpec = tableQueryMapping.get(name);
+            if (selectQuerySpec == null) {
+                tableQueryMapping.put(name, selectQuerySpec = new SelectQuerySpec(name));
             }
-            tableSpec.setFilter(iterator.next());
+            selectQuerySpec.setFilter(iterator.next());
         }
-        return tableSpecsMapping.values();
+        return tableQueryMapping.values();
     }
 
     /**
@@ -254,14 +252,29 @@ public class CliOptionsSupport implements CliResources, CliOptions {
         return map;
     }
 
-    class TableFilterOption extends RegexOption {
+    /**
+     * Updates maximum value of container's argument option. Used together with RegexOption when part of option name
+     * matching regular expression is stored in the option values and option's argument.
+     */
+    public static class ContainerArgumentUpdater implements OptionProcessor {
 
         private int count = 0;
 
         @Override
-        protected void doProcess(CommandLine commandLine, RegexTrigger trigger, String argument) {
-            super.doProcess(commandLine, trigger, argument);
-            getArgument().setMaximum(++count * 2);
+        public void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments) {
+        }
+
+        @Override
+        public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
+            Container container = (Container) option;
+            Argument argument = container.getArgument();
+            if (argument != null) {
+                argument.setMaximum(++count * 2);
+            }
+        }
+
+        @Override
+        public void postProcess(CommandLine commandLine, Option option) {
         }
     }
 }

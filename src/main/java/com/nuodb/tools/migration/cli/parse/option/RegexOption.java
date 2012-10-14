@@ -33,7 +33,6 @@ import com.nuodb.tools.migration.match.AntRegexCompiler;
 import com.nuodb.tools.migration.match.Match;
 import com.nuodb.tools.migration.match.RegexCompiler;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +65,7 @@ public class RegexOption extends OptionImpl {
     public void addRegex(String regex, int group) {
         for (String prefix : getPrefixes()) {
             RegexTrigger trigger = new RegexTrigger(regexCompiler.compile(prefix + regex));
-            triggersGroups.put(trigger, group);
+            getTriggersGroups().put(trigger, group);
             addTrigger(trigger);
         }
     }
@@ -79,16 +78,16 @@ public class RegexOption extends OptionImpl {
      * @param trigger     which was triggered.
      */
     @Override
-    protected void doProcess(CommandLine commandLine, Trigger trigger, String argument) {
-        super.doProcess(commandLine, trigger, argument);
+    protected void processInternal(CommandLine commandLine, Trigger trigger, String argument) {
+        super.processInternal(commandLine, trigger, argument);
         if (trigger instanceof RegexTrigger) {
-            doProcess(commandLine, (RegexTrigger) trigger, argument);
+            processInternal(commandLine, (RegexTrigger) trigger, argument);
         }
     }
 
-    protected void doProcess(CommandLine commandLine, RegexTrigger trigger, String argument) {
+    protected void processInternal(CommandLine commandLine, RegexTrigger trigger, String argument) {
         Match match = trigger.getRegex().exec(argument);
-        Integer group = triggersGroups.get(trigger);
+        Integer group = getTriggersGroups().get(trigger);
         String[] matches = match.matches();
         if (group != null && matches.length >= group) {
             commandLine.addValue(this, matches[group]);
@@ -96,6 +95,6 @@ public class RegexOption extends OptionImpl {
     }
 
     public Map<RegexTrigger, Integer> getTriggersGroups() {
-        return Collections.unmodifiableMap(triggersGroups);
+        return triggersGroups;
     }
 }

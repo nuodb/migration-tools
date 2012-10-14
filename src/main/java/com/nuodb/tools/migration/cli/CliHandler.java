@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -72,6 +73,9 @@ public class CliHandler implements CliResources, CliOptions {
     public void handle(String[] arguments) throws OptionException {
         Option root = createOption();
         try {
+            if (log.isTraceEnabled()) {
+                log.trace(String.format("Parsing cli arguments: %1$s", Arrays.asList(arguments)));
+            }
             OptionSet options = new ParserImpl().parse(arguments, root);
             handleOptionSet(options, root);
         } catch (OptionException exception) {
@@ -117,24 +121,27 @@ public class CliHandler implements CliResources, CliOptions {
     }
 
     protected void handleOptionSet(OptionSet options, Option root) {
+        if (log.isTraceEnabled()) {
+            log.trace("Options successfully parsed");
+        }
         if (options.hasOption(HELP_OPTION)) {
             if (log.isTraceEnabled()) {
-                log.trace("Handling --help");
+                log.trace("Handling --help option");
             }
             handleHelp(options, root);
         } else if (options.hasOption(COMMAND_OPTION)) {
             CliRun runnable = options.getValue(COMMAND_OPTION);
             if (log.isTraceEnabled()) {
-                log.trace(String.format("Handling %1$s", runnable.getCommand()));
+                log.trace(String.format("Running %1$s command", runnable.getCommand()));
             }
             runnable.run();
         } else if (options.hasOption(CONFIG_OPTION)) {
             if (log.isTraceEnabled()) {
-                log.trace(String.format("Handling --config %1$s", options.getValue("config")));
+                log.trace(String.format("Handling --config %1$s option", options.getValue("config")));
             }
         } else if (options.hasOption(LIST_OPTION)) {
             if (log.isTraceEnabled()) {
-                log.trace(String.format("Handling --list"));
+                log.trace(String.format("Handling --list option"));
             }
             Collection<String> commands = cliRunFactoryLookup.getCommands();
             for (String command : commands) {
@@ -152,7 +159,7 @@ public class CliHandler implements CliResources, CliOptions {
                 formatter.setOption(cliRunFactory.createCliRun(optionToolkit));
                 formatter.setExecutable(String.format(MIGRATION_EXECUTABLE_COMMAND, command));
             } else {
-                // TODO: process command not found
+                // TODO: command not found
             }
         } else {
             formatter.setOption(root);

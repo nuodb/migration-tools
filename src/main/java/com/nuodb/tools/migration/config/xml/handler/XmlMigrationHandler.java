@@ -46,19 +46,19 @@ public class XmlMigrationHandler extends XmlReadWriteHandlerBase<MigrationSpec> 
     }
 
     @Override
-    public boolean write(MigrationSpec migration, OutputNode output, XmlWriteContext context) throws Exception {
+    public boolean write(MigrationSpec migrationSpec, OutputNode output, XmlWriteContext context) throws Exception {
         output.getNamespaces().setReference(MIGRATION_NAMESPACE);
-        for (ConnectionSpec connection : migration.getConnectionSpecs()) {
+        for (ConnectionSpec connection : migrationSpec.getConnectionSpecs()) {
             context.write(connection, ConnectionSpec.class, output.getChild(CONNECTION_ELEMENT));
         }
-        for (TaskSpec task : migration.getTaskSpecs()) {
+        for (TaskSpec task : migrationSpec.getTaskSpecs()) {
             context.write(task, TaskSpec.class, output.getChild(TASK_ELEMENT));
         }
         return true;
     }
 
     @Override
-    protected void read(InputNode input, MigrationSpec migration, XmlReadContext context) throws Exception {
+    protected void read(InputNode input, MigrationSpec migrationSpec, XmlReadContext context) throws Exception {
         List<ConnectionSpec> connections = new ArrayList<ConnectionSpec>();
         List<TaskSpec> tasks = new ArrayList<TaskSpec>();
         InputNode node;
@@ -72,7 +72,7 @@ public class XmlMigrationHandler extends XmlReadWriteHandlerBase<MigrationSpec> 
                 tasks.add(context.read(node, TaskSpec.class));
             }
         }
-        migration.setConnectionSpecs(connections);
-        migration.setTaskSpecs(tasks);
+        migrationSpec.setConnectionSpecs(connections);
+        migrationSpec.setTaskSpecs(tasks);
     }
 }

@@ -88,6 +88,16 @@ public abstract class CliRunAdapter implements CliRun {
     }
 
     @Override
+    public OptionProcessor getOptionProcessor() {
+        return option.getOptionProcessor();
+    }
+
+    @Override
+    public void setOptionProcessor(OptionProcessor optionProcessor) {
+        option.setOptionProcessor(optionProcessor);
+    }
+
+    @Override
     public Set<String> getPrefixes() {
         return option.getPrefixes();
     }
