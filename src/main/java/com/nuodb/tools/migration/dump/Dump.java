@@ -27,14 +27,17 @@
  */
 package com.nuodb.tools.migration.dump;
 
-import com.nuodb.tools.migration.dump.output.CsvOutputFormat;
 import com.nuodb.tools.migration.dump.output.OutputFormat;
+import com.nuodb.tools.migration.dump.output.XmlOutputFormat;
 import com.nuodb.tools.migration.dump.query.Query;
 import com.nuodb.tools.migration.dump.query.SelectQuery;
 import com.nuodb.tools.migration.dump.query.StatementQuery;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
-import com.nuodb.tools.migration.jdbc.metamodel.*;
+import com.nuodb.tools.migration.jdbc.metamodel.Column;
+import com.nuodb.tools.migration.jdbc.metamodel.Database;
+import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
+import com.nuodb.tools.migration.jdbc.metamodel.Table;
 import com.nuodb.tools.migration.jdbc.type.extract.Jdbc4TypeExtractor;
 import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
 import com.nuodb.tools.migration.spec.*;
@@ -89,10 +92,9 @@ public class Dump {
             // -table.(*)
             // -table.(*).filter=<argument>
             // -column.(*).(*)=<argument>
-
             ResultSet resultSet = statement.executeQuery();
             // TODO: create & configure dump output based on the provided output spec
-            OutputFormat format = new CsvOutputFormat();
+            OutputFormat format = new XmlOutputFormat();
             format.setOutputStream(System.out);
             format.setAttributes(dumpSpec.getOutputSpec().getAttributes());
             format.setJdbcTypeExtractor(getJdbcTypeExtractor());

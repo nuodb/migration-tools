@@ -63,7 +63,7 @@ public class CsvOutputFormat extends OutputFormatBase {
     }
 
     @Override
-    public void outputRow(ResultSet resultSet) throws IOException, SQLException {
+    protected void doOutputRow(ResultSet resultSet) throws IOException, SQLException {
         output.write(formatColumns(resultSet));
     }
 

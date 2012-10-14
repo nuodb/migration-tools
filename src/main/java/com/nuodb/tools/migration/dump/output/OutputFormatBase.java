@@ -90,6 +90,13 @@ public abstract class OutputFormatBase implements OutputFormat {
     }
 
     @Override
+    public void outputRow(ResultSet resultSet) throws IOException, SQLException {
+        doOutputRow(resultSet);
+    }
+
+    protected abstract void doOutputRow(ResultSet resultSet) throws IOException, SQLException;
+
+    @Override
     public final void outputEnd(ResultSet resultSet) throws IOException, SQLException {
         doOutputEnd(resultSet);
     }

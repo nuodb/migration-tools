@@ -15,16 +15,16 @@ import static org.mockito.Mockito.*;
 
 public class CliDumpFactoryTest {
 
-    private OptionToolkit optionToolkitMock;
+    private OptionToolkit optionToolkit;
 
     @Before
     public void setUp() throws Exception {
-        optionToolkitMock = mock(OptionToolkit.class);
+        optionToolkit = mock(OptionToolkit.class);
         ArgumentBuilder argumentBuilder = mock(ArgumentBuilder.class);
         GroupBuilder groupBuilder = mock(GroupBuilder.class);
         OptionBuilder optionBuilder = mock(OptionBuilder.class);
 
-        when(optionToolkitMock.newOption()).thenReturn(optionBuilder);
+        when(optionToolkit.newOption()).thenReturn(optionBuilder);
         when(optionBuilder.withId(anyInt())).thenReturn(optionBuilder);
         when(optionBuilder.withName(anyString())).thenReturn(optionBuilder);
         when(optionBuilder.withDescription(anyString())).thenReturn(optionBuilder);
@@ -32,14 +32,14 @@ public class CliDumpFactoryTest {
         when(optionBuilder.withAlias(anyString())).thenReturn(optionBuilder);
         when(optionBuilder.withArgument(any(Argument.class))).thenReturn(optionBuilder);
 
-        when(optionToolkitMock.newArgument()).thenReturn(argumentBuilder);
+        when(optionToolkit.newArgument()).thenReturn(argumentBuilder);
         when(argumentBuilder.withId(anyInt())).thenReturn(argumentBuilder);
         when(argumentBuilder.withMaximum(anyInt())).thenReturn(argumentBuilder);
         when(argumentBuilder.withMinimum(anyInt())).thenReturn(argumentBuilder);
         when(argumentBuilder.withName(anyString())).thenReturn(argumentBuilder);
         when(argumentBuilder.withRequired(anyBoolean())).thenReturn(argumentBuilder);
 
-        when(optionToolkitMock.newGroup()).thenReturn(groupBuilder);
+        when(optionToolkit.newGroup()).thenReturn(groupBuilder);
         when(groupBuilder.withId(anyInt())).thenReturn(groupBuilder);
         when(groupBuilder.withMinimum(anyInt())).thenReturn(groupBuilder);
         when(groupBuilder.withOption(any(Option.class))).thenReturn(groupBuilder);
@@ -51,8 +51,8 @@ public class CliDumpFactoryTest {
     public void testCreateCliRun() throws Exception {
         final CliDumpFactory cliDumpFactory = new CliDumpFactory();
         final CliDumpFactory spy = spy(cliDumpFactory);
-        spy.createCliRun(optionToolkitMock);
-        verify(spy, times(1)).createOutputGroup(optionToolkitMock);
-        verify(spy, times(1)).createSourceGroup(optionToolkitMock);
+        spy.createCliRun(optionToolkit);
+        verify(spy, times(1)).createOutputGroup(optionToolkit);
+        verify(spy, times(1)).createSourceGroup(optionToolkit);
     }
 }
