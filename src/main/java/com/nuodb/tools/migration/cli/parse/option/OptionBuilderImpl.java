@@ -27,9 +27,7 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
-import com.nuodb.tools.migration.cli.parse.Argument;
-import com.nuodb.tools.migration.cli.parse.Group;
-import com.nuodb.tools.migration.cli.parse.Option;
+import com.nuodb.tools.migration.cli.parse.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -44,12 +42,15 @@ public class OptionBuilderImpl implements OptionBuilder {
     protected String description;
     protected boolean required;
     protected Argument argument;
-    protected Group children;
+    protected Group group;
     protected Set<String> aliases = new HashSet<String>();
-    private OptionFormat optionFormat;
+    protected Set<Trigger> triggers = new HashSet<Trigger>();
+    private Set<String> prefixes;
+    private String argumentSeparator;
 
     public OptionBuilderImpl(OptionFormat optionFormat) {
-        this.optionFormat = optionFormat;
+        this.prefixes = optionFormat.getOptionPrefixes();
+        this.argumentSeparator = optionFormat.getArgumentSeparator();
     }
 
     @Override
@@ -82,8 +83,8 @@ public class OptionBuilderImpl implements OptionBuilder {
         return this;
     }
 
-    public OptionBuilder withChildren(Group children) {
-        this.children = children;
+    public OptionBuilder withGroup(Group group) {
+        this.group = group;
         return this;
     }
 
@@ -94,8 +95,38 @@ public class OptionBuilderImpl implements OptionBuilder {
     }
 
     @Override
+    public OptionBuilder withPrefixes(Set<String> prefixes) {
+        this.prefixes = prefixes;
+        return this;
+    }
+
+    @Override
+    public OptionBuilder withArgumentSeparator(String argumentSeparator) {
+        this.argumentSeparator = argumentSeparator;
+        return this;
+    }
+
+    @Override
+    public OptionBuilder withTrigger(Trigger trigger) {
+        triggers.add(trigger);
+        return this;
+    }
+
+    @Override
     public Option build() {
-        return new OptionImpl(id, name, description, required, children, argument,
-                optionFormat.getArgumentSeparator(), optionFormat.getOptionPrefixes(), aliases);
+        OptionImpl option = new OptionImpl();
+        option.setId(id);
+        option.setName(name);
+        option.setDescription(description);
+        option.setRequired(required);
+        option.setArgument(argument);
+        option.setArgumentSeparator(argumentSeparator);
+        option.setPrefixes(prefixes);
+        option.setAliases(aliases);
+        option.setGroup(group);
+        for (Trigger trigger : triggers) {
+            option.addTrigger(trigger);
+        }
+        return option;
     }
 }

@@ -42,6 +42,10 @@ public class OptionToolkit {
         this.optionFormat = optionFormat;
     }
 
+    public OptionFormat getOptionFormat() {
+        return optionFormat;
+    }
+
     public OptionBuilder newOption() {
         return new OptionBuilderImpl(optionFormat);
     }

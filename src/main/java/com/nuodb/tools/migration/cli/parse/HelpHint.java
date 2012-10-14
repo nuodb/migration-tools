@@ -52,7 +52,7 @@ public class HelpHint {
      */
     public static final HelpHint GROUP_OPTIONS = new HelpHint();
     /**
-     * Indicates that option arguments.properties should be included
+     * Indicates that option arguments should be included
      */
     public static final HelpHint GROUP_ARGUMENTS = new HelpHint();
     /**
@@ -60,21 +60,21 @@ public class HelpHint {
      */
     public static final HelpHint GROUP_OUTER = new HelpHint();
     /**
-     * Indicates that arguments.properties should be included numbered
+     * Indicates that arguments should be included numbered
      */
     public static final HelpHint ARGUMENT_NUMBERED = new HelpHint();
     /**
-     * Indicates that arguments.properties should be included bracketed
+     * Indicates that arguments should be included bracketed
      */
     public static final HelpHint ARGUMENT_BRACKETED = new HelpHint();
     /**
-     * Indicates that arguments.properties of parents should be included
+     * Indicates that arguments of parents should be included
      */
-    public static final HelpHint PARENT_ARGUMENT = new HelpHint();
+    public static final HelpHint CONTAINER_ARGUMENT = new HelpHint();
     /**
      * Indicates that children of parents should be included
      */
-    public static final HelpHint PARENT_CHILDREN = new HelpHint();
+    public static final HelpHint CONTAINER_GROUP = new HelpHint();
 
     public static Set<HelpHint> ALL_HINTS;
 

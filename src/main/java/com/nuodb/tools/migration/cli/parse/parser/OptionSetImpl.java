@@ -34,18 +34,18 @@ public abstract class OptionSetImpl implements OptionSet {
     }
 
     @Override
-    public List<Object> getValues(String trigger) {
-        return getValues(getOption(trigger), Collections.emptyList());
+    public <T> List<T> getValues(String trigger) {
+        return getValues(getOption(trigger), Collections.<T>emptyList());
     }
 
     @Override
-    public List<Object> getValues(String trigger, List<Object> defaultValues) {
+    public <T> List<T> getValues(String trigger, List<T> defaultValues) {
         return getValues(getOption(trigger), defaultValues);
     }
 
     @Override
-    public List<Object> getValues(Option option) {
-        return getValues(option, Collections.emptyList());
+    public <T> List<T> getValues(Option option) {
+        return getValues(option, Collections.<T>emptyList());
     }
 
     @Override

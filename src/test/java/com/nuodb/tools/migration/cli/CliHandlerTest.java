@@ -27,16 +27,13 @@ public class CliHandlerTest {
     public void setUp() throws Exception {
         handler = new CliHandler();
         optionToolkitMock = mock(OptionToolkit.class);
-
     }
 
     @Test
     public void testCreateOptions() throws Exception {
-
         OptionBuilder optionBuilder = mock(OptionBuilder.class);
         ArgumentBuilder argumentBuilder = mock(ArgumentBuilder.class);
         GroupBuilder groupBuilder = mock(GroupBuilder.class);
-
 
         when(optionToolkitMock.newOption()).thenReturn(optionBuilder);
         when(optionBuilder.withId(anyInt())).thenReturn(optionBuilder);
@@ -59,8 +56,7 @@ public class CliHandlerTest {
         when(groupBuilder.withName(anyString())).thenReturn(groupBuilder);
         when(groupBuilder.withRequired(anyBoolean())).thenReturn(groupBuilder);
 
-
-        final Group option = handler.createOption(optionToolkitMock);
+        final Group option = handler.createOption();
         verify(optionToolkitMock, times(2)).newArgument();
         verify(optionToolkitMock, times(3)).newOption();
         verify(optionToolkitMock, times(1)).newGroup();
@@ -70,8 +66,6 @@ public class CliHandlerTest {
         verify(optionBuilder, times(3)).build();
         verify(argumentBuilder, times(2)).build();
         verify(groupBuilder, times(1)).build();
-
-
     }
 
     @Test

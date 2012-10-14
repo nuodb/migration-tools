@@ -27,28 +27,45 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
-import com.nuodb.tools.migration.cli.parse.Argument;
+import com.nuodb.tools.migration.cli.parse.Trigger;
+import com.nuodb.tools.migration.match.Regex;
 
 /**
  * @author Sergey Bushik
  */
-public interface ArgumentBuilder {
+public class RegexTrigger implements Trigger {
 
-    ArgumentBuilder withId(int id);
+    private final Regex regex;
 
-    ArgumentBuilder withName(String name);
+    public RegexTrigger(Regex regex) {
+        this.regex = regex;
+    }
 
-    ArgumentBuilder withDescription(String description);
+    public Regex getRegex() {
+        return regex;
+    }
 
-    ArgumentBuilder withRequired(boolean required);
+    @Override
+    public boolean fire(String argument) {
+        return regex.test(argument);
+    }
 
-    ArgumentBuilder withMinimum(int minimum);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RegexTrigger that = (RegexTrigger) o;
+        if (regex != null ? !regex.equals(that.regex) : that.regex != null) return false;
+        return true;
+    }
 
-    ArgumentBuilder withMaximum(int maximum);
+    @Override
+    public int hashCode() {
+        return regex != null ? regex.hashCode() : 0;
+    }
 
-    ArgumentBuilder withDefaultValue(Object defaultValue);
-
-    Argument build();
-
-    ArgumentBuilder withValuesSeparator(String valuesSeparator);
+    @Override
+    public String toString() {
+        return regex.regex();
+    }
 }

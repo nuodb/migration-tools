@@ -150,12 +150,13 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     }
 
     @Override
-    public List<Object> getValues(Option option, List<Object> defaultValues) {
-        List<Object> values = this.values.get(option);
+    @SuppressWarnings("unchecked")
+    public <T> List<T> getValues(Option option, List<T> defaultValues) {
+        List<T> values = (List<T>) this.values.get(option);
         if (values == null || values.isEmpty()) {
-            values = this.defaultValues.get(option);
+            values = (List<T>) this.defaultValues.get(option);
         }
-        return values == null ? Collections.emptyList() : values;
+        return values == null ? Collections.<T>emptyList() : values;
     }
 
     @Override

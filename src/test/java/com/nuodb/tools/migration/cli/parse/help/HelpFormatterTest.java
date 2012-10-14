@@ -21,21 +21,21 @@ public class HelpFormatterTest {
 
     @Test
     public void testException() throws Exception {
-        final String testException = "Test exception";
+        final String message = "Test exception";
         final String divider = "/";
         final HelpFormatter spy = spy(formatter);
 
         final OptionException exception = mock(OptionException.class);
-        when(exception.getMessage()).thenReturn(testException);
+        when(exception.getMessage()).thenReturn(message);
         spy.setException(exception);
         spy.setDivider(divider);
 
         final Writer writer = mock(Writer.class);
 
         spy.exception(writer);
-        
+
         verify(spy).divider(writer);
-        verify(spy).line(writer, testException);
+        verify(spy).line(writer, message);
         verify(spy).line(writer, divider);
         verify(exception).getMessage();
     }

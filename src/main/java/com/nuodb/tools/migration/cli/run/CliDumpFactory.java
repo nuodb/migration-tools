@@ -30,7 +30,6 @@ package com.nuodb.tools.migration.cli.run;
 import com.nuodb.tools.migration.MigrationException;
 import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.dump.Dump;
 import com.nuodb.tools.migration.spec.DumpSpec;
@@ -38,43 +37,60 @@ import com.nuodb.tools.migration.spec.DumpSpec;
 import java.sql.SQLException;
 
 /**
+ * The Factory instantiates a {@link CliDump} which is a set of groups of options for source database connection spec
+ * {@link #createSourceGroup}, spec of output format & type via {@link #createOutputGroup}, table option {@link
+ * #createTableGroup} and after a validation is passed assembles command line option arguments into a {@link DumpSpec}
+ * object.
+ *
  * @author Sergey Bushik
  */
 public class CliDumpFactory extends CliOptionsSupport implements CliRunFactory, CliResources {
 
-    public static final String DUMP_COMMAND = "dump";
+    /**
+     * The "dump" literal command which is matched against the value on the command line. If matched the CliDump object
+     * is constructed with {@link #createCliRun(OptionToolkit)} method.
+     */
+    public static final String COMMAND = "dump";
 
     @Override
     public String getCommand() {
-        return DUMP_COMMAND;
+        return COMMAND;
     }
 
     @Override
     public CliRun createCliRun(OptionToolkit optionToolkit) {
-        return new CliDump(
-                optionToolkit.newGroup().
-                        withName(resources.getMessage(DUMP_GROUP_NAME)).
-                        withOption(createSourceGroup(optionToolkit)).
-                        withOption(createOutputGroup(optionToolkit)).
-                        withRequired(true).build()
-        );
+        return new CliDump(optionToolkit);
     }
 
+    /**
+     * An implementation of {@link CliRunAdapter} which assembles dump spec from provided
+     * command line after the validation is passed.
+     */
     class CliDump extends CliRunAdapter {
 
         private DumpSpec dumpSpec;
 
-        public CliDump(Option option) {
-            super(option, DUMP_COMMAND);
+        public CliDump(OptionToolkit optionToolkit) {
+            super(optionToolkit.newGroup()
+                    .withName(resources.getMessage(DUMP_GROUP_NAME))
+                    .withOption(createSourceGroup(optionToolkit))
+                    .withOption(createOutputGroup(optionToolkit))
+                    .withOption(createTableGroup(optionToolkit))
+                    .withRequired(true).build(),
+                    COMMAND);
         }
 
         @Override
-        protected void bind(CommandLine commandLine, Option option) {
+        protected void bind(CommandLine commandLine) {
             dumpSpec = new DumpSpec();
-            dumpSpec.setConnectionSpec(createSource(commandLine, option));
-            dumpSpec.setOutputSpec(createOutput(commandLine, option));
+            dumpSpec.setConnectionSpec(parseSourceGroup(commandLine, this));
+            dumpSpec.setOutputSpec(parseOutputGroup(commandLine, this));
+            dumpSpec.setTableSpecs(parseTableGroup(commandLine, this));
         }
 
+        /**
+         * Executes dump process
+         */
         @Override
         public void run() {
             try {

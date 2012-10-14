@@ -45,13 +45,13 @@ public class PatternMatch implements Match {
 
     @Override
     public boolean test() {
-        return matcher.matches();
+        return matcher.find();
     }
 
     @Override
     public String[] matches() {
         List<String> matches = new ArrayList<String>();
-        while (matcher.find()) {
+        if (matcher.matches()) {
             int count = matcher.groupCount();
             for (int index = 0; index <= count; index++) {
                 matches.add(matcher.group(index));

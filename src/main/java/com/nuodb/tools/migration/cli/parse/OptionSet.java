@@ -23,13 +23,13 @@ public interface OptionSet {
 
     Option getOption(String trigger);
 
-    List<Object> getValues(String trigger);
+    <T> List<T> getValues(String trigger);
 
-    List<Object> getValues(String trigger, List<Object> defaultValues);
+    <T> List<T> getValues(String trigger, List<T> defaultValues);
 
-    List<Object> getValues(Option option);
+    <T> List<T> getValues(Option option);
 
-    List<Object> getValues(Option option, List<Object> defaultValues);
+    <T> List<T> getValues(Option option, List<T> defaultValues);
 
     <T> T getValue(String trigger);
 

@@ -31,10 +31,14 @@ public class GroupImpl extends BaseOption implements Group {
 
     private int minimum;
     private int maximum;
+
     private List<Option> options = new ArrayList<Option>();
+    private Set<String> prefixes = new HashSet<String>();
     private List<Argument> arguments = new ArrayList<Argument>();
     private Map<Trigger, Option> triggers = new HashMap<Trigger, Option>();
-    private Set<String> prefixes = new HashSet<String>();
+
+    public GroupImpl() {
+    }
 
     public GroupImpl(int id, String name, String description, boolean required) {
         super(id, name, description, required);
@@ -54,8 +58,18 @@ public class GroupImpl extends BaseOption implements Group {
     }
 
     @Override
+    public void setMinimum(int minimum) {
+        this.minimum = minimum;
+    }
+
+    @Override
     public int getMaximum() {
         return maximum;
+    }
+
+    @Override
+    public void setMaximum(int maximum) {
+        this.maximum = maximum;
     }
 
     @Override
@@ -72,7 +86,7 @@ public class GroupImpl extends BaseOption implements Group {
     }
 
     @Override
-    public void addOptions(List<Option> options) {
+    public void addOptions(Collection<Option> options) {
         for (Option option : options) {
             addOption(option);
         }
@@ -142,6 +156,16 @@ public class GroupImpl extends BaseOption implements Group {
     }
 
     @Override
+    public void preProcess(CommandLine commandLine, ListIterator<String> arguments) {
+        for (Option option : this.options) {
+            option.preProcess(commandLine, arguments);
+        }
+        for (Argument argument : this.arguments) {
+            argument.preProcess(commandLine, arguments);
+        }
+    }
+
+    @Override
     @SuppressWarnings("StringEquality")
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
         String previous = null;
@@ -168,6 +192,7 @@ public class GroupImpl extends BaseOption implements Group {
     protected void processOption(CommandLine commandLine, ListIterator<String> arguments, String argument) {
         for (Option option : this.triggers.values()) {
             if (option.canProcess(commandLine, argument)) {
+                option.preProcess(commandLine, arguments);
                 option.process(commandLine, arguments);
                 break;
             }
@@ -177,6 +202,7 @@ public class GroupImpl extends BaseOption implements Group {
     protected void processArgument(CommandLine commandLine, ListIterator<String> arguments, String argument) {
         for (Option option : this.arguments) {
             if (option.canProcess(commandLine, argument)) {
+                option.preProcess(commandLine, arguments);
                 option.process(commandLine, arguments);
                 break;
             }
@@ -184,13 +210,13 @@ public class GroupImpl extends BaseOption implements Group {
     }
 
     @Override
-    public void validate(CommandLine commandLine) {
+    public void postProcess(CommandLine commandLine) {
         // number of options found
         int present = 0;
         // reference to first unexpected option
         Option unexpected = null;
         for (Option option : this.options) {
-            // if the child option is present then validate it
+            // if the child option is present then post process it
             if (commandLine.hasOption(option)) {
                 present++;
                 if (maximum != 0 && present > this.maximum) {
@@ -198,7 +224,7 @@ public class GroupImpl extends BaseOption implements Group {
                     break;
                 }
             }
-            option.validate(commandLine);
+            option.postProcess(commandLine);
         }
         // too many options
         if (unexpected != null) {
@@ -210,7 +236,7 @@ public class GroupImpl extends BaseOption implements Group {
         }
         // post execute each arguments.properties argument
         for (Argument argument : arguments) {
-            argument.validate(commandLine);
+            argument.postProcess(commandLine);
         }
     }
 

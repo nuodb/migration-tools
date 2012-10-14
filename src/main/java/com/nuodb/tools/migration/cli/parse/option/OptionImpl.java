@@ -36,15 +36,21 @@ import static com.nuodb.tools.migration.cli.parse.HelpHint.*;
 /**
  * @author Sergey Bushik
  */
-public class OptionImpl extends BaseParent {
+public class OptionImpl extends BaseContainer {
 
     private Set<String> prefixes;
     private Set<String> aliases;
 
+    public OptionImpl() {
+    }
+
+    public OptionImpl(int id, String name, String description, boolean required) {
+        super(id, name, description, required);
+    }
+
     public OptionImpl(int id, String name, String description, boolean required,
-                      Group children, Argument argument, String argumentSeparator,
                       Set<String> prefixes, Set<String> aliases) {
-        super(id, name, description, required, children, argument, argumentSeparator);
+        super(id, name, description, required);
         this.prefixes = prefixes;
         this.aliases = aliases;
     }
@@ -59,37 +65,50 @@ public class OptionImpl extends BaseParent {
 
     @Override
     public Set<String> getPrefixes() {
-        Set<String> prefixes = new HashSet<String>(super.getPrefixes());
-        prefixes.addAll(this.prefixes);
+        Set<String> prefixes = new HashSet<String>();
+        Group group = getGroup();
+        if (group != null) {
+            prefixes.addAll(group.getPrefixes());
+        }
+        if (this.prefixes != null) {
+            prefixes.addAll(this.prefixes);
+        }
         return prefixes;
+    }
+
+    public void setPrefixes(Set<String> prefixes) {
+        this.prefixes = prefixes;
     }
 
     @Override
     public Set<Trigger> getTriggers() {
         Set<Trigger> triggers = new HashSet<Trigger>();
+        triggers.addAll(super.getTriggers());
+
         Set<String> prefixes = getPrefixes();
         addTriggers(triggers, prefixes, getName());
-        for (String alias : this.aliases) {
-            addTriggers(triggers, prefixes, alias);
+        Set<String> aliases = getAliases();
+        if (aliases != null) {
+            for (String alias : aliases) {
+                addTriggers(triggers, prefixes, alias);
+            }
         }
         return triggers;
     }
 
-    protected void addTriggers(Set<Trigger> triggers, Set<String> prefixes, String trigger) {
-        for (String prefix : prefixes) {
-            triggers.add(new TriggerImpl(prefix + trigger));
-        }
-    }
-
     @Override
-    public void processParent(CommandLine line, ListIterator<String> arguments) {
+    protected void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
-        if (fire(getTriggers(), argument)) {
-            line.addOption(this);
-            arguments.set(getName());
+        Trigger trigger = fire(getTriggers(), argument);
+        if (trigger != null) {
+            doProcess(commandLine, trigger, argument);
         } else {
             throw new OptionException(this, String.format("Unexpected token %1$s", argument));
         }
+    }
+
+    protected void doProcess(CommandLine commandLine, Trigger trigger, String argument) {
+        commandLine.addOption(this);
     }
 
     @Override
@@ -103,9 +122,10 @@ public class OptionImpl extends BaseParent {
         Set<Trigger> triggers = new HashSet<Trigger>();
         addTriggers(triggers, prefixes, getName());
         joinTriggers(help, triggers);
-        if (displayAliases && !this.aliases.isEmpty()) {
+        Set<String> aliases = getAliases();
+        if (displayAliases && (aliases != null && !aliases.isEmpty())) {
             help.append(" (");
-            List<String> list = new ArrayList<String>(this.aliases);
+            List<String> list = new ArrayList<String>(aliases);
             Collections.sort(list);
             for (Iterator<String> i = list.iterator(); i.hasNext(); ) {
                 String alias = i.next();
@@ -119,9 +139,9 @@ public class OptionImpl extends BaseParent {
             help.append(')');
         }
         Argument argument = getArgument();
-        boolean displayArgument = argument != null && hints.contains(PARENT_ARGUMENT);
+        boolean displayArgument = argument != null && hints.contains(CONTAINER_ARGUMENT);
         Group children = getGroup();
-        boolean displayChildren = children != null && hints.contains(PARENT_CHILDREN);
+        boolean displayChildren = children != null && hints.contains(CONTAINER_GROUP);
         if (displayArgument) {
             help.append(getArgumentSeparator());
             argument.help(help, hints, comparator);
@@ -133,6 +153,12 @@ public class OptionImpl extends BaseParent {
 
         if (optional) {
             help.append("]");
+        }
+    }
+
+    protected void addTriggers(Set<Trigger> triggers, Set<String> prefixes, String trigger) {
+        for (String prefix : prefixes) {
+            triggers.add(new TriggerImpl(prefix + trigger));
         }
     }
 

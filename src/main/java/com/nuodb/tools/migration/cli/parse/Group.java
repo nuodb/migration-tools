@@ -16,12 +16,12 @@
  */
 package com.nuodb.tools.migration.cli.parse;
 
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 
 /**
- * An option representing a choice or option of otions in the form "-a|-b|-c".
+ * An option representing a choice or option of options in the form "-a|-b|-c".
  */
 public interface Group extends Option {
 
@@ -32,12 +32,16 @@ public interface Group extends Option {
      */
     int getMinimum();
 
+    void setMinimum(int minimum);
+
     /**
      * Retrieves the maximum number of members acceptable for a valid option
      *
      * @return the maximum number of members
      */
     int getMaximum();
+
+    void setMaximum(int maximum);
 
     /**
      * Adds option to this option
@@ -51,7 +55,7 @@ public interface Group extends Option {
      *
      * @param options list of options
      */
-    void addOptions(List<Option> options);
+    void addOptions(Collection<Option> options);
 
     /**
      * Appends help information to the specified buffer

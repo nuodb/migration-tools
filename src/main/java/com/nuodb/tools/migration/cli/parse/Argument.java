@@ -26,9 +26,19 @@ public interface Argument extends Option {
 
     int getMinimum();
 
+    void setMinimum(int minimum);
+
     int getMaximum();
 
+    void setMaximum(int maximum);
+
     List<Object> getDefaultValues();
+
+    void setDefaultValues(List<Object> defaultValues);
+
+    String getValuesSeparator();
+
+    void setValuesSeparator(String valuesSeparator);
 
     /**
      * Adds defaults to a executable line.
@@ -56,5 +66,5 @@ public interface Argument extends Option {
      * @param commandLine the executable line object to query.
      * @param option      the option to lookup values with.
      */
-    void validate(CommandLine commandLine, Option option);
+    void postProcess(CommandLine commandLine, Option option);
 }

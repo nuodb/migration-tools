@@ -51,12 +51,13 @@ public class ParserImpl implements Parser {
                 break;
             }
             previous = current;
+            option.preProcess(commandLine, iterator);
             option.process(commandLine, iterator);
         }
         if (iterator.hasNext()) {
             throw new OptionException(option, String.format("Unexpected argument %1$s", iterator.next()));
         }
-        option.validate(commandLine);
+        option.postProcess(commandLine);
         return commandLine;
     }
 }

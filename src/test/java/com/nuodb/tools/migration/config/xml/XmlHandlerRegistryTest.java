@@ -17,7 +17,6 @@ import static org.mockito.Mockito.*;
 
 public class XmlHandlerRegistryTest {
 
-
     private XmlHandlerRegistry xmlHandlerRegistry;
 
     @Before
@@ -33,7 +32,6 @@ public class XmlHandlerRegistryTest {
         xmlHandlerRegistry.register(mock(XmlDumpTaskHandler.class));
         xmlHandlerRegistry.register(mock(XmlMigrationHandler.class));
         xmlHandlerRegistry.register(mock(XmlHandlerRegistry.ConverterAdapter.class));
-
     }
 
     @Test
@@ -44,7 +42,6 @@ public class XmlHandlerRegistryTest {
                 mock(XmlReadContext.class)
         );
         Assert.assertNull(xmlReadHandler);
-
 
         final XmlJdbcConnectionHandler mock = mock(XmlJdbcConnectionHandler.class);
 
@@ -78,7 +75,6 @@ public class XmlHandlerRegistryTest {
                 mock(XmlWriteContext.class)
         );
         Assert.assertNull(xmlWriteHandler);
-
 
         when(mock.canWrite(anyObject(),
                 eq(XmlJdbcConnectionHandler.class),

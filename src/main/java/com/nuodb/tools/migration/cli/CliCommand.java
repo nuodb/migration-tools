@@ -49,6 +49,11 @@ public class CliCommand extends ArgumentImpl {
     private CliRunFactoryLookup runFactoryLookup;
     private OptionToolkit optionToolkit;
 
+    public CliCommand(CliRunFactoryLookup runFactoryLookup, OptionToolkit optionToolkit) {
+        this.runFactoryLookup = runFactoryLookup;
+        this.optionToolkit = optionToolkit;
+    }
+
     public CliCommand(int id, String name, String description, boolean required,
                       CliRunFactoryLookup runFactoryLookup, OptionToolkit optionToolkit) {
         super(id, name, description, required);
@@ -79,11 +84,11 @@ public class CliCommand extends ArgumentImpl {
     }
 
     @Override
-    public void validate(CommandLine commandLine) {
+    public void postProcess(CommandLine commandLine) {
         CliRun command = commandLine.getValue(this);
         try {
             if (command != null) {
-                command.validate(commandLine);
+                command.postProcess(commandLine);
             }
         } catch (OptionException exception) {
             throw new OptionException(command, exception.getMessage());

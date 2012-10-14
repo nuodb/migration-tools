@@ -37,37 +37,47 @@ import static com.nuodb.tools.migration.cli.parse.HelpHint.OPTIONAL;
 /**
  * @author Sergey Bushik
  */
-public class Command extends BaseParent {
+public class Command extends BaseContainer {
 
     private Set<String> aliases;
+
+    public Command() {
+    }
 
     public Command(int id, String name, String description, boolean required) {
         super(id, name, description, required);
     }
 
-    public Command(int id, String name, String description, boolean required, Set<String> aliases) {
+    public Command(int id, String name, String description, boolean required,
+                   Set<String> aliases) {
         super(id, name, description, required);
         this.aliases = aliases;
     }
 
-    public Command(int id, String name, String description, boolean required, Group children,
-                   Argument argument, String argumentSeparator, Set<String> aliases) {
-        super(id, name, description, required, children, argument, argumentSeparator);
+    public Set<String> getAliases() {
+        return aliases;
+    }
+
+    public void setAliases(Set<String> aliases) {
         this.aliases = aliases;
     }
 
     @Override
     public Set<Trigger> getTriggers() {
         Set<Trigger> triggers = new HashSet<Trigger>();
+        triggers.addAll(super.getTriggers());
         triggers.add(new TriggerImpl(getName()));
-        for (String alias : aliases) {
-            triggers.add(new TriggerImpl(alias));
+        Set<String> aliases = getAliases();
+        if (aliases != null) {
+            for (String alias : aliases) {
+                triggers.add(new TriggerImpl(alias));
+            }
         }
         return Collections.unmodifiableSet(triggers);
     }
 
     @Override
-    public void processParent(CommandLine commandLine, ListIterator<String> arguments) {
+    public void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
         if (canProcess(commandLine, argument)) {
             commandLine.addOption(this);
@@ -85,6 +95,7 @@ public class Command extends BaseParent {
             buffer.append('[');
         }
         buffer.append(getName());
+        Set<String> aliases = getAliases();
         if (displayAliases && (aliases != null && !aliases.isEmpty())) {
             buffer.append(" (");
             List<String> list = new ArrayList<String>(aliases);

@@ -33,11 +33,14 @@ import java.util.regex.Pattern;
 
 /**
  * Compiles Ant style pattern to a matcher, where each '*' wildcard character interpreted as any number of symbols and
- * '?' sign meaning any single character.
+ * '?' sign meaning any single character. Builds additional capturing groups around wildcard symbols, so that they are
+ * returned by {@link Match#matches()} method.
  *
  * @author Sergey Bushik
  */
 public class AntRegexCompiler extends PatternCompilerBase {
+
+    public static final AntRegexCompiler INSTANCE = new AntRegexCompiler();
 
     private static final Pattern ANT_PATTERN = Pattern.compile("\\?|\\*|\\{([^/]+?)\\}");
 
@@ -75,6 +78,6 @@ public class AntRegexCompiler extends PatternCompilerBase {
     public static void main(String[] args) {
         RegexCompiler compiler = new AntRegexCompiler();
         Regex regex = compiler.compile("-table.*.filter");
-        System.out.println(Arrays.asList(regex.matches("-table.users.filter")));
+        System.out.println(Arrays.asList(regex.matches("-table.\\wusers.filter")));
     }
 }

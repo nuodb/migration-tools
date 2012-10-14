@@ -53,15 +53,15 @@ public class HelpFormatter extends HelpHint {
                         GROUP_OUTER,
                         ARGUMENT_NUMBERED,
                         ARGUMENT_BRACKETED,
-                        PARENT_ARGUMENT,
-                        PARENT_CHILDREN
+                        CONTAINER_ARGUMENT,
+                        CONTAINER_GROUP
                 )));
         HELP_OUTPUT_HINTS = Collections.unmodifiableSet(
                 new HashSet<HelpHint>(Arrays.asList(
                         ALIASES,
                         OPTIONAL,
                         GROUP,
-                        PARENT_ARGUMENT
+                        CONTAINER_ARGUMENT
                 )));
         OPTION_OUTPUT_HINTS = Collections.unmodifiableSet(
                 new HashSet<HelpHint>(Arrays.asList(
@@ -76,7 +76,7 @@ public class HelpFormatter extends HelpHint {
                         GROUP_OUTER,
                         ARGUMENT_NUMBERED,
                         ARGUMENT_BRACKETED,
-                        PARENT_CHILDREN
+                        CONTAINER_GROUP
                 )));
     }
 

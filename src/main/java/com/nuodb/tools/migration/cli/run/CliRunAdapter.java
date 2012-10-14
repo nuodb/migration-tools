@@ -42,7 +42,7 @@ public abstract class CliRunAdapter implements CliRun {
     private Option option;
     private String command;
 
-    protected CliRunAdapter(Option option, String command) {
+    public CliRunAdapter(Option option, String command) {
         this.option = option;
         this.command = command;
     }
@@ -93,6 +93,11 @@ public abstract class CliRunAdapter implements CliRun {
     }
 
     @Override
+    public void addTrigger(Trigger trigger) {
+        option.addTrigger(trigger);
+    }
+
+    @Override
     public Set<Trigger> getTriggers() {
         return option.getTriggers();
     }
@@ -123,14 +128,22 @@ public abstract class CliRunAdapter implements CliRun {
     }
 
     @Override
+    public void preProcess(CommandLine commandLine, ListIterator<String> arguments) {
+        option.preProcess(commandLine, arguments);
+    }
+
+    @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
         option.process(commandLine, arguments);
     }
 
     @Override
-    public void validate(CommandLine commandLine) {
-        option.validate(commandLine);
-        bind(commandLine, option);
+    public void postProcess(CommandLine commandLine) {
+        option.postProcess(commandLine);
+        bind(commandLine);
+    }
+
+    protected void bind(CommandLine commandLine) {
     }
 
     @Override
@@ -143,11 +156,20 @@ public abstract class CliRunAdapter implements CliRun {
         return option.help(indent, hints, comparator);
     }
 
+    public Option getOption() {
+        return option;
+    }
+
+    public void setOption(Option option) {
+        this.option = option;
+    }
+
     @Override
     public String getCommand() {
         return command;
     }
 
-
-    protected abstract void bind(CommandLine commandLine, Option option);
+    public void setCommand(String command) {
+        this.command = command;
+    }
 }

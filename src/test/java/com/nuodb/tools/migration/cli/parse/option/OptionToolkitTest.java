@@ -14,10 +14,9 @@ public class OptionToolkitTest {
     private OptionToolkit toolkit;
     private OptionFormat optionFormat;
 
-    private final int TEST_ID = 1;
-    private final int TEST_MIN = 0;
-    private final int TEST_MAX = 1;
-
+    private final int OPTION_ID = 1;
+    private final int OPTION_MINIMUM = 0;
+    private final int OPTION_MAXIMUM = 1;
 
     @Before
     public void setUp() throws Exception {
@@ -34,35 +33,35 @@ public class OptionToolkitTest {
 
     @Test
     public void testArgumentBuilder() throws Exception {
-        final ArgumentBuilder argumentBuilder = toolkit.newArgument();
-        argumentBuilder.withMaximum(TEST_MAX).withMinimum(TEST_MIN).withId(TEST_ID);
-        final Argument argument = argumentBuilder.build();
+        final ArgumentBuilder builder = toolkit.newArgument();
+        builder.withMaximum(OPTION_MAXIMUM).withMinimum(OPTION_MINIMUM).withId(OPTION_ID);
+        final Argument argument = builder.build();
 
         verify(optionFormat, times(1)).getArgumentValuesSeparator();
-        Assert.assertEquals(argument.getId(), TEST_ID);
-        Assert.assertEquals(argument.getMinimum(), TEST_MIN);
-        Assert.assertEquals(argument.getMaximum(), TEST_MAX);
+        Assert.assertEquals(argument.getId(), OPTION_ID);
+        Assert.assertEquals(argument.getMinimum(), OPTION_MINIMUM);
+        Assert.assertEquals(argument.getMaximum(), OPTION_MAXIMUM);
     }
 
     @Test
     public void testOptionBuilder() throws Exception {
-        final OptionBuilder optionBuilder = toolkit.newOption();
-        optionBuilder.withId(TEST_ID);
-        final Option option = optionBuilder.build();
+        final OptionBuilder builder = toolkit.newOption();
+        builder.withId(OPTION_ID);
+        final Option option = builder.build();
 
         verify(optionFormat, times(1)).getArgumentSeparator();
         verify(optionFormat, times(1)).getOptionPrefixes();
-        Assert.assertEquals(option.getId(), TEST_ID);
+        Assert.assertEquals(option.getId(), OPTION_ID);
     }
 
     @Test
     public void testGroupBuilder() throws Exception {
-        final GroupBuilder groupBuilder = toolkit.newGroup();
-        groupBuilder.withId(TEST_ID).withMaximum(TEST_MAX).withMinimum(TEST_MIN);
+        final GroupBuilder builder = toolkit.newGroup();
+        builder.withId(OPTION_ID).withMaximum(OPTION_MAXIMUM).withMinimum(OPTION_MINIMUM);
 
-        final Group group = groupBuilder.build();
-        Assert.assertEquals(group.getId(), TEST_ID);
-        Assert.assertEquals(group.getMinimum(), TEST_MIN);
-        Assert.assertEquals(group.getMaximum(), TEST_MAX);
+        final Group group = builder.build();
+        Assert.assertEquals(group.getId(), OPTION_ID);
+        Assert.assertEquals(group.getMinimum(), OPTION_MINIMUM);
+        Assert.assertEquals(group.getMaximum(), OPTION_MAXIMUM);
     }
 }

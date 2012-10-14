@@ -90,6 +90,14 @@ public class GroupBuilderImpl implements GroupBuilder {
 
     @Override
     public Group build() {
-        return new GroupImpl(id, name, description, required, minimum, maximum, options);
+        GroupImpl group = new GroupImpl();
+        group.setId(id);
+        group.setName(name);
+        group.setDescription(description);
+        group.setMinimum(minimum);
+        group.setMaximum(maximum);
+        group.setRequired(required);
+        group.addOptions(options);
+        return group;
     }
 }

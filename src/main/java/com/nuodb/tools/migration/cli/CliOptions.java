@@ -25,12 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.run;
+package com.nuodb.tools.migration.cli;
 
 /**
+ * Contains literal constants for the available, recognized command line options, without their prefixes (i.e. double
+ * hyphen --). Option prefixes, argument separators, argument value separators are specified in the option format
+ * instance.
+ *
  * @author Sergey Bushik
  */
 public interface CliOptions {
+
+    final int HELP_OPTION_ID = 1;
+    final int LIST_OPTION_ID = 2;
+    final int CONFIG_OPTION_ID = 3;
+    final int COMMAND_OPTION_ID = 4;
+
+    /**
+     * Formats & shows help.
+     */
+    final String HELP_OPTION = "help";
+    /**
+     * Lists available command line interface commands, such as dump, load, copy.
+     */
+    final String LIST_OPTION = "list";
+    /**
+     * Points the where migration process is specified in the form of XML file.
+     */
+    final String CONFIG_OPTION = "config";
+    /**
+     * Cli command to execute.
+     */
+    final String COMMAND_OPTION = "command";
 
     final String SOURCE_DRIVER_OPTION = "source.driver";
     final String SOURCE_URL_OPTION = "source.url";
@@ -42,4 +68,7 @@ public interface CliOptions {
 
     final String OUTPUT_TYPE_OPTION = "output.type";
     final String OUTPUT_PATH_OPTION = "output.path";
+
+    final String TABLE_OPTION = "table";
+    final String TABLE_FILTER_OPTION = "table.*.filter";
 }

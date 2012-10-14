@@ -1,7 +1,7 @@
 package com.nuodb.tools.migration;
 
 
-public class TestUtils {
+public class CliConstants {
 
     public final static String[] ARGUMENTS = new String[]{
             "dump",

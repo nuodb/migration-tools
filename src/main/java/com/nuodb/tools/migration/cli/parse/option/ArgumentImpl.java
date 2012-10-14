@@ -32,13 +32,16 @@ public class ArgumentImpl extends BaseOption implements Argument {
     private List<Object> defaultValues;
     private String valuesSeparator;
 
+    public ArgumentImpl() {
+    }
+
     public ArgumentImpl(int id, String name, String description, boolean required) {
         super(id, name, description, required);
     }
 
     public ArgumentImpl(int id, String name, String description, boolean required,
                         int minimum, int maximum, List<Object> defaultValues, String valuesSeparator) {
-        super(id, name != null ? name : NAME, description, required);
+        super(id, name, description, required);
         this.minimum = minimum;
         this.maximum = maximum;
         this.defaultValues = defaultValues;
@@ -56,8 +59,18 @@ public class ArgumentImpl extends BaseOption implements Argument {
     }
 
     @Override
+    public void setMinimum(int minimum) {
+        this.minimum = minimum;
+    }
+
+    @Override
     public int getMaximum() {
         return maximum;
+    }
+
+    @Override
+    public void setMaximum(int maximum) {
+        this.maximum = maximum;
     }
 
     @Override
@@ -66,12 +79,22 @@ public class ArgumentImpl extends BaseOption implements Argument {
     }
 
     @Override
-    public Set<String> getPrefixes() {
-        return Collections.emptySet();
+    public void setDefaultValues(List<Object> defaultValues) {
+        this.defaultValues = defaultValues;
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
+    public String getValuesSeparator() {
+        return valuesSeparator;
+    }
+
+    @Override
+    public void setValuesSeparator(String valuesSeparator) {
+        this.valuesSeparator = valuesSeparator;
+    }
+
+    @Override
+    public Set<String> getPrefixes() {
         return Collections.emptySet();
     }
 
@@ -91,45 +114,63 @@ public class ArgumentImpl extends BaseOption implements Argument {
     }
 
     @Override
-    public void process(CommandLine line, ListIterator<String> arguments) {
-        process(line, arguments, this);
+    public void process(CommandLine commandLine, ListIterator<String> arguments) {
+        process(commandLine, arguments, this);
     }
 
     @Override
-    public void process(CommandLine line, ListIterator<String> arguments, Option option) {
-        int valuesCount = line.getOptionValues(option).size();
-        while (arguments.hasNext() && (valuesCount < maximum)) {
+    public void process(CommandLine commandLine, ListIterator<String> arguments, Option option) {
+        int count = commandLine.getOptionValues(option).size();
+        while (arguments.hasNext() && (count < maximum)) {
             String value = arguments.next();
-            if (line.isOption(value)) {
+            if (commandLine.isOption(value)) {
                 arguments.previous();
                 break;
             }
             if (valuesSeparator != null) {
                 StringTokenizer values = new StringTokenizer(value, valuesSeparator);
                 arguments.remove();
-                while (values.hasMoreTokens() && (valuesCount < maximum)) {
-                    valuesCount++;
+                while (values.hasMoreTokens() && (count < maximum)) {
+                    count++;
                     value = values.nextToken();
-                    line.addValue(option, value);
+                    commandLine.addValue(option, value);
                     arguments.add(value);
                 }
                 if (values.hasMoreTokens()) {
                     throw new OptionException(this, String.format("Unexpected token %1$s", values.nextToken()));
                 }
             } else {
-                valuesCount++;
-                line.addValue(option, value);
+                count++;
+                commandLine.addValue(option, value);
             }
         }
     }
 
     @Override
-    public void validate(CommandLine commandLine) throws OptionException {
-        validate(commandLine, this);
+    public void postProcess(CommandLine commandLine) {
+        postProcess(commandLine, this);
     }
 
     @Override
-    public void validate(CommandLine commandLine, Option option) throws OptionException {
+    public void postProcess(CommandLine commandLine, Option option) throws OptionException {
+        doBind(commandLine, option);
+        doValidate(commandLine, option);
+    }
+
+    @Override
+    protected void doBind(CommandLine commandLine) {
+        doBind(commandLine, this);
+    }
+
+    protected void doBind(CommandLine commandLine, Option option) {
+    }
+
+    @Override
+    protected void doValidate(CommandLine commandLine) {
+        doValidate(commandLine, this);
+    }
+
+    protected void doValidate(CommandLine commandLine, Option option) {
         List values = commandLine.getValues(option);
         int minimum = getMinimum();
         if (values.size() < minimum) {
@@ -137,7 +178,7 @@ public class ArgumentImpl extends BaseOption implements Argument {
         }
         int maximum = getMaximum();
         if (values.size() > maximum) {
-            throw new OptionException(option, String.format("Too many arguments for %1$s", getName()));
+            throw new OptionException(option, String.format("Too many values for %1$s argument", getName()));
         }
     }
 

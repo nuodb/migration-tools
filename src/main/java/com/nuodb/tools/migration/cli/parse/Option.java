@@ -98,7 +98,14 @@ public interface Option {
     Set<String> getPrefixes();
 
     /**
-     * Identifies the argument triggers that should fire this option. This is used to decide which of many options
+     * Adds trigger to this option.
+     *
+     * @param trigger to be added to the option.
+     */
+    void addTrigger(Trigger trigger);
+
+    /**
+     * Identifies the argument triggers that should triggers this option. This is used to decide which of many options
      * should be tried when processing a given argument string.
      * <p/>
      * The returned set must not be null.
@@ -136,7 +143,7 @@ public interface Option {
      * Indicates whether this Option will be able to execute the particular argument.
      *
      * @param commandLine executable line to check
-     * @param argument    The argument to be tested
+     * @param argument    the argument to be tested
      * @return true if the argument can be processed by this Option
      */
     boolean canProcess(CommandLine commandLine, String argument);
@@ -145,21 +152,30 @@ public interface Option {
      * Indicates whether this Option will be able to execute the particular argument. The list iterator must be restored
      * to the initial state before returning the boolean.
      *
-     * @param commandLine the executable line to check
-     * @param arguments   the list iterator over String arguments.properties
+     * @param commandLine the command line to check
+     * @param arguments   the list iterator over string arguments
      * @return true if the argument can be processed by this Option
      * @see #canProcess(CommandLine, String)
      */
     boolean canProcess(CommandLine commandLine, ListIterator<String> arguments);
 
+
     /**
-     * Processes String arguments.properties into a executable line.
+     * Pre processes command line arguments.
+     *
+     * @param commandLine the command line to store any pre processed results in.
+     * @param arguments   the argument to be pre processed.
+     */
+    void preProcess(CommandLine commandLine, ListIterator<String> arguments);
+
+    /**
+     * Processes string arguments into a executable line.
      * <p/>
      * The iterator will initially point at the first argument to be processed and at the end of the method should point
      * to the first argument not processed. This method must execute at least one argument from the list iterator.
      *
      * @param commandLine the executable line object to store results in
-     * @param arguments   the arguments.properties to execute.
+     * @param arguments   the arguments to execute.
      */
     void process(CommandLine commandLine, ListIterator<String> arguments);
 
@@ -169,7 +185,7 @@ public interface Option {
      * @param commandLine executable line to check.
      * @throws OptionException if the executable line is not valid.
      */
-    void validate(CommandLine commandLine);
+    void postProcess(CommandLine commandLine);
 
     /**
      * Appends help to the specified buffer

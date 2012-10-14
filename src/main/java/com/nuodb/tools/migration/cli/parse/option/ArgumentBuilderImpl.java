@@ -48,10 +48,10 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
     private int minimum = 0;
     private int maximum = 1;
     private List<Object> defaultValues = new ArrayList<Object>();
-    private OptionFormat optionFormat;
+    private String valuesSeparator;
 
     public ArgumentBuilderImpl(OptionFormat optionFormat) {
-        this.optionFormat = optionFormat;
+        this.valuesSeparator = optionFormat.getArgumentValuesSeparator();
     }
 
     @Override
@@ -97,9 +97,23 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
     }
 
     @Override
+    public ArgumentBuilder withValuesSeparator(String valuesSeparator) {
+        this.valuesSeparator = valuesSeparator;
+        return this;
+    }
+
+    @Override
     public Argument build() {
-        return new ArgumentImpl(id, name, description, required,
-                minimum, maximum, defaultValues, optionFormat.getArgumentValuesSeparator());
+        ArgumentImpl argument = new ArgumentImpl();
+        argument.setId(id);
+        argument.setName(name);
+        argument.setDescription(description);
+        argument.setRequired(required);
+        argument.setMinimum(minimum);
+        argument.setMaximum(maximum);
+        argument.setDefaultValues(defaultValues);
+        argument.setValuesSeparator(valuesSeparator);
+        return argument;
     }
 }
 

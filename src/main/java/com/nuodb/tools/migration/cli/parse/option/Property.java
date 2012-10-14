@@ -20,25 +20,35 @@ import com.nuodb.tools.migration.cli.parse.*;
 
 import java.util.*;
 
+import static com.nuodb.tools.migration.cli.parse.HelpHint.ARGUMENT_BRACKETED;
+import static com.nuodb.tools.migration.cli.parse.HelpHint.PROPERTY;
+
 /**
- * Handles the java style "-Dproperty=value" options
+ * Handles the java style options prefixed with -D
  */
 public class Property extends BaseOption {
 
     public static String PREFIX = "-D";
 
-    private String prefix;
+    private String prefix = PREFIX;
 
     public Property() {
-        this(0, "property", null, false);
     }
 
     public Property(int id, String name, String description, boolean required) {
-        this(id, name, description, required, PREFIX);
+        super(id, name, description, required);
     }
 
     public Property(int id, String name, String description, boolean required, String prefix) {
         super(id, name, description, required);
+        this.prefix = prefix;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
 
@@ -82,13 +92,9 @@ public class Property extends BaseOption {
     }
 
     @Override
-    public void validate(CommandLine commandLine) {
-    }
-
-    @Override
     public void help(StringBuilder buffer, Set<HelpHint> helpSettings, Comparator<Option> comparator) {
-        if (helpSettings.contains(HelpHint.PROPERTY)) {
-            boolean bracketed = helpSettings.contains(HelpHint.ARGUMENT_BRACKETED);
+        if (helpSettings.contains(PROPERTY)) {
+            boolean bracketed = helpSettings.contains(ARGUMENT_BRACKETED);
             buffer.append(prefix);
             if (bracketed) {
                 buffer.append('<');
@@ -110,7 +116,7 @@ public class Property extends BaseOption {
 
     @Override
     public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
-        if (hints.contains(HelpHint.PROPERTY)) {
+        if (hints.contains(PROPERTY)) {
             Help help = new HelpImpl(this, indent);
             return Collections.singletonList(help);
         } else {

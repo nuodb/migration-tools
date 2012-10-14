@@ -42,8 +42,12 @@ public class CliRunFactoryLookup {
         register(new CliDumpFactory());
     }
 
-    public Collection<? extends String> getCommands() {
+    public Collection<String> getCommands() {
         return factories.keySet();
+    }
+
+    public Collection<CliRunFactory> getFactories() {
+        return factories.values();
     }
 
     public CliRunFactory lookup(String command) {

@@ -25,30 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.parse.option;
-
-import com.nuodb.tools.migration.cli.parse.Argument;
+package com.nuodb.tools.migration.cli.parse;
 
 /**
  * @author Sergey Bushik
  */
-public interface ArgumentBuilder {
+public interface Container extends Option {
 
-    ArgumentBuilder withId(int id);
+    Group getGroup();
 
-    ArgumentBuilder withName(String name);
+    void setGroup(Group group);
 
-    ArgumentBuilder withDescription(String description);
+    Argument getArgument();
 
-    ArgumentBuilder withRequired(boolean required);
+    void setArgument(Argument argument);
 
-    ArgumentBuilder withMinimum(int minimum);
+    String getArgumentSeparator();
 
-    ArgumentBuilder withMaximum(int maximum);
-
-    ArgumentBuilder withDefaultValue(Object defaultValue);
-
-    Argument build();
-
-    ArgumentBuilder withValuesSeparator(String valuesSeparator);
+    void setArgumentSeparator(String argumentSeparator);
 }

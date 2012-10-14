@@ -18,7 +18,9 @@ package com.nuodb.tools.migration.cli.parse.option;
 
 import com.nuodb.tools.migration.cli.parse.*;
 
+import java.util.HashSet;
 import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * A base implementation of option providing limited ground work for further implementations.
@@ -29,6 +31,10 @@ public abstract class BaseOption implements Option {
     private String name;
     private String description;
     private boolean required;
+    private Set<Trigger> triggers = new HashSet<Trigger>();
+
+    protected BaseOption() {
+    }
 
     protected BaseOption(int id, String name, String description, boolean required) {
         this.id = id;
@@ -78,6 +84,16 @@ public abstract class BaseOption implements Option {
     }
 
     @Override
+    public void addTrigger(Trigger trigger) {
+        triggers.add(trigger);
+    }
+
+    @Override
+    public Set<Trigger> getTriggers() {
+        return triggers;
+    }
+
+    @Override
     public Option findOption(String trigger) {
         return findOption(new TriggerImpl(trigger));
     }
@@ -101,7 +117,19 @@ public abstract class BaseOption implements Option {
     }
 
     @Override
-    public void validate(CommandLine commandLine) {
+    public void preProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    }
+
+    @Override
+    public void postProcess(CommandLine commandLine) {
+        doBind(commandLine);
+        doValidate(commandLine);
+    }
+
+    protected void doBind(CommandLine commandLine) {
+    }
+
+    protected void doValidate(CommandLine commandLine) {
         if (isRequired() && !commandLine.hasOption(this)) {
             throw new OptionException(this, String.format("Missing required option %1$s", getName()));
         }

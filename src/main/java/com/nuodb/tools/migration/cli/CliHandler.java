@@ -35,6 +35,7 @@ import com.nuodb.tools.migration.cli.parse.help.HelpFormatter;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.cli.parse.parser.ParserImpl;
 import com.nuodb.tools.migration.cli.run.CliRun;
+import com.nuodb.tools.migration.cli.run.CliRunFactory;
 import com.nuodb.tools.migration.cli.run.CliRunFactoryLookup;
 import com.nuodb.tools.migration.i18n.Resources;
 import org.apache.commons.logging.Log;
@@ -45,29 +46,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
+ * Main entry point for the command line interface, for the names of the available options see {@see CliOptions}.
+ *
  * @author Sergey Bushik
  */
-public class CliHandler implements CliResources {
+public class CliHandler implements CliResources, CliOptions {
 
     private transient final Log log = LogFactory.getLog(getClass());
 
-    public static final int HELP_OPTION_ID = 1;
-    public static final int LIST_OPTION_ID = 2;
-    public static final int CONFIG_OPTION_ID = 3;
-    public static final int COMMAND_OPTION_ID = 4;
-
-    public static final String HELP_OPTION = "help";
-    public static final String LIST_OPTION = "list";
-    public static final String CONFIG_OPTION = "config";
-    public static final String COMMAND_OPTION = "command";
-
     public static final String MIGRATION_EXECUTABLE = "migration";
+    public static final String MIGRATION_EXECUTABLE_COMMAND = "migration %1$s";
+
+    private OptionToolkit optionToolkit;
+    private CliRunFactoryLookup cliRunFactoryLookup;
+
+    public CliHandler() {
+        optionToolkit = new OptionToolkit();
+        cliRunFactoryLookup = new CliRunFactoryLookup();
+    }
 
     public void handle(String[] arguments) throws OptionException {
-        Option root = createOption(new OptionToolkit());
+        Option root = createOption();
         try {
             OptionSet options = new ParserImpl().parse(arguments, root);
             handleOptionSet(options, root);
@@ -76,8 +79,7 @@ public class CliHandler implements CliResources {
         }
     }
 
-    protected Group createOption(OptionToolkit optionToolkit) {
-        //OptionToolkit optionToolkit = new OptionToolkit();
+    protected Group createOption() {
         Resources resources = Resources.getResources();
         Option help = optionToolkit.newOption().
                 withId(HELP_OPTION_ID).
@@ -101,9 +103,10 @@ public class CliHandler implements CliResources {
                                 withMinimum(1).
                                 withMaximum(1).build()
                 ).build();
+
         Option command = new CliCommand(
                 COMMAND_OPTION_ID, COMMAND_OPTION, resources.getMessage(COMMAND_OPTION_DESCRIPTION), false,
-                new CliRunFactoryLookup(), optionToolkit);
+                cliRunFactoryLookup, optionToolkit);
         return optionToolkit.newGroup().
                 withName(resources.getMessage(MIGRATION_GROUP_NAME)).
                 withOption(help).
@@ -118,10 +121,7 @@ public class CliHandler implements CliResources {
             if (log.isTraceEnabled()) {
                 log.trace("Handling --help");
             }
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.setOption(root);
-            formatter.setExecutable(MIGRATION_EXECUTABLE);
-            formatter.format(System.out);
+            handleHelp(options, root);
         } else if (options.hasOption(COMMAND_OPTION)) {
             CliRun runnable = options.getValue(COMMAND_OPTION);
             if (log.isTraceEnabled()) {
@@ -132,7 +132,33 @@ public class CliHandler implements CliResources {
             if (log.isTraceEnabled()) {
                 log.trace(String.format("Handling --config %1$s", options.getValue("config")));
             }
+        } else if (options.hasOption(LIST_OPTION)) {
+            if (log.isTraceEnabled()) {
+                log.trace(String.format("Handling --list"));
+            }
+            Collection<String> commands = cliRunFactoryLookup.getCommands();
+            for (String command : commands) {
+                System.out.println(command);
+            }
         }
+    }
+
+    protected void handleHelp(OptionSet options, Option root) {
+        String command = options.getValue(HELP_OPTION);
+        HelpFormatter formatter = new HelpFormatter();
+        if (command != null) {
+            CliRunFactory cliRunFactory = cliRunFactoryLookup.lookup(command);
+            if (cliRunFactory != null) {
+                formatter.setOption(cliRunFactory.createCliRun(optionToolkit));
+                formatter.setExecutable(String.format(MIGRATION_EXECUTABLE_COMMAND, command));
+            } else {
+                // TODO: process command not found
+            }
+        } else {
+            formatter.setOption(root);
+            formatter.setExecutable(MIGRATION_EXECUTABLE);
+        }
+        formatter.format(System.out);
     }
 
     protected void handleOptionException(OptionException exception) {
@@ -142,7 +168,7 @@ public class CliHandler implements CliResources {
         String executable;
         if (option instanceof CliRun) {
             String command = ((CliRun) option).getCommand();
-            executable = MIGRATION_EXECUTABLE + " " + command;
+            executable = String.format(MIGRATION_EXECUTABLE_COMMAND, command);
         } else {
             executable = MIGRATION_EXECUTABLE;
         }
@@ -153,6 +179,7 @@ public class CliHandler implements CliResources {
     public static void main(String[] args) throws IOException {
         CliHandler handler = new CliHandler();
         handler.handle(loadArguments("arguments.properties"));
+        // handler.handle(new String[]{"--help", "dump"});
     }
 
     private static String[] loadArguments(String resource) throws IOException {

@@ -1,6 +1,6 @@
 package com.nuodb.tools.migration.cli.parse.parser;
 
-import com.nuodb.tools.migration.TestUtils;
+import com.nuodb.tools.migration.CliConstants;
 import com.nuodb.tools.migration.cli.parse.Group;
 import com.nuodb.tools.migration.cli.parse.OptionException;
 import com.nuodb.tools.migration.cli.parse.Parser;
@@ -11,8 +11,9 @@ import org.junit.Test;
 import static org.mockito.Mockito.mock;
 
 public class ParserImplTest {
-    Parser parser = new ParserImpl();
-    Group build;
+
+    private Parser parser = new ParserImpl();
+    private Group build;
 
     @Before
     public void setUp() throws Exception {
@@ -23,6 +24,6 @@ public class ParserImplTest {
 
     @Test(expected = OptionException.class)
     public void testParseError() throws Exception {
-        parser.parse(TestUtils.ARGUMENTS, new Property());
+        parser.parse(CliConstants.ARGUMENTS, new Property());
     }
 }

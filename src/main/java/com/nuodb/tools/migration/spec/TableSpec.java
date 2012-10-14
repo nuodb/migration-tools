@@ -34,6 +34,18 @@ public class TableSpec {
     private String name;
     private String filter;
 
+    public TableSpec() {
+    }
+
+    public TableSpec(String name) {
+        this.name = name;
+    }
+
+    public TableSpec(String name, String filter) {
+        this.name = name;
+        this.filter = filter;
+    }
+
     public List<ColumnSpec> getColumnSpecs() {
         return columnSpecs;
     }

@@ -45,14 +45,10 @@ public class CliDumpFactoryTest {
         when(groupBuilder.withOption(any(Option.class))).thenReturn(groupBuilder);
         when(groupBuilder.withName(anyString())).thenReturn(groupBuilder);
         when(groupBuilder.withRequired(anyBoolean())).thenReturn(groupBuilder);
-
-
     }
 
     @Test
     public void testCreateCliRun() throws Exception {
-
-
         final CliDumpFactory cliDumpFactory = new CliDumpFactory();
         final CliDumpFactory spy = spy(cliDumpFactory);
         spy.createCliRun(optionToolkitMock);
