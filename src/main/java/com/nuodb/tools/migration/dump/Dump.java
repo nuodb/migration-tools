@@ -28,7 +28,8 @@
 package com.nuodb.tools.migration.dump;
 
 import com.nuodb.tools.migration.dump.output.OutputFormat;
-import com.nuodb.tools.migration.dump.output.XmlOutputFormat;
+import com.nuodb.tools.migration.dump.output.OutputFormatLookup;
+import com.nuodb.tools.migration.dump.output.OutputFormatLookupImpl;
 import com.nuodb.tools.migration.dump.query.NativeQueryBuilder;
 import com.nuodb.tools.migration.dump.query.Query;
 import com.nuodb.tools.migration.dump.query.SelectQuery;
@@ -61,7 +62,9 @@ import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
 @SuppressWarnings("unchecked")
 public class Dump {
 
-    private final Log log = LogFactory.getLog(getClass());
+    protected final Log log = LogFactory.getLog(getClass());
+
+    protected OutputFormatLookup outputFormatLookup = new OutputFormatLookupImpl();
 
     public void write(DumpSpec dumpSpec) throws SQLException {
         // TODO: 1) transaction context should be created / obtained ?
@@ -77,43 +80,53 @@ public class Dump {
     }
 
     public void write(DumpSpec dumpSpec, Connection connection, String catalog, String schema) throws SQLException {
-        DatabaseIntrospector introspector = new DatabaseIntrospector();
+        DatabaseIntrospector introspector = getDatabaseIntrospector(connection);
         introspector.withCatalog(catalog);
         introspector.withSchema(schema);
         introspector.withConnection(connection);
         introspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
         Database database = introspector.introspect();
+
         List<Query> queries = createQueries(database, dumpSpec);
+        // TODO: create catalog file dump-${timestamp}.cat and write dump spec & queries to it
         for (Query query : queries) {
-            // TODO: create & configure dump output based on the provided output spec
-            OutputFormat format = new XmlOutputFormat();
-            if (log.isTraceEnabled()) {
-                log.trace(String.format("Writing dump with %1$s", format.getClass().getName()));
-            }
+            OutputSpec outputSpec = dumpSpec.getOutputSpec();
+            OutputFormat format = getOutputFormatLookup().lookup(outputSpec);
+            // TODO: create output file for the query table-${timestamp}.${type} or query-${timestamp}.csv and append it the catalog file
             format.setOutputStream(System.out);
-            format.setAttributes(dumpSpec.getOutputSpec().getAttributes());
+            format.setAttributes(outputSpec.getAttributes());
             format.setJdbcTypeExtractor(getJdbcTypeExtractor());
-            format.init();
-            if (log.isDebugEnabled()) {
-                log.debug(String.format("Preparing SQL query %1$s", query.toQueryString()));
+            write(connection, query, format);
+        }
+    }
+
+    protected void write(Connection connection, Query query, OutputFormat format) throws SQLException {
+        if (log.isTraceEnabled()) {
+            log.trace(String.format("Writing dump with %1$s", format.getClass().getName()));
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Preparing SQL query: %1$s", query.toQuery()));
+        }
+        PreparedStatement statement = connection.prepareStatement(query.toQuery());
+        ResultSet resultSet = statement.executeQuery();
+        try {
+            format.outputBegin(resultSet);
+            while (resultSet.next()) {
+                format.outputRow(resultSet);
             }
-            PreparedStatement statement = connection.prepareStatement(query.toQueryString());
-            ResultSet resultSet = statement.executeQuery();
-            try {
-                format.outputBegin(resultSet);
-                while (resultSet.next()) {
-                    format.outputRow(resultSet);
-                }
-                format.outputEnd(resultSet);
-            } catch (IOException e) {
-                throw new DumpException(e);
-            }
+            format.outputEnd(resultSet);
+        } catch (IOException e) {
+            throw new DumpException(e);
         }
     }
 
     protected ConnectionProvider getConnectionProvider(ConnectionSpec connectionSpec) {
         return new DriverManagerConnectionProvider(
                 (DriverManagerConnectionSpec) connectionSpec, false, Connection.TRANSACTION_READ_COMMITTED);
+    }
+
+    protected DatabaseIntrospector getDatabaseIntrospector(Connection connection) {
+        return new DatabaseIntrospector();
     }
 
     protected JdbcTypeExtractor getJdbcTypeExtractor() {
@@ -153,11 +166,19 @@ public class Dump {
                 selectQueryBuilder.setTable(table);
                 if (selectQuerySpec != null) {
                     selectQueryBuilder.setColumns(selectQuerySpec.getColumns());
-                    selectQueryBuilder.setFilter(selectQuerySpec.getFilter());
+                    selectQueryBuilder.addFilter(selectQuerySpec.getFilter());
                 }
                 selectQueries.add(selectQueryBuilder.build());
             }
         }
         return selectQueries;
+    }
+
+    public OutputFormatLookup getOutputFormatLookup() {
+        return outputFormatLookup;
+    }
+
+    public void setOutputFormatLookup(OutputFormatLookup outputFormatLookup) {
+        this.outputFormatLookup = outputFormatLookup;
     }
 }

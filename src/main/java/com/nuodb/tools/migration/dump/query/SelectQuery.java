@@ -30,61 +30,64 @@ package com.nuodb.tools.migration.dump.query;
 import com.nuodb.tools.migration.jdbc.metamodel.Column;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * @author Sergey Bushik
  */
 public class SelectQuery implements Query {
 
-    private StringBuilder select = new StringBuilder();
-    private StringBuilder from = new StringBuilder();
-    private StringBuilder where = new StringBuilder();
-
-    public void addColumn(String column) {
-        if (select.length() > 0) {
-            select.append(", ");
-        }
-        select.append(column);
-    }
+    private List<Table> tables = new ArrayList<Table>();
+    private List<Column> columns = new ArrayList<Column>();
+    private List<String> conditions = new ArrayList<String>();
 
     public void addColumn(Column column) {
-        addColumn(column.getName().value());
+        columns.add(column);
     }
 
     public void addTable(Table table) {
-        addTable(table.getName().value());
-    }
-
-    public void addTable(String table) {
-        if (from.length() > 0) {
-            from.append(", ");
-        }
-        from.append(table);
+        tables.add(table);
     }
 
     public void addCondition(String condition) {
-        if (where.length() > 0) {
-            where.append(" and ").append(condition);
-        } else {
-            where.append(condition);
-        }
+        conditions.add(condition);
     }
 
     @Override
-    public String toQueryString() {
+    public String toQuery() {
         StringBuilder query = new StringBuilder();
         query.append("select ");
-        query.append(select);
+        for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
+            Column column = iterator.next();
+            query.append(column.getName().value());
+            if (iterator.hasNext()) {
+                query.append(", ");
+            }
+        }
         query.append(" from ");
-        query.append(from);
-        if (where.length() > 0) {
+        for (Iterator<Table> iterator = tables.iterator(); iterator.hasNext(); ) {
+            Table table = iterator.next();
+            query.append(table.getName().value());
+            if (iterator.hasNext()) {
+                query.append(", ");
+            }
+        }
+        if (conditions.size() > 0) {
             query.append(" where ");
-            query.append(where);
+            for (Iterator<String> iterator = conditions.iterator(); iterator.hasNext(); ) {
+                query.append(iterator.next());
+                if (iterator.hasNext()) {
+                    query.append(" and ");
+                }
+            }
         }
         return query.toString();
     }
 
     @Override
     public String toString() {
-        return toQueryString();
+        return toQuery();
     }
 }

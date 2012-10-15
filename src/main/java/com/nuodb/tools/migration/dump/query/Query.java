@@ -32,5 +32,5 @@ package com.nuodb.tools.migration.dump.query;
  */
 public interface Query {
 
-    String toQueryString();
+    String toQuery();
 }

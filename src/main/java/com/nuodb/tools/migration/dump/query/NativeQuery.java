@@ -39,12 +39,12 @@ public class NativeQuery implements Query {
     }
 
     @Override
-    public String toQueryString() {
+    public String toQuery() {
         return query;
     }
 
     @Override
     public String toString() {
-        return toQueryString();
+        return toQuery();
     }
 }

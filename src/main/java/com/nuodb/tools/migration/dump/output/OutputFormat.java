@@ -41,7 +41,7 @@ import java.util.Map;
  */
 public interface OutputFormat {
 
-    void init();
+    String getExtension();
 
     void outputBegin(ResultSet resultSet) throws IOException, SQLException;
 

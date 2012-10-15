@@ -40,8 +40,8 @@ import java.util.List;
 public class SelectQueryBuilder {
 
     private Table table;
-    private List<String> columns;
-    private String filter;
+    private List<String> columns = new ArrayList<String>();
+    private List<String> filters = new ArrayList<String>();
 
     public SelectQuery build() {
         Collection<Column> selectQueryColumns;
@@ -63,8 +63,10 @@ public class SelectQueryBuilder {
             selectQuery.addColumn(selectQueryColumn);
         }
         selectQuery.addTable(table);
-        if (filter != null) {
-            selectQuery.addCondition(filter);
+        if (filters != null) {
+            for (String filter : filters) {
+                selectQuery.addCondition(filter);
+            }
         }
         return selectQuery;
     }
@@ -85,11 +87,19 @@ public class SelectQueryBuilder {
         this.columns = columns;
     }
 
-    public String getFilter() {
-        return filter;
+    public void addColumn(String column) {
+        this.columns.add(column);
     }
 
-    public void setFilter(String filter) {
-        this.filter = filter;
+    public List<String> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(List<String> filters) {
+        this.filters = filters;
+    }
+
+    public void addFilter(String filter) {
+        this.filters.add(filter);
     }
 }

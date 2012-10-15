@@ -47,7 +47,7 @@ public class ClassUtils {
         try {
             return (T) newInstance(getClassLoader().loadClass(className));
         } catch (ClassNotFoundException e) {
-            throw new MigrationException("Class is not found " + className);
+            throw new MigrationException("Class not found " + className);
         }
     }
 

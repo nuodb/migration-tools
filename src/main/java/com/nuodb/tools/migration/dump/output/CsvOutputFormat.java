@@ -27,13 +27,11 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import org.supercsv.io.CsvListWriter;
-import org.supercsv.prefs.CsvPreference;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -43,32 +41,39 @@ import java.sql.SQLException;
 @SuppressWarnings("unchecked")
 public class CsvOutputFormat extends OutputFormatBase {
 
-    private CsvListWriter output;
+    public static final String EXTENSION = "csv";
+
+    private CSVPrinter printer;
 
     @Override
-    public void init() {
-        Writer writer = getWriter();
-        OutputStream outputStream = getOutputStream();
-        CsvPreference preference = CsvPreference.STANDARD_PREFERENCE;
-        if (writer != null) {
-            output = new CsvListWriter(writer, preference);
-        } else if (outputStream != null) {
-            output = new CsvListWriter(new PrintWriter(outputStream), preference);
+    public String getExtension() {
+        return EXTENSION;
+    }
+
+    @Override
+    protected void doOutputInit() {
+        CSVFormat format = CSVFormat.DEFAULT;
+        // TODO: Map<String,String> attributes = getAttributes();
+        // TODO: configure csv format based on the provided attributes
+        if (getWriter() != null) {
+            printer = new CSVPrinter(getWriter(), format);
+        } else if (getOutputStream() != null) {
+            printer = new CSVPrinter(new PrintWriter(getOutputStream()), format);
         }
     }
 
     @Override
     protected void doOutputBegin(ResultSet resultSet) throws IOException, SQLException {
-        output.writeHeader(getResultSetMetaModel().getColumns());
+        printer.printRecord(getResultSetMetaModel().getColumns());
     }
 
     @Override
     protected void doOutputRow(ResultSet resultSet) throws IOException, SQLException {
-        output.write(formatColumns(resultSet));
+        printer.printRecord(formatColumns(resultSet));
     }
 
     @Override
     protected void doOutputEnd(ResultSet resultSet) throws IOException, SQLException {
-        output.flush();
+        printer.flush();
     }
 }

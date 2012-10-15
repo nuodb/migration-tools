@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <table>NuoDB Customer Data Migration Tools</table>
+    <name>NuoDB Customer Data Migration Tools</name>
     <groupId>com.nuodb</groupId>
     <artifactId>data-migration-tool</artifactId>
     <version>1.0</version>
@@ -11,6 +11,10 @@
         <repository>
             <id>local</id>
             <url>file://${basedir}/.m2</url>
+        </repository>
+        <repository>
+            <id>apache.snapshots</id>
+            <url>https://repository.apache.org/content/groups/snapshots</url>
         </repository>
     </repositories>
 
@@ -66,9 +70,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>net.sf.supercsv</groupId>
-            <artifactId>super-csv</artifactId>
-            <version>2.0.0-beta-1</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>

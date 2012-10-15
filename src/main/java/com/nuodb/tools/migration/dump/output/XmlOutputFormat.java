@@ -33,11 +33,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
 
@@ -45,6 +42,8 @@ import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
  * @author Sergey Bushik
  */
 public class XmlOutputFormat extends OutputFormatBase {
+
+    public static final String EXTENSION = "xml";
 
     public static final String ENCODING = "utf-8";
     public static final String VERSION = "1.0";
@@ -59,15 +58,18 @@ public class XmlOutputFormat extends OutputFormatBase {
     private String rowElement = ROW_ELEMENT;
 
     @Override
-    public void init() {
+    public String getExtension() {
+        return EXTENSION;
+    }
+
+    @Override
+    protected void doOutputInit() {
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
-        Writer writer = getWriter();
-        OutputStream outputStream = getOutputStream();
         try {
-            if (writer != null) {
-                this.writer = xmlOutputFactory.createXMLStreamWriter(writer);
-            } else {
-                this.writer = xmlOutputFactory.createXMLStreamWriter(outputStream, getEncoding());
+            if (getWriter() != null) {
+                writer = xmlOutputFactory.createXMLStreamWriter(getWriter());
+            } else if (getOutputStream() != null) {
+                writer = xmlOutputFactory.createXMLStreamWriter(getOutputStream(), getEncoding());
             }
         } catch (XMLStreamException e) {
             throw new OutputFormatException(e);
@@ -89,9 +91,9 @@ public class XmlOutputFormat extends OutputFormatBase {
     protected void doOutputRow(ResultSet resultSet) throws IOException, SQLException {
         try {
             writer.writeStartElement(getRowElement());
-            List<String> columns = formatColumns(resultSet);
-            for (int index = 0, columnsSize = columns.size(); index < columnsSize; index++) {
-                doOutputColumn(columns.get(index), index);
+            int index = 0;
+            for (String column : formatColumns(resultSet)) {
+                doOutputColumn(column, index++);
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {

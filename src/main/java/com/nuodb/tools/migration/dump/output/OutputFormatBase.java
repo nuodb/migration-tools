@@ -36,9 +36,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,21 +55,28 @@ public abstract class OutputFormatBase implements OutputFormat {
     @Override
     public final void outputBegin(ResultSet resultSet) throws IOException, SQLException {
         resultSetMetaModel = new ResultSetMetaModel(resultSet);
+        doOutputInit();
         doOutputBegin(resultSet);
     }
 
-    protected abstract void doOutputBegin(ResultSet resultSet) throws IOException, SQLException;
+    protected void doOutputInit() throws IOException {
+    }
+
+    protected void doOutputBegin(ResultSet resultSet) throws IOException, SQLException {
+    }
 
     protected ResultSetMetaModel getResultSetMetaModel() {
         return resultSetMetaModel;
     }
 
-    protected List<String> formatColumns(ResultSet resultSet) throws IOException, SQLException {
-        final List<String> columns = new ArrayList<String>();
+    protected String[] formatColumns(ResultSet resultSet) throws IOException, SQLException {
+        final String[] columns = new String[resultSetMetaModel.getColumnCount()];
         final JdbcTypeAcceptor acceptor = new JdbcTypeAcceptor() {
+            public int column;
+
             @Override
             public void accept(Object value, int type) throws SQLException {
-                columns.add(formatColumn(value, type));
+                columns[column++] = formatColumn(value, type);
             }
         };
         final JdbcTypeExtractor jdbcTypeExtractor = getJdbcTypeExtractor();

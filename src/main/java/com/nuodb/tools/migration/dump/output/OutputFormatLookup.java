@@ -25,48 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.dump.output;
 
-import java.util.List;
+import com.nuodb.tools.migration.spec.OutputSpec;
 
-public class TableSpec {
-    private List<ColumnSpec> columnSpecs;
-    private String name;
-    private String filter;
+/**
+ * @author Sergey Bushik
+ */
+public interface OutputFormatLookup {
 
-    public TableSpec() {
-    }
+    OutputFormat lookup(String type);
 
-    public TableSpec(String name) {
-        this.name = name;
-    }
+    OutputFormat lookup(OutputSpec outputSpec);
 
-    public TableSpec(String name, String filter) {
-        this.name = name;
-        this.filter = filter;
-    }
-
-    public List<ColumnSpec> getColumnSpecs() {
-        return columnSpecs;
-    }
-
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
-        this.columnSpecs = columnSpecs;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getFilter() {
-        return filter;
-    }
-
-    public void setFilter(String filter) {
-        this.filter = filter;
-    }
+    void register(String type, Class<? extends OutputFormat> formatClass);
 }
