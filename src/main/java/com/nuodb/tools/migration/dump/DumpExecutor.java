@@ -60,26 +60,26 @@ import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class Dump {
+public class DumpExecutor {
 
     protected final Log log = LogFactory.getLog(getClass());
 
     protected OutputFormatLookup outputFormatLookup = new OutputFormatLookupImpl();
 
-    public void write(DumpSpec dumpSpec) throws SQLException {
+    public void execute(DumpSpec dumpSpec) throws SQLException {
         // TODO: 1) transaction context should be created / obtained ?
         // TODO: 2) statistics event listener reference to publish events to
         ConnectionSpec connectionSpec = dumpSpec.getConnectionSpec();
         ConnectionProvider connectionProvider = getConnectionProvider(connectionSpec);
         Connection connection = connectionProvider.getConnection();
         try {
-            write(dumpSpec, connection, connectionSpec.getCatalog(), connectionSpec.getSchema());
+            execute(dumpSpec, connection, connectionSpec.getCatalog(), connectionSpec.getSchema());
         } finally {
             connectionProvider.closeConnection(connection);
         }
     }
 
-    public void write(DumpSpec dumpSpec, Connection connection, String catalog, String schema) throws SQLException {
+    public void execute(DumpSpec dumpSpec, Connection connection, String catalog, String schema) throws SQLException {
         DatabaseIntrospector introspector = getDatabaseIntrospector(connection);
         introspector.withCatalog(catalog);
         introspector.withSchema(schema);
@@ -88,7 +88,7 @@ public class Dump {
         Database database = introspector.introspect();
 
         List<Query> queries = createQueries(database, dumpSpec);
-        // TODO: create catalog file dump-${timestamp}.cat and write dump spec & queries to it
+        // TODO: create catalog file dump-${timestamp}.cat and dump dump spec & queries to it
         for (Query query : queries) {
             OutputSpec outputSpec = dumpSpec.getOutputSpec();
             OutputFormat format = getOutputFormatLookup().lookup(outputSpec);
@@ -96,11 +96,11 @@ public class Dump {
             format.setOutputStream(System.out);
             format.setAttributes(outputSpec.getAttributes());
             format.setJdbcTypeExtractor(getJdbcTypeExtractor());
-            write(connection, query, format);
+            execute(connection, query, format);
         }
     }
 
-    protected void write(Connection connection, Query query, OutputFormat format) throws SQLException {
+    protected void execute(Connection connection, Query query, OutputFormat format) throws SQLException {
         if (log.isTraceEnabled()) {
             log.trace(String.format("Writing dump with %1$s", format.getClass().getName()));
         }

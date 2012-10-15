@@ -31,7 +31,7 @@ import com.nuodb.tools.migration.MigrationException;
 import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.dump.Dump;
+import com.nuodb.tools.migration.dump.DumpExecutor;
 import com.nuodb.tools.migration.spec.DumpSpec;
 
 import java.sql.SQLException;
@@ -93,7 +93,7 @@ public class CliDumpFactory extends CliOptionsSupport implements CliRunFactory, 
         @Override
         public void run() {
             try {
-                new Dump().write(dumpSpec);
+                new DumpExecutor().execute(dumpSpec);
             } catch (SQLException e) {
                 throw new MigrationException(e);
             }

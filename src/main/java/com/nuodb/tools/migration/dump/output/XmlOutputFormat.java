@@ -65,6 +65,7 @@ public class XmlOutputFormat extends OutputFormatBase {
     @Override
     protected void doOutputInit() {
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
+        // TODO: configure document element & row element names & encoding based on the provided attributes
         try {
             if (getWriter() != null) {
                 writer = xmlOutputFactory.createXMLStreamWriter(getWriter());
