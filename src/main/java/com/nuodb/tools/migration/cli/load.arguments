@@ -1,0 +1,6 @@
+load
+--target.url=jdbc:com.nuodb://localhost/test
+--target.username=dba
+--target.password=goalie
+--target.properties=
+--target.schema=

@@ -72,4 +72,10 @@ public interface CliOptions {
 
     final String TABLE_OPTION = "table";
     final String TABLE_FILTER_OPTION = "table.*.filter";
+
+    final String TARGET_URL_OPTION = "target.url";
+    final String TARGET_USERNAME_OPTION = "target.username";
+    final String TARGET_PASSWORD_OPTION = "target.password";
+    final String TARGET_PROPERTIES_OPTION = "target.properties";
+    final String TARGET_SCHEMA_OPTION = "target.schema";
 }

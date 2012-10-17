@@ -185,7 +185,8 @@ public class CliHandler implements CliResources, CliOptions {
 
     public static void main(String[] args) throws IOException {
         CliHandler handler = new CliHandler();
-        handler.handle(loadArguments("arguments.properties"));
+        handler.handle(loadArguments("load.arguments"));
+        // handler.handle(loadArguments("dump.arguments"));
         // handler.handle(new String[]{"--help", "dump"});
     }
 

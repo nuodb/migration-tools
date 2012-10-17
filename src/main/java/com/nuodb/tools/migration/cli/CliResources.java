@@ -75,4 +75,17 @@ public interface CliResources {
     final String TABLE_FILTER_ARGUMENT_NAME = "migration.cli.table.filter.argument.name";
 
     final String OUTPUT_OPTION_DESCRIPTION = "migration.cli.output.option.description";
+
+    final String LOAD_GROUP_NAME = "migration.cli.load.group.name";
+    final String TARGET_GROUP_NAME = "migration.cli.target.group.name";
+    final String TARGET_URL_OPTION_DESCRIPTION = "migration.cli.target.url.option.description";
+    final String TARGET_URL_ARGUMENT_NAME = "migration.cli.target.url.argument.name";
+    final String TARGET_USERNAME_OPTION_DESCRIPTION = "migration.cli.target.username.option.description";
+    final String TARGET_USERNAME_ARGUMENT_NAME = "migration.cli.target.username.argument.name";
+    final String TARGET_PASSWORD_OPTION_DESCRIPTION = "migration.cli.target.password.option.description";
+    final String TARGET_PASSWORD_ARGUMENT_NAME = "migration.cli.target.password.argument.name";
+    final String TARGET_PROPERTIES_OPTION_DESCRIPTION = "migration.cli.target.properties.option.description";
+    final String TARGET_PROPERTIES_ARGUMENT_NAME = "migration.cli.target.properties.argument.name";
+    final String TARGET_SCHEMA_OPTION_DESCRIPTION = "migration.cli.target.schema.option.description";
+    final String TARGET_SCHEMA_ARGUMENT_NAME = "migration.cli.target.schema.argument.name";
 }

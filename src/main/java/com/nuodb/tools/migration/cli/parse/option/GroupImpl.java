@@ -234,7 +234,7 @@ public class GroupImpl extends OptionBase implements Group {
         if (present < this.minimum) {
             throw new OptionException(this, "Missing option");
         }
-        // post execute each arguments.properties argument
+        // post execute each dump.arguments argument
         for (Argument argument : arguments) {
             argument.postProcess(commandLine);
         }

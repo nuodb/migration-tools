@@ -26,7 +26,7 @@ import java.util.ListIterator;
 public class ParserImpl implements Parser {
 
     /**
-     * Parse the arguments.properties according to the specified options and properties.
+     * Parse the dump.arguments according to the specified options and properties.
      *
      * @param arguments to parse.
      * @param option    sets the option to parse against.
@@ -55,7 +55,7 @@ public class ParserImpl implements Parser {
             option.process(commandLine, iterator);
         }
         if (iterator.hasNext()) {
-            throw new OptionException(option, String.format("Unexpected argument %1$s", iterator.next()));
+            throw new OptionException(option, String.format("Unexpected argument '%1$s'", iterator.next()));
         }
         option.postProcess(commandLine);
         return commandLine;

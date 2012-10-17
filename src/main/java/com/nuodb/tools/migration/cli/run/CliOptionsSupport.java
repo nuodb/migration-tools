@@ -29,7 +29,9 @@ package com.nuodb.tools.migration.cli.run;
 
 import com.nuodb.tools.migration.cli.CliOptions;
 import com.nuodb.tools.migration.cli.CliResources;
-import com.nuodb.tools.migration.cli.parse.*;
+import com.nuodb.tools.migration.cli.parse.CommandLine;
+import com.nuodb.tools.migration.cli.parse.Option;
+import com.nuodb.tools.migration.cli.parse.OptionException;
 import com.nuodb.tools.migration.cli.parse.option.OptionFormat;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.cli.parse.option.RegexOption;
@@ -274,5 +276,70 @@ public class CliOptionsSupport implements CliResources, CliOptions {
             map.put(pair[0], pair[1]);
         }
         return map;
+    }
+
+
+    public Option createTargetGroup(OptionToolkit optionToolkit) {
+        Option url = optionToolkit.newOption().
+                withName(TARGET_URL_OPTION).
+                withDescription(resources.getMessage(TARGET_URL_OPTION_DESCRIPTION)).
+                withRequired(true).
+                withArgument(
+                        optionToolkit.newArgument().
+                                withName(resources.getMessage(TARGET_URL_ARGUMENT_NAME)).
+                                withRequired(true).
+                                withMinimum(1).build()
+                ).build();
+        Option username = optionToolkit.newOption().
+                withName(TARGET_USERNAME_OPTION).
+                withDescription(resources.getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
+                withArgument(
+                        optionToolkit.newArgument().
+                                withName(resources.getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()
+                ).build();
+        Option password = optionToolkit.newOption().
+                withName(TARGET_PASSWORD_OPTION).
+                withDescription(resources.getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
+                withArgument(
+                        optionToolkit.newArgument().
+                                withName(resources.getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()
+                ).build();
+        Option properties = optionToolkit.newOption().
+                withName(TARGET_PROPERTIES_OPTION).
+                withDescription(resources.getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
+                withArgument(
+                        optionToolkit.newArgument().
+                                withName(resources.getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build()
+                ).build();
+        Option schema = optionToolkit.newOption().
+                withName(TARGET_SCHEMA_OPTION).
+                withDescription(resources.getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
+                withArgument(
+                        optionToolkit.newArgument().
+                                withName(resources.getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
+                ).build();
+        return optionToolkit.newGroup().
+                withName(resources.getMessage(TARGET_GROUP_NAME)).
+                withRequired(true).
+                withMinimum(1).
+                withOption(url).
+                withOption(username).
+                withOption(password).
+                withOption(properties).
+                withOption(schema).build();
+    }
+
+    public ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
+        DriverManagerConnectionSpec connection = new DriverManagerConnectionSpec();
+        connection.setSchema(commandLine.<String>getValue(TARGET_SCHEMA_OPTION));
+        connection.setUrl(commandLine.<String>getValue(TARGET_URL_OPTION));
+        connection.setUsername(commandLine.<String>getValue(TARGET_USERNAME_OPTION));
+        connection.setPassword(commandLine.<String>getValue(TARGET_PASSWORD_OPTION));
+        String properties = commandLine.getValue(TARGET_PROPERTIES_OPTION);
+        if (properties != null) {
+            Map<String, String> map = parseUrl(option, properties);
+            connection.setProperties(map);
+        }
+        return connection;
     }
 }

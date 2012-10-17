@@ -27,8 +27,8 @@
  */
 package com.nuodb.tools.migration.cli.run;
 
+import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.load.LoadExecutor;
 import com.nuodb.tools.migration.spec.LoadSpec;
@@ -36,7 +36,7 @@ import com.nuodb.tools.migration.spec.LoadSpec;
 /**
  * @author Sergey Bushik
  */
-public class CliLoadFactory implements CliRunFactory {
+public class CliLoadFactory extends CliOptionsSupport implements CliRunFactory, CliResources {
 
     public static final String COMMAND = "load";
 
@@ -47,20 +47,26 @@ public class CliLoadFactory implements CliRunFactory {
 
     @Override
     public CliRun createCliRun(OptionToolkit optionToolkit) {
-        return new CliLoad(null);
+        return new CliLoad(optionToolkit);
     }
 
     class CliLoad extends CliRunAdapter {
 
         private LoadSpec loadSpec;
 
-        public CliLoad(Option option) {
-            super(option, COMMAND);
+        public CliLoad(OptionToolkit optionToolkit) {
+            super(optionToolkit.newGroup()
+                    .withName(resources.getMessage(LOAD_GROUP_NAME))
+                    .withOption(createTargetGroup(optionToolkit))
+                    .withRequired(true).build(), COMMAND);
         }
 
         @Override
         protected void bind(CommandLine commandLine) {
             // TODO: parse load spec
+            loadSpec = new LoadSpec();
+            loadSpec.setConnectionSpec(parseTargetGroup(commandLine, this));
+            System.out.println("CliLoadFactory$CliLoad.bind");
         }
 
         @Override

@@ -31,4 +31,13 @@ package com.nuodb.tools.migration.spec;
  * @author Sergey Bushik
  */
 public class LoadSpec extends TaskSpecBase {
+    private ConnectionSpec connectionSpec;
+
+    public ConnectionSpec getConnectionSpec() {
+        return connectionSpec;
+    }
+
+    public void setConnectionSpec(ConnectionSpec connectionSpec) {
+        this.connectionSpec = connectionSpec;
+    }
 }
