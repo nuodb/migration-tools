@@ -37,7 +37,7 @@ import com.nuodb.tools.migration.cli.parse.parser.ParserImpl;
 import com.nuodb.tools.migration.cli.run.CliRun;
 import com.nuodb.tools.migration.cli.run.CliRunFactory;
 import com.nuodb.tools.migration.cli.run.CliRunFactoryLookup;
-import com.nuodb.tools.migration.i18n.Resources;
+import com.nuodb.tools.migration.support.ApplicationSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -55,7 +55,7 @@ import java.util.List;
  *
  * @author Sergey Bushik
  */
-public class CliHandler implements CliResources, CliOptions {
+public class CliHandler extends ApplicationSupport implements CliResources, CliOptions {
 
     private transient final Log log = LogFactory.getLog(getClass());
 
@@ -84,35 +84,34 @@ public class CliHandler implements CliResources, CliOptions {
     }
 
     protected Group createOption() {
-        Resources resources = Resources.getResources();
         Option help = optionToolkit.newOption().
                 withId(HELP_OPTION_ID).
                 withName(HELP_OPTION).
-                withDescription(resources.getMessage(HELP_OPTION_DESCRIPTION)).
+                withDescription(getMessage(HELP_OPTION_DESCRIPTION)).
                 withArgument(
                         optionToolkit.newArgument().
-                                withName(resources.getMessage(HELP_ARGUMENT_NAME)).build()
+                                withName(getMessage(HELP_ARGUMENT_NAME)).build()
                 ).build();
         Option list = optionToolkit.newOption().
                 withId(LIST_OPTION_ID).
                 withName(LIST_OPTION).
-                withDescription(resources.getMessage(LIST_OPTION_DESCRIPTION)).build();
+                withDescription(getMessage(LIST_OPTION_DESCRIPTION)).build();
         Option config = optionToolkit.newOption().
                 withId(CONFIG_OPTION_ID).
                 withName(CONFIG_OPTION).
-                withDescription(resources.getMessage(CONFIG_OPTION_DESCRIPTION)).
+                withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
                 withArgument(
                         optionToolkit.newArgument().
-                                withName(resources.getMessage(CONFIG_ARGUMENT_NAME)).
+                                withName(getMessage(CONFIG_ARGUMENT_NAME)).
                                 withMinimum(1).
                                 withMaximum(1).build()
                 ).build();
 
         Option command = new CliCommand(
-                COMMAND_OPTION_ID, COMMAND_OPTION, resources.getMessage(COMMAND_OPTION_DESCRIPTION), false,
+                COMMAND_OPTION_ID, COMMAND_OPTION, getMessage(COMMAND_OPTION_DESCRIPTION), false,
                 cliRunFactoryLookup, optionToolkit);
         return optionToolkit.newGroup().
-                withName(resources.getMessage(MIGRATION_GROUP_NAME)).
+                withName(getMessage(MIGRATION_GROUP_NAME)).
                 withOption(help).
                 withOption(list).
                 withOption(config).
@@ -186,8 +185,6 @@ public class CliHandler implements CliResources, CliOptions {
     public static void main(String[] args) throws IOException {
         CliHandler handler = new CliHandler();
         handler.handle(loadArguments("load.arguments"));
-        // handler.handle(loadArguments("dump.arguments"));
-        // handler.handle(new String[]{"--help", "dump"});
     }
 
     private static String[] loadArguments(String resource) throws IOException {
@@ -196,7 +193,10 @@ public class CliHandler implements CliResources, CliOptions {
         List<String> arguments = new ArrayList<String>();
         String line;
         while ((line = reader.readLine()) != null) {
-            arguments.add(line.trim());
+            line = line.trim();
+            if (line.length() != 0 && !line.startsWith("#")) {
+                arguments.add(line);
+            }
         }
         return arguments.toArray(new String[arguments.size()]);
     }

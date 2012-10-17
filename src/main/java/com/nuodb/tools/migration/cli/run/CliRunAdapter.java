@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.cli.run;
 
 import com.nuodb.tools.migration.cli.parse.*;
+import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.utils.PriorityList;
 
 import java.util.Comparator;
@@ -38,15 +39,18 @@ import java.util.Set;
 /**
  * @author Sergey Bushik
  */
-public abstract class CliRunAdapter implements CliRun {
+public abstract class CliRunAdapter extends CliRunSupport implements CliRun {
 
     private Option option;
     private String command;
 
-    public CliRunAdapter(Option option, String command) {
-        this.option = option;
+    protected CliRunAdapter(OptionToolkit optionToolkit, String command) {
+        super(optionToolkit);
         this.command = command;
+        this.option = createOption();
     }
+
+    protected abstract Option createOption();
 
     @Override
     public int getId() {

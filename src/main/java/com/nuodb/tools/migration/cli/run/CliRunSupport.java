@@ -32,11 +32,10 @@ import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.OptionException;
-import com.nuodb.tools.migration.cli.parse.option.OptionFormat;
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.cli.parse.option.RegexOption;
+import com.nuodb.tools.migration.cli.parse.option.*;
 import com.nuodb.tools.migration.i18n.Resources;
 import com.nuodb.tools.migration.spec.*;
+import com.nuodb.tools.migration.support.ApplicationSupport;
 import com.nuodb.tools.migration.utils.Priority;
 
 import java.io.UnsupportedEncodingException;
@@ -46,73 +45,77 @@ import java.util.*;
 /**
  * @author Sergey Bushik
  */
-public class CliOptionsSupport implements CliResources, CliOptions {
+public class CliRunSupport extends ApplicationSupport implements CliResources, CliOptions {
 
-    protected Resources resources = Resources.getResources();
+    private OptionToolkit optionToolkit;
+
+    public CliRunSupport(OptionToolkit optionToolkit) {
+        this.optionToolkit = optionToolkit;
+    }
 
     /**
      * Builds the source group of options for the source database connection.
      *
      * @return group of options for the source database.
      */
-    public Option createSourceGroup(OptionToolkit optionToolkit) {
-        Option driver = optionToolkit.newOption().
+    public Option createSourceGroup() {
+        Option driver = newOption().
                 withName(SOURCE_DRIVER_OPTION).
-                withDescription(resources.getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).
+                withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).
+                        newArgument().
+                                withName(getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
-        Option url = optionToolkit.newOption().
+        Option url = newOption().
                 withName(SOURCE_URL_OPTION).
-                withDescription(resources.getMessage(SOURCE_URL_OPTION_DESCRIPTION)).
+                withDescription(getMessage(SOURCE_URL_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(SOURCE_URL_ARGUMENT_NAME)).
+                        newArgument().
+                                withName(getMessage(SOURCE_URL_ARGUMENT_NAME)).
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
-        Option username = optionToolkit.newOption().
+        Option username = newOption().
                 withName(SOURCE_USERNAME_OPTION).
-                withDescription(resources.getMessage(SOURCE_USERNAME_OPTION_DESCRIPTION)).
+                withDescription(getMessage(SOURCE_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(SOURCE_USERNAME_ARGUMENT_NAME)).build()
+                        newArgument().
+                                withName(getMessage(SOURCE_USERNAME_ARGUMENT_NAME)).build()
                 ).build();
-        Option password = optionToolkit.newOption().
+        Option password = newOption().
                 withName(SOURCE_PASSWORD_OPTION).
-                withDescription(resources.getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION)).
+                withDescription(getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).build()
+                        newArgument().
+                                withName(getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).build()
                 ).build();
-        Option properties = optionToolkit.newOption().
+        Option properties = newOption().
                 withName(SOURCE_PROPERTIES_OPTION).
-                withDescription(resources.getMessage(SOURCE_PROPERTIES_OPTION_DESCRIPTION)).
+                withDescription(getMessage(SOURCE_PROPERTIES_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(SOURCE_PROPERTIES_ARGUMENT_NAME)).build()
+                        newArgument().
+                                withName(getMessage(SOURCE_PROPERTIES_ARGUMENT_NAME)).build()
                 ).build();
-        Option catalog = optionToolkit.newOption().
+        Option catalog = newOption().
                 withName(SOURCE_CATALOG_OPTION).
-                withDescription(resources.getMessage(SOURCE_CATALOG_OPTION_DESCRIPTION)).
+                withDescription(getMessage(SOURCE_CATALOG_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(SOURCE_CATALOG_ARGUMENT_NAME)).build()
+                        newArgument().
+                                withName(getMessage(SOURCE_CATALOG_ARGUMENT_NAME)).build()
                 ).build();
-        Option schema = optionToolkit.newOption().
+        Option schema = newOption().
                 withName(SOURCE_SCHEMA_OPTION).
-                withDescription(resources.getMessage(SOURCE_SCHEMA_OPTION_DESCRIPTION)).
+                withDescription(getMessage(SOURCE_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).build()
+                        newArgument().
+                                withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).build()
                 ).build();
-        return optionToolkit.newGroup().
-                withName(resources.getMessage(SOURCE_GROUP_NAME)).
+        return newGroup().
+                withName(getMessage(SOURCE_GROUP_NAME)).
                 withRequired(true).
                 withMinimum(1).
                 withOption(driver).
@@ -124,43 +127,43 @@ public class CliOptionsSupport implements CliResources, CliOptions {
                 withOption(schema).build();
     }
 
-    public Option createOutputGroup(OptionToolkit optionToolkit) {
+    public Option createOutputGroup() {
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
         Resources resources = Resources.getResources();
-        Option type = optionToolkit.newOption().
+        Option type = newOption().
                 withName(OUTPUT_TYPE_OPTION).
-                withDescription(resources.getMessage(OUTPUT_TYPE_OPTION_DESCRIPTION)).
+                withDescription(getMessage(OUTPUT_TYPE_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(OUTPUT_TYPE_ARGUMENT_NAME)).
+                        newArgument().
+                                withName(getMessage(OUTPUT_TYPE_ARGUMENT_NAME)).
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
 
-        Option path = optionToolkit.newOption().
+        Option path = newOption().
                 withName(OUTPUT_PATH_OPTION).
-                withDescription(resources.getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
+                withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(OUTPUT_PATH_ARGUMENT_NAME)).
+                        newArgument().
+                                withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
 
         RegexOption attributes = new RegexOption();
         attributes.setName(OUTPUT_OPTION);
-        attributes.setDescription(resources.getMessage(OUTPUT_OPTION_DESCRIPTION));
+        attributes.setDescription(getMessage(OUTPUT_OPTION_DESCRIPTION));
         attributes.setPrefixes(optionFormat.getOptionPrefixes());
         attributes.setArgumentSeparator(optionFormat.getArgumentSeparator());
         attributes.addRegex("output.*", 1, Priority.LOW);
         attributes.setArgument(
-                optionToolkit.newArgument().
+                newArgument().
                         withName("").
                         withValuesSeparator(null).withMinimum(1).build());
-        return optionToolkit.newGroup().
-                withName(resources.getMessage(OUTPUT_GROUP_NAME)).
+        return newGroup().
+                withName(getMessage(OUTPUT_GROUP_NAME)).
                 withRequired(true).
                 withMinimum(1).
                 withOption(type).
@@ -171,33 +174,33 @@ public class CliOptionsSupport implements CliResources, CliOptions {
     /**
      * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
      */
-    public Option createSelectQueryGroup(OptionToolkit optionToolkit) {
+    public Option createSelectQueryGroup() {
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
-        Option table = optionToolkit.newOption().
+        Option table = newOption().
                 withName(TABLE_OPTION).
-                withDescription(resources.getMessage(TABLE_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(TABLE_ARGUMENT_NAME)).
+                        newArgument().
+                                withName(getMessage(TABLE_ARGUMENT_NAME)).
                                 withMinimum(1).
                                 withRequired(true).build()
                 ).build();
 
         RegexOption tableFilter = new RegexOption();
         tableFilter.setName(TABLE_FILTER_OPTION);
-        tableFilter.setDescription(resources.getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
+        tableFilter.setDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
         tableFilter.setPrefixes(optionFormat.getOptionPrefixes());
         tableFilter.setArgumentSeparator(optionFormat.getArgumentSeparator());
         tableFilter.addRegex(TABLE_FILTER_OPTION, 1, Priority.LOW);
         tableFilter.setArgument(
-                optionToolkit.newArgument().
-                        withName(resources.getMessage(TABLE_FILTER_ARGUMENT_NAME)).
+                newArgument().
+                        withName(getMessage(TABLE_FILTER_ARGUMENT_NAME)).
                         withValuesSeparator(null).
                         withMinimum(1).
                         withRequired(true).build()
         );
-        return optionToolkit.newGroup().
-                withName(resources.getMessage(TABLE_GROUP_NAME)).
+        return newGroup().
+                withName(getMessage(TABLE_GROUP_NAME)).
                 withOption(table).
                 withOption(tableFilter).
                 withMaximum(Integer.MAX_VALUE).
@@ -271,55 +274,54 @@ public class CliOptionsSupport implements CliResources, CliOptions {
         for (String param : params) {
             String[] pair = param.split("=");
             if (pair.length != 2) {
-                throw new OptionException(option, String.format("Malformed name value pair %1$s", pair));
+                throw new OptionException(option, String.format("Malformed name-value pair %1$s", pair));
             }
             map.put(pair[0], pair[1]);
         }
         return map;
     }
 
-
-    public Option createTargetGroup(OptionToolkit optionToolkit) {
-        Option url = optionToolkit.newOption().
+    public Option createTargetGroup() {
+        Option url = newOption().
                 withName(TARGET_URL_OPTION).
-                withDescription(resources.getMessage(TARGET_URL_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(TARGET_URL_ARGUMENT_NAME)).
+                        newArgument().
+                                withName(getMessage(TARGET_URL_ARGUMENT_NAME)).
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
-        Option username = optionToolkit.newOption().
+        Option username = newOption().
                 withName(TARGET_USERNAME_OPTION).
-                withDescription(resources.getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()
+                        newArgument().
+                                withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()
                 ).build();
-        Option password = optionToolkit.newOption().
+        Option password = newOption().
                 withName(TARGET_PASSWORD_OPTION).
-                withDescription(resources.getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()
+                        newArgument().
+                                withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()
                 ).build();
-        Option properties = optionToolkit.newOption().
+        Option properties = newOption().
                 withName(TARGET_PROPERTIES_OPTION).
-                withDescription(resources.getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build()
+                        newArgument().
+                                withName(getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build()
                 ).build();
-        Option schema = optionToolkit.newOption().
+        Option schema = newOption().
                 withName(TARGET_SCHEMA_OPTION).
-                withDescription(resources.getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
-                                withName(resources.getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
+                        newArgument().
+                                withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
                 ).build();
-        return optionToolkit.newGroup().
-                withName(resources.getMessage(TARGET_GROUP_NAME)).
+        return newGroup().
+                withName(getMessage(TARGET_GROUP_NAME)).
                 withRequired(true).
                 withMinimum(1).
                 withOption(url).
@@ -341,5 +343,21 @@ public class CliOptionsSupport implements CliResources, CliOptions {
             connection.setProperties(map);
         }
         return connection;
+    }
+
+    public OptionBuilder newOption() {
+        return optionToolkit.newOption();
+    }
+
+    public GroupBuilder newGroup() {
+        return optionToolkit.newGroup();
+    }
+
+    public ArgumentBuilder newArgument() {
+        return optionToolkit.newArgument();
+    }
+
+    public OptionFormat getOptionFormat() {
+        return optionToolkit.getOptionFormat();
     }
 }

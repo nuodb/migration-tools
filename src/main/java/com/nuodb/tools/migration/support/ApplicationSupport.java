@@ -25,59 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.run;
+package com.nuodb.tools.migration.support;
 
-import com.nuodb.tools.migration.cli.CliResources;
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Option;
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.load.LoadExecutor;
-import com.nuodb.tools.migration.spec.LoadSpec;
+import com.nuodb.tools.migration.context.MigrationContext;
+import com.nuodb.tools.migration.context.MigrationContextHolder;
+import com.nuodb.tools.migration.i18n.Resources;
 
 /**
  * @author Sergey Bushik
  */
-public class CliLoadFactory implements CliRunFactory, CliResources {
+public class ApplicationSupport {
 
-    public static final String COMMAND = "load";
-
-    @Override
-    public String getCommand() {
-        return COMMAND;
+    public MigrationContext getMigrationContext() {
+        return MigrationContextHolder.getContext();
     }
 
-    @Override
-    public CliRun createCliRun(OptionToolkit optionToolkit) {
-        return new CliLoad(optionToolkit);
+    public Resources getResources() {
+        return getMigrationContext().getResources();
     }
 
-    class CliLoad extends CliRunAdapter {
-
-        private LoadSpec loadSpec;
-
-        public CliLoad(OptionToolkit optionToolkit) {
-            super(optionToolkit, COMMAND);
-        }
-
-        @Override
-        protected Option createOption() {
-            return newGroup()
-                    .withName(getResources().getMessage(LOAD_GROUP_NAME))
-                    .withOption(createTargetGroup())
-                    .withRequired(true).build();
-        }
-
-        @Override
-        protected void bind(CommandLine commandLine) {
-            // TODO: parse load spec
-            loadSpec = new LoadSpec();
-            loadSpec.setConnectionSpec(parseTargetGroup(commandLine, this));
-            System.out.println("CliLoadFactory$CliLoad.bind");
-        }
-
-        @Override
-        public void run() {
-            new LoadExecutor().load(loadSpec);
-        }
+    public String getMessage(String key, Object... values) {
+        return getResources().getMessage(key, values);
     }
 }

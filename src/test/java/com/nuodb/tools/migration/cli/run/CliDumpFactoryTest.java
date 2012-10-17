@@ -46,13 +46,4 @@ public class CliDumpFactoryTest {
         when(groupBuilder.withName(anyString())).thenReturn(groupBuilder);
         when(groupBuilder.withRequired(anyBoolean())).thenReturn(groupBuilder);
     }
-
-    @Test
-    public void testCreateCliRun() throws Exception {
-        final CliDumpFactory cliDumpFactory = new CliDumpFactory();
-        final CliDumpFactory spy = spy(cliDumpFactory);
-        spy.createCliRun(optionToolkit);
-        verify(spy, times(1)).createOutputGroup(optionToolkit);
-        verify(spy, times(1)).createSourceGroup(optionToolkit);
-    }
 }

@@ -30,6 +30,7 @@ package com.nuodb.tools.migration.cli.run;
 import com.nuodb.tools.migration.MigrationException;
 import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
+import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.dump.DumpExecutor;
 import com.nuodb.tools.migration.spec.DumpSpec;
@@ -38,13 +39,13 @@ import java.sql.SQLException;
 
 /**
  * The Factory instantiates a {@link CliDump} which is a set of groups of options for source database connection spec
- * {@link #createSourceGroup}, spec of output format & type via {@link #createOutputGroup}, table option {@link
- * #createSelectQueryGroup} and after a validation is passed assembles command line option arguments into a {@link DumpSpec}
- * object.
+ * {@link CliRunSupport#createSourceGroup}, spec of output format & type via {@link CliRunSupport#createOutputGroup},
+ * table option {@link CliRunSupport#createSelectQueryGroup} and after a validation is passed assembles command line
+ * option arguments into a {@link DumpSpec} object.
  *
  * @author Sergey Bushik
  */
-public class CliDumpFactory extends CliOptionsSupport implements CliRunFactory, CliResources {
+public class CliDumpFactory implements CliRunFactory, CliResources {
 
     /**
      * The "dump" literal command which is matched against the value on the command line. If matched the CliDump object
@@ -63,20 +64,25 @@ public class CliDumpFactory extends CliOptionsSupport implements CliRunFactory, 
     }
 
     /**
-     * An implementation of {@link CliRunAdapter} which assembles dump spec from provided
-     * command line after the validation is passed.
+     * An implementation of {@link CliRunAdapter} which assembles dump spec from provided command line after the
+     * validation is passed.
      */
     class CliDump extends CliRunAdapter {
 
         private DumpSpec dumpSpec;
 
         public CliDump(OptionToolkit optionToolkit) {
-            super(optionToolkit.newGroup()
-                    .withName(resources.getMessage(DUMP_GROUP_NAME))
-                    .withOption(createSourceGroup(optionToolkit))
-                    .withOption(createOutputGroup(optionToolkit))
-                    .withOption(createSelectQueryGroup(optionToolkit))
-                    .withRequired(true).build(), COMMAND);
+            super(optionToolkit, COMMAND);
+        }
+
+        @Override
+        protected Option createOption() {
+            return newGroup()
+                    .withName(getResources().getMessage(DUMP_GROUP_NAME))
+                    .withOption(createSourceGroup())
+                    .withOption(createOutputGroup())
+                    .withOption(createSelectQueryGroup())
+                    .withRequired(true).build();
         }
 
         @Override
