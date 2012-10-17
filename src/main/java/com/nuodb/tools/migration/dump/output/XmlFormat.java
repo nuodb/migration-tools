@@ -25,47 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.run;
-
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Option;
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.load.LoadExecutor;
-import com.nuodb.tools.migration.spec.LoadSpec;
+package com.nuodb.tools.migration.dump.output;
 
 /**
  * @author Sergey Bushik
  */
-public class CliLoadFactory implements CliRunFactory {
+public interface XmlFormat {
+    static final String EXTENSION = "xml";
 
-    public static final String COMMAND = "load";
+    final String ATTRIBUTE_ENCODING = "xml.encoding";
+    final String ATTRIBUTE_VERSION = "xml.version";
+    final String ATTRIBUTE_DOCUMENT_ELEMENT = "xml.document.element";
+    final String ATTRIBUTE_ROW_ELEMENT = "xml.row.element";
 
-    @Override
-    public String getCommand() {
-        return COMMAND;
-    }
-
-    @Override
-    public CliRun createCliRun(OptionToolkit optionToolkit) {
-        return new CliLoad(null);
-    }
-
-    class CliLoad extends CliRunAdapter {
-
-        private LoadSpec loadSpec;
-
-        public CliLoad(Option option) {
-            super(option, COMMAND);
-        }
-
-        @Override
-        protected void bind(CommandLine commandLine) {
-            // TODO: parse load spec
-        }
-
-        @Override
-        public void run() {
-            new LoadExecutor().load(loadSpec);
-        }
-    }
+    final String ENCODING = "utf-8";
+    final String VERSION = "1.0";
+    final String DOCUMENT_ELEMENT = "rows";
+    final String ROW_ELEMENT = "row";
 }

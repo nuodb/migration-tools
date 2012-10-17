@@ -27,46 +27,41 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Trigger;
+import com.nuodb.tools.migration.cli.parse.*;
 import com.nuodb.tools.migration.match.AntRegexCompiler;
 import com.nuodb.tools.migration.match.Match;
 import com.nuodb.tools.migration.match.RegexCompiler;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static com.nuodb.tools.migration.cli.parse.HelpHint.OPTIONAL;
 
 /**
  * @author Sergey Bushik
  */
-public class RegexOption extends OptionImpl {
+public class RegexOption extends ContainerBase {
 
     /**
      * Regular expression compiler used to compile wild char triggers into a pattern to match & process --table.*,
      * --table.*.filter=<filter> options.
      */
     private RegexCompiler regexCompiler = AntRegexCompiler.INSTANCE;
-
     private Map<RegexTrigger, Integer> triggersGroups = new HashMap<RegexTrigger, Integer>();
 
     public RegexOption() {
+        setOptionProcessor(new ArgumentMaximumProcessor());
     }
 
     public RegexOption(int id, String name, String description, boolean required) {
         super(id, name, description, required);
+        setOptionProcessor(new ArgumentMaximumProcessor());
     }
 
-    public RegexOption(int id, String name, String description, boolean required,
-                       Set<String> prefixes, Set<String> aliases) {
-        super(id, name, description, required, prefixes, aliases);
-    }
-
-    public void addRegex(String regex, int group) {
+    public void addRegex(String regex, int group, int priority) {
         for (String prefix : getPrefixes()) {
             RegexTrigger trigger = new RegexTrigger(regexCompiler.compile(prefix + regex));
             getTriggersGroups().put(trigger, group);
-            addTrigger(trigger);
+            addTrigger(trigger, priority);
         }
     }
 
@@ -74,18 +69,27 @@ public class RegexOption extends OptionImpl {
      * Tests if arguments matches Ant style regexp for provided table names.
      *
      * @param commandLine command line to store matched table names in.
-     * @param argument    to execute regular expression on.
-     * @param trigger     which was triggered.
+     * @param arguments   to execute regular expression on.
      */
     @Override
-    protected void processInternal(CommandLine commandLine, Trigger trigger, String argument) {
-        super.processInternal(commandLine, trigger, argument);
-        if (trigger instanceof RegexTrigger) {
-            processInternal(commandLine, (RegexTrigger) trigger, argument);
+    public void processInternal(CommandLine commandLine, ListIterator<String> arguments) {
+        String argument = arguments.next();
+        Trigger trigger = getTriggerFired(getTriggers(), argument);
+        if (canProcess(commandLine, argument)) {
+            processTriggerFired(commandLine, trigger, argument);
+        } else {
+            throw new OptionException(this, String.format("Unexpected token %1$s", argument));
         }
     }
 
-    protected void processInternal(CommandLine commandLine, RegexTrigger trigger, String argument) {
+    protected void processTriggerFired(CommandLine commandLine, Trigger trigger, String argument) {
+        commandLine.addOption(this);
+        if (trigger instanceof RegexTrigger) {
+            processRegexTriggerFired(commandLine, (RegexTrigger) trigger, argument);
+        }
+    }
+
+    protected void processRegexTriggerFired(CommandLine commandLine, RegexTrigger trigger, String argument) {
         Match match = trigger.getRegex().exec(argument);
         Integer group = getTriggersGroups().get(trigger);
         String[] matches = match.matches();
@@ -96,5 +100,44 @@ public class RegexOption extends OptionImpl {
 
     public Map<RegexTrigger, Integer> getTriggersGroups() {
         return triggersGroups;
+    }
+
+    @Override
+    public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator) {
+        boolean optional = !isRequired() && hints.contains(OPTIONAL);
+        if (optional) {
+            buffer.append('[');
+        }
+        buffer.append(getName());
+        super.help(buffer, hints, comparator);
+        if (optional) {
+            buffer.append(']');
+        }
+    }
+
+    /**
+     * Updates maximum value of container's argument option. Used with RegexOption when part of option name matching
+     * regular expression is stored in the option items and option's argument.
+     */
+    static class ArgumentMaximumProcessor implements OptionProcessor {
+
+        private int count = 0;
+
+        @Override
+        public void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments) {
+        }
+
+        @Override
+        public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
+            Container container = (Container) option;
+            Argument argument = container.getArgument();
+            if (argument != null) {
+                argument.setMaximum(++count * 2);
+            }
+        }
+
+        @Override
+        public void postProcess(CommandLine commandLine, Option option) {
+        }
     }
 }

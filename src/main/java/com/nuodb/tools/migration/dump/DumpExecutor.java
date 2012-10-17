@@ -94,7 +94,7 @@ public class DumpExecutor {
             OutputFormat format = getOutputFormatLookup().lookup(outputSpec);
             // TODO: create output file for the query table-${timestamp}.${type} or query-${timestamp}.csv and append it the catalog file
             format.setOutputStream(System.out);
-            format.setAttributes(outputSpec.getAttributes());
+            format.configure(outputSpec.getAttributes());
             format.setJdbcTypeExtractor(getJdbcTypeExtractor());
             execute(connection, query, format);
         }

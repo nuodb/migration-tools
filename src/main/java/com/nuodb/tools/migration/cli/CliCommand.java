@@ -36,10 +36,10 @@ import com.nuodb.tools.migration.cli.parse.option.TriggerImpl;
 import com.nuodb.tools.migration.cli.run.CliRun;
 import com.nuodb.tools.migration.cli.run.CliRunFactory;
 import com.nuodb.tools.migration.cli.run.CliRunFactoryLookup;
+import com.nuodb.tools.migration.utils.PriorityList;
+import com.nuodb.tools.migration.utils.PriorityListImpl;
 
-import java.util.HashSet;
 import java.util.ListIterator;
-import java.util.Set;
 
 /**
  * @author Sergey Bushik
@@ -62,8 +62,8 @@ public class CliCommand extends ArgumentImpl {
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
-        Set<Trigger> triggers = new HashSet<Trigger>();
+    public PriorityList<Trigger> getTriggers() {
+        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
         for (String command : runFactoryLookup.getCommands()) {
             triggers.add(new TriggerImpl(command));
         }

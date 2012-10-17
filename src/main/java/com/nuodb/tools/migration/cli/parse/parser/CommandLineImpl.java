@@ -30,7 +30,7 @@ import java.util.*;
 public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     private List<String> arguments;
-    private List<Option> options = new ArrayList<Option>();
+    private Set<Option> options = new HashSet<Option>();
     private Map<Option, List<Object>> values = new HashMap<Option, List<Object>>();
     private Map<Option, Boolean> switches = new HashMap<Option, Boolean>();
     private Map<Option, List<Object>> defaultValues = new HashMap<Option, List<Object>>();
@@ -190,8 +190,8 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     }
 
     @Override
-    public List<Option> getOptions() {
-        return Collections.unmodifiableList(options);
+    public Set<Option> getOptions() {
+        return Collections.unmodifiableSet(options);
     }
 
     @Override

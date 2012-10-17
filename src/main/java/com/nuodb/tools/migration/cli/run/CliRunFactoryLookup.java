@@ -40,6 +40,7 @@ public class CliRunFactoryLookup {
 
     public CliRunFactoryLookup() {
         register(new CliDumpFactory());
+        register(new CliLoadFactory());
     }
 
     public Collection<String> getCommands() {

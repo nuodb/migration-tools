@@ -27,6 +27,9 @@
  */
 package com.nuodb.tools.migration.config.xml;
 
+import com.nuodb.tools.migration.utils.Priority;
+import com.nuodb.tools.migration.utils.PriorityList;
+import com.nuodb.tools.migration.utils.PriorityListImpl;
 import org.simpleframework.xml.convert.Converter;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
@@ -34,22 +37,15 @@ import org.simpleframework.xml.stream.OutputNode;
 @SuppressWarnings("unchecked")
 public class XmlHandlerRegistry {
 
-    //TODO convert to enum?
-    public static final int PRIORITY_HIGH = 1;
-    public static final int PRIORITY_NORMAL = 0;
-    public static final int PRIORITY_LOW = -1;
-
-    private PriorityList<XmlReadHandler> readers = new PriorityList<XmlReadHandler>();
-    private PriorityList<XmlWriteHandler> writers = new PriorityList<XmlWriteHandler>();
+    private PriorityList<XmlReadHandler> readers = new PriorityListImpl<XmlReadHandler>();
+    private PriorityList<XmlWriteHandler> writers = new PriorityListImpl<XmlWriteHandler>();
 
     public XmlHandlerRegistry register(XmlHandler handler) {
-        return register(handler, PRIORITY_NORMAL);
+        return register(handler, Priority.NORMAL);
     }
 
-    //TODO handler type and priority check
     public XmlHandlerRegistry register(XmlHandler handler, int priority) {
         assert (handler instanceof XmlReadHandler || handler instanceof XmlWriteHandler);
-
         if (handler instanceof XmlWriteHandler) {
             writers.add((XmlWriteHandler) handler, priority);
         }

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * An option that can execute values passed on the executable line in the form "--file readme.txt".
+ * An option that can execute items passed on the executable line in the form "--file readme.txt".
  */
 public interface Argument extends Option {
 
@@ -60,11 +60,11 @@ public interface Argument extends Option {
     void process(CommandLine commandLine, ListIterator<String> arguments, Option option);
 
     /**
-     * Performs any post execute logic on the values added to the executable line.
+     * Performs any post execute logic on the items added to the executable line.
      * <p/>
      *
      * @param commandLine the executable line object to query.
-     * @param option      the option to lookup values with.
+     * @param option      the option to lookup items with.
      */
     void postProcess(CommandLine commandLine, Option option);
 }

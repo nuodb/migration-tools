@@ -17,6 +17,8 @@
 package com.nuodb.tools.migration.cli.parse.option;
 
 import com.nuodb.tools.migration.cli.parse.*;
+import com.nuodb.tools.migration.utils.PriorityList;
+import com.nuodb.tools.migration.utils.PriorityListImpl;
 
 import java.util.*;
 
@@ -25,7 +27,7 @@ import static com.nuodb.tools.migration.cli.parse.HelpHint.*;
 /**
  * An implementation of option of options.
  */
-public class GroupImpl extends BaseOption implements Group {
+public class GroupImpl extends OptionBase implements Group {
 
     public static final String OPTION_SEPARATOR = "|";
 
@@ -35,7 +37,7 @@ public class GroupImpl extends BaseOption implements Group {
     private List<Option> options = new ArrayList<Option>();
     private Set<String> prefixes = new HashSet<String>();
     private List<Argument> arguments = new ArrayList<Argument>();
-    private Map<Trigger, Option> triggers = new HashMap<Trigger, Option>();
+    private PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
 
     public GroupImpl() {
     }
@@ -78,9 +80,7 @@ public class GroupImpl extends BaseOption implements Group {
             arguments.add((Argument) option);
         } else {
             options.add(option);
-            for (Trigger trigger : option.getTriggers()) {
-                triggers.put(trigger, option);
-            }
+            triggers.addAll(option.getTriggers());
             prefixes.addAll(option.getPrefixes());
         }
     }
@@ -97,10 +97,10 @@ public class GroupImpl extends BaseOption implements Group {
             return false;
         }
         Trigger trigger = new TriggerImpl(argument);
-        if (triggers.containsKey(trigger)) {
+        if (triggers.contains(trigger)) {
             return true;
         }
-        for (Option option : triggers.values()) {
+        for (Option option : options) {
             if (option.canProcess(commandLine, argument)) {
                 return true;
             }
@@ -130,8 +130,8 @@ public class GroupImpl extends BaseOption implements Group {
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
-        return triggers.keySet();
+    public PriorityList<Trigger> getTriggers() {
+        return triggers;
     }
 
     /**
@@ -190,7 +190,7 @@ public class GroupImpl extends BaseOption implements Group {
     }
 
     protected void processOption(CommandLine commandLine, ListIterator<String> arguments, String argument) {
-        for (Option option : this.triggers.values()) {
+        for (Option option : this.options) {
             if (option.canProcess(commandLine, argument)) {
                 option.preProcess(commandLine, arguments);
                 option.process(commandLine, arguments);

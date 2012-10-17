@@ -25,47 +25,13 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.run;
-
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Option;
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.load.LoadExecutor;
-import com.nuodb.tools.migration.spec.LoadSpec;
+package com.nuodb.tools.migration.utils;
 
 /**
  * @author Sergey Bushik
  */
-public class CliLoadFactory implements CliRunFactory {
-
-    public static final String COMMAND = "load";
-
-    @Override
-    public String getCommand() {
-        return COMMAND;
-    }
-
-    @Override
-    public CliRun createCliRun(OptionToolkit optionToolkit) {
-        return new CliLoad(null);
-    }
-
-    class CliLoad extends CliRunAdapter {
-
-        private LoadSpec loadSpec;
-
-        public CliLoad(Option option) {
-            super(option, COMMAND);
-        }
-
-        @Override
-        protected void bind(CommandLine commandLine) {
-            // TODO: parse load spec
-        }
-
-        @Override
-        public void run() {
-            new LoadExecutor().load(loadSpec);
-        }
-    }
+public interface Priority {
+    final int LOW    = -1;
+    final int NORMAL = 0;
+    final int HIGH   = 1;
 }

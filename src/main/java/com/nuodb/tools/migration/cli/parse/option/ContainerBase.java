@@ -28,22 +28,25 @@
 package com.nuodb.tools.migration.cli.parse.option;
 
 import com.nuodb.tools.migration.cli.parse.*;
+import com.nuodb.tools.migration.utils.PriorityList;
+import com.nuodb.tools.migration.utils.PriorityListImpl;
 
 import java.util.*;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class BaseContainer extends BaseOption implements Container {
+public abstract class ContainerBase extends OptionBase implements Container {
 
     private Group group;
     private Argument argument;
     private String argumentSeparator;
+    private Set<String> prefixes;
 
-    protected BaseContainer() {
+    protected ContainerBase() {
     }
 
-    protected BaseContainer(int id, String name, String description, boolean required) {
+    protected ContainerBase(int id, String name, String description, boolean required) {
         super(id, name, description, required);
     }
 
@@ -79,12 +82,23 @@ public abstract class BaseContainer extends BaseOption implements Container {
 
     @Override
     public Set<String> getPrefixes() {
-        return group != null ? group.getPrefixes() : Collections.<String>emptySet();
+        Set<String> prefixes = new HashSet<String>();
+        if (group != null) {
+            prefixes.addAll(group.getPrefixes());
+        }
+        if (this.prefixes != null) {
+            prefixes.addAll(this.prefixes);
+        }
+        return prefixes;
+    }
+
+    public void setPrefixes(Set<String> prefixes) {
+        this.prefixes = prefixes;
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
-        Set<Trigger> triggers = new HashSet<Trigger>();
+    public PriorityList<Trigger> getTriggers() {
+        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
         triggers.addAll(super.getTriggers());
         if (group != null) {
             triggers.addAll(group.getTriggers());
@@ -94,19 +108,19 @@ public abstract class BaseContainer extends BaseOption implements Container {
 
     @Override
     public boolean canProcess(CommandLine commandLine, String argument) {
-        Set<Trigger> triggers = getTriggers();
+        PriorityList<Trigger> triggers = getTriggers();
         if (this.argument != null) {
             if (this.argumentSeparator != null) {
                 int index = argument.indexOf(this.argumentSeparator);
                 if (index > 0) {
-                    return fire(triggers, argument.substring(0, index)) != null;
+                    return getTriggerFired(triggers, argument.substring(0, index)) != null;
                 }
             }
         }
-        return fire(triggers, argument) != null;
+        return getTriggerFired(triggers, argument) != null;
     }
 
-    protected Trigger fire(Set<Trigger> triggers, String argument) {
+    protected Trigger getTriggerFired(PriorityList<Trigger> triggers, String argument) {
         for (Trigger trigger : triggers) {
             if (trigger.fire(argument)) {
                 return trigger;

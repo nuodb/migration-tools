@@ -25,47 +25,25 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.run;
+package com.nuodb.tools.migration.utils;
 
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Option;
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.load.LoadExecutor;
-import com.nuodb.tools.migration.spec.LoadSpec;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public class CliLoadFactory implements CliRunFactory {
+public interface PriorityList<T> extends Collection<T> {
 
-    public static final String COMMAND = "load";
+    boolean add(T t, int priority);
 
-    @Override
-    public String getCommand() {
-        return COMMAND;
-    }
+    boolean addAll(PriorityList<? extends T> list);
 
-    @Override
-    public CliRun createCliRun(OptionToolkit optionToolkit) {
-        return new CliLoad(null);
-    }
+    Collection<Item<T>> items();
 
-    class CliLoad extends CliRunAdapter {
+    interface Item<T> {
 
-        private LoadSpec loadSpec;
+        T getValue();
 
-        public CliLoad(Option option) {
-            super(option, COMMAND);
-        }
-
-        @Override
-        protected void bind(CommandLine commandLine) {
-            // TODO: parse load spec
-        }
-
-        @Override
-        public void run() {
-            new LoadExecutor().load(loadSpec);
-        }
+        int getPriority();
     }
 }

@@ -17,6 +17,8 @@
 package com.nuodb.tools.migration.cli.parse.option;
 
 import com.nuodb.tools.migration.cli.parse.*;
+import com.nuodb.tools.migration.utils.PriorityList;
+import com.nuodb.tools.migration.utils.PriorityListImpl;
 
 import java.util.*;
 
@@ -26,7 +28,7 @@ import static com.nuodb.tools.migration.cli.parse.HelpHint.PROPERTY;
 /**
  * Handles the java style options prefixed with -D
  */
-public class Property extends BaseOption {
+public class Property extends OptionBase {
 
     public static String PREFIX = "-D";
 
@@ -58,8 +60,10 @@ public class Property extends BaseOption {
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
-        return Collections.singleton((Trigger) new TriggerImpl(prefix));
+    public PriorityList<Trigger> getTriggers() {
+        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+        triggers.add(new TriggerImpl(prefix));
+        return triggers;
     }
 
     @Override

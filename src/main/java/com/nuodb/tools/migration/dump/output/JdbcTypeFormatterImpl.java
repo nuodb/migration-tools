@@ -62,7 +62,7 @@ public class JdbcTypeFormatterImpl implements JdbcTypeFormatter {
     private Format timestampFormat = TIMESTAMP_FORMAT;
 
     public String format(Object value, int type) {
-        String result;
+        String result = null;
         if (value != null) {
             switch (type) {
                 case Types.BIT:
@@ -164,8 +164,6 @@ public class JdbcTypeFormatterImpl implements JdbcTypeFormatter {
                 default:
                     throw new OutputFormatException(String.format("Jdbc type %1$d formatting unsupported", type));
             }
-        } else {
-            result = "";
         }
         return result;
     }

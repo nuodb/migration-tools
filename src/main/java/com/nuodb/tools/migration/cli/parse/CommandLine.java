@@ -19,7 +19,7 @@ package com.nuodb.tools.migration.cli.parse;
 import java.util.List;
 
 /**
- * A CommandLine that detected values and options can be written to.
+ * A CommandLine that detected items and options can be written to.
  */
 public interface CommandLine extends OptionSet {
 

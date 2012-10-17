@@ -41,21 +41,14 @@ import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
 /**
  * @author Sergey Bushik
  */
-public class XmlOutputFormat extends OutputFormatBase {
-
-    public static final String EXTENSION = "xml";
-
-    public static final String ENCODING = "utf-8";
-    public static final String VERSION = "1.0";
-    public static final String DOCUMENT_ELEMENT = "rows";
-    public static final String ROW_ELEMENT = "row";
+public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
 
     private XMLStreamWriter writer;
 
-    private String encoding = ENCODING;
-    private String version = VERSION;
-    private String documentElement = DOCUMENT_ELEMENT;
-    private String rowElement = ROW_ELEMENT;
+    private String encoding;
+    private String version;
+    private String documentElement;
+    private String rowElement;
 
     @Override
     public String getExtension() {
@@ -63,9 +56,16 @@ public class XmlOutputFormat extends OutputFormatBase {
     }
 
     @Override
+    protected void doConfigure() {
+        documentElement = getAttribute(ATTRIBUTE_DOCUMENT_ELEMENT, DOCUMENT_ELEMENT);
+        rowElement = getAttribute(ATTRIBUTE_ROW_ELEMENT, ROW_ELEMENT);
+        version = getAttribute(ATTRIBUTE_VERSION, VERSION);
+        encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
+    }
+
+    @Override
     protected void doOutputInit() {
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
-        // TODO: configure document element & row element names & encoding based on the provided attributes
         try {
             if (getWriter() != null) {
                 writer = xmlOutputFactory.createXMLStreamWriter(getWriter());

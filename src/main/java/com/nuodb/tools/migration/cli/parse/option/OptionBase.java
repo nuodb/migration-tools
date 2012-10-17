@@ -16,28 +16,37 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
-import com.nuodb.tools.migration.cli.parse.*;
+import com.nuodb.tools.migration.cli.parse.CommandLine;
+import com.nuodb.tools.migration.cli.parse.HelpHint;
+import com.nuodb.tools.migration.cli.parse.Option;
+import com.nuodb.tools.migration.cli.parse.OptionException;
+import com.nuodb.tools.migration.cli.parse.OptionProcessor;
+import com.nuodb.tools.migration.cli.parse.Trigger;
+import com.nuodb.tools.migration.utils.Priority;
+import com.nuodb.tools.migration.utils.PriorityList;
+import com.nuodb.tools.migration.utils.PriorityListImpl;
 
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Set;
 
 /**
  * A base implementation of option providing limited ground work for further implementations.
  */
-public abstract class BaseOption implements Option {
+public abstract class OptionBase implements Option {
 
     private int id;
     private String name;
     private String description;
     private boolean required;
     private OptionProcessor optionProcessor;
-    private Set<Trigger> triggers = new HashSet<Trigger>();
+    private PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
 
-    protected BaseOption() {
+    protected OptionBase() {
     }
 
-    protected BaseOption(int id, String name, String description, boolean required) {
+    protected OptionBase(int id, String name, String description, boolean required) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -96,11 +105,16 @@ public abstract class BaseOption implements Option {
 
     @Override
     public void addTrigger(Trigger trigger) {
-        triggers.add(trigger);
+        addTrigger(trigger, Priority.NORMAL);
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
+    public void addTrigger(Trigger trigger, int priority) {
+        triggers.add(trigger, priority);
+    }
+
+    @Override
+    public PriorityList<Trigger> getTriggers() {
         return triggers;
     }
 
@@ -166,11 +180,26 @@ public abstract class BaseOption implements Option {
         }
     }
 
+    public static void createTriggers(PriorityList<Trigger> triggers, Set<String> prefixes, String trigger) {
+        for (String prefix : prefixes) {
+            triggers.add(new TriggerImpl(prefix + trigger));
+        }
+    }
+
+    public static void join(StringBuilder help, Collection<?> values) {
+        for (Iterator<?> iterator = values.iterator(); iterator.hasNext(); ) {
+            help.append(iterator.next());
+            if (iterator.hasNext()) {
+                help.append(",");
+            }
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BaseOption option = (BaseOption) o;
+        OptionBase option = (OptionBase) o;
         if (id != option.id) return false;
         if (name != null ? !name.equals(option.name) : option.name != null) return false;
         if (description != null ? !description.equals(option.description) : option.description != null) return false;

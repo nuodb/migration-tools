@@ -43,6 +43,8 @@ public interface OutputFormat {
 
     String getExtension();
 
+    void configure(Map<String, String> attributes);
+
     void outputBegin(ResultSet resultSet) throws IOException, SQLException;
 
     void outputRow(ResultSet resultSet) throws IOException, SQLException;
@@ -52,8 +54,6 @@ public interface OutputFormat {
     void setWriter(Writer writer);
 
     void setOutputStream(OutputStream outputStream);
-
-    void setAttributes(Map<String, String> attributes);
 
     void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
 

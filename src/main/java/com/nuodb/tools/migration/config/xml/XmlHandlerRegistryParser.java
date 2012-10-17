@@ -29,6 +29,7 @@ package com.nuodb.tools.migration.config.xml;
 
 import com.nuodb.tools.migration.utils.Assertions;
 import com.nuodb.tools.migration.utils.ClassUtils;
+import com.nuodb.tools.migration.utils.Priority;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -89,7 +90,7 @@ public class XmlHandlerRegistryParser {
         value = value.trim();
         int comma = value.lastIndexOf(",");
         String handlerClassAsText;
-        int priority = XmlHandlerRegistry.PRIORITY_NORMAL;
+        int priority = Priority.NORMAL;
         if (comma == -1) {
             handlerClassAsText = value;
         } else {

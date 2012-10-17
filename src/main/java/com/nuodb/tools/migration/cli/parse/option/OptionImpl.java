@@ -28,6 +28,8 @@
 package com.nuodb.tools.migration.cli.parse.option;
 
 import com.nuodb.tools.migration.cli.parse.*;
+import com.nuodb.tools.migration.utils.PriorityList;
+import com.nuodb.tools.migration.utils.PriorityListImpl;
 
 import java.util.*;
 
@@ -36,7 +38,7 @@ import static com.nuodb.tools.migration.cli.parse.HelpHint.*;
 /**
  * @author Sergey Bushik
  */
-public class OptionImpl extends BaseContainer {
+public class OptionImpl extends ContainerBase {
 
     private Set<String> prefixes;
     private Set<String> aliases;
@@ -64,33 +66,15 @@ public class OptionImpl extends BaseContainer {
     }
 
     @Override
-    public Set<String> getPrefixes() {
-        Set<String> prefixes = new HashSet<String>();
-        Group group = getGroup();
-        if (group != null) {
-            prefixes.addAll(group.getPrefixes());
-        }
-        if (this.prefixes != null) {
-            prefixes.addAll(this.prefixes);
-        }
-        return prefixes;
-    }
-
-    public void setPrefixes(Set<String> prefixes) {
-        this.prefixes = prefixes;
-    }
-
-    @Override
-    public Set<Trigger> getTriggers() {
-        Set<Trigger> triggers = new HashSet<Trigger>();
+    public PriorityList<Trigger> getTriggers() {
+        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
         triggers.addAll(super.getTriggers());
-
         Set<String> prefixes = getPrefixes();
-        addTriggers(triggers, prefixes, getName());
+        createTriggers(triggers, prefixes, getName());
         Set<String> aliases = getAliases();
         if (aliases != null) {
             for (String alias : aliases) {
-                addTriggers(triggers, prefixes, alias);
+                createTriggers(triggers, prefixes, alias);
             }
         }
         return triggers;
@@ -99,16 +83,12 @@ public class OptionImpl extends BaseContainer {
     @Override
     protected void processInternal(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
-        Trigger trigger = fire(getTriggers(), argument);
+        Trigger trigger = getTriggerFired(getTriggers(), argument);
         if (trigger != null) {
-            processInternal(commandLine, trigger, argument);
+            commandLine.addOption(this);
         } else {
             throw new OptionException(this, String.format("Unexpected token %1$s", argument));
         }
-    }
-
-    protected void processInternal(CommandLine commandLine, Trigger trigger, String argument) {
-        commandLine.addOption(this);
     }
 
     @Override
@@ -119,9 +99,9 @@ public class OptionImpl extends BaseContainer {
             help.append('[');
         }
         Set<String> prefixes = getPrefixes();
-        Set<Trigger> triggers = new HashSet<Trigger>();
-        addTriggers(triggers, prefixes, getName());
-        joinTriggers(help, triggers);
+        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+        createTriggers(triggers, prefixes, getName());
+        join(help, triggers);
         Set<String> aliases = getAliases();
         if (displayAliases && (aliases != null && !aliases.isEmpty())) {
             help.append(" (");
@@ -129,9 +109,9 @@ public class OptionImpl extends BaseContainer {
             Collections.sort(list);
             for (Iterator<String> i = list.iterator(); i.hasNext(); ) {
                 String alias = i.next();
-                triggers = new HashSet<Trigger>();
-                addTriggers(triggers, prefixes, alias);
-                joinTriggers(help, triggers);
+                triggers = new PriorityListImpl<Trigger>();
+                createTriggers(triggers, prefixes, alias);
+                join(help, triggers);
                 if (i.hasNext()) {
                     help.append(',');
                 }
@@ -153,21 +133,6 @@ public class OptionImpl extends BaseContainer {
 
         if (optional) {
             help.append("]");
-        }
-    }
-
-    protected void addTriggers(Set<Trigger> triggers, Set<String> prefixes, String trigger) {
-        for (String prefix : prefixes) {
-            triggers.add(new TriggerImpl(prefix + trigger));
-        }
-    }
-
-    protected void joinTriggers(StringBuilder help, Set<Trigger> triggers) {
-        for (Iterator<Trigger> iterator = triggers.iterator(); iterator.hasNext(); ) {
-            help.append(iterator.next());
-            if (iterator.hasNext()) {
-                help.append(",");
-            }
         }
     }
 }

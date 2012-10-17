@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.cli.run;
 
 import com.nuodb.tools.migration.cli.parse.*;
+import com.nuodb.tools.migration.utils.PriorityList;
 
 import java.util.Comparator;
 import java.util.List;
@@ -108,7 +109,12 @@ public abstract class CliRunAdapter implements CliRun {
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
+    public void addTrigger(Trigger trigger, int priority) {
+        option.addTrigger(trigger, priority);
+    }
+
+    @Override
+    public PriorityList<Trigger> getTriggers() {
         return option.getTriggers();
     }
 

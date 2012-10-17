@@ -32,6 +32,7 @@ import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 import com.nuodb.tools.migration.spec.DumpSpec;
 import com.nuodb.tools.migration.spec.MigrationSpec;
 import com.nuodb.tools.migration.spec.Spec;
+import com.nuodb.tools.migration.utils.Priority;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class XmlPersisterBuilder implements XmlConstants {
         XmlAliasTypeMapper<Spec> handler = new XmlAliasTypeMapper<Spec>();
         handler.bind(MIGRATION_NAMESPACE, CONNECTION_ELEMENT, JDBC, DriverManagerConnectionSpec.class);
         handler.bind(MIGRATION_NAMESPACE, TASK_ELEMENT, DUMP, DumpSpec.class);
-        registry.register(handler, XmlHandlerRegistry.PRIORITY_LOW);
+        registry.register(handler, Priority.LOW);
 
         return new XmlPersister(registry);
     }

@@ -28,6 +28,8 @@
 package com.nuodb.tools.migration.cli.parse.option;
 
 import com.nuodb.tools.migration.cli.parse.*;
+import com.nuodb.tools.migration.utils.PriorityList;
+import com.nuodb.tools.migration.utils.PriorityListImpl;
 
 import java.util.*;
 
@@ -37,7 +39,7 @@ import static com.nuodb.tools.migration.cli.parse.HelpHint.OPTIONAL;
 /**
  * @author Sergey Bushik
  */
-public class Command extends BaseContainer {
+public class Command extends ContainerBase {
 
     private Set<String> aliases;
 
@@ -63,8 +65,8 @@ public class Command extends BaseContainer {
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
-        Set<Trigger> triggers = new HashSet<Trigger>();
+    public PriorityList<Trigger> getTriggers() {
+        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
         triggers.addAll(super.getTriggers());
         triggers.add(new TriggerImpl(getName()));
         Set<String> aliases = getAliases();
@@ -73,7 +75,7 @@ public class Command extends BaseContainer {
                 triggers.add(new TriggerImpl(alias));
             }
         }
-        return Collections.unmodifiableSet(triggers);
+        return triggers;
     }
 
     @Override
@@ -81,7 +83,6 @@ public class Command extends BaseContainer {
         String argument = arguments.next();
         if (canProcess(commandLine, argument)) {
             commandLine.addOption(this);
-            arguments.set(getName());
         } else {
             throw new OptionException(this, String.format("Unexpected token %1$s", argument));
         }

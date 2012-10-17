@@ -16,6 +16,8 @@
  */
 package com.nuodb.tools.migration.cli.parse;
 
+import com.nuodb.tools.migration.utils.PriorityList;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
@@ -111,12 +113,14 @@ public interface Option {
      */
     Set<String> getPrefixes();
 
+    void addTrigger(Trigger trigger);
+
     /**
      * Adds trigger to this option.
      *
      * @param trigger to be added to the option.
      */
-    void addTrigger(Trigger trigger);
+    void addTrigger(Trigger trigger, int priority);
 
     /**
      * Identifies the argument triggers that should triggers this option. This is used to decide which of many options
@@ -126,7 +130,7 @@ public interface Option {
      *
      * @return The set of triggers for this option
      */
-    Set<Trigger> getTriggers();
+    PriorityList<Trigger> getTriggers();
 
     /**
      * Recursively searches for an option with the supplied trigger.
@@ -194,7 +198,7 @@ public interface Option {
     void process(CommandLine commandLine, ListIterator<String> arguments);
 
     /**
-     * Performs any required post processing, such as validation & values conversion.
+     * Performs any required post processing, such as validation & items conversion.
      *
      * @param commandLine executable line to check.
      * @throws OptionException if the executable line is not valid.

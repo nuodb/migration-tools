@@ -54,7 +54,7 @@ public interface CliOptions {
      */
     final String CONFIG_OPTION = "config";
     /**
-     * Cli command to execute.
+     * Command line interface command to execute.
      */
     final String COMMAND_OPTION = "command";
 
@@ -66,6 +66,7 @@ public interface CliOptions {
     final String SOURCE_CATALOG_OPTION = "source.catalog";
     final String SOURCE_SCHEMA_OPTION = "source.schema";
 
+    final String OUTPUT_OPTION = "output.*";
     final String OUTPUT_TYPE_OPTION = "output.type";
     final String OUTPUT_PATH_OPTION = "output.path";
 

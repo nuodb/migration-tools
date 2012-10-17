@@ -35,6 +35,7 @@ import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.cli.parse.option.RegexOption;
 import com.nuodb.tools.migration.i18n.Resources;
 import com.nuodb.tools.migration.spec.*;
+import com.nuodb.tools.migration.utils.Priority;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -122,6 +123,7 @@ public class CliOptionsSupport implements CliResources, CliOptions {
     }
 
     public Option createOutputGroup(OptionToolkit optionToolkit) {
+        OptionFormat optionFormat = optionToolkit.getOptionFormat();
         Resources resources = Resources.getResources();
         Option type = optionToolkit.newOption().
                 withName(OUTPUT_TYPE_OPTION).
@@ -133,6 +135,7 @@ public class CliOptionsSupport implements CliResources, CliOptions {
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
+
         Option path = optionToolkit.newOption().
                 withName(OUTPUT_PATH_OPTION).
                 withDescription(resources.getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
@@ -143,16 +146,28 @@ public class CliOptionsSupport implements CliResources, CliOptions {
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
+
+        RegexOption attributes = new RegexOption();
+        attributes.setName(OUTPUT_OPTION);
+        attributes.setDescription(resources.getMessage(OUTPUT_OPTION_DESCRIPTION));
+        attributes.setPrefixes(optionFormat.getOptionPrefixes());
+        attributes.setArgumentSeparator(optionFormat.getArgumentSeparator());
+        attributes.addRegex("output.*", 1, Priority.LOW);
+        attributes.setArgument(
+                optionToolkit.newArgument().
+                        withName("").
+                        withValuesSeparator(null).withMinimum(1).build());
         return optionToolkit.newGroup().
                 withName(resources.getMessage(OUTPUT_GROUP_NAME)).
                 withRequired(true).
                 withMinimum(1).
                 withOption(type).
-                withOption(path).build();
+                withOption(path).
+                withOption(attributes).build();
     }
 
     /**
-     * Table option handles -table=users, -table=roles and stores it values the option in the  command line.
+     * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
      */
     public Option createSelectQueryGroup(OptionToolkit optionToolkit) {
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
@@ -171,8 +186,7 @@ public class CliOptionsSupport implements CliResources, CliOptions {
         tableFilter.setDescription(resources.getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
         tableFilter.setPrefixes(optionFormat.getOptionPrefixes());
         tableFilter.setArgumentSeparator(optionFormat.getArgumentSeparator());
-        tableFilter.addRegex(TABLE_FILTER_OPTION, 1);
-        tableFilter.setOptionProcessor(new ContainerArgumentUpdater());
+        tableFilter.addRegex(TABLE_FILTER_OPTION, 1, Priority.LOW);
         tableFilter.setArgument(
                 optionToolkit.newArgument().
                         withName(resources.getMessage(TABLE_FILTER_ARGUMENT_NAME)).
@@ -208,7 +222,17 @@ public class CliOptionsSupport implements CliResources, CliOptions {
         OutputSpec output = new OutputSpecBase();
         output.setType(commandLine.<String>getValue(OUTPUT_TYPE_OPTION));
         output.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
+        output.setAttributes(parseOutputAttributes(
+                commandLine.getOption(OUTPUT_OPTION), commandLine.<String>getValues(OUTPUT_OPTION)));
         return output;
+    }
+
+    public Map<String, String> parseOutputAttributes(Option option, List<String> values) {
+        Map<String, String> attributes = new HashMap<String, String>();
+        for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
+            attributes.put(iterator.next(), iterator.next());
+        }
+        return attributes;
     }
 
     public Collection<SelectQuerySpec> parseSelectQueryGroup(CommandLine commandLine, Option option) {
@@ -250,31 +274,5 @@ public class CliOptionsSupport implements CliResources, CliOptions {
             map.put(pair[0], pair[1]);
         }
         return map;
-    }
-
-    /**
-     * Updates maximum value of container's argument option. Used together with RegexOption when part of option name
-     * matching regular expression is stored in the option values and option's argument.
-     */
-    public static class ContainerArgumentUpdater implements OptionProcessor {
-
-        private int count = 0;
-
-        @Override
-        public void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-        }
-
-        @Override
-        public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-            Container container = (Container) option;
-            Argument argument = container.getArgument();
-            if (argument != null) {
-                argument.setMaximum(++count * 2);
-            }
-        }
-
-        @Override
-        public void postProcess(CommandLine commandLine, Option option) {
-        }
     }
 }

@@ -53,6 +53,31 @@ public abstract class OutputFormatBase implements OutputFormat {
     private ResultSetMetaModel resultSetMetaModel;
 
     @Override
+    public void configure(Map<String, String> attributes) {
+        this.attributes = attributes;
+        doConfigure();
+    }
+
+    protected void doConfigure() {
+    }
+
+    protected String getAttribute(String attribute) {
+        return attributes.get(attribute);
+    }
+
+    protected String getAttribute(String attribute, String defaultValue) {
+        String value = null;
+        if (attributes != null) {
+            value = attributes.get(attribute);
+        }
+        return value == null ? defaultValue : value;
+    }
+
+    protected Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    @Override
     public final void outputBegin(ResultSet resultSet) throws IOException, SQLException {
         resultSetMetaModel = new ResultSetMetaModel(resultSet);
         doOutputInit();
@@ -134,15 +159,6 @@ public abstract class OutputFormatBase implements OutputFormat {
     @Override
     public void setOutputStream(OutputStream outputStream) {
         this.outputStream = outputStream;
-    }
-
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
-    @Override
-    public void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
     }
 
     public JdbcTypeExtractor getJdbcTypeExtractor() {

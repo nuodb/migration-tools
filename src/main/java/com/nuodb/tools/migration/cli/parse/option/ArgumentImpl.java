@@ -16,14 +16,25 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
-import com.nuodb.tools.migration.cli.parse.*;
+import com.nuodb.tools.migration.cli.parse.Argument;
+import com.nuodb.tools.migration.cli.parse.CommandLine;
+import com.nuodb.tools.migration.cli.parse.Help;
+import com.nuodb.tools.migration.cli.parse.HelpHint;
+import com.nuodb.tools.migration.cli.parse.Option;
+import com.nuodb.tools.migration.cli.parse.OptionException;
+import com.nuodb.tools.migration.cli.parse.OptionProcessor;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * An implementation of an argument
  */
-public class ArgumentImpl extends BaseOption implements Argument {
+public class ArgumentImpl extends OptionBase implements Argument {
 
     public static final String NAME = "arg";
 
@@ -36,12 +47,12 @@ public class ArgumentImpl extends BaseOption implements Argument {
     }
 
     public ArgumentImpl(int id, String name, String description, boolean required) {
-        super(id, name, description, required);
+        super(id, name != null ? name : NAME, description, required);
     }
 
     public ArgumentImpl(int id, String name, String description, boolean required,
                         int minimum, int maximum, List<Object> defaultValues, String valuesSeparator) {
-        super(id, name, description, required);
+        super(id, name != null ? name : NAME, description, required);
         this.minimum = minimum;
         this.maximum = maximum;
         this.defaultValues = defaultValues;

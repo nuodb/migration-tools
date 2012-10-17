@@ -29,21 +29,44 @@ package com.nuodb.tools.migration.dump.output;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.Quote;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static java.lang.Boolean.parseBoolean;
+import static java.lang.String.valueOf;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class CsvOutputFormat extends OutputFormatBase {
-
-    public static final String EXTENSION = "csv";
+public class CsvOutputFormat extends OutputFormatBase implements CsvFormat {
 
     private CSVPrinter printer;
+    /**
+     *  The symbol used for value separation, must not be a line break character.
+     */
+    private Character delimiter;
+    /**
+     * Indicates whether quotation should be used.
+     */
+    private boolean quoting;
+    /**
+     * The symbol used as value encapsulation marker.
+     */
+    private Character quote;
+    /**
+     * The symbol used to escape special characters in values.
+     */
+    private Character escape;
+    /**
+     * The record separator to use for output.
+     */
+    private String lineSeparator;
 
     @Override
     public String getExtension() {
@@ -51,29 +74,78 @@ public class CsvOutputFormat extends OutputFormatBase {
     }
 
     @Override
+    protected void doConfigure() {
+        String delimiterValue = getAttribute(ATTRIBUTE_DELIMITER);
+        if (isEmpty(delimiterValue)) {
+            delimiter = DELIMITER;
+        } else {
+            delimiter = delimiterValue.charAt(0);
+        }
+
+        String quotingValue = getAttribute(ATTRIBUTE_QUOTING);
+        if (isEmpty(quotingValue)){
+            quoting = QUOTING;
+        } else {
+            quoting = parseBoolean(quotingValue);
+        }
+
+        String quoteValue = getAttribute(ATTRIBUTE_QUOTE);
+        if (isEmpty(quoteValue)) {
+            quote = QUOTE;
+        } else {
+            quote = quoteValue.charAt(0);
+        }
+
+        String escapeValue = getAttribute(ATTRIBUTE_ESCAPE);
+        if (isEmpty(escapeValue)) {
+            escape = ESCAPE;
+        } else {
+            escape = escapeValue.charAt(0);
+        }
+        lineSeparator = getAttribute(ATTRIBUTE_LINE_SEPARATOR, LINE_SEPARATOR);
+    }
+
+    @Override
     protected void doOutputInit() {
-        CSVFormat format = CSVFormat.DEFAULT;
-        // TODO: Map<String,String> attributes = getAttributes();
-        // TODO: configure csv format based on the provided attributes
+        CSVFormat format = new CSVFormat(delimiter);
+        if (quoting && quote != null) {
+            format = format.withQuotePolicy(Quote.ALL);
+            format = format.withQuoteChar(quote);
+        }
+        format = format.withRecordSeparator(lineSeparator);
+        format = format.withEscape(escape);
+
         if (getWriter() != null) {
             printer = new CSVPrinter(getWriter(), format);
         } else if (getOutputStream() != null) {
             printer = new CSVPrinter(new PrintWriter(getOutputStream()), format);
         }
+        // CsvPreference.Builder builder = new CsvPreference.Builder(quote, delimiter, lineSeparator);
+        // writer2 = new CsvListWriter(new PrintWriter(getOutputStream()), builder.build());
     }
 
     @Override
     protected void doOutputBegin(ResultSet resultSet) throws IOException, SQLException {
         printer.printRecord(getResultSetMetaModel().getColumns());
+        // writer2.writeHeader(getResultSetMetaModel().getColumns());
     }
 
     @Override
     protected void doOutputRow(ResultSet resultSet) throws IOException, SQLException {
-        printer.printRecord(formatColumns(resultSet));
+        String[] columns = formatColumns(resultSet);
+        for (int i = 0; i < columns.length; i++) {
+            String column = columns[i];
+            if (column != null && column.length() == 0) {
+                columns[i] = valueOf(quote) + valueOf(quote);
+            }
+        }
+        printer.printRecord(columns);
+        // writer2.write(formatColumns(resultSet));
     }
 
     @Override
     protected void doOutputEnd(ResultSet resultSet) throws IOException, SQLException {
         printer.flush();
+        // writer2.flush();
     }
 }

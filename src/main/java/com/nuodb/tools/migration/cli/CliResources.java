@@ -73,4 +73,6 @@ public interface CliResources {
     final String TABLE_ARGUMENT_NAME = "migration.cli.table.argument.name";
     final String TABLE_FILTER_OPTION_DESCRIPTION = "migration.cli.table.filter.option.description";
     final String TABLE_FILTER_ARGUMENT_NAME = "migration.cli.table.filter.argument.name";
+
+    final String OUTPUT_OPTION_DESCRIPTION = "migration.cli.output.option.description";
 }
