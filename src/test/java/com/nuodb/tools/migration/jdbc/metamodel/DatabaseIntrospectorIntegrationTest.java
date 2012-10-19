@@ -17,6 +17,8 @@ public class DatabaseIntrospectorIntegrationTest {
 
     private Connection connection;
     private DatabaseIntrospector introspector;
+    private Connection mySqlConnection;
+
 
     @Before
     public void setUp() throws Exception {
@@ -32,9 +34,17 @@ public class DatabaseIntrospectorIntegrationTest {
         nuodb.setPassword("goalie");
 
 
-        DriverManagerConnectionProvider connectionProvider = new DriverManagerConnectionProvider(nuodb);
+        final DriverManagerConnectionProvider connectionProvider = 
+                new DriverManagerConnectionProvider(nuodb);
+        final DriverManagerConnectionProvider mySqlConnectionProvider
+                = new DriverManagerConnectionProvider(mysql);
+        
+        
 
         connection = connectionProvider.getConnection();
+        // mySqlConnection = mySqlConnectionProvider.getConnection();
+
+
         Assert.assertNotNull(connection);
         Assert.assertNotNull(connection.getMetaData());
         Assert.assertFalse(connection.isClosed());
@@ -76,9 +86,7 @@ public class DatabaseIntrospectorIntegrationTest {
 
         final Collection<Table> tables = database.listTables();
         Assert.assertFalse(tables.isEmpty());
-
     }
-
 
 
     @After
