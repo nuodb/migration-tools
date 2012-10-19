@@ -27,7 +27,8 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.jdbc.type.JdbcTypeUtils;
+import com.nuodb.tools.migration.jdbc.type.JdbcLobUtils;
+import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.ByteArrayOutputStream;
@@ -49,7 +50,7 @@ import static java.lang.String.valueOf;
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeFormatterImpl implements JdbcTypeFormatter {
+public class JdbcTypeFormatterImpl implements JdbcTypeFormatter<Object> {
 
     public static final Format DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
 
@@ -61,10 +62,11 @@ public class JdbcTypeFormatterImpl implements JdbcTypeFormatter {
     private Format timeFormat = TIME_FORMAT;
     private Format timestampFormat = TIMESTAMP_FORMAT;
 
-    public String format(Object value, int type) {
+    @Override
+    public String format(Object value, JdbcType<Object> jdbcType, int sqlType) {
         String result = null;
         if (value != null) {
-            switch (type) {
+            switch (sqlType) {
                 case Types.BIT:
                 case Types.TINYINT:
                 case Types.SMALLINT:
@@ -119,7 +121,7 @@ public class JdbcTypeFormatterImpl implements JdbcTypeFormatter {
                     break;
                 case Types.BLOB:
                     try {
-                        result = encode(JdbcTypeUtils.read((Blob) value));
+                        result = encode(JdbcLobUtils.read((Blob) value));
                     } catch (IOException e) {
                         throw new OutputFormatException("Failed reading jdbc blob", e);
                     } catch (SQLException e) {
@@ -129,7 +131,7 @@ public class JdbcTypeFormatterImpl implements JdbcTypeFormatter {
                 case Types.CLOB:
                 case Types.NCHAR:
                     try {
-                        result = JdbcTypeUtils.read((Clob) value);
+                        result = JdbcLobUtils.read((Clob) value);
                     } catch (IOException e) {
                         throw new OutputFormatException("Failed reading jdbc clob", e);
                     } catch (SQLException e) {
@@ -162,7 +164,7 @@ public class JdbcTypeFormatterImpl implements JdbcTypeFormatter {
                     }
                     break;
                 default:
-                    throw new OutputFormatException(String.format("Jdbc type %1$d formatting unsupported", type));
+                    throw new OutputFormatException(String.format("Jdbc type %1$d formatting unsupported", sqlType));
             }
         }
         return result;

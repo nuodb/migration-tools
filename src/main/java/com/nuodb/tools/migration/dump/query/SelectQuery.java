@@ -86,6 +86,18 @@ public class SelectQuery implements Query {
         return query.toString();
     }
 
+    public List<Table> getTables() {
+        return tables;
+    }
+
+    public List<Column> getColumns() {
+        return columns;
+    }
+
+    public List<String> getConditions() {
+        return conditions;
+    }
+
     @Override
     public String toString() {
         return toQuery();

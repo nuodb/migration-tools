@@ -25,44 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
-
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
+package com.nuodb.tools.migration.context;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public class ApplicationContextHolder {
 
-    String getType();
+    private static MigrationContextHolderStrategy migrationContextHolderStrategy = new StaticApplicationContextHolderStrategy();
 
-    void setAttributes(Map<String, String> attributes);
+    public static void setStrategy(MigrationContextHolderStrategy strategy) {
+        migrationContextHolderStrategy = strategy;
+    }
 
-    void outputBegin(ResultSet resultSet) throws IOException, SQLException;
+    public static ApplicationContext getContext() {
+        return migrationContextHolderStrategy.getContext();
+    }
 
-    void outputRow(ResultSet resultSet) throws IOException, SQLException;
-
-    void outputEnd(ResultSet resultSet) throws IOException, SQLException;
-
-    void setWriter(Writer writer);
-
-    void setOutputStream(OutputStream outputStream);
-
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(JdbcType type, JdbcTypeFormatter jdbcTypeFormatter);
-
-    JdbcTypeFormatter getJdbcTypeFormatter(JdbcType type);
-
-    JdbcTypeFormatter getDefaultJdbcTypeFormatter();
-
-    void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter);
+    public static void setContext(ApplicationContext context) {
+        migrationContextHolderStrategy.setContext(context);
+    }
 }

@@ -43,28 +43,13 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
 
     private transient final Log log = LogFactory.getLog(this.getClass());
     
-    private DriverManagerConnectionSpec driverManagerConnectionSpec;
-    private Boolean autoCommit = Boolean.FALSE;
-    private Integer transactionIsolation;
-
-    public DriverManagerConnectionProvider(DriverManagerConnectionSpec driverManagerConnectionSpec) {
-        this.driverManagerConnectionSpec = driverManagerConnectionSpec;
-    }
-
-    public DriverManagerConnectionProvider(DriverManagerConnectionSpec driverManagerConnectionSpec, Boolean autoCommit) {
-        this.driverManagerConnectionSpec = driverManagerConnectionSpec;
-        this.autoCommit = autoCommit;
-    }
-
-    public DriverManagerConnectionProvider(DriverManagerConnectionSpec driverManagerConnectionSpec, Boolean autoCommit, Integer transactionIsolation) {
-        this.driverManagerConnectionSpec = driverManagerConnectionSpec;
-        this.autoCommit = autoCommit;
-        this.transactionIsolation = transactionIsolation;
-    }
+    private DriverManagerConnectionSpec connectionSpec;
+    private boolean autoCommit = Boolean.FALSE;
+    private int transactionIsolation;
 
     public Connection getConnection() throws SQLException {
         try {
-            String driver = driverManagerConnectionSpec.getDriver();
+            String driver = connectionSpec.getDriver();
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Loading driver %s", driver));
             }
@@ -78,13 +63,13 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
     }
 
     protected Connection createConnection() throws SQLException {
-        String url = driverManagerConnectionSpec.getUrl();
+        String url = connectionSpec.getUrl();
         Properties properties = new Properties();
-        if (driverManagerConnectionSpec.getProperties() != null) {
-            properties.putAll(driverManagerConnectionSpec.getProperties());
+        if (connectionSpec.getProperties() != null) {
+            properties.putAll(connectionSpec.getProperties());
         }
-        String username = driverManagerConnectionSpec.getUsername();
-        String password = driverManagerConnectionSpec.getPassword();
+        String username = connectionSpec.getUsername();
+        String password = connectionSpec.getPassword();
         if (username != null) {
             properties.setProperty(USER_PROPERTY, username);
         }
@@ -95,12 +80,8 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
             log.debug(String.format("Creating new connection at %s", url));
         }
         Connection connection = DriverManager.getConnection(url, properties);
-        if (transactionIsolation != null) {
-            connection.setTransactionIsolation(transactionIsolation);
-        }
-        if (autoCommit != null) {
-            connection.setAutoCommit(autoCommit);
-        }
+        connection.setTransactionIsolation(transactionIsolation);
+        connection.setAutoCommit(autoCommit);
         return connection;
     }
 
@@ -113,19 +94,27 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
         }
     }
 
-    public Integer getTransactionIsolation() {
-        return transactionIsolation;
+    public DriverManagerConnectionSpec getConnectionSpec() {
+        return connectionSpec;
     }
 
-    public void setTransactionIsolation(Integer transactionIsolation) {
-        this.transactionIsolation = transactionIsolation;
+    public void setConnectionSpec(DriverManagerConnectionSpec connectionSpec) {
+        this.connectionSpec = connectionSpec;
     }
 
-    public Boolean getAutoCommit() {
+    public boolean isAutoCommit() {
         return autoCommit;
     }
 
-    public void setAutoCommit(Boolean autoCommit) {
+    public void setAutoCommit(boolean autoCommit) {
         this.autoCommit = autoCommit;
+    }
+
+    public int getTransactionIsolation() {
+        return transactionIsolation;
+    }
+
+    public void setTransactionIsolation(int transactionIsolation) {
+        this.transactionIsolation = transactionIsolation;
     }
 }

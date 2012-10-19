@@ -27,8 +27,8 @@
  */
 package com.nuodb.tools.migration.support;
 
-import com.nuodb.tools.migration.context.MigrationContext;
-import com.nuodb.tools.migration.context.MigrationContextHolder;
+import com.nuodb.tools.migration.context.ApplicationContext;
+import com.nuodb.tools.migration.context.ApplicationContextHolder;
 import com.nuodb.tools.migration.i18n.Resources;
 
 /**
@@ -36,12 +36,12 @@ import com.nuodb.tools.migration.i18n.Resources;
  */
 public class ApplicationSupport {
 
-    public MigrationContext getMigrationContext() {
-        return MigrationContextHolder.getContext();
+    public ApplicationContext getApplicationContext() {
+        return ApplicationContextHolder.getContext();
     }
 
     public Resources getResources() {
-        return getMigrationContext().getResources();
+        return getApplicationContext().getResources();
     }
 
     public String getMessage(String key, Object... values) {

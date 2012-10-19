@@ -202,7 +202,8 @@ public class DatabaseIntrospector {
         nuodb.setUsername("dba");
         nuodb.setPassword("goalie");
 
-        DriverManagerConnectionProvider connectionProvider = new DriverManagerConnectionProvider(nuodb);
+        DriverManagerConnectionProvider connectionProvider = new DriverManagerConnectionProvider();
+        connectionProvider.setConnectionSpec(nuodb);
         Connection connection = connectionProvider.getConnection();
         try {
             DatabaseIntrospector introspector = new DatabaseIntrospector();

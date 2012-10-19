@@ -25,25 +25,28 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.context;
+package com.nuodb.tools.migration.jdbc.type.jdbc2;
+
+import com.nuodb.tools.migration.jdbc.type.JdbcType;
+
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * @author Sergey Bushik
  */
-public class StaticMigrationContextHolderStrategy implements MigrationContextHolderStrategy {
-
-    private static MigrationContext migrationContext;
+public class JdbcDateType implements JdbcType<Date> {
+    public static final JdbcType INSTANCE = new JdbcDateType();
 
     @Override
-    public MigrationContext getContext() {
-        if (migrationContext == null) {
-            migrationContext = new MigrationContextImpl();
-        }
-        return migrationContext;
+    public int[] getSqlTypes() {
+        return new int[] {Types.DATE};
     }
 
     @Override
-    public void setContext(MigrationContext context) {
-        migrationContext = context;
+    public Date extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+        return resultSet.getDate(column);
     }
 }

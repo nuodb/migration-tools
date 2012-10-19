@@ -27,10 +27,12 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
+import com.nuodb.tools.migration.jdbc.type.JdbcType;
+
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeFormatter {
+public interface JdbcTypeFormatter<T> {
 
-    String format(Object value, int type);
+    String format(T value, JdbcType<T> jdbcType, int sqlType);
 }

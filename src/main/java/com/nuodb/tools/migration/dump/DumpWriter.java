@@ -34,18 +34,19 @@ import com.nuodb.tools.migration.dump.query.NativeQueryBuilder;
 import com.nuodb.tools.migration.dump.query.Query;
 import com.nuodb.tools.migration.dump.query.SelectQuery;
 import com.nuodb.tools.migration.dump.query.SelectQueryBuilder;
+import com.nuodb.tools.migration.jdbc.JdbcServiceImpl;
+import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.tools.migration.jdbc.metamodel.Database;
 import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
-import com.nuodb.tools.migration.jdbc.type.extract.Jdbc4TypeExtractor;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
 import com.nuodb.tools.migration.spec.*;
+import com.nuodb.tools.migration.support.ApplicationSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,47 +61,59 @@ import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DumpExecutor {
+public class DumpWriter extends ApplicationSupport {
 
     protected final Log log = LogFactory.getLog(getClass());
 
-    protected OutputFormatLookup outputFormatLookup = new OutputFormatLookupImpl();
+    private OutputFormatLookup outputFormatLookup = new OutputFormatLookupImpl();
 
-    public void execute(DumpSpec dumpSpec) throws SQLException {
-        // TODO: 1) transaction context should be created / obtained ?
-        // TODO: 2) statistics event listener reference to publish events to
-        ConnectionSpec connectionSpec = dumpSpec.getConnectionSpec();
-        ConnectionProvider connectionProvider = getConnectionProvider(connectionSpec);
+    public void dump(DumpSpec dumpSpec) throws SQLException {
+        dump(dumpSpec.getConnectionSpec(), dumpSpec.getSelectQuerySpecs(), dumpSpec.getNativeQuerySpecs(), dumpSpec.getOutputSpec());
+    }
+
+    public void dump(ConnectionSpec connectionSpec, Collection<SelectQuerySpec> selectQuerySpecs,
+                     Collection<NativeQuerySpec> nativeQuerySpecs, OutputSpec outputSpec) throws SQLException {
+        dump(new JdbcServiceImpl(connectionSpec), connectionSpec, selectQuerySpecs, nativeQuerySpecs, outputSpec);
+    }
+
+    public void dump(JdbcServices jdbcServices, ConnectionSpec connectionSpec,
+                     Collection<SelectQuerySpec> selectQuerySpecs, Collection<NativeQuerySpec> nativeQuerySpecs,
+                     OutputSpec outputSpec) throws SQLException {
+        ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
         Connection connection = connectionProvider.getConnection();
         try {
-            execute(dumpSpec, connection, connectionSpec.getCatalog(), connectionSpec.getSchema());
+            Database database = introspect(jdbcServices, connectionSpec, connection);
+
+            DumpCatalog catalog = new DumpCatalog(outputSpec.getPath());
+            catalog.open();
+            for (Query query : createQueries(database, selectQuerySpecs, nativeQuerySpecs)) {
+                OutputFormat format = getOutputFormatLookup().lookup(outputSpec.getType());
+                format.setAttributes(outputSpec.getAttributes());
+                format.setJdbcTypeExtractor(jdbcServices.getJdbcTypeExtractor());
+
+                OutputStream output = catalog.addEntry(query, format.getType());
+                format.setOutputStream(output);
+                dump(connection, query, format);
+                catalog.closeEntry(output);
+            }
+            catalog.close();
         } finally {
             connectionProvider.closeConnection(connection);
         }
     }
 
-    public void execute(DumpSpec dumpSpec, Connection connection, String catalog, String schema) throws SQLException {
-        DatabaseIntrospector introspector = getDatabaseIntrospector(connection);
-        introspector.withCatalog(catalog);
-        introspector.withSchema(schema);
+    protected Database introspect(JdbcServices jdbcServices, ConnectionSpec connectionSpec, Connection connection) throws SQLException {
+        DatabaseIntrospector introspector = jdbcServices.getDatabaseIntrospector();
         introspector.withConnection(connection);
-        introspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-        Database database = introspector.introspect();
-
-        List<Query> queries = createQueries(database, dumpSpec);
-        // TODO: create catalog file dump-${timestamp}.cat and dump dump spec & queries to it
-        for (Query query : queries) {
-            OutputSpec outputSpec = dumpSpec.getOutputSpec();
-            OutputFormat format = getOutputFormatLookup().lookup(outputSpec);
-            // TODO: create output file for the query table-${timestamp}.${type} or query-${timestamp}.csv and append it the catalog file
-            format.setOutputStream(System.out);
-            format.configure(outputSpec.getAttributes());
-            format.setJdbcTypeExtractor(getJdbcTypeExtractor());
-            execute(connection, query, format);
+        if (connectionSpec != null) {
+            introspector.withCatalog(connectionSpec.getCatalog());
+            introspector.withSchema(connectionSpec.getSchema());
         }
+        introspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+        return introspector.introspect();
     }
 
-    protected void execute(Connection connection, Query query, OutputFormat format) throws SQLException {
+    protected void dump(Connection connection, Query query, OutputFormat format) throws SQLException {
         if (log.isTraceEnabled()) {
             log.trace(String.format("Writing dump with %1$s", format.getClass().getName()));
         }
@@ -120,22 +133,9 @@ public class DumpExecutor {
         }
     }
 
-    protected ConnectionProvider getConnectionProvider(ConnectionSpec connectionSpec) {
-        return new DriverManagerConnectionProvider(
-                (DriverManagerConnectionSpec) connectionSpec, false, Connection.TRANSACTION_READ_COMMITTED);
-    }
-
-    protected DatabaseIntrospector getDatabaseIntrospector(Connection connection) {
-        return new DatabaseIntrospector();
-    }
-
-    protected JdbcTypeExtractor getJdbcTypeExtractor() {
-        return new Jdbc4TypeExtractor();
-    }
-
-    protected List<Query> createQueries(Database database, DumpSpec dumpSpec) {
+    protected List<Query> createQueries(Database database, Collection<SelectQuerySpec> selectQuerySpecs,
+                                        Collection<NativeQuerySpec> nativeQuerySpecs) {
         List<Query> queries = new ArrayList<Query>();
-        Collection<SelectQuerySpec> selectQuerySpecs = dumpSpec.getSelectQuerySpecs();
         if (selectQuerySpecs != null) {
             Collection<Table> tables = database.listTables();
             if (selectQuerySpecs.isEmpty()) {
@@ -146,7 +146,6 @@ public class DumpExecutor {
                 }
             }
         }
-        Collection<NativeQuerySpec> nativeQuerySpecs = dumpSpec.getNativeQuerySpecs();
         if (nativeQuerySpecs != null) {
             for (NativeQuerySpec nativeQuerySpec : nativeQuerySpecs) {
                 NativeQueryBuilder nativeQueryBuilder = new NativeQueryBuilder();

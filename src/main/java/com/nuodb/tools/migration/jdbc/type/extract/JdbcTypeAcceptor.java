@@ -27,12 +27,14 @@
  */
 package com.nuodb.tools.migration.jdbc.type.extract;
 
+import com.nuodb.tools.migration.jdbc.type.JdbcType;
+
 import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeAcceptor {
+public interface JdbcTypeAcceptor<T> {
 
-    void accept(Object value, int type) throws SQLException;
+    void accept(T value, JdbcType jdbcType, int sqlType) throws SQLException;
 }

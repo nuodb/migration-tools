@@ -25,19 +25,28 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.context;
+package com.nuodb.tools.migration.jdbc.type.jdbc4;
 
-import com.nuodb.tools.migration.i18n.Resources;
+import com.nuodb.tools.migration.jdbc.type.JdbcType;
+
+import java.sql.ResultSet;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * @author Sergey Bushik
  */
-public class MigrationContextImpl implements MigrationContext {
-
-    private Resources resource = Resources.getResources();
+public class JdbcRowIdType implements JdbcType<RowId> {
+    public static final JdbcType INSTANCE = new JdbcRowIdType();
 
     @Override
-    public Resources getResources() {
-        return resource;
+    public int[] getSqlTypes() {
+        return new int[]{Types.ROWID};
+    }
+
+    @Override
+    public RowId extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+        return resultSet.getRowId(column);
     }
 }

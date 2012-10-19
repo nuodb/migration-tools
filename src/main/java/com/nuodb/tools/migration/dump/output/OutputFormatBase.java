@@ -28,10 +28,10 @@
 package com.nuodb.tools.migration.dump.output;
 
 import com.nuodb.tools.migration.jdbc.metamodel.ResultSetMetaModel;
+import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeAcceptor;
 import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.ResultSet;
@@ -48,17 +48,17 @@ public abstract class OutputFormatBase implements OutputFormat {
     private OutputStream outputStream;
     private Map<String, String> attributes;
     private JdbcTypeExtractor jdbcTypeExtractor;
-    private Map<Integer, JdbcTypeFormatter> jdbcTypeFormatters = new HashMap<Integer, JdbcTypeFormatter>();
+    private Map<JdbcType, JdbcTypeFormatter> jdbcTypeFormatters = new HashMap<JdbcType, JdbcTypeFormatter>();
     private JdbcTypeFormatter defaultJdbcTypeFormatter = new JdbcTypeFormatterImpl();
     private ResultSetMetaModel resultSetMetaModel;
 
     @Override
-    public void configure(Map<String, String> attributes) {
+    public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
-        doConfigure();
+        doSetAttributes();
     }
 
-    protected void doConfigure() {
+    protected void doSetAttributes() {
     }
 
     protected String getAttribute(String attribute) {
@@ -78,69 +78,71 @@ public abstract class OutputFormatBase implements OutputFormat {
     }
 
     @Override
-    public final void outputBegin(ResultSet resultSet) throws IOException, SQLException {
+    public final void outputBegin(ResultSet resultSet) throws SQLException {
         resultSetMetaModel = new ResultSetMetaModel(resultSet);
         doOutputInit();
         doOutputBegin(resultSet);
     }
 
-    protected void doOutputInit() throws IOException {
+    protected void doOutputInit() {
     }
 
-    protected void doOutputBegin(ResultSet resultSet) throws IOException, SQLException {
+    protected void doOutputBegin(ResultSet resultSet) throws SQLException {
     }
 
     protected ResultSetMetaModel getResultSetMetaModel() {
         return resultSetMetaModel;
     }
 
-    protected String[] formatColumns(ResultSet resultSet) throws IOException, SQLException {
+    @SuppressWarnings("unchecked")
+    protected String[] formatColumns(ResultSet resultSet) throws SQLException {
         final String[] columns = new String[resultSetMetaModel.getColumnCount()];
-        final JdbcTypeAcceptor acceptor = new JdbcTypeAcceptor() {
+        final JdbcTypeAcceptor acceptor = new JdbcTypeAcceptor<Object>() {
             public int column;
 
             @Override
-            public void accept(Object value, int type) throws SQLException {
-                columns[column++] = formatColumn(value, type);
+            public void accept(Object value, JdbcType jdbcType, int sqlType) throws SQLException {
+                columns[column++] = formatColumn(value, column, jdbcType, sqlType);
             }
         };
         final JdbcTypeExtractor jdbcTypeExtractor = getJdbcTypeExtractor();
         for (int column = 0; column < resultSetMetaModel.getColumnCount(); column++) {
-            jdbcTypeExtractor.extract(resultSet, column + 1, acceptor);
+            jdbcTypeExtractor.<Object>extract(resultSet, column + 1, acceptor);
         }
         return columns;
     }
 
-    protected String formatColumn(Object value, int type) {
-        JdbcTypeFormatter jdbcTypeFormatter = getJdbcTypeFormatter(type);
+    @SuppressWarnings("unchecked")
+    protected <T> String formatColumn(Object value, int column, JdbcType<T> jdbcType, int sqlType) {
+        JdbcTypeFormatter<T> jdbcTypeFormatter = getJdbcTypeFormatter(jdbcType);
         if (jdbcTypeFormatter == null) {
             jdbcTypeFormatter = getDefaultJdbcTypeFormatter();
         }
-        return jdbcTypeFormatter.format(value, type);
+        return jdbcTypeFormatter.format((T) value, jdbcType, sqlType);
     }
 
     @Override
-    public void outputRow(ResultSet resultSet) throws IOException, SQLException {
+    public void outputRow(ResultSet resultSet) throws SQLException {
         doOutputRow(resultSet);
     }
 
-    protected abstract void doOutputRow(ResultSet resultSet) throws IOException, SQLException;
+    protected abstract void doOutputRow(ResultSet resultSet) throws SQLException;
 
     @Override
-    public final void outputEnd(ResultSet resultSet) throws IOException, SQLException {
+    public final void outputEnd(ResultSet resultSet) throws SQLException {
         doOutputEnd(resultSet);
     }
 
-    protected abstract void doOutputEnd(ResultSet resultSet) throws IOException, SQLException;
+    protected abstract void doOutputEnd(ResultSet resultSet) throws SQLException;
 
     @Override
-    public void addJdbcTypeFormatter(int type, JdbcTypeFormatter jdbcTypeFormatter) {
+    public void addJdbcTypeFormatter(JdbcType type, JdbcTypeFormatter jdbcTypeFormatter) {
         jdbcTypeFormatters.put(type, jdbcTypeFormatter);
     }
 
     @Override
-    public JdbcTypeFormatter getJdbcTypeFormatter(int type) {
-        return jdbcTypeFormatters.get(type);
+    public JdbcTypeFormatter getJdbcTypeFormatter(JdbcType jdbcType) {
+        return jdbcTypeFormatters.get(jdbcType);
     }
 
     public Writer getWriter() {

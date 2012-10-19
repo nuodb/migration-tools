@@ -31,7 +31,7 @@ package com.nuodb.tools.migration.dump.output;
  * @author Sergey Bushik
  */
 public interface CsvFormat {
-    final String EXTENSION = "csv";
+    final String TYPE = "csv";
 
     final String ATTRIBUTE_DELIMITER = "csv.delimiter";
     final String ATTRIBUTE_QUOTING = "csv.quoting";

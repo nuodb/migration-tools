@@ -32,7 +32,7 @@ package com.nuodb.tools.migration.context;
  */
 public interface MigrationContextHolderStrategy {
 
-    MigrationContext getContext();
+    ApplicationContext getContext();
 
-    void setContext(MigrationContext context);
+    void setContext(ApplicationContext context);
 }

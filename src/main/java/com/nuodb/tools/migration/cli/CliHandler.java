@@ -184,7 +184,7 @@ public class CliHandler extends ApplicationSupport implements CliResources, CliO
 
     public static void main(String[] args) throws IOException {
         CliHandler handler = new CliHandler();
-        handler.handle(loadArguments("load.arguments"));
+        handler.handle(loadArguments("dump.arguments"));
     }
 
     private static String[] loadArguments(String resource) throws IOException {

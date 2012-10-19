@@ -27,13 +27,15 @@
  */
 package com.nuodb.tools.migration.jdbc.type.extract;
 
+import com.nuodb.tools.migration.jdbc.type.JdbcTypes;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeExtractor {
+public interface JdbcTypeExtractor extends JdbcTypes {
 
-    void extract(ResultSet resultSet, int column, JdbcTypeAcceptor acceptor) throws SQLException;
+    <X> void extract(ResultSet resultSet, int column, JdbcTypeAcceptor<X> acceptor) throws SQLException;
 }

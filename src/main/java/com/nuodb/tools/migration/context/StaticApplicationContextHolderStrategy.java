@@ -25,35 +25,25 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.type.extract;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+package com.nuodb.tools.migration.context;
 
 /**
  * @author Sergey Bushik
  */
-public class Jdbc4TypeExtractor extends Jdbc3TypeExtractor {
+public class StaticApplicationContextHolderStrategy implements MigrationContextHolderStrategy {
+
+    private static ApplicationContext applicationContext;
 
     @Override
-    protected void extract(ResultSet resultSet, int column, int columnType, JdbcTypeAcceptor acceptor) throws SQLException {
-        switch (columnType) {
-            case Types.ROWID:
-                acceptor.accept(resultSet.getRowId(column), columnType);
-                break;
-            case Types.NCHAR:
-                acceptor.accept(resultSet.getNClob(column), columnType);
-                break;
-            case Types.NVARCHAR:
-            case Types.LONGNVARCHAR:
-                acceptor.accept(resultSet.getNString(column), columnType);
-                break;
-            case Types.SQLXML:
-                acceptor.accept(resultSet.getSQLXML(column), columnType);
-                break;
-            default:
-                super.extract(resultSet, column, columnType, acceptor);
+    public ApplicationContext getContext() {
+        if (applicationContext == null) {
+            applicationContext = new ApplicationContextImpl();
         }
+        return applicationContext;
+    }
+
+    @Override
+    public void setContext(ApplicationContext context) {
+        applicationContext = context;
     }
 }

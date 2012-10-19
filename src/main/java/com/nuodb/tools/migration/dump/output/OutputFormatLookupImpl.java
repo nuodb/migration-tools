@@ -27,7 +27,6 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.spec.OutputSpec;
 import com.nuodb.tools.migration.utils.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +46,7 @@ public class OutputFormatLookupImpl implements OutputFormatLookup {
 
     public OutputFormatLookupImpl() {
         register(XmlOutputFormat.EXTENSION, XmlOutputFormat.class);
-        register(CsvOutputFormat.EXTENSION, CsvOutputFormat.class);
+        register(CsvOutputFormat.TYPE, CsvOutputFormat.class);
     }
 
     @Override
@@ -74,11 +73,6 @@ public class OutputFormatLookupImpl implements OutputFormatLookup {
             }
         }
         return newInstance(formatClass);
-    }
-
-    @Override
-    public OutputFormat lookup(OutputSpec outputSpec) {
-        return lookup(outputSpec.getType());
     }
 
     @Override

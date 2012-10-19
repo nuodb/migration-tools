@@ -121,12 +121,12 @@ public class OptionImpl extends ContainerBase {
         Argument argument = getArgument();
         boolean displayArgument = argument != null && hints.contains(CONTAINER_ARGUMENT);
         Group children = getGroup();
-        boolean displayChildren = children != null && hints.contains(CONTAINER_GROUP);
+        boolean displayGroup = children != null && hints.contains(CONTAINER_GROUP);
         if (displayArgument) {
             help.append(getArgumentSeparator());
             argument.help(help, hints, comparator);
         }
-        if (displayChildren) {
+        if (displayGroup) {
             help.append(' ');
             children.help(help, hints, comparator);
         }

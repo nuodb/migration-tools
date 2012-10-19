@@ -25,44 +25,37 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.jdbc.type.extract;
 
+import com.nuodb.tools.migration.MigrationException;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypes;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypesBase;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public class JdbcTypeExtractorImpl extends JdbcTypesBase implements JdbcTypeExtractor {
 
-    String getType();
+    public JdbcTypeExtractorImpl() {
+    }
 
-    void setAttributes(Map<String, String> attributes);
+    public JdbcTypeExtractorImpl(JdbcTypes jdbcTypes) {
+        super(jdbcTypes);
+    }
 
-    void outputBegin(ResultSet resultSet) throws IOException, SQLException;
-
-    void outputRow(ResultSet resultSet) throws IOException, SQLException;
-
-    void outputEnd(ResultSet resultSet) throws IOException, SQLException;
-
-    void setWriter(Writer writer);
-
-    void setOutputStream(OutputStream outputStream);
-
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(JdbcType type, JdbcTypeFormatter jdbcTypeFormatter);
-
-    JdbcTypeFormatter getJdbcTypeFormatter(JdbcType type);
-
-    JdbcTypeFormatter getDefaultJdbcTypeFormatter();
-
-    void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter);
+    @Override
+    @SuppressWarnings("unchecked")
+    public <X> void extract(ResultSet resultSet, int column, JdbcTypeAcceptor<X> acceptor) throws SQLException {
+        int sqlType = resultSet.getMetaData().getColumnType(column);
+        JdbcType<X> jdbcType = getJdbcType(sqlType);
+        if (jdbcType == null) {
+            throw new MigrationException(String.format("SQL type %1$d extraction is unsupported", sqlType));
+        } else {
+             acceptor.accept(jdbcType.extract(resultSet, column, sqlType), jdbcType, sqlType);
+        }
+    }
 }
