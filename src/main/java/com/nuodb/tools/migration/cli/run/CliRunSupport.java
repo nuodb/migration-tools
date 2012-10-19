@@ -33,7 +33,6 @@ import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.OptionException;
 import com.nuodb.tools.migration.cli.parse.option.*;
-import com.nuodb.tools.migration.i18n.Resources;
 import com.nuodb.tools.migration.spec.*;
 import com.nuodb.tools.migration.support.ApplicationSupport;
 import com.nuodb.tools.migration.utils.Priority;
@@ -129,7 +128,6 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     public Option createOutputGroup() {
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
-        Resources resources = Resources.getResources();
         Option type = newOption().
                 withName(OUTPUT_TYPE_OPTION).
                 withDescription(getMessage(OUTPUT_TYPE_OPTION_DESCRIPTION)).
@@ -147,9 +145,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withRequired(true).
                 withArgument(
                         newArgument().
-                                withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).
-                                withRequired(true).
-                                withMinimum(1).build()
+                                withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).build()
                 ).build();
 
         RegexOption attributes = new RegexOption();
@@ -157,11 +153,11 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         attributes.setDescription(getMessage(OUTPUT_OPTION_DESCRIPTION));
         attributes.setPrefixes(optionFormat.getOptionPrefixes());
         attributes.setArgumentSeparator(optionFormat.getArgumentSeparator());
-        attributes.addRegex("output.*", 1, Priority.LOW);
+        attributes.addRegex(OUTPUT_OPTION, 1, Priority.LOW);
         attributes.setArgument(
                 newArgument().
-                        withName("").
-                        withValuesSeparator(null).withMinimum(1).build());
+                        withName(getMessage(OUTPUT_OPTION_ARGUMENT_NAME)).
+                        withValuesSeparator(null).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
         return newGroup().
                 withName(getMessage(OUTPUT_GROUP_NAME)).
                 withRequired(true).

@@ -51,12 +51,12 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
     private String rowElement;
 
     @Override
-    public String getExtension() {
+    public String getType() {
         return EXTENSION;
     }
 
     @Override
-    protected void doConfigure() {
+    protected void doSetAttributes() {
         documentElement = getAttribute(ATTRIBUTE_DOCUMENT_ELEMENT, DOCUMENT_ELEMENT);
         rowElement = getAttribute(ATTRIBUTE_ROW_ELEMENT, ROW_ELEMENT);
         version = getAttribute(ATTRIBUTE_VERSION, VERSION);
@@ -78,7 +78,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
     }
 
     @Override
-    protected void doOutputBegin(ResultSet resultSet) throws IOException, SQLException {
+    protected void doOutputBegin(ResultSet resultSet) throws SQLException {
         try {
             writer.writeStartDocument(getEncoding(), getVersion());
             writer.writeStartElement(getDocumentElement());
@@ -89,7 +89,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
     }
 
     @Override
-    protected void doOutputRow(ResultSet resultSet) throws IOException, SQLException {
+    protected void doOutputRow(ResultSet resultSet) throws SQLException {
         try {
             writer.writeStartElement(getRowElement());
             int index = 0;
@@ -116,7 +116,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
     }
 
     @Override
-    protected void doOutputEnd(ResultSet resultSet) throws IOException, SQLException {
+    protected void doOutputEnd(ResultSet resultSet) throws SQLException {
         try {
             writer.writeEndElement();
             writer.writeEndDocument();

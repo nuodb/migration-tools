@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
+import com.nuodb.tools.migration.dump.DumpException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.Quote;
@@ -64,17 +65,17 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvFormat {
      */
     private Character escape;
     /**
-     * The record separator to use for output.
+     * The record separator to use for dump.
      */
     private String lineSeparator;
 
     @Override
-    public String getExtension() {
-        return EXTENSION;
+    public String getType() {
+        return TYPE;
     }
 
     @Override
-    protected void doConfigure() {
+    protected void doSetAttributes() {
         String delimiterValue = getAttribute(ATTRIBUTE_DELIMITER);
         if (isEmpty(delimiterValue)) {
             delimiter = DELIMITER;
@@ -120,18 +121,19 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvFormat {
         } else if (getOutputStream() != null) {
             printer = new CSVPrinter(new PrintWriter(getOutputStream()), format);
         }
-        // CsvPreference.Builder builder = new CsvPreference.Builder(quote, delimiter, lineSeparator);
-        // writer2 = new CsvListWriter(new PrintWriter(getOutputStream()), builder.build());
     }
 
     @Override
-    protected void doOutputBegin(ResultSet resultSet) throws IOException, SQLException {
-        printer.printRecord(getResultSetMetaModel().getColumns());
-        // writer2.writeHeader(getResultSetMetaModel().getColumns());
+    protected void doOutputBegin(ResultSet resultSet) throws SQLException {
+        try {
+            printer.printRecord(getResultSetMetaModel().getColumns());
+        } catch (IOException e) {
+            throw new DumpException(e);
+        }
     }
 
     @Override
-    protected void doOutputRow(ResultSet resultSet) throws IOException, SQLException {
+    protected void doOutputRow(ResultSet resultSet) throws SQLException {
         String[] columns = formatColumns(resultSet);
         for (int i = 0; i < columns.length; i++) {
             String column = columns[i];
@@ -139,13 +141,19 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvFormat {
                 columns[i] = valueOf(quote) + valueOf(quote);
             }
         }
-        printer.printRecord(columns);
-        // writer2.write(formatColumns(resultSet));
+        try {
+            printer.printRecord(columns);
+        } catch (IOException e) {
+            throw new DumpException(e);
+        }
     }
 
     @Override
-    protected void doOutputEnd(ResultSet resultSet) throws IOException, SQLException {
-        printer.flush();
-        // writer2.flush();
+    protected void doOutputEnd(ResultSet resultSet) throws SQLException {
+        try {
+            printer.flush();
+        } catch (IOException e) {
+            throw new DumpException(e);
+        }
     }
 }

@@ -27,16 +27,12 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.spec.OutputSpec;
-
 /**
  * @author Sergey Bushik
  */
 public interface OutputFormatLookup {
 
     OutputFormat lookup(String type);
-
-    OutputFormat lookup(OutputSpec outputSpec);
 
     void register(String type, Class<? extends OutputFormat> formatClass);
 }

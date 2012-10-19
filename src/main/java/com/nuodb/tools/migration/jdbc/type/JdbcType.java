@@ -25,14 +25,17 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.context;
+package com.nuodb.tools.migration.jdbc.type;
 
-import com.nuodb.tools.migration.i18n.Resources;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface MigrationContext {
+public interface JdbcType<T> {
 
-    Resources getResources();
+    int[] getSqlTypes();
+
+    T extract(ResultSet resultSet, int column, int sqlType) throws SQLException;
 }

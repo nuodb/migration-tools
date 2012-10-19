@@ -75,6 +75,7 @@ public interface CliResources {
     final String TABLE_FILTER_ARGUMENT_NAME = "migration.cli.table.filter.argument.name";
 
     final String OUTPUT_OPTION_DESCRIPTION = "migration.cli.output.option.description";
+    final String OUTPUT_OPTION_ARGUMENT_NAME = "migration.cli.output.argument.description";
 
     final String LOAD_GROUP_NAME = "migration.cli.load.group.name";
     final String TARGET_GROUP_NAME = "migration.cli.target.group.name";

@@ -25,43 +25,29 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.type;
+package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.sql.Blob;
-import java.sql.Clob;
+import com.nuodb.tools.migration.jdbc.type.JdbcType;
+
+import java.math.BigDecimal;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLXML;
+import java.sql.Types;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeUtils {
+public class JdbcDecimalType implements JdbcType<BigDecimal> {
 
-    public static byte[] read(Blob blob) throws IOException, SQLException {
-        ByteArrayOutputStream output = new ByteArrayOutputStream((int) blob.length());
-        InputStream input = blob.getBinaryStream();
-        byte[] buffer = new byte[2048];
-        int count;
-        while ((count = input.read(buffer)) != -1) {
-            output.write(buffer, 0, count);
-        }
-        return output.toByteArray();
+    public static final JdbcType INSTANCE = new JdbcDecimalType();
+
+    @Override
+    public int[] getSqlTypes() {
+        return new int[]{Types.NUMERIC, Types.DECIMAL};
     }
 
-    public static String read(Clob clob) throws SQLException, IOException {
-        StringBuilder builder = new StringBuilder((int) clob.length());
-        Reader reader = clob.getCharacterStream();
-        char[] buffer = new char[2048];
-        int count;
-        while ((count = reader.read(buffer, 0, buffer.length)) != -1) {
-            if (count > 0) {
-                builder.append(buffer, 0, count);
-            }
-        }
-        return builder.toString();
+    @Override
+    public BigDecimal extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+        return resultSet.getBigDecimal(column);
     }
 }

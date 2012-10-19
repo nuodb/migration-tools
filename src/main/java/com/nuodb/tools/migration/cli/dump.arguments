@@ -3,8 +3,8 @@ dump
 --source.url=jdbc:mysql://localhost:3306/test
 --source.username=root
 --output.type=csv
---output.path=/tmp/
 --output.csv.delimiter=,
+--output.path=/tmp/test/
 --output.csv.quoting=false
 --output.csv.quote="
 --output.csv.escape=|
@@ -12,5 +12,5 @@ dump
 --output.xml.row.element=row
 --output.xml.encoding=utf-8
 --output.xml.version=1.0
---table=example
---table.example.filter=id >= 3
+#--table=example
+#--table.example.filter=id >= 3

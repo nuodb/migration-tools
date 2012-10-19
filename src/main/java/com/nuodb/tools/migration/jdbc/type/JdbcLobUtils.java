@@ -25,24 +25,42 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.context;
+package com.nuodb.tools.migration.jdbc.type;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public class MigrationContextHolder {
+public class JdbcLobUtils {
 
-    private static MigrationContextHolderStrategy migrationContextHolderStrategy = new StaticMigrationContextHolderStrategy();
-
-    public static void setStrategy(MigrationContextHolderStrategy strategy) {
-        migrationContextHolderStrategy = strategy;
+    public static byte[] read(Blob blob) throws IOException, SQLException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream((int) blob.length());
+        InputStream input = blob.getBinaryStream();
+        byte[] buffer = new byte[2048];
+        int count;
+        while ((count = input.read(buffer)) != -1) {
+            output.write(buffer, 0, count);
+        }
+        return output.toByteArray();
     }
 
-    public static MigrationContext getContext() {
-        return migrationContextHolderStrategy.getContext();
-    }
-
-    public static void setContext(MigrationContext context) {
-        migrationContextHolderStrategy.setContext(context);
+    public static String read(Clob clob) throws SQLException, IOException {
+        StringBuilder builder = new StringBuilder((int) clob.length());
+        Reader reader = clob.getCharacterStream();
+        char[] buffer = new char[2048];
+        int count;
+        while ((count = reader.read(buffer, 0, buffer.length)) != -1) {
+            if (count > 0) {
+                builder.append(buffer, 0, count);
+            }
+        }
+        return builder.toString();
     }
 }

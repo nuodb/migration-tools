@@ -31,9 +31,13 @@ import com.nuodb.tools.migration.cli.parse.*;
 import com.nuodb.tools.migration.match.AntRegexCompiler;
 import com.nuodb.tools.migration.match.Match;
 import com.nuodb.tools.migration.match.RegexCompiler;
+import com.nuodb.tools.migration.utils.PriorityList;
+import com.nuodb.tools.migration.utils.PriorityListImpl;
 
 import java.util.*;
 
+import static com.nuodb.tools.migration.cli.parse.HelpHint.CONTAINER_ARGUMENT;
+import static com.nuodb.tools.migration.cli.parse.HelpHint.CONTAINER_GROUP;
 import static com.nuodb.tools.migration.cli.parse.HelpHint.OPTIONAL;
 
 /**
@@ -103,15 +107,45 @@ public class RegexOption extends ContainerBase {
     }
 
     @Override
-    public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public void help(StringBuilder help, Set<HelpHint> hints, Comparator<Option> comparator) {
         boolean optional = !isRequired() && hints.contains(OPTIONAL);
         if (optional) {
-            buffer.append('[');
+            help.append('[');
         }
-        buffer.append(getName());
-        super.help(buffer, hints, comparator);
+        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+        createTriggers(triggers, getPrefixes(), getName());
+        join(help, triggers);
+
+        Argument argument = getArgument();
+        boolean displayArgument = argument != null && hints.contains(CONTAINER_ARGUMENT);
+        Group group = getGroup();
+        boolean displayGroup = group != null && hints.contains(CONTAINER_GROUP);
+        if (displayArgument) {
+            help.append(getArgumentSeparator());
+            boolean bracketed = hints.contains(HelpHint.ARGUMENT_BRACKETED);
+            // if the arguments is optional
+            if (optional) {
+                help.append('[');
+            }
+            if (bracketed) {
+                help.append('<');
+            }
+            // append name
+            help.append(argument.getName());
+
+            if (bracketed) {
+                help.append('>');
+            }
+            if (optional) {
+                help.append(']');
+            }
+        }
+        if (displayGroup) {
+            help.append(' ');
+            group.help(help, hints, comparator);
+        }
         if (optional) {
-            buffer.append(']');
+            help.append(']');
         }
     }
 

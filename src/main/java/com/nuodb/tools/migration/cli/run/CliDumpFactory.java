@@ -32,14 +32,14 @@ import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.dump.DumpExecutor;
+import com.nuodb.tools.migration.dump.DumpWriter;
 import com.nuodb.tools.migration.spec.DumpSpec;
 
 import java.sql.SQLException;
 
 /**
  * The Factory instantiates a {@link CliDump} which is a set of groups of options for source database connection spec
- * {@link CliRunSupport#createSourceGroup}, spec of output format & type via {@link CliRunSupport#createOutputGroup},
+ * {@link CliRunSupport#createSourceGroup}, spec of dump format & type via {@link CliRunSupport#createOutputGroup},
  * table option {@link CliRunSupport#createSelectQueryGroup} and after a validation is passed assembles command line
  * option arguments into a {@link DumpSpec} object.
  *
@@ -99,7 +99,7 @@ public class CliDumpFactory implements CliRunFactory, CliResources {
         @Override
         public void run() {
             try {
-                new DumpExecutor().execute(dumpSpec);
+                new DumpWriter().dump(dumpSpec);
             } catch (SQLException e) {
                 throw new MigrationException(e);
             }

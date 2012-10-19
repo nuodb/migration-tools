@@ -25,44 +25,46 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.jdbc;
 
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
+import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
 import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
+import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractorImpl;
+import com.nuodb.tools.migration.jdbc.type.jdbc4.Jdbc4Types;
+import com.nuodb.tools.migration.spec.ConnectionSpec;
+import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
+import java.sql.Connection;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public class JdbcServiceImpl implements JdbcServices {
 
-    String getType();
+    private ConnectionSpec connectionSpec;
 
-    void setAttributes(Map<String, String> attributes);
+    public JdbcServiceImpl(ConnectionSpec connectionSpec) {
+        this.connectionSpec = connectionSpec;
+    }
 
-    void outputBegin(ResultSet resultSet) throws IOException, SQLException;
+    @Override
+    public JdbcTypeExtractor getJdbcTypeExtractor() {
+        return new JdbcTypeExtractorImpl(Jdbc4Types.INSTANCE);
+    }
 
-    void outputRow(ResultSet resultSet) throws IOException, SQLException;
+    @Override
+    public ConnectionProvider getConnectionProvider() {
+        DriverManagerConnectionProvider connectionProvider = new DriverManagerConnectionProvider();
+        connectionProvider.setConnectionSpec((DriverManagerConnectionSpec) connectionSpec);
+        connectionProvider.setAutoCommit(false);
+        connectionProvider.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        return connectionProvider;
+    }
 
-    void outputEnd(ResultSet resultSet) throws IOException, SQLException;
-
-    void setWriter(Writer writer);
-
-    void setOutputStream(OutputStream outputStream);
-
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(JdbcType type, JdbcTypeFormatter jdbcTypeFormatter);
-
-    JdbcTypeFormatter getJdbcTypeFormatter(JdbcType type);
-
-    JdbcTypeFormatter getDefaultJdbcTypeFormatter();
-
-    void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter);
+    @Override
+    public DatabaseIntrospector getDatabaseIntrospector() {
+        return new DatabaseIntrospector();
+    }
 }

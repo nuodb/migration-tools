@@ -84,11 +84,21 @@
             <artifactId>commons-lang</artifactId>
             <version>2.6</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>net.sf.supercsv</groupId>-->
-            <!--<artifactId>super-csv</artifactId>-->
-            <!--<version>2.0.0-beta-1</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>3.1.2.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>hibernate</groupId>
+            <artifactId>hibernate</artifactId>
+            <version>3.1rc2</version>
+        </dependency>
     </dependencies>
     <reporting>
         <plugins>

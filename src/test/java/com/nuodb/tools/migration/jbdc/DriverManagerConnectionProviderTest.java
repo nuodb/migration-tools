@@ -36,7 +36,8 @@ public class DriverManagerConnectionProviderTest {
     @Test
     public void testGetConnection() throws Exception {
         DriverManagerConnectionProvider connectionProvider =
-                new DriverManagerConnectionProvider(connectionSpec);
+                new DriverManagerConnectionProvider();
+        connectionProvider.setConnectionSpec(connectionSpec);
         final Connection connection = connectionProvider.getConnection();
         Assert.assertNotNull(connection);
         Assert.assertTrue(this.connection == connection);
@@ -51,7 +52,10 @@ public class DriverManagerConnectionProviderTest {
     @Test
     public void testCreation() throws Exception {
         final DriverManagerConnectionProvider connectionProvider =
-                new DriverManagerConnectionProvider(connectionSpec, true, 1);
+                new DriverManagerConnectionProvider();
+        connectionProvider.setConnectionSpec(connectionSpec);
+        connectionProvider.setAutoCommit(true);
+        connectionProvider.setTransactionIsolation(1);
         final Connection connection = connectionProvider.getConnection();
         Assert.assertNotNull(connection);
         Assert.assertTrue(this.connection == connection);

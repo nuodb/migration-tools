@@ -25,44 +25,52 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.jdbc.type;
 
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public class JdbcTypesBase implements JdbcTypes {
 
-    String getType();
+    private Map<Integer, JdbcType> jdbcTypes = new HashMap<Integer, JdbcType>();
 
-    void setAttributes(Map<String, String> attributes);
+    public JdbcTypesBase() {
+    }
 
-    void outputBegin(ResultSet resultSet) throws IOException, SQLException;
+    public JdbcTypesBase(JdbcTypes jdbcTypes) {
+        addJdbcTypes(jdbcTypes.getJdbcTypes());
+    }
 
-    void outputRow(ResultSet resultSet) throws IOException, SQLException;
+    @Override
+    public JdbcType getJdbcType(int sqlType) {
+        return jdbcTypes.get(sqlType);
+    }
 
-    void outputEnd(ResultSet resultSet) throws IOException, SQLException;
+    @Override
+    public void addJdbcType(JdbcType jdbcType) {
+        for (int type : jdbcType.getSqlTypes()) {
+            jdbcTypes.put(type, jdbcType);
+        }
+    }
 
-    void setWriter(Writer writer);
+    @Override
+    public Collection<JdbcType> getJdbcTypes() {
+        return jdbcTypes.values();
+    }
 
-    void setOutputStream(OutputStream outputStream);
+    @Override
+    public void addJdbcTypes(JdbcTypes jdbcTypes) {
+        addJdbcTypes(jdbcTypes.getJdbcTypes());
+    }
 
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(JdbcType type, JdbcTypeFormatter jdbcTypeFormatter);
-
-    JdbcTypeFormatter getJdbcTypeFormatter(JdbcType type);
-
-    JdbcTypeFormatter getDefaultJdbcTypeFormatter();
-
-    void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter);
+    @Override
+    public void addJdbcTypes(Collection<JdbcType> jdbcTypes) {
+        for (JdbcType jdbcType : jdbcTypes) {
+            addJdbcType(jdbcType);
+        }
+    }
 }

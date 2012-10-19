@@ -64,7 +64,6 @@ public class Table {
         return type;
     }
 
-
     public Column getColumn(String name) {
         return getColumn(Name.valueOf(name));
     }

@@ -25,29 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.type.extract;
+package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypes;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypesBase;
 
 /**
  * @author Sergey Bushik
  */
-public class Jdbc3TypeExtractor extends Jdbc2TypeExtractor {
+public class Jdbc2Types extends JdbcTypesBase {
 
-    @Override
-    protected void extract(ResultSet resultSet, int column, int columnType, JdbcTypeAcceptor acceptor) throws SQLException {
-        switch (columnType) {
-            case Types.DATALINK:
-                acceptor.accept(resultSet.getURL(column), columnType);
-                break;
-            case Types.BOOLEAN:
-                boolean booleanValue = resultSet.getBoolean(column);
-                acceptor.accept(resultSet.wasNull() ? null : booleanValue, columnType);
-                break;
-            default:
-                super.extract(resultSet, column, columnType, acceptor);
-        }
+    public static final JdbcTypes INSTANCE = new Jdbc2Types();
+
+    public Jdbc2Types() {
+        addJdbcType(JdbcArrayType.INSTANCE);
+        addJdbcType(JdbcBigIntType.INSTANCE);
+        addJdbcType(JdbcBinaryType.INSTANCE);
+        addJdbcType(JdbcBitType.INSTANCE);
+        addJdbcType(JdbcBlobType.INSTANCE);
+        addJdbcType(JdbcCharType.INSTANCE);
+        addJdbcType(JdbcClobType.INSTANCE);
+        addJdbcType(JdbcDateType.INSTANCE);
+        addJdbcType(JdbcDecimalType.INSTANCE);
+        addJdbcType(JdbcDoubleType.INSTANCE);
+        addJdbcType(JdbcFloatType.INSTANCE);
+        addJdbcType(JdbcIntegerType.INSTANCE);
+        addJdbcType(JdbcNullType.INSTANCE);
+        addJdbcType(JdbcObjectType.INSTANCE);
+        addJdbcType(JdbcRefType.INSTANCE);
+        addJdbcType(JdbcSmallIntType.INSTANCE);
+        addJdbcType(JdbcTimestampType.INSTANCE);
+        addJdbcType(JdbcTimeType.INSTANCE);
     }
 }
