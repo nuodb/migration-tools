@@ -105,6 +105,7 @@ public class DatabaseIntrospectorTest {
         spyIntrospector.readInfo(metaData, database);
 
         verify(database, times(1)).setDatabaseInfo(any(DatabaseInfo.class));
+        verify(database, times(1)).setDriverInfo(any(DriverInfo.class));
         verify(metaData, times(1)).getDriverName();
         verify(metaData, times(1)).getDriverVersion();
         verify(metaData, times(1)).getDatabaseMajorVersion();
