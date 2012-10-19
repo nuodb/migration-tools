@@ -25,12 +25,13 @@ public class CliHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        handler = new CliHandler();
         optionToolkitMock = mock(OptionToolkit.class);
+        handler = new CliHandler(optionToolkitMock);
     }
 
     @Test
     public void testCreateOptions() throws Exception {
+
         OptionBuilder optionBuilder = mock(OptionBuilder.class);
         ArgumentBuilder argumentBuilder = mock(ArgumentBuilder.class);
         GroupBuilder groupBuilder = mock(GroupBuilder.class);

@@ -70,6 +70,11 @@ public class CliHandler extends ApplicationSupport implements CliResources, CliO
         cliRunFactoryLookup = new CliRunFactoryLookup();
     }
 
+    public CliHandler(OptionToolkit optionToolkit) {
+        this.optionToolkit = optionToolkit;
+        cliRunFactoryLookup = new CliRunFactoryLookup();
+    }
+
     public void handle(String[] arguments) throws OptionException {
         Option root = createOption();
         try {
