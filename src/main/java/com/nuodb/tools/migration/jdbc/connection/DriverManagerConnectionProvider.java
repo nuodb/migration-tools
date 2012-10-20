@@ -42,10 +42,30 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
     public static final String PASSWORD_PROPERTY = "password";
 
     private transient final Log log = LogFactory.getLog(this.getClass());
-    
+
     private DriverManagerConnectionSpec connectionSpec;
     private boolean autoCommit = Boolean.FALSE;
     private int transactionIsolation;
+
+    public DriverManagerConnectionProvider() {
+    }
+
+    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec) {
+        this.connectionSpec = connectionSpec;
+    }
+
+    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec,
+                                           boolean autoCommit) {
+        this.connectionSpec = connectionSpec;
+        this.autoCommit = autoCommit;
+    }
+
+    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec,
+                                           boolean autoCommit, int transactionIsolation) {
+        this.connectionSpec = connectionSpec;
+        this.autoCommit = autoCommit;
+        this.transactionIsolation = transactionIsolation;
+    }
 
     public Connection getConnection() throws SQLException {
         try {

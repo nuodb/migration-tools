@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
+import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 import org.apache.commons.logging.Log;
@@ -58,6 +59,7 @@ public class DatabaseIntrospector {
     protected List<ObjectType> objectTypes = OBJECT_TYPES_ALL;
     protected String[] tableTypes = TABLE_TYPES;
     protected Connection connection;
+    protected ConnectionProvider connectionProvider;
 
     public DatabaseIntrospector withObjectTypes(ObjectType... types) {
         this.objectTypes = Arrays.asList(types);
@@ -85,11 +87,28 @@ public class DatabaseIntrospector {
         return this;
     }
 
+    public DatabaseIntrospector withConnectionProvider(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
+        return this;
+    }
+
     public Database introspect() throws SQLException {
         Database database = createDatabase();
-        DatabaseMetaData meta = connection.getMetaData();
-        readInfo(meta, database);
-        readObjects(meta, database);
+        Connection connection = this.connection;
+        boolean closeConnection = false;
+        if (connection == null) {
+            connection = connectionProvider.getConnection();
+            closeConnection = true;
+        }
+        try {
+            DatabaseMetaData meta = connection.getMetaData();
+            readInfo(meta, database);
+            readObjects(meta, database);
+        } finally {
+            if (closeConnection) {
+                connectionProvider.closeConnection(connection);
+            }
+        }
         return database;
     }
 

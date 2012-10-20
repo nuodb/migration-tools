@@ -31,7 +31,6 @@ public class CliHandlerTest {
 
     @Test
     public void testCreateOptions() throws Exception {
-
         OptionBuilder optionBuilder = mock(OptionBuilder.class);
         ArgumentBuilder argumentBuilder = mock(ArgumentBuilder.class);
         GroupBuilder groupBuilder = mock(GroupBuilder.class);

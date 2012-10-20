@@ -13,12 +13,8 @@ import java.util.Collection;
 import java.util.Map;
 
 public class DatabaseIntrospectorIntegrationTest {
-
-
     private Connection connection;
     private DatabaseIntrospector introspector;
-    private Connection mySqlConnection;
-
 
     @Before
     public void setUp() throws Exception {
@@ -33,17 +29,10 @@ public class DatabaseIntrospectorIntegrationTest {
         nuodb.setUsername("dba");
         nuodb.setPassword("goalie");
 
-
-        final DriverManagerConnectionProvider connectionProvider = 
+        final DriverManagerConnectionProvider connectionProvider =
                 new DriverManagerConnectionProvider(nuodb);
-        final DriverManagerConnectionProvider mySqlConnectionProvider
-                = new DriverManagerConnectionProvider(mysql);
-        
-        
 
         connection = connectionProvider.getConnection();
-        // mySqlConnection = mySqlConnectionProvider.getConnection();
-
 
         Assert.assertNotNull(connection);
         Assert.assertNotNull(connection.getMetaData());
@@ -78,7 +67,7 @@ public class DatabaseIntrospectorIntegrationTest {
         introspector.readObjects(connection.getMetaData(), database);
 
 
-        final Map<Name,Catalog> catalogs = database.getCatalogs();
+        final Map<Name, Catalog> catalogs = database.getCatalogs();
         Assert.assertFalse(catalogs.isEmpty());
 
         final Collection<Schema> schemas = database.listSchemas();

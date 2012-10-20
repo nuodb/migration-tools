@@ -94,11 +94,6 @@
             <artifactId>spring-core</artifactId>
             <version>3.1.2.RELEASE</version>
         </dependency>
-        <dependency>
-            <groupId>hibernate</groupId>
-            <artifactId>hibernate</artifactId>
-            <version>3.1rc2</version>
-        </dependency>
     </dependencies>
     <reporting>
         <plugins>

@@ -48,7 +48,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     private OptionToolkit optionToolkit;
 
-    public CliRunSupport(OptionToolkit optionToolkit) {
+    protected CliRunSupport(OptionToolkit optionToolkit) {
         this.optionToolkit = optionToolkit;
     }
 
@@ -57,7 +57,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
      *
      * @return group of options for the source database.
      */
-    public Option createSourceGroup() {
+    protected Option createSourceGroup() {
         Option driver = newOption().
                 withName(SOURCE_DRIVER_OPTION).
                 withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).
@@ -126,7 +126,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withOption(schema).build();
     }
 
-    public Option createOutputGroup() {
+    protected Option createOutputGroup() {
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
         Option type = newOption().
                 withName(OUTPUT_TYPE_OPTION).
@@ -170,7 +170,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     /**
      * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
      */
-    public Option createSelectQueryGroup() {
+    protected Option createSelectQueryGroup() {
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
         Option table = newOption().
                 withName(TABLE_OPTION).
@@ -203,7 +203,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 build();
     }
 
-    public ConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
+    protected ConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
         DriverManagerConnectionSpec connection = new DriverManagerConnectionSpec();
         connection.setCatalog(commandLine.<String>getValue(SOURCE_CATALOG_OPTION));
         connection.setSchema(commandLine.<String>getValue(SOURCE_SCHEMA_OPTION));
@@ -219,7 +219,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return connection;
     }
 
-    public OutputSpec parseOutputGroup(CommandLine commandLine, Option option) {
+    protected OutputSpec parseOutputGroup(CommandLine commandLine, Option option) {
         OutputSpec output = new OutputSpecBase();
         output.setType(commandLine.<String>getValue(OUTPUT_TYPE_OPTION));
         output.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
@@ -228,7 +228,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return output;
     }
 
-    public Map<String, String> parseOutputAttributes(Option option, List<String> values) {
+    protected Map<String, String> parseOutputAttributes(Option option, List<String> values) {
         Map<String, String> attributes = new HashMap<String, String>();
         for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
             attributes.put(iterator.next(), iterator.next());
@@ -236,7 +236,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return attributes;
     }
 
-    public Collection<SelectQuerySpec> parseSelectQueryGroup(CommandLine commandLine, Option option) {
+    protected Collection<SelectQuerySpec> parseSelectQueryGroup(CommandLine commandLine, Option option) {
         Map<String, SelectQuerySpec> tableQueryMapping = new HashMap<String, SelectQuerySpec>();
         for (String table : commandLine.<String>getValues(TABLE_OPTION)) {
             tableQueryMapping.put(table, new SelectQuerySpec(table));
@@ -259,7 +259,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
      * @param url    to be parsed
      * @return map of strings to strings formed from key value pairs from url
      */
-    public Map<String, String> parseUrl(Option option, String url) {
+    protected Map<String, String> parseUrl(Option option, String url) {
         try {
             url = URLDecoder.decode(url, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -277,7 +277,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return map;
     }
 
-    public Option createTargetGroup() {
+    protected Option createTargetGroup() {
         Option url = newOption().
                 withName(TARGET_URL_OPTION).
                 withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
@@ -327,7 +327,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withOption(schema).build();
     }
 
-    public ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
+    protected ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
         DriverManagerConnectionSpec connection = new DriverManagerConnectionSpec();
         connection.setSchema(commandLine.<String>getValue(TARGET_SCHEMA_OPTION));
         connection.setUrl(commandLine.<String>getValue(TARGET_URL_OPTION));
@@ -341,19 +341,19 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return connection;
     }
 
-    public OptionBuilder newOption() {
+    protected OptionBuilder newOption() {
         return optionToolkit.newOption();
     }
 
-    public GroupBuilder newGroup() {
+    protected GroupBuilder newGroup() {
         return optionToolkit.newGroup();
     }
 
-    public ArgumentBuilder newArgument() {
+    protected ArgumentBuilder newArgument() {
         return optionToolkit.newArgument();
     }
 
-    public OptionFormat getOptionFormat() {
+    protected OptionFormat getOptionFormat() {
         return optionToolkit.getOptionFormat();
     }
 }

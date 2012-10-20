@@ -1,4 +1,4 @@
-package com.nuodb.tools.migration.jbdc;
+package com.nuodb.tools.migration.jdbc;
 
 
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;

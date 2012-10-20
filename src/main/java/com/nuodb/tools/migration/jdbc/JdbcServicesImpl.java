@@ -41,30 +41,40 @@ import java.sql.Connection;
 /**
  * @author Sergey Bushik
  */
-public class JdbcServiceImpl implements JdbcServices {
+public class JdbcServicesImpl implements JdbcServices {
 
     private ConnectionSpec connectionSpec;
+    private ConnectionProvider connectionProvider;
+    private JdbcTypeExtractor jdbcTypeExtractor;
 
-    public JdbcServiceImpl(ConnectionSpec connectionSpec) {
-        this.connectionSpec = connectionSpec;
+    public JdbcServicesImpl(DriverManagerConnectionSpec connectionSpec) {
+        this(connectionSpec,
+                new DriverManagerConnectionProvider(connectionSpec, false, Connection.TRANSACTION_READ_COMMITTED),
+                new JdbcTypeExtractorImpl(Jdbc4Types.INSTANCE));
     }
 
-    @Override
-    public JdbcTypeExtractor getJdbcTypeExtractor() {
-        return new JdbcTypeExtractorImpl(Jdbc4Types.INSTANCE);
+    public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider, JdbcTypeExtractor jdbcTypeExtractor) {
+        this.connectionSpec = connectionSpec;
+        this.connectionProvider = connectionProvider;
+        this.jdbcTypeExtractor = jdbcTypeExtractor;
     }
 
     @Override
     public ConnectionProvider getConnectionProvider() {
-        DriverManagerConnectionProvider connectionProvider = new DriverManagerConnectionProvider();
-        connectionProvider.setConnectionSpec((DriverManagerConnectionSpec) connectionSpec);
-        connectionProvider.setAutoCommit(false);
-        connectionProvider.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         return connectionProvider;
     }
 
     @Override
+    public JdbcTypeExtractor getJdbcTypeExtractor() {
+        return jdbcTypeExtractor;
+    }
+
+    @Override
     public DatabaseIntrospector getDatabaseIntrospector() {
-        return new DatabaseIntrospector();
+        DatabaseIntrospector introspector = new DatabaseIntrospector();
+        introspector.withConnectionProvider(getConnectionProvider());
+        introspector.withCatalog(connectionSpec.getCatalog());
+        introspector.withSchema(connectionSpec.getSchema());
+        return introspector;
     }
 }

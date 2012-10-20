@@ -27,19 +27,12 @@
  */
 package com.nuodb.tools.migration.cli;
 
-import com.nuodb.tools.migration.cli.parse.Group;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.OptionException;
 import com.nuodb.tools.migration.cli.parse.OptionSet;
-import com.nuodb.tools.migration.cli.parse.help.HelpFormatter;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.cli.parse.parser.ParserImpl;
-import com.nuodb.tools.migration.cli.run.CliRun;
-import com.nuodb.tools.migration.cli.run.CliRunFactory;
 import com.nuodb.tools.migration.cli.run.CliRunFactoryLookup;
-import com.nuodb.tools.migration.support.ApplicationSupport;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,7 +40,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -55,24 +47,17 @@ import java.util.List;
  *
  * @author Sergey Bushik
  */
-public class CliHandler extends ApplicationSupport implements CliResources, CliOptions {
-
-    private transient final Log log = LogFactory.getLog(getClass());
-
-    public static final String MIGRATION_EXECUTABLE = "migration";
-    public static final String MIGRATION_EXECUTABLE_COMMAND = "migration %1$s";
-
-    private OptionToolkit optionToolkit;
-    private CliRunFactoryLookup cliRunFactoryLookup;
+public class CliHandler extends CliHandlerSupport {
 
     public CliHandler() {
-        optionToolkit = new OptionToolkit();
-        cliRunFactoryLookup = new CliRunFactoryLookup();
     }
 
     public CliHandler(OptionToolkit optionToolkit) {
-        this.optionToolkit = optionToolkit;
-        cliRunFactoryLookup = new CliRunFactoryLookup();
+        super(optionToolkit);
+    }
+
+    public CliHandler(OptionToolkit optionToolkit, CliRunFactoryLookup cliRunFactoryLookup) {
+        super(optionToolkit, cliRunFactoryLookup);
     }
 
     public void handle(String[] arguments) throws OptionException {
@@ -86,105 +71,6 @@ public class CliHandler extends ApplicationSupport implements CliResources, CliO
         } catch (OptionException exception) {
             handleOptionException(exception);
         }
-    }
-
-    protected Group createOption() {
-        Option help = optionToolkit.newOption().
-                withId(HELP_OPTION_ID).
-                withName(HELP_OPTION).
-                withDescription(getMessage(HELP_OPTION_DESCRIPTION)).
-                withArgument(
-                        optionToolkit.newArgument().
-                                withName(getMessage(HELP_ARGUMENT_NAME)).build()
-                ).build();
-        Option list = optionToolkit.newOption().
-                withId(LIST_OPTION_ID).
-                withName(LIST_OPTION).
-                withDescription(getMessage(LIST_OPTION_DESCRIPTION)).build();
-        Option config = optionToolkit.newOption().
-                withId(CONFIG_OPTION_ID).
-                withName(CONFIG_OPTION).
-                withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
-                withArgument(
-                        optionToolkit.newArgument().
-                                withName(getMessage(CONFIG_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withMaximum(1).build()
-                ).build();
-
-        Option command = new CliCommand(
-                COMMAND_OPTION_ID, COMMAND_OPTION, getMessage(COMMAND_OPTION_DESCRIPTION), false,
-                cliRunFactoryLookup, optionToolkit);
-        return optionToolkit.newGroup().
-                withName(getMessage(MIGRATION_GROUP_NAME)).
-                withOption(help).
-                withOption(list).
-                withOption(config).
-                withOption(command).
-                withRequired(true).build();
-    }
-
-    protected void handleOptionSet(OptionSet options, Option root) {
-        if (log.isTraceEnabled()) {
-            log.trace("Options successfully parsed");
-        }
-        if (options.hasOption(HELP_OPTION)) {
-            if (log.isTraceEnabled()) {
-                log.trace("Handling --help option");
-            }
-            handleHelp(options, root);
-        } else if (options.hasOption(COMMAND_OPTION)) {
-            CliRun runnable = options.getValue(COMMAND_OPTION);
-            if (log.isTraceEnabled()) {
-                log.trace(String.format("Running %1$s command", runnable.getCommand()));
-            }
-            runnable.run();
-        } else if (options.hasOption(CONFIG_OPTION)) {
-            if (log.isTraceEnabled()) {
-                log.trace(String.format("Handling --config %1$s option", options.getValue("config")));
-            }
-        } else if (options.hasOption(LIST_OPTION)) {
-            if (log.isTraceEnabled()) {
-                log.trace(String.format("Handling --list option"));
-            }
-            Collection<String> commands = cliRunFactoryLookup.getCommands();
-            for (String command : commands) {
-                System.out.println(command);
-            }
-        }
-    }
-
-    protected void handleHelp(OptionSet options, Option root) {
-        String command = options.getValue(HELP_OPTION);
-        HelpFormatter formatter = new HelpFormatter();
-        if (command != null) {
-            CliRunFactory cliRunFactory = cliRunFactoryLookup.lookup(command);
-            if (cliRunFactory != null) {
-                formatter.setOption(cliRunFactory.createCliRun(optionToolkit));
-                formatter.setExecutable(String.format(MIGRATION_EXECUTABLE_COMMAND, command));
-            } else {
-                // TODO: command not found
-            }
-        } else {
-            formatter.setOption(root);
-            formatter.setExecutable(MIGRATION_EXECUTABLE);
-        }
-        formatter.format(System.out);
-    }
-
-    protected void handleOptionException(OptionException exception) {
-        HelpFormatter formatter = new HelpFormatter();
-        formatter.setException(exception);
-        Option option = exception.getOption();
-        String executable;
-        if (option instanceof CliRun) {
-            String command = ((CliRun) option).getCommand();
-            executable = String.format(MIGRATION_EXECUTABLE_COMMAND, command);
-        } else {
-            executable = MIGRATION_EXECUTABLE;
-        }
-        formatter.setExecutable(executable);
-        formatter.format(System.out);
     }
 
     public static void main(String[] args) throws IOException {

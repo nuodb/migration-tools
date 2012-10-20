@@ -34,13 +34,18 @@ import com.nuodb.tools.migration.dump.query.NativeQueryBuilder;
 import com.nuodb.tools.migration.dump.query.Query;
 import com.nuodb.tools.migration.dump.query.SelectQuery;
 import com.nuodb.tools.migration.dump.query.SelectQueryBuilder;
-import com.nuodb.tools.migration.jdbc.JdbcServiceImpl;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
+import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.metamodel.Database;
 import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
-import com.nuodb.tools.migration.spec.*;
+import com.nuodb.tools.migration.spec.ConnectionSpec;
+import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
+import com.nuodb.tools.migration.spec.DumpSpec;
+import com.nuodb.tools.migration.spec.NativeQuerySpec;
+import com.nuodb.tools.migration.spec.OutputSpec;
+import com.nuodb.tools.migration.spec.SelectQuerySpec;
 import com.nuodb.tools.migration.support.ApplicationSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,18 +78,16 @@ public class DumpWriter extends ApplicationSupport {
 
     public void dump(ConnectionSpec connectionSpec, Collection<SelectQuerySpec> selectQuerySpecs,
                      Collection<NativeQuerySpec> nativeQuerySpecs, OutputSpec outputSpec) throws SQLException {
-        dump(new JdbcServiceImpl(connectionSpec), connectionSpec, selectQuerySpecs, nativeQuerySpecs, outputSpec);
+        dump(new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec), selectQuerySpecs, nativeQuerySpecs, outputSpec);
     }
 
-    public void dump(JdbcServices jdbcServices, ConnectionSpec connectionSpec,
-                     Collection<SelectQuerySpec> selectQuerySpecs, Collection<NativeQuerySpec> nativeQuerySpecs,
-                     OutputSpec outputSpec) throws SQLException {
+    public void dump(JdbcServices jdbcServices, Collection<SelectQuerySpec> selectQuerySpecs,
+                     Collection<NativeQuerySpec> nativeQuerySpecs, OutputSpec outputSpec) throws SQLException {
         ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
         Connection connection = connectionProvider.getConnection();
         try {
-            Database database = introspect(jdbcServices, connectionSpec, connection);
-
-            DumpCatalog catalog = new DumpCatalog(outputSpec.getPath());
+            Database database = introspect(jdbcServices, connection);
+            DumpCatalog catalog = createDumpCatalog(outputSpec);
             catalog.open();
             for (Query query : createQueries(database, selectQuerySpecs, nativeQuerySpecs)) {
                 OutputFormat format = getOutputFormatLookup().lookup(outputSpec.getType());
@@ -102,15 +105,15 @@ public class DumpWriter extends ApplicationSupport {
         }
     }
 
-    protected Database introspect(JdbcServices jdbcServices, ConnectionSpec connectionSpec, Connection connection) throws SQLException {
+    protected Database introspect(JdbcServices jdbcServices, Connection connection) throws SQLException {
         DatabaseIntrospector introspector = jdbcServices.getDatabaseIntrospector();
         introspector.withConnection(connection);
-        if (connectionSpec != null) {
-            introspector.withCatalog(connectionSpec.getCatalog());
-            introspector.withSchema(connectionSpec.getSchema());
-        }
         introspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
         return introspector.introspect();
+    }
+
+    protected DumpCatalog createDumpCatalog(OutputSpec outputSpec) {
+        return new DumpCatalog(outputSpec.getPath());
     }
 
     protected void dump(Connection connection, Query query, OutputFormat format) throws SQLException {

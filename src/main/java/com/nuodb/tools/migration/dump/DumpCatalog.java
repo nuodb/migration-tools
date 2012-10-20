@@ -118,7 +118,7 @@ public class DumpCatalog {
             throw new DumpException("Failed opening file to output", e);
         }
         try {
-            if (entryNames.isEmpty()) {
+            if (!entryNames.isEmpty()) {
                 write(System.getProperty("line.separator"), getCatalogFileOutput());
             }
             entryNames.add(entryName);

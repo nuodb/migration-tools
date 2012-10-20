@@ -48,7 +48,7 @@ public abstract class OutputFormatBase implements OutputFormat {
     private OutputStream outputStream;
     private Map<String, String> attributes;
     private JdbcTypeExtractor jdbcTypeExtractor;
-    private Map<JdbcType, JdbcTypeFormatter> jdbcTypeFormatters = new HashMap<JdbcType, JdbcTypeFormatter>();
+    private Map<Integer, JdbcTypeFormatter> jdbcTypeFormatters = new HashMap<Integer, JdbcTypeFormatter>();
     private JdbcTypeFormatter defaultJdbcTypeFormatter = new JdbcTypeFormatterImpl();
     private ResultSetMetaModel resultSetMetaModel;
 
@@ -114,11 +114,11 @@ public abstract class OutputFormatBase implements OutputFormat {
 
     @SuppressWarnings("unchecked")
     protected <T> String formatColumn(Object value, int column, JdbcType<T> jdbcType, int sqlType) {
-        JdbcTypeFormatter<T> jdbcTypeFormatter = getJdbcTypeFormatter(jdbcType);
+        JdbcTypeFormatter<T> jdbcTypeFormatter = getJdbcTypeFormatter(sqlType);
         if (jdbcTypeFormatter == null) {
             jdbcTypeFormatter = getDefaultJdbcTypeFormatter();
         }
-        return jdbcTypeFormatter.format((T) value, jdbcType, sqlType);
+        return jdbcTypeFormatter.format((T) value, column, jdbcType, sqlType);
     }
 
     @Override
@@ -136,13 +136,15 @@ public abstract class OutputFormatBase implements OutputFormat {
     protected abstract void doOutputEnd(ResultSet resultSet) throws SQLException;
 
     @Override
-    public void addJdbcTypeFormatter(JdbcType type, JdbcTypeFormatter jdbcTypeFormatter) {
-        jdbcTypeFormatters.put(type, jdbcTypeFormatter);
+    public void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormatter jdbcTypeFormatter) {
+        for (Integer sqlType : jdbcType.getSqlTypes()) {
+            jdbcTypeFormatters.put(sqlType, jdbcTypeFormatter);
+        }
     }
 
     @Override
-    public JdbcTypeFormatter getJdbcTypeFormatter(JdbcType jdbcType) {
-        return jdbcTypeFormatters.get(jdbcType);
+    public JdbcTypeFormatter getJdbcTypeFormatter(int sqlType) {
+        return jdbcTypeFormatters.get(sqlType);
     }
 
     public Writer getWriter() {
