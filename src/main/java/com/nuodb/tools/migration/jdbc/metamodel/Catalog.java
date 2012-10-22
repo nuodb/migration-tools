@@ -43,6 +43,11 @@ public class Catalog {
         this.name = name;
     }
 
+    public Catalog(Database database, String name) {
+        this.database = database;
+        this.name = Name.valueOf(name);
+    }
+
     public Database getDatabase() {
         return database;
     }

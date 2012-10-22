@@ -43,6 +43,11 @@ public class Schema {
         this.name = name;
     }
 
+    public Schema(Catalog catalog, String name) {
+        this.catalog = catalog;
+        this.name = Name.valueOf(name);
+    }
+
     public Catalog getCatalog() {
         return catalog;
     }

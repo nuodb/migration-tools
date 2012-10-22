@@ -46,6 +46,10 @@ public class Table {
         this(schema, name, TABLE);
     }
 
+    public Table(Schema schema, String name) {
+        this(schema, Name.valueOf(name));
+    }
+
     public Table(Schema schema, Name name, String type) {
         this.schema = schema;
         this.name = name;
