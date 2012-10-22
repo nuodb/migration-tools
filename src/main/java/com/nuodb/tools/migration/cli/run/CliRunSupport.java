@@ -34,7 +34,7 @@ import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.OptionException;
 import com.nuodb.tools.migration.cli.parse.option.*;
 import com.nuodb.tools.migration.spec.*;
-import com.nuodb.tools.migration.support.ApplicationSupport;
+import com.nuodb.tools.migration.context.support.ApplicationSupport;
 import com.nuodb.tools.migration.utils.Priority;
 
 import java.io.UnsupportedEncodingException;

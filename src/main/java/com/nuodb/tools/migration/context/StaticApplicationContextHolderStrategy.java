@@ -30,20 +30,24 @@ package com.nuodb.tools.migration.context;
 /**
  * @author Sergey Bushik
  */
-public class StaticApplicationContextHolderStrategy implements MigrationContextHolderStrategy {
+public class StaticApplicationContextHolderStrategy implements ApplicationContextHolderStrategy {
 
-    private static ApplicationContext applicationContext;
+    private volatile static ApplicationContext context;
 
     @Override
     public ApplicationContext getContext() {
-        if (applicationContext == null) {
-            applicationContext = new ApplicationContextImpl();
+        if (context == null) {
+            synchronized (StaticApplicationContextHolderStrategy.class) {
+                if (context == null) {
+                    context = new ApplicationContextImpl();
+                }
+            }
         }
-        return applicationContext;
+        return context;
     }
 
     @Override
     public void setContext(ApplicationContext context) {
-        applicationContext = context;
+        StaticApplicationContextHolderStrategy.context = context;
     }
 }

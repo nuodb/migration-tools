@@ -46,7 +46,7 @@ import com.nuodb.tools.migration.spec.DumpSpec;
 import com.nuodb.tools.migration.spec.NativeQuerySpec;
 import com.nuodb.tools.migration.spec.OutputSpec;
 import com.nuodb.tools.migration.spec.SelectQuerySpec;
-import com.nuodb.tools.migration.support.ApplicationSupport;
+import com.nuodb.tools.migration.context.support.ApplicationSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

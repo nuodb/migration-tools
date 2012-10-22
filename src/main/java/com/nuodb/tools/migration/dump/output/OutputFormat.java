@@ -58,6 +58,8 @@ public interface OutputFormat {
 
     void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
 
+    void addJdbcTypeFormatter(int sqlType, JdbcTypeFormatter jdbcTypeFormatter);
+
     void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormatter jdbcTypeFormatter);
 
     JdbcTypeFormatter getJdbcTypeFormatter(int sqlType);

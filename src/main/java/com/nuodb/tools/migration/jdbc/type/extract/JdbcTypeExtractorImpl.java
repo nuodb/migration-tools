@@ -55,7 +55,7 @@ public class JdbcTypeExtractorImpl extends JdbcTypesBase implements JdbcTypeExtr
         if (jdbcType == null) {
             throw new MigrationException(String.format("SQL type %1$d extraction is unsupported", sqlType));
         } else {
-             acceptor.accept(jdbcType.extract(resultSet, column, sqlType), jdbcType, sqlType);
+             acceptor.accept(jdbcType.extract(resultSet, column, sqlType), sqlType, jdbcType);
         }
     }
 }

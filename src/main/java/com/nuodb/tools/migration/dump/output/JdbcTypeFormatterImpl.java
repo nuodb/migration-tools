@@ -63,7 +63,7 @@ public class JdbcTypeFormatterImpl implements JdbcTypeFormatter<Object> {
     private Format timestampFormat = TIMESTAMP_FORMAT;
 
     @Override
-    public String format(Object value, int column, JdbcType<Object> jdbcType, int sqlType) {
+    public String format(Object value, int column, int sqlType, JdbcType<Object> jdbcType) {
         String result = null;
         if (value != null) {
             switch (sqlType) {

@@ -25,14 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.context;
+package com.nuodb.tools.migration.context.support;
+
+import com.nuodb.tools.migration.context.ApplicationContext;
+import com.nuodb.tools.migration.context.ApplicationContextHolder;
+import com.nuodb.tools.migration.i18n.Resources;
 
 /**
  * @author Sergey Bushik
  */
-public interface MigrationContextHolderStrategy {
+public class ApplicationSupport {
 
-    ApplicationContext getContext();
+    public ApplicationContext getApplicationContext() {
+        return ApplicationContextHolder.getContext();
+    }
 
-    void setContext(ApplicationContext context);
+    public Resources getResources() {
+        return getApplicationContext().getResources();
+    }
+
+    public String getMessage(String key, Object... values) {
+        return getResources().getMessage(key, values);
+    }
 }

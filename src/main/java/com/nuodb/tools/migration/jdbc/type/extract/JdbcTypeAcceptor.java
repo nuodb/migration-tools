@@ -36,5 +36,5 @@ import java.sql.SQLException;
  */
 public interface JdbcTypeAcceptor<T> {
 
-    void accept(T value, JdbcType jdbcType, int sqlType) throws SQLException;
+    void accept(T value, int sqlType, JdbcType jdbcType) throws SQLException;
 }

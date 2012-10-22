@@ -34,5 +34,5 @@ import com.nuodb.tools.migration.jdbc.type.JdbcType;
  */
 public interface JdbcTypeFormatter<T> {
 
-    String format(T value, int column, JdbcType<T> jdbcType, int sqlType);
+    String format(T value, int column, int sqlType, JdbcType<T> jdbcType);
 }

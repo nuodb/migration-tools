@@ -36,7 +36,7 @@ import com.nuodb.tools.migration.jdbc.type.jdbc4.Jdbc4Types;
 import com.nuodb.tools.migration.spec.ConnectionSpec;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 
-import java.sql.Connection;
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
 /**
  * @author Sergey Bushik
@@ -49,7 +49,7 @@ public class JdbcServicesImpl implements JdbcServices {
 
     public JdbcServicesImpl(DriverManagerConnectionSpec connectionSpec) {
         this(connectionSpec,
-                new DriverManagerConnectionProvider(connectionSpec, false, Connection.TRANSACTION_READ_COMMITTED),
+                new DriverManagerConnectionProvider(connectionSpec, false, TRANSACTION_READ_COMMITTED),
                 new JdbcTypeExtractorImpl(Jdbc4Types.INSTANCE));
     }
 

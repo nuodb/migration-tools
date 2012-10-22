@@ -53,7 +53,7 @@ public abstract class OutputFormatBase implements OutputFormat {
     private ResultSetMetaModel resultSetMetaModel;
 
     @Override
-    public void setAttributes(Map<String, String> attributes) {
+    public final void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
         doSetAttributes();
     }
@@ -101,8 +101,8 @@ public abstract class OutputFormatBase implements OutputFormat {
             public int column;
 
             @Override
-            public void accept(Object value, JdbcType jdbcType, int sqlType) throws SQLException {
-                columns[column++] = formatColumn(value, column, jdbcType, sqlType);
+            public void accept(Object value, int sqlType, JdbcType jdbcType) throws SQLException {
+                columns[column++] = formatColumn(value, column, sqlType, jdbcType);
             }
         };
         final JdbcTypeExtractor jdbcTypeExtractor = getJdbcTypeExtractor();
@@ -113,12 +113,12 @@ public abstract class OutputFormatBase implements OutputFormat {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> String formatColumn(Object value, int column, JdbcType<T> jdbcType, int sqlType) {
+    protected <T> String formatColumn(Object value, int column, int sqlType, JdbcType<T> jdbcType) {
         JdbcTypeFormatter<T> jdbcTypeFormatter = getJdbcTypeFormatter(sqlType);
         if (jdbcTypeFormatter == null) {
             jdbcTypeFormatter = getDefaultJdbcTypeFormatter();
         }
-        return jdbcTypeFormatter.format((T) value, column, jdbcType, sqlType);
+        return jdbcTypeFormatter.format((T) value, column, sqlType, jdbcType);
     }
 
     @Override
@@ -136,9 +136,14 @@ public abstract class OutputFormatBase implements OutputFormat {
     protected abstract void doOutputEnd(ResultSet resultSet) throws SQLException;
 
     @Override
+    public void addJdbcTypeFormatter(int sqlType, JdbcTypeFormatter jdbcTypeFormatter) {
+        jdbcTypeFormatters.put(sqlType, jdbcTypeFormatter);
+    }
+
+    @Override
     public void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormatter jdbcTypeFormatter) {
         for (Integer sqlType : jdbcType.getSqlTypes()) {
-            jdbcTypeFormatters.put(sqlType, jdbcTypeFormatter);
+            addJdbcTypeFormatter(sqlType, jdbcTypeFormatter);
         }
     }
 

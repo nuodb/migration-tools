@@ -42,7 +42,7 @@ public class OutputFormatLookupImpl implements OutputFormatLookup {
     protected final Log log = LogFactory.getLog(getClass());
 
     private Class<? extends OutputFormat> defaultFormatClass = CsvOutputFormat.class;
-    private Map<String, Class<? extends OutputFormat>> formatsClasses = new HashMap<String, Class<? extends OutputFormat>>();
+    private Map<String, Class<? extends OutputFormat>> formatClasses = new HashMap<String, Class<? extends OutputFormat>>();
 
     public OutputFormatLookupImpl() {
         register(XmlOutputFormat.EXTENSION, XmlOutputFormat.class);
@@ -52,7 +52,7 @@ public class OutputFormatLookupImpl implements OutputFormatLookup {
     @Override
     @SuppressWarnings("unchecked")
     public OutputFormat lookup(String type) {
-        Class<? extends OutputFormat> formatClass = formatsClasses.get(type);
+        Class<? extends OutputFormat> formatClass = formatClasses.get(type);
         if (formatClass == null) {
             if (log.isTraceEnabled()) {
                 log.trace(String.format("Can't resolve output format type %1$s to a class", type));
@@ -77,7 +77,7 @@ public class OutputFormatLookupImpl implements OutputFormatLookup {
 
     @Override
     public void register(String type, Class<? extends OutputFormat> formatClass) {
-        formatsClasses.put(type, formatClass);
+        formatClasses.put(type, formatClass);
     }
 
     protected OutputFormat newInstance(Class<? extends OutputFormat> formatClass) {

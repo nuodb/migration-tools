@@ -36,7 +36,7 @@ import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.cli.run.CliRun;
 import com.nuodb.tools.migration.cli.run.CliRunFactory;
 import com.nuodb.tools.migration.cli.run.CliRunFactoryLookup;
-import com.nuodb.tools.migration.support.ApplicationSupport;
+import com.nuodb.tools.migration.context.support.ApplicationSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

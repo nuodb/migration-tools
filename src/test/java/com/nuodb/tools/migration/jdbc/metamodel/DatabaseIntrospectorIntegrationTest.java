@@ -1,6 +1,5 @@
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 import junit.framework.Assert;
