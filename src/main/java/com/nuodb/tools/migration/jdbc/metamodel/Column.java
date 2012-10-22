@@ -85,6 +85,10 @@ public class Column {
         this.name = name;
     }
 
+    public Column(Table table, String name) {
+        this(table, Name.valueOf(name));
+    }
+
     public Table getTable() {
         return table;
     }

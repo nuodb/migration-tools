@@ -1,6 +1,7 @@
 package com.nuodb.tools.migration.jdbc.metamodel;
 
 
+import com.nuodb.tools.migration.TestConstants;
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 import junit.framework.Assert;
@@ -27,12 +28,7 @@ public class DatabaseIntrospectorIntegrationTest {
         mysql.setUrl("jdbc:mysql://localhost:3306/test");
         mysql.setUsername("root");
 
-        DriverManagerConnectionSpec nuodb = new DriverManagerConnectionSpec();
-        nuodb.setDriver("com.nuodb.jdbc.Driver");
-        nuodb.setUrl("jdbc:com.nuodb://localhost/test");
-        nuodb.setUsername("dba");
-        nuodb.setPassword("goalie");
-
+        DriverManagerConnectionSpec nuodb = TestConstants.createTestNuoDBConnectionSpec();
 
         final DriverManagerConnectionProvider connectionProvider =
                 new DriverManagerConnectionProvider();
