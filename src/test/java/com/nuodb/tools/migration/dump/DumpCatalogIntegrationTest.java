@@ -1,6 +1,7 @@
 package com.nuodb.tools.migration.dump;
 
 
+import com.nuodb.tools.migration.TestConstants;
 import com.nuodb.tools.migration.dump.output.OutputFormat;
 import com.nuodb.tools.migration.dump.output.OutputFormatLookupImpl;
 import com.nuodb.tools.migration.dump.query.SelectQuery;
@@ -14,18 +15,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+
 import java.io.File;
 import java.io.OutputStream;
+
+import static com.nuodb.tools.migration.TestConstants.*;
 
 public class DumpCatalogIntegrationTest {
 
     private static final String TEST_DIR = "/tmp/migration-tool";
     private static final String TEST_PATH = TEST_DIR + "/migration-tool-test";
-    private static final String TEST_CATALOG_NAME = "Test_Catalog";
-    private static final String TEST_SCHEMA_NAME = "Test_Schema";
-    private static final String TEST_TABLE_NAME = "Test_table";
-    private static final String FIRST_COLUMN_NAME = "FirstColumn";
-    private static final String SECOND_COLUMN_NAME = "SecondColumn";
+
 
 
     DumpCatalog catalog;

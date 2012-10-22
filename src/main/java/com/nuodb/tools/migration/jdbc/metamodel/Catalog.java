@@ -64,6 +64,10 @@ public class Catalog {
         return schema;
     }
 
+    public Schema getSchema(String name) {
+        return this.getSchema(Name.valueOf(name));
+    }
+
     protected Schema createSchema(Name name) {
         Schema schema = new Schema(this, name);
         schemas.put(name, schema);
