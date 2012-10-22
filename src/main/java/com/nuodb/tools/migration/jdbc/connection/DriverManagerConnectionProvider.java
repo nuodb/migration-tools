@@ -45,7 +45,7 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
 
     private DriverManagerConnectionSpec connectionSpec;
     private boolean autoCommit = Boolean.FALSE;
-    private int transactionIsolation;
+    private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 
     public DriverManagerConnectionProvider() {
     }

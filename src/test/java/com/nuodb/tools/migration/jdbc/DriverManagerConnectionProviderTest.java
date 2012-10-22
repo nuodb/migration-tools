@@ -19,6 +19,7 @@ public class DriverManagerConnectionProviderTest {
     private DriverManagerConnectionSpec connectionSpec;
     private Connection connection;
     private Driver driver;
+    private static final int TRANSACTION_ISOLATION = Connection.TRANSACTION_READ_COMMITTED;
 
     @Before
     public void setUp() throws Exception {
@@ -45,7 +46,7 @@ public class DriverManagerConnectionProviderTest {
         verify(connectionSpec, times(1)).getUsername();
         verify(connectionSpec, times(1)).getUrl();
         verify(connectionSpec, times(1)).getPassword();
-        verify(connection, times(0)).setTransactionIsolation(anyInt());
+        verify(connection, times(1)).setTransactionIsolation(anyInt());
         verify(connection, times(1)).setAutoCommit(false);
     }
 
@@ -55,7 +56,7 @@ public class DriverManagerConnectionProviderTest {
                 new DriverManagerConnectionProvider();
         connectionProvider.setConnectionSpec(connectionSpec);
         connectionProvider.setAutoCommit(true);
-        connectionProvider.setTransactionIsolation(1);
+        connectionProvider.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
         final Connection connection = connectionProvider.getConnection();
         Assert.assertNotNull(connection);
         Assert.assertTrue(this.connection == connection);
@@ -63,7 +64,7 @@ public class DriverManagerConnectionProviderTest {
         verify(connectionSpec, times(1)).getUsername();
         verify(connectionSpec, times(1)).getUrl();
         verify(connectionSpec, times(1)).getPassword();
-        verify(connection, times(1)).setTransactionIsolation(1);
+        verify(connection, times(1)).setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
         verify(connection, times(1)).setAutoCommit(true);
     }
 

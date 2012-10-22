@@ -1,5 +1,6 @@
 package com.nuodb.tools.migration.jdbc.metamodel;
 
+
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 import junit.framework.Assert;
@@ -12,8 +13,12 @@ import java.util.Collection;
 import java.util.Map;
 
 public class DatabaseIntrospectorIntegrationTest {
+
+
     private Connection connection;
     private DatabaseIntrospector introspector;
+    private Connection mySqlConnection;
+
 
     @Before
     public void setUp() throws Exception {
@@ -28,10 +33,18 @@ public class DatabaseIntrospectorIntegrationTest {
         nuodb.setUsername("dba");
         nuodb.setPassword("goalie");
 
+
         final DriverManagerConnectionProvider connectionProvider =
-                new DriverManagerConnectionProvider(nuodb);
+                new DriverManagerConnectionProvider();
+        connectionProvider.setConnectionSpec(nuodb);
+        final DriverManagerConnectionProvider mySqlConnectionProvider
+                = new DriverManagerConnectionProvider();
+        mySqlConnectionProvider.setConnectionSpec(mysql);
+
 
         connection = connectionProvider.getConnection();
+        // mySqlConnection = mySqlConnectionProvider.getConnection();
+
 
         Assert.assertNotNull(connection);
         Assert.assertNotNull(connection.getMetaData());
@@ -79,6 +92,8 @@ public class DatabaseIntrospectorIntegrationTest {
 
     @After
     public void tearDown() throws Exception {
-        connection.close();
+        if (connection != null) {
+            connection.close();
+        }
     }
 }
