@@ -1,6 +1,6 @@
 package com.nuodb.tools.migration.cli.parse.parser;
 
-import com.nuodb.tools.migration.CliConstants;
+import com.nuodb.tools.migration.TestConstants;
 import com.nuodb.tools.migration.cli.parse.Group;
 import com.nuodb.tools.migration.cli.parse.OptionException;
 import com.nuodb.tools.migration.cli.parse.Parser;
@@ -24,6 +24,6 @@ public class ParserImplTest {
 
     @Test(expected = OptionException.class)
     public void testParseError() throws Exception {
-        parser.parse(CliConstants.ARGUMENTS, new Property());
+        parser.parse(TestConstants.ARGUMENTS, new Property());
     }
 }

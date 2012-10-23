@@ -83,6 +83,10 @@ public class Column extends HasObjectNameBase {
         this.table = table;
     }
 
+    public Column(Table table, String name) {
+        this(table, Name.valueOf(name));
+    }
+
     public Table getTable() {
         return table;
     }

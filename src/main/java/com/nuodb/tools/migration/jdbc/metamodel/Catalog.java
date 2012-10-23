@@ -27,38 +27,50 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import org.hibernate.dialect.Dialect;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Catalog extends HasObjectNameBase {
+public class Catalog {
 
-    private Map<ObjectName, Schema> schemas = new HashMap<ObjectName, Schema>();
+    private Map<Name, Schema> schemas = new HashMap<Name, Schema>();
     private Database database;
+    private Name name;
 
-    public Catalog(Database database, ObjectName objectName) {
-        super(objectName);
+    public Catalog(Database database, Name name) {
         this.database = database;
+        this.name = name;
+    }
+
+    public Catalog(Database database, String name) {
+        this.database = database;
+        this.name = Name.valueOf(name);
     }
 
     public Database getDatabase() {
         return database;
     }
 
-    public Schema getSchema(ObjectName objectName) {
-        Schema schema = schemas.get(objectName);
+    public Name getName() {
+        return name;
+    }
+
+    public Schema getSchema(Name name) {
+        Schema schema = schemas.get(name);
         if (schema == null) {
-            schema = createSchema(objectName);
+            schema = createSchema(name);
         }
         return schema;
     }
 
-    protected Schema createSchema(ObjectName objectName) {
-        Schema schema = new Schema(database, this, objectName);
-        schemas.put(objectName, schema);
+    public Schema getSchema(String name) {
+        return this.getSchema(Name.valueOf(name));
+    }
+
+    protected Schema createSchema(Name name) {
+        Schema schema = new Schema(this, name);
+        schemas.put(name, schema);
         return schema;
     }
 

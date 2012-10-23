@@ -45,7 +45,7 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
 
     private DriverManagerConnectionSpec connectionSpec;
     private boolean autoCommit = Boolean.FALSE;
-    private Integer transactionIsolation;
+    private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 
     public DriverManagerConnectionProvider() {
     }
@@ -100,10 +100,8 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
             log.debug(String.format("Creating new connection at %s", url));
         }
         Connection connection = DriverManager.getConnection(url, properties);
+        connection.setTransactionIsolation(transactionIsolation);
         connection.setAutoCommit(autoCommit);
-        if (transactionIsolation != null) {
-            connection.setTransactionIsolation(transactionIsolation);
-        }
         return connection;
     }
 
@@ -132,11 +130,11 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
         this.autoCommit = autoCommit;
     }
 
-    public Integer getTransactionIsolation() {
+    public int getTransactionIsolation() {
         return transactionIsolation;
     }
 
-    public void setTransactionIsolation(Integer transactionIsolation) {
+    public void setTransactionIsolation(int transactionIsolation) {
         this.transactionIsolation = transactionIsolation;
     }
 }

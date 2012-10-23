@@ -27,64 +27,41 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import org.hibernate.dialect.Dialect;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-public class Table extends HasObjectNameBase {
+public class Table {
     public static final String TABLE = "TABLE";
     public static final String VIEW = "VIEW";
 
-    private Database database;
-    private Catalog catalog;
     private Schema schema;
+    private Name name;
     private String type;
 
-    private final Map<ObjectName, Column> columns = new LinkedHashMap<ObjectName, Column>();
-    private final Map<ObjectName, Index> indexes = new LinkedHashMap<ObjectName, Index>();
-    private final Map<ObjectName, UniqueKey> uniqueKeys = new LinkedHashMap<ObjectName, UniqueKey>();
+    private final Map<Name, Column> columns = new LinkedHashMap<Name, Column>();
+    private final Map<Name, Index> indexes = new LinkedHashMap<Name, Index>();
+    private final Map<Name, UniqueKey> uniqueKeys = new LinkedHashMap<Name, UniqueKey>();
     private final List<Constraint> constraints = new ArrayList<Constraint>();
 
-    public Table(Database database, Catalog catalog, Schema schema, ObjectName objectName) {
-        this(database, catalog, schema, objectName, TABLE);
+    public Table(Schema schema, Name name) {
+        this(schema, name, TABLE);
     }
 
-    public Table(Database database, Catalog catalog, Schema schema, ObjectName objectName, String type) {
-        super(objectName);
-        this.database = database;
-        this.catalog = catalog;
+    public Table(Schema schema, String name) {
+        this(schema, Name.valueOf(name));
+    }
+
+    public Table(Schema schema, Name name, String type) {
         this.schema = schema;
+        this.name = name;
         this.type = type;
-    }
-
-    public String getQualifiedName(Dialect dialect) {
-        StringBuilder qualifiedName = new StringBuilder();
-        if (catalog != null && catalog.getName() != null) {
-            qualifiedName.append(catalog.getQuotedName(dialect));
-            qualifiedName.append('.');
-        }
-        if (schema != null && schema.getName() != null) {
-            qualifiedName.append(schema.getQuotedName(dialect));
-            qualifiedName.append('.');
-        }
-        qualifiedName.append(getQuotedName(dialect));
-        return qualifiedName.toString();
-    }
-
-    public Database getDatabase() {
-        return database;
-    }
-
-    public Catalog getCatalog() {
-        return catalog;
     }
 
     public Schema getSchema() {
         return schema;
+    }
+
+    public Name getName() {
+        return name;
     }
 
     public String getType() {
@@ -92,24 +69,24 @@ public class Table extends HasObjectNameBase {
     }
 
     public Column getColumn(String name) {
-        return getColumn(ObjectName.valueOf(name));
+        return getColumn(Name.valueOf(name));
     }
 
-    public Column getColumn(ObjectName objectName) {
-        Column column = columns.get(objectName);
+    public Column getColumn(Name name) {
+        Column column = columns.get(name);
         if (column == null) {
-            column = createColumn(objectName);
+            column = createColumn(name);
         }
         return column;
     }
 
     public Column createColumn(String name) {
-        return createColumn(ObjectName.valueOf(name));
+        return createColumn(Name.valueOf(name));
     }
 
-    public Column createColumn(ObjectName objectName) {
-        Column column = new Column(this, objectName);
-        columns.put(objectName, column);
+    public Column createColumn(Name name) {
+        Column column = new Column(this, name);
+        columns.put(name, column);
         return column;
     }
 

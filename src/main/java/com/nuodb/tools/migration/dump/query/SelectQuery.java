@@ -62,6 +62,7 @@ public class SelectQuery implements Query {
     public String toQuery() {
         StringBuilder query = new StringBuilder();
         query.append("select ");
+        //TODO assert for no column?
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
             query.append(column.getQuotedName(dialect));
