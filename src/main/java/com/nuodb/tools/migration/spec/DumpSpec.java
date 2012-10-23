@@ -38,7 +38,7 @@ public class DumpSpec extends TaskSpecBase {
     private ConnectionSpec connectionSpec;
     private Collection<SelectQuerySpec> selectQuerySpecs = new ArrayList<SelectQuerySpec>();
     private Collection<NativeQuerySpec> nativeQuerySpecs = new ArrayList<NativeQuerySpec>();
-    private OutputSpec outputSpec;
+    private FormatSpec outputSpec;
 
     public ConnectionSpec getConnectionSpec() {
         return connectionSpec;
@@ -64,11 +64,11 @@ public class DumpSpec extends TaskSpecBase {
         this.nativeQuerySpecs = nativeQuerySpecs;
     }
 
-    public OutputSpec getOutputSpec() {
+    public FormatSpec getOutputSpec() {
         return outputSpec;
     }
 
-    public void setOutputSpec(OutputSpec outputSpec) {
+    public void setOutputSpec(FormatSpec outputSpec) {
         this.outputSpec = outputSpec;
     }
 }

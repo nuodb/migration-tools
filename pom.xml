@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <name>NuoDB Customer Data Migration Tools</name>
+    <value>NuoDB Customer Data Migration Tools</value>
     <groupId>com.nuodb</groupId>
     <artifactId>data-migration-tool</artifactId>
     <version>1.0</version>
@@ -88,11 +88,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>3.1.2.RELEASE</version>
         </dependency>
     </dependencies>
     <reporting>

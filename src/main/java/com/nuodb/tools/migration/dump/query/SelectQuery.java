@@ -29,6 +29,7 @@ package com.nuodb.tools.migration.dump.query;
 
 import com.nuodb.tools.migration.jdbc.metamodel.Column;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
+import org.hibernate.dialect.Dialect;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,6 +40,8 @@ import java.util.List;
  */
 public class SelectQuery implements Query {
 
+    private Dialect dialect;
+    private boolean qualify;
     private List<Table> tables = new ArrayList<Table>();
     private List<Column> columns = new ArrayList<Column>();
     private List<String> conditions = new ArrayList<String>();
@@ -61,7 +64,7 @@ public class SelectQuery implements Query {
         query.append("select ");
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            query.append(column.getName().value());
+            query.append(column.getQuotedName(dialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }
@@ -69,7 +72,7 @@ public class SelectQuery implements Query {
         query.append(" from ");
         for (Iterator<Table> iterator = tables.iterator(); iterator.hasNext(); ) {
             Table table = iterator.next();
-            query.append(table.getName().value());
+            query.append(qualify ? table.getQualifiedName(dialect) : table.getQuotedName(dialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }
@@ -84,6 +87,22 @@ public class SelectQuery implements Query {
             }
         }
         return query.toString();
+    }
+
+    public Dialect getDialect() {
+        return dialect;
+    }
+
+    public void setDialect(Dialect dialect) {
+        this.dialect = dialect;
+    }
+
+    public boolean isQualify() {
+        return qualify;
+    }
+
+    public void setQualify(boolean qualify) {
+        this.qualify = qualify;
     }
 
     public List<Table> getTables() {

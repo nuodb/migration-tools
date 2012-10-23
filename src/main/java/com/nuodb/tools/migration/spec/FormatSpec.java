@@ -25,50 +25,11 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.metamodel;
+package com.nuodb.tools.migration.spec;
 
-public class Name {
+public interface FormatSpec extends Spec {
 
-    private String name;
+    public String getPath();
 
-    protected Name() {
-    }
-
-    protected Name(String name) {
-        this.name = name;
-    }
-
-    public String value() {
-        return name;
-    }
-
-    private static boolean isEmpty(String name) {
-        return name == null || name.length() == 0;
-    }
-
-    public static Name valueOf(String name) {
-        return isEmpty(name) ? null : new Name(name);
-    }
-
-    @Override
-    public String toString() {
-        return value();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Name name1 = (Name) o;
-
-        if (name != null ? !name.equals(name1.name) : name1.name != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return name != null ? name.hashCode() : 0;
-    }
+    public void setPath(String path);
 }

@@ -64,15 +64,15 @@ public class CliLoadFactory implements CliRunFactory, CliResources {
             return newGroup()
                     .withName(getResources().getMessage(LOAD_GROUP_NAME))
                     .withOption(createTargetGroup())
+                    .withOption(createInputGroup())
                     .withRequired(true).build();
         }
 
         @Override
         protected void bind(CommandLine commandLine) {
-            // TODO: parse load spec
             loadSpec = new LoadSpec();
             loadSpec.setConnectionSpec(parseTargetGroup(commandLine, this));
-            System.out.println("CliLoadFactory$CliLoad.bind");
+            loadSpec.setInputSpec(parseInputGroup(commandLine, this));
         }
 
         @Override

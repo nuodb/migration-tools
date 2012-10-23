@@ -10,7 +10,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of NuoDB, Inc. nor the names of its contributors may
+ *     * Neither the value of NuoDB, Inc. nor the names of its contributors may
  *       be used to endorse or promote products derived from this software
  *       without specific prior written permission.
  *
@@ -25,42 +25,47 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.load;
+package com.nuodb.tools.migration.jdbc.metamodel;
 
-import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
-import com.nuodb.tools.migration.spec.FormatSpec;
-import com.nuodb.tools.migration.spec.FormatSpecBase;
-import com.nuodb.tools.migration.spec.LoadSpec;
+public class ObjectName {
 
-import java.util.HashMap;
+    private String value;
 
-/**
- * @author Sergey Bushik
- */
-public class LoadExecutor {
-    public void load(LoadSpec loadSpec) {
+    protected ObjectName(String value) {
+        this.value = value;
     }
 
-    public static void main(String[] args) {
-        DriverManagerConnectionSpec connectionSpec = new DriverManagerConnectionSpec();
-        connectionSpec.setDriver("com.mysql.jdbc.Driver");
-        connectionSpec.setUrl("jdbc:mysql://localhost:3306/test");
-        connectionSpec.setUsername("root");
+    public String value() {
+        return value;
+    }
 
-        FormatSpec inputSpec = new FormatSpecBase();
-        inputSpec.setPath("/tmp/test/dump-12-10-21-17-06.cat");
-        inputSpec.setAttributes(new HashMap<String, String>() {
-            {
-                put("xml.row.element", "row");
-                put("xml.document.element", "rows");
-                put("csv.quote", "\"");
-                put("csv.delimiter", ",");
-                put("csv.quoting", "false");
-                put("csv.escape", "|");
-            }
-        });
-        LoadSpec loadSpec = new LoadSpec();
-        loadSpec.setConnectionSpec(connectionSpec);
-        loadSpec.setInputSpec(inputSpec);
+    private static boolean isEmpty(String value) {
+        return value == null || value.length() == 0;
+    }
+
+    public static ObjectName valueOf(String value) {
+        return isEmpty(value) ? null : new ObjectName(value);
+    }
+
+    @Override
+    public String toString() {
+        return value();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ObjectName objectName1 = (ObjectName) o;
+
+        if (value != null ? !value.equals(objectName1.value) : objectName1.value != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return value != null ? value.hashCode() : 0;
     }
 }

@@ -27,8 +27,8 @@
  */
 package com.nuodb.tools.migration.dump.query;
 
-import com.nuodb.tools.migration.jdbc.metamodel.Column;
-import com.nuodb.tools.migration.jdbc.metamodel.Table;
+import com.nuodb.tools.migration.jdbc.metamodel.*;
+import org.hibernate.dialect.Dialect;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,6 +39,7 @@ import java.util.List;
  */
 public class SelectQueryBuilder {
 
+    private Dialect dialect;
     private Table table;
     private List<String> columns = new ArrayList<String>();
     private List<String> filters = new ArrayList<String>();
@@ -52,13 +53,19 @@ public class SelectQueryBuilder {
             selectQueryColumns = new ArrayList<Column>();
             for (String column : columns) {
                 for (Column tableColumn : tableColumns) {
-                    if (tableColumn.getName().value().equals(column)) {
+                    if (tableColumn.getObjectName().value().equals(column)) {
                         selectQueryColumns.add(tableColumn);
                     }
                 }
             }
         }
         SelectQuery selectQuery = new SelectQuery();
+        if (dialect != null) {
+            selectQuery.setDialect(dialect);
+        } else {
+            selectQuery.setDialect(table.getDatabase().getDialect());
+        }
+        selectQuery.setQualify(true);
         for (Column selectQueryColumn : selectQueryColumns) {
             selectQuery.addColumn(selectQueryColumn);
         }
@@ -69,6 +76,10 @@ public class SelectQueryBuilder {
             }
         }
         return selectQuery;
+    }
+
+    public void setDialect(Dialect dialect) {
+        this.dialect = dialect;
     }
 
     public Table getTable() {

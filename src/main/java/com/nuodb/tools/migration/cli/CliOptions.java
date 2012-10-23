@@ -78,4 +78,8 @@ public interface CliOptions {
     final String TARGET_PASSWORD_OPTION = "target.password";
     final String TARGET_PROPERTIES_OPTION = "target.properties";
     final String TARGET_SCHEMA_OPTION = "target.schema";
+
+    final String INPUT_OPTION = "input.*";
+    final String INPUT_TYPE_OPTION = "input.type";
+    final String INPUT_PATH_OPTION = "input.path";
 }

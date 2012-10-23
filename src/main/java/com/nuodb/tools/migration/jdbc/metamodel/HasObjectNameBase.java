@@ -25,42 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.load;
+package com.nuodb.tools.migration.jdbc.metamodel;
 
-import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
-import com.nuodb.tools.migration.spec.FormatSpec;
-import com.nuodb.tools.migration.spec.FormatSpecBase;
-import com.nuodb.tools.migration.spec.LoadSpec;
-
-import java.util.HashMap;
+import org.hibernate.dialect.Dialect;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadExecutor {
-    public void load(LoadSpec loadSpec) {
+public abstract class HasObjectNameBase implements HasObjectName {
+
+    private ObjectName objectName;
+
+    protected HasObjectNameBase(ObjectName objectName) {
+        this.objectName = objectName;
+    }
+    @Override
+    public String getName() {
+        return objectName != null ? objectName.value() : null;
     }
 
-    public static void main(String[] args) {
-        DriverManagerConnectionSpec connectionSpec = new DriverManagerConnectionSpec();
-        connectionSpec.setDriver("com.mysql.jdbc.Driver");
-        connectionSpec.setUrl("jdbc:mysql://localhost:3306/test");
-        connectionSpec.setUsername("root");
+    @Override
+    public String getQuotedName(Dialect dialect) {
+        return dialect.openQuote() + getName() + dialect.closeQuote();
+    }
 
-        FormatSpec inputSpec = new FormatSpecBase();
-        inputSpec.setPath("/tmp/test/dump-12-10-21-17-06.cat");
-        inputSpec.setAttributes(new HashMap<String, String>() {
-            {
-                put("xml.row.element", "row");
-                put("xml.document.element", "rows");
-                put("csv.quote", "\"");
-                put("csv.delimiter", ",");
-                put("csv.quoting", "false");
-                put("csv.escape", "|");
-            }
-        });
-        LoadSpec loadSpec = new LoadSpec();
-        loadSpec.setConnectionSpec(connectionSpec);
-        loadSpec.setInputSpec(inputSpec);
+    @Override
+    public ObjectName getObjectName() {
+        return objectName;
     }
 }

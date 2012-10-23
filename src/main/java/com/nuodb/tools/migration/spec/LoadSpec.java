@@ -31,7 +31,9 @@ package com.nuodb.tools.migration.spec;
  * @author Sergey Bushik
  */
 public class LoadSpec extends TaskSpecBase {
+
     private ConnectionSpec connectionSpec;
+    private FormatSpec inputSpec;
 
     public ConnectionSpec getConnectionSpec() {
         return connectionSpec;
@@ -39,5 +41,13 @@ public class LoadSpec extends TaskSpecBase {
 
     public void setConnectionSpec(ConnectionSpec connectionSpec) {
         this.connectionSpec = connectionSpec;
+    }
+
+    public FormatSpec getInputSpec() {
+        return inputSpec;
+    }
+
+    public void setInputSpec(FormatSpec inputSpec) {
+        this.inputSpec = inputSpec;
     }
 }

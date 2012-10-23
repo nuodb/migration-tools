@@ -32,6 +32,8 @@ import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.service.jdbc.dialect.internal.StandardDialectResolver;
+import org.hibernate.service.jdbc.dialect.spi.DialectResolver;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -60,6 +62,7 @@ public class DatabaseIntrospector {
     protected String[] tableTypes = TABLE_TYPES;
     protected Connection connection;
     protected ConnectionProvider connectionProvider;
+    protected DialectResolver dialectResolver = new StandardDialectResolver();
 
     public DatabaseIntrospector withObjectTypes(ObjectType... types) {
         this.objectTypes = Arrays.asList(types);
@@ -101,9 +104,10 @@ public class DatabaseIntrospector {
             closeConnection = true;
         }
         try {
-            DatabaseMetaData meta = connection.getMetaData();
-            readInfo(meta, database);
-            readObjects(meta, database);
+            DatabaseMetaData metaData = connection.getMetaData();
+            readInfo(metaData, database);
+            resolveDialect(metaData, database);
+            readObjects(metaData, database);
         } finally {
             if (closeConnection) {
                 connectionProvider.closeConnection(connection);
@@ -116,42 +120,46 @@ public class DatabaseIntrospector {
         return new Database();
     }
 
-    protected void readObjects(DatabaseMetaData meta, Database database) throws SQLException {
-        if (objectTypes.contains(ObjectType.CATALOG)) {
-            readCatalogs(meta, database);
-        }
-        if (objectTypes.contains(ObjectType.SCHEMA)) {
-            readSchemas(meta, database);
-        }
-        if (objectTypes.contains(ObjectType.TABLE)) {
-            readTables(meta, database);
-        }
-    }
-
-    protected void readInfo(DatabaseMetaData meta, Database database) throws SQLException {
+    protected void readInfo(DatabaseMetaData metaData, Database database) throws SQLException {
         DriverInfo driverInfo = new DriverInfo();
-        driverInfo.setName(meta.getDriverName());
-        driverInfo.setVersion(meta.getDriverVersion());
-        driverInfo.setMinorVersion(meta.getDriverMinorVersion());
-        driverInfo.setMajorVersion(meta.getDriverMajorVersion());
+        driverInfo.setName(metaData.getDriverName());
+        driverInfo.setVersion(metaData.getDriverVersion());
+        driverInfo.setMinorVersion(metaData.getDriverMinorVersion());
+        driverInfo.setMajorVersion(metaData.getDriverMajorVersion());
         if (log.isDebugEnabled()) {
             log.debug(String.format("DriverInfo: %s", driverInfo));
         }
         database.setDriverInfo(driverInfo);
 
         DatabaseInfo databaseInfo = new DatabaseInfo();
-        databaseInfo.setProductName(meta.getDatabaseProductName());
-        databaseInfo.setProductVersion(meta.getDatabaseProductVersion());
-        databaseInfo.setMinorVersion(meta.getDatabaseMinorVersion());
-        databaseInfo.setMajorVersion(meta.getDatabaseMajorVersion());
+        databaseInfo.setProductName(metaData.getDatabaseProductName());
+        databaseInfo.setProductVersion(metaData.getDatabaseProductVersion());
+        databaseInfo.setMinorVersion(metaData.getDatabaseMinorVersion());
+        databaseInfo.setMajorVersion(metaData.getDatabaseMajorVersion());
         if (log.isDebugEnabled()) {
             log.debug(String.format("DatabaseInfo: %s", databaseInfo));
         }
         database.setDatabaseInfo(databaseInfo);
     }
 
-    protected void readCatalogs(DatabaseMetaData meta, Database database) throws SQLException {
-        ResultSet catalogs = meta.getCatalogs();
+    protected void resolveDialect(DatabaseMetaData metaData, Database database) {
+        database.setDialect(dialectResolver.resolveDialect(metaData));
+    }
+
+    protected void readObjects(DatabaseMetaData metaData, Database database) throws SQLException {
+        if (objectTypes.contains(ObjectType.CATALOG)) {
+            readCatalogs(metaData, database);
+        }
+        if (objectTypes.contains(ObjectType.SCHEMA)) {
+            readSchemas(metaData, database);
+        }
+        if (objectTypes.contains(ObjectType.TABLE)) {
+            readTables(metaData, database);
+        }
+    }
+
+    protected void readCatalogs(DatabaseMetaData metaData, Database database) throws SQLException {
+        ResultSet catalogs = metaData.getCatalogs();
         try {
             while (catalogs.next()) {
                 database.createCatalog(catalogs.getString("TABLE_CAT"));
@@ -161,8 +169,8 @@ public class DatabaseIntrospector {
         }
     }
 
-    protected void readSchemas(DatabaseMetaData meta, Database database) throws SQLException {
-        ResultSet schemas = catalog != null ? meta.getSchemas(catalog, null) : meta.getSchemas();
+    protected void readSchemas(DatabaseMetaData metaData, Database database) throws SQLException {
+        ResultSet schemas = catalog != null ? metaData.getSchemas(catalog, null) : metaData.getSchemas();
         try {
             while (schemas.next()) {
                 database.createSchema(schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
@@ -172,14 +180,14 @@ public class DatabaseIntrospector {
         }
     }
 
-    protected void readTables(DatabaseMetaData meta, Database database) throws SQLException {
-        ResultSet tables = meta.getTables(catalog, schema, table, tableTypes);
+    protected void readTables(DatabaseMetaData metaData, Database database) throws SQLException {
+        ResultSet tables = metaData.getTables(catalog, schema, table, tableTypes);
         try {
             while (tables.next()) {
                 Schema schema = database.getSchema(tables.getString("TABLE_CAT"), tables.getString("TABLE_SCHEM"));
                 Table table = schema.createTable(tables.getString("TABLE_NAME"), tables.getString("TABLE_TYPE"));
                 if (objectTypes.contains(ObjectType.COLUMN)) {
-                    readTableColumns(meta, table);
+                    readTableColumns(metaData, table);
                 }
             }
         } finally {
@@ -187,8 +195,8 @@ public class DatabaseIntrospector {
         }
     }
 
-    protected void readTableColumns(DatabaseMetaData meta, Table table) throws SQLException {
-        ResultSet columns = meta.getColumns(catalog, schema, table.getName().value(), null);
+    protected void readTableColumns(DatabaseMetaData metaData, Table table) throws SQLException {
+        ResultSet columns = metaData.getColumns(catalog, schema, table.getObjectName().value(), null);
         try {
             ResultSetMetaModel model = new ResultSetMetaModel(columns.getMetaData());
             while (columns.next()) {

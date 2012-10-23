@@ -110,6 +110,9 @@ public class DumpCatalog {
 
     public OutputStream addEntry(Query query, String type) {
         String entryName = getEntryName(query, type);
+        if (log.isTraceEnabled()) {
+            log.trace(String.format("Adding entry %1$s", entryName));
+        }
         OutputStream output;
         try {
             output = new BufferedOutputStream(
@@ -133,7 +136,7 @@ public class DumpCatalog {
         if (query instanceof SelectQuery) {
             List<Table> tables = ((SelectQuery) query).getTables();
             Table table = tables.get(0);
-            String tableName = table.getName().value();
+            String tableName = table.getName();
             return format(SELECT_QUERY_ENTRY_NAME, tableName, new Date(), type);
         } else {
             return format(QUERY_ENTRY_NAME, new Date(), type);

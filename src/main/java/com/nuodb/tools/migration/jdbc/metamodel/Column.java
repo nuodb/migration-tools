@@ -27,7 +27,7 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-public class Column {
+public class Column extends HasObjectNameBase {
     /**
      * Default precision is maximum value
      */
@@ -36,8 +36,6 @@ public class Column {
     public static final int DEFAULT_RADIX = 10;
 
     private Table table;
-
-    private Name name;
 
     private ColumnType type;
     /**
@@ -80,21 +78,13 @@ public class Column {
 
     private String defaultValue;
 
-    public Column(Table table, Name name) {
+    public Column(Table table, ObjectName objectName) {
+        super(objectName);
         this.table = table;
-        this.name = name;
     }
 
     public Table getTable() {
         return table;
-    }
-
-    public Name getName() {
-        return name;
-    }
-
-    public void setName(Name name) {
-        this.name = name;
     }
 
     public ColumnType getType() {
@@ -187,6 +177,6 @@ public class Column {
 
     @Override
     public String toString() {
-        return getName().toString();
+        return getObjectName().toString();
     }
 }

@@ -25,11 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.spec;
+package com.nuodb.tools.migration.jdbc.metamodel;
 
-public interface OutputSpec extends Spec {
+import org.hibernate.dialect.Dialect;
 
-    public String getPath();
+/**
+ * @author Sergey Bushik
+ */
+public interface HasObjectName {
 
-    public void setPath(String path);
+    String getName();
+
+    String getQuotedName(Dialect dialect);
+
+    ObjectName getObjectName();
 }

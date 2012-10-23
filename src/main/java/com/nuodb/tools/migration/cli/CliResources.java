@@ -62,20 +62,20 @@ public interface CliResources {
     final String SOURCE_CATALOG_ARGUMENT_NAME = "migration.cli.source.catalog.argument.name";
     final String SOURCE_SCHEMA_OPTION_DESCRIPTION = "migration.cli.source.schema.option.description";
     final String SOURCE_SCHEMA_ARGUMENT_NAME = "migration.cli.source.schema.argument.name";
+
     final String OUTPUT_GROUP_NAME = "migration.cli.output.group";
     final String OUTPUT_TYPE_OPTION_DESCRIPTION = "migration.cli.output.type.option.description";
     final String OUTPUT_TYPE_ARGUMENT_NAME = "migration.cli.output.type.argument.name";
     final String OUTPUT_PATH_OPTION_DESCRIPTION = "migration.cli.output.path.option.description";
     final String OUTPUT_PATH_ARGUMENT_NAME = "migration.cli.output.path.argument.name";
+    final String OUTPUT_OPTION_DESCRIPTION = "migration.cli.output.option.description";
+    final String OUTPUT_OPTION_ARGUMENT_NAME = "migration.cli.output.argument.description";
 
     final String TABLE_GROUP_NAME = "migration.cli.table.group.name";
     final String TABLE_OPTION_DESCRIPTION = "migration.cli.table.option.description";
     final String TABLE_ARGUMENT_NAME = "migration.cli.table.argument.name";
     final String TABLE_FILTER_OPTION_DESCRIPTION = "migration.cli.table.filter.option.description";
     final String TABLE_FILTER_ARGUMENT_NAME = "migration.cli.table.filter.argument.name";
-
-    final String OUTPUT_OPTION_DESCRIPTION = "migration.cli.output.option.description";
-    final String OUTPUT_OPTION_ARGUMENT_NAME = "migration.cli.output.argument.description";
 
     final String LOAD_GROUP_NAME = "migration.cli.load.group.name";
     final String TARGET_GROUP_NAME = "migration.cli.target.group.name";
@@ -89,4 +89,12 @@ public interface CliResources {
     final String TARGET_PROPERTIES_ARGUMENT_NAME = "migration.cli.target.properties.argument.name";
     final String TARGET_SCHEMA_OPTION_DESCRIPTION = "migration.cli.target.schema.option.description";
     final String TARGET_SCHEMA_ARGUMENT_NAME = "migration.cli.target.schema.argument.name";
+
+    final String INPUT_GROUP_NAME = "migration.cli.input.group";
+    final String INPUT_TYPE_OPTION_DESCRIPTION = "migration.cli.input.type.option.description";
+    final String INPUT_TYPE_ARGUMENT_NAME = "migration.cli.input.type.argument.name";
+    final String INPUT_PATH_OPTION_DESCRIPTION = "migration.cli.input.path.option.description";
+    final String INPUT_PATH_ARGUMENT_NAME = "migration.cli.input.path.argument.name";
+    final String INPUT_OPTION_DESCRIPTION = "migration.cli.input.option.description";
+    final String INPUT_OPTION_ARGUMENT_NAME = "migration.cli.input.argument.description";
 }

@@ -3,8 +3,8 @@ dump
 --source.url=jdbc:mysql://localhost:3306/test
 --source.username=root
 --output.type=csv
---output.csv.delimiter=,
 --output.path=/tmp/test/
+--output.csv.delimiter=,
 --output.csv.quoting=false
 --output.csv.quote="
 --output.csv.escape=|

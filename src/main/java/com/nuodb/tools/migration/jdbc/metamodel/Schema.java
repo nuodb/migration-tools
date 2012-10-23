@@ -27,49 +27,52 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
+import org.hibernate.dialect.Dialect;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Schema {
-    private Map<Name, Table> tables = new HashMap<Name, Table>();
+public class Schema extends HasObjectNameBase {
+    private Map<ObjectName, Table> tables = new HashMap<ObjectName, Table>();
 
+    private Database database;
     private Catalog catalog;
-    private Name name;
 
-    public Schema(Catalog catalog, Name name) {
+    public Schema(Database database, Catalog catalog, ObjectName objectName) {
+        super(objectName);
+        this.database = database;
         this.catalog = catalog;
-        this.name = name;
+    }
+
+    public Database getDatabase() {
+        return database;
     }
 
     public Catalog getCatalog() {
         return catalog;
     }
 
-    public Name getName() {
-        return name;
-    }
-
     public Table getTable(String name) {
-        return getTable(Name.valueOf(name));
+        return getTable(ObjectName.valueOf(name));
     }
 
-    public Table getTable(Name name) {
-        Table table = tables.get(name);
+    public Table getTable(ObjectName objectName) {
+        Table table = tables.get(objectName);
         if (table == null) {
-            table = createTable(name, Table.TABLE);
+            table = createTable(objectName, Table.TABLE);
         }
         return table;
     }
 
     public Table createTable(String name, String type) {
-        return createTable(Name.valueOf(name), type);
+        return createTable(ObjectName.valueOf(name), type);
     }
 
-    public Table createTable(Name name, String type) {
-        Table table = new Table(this, name, type);
-        tables.put(name, table);
+    public Table createTable(ObjectName objectName, String type) {
+        Table table = new Table(database, catalog, this, objectName, type);
+        tables.put(objectName, table);
         return table;
     }
 

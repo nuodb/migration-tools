@@ -166,7 +166,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withOption(path).
                 withOption(attributes).build();
     }
-
+    
     /**
      * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
      */
@@ -219,16 +219,16 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return connection;
     }
 
-    protected OutputSpec parseOutputGroup(CommandLine commandLine, Option option) {
-        OutputSpec output = new OutputSpecBase();
-        output.setType(commandLine.<String>getValue(OUTPUT_TYPE_OPTION));
-        output.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
-        output.setAttributes(parseOutputAttributes(
+    protected FormatSpec parseOutputGroup(CommandLine commandLine, Option option) {
+        FormatSpec format = new FormatSpecBase();
+        format.setType(commandLine.<String>getValue(OUTPUT_TYPE_OPTION));
+        format.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
+        format.setAttributes(parseFormatAttributes(
                 commandLine.getOption(OUTPUT_OPTION), commandLine.<String>getValues(OUTPUT_OPTION)));
-        return output;
+        return format;
     }
 
-    protected Map<String, String> parseOutputAttributes(Option option, List<String> values) {
+    protected Map<String, String> parseFormatAttributes(Option option, List<String> values) {
         Map<String, String> attributes = new HashMap<String, String>();
         for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
             attributes.put(iterator.next(), iterator.next());
@@ -327,6 +327,46 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withOption(schema).build();
     }
 
+    protected Option createInputGroup() {
+        OptionFormat optionFormat = optionToolkit.getOptionFormat();
+        Option type = newOption().
+                withName(INPUT_TYPE_OPTION).
+                withDescription(getMessage(INPUT_TYPE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgument().
+                                withName(getMessage(INPUT_TYPE_ARGUMENT_NAME)).
+                                withRequired(true).
+                                withMinimum(1).build()
+                ).build();
+
+        Option path = newOption().
+                withName(INPUT_PATH_OPTION).
+                withDescription(getMessage(INPUT_PATH_OPTION_DESCRIPTION)).
+                withRequired(true).
+                withArgument(
+                        newArgument().
+                                withName(getMessage(INPUT_PATH_ARGUMENT_NAME)).build()
+                ).build();
+
+        RegexOption attributes = new RegexOption();
+        attributes.setName(INPUT_OPTION);
+        attributes.setDescription(getMessage(INPUT_OPTION_DESCRIPTION));
+        attributes.setPrefixes(optionFormat.getOptionPrefixes());
+        attributes.setArgumentSeparator(optionFormat.getArgumentSeparator());
+        attributes.addRegex(INPUT_OPTION, 1, Priority.LOW);
+        attributes.setArgument(
+                newArgument().
+                        withName(getMessage(INPUT_OPTION_ARGUMENT_NAME)).
+                        withValuesSeparator(null).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
+        return newGroup().
+                withName(getMessage(INPUT_GROUP_NAME)).
+                withRequired(true).
+                withMinimum(1).
+                withOption(type).
+                withOption(path).
+                withOption(attributes).build();
+    }
+
     protected ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
         DriverManagerConnectionSpec connection = new DriverManagerConnectionSpec();
         connection.setSchema(commandLine.<String>getValue(TARGET_SCHEMA_OPTION));
@@ -339,6 +379,15 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
             connection.setProperties(map);
         }
         return connection;
+    }
+
+    protected FormatSpec parseInputGroup(CommandLine commandLine, Option cliLoad) {
+        FormatSpec format = new FormatSpecBase();
+        format.setType(commandLine.<String>getValue(INPUT_TYPE_OPTION));
+        format.setPath(commandLine.<String>getValue(INPUT_PATH_OPTION));
+        format.setAttributes(parseFormatAttributes(
+                commandLine.getOption(INPUT_OPTION), commandLine.<String>getValues(INPUT_OPTION)));
+        return format;
     }
 
     protected OptionBuilder newOption() {

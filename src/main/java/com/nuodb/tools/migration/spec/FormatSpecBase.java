@@ -30,7 +30,7 @@ package com.nuodb.tools.migration.spec;
 /**
  * @author Sergey Bushik
  */
-public class OutputSpecBase extends SpecBase implements OutputSpec {
+public class FormatSpecBase extends SpecBase implements FormatSpec {
 
     private String path;
 
