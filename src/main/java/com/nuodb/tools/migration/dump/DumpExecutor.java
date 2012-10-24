@@ -27,22 +27,21 @@
  */
 package com.nuodb.tools.migration.dump;
 
+import com.nuodb.tools.migration.context.support.ApplicationSupport;
+import com.nuodb.tools.migration.dump.catalog.Catalog;
+import com.nuodb.tools.migration.dump.catalog.CatalogImpl;
+import com.nuodb.tools.migration.dump.catalog.CatalogWriter;
 import com.nuodb.tools.migration.dump.output.OutputFormat;
 import com.nuodb.tools.migration.dump.output.OutputFormatLookup;
 import com.nuodb.tools.migration.dump.output.OutputFormatLookupImpl;
-import com.nuodb.tools.migration.jdbc.query.NativeQueryBuilder;
-import com.nuodb.tools.migration.jdbc.query.Query;
-import com.nuodb.tools.migration.jdbc.query.SelectQuery;
-import com.nuodb.tools.migration.jdbc.query.SelectQueryBuilder;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.metamodel.Database;
 import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
+import com.nuodb.tools.migration.jdbc.query.*;
 import com.nuodb.tools.migration.spec.*;
-import com.nuodb.tools.migration.spec.FormatSpec;
-import com.nuodb.tools.migration.context.support.ApplicationSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -68,51 +67,48 @@ public class DumpExecutor extends ApplicationSupport {
 
     private OutputFormatLookup outputFormatLookup = new OutputFormatLookupImpl();
 
-    public void execute(DumpSpec dumpSpec) throws SQLException {
-        dump(dumpSpec.getConnectionSpec(), dumpSpec.getSelectQuerySpecs(), dumpSpec.getNativeQuerySpecs(), dumpSpec.getOutputSpec());
+    public void execute(DumpSpec dumpSpec) throws DumpException {
+        execute(dumpSpec.getConnectionSpec(), dumpSpec.getSelectQuerySpecs(), dumpSpec.getNativeQuerySpecs(), dumpSpec.getOutputSpec());
     }
 
-    public void dump(ConnectionSpec connectionSpec, Collection<SelectQuerySpec> selectQuerySpecs,
-                        Collection<NativeQuerySpec> nativeQuerySpecs, FormatSpec outputSpec) throws SQLException {
-        dump(new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec), selectQuerySpecs, nativeQuerySpecs, outputSpec);
+    public void execute(ConnectionSpec connectionSpec, Collection<SelectQuerySpec> selectQuerySpecs,
+                        Collection<NativeQuerySpec> nativeQuerySpecs, FormatSpec outputSpec) throws DumpException {
+        execute(createJdbcServices(connectionSpec), createCatalog(outputSpec).openWriter(), selectQuerySpecs, nativeQuerySpecs, outputSpec);
     }
 
-    public void dump(JdbcServices jdbcServices, Collection<SelectQuerySpec> selectQuerySpecs,
-                     Collection<NativeQuerySpec> nativeQuerySpecs, FormatSpec outputSpec) throws SQLException {
+    public void execute(JdbcServices jdbcServices, CatalogWriter writer, Collection<SelectQuerySpec> selectQuerySpecs,
+                        Collection<NativeQuerySpec> nativeQuerySpecs, FormatSpec outputSpec) throws DumpException {
+        try {
+            doExecute(jdbcServices, writer, selectQuerySpecs, nativeQuerySpecs, outputSpec);
+        } catch (SQLException exception) {
+            doTranslate(exception);
+        } finally {
+            writer.close();
+        }
+    }
+
+    protected void doExecute(JdbcServices jdbcServices, CatalogWriter writer, Collection<SelectQuerySpec> selectQuerySpecs,
+                             Collection<NativeQuerySpec> nativeQuerySpecs, FormatSpec outputSpec) throws SQLException {
         ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
         Connection connection = connectionProvider.getConnection();
         try {
             Database database = introspect(jdbcServices, connection);
-            DumpCatalog catalog = createDumpCatalog(outputSpec);
-            catalog.open();
             for (Query query : createQueries(database, selectQuerySpecs, nativeQuerySpecs)) {
                 OutputFormat format = getOutputFormatLookup().lookup(outputSpec.getType());
                 format.setAttributes(outputSpec.getAttributes());
                 format.setJdbcTypeExtractor(jdbcServices.getJdbcTypeExtractor());
 
-                OutputStream output = catalog.addEntry(query, format.getType());
+                OutputStream output = writer.openEntry(query, format.getType());
                 format.setOutputStream(output);
-                dump(connection, query, format);
-                catalog.closeEntry(output);
+                doExecute(connection, query, format);
+                writer.closeEntry(output);
             }
-            catalog.close();
         } finally {
             connectionProvider.closeConnection(connection);
         }
     }
 
-    protected Database introspect(JdbcServices jdbcServices, Connection connection) throws SQLException {
-        DatabaseIntrospector introspector = jdbcServices.getDatabaseIntrospector();
-        introspector.withConnection(connection);
-        introspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-        return introspector.introspect();
-    }
-
-    protected DumpCatalog createDumpCatalog(FormatSpec outputSpec) {
-        return new DumpCatalog(outputSpec.getPath());
-    }
-
-    protected void dump(Connection connection, Query query, OutputFormat format) throws SQLException {
+    protected void doExecute(Connection connection, Query query, OutputFormat format) throws SQLException {
         if (log.isTraceEnabled()) {
             log.trace(String.format("Writing dump with %1$s", format.getClass().getName()));
         }
@@ -132,9 +128,47 @@ public class DumpExecutor extends ApplicationSupport {
         }
     }
 
+    protected JdbcServices createJdbcServices(ConnectionSpec connectionSpec) {
+        return new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec);
+    }
+
+    protected Catalog createCatalog(FormatSpec outputSpec) {
+        return new CatalogImpl(outputSpec.getPath());
+    }
+
+    protected void doTranslate(SQLException exception) {
+        throw new DumpException(exception);
+    }
+
+    protected Database introspect(JdbcServices jdbcServices, Connection connection) throws SQLException {
+        DatabaseIntrospector introspector = jdbcServices.getDatabaseIntrospector();
+        introspector.withConnection(connection);
+        introspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+        return introspector.introspect();
+    }
+
     protected List<Query> createQueries(Database database, Collection<SelectQuerySpec> selectQuerySpecs,
                                         Collection<NativeQuerySpec> nativeQuerySpecs) {
         List<Query> queries = new ArrayList<Query>();
+        queries.addAll(createSelectQueries(database, selectQuerySpecs));
+        queries.addAll(createNativeQueries(database, nativeQuerySpecs));
+        return queries;
+    }
+
+    protected List<NativeQuery> createNativeQueries(Database database, Collection<NativeQuerySpec> nativeQuerySpecs) {
+        List<NativeQuery> queries = new ArrayList<NativeQuery>();
+        if (nativeQuerySpecs != null) {
+            for (NativeQuerySpec nativeQuerySpec : nativeQuerySpecs) {
+                NativeQueryBuilder nativeQueryBuilder = new NativeQueryBuilder();
+                nativeQueryBuilder.setQuery(nativeQuerySpec.getQuery());
+                queries.add(nativeQueryBuilder.build());
+            }
+        }
+        return queries;
+    }
+
+    protected List<SelectQuery> createSelectQueries(Database database, Collection<SelectQuerySpec> selectQuerySpecs) {
+        List<SelectQuery> queries = new ArrayList<SelectQuery>();
         if (selectQuerySpecs != null) {
             Collection<Table> tables = database.listTables();
             if (selectQuerySpecs.isEmpty()) {
@@ -143,13 +177,6 @@ public class DumpExecutor extends ApplicationSupport {
                 for (SelectQuerySpec selectQuerySpec : selectQuerySpecs) {
                     queries.addAll(createSelectQueries(tables, selectQuerySpec));
                 }
-            }
-        }
-        if (nativeQuerySpecs != null) {
-            for (NativeQuerySpec nativeQuerySpec : nativeQuerySpecs) {
-                NativeQueryBuilder nativeQueryBuilder = new NativeQueryBuilder();
-                nativeQueryBuilder.setQuery(nativeQuerySpec.getQuery());
-                queries.add(nativeQueryBuilder.build());
             }
         }
         return queries;

@@ -48,9 +48,11 @@ public class JdbcServicesImpl implements JdbcServices {
     private JdbcTypeExtractor jdbcTypeExtractor;
 
     public JdbcServicesImpl(DriverManagerConnectionSpec connectionSpec) {
-        this(connectionSpec,
-                new DriverManagerConnectionProvider(connectionSpec, false, TRANSACTION_READ_COMMITTED),
-                new JdbcTypeExtractorImpl(Jdbc4Types.INSTANCE));
+        this(connectionSpec, new DriverManagerConnectionProvider(connectionSpec, false, TRANSACTION_READ_COMMITTED));
+    }
+
+    public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider) {
+        this(connectionSpec, connectionProvider, new JdbcTypeExtractorImpl(Jdbc4Types.INSTANCE));
     }
 
     public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider, JdbcTypeExtractor jdbcTypeExtractor) {

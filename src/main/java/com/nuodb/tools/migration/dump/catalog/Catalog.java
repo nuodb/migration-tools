@@ -25,59 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.run;
-
-import com.nuodb.tools.migration.cli.CliResources;
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Option;
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.load.LoadExecutor;
-import com.nuodb.tools.migration.spec.LoadSpec;
+package com.nuodb.tools.migration.dump.catalog;
 
 /**
  * @author Sergey Bushik
  */
-public class CliLoadFactory implements CliRunFactory, CliResources {
+public interface Catalog {
 
-    public static final String COMMAND = "load";
+    CatalogReader openReader();
 
-    @Override
-    public String getCommand() {
-        return COMMAND;
-    }
-
-    @Override
-    public CliRun createCliRun(OptionToolkit optionToolkit) {
-        return new CliLoad(optionToolkit);
-    }
-
-    class CliLoad extends CliRunAdapter {
-
-        private LoadSpec loadSpec;
-
-        public CliLoad(OptionToolkit optionToolkit) {
-            super(optionToolkit, COMMAND);
-        }
-
-        @Override
-        protected Option createOption() {
-            return newGroup()
-                    .withName(getResources().getMessage(LOAD_GROUP_NAME))
-                    .withOption(createTargetGroup())
-                    .withOption(createInputGroup())
-                    .withRequired(true).build();
-        }
-
-        @Override
-        protected void bind(CommandLine commandLine) {
-            loadSpec = new LoadSpec();
-            loadSpec.setConnectionSpec(parseTargetGroup(commandLine, this));
-            loadSpec.setInputSpec(parseInputGroup(commandLine, this));
-        }
-
-        @Override
-        public void run() {
-            new LoadExecutor().execute(loadSpec);
-        }
-    }
+    CatalogWriter openWriter();
 }

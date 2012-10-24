@@ -25,59 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.cli.run;
+package com.nuodb.tools.migration.dump.catalog;
 
-import com.nuodb.tools.migration.cli.CliResources;
-import com.nuodb.tools.migration.cli.parse.CommandLine;
-import com.nuodb.tools.migration.cli.parse.Option;
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.load.LoadExecutor;
-import com.nuodb.tools.migration.spec.LoadSpec;
+import com.nuodb.tools.migration.dump.DumpException;
 
 /**
  * @author Sergey Bushik
  */
-public class CliLoadFactory implements CliRunFactory, CliResources {
+public class CatalogException extends DumpException {
 
-    public static final String COMMAND = "load";
-
-    @Override
-    public String getCommand() {
-        return COMMAND;
+    public CatalogException(String message) {
+        super(message);
     }
 
-    @Override
-    public CliRun createCliRun(OptionToolkit optionToolkit) {
-        return new CliLoad(optionToolkit);
+    public CatalogException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    class CliLoad extends CliRunAdapter {
-
-        private LoadSpec loadSpec;
-
-        public CliLoad(OptionToolkit optionToolkit) {
-            super(optionToolkit, COMMAND);
-        }
-
-        @Override
-        protected Option createOption() {
-            return newGroup()
-                    .withName(getResources().getMessage(LOAD_GROUP_NAME))
-                    .withOption(createTargetGroup())
-                    .withOption(createInputGroup())
-                    .withRequired(true).build();
-        }
-
-        @Override
-        protected void bind(CommandLine commandLine) {
-            loadSpec = new LoadSpec();
-            loadSpec.setConnectionSpec(parseTargetGroup(commandLine, this));
-            loadSpec.setInputSpec(parseInputGroup(commandLine, this));
-        }
-
-        @Override
-        public void run() {
-            new LoadExecutor().execute(loadSpec);
-        }
+    public CatalogException(Throwable cause) {
+        super(cause);
     }
 }

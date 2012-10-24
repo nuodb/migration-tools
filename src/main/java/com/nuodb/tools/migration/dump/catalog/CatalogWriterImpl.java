@@ -25,11 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump;
+package com.nuodb.tools.migration.dump.catalog;
 
+import com.nuodb.tools.migration.dump.DumpException;
+import com.nuodb.tools.migration.jdbc.metamodel.Table;
 import com.nuodb.tools.migration.jdbc.query.Query;
 import com.nuodb.tools.migration.jdbc.query.SelectQuery;
-import com.nuodb.tools.migration.jdbc.metamodel.Table;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,72 +44,53 @@ import java.util.Date;
 import java.util.List;
 
 import static java.lang.String.format;
-import static org.apache.commons.io.FileUtils.*;
-import static org.apache.commons.io.FilenameUtils.getFullPath;
-import static org.apache.commons.io.FilenameUtils.getName;
+import static org.apache.commons.io.FileUtils.getFile;
+import static org.apache.commons.io.FileUtils.openOutputStream;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.write;
 
 /**
  * @author Sergey Bushik
  */
-public class DumpCatalog {
+public class CatalogWriterImpl implements CatalogWriter {
+
+    private static final String SELECT_QUERY_ENTRY_NAME = "table-%1$s.%2$s";
+    private static final String QUERY_ENTRY_NAME = "query-%1$ty.%2$s";
 
     protected final Log log = LogFactory.getLog(getClass());
 
-    private static final String CATALOG_FILE_NAME = "dump-%1$ty-%1$tm-%1$te-%1$tH-%1$tM.cat";
-    private static final String SELECT_QUERY_ENTRY_NAME = "table-%1$s-%2$ty-%2$tm-%2$te-%2$tH-%2$tM.%3$s";
-    private static final String QUERY_ENTRY_NAME = "query-%1$ty-%1$tm-%1$te-%1$tH-%1$tM.%2$s";
-
-    private String path;
-    private File catalogDir;
-    private File catalogFile;
-    private OutputStream catalogFileOutput;
+    private CatalogImpl catalog;
+    private OutputStream catalogOutput;
     private List<String> entryNames = new ArrayList<String>();
 
-    public DumpCatalog(String path) {
-        this.path = path;
+    public CatalogWriterImpl(CatalogImpl catalog) {
+        this.catalog = catalog;
     }
 
-    public void open() {
+    protected void open() throws CatalogException {
+        File catalogDir = catalog.getCatalogDir();
         try {
-            this.catalogDir = makeCatalogDir();
+            FileUtils.forceMkdir(catalogDir);
         } catch (IOException e) {
-            throw new DumpException("Can't create dump catalog dir", e);
+            throw new DumpException("Can't open dump catalog dir", e);
         }
+        File catalogFile = catalog.getCatalogFile();
         try {
-            this.catalogFile = makeCatalogFile();
+            FileUtils.touch(catalogFile);
         } catch (IOException e) {
-            throw new DumpException("Can't create dump catalog file", e);
+            throw new DumpException("Can't open dump catalog file", e);
         }
         if (log.isDebugEnabled()) {
-            log.debug(format("Dump catalog file is %1$s", getCatalogFile().getPath()));
+            log.debug(String.format("Dump catalog file is %1$s", catalogFile));
         }
         try {
-            this.catalogFileOutput = openOutputStream(getCatalogFile());
+            this.catalogOutput = openOutputStream(catalogFile);
         } catch (IOException e) {
             throw new DumpException("Error opening catalog file for writing", e);
         }
     }
 
-    protected File makeCatalogDir() throws IOException {
-        String dirPath = path == null ? getUserDirectoryPath() : path;
-        File dir = new File(getFullPath(dirPath));
-        FileUtils.forceMkdir(dir);
-        return dir;
-    }
-
-    protected File makeCatalogFile() throws IOException {
-        String fileName = getName(path);
-        if (fileName.isEmpty()) {
-            fileName = format(CATALOG_FILE_NAME, new Date());
-        }
-        File catalogFile = getFile(getCatalogDir(), fileName);
-        touch(catalogFile);
-        return catalogFile;
-    }
-
-    public OutputStream addEntry(Query query, String type) {
+    public OutputStream openEntry(Query query, String type) {
         String entryName = getEntryName(query, type);
         if (log.isTraceEnabled()) {
             log.trace(String.format("Adding entry %1$s", entryName));
@@ -116,16 +98,16 @@ public class DumpCatalog {
         OutputStream output;
         try {
             output = new BufferedOutputStream(
-                    openOutputStream(getFile(getCatalogDir(), entryName)));
+                    openOutputStream(getFile(catalog.getCatalogDir(), entryName)));
         } catch (IOException e) {
             throw new DumpException("Failed opening file to output", e);
         }
         try {
             if (!entryNames.isEmpty()) {
-                write(System.getProperty("line.separator"), getCatalogFileOutput());
+                write(System.getProperty("line.separator"), catalogOutput);
             }
             entryNames.add(entryName);
-            write(entryName, getCatalogFileOutput());
+            write(entryName, catalogOutput);
         } catch (IOException e) {
             throw new DumpException("Failed add entry in catalog", e);
         }
@@ -137,7 +119,7 @@ public class DumpCatalog {
             List<Table> tables = ((SelectQuery) query).getTables();
             Table table = tables.get(0);
             String tableName = table.getName();
-            return format(SELECT_QUERY_ENTRY_NAME, tableName, new Date(), type);
+            return format(SELECT_QUERY_ENTRY_NAME, tableName, type);
         } else {
             return format(QUERY_ENTRY_NAME, new Date(), type);
         }
@@ -148,26 +130,6 @@ public class DumpCatalog {
     }
 
     public void close() {
-        closeQuietly(catalogFileOutput);
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    protected File getCatalogDir() {
-        return catalogDir;
-    }
-
-    protected File getCatalogFile() {
-        return catalogFile;
-    }
-
-    protected OutputStream getCatalogFileOutput() {
-        return catalogFileOutput;
+        closeQuietly(catalogOutput);
     }
 }

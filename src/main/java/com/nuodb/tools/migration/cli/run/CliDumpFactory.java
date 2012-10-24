@@ -27,15 +27,12 @@
  */
 package com.nuodb.tools.migration.cli.run;
 
-import com.nuodb.tools.migration.MigrationException;
 import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.tools.migration.dump.DumpExecutor;
 import com.nuodb.tools.migration.spec.DumpSpec;
-
-import java.sql.SQLException;
 
 /**
  * The Factory instantiates a {@link CliDump} which is a set of groups of options for source database connection spec
@@ -48,8 +45,8 @@ import java.sql.SQLException;
 public class CliDumpFactory implements CliRunFactory, CliResources {
 
     /**
-     * The "execute" literal command which is matched against the value on the command line. If matched the CliDump object
-     * is constructed with {@link #createCliRun(OptionToolkit)} method.
+     * The "execute" literal command which is matched against the value on the command line. If matched the CliDump
+     * object is constructed with {@link #createCliRun(OptionToolkit)} method.
      */
     public static final String COMMAND = "dump";
 
@@ -98,11 +95,7 @@ public class CliDumpFactory implements CliRunFactory, CliResources {
          */
         @Override
         public void run() {
-            try {
-                new DumpExecutor().execute(dumpSpec);
-            } catch (SQLException e) {
-                throw new MigrationException(e);
-            }
+            new DumpExecutor().execute(dumpSpec);
         }
     }
 }

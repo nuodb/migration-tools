@@ -41,8 +41,8 @@ import java.util.List;
  */
 public class SelectQueryBuilder {
 
-    private Table table;
     private DatabaseDialect databaseDialect;
+    private Table table;
     private boolean qualifyNames;
     private List<String> columns = new ArrayList<String>();
     private List<String> filters = new ArrayList<String>();

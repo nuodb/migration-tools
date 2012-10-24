@@ -1,6 +1,7 @@
 package com.nuodb.tools.migration.dump;
 
 
+import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.metamodel.*;
@@ -22,13 +23,11 @@ import static com.nuodb.tools.migration.TestConstants.*;
 
 public class DumpExecutorIntegrationTest {
 
-
     private DumpExecutor dumpExecutor;
 
     @Before
     public void setUp() throws Exception {
         dumpExecutor = new DumpExecutor();
-
     }
 
     @Test
@@ -48,7 +47,6 @@ public class DumpExecutorIntegrationTest {
                         new ArrayList<SelectQuerySpec>(),
                         new ArrayList<NativeQuerySpec>());
 
-
         Assert.assertFalse(queries.isEmpty());
         Assert.assertEquals(1, queries.size());
         Assert.assertTrue(queries.get(0) instanceof SelectQuery);
@@ -57,23 +55,20 @@ public class DumpExecutorIntegrationTest {
     @Test
     public void testIntrospect() throws Exception {
         final DriverManagerConnectionSpec connectionSpec = createTestNuoDBConnectionSpec();
-        final JdbcServicesImpl jdbcServices = new JdbcServicesImpl(connectionSpec);
-        ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
-        Connection connection = connectionProvider.getConnection();
-
-        final Database introspect = dumpExecutor.introspect(jdbcServices, connection);
-        Assert.assertNotNull(introspect);
+        final JdbcServices jdbcServices = new JdbcServicesImpl(connectionSpec);
+        final ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
+        final Connection connection = connectionProvider.getConnection();
+        final Database database = dumpExecutor.introspect(jdbcServices, connection);
+        Assert.assertNotNull(database);
     }
 
     @Test
     public void testDump() throws Exception {
         final DriverManagerConnectionSpec connectionSpec = createTestNuoDBConnectionSpec();
-        final JdbcServicesImpl jdbcServices = new JdbcServicesImpl(connectionSpec);
-        ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
-        Connection connection = connectionProvider.getConnection();
-
+        final JdbcServices jdbcServices = new JdbcServicesImpl(connectionSpec);
+        final ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
+        final Connection connection = connectionProvider.getConnection();
         final SelectQuery selectQuery = createTestSelectQuery();
-
-        dumpExecutor.dump(connection, selectQuery, getDefaultOutputFormat());
+        dumpExecutor.doExecute(connection, selectQuery, getDefaultOutputFormat());
     }
 }

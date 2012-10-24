@@ -27,28 +27,76 @@
  */
 package com.nuodb.tools.migration.load;
 
+import com.nuodb.tools.migration.dump.catalog.Catalog;
+import com.nuodb.tools.migration.dump.catalog.CatalogImpl;
+import com.nuodb.tools.migration.dump.catalog.CatalogReader;
+import com.nuodb.tools.migration.jdbc.JdbcServices;
+import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
+import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.tools.migration.spec.ConnectionSpec;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 import com.nuodb.tools.migration.spec.FormatSpec;
 import com.nuodb.tools.migration.spec.FormatSpecBase;
 import com.nuodb.tools.migration.spec.LoadSpec;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 
 /**
  * @author Sergey Bushik
  */
 public class LoadExecutor {
-    public void load(LoadSpec loadSpec) {
+
+    protected final Log log = LogFactory.getLog(getClass());
+
+    public void execute(LoadSpec loadSpec) throws LoadException {
+        execute(createJdbcServices(loadSpec.getConnectionSpec()),
+                createCatalog(loadSpec.getInputSpec()).openReader(), loadSpec.getInputSpec());
     }
 
-    public static void main(String[] args) {
+    public void execute(JdbcServices jdbcServices, CatalogReader reader, FormatSpec inputSpec) throws LoadException {
+        try {
+            doExecute(jdbcServices, reader, inputSpec);
+        } catch (SQLException exception) {
+            doTranslate(exception);
+        } finally {
+            reader.close();
+        }
+    }
+
+    protected void doExecute(JdbcServices jdbcServices, CatalogReader reader, FormatSpec inputSpec) throws SQLException {
+        ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
+        Connection connection = connectionProvider.getConnection();
+        try {
+            // TODO: implement
+        } finally {
+            connectionProvider.closeConnection(connection);
+        }
+    }
+
+    protected void doTranslate(SQLException exception) {
+        throw new LoadException(exception);
+    }
+
+    protected JdbcServicesImpl createJdbcServices(ConnectionSpec connectionSpec) {
+        return new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec);
+    }
+
+    protected Catalog createCatalog(FormatSpec inputSpec) {
+        return new CatalogImpl(inputSpec.getPath());
+    }
+
+    public static void main(String[] args) throws LoadException {
         DriverManagerConnectionSpec connectionSpec = new DriverManagerConnectionSpec();
         connectionSpec.setDriver("com.mysql.jdbc.Driver");
         connectionSpec.setUrl("jdbc:mysql://localhost:3306/test");
         connectionSpec.setUsername("root");
 
         FormatSpec inputSpec = new FormatSpecBase();
-        inputSpec.setPath("/tmp/test/dump-12-10-21-17-06.cat");
+        inputSpec.setPath("/tmp/test/dump.cat");
         inputSpec.setAttributes(new HashMap<String, String>() {
             {
                 put("xml.row.element", "row");
@@ -62,6 +110,6 @@ public class LoadExecutor {
         LoadSpec loadSpec = new LoadSpec();
         loadSpec.setConnectionSpec(connectionSpec);
         loadSpec.setInputSpec(inputSpec);
-        new LoadExecutor().load(loadSpec);
+        new LoadExecutor().execute(loadSpec);
     }
 }
