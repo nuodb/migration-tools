@@ -52,9 +52,7 @@ public class JdbcTypesBase implements JdbcTypes {
 
     @Override
     public void addJdbcType(JdbcType jdbcType) {
-        for (int type : jdbcType.getSqlTypes()) {
-            jdbcTypes.put(type, jdbcType);
-        }
+        jdbcTypes.put(jdbcType.getSqlType(), jdbcType);
     }
 
     @Override

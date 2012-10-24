@@ -25,12 +25,20 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.query;
+package com.nuodb.tools.migration.jdbc.dialect;
 
 /**
  * @author Sergey Bushik
  */
-public interface Query {
+public class SQLServerDialect extends DatabaseDialectBase {
 
-    String toQuery();
+    @Override
+    public char closeQuote() {
+        return ']';
+    }
+
+    @Override
+    public char openQuote() {
+        return '[';
+    }
 }

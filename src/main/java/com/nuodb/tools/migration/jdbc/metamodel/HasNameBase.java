@@ -25,26 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.query;
+package com.nuodb.tools.migration.jdbc.metamodel;
+
+
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
 
 /**
  * @author Sergey Bushik
  */
-public class NativeQuery implements Query {
+public abstract class HasNameBase implements HasName {
 
-    private String query;
+    private Name name;
 
-    public NativeQuery(String query) {
-        this.query = query;
+    protected HasNameBase(Name name) {
+        this.name = name;
     }
 
     @Override
-    public String toQuery() {
-        return query;
+    public Name getNameObject() {
+        return name;
     }
 
     @Override
-    public String toString() {
-        return toQuery();
+    public String getName() {
+        return name != null ? name.value() : null;
+    }
+
+    @Override
+    public String getQuotedName(DatabaseDialect databaseDialect) {
+        return databaseDialect.openQuote() + getName() + databaseDialect.closeQuote();
     }
 }

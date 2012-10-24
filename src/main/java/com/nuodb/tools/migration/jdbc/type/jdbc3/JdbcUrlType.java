@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.jdbc.type.jdbc3;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.net.URL;
 import java.sql.ResultSet;
@@ -37,12 +38,12 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class JdbcUrlType implements JdbcType<URL> {
+public class JdbcUrlType extends JdbcTypeBase<URL> {
     public static final JdbcType INSTANCE = new JdbcUrlType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.DATALINK};
+    public int getSqlType() {
+        return Types.DATALINK;
     }
 
     @Override

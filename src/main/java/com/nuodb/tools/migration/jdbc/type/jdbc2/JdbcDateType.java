@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -37,12 +38,12 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class JdbcDateType implements JdbcType<Date> {
+public class JdbcDateType extends JdbcTypeBase<Date> {
     public static final JdbcType INSTANCE = new JdbcDateType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[] {Types.DATE};
+    public int getSqlType() {
+        return Types.DATE;
     }
 
     @Override

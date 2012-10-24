@@ -41,8 +41,8 @@ public class JdbcNClobType implements JdbcType<NClob> {
     public static final JdbcType INSTANCE = new JdbcNClobType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.NCLOB};
+    public int getSqlType() {
+        return Types.NCLOB;
     }
 
     @Override

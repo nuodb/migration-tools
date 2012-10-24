@@ -30,8 +30,8 @@ package com.nuodb.tools.migration.jdbc.metamodel;
 public class DatabaseInfo {
     private String productName;
     private String productVersion;
-    private int minorVersion;
     private int majorVersion;
+    private int minorVersion;
 
     public String getProductName() {
         return productName;
@@ -49,14 +49,6 @@ public class DatabaseInfo {
         this.productVersion = productVersion;
     }
 
-    public int getMinorVersion() {
-        return minorVersion;
-    }
-
-    public void setMinorVersion(int minorVersion) {
-        this.minorVersion = minorVersion;
-    }
-
     public int getMajorVersion() {
         return majorVersion;
     }
@@ -65,10 +57,18 @@ public class DatabaseInfo {
         this.majorVersion = majorVersion;
     }
 
+    public int getMinorVersion() {
+        return minorVersion;
+    }
+
+    public void setMinorVersion(int minorVersion) {
+        this.minorVersion = minorVersion;
+    }
+
     @Override
     public String toString() {
-        return String.format("product name=%s, product version=%s, minor version=%d, major version=%d",
-                productName, productVersion, minorVersion, majorVersion);
+        return String.format("product name=%s, product version=%s, major version=%d, minor version=%d",
+                productName, productVersion, majorVersion, minorVersion);
     }
 
     @Override

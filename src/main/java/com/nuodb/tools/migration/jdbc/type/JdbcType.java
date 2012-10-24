@@ -35,7 +35,7 @@ import java.sql.SQLException;
  */
 public interface JdbcType<T> {
 
-    int[] getSqlTypes();
+    int getSqlType();
 
     T extract(ResultSet resultSet, int column, int sqlType) throws SQLException;
 }

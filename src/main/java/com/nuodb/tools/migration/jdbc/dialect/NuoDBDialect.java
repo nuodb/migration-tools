@@ -25,62 +25,10 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.metamodel;
+package com.nuodb.tools.migration.jdbc.dialect;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-
-public class ResultSetMetaModel {
-
-    private int columnCount;
-    private int[] columnTypes;
-    private String[] columns;
-    private List<String> columnsList;
-
-    public ResultSetMetaModel(ResultSet resultSet) throws SQLException {
-        this(resultSet.getMetaData());
-    }
-
-    public ResultSetMetaModel(ResultSetMetaData metaData) throws SQLException {
-        int columnCount = metaData.getColumnCount();
-
-        String[] columns = new String[columnCount];
-        int[] columnTypes = new int[columnCount];
-        for (int i = 0; i < columnCount; i++) {
-            int column = i + 1;
-            columns[i] = metaData.getColumnLabel(column);
-            columnTypes[i] = metaData.getColumnType(column);
-        }
-        this.columns = columns;
-        this.columnsList = Arrays.asList(columns);
-        this.columnTypes = columnTypes;
-        this.columnCount = columnCount;
-    }
-
-    public int getColumnCount() {
-        return columnCount;
-    }
-
-    public String[] getColumns() {
-        return columns;
-    }
-
-    public boolean hasColumn(String column) {
-        return columnsList.contains(column);
-    }
-
-    public int getColumnType(int column) {
-        return columnTypes[column];
-    }
-
-    public int[] getColumnTypes() {
-        return columnTypes;
-    }
-
-    public String getColumn(int column) {
-        return columns[column];
-    }
+/**
+ * @author Sergey Bushik
+ */
+public class NuoDBDialect extends DatabaseDialectBase {
 }

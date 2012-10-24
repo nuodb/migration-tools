@@ -25,11 +25,11 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.query;
+package com.nuodb.tools.migration.jdbc.query;
 
 import com.nuodb.tools.migration.jdbc.metamodel.Column;
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
-import org.hibernate.dialect.Dialect;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,8 +40,8 @@ import java.util.List;
  */
 public class SelectQuery implements Query {
 
-    private Dialect dialect;
-    private boolean qualify;
+    private DatabaseDialect databaseDialect;
+    private boolean qualifyNames;
     private List<Table> tables = new ArrayList<Table>();
     private List<Column> columns = new ArrayList<Column>();
     private List<String> conditions = new ArrayList<String>();
@@ -62,10 +62,9 @@ public class SelectQuery implements Query {
     public String toQuery() {
         StringBuilder query = new StringBuilder();
         query.append("select ");
-        //TODO assert for no column?
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            query.append(column.getQuotedName(dialect));
+            query.append(column.getQuotedName(databaseDialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }
@@ -73,7 +72,7 @@ public class SelectQuery implements Query {
         query.append(" from ");
         for (Iterator<Table> iterator = tables.iterator(); iterator.hasNext(); ) {
             Table table = iterator.next();
-            query.append(qualify ? table.getQualifiedName(dialect) : table.getQuotedName(dialect));
+            query.append(qualifyNames ? table.getNameQualified(databaseDialect) : table.getQuotedName(databaseDialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }
@@ -90,20 +89,20 @@ public class SelectQuery implements Query {
         return query.toString();
     }
 
-    public Dialect getDialect() {
-        return dialect;
+    public DatabaseDialect getDatabaseDialect() {
+        return databaseDialect;
     }
 
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
+    public void setDatabaseDialect(DatabaseDialect databaseDialect) {
+        this.databaseDialect = databaseDialect;
     }
 
-    public boolean isQualify() {
-        return qualify;
+    public boolean isQualifyNames() {
+        return qualifyNames;
     }
 
-    public void setQualify(boolean qualify) {
-        this.qualify = qualify;
+    public void setQualifyNames(boolean qualifyNames) {
+        this.qualifyNames = qualifyNames;
     }
 
     public List<Table> getTables() {

@@ -58,7 +58,7 @@ public class DatabaseIntrospectorTest {
 
         when(database.getSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME)).thenReturn(schema);
         when(schema.createTable(TEST_TABLE_NAME, TEST_TABLE_TYPE)).thenReturn(table);
-        when(table.getObjectName()).thenReturn(ObjectName.valueOf(TEST_TABLE_NAME));
+        when(table.getNameObject()).thenReturn(Name.valueOf(TEST_TABLE_NAME));
     }
 
     @Test

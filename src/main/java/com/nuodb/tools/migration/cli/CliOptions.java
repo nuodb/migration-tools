@@ -46,7 +46,7 @@ public interface CliOptions {
      */
     final String HELP_OPTION = "help";
     /**
-     * Lists available command line interface commands, such as dump, load, copy.
+     * Lists available command line interface commands, such as execute, load, copy.
      */
     final String LIST_OPTION = "list";
     /**

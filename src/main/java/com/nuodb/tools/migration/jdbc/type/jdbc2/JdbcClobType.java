@@ -28,18 +28,20 @@
 package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.*;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcClobType implements JdbcType<Clob> {
+public class JdbcClobType extends JdbcTypeBase<Clob> {
+
     public static final JdbcType INSTANCE = new JdbcClobType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.CLOB};
+    public int getSqlType() {
+        return Types.CLOB;
     }
 
     @Override

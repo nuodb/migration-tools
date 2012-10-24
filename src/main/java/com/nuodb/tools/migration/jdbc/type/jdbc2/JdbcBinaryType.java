@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,13 +37,13 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class JdbcBinaryType implements JdbcType<byte[]> {
+public class JdbcBinaryType extends JdbcTypeBase<byte[]> {
 
     public static final JdbcType INSTANCE = new JdbcBinaryType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.BINARY, Types.VARBINARY, Types.LONGVARBINARY};
+    public int getSqlType() {
+        return Types.BINARY;
     }
 
     @Override

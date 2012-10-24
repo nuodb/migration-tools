@@ -209,7 +209,7 @@ public interface Option {
      * Appends help to the specified buffer
      *
      * @param buffer     the buffer to append to
-     * @param hints      a set of dump hints
+     * @param hints      a set of execute hints
      * @param comparator a comparator used to sort the options
      */
     void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator);

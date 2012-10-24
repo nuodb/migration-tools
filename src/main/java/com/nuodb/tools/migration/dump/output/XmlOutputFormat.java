@@ -27,12 +27,11 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.jdbc.metamodel.ResultSetMetaModel;
+import com.nuodb.tools.migration.jdbc.metamodel.ResultSetModel;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -103,8 +102,8 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
     }
 
     protected void doOutputColumn(String column, int index) throws XMLStreamException {
-        ResultSetMetaModel metaModel = getResultSetMetaModel();
-        String element = metaModel.getColumn(index);
+        ResultSetModel resultSetModel = getResultSetModel();
+        String element = resultSetModel.getColumn(index);
         if (column == null) {
             writer.writeEmptyElement(element);
             writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil", "true");

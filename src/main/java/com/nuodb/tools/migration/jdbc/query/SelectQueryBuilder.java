@@ -25,10 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.query;
+package com.nuodb.tools.migration.jdbc.query;
 
-import com.nuodb.tools.migration.jdbc.metamodel.*;
-import org.hibernate.dialect.Dialect;
+import com.nuodb.tools.migration.jdbc.metamodel.Column;
+import com.nuodb.tools.migration.jdbc.metamodel.Database;
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.tools.migration.jdbc.metamodel.Table;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,8 +41,9 @@ import java.util.List;
  */
 public class SelectQueryBuilder {
 
-    private Dialect dialect;
     private Table table;
+    private DatabaseDialect databaseDialect;
+    private boolean qualifyNames;
     private List<String> columns = new ArrayList<String>();
     private List<String> filters = new ArrayList<String>();
 
@@ -53,19 +56,20 @@ public class SelectQueryBuilder {
             selectQueryColumns = new ArrayList<Column>();
             for (String column : columns) {
                 for (Column tableColumn : tableColumns) {
-                    if (tableColumn.getObjectName().value().equals(column)) {
+                    if (tableColumn.getNameObject().value().equals(column)) {
                         selectQueryColumns.add(tableColumn);
                     }
                 }
             }
         }
         SelectQuery selectQuery = new SelectQuery();
-        if (dialect != null) {
-            selectQuery.setDialect(dialect);
-        } else {
-            selectQuery.setDialect(table.getDatabase().getDialect());
+        Database database = table.getDatabase();
+        if (databaseDialect != null) {
+            selectQuery.setDatabaseDialect(databaseDialect);
+        } else if (database != null) {
+            selectQuery.setDatabaseDialect(database.getDatabaseDialect());
         }
-        selectQuery.setQualify(true);
+        selectQuery.setQualifyNames(qualifyNames);
         for (Column selectQueryColumn : selectQueryColumns) {
             selectQuery.addColumn(selectQueryColumn);
         }
@@ -78,8 +82,12 @@ public class SelectQueryBuilder {
         return selectQuery;
     }
 
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
+    public DatabaseDialect getDatabaseDialect() {
+        return databaseDialect;
+    }
+
+    public void setDatabaseDialect(DatabaseDialect databaseDialect) {
+        this.databaseDialect = databaseDialect;
     }
 
     public Table getTable() {
@@ -90,6 +98,14 @@ public class SelectQueryBuilder {
         this.table = table;
     }
 
+    public boolean isQualifyNames() {
+        return qualifyNames;
+    }
+
+    public void setQualifyNames(boolean qualifyNames) {
+        this.qualifyNames = qualifyNames;
+    }
+
     public List<String> getColumns() {
         return columns;
     }
@@ -98,16 +114,16 @@ public class SelectQueryBuilder {
         this.columns = columns;
     }
 
-    public void addColumn(String column) {
-        this.columns.add(column);
-    }
-
     public List<String> getFilters() {
         return filters;
     }
 
     public void setFilters(List<String> filters) {
         this.filters = filters;
+    }
+
+    public void addColumn(String column) {
+        this.columns.add(column);
     }
 
     public void addFilter(String filter) {

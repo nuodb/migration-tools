@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.jdbc.type.jdbc4;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,12 +38,12 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class JdbcSqlXmlType implements JdbcType<SQLXML> {
+public class JdbcSqlXmlType extends JdbcTypeBase<SQLXML> {
     public static final JdbcType INSTANCE = new JdbcSqlXmlType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.SQLXML};
+    public int getSqlType() {
+        return Types.SQLXML;
     }
 
     @Override

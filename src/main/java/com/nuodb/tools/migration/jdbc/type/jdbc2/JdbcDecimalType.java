@@ -37,13 +37,13 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class JdbcDecimalType implements JdbcType<BigDecimal> {
+public class JdbcDecimalType extends JdbcNumericType {
 
     public static final JdbcType INSTANCE = new JdbcDecimalType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.NUMERIC, Types.DECIMAL};
+    public int getSqlType() {
+        return Types.DECIMAL;
     }
 
     @Override

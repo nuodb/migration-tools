@@ -32,14 +32,14 @@ import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.dump.DumpWriter;
+import com.nuodb.tools.migration.dump.DumpExecutor;
 import com.nuodb.tools.migration.spec.DumpSpec;
 
 import java.sql.SQLException;
 
 /**
  * The Factory instantiates a {@link CliDump} which is a set of groups of options for source database connection spec
- * {@link CliRunSupport#createSourceGroup}, spec of dump format & type via {@link CliRunSupport#createOutputGroup},
+ * {@link CliRunSupport#createSourceGroup}, spec of execute format & type via {@link CliRunSupport#createOutputGroup},
  * table option {@link CliRunSupport#createSelectQueryGroup} and after a validation is passed assembles command line
  * option arguments into a {@link DumpSpec} object.
  *
@@ -48,7 +48,7 @@ import java.sql.SQLException;
 public class CliDumpFactory implements CliRunFactory, CliResources {
 
     /**
-     * The "dump" literal command which is matched against the value on the command line. If matched the CliDump object
+     * The "execute" literal command which is matched against the value on the command line. If matched the CliDump object
      * is constructed with {@link #createCliRun(OptionToolkit)} method.
      */
     public static final String COMMAND = "dump";
@@ -64,7 +64,7 @@ public class CliDumpFactory implements CliRunFactory, CliResources {
     }
 
     /**
-     * An implementation of {@link CliRunAdapter} which assembles dump spec from provided command line after the
+     * An implementation of {@link CliRunAdapter} which assembles execute spec from provided command line after the
      * validation is passed.
      */
     class CliDump extends CliRunAdapter {
@@ -94,12 +94,12 @@ public class CliDumpFactory implements CliRunFactory, CliResources {
         }
 
         /**
-         * Executes dump process
+         * Executes execute process
          */
         @Override
         public void run() {
             try {
-                new DumpWriter().dump(dumpSpec);
+                new DumpExecutor().execute(dumpSpec);
             } catch (SQLException e) {
                 throw new MigrationException(e);
             }

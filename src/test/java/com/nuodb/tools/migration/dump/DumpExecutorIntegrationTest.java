@@ -1,11 +1,11 @@
 package com.nuodb.tools.migration.dump;
 
 
-import com.nuodb.tools.migration.dump.query.Query;
-import com.nuodb.tools.migration.dump.query.SelectQuery;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.metamodel.*;
+import com.nuodb.tools.migration.jdbc.query.Query;
+import com.nuodb.tools.migration.jdbc.query.SelectQuery;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 import com.nuodb.tools.migration.spec.NativeQuerySpec;
 import com.nuodb.tools.migration.spec.SelectQuerySpec;
@@ -20,32 +20,31 @@ import java.util.List;
 
 import static com.nuodb.tools.migration.TestConstants.*;
 
-public class DumpWriterIntegrationTest {
+public class DumpExecutorIntegrationTest {
 
 
-    private DumpWriter dumpWriter;
+    private DumpExecutor dumpExecutor;
 
     @Before
     public void setUp() throws Exception {
-        dumpWriter = new DumpWriter();
+        dumpExecutor = new DumpExecutor();
 
     }
 
     @Test
     public void testCreateQueries() throws Exception {
         final Database database = new Database();
-        database.setCatalogs(new HashMap<Name, Catalog>(){{
+        database.setCatalogs(new HashMap<Name, Catalog>() {{
             final Catalog testCatalog = new Catalog(database, TEST_CATALOG_NAME);
             final Schema newSchema = testCatalog.getSchema(TEST_SCHEMA_NAME);
             final Table testTable = newSchema.createTable(TEST_TABLE_NAME, "");
             testTable.createColumn("FIRST");
             testTable.createColumn("SECOND");
             testTable.createColumn("THIRD");
-
             put(Name.valueOf("TEST_CATALOG"), testCatalog);
         }});
         final List<Query> queries =
-                dumpWriter.createQueries(database,
+                dumpExecutor.createQueries(database,
                         new ArrayList<SelectQuerySpec>(),
                         new ArrayList<NativeQuerySpec>());
 
@@ -62,7 +61,7 @@ public class DumpWriterIntegrationTest {
         ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
         Connection connection = connectionProvider.getConnection();
 
-        final Database introspect = dumpWriter.introspect(jdbcServices, connection);
+        final Database introspect = dumpExecutor.introspect(jdbcServices, connection);
         Assert.assertNotNull(introspect);
     }
 
@@ -75,6 +74,6 @@ public class DumpWriterIntegrationTest {
 
         final SelectQuery selectQuery = createTestSelectQuery();
 
-        dumpWriter.dump(connection, selectQuery, getDefaultOutputFormat());
+        dumpExecutor.dump(connection, selectQuery, getDefaultOutputFormat());
     }
 }

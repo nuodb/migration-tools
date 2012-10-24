@@ -26,7 +26,7 @@ import java.util.ListIterator;
 public class ParserImpl implements Parser {
 
     /**
-     * Parse the dump.arguments according to the specified options and properties.
+     * Parse the execute.arguments according to the specified options and properties.
      *
      * @param arguments to parse.
      * @param option    sets the option to parse against.

@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.Blob;
 import java.sql.ResultSet;
@@ -37,13 +38,13 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class JdbcBlobType implements JdbcType<Blob> {
+public class JdbcBlobType extends JdbcTypeBase<Blob> {
 
     public static final JdbcType INSTANCE = new JdbcBlobType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.BLOB};
+    public int getSqlType() {
+        return Types.BLOB;
     }
 
     @Override

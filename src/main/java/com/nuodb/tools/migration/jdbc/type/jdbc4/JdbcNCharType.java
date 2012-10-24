@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.jdbc.type.jdbc4;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,12 +37,12 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class JdbcNCharType implements JdbcType<String> {
+public class JdbcNCharType extends JdbcTypeBase<String> {
     public static final JdbcType INSTANCE = new JdbcNCharType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.NCHAR, Types.NVARCHAR, Types.LONGNVARCHAR};
+    public int getSqlType() {
+        return Types.NCHAR;
     }
 
     @Override

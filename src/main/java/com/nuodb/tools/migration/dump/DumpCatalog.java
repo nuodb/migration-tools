@@ -27,8 +27,8 @@
  */
 package com.nuodb.tools.migration.dump;
 
-import com.nuodb.tools.migration.dump.query.Query;
-import com.nuodb.tools.migration.dump.query.SelectQuery;
+import com.nuodb.tools.migration.jdbc.query.Query;
+import com.nuodb.tools.migration.jdbc.query.SelectQuery;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;

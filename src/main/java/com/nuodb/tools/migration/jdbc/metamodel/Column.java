@@ -27,7 +27,7 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-public class Column extends HasObjectNameBase {
+public class Column extends HasNameBase {
     /**
      * Default precision is maximum value
      */
@@ -78,8 +78,8 @@ public class Column extends HasObjectNameBase {
 
     private String defaultValue;
 
-    public Column(Table table, ObjectName objectName) {
-        super(objectName);
+    public Column(Table table, Name name) {
+        super(name);
         this.table = table;
     }
 
@@ -181,6 +181,6 @@ public class Column extends HasObjectNameBase {
 
     @Override
     public String toString() {
-        return getObjectName().toString();
+        return getNameObject().toString();
     }
 }

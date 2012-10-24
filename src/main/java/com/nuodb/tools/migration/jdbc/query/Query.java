@@ -25,18 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.metamodel;
-
-import org.hibernate.dialect.Dialect;
+package com.nuodb.tools.migration.jdbc.query;
 
 /**
  * @author Sergey Bushik
  */
-public interface HasObjectName {
+public interface Query {
 
-    String getName();
-
-    String getQuotedName(Dialect dialect);
-
-    ObjectName getObjectName();
+    String toQuery();
 }

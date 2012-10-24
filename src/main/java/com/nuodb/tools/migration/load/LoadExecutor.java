@@ -62,5 +62,6 @@ public class LoadExecutor {
         LoadSpec loadSpec = new LoadSpec();
         loadSpec.setConnectionSpec(connectionSpec);
         loadSpec.setInputSpec(inputSpec);
+        new LoadExecutor().load(loadSpec);
     }
 }

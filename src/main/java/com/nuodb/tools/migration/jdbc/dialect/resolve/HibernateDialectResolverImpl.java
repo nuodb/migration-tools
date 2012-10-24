@@ -25,32 +25,58 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.metamodel;
+package com.nuodb.tools.migration.jdbc.dialect.resolve;
 
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialectResolver;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.service.jdbc.dialect.internal.StandardDialectResolver;
+import org.hibernate.service.jdbc.dialect.spi.DialectResolver;
+
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class HasObjectNameBase implements HasObjectName {
+public class HibernateDialectResolverImpl implements DatabaseDialectResolver {
 
-    private ObjectName objectName;
+    private final DialectResolver dialectResolver;
 
-    protected HasObjectNameBase(ObjectName objectName) {
-        this.objectName = objectName;
-    }
-    @Override
-    public String getName() {
-        return objectName != null ? objectName.value() : null;
+    public HibernateDialectResolverImpl() {
+        this(new StandardDialectResolver());
     }
 
-    @Override
-    public String getQuotedName(Dialect dialect) {
-        return dialect.openQuote() + getName() + dialect.closeQuote();
+    public HibernateDialectResolverImpl(DialectResolver dialectResolver) {
+        this.dialectResolver = dialectResolver;
     }
 
     @Override
-    public ObjectName getObjectName() {
-        return objectName;
+    public DatabaseDialect resolve(DatabaseMetaData metaData) throws SQLException {
+        return new HibernateDialect(dialectResolver.resolveDialect(metaData));
+    }
+
+    class HibernateDialect implements DatabaseDialect {
+
+        private Dialect dialect;
+
+        public HibernateDialect(Dialect dialect) {
+            this.dialect = dialect;
+        }
+
+        @Override
+        public char openQuote() {
+            return dialect.openQuote();
+        }
+
+        @Override
+        public char closeQuote() {
+            return dialect.closeQuote();
+        }
+
+        @Override
+        public String quote(String name) {
+            return dialect.quote(name);
+        }
     }
 }

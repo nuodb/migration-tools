@@ -29,11 +29,11 @@ package com.nuodb.tools.migration.jdbc.metamodel;
 
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialectResolver;
+import com.nuodb.tools.migration.jdbc.dialect.resolve.DatabaseDialectResolverImpl;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.service.jdbc.dialect.internal.StandardDialectResolver;
-import org.hibernate.service.jdbc.dialect.spi.DialectResolver;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -62,7 +62,7 @@ public class DatabaseIntrospector {
     protected String[] tableTypes = TABLE_TYPES;
     protected Connection connection;
     protected ConnectionProvider connectionProvider;
-    protected DialectResolver dialectResolver = new StandardDialectResolver();
+    protected DatabaseDialectResolver databaseDialectResolver = new DatabaseDialectResolverImpl();
 
     public DatabaseIntrospector withObjectTypes(ObjectType... types) {
         this.objectTypes = Arrays.asList(types);
@@ -92,6 +92,11 @@ public class DatabaseIntrospector {
 
     public DatabaseIntrospector withConnectionProvider(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
+        return this;
+    }
+
+    public DatabaseIntrospector withDatabaseDialectResolver(DatabaseDialectResolver databaseDialectResolver) {
+        this.databaseDialectResolver = databaseDialectResolver;
         return this;
     }
 
@@ -142,8 +147,8 @@ public class DatabaseIntrospector {
         database.setDatabaseInfo(databaseInfo);
     }
 
-    protected void resolveDialect(DatabaseMetaData metaData, Database database) {
-        database.setDialect(dialectResolver.resolveDialect(metaData));
+    protected void resolveDialect(DatabaseMetaData metaData, Database database) throws SQLException {
+        database.setDatabaseDialect(databaseDialectResolver.resolve(metaData));
     }
 
     protected void readObjects(DatabaseMetaData metaData, Database database) throws SQLException {
@@ -196,10 +201,11 @@ public class DatabaseIntrospector {
     }
 
     protected void readTableColumns(DatabaseMetaData metaData, Table table) throws SQLException {
-        ResultSet columns = metaData.getColumns(catalog, schema, table.getObjectName().value(), null);
+        ResultSet columns = metaData.getColumns(catalog, schema, table.getName(), null);
         try {
-            ResultSetMetaModel model = new ResultSetMetaModel(columns.getMetaData());
             while (columns.next()) {
+                ResultSetModel model = new ResultSetModel(columns.getMetaData());
+
                 Column column = table.createColumn(columns.getString("COLUMN_NAME"));
                 column.setType(new ColumnType(columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME")));
                 column.setSize(columns.getInt("COLUMN_SIZE"));

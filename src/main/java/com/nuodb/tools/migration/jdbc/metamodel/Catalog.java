@@ -32,28 +32,22 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Catalog {
+public class Catalog extends HasNameBase {
 
     private Map<Name, Schema> schemas = new HashMap<Name, Schema>();
     private Database database;
-    private Name name;
-
-    public Catalog(Database database, Name name) {
-        this.database = database;
-        this.name = name;
-    }
 
     public Catalog(Database database, String name) {
+        this(database, Name.valueOf(name));
+    }
+
+    public Catalog(Database database, Name name) {
+        super(name);
         this.database = database;
-        this.name = Name.valueOf(name);
     }
 
     public Database getDatabase() {
         return database;
-    }
-
-    public Name getName() {
-        return name;
     }
 
     public Schema getSchema(Name name) {
@@ -69,7 +63,7 @@ public class Catalog {
     }
 
     protected Schema createSchema(Name name) {
-        Schema schema = new Schema(this, name);
+        Schema schema = new Schema(database, this, name);
         schemas.put(name, schema);
         return schema;
     }

@@ -10,7 +10,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the value of NuoDB, Inc. nor the names of its contributors may
+ *     * Neither the name of NuoDB, Inc. nor the names of its contributors may
  *       be used to endorse or promote products derived from this software
  *       without specific prior written permission.
  *
@@ -27,45 +27,16 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-public class ObjectName {
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
 
-    private String value;
+/**
+ * @author Sergey Bushik
+ */
+public interface HasName {
 
-    protected ObjectName(String value) {
-        this.value = value;
-    }
+    Name getNameObject();
 
-    public String value() {
-        return value;
-    }
+    String getName();
 
-    private static boolean isEmpty(String value) {
-        return value == null || value.length() == 0;
-    }
-
-    public static ObjectName valueOf(String value) {
-        return isEmpty(value) ? null : new ObjectName(value);
-    }
-
-    @Override
-    public String toString() {
-        return value();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ObjectName objectName1 = (ObjectName) o;
-
-        if (value != null ? !value.equals(objectName1.value) : objectName1.value != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return value != null ? value.hashCode() : 0;
-    }
+    String getQuotedName(DatabaseDialect dialect);
 }

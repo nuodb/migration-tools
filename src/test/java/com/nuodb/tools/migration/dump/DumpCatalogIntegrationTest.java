@@ -1,7 +1,7 @@
 package com.nuodb.tools.migration.dump;
 
 
-import com.nuodb.tools.migration.dump.query.SelectQuery;
+import com.nuodb.tools.migration.jdbc.query.SelectQuery;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;

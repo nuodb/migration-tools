@@ -3,8 +3,11 @@ package com.nuodb.tools.migration;
 
 import com.nuodb.tools.migration.dump.output.OutputFormat;
 import com.nuodb.tools.migration.dump.output.OutputFormatLookupImpl;
-import com.nuodb.tools.migration.dump.query.SelectQuery;
-import com.nuodb.tools.migration.jdbc.metamodel.*;
+import com.nuodb.tools.migration.jdbc.query.SelectQuery;
+import com.nuodb.tools.migration.jdbc.metamodel.Column;
+import com.nuodb.tools.migration.jdbc.metamodel.Database;
+import com.nuodb.tools.migration.jdbc.metamodel.Schema;
+import com.nuodb.tools.migration.jdbc.metamodel.Table;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 
 public class TestConstants {
@@ -38,13 +41,15 @@ public class TestConstants {
     }
 
     public static SelectQuery createTestSelectQuery() {
+
         final SelectQuery query = new SelectQuery();
-        final Schema testSchema = new Schema(new Catalog(new Database(), TEST_CATALOG_NAME), TEST_SCHEMA_NAME);
-        final Table testTable = new Table(testSchema, TEST_TABLE_NAME);
+        final Database database = new Database();
+        final Schema schema = database.createSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME);
+        final Table table = schema.createTable(TEST_TABLE_NAME, Table.TABLE);
         //testTable.createColumn(FIRST_COLUMN_NAME);
         //testTable.createColumn(SECOND_COLUMN_NAME);
-        query.addTable(testTable);
-        query.addColumn(new Column(testTable, FIRST_COLUMN_NAME));
+        query.addTable(table);
+        query.addColumn(new Column(table, FIRST_COLUMN_NAME));
 
         return query;
     }

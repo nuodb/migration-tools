@@ -75,7 +75,7 @@ public class DatabaseIntrospectorIntegrationTest {
         introspector.readObjects(connection.getMetaData(), database);
 
 
-        final Map<ObjectName, Catalog> catalogs = database.getCatalogs();
+        final Map<Name, Catalog> catalogs = database.getCatalogs();
         Assert.assertFalse(catalogs.isEmpty());
 
         final Collection<Schema> schemas = database.listSchemas();

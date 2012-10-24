@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.jdbc.type.jdbc3;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,13 +37,13 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class JdbcBooleanType implements JdbcType<Boolean> {
+public class JdbcBooleanType extends JdbcTypeBase<Boolean> {
 
     public static final JdbcType INSTANCE = new JdbcBooleanType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.BOOLEAN};
+    public int getSqlType() {
+        return Types.BOOLEAN;
     }
 
     @Override

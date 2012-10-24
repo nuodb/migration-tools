@@ -30,10 +30,10 @@ package com.nuodb.tools.migration.dump;
 import com.nuodb.tools.migration.dump.output.OutputFormat;
 import com.nuodb.tools.migration.dump.output.OutputFormatLookup;
 import com.nuodb.tools.migration.dump.output.OutputFormatLookupImpl;
-import com.nuodb.tools.migration.dump.query.NativeQueryBuilder;
-import com.nuodb.tools.migration.dump.query.Query;
-import com.nuodb.tools.migration.dump.query.SelectQuery;
-import com.nuodb.tools.migration.dump.query.SelectQueryBuilder;
+import com.nuodb.tools.migration.jdbc.query.NativeQueryBuilder;
+import com.nuodb.tools.migration.jdbc.query.Query;
+import com.nuodb.tools.migration.jdbc.query.SelectQuery;
+import com.nuodb.tools.migration.jdbc.query.SelectQueryBuilder;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
@@ -62,32 +62,32 @@ import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DumpWriter extends ApplicationSupport {
+public class DumpExecutor extends ApplicationSupport {
 
     protected final Log log = LogFactory.getLog(getClass());
 
     private OutputFormatLookup outputFormatLookup = new OutputFormatLookupImpl();
 
-    public void dump(DumpSpec dumpSpec) throws SQLException {
+    public void execute(DumpSpec dumpSpec) throws SQLException {
         dump(dumpSpec.getConnectionSpec(), dumpSpec.getSelectQuerySpecs(), dumpSpec.getNativeQuerySpecs(), dumpSpec.getOutputSpec());
     }
 
     public void dump(ConnectionSpec connectionSpec, Collection<SelectQuerySpec> selectQuerySpecs,
-                     Collection<NativeQuerySpec> nativeQuerySpecs, FormatSpec formatSpec) throws SQLException {
-        dump(new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec), selectQuerySpecs, nativeQuerySpecs, formatSpec);
+                        Collection<NativeQuerySpec> nativeQuerySpecs, FormatSpec outputSpec) throws SQLException {
+        dump(new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec), selectQuerySpecs, nativeQuerySpecs, outputSpec);
     }
 
     public void dump(JdbcServices jdbcServices, Collection<SelectQuerySpec> selectQuerySpecs,
-                     Collection<NativeQuerySpec> nativeQuerySpecs, FormatSpec formatSpec) throws SQLException {
+                     Collection<NativeQuerySpec> nativeQuerySpecs, FormatSpec outputSpec) throws SQLException {
         ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
         Connection connection = connectionProvider.getConnection();
         try {
             Database database = introspect(jdbcServices, connection);
-            DumpCatalog catalog = createDumpCatalog(formatSpec);
+            DumpCatalog catalog = createDumpCatalog(outputSpec);
             catalog.open();
             for (Query query : createQueries(database, selectQuerySpecs, nativeQuerySpecs)) {
-                OutputFormat format = getOutputFormatLookup().lookup(formatSpec.getType());
-                format.setAttributes(formatSpec.getAttributes());
+                OutputFormat format = getOutputFormatLookup().lookup(outputSpec.getType());
+                format.setAttributes(outputSpec.getAttributes());
                 format.setJdbcTypeExtractor(jdbcServices.getJdbcTypeExtractor());
 
                 OutputStream output = catalog.addEntry(query, format.getType());
@@ -108,8 +108,8 @@ public class DumpWriter extends ApplicationSupport {
         return introspector.introspect();
     }
 
-    protected DumpCatalog createDumpCatalog(FormatSpec formatSpec) {
-        return new DumpCatalog(formatSpec.getPath());
+    protected DumpCatalog createDumpCatalog(FormatSpec outputSpec) {
+        return new DumpCatalog(outputSpec.getPath());
     }
 
     protected void dump(Connection connection, Query query, OutputFormat format) throws SQLException {
@@ -159,8 +159,9 @@ public class DumpWriter extends ApplicationSupport {
         List<SelectQuery> selectQueries = new ArrayList<SelectQuery>();
         String tableName = selectQuerySpec != null ? selectQuerySpec.getTable() : null;
         for (Table table : tables) {
-            if (tableName == null || tableName.equals(table.getObjectName().value())) {
+            if (tableName == null || tableName.equals(table.getNameObject().value())) {
                 SelectQueryBuilder selectQueryBuilder = new SelectQueryBuilder();
+                selectQueryBuilder.setQualifyNames(true);
                 selectQueryBuilder.setTable(table);
                 if (selectQuerySpec != null) {
                     selectQueryBuilder.setColumns(selectQuerySpec.getColumns());

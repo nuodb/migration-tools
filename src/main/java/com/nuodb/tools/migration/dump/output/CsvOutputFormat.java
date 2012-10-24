@@ -65,7 +65,7 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvFormat {
      */
     private Character escape;
     /**
-     * The record separator to use for dump.
+     * The record separator to use for execute.
      */
     private String lineSeparator;
 
@@ -126,7 +126,7 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvFormat {
     @Override
     protected void doOutputBegin(ResultSet resultSet) throws SQLException {
         try {
-            printer.printRecord(getResultSetMetaModel().getColumns());
+            printer.printRecord(getResultSetModel().getColumns());
         } catch (IOException e) {
             throw new DumpException(e);
         }

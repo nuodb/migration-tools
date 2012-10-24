@@ -40,6 +40,8 @@ public class Jdbc4Types extends Jdbc3Types {
     public Jdbc4Types() {
         super();
         addJdbcType(JdbcNCharType.INSTANCE);
+        addJdbcType(JdbcNVarCharType.INSTANCE);
+        addJdbcType(JdbcNLongVarCharType.INSTANCE);
         addJdbcType(JdbcNClobType.INSTANCE);
         addJdbcType(JdbcRowIdType.INSTANCE);
         addJdbcType(JdbcSqlXmlType.INSTANCE);

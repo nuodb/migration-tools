@@ -27,7 +27,7 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.jdbc.metamodel.ResultSetMetaModel;
+import com.nuodb.tools.migration.jdbc.metamodel.ResultSetModel;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeAcceptor;
 import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
@@ -50,7 +50,7 @@ public abstract class OutputFormatBase implements OutputFormat {
     private JdbcTypeExtractor jdbcTypeExtractor;
     private Map<Integer, JdbcTypeFormatter> jdbcTypeFormatters = new HashMap<Integer, JdbcTypeFormatter>();
     private JdbcTypeFormatter defaultJdbcTypeFormatter = new JdbcTypeFormatterImpl();
-    private ResultSetMetaModel resultSetMetaModel;
+    private ResultSetModel resultSetModel;
 
     @Override
     public final void setAttributes(Map<String, String> attributes) {
@@ -79,7 +79,7 @@ public abstract class OutputFormatBase implements OutputFormat {
 
     @Override
     public final void outputBegin(ResultSet resultSet) throws SQLException {
-        resultSetMetaModel = new ResultSetMetaModel(resultSet);
+        resultSetModel = new ResultSetModel(resultSet);
         doOutputInit();
         doOutputBegin(resultSet);
     }
@@ -90,13 +90,13 @@ public abstract class OutputFormatBase implements OutputFormat {
     protected void doOutputBegin(ResultSet resultSet) throws SQLException {
     }
 
-    protected ResultSetMetaModel getResultSetMetaModel() {
-        return resultSetMetaModel;
+    protected ResultSetModel getResultSetModel() {
+        return resultSetModel;
     }
 
     @SuppressWarnings("unchecked")
     protected String[] formatColumns(ResultSet resultSet) throws SQLException {
-        final String[] columns = new String[resultSetMetaModel.getColumnCount()];
+        final String[] columns = new String[resultSetModel.getColumnCount()];
         final JdbcTypeAcceptor acceptor = new JdbcTypeAcceptor<Object>() {
             public int column;
 
@@ -106,7 +106,7 @@ public abstract class OutputFormatBase implements OutputFormat {
             }
         };
         final JdbcTypeExtractor jdbcTypeExtractor = getJdbcTypeExtractor();
-        for (int column = 0; column < resultSetMetaModel.getColumnCount(); column++) {
+        for (int column = 0; column < resultSetModel.getColumnCount(); column++) {
             jdbcTypeExtractor.<Object>extract(resultSet, column + 1, acceptor);
         }
         return columns;
@@ -142,9 +142,7 @@ public abstract class OutputFormatBase implements OutputFormat {
 
     @Override
     public void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormatter jdbcTypeFormatter) {
-        for (Integer sqlType : jdbcType.getSqlTypes()) {
-            addJdbcTypeFormatter(sqlType, jdbcTypeFormatter);
-        }
+        addJdbcTypeFormatter(jdbcType.getSqlType(), jdbcTypeFormatter);
     }
 
     @Override

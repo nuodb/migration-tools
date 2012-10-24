@@ -25,24 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.query;
+package com.nuodb.tools.migration.jdbc.dialect;
 
 /**
+ * Vendor specific dialect
+ *
  * @author Sergey Bushik
  */
-public class NativeQueryBuilder {
+public interface DatabaseDialect {
 
-    private String query;
+    char openQuote();
 
-    public String getQuery() {
-        return query;
-    }
+    char closeQuote();
 
-    public void setQuery(String query) {
-        this.query = query;
-    }
-
-    public NativeQuery build() {
-        return new NativeQuery(query);
-    }
+    String quote(String name);
 }

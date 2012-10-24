@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,13 +37,13 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class JdbcSmallIntType implements JdbcType<Short> {
+public class JdbcSmallIntType extends JdbcTypeBase<Short> {
 
     public static final JdbcType INSTANCE = new JdbcSmallIntType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.TINYINT, Types.SMALLINT};
+    public int getSqlType() {
+        return Types.SMALLINT;
     }
 
     @Override

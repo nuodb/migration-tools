@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.Array;
 import java.sql.ResultSet;
@@ -37,13 +38,13 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class JdbcArrayType implements JdbcType<Array> {
+public class JdbcArrayType extends JdbcTypeBase<Array> {
 
     public static final JdbcType INSTANCE = new JdbcArrayType();
 
     @Override
-    public int[] getSqlTypes() {
-        return new int[]{Types.ARRAY};
+    public int getSqlType() {
+        return Types.ARRAY;
     }
 
     @Override

@@ -27,7 +27,7 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import org.hibernate.dialect.Dialect;
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,10 +37,10 @@ import java.util.Map;
 
 public class Database {
 
-    private Map<ObjectName, Catalog> catalogs = new HashMap<ObjectName, Catalog>();
-    private DatabaseInfo databaseInfo;
+    private Map<Name, Catalog> catalogs = new HashMap<Name, Catalog>();
     private DriverInfo driverInfo;
-    private Dialect dialect;
+    private DatabaseInfo databaseInfo;
+    private DatabaseDialect databaseDialect;
 
     public DriverInfo getDriverInfo() {
         return driverInfo;
@@ -58,49 +58,57 @@ public class Database {
         this.databaseInfo = databaseInfo;
     }
 
-    public Map<ObjectName, Catalog> getCatalogs() {
+    public DatabaseDialect getDatabaseDialect() {
+        return databaseDialect;
+    }
+
+    public void setDatabaseDialect(DatabaseDialect databaseDialect) {
+        this.databaseDialect = databaseDialect;
+    }
+
+    public Map<Name, Catalog> getCatalogs() {
         return catalogs;
     }
 
-    public void setCatalogs(Map<ObjectName, Catalog> catalogs) {
+    public void setCatalogs(Map<Name, Catalog> catalogs) {
         this.catalogs = catalogs;
     }
 
     public Catalog getCatalog(String name) {
-        return getCatalog(ObjectName.valueOf(name));
+        return getCatalog(Name.valueOf(name));
     }
 
-    public Catalog getCatalog(ObjectName objectName) {
-        Catalog catalog = catalogs.get(objectName);
+    public Catalog getCatalog(Name name) {
+        Catalog catalog = catalogs.get(name);
         if (catalog == null) {
-            catalog = createCatalog(objectName);
+            catalog = createCatalog(name);
         }
         return catalog;
     }
 
     public Catalog createCatalog(String name) {
-        return getCatalog(ObjectName.valueOf(name));
+        return getCatalog(Name.valueOf(name));
     }
 
-    public Catalog createCatalog(ObjectName objectName) {
-        Catalog catalog = new Catalog(this, objectName);
-        catalogs.put(objectName, catalog);
+    public Catalog createCatalog(Name name) {
+        Catalog catalog = new Catalog(this, name);
+        catalogs.put(name, catalog);
         return catalog;
     }
 
     public Schema getSchema(String catalog, String schema) {
-        return getSchema(ObjectName.valueOf(catalog), ObjectName.valueOf(schema));
+        return getSchema(Name.valueOf(catalog), Name.valueOf(schema));
     }
 
-    public Schema getSchema(ObjectName catalog, ObjectName schema) {
+    public Schema getSchema(Name catalog, Name schema) {
         return getCatalog(catalog).getSchema(schema);
     }
 
     public Schema createSchema(String catalog, String schema) {
-        return createSchema(ObjectName.valueOf(catalog), ObjectName.valueOf(schema));
+        return createSchema(Name.valueOf(catalog), Name.valueOf(schema));
     }
 
-    public Schema createSchema(ObjectName catalog, ObjectName schema) {
+    public Schema createSchema(Name catalog, Name schema) {
         return getCatalog(catalog).createSchema(schema);
     }
 
@@ -124,13 +132,5 @@ public class Database {
             tables.addAll(schema.listTables());
         }
         return tables;
-    }
-
-    public Dialect getDialect() {
-        return dialect;
-    }
-
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
     }
 }

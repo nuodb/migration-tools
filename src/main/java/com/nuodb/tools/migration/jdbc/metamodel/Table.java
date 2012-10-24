@@ -27,41 +27,64 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
+
 import java.util.*;
 
-public class Table {
+public class Table extends HasNameBase {
+
     public static final String TABLE = "TABLE";
     public static final String VIEW = "VIEW";
-
-    private Schema schema;
-    private Name name;
-    private String type;
 
     private final Map<Name, Column> columns = new LinkedHashMap<Name, Column>();
     private final Map<Name, Index> indexes = new LinkedHashMap<Name, Index>();
     private final Map<Name, UniqueKey> uniqueKeys = new LinkedHashMap<Name, UniqueKey>();
     private final List<Constraint> constraints = new ArrayList<Constraint>();
+    private final Database database;
+    private final Catalog catalog;
+    private Schema schema;
+    private String type;
 
-    public Table(Schema schema, Name name) {
-        this(schema, name, TABLE);
+    public Table(Database database, Catalog catalog, Schema schema, String name) {
+        this(database, catalog, schema, Name.valueOf(name));
     }
 
-    public Table(Schema schema, String name) {
-        this(schema, Name.valueOf(name));
+    public Table(Database database, Catalog catalog, Schema schema, Name name) {
+        this(database, catalog, schema, name, TABLE);
     }
 
-    public Table(Schema schema, Name name, String type) {
+    public Table(Database database, Catalog catalog, Schema schema, Name name, String type) {
+        super(name);
+        this.database = database;
+        this.catalog = catalog;
         this.schema = schema;
-        this.name = name;
         this.type = type;
+    }
+
+    public Object getNameQualified(DatabaseDialect dialect) {
+        StringBuilder qualifiedName = new StringBuilder();
+        if (catalog.getName() != null) {
+            qualifiedName.append(catalog.getQuotedName(dialect));
+            qualifiedName.append('.');
+        }
+        if (schema.getName() != null) {
+            qualifiedName.append(schema.getQuotedName(dialect));
+            qualifiedName.append('.');
+        }
+        qualifiedName.append(getQuotedName(dialect));
+        return qualifiedName;
+    }
+
+    public Database getDatabase() {
+        return database;
+    }
+
+    public Catalog getCatalog() {
+        return catalog;
     }
 
     public Schema getSchema() {
         return schema;
-    }
-
-    public Name getName() {
-        return name;
     }
 
     public String getType() {

@@ -54,7 +54,7 @@ public interface Argument extends Option {
      * Values identified should be added to the executable line object in association with this argument.
      *
      * @param commandLine the executable line object to store results in.
-     * @param arguments   the dump.arguments to execute.
+     * @param arguments   the execute.arguments to execute.
      * @param option      the option to register value against.
      */
     void process(CommandLine commandLine, ListIterator<String> arguments, Option option);
