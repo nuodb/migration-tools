@@ -90,13 +90,13 @@ public class DatabaseDialectResolverImpl implements DatabaseDialectResolver {
             DatabaseInfoMatcher databaseInfoMatcher = databaseInfoMatcherEntry.getKey();
             if (databaseInfoMatcher.matches(productName, productVersion, minorVersion, majorVersion)) {
                 if (log.isDebugEnabled()) {
-                    log.debug(String.format("Database dialect resolved: %1$s", databaseInfoMatcherEntry.getValue().getName()));
+                    log.debug(String.format("Database dialect resolved %1$s", databaseInfoMatcherEntry.getValue().getName()));
                 }
                 return ClassUtils.newInstance(databaseInfoMatcherEntry.getValue());
             }
         }
         if (log.isWarnEnabled()) {
-            log.warn(String.format("Default database dialect to %1$s", defaultDatabaseDialect.getName()));
+            log.warn(String.format("Database dialect defaulted to %1$s", defaultDatabaseDialect.getName()));
         }
         return ClassUtils.newInstance(defaultDatabaseDialect);
     }
