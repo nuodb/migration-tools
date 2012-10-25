@@ -3,13 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <value>NuoDB Customer Data Migration Tools</value>
+    <name>NuoDB Customer Data Migration Tools</name>
     <groupId>com.nuodb</groupId>
     <artifactId>data-migration-tool</artifactId>
     <version>1.0</version>
     <repositories>
         <repository>
-            <id>local</id>
+            <id>nuodb.migration.tools</id>
             <url>file://${basedir}/.m2</url>
         </repository>
         <repository>
@@ -128,6 +128,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -157,4 +158,71 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>cli-handler-help</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>com.nuodb.tools.migration.cli.CliHandler</mainClass>
+                                    <arguments>
+                                        <argument>--help</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>cli-handler-dump</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>com.nuodb.tools.migration.cli.CliHandler</mainClass>
+                                    <arguments>
+                                        <argument>dump</argument>
+                                        <argument>--source.driver=com.mysql.jdbc.Driver</argument>
+                                        <argument>--source.url=jdbc:mysql://localhost:3306/test</argument>
+                                        <argument>--source.username=root</argument>
+                                        <argument>--output.type=csv</argument>
+                                        <argument>--output.path=/tmp/test/</argument>
+                                        <argument>--output.csv.delimiter=,</argument>
+                                        <argument>--output.csv.quoting=false</argument>
+                                        <argument>--output.csv.quote="</argument>
+                                        <argument>--output.csv.escape=|</argument>
+                                        <argument>--output.xml.document.element=rows</argument>
+                                        <argument>--output.xml.row.element=row</argument>
+                                        <argument>--output.xml.encoding=utf-8</argument>
+                                        <argument>--output.xml.version=1.0</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
