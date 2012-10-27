@@ -25,14 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.catalog;
+package com.nuodb.tools.migration.format;
 
 /**
  * @author Sergey Bushik
  */
-public interface QueryEntryCatalog {
+public interface XmlFormat {
+    static final String EXTENSION = "xml";
 
-    QueryEntryReader openQueryEntryReader();
+    final String ATTRIBUTE_ENCODING = "xml.encoding";
+    final String ATTRIBUTE_VERSION = "xml.version";
 
-    QueryEntryWriter openQueryEntryWriter();
+    final String ENCODING = "utf-8";
+    final String VERSION = "1.0";
+    final String DOCUMENT_ELEMENT = "rows";
+    final String MODEL_ELEMENT = "model";
+    final String ROW_ELEMENT = "row";
+    final String COLUMN_ELEMENT = "column";
+    final String ATTRIBUTE_NAME = "name";
 }

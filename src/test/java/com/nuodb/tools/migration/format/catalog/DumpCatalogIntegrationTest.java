@@ -1,8 +1,8 @@
-package com.nuodb.tools.migration.dump.catalog;
+package com.nuodb.tools.migration.format.catalog;
 
 
 import com.nuodb.tools.migration.TestConstants;
-import com.nuodb.tools.migration.dump.output.CsvFormat;
+import com.nuodb.tools.migration.format.CsvFormat;
 import com.nuodb.tools.migration.jdbc.query.SelectQuery;
 import com.nuodb.tools.migration.spec.FormatSpec;
 import com.nuodb.tools.migration.spec.FormatSpecBase;

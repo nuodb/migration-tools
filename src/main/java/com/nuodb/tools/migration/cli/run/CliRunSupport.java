@@ -33,8 +33,8 @@ import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.OptionException;
 import com.nuodb.tools.migration.cli.parse.option.*;
-import com.nuodb.tools.migration.spec.*;
 import com.nuodb.tools.migration.context.support.ApplicationSupport;
+import com.nuodb.tools.migration.spec.*;
 import com.nuodb.tools.migration.utils.Priority;
 
 import java.io.UnsupportedEncodingException;
@@ -166,7 +166,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withOption(path).
                 withOption(attributes).build();
     }
-    
+
     /**
      * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
      */
@@ -201,6 +201,24 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withOption(tableFilter).
                 withMaximum(Integer.MAX_VALUE).
                 build();
+    }
+
+    protected Option createNativeQueryGroup() {
+        Option query = newOption().
+                withName(QUERY_OPTION).
+                withDescription(getMessage(QUERY_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgument().
+                                withName(getMessage(QUERY_ARGUMENT_NAME)).
+                                withMinimum(1).
+                                withValuesSeparator(null).
+                                withRequired(true).build()
+                ).build();
+        return newGroup().
+                withName(getMessage(QUERY_GROUP_NAME)).
+                withOption(query).
+                withMaximum(Integer.MAX_VALUE).build();
+
     }
 
     protected ConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
@@ -241,7 +259,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         for (String table : commandLine.<String>getValues(TABLE_OPTION)) {
             tableQueryMapping.put(table, new SelectQuerySpec(table));
         }
-        for (Iterator<String> iterator = commandLine.<String>getValues(TABLE_FILTER_OPTION).iterator(); iterator.hasNext(); ) {
+        for (Iterator<String> iterator = commandLine.<String>getValues(
+                TABLE_FILTER_OPTION).iterator(); iterator.hasNext(); ) {
             String name = iterator.next();
             SelectQuerySpec selectQuerySpec = tableQueryMapping.get(name);
             if (selectQuerySpec == null) {
@@ -250,6 +269,16 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
             selectQuerySpec.setFilter(iterator.next());
         }
         return tableQueryMapping.values();
+    }
+
+    protected Collection<NativeQuerySpec> parseNativeQueryGroup(CommandLine commandLine, Option option) {
+        List<NativeQuerySpec> nativeQuerySpecs = new ArrayList<NativeQuerySpec>();
+        for (String query : commandLine.<String>getValues(QUERY_OPTION)) {
+            NativeQuerySpec nativeQuerySpec = new NativeQuerySpec();
+            nativeQuerySpec.setQuery(query);
+            nativeQuerySpecs.add(nativeQuerySpec);
+        }
+        return nativeQuerySpecs;
     }
 
     /**

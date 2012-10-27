@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.catalog;
+package com.nuodb.tools.migration.format.catalog;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;

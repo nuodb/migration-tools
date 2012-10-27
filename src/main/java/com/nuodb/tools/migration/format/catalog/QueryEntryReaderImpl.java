@@ -25,16 +25,51 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.catalog;
+package com.nuodb.tools.migration.format.catalog;
 
-import java.io.Closeable;
+import com.nuodb.tools.migration.dump.DumpException;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.apache.commons.io.FileUtils.openInputStream;
 
 /**
  * @author Sergey Bushik
  */
-public interface QueryEntryReader extends Closeable {
+public class QueryEntryReaderImpl implements QueryEntryReader {
 
-    QueryEntry read() throws EntryCatalogException;
+    protected final Log log = LogFactory.getLog(getClass());
 
-    void close() throws EntryCatalogException;
+    private EntryCatalogImpl catalog;
+    private InputStream catalogInput;
+
+    public QueryEntryReaderImpl(EntryCatalogImpl catalog) {
+        this.catalog = catalog;
+    }
+
+    protected void open() throws EntryCatalogException {
+        File catalogFile = catalog.getCatalogFile();
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Dump catalog file is %1$s", catalogFile.getPath()));
+        }
+        try {
+            this.catalogInput = openInputStream(catalogFile);
+        } catch (IOException e) {
+            throw new DumpException("Error opening catalog file for writing", e);
+        }
+    }
+
+    public QueryEntry read() throws EntryCatalogException {
+        return null;
+    }
+
+    @Override
+    public void close() throws EntryCatalogException {
+        IOUtils.closeQuietly(catalogInput);
+    }
 }

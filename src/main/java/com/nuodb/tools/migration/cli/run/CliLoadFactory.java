@@ -31,8 +31,13 @@ import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.load.LoadExecutor;
+import com.nuodb.tools.migration.job.JobExecutor;
+import com.nuodb.tools.migration.job.JobExecutors;
+import com.nuodb.tools.migration.job.TraceJobExecutionListener;
+import com.nuodb.tools.migration.load.LoadJobFactory;
 import com.nuodb.tools.migration.spec.LoadSpec;
+
+import java.util.Collections;
 
 /**
  * @author Sergey Bushik
@@ -53,7 +58,7 @@ public class CliLoadFactory implements CliRunFactory, CliResources {
 
     class CliLoad extends CliRunAdapter {
 
-        private LoadSpec loadSpec;
+        private LoadJobFactory loadJobFactory = new LoadJobFactory();
 
         public CliLoad(OptionToolkit optionToolkit) {
             super(optionToolkit, COMMAND);
@@ -70,14 +75,18 @@ public class CliLoadFactory implements CliRunFactory, CliResources {
 
         @Override
         protected void bind(CommandLine commandLine) {
-            loadSpec = new LoadSpec();
+            LoadSpec loadSpec = new LoadSpec();
             loadSpec.setConnectionSpec(parseTargetGroup(commandLine, this));
             loadSpec.setInputSpec(parseInputGroup(commandLine, this));
+
+            loadJobFactory.setLoadSpec(loadSpec);
         }
 
         @Override
         public void run() {
-            new LoadExecutor().execute(loadSpec);
+            JobExecutor executor = JobExecutors.createJobExecutor(loadJobFactory.createJob());
+            executor.addJobExecutionListener(new TraceJobExecutionListener());
+            executor.execute(Collections.<String, Object>emptyMap());
         }
     }
 }

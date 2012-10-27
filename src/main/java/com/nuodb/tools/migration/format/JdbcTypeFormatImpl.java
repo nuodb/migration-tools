@@ -25,8 +25,9 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.format;
 
+import com.nuodb.tools.migration.dump.output.OutputFormatException;
 import com.nuodb.tools.migration.jdbc.type.JdbcLobUtils;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import org.apache.commons.codec.binary.Base64;
@@ -50,7 +51,7 @@ import static java.lang.String.valueOf;
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeFormatterImpl implements JdbcTypeFormatter<Object> {
+public class JdbcTypeFormatImpl implements JdbcTypeFormat<Object> {
 
     public static final Format DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
 

@@ -27,62 +27,47 @@
  */
 package com.nuodb.tools.migration.load;
 
-import com.nuodb.tools.migration.dump.catalog.QueryEntry;
-import com.nuodb.tools.migration.dump.catalog.QueryEntryCatalog;
-import com.nuodb.tools.migration.dump.catalog.QueryEntryReader;
+import com.nuodb.tools.migration.format.CsvFormat;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
-import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.tools.migration.job.JobExecutor;
+import com.nuodb.tools.migration.job.JobExecutors;
+import com.nuodb.tools.migration.job.JobFactory;
+import com.nuodb.tools.migration.job.TraceJobExecutionListener;
 import com.nuodb.tools.migration.spec.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadExecutor {
+public class LoadJobFactory implements JobFactory<LoadJob> {
 
-    protected final Log log = LogFactory.getLog(getClass());
+    private LoadSpec loadSpec;
 
-    public void execute(LoadSpec loadSpec) throws LoadException {
-        execute(createJdbcServices(loadSpec.getConnectionSpec()),
-                createCatalog(loadSpec.getInputSpec()).openQueryEntryReader(), loadSpec.getInputSpec());
+    @Override
+    public LoadJob createJob() {
+        ConnectionSpec connectionSpec = loadSpec.getConnectionSpec();
+        FormatSpec inputSpec = loadSpec.getInputSpec();
+
+        LoadJob job = new LoadJob();
+        job.setJdbcServices(createJdbcServices(connectionSpec));
+        job.setInputType(inputSpec.getType());
+        job.setInputAttributes(inputSpec.getAttributes());
+        return job;
     }
 
-    public void execute(JdbcServices jdbcServices, QueryEntryReader reader, FormatSpec inputSpec) throws LoadException {
-        try {
-            load(jdbcServices, reader, inputSpec);
-        } catch (SQLException exception) {
-            translate(exception);
-        } finally {
-            reader.close();
-        }
-    }
-
-    protected void load(JdbcServices jdbcServices, QueryEntryReader reader, FormatSpec inputSpec) throws SQLException {
-        ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
-        Connection connection = connectionProvider.getConnection();
-        try {
-            QueryEntry entry = reader.read();
-        } finally {
-            connectionProvider.closeConnection(connection);
-        }
-    }
-
-    protected void translate(SQLException exception) {
-        throw new LoadException(exception);
-    }
-
-    protected JdbcServicesImpl createJdbcServices(ConnectionSpec connectionSpec) {
+    protected JdbcServices createJdbcServices(ConnectionSpec connectionSpec) {
         return new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec);
     }
 
-    protected QueryEntryCatalog createCatalog(FormatSpec inputSpec) {
-        return null;// new DumpCatalogImpl(inputSpec.getPath(), outputSpec.getType());
+    public LoadSpec getLoadSpec() {
+        return loadSpec;
+    }
+
+    public void setLoadSpec(LoadSpec loadSpec) {
+        this.loadSpec = loadSpec;
     }
 
     public static void main(String[] args) throws LoadException {
@@ -92,11 +77,10 @@ public class LoadExecutor {
         connectionSpec.setUsername("root");
 
         FormatSpec inputSpec = new FormatSpecBase();
+        inputSpec.setType(CsvFormat.TYPE);
         inputSpec.setPath("/tmp/test/dump.cat");
         inputSpec.setAttributes(new HashMap<String, String>() {
             {
-                put("xml.row.element", "row");
-                put("xml.document.element", "rows");
                 put("csv.quote", "\"");
                 put("csv.delimiter", ",");
                 put("csv.quoting", "false");
@@ -106,6 +90,12 @@ public class LoadExecutor {
         LoadSpec loadSpec = new LoadSpec();
         loadSpec.setConnectionSpec(connectionSpec);
         loadSpec.setInputSpec(inputSpec);
-        new LoadExecutor().execute(loadSpec);
+
+        LoadJobFactory jobFactory = new LoadJobFactory();
+        jobFactory.setLoadSpec(loadSpec);
+
+        JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());
+        executor.addJobExecutionListener(new TraceJobExecutionListener());
+        executor.execute(Collections.<String, Object>emptyMap());
     }
 }

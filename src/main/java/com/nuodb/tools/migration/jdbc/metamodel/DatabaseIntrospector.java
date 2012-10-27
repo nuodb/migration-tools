@@ -111,7 +111,7 @@ public class DatabaseIntrospector {
         try {
             DatabaseMetaData metaData = connection.getMetaData();
             readInfo(metaData, database);
-            resolveDialect(metaData, database);
+            readDialect(metaData, database);
             readObjects(metaData, database);
         } finally {
             if (closeConnection) {
@@ -147,7 +147,7 @@ public class DatabaseIntrospector {
         database.setDatabaseInfo(databaseInfo);
     }
 
-    protected void resolveDialect(DatabaseMetaData metaData, Database database) throws SQLException {
+    protected void readDialect(DatabaseMetaData metaData, Database database) throws SQLException {
         database.setDatabaseDialect(databaseDialectResolver.resolve(metaData));
     }
 

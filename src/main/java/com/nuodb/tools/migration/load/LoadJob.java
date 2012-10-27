@@ -25,39 +25,49 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.catalog;
+package com.nuodb.tools.migration.load;
 
-import com.nuodb.tools.migration.jdbc.metamodel.Table;
-import com.nuodb.tools.migration.jdbc.query.Query;
-import com.nuodb.tools.migration.jdbc.query.SelectQuery;
+import com.nuodb.tools.migration.jdbc.JdbcServices;
+import com.nuodb.tools.migration.job.JobBase;
+import com.nuodb.tools.migration.job.JobExecution;
+
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class SelectQueryEntry implements QueryEntry {
+public class LoadJob extends JobBase {
 
-    private static final String SELECT_QUERY_ENTRY_NAME = "table-%1$s";
-
-    private String name;
-    private Query query;
-
-    public SelectQueryEntry(SelectQuery query) {
-        this.name = createName(query);
-        this.query = query;
-    }
-
-    protected String createName(SelectQuery query) {
-        Table table = query.getTables().get(0);
-        return String.format(SELECT_QUERY_ENTRY_NAME, table.getName());
-    }
+    private JdbcServices jdbcServices;
+    private String inputType;
+    private Map<String, String> inputAttributes;
 
     @Override
-    public String getName() {
-        return name;
+    public void execute(JobExecution execution) throws Exception {
+        System.out.println("LoadJob.execute");
     }
 
-    @Override
-    public Query getQuery() {
-        return query;
+    public JdbcServices getJdbcServices() {
+        return jdbcServices;
+    }
+
+    public void setJdbcServices(JdbcServices jdbcServices) {
+        this.jdbcServices = jdbcServices;
+    }
+
+    public String getInputType() {
+        return inputType;
+    }
+
+    public void setInputType(String inputType) {
+        this.inputType = inputType;
+    }
+
+    public Map<String, String> getInputAttributes() {
+        return inputAttributes;
+    }
+
+    public void setInputAttributes(Map<String, String> inputAttributes) {
+        this.inputAttributes = inputAttributes;
     }
 }

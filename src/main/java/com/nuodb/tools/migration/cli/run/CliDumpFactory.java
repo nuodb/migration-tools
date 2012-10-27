@@ -71,7 +71,6 @@ public class CliDumpFactory implements CliRunFactory, CliResources {
      */
     class CliDump extends CliRunAdapter {
 
-        private DumpSpec dumpSpec;
         private DumpJobFactory dumpJobFactory = new DumpJobFactory();
 
         public CliDump(OptionToolkit optionToolkit) {
@@ -85,16 +84,17 @@ public class CliDumpFactory implements CliRunFactory, CliResources {
                     .withOption(createSourceGroup())
                     .withOption(createOutputGroup())
                     .withOption(createSelectQueryGroup())
+                    .withOption(createNativeQueryGroup())
                     .withRequired(true).build();
         }
 
         @Override
         protected void bind(CommandLine commandLine) {
-            dumpSpec = new DumpSpec();
+            DumpSpec dumpSpec = new DumpSpec();
             dumpSpec.setConnectionSpec(parseSourceGroup(commandLine, this));
             dumpSpec.setOutputSpec(parseOutputGroup(commandLine, this));
-            dumpSpec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
-
+            // dumpSpec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
+            dumpSpec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine, this));
             dumpJobFactory.setDumpSpec(dumpSpec);
         }
 

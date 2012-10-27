@@ -27,6 +27,8 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
+import com.nuodb.tools.migration.format.JdbcTypeFormat;
+import com.nuodb.tools.migration.format.JdbcTypeFormatImpl;
 import com.nuodb.tools.migration.jdbc.metamodel.ResultSetModel;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeAcceptor;
@@ -48,8 +50,8 @@ public abstract class OutputFormatBase implements OutputFormat {
     private OutputStream outputStream;
     private Map<String, String> attributes;
     private JdbcTypeExtractor jdbcTypeExtractor;
-    private Map<Integer, JdbcTypeFormatter> jdbcTypeFormatters = new HashMap<Integer, JdbcTypeFormatter>();
-    private JdbcTypeFormatter defaultJdbcTypeFormatter = new JdbcTypeFormatterImpl();
+    private Map<Integer, JdbcTypeFormat> jdbcTypeFormatters = new HashMap<Integer, JdbcTypeFormat>();
+    private JdbcTypeFormat defaultJdbcTypeFormat = new JdbcTypeFormatImpl();
     private ResultSetModel resultSetModel;
 
     @Override
@@ -114,11 +116,11 @@ public abstract class OutputFormatBase implements OutputFormat {
 
     @SuppressWarnings("unchecked")
     protected <T> String formatColumn(Object value, int column, int sqlType, JdbcType<T> jdbcType) {
-        JdbcTypeFormatter<T> jdbcTypeFormatter = getJdbcTypeFormatter(sqlType);
-        if (jdbcTypeFormatter == null) {
-            jdbcTypeFormatter = getDefaultJdbcTypeFormatter();
+        JdbcTypeFormat<T> jdbcTypeFormat = getJdbcTypeFormatter(sqlType);
+        if (jdbcTypeFormat == null) {
+            jdbcTypeFormat = getDefaultJdbcTypeFormat();
         }
-        return jdbcTypeFormatter.format((T) value, column, sqlType, jdbcType);
+        return jdbcTypeFormat.format((T) value, column, sqlType, jdbcType);
     }
 
     @Override
@@ -136,17 +138,17 @@ public abstract class OutputFormatBase implements OutputFormat {
     protected abstract void doOutputEnd(ResultSet resultSet) throws SQLException;
 
     @Override
-    public void addJdbcTypeFormatter(int sqlType, JdbcTypeFormatter jdbcTypeFormatter) {
-        jdbcTypeFormatters.put(sqlType, jdbcTypeFormatter);
+    public void addJdbcTypeFormatter(int sqlType, JdbcTypeFormat jdbcTypeFormat) {
+        jdbcTypeFormatters.put(sqlType, jdbcTypeFormat);
     }
 
     @Override
-    public void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormatter jdbcTypeFormatter) {
-        addJdbcTypeFormatter(jdbcType.getSqlType(), jdbcTypeFormatter);
+    public void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormat jdbcTypeFormat) {
+        addJdbcTypeFormatter(jdbcType.getSqlType(), jdbcTypeFormat);
     }
 
     @Override
-    public JdbcTypeFormatter getJdbcTypeFormatter(int sqlType) {
+    public JdbcTypeFormat getJdbcTypeFormatter(int sqlType) {
         return jdbcTypeFormatters.get(sqlType);
     }
 
@@ -177,12 +179,12 @@ public abstract class OutputFormatBase implements OutputFormat {
         this.jdbcTypeExtractor = jdbcTypeExtractor;
     }
 
-    public JdbcTypeFormatter getDefaultJdbcTypeFormatter() {
-        return defaultJdbcTypeFormatter;
+    public JdbcTypeFormat getDefaultJdbcTypeFormat() {
+        return defaultJdbcTypeFormat;
     }
 
     @Override
-    public void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter) {
-        this.defaultJdbcTypeFormatter = defaultJdbcTypeFormatter;
+    public void setDefaultJdbcTypeFormat(JdbcTypeFormat defaultJdbcTypeFormat) {
+        this.defaultJdbcTypeFormat = defaultJdbcTypeFormat;
     }
 }

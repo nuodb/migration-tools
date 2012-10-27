@@ -42,7 +42,7 @@ public interface CliOptions {
     final int COMMAND_OPTION_ID = 4;
 
     /**
-     * Formats & shows help.
+     * Formats and shows help.
      */
     final String HELP_OPTION = "help";
     /**
@@ -72,6 +72,8 @@ public interface CliOptions {
 
     final String TABLE_OPTION = "table";
     final String TABLE_FILTER_OPTION = "table.*.filter";
+
+    final String QUERY_OPTION = "query";
 
     final String TARGET_URL_OPTION = "target.url";
     final String TARGET_USERNAME_OPTION = "target.username";

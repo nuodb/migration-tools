@@ -25,30 +25,30 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.catalog;
+package com.nuodb.tools.migration.format.catalog;
 
-import com.nuodb.tools.migration.jdbc.query.NativeQuery;
+import com.nuodb.tools.migration.jdbc.metamodel.Table;
 import com.nuodb.tools.migration.jdbc.query.Query;
-
-import java.util.Date;
+import com.nuodb.tools.migration.jdbc.query.SelectQuery;
 
 /**
  * @author Sergey Bushik
  */
-public class NativeQueryEntry implements QueryEntry {
+public class SelectQueryEntry implements QueryEntry {
 
-    private static final String QUERY_ENTRY_NAME = "query-%1$ty";
+    private static final String SELECT_QUERY_ENTRY_NAME = "table-%1$s";
 
     private String name;
-    private NativeQuery query;
+    private Query query;
 
-    public NativeQueryEntry(NativeQuery query) {
+    public SelectQueryEntry(SelectQuery query) {
         this.name = createName(query);
         this.query = query;
     }
 
-    protected String createName(NativeQuery query) {
-        return String.format(QUERY_ENTRY_NAME, new Date());
+    protected String createName(SelectQuery query) {
+        Table table = query.getTables().get(0);
+        return String.format(SELECT_QUERY_ENTRY_NAME, table.getName());
     }
 
     @Override

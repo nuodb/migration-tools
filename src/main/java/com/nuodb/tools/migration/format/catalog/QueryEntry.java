@@ -25,46 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.format.catalog;
 
-import com.nuodb.tools.migration.format.JdbcTypeFormat;
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
-
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
+import com.nuodb.tools.migration.jdbc.query.Query;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public interface QueryEntry {
 
-    String getType();
+    String getName();
 
-    void setAttributes(Map<String, String> attributes);
-
-    void outputBegin(ResultSet resultSet) throws SQLException;
-
-    void outputRow(ResultSet resultSet) throws SQLException;
-
-    void outputEnd(ResultSet resultSet) throws SQLException;
-
-    void setWriter(Writer writer);
-
-    void setOutputStream(OutputStream outputStream);
-
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(int sqlType, JdbcTypeFormat jdbcTypeFormat);
-
-    void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormat jdbcTypeFormat);
-
-    JdbcTypeFormat getJdbcTypeFormatter(int sqlType);
-
-    JdbcTypeFormat getDefaultJdbcTypeFormat();
-
-    void setDefaultJdbcTypeFormat(JdbcTypeFormat defaultJdbcTypeFormat);
+    Query getQuery();
 }

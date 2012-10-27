@@ -25,21 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.format.catalog;
+
+import java.io.Closeable;
 
 /**
  * @author Sergey Bushik
  */
-public interface XmlFormat {
-    static final String EXTENSION = "xml";
+public interface QueryEntryReader extends Closeable {
 
-    final String ATTRIBUTE_ENCODING = "xml.encoding";
-    final String ATTRIBUTE_VERSION = "xml.version";
-    final String ATTRIBUTE_DOCUMENT_ELEMENT = "xml.document.element";
-    final String ATTRIBUTE_ROW_ELEMENT = "xml.row.element";
+    QueryEntry read() throws EntryCatalogException;
 
-    final String ENCODING = "utf-8";
-    final String VERSION = "1.0";
-    final String DOCUMENT_ELEMENT = "rows";
-    final String ROW_ELEMENT = "row";
+    void close() throws EntryCatalogException;
 }

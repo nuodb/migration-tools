@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
+import com.nuodb.tools.migration.format.CsvFormat;
 import com.nuodb.tools.migration.dump.DumpException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;

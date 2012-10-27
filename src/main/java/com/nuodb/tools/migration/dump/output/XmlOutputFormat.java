@@ -27,7 +27,7 @@
  */
 package com.nuodb.tools.migration.dump.output;
 
-import com.nuodb.tools.migration.jdbc.metamodel.ResultSetModel;
+import com.nuodb.tools.migration.format.XmlFormat;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -35,7 +35,7 @@ import javax.xml.stream.XMLStreamWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
+import static javax.xml.XMLConstants.*;
 
 /**
  * @author Sergey Bushik
@@ -46,8 +46,6 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
 
     private String encoding;
     private String version;
-    private String documentElement;
-    private String rowElement;
 
     @Override
     public String getType() {
@@ -56,8 +54,6 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
 
     @Override
     protected void doSetAttributes() {
-        documentElement = getAttribute(ATTRIBUTE_DOCUMENT_ELEMENT, DOCUMENT_ELEMENT);
-        rowElement = getAttribute(ATTRIBUTE_ROW_ELEMENT, ROW_ELEMENT);
         version = getAttribute(ATTRIBUTE_VERSION, VERSION);
         encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
     }
@@ -80,8 +76,14 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
     protected void doOutputBegin(ResultSet resultSet) throws SQLException {
         try {
             writer.writeStartDocument(getEncoding(), getVersion());
-            writer.writeStartElement(getDocumentElement());
-            writer.setPrefix("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
+            writer.writeStartElement(DOCUMENT_ELEMENT);
+            writer.writeStartElement(MODEL_ELEMENT);
+            for (String column : getResultSetModel().getColumns()) {
+                writer.writeEmptyElement(COLUMN_ELEMENT);
+                writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
+                writer.writeAttribute(ATTRIBUTE_NAME, column);
+            }
+            writer.writeEndElement();
         } catch (XMLStreamException e) {
             throw new OutputFormatException(e);
         }
@@ -90,7 +92,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
     @Override
     protected void doOutputRow(ResultSet resultSet) throws SQLException {
         try {
-            writer.writeStartElement(getRowElement());
+            writer.writeStartElement(ROW_ELEMENT);
             int index = 0;
             for (String column : formatColumns(resultSet)) {
                 doOutputColumn(column, index++);
@@ -102,13 +104,12 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
     }
 
     protected void doOutputColumn(String column, int index) throws XMLStreamException {
-        ResultSetModel resultSetModel = getResultSetModel();
-        String element = resultSetModel.getColumn(index);
         if (column == null) {
-            writer.writeEmptyElement(element);
+            writer.writeEmptyElement(COLUMN_ELEMENT);
+            writer.setPrefix("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
             writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil", "true");
         } else {
-            writer.writeStartElement(element);
+            writer.writeStartElement(COLUMN_ELEMENT);
             writer.writeCharacters(column);
             writer.writeEndElement();
         }
@@ -139,21 +140,5 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlFormat {
 
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    public String getDocumentElement() {
-        return documentElement;
-    }
-
-    public void setDocumentElement(String documentElement) {
-        this.documentElement = documentElement;
-    }
-
-    public String getRowElement() {
-        return rowElement;
-    }
-
-    public void setRowElement(String rowElement) {
-        this.rowElement = rowElement;
     }
 }

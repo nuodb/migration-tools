@@ -27,8 +27,8 @@
  */
 package com.nuodb.tools.migration.dump;
 
-import com.nuodb.tools.migration.dump.catalog.QueryEntryCatalog;
-import com.nuodb.tools.migration.dump.catalog.EntryCatalogImpl;
+import com.nuodb.tools.migration.format.catalog.QueryEntryCatalog;
+import com.nuodb.tools.migration.format.catalog.EntryCatalogImpl;
 import com.nuodb.tools.migration.dump.output.OutputFormatFactory;
 import com.nuodb.tools.migration.dump.output.OutputFormatFactoryImpl;
 import com.nuodb.tools.migration.jdbc.JdbcServices;

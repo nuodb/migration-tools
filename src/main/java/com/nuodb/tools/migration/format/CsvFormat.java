@@ -25,16 +25,23 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.catalog;
-
-import com.nuodb.tools.migration.jdbc.query.Query;
+package com.nuodb.tools.migration.format;
 
 /**
  * @author Sergey Bushik
  */
-public interface QueryEntry {
+public interface CsvFormat {
+    final String TYPE = "csv";
 
-    String getName();
+    final String ATTRIBUTE_DELIMITER = "csv.delimiter";
+    final String ATTRIBUTE_QUOTING = "csv.quoting";
+    final String ATTRIBUTE_QUOTE = "csv.quote";
+    final String ATTRIBUTE_ESCAPE = "csv.escape";
+    final String ATTRIBUTE_LINE_SEPARATOR = "csv.line.separator";
 
-    Query getQuery();
+    final Character DELIMITER = ',';
+    final String LINE_SEPARATOR = "\r\n";
+    final boolean QUOTING = false;
+    final Character QUOTE = '"';
+    final Character ESCAPE = '|';
 }

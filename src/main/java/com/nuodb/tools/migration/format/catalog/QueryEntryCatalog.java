@@ -25,19 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.catalog;
-
-import java.io.Closeable;
-import java.io.OutputStream;
+package com.nuodb.tools.migration.format.catalog;
 
 /**
  * @author Sergey Bushik
  */
-public interface QueryEntryWriter extends Closeable {
+public interface QueryEntryCatalog {
 
-    OutputStream write(QueryEntry entry) throws EntryCatalogException;
+    QueryEntryReader openQueryEntryReader();
 
-    void close(QueryEntry entry) throws EntryCatalogException;
-
-    void close() throws EntryCatalogException;
+    QueryEntryWriter openQueryEntryWriter();
 }

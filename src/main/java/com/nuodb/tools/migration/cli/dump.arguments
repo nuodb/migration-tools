@@ -12,5 +12,6 @@ dump
 --output.xml.row.element=row
 --output.xml.encoding=utf-8
 --output.xml.version=1.0
+--query=select `rid`, `mid`, `rtype`, `rvalue`, `dater` from `enron`.`recipientinfo`
 #--table=example
 #--table.example.filter=id >= 3

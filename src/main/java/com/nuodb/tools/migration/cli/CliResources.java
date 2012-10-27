@@ -77,6 +77,10 @@ public interface CliResources {
     final String TABLE_FILTER_OPTION_DESCRIPTION = "migration.cli.table.filter.option.description";
     final String TABLE_FILTER_ARGUMENT_NAME = "migration.cli.table.filter.argument.name";
 
+    final String QUERY_GROUP_NAME = "migration.cli.query.group.name";
+    final String QUERY_OPTION_DESCRIPTION = "migration.cli.query.option.description";
+    final String QUERY_ARGUMENT_NAME = "migration.cli.query.argument.name";
+
     final String LOAD_GROUP_NAME = "migration.cli.load.group.name";
     final String TARGET_GROUP_NAME = "migration.cli.target.group.name";
     final String TARGET_URL_OPTION_DESCRIPTION = "migration.cli.target.url.option.description";

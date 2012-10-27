@@ -25,14 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.format.catalog;
 
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import com.nuodb.tools.migration.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeFormatter<T> {
+public class EntryCatalogException extends MigrationException {
 
-    String format(T value, int column, int sqlType, JdbcType<T> jdbcType);
+    public EntryCatalogException(String message) {
+        super(message);
+    }
+
+    public EntryCatalogException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public EntryCatalogException(Throwable cause) {
+        super(cause);
+    }
 }
