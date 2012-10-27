@@ -169,12 +169,12 @@ public class GroupImpl extends OptionBase implements Group {
     @SuppressWarnings("StringEquality")
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
         String previous = null;
-        // init execute each executable line token
+        // init withConnection each executable line token
         while (arguments.hasNext()) {
             // grab the next argument
             String argument = arguments.next();
             arguments.previous();
-            // if we have just tried to execute this instance
+            // if we have just tried to withConnection this instance
             if (argument == previous) {
                 // rollback and abort
                 break;
@@ -234,7 +234,7 @@ public class GroupImpl extends OptionBase implements Group {
         if (present < this.minimum) {
             throw new OptionException(this, "Missing option");
         }
-        // post execute each execute.arguments argument
+        // post withConnection each withConnection.arguments argument
         for (Argument argument : arguments) {
             argument.postProcess(commandLine);
         }

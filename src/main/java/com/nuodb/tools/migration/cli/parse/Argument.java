@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * An option that can execute items passed on the executable line in the form "--file readme.txt".
+ * An option that can withConnection items passed on the executable line in the form "--file readme.txt".
  */
 public interface Argument extends Option {
 
@@ -54,13 +54,13 @@ public interface Argument extends Option {
      * Values identified should be added to the executable line object in association with this argument.
      *
      * @param commandLine the executable line object to store results in.
-     * @param arguments   the execute.arguments to execute.
+     * @param arguments   the withConnection.arguments to withConnection.
      * @param option      the option to register value against.
      */
     void process(CommandLine commandLine, ListIterator<String> arguments, Option option);
 
     /**
-     * Performs any post execute logic on the items added to the executable line.
+     * Performs any post withConnection logic on the items added to the executable line.
      * <p/>
      *
      * @param commandLine the executable line object to query.

@@ -25,15 +25,15 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.connection;
+package com.nuodb.tools.migration.jdbc.query;
 
-import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionCallback {
+public interface PreparedStatementCallback {
 
-    void execute(Connection connection) throws SQLException;
+    void execute(PreparedStatement statement) throws SQLException;
 }

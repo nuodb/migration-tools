@@ -46,7 +46,7 @@ public interface CliOptions {
      */
     final String HELP_OPTION = "help";
     /**
-     * Lists available command line interface commands, such as execute, load, copy.
+     * Lists available command line interface commands, such as withConnection, load, copy.
      */
     final String LIST_OPTION = "list";
     /**
@@ -54,7 +54,7 @@ public interface CliOptions {
      */
     final String CONFIG_OPTION = "config";
     /**
-     * Command line interface command to execute.
+     * Command line interface command to withConnection.
      */
     final String COMMAND_OPTION = "command";
 

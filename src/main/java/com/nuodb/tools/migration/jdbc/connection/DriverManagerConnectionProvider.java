@@ -113,8 +113,8 @@ public class DriverManagerConnectionProvider extends ConnectionProviderBase {
             try {
                 connection.close();
             } catch (SQLException exception) {
-                if (log.isWarnEnabled()) {
-                    log.warn("Failed closing connection", exception);
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed closing connection", exception);
                 }
             }
         }

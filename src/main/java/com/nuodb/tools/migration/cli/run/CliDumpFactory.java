@@ -41,7 +41,7 @@ import java.util.Collections;
 
 /**
  * The Factory instantiates a {@link CliDump} which is a set of groups of options for source database connection spec
- * {@link CliRunSupport#createSourceGroup}, spec of execute format & type via {@link CliRunSupport#createOutputGroup},
+ * {@link CliRunSupport#createSourceGroup}, spec of withConnection format & type via {@link CliRunSupport#createOutputGroup},
  * table option {@link CliRunSupport#createSelectQueryGroup} and after a validation is passed assembles command line
  * option arguments into a {@link DumpSpec} object.
  *
@@ -50,7 +50,7 @@ import java.util.Collections;
 public class CliDumpFactory implements CliRunFactory, CliResources {
 
     /**
-     * The "execute" literal command which is matched against the value on the command line. If matched the CliDump
+     * The "withConnection" literal command which is matched against the value on the command line. If matched the CliDump
      * object is constructed with {@link #createCliRun(OptionToolkit)} method.
      */
     public static final String COMMAND = "dump";
@@ -66,7 +66,7 @@ public class CliDumpFactory implements CliRunFactory, CliResources {
     }
 
     /**
-     * An implementation of {@link CliRunAdapter} which assembles execute spec from provided command line after the
+     * An implementation of {@link CliRunAdapter} which assembles withConnection spec from provided command line after the
      * validation is passed.
      */
     class CliDump extends CliRunAdapter {
@@ -93,7 +93,7 @@ public class CliDumpFactory implements CliRunFactory, CliResources {
             DumpSpec dumpSpec = new DumpSpec();
             dumpSpec.setConnectionSpec(parseSourceGroup(commandLine, this));
             dumpSpec.setOutputSpec(parseOutputGroup(commandLine, this));
-            // dumpSpec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
+            dumpSpec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
             dumpSpec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine, this));
             dumpJobFactory.setDumpSpec(dumpSpec);
         }

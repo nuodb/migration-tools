@@ -27,9 +27,9 @@
  */
 package com.nuodb.tools.migration.dump;
 
-import com.nuodb.tools.migration.format.catalog.*;
 import com.nuodb.tools.migration.dump.output.OutputFormat;
 import com.nuodb.tools.migration.dump.output.OutputFormatFactory;
+import com.nuodb.tools.migration.format.catalog.*;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionCallback;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
@@ -108,29 +108,34 @@ public class DumpJob extends JobBase {
         }
     }
 
-    protected void dump(JobExecution execution, Connection connection, Query query,
-                        OutputFormat output) throws SQLException {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Preparing SQL query %1$s", query.toQuery()));
-        }
-        PreparedStatement statement = connection.prepareStatement(query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-        try {
-            ResultSet resultSet = statement.executeQuery();
-            if (log.isDebugEnabled()) {
-                log.debug(String.format("Writing dump with %1$s", output.getClass().getName()));
-            }
-            try {
-                output.outputBegin(resultSet);
-                while (execution.isRunning() && resultSet.next()) {
-                    output.outputRow(resultSet);
+    protected void dump(final JobExecution execution, Connection connection, final Query query,
+                        final OutputFormat output) throws SQLException {
+        QueryTemplate queryTemplate = new QueryTemplate(connection);
+        queryTemplate.execute(
+                new PreparedStatementBuilder() {
+                    @Override
+                    public PreparedStatement build(Connection connection) throws SQLException {
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("Preparing SQL query %1$s", query.toQuery()));
+                        }
+                        return connection.prepareStatement(query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                    }
+                },
+                new PreparedStatementCallback() {
+                    @Override
+                    public void execute(PreparedStatement statement) throws SQLException {
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("Writing dump with %1$s", output.getClass().getName()));
+                        }
+                        ResultSet resultSet = statement.executeQuery();
+                        output.outputBegin(resultSet);
+                        while (execution.isRunning() && resultSet.next()) {
+                            output.outputRow(resultSet);
+                        }
+                        output.outputEnd(resultSet);
+                    }
                 }
-                output.outputEnd(resultSet);
-            } finally {
-                resultSet.close();
-            }
-        } finally {
-            statement.close();
-        }
+        );
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database,

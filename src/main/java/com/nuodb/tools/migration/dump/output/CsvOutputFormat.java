@@ -66,7 +66,7 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvFormat {
      */
     private Character escape;
     /**
-     * The record separator to use for execute.
+     * The record separator to use for withConnection.
      */
     private String lineSeparator;
 

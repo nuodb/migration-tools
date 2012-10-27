@@ -158,7 +158,7 @@ public interface Option {
     void defaults(CommandLine commandLine);
 
     /**
-     * Indicates whether this Option will be able to execute the particular argument.
+     * Indicates whether this Option will be able to withConnection the particular argument.
      *
      * @param commandLine executable line to check
      * @param argument    the argument to be tested
@@ -167,7 +167,7 @@ public interface Option {
     boolean canProcess(CommandLine commandLine, String argument);
 
     /**
-     * Indicates whether this Option will be able to execute the particular argument. The list iterator must be restored
+     * Indicates whether this Option will be able to withConnection the particular argument. The list iterator must be restored
      * to the initial state before returning the boolean.
      *
      * @param commandLine the command line to check
@@ -190,10 +190,10 @@ public interface Option {
      * Processes string arguments into a executable line.
      * <p/>
      * The iterator will initially point at the first argument to be processed and at the end of the method should point
-     * to the first argument not processed. This method must execute at least one argument from the list iterator.
+     * to the first argument not processed. This method must withConnection at least one argument from the list iterator.
      *
      * @param commandLine the executable line object to store results in
-     * @param arguments   the arguments to execute.
+     * @param arguments   the arguments to withConnection.
      */
     void process(CommandLine commandLine, ListIterator<String> arguments);
 
@@ -209,7 +209,7 @@ public interface Option {
      * Appends help to the specified buffer
      *
      * @param buffer     the buffer to append to
-     * @param hints      a set of execute hints
+     * @param hints      a set of withConnection hints
      * @param comparator a comparator used to sort the options
      */
     void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator);

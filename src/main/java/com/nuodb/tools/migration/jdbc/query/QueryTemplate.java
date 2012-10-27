@@ -27,9 +27,55 @@
  */
 package com.nuodb.tools.migration.jdbc.query;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.sql.*;
+
 /**
  * @author Sergey Bushik
  */
-public interface QueryTemplate {
-    // public execute()
+public class QueryTemplate {
+
+    private transient final Log log = LogFactory.getLog(getClass());
+
+    private final Connection connection;
+
+    public QueryTemplate(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void execute(PreparedStatementBuilder builder, PreparedStatementCallback callback) throws SQLException {
+        PreparedStatement statement = builder.build(connection);
+        try {
+            callback.execute(statement);
+        } finally {
+            close(statement.getResultSet());
+            close(statement);
+        }
+    }
+
+    private void close(ResultSet resultSet) {
+        try {
+            if (resultSet != null && !resultSet.isClosed()) {
+                resultSet.close();
+            }
+        } catch (SQLException exception) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed closing result set", exception);
+            }
+        }
+    }
+
+    private void close(Statement statement) {
+        try {
+            if (statement != null && !statement.isClosed()) {
+                statement.close();
+            }
+        } catch (SQLException exception) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed closing statement", exception);
+            }
+        }
+    }
 }

@@ -73,7 +73,7 @@ public class RegexOption extends ContainerBase {
      * Tests if arguments matches Ant style regexp for provided table names.
      *
      * @param commandLine command line to store matched table names in.
-     * @param arguments   to execute regular expression on.
+     * @param arguments   to withConnection regular expression on.
      */
     @Override
     public void processInternal(CommandLine commandLine, ListIterator<String> arguments) {

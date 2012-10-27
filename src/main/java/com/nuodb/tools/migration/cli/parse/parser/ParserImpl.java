@@ -26,7 +26,7 @@ import java.util.ListIterator;
 public class ParserImpl implements Parser {
 
     /**
-     * Parse the execute.arguments according to the specified options and properties.
+     * Parse the withConnection.arguments according to the specified options and properties.
      *
      * @param arguments to parse.
      * @param option    sets the option to parse against.
@@ -38,14 +38,14 @@ public class ParserImpl implements Parser {
         CommandLine commandLine = new CommandLineImpl(option, list);
         // pick up any defaults from the model
         option.defaults(commandLine);
-        // execute the options as far as possible
+        // withConnection the options as far as possible
         ListIterator<String> iterator = list.listIterator();
         Object previous = null;
         while (option.canProcess(commandLine, iterator)) {
             // peek at the next item and backtrack
             String current = iterator.next();
             iterator.previous();
-            // if we have just tried to execute this instance
+            // if we have just tried to withConnection this instance
             if (current == previous) {
                 // abort
                 break;

@@ -40,10 +40,10 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     private Option current;
 
     /**
-     * Creates a new WriteableCommandLineImpl rooted on the specified option, to hold the parsed execute.arguments.
+     * Creates a new WriteableCommandLineImpl rooted on the specified option, to hold the parsed withConnection.arguments.
      *
      * @param root      the executable line's root option
-     * @param arguments the execute.arguments this executable line represents
+     * @param arguments the withConnection.arguments this executable line represents
      */
     public CommandLineImpl(Option root, List<String> arguments) {
         this.root = root;
