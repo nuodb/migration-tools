@@ -25,14 +25,15 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.catalog;
-
-import java.io.Closeable;
+package com.nuodb.tools.migration.job;
 
 /**
  * @author Sergey Bushik
  */
-public interface CatalogReader extends Closeable {
-
-    void close() throws CatalogException;
+public enum JobStatusType {
+    RUNNING,
+    PAUSED,
+    WAITING,
+    STOPPED,
+    FINISHED
 }

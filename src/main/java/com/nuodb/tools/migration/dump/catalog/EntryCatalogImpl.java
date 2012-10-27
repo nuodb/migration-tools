@@ -41,18 +41,20 @@ import static org.apache.commons.io.FilenameUtils.getName;
 /**
  * @author Sergey Bushik
  */
-public class CatalogImpl implements Catalog {
+public class EntryCatalogImpl implements QueryEntryCatalog {
 
     private static final String CATALOG_FILE_NAME = "dump.cat";
 
     protected final Log log = LogFactory.getLog(getClass());
 
     private String path;
+    private String type;
     private File catalogDir;
     private File catalogFile;
 
-    public CatalogImpl(String path) {
+    public EntryCatalogImpl(String path, String type) {
         this.path = path;
+        this.type = type;
         this.catalogDir = createCatalogDir();
         this.catalogFile = createCatalogFile();
     }
@@ -71,21 +73,31 @@ public class CatalogImpl implements Catalog {
     }
 
     @Override
-    public CatalogReader openReader() {
-        CatalogReaderImpl reader = new CatalogReaderImpl(this);
+    public QueryEntryReader openQueryEntryReader() {
+        QueryEntryReaderImpl reader = new QueryEntryReaderImpl(this);
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Opening entry catalog reader %s", catalogFile));
+        }
         reader.open();
         return reader;
     }
 
     @Override
-    public CatalogWriter openWriter() {
-        CatalogWriterImpl writer = new CatalogWriterImpl(this);
+    public QueryEntryWriter openQueryEntryWriter() {
+        QueryEntryWriterImpl writer = new QueryEntryWriterImpl(this);
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Opening entry catalog writer %s", catalogFile));
+        }
         writer.open();
         return writer;
     }
 
     public String getPath() {
         return path;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public File getCatalogDir() {

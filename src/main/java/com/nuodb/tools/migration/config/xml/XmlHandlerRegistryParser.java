@@ -101,6 +101,6 @@ public class XmlHandlerRegistryParser {
             }
         }
         XmlHandler handler = ClassUtils.newInstance(handlerClassAsText);
-        registry.register(handler, priority);
+        registry.registerHandler(handler, priority);
     }
 }

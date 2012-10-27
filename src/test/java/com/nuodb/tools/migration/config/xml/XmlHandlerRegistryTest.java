@@ -26,12 +26,12 @@ public class XmlHandlerRegistryTest {
 
     @Test
     public void testRegister() throws Exception {
-        xmlHandlerRegistry.register(mock(XmlJdbcConnectionHandler.class));
-        xmlHandlerRegistry.register(mock(XmlJdbcConnectionHandler.class), 1);
-        xmlHandlerRegistry.register(mock(XmlJdbcConnectionHandler.class), -1);
-        xmlHandlerRegistry.register(mock(XmlDumpTaskHandler.class));
-        xmlHandlerRegistry.register(mock(XmlMigrationHandler.class));
-        xmlHandlerRegistry.register(mock(XmlHandlerRegistry.ConverterAdapter.class));
+        xmlHandlerRegistry.registerHandler(mock(XmlJdbcConnectionHandler.class));
+        xmlHandlerRegistry.registerHandler(mock(XmlJdbcConnectionHandler.class), 1);
+        xmlHandlerRegistry.registerHandler(mock(XmlJdbcConnectionHandler.class), -1);
+        xmlHandlerRegistry.registerHandler(mock(XmlDumpTaskHandler.class));
+        xmlHandlerRegistry.registerHandler(mock(XmlMigrationHandler.class));
+        xmlHandlerRegistry.registerHandler(mock(XmlHandlerRegistry.ConverterAdapter.class));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class XmlHandlerRegistryTest {
                 eq(XmlJdbcConnectionHandler.class),
                 any(XmlReadContext.class))).thenReturn(true);
 
-        xmlHandlerRegistry.register(mock);
+        xmlHandlerRegistry.registerHandler(mock);
 
         xmlReadHandler = xmlHandlerRegistry.lookupReader(
                 mock(InputNode.class),
@@ -80,7 +80,7 @@ public class XmlHandlerRegistryTest {
                 eq(XmlJdbcConnectionHandler.class),
                 any(OutputNode.class),
                 any(XmlWriteContext.class))).thenReturn(true);
-        xmlHandlerRegistry.register(mock);
+        xmlHandlerRegistry.registerHandler(mock);
 
         xmlWriteHandler = xmlHandlerRegistry.lookupWriter(
                 mock(Object.class),
@@ -98,6 +98,6 @@ public class XmlHandlerRegistryTest {
 
     @Test(expected = AssertionError.class)
     public void testRegisterWrongType() throws Exception {
-        xmlHandlerRegistry.register(mock(XmlHandler.class));
+        xmlHandlerRegistry.registerHandler(mock(XmlHandler.class));
     }
 }

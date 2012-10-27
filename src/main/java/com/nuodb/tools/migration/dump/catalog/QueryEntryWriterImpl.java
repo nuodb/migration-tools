@@ -28,10 +28,8 @@
 package com.nuodb.tools.migration.dump.catalog;
 
 import com.nuodb.tools.migration.dump.DumpException;
-import com.nuodb.tools.migration.jdbc.metamodel.Table;
-import com.nuodb.tools.migration.jdbc.query.Query;
-import com.nuodb.tools.migration.jdbc.query.SelectQuery;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -39,35 +37,28 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
-import static java.lang.String.format;
 import static org.apache.commons.io.FileUtils.getFile;
 import static org.apache.commons.io.FileUtils.openOutputStream;
 import static org.apache.commons.io.IOUtils.closeQuietly;
-import static org.apache.commons.io.IOUtils.write;
 
 /**
  * @author Sergey Bushik
  */
-public class CatalogWriterImpl implements CatalogWriter {
-
-    private static final String SELECT_QUERY_ENTRY_NAME = "table-%1$s.%2$s";
-    private static final String QUERY_ENTRY_NAME = "query-%1$ty.%2$s";
-
+public class QueryEntryWriterImpl implements QueryEntryWriter {
     protected final Log log = LogFactory.getLog(getClass());
 
-    private CatalogImpl catalog;
+    private EntryCatalogImpl catalog;
     private OutputStream catalogOutput;
-    private List<String> entryNames = new ArrayList<String>();
+    private List<QueryEntry> catalogEntries = new ArrayList<QueryEntry>();
+    private Map<QueryEntry, OutputStream> catalogEntriesOutputs = new HashMap<QueryEntry, OutputStream>();
 
-    public CatalogWriterImpl(CatalogImpl catalog) {
+    public QueryEntryWriterImpl(EntryCatalogImpl catalog) {
         this.catalog = catalog;
     }
 
-    protected void open() throws CatalogException {
+    protected void open() throws EntryCatalogException {
         File catalogDir = catalog.getCatalogDir();
         try {
             FileUtils.forceMkdir(catalogDir);
@@ -80,9 +71,6 @@ public class CatalogWriterImpl implements CatalogWriter {
         } catch (IOException e) {
             throw new DumpException("Can't open dump catalog file", e);
         }
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Dump catalog file is %1$s", catalogFile));
-        }
         try {
             this.catalogOutput = openOutputStream(catalogFile);
         } catch (IOException e) {
@@ -90,46 +78,49 @@ public class CatalogWriterImpl implements CatalogWriter {
         }
     }
 
-    public OutputStream openEntry(Query query, String type) {
-        String entryName = getEntryName(query, type);
+    public OutputStream write(QueryEntry entry) {
+        String entryName = getEntryName(entry);
         if (log.isTraceEnabled()) {
             log.trace(String.format("Adding entry %1$s", entryName));
         }
-        OutputStream output;
+        OutputStream catalogEntryOutput;
         try {
-            output = new BufferedOutputStream(
+            catalogEntryOutput = new BufferedOutputStream(
                     openOutputStream(getFile(catalog.getCatalogDir(), entryName)));
         } catch (IOException e) {
             throw new DumpException("Failed opening file to output", e);
         }
         try {
-            if (!entryNames.isEmpty()) {
-                write(System.getProperty("line.separator"), catalogOutput);
+            if (!catalogEntries.isEmpty()) {
+                IOUtils.write(System.getProperty("line.separator"), catalogOutput);
             }
-            entryNames.add(entryName);
-            write(entryName, catalogOutput);
+            catalogEntries.add(entry);
+            catalogEntriesOutputs.put(entry, catalogEntryOutput);
+            IOUtils.write(entryName, catalogOutput);
         } catch (IOException e) {
             throw new DumpException("Failed add entry in catalog", e);
         }
-        return output;
+        return catalogEntryOutput;
     }
 
-    protected String getEntryName(Query query, String type) {
-        if (query instanceof SelectQuery) {
-            List<Table> tables = ((SelectQuery) query).getTables();
-            Table table = tables.get(0);
-            String tableName = table.getName();
-            return format(SELECT_QUERY_ENTRY_NAME, tableName, type);
-        } else {
-            return format(QUERY_ENTRY_NAME, new Date(), type);
-        }
+    protected String getEntryName(QueryEntry entry) {
+        StringBuilder entryName = new StringBuilder();
+        entryName.append(entry.getName());
+        entryName.append('.');
+        entryName.append(catalog.getType());
+        return entryName.toString();
     }
 
-    public void closeEntry(OutputStream output) {
-        closeQuietly(output);
+    public void close(QueryEntry entry) {
+        closeQuietly(catalogEntriesOutputs.remove(entry));
     }
 
     public void close() {
+        Iterator<OutputStream> iterator = catalogEntriesOutputs.values().iterator();
+        while (iterator.hasNext()) {
+            closeQuietly(iterator.next());
+            iterator.remove();
+        }
         closeQuietly(catalogOutput);
     }
 }

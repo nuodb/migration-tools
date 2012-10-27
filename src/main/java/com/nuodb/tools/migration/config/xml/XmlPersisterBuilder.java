@@ -56,7 +56,7 @@ public class XmlPersisterBuilder implements XmlConstants {
         XmlAliasTypeMapper<Spec> handler = new XmlAliasTypeMapper<Spec>();
         handler.bind(MIGRATION_NAMESPACE, CONNECTION_ELEMENT, JDBC, DriverManagerConnectionSpec.class);
         handler.bind(MIGRATION_NAMESPACE, TASK_ELEMENT, DUMP, DumpSpec.class);
-        registry.register(handler, Priority.LOW);
+        registry.registerHandler(handler, Priority.LOW);
 
         return new XmlPersister(registry);
     }

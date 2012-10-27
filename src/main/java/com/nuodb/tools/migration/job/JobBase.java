@@ -25,14 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.catalog;
+package com.nuodb.tools.migration.job;
 
 /**
  * @author Sergey Bushik
  */
-public interface Catalog {
-
-    CatalogReader openReader();
-
-    CatalogWriter openWriter();
+public abstract class JobBase implements Job {
+    @Override
+    public String getName() {
+        return getClass().getName();
+    }
 }

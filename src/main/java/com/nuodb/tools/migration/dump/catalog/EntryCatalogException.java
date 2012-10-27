@@ -32,17 +32,17 @@ import com.nuodb.tools.migration.dump.DumpException;
 /**
  * @author Sergey Bushik
  */
-public class CatalogException extends DumpException {
+public class EntryCatalogException extends DumpException {
 
-    public CatalogException(String message) {
+    public EntryCatalogException(String message) {
         super(message);
     }
 
-    public CatalogException(String message, Throwable cause) {
+    public EntryCatalogException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public CatalogException(Throwable cause) {
+    public EntryCatalogException(Throwable cause) {
         super(cause);
     }
 }

@@ -108,7 +108,9 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
         if (log.isTraceEnabled()) {
             log.trace("Options successfully parsed");
         }
-        if (options.hasOption(HELP_OPTION)) {
+        if (options.getOptions().isEmpty()) {
+            handleHelp(options, root);
+        } else if (options.hasOption(HELP_OPTION)) {
             if (log.isTraceEnabled()) {
                 log.trace("Handling --help option");
             }

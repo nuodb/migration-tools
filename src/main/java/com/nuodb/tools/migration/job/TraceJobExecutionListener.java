@@ -25,21 +25,48 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.catalog;
+package com.nuodb.tools.migration.job;
 
-import com.nuodb.tools.migration.jdbc.query.Query;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.io.Closeable;
-import java.io.OutputStream;
+import java.util.Date;
 
 /**
  * @author Sergey Bushik
  */
-public interface CatalogWriter extends Closeable {
+public class TraceJobExecutionListener implements JobExecutionListener {
 
-    OutputStream openEntry(Query query, String type) throws CatalogException;
+    private transient final Log log = LogFactory.getLog(getClass());
 
-    void closeEntry(OutputStream output) throws CatalogException;
+    @Override
+    public void onJobExecuted(JobExecutionEvent event) {
+        JobExecution execution = event.getJobExecution();
+        JobStatus jobStatus = execution.getJobStatus();
+        if (log.isInfoEnabled()) {
+            log.info(String.format("Job %1s status type is %2s",
+                    execution.getJob().getName(), jobStatus.getJobStatusType()));
+        }
+        if (!jobStatus.isRunning()) {
+            Date startDate = jobStatus.getExecutionStartDate();
+            Date endDate = jobStatus.getExecutionEndDate();
+            long duration = endDate.getTime() - startDate.getTime();
+            duration(execution, duration);
+        }
+    }
 
-    void close() throws CatalogException;
+    protected void duration(JobExecution execution, long duration) {
+        if (log.isInfoEnabled()) {
+            long left = duration;
+            long millis = duration % 1000;
+            left = left / 1000;
+            long seconds = left % 60;
+            left = left / 60;
+            long minutes = left % 60;
+            left = left / 60;
+            long hours = left / 60;
+            log.info(String.format("Job %1s execution duration %02d:%02d:%02d.%03d",
+                    execution.getJob().getName(), hours, minutes, seconds, millis));
+        }
+    }
 }

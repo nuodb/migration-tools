@@ -32,7 +32,9 @@ import java.sql.SQLException;
 
 public interface ConnectionProvider {
 
-    public Connection getConnection() throws SQLException;
+    Connection getConnection() throws SQLException;
 
-    public void closeConnection(Connection connection) throws SQLException;
+    void execute(ConnectionCallback callback) throws SQLException;
+
+    void closeConnection(Connection connection) throws SQLException;
 }

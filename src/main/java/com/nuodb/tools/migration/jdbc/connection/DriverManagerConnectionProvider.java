@@ -36,7 +36,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class DriverManagerConnectionProvider implements ConnectionProvider {
+public class DriverManagerConnectionProvider extends ConnectionProviderBase {
 
     public static final String USER_PROPERTY = "user";
     public static final String PASSWORD_PROPERTY = "password";
@@ -110,7 +110,13 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
             log.debug("Closing connection");
         }
         if (connection != null) {
-            connection.close();
+            try {
+                connection.close();
+            } catch (SQLException exception) {
+                if (log.isWarnEnabled()) {
+                    log.warn("Failed closing connection", exception);
+                }
+            }
         }
     }
 

@@ -25,45 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.dump.catalog;
 
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
+import com.nuodb.tools.migration.jdbc.query.NativeQuery;
+import com.nuodb.tools.migration.jdbc.query.Query;
 
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
+import java.util.Date;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public class NativeQueryEntry implements QueryEntry {
 
-    String getType();
+    private static final String QUERY_ENTRY_NAME = "query-%1$ty";
 
-    void setAttributes(Map<String, String> attributes);
+    private String name;
+    private NativeQuery query;
 
-    void outputBegin(ResultSet resultSet) throws SQLException;
+    public NativeQueryEntry(NativeQuery query) {
+        this.name = createName(query);
+        this.query = query;
+    }
 
-    void outputRow(ResultSet resultSet) throws SQLException;
+    protected String createName(NativeQuery query) {
+        return String.format(QUERY_ENTRY_NAME, new Date());
+    }
 
-    void outputEnd(ResultSet resultSet) throws SQLException;
+    @Override
+    public String getName() {
+        return name;
+    }
 
-    void setWriter(Writer writer);
-
-    void setOutputStream(OutputStream outputStream);
-
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(int sqlType, JdbcTypeFormatter jdbcTypeFormatter);
-
-    void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormatter jdbcTypeFormatter);
-
-    JdbcTypeFormatter getJdbcTypeFormatter(int sqlType);
-
-    JdbcTypeFormatter getDefaultJdbcTypeFormatter();
-
-    void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter);
+    @Override
+    public Query getQuery() {
+        return query;
+    }
 }

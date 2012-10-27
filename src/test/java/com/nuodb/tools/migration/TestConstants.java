@@ -1,13 +1,11 @@
 package com.nuodb.tools.migration;
 
 
-import com.nuodb.tools.migration.dump.output.OutputFormat;
-import com.nuodb.tools.migration.dump.output.OutputFormatLookupImpl;
-import com.nuodb.tools.migration.jdbc.query.SelectQuery;
 import com.nuodb.tools.migration.jdbc.metamodel.Column;
 import com.nuodb.tools.migration.jdbc.metamodel.Database;
 import com.nuodb.tools.migration.jdbc.metamodel.Schema;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
+import com.nuodb.tools.migration.jdbc.query.SelectQuery;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 
 public class TestConstants {
@@ -34,10 +32,6 @@ public class TestConstants {
         connectionSpec.setPassword("goalie");
         connectionSpec.setDriver("com.nuodb.jdbc.Driver");
         return connectionSpec;
-    }
-
-    public static OutputFormat getDefaultOutputFormat() throws IllegalAccessException, InstantiationException {
-        return new OutputFormatLookupImpl().getDefaultFormatClass().newInstance();
     }
 
     public static SelectQuery createTestSelectQuery() {

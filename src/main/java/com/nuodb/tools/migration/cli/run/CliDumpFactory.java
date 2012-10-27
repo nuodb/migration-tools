@@ -31,8 +31,13 @@ import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.dump.DumpExecutor;
+import com.nuodb.tools.migration.dump.DumpJobFactory;
+import com.nuodb.tools.migration.job.JobExecutor;
+import com.nuodb.tools.migration.job.JobExecutors;
+import com.nuodb.tools.migration.job.TraceJobExecutionListener;
 import com.nuodb.tools.migration.spec.DumpSpec;
+
+import java.util.Collections;
 
 /**
  * The Factory instantiates a {@link CliDump} which is a set of groups of options for source database connection spec
@@ -67,6 +72,7 @@ public class CliDumpFactory implements CliRunFactory, CliResources {
     class CliDump extends CliRunAdapter {
 
         private DumpSpec dumpSpec;
+        private DumpJobFactory dumpJobFactory = new DumpJobFactory();
 
         public CliDump(OptionToolkit optionToolkit) {
             super(optionToolkit, COMMAND);
@@ -88,14 +94,18 @@ public class CliDumpFactory implements CliRunFactory, CliResources {
             dumpSpec.setConnectionSpec(parseSourceGroup(commandLine, this));
             dumpSpec.setOutputSpec(parseOutputGroup(commandLine, this));
             dumpSpec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
+
+            dumpJobFactory.setDumpSpec(dumpSpec);
         }
 
         /**
-         * Executes execute process
+         * Executes dump job
          */
         @Override
         public void run() {
-            new DumpExecutor().execute(dumpSpec);
+            JobExecutor executor = JobExecutors.createJobExecutor(dumpJobFactory.createJob());
+            executor.addJobExecutionListener(new TraceJobExecutionListener());
+            executor.execute(Collections.<String, Object>emptyMap());
         }
     }
 }

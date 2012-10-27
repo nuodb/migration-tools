@@ -73,6 +73,10 @@ public class JdbcServicesImpl implements JdbcServices {
 
     @Override
     public DatabaseIntrospector getDatabaseIntrospector() {
+        return createDatabaseIntrospector();
+    }
+
+    protected DatabaseIntrospector createDatabaseIntrospector() {
         DatabaseIntrospector introspector = new DatabaseIntrospector();
         introspector.withConnectionProvider(getConnectionProvider());
         introspector.withCatalog(connectionSpec.getCatalog());

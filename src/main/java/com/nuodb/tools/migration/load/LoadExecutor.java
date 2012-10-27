@@ -27,17 +27,13 @@
  */
 package com.nuodb.tools.migration.load;
 
-import com.nuodb.tools.migration.dump.catalog.Catalog;
-import com.nuodb.tools.migration.dump.catalog.CatalogImpl;
-import com.nuodb.tools.migration.dump.catalog.CatalogReader;
+import com.nuodb.tools.migration.dump.catalog.QueryEntry;
+import com.nuodb.tools.migration.dump.catalog.QueryEntryCatalog;
+import com.nuodb.tools.migration.dump.catalog.QueryEntryReader;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.tools.migration.spec.ConnectionSpec;
-import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
-import com.nuodb.tools.migration.spec.FormatSpec;
-import com.nuodb.tools.migration.spec.FormatSpecBase;
-import com.nuodb.tools.migration.spec.LoadSpec;
+import com.nuodb.tools.migration.spec.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,30 +50,30 @@ public class LoadExecutor {
 
     public void execute(LoadSpec loadSpec) throws LoadException {
         execute(createJdbcServices(loadSpec.getConnectionSpec()),
-                createCatalog(loadSpec.getInputSpec()).openReader(), loadSpec.getInputSpec());
+                createCatalog(loadSpec.getInputSpec()).openQueryEntryReader(), loadSpec.getInputSpec());
     }
 
-    public void execute(JdbcServices jdbcServices, CatalogReader reader, FormatSpec inputSpec) throws LoadException {
+    public void execute(JdbcServices jdbcServices, QueryEntryReader reader, FormatSpec inputSpec) throws LoadException {
         try {
-            doExecute(jdbcServices, reader, inputSpec);
+            load(jdbcServices, reader, inputSpec);
         } catch (SQLException exception) {
-            doTranslate(exception);
+            translate(exception);
         } finally {
             reader.close();
         }
     }
 
-    protected void doExecute(JdbcServices jdbcServices, CatalogReader reader, FormatSpec inputSpec) throws SQLException {
+    protected void load(JdbcServices jdbcServices, QueryEntryReader reader, FormatSpec inputSpec) throws SQLException {
         ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
         Connection connection = connectionProvider.getConnection();
         try {
-            // TODO: implement
+            QueryEntry entry = reader.read();
         } finally {
             connectionProvider.closeConnection(connection);
         }
     }
 
-    protected void doTranslate(SQLException exception) {
+    protected void translate(SQLException exception) {
         throw new LoadException(exception);
     }
 
@@ -85,8 +81,8 @@ public class LoadExecutor {
         return new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec);
     }
 
-    protected Catalog createCatalog(FormatSpec inputSpec) {
-        return new CatalogImpl(inputSpec.getPath());
+    protected QueryEntryCatalog createCatalog(FormatSpec inputSpec) {
+        return null;// new DumpCatalogImpl(inputSpec.getPath(), outputSpec.getType());
     }
 
     public static void main(String[] args) throws LoadException {

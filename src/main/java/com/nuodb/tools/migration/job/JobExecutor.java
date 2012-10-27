@@ -25,45 +25,28 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.job;
 
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
-
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public interface JobExecutor {
 
-    String getType();
+    void pause();
 
-    void setAttributes(Map<String, String> attributes);
+    void resume();
 
-    void outputBegin(ResultSet resultSet) throws SQLException;
+    void stop();
 
-    void outputRow(ResultSet resultSet) throws SQLException;
+    boolean execute(Map<String, Object> context);
 
-    void outputEnd(ResultSet resultSet) throws SQLException;
+    Job getJob();
 
-    void setWriter(Writer writer);
+    JobStatus getJobStatus();
 
-    void setOutputStream(OutputStream outputStream);
+    void addJobExecutionListener(JobExecutionListener listener);
 
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(int sqlType, JdbcTypeFormatter jdbcTypeFormatter);
-
-    void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormatter jdbcTypeFormatter);
-
-    JdbcTypeFormatter getJdbcTypeFormatter(int sqlType);
-
-    JdbcTypeFormatter getDefaultJdbcTypeFormatter();
-
-    void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter);
+    void removeJobExecutionListener(JobExecutionListener listener);
 }

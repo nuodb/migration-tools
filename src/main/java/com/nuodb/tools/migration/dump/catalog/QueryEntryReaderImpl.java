@@ -25,45 +25,51 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.dump.catalog;
 
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
+import com.nuodb.tools.migration.dump.DumpException;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.apache.commons.io.FileUtils.openInputStream;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public class QueryEntryReaderImpl implements QueryEntryReader {
 
-    String getType();
+    protected final Log log = LogFactory.getLog(getClass());
 
-    void setAttributes(Map<String, String> attributes);
+    private EntryCatalogImpl catalog;
+    private InputStream catalogInput;
 
-    void outputBegin(ResultSet resultSet) throws SQLException;
+    public QueryEntryReaderImpl(EntryCatalogImpl catalog) {
+        this.catalog = catalog;
+    }
 
-    void outputRow(ResultSet resultSet) throws SQLException;
+    protected void open() throws EntryCatalogException {
+        File catalogFile = catalog.getCatalogFile();
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Dump catalog file is %1$s", catalogFile.getPath()));
+        }
+        try {
+            this.catalogInput = openInputStream(catalogFile);
+        } catch (IOException e) {
+            throw new DumpException("Error opening catalog file for writing", e);
+        }
+    }
 
-    void outputEnd(ResultSet resultSet) throws SQLException;
+    public QueryEntry read() throws EntryCatalogException {
+        return null;
+    }
 
-    void setWriter(Writer writer);
-
-    void setOutputStream(OutputStream outputStream);
-
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(int sqlType, JdbcTypeFormatter jdbcTypeFormatter);
-
-    void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormatter jdbcTypeFormatter);
-
-    JdbcTypeFormatter getJdbcTypeFormatter(int sqlType);
-
-    JdbcTypeFormatter getDefaultJdbcTypeFormatter();
-
-    void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter);
+    @Override
+    public void close() throws EntryCatalogException {
+        IOUtils.closeQuietly(catalogInput);
+    }
 }

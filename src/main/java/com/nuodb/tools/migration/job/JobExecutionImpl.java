@@ -25,45 +25,52 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.job;
 
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
-
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat {
+public class JobExecutionImpl implements JobExecution {
 
-    String getType();
+    private Job job;
+    private JobStatus jobStatus;
+    private Map<String, Object> context;
 
-    void setAttributes(Map<String, String> attributes);
+    public JobExecutionImpl(Job job, JobStatus jobStatus, Map<String, Object> context) {
+        this.job = job;
+        this.jobStatus = jobStatus;
+        this.context = context;
+    }
 
-    void outputBegin(ResultSet resultSet) throws SQLException;
+    @Override
+    public boolean isRunning() {
+        return jobStatus.isRunning();
+    }
 
-    void outputRow(ResultSet resultSet) throws SQLException;
+    @Override
+    public boolean isPaused() {
+        return jobStatus.isPaused();
+    }
 
-    void outputEnd(ResultSet resultSet) throws SQLException;
+    @Override
+    public boolean isStopped() {
+        return jobStatus.isStopped();
+    }
 
-    void setWriter(Writer writer);
+    @Override
+    public Job getJob() {
+        return job;
+    }
 
-    void setOutputStream(OutputStream outputStream);
+    @Override
+    public JobStatus getJobStatus() {
+        return jobStatus;
+    }
 
-    void setJdbcTypeExtractor(JdbcTypeExtractor jdbcTypeExtractor);
-
-    void addJdbcTypeFormatter(int sqlType, JdbcTypeFormatter jdbcTypeFormatter);
-
-    void addJdbcTypeFormatter(JdbcType jdbcType, JdbcTypeFormatter jdbcTypeFormatter);
-
-    JdbcTypeFormatter getJdbcTypeFormatter(int sqlType);
-
-    JdbcTypeFormatter getDefaultJdbcTypeFormatter();
-
-    void setDefaultJdbcTypeFormatter(JdbcTypeFormatter defaultJdbcTypeFormatter);
+    @Override
+    public Map<String, Object> getContext() {
+        return context;
+    }
 }

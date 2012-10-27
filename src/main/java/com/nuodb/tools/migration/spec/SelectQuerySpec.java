@@ -27,16 +27,13 @@
  */
 package com.nuodb.tools.migration.spec;
 
-import java.util.List;
+import java.util.Collection;
 
 public class SelectQuerySpec {
 
     private String table;
-    private List<String> columns;
+    private Collection<String> columns;
     private String filter;
-
-    public SelectQuerySpec() {
-    }
 
     public SelectQuerySpec(String table) {
         this.table = table;
@@ -47,11 +44,11 @@ public class SelectQuerySpec {
         this.filter = filter;
     }
 
-    public List<String> getColumns() {
+    public Collection<String> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<String> columns) {
+    public void setColumns(Collection<String> columns) {
         this.columns = columns;
     }
 

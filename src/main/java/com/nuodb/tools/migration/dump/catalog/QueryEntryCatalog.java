@@ -25,14 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.dump.output;
+package com.nuodb.tools.migration.dump.catalog;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormatLookup {
+public interface QueryEntryCatalog {
 
-    OutputFormat lookup(String type);
+    QueryEntryReader openQueryEntryReader();
 
-    void register(String type, Class<? extends OutputFormat> formatClass);
+    QueryEntryWriter openQueryEntryWriter();
 }

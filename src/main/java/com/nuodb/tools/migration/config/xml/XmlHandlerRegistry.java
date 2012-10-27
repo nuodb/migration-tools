@@ -40,11 +40,11 @@ public class XmlHandlerRegistry {
     private PriorityList<XmlReadHandler> readers = new PriorityListImpl<XmlReadHandler>();
     private PriorityList<XmlWriteHandler> writers = new PriorityListImpl<XmlWriteHandler>();
 
-    public XmlHandlerRegistry register(XmlHandler handler) {
-        return register(handler, Priority.NORMAL);
+    public XmlHandlerRegistry registerHandler(XmlHandler handler) {
+        return registerHandler(handler, Priority.NORMAL);
     }
 
-    public XmlHandlerRegistry register(XmlHandler handler, int priority) {
+    public XmlHandlerRegistry registerHandler(XmlHandler handler, int priority) {
         assert (handler instanceof XmlReadHandler || handler instanceof XmlWriteHandler);
         if (handler instanceof XmlWriteHandler) {
             writers.add((XmlWriteHandler) handler, priority);

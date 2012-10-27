@@ -44,8 +44,8 @@ public class SelectQueryBuilder {
     private DatabaseDialect databaseDialect;
     private Table table;
     private boolean qualifyNames;
-    private List<String> columns = new ArrayList<String>();
-    private List<String> filters = new ArrayList<String>();
+    private Collection<String> columns = new ArrayList<String>();
+    private Collection<String> filters = new ArrayList<String>();
 
     public SelectQuery build() {
         Collection<Column> selectQueryColumns;
@@ -106,15 +106,15 @@ public class SelectQueryBuilder {
         this.qualifyNames = qualifyNames;
     }
 
-    public List<String> getColumns() {
+    public Collection<String> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<String> columns) {
+    public void setColumns(Collection<String> columns) {
         this.columns = columns;
     }
 
-    public List<String> getFilters() {
+    public Collection<String> getFilters() {
         return filters;
     }
 

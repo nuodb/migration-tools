@@ -37,21 +37,20 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class OutputFormatLookupImpl implements OutputFormatLookup {
+public class OutputFormatFactoryImpl implements OutputFormatFactory {
 
     protected final Log log = LogFactory.getLog(getClass());
 
-    private Class<? extends OutputFormat> defaultFormatClass = CsvOutputFormat.class;
     private Map<String, Class<? extends OutputFormat>> formatClasses = new HashMap<String, Class<? extends OutputFormat>>();
 
-    public OutputFormatLookupImpl() {
-        register(XmlOutputFormat.EXTENSION, XmlOutputFormat.class);
-        register(CsvOutputFormat.TYPE, CsvOutputFormat.class);
+    public OutputFormatFactoryImpl() {
+        registerOutputFormat(XmlOutputFormat.EXTENSION, XmlOutputFormat.class);
+        registerOutputFormat(CsvOutputFormat.TYPE, CsvOutputFormat.class);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public OutputFormat lookup(String type) {
+    public OutputFormat createOutputFormat(String type) {
         Class<? extends OutputFormat> formatClass = formatClasses.get(type);
         if (formatClass == null) {
             if (log.isTraceEnabled()) {
@@ -66,29 +65,18 @@ public class OutputFormatLookupImpl implements OutputFormatLookup {
                 }
             }
             if (formatClass == null) {
-                formatClass = getDefaultFormatClass();
-                if (log.isTraceEnabled()) {
-                    log.trace(String.format("Defaulting output format to %1$s", formatClass.getName()));
-                }
+                throw new OutputFormatException(String.format("Output format %1$s is not recognized", type));
             }
         }
         return newInstance(formatClass);
     }
 
     @Override
-    public void register(String type, Class<? extends OutputFormat> formatClass) {
+    public void registerOutputFormat(String type, Class<? extends OutputFormat> formatClass) {
         formatClasses.put(type, formatClass);
     }
 
     protected OutputFormat newInstance(Class<? extends OutputFormat> formatClass) {
         return ClassUtils.newInstance(formatClass);
-    }
-
-    public Class<? extends OutputFormat> getDefaultFormatClass() {
-        return defaultFormatClass;
-    }
-
-    public void setDefaultFormatClass(Class<? extends OutputFormat> defaultFormatClass) {
-        this.defaultFormatClass = defaultFormatClass;
     }
 }
