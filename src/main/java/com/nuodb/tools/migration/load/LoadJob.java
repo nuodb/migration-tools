@@ -27,11 +27,21 @@
  */
 package com.nuodb.tools.migration.load;
 
+import com.nuodb.tools.migration.format.catalog.QueryEntryCatalog;
+import com.nuodb.tools.migration.format.catalog.QueryEntryReader;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
+import com.nuodb.tools.migration.jdbc.connection.ConnectionCallback;
+import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.tools.migration.jdbc.metamodel.Database;
+import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
 import com.nuodb.tools.migration.job.JobBase;
 import com.nuodb.tools.migration.job.JobExecution;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
+
+import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
 
 /**
  * @author Sergey Bushik
@@ -39,12 +49,33 @@ import java.util.Map;
 public class LoadJob extends JobBase {
 
     private JdbcServices jdbcServices;
+    private QueryEntryCatalog queryEntryCatalog;
     private String inputType;
     private Map<String, String> inputAttributes;
 
     @Override
-    public void execute(JobExecution execution) throws Exception {
-        System.out.println("LoadJob.execute");
+    public void execute(final JobExecution execution) throws Exception {
+        ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
+        connectionProvider.execute(new ConnectionCallback() {
+            @Override
+            public void execute(Connection connection) throws SQLException {
+                DatabaseIntrospector databaseIntrospector = jdbcServices.getDatabaseIntrospector();
+                databaseIntrospector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+                databaseIntrospector.withConnection(connection);
+                Database database = databaseIntrospector.introspect();
+
+                QueryEntryReader reader = queryEntryCatalog.openQueryEntryReader();
+                try {
+                    load(execution, connection, database, reader);
+                } finally {
+                    reader.close();
+                }
+            }
+        });
+    }
+
+    protected void load(JobExecution execution, Connection connection, Database database, QueryEntryReader reader) {
+        System.out.println("LoadJob.load");
     }
 
     public JdbcServices getJdbcServices() {
@@ -53,6 +84,14 @@ public class LoadJob extends JobBase {
 
     public void setJdbcServices(JdbcServices jdbcServices) {
         this.jdbcServices = jdbcServices;
+    }
+
+    public QueryEntryCatalog getQueryEntryCatalog() {
+        return queryEntryCatalog;
+    }
+
+    public void setQueryEntryCatalog(QueryEntryCatalog queryEntryCatalog) {
+        this.queryEntryCatalog = queryEntryCatalog;
     }
 
     public String getInputType() {

@@ -35,9 +35,9 @@ import java.io.OutputStream;
  */
 public interface QueryEntryWriter extends Closeable {
 
-    OutputStream write(QueryEntry entry) throws EntryCatalogException;
+    OutputStream write(QueryEntry entry) throws QueryEntryCatalogException;
 
-    void close(QueryEntry entry) throws EntryCatalogException;
+    void close(QueryEntry entry) throws QueryEntryCatalogException;
 
-    void close() throws EntryCatalogException;
+    void close() throws QueryEntryCatalogException;
 }

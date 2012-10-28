@@ -3,6 +3,7 @@ package com.nuodb.tools.migration.format.catalog;
 
 import com.nuodb.tools.migration.TestConstants;
 import com.nuodb.tools.migration.format.CsvFormat;
+import com.nuodb.tools.migration.format.catalog.entry.SelectQueryEntry;
 import com.nuodb.tools.migration.jdbc.query.SelectQuery;
 import com.nuodb.tools.migration.spec.FormatSpec;
 import com.nuodb.tools.migration.spec.FormatSpecBase;
@@ -20,7 +21,7 @@ public class DumpCatalogIntegrationTest extends TestConstants {
     private static final String TEST_DIR = "/tmp/migration-tool";
     private static final String TEST_PATH = TEST_DIR + "/migration-tool-test";
 
-    private EntryCatalogImpl catalog;
+    private QueryEntryCatalogImpl catalog;
     private QueryEntryWriterImpl writer;
     private FormatSpec outputSpec;
 
@@ -31,7 +32,7 @@ public class DumpCatalogIntegrationTest extends TestConstants {
         outputSpec.setType(CsvFormat.TYPE);
         this.outputSpec = outputSpec;
 
-        EntryCatalogImpl catalog = new EntryCatalogImpl(outputSpec.getType(), outputSpec.getType());
+        QueryEntryCatalogImpl catalog = new QueryEntryCatalogImpl(outputSpec.getType(), outputSpec.getType());
         Assert.assertEquals(catalog.getPath(), TEST_PATH);
     }
 
@@ -39,7 +40,7 @@ public class DumpCatalogIntegrationTest extends TestConstants {
     public void testOpen() throws Exception {
         try {
             writer = (QueryEntryWriterImpl) catalog.openQueryEntryWriter();
-        } catch (EntryCatalogException e) {
+        } catch (QueryEntryCatalogException e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -61,9 +62,9 @@ public class DumpCatalogIntegrationTest extends TestConstants {
         Assert.assertNotNull(outputStream);
     }
 
-    @Test(expected = EntryCatalogException.class)
+    @Test(expected = QueryEntryCatalogException.class)
     public void testOpenError() throws Exception {
-        new EntryCatalogImpl("", outputSpec.getType()).openQueryEntryWriter();
+        new QueryEntryCatalogImpl("", outputSpec.getType()).openQueryEntryWriter();
     }
 
     @After

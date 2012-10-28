@@ -25,39 +25,15 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.format.catalog;
+package com.nuodb.tools.migration.jdbc.query;
 
-import com.nuodb.tools.migration.jdbc.query.NativeQuery;
-import com.nuodb.tools.migration.jdbc.query.Query;
-
-import java.util.Date;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
-public class NativeQueryEntry implements QueryEntry {
+public interface StatementCallback<T extends Statement> {
 
-    private static final String QUERY_ENTRY_NAME = "query-%1$tH-%1$tM-%1$tS";
-
-    private String name;
-    private NativeQuery query;
-
-    public NativeQueryEntry(NativeQuery query) {
-        this.name = createName(query);
-        this.query = query;
-    }
-
-    protected String createName(NativeQuery query) {
-        return String.format(QUERY_ENTRY_NAME, new Date());
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Query getQuery() {
-        return query;
-    }
+    void execute(T statement) throws SQLException;
 }

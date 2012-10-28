@@ -41,7 +41,7 @@ import static org.apache.commons.io.FilenameUtils.getName;
 /**
  * @author Sergey Bushik
  */
-public class EntryCatalogImpl implements QueryEntryCatalog {
+public class QueryEntryCatalogImpl implements QueryEntryCatalog {
 
     private static final String CATALOG_FILE_NAME = "dump.cat";
 
@@ -52,7 +52,7 @@ public class EntryCatalogImpl implements QueryEntryCatalog {
     private File catalogDir;
     private File catalogFile;
 
-    public EntryCatalogImpl(String path, String type) {
+    public QueryEntryCatalogImpl(String path, String type) {
         this.path = path;
         this.type = type;
         this.catalogDir = createCatalogDir();

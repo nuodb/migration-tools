@@ -25,15 +25,40 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.query;
+package com.nuodb.tools.migration.format.catalog.entry;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import com.nuodb.tools.migration.format.catalog.QueryEntry;
+import com.nuodb.tools.migration.jdbc.metamodel.Table;
+import com.nuodb.tools.migration.jdbc.query.Query;
+import com.nuodb.tools.migration.jdbc.query.SelectQuery;
 
 /**
  * @author Sergey Bushik
  */
-public interface PreparedStatementCallback {
+public class SelectQueryEntry implements QueryEntry {
 
-    void execute(PreparedStatement statement) throws SQLException;
+    private static final String SELECT_QUERY_ENTRY_NAME = "table-%1$s";
+
+    private String name;
+    private Query query;
+
+    public SelectQueryEntry(SelectQuery query) {
+        this.name = createName(query);
+        this.query = query;
+    }
+
+    protected String createName(SelectQuery query) {
+        Table table = query.getTables().get(0);
+        return String.format(SELECT_QUERY_ENTRY_NAME, table.getName());
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Query getQuery() {
+        return query;
+    }
 }

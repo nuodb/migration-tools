@@ -30,6 +30,8 @@ package com.nuodb.tools.migration.dump;
 import com.nuodb.tools.migration.dump.output.OutputFormat;
 import com.nuodb.tools.migration.dump.output.OutputFormatFactory;
 import com.nuodb.tools.migration.format.catalog.*;
+import com.nuodb.tools.migration.format.catalog.entry.NativeQueryEntry;
+import com.nuodb.tools.migration.format.catalog.entry.SelectQueryEntry;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionCallback;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
@@ -83,11 +85,15 @@ public class DumpJob extends JobBase {
                 Database database = databaseIntrospector.introspect();
 
                 QueryEntryWriter writer = queryEntryCatalog.openQueryEntryWriter();
-                for (SelectQuery selectQuery : createSelectQueries(database, selectQuerySpecs)) {
-                    dump(execution, connection, writer, new SelectQueryEntry(selectQuery));
-                }
-                for (NativeQuery nativeQuery : createNativeQueries(database, nativeQuerySpecs)) {
-                    dump(execution, connection, writer, new NativeQueryEntry(nativeQuery));
+                try {
+                    for (SelectQuery selectQuery : createSelectQueries(database, selectQuerySpecs)) {
+                        dump(execution, connection, writer, new SelectQueryEntry(selectQuery));
+                    }
+                    for (NativeQuery nativeQuery : createNativeQueries(database, nativeQuerySpecs)) {
+                        dump(execution, connection, writer, new NativeQueryEntry(nativeQuery));
+                    }
+                } finally {
+                    writer.close();
                 }
             }
         });
@@ -95,24 +101,22 @@ public class DumpJob extends JobBase {
 
     protected void dump(JobExecution execution, Connection connection, QueryEntryWriter writer,
                         QueryEntry entry) throws SQLException {
-        if (execution.isRunning()) {
-            OutputFormat output = outputFormatFactory.createOutputFormat(outputType);
-            output.setAttributes(outputAttributes);
-            output.setJdbcTypeExtractor(jdbcServices.getJdbcTypeExtractor());
-            output.setOutputStream(writer.write(entry));
-            try {
-                dump(execution, connection, entry.getQuery(), output);
-            } finally {
-                writer.close(entry);
-            }
+        OutputFormat output = outputFormatFactory.createOutputFormat(outputType);
+        output.setAttributes(outputAttributes);
+        output.setJdbcTypeExtractor(jdbcServices.getJdbcTypeExtractor());
+        output.setOutputStream(writer.write(entry));
+        try {
+            dump(execution, connection, entry.getQuery(), output);
+        } finally {
+            writer.close(entry);
         }
     }
 
-    protected void dump(final JobExecution execution, Connection connection, final Query query,
+    protected void dump(final JobExecution execution, final Connection connection, final Query query,
                         final OutputFormat output) throws SQLException {
         QueryTemplate queryTemplate = new QueryTemplate(connection);
         queryTemplate.execute(
-                new PreparedStatementBuilder() {
+                new StatementBuilder<PreparedStatement>() {
                     @Override
                     public PreparedStatement build(Connection connection) throws SQLException {
                         if (log.isDebugEnabled()) {
@@ -121,7 +125,7 @@ public class DumpJob extends JobBase {
                         return connection.prepareStatement(query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                     }
                 },
-                new PreparedStatementCallback() {
+                new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
                         if (log.isDebugEnabled()) {

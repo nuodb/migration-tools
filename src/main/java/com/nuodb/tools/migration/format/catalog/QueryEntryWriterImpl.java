@@ -49,16 +49,16 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 public class QueryEntryWriterImpl implements QueryEntryWriter {
     protected final Log log = LogFactory.getLog(getClass());
 
-    private EntryCatalogImpl catalog;
+    private QueryEntryCatalogImpl catalog;
     private OutputStream catalogOutput;
     private List<QueryEntry> catalogEntries = new ArrayList<QueryEntry>();
     private Map<QueryEntry, OutputStream> catalogEntriesOutputs = new HashMap<QueryEntry, OutputStream>();
 
-    public QueryEntryWriterImpl(EntryCatalogImpl catalog) {
+    public QueryEntryWriterImpl(QueryEntryCatalogImpl catalog) {
         this.catalog = catalog;
     }
 
-    protected void open() throws EntryCatalogException {
+    protected void open() throws QueryEntryCatalogException {
         File catalogDir = catalog.getCatalogDir();
         try {
             FileUtils.forceMkdir(catalogDir);
@@ -98,7 +98,7 @@ public class QueryEntryWriterImpl implements QueryEntryWriter {
             catalogEntriesOutputs.put(entry, catalogEntryOutput);
             IOUtils.write(entryName, catalogOutput);
         } catch (IOException e) {
-            throw new DumpException("Failed add entry in catalog", e);
+            throw new DumpException("Failed writing entry to catalog", e);
         }
         return catalogEntryOutput;
     }

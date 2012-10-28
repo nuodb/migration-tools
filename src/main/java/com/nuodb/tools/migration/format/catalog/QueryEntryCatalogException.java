@@ -25,16 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.query;
+package com.nuodb.tools.migration.format.catalog;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import com.nuodb.tools.migration.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public interface PreparedStatementBuilder {
+public class QueryEntryCatalogException extends MigrationException {
 
-    PreparedStatement build(Connection connection) throws SQLException;
+    public QueryEntryCatalogException(String message) {
+        super(message);
+    }
+
+    public QueryEntryCatalogException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public QueryEntryCatalogException(Throwable cause) {
+        super(cause);
+    }
 }

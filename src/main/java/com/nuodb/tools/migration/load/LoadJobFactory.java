@@ -28,6 +28,8 @@
 package com.nuodb.tools.migration.load;
 
 import com.nuodb.tools.migration.format.CsvFormat;
+import com.nuodb.tools.migration.format.catalog.QueryEntryCatalog;
+import com.nuodb.tools.migration.format.catalog.QueryEntryCatalogImpl;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
 import com.nuodb.tools.migration.job.JobExecutor;
@@ -55,11 +57,16 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         job.setJdbcServices(createJdbcServices(connectionSpec));
         job.setInputType(inputSpec.getType());
         job.setInputAttributes(inputSpec.getAttributes());
+        job.setQueryEntryCatalog(createQueryEntryCatalog(inputSpec));
         return job;
     }
 
     protected JdbcServices createJdbcServices(ConnectionSpec connectionSpec) {
         return new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec);
+    }
+
+    protected QueryEntryCatalog createQueryEntryCatalog(FormatSpec inputSpec) {
+        return new QueryEntryCatalogImpl(inputSpec.getPath(), inputSpec.getType());
     }
 
     public LoadSpec getLoadSpec() {

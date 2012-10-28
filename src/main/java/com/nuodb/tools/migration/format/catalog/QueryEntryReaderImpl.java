@@ -45,14 +45,14 @@ public class QueryEntryReaderImpl implements QueryEntryReader {
 
     protected final Log log = LogFactory.getLog(getClass());
 
-    private EntryCatalogImpl catalog;
+    private QueryEntryCatalogImpl catalog;
     private InputStream catalogInput;
 
-    public QueryEntryReaderImpl(EntryCatalogImpl catalog) {
+    public QueryEntryReaderImpl(QueryEntryCatalogImpl catalog) {
         this.catalog = catalog;
     }
 
-    protected void open() throws EntryCatalogException {
+    protected void open() throws QueryEntryCatalogException {
         File catalogFile = catalog.getCatalogFile();
         if (log.isDebugEnabled()) {
             log.debug(String.format("Dump catalog file is %1$s", catalogFile.getPath()));
@@ -64,12 +64,12 @@ public class QueryEntryReaderImpl implements QueryEntryReader {
         }
     }
 
-    public QueryEntry read() throws EntryCatalogException {
+    public QueryEntry read() throws QueryEntryCatalogException {
         return null;
     }
 
     @Override
-    public void close() throws EntryCatalogException {
+    public void close() throws QueryEntryCatalogException {
         IOUtils.closeQuietly(catalogInput);
     }
 }

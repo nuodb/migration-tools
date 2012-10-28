@@ -28,7 +28,7 @@
 package com.nuodb.tools.migration.dump;
 
 import com.nuodb.tools.migration.format.catalog.QueryEntryCatalog;
-import com.nuodb.tools.migration.format.catalog.EntryCatalogImpl;
+import com.nuodb.tools.migration.format.catalog.QueryEntryCatalogImpl;
 import com.nuodb.tools.migration.dump.output.OutputFormatFactory;
 import com.nuodb.tools.migration.dump.output.OutputFormatFactoryImpl;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
@@ -78,7 +78,7 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
     }
 
     protected QueryEntryCatalog createQueryEntryCatalog(FormatSpec outputSpec) {
-        return new EntryCatalogImpl(outputSpec.getPath(), outputSpec.getType());
+        return new QueryEntryCatalogImpl(outputSpec.getPath(), outputSpec.getType());
     }
 
     public DumpSpec getDumpSpec() {

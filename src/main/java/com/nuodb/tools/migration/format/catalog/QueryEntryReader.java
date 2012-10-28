@@ -34,7 +34,7 @@ import java.io.Closeable;
  */
 public interface QueryEntryReader extends Closeable {
 
-    QueryEntry read() throws EntryCatalogException;
+    QueryEntry read() throws QueryEntryCatalogException;
 
-    void close() throws EntryCatalogException;
+    void close() throws QueryEntryCatalogException;
 }

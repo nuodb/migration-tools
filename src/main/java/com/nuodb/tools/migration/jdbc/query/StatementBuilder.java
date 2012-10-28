@@ -25,39 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.format.catalog;
+package com.nuodb.tools.migration.jdbc.query;
 
-import com.nuodb.tools.migration.jdbc.metamodel.Table;
-import com.nuodb.tools.migration.jdbc.query.Query;
-import com.nuodb.tools.migration.jdbc.query.SelectQuery;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
-public class SelectQueryEntry implements QueryEntry {
+public interface StatementBuilder<X extends Statement> {
 
-    private static final String SELECT_QUERY_ENTRY_NAME = "table-%1$s";
-
-    private String name;
-    private Query query;
-
-    public SelectQueryEntry(SelectQuery query) {
-        this.name = createName(query);
-        this.query = query;
-    }
-
-    protected String createName(SelectQuery query) {
-        Table table = query.getTables().get(0);
-        return String.format(SELECT_QUERY_ENTRY_NAME, table.getName());
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Query getQuery() {
-        return query;
-    }
+    X build(Connection connection) throws SQLException;
 }
