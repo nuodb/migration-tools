@@ -114,7 +114,7 @@ public class JdbcTypeAccessorImpl extends JdbcTypeRegistryBase implements JdbcTy
         JdbcType jdbcType = getJdbcType(typeCode);
         if (jdbcType == null) {
             throw new JdbcTypeException(
-                    String.format("Jdbc type %s access is not supported", getTypeName(typeCode)));
+                    String.format("Jdbc type %s is not supported", getTypeName(typeCode)));
         }
         return jdbcType;
     }

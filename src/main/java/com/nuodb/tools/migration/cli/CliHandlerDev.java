@@ -27,55 +27,35 @@
  */
 package com.nuodb.tools.migration.cli;
 
-import com.nuodb.tools.migration.cli.parse.Option;
-import com.nuodb.tools.migration.cli.parse.OptionException;
-import com.nuodb.tools.migration.cli.parse.OptionSet;
-import com.nuodb.tools.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.tools.migration.cli.parse.parser.ParserImpl;
-import com.nuodb.tools.migration.cli.run.CliRunFactoryLookup;
+import com.google.common.collect.Lists;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
 
 /**
- * Main entry point for the command line interface, for the names of the available options see {@see CliOptions}.
- *
  * @author Sergey Bushik
  */
-public class CliHandler extends CliHandlerSupport {
+public class CliHandlerDev {
 
-    private static final int ERROR_STATUS = 1;
-
-    public CliHandler() {
-    }
-
-    public CliHandler(OptionToolkit optionToolkit) {
-        super(optionToolkit);
-    }
-
-    public CliHandler(OptionToolkit optionToolkit, CliRunFactoryLookup cliRunFactoryLookup) {
-        super(optionToolkit, cliRunFactoryLookup);
-    }
-
-    public void handle(String[] arguments) throws OptionException {
-        Option root = createOption();
-        try {
-            if (log.isTraceEnabled()) {
-                log.trace(String.format("Parsing cli arguments: %1$s", Arrays.asList(arguments)));
-            }
-            OptionSet options = new ParserImpl().parse(arguments, root);
-            handleOptionSet(options, root);
-        } catch (OptionException exception) {
-            handleOptionException(exception);
-        }
-    }
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         CliHandler handler = new CliHandler();
-        try {
-            handler.handle(args);
-        } catch (Throwable exception) {
-            System.exit(ERROR_STATUS);
+        handler.handle(loadArguments("dump.arguments"));
+    }
+
+    private static String[] loadArguments(String resource) throws IOException {
+        InputStream input = CliHandler.class.getResourceAsStream(resource);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+        List<String> arguments = Lists.newArrayList();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            line = line.trim();
+            if (line.length() != 0 && !line.startsWith("#")) {
+                arguments.add(line);
+            }
         }
+        return arguments.toArray(new String[arguments.size()]);
     }
 }

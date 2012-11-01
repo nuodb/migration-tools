@@ -48,11 +48,11 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 @SuppressWarnings("unchecked")
 public class JdbcTypeFormatImpl extends JdbcTypeFormatBase<Object> {
 
-    public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
+    public static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     public static final DateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
-    public static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+    public static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private DateFormat dateFormat = DATE_FORMAT;
     private DateFormat timeFormat = TIME_FORMAT;

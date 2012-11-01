@@ -72,7 +72,7 @@ public abstract class DataOutputFormatBase extends DataFormatBase implements Dat
         for (int column = 0; column < resultSetModel.getColumnCount(); column++) {
             int typeCode = resultSetModel.getColumnType(column);
             JdbcTypeGet jdbcTypeGet = getJdbcTypeAccessor().getJdbcTypeGet(typeCode);
-            columns[column++] = formatColumn(jdbcTypeGet, resultSet, column);
+            columns[column] = formatColumn(jdbcTypeGet, resultSet, column + 1);
         }
         return columns;
     }
