@@ -76,7 +76,7 @@ public class CliHandler extends CliHandlerSupport {
     public static void main(String[] args) throws IOException {
         CliHandler handler = new CliHandler();
         // handler.handle(args);
-        handler.handle(loadArguments("dump.arguments"));
+        // handler.handle(loadArguments("dump.arguments"));
     }
 
     private static String[] loadArguments(String resource) throws IOException {
