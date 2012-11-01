@@ -16,6 +16,8 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.nuodb.tools.migration.cli.parse.*;
 import com.nuodb.tools.migration.utils.PriorityList;
 import com.nuodb.tools.migration.utils.PriorityListImpl;
@@ -34,9 +36,9 @@ public class GroupImpl extends OptionBase implements Group {
     private int minimum;
     private int maximum;
 
-    private List<Option> options = new ArrayList<Option>();
-    private Set<String> prefixes = new HashSet<String>();
-    private List<Argument> arguments = new ArrayList<Argument>();
+    private List<Option> options = Lists.newArrayList();
+    private Set<String> prefixes = Sets.newHashSet();
+    private List<Argument> arguments = Lists.newArrayList();
     private PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
 
     public GroupImpl() {
@@ -247,7 +249,7 @@ public class GroupImpl extends OptionBase implements Group {
 
     @Override
     public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator, String optionSeparator) {
-        hints = new HashSet<HelpHint>(hints);
+        hints = Sets.newHashSet(hints);
         boolean optional = !isRequired() && (hints.contains(OPTIONAL) || hints.contains(OPTIONAL_CHILD_GROUP));
         boolean expanded = (getName() == null) || hints.contains(GROUP_OPTIONS);
         boolean named = !expanded || ((getName() != null) && hints.contains(GROUP));
@@ -270,7 +272,7 @@ public class GroupImpl extends OptionBase implements Group {
             if (!hints.contains(GROUP_OPTIONS)) {
                 optionHints = Collections.emptySet();
             } else {
-                optionHints = new HashSet<HelpHint>(hints);
+                optionHints = Sets.newHashSet(hints);
                 optionHints.remove(OPTIONAL);
             }
             // grab a list of the option's options.
@@ -280,7 +282,7 @@ public class GroupImpl extends OptionBase implements Group {
                 list = options;
             } else {
                 // sort options if comparator is supplied
-                list = new ArrayList<Option>(options);
+                list = Lists.newArrayList(options);
                 Collections.sort(list, comparator);
             }
             // for each option.
@@ -315,7 +317,7 @@ public class GroupImpl extends OptionBase implements Group {
 
     @Override
     public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
-        List<Help> help = new ArrayList<Help>();
+        List<Help> help = Lists.newArrayList();
         if (hints.contains(GROUP)) {
             help.add(new HelpImpl(this, indent));
         }
@@ -327,7 +329,7 @@ public class GroupImpl extends OptionBase implements Group {
                 options = this.options;
             } else {
                 // sort options if comparator is supplied
-                options = new ArrayList<Option>(this.options);
+                options = Lists.newArrayList(this.options);
                 Collections.sort(options, comparator);
             }
             // for each option

@@ -30,10 +30,7 @@ package com.nuodb.tools.migration.jdbc.type.jdbc2;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
-import java.sql.Array;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 /**
  * @author Sergey Bushik
@@ -43,12 +40,22 @@ public class JdbcArrayType extends JdbcTypeBase<Array> {
     public static final JdbcType INSTANCE = new JdbcArrayType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.ARRAY;
     }
 
     @Override
-    public Array extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends Array> getTypeClass() {
+        return Array.class;
+    }
+
+    @Override
+    public Array getValue(ResultSet resultSet, int column) throws SQLException {
         return resultSet.getArray(column);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Array value, int column) throws SQLException {
+        statement.setArray(column, value);
     }
 }

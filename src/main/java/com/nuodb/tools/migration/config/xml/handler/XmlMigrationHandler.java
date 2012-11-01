@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.config.xml.handler;
 
+import com.google.common.collect.Lists;
 import com.nuodb.tools.migration.config.xml.XmlConstants;
 import com.nuodb.tools.migration.config.xml.XmlReadContext;
 import com.nuodb.tools.migration.config.xml.XmlWriteContext;
@@ -36,7 +37,6 @@ import com.nuodb.tools.migration.spec.TaskSpec;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class XmlMigrationHandler extends XmlReadWriteHandlerBase<MigrationSpec> implements XmlConstants {
@@ -59,8 +59,8 @@ public class XmlMigrationHandler extends XmlReadWriteHandlerBase<MigrationSpec> 
 
     @Override
     protected void read(InputNode input, MigrationSpec migrationSpec, XmlReadContext context) throws Exception {
-        List<ConnectionSpec> connections = new ArrayList<ConnectionSpec>();
-        List<TaskSpec> tasks = new ArrayList<TaskSpec>();
+        List<ConnectionSpec> connections = Lists.newArrayList();
+        List<TaskSpec> tasks = Lists.newArrayList();
         InputNode node;
 
         while ((node = input.getNext()) != null) {

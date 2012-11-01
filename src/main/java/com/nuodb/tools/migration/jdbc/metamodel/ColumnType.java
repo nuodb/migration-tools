@@ -31,19 +31,19 @@ public class ColumnType {
     /**
      * SQL type from java.sql.Types
      */
-    private final int dataType;
+    private final int typeCode;
     /**
      * Data source dependent type name
      */
     private final String typeName;
 
-    public ColumnType(int dataType, String typeName) {
-        this.dataType = dataType;
+    public ColumnType(int typeCode, String typeName) {
+        this.typeCode = typeCode;
         this.typeName = typeName;
     }
 
-    public int getDataType() {
-        return dataType;
+    public int getTypeCode() {
+        return typeCode;
     }
 
     public String getTypeName() {
@@ -57,14 +57,14 @@ public class ColumnType {
 
         ColumnType that = (ColumnType) o;
 
-        if (dataType != that.dataType) return false;
+        if (typeCode != that.typeCode) return false;
         if (typeName != null ? !typeName.equals(that.typeName) : that.typeName != null) return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = dataType;
+        int result = typeCode;
         result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
         return result;
     }

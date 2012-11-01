@@ -40,12 +40,22 @@ public class JdbcClobType extends JdbcTypeBase<Clob> {
     public static final JdbcType INSTANCE = new JdbcClobType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.CLOB;
     }
 
     @Override
-    public Clob extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends Clob> getTypeClass() {
+        return Clob.class;
+    }
+
+    @Override
+    public Clob getValue(ResultSet resultSet, int column) throws SQLException {
         return resultSet.getClob(column);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Clob value, int column) throws SQLException {
+        statement.setClob(column, value);
     }
 }

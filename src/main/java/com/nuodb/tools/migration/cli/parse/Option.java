@@ -104,12 +104,12 @@ public interface Option {
 
     /**
      * Identifies the argument prefixes that should be considered options. This is used to identify whether a given
-     * string looks like an option or an argument value. Typically an option would return the set [--,-] while switches
+     * string looks like an option or an argument value. Typically an option would return the setValue [--,-] while switches
      * might offer [-,+].
      * <p/>
      * The returned Set must not be null.
      *
-     * @return The set of prefixes for this Option
+     * @return The setValue of prefixes for this Option
      */
     Set<String> getPrefixes();
 
@@ -126,9 +126,9 @@ public interface Option {
      * Identifies the argument triggers that should triggers this option. This is used to decide which of many options
      * should be tried when processing a given argument string.
      * <p/>
-     * The returned set must not be null.
+     * The returned setValue must not be null.
      *
-     * @return The set of triggers for this option
+     * @return The setValue of triggers for this option
      */
     PriorityList<Trigger> getTriggers();
 
@@ -209,7 +209,7 @@ public interface Option {
      * Appends help to the specified buffer
      *
      * @param buffer     the buffer to append to
-     * @param hints      a set of withConnection hints
+     * @param hints      a setValue of withConnection hints
      * @param comparator a comparator used to sort the options
      */
     void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator);

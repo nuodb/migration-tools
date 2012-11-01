@@ -27,7 +27,8 @@
  */
 package com.nuodb.tools.migration.match;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,7 +51,7 @@ public class PatternMatch implements Match {
 
     @Override
     public String[] matches() {
-        List<String> matches = new ArrayList<String>();
+        List<String> matches = Lists.newArrayList();
         if (matcher.matches()) {
             int count = matcher.groupCount();
             for (int index = 0; index <= count; index++) {

@@ -29,6 +29,8 @@ package com.nuodb.tools.migration.dump;
 
 import com.nuodb.tools.migration.MigrationException;
 
+import java.net.URLConnection;
+
 /**
  * @author Sergey Bushik
  */
@@ -44,5 +46,9 @@ public class DumpException extends MigrationException {
 
     public DumpException(Throwable cause) {
         super(cause);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(URLConnection.getFileNameMap());
     }
 }

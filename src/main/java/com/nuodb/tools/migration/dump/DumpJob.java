@@ -27,16 +27,18 @@
  */
 package com.nuodb.tools.migration.dump;
 
-import com.nuodb.tools.migration.dump.output.OutputFormat;
-import com.nuodb.tools.migration.dump.output.OutputFormatFactory;
-import com.nuodb.tools.migration.format.catalog.*;
-import com.nuodb.tools.migration.format.catalog.entry.NativeQueryEntry;
-import com.nuodb.tools.migration.format.catalog.entry.SelectQueryEntry;
+import com.google.common.collect.Lists;
+import com.nuodb.tools.migration.output.catalog.Entry;
+import com.nuodb.tools.migration.output.catalog.EntryCatalog;
+import com.nuodb.tools.migration.output.catalog.EntryImpl;
+import com.nuodb.tools.migration.output.catalog.EntryWriter;
+import com.nuodb.tools.migration.output.format.DataFormatFactory;
+import com.nuodb.tools.migration.output.format.DataOutputFormat;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionCallback;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.metamodel.Database;
-import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
+import com.nuodb.tools.migration.jdbc.metamodel.DatabaseInspector;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
 import com.nuodb.tools.migration.jdbc.query.*;
 import com.nuodb.tools.migration.job.JobBase;
@@ -46,32 +48,36 @@ import com.nuodb.tools.migration.spec.SelectQuerySpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
  */
 public class DumpJob extends JobBase {
 
+    private static final String QUERY_ENTRY_NAME = "query-%1$tH-%1$tM-%1$tS";
+
     protected final Log log = LogFactory.getLog(getClass());
 
     private JdbcServices jdbcServices;
-    private QueryEntryCatalog queryEntryCatalog;
+    private EntryCatalog entryCatalog;
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
     private Map<String, String> outputAttributes;
-    private OutputFormatFactory outputFormatFactory;
+    private DataFormatFactory<DataOutputFormat> outputDataFormatFactory;
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
@@ -79,41 +85,56 @@ public class DumpJob extends JobBase {
         connectionProvider.execute(new ConnectionCallback() {
             @Override
             public void execute(Connection connection) throws SQLException {
-                DatabaseIntrospector databaseIntrospector = jdbcServices.getDatabaseIntrospector();
-                databaseIntrospector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-                databaseIntrospector.withConnection(connection);
-                Database database = databaseIntrospector.introspect();
+                DatabaseInspector databaseInspector = jdbcServices.getDatabaseIntrospector();
+                databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+                databaseInspector.withConnection(connection);
+                Database database = databaseInspector.inspect();
 
-                QueryEntryWriter writer = queryEntryCatalog.openQueryEntryWriter();
+                EntryWriter entryWriter = entryCatalog.openWriter();
                 try {
                     for (SelectQuery selectQuery : createSelectQueries(database, selectQuerySpecs)) {
-                        dump(execution, connection, writer, new SelectQueryEntry(selectQuery));
+                        dump(execution, connection, selectQuery, entryWriter, createEntry(selectQuery, outputType));
                     }
                     for (NativeQuery nativeQuery : createNativeQueries(database, nativeQuerySpecs)) {
-                        dump(execution, connection, writer, new NativeQueryEntry(nativeQuery));
+                        dump(execution, connection, nativeQuery, entryWriter, createEntry(nativeQuery, outputType));
                     }
                 } finally {
-                    writer.close();
+                    entryWriter.close();
                 }
             }
         });
     }
 
-    protected void dump(JobExecution execution, Connection connection, QueryEntryWriter writer,
-                        QueryEntry entry) throws SQLException {
-        OutputFormat output = outputFormatFactory.createOutputFormat(outputType);
-        output.setAttributes(outputAttributes);
-        output.setJdbcTypeExtractor(jdbcServices.getJdbcTypeExtractor());
-        output.setOutputStream(writer.write(entry));
+    protected Entry createEntry(SelectQuery selectQuery, String type) {
+        Table table = selectQuery.getTables().get(0);
+        return new EntryImpl(table.getName(), type);
+    }
+
+    protected Entry createEntry(NativeQuery nativeQuery, String type) {
+        return new EntryImpl(String.format(QUERY_ENTRY_NAME, new Date()), type);
+    }
+
+    protected void dump(JobExecution execution, Connection connection, Query query, EntryWriter entryWriter,
+                        Entry entry) throws SQLException {
+        entryWriter.addEntry(entry);
+        dump(execution, connection, query, entryWriter.getEntryOutput(entry));
+    }
+
+    protected void dump(JobExecution execution, Connection connection, Query query,
+                        OutputStream output) throws SQLException {
         try {
-            dump(execution, connection, entry.getQuery(), output);
+            DataOutputFormat outputFormat = outputDataFormatFactory.createDataFormat(outputType);
+            outputFormat.setAttributes(outputAttributes);
+            outputFormat.setJdbcTypeAccessor(jdbcServices.getJdbcTypeAccessor());
+            outputFormat.setOutputStream(output);
+            dump(execution, connection, query, outputFormat);
         } finally {
-            writer.close(entry);
+            closeQuietly(output);
         }
     }
 
     protected void dump(final JobExecution execution, final Connection connection, final Query query,
-                        final OutputFormat output) throws SQLException {
+                        final DataOutputFormat output) throws SQLException {
         QueryTemplate queryTemplate = new QueryTemplate(connection);
         queryTemplate.execute(
                 new StatementBuilder<PreparedStatement>() {
@@ -122,7 +143,11 @@ public class DumpJob extends JobBase {
                         if (log.isDebugEnabled()) {
                             log.debug(String.format("Preparing SQL query %1$s", query.toQuery()));
                         }
-                        return connection.prepareStatement(query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                        PreparedStatement statement = connection.prepareStatement(query.toQuery(),
+                                TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                        // forces driver to stream result setValue http://goo.gl/kl1Nr
+                        statement.setFetchSize(Integer.MIN_VALUE);
+                        return statement;
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
@@ -144,54 +169,45 @@ public class DumpJob extends JobBase {
 
     protected Collection<SelectQuery> createSelectQueries(Database database,
                                                           Collection<SelectQuerySpec> selectQuerySpecs) {
-        Collection<SelectQuery> selectQueries = new ArrayList<SelectQuery>();
-        Collection<Table> tables = database.listTables();
+        Collection<SelectQuery> selectQueries = Lists.newArrayList();
         if (selectQuerySpecs.isEmpty()) {
-            selectQueries.addAll(createSelectQueries(tables));
+            selectQueries.addAll(createSelectQueries(database));
         } else {
             for (SelectQuerySpec selectQuerySpec : selectQuerySpecs) {
-                selectQueries.addAll(createSelectQueries(tables, selectQuerySpec));
+                selectQueries.add(createSelectQuery(database, selectQuerySpec));
             }
         }
         return selectQueries;
     }
 
-    protected Collection<SelectQuery> createSelectQueries(Collection<Table> tables) {
-        Collection<SelectQuery> selectQueries = new ArrayList<SelectQuery>();
-        for (Table table : tables) {
-            SelectQueryBuilder selectQueryBuilder = new SelectQueryBuilder();
-            selectQueryBuilder.setQualifyNames(true);
-            selectQueryBuilder.setTable(table);
-            selectQueries.add(selectQueryBuilder.build());
+    protected Collection<SelectQuery> createSelectQueries(Database database) {
+        Collection<SelectQuery> selectQueries = Lists.newArrayList();
+        for (Table table : database.listTables()) {
+            SelectQueryBuilder builder = new SelectQueryBuilder();
+            builder.setTable(table);
+            builder.setQualifyNames(true);
+            selectQueries.add(builder.build());
         }
         return selectQueries;
     }
 
-    protected Collection<SelectQuery> createSelectQueries(Collection<Table> tables, SelectQuerySpec selectQuerySpec) {
-        Collection<SelectQuery> selectQueries = new ArrayList<SelectQuery>();
+    protected SelectQuery createSelectQuery(Database database, SelectQuerySpec selectQuerySpec) {
         String tableName = selectQuerySpec.getTable();
-        for (Table table : tables) {
-            if (tableName.equals(table.getName())) {
-                SelectQueryBuilder selectQueryBuilder = new SelectQueryBuilder();
-                selectQueryBuilder.setQualifyNames(true);
-                selectQueryBuilder.setColumns(selectQuerySpec.getColumns());
-                selectQueryBuilder.setTable(table);
-                selectQueryBuilder.addFilter(selectQuerySpec.getFilter());
-                selectQueries.add(selectQueryBuilder.build());
-            }
-        }
-        return selectQueries;
+        SelectQueryBuilder builder = new SelectQueryBuilder();
+        builder.setQualifyNames(true);
+        builder.setTable(database.findTable(tableName));
+        builder.setColumns(selectQuerySpec.getColumns());
+        builder.addFilter(selectQuerySpec.getFilter());
+        return builder.build();
     }
 
     protected Collection<NativeQuery> createNativeQueries(Database database,
                                                           Collection<NativeQuerySpec> nativeQuerySpecs) {
-        Collection<NativeQuery> queries = new ArrayList<NativeQuery>();
-        if (nativeQuerySpecs != null) {
-            for (NativeQuerySpec nativeQuerySpec : nativeQuerySpecs) {
-                NativeQueryBuilder nativeQueryBuilder = new NativeQueryBuilder();
-                nativeQueryBuilder.setQuery(nativeQuerySpec.getQuery());
-                queries.add(nativeQueryBuilder.build());
-            }
+        Collection<NativeQuery> queries = Lists.newArrayList();
+        for (NativeQuerySpec nativeQuerySpec : nativeQuerySpecs) {
+            NativeQueryBuilder builder = new NativeQueryBuilder();
+            builder.setQuery(nativeQuerySpec.getQuery());
+            queries.add(builder.build());
         }
         return queries;
     }
@@ -204,12 +220,12 @@ public class DumpJob extends JobBase {
         this.jdbcServices = jdbcServices;
     }
 
-    public QueryEntryCatalog getQueryEntryCatalog() {
-        return queryEntryCatalog;
+    public EntryCatalog getEntryCatalog() {
+        return entryCatalog;
     }
 
-    public void setQueryEntryCatalog(QueryEntryCatalog queryEntryCatalog) {
-        this.queryEntryCatalog = queryEntryCatalog;
+    public void setEntryCatalog(EntryCatalog entryCatalog) {
+        this.entryCatalog = entryCatalog;
     }
 
     public Collection<SelectQuerySpec> getSelectQuerySpecs() {
@@ -244,11 +260,11 @@ public class DumpJob extends JobBase {
         this.outputAttributes = outputAttributes;
     }
 
-    public OutputFormatFactory getOutputFormatFactory() {
-        return outputFormatFactory;
+    public DataFormatFactory<DataOutputFormat> getOutputDataFormatFactory() {
+        return outputDataFormatFactory;
     }
 
-    public void setOutputFormatFactory(OutputFormatFactory outputFormatFactory) {
-        this.outputFormatFactory = outputFormatFactory;
+    public void setOutputDataFormatFactory(DataFormatFactory<DataOutputFormat> outputDataFormatFactory) {
+        this.outputDataFormatFactory = outputDataFormatFactory;
     }
 }

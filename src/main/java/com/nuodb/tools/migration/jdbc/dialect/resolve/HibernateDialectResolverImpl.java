@@ -78,5 +78,10 @@ public class HibernateDialectResolverImpl implements DatabaseDialectResolver {
         public String quote(String name) {
             return dialect.quote(name);
         }
+
+        @Override
+        public String getNoColumnsInsertString() {
+            return dialect.getNoColumnsInsertString();
+        }
     }
 }

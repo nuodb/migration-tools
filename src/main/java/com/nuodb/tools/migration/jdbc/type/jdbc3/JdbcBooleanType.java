@@ -30,6 +30,7 @@ package com.nuodb.tools.migration.jdbc.type.jdbc3;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -42,13 +43,24 @@ public class JdbcBooleanType extends JdbcTypeBase<Boolean> {
     public static final JdbcType INSTANCE = new JdbcBooleanType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.BOOLEAN;
     }
 
     @Override
-    public Boolean extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends Boolean> getTypeClass() {
+        return Boolean.class;
+    }
+
+    @Override
+    public Boolean getValue(ResultSet resultSet, int column) throws SQLException {
         boolean booleanValue = resultSet.getBoolean(column);
         return resultSet.wasNull() ? null : booleanValue;
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Boolean value,
+                                    int column) throws SQLException {
+        statement.setBoolean(column, value);
     }
 }

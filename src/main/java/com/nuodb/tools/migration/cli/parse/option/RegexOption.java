@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
+import com.google.common.collect.Maps;
 import com.nuodb.tools.migration.cli.parse.*;
 import com.nuodb.tools.migration.match.AntRegexCompiler;
 import com.nuodb.tools.migration.match.Match;
@@ -50,7 +51,7 @@ public class RegexOption extends ContainerBase {
      * --table.*.filter=<filter> options.
      */
     private RegexCompiler regexCompiler = AntRegexCompiler.INSTANCE;
-    private Map<RegexTrigger, Integer> triggersGroups = new HashMap<RegexTrigger, Integer>();
+    private Map<RegexTrigger, Integer> triggersGroups = Maps.newHashMap();
 
     public RegexOption() {
         setOptionProcessor(new ArgumentMaximumProcessor());

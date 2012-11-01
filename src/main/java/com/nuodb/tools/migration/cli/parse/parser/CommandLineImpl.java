@@ -16,6 +16,9 @@
  */
 package com.nuodb.tools.migration.cli.parse.parser;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.Trigger;
@@ -30,12 +33,12 @@ import java.util.*;
 public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     private List<String> arguments;
-    private Set<Option> options = new HashSet<Option>();
-    private Map<Option, List<Object>> values = new HashMap<Option, List<Object>>();
-    private Map<Option, Boolean> switches = new HashMap<Option, Boolean>();
-    private Map<Option, List<Object>> defaultValues = new HashMap<Option, List<Object>>();
-    private Map<Option, Boolean> defaultSwitches = new HashMap<Option, Boolean>();
-    private Map<Option, Properties> properties = new HashMap<Option, Properties>();
+    private Set<Option> options = Sets.newHashSet();
+    private Map<Option, List<Object>> values = Maps.newHashMap();
+    private Map<Option, Boolean> switches = Maps.newHashMap();
+    private Map<Option, List<Object>> defaultValues = Maps.newHashMap();
+    private Map<Option, Boolean> defaultSwitches = Maps.newHashMap();
+    private Map<Option, Properties> properties = Maps.newHashMap();
     private Option root;
     private Option current;
 
@@ -66,7 +69,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
         addOption(option);
         List<Object> values = this.values.get(option);
         if (values == null) {
-            values = new ArrayList<Object>();
+            values = Lists.newArrayList();
             this.values.put(option, values);
         }
         values.add(value);
@@ -117,7 +120,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     }
 
     protected Map<Trigger, Option> getTriggers() {
-        Map<Trigger, Option> triggers = new HashMap<Trigger, Option>();
+        Map<Trigger, Option> triggers = Maps.newHashMap();
         for (Option option : options) {
             triggers.put(new TriggerImpl(option.getName()), option);
             for (Trigger trigger : option.getTriggers()) {

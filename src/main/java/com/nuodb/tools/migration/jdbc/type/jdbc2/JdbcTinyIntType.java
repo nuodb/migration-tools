@@ -39,7 +39,7 @@ public class JdbcTinyIntType extends JdbcSmallIntType {
     public static final JdbcType INSTANCE = new JdbcTinyIntType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.TINYINT;
     }
 }

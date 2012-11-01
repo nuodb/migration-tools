@@ -27,6 +27,8 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.nuodb.tools.migration.cli.parse.*;
 import com.nuodb.tools.migration.utils.PriorityList;
 import com.nuodb.tools.migration.utils.PriorityListImpl;
@@ -82,14 +84,14 @@ public abstract class ContainerBase extends OptionBase implements Container {
 
     @Override
     public Set<String> getPrefixes() {
-        Set<String> prefixes = new HashSet<String>();
+        Set<String> prefixesOfContainer = Sets.newHashSet();
         if (group != null) {
-            prefixes.addAll(group.getPrefixes());
+            prefixesOfContainer.addAll(group.getPrefixes());
         }
-        if (this.prefixes != null) {
-            prefixes.addAll(this.prefixes);
+        if (prefixes != null) {
+            prefixesOfContainer.addAll(prefixes);
         }
-        return prefixes;
+        return prefixesOfContainer;
     }
 
     public void setPrefixes(Set<String> prefixes) {
@@ -237,7 +239,7 @@ public abstract class ContainerBase extends OptionBase implements Container {
 
     @Override
     public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
-        List<Help> help = new ArrayList<Help>();
+        List<Help> help = Lists.newArrayList();
         help.add(new HelpImpl(this, indent));
         Argument argument = getArgument();
         if (hints.contains(HelpHint.CONTAINER_ARGUMENT) && (argument != null)) {

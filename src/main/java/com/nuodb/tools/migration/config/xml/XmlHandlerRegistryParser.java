@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.config.xml;
 
+import com.google.common.collect.Lists;
 import com.nuodb.tools.migration.utils.Assertions;
 import com.nuodb.tools.migration.utils.ClassUtils;
 import com.nuodb.tools.migration.utils.Priority;
@@ -38,14 +39,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 public class XmlHandlerRegistryParser {
 
     protected transient final Log log = LogFactory.getLog(this.getClass());
 
-    protected final List<URL> resources = new ArrayList<URL>();
+    protected final List<URL> resources = Lists.newArrayList();
 
     public void addRegistry(String resource) {
         addRegistry(ClassUtils.getClassLoader().getResource(resource));

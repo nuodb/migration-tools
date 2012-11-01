@@ -16,10 +16,9 @@
  */
 package com.nuodb.tools.migration.cli.parse.parser;
 
+import com.google.common.collect.Lists;
 import com.nuodb.tools.migration.cli.parse.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -30,13 +29,13 @@ public class ParserImpl implements Parser {
      *
      * @param arguments to parse.
      * @param option    sets the option to parse against.
-     * @return the option set object.
+     * @return the option setValue object.
      */
     public OptionSet parse(String[] arguments, Option option) throws OptionException {
-        List<String> list = new ArrayList<String>(Arrays.asList(arguments));
+        List<String> list = Lists.newArrayList(arguments);
 
         CommandLine commandLine = new CommandLineImpl(option, list);
-        // pick up any defaults from the model
+        // pick up any defaults from the meta
         option.defaults(commandLine);
         // withConnection the options as far as possible
         ListIterator<String> iterator = list.listIterator();

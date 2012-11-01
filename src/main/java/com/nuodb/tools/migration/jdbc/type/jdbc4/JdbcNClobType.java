@@ -29,24 +29,32 @@ package com.nuodb.tools.migration.jdbc.type.jdbc4;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 
-import java.sql.NClob;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 /**
  * @author Sergey Bushik
  */
 public class JdbcNClobType implements JdbcType<NClob> {
+
     public static final JdbcType INSTANCE = new JdbcNClobType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.NCLOB;
     }
 
     @Override
-    public NClob extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends NClob> getTypeClass() {
+        return NClob.class;
+    }
+
+    @Override
+    public NClob getValue(ResultSet resultSet, int column) throws SQLException {
         return resultSet.getNClob(column);
+    }
+
+    @Override
+    public void setValue(PreparedStatement statement, int column, NClob value) throws SQLException {
+        statement.setNClob(column, value);
     }
 }

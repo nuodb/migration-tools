@@ -31,6 +31,7 @@ import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -43,12 +44,23 @@ public class JdbcNumericType extends JdbcTypeBase<BigDecimal> {
     public static final JdbcType INSTANCE = new JdbcNumericType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.NUMERIC;
     }
 
     @Override
-    public BigDecimal extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends BigDecimal> getTypeClass() {
+        return BigDecimal.class;
+    }
+
+    @Override
+    public BigDecimal getValue(ResultSet resultSet, int column) throws SQLException {
         return resultSet.getBigDecimal(column);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value,
+                                    int column) throws SQLException {
+        statement.setBigDecimal(column, value);
     }
 }

@@ -29,10 +29,9 @@ package com.nuodb.tools.migration.jdbc;
 
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.tools.migration.jdbc.connection.DriverManagerConnectionProvider;
-import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractor;
-import com.nuodb.tools.migration.jdbc.type.extract.JdbcTypeExtractorImpl;
-import com.nuodb.tools.migration.jdbc.type.jdbc4.Jdbc4Types;
+import com.nuodb.tools.migration.jdbc.metamodel.DatabaseInspector;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeAccessor;
+import com.nuodb.tools.migration.jdbc.type.JdbcTypeAccessorImpl;
 import com.nuodb.tools.migration.spec.ConnectionSpec;
 import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
 
@@ -45,20 +44,21 @@ public class JdbcServicesImpl implements JdbcServices {
 
     private ConnectionSpec connectionSpec;
     private ConnectionProvider connectionProvider;
-    private JdbcTypeExtractor jdbcTypeExtractor;
+    private JdbcTypeAccessor jdbcTypeAccessor;
 
     public JdbcServicesImpl(DriverManagerConnectionSpec connectionSpec) {
         this(connectionSpec, new DriverManagerConnectionProvider(connectionSpec, false, TRANSACTION_READ_COMMITTED));
     }
 
     public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider) {
-        this(connectionSpec, connectionProvider, new JdbcTypeExtractorImpl(Jdbc4Types.INSTANCE));
+        this(connectionSpec, connectionProvider, new JdbcTypeAccessorImpl());
     }
 
-    public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider, JdbcTypeExtractor jdbcTypeExtractor) {
+    public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider,
+                            JdbcTypeAccessor jdbcTypeAccessor) {
         this.connectionSpec = connectionSpec;
         this.connectionProvider = connectionProvider;
-        this.jdbcTypeExtractor = jdbcTypeExtractor;
+        this.jdbcTypeAccessor = jdbcTypeAccessor;
     }
 
     @Override
@@ -67,20 +67,16 @@ public class JdbcServicesImpl implements JdbcServices {
     }
 
     @Override
-    public JdbcTypeExtractor getJdbcTypeExtractor() {
-        return jdbcTypeExtractor;
+    public JdbcTypeAccessor getJdbcTypeAccessor() {
+        return jdbcTypeAccessor;
     }
 
     @Override
-    public DatabaseIntrospector getDatabaseIntrospector() {
-        return createDatabaseIntrospector();
-    }
-
-    protected DatabaseIntrospector createDatabaseIntrospector() {
-        DatabaseIntrospector introspector = new DatabaseIntrospector();
-        introspector.withConnectionProvider(getConnectionProvider());
-        introspector.withCatalog(connectionSpec.getCatalog());
-        introspector.withSchema(connectionSpec.getSchema());
-        return introspector;
+    public DatabaseInspector getDatabaseIntrospector() {
+        DatabaseInspector inspector = new DatabaseInspector();
+        inspector.withConnectionProvider(getConnectionProvider());
+        inspector.withCatalog(connectionSpec.getCatalog());
+        inspector.withSchema(connectionSpec.getSchema());
+        return inspector;
     }
 }

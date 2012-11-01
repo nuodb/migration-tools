@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.jdbc.dialect.resolve;
 
+import com.google.common.collect.Maps;
 import com.nuodb.tools.migration.jdbc.dialect.*;
 import com.nuodb.tools.migration.utils.ClassUtils;
 import org.apache.commons.logging.Log;
@@ -34,7 +35,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,8 +44,7 @@ public class DatabaseDialectResolverImpl implements DatabaseDialectResolver {
 
     private final transient Log log = LogFactory.getLog(getClass());
 
-    private Map<DatabaseInfoMatcher, Class<? extends DatabaseDialect>> databaseInfoMatchers =
-            new HashMap<DatabaseInfoMatcher, Class<? extends DatabaseDialect>>();
+    private Map<DatabaseInfoMatcher, Class<? extends DatabaseDialect>> databaseInfoMatchers = Maps.newHashMap();
 
     private Class<? extends DatabaseDialect> defaultDatabaseDialect = DatabaseDialectBase.class;
 

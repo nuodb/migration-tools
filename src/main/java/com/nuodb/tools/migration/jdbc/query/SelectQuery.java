@@ -27,11 +27,11 @@
  */
 package com.nuodb.tools.migration.jdbc.query;
 
-import com.nuodb.tools.migration.jdbc.metamodel.Column;
+import com.google.common.collect.Lists;
 import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.tools.migration.jdbc.metamodel.Column;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,9 +42,9 @@ public class SelectQuery implements Query {
 
     private DatabaseDialect databaseDialect;
     private boolean qualifyNames;
-    private List<Table> tables = new ArrayList<Table>();
-    private List<Column> columns = new ArrayList<Column>();
-    private List<String> conditions = new ArrayList<String>();
+    private List<Table> tables = Lists.newArrayList();
+    private List<Column> columns = Lists.newArrayList();
+    private List<String> conditions = Lists.newArrayList();
 
     public void addColumn(Column column) {
         columns.add(column);
@@ -72,7 +72,7 @@ public class SelectQuery implements Query {
         query.append(" from ");
         for (Iterator<Table> iterator = tables.iterator(); iterator.hasNext(); ) {
             Table table = iterator.next();
-            query.append(qualifyNames ? table.getNameQualified(databaseDialect) : table.getQuotedName(databaseDialect));
+            query.append(qualifyNames ? table.getQualifiedName(databaseDialect) : table.getQuotedName(databaseDialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }

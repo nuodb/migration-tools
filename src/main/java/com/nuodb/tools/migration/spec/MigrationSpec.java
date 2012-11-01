@@ -27,13 +27,14 @@
  */
 package com.nuodb.tools.migration.spec;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+
 import java.util.List;
 
 public class MigrationSpec {
 
-    private List<? extends ConnectionSpec> connectionSpecs = new ArrayList<ConnectionSpec>();
-    private List<? extends TaskSpec> taskSpecs = new ArrayList<TaskSpec>();
+    private List<? extends ConnectionSpec> connectionSpecs = Lists.newArrayList();
+    private List<? extends TaskSpec> taskSpecs = Lists.newArrayList();
 
     public List<? extends ConnectionSpec> getConnectionSpecs() {
         return connectionSpecs;

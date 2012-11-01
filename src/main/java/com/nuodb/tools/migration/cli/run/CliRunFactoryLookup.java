@@ -27,8 +27,9 @@
  */
 package com.nuodb.tools.migration.cli.run;
 
+import com.google.common.collect.Maps;
+
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,7 +37,7 @@ import java.util.Map;
  */
 public class CliRunFactoryLookup {
 
-    private Map<String, CliRunFactory> factories = new HashMap<String, CliRunFactory>();
+    private Map<String, CliRunFactory> factories = Maps.newHashMap();
 
     public CliRunFactoryLookup() {
         register(new CliDumpFactory());

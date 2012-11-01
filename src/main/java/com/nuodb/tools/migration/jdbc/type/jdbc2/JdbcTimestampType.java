@@ -30,10 +30,7 @@ package com.nuodb.tools.migration.jdbc.type.jdbc2;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 
 /**
  * @author Sergey Bushik
@@ -43,12 +40,23 @@ public class JdbcTimestampType extends JdbcTypeBase<Timestamp> {
     public static final JdbcType INSTANCE = new JdbcTimestampType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.TIMESTAMP;
     }
 
     @Override
-    public Timestamp extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends Timestamp> getTypeClass() {
+        return Timestamp.class;
+    }
+
+    @Override
+    public Timestamp getValue(ResultSet resultSet, int column) throws SQLException {
         return resultSet.getTimestamp(column);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Timestamp value,
+                                    int column) throws SQLException {
+        statement.setTimestamp(column, value);
     }
 }

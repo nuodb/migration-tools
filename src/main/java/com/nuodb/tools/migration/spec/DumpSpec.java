@@ -27,7 +27,8 @@
  */
 package com.nuodb.tools.migration.spec;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+
 import java.util.Collection;
 
 /**
@@ -36,8 +37,8 @@ import java.util.Collection;
 public class DumpSpec extends TaskSpecBase {
 
     private ConnectionSpec connectionSpec;
-    private Collection<SelectQuerySpec> selectQuerySpecs = new ArrayList<SelectQuerySpec>();
-    private Collection<NativeQuerySpec> nativeQuerySpecs = new ArrayList<NativeQuerySpec>();
+    private Collection<SelectQuerySpec> selectQuerySpecs = Lists.newArrayList();
+    private Collection<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
     private FormatSpec outputSpec;
 
     public ConnectionSpec getConnectionSpec() {

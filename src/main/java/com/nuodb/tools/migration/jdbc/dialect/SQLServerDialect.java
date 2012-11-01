@@ -41,4 +41,9 @@ public class SQLServerDialect extends DatabaseDialectBase {
     public char openQuote() {
         return '[';
     }
+
+    @Override
+    public String getNoColumnsInsertString() {
+        return "default values";
+    }
 }

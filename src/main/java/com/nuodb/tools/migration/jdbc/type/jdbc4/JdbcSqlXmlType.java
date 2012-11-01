@@ -30,24 +30,32 @@ package com.nuodb.tools.migration.jdbc.type.jdbc4;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLXML;
-import java.sql.Types;
+import java.sql.*;
 
 /**
  * @author Sergey Bushik
  */
 public class JdbcSqlXmlType extends JdbcTypeBase<SQLXML> {
+
     public static final JdbcType INSTANCE = new JdbcSqlXmlType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.SQLXML;
     }
 
     @Override
-    public SQLXML extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends SQLXML> getTypeClass() {
+        return SQLXML.class;
+    }
+
+    @Override
+    public SQLXML getValue(ResultSet resultSet, int column) throws SQLException {
         return resultSet.getSQLXML(column);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, SQLXML value, int column) throws SQLException {
+        statement.setSQLXML(column, value);
     }
 }

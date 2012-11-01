@@ -27,17 +27,20 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
+import org.apache.commons.lang.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Database {
 
-    private Map<Name, Catalog> catalogs = new HashMap<Name, Catalog>();
+    private Map<Name, Catalog> catalogs = Maps.newHashMap();
     private DriverInfo driverInfo;
     private DatabaseInfo databaseInfo;
     private DatabaseDialect databaseDialect;
@@ -66,12 +69,12 @@ public class Database {
         this.databaseDialect = databaseDialect;
     }
 
-    public Map<Name, Catalog> getCatalogs() {
-        return catalogs;
+    public Catalog createCatalog(String catalog) {
+        return getCatalog(catalog, true);
     }
 
-    public void setCatalogs(Map<Name, Catalog> catalogs) {
-        this.catalogs = catalogs;
+    public Schema createSchema(String catalog, String schema) {
+        return getCatalog(catalog, true).getSchema(schema, true);
     }
 
     public Catalog getCatalog(String name) {
@@ -79,58 +82,104 @@ public class Database {
     }
 
     public Catalog getCatalog(Name name) {
+        return getCatalog(name, false);
+    }
+
+    public Catalog getCatalog(String catalog, boolean create) {
+        return getCatalog(Name.valueOf(catalog), create);
+    }
+
+    public Catalog getCatalog(Name name, boolean create) {
         Catalog catalog = catalogs.get(name);
         if (catalog == null) {
-            catalog = createCatalog(name);
+            if (create) {
+                catalog = createCatalog(name);
+            } else {
+                throw new MetaModelException(String.format("Catalog %s doesn't exist", name));
+            }
         }
         return catalog;
     }
 
-    public Catalog createCatalog(String name) {
-        return getCatalog(Name.valueOf(name));
-    }
-
-    public Catalog createCatalog(Name name) {
+    private Catalog createCatalog(Name name) {
         Catalog catalog = new Catalog(this, name);
         catalogs.put(name, catalog);
         return catalog;
     }
 
-    public Schema getSchema(String catalog, String schema) {
-        return getSchema(Name.valueOf(catalog), Name.valueOf(schema));
+    public List<Catalog> listCatalogs() {
+        return Lists.newArrayList(catalogs.values());
     }
 
-    public Schema getSchema(Name catalog, Name schema) {
-        return getCatalog(catalog).getSchema(schema);
-    }
-
-    public Schema createSchema(String catalog, String schema) {
-        return createSchema(Name.valueOf(catalog), Name.valueOf(schema));
-    }
-
-    public Schema createSchema(Name catalog, Name schema) {
-        return getCatalog(catalog).createSchema(schema);
-    }
-
-    public Collection<Catalog> listCatalogs() {
-        return new ArrayList<Catalog>(catalogs.values());
-    }
-
-    public Collection<Schema> listSchemas() {
+    public List<Schema> listSchemas() {
         Collection<Catalog> catalogs = listCatalogs();
-        List<Schema> schemas = new ArrayList<Schema>();
+        List<Schema> schemas = Lists.newArrayList();
         for (Catalog catalog : catalogs) {
             schemas.addAll(catalog.listSchemas());
         }
         return schemas;
     }
 
-    public Collection<Table> listTables() {
+    public List<Table> listTables() {
         Collection<Schema> schemas = listSchemas();
-        List<Table> tables = new ArrayList<Table>();
+        List<Table> tables = Lists.newArrayList();
         for (Schema schema : schemas) {
             tables.addAll(schema.listTables());
         }
         return tables;
+    }
+
+    public Table findTable(String table) {
+        List<Table> tables = findTables(table);
+        if (tables.isEmpty()) {
+            throw new MetaModelException(String.format("Table %s doesn't exist", table));
+        } else if (tables.size() > 1) {
+            throw new MetaModelException(String.format("Multiple tables %s correspond to %s", tables, table));
+        }
+        return tables.get(0);
+    }
+
+    public List<Table> findTables(String table) {
+        String[] parts = StringUtils.split(table, ".");
+        List<Table> tables = Lists.newArrayList();
+        if (parts.length == 1) {
+            tables.addAll(listTables(parts[0]));
+        } else if (parts.length == 2) {
+            tables.addAll(listTables(parts[0], parts[1]));
+            tables.addAll(listTables(parts[0], null, parts[1]));
+        } else if (parts.length > 2) {
+            tables.addAll(listTables(parts[0], parts[1], parts[2]));
+        }
+        return tables;
+    }
+
+    public List<Table> listTables(final String tableName) {
+        return Lists.newArrayList(Iterables.filter(listTables(), new Predicate<Table>() {
+            @Override
+            public boolean apply(Table table) {
+                return StringUtils.equals(table.getName(), tableName);
+            }
+        }));
+    }
+
+    public List<Table> listTables(final String schemaName, final String tableName) {
+        return Lists.newArrayList(Iterables.find(listTables(), new Predicate<Table>() {
+            @Override
+            public boolean apply(Table table) {
+                return StringUtils.equals(table.getSchema().getName(), schemaName) &&
+                        StringUtils.equals(table.getName(), tableName);
+            }
+        }));
+    }
+
+    public List<Table> listTables(final String catalogName, final String schemaName, final String tableName) {
+        return Lists.newArrayList(Iterables.find(listTables(), new Predicate<Table>() {
+            @Override
+            public boolean apply(Table table) {
+                return StringUtils.equals(table.getCatalog().getName(), catalogName) &&
+                        StringUtils.equals(table.getSchema().getName(), schemaName) &&
+                        StringUtils.equals(table.getName(), tableName);
+            }
+        }));
     }
 }

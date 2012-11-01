@@ -39,4 +39,6 @@ public interface DatabaseDialect {
     char closeQuote();
 
     String quote(String name);
+
+    String getNoColumnsInsertString();
 }

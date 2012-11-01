@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.cli;
 
+import com.google.common.collect.Lists;
 import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.OptionException;
 import com.nuodb.tools.migration.cli.parse.OptionSet;
@@ -38,7 +39,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -82,7 +82,7 @@ public class CliHandler extends CliHandlerSupport {
     private static String[] loadArguments(String resource) throws IOException {
         InputStream input = CliHandler.class.getResourceAsStream(resource);
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-        List<String> arguments = new ArrayList<String>();
+        List<String> arguments = Lists.newArrayList();
         String line;
         while ((line = reader.readLine()) != null) {
             line = line.trim();

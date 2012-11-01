@@ -27,13 +27,14 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Schema extends HasNameBase {
-    private Map<Name, Table> tables = new HashMap<Name, Table>();
+    private Map<Name, Table> tables = Maps.newHashMap();
 
     private Database database;
     private Catalog catalog;
@@ -57,13 +58,19 @@ public class Schema extends HasNameBase {
     }
 
     public Table getTable(String name) {
-        return getTable(Name.valueOf(name));
+        return getTable(name, false);
     }
 
-    public Table getTable(Name name) {
+    public Table getTable(String name, boolean create) {
+        return getTable(Name.valueOf(name), create);
+    }
+
+    public Table getTable(Name name, boolean create) {
         Table table = tables.get(name);
-        if (table == null) {
+        if (table == null && create) {
             table = createTable(name, Table.TABLE);
+        } else {
+            throw new MetaModelException(String.format("Table %s doesn't exist", name));
         }
         return table;
     }
@@ -79,6 +86,6 @@ public class Schema extends HasNameBase {
     }
 
     public Collection<Table> listTables() {
-        return new ArrayList<Table>(tables.values());
+        return Lists.newArrayList(tables.values());
     }
 }

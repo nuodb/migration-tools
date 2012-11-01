@@ -27,7 +27,8 @@
  */
 package com.nuodb.tools.migration.spec;
 
-import java.util.HashMap;
+import com.google.common.collect.Maps;
+
 import java.util.Map;
 
 public class DriverManagerConnectionSpec extends ConnectionSpecBase {
@@ -36,7 +37,7 @@ public class DriverManagerConnectionSpec extends ConnectionSpecBase {
     private String url;
     private String username;
     private String password;
-    private Map<String, String> properties = new HashMap<String, String>();
+    private Map<String, String> properties = Maps.newHashMap();
 
     public String getDriver() {
         return driver;

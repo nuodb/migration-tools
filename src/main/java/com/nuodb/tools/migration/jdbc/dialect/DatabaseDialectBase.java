@@ -49,4 +49,9 @@ public class DatabaseDialectBase implements DatabaseDialect {
         }
         return openQuote() + name.substring(1, name.length() - 1) + closeQuote();
     }
+
+    @Override
+    public String getNoColumnsInsertString() {
+        return "values ()";
+    }
 }

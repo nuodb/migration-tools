@@ -30,10 +30,7 @@ package com.nuodb.tools.migration.jdbc.type.jdbc2;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
-import java.sql.Blob;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 /**
  * @author Sergey Bushik
@@ -43,12 +40,22 @@ public class JdbcBlobType extends JdbcTypeBase<Blob> {
     public static final JdbcType INSTANCE = new JdbcBlobType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.BLOB;
     }
 
     @Override
-    public Blob extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends Blob> getTypeClass() {
+        return Blob.class;
+    }
+
+    @Override
+    public Blob getValue(ResultSet resultSet, int column) throws SQLException {
         return resultSet.getBlob(column);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Blob value, int column) throws SQLException {
+        statement.setBlob(column, value);
     }
 }

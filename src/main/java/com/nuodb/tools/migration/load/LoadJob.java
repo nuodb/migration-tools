@@ -27,17 +27,29 @@
  */
 package com.nuodb.tools.migration.load;
 
-import com.nuodb.tools.migration.format.catalog.QueryEntryCatalog;
-import com.nuodb.tools.migration.format.catalog.QueryEntryReader;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.nuodb.tools.migration.output.catalog.Entry;
+import com.nuodb.tools.migration.output.catalog.EntryCatalog;
+import com.nuodb.tools.migration.output.catalog.EntryReader;
+import com.nuodb.tools.migration.output.format.ColumnDataModel;
+import com.nuodb.tools.migration.output.format.DataFormatFactory;
+import com.nuodb.tools.migration.output.format.InputDataFormat;
+import com.nuodb.tools.migration.output.format.csv.CsvInputDataFormat;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionCallback;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.tools.migration.jdbc.metamodel.Database;
-import com.nuodb.tools.migration.jdbc.metamodel.DatabaseIntrospector;
+import com.nuodb.tools.migration.jdbc.metamodel.*;
+import com.nuodb.tools.migration.jdbc.query.*;
 import com.nuodb.tools.migration.job.JobBase;
 import com.nuodb.tools.migration.job.JobExecution;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -48,10 +60,12 @@ import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
  */
 public class LoadJob extends JobBase {
 
+    protected final Log log = LogFactory.getLog(getClass());
     private JdbcServices jdbcServices;
-    private QueryEntryCatalog queryEntryCatalog;
+    private EntryCatalog entryCatalog;
     private String inputType;
     private Map<String, String> inputAttributes;
+    private DataFormatFactory<InputDataFormat> inputDataFormatFactory;
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
@@ -59,23 +73,72 @@ public class LoadJob extends JobBase {
         connectionProvider.execute(new ConnectionCallback() {
             @Override
             public void execute(Connection connection) throws SQLException {
-                DatabaseIntrospector databaseIntrospector = jdbcServices.getDatabaseIntrospector();
-                databaseIntrospector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-                databaseIntrospector.withConnection(connection);
-                Database database = databaseIntrospector.introspect();
+                DatabaseInspector databaseInspector = jdbcServices.getDatabaseIntrospector();
+                databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+                databaseInspector.withConnection(connection);
+                Database database = databaseInspector.inspect();
 
-                QueryEntryReader reader = queryEntryCatalog.openQueryEntryReader();
+                EntryReader entryReader = entryCatalog.openReader();
                 try {
-                    load(execution, connection, database, reader);
+                    for (Entry entry : entryReader.getEntries()) {
+                        load(execution, connection, database, entryReader, entry);
+                    }
+                    connection.commit();
                 } finally {
-                    reader.close();
+                    entryReader.close();
                 }
             }
         });
     }
 
-    protected void load(JobExecution execution, Connection connection, Database database, QueryEntryReader reader) {
-        System.out.println("LoadJob.load");
+    protected void load(JobExecution execution, Connection connection, Database database, EntryReader reader,
+                        Entry entry) throws SQLException {
+        InputStream entryInput = reader.getEntryInput(entry);
+        try {
+            final CsvInputDataFormat format = (CsvInputDataFormat) inputDataFormatFactory.createDataFormat(entry.getType());
+            format.setAttributes(inputAttributes);
+            format.setInputStream(entryInput);
+            format.setJdbcTypeAccess(jdbcServices.getJdbcTypeAccessor());
+            format.init();
+            final Table table = database.findTable(entry.getName());
+            final ColumnDataModel model = format.read();
+            final InsertQuery query = createInsertQuery(table, model);
+            final ColumnSetModel columnSetModel = new ColumnSetModelImpl(model.getColumns(),
+                    Collections2.transform(model.getColumns(), new Function<String, Integer>() {
+                        @Override
+                        public Integer apply(String column) {
+                            ColumnType type = table.getColumn(column).getType();
+                            return type.getTypeCode();
+                        }
+                    }));
+            QueryTemplate queryTemplate = new QueryTemplate(connection);
+            queryTemplate.execute(
+                    new StatementBuilder<PreparedStatement>() {
+                        @Override
+                        public PreparedStatement build(Connection connection) throws SQLException {
+                            return connection.prepareStatement(query.toQuery());
+                        }
+                    },
+                    new StatementCallback<PreparedStatement>() {
+                        @Override
+                        public void execute(PreparedStatement statement) throws SQLException {
+                            while (format.bind(statement, columnSetModel)) {
+                                statement.executeUpdate();
+                            }
+                        }
+                    }
+            );
+        } finally {
+            IOUtils.closeQuietly(entryInput);
+        }
+    }
+
+    protected InsertQuery createInsertQuery(Table table, ColumnDataModel model) {
+        InsertQueryBuilder builder = new InsertQueryBuilder();
+        builder.setQualifyNames(true);
+        builder.setTable(table);
+        builder.setColumns(model.getColumns());
+        return builder.build();
     }
 
     public JdbcServices getJdbcServices() {
@@ -86,12 +149,12 @@ public class LoadJob extends JobBase {
         this.jdbcServices = jdbcServices;
     }
 
-    public QueryEntryCatalog getQueryEntryCatalog() {
-        return queryEntryCatalog;
+    public EntryCatalog getEntryCatalog() {
+        return entryCatalog;
     }
 
-    public void setQueryEntryCatalog(QueryEntryCatalog queryEntryCatalog) {
-        this.queryEntryCatalog = queryEntryCatalog;
+    public void setEntryCatalog(EntryCatalog entryCatalog) {
+        this.entryCatalog = entryCatalog;
     }
 
     public String getInputType() {
@@ -108,5 +171,13 @@ public class LoadJob extends JobBase {
 
     public void setInputAttributes(Map<String, String> inputAttributes) {
         this.inputAttributes = inputAttributes;
+    }
+
+    public DataFormatFactory<InputDataFormat> getInputDataFormatFactory() {
+        return inputDataFormatFactory;
+    }
+
+    public void setInputDataFormatFactory(DataFormatFactory<InputDataFormat> inputDataFormatFactory) {
+        this.inputDataFormatFactory = inputDataFormatFactory;
     }
 }

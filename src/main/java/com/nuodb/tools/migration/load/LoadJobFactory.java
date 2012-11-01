@@ -27,9 +27,12 @@
  */
 package com.nuodb.tools.migration.load;
 
-import com.nuodb.tools.migration.format.CsvFormat;
-import com.nuodb.tools.migration.format.catalog.QueryEntryCatalog;
-import com.nuodb.tools.migration.format.catalog.QueryEntryCatalogImpl;
+import com.nuodb.tools.migration.output.catalog.EntryCatalog;
+import com.nuodb.tools.migration.output.catalog.EntryCatalogImpl;
+import com.nuodb.tools.migration.output.format.csv.CsvDataFormat;
+import com.nuodb.tools.migration.output.format.DataFormatFactory;
+import com.nuodb.tools.migration.output.format.InputDataFormat;
+import com.nuodb.tools.migration.output.format.InputDataFormatFactory;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
 import com.nuodb.tools.migration.job.JobExecutor;
@@ -47,6 +50,7 @@ import java.util.HashMap;
 public class LoadJobFactory implements JobFactory<LoadJob> {
 
     private LoadSpec loadSpec;
+    private DataFormatFactory<InputDataFormat> inputDataFormatFactory = new InputDataFormatFactory();
 
     @Override
     public LoadJob createJob() {
@@ -57,7 +61,8 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         job.setJdbcServices(createJdbcServices(connectionSpec));
         job.setInputType(inputSpec.getType());
         job.setInputAttributes(inputSpec.getAttributes());
-        job.setQueryEntryCatalog(createQueryEntryCatalog(inputSpec));
+        job.setEntryCatalog(createEntryCatalog(inputSpec));
+        job.setInputDataFormatFactory(inputDataFormatFactory);
         return job;
     }
 
@@ -65,8 +70,8 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         return new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec);
     }
 
-    protected QueryEntryCatalog createQueryEntryCatalog(FormatSpec inputSpec) {
-        return new QueryEntryCatalogImpl(inputSpec.getPath(), inputSpec.getType());
+    protected EntryCatalog createEntryCatalog(FormatSpec inputSpec) {
+        return new EntryCatalogImpl(inputSpec.getPath());
     }
 
     public LoadSpec getLoadSpec() {
@@ -77,14 +82,23 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         this.loadSpec = loadSpec;
     }
 
+    public DataFormatFactory<InputDataFormat> getInputDataFormatFactory() {
+        return inputDataFormatFactory;
+    }
+
+    public void setInputDataFormatFactory(DataFormatFactory<InputDataFormat> inputDataFormatFactory) {
+        this.inputDataFormatFactory = inputDataFormatFactory;
+    }
+
     public static void main(String[] args) throws LoadException {
         DriverManagerConnectionSpec connectionSpec = new DriverManagerConnectionSpec();
         connectionSpec.setDriver("com.mysql.jdbc.Driver");
-        connectionSpec.setUrl("jdbc:mysql://localhost:3306/test");
+        connectionSpec.setUrl("jdbc:mysql://localhost:3306/enron-load");
         connectionSpec.setUsername("root");
+        connectionSpec.setCatalog("enron-load");
 
         FormatSpec inputSpec = new FormatSpecBase();
-        inputSpec.setType(CsvFormat.TYPE);
+        inputSpec.setType(CsvDataFormat.TYPE);
         inputSpec.setPath("/tmp/test/dump.cat");
         inputSpec.setAttributes(new HashMap<String, String>() {
             {

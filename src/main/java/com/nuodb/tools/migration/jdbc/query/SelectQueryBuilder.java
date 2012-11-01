@@ -27,36 +27,37 @@
  */
 package com.nuodb.tools.migration.jdbc.query;
 
+import com.google.common.collect.Lists;
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
 import com.nuodb.tools.migration.jdbc.metamodel.Column;
 import com.nuodb.tools.migration.jdbc.metamodel.Database;
-import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 /**
  * @author Sergey Bushik
  */
-public class SelectQueryBuilder {
+public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
 
     private DatabaseDialect databaseDialect;
     private Table table;
     private boolean qualifyNames;
-    private Collection<String> columns = new ArrayList<String>();
-    private Collection<String> filters = new ArrayList<String>();
+    private Collection<String> columns = Lists.newArrayList();
+    private Collection<String> filters = Lists.newArrayList();
 
+    @Override
     public SelectQuery build() {
         Collection<Column> selectQueryColumns;
         Collection<Column> tableColumns = table.listColumns();
         if (columns == null || columns.isEmpty()) {
             selectQueryColumns = tableColumns;
         } else {
-            selectQueryColumns = new ArrayList<Column>();
+            selectQueryColumns = Lists.newArrayList();
             for (String column : columns) {
                 for (Column tableColumn : tableColumns) {
-                    if (tableColumn.getNameObject().value().equals(column)) {
+                    if (tableColumn.getName().equals(column)) {
                         selectQueryColumns.add(tableColumn);
                     }
                 }
@@ -106,6 +107,10 @@ public class SelectQueryBuilder {
         this.qualifyNames = qualifyNames;
     }
 
+    public void addColumn(String column) {
+        this.columns.add(column);
+    }
+
     public Collection<String> getColumns() {
         return columns;
     }
@@ -114,19 +119,15 @@ public class SelectQueryBuilder {
         this.columns = columns;
     }
 
+    public void addFilter(String filter) {
+        this.filters.add(filter);
+    }
+
     public Collection<String> getFilters() {
         return filters;
     }
 
     public void setFilters(List<String> filters) {
         this.filters = filters;
-    }
-
-    public void addColumn(String column) {
-        this.columns.add(column);
-    }
-
-    public void addFilter(String filter) {
-        this.filters.add(filter);
     }
 }

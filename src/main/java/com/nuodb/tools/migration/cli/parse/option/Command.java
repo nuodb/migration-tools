@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
+import com.google.common.collect.Lists;
 import com.nuodb.tools.migration.cli.parse.*;
 import com.nuodb.tools.migration.utils.PriorityList;
 import com.nuodb.tools.migration.utils.PriorityListImpl;
@@ -99,7 +100,7 @@ public class Command extends ContainerBase {
         Set<String> aliases = getAliases();
         if (displayAliases && (aliases != null && !aliases.isEmpty())) {
             buffer.append(" (");
-            List<String> list = new ArrayList<String>(aliases);
+            List<String> list = Lists.newArrayList(aliases);
             Collections.sort(list);
             for (Iterator<String> i = list.iterator(); i.hasNext(); ) {
                 String alias = i.next();

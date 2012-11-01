@@ -30,6 +30,7 @@ package com.nuodb.tools.migration.jdbc.type.jdbc2;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -42,13 +43,23 @@ public class JdbcFloatType extends JdbcTypeBase<Float> {
     public static final JdbcType INSTANCE = new JdbcFloatType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.FLOAT;
     }
 
     @Override
-    public Float extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends Float> getTypeClass() {
+        return Float.class;
+    }
+
+    @Override
+    public Float getValue(ResultSet resultSet, int column) throws SQLException {
         float floatValue = resultSet.getFloat(column);
         return resultSet.wasNull() ? null : floatValue;
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Float value, int column) throws SQLException {
+        statement.setFloat(column, value);
     }
 }

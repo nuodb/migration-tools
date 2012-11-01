@@ -30,7 +30,7 @@ package com.nuodb.tools.migration.jdbc.query;
 /**
  * @author Sergey Bushik
  */
-public class NativeQueryBuilder {
+public class NativeQueryBuilder implements QueryBuilder<NativeQuery> {
 
     private String query;
 
@@ -42,6 +42,7 @@ public class NativeQueryBuilder {
         this.query = query;
     }
 
+    @Override
     public NativeQuery build() {
         return new NativeQuery(query);
     }

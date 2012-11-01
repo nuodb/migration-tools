@@ -31,9 +31,9 @@ package com.nuodb.tools.migration.cli.parse.option;
  * @author Sergey Bushik
  */
 
+import com.google.common.collect.Lists;
 import com.nuodb.tools.migration.cli.parse.Argument;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,7 +47,7 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
     private boolean required;
     private int minimum = 0;
     private int maximum = 1;
-    private List<Object> defaultValues = new ArrayList<Object>();
+    private List<Object> defaultValues = Lists.newArrayList();
     private String valuesSeparator;
 
     public ArgumentBuilderImpl(OptionFormat optionFormat) {

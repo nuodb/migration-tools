@@ -39,7 +39,7 @@ public class JdbcNVarCharType extends JdbcNCharType {
     public static final JdbcType INSTANCE = new JdbcNVarCharType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.NVARCHAR;
     }
 }

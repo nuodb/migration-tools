@@ -30,6 +30,7 @@ package com.nuodb.tools.migration.jdbc.type.jdbc2;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -42,13 +43,23 @@ public class JdbcSmallIntType extends JdbcTypeBase<Short> {
     public static final JdbcType INSTANCE = new JdbcSmallIntType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.SMALLINT;
     }
 
     @Override
-    public Short extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends Short> getTypeClass() {
+        return Short.class;
+    }
+
+    @Override
+    public Short getValue(ResultSet resultSet, int column) throws SQLException {
         short shortValue = resultSet.getShort(column);
         return resultSet.wasNull() ? null : shortValue;
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Short value, int column) throws SQLException {
+        statement.setShort(column, value);
     }
 }

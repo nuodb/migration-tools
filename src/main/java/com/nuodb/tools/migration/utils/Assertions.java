@@ -33,7 +33,7 @@ public class Assertions {
     }
 
     public static void assertNotNull(Object object) {
-        assertNotNull(object, "Value is required");
+        assertNotNull(object, "Not null value is required");
     }
 
     public static void assertNotNull(Object object, String message) {
@@ -43,7 +43,7 @@ public class Assertions {
     }
 
     public static void assertTrue(boolean expression) {
-        assertTrue(expression, "True is expected");
+        assertTrue(expression, "Boolean true is expected");
     }
 
     public static void assertTrue(boolean expression, String message) {

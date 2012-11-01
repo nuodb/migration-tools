@@ -38,5 +38,7 @@ public interface HasName {
 
     String getName();
 
+    String getQuotedName();
+
     String getQuotedName(DatabaseDialect dialect);
 }

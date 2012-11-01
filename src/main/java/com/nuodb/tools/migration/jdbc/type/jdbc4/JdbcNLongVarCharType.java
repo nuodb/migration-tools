@@ -39,7 +39,7 @@ public class JdbcNLongVarCharType extends JdbcNCharType {
     public static final JdbcType INSTANCE = new JdbcNLongVarCharType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.LONGNVARCHAR;
     }
 }

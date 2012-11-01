@@ -39,7 +39,7 @@ public class JdbcStructType extends JdbcObjectType {
     public static final JdbcType INSTANCE = new JdbcStructType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.STRUCT;
     }
 }

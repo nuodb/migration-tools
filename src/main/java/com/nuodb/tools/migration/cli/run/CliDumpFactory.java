@@ -40,7 +40,7 @@ import com.nuodb.tools.migration.spec.DumpSpec;
 import java.util.Collections;
 
 /**
- * The Factory instantiates a {@link CliDump} which is a set of groups of options for source database connection spec
+ * The Factory instantiates a {@link CliDump} which is a setValue of groups of options for source database connection spec
  * {@link CliRunSupport#createSourceGroup}, spec of withConnection format & type via {@link CliRunSupport#createOutputGroup},
  * table option {@link CliRunSupport#createSelectQueryGroup} and after a validation is passed assembles command line
  * option arguments into a {@link DumpSpec} object.

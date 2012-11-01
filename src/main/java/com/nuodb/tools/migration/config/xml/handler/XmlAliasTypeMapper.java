@@ -27,19 +27,19 @@
  */
 package com.nuodb.tools.migration.config.xml.handler;
 
+import com.google.common.collect.Maps;
 import com.nuodb.tools.migration.config.xml.XmlConstants;
 import com.nuodb.tools.migration.config.xml.XmlPersisterException;
 import com.nuodb.tools.migration.config.xml.XmlReadContext;
 import com.nuodb.tools.migration.config.xml.XmlReadHandler;
 import org.simpleframework.xml.stream.InputNode;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class XmlAliasTypeMapper<T> implements XmlReadHandler<T>, XmlConstants {
 
-    private Map<TypeAlias, Class<? extends T>> typeAliases = new HashMap<TypeAlias, Class<? extends T>>();
+    private Map<TypeAlias, Class<? extends T>> typeAliases = Maps.newHashMap();
 
     public void bind(String namespace, String element, String name, Class<? extends T> type) {
         typeAliases.put(new TypeAlias(namespace, element, name), type);

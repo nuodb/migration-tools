@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.jdbc.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -35,7 +36,11 @@ import java.sql.SQLException;
  */
 public interface JdbcType<T> {
 
-    int getSqlType();
+    int getTypeCode();
 
-    T extract(ResultSet resultSet, int column, int sqlType) throws SQLException;
+    Class<? extends T> getTypeClass();
+
+    T getValue(ResultSet resultSet, int column) throws SQLException;
+
+    void setValue(PreparedStatement statement, int column, T value) throws SQLException;
 }

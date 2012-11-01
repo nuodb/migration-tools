@@ -39,7 +39,7 @@ public class JdbcOtherType extends JdbcObjectType {
     public static final JdbcType INSTANCE = new JdbcOtherType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.OTHER;
     }
 }

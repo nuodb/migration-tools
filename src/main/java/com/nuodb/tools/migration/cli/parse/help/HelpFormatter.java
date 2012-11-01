@@ -16,6 +16,7 @@
  */
 package com.nuodb.tools.migration.cli.parse.help;
 
+import com.google.common.collect.Sets;
 import com.nuodb.tools.migration.cli.parse.Help;
 import com.nuodb.tools.migration.cli.parse.HelpHint;
 import com.nuodb.tools.migration.cli.parse.Option;
@@ -44,7 +45,7 @@ public class HelpFormatter extends HelpHint {
 
     static {
         USAGE_OUTPUT_HINTS = Collections.unmodifiableSet(
-                new HashSet<HelpHint>(Arrays.asList(
+                Sets.newHashSet(
                         OPTIONAL,
                         PROPERTY,
                         SWITCH,
@@ -55,16 +56,16 @@ public class HelpFormatter extends HelpHint {
                         ARGUMENT_BRACKETED,
                         CONTAINER_ARGUMENT,
                         CONTAINER_GROUP
-                )));
+                ));
         HELP_OUTPUT_HINTS = Collections.unmodifiableSet(
-                new HashSet<HelpHint>(Arrays.asList(
+                Sets.newHashSet(
                         ALIASES,
                         OPTIONAL,
                         GROUP,
                         CONTAINER_ARGUMENT
-                )));
+                ));
         OPTION_OUTPUT_HINTS = Collections.unmodifiableSet(
-                new HashSet<HelpHint>(Arrays.asList(
+                Sets.newHashSet(
                         ALIASES,
                         OPTIONAL,
                         OPTIONAL_CHILD_GROUP,
@@ -77,13 +78,13 @@ public class HelpFormatter extends HelpHint {
                         ARGUMENT_NUMBERED,
                         ARGUMENT_BRACKETED,
                         CONTAINER_GROUP
-                )));
+                ));
     }
 
-    protected transient final Log log = LogFactory.getLog(this.getClass());
-    protected Set<HelpHint> usageOutputHints = new HashSet<HelpHint>(USAGE_OUTPUT_HINTS);
-    protected Set<HelpHint> helpOutputHints = new HashSet<HelpHint>(HELP_OUTPUT_HINTS);
-    protected Set<HelpHint> optionOutputHints = new HashSet<HelpHint>(OPTION_OUTPUT_HINTS);
+    protected transient final Log log = LogFactory.getLog(getClass());
+    protected Set<HelpHint> usageOutputHints = Sets.newHashSet(USAGE_OUTPUT_HINTS);
+    protected Set<HelpHint> helpOutputHints = Sets.newHashSet(HELP_OUTPUT_HINTS);
+    protected Set<HelpHint> optionOutputHints = Sets.newHashSet(OPTION_OUTPUT_HINTS);
 
     protected String executable;
     protected String header;

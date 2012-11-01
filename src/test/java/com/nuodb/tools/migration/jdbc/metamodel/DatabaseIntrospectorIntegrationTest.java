@@ -10,14 +10,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Connection;
-import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
 public class DatabaseIntrospectorIntegrationTest {
 
 
     private Connection connection;
-    private DatabaseIntrospector introspector;
+    private DatabaseInspector inspector;
     private Connection mySqlConnection;
 
 
@@ -46,15 +45,15 @@ public class DatabaseIntrospectorIntegrationTest {
         Assert.assertNotNull(connection.getMetaData());
         Assert.assertFalse(connection.isClosed());
 
-        introspector = new DatabaseIntrospector();
-        introspector.withConnection(connection);
+        inspector = new DatabaseInspector();
+        inspector.withConnection(connection);
     }
 
     @Test
     public void testReadInfo() throws Exception {
 
         final Database database = new Database();
-        introspector.readInfo(connection.getMetaData(), database);
+        inspector.readInfo(connection.getMetaData(), database);
 
         final DriverInfo driverInfo = database.getDriverInfo();
         final DatabaseInfo databaseInfo = database.getDatabaseInfo();
@@ -72,16 +71,15 @@ public class DatabaseIntrospectorIntegrationTest {
     @Test
     public void testReadObjects() throws Exception {
         final Database database = new Database();
-        introspector.readObjects(connection.getMetaData(), database);
+        inspector.readObjects(connection.getMetaData(), database);
 
-
-        final Map<Name, Catalog> catalogs = database.getCatalogs();
+        final List<Catalog> catalogs = database.listCatalogs();
         Assert.assertFalse(catalogs.isEmpty());
 
-        final Collection<Schema> schemas = database.listSchemas();
+        final List<Schema> schemas = database.listSchemas();
         Assert.assertFalse(schemas.isEmpty());
 
-        final Collection<Table> tables = database.listTables();
+        final List<Table> tables = database.listTables();
         Assert.assertFalse(tables.isEmpty());
     }
 

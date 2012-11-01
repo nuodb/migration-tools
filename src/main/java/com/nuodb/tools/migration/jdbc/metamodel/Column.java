@@ -180,6 +180,11 @@ public class Column extends HasNameBase {
     }
 
     @Override
+    protected Database getDatabase() {
+        return table.getDatabase();
+    }
+
+    @Override
     public String toString() {
         return getNameObject().toString();
     }

@@ -30,6 +30,7 @@ package com.nuodb.tools.migration.jdbc.type.jdbc2;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -42,13 +43,24 @@ public class JdbcIntegerType extends JdbcTypeBase<Integer> {
     public static final JdbcType INSTANCE = new JdbcIntegerType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.INTEGER;
     }
 
     @Override
-    public Integer extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends Integer> getTypeClass() {
+        return Integer.class;
+    }
+
+    @Override
+    public Integer getValue(ResultSet resultSet, int column) throws SQLException {
         int intValue = resultSet.getInt(column);
         return resultSet.wasNull() ? null : intValue;
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Integer value,
+                                    int column) throws SQLException {
+        statement.setInt(column, value);
     }
 }

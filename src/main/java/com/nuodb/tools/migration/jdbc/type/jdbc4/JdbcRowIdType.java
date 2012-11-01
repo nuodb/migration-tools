@@ -30,24 +30,32 @@ package com.nuodb.tools.migration.jdbc.type.jdbc4;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
-import java.sql.ResultSet;
-import java.sql.RowId;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 /**
  * @author Sergey Bushik
  */
 public class JdbcRowIdType extends JdbcTypeBase<RowId> {
+
     public static final JdbcType INSTANCE = new JdbcRowIdType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.ROWID;
     }
 
     @Override
-    public RowId extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends RowId> getTypeClass() {
+        return RowId.class;
+    }
+
+    @Override
+    public RowId getValue(ResultSet resultSet, int column) throws SQLException {
         return resultSet.getRowId(column);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, RowId value, int column) throws SQLException {
+        statement.setRowId(column, value);
     }
 }

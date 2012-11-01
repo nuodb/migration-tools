@@ -27,10 +27,10 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
+import com.google.common.collect.Lists;
 import com.nuodb.tools.migration.cli.parse.Group;
 import com.nuodb.tools.migration.cli.parse.Option;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,7 +44,7 @@ public class GroupBuilderImpl implements GroupBuilder {
     private int minimum = 0;
     private int maximum = 0;
     private boolean required;
-    private List<Option> options = new ArrayList<Option>();
+    private List<Option> options = Lists.newArrayList();
 
     @Override
     public GroupBuilder withId(int id) {

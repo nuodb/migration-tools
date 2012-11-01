@@ -27,19 +27,15 @@
  */
 package com.nuodb.tools.migration.dump;
 
-import com.nuodb.tools.migration.format.catalog.QueryEntryCatalog;
-import com.nuodb.tools.migration.format.catalog.QueryEntryCatalogImpl;
-import com.nuodb.tools.migration.dump.output.OutputFormatFactory;
-import com.nuodb.tools.migration.dump.output.OutputFormatFactoryImpl;
+import com.nuodb.tools.migration.output.catalog.EntryCatalog;
+import com.nuodb.tools.migration.output.catalog.EntryCatalogImpl;
+import com.nuodb.tools.migration.output.format.DataOutputFormat;
+import com.nuodb.tools.migration.output.format.DataFormatFactory;
+import com.nuodb.tools.migration.output.format.OutputDataFormatFactory;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
 import com.nuodb.tools.migration.job.JobFactory;
-import com.nuodb.tools.migration.spec.ConnectionSpec;
-import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
-import com.nuodb.tools.migration.spec.DumpSpec;
-import com.nuodb.tools.migration.spec.FormatSpec;
-import com.nuodb.tools.migration.spec.NativeQuerySpec;
-import com.nuodb.tools.migration.spec.SelectQuerySpec;
+import com.nuodb.tools.migration.spec.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,7 +50,7 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
     protected final Log log = LogFactory.getLog(getClass());
 
     private DumpSpec dumpSpec;
-    private OutputFormatFactory outputFormatFactory = new OutputFormatFactoryImpl();
+    private DataFormatFactory<DataOutputFormat> outputDataFormatFactory = new OutputDataFormatFactory();
 
     public DumpJob createJob() {
         ConnectionSpec connectionSpec = dumpSpec.getConnectionSpec();
@@ -64,12 +60,12 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
 
         DumpJob job = new DumpJob();
         job.setJdbcServices(createJdbcServices(connectionSpec));
-        job.setQueryEntryCatalog(createQueryEntryCatalog(outputSpec));
+        job.setEntryCatalog(createEntryCatalog(outputSpec));
         job.setSelectQuerySpecs(selectQuerySpecs);
         job.setNativeQuerySpecs(nativeQuerySpecs);
         job.setOutputType(outputSpec.getType());
         job.setOutputAttributes(outputSpec.getAttributes());
-        job.setOutputFormatFactory(outputFormatFactory);
+        job.setOutputDataFormatFactory(outputDataFormatFactory);
         return job;
     }
 
@@ -77,8 +73,8 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         return new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec);
     }
 
-    protected QueryEntryCatalog createQueryEntryCatalog(FormatSpec outputSpec) {
-        return new QueryEntryCatalogImpl(outputSpec.getPath(), outputSpec.getType());
+    protected EntryCatalog createEntryCatalog(FormatSpec outputSpec) {
+        return new EntryCatalogImpl(outputSpec.getPath());
     }
 
     public DumpSpec getDumpSpec() {
@@ -89,11 +85,11 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         this.dumpSpec = dumpSpec;
     }
 
-    public OutputFormatFactory getOutputFormatFactory() {
-        return outputFormatFactory;
+    public DataFormatFactory<DataOutputFormat> getOutputDataFormatFactory() {
+        return outputDataFormatFactory;
     }
 
-    public void setOutputFormatFactory(OutputFormatFactory outputFormatFactory) {
-        this.outputFormatFactory = outputFormatFactory;
+    public void setOutputDataFormatFactory(DataFormatFactory<DataOutputFormat> outputDataFormatFactory) {
+        this.outputDataFormatFactory = outputDataFormatFactory;
     }
 }

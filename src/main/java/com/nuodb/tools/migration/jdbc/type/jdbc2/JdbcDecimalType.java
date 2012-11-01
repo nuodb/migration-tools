@@ -29,9 +29,6 @@ package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
 
 /**
@@ -42,12 +39,7 @@ public class JdbcDecimalType extends JdbcNumericType {
     public static final JdbcType INSTANCE = new JdbcDecimalType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.DECIMAL;
-    }
-
-    @Override
-    public BigDecimal extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
-        return resultSet.getBigDecimal(column);
     }
 }

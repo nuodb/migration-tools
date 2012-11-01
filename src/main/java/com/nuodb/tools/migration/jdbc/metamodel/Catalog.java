@@ -27,14 +27,15 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Catalog extends HasNameBase {
 
-    private Map<Name, Schema> schemas = new HashMap<Name, Schema>();
+    private Map<Name, Schema> schemas = Maps.newHashMap();
     private Database database;
 
     public Catalog(Database database, String name) {
@@ -50,25 +51,37 @@ public class Catalog extends HasNameBase {
         return database;
     }
 
+    public Schema getSchema(String name) {
+        return getSchema(name, false);
+    }
+
     public Schema getSchema(Name name) {
+        return getSchema(name, false);
+    }
+
+    public Schema getSchema(String name, boolean create) {
+        return getSchema(Name.valueOf(name), create);
+    }
+
+    public Schema getSchema(Name name, boolean create) {
         Schema schema = schemas.get(name);
         if (schema == null) {
-            schema = createSchema(name);
+            if (create) {
+                schema = createSchema(name);
+            } else {
+                throw new MetaModelException(String.format("Schema %s doesn't exist", name));
+            }
         }
         return schema;
     }
 
-    public Schema getSchema(String name) {
-        return this.getSchema(Name.valueOf(name));
-    }
-
-    protected Schema createSchema(Name name) {
+    public Schema createSchema(Name name) {
         Schema schema = new Schema(database, this, name);
         schemas.put(name, schema);
         return schema;
     }
 
     public Collection<Schema> listSchemas() {
-        return new ArrayList<Schema>(schemas.values());
+        return Lists.newArrayList(schemas.values());
     }
 }

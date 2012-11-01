@@ -59,7 +59,7 @@ public class Name {
 
         Name name1 = (Name) o;
 
-        if (value != null ? !value.equals(name1.value) : name1.value != null) return false;
+        if (value != null ? !value.equalsIgnoreCase(name1.value) : name1.value != null) return false;
 
         return true;
     }

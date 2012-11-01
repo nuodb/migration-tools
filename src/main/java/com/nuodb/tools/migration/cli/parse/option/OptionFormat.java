@@ -27,8 +27,8 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import com.google.common.collect.Sets;
+
 import java.util.Set;
 
 /**
@@ -43,7 +43,7 @@ public class OptionFormat {
     private final String argumentValuesSeparator;
 
     public OptionFormat(String optionPrefix, String argumentSeparator, String argumentValuesSeparator) {
-        this(new HashSet<String>(Arrays.asList(optionPrefix)), argumentSeparator, argumentValuesSeparator);
+        this(Sets.newHashSet(optionPrefix), argumentSeparator, argumentValuesSeparator);
     }
 
     public OptionFormat(Set<String> optionPrefixes, String argumentSeparator, String argumentValuesSeparator) {

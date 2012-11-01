@@ -39,7 +39,7 @@ public class JdbcRealType extends JdbcFloatType {
     public static final JdbcType INSTANCE = new JdbcRealType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.REAL;
     }
 }

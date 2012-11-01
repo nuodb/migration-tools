@@ -27,10 +27,28 @@
  */
 package com.nuodb.tools.migration.jdbc.type;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * @author Sergey Bushik
  */
 public abstract class JdbcTypeBase<T> implements JdbcType<T> {
+
+    @Override
+    public void setValue(PreparedStatement statement, int column, T value) throws SQLException {
+        if (value == null) {
+            setNullValue(statement, column);
+        } else {
+            setNullSafeValue(statement, value, column);
+        }
+    }
+
+    protected void setNullValue(PreparedStatement statement, int column) throws SQLException {
+        statement.setNull(column, getTypeCode());
+    }
+
+    protected abstract void setNullSafeValue(PreparedStatement statement, T value, int column) throws SQLException;
 
     @Override
     public boolean equals(Object o) {
@@ -39,13 +57,18 @@ public abstract class JdbcTypeBase<T> implements JdbcType<T> {
 
         JdbcTypeBase that = (JdbcTypeBase) o;
 
-        if (getSqlType() != that.getSqlType()) return false;
+        if (getTypeCode() != that.getTypeCode()) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return getSqlType();
+        return getTypeCode();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName();
     }
 }

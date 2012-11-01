@@ -27,6 +27,8 @@
  */
 package com.nuodb.tools.migration.cli.run;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.nuodb.tools.migration.cli.CliOptions;
 import com.nuodb.tools.migration.cli.CliResources;
 import com.nuodb.tools.migration.cli.parse.CommandLine;
@@ -247,7 +249,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected Map<String, String> parseFormatAttributes(Option option, List<String> values) {
-        Map<String, String> attributes = new HashMap<String, String>();
+        Map<String, String> attributes = Maps.newHashMap();
         for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
             attributes.put(iterator.next(), iterator.next());
         }
@@ -255,7 +257,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected Collection<SelectQuerySpec> parseSelectQueryGroup(CommandLine commandLine, Option option) {
-        Map<String, SelectQuerySpec> tableQueryMapping = new HashMap<String, SelectQuerySpec>();
+        Map<String, SelectQuerySpec> tableQueryMapping = Maps.newHashMap();
         for (String table : commandLine.<String>getValues(TABLE_OPTION)) {
             tableQueryMapping.put(table, new SelectQuerySpec(table));
         }
@@ -272,7 +274,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected Collection<NativeQuerySpec> parseNativeQueryGroup(CommandLine commandLine, Option option) {
-        List<NativeQuerySpec> nativeQuerySpecs = new ArrayList<NativeQuerySpec>();
+        List<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
         for (String query : commandLine.<String>getValues(QUERY_OPTION)) {
             NativeQuerySpec nativeQuerySpec = new NativeQuerySpec();
             nativeQuerySpec.setQuery(query);
@@ -295,7 +297,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
             throw new OptionException(option, e.getMessage());
         }
         String[] params = url.split("&");
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = Maps.newHashMap();
         for (String param : params) {
             String[] pair = param.split("=");
             if (pair.length != 2) {

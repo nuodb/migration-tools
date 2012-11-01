@@ -27,9 +27,13 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
+import com.google.common.collect.Lists;
 import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Table extends HasNameBase {
 
@@ -39,7 +43,7 @@ public class Table extends HasNameBase {
     private final Map<Name, Column> columns = new LinkedHashMap<Name, Column>();
     private final Map<Name, Index> indexes = new LinkedHashMap<Name, Index>();
     private final Map<Name, UniqueKey> uniqueKeys = new LinkedHashMap<Name, UniqueKey>();
-    private final List<Constraint> constraints = new ArrayList<Constraint>();
+    private final List<Constraint> constraints = Lists.newArrayList();
     private final Database database;
     private final Catalog catalog;
     private Schema schema;
@@ -61,18 +65,22 @@ public class Table extends HasNameBase {
         this.type = type;
     }
 
-    public Object getNameQualified(DatabaseDialect dialect) {
+    public String getQualifiedName() {
+        return getQualifiedName(database.getDatabaseDialect());
+    }
+
+    public String getQualifiedName(DatabaseDialect databaseDialect) {
         StringBuilder qualifiedName = new StringBuilder();
         if (catalog.getName() != null) {
-            qualifiedName.append(catalog.getQuotedName(dialect));
+            qualifiedName.append(catalog.getQuotedName(databaseDialect));
             qualifiedName.append('.');
         }
         if (schema.getName() != null) {
-            qualifiedName.append(schema.getQuotedName(dialect));
+            qualifiedName.append(schema.getQuotedName(databaseDialect));
             qualifiedName.append('.');
         }
-        qualifiedName.append(getQuotedName(dialect));
-        return qualifiedName;
+        qualifiedName.append(getQuotedName(databaseDialect));
+        return qualifiedName.toString();
     }
 
     public Database getDatabase() {
@@ -92,13 +100,22 @@ public class Table extends HasNameBase {
     }
 
     public Column getColumn(String name) {
-        return getColumn(Name.valueOf(name));
+        return getColumn(name, false);
     }
 
-    public Column getColumn(Name name) {
+    public Column getColumn(String name, boolean create) {
+        return getColumn(Name.valueOf(name), create);
+    }
+
+    public Column getColumn(Name name, boolean create) {
         Column column = columns.get(name);
         if (column == null) {
-            column = createColumn(name);
+            if (create) {
+                column = createColumn(name);
+            } else {
+                throw new MetaModelException(
+                        String.format("Table %s doesn't contain %s column", getQualifiedName(), name));
+            }
         }
         return column;
     }
@@ -114,6 +131,6 @@ public class Table extends HasNameBase {
     }
 
     public Collection<Column> listColumns() {
-        return new ArrayList<Column>(columns.values());
+        return Lists.newArrayList(columns.values());
     }
 }

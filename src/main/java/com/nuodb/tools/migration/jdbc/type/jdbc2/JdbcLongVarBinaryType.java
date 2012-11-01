@@ -39,7 +39,7 @@ public class JdbcLongVarBinaryType extends JdbcBinaryType {
     public static final JdbcType INSTANCE = new JdbcLongVarBinaryType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.LONGVARBINARY;
     }
 }

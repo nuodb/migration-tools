@@ -51,8 +51,25 @@ public abstract class HasNameBase implements HasName {
         return name != null ? name.value() : null;
     }
 
+    public String getQuotedName() {
+        return getQuotedName(getDatabaseDialect());
+    }
+
     @Override
     public String getQuotedName(DatabaseDialect databaseDialect) {
-        return databaseDialect.openQuote() + getName() + databaseDialect.closeQuote();
+        return databaseDialect != null ?
+                databaseDialect.openQuote() + getName() + databaseDialect.closeQuote() : getName();
+    }
+
+    protected DatabaseDialect getDatabaseDialect() {
+        Database database = getDatabase();
+        return database != null ? database.getDatabaseDialect() : null;
+    }
+
+    protected abstract Database getDatabase();
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

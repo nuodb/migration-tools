@@ -30,6 +30,7 @@ package com.nuodb.tools.migration.jdbc.type.jdbc4;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeBase;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -38,15 +39,26 @@ import java.sql.Types;
  * @author Sergey Bushik
  */
 public class JdbcNCharType extends JdbcTypeBase<String> {
+
     public static final JdbcType INSTANCE = new JdbcNCharType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.NCHAR;
     }
 
     @Override
-    public String extract(ResultSet resultSet, int column, int sqlType) throws SQLException {
+    public Class<? extends String> getTypeClass() {
+        return String.class;
+    }
+
+    @Override
+    public String getValue(ResultSet resultSet, int column) throws SQLException {
         return resultSet.getNString(column);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, String value, int column) throws SQLException {
+        statement.setNString(column, value);
     }
 }

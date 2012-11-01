@@ -27,6 +27,7 @@
  */
 package com.nuodb.tools.migration.job;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -40,7 +41,7 @@ public class JobExecutorImpl implements JobExecutor {
     private transient final Log log = LogFactory.getLog(getClass());
     private final Job job;
     private final JobStatusImpl jobStatus;
-    private List<JobExecutionListener> listeners = new ArrayList<JobExecutionListener>();
+    private List<JobExecutionListener> listeners = Lists.newArrayList();
 
     public JobExecutorImpl(Job job) {
         this.job = job;

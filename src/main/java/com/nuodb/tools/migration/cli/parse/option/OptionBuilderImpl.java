@@ -27,9 +27,12 @@
  */
 package com.nuodb.tools.migration.cli.parse.option;
 
-import com.nuodb.tools.migration.cli.parse.*;
+import com.google.common.collect.Sets;
+import com.nuodb.tools.migration.cli.parse.Argument;
+import com.nuodb.tools.migration.cli.parse.Group;
+import com.nuodb.tools.migration.cli.parse.Option;
+import com.nuodb.tools.migration.cli.parse.Trigger;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -43,8 +46,8 @@ public class OptionBuilderImpl implements OptionBuilder {
     protected boolean required;
     protected Argument argument;
     protected Group group;
-    protected Set<String> aliases = new HashSet<String>();
-    protected Set<Trigger> triggers = new HashSet<Trigger>();
+    protected Set<String> aliases = Sets.newHashSet();
+    protected Set<Trigger> triggers = Sets.newHashSet();
     private Set<String> prefixes;
     private String argumentSeparator;
 

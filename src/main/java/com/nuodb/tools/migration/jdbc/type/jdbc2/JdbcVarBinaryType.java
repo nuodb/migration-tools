@@ -39,7 +39,7 @@ public class JdbcVarBinaryType extends JdbcBinaryType {
     public static final JdbcType INSTANCE = new JdbcVarBinaryType();
 
     @Override
-    public int getSqlType() {
+    public int getTypeCode() {
         return Types.VARBINARY;
     }
 }
