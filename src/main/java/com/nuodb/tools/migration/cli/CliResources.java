@@ -31,7 +31,6 @@ package com.nuodb.tools.migration.cli;
  * @author Sergey Bushik
  */
 public interface CliResources {
-
     /**
      * Root options resources
      */
@@ -42,7 +41,6 @@ public interface CliResources {
     final String CONFIG_OPTION_DESCRIPTION = "migration.cli.config.option.description";
     final String CONFIG_ARGUMENT_NAME = "migration.cli.config.argument.name";
     final String COMMAND_OPTION_DESCRIPTION = "migration.cli.command.option.description";
-
     /**
      * Dump plugin resources
      */
@@ -80,7 +78,9 @@ public interface CliResources {
     final String QUERY_GROUP_NAME = "migration.cli.query.group.name";
     final String QUERY_OPTION_DESCRIPTION = "migration.cli.query.option.description";
     final String QUERY_ARGUMENT_NAME = "migration.cli.query.argument.name";
-
+    /**
+     * Load plugin resources
+     */
     final String LOAD_GROUP_NAME = "migration.cli.load.group.name";
     final String TARGET_GROUP_NAME = "migration.cli.target.group.name";
     final String TARGET_URL_OPTION_DESCRIPTION = "migration.cli.target.url.option.description";

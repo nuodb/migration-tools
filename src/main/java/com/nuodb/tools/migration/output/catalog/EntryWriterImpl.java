@@ -59,7 +59,6 @@ public class EntryWriterImpl implements EntryWriter {
     public EntryWriterImpl(File catalogDir, File catalogFile) {
         this.catalogDir = catalogDir;
         this.catalogFile = catalogFile;
-
         open();
     }
 

@@ -56,7 +56,6 @@ public class EntryReaderImpl implements EntryReader {
     public EntryReaderImpl(File catalogDir, File catalogFile) {
         this.catalogDir = catalogDir;
         this.catalogFile = catalogFile;
-
         open();
     }
 
