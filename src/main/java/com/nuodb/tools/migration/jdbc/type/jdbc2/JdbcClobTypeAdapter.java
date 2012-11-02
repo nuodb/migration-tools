@@ -27,9 +27,10 @@
  */
 package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeAdapterBase;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeException;
-import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,14 +67,14 @@ public class JdbcClobTypeAdapter extends JdbcTypeAdapterBase<Clob> {
         } else if (Reader.class.isInstance(value)) {
             clob = connection.createClob();
             try {
-                IOUtils.copy((Reader) value, clob.setCharacterStream(0));
+                CharStreams.copy((Reader) value, clob.setCharacterStream(0));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
         } else if (InputStream.class.isInstance(value)) {
             clob = connection.createClob();
             try {
-                IOUtils.copy((InputStream) value, clob.setAsciiStream(0));
+                ByteStreams.copy((InputStream) value, clob.setAsciiStream(0));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
@@ -85,17 +86,19 @@ public class JdbcClobTypeAdapter extends JdbcTypeAdapterBase<Clob> {
 
     @Override
     public <X> X unwrap(Clob value, Class<X> valueClass, Connection connection) throws SQLException {
-        if (valueClass.isAssignableFrom(Clob.class)) {
+        if ( value == null ) {
+            return null;
+        } else if (valueClass.isAssignableFrom(Clob.class)) {
             return (X) value;
         } else if (valueClass.isAssignableFrom(char[].class)) {
             try {
-                return (X) IOUtils.toString(value.getCharacterStream()).toCharArray();
+                return (X) CharStreams.toString(value.getCharacterStream()).toCharArray();
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
         } else if (valueClass.isAssignableFrom(String.class)) {
             try {
-                return (X) IOUtils.toString(value.getCharacterStream());
+                return (X) CharStreams.toString(value.getCharacterStream());
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }

@@ -113,7 +113,7 @@ public class JobExecutorImpl implements JobExecutor {
             synchronized (jobStatus) {
                 jobStatus.setExecutionEndDate(new Date());
                 jobStatus.setRunning(false);
-                jobStatus.setException(error);
+                jobStatus.setFailure(error);
             }
             fireJobExecutionEvent(new JobExecutionEvent(execution));
         }

@@ -27,9 +27,9 @@
  */
 package com.nuodb.tools.migration.jdbc.type.jdbc2;
 
+import com.google.common.io.ByteStreams;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeAdapterBase;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeException;
-import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,7 +61,7 @@ public class JdbcBlobTypeAdapter extends JdbcTypeAdapterBase<Blob> {
         } else if (InputStream.class.isInstance(value)) {
             blob = connection.createBlob();
             try {
-                IOUtils.copy((InputStream) value, blob.setBinaryStream(0));
+                ByteStreams.copy((InputStream) value, blob.setBinaryStream(0));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
@@ -73,11 +73,13 @@ public class JdbcBlobTypeAdapter extends JdbcTypeAdapterBase<Blob> {
 
     @Override
     public <X> X unwrap(Blob value, Class<X> valueClass, Connection connection) throws SQLException {
-        if (valueClass.isAssignableFrom(Blob.class)) {
+        if (value == null) {
+            return null;
+        } else if (valueClass.isAssignableFrom(Blob.class)) {
             return (X) value;
         } else if (valueClass.isAssignableFrom(byte[].class)) {
             try {
-                return (X) IOUtils.toByteArray(value.getBinaryStream());
+                return (X) ByteStreams.toByteArray(value.getBinaryStream());
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }

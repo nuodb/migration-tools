@@ -40,8 +40,8 @@ public class CliRunFactoryLookup {
     private Map<String, CliRunFactory> factories = Maps.newHashMap();
 
     public CliRunFactoryLookup() {
-        register(new CliDumpFactory());
-        register(new CliLoadFactory());
+        register(new CliDumpJobFactory());
+        register(new CliLoadJobFactory());
     }
 
     public Collection<String> getCommands() {

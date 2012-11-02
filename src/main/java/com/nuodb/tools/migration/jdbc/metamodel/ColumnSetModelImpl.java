@@ -27,51 +27,48 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import com.google.common.collect.Lists;
-
-import java.util.Collection;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * @author Sergey Bushik
  */
 public class ColumnSetModelImpl implements ColumnSetModel {
 
-    private List<String> columns;
-    private List<Integer> columnTypes;
+    private String[] columns;
+    private int[] columnTypes;
 
-    public ColumnSetModelImpl(Collection<String> columns, Collection<Integer> columnTypes) {
-        this.columns = Lists.newArrayList(columns);
-        this.columnTypes = Lists.newArrayList(columnTypes);
+    public ColumnSetModelImpl(String[] columns, int[] columnTypes) {
+        this.columns = columns;
+        this.columnTypes = columnTypes;
     }
 
     @Override
     public boolean hasColumn(String column) {
-        return columns.contains(column);
+        return Arrays.binarySearch(columns, column) >= 0;
     }
 
     @Override
     public int getColumnType(int column) {
-        return columnTypes.get(column);
+        return columnTypes[column];
     }
 
     @Override
-    public Collection<Integer> getColumnTypes() {
+    public int[] getColumnTypes() {
         return columnTypes;
     }
 
     @Override
     public String getColumn(int index) {
-        return columns.get(index);
+        return columns[index];
     }
 
     @Override
-    public Collection<String> getColumns() {
+    public String[] getColumns() {
         return columns;
     }
 
     @Override
     public int getColumnCount() {
-        return columns.size();
+        return columns.length;
     }
 }

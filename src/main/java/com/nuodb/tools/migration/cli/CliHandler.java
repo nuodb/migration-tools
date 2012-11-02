@@ -44,7 +44,7 @@ import java.util.Arrays;
  */
 public class CliHandler extends CliHandlerSupport {
 
-    private static final int ERROR_STATUS = 1;
+    public static final int ERROR_EXIT_STATUS = 1;
 
     public CliHandler() {
     }
@@ -75,7 +75,7 @@ public class CliHandler extends CliHandlerSupport {
         try {
             handler.handle(args);
         } catch (Throwable exception) {
-            System.exit(ERROR_STATUS);
+            System.exit(ERROR_EXIT_STATUS);
         }
     }
 }

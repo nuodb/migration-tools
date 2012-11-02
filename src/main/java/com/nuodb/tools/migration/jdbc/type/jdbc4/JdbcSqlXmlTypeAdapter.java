@@ -81,7 +81,9 @@ public class JdbcSqlXmlTypeAdapter extends JdbcTypeAdapterBase<SQLXML> {
 
     @Override
     public <X> X unwrap(SQLXML value, Class<X> valueClass, Connection connection) throws SQLException {
-        if (valueClass.isAssignableFrom(SQLXML.class)) {
+        if (value == null) {
+            return null;
+        } else if (valueClass.isAssignableFrom(SQLXML.class)) {
             return (X) value;
         } else if (valueClass.isAssignableFrom(String.class)) {
             try {

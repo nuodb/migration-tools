@@ -31,4 +31,9 @@ package com.nuodb.tools.migration.jdbc.dialect;
  * @author Sergey Bushik
  */
 public class NuoDBDialect extends DatabaseDialectBase {
+
+    @Override
+    public boolean supportsReadSchemas() {
+        return true;
+    }
 }

@@ -27,8 +27,6 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import java.util.Collection;
-
 /**
  * @author Sergey Bushik
  */
@@ -38,11 +36,11 @@ public interface ColumnSetModel {
 
     int getColumnType(int column);
 
-    Collection<Integer> getColumnTypes();
+    int[] getColumnTypes();
 
     String getColumn(int index);
 
-    Collection<String> getColumns();
+    String[] getColumns();
 
     int getColumnCount();
 }

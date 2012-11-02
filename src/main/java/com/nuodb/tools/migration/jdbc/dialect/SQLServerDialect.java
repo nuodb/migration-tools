@@ -27,6 +27,9 @@
  */
 package com.nuodb.tools.migration.jdbc.dialect;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+
 /**
  * @author Sergey Bushik
  */

@@ -27,6 +27,9 @@
  */
 package com.nuodb.tools.migration.jdbc.dialect;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+
 /**
  * Vendor specific dialect
  *
@@ -41,4 +44,10 @@ public interface DatabaseDialect {
     String quote(String name);
 
     String getNoColumnsInsertString();
+
+    boolean supportsReadCatalogs();
+
+    boolean supportsReadSchemas();
+
+    void enableStreaming(Statement statement) throws SQLException;
 }

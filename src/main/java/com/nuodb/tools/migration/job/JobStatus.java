@@ -44,7 +44,7 @@ public interface JobStatus {
 
     Date getExecutionEndDate();
 
-    Throwable getException();
+    Throwable getFailure();
 
     JobStatusType getJobStatusType();
 }

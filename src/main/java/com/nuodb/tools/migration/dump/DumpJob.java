@@ -28,21 +28,22 @@
 package com.nuodb.tools.migration.dump;
 
 import com.google.common.collect.Lists;
-import com.nuodb.tools.migration.output.catalog.Entry;
-import com.nuodb.tools.migration.output.catalog.EntryCatalog;
-import com.nuodb.tools.migration.output.catalog.EntryImpl;
-import com.nuodb.tools.migration.output.catalog.EntryWriter;
-import com.nuodb.tools.migration.output.format.DataFormatFactory;
-import com.nuodb.tools.migration.output.format.DataOutputFormat;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionCallback;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
 import com.nuodb.tools.migration.jdbc.metamodel.Database;
 import com.nuodb.tools.migration.jdbc.metamodel.DatabaseInspector;
 import com.nuodb.tools.migration.jdbc.metamodel.Table;
 import com.nuodb.tools.migration.jdbc.query.*;
 import com.nuodb.tools.migration.job.JobBase;
 import com.nuodb.tools.migration.job.JobExecution;
+import com.nuodb.tools.migration.result.catalog.ResultCatalog;
+import com.nuodb.tools.migration.result.catalog.ResultEntry;
+import com.nuodb.tools.migration.result.catalog.ResultEntryImpl;
+import com.nuodb.tools.migration.result.catalog.ResultEntryWriter;
+import com.nuodb.tools.migration.result.format.ResultFormatFactory;
+import com.nuodb.tools.migration.result.format.ResultOutput;
 import com.nuodb.tools.migration.spec.NativeQuerySpec;
 import com.nuodb.tools.migration.spec.SelectQuerySpec;
 import org.apache.commons.logging.Log;
@@ -57,10 +58,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
-import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
+import static com.google.common.io.Closeables.closeQuietly;
+import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.COLUMN;
+import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.TABLE;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
@@ -72,12 +74,12 @@ public class DumpJob extends JobBase {
     protected final Log log = LogFactory.getLog(getClass());
 
     private JdbcServices jdbcServices;
-    private EntryCatalog entryCatalog;
+    private ResultCatalog resultCatalog;
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
     private Map<String, String> outputAttributes;
-    private DataFormatFactory<DataOutputFormat> outputDataFormatFactory;
+    private ResultFormatFactory resultFormatFactory;
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
@@ -86,17 +88,19 @@ public class DumpJob extends JobBase {
             @Override
             public void execute(Connection connection) throws SQLException {
                 DatabaseInspector databaseInspector = jdbcServices.getDatabaseIntrospector();
-                databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+                databaseInspector.withObjectTypes(TABLE, COLUMN);
                 databaseInspector.withConnection(connection);
                 Database database = databaseInspector.inspect();
 
-                EntryWriter entryWriter = entryCatalog.openWriter();
+                ResultEntryWriter entryWriter = resultCatalog.openWriter();
                 try {
                     for (SelectQuery selectQuery : createSelectQueries(database, selectQuerySpecs)) {
-                        dump(execution, connection, selectQuery, entryWriter, createEntry(selectQuery, outputType));
+                        OutputStream output = getEntryOutput(entryWriter, createEntry(selectQuery, outputType));
+                        dump(execution, connection, database, selectQuery, output);
                     }
                     for (NativeQuery nativeQuery : createNativeQueries(database, nativeQuerySpecs)) {
-                        dump(execution, connection, nativeQuery, entryWriter, createEntry(nativeQuery, outputType));
+                        OutputStream output = getEntryOutput(entryWriter, createEntry(nativeQuery, outputType));
+                        dump(execution, connection, database, nativeQuery, output);
                     }
                 } finally {
                     entryWriter.close();
@@ -105,36 +109,36 @@ public class DumpJob extends JobBase {
         });
     }
 
-    protected Entry createEntry(SelectQuery selectQuery, String type) {
+    protected ResultEntry createEntry(SelectQuery selectQuery, String type) {
         Table table = selectQuery.getTables().get(0);
-        return new EntryImpl(table.getName(), type);
+        return new ResultEntryImpl(table.getName(), type);
     }
 
-    protected Entry createEntry(NativeQuery nativeQuery, String type) {
-        return new EntryImpl(String.format(QUERY_ENTRY_NAME, new Date()), type);
+    protected ResultEntry createEntry(NativeQuery nativeQuery, String type) {
+        return new ResultEntryImpl(String.format(QUERY_ENTRY_NAME, new Date()), type);
     }
 
-    protected void dump(JobExecution execution, Connection connection, Query query, EntryWriter entryWriter,
-                        Entry entry) throws SQLException {
-        entryWriter.addEntry(entry);
-        dump(execution, connection, query, entryWriter.getEntryOutput(entry));
+    protected OutputStream getEntryOutput(ResultEntryWriter writer, ResultEntry entry) {
+        writer.addEntry(entry);
+        return writer.getEntryOutput(entry);
     }
 
-    protected void dump(JobExecution execution, Connection connection, Query query,
+    protected void dump(JobExecution execution, Connection connection, Database database, Query query,
                         OutputStream output) throws SQLException {
         try {
-            DataOutputFormat outputFormat = outputDataFormatFactory.createDataFormat(outputType);
-            outputFormat.setAttributes(outputAttributes);
-            outputFormat.setJdbcTypeAccessor(jdbcServices.getJdbcTypeAccessor());
-            outputFormat.setOutputStream(output);
-            dump(execution, connection, query, outputFormat);
+            ResultOutput result = resultFormatFactory.createOutput(outputType);
+            result.setAttributes(outputAttributes);
+            result.setJdbcTypeAccessor(jdbcServices.getJdbcTypeAccessor());
+            result.setOutputStream(output);
+            dump(execution, connection, database, query, result);
         } finally {
             closeQuietly(output);
         }
     }
 
-    protected void dump(final JobExecution execution, final Connection connection, final Query query,
-                        final DataOutputFormat output) throws SQLException {
+    protected void dump(final JobExecution execution, final Connection connection, final Database database,
+                        final Query query, final ResultOutput resultOutput) throws SQLException {
+        final DatabaseDialect databaseDialect = database.getDatabaseDialect();
         QueryTemplate queryTemplate = new QueryTemplate(connection);
         queryTemplate.execute(
                 new StatementBuilder<PreparedStatement>() {
@@ -145,8 +149,7 @@ public class DumpJob extends JobBase {
                         }
                         PreparedStatement statement = connection.prepareStatement(query.toQuery(),
                                 TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                        // forces driver to stream result setValue http://goo.gl/kl1Nr
-                        statement.setFetchSize(Integer.MIN_VALUE);
+                        databaseDialect.enableStreaming(statement);
                         return statement;
                     }
                 },
@@ -154,14 +157,16 @@ public class DumpJob extends JobBase {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
                         if (log.isDebugEnabled()) {
-                            log.debug(String.format("Writing dump with %1$s", output.getClass().getName()));
+                            log.debug(String.format("Writing dump %1$s", resultOutput.getClass().getName()));
                         }
                         ResultSet resultSet = statement.executeQuery();
-                        output.outputBegin(resultSet);
+                        resultOutput.setResultSet(resultSet);
+
+                        resultOutput.outputStart();
                         while (execution.isRunning() && resultSet.next()) {
-                            output.outputRow(resultSet);
+                            resultOutput.outputRow();
                         }
-                        output.outputEnd(resultSet);
+                        resultOutput.outputEnd();
                     }
                 }
         );
@@ -220,12 +225,12 @@ public class DumpJob extends JobBase {
         this.jdbcServices = jdbcServices;
     }
 
-    public EntryCatalog getEntryCatalog() {
-        return entryCatalog;
+    public ResultCatalog getResultCatalog() {
+        return resultCatalog;
     }
 
-    public void setEntryCatalog(EntryCatalog entryCatalog) {
-        this.entryCatalog = entryCatalog;
+    public void setResultCatalog(ResultCatalog resultCatalog) {
+        this.resultCatalog = resultCatalog;
     }
 
     public Collection<SelectQuerySpec> getSelectQuerySpecs() {
@@ -260,11 +265,11 @@ public class DumpJob extends JobBase {
         this.outputAttributes = outputAttributes;
     }
 
-    public DataFormatFactory<DataOutputFormat> getOutputDataFormatFactory() {
-        return outputDataFormatFactory;
+    public ResultFormatFactory getResultFormatFactory() {
+        return resultFormatFactory;
     }
 
-    public void setOutputDataFormatFactory(DataFormatFactory<DataOutputFormat> outputDataFormatFactory) {
-        this.outputDataFormatFactory = outputDataFormatFactory;
+    public void setResultFormatFactory(ResultFormatFactory resultFormatFactory) {
+        this.resultFormatFactory = resultFormatFactory;
     }
 }

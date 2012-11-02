@@ -70,6 +70,6 @@ public abstract class HasNameBase implements HasName {
 
     @Override
     public String toString() {
-        return getName();
+        return getQuotedName();
     }
 }

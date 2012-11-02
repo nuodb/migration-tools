@@ -45,6 +45,7 @@ public class JdbcTypeRegistryBase extends JdbcTypeCodeNameMap implements JdbcTyp
 
     public JdbcTypeRegistryBase(JdbcTypeRegistry jdbcTypeRegistry) {
         addJdbcTypes(jdbcTypeRegistry.getJdbcTypes());
+        addJdbcTypeAdapters(jdbcTypeRegistry.getJdbcTypeAdapters());
     }
 
     @Override

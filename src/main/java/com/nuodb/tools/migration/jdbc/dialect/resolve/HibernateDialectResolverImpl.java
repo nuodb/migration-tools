@@ -28,6 +28,7 @@
 package com.nuodb.tools.migration.jdbc.dialect.resolve;
 
 import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialectException;
 import com.nuodb.tools.migration.jdbc.dialect.DatabaseDialectResolver;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.service.jdbc.dialect.internal.StandardDialectResolver;
@@ -35,6 +36,7 @@ import org.hibernate.service.jdbc.dialect.spi.DialectResolver;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
@@ -82,6 +84,21 @@ public class HibernateDialectResolverImpl implements DatabaseDialectResolver {
         @Override
         public String getNoColumnsInsertString() {
             return dialect.getNoColumnsInsertString();
+        }
+
+        @Override
+        public boolean supportsReadCatalogs() {
+            throw new DatabaseDialectException("Feature is not supported");
+        }
+
+        @Override
+        public boolean supportsReadSchemas() {
+            throw new DatabaseDialectException("Feature is not supported");
+        }
+
+        @Override
+        public void enableStreaming(Statement statement) throws SQLException {
+            throw new DatabaseDialectException("Feature is not supported");
         }
     }
 }

@@ -84,7 +84,9 @@ public class JdbcNClobTypeAdapter extends JdbcTypeAdapterBase<NClob> {
 
     @Override
     public <X> X unwrap(NClob value, Class<X> valueClass, Connection connection) throws SQLException {
-        if (valueClass.isAssignableFrom(NClob.class)) {
+        if (value == null) {
+            return null;
+        } else if (valueClass.isAssignableFrom(NClob.class)) {
             return (X) value;
         } else if (valueClass.isAssignableFrom(char[].class)) {
             try {

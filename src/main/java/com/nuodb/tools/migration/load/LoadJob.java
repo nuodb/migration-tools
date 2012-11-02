@@ -27,22 +27,22 @@
  */
 package com.nuodb.tools.migration.load;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.nuodb.tools.migration.output.catalog.Entry;
-import com.nuodb.tools.migration.output.catalog.EntryCatalog;
-import com.nuodb.tools.migration.output.catalog.EntryReader;
-import com.nuodb.tools.migration.output.format.ColumnDataModel;
-import com.nuodb.tools.migration.output.format.DataFormatFactory;
-import com.nuodb.tools.migration.output.format.InputDataFormat;
-import com.nuodb.tools.migration.output.format.csv.CsvInputDataFormat;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionCallback;
 import com.nuodb.tools.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.tools.migration.jdbc.metamodel.*;
+import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModel;
+import com.nuodb.tools.migration.jdbc.metamodel.Database;
+import com.nuodb.tools.migration.jdbc.metamodel.DatabaseInspector;
+import com.nuodb.tools.migration.jdbc.metamodel.Table;
 import com.nuodb.tools.migration.jdbc.query.*;
 import com.nuodb.tools.migration.job.JobBase;
 import com.nuodb.tools.migration.job.JobExecution;
+import com.nuodb.tools.migration.result.catalog.ResultCatalog;
+import com.nuodb.tools.migration.result.catalog.ResultEntry;
+import com.nuodb.tools.migration.result.catalog.ResultEntryReader;
+import com.nuodb.tools.migration.result.format.ColumnDataModel;
+import com.nuodb.tools.migration.result.format.ResultFormatFactory;
+import com.nuodb.tools.migration.result.format.csv.CsvResultInput;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,7 +53,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 
-import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.*;
+import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.COLUMN;
+import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.TABLE;
 
 /**
  * @author Sergey Bushik
@@ -62,10 +63,10 @@ public class LoadJob extends JobBase {
 
     protected final Log log = LogFactory.getLog(getClass());
     private JdbcServices jdbcServices;
-    private EntryCatalog entryCatalog;
     private String inputType;
     private Map<String, String> inputAttributes;
-    private DataFormatFactory<InputDataFormat> inputDataFormatFactory;
+    private ResultCatalog resultCatalog;
+    private ResultFormatFactory resultFormatFactory;
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
@@ -74,13 +75,13 @@ public class LoadJob extends JobBase {
             @Override
             public void execute(Connection connection) throws SQLException {
                 DatabaseInspector databaseInspector = jdbcServices.getDatabaseIntrospector();
-                databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+                databaseInspector.withObjectTypes(TABLE, COLUMN);
                 databaseInspector.withConnection(connection);
                 Database database = databaseInspector.inspect();
 
-                EntryReader entryReader = entryCatalog.openReader();
+                ResultEntryReader entryReader = resultCatalog.openReader();
                 try {
-                    for (Entry entry : entryReader.getEntries()) {
+                    for (ResultEntry entry : entryReader.getEntries()) {
                         load(execution, connection, database, entryReader, entry);
                     }
                     connection.commit();
@@ -91,11 +92,11 @@ public class LoadJob extends JobBase {
         });
     }
 
-    protected void load(JobExecution execution, Connection connection, Database database, EntryReader reader,
-                        Entry entry) throws SQLException {
+    protected void load(JobExecution execution, Connection connection, Database database, ResultEntryReader reader,
+                        ResultEntry entry) throws SQLException {
         InputStream entryInput = reader.getEntryInput(entry);
         try {
-            final CsvInputDataFormat format = (CsvInputDataFormat) inputDataFormatFactory.createDataFormat(entry.getType());
+            final CsvResultInput format = (CsvResultInput) resultFormatFactory.createInput(entry.getType());
             format.setAttributes(inputAttributes);
             format.setInputStream(entryInput);
             format.setJdbcTypeAccess(jdbcServices.getJdbcTypeAccessor());
@@ -103,14 +104,15 @@ public class LoadJob extends JobBase {
             final Table table = database.findTable(entry.getName());
             final ColumnDataModel model = format.read();
             final InsertQuery query = createInsertQuery(table, model);
-            final ColumnSetModel columnSetModel = new ColumnSetModelImpl(model.getColumns(),
-                    Collections2.transform(model.getColumns(), new Function<String, Integer>() {
-                        @Override
-                        public Integer apply(String column) {
-                            ColumnType type = table.getColumn(column).getType();
-                            return type.getTypeCode();
-                        }
-                    }));
+            final ColumnSetModel columnSetModel = null;
+//             = new ColumnSetModelImpl(model.getColumns(),
+//                    Collections2.transform(model.getColumns(), new Function<String, Integer>() {
+//                        @Override
+//                        public Integer apply(String column) {
+//                            ColumnType type = table.getColumn(column).getType();
+//                            return type.getTypeCode();
+//                        }
+//                    }));
             QueryTemplate queryTemplate = new QueryTemplate(connection);
             queryTemplate.execute(
                     new StatementBuilder<PreparedStatement>() {
@@ -149,12 +151,12 @@ public class LoadJob extends JobBase {
         this.jdbcServices = jdbcServices;
     }
 
-    public EntryCatalog getEntryCatalog() {
-        return entryCatalog;
+    public ResultCatalog getResultCatalog() {
+        return resultCatalog;
     }
 
-    public void setEntryCatalog(EntryCatalog entryCatalog) {
-        this.entryCatalog = entryCatalog;
+    public void setResultCatalog(ResultCatalog resultCatalog) {
+        this.resultCatalog = resultCatalog;
     }
 
     public String getInputType() {
@@ -173,11 +175,11 @@ public class LoadJob extends JobBase {
         this.inputAttributes = inputAttributes;
     }
 
-    public DataFormatFactory<InputDataFormat> getInputDataFormatFactory() {
-        return inputDataFormatFactory;
+    public ResultFormatFactory getResultFormatFactory() {
+        return resultFormatFactory;
     }
 
-    public void setInputDataFormatFactory(DataFormatFactory<InputDataFormat> inputDataFormatFactory) {
-        this.inputDataFormatFactory = inputDataFormatFactory;
+    public void setResultFormatFactory(ResultFormatFactory resultFormatFactory) {
+        this.resultFormatFactory = resultFormatFactory;
     }
 }

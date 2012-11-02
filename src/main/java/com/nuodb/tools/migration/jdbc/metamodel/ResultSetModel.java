@@ -27,18 +27,16 @@
  */
 package com.nuodb.tools.migration.jdbc.metamodel;
 
-import com.google.common.collect.Lists;
-
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
+import java.util.Arrays;
 
 public class ResultSetModel implements ColumnSetModel {
 
-    private List<Integer> columnTypes;
-    private List<String> columns;
+    private int columnCount;
+    private int[] columnTypes;
+    private String[] columns;
 
     public ResultSetModel(ResultSet resultSet) throws SQLException {
         this(resultSet.getMetaData());
@@ -47,38 +45,39 @@ public class ResultSetModel implements ColumnSetModel {
     public ResultSetModel(ResultSetMetaData metaData) throws SQLException {
         int columnCount = metaData.getColumnCount();
 
-        List<String> columns = Lists.newArrayList();
-        List<Integer> columnTypes = Lists.newArrayList();
+        String[] columns = new String[columnCount];
+        int[] columnTypes = new int[columnCount];
         for (int i = 0; i < columnCount; i++) {
             int column = i + 1;
-            columns.add(metaData.getColumnLabel(column));
-            columnTypes.add(metaData.getColumnType(column));
+            columns[i] = metaData.getColumnLabel(column);
+            columnTypes[i] = metaData.getColumnType(column);
         }
+        this.columnCount = columnCount;
         this.columns = columns;
         this.columnTypes = columnTypes;
     }
 
     public boolean hasColumn(String column) {
-        return columns.contains(column);
+        return Arrays.binarySearch(columns, column) >= 0;
     }
 
     public int getColumnType(int column) {
-        return columnTypes.get(column);
+        return columnTypes[column];
     }
 
-    public Collection<Integer> getColumnTypes() {
+    public int[] getColumnTypes() {
         return columnTypes;
     }
 
     public String getColumn(int index) {
-        return columns.get(index);
+        return columns[index];
     }
 
-    public Collection<String> getColumns() {
+    public String[] getColumns() {
         return columns;
     }
 
     public int getColumnCount() {
-        return columns.size();
+        return columnCount;
     }
 }

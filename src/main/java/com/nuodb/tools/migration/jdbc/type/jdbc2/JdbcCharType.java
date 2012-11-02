@@ -54,8 +54,7 @@ public class JdbcCharType extends JdbcTypeBase<String> {
 
     @Override
     public String getValue(ResultSet resultSet, int column) throws SQLException {
-        String stringValue = resultSet.getString(column);
-        return resultSet.wasNull() ? null : stringValue;
+        return resultSet.getString(column);
     }
 
     @Override

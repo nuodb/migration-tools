@@ -23,7 +23,7 @@
     </xs:complexType>
     <xs:complexType name="connectionSpec">
         <xs:sequence>
-            <xs:element type="xs:string" name="catalog" minOccurs="0"/>
+            <xs:element type="xs:string" name="resultCatalog" minOccurs="0"/>
             <xs:element type="xs:string" name="schema" minOccurs="0"/>
             <xs:element type="xs:string" name="driver"/>
             <xs:element type="xs:string" name="url"/>

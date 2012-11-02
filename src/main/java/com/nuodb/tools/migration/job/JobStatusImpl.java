@@ -40,7 +40,7 @@ public class JobStatusImpl implements JobStatus {
     private boolean stopped;
     private Date executionStartDate;
     private Date executionEndDate;
-    private Throwable exception;
+    private Throwable failure;
 
     @Override
     public JobStatusType getJobStatusType() {
@@ -66,12 +66,12 @@ public class JobStatusImpl implements JobStatus {
     }
 
     @Override
-    public Throwable getException() {
-        return exception;
+    public Throwable getFailure() {
+        return failure;
     }
 
-    public void setException(Throwable exception) {
-        this.exception = exception;
+    public void setFailure(Throwable failure) {
+        this.failure = failure;
     }
 
     @Override

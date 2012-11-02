@@ -34,5 +34,9 @@ public interface JdbcTypeAccessor extends JdbcTypeRegistry {
 
     <T> JdbcTypeGet<T> getJdbcTypeGet(int typeCode);
 
+    <T> JdbcTypeGet<T> getJdbcTypeGet(JdbcType<T> jdbcType);
+
     <T> JdbcTypeSet<T> getJdbcTypeSet(int typeCode);
+
+    <T> JdbcTypeSet<T> getJdbcTypeSet(JdbcType<T> jdbcType);
 }

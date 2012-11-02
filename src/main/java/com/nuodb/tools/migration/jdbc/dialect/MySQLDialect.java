@@ -27,6 +27,9 @@
  */
 package com.nuodb.tools.migration.jdbc.dialect;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+
 /**
  * @author Sergey Bushik
  */
@@ -40,5 +43,16 @@ public class MySQLDialect extends DatabaseDialectBase {
     @Override
     public char closeQuote() {
         return '`';
+    }
+
+    /**
+     * Forces driver to stream result http://goo.gl/kl1Nr
+     *
+     * @param statement to stream result set
+     * @throws SQLException
+     */
+    @Override
+    public void enableStreaming(Statement statement) throws SQLException {
+        statement.setFetchSize(Integer.MIN_VALUE);
     }
 }

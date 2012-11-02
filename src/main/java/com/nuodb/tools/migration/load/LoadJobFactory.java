@@ -27,18 +27,17 @@
  */
 package com.nuodb.tools.migration.load;
 
-import com.nuodb.tools.migration.output.catalog.EntryCatalog;
-import com.nuodb.tools.migration.output.catalog.EntryCatalogImpl;
-import com.nuodb.tools.migration.output.format.csv.CsvDataFormat;
-import com.nuodb.tools.migration.output.format.DataFormatFactory;
-import com.nuodb.tools.migration.output.format.InputDataFormat;
-import com.nuodb.tools.migration.output.format.InputDataFormatFactory;
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
 import com.nuodb.tools.migration.job.JobExecutor;
 import com.nuodb.tools.migration.job.JobExecutors;
 import com.nuodb.tools.migration.job.JobFactory;
 import com.nuodb.tools.migration.job.TraceJobExecutionListener;
+import com.nuodb.tools.migration.result.catalog.ResultCatalog;
+import com.nuodb.tools.migration.result.catalog.ResultCatalogImpl;
+import com.nuodb.tools.migration.result.format.ResultFormatFactory;
+import com.nuodb.tools.migration.result.format.ResultFormatFactoryImpl;
+import com.nuodb.tools.migration.result.format.csv.CsvResultFormat;
 import com.nuodb.tools.migration.spec.*;
 
 import java.util.Collections;
@@ -50,7 +49,7 @@ import java.util.HashMap;
 public class LoadJobFactory implements JobFactory<LoadJob> {
 
     private LoadSpec loadSpec;
-    private DataFormatFactory<InputDataFormat> inputDataFormatFactory = new InputDataFormatFactory();
+    private ResultFormatFactory resultFormatFactory = new ResultFormatFactoryImpl();
 
     @Override
     public LoadJob createJob() {
@@ -61,8 +60,8 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         job.setJdbcServices(createJdbcServices(connectionSpec));
         job.setInputType(inputSpec.getType());
         job.setInputAttributes(inputSpec.getAttributes());
-        job.setEntryCatalog(createEntryCatalog(inputSpec));
-        job.setInputDataFormatFactory(inputDataFormatFactory);
+        job.setResultCatalog(createResultCatalog(inputSpec.getPath()));
+        job.setResultFormatFactory(resultFormatFactory);
         return job;
     }
 
@@ -70,8 +69,8 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         return new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec);
     }
 
-    protected EntryCatalog createEntryCatalog(FormatSpec inputSpec) {
-        return new EntryCatalogImpl(inputSpec.getPath());
+    protected ResultCatalog createResultCatalog(String path) {
+        return new ResultCatalogImpl(path);
     }
 
     public LoadSpec getLoadSpec() {
@@ -82,12 +81,12 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         this.loadSpec = loadSpec;
     }
 
-    public DataFormatFactory<InputDataFormat> getInputDataFormatFactory() {
-        return inputDataFormatFactory;
+    public ResultFormatFactory getResultFormatFactory() {
+        return resultFormatFactory;
     }
 
-    public void setInputDataFormatFactory(DataFormatFactory<InputDataFormat> inputDataFormatFactory) {
-        this.inputDataFormatFactory = inputDataFormatFactory;
+    public void setResultFormatFactory(ResultFormatFactory resultFormatFactory) {
+        this.resultFormatFactory = resultFormatFactory;
     }
 
     public static void main(String[] args) throws LoadException {
@@ -98,7 +97,7 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         connectionSpec.setCatalog("enron-load");
 
         FormatSpec inputSpec = new FormatSpecBase();
-        inputSpec.setType(CsvDataFormat.TYPE);
+        inputSpec.setType(CsvResultFormat.TYPE);
         inputSpec.setPath("/tmp/test/dump.cat");
         inputSpec.setAttributes(new HashMap<String, String>() {
             {

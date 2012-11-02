@@ -34,7 +34,7 @@ import java.util.Collection;
  */
 public interface JdbcTypeRegistry {
 
-    JdbcType getJdbcType(int sqlType);
+    JdbcType getJdbcType(int typeCode);
 
     void addJdbcType(JdbcType jdbcType);
 

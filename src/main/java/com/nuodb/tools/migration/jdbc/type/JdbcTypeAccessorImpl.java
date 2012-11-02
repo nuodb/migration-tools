@@ -50,7 +50,11 @@ public class JdbcTypeAccessorImpl extends JdbcTypeRegistryBase implements JdbcTy
 
     @Override
     public <T> JdbcTypeGet<T> getJdbcTypeGet(int typeCode) {
-        final JdbcType<T> jdbcType = getJdbcTypeRequired(typeCode);
+        return getJdbcTypeGet(getJdbcTypeRequired(typeCode));
+    }
+
+    @Override
+    public <T> JdbcTypeGet<T> getJdbcTypeGet(final JdbcType<T> jdbcType) {
         return new JdbcTypeGet<T>() {
             @Override
             public JdbcType<T> getJdbcType() {
@@ -59,7 +63,7 @@ public class JdbcTypeAccessorImpl extends JdbcTypeRegistryBase implements JdbcTy
 
             @Override
             public T getValue(ResultSet resultSet, int column) throws SQLException {
-                return getValue(resultSet, column, jdbcType.getTypeClass());
+                return jdbcType.getValue(resultSet, column);
             }
 
             @Override
@@ -77,7 +81,11 @@ public class JdbcTypeAccessorImpl extends JdbcTypeRegistryBase implements JdbcTy
 
     @Override
     public <T> JdbcTypeSet<T> getJdbcTypeSet(int typeCode) {
-        final JdbcType<T> jdbcType = getJdbcTypeRequired(typeCode);
+        return getJdbcTypeSet(getJdbcTypeRequired(typeCode));
+    }
+
+    @Override
+    public <T> JdbcTypeSet<T> getJdbcTypeSet(final JdbcType<T> jdbcType) {
         return new JdbcTypeSet<T>() {
             @Override
             public JdbcType<T> getJdbcType() {
@@ -97,15 +105,14 @@ public class JdbcTypeAccessorImpl extends JdbcTypeRegistryBase implements JdbcTy
     }
 
     protected <T> JdbcTypeAdapter<T> getJdbcTypeAdapter(Class valueClass, Class typeClass) {
-        boolean required = false;
+        JdbcTypeAdapter jdbcTypeAdapter = null;
         if (valueClass != null && !valueClass.isAssignableFrom(typeClass)) {
-            required = true;
-        }
-        JdbcTypeAdapter jdbcTypeAdapter = getJdbcTypeAdapter(typeClass);
-        if (required && jdbcTypeAdapter == null) {
-            throw new JdbcTypeException(
-                    String.format("Jdbc type %s adapter not found to adapt %s type", typeClass.getName(),
-                            valueClass.getName()));
+            jdbcTypeAdapter = getJdbcTypeAdapter(typeClass);
+            if (jdbcTypeAdapter == null) {
+                throw new JdbcTypeException(
+                        String.format("Jdbc type %s adapter not found to adapt %s type", typeClass.getName(),
+                                valueClass.getName()));
+            }
         }
         return jdbcTypeAdapter;
     }

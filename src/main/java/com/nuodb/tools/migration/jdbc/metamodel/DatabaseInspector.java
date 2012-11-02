@@ -110,8 +110,8 @@ public class DatabaseInspector {
         }
         try {
             DatabaseMetaData metaData = connection.getMetaData();
-            readInfo(metaData, database);
             readDialect(metaData, database);
+            readInfo(metaData, database);
             readObjects(metaData, database);
         } finally {
             if (closeConnection) {
@@ -164,24 +164,36 @@ public class DatabaseInspector {
     }
 
     protected void readCatalogs(DatabaseMetaData metaData, Database database) throws SQLException {
-        ResultSet catalogs = metaData.getCatalogs();
-        try {
-            while (catalogs.next()) {
-                database.createCatalog(catalogs.getString("TABLE_CAT"));
+        if (database.getDatabaseDialect().supportsReadCatalogs()) {
+            ResultSet catalogs = metaData.getCatalogs();
+            try {
+                while (catalogs.next()) {
+                    database.createCatalog(catalogs.getString("TABLE_CAT"));
+                }
+            } finally {
+                catalogs.close();
             }
-        } finally {
-            catalogs.close();
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Read catalogs is unsupported");
+            }
         }
     }
 
     protected void readSchemas(DatabaseMetaData metaData, Database database) throws SQLException {
-        ResultSet schemas = catalog != null ? metaData.getSchemas(catalog, null) : metaData.getSchemas();
-        try {
-            while (schemas.next()) {
-                database.createSchema(schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
+        if (database.getDatabaseDialect().supportsReadSchemas()) {
+            ResultSet schemas = catalog != null ? metaData.getSchemas(catalog, null) : metaData.getSchemas();
+            try {
+                while (schemas.next()) {
+                    database.createSchema(schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
+                }
+            } finally {
+                schemas.close();
             }
-        } finally {
-            schemas.close();
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Read schemas is unsupported");
+            }
         }
     }
 
