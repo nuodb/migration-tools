@@ -2,7 +2,7 @@ package com.nuodb.tools.migration.result.catalog;
 
 
 import com.nuodb.tools.migration.TestConstants;
-import com.nuodb.tools.migration.result.format.csv.CsvResultFormat;
+import com.nuodb.tools.migration.result.format.csv.CsvAttributes;
 import com.nuodb.tools.migration.spec.FormatSpec;
 import com.nuodb.tools.migration.spec.FormatSpecBase;
 import org.apache.commons.io.FileUtils;
@@ -26,7 +26,7 @@ public class DumpCatalogIntegrationTest extends TestConstants {
     public void setUp() throws Exception {
         FormatSpec outputSpec = new FormatSpecBase();
         outputSpec.setPath(TEST_PATH);
-        outputSpec.setType(CsvResultFormat.TYPE);
+        outputSpec.setType(CsvAttributes.TYPE);
         this.outputSpec = outputSpec;
 
         ResultCatalogImpl catalogFile = new ResultCatalogImpl(outputSpec.getType());

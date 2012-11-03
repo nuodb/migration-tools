@@ -32,9 +32,31 @@ import com.nuodb.tools.migration.result.format.ResultInputBase;
 /**
  * @author Sergey Bushik
  */
-public class XmlResultInput extends ResultInputBase implements XmlResultFormat {
+public class XmlResultInput extends ResultInputBase implements XmlAttributes {
+
     @Override
     public String getType() {
         return TYPE;
+    }
+
+    @Override
+    protected void doInitInput() {
+    }
+
+    @Override
+    protected void doReadBegin() {
+    }
+
+    @Override
+    protected void doReadEnd() {
+    }
+
+    @Override
+    public boolean canReadRead() {
+        return false;
+    }
+
+    @Override
+    public void readRow() {
     }
 }

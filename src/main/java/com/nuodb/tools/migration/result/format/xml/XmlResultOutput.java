@@ -39,7 +39,7 @@ import static javax.xml.XMLConstants.*;
 /**
  * @author Sergey Bushik
  */
-public class XmlResultOutput extends ResultOutputBase implements XmlResultFormat {
+public class XmlResultOutput extends ResultOutputBase implements XmlAttributes {
 
     private XMLStreamWriter writer;
 
@@ -52,14 +52,10 @@ public class XmlResultOutput extends ResultOutputBase implements XmlResultFormat
     }
 
     @Override
-    protected void doSetAttributes() {
+    protected void doInitOutput() {
         version = getAttribute(ATTRIBUTE_VERSION, VERSION);
         encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
-    }
 
-
-    @Override
-    protected void doOutputStart() {
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
         try {
             if (getWriter() != null) {
@@ -70,11 +66,15 @@ public class XmlResultOutput extends ResultOutputBase implements XmlResultFormat
         } catch (XMLStreamException e) {
             throw new ResultFormatException(e);
         }
+    }
+
+    @Override
+    protected void doWriteBegin() {
         try {
             writer.writeStartDocument(getEncoding(), getVersion());
             writer.writeStartElement(DOCUMENT_ELEMENT);
             writer.writeStartElement(MODEL_ELEMENT);
-            for (String column : getColumnSetModel().getColumns()) {
+            for (String column : getResultFormatModel().getColumns()) {
                 writer.writeEmptyElement(COLUMN_ELEMENT);
                 writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
                 writer.writeAttribute(ATTRIBUTE_NAME, column);
@@ -86,12 +86,11 @@ public class XmlResultOutput extends ResultOutputBase implements XmlResultFormat
     }
 
     @Override
-    protected void doOutputRow() {
+    protected void doWriteRow(String[] values) {
         try {
             writer.writeStartElement(ROW_ELEMENT);
-            int index = 0;
-            for (String column : getRowValues()) {
-                doOutputColumn(column, index++);
+            for (String columnValue : values) {
+                doWriteColumn(columnValue);
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
@@ -99,26 +98,26 @@ public class XmlResultOutput extends ResultOutputBase implements XmlResultFormat
         }
     }
 
+    protected void doWriteColumn(String value) throws XMLStreamException {
+        if (value == null) {
+            writer.writeEmptyElement(COLUMN_ELEMENT);
+            writer.setPrefix("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
+            writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil", "true");
+        } else {
+            writer.writeStartElement(COLUMN_ELEMENT);
+            writer.writeCharacters(value);
+            writer.writeEndElement();
+        }
+    }
+
     @Override
-    protected void doOutputEnd() {
+    protected void doWriteEnd() {
         try {
             writer.writeEndElement();
             writer.writeEndDocument();
             writer.flush();
         } catch (XMLStreamException e) {
             throw new ResultFormatException(e);
-        }
-    }
-
-    protected void doOutputColumn(String column, int index) throws XMLStreamException {
-        if (column == null) {
-            writer.writeEmptyElement(COLUMN_ELEMENT);
-            writer.setPrefix("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
-            writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil", "true");
-        } else {
-            writer.writeStartElement(COLUMN_ELEMENT);
-            writer.writeCharacters(column);
-            writer.writeEndElement();
         }
     }
 

@@ -25,12 +25,11 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.result.format.jdbc;
+package com.nuodb.tools.migration.result.format;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeGet;
 import com.nuodb.tools.migration.jdbc.type.JdbcTypeSet;
-import com.nuodb.tools.migration.result.format.ResultFormatException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,21 +40,24 @@ import java.sql.SQLException;
  */
 public class JdbcTypeValueImpl<T> implements JdbcTypeValue<T> {
 
+    private JdbcType<T> jdbcType;
     private JdbcTypeGet<T> jdbcTypeGet;
     private ResultSet resultSet;
     private JdbcTypeSet<T> jdbcTypeSet;
-    private PreparedStatement statement;
+    private PreparedStatement preparedStatement;
     private int column;
 
     public JdbcTypeValueImpl(JdbcTypeGet<T> jdbcTypeGet, ResultSet resultSet, int column) {
+        this.jdbcType = jdbcTypeGet.getJdbcType();
         this.jdbcTypeGet = jdbcTypeGet;
         this.resultSet = resultSet;
         this.column = column;
     }
 
-    public JdbcTypeValueImpl(JdbcTypeSet<T> jdbcTypeSet, PreparedStatement statement, int column) {
+    public JdbcTypeValueImpl(JdbcTypeSet<T> jdbcTypeSet, PreparedStatement preparedStatement, int column) {
+        this.jdbcType = jdbcTypeSet.getJdbcType();
         this.jdbcTypeSet = jdbcTypeSet;
-        this.statement = statement;
+        this.preparedStatement = preparedStatement;
         this.column = column;
     }
 
@@ -85,11 +87,11 @@ public class JdbcTypeValueImpl<T> implements JdbcTypeValue<T> {
         if (jdbcTypeSet == null) {
             throw new ResultFormatException("Set value is unsupported");
         }
-        jdbcTypeSet.setValue(statement, column, value);
+        jdbcTypeSet.setValue(preparedStatement, column, value);
     }
 
     @Override
     public JdbcType<T> getJdbcType() {
-        return jdbcTypeGet.getJdbcType();
+        return jdbcType;
     }
 }

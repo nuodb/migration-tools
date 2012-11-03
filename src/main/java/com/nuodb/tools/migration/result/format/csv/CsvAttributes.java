@@ -25,14 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.result.format.jdbc;
+package com.nuodb.tools.migration.result.format.csv;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeFormat<T> {
+public interface CsvAttributes {
 
-    String format(JdbcTypeValue<T> jdbcTypeValue) throws JdbcTypeFormatException;
+    final String TYPE = "csv";
+    /**
+     * The symbol used for value separation, must not be a line break character.
+     */
+    final String ATTRIBUTE_DELIMITER = "csv.delimiter";
+    /**
+     * Indicates whether quotation should be used.
+     */
+    final String ATTRIBUTE_QUOTING = "csv.quoting";
+    /**
+     * The symbol used as value encapsulation marker.
+     */
+    final String ATTRIBUTE_QUOTE = "csv.quote";
+    /**
+     * The symbol used to escape special characters in values.
+     */
+    final String ATTRIBUTE_ESCAPE = "csv.escape";
+    /**
+     * The record separator to use for withConnection.
+     */
+    final String ATTRIBUTE_LINE_SEPARATOR = "csv.line.separator";
 
-    void parse(JdbcTypeValue<T> jdbcTypeValue, String value) throws JdbcTypeFormatException;
+    final Character DELIMITER = ',';
+    final String LINE_SEPARATOR = "\r\n";
+    final boolean QUOTING = false;
+    final Character QUOTE = '"';
+    final Character ESCAPE = '|';
 }

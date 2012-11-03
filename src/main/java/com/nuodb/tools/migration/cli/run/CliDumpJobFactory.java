@@ -37,7 +37,7 @@ import com.nuodb.tools.migration.spec.DumpSpec;
 
 /**
  * The Factory instantiates a {@link CliDumpJobFactory.CliDumpJob} which is a setValue of groups of options for source database connection spec
- * {@link CliRunSupport#createSourceGroup}, spec of withConnection format & type via {@link CliRunSupport#createOutputGroup},
+ * {@link CliRunSupport#createSourceGroup}, spec of withConnection getValue & type via {@link CliRunSupport#createOutputGroup},
  * table option {@link CliRunSupport#createSelectQueryGroup} and after a validation is passed assembles command line
  * option arguments into a {@link DumpSpec} object.
  *

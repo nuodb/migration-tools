@@ -29,7 +29,7 @@ package com.nuodb.tools.migration.cli;
 
 /**
  * Contains literal constants for the available, recognized command line options, without their prefixes (i.e. double
- * hyphen --). Option prefixes, argument separators, argument value separators are specified in the option format
+ * hyphen --). Option prefixes, argument separators, argument value separators are specified in the option getValue
  * instance.
  *
  * @author Sergey Bushik

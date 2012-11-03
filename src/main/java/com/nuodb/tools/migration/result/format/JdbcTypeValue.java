@@ -25,25 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.result.format.xml;
+package com.nuodb.tools.migration.result.format;
 
-import com.nuodb.tools.migration.result.format.ResultFormat;
+import com.nuodb.tools.migration.jdbc.type.JdbcType;
+
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface XmlResultFormat extends ResultFormat {
+public interface JdbcTypeValue<T> {
 
-    static final String TYPE = "xml";
+    int getColumn();
 
-    final String ATTRIBUTE_ENCODING = "xml.encoding";
-    final String ATTRIBUTE_VERSION = "xml.version";
+    JdbcType<T> getJdbcType();
 
-    final String ENCODING = "utf-8";
-    final String VERSION = "1.0";
-    final String DOCUMENT_ELEMENT = "rows";
-    final String MODEL_ELEMENT = "model";
-    final String ROW_ELEMENT = "row";
-    final String COLUMN_ELEMENT = "column";
-    final String ATTRIBUTE_NAME = "name";
+    T getValue() throws SQLException;
+
+    <X> X getValue(Class<X> valueClass) throws SQLException;
+
+    <X> void setValue(X value) throws SQLException;
 }

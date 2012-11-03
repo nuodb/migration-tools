@@ -37,37 +37,45 @@ public class ColumnSetModelImpl implements ColumnSetModel {
     private String[] columns;
     private int[] columnTypes;
 
+    public ColumnSetModelImpl(ColumnSetModel model) {
+        this(model.getColumns(), model.getColumnTypes());
+    }
+
     public ColumnSetModelImpl(String[] columns, int[] columnTypes) {
         this.columns = columns;
         this.columnTypes = columnTypes;
     }
 
-    @Override
     public boolean hasColumn(String column) {
         return Arrays.binarySearch(columns, column) >= 0;
     }
 
-    @Override
-    public int getColumnType(int column) {
-        return columnTypes[column];
+    public int getColumnType(int index) {
+        return columnTypes[index];
     }
 
     @Override
+    public void setColumnType(int index, int columnType) {
+        columnTypes[index] = columnType;
+    }
+
     public int[] getColumnTypes() {
         return columnTypes;
     }
 
-    @Override
     public String getColumn(int index) {
         return columns[index];
     }
 
     @Override
+    public void setColumn(int index, String column) {
+        columns[index] = column;
+    }
+
     public String[] getColumns() {
         return columns;
     }
 
-    @Override
     public int getColumnCount() {
         return columns.length;
     }

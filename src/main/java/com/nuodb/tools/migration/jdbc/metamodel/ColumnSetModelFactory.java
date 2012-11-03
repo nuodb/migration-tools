@@ -25,40 +25,35 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.result.format.jdbc;
+package com.nuodb.tools.migration.jdbc.metamodel;
 
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
-import com.nuodb.tools.migration.result.format.ResultFormatException;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class JdbcTypeFormatBase<T> implements JdbcTypeFormat<T> {
+public class ColumnSetModelFactory {
 
-    @Override
-    public String format(JdbcTypeValue<T> jdbcTypeValue) {
-        try {
-            return doFormat(jdbcTypeValue);
-        } catch (Exception exception) {
-            throw newResultFormatFailure(jdbcTypeValue.getJdbcType(), exception);
-        }
+    public static ColumnSetModel create(ResultSet resultSet) throws SQLException {
+        return create(resultSet.getMetaData());
     }
 
-    protected abstract String doFormat(JdbcTypeValue<T> jdbcTypeValue) throws Exception;
+    public static ColumnSetModel create(ResultSetMetaData metaData) throws SQLException {
+        int columnCount = metaData.getColumnCount();
 
-    @Override
-    public void parse(JdbcTypeValue<T> jdbcTypeValue, String value) {
-        try {
-            doParse(jdbcTypeValue, value);
-        } catch (Exception exception) {
-            throw newResultFormatFailure(jdbcTypeValue.getJdbcType(), exception);
+        String[] columns = new String[columnCount];
+        int[] columnTypes = new int[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            int column = i + 1;
+            columns[i] = metaData.getColumnLabel(column);
+            columnTypes[i] = metaData.getColumnType(column);
         }
+        return new ColumnSetModelImpl(columns, columnTypes);
     }
 
-    protected abstract void doParse(JdbcTypeValue<T> jdbcTypeValue, String value) throws Exception;
-
-    protected ResultFormatException newResultFormatFailure(JdbcType jdbcType, Exception exception) {
-        return new ResultFormatException(
-                String.format("Failed processing jdbc type %s", jdbcType.getClass().getName()), exception);
+    public static ColumnSetModel create(String[] columns, int[] columnTypes) {
+        return new ColumnSetModelImpl(columns, columnTypes);
     }
 }

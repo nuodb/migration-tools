@@ -27,35 +27,22 @@
  */
 package com.nuodb.tools.migration.result.format;
 
-import java.util.List;
+import com.nuodb.tools.migration.result.format.ResultFormatException;
 
 /**
  * @author Sergey Bushik
  */
-public class ColumnDataModelImpl implements ColumnDataModel {
+public class JdbcTypeFormatException extends ResultFormatException {
 
-    private List<String> columns;
-
-    public ColumnDataModelImpl(List<String> columns) {
-        this.columns = columns;
+    public JdbcTypeFormatException(String message) {
+        super(message);
     }
 
-    @Override
-    public String getColumn(int index) {
-        return columns.get(index);
+    public JdbcTypeFormatException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    public List<String> getColumns() {
-        return columns;
-    }
-
-    @Override
-    public int getColumnCount() {
-        return columns.size();
-    }
-
-    public String toString() {
-        return String.valueOf(columns);
+    public JdbcTypeFormatException(Throwable cause) {
+        super(cause);
     }
 }

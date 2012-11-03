@@ -67,15 +67,14 @@ public class CliHandler extends CliHandlerSupport {
             handleOptionSet(options, root);
         } catch (OptionException exception) {
             handleOptionException(exception);
+            System.exit(ERROR_EXIT_STATUS);
+        } catch (Throwable exception) {
+            System.exit(ERROR_EXIT_STATUS);
         }
     }
 
     public static void main(String[] args) throws IOException {
         CliHandler handler = new CliHandler();
-        try {
-            handler.handle(args);
-        } catch (Throwable exception) {
-            System.exit(ERROR_EXIT_STATUS);
-        }
+        handler.handle(args);
     }
 }

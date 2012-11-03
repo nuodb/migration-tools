@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.result.format.jdbc;
+package com.nuodb.tools.migration.result.format;
 
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
 import org.apache.commons.codec.binary.Base64;
@@ -60,7 +60,7 @@ public class JdbcTypeFormatImpl implements JdbcTypeFormat<Object> {
     private DateFormat timestampFormat = TIMESTAMP_FORMAT;
 
     @Override
-    public String format(JdbcTypeValue jdbcTypeValue) {
+    public String getValue(JdbcTypeValue jdbcTypeValue) {
         JdbcType jdbcType = jdbcTypeValue.getJdbcType();
         Object jdbcValue;
         String value = null;
@@ -221,7 +221,7 @@ public class JdbcTypeFormatImpl implements JdbcTypeFormat<Object> {
     }
 
     @Override
-    public void parse(JdbcTypeValue<Object> jdbcTypeValue, String value) {
+    public void setValue(JdbcTypeValue<Object> jdbcTypeValue, String value) {
         JdbcType<Object> jdbcType = jdbcTypeValue.getJdbcType();
         switch (jdbcType.getTypeCode()) {
             case Types.BIT:

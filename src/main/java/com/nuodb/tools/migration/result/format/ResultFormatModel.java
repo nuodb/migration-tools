@@ -25,24 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.result.format.jdbc;
+package com.nuodb.tools.migration.result.format;
 
-import com.nuodb.tools.migration.jdbc.type.JdbcType;
-
-import java.sql.SQLException;
+import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModel;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValue<T> {
 
-    int getColumn();
+public interface ResultFormatModel extends ColumnSetModel {
 
-    T getValue() throws SQLException;
+    JdbcTypeValue getColumnValue(int column);
 
-    <X> X getValue(Class<X> valueClass) throws SQLException;
+    JdbcTypeValue[] getColumnValues();
 
-    <X> void setValue(X value) throws SQLException;
+    JdbcTypeFormat getColumnFormat(int column);
 
-    JdbcType<T> getJdbcType();
+    JdbcTypeFormat[] getColumnFormats();
 }

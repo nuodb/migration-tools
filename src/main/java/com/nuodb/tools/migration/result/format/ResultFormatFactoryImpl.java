@@ -28,10 +28,10 @@
 package com.nuodb.tools.migration.result.format;
 
 import com.google.common.collect.Maps;
-import com.nuodb.tools.migration.result.format.csv.CsvResultFormat;
+import com.nuodb.tools.migration.result.format.csv.CsvAttributes;
 import com.nuodb.tools.migration.result.format.csv.CsvResultInput;
 import com.nuodb.tools.migration.result.format.csv.CsvResultOutput;
-import com.nuodb.tools.migration.result.format.xml.XmlResultFormat;
+import com.nuodb.tools.migration.result.format.xml.XmlAttributes;
 import com.nuodb.tools.migration.result.format.xml.XmlResultInput;
 import com.nuodb.tools.migration.result.format.xml.XmlResultOutput;
 import com.nuodb.tools.migration.utils.ClassUtils;
@@ -53,10 +53,10 @@ public class ResultFormatFactoryImpl implements ResultFormatFactory {
     private Map<String, Class<? extends ResultOutput>> outputClasses = Maps.newHashMap();
 
     public ResultFormatFactoryImpl() {
-        registerInput(CsvResultFormat.TYPE, CsvResultInput.class);
-        registerInput(XmlResultFormat.TYPE, XmlResultInput.class);
-        registerOutput(CsvResultFormat.TYPE, CsvResultOutput.class);
-        registerOutput(XmlResultFormat.TYPE, XmlResultOutput.class);
+        registerInput(CsvAttributes.TYPE, CsvResultInput.class);
+        registerInput(XmlAttributes.TYPE, XmlResultInput.class);
+        registerOutput(CsvAttributes.TYPE, CsvResultOutput.class);
+        registerOutput(XmlAttributes.TYPE, XmlResultOutput.class);
     }
 
     @Override

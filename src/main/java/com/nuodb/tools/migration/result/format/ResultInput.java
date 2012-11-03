@@ -29,13 +29,26 @@ package com.nuodb.tools.migration.result.format;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.PreparedStatement;
 
 /**
  * @author Sergey Bushik
  */
 public interface ResultInput extends ResultFormat {
 
+    void initInput();
+
+    void readBegin();
+
+    boolean canReadRead();
+
+    void readRow();
+
+    void readEnd();
+
     void setReader(Reader reader);
 
     void setInputStream(InputStream inputStream);
+
+    void setPreparedStatement(PreparedStatement preparedStatement);
 }

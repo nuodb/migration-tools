@@ -126,11 +126,12 @@ public class DumpJob extends JobBase {
     protected void dump(JobExecution execution, Connection connection, Database database, Query query,
                         OutputStream output) throws SQLException {
         try {
-            ResultOutput result = resultFormatFactory.createOutput(outputType);
-            result.setAttributes(outputAttributes);
-            result.setJdbcTypeAccessor(jdbcServices.getJdbcTypeAccessor());
-            result.setOutputStream(output);
-            dump(execution, connection, database, query, result);
+            ResultOutput resultOutput = resultFormatFactory.createOutput(outputType);
+            resultOutput.setAttributes(outputAttributes);
+            resultOutput.setJdbcTypeAccessor(jdbcServices.getJdbcTypeAccessor());
+            resultOutput.setOutputStream(output);
+            resultOutput.initOutput();
+            dump(execution, connection, database, query, resultOutput);
         } finally {
             closeQuietly(output);
         }
@@ -145,7 +146,7 @@ public class DumpJob extends JobBase {
                     @Override
                     public PreparedStatement build(Connection connection) throws SQLException {
                         if (log.isDebugEnabled()) {
-                            log.debug(String.format("Preparing SQL query %1$s", query.toQuery()));
+                            log.debug(String.format("Prepare SQL query %s", query.toQuery()));
                         }
                         PreparedStatement statement = connection.prepareStatement(query.toQuery(),
                                 TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
@@ -156,17 +157,15 @@ public class DumpJob extends JobBase {
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        if (log.isDebugEnabled()) {
-                            log.debug(String.format("Writing dump %1$s", resultOutput.getClass().getName()));
-                        }
                         ResultSet resultSet = statement.executeQuery();
                         resultOutput.setResultSet(resultSet);
+                        resultOutput.initModel();
 
-                        resultOutput.outputStart();
+                        resultOutput.writeBegin();
                         while (execution.isRunning() && resultSet.next()) {
-                            resultOutput.outputRow();
+                            resultOutput.writeRow();
                         }
-                        resultOutput.outputEnd();
+                        resultOutput.writeEnd();
                     }
                 }
         );

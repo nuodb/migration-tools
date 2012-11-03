@@ -40,9 +40,8 @@ import com.nuodb.tools.migration.job.JobExecution;
 import com.nuodb.tools.migration.result.catalog.ResultCatalog;
 import com.nuodb.tools.migration.result.catalog.ResultEntry;
 import com.nuodb.tools.migration.result.catalog.ResultEntryReader;
-import com.nuodb.tools.migration.result.format.ColumnDataModel;
 import com.nuodb.tools.migration.result.format.ResultFormatFactory;
-import com.nuodb.tools.migration.result.format.csv.CsvResultInput;
+import com.nuodb.tools.migration.result.format.ResultInput;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,6 +50,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Map;
 
 import static com.nuodb.tools.migration.jdbc.metamodel.ObjectType.COLUMN;
@@ -79,67 +79,85 @@ public class LoadJob extends JobBase {
                 databaseInspector.withConnection(connection);
                 Database database = databaseInspector.inspect();
 
-                ResultEntryReader entryReader = resultCatalog.openReader();
+                ResultEntryReader reader = resultCatalog.openReader();
                 try {
-                    for (ResultEntry entry : entryReader.getEntries()) {
-                        load(execution, connection, database, entryReader, entry);
+                    for (ResultEntry entry : reader.getEntries()) {
+                        load(execution, connection, database, reader, entry);
                     }
                     connection.commit();
                 } finally {
-                    entryReader.close();
+                    reader.close();
                 }
             }
         });
     }
 
-    protected void load(JobExecution execution, Connection connection, Database database, ResultEntryReader reader,
-                        ResultEntry entry) throws SQLException {
+    protected void load(final JobExecution execution, Connection connection, Database database,
+                        ResultEntryReader reader, ResultEntry entry) throws SQLException {
         InputStream entryInput = reader.getEntryInput(entry);
         try {
-            final CsvResultInput format = (CsvResultInput) resultFormatFactory.createInput(entry.getType());
-            format.setAttributes(inputAttributes);
-            format.setInputStream(entryInput);
-            format.setJdbcTypeAccess(jdbcServices.getJdbcTypeAccessor());
-            format.init();
-            final Table table = database.findTable(entry.getName());
-            final ColumnDataModel model = format.read();
-            final InsertQuery query = createInsertQuery(table, model);
-            final ColumnSetModel columnSetModel = null;
-//             = new ColumnSetModelImpl(model.getColumns(),
-//                    Collections2.transform(model.getColumns(), new Function<String, Integer>() {
-//                        @Override
-//                        public Integer apply(String column) {
-//                            ColumnType type = table.getColumn(column).getType();
-//                            return type.getTypeCode();
-//                        }
-//                    }));
-            QueryTemplate queryTemplate = new QueryTemplate(connection);
-            queryTemplate.execute(
-                    new StatementBuilder<PreparedStatement>() {
-                        @Override
-                        public PreparedStatement build(Connection connection) throws SQLException {
-                            return connection.prepareStatement(query.toQuery());
-                        }
-                    },
-                    new StatementCallback<PreparedStatement>() {
-                        @Override
-                        public void execute(PreparedStatement statement) throws SQLException {
-                            while (format.bind(statement, columnSetModel)) {
-                                statement.executeUpdate();
-                            }
-                        }
-                    }
-            );
+            final ResultInput resultInput = resultFormatFactory.createInput(entry.getType());
+            resultInput.setAttributes(inputAttributes);
+            resultInput.setInputStream(entryInput);
+            resultInput.setJdbcTypeAccessor(jdbcServices.getJdbcTypeAccessor());
+            resultInput.initInput();
+
+            load(execution, connection, database, resultInput, entry.getName());
         } finally {
             IOUtils.closeQuietly(entryInput);
         }
     }
 
-    protected InsertQuery createInsertQuery(Table table, ColumnDataModel model) {
+    protected void load(final JobExecution execution, Connection connection, Database database,
+                        final ResultInput resultInput, String tableName) throws SQLException {
+        resultInput.readBegin();
+        ColumnSetModel columnSetModel = resultInput.getColumnSetModel();
+        Table table = database.findTable(tableName);
+        mergeColumnSetModel(table, columnSetModel);
+        final InsertQuery query = createInsertQuery(table, columnSetModel);
+
+        QueryTemplate queryTemplate = new QueryTemplate(connection);
+        queryTemplate.execute(
+                new StatementBuilder<PreparedStatement>() {
+                    @Override
+                    public PreparedStatement build(Connection connection) throws SQLException {
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("Prepare SQL query %s", query.toQuery()));
+                        }
+                        return connection.prepareStatement(query.toQuery());
+                    }
+                },
+                new StatementCallback<PreparedStatement>() {
+                    @Override
+                    public void execute(PreparedStatement preparedStatement) throws SQLException {
+                        resultInput.setPreparedStatement(preparedStatement);
+
+                        resultInput.initModel();
+                        while (resultInput.canReadRead() && execution.isRunning()) {
+                            resultInput.readRow();
+                            preparedStatement.executeUpdate();
+                        }
+                        resultInput.readEnd();
+                    }
+                }
+        );
+    }
+
+    protected void mergeColumnSetModel(Table table, ColumnSetModel columnSetModel) {
+        for (int index = 0; index < columnSetModel.getColumnCount(); index++) {
+            String column = columnSetModel.getColumn(index);
+            int columnType = table.getColumn(column).getType().getTypeCode();
+            columnSetModel.setColumnType(index, columnType);
+        }
+    }
+
+    protected InsertQuery createInsertQuery(Table table, ColumnSetModel columnSetModel) {
         InsertQueryBuilder builder = new InsertQueryBuilder();
         builder.setQualifyNames(true);
         builder.setTable(table);
-        builder.setColumns(model.getColumns());
+        if (columnSetModel != null) {
+            builder.setColumns(Arrays.asList(columnSetModel.getColumns()));
+        }
         return builder.build();
     }
 

@@ -37,7 +37,7 @@ import com.nuodb.tools.migration.result.catalog.ResultCatalog;
 import com.nuodb.tools.migration.result.catalog.ResultCatalogImpl;
 import com.nuodb.tools.migration.result.format.ResultFormatFactory;
 import com.nuodb.tools.migration.result.format.ResultFormatFactoryImpl;
-import com.nuodb.tools.migration.result.format.csv.CsvResultFormat;
+import com.nuodb.tools.migration.result.format.csv.CsvAttributes;
 import com.nuodb.tools.migration.spec.*;
 
 import java.util.Collections;
@@ -97,7 +97,7 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         connectionSpec.setCatalog("enron-load");
 
         FormatSpec inputSpec = new FormatSpecBase();
-        inputSpec.setType(CsvResultFormat.TYPE);
+        inputSpec.setType(CsvAttributes.TYPE);
         inputSpec.setPath("/tmp/test/dump.cat");
         inputSpec.setAttributes(new HashMap<String, String>() {
             {

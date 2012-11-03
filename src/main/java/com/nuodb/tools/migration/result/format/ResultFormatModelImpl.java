@@ -25,59 +25,50 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.jdbc.metamodel;
+package com.nuodb.tools.migration.result.format;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.Arrays;
+import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModel;
+import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModelImpl;
 
-public class ResultSetModel implements ColumnSetModel {
+/**
+ * @author Sergey Bushik
+ */
+public class ResultFormatModelImpl extends ColumnSetModelImpl implements ResultFormatModel {
 
-    private int columnCount;
-    private int[] columnTypes;
-    private String[] columns;
+    private JdbcTypeValue[] columnValues;
+    private JdbcTypeFormat[] columnFormats;
 
-    public ResultSetModel(ResultSet resultSet) throws SQLException {
-        this(resultSet.getMetaData());
+    public ResultFormatModelImpl(JdbcTypeValue[] columnValues, JdbcTypeFormat[] columnFormats,
+                                 String[] columns, int[] columnTypes) {
+        super(columns, columnTypes);
+        this.columnValues = columnValues;
+        this.columnFormats = columnFormats;
     }
 
-    public ResultSetModel(ResultSetMetaData metaData) throws SQLException {
-        int columnCount = metaData.getColumnCount();
-
-        String[] columns = new String[columnCount];
-        int[] columnTypes = new int[columnCount];
-        for (int i = 0; i < columnCount; i++) {
-            int column = i + 1;
-            columns[i] = metaData.getColumnLabel(column);
-            columnTypes[i] = metaData.getColumnType(column);
-        }
-        this.columnCount = columnCount;
-        this.columns = columns;
-        this.columnTypes = columnTypes;
+    public ResultFormatModelImpl(JdbcTypeValue[] columnValues, JdbcTypeFormat[] columnFormats,
+                                 ColumnSetModel columnSetModel) {
+        super(columnSetModel);
+        this.columnValues = columnValues;
+        this.columnFormats = columnFormats;
     }
 
-    public boolean hasColumn(String column) {
-        return Arrays.binarySearch(columns, column) >= 0;
+    @Override
+    public JdbcTypeValue getColumnValue(int column) {
+        return columnValues[column];
     }
 
-    public int getColumnType(int column) {
-        return columnTypes[column];
+    @Override
+    public JdbcTypeValue[] getColumnValues() {
+        return columnValues;
     }
 
-    public int[] getColumnTypes() {
-        return columnTypes;
+    @Override
+    public JdbcTypeFormat getColumnFormat(int column) {
+        return columnFormats[column];
     }
 
-    public String getColumn(int index) {
-        return columns[index];
-    }
-
-    public String[] getColumns() {
-        return columns;
-    }
-
-    public int getColumnCount() {
-        return columnCount;
+    @Override
+    public JdbcTypeFormat[] getColumnFormats() {
+        return columnFormats;
     }
 }

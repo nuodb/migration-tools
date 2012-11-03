@@ -25,24 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.result.format.jdbc;
-
-import com.nuodb.tools.migration.result.format.ResultFormatException;
+package com.nuodb.tools.migration.result.format.xml;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeFormatException extends ResultFormatException {
+public interface XmlAttributes {
+    static final String TYPE = "xml";
 
-    public JdbcTypeFormatException(String message) {
-        super(message);
-    }
+    final String ATTRIBUTE_ENCODING = "xml.encoding";
+    final String ATTRIBUTE_VERSION = "xml.version";
 
-    public JdbcTypeFormatException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public JdbcTypeFormatException(Throwable cause) {
-        super(cause);
-    }
+    final String ENCODING = "utf-8";
+    final String VERSION = "1.0";
+    final String DOCUMENT_ELEMENT = "rows";
+    final String MODEL_ELEMENT = "model";
+    final String ROW_ELEMENT = "row";
+    final String COLUMN_ELEMENT = "column";
+    final String ATTRIBUTE_NAME = "name";
 }

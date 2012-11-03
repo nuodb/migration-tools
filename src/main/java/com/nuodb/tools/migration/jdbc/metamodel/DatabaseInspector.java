@@ -216,7 +216,7 @@ public class DatabaseInspector {
         ResultSet columns = metaData.getColumns(catalog, schema, table.getName(), null);
         try {
             while (columns.next()) {
-                ResultSetModel model = new ResultSetModel(columns.getMetaData());
+                ColumnSetModel model = ColumnSetModelFactory.create(columns.getMetaData());
 
                 Column column = table.createColumn(columns.getString("COLUMN_NAME"));
                 column.setType(new ColumnType(columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME")));

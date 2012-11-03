@@ -30,22 +30,23 @@ package com.nuodb.tools.migration.result.format;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
 public interface ResultOutput extends ResultFormat {
 
-    void outputStart() throws ResultFormatException;
+    void initOutput();
+    
+    void writeBegin();
 
-    void outputRow() throws ResultFormatException;
+    void writeRow();
 
-    void outputEnd() throws ResultFormatException;
+    void writeEnd();
+
+    void setResultSet(ResultSet resultSet);
 
     void setWriter(Writer writer);
 
     void setOutputStream(OutputStream outputStream);
-
-    void setResultSet(ResultSet resultSet) throws SQLException;
 }

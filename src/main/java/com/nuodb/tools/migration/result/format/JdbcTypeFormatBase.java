@@ -27,16 +27,37 @@
  */
 package com.nuodb.tools.migration.result.format;
 
-import java.util.List;
+import com.nuodb.tools.migration.jdbc.type.JdbcType;
 
 /**
  * @author Sergey Bushik
  */
-public interface ColumnDataModel {
+public abstract class JdbcTypeFormatBase<T> implements JdbcTypeFormat<T> {
 
-    String getColumn(int index);
+    @Override
+    public String getValue(JdbcTypeValue<T> jdbcTypeValue) {
+        try {
+            return doFormat(jdbcTypeValue);
+        } catch (Exception exception) {
+            throw newResultFormatFailure(jdbcTypeValue.getJdbcType(), exception);
+        }
+    }
 
-    List<String> getColumns();
+    protected abstract String doFormat(JdbcTypeValue<T> jdbcTypeValue) throws Exception;
 
-    int getColumnCount();
+    @Override
+    public void setValue(JdbcTypeValue<T> jdbcTypeValue, String value) {
+        try {
+            doParse(jdbcTypeValue, value);
+        } catch (Exception exception) {
+            throw newResultFormatFailure(jdbcTypeValue.getJdbcType(), exception);
+        }
+    }
+
+    protected abstract void doParse(JdbcTypeValue<T> jdbcTypeValue, String value) throws Exception;
+
+    protected ResultFormatException newResultFormatFailure(JdbcType jdbcType, Exception exception) {
+        return new ResultFormatException(
+                String.format("Failed processing jdbc type %s", jdbcType.getClass().getName()), exception);
+    }
 }

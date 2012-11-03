@@ -28,56 +28,29 @@
 package com.nuodb.tools.migration.result.format.csv;
 
 import com.google.common.collect.Lists;
-import com.nuodb.tools.migration.result.format.ColumnDataModel;
-import com.nuodb.tools.migration.result.format.ColumnDataModelImpl;
+import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModel;
+import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModelFactory;
+import com.nuodb.tools.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.tools.migration.result.format.ResultFormatException;
 import com.nuodb.tools.migration.result.format.ResultInputBase;
-import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModel;
-import com.nuodb.tools.migration.jdbc.type.JdbcTypeAccessor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.csv.Quote;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import static java.lang.Boolean.parseBoolean;
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class CsvResultInput extends ResultInputBase implements CsvResultFormat {
-
-    private JdbcTypeAccessor jdbcTypeAccess;
-    /**
-     * The symbol used for value separation, must not be a line break character.
-     */
-    private Character delimiter;
-    /**
-     * Indicates whether quotation should be used.
-     */
-    private boolean quoting;
-    /**
-     * The symbol used as value encapsulation marker.
-     */
-    private Character quote;
-    /**
-     * The symbol used to escape special characters in values.
-     */
-    private Character escape;
-    /**
-     * The record separator to use for withConnection.
-     */
-    private String lineSeparator;
+public class CsvResultInput extends ResultInputBase implements CsvAttributes {
 
     private CSVParser parser;
+    private Character quote;
+    private Iterator<CSVRecord> iterator;
 
     @Override
     public String getType() {
@@ -85,44 +58,10 @@ public class CsvResultInput extends ResultInputBase implements CsvResultFormat {
     }
 
     @Override
-    protected void doSetAttributes() {
-        String delimiterValue = getAttribute(ATTRIBUTE_DELIMITER);
-        if (isEmpty(delimiterValue)) {
-            delimiter = DELIMITER;
-        } else {
-            delimiter = delimiterValue.charAt(0);
-        }
-
-        String quotingValue = getAttribute(ATTRIBUTE_QUOTING);
-        if (isEmpty(quotingValue)) {
-            quoting = QUOTING;
-        } else {
-            quoting = parseBoolean(quotingValue);
-        }
-        String quoteValue = getAttribute(ATTRIBUTE_QUOTE);
-        if (isEmpty(quoteValue)) {
-            quote = QUOTE;
-        } else {
-            quote = quoteValue.charAt(0);
-        }
-
-        String escapeValue = getAttribute(ATTRIBUTE_ESCAPE);
-        if (isEmpty(escapeValue)) {
-            escape = ESCAPE;
-        } else {
-            escape = escapeValue.charAt(0);
-        }
-        lineSeparator = getAttribute(ATTRIBUTE_LINE_SEPARATOR, LINE_SEPARATOR);
-    }
-
-    public void init() {
-        CSVFormat format = new CSVFormat(delimiter);
-        if (quoting && quote != null) {
-            format = format.withQuotePolicy(Quote.ALL);
-            format = format.withQuoteChar(quote);
-        }
-        format = format.withRecordSeparator(lineSeparator);
-        format = format.withEscape(escape);
+    protected void doInitInput() {
+        CsvFormatBuilder builder = new CsvFormatBuilder(this);
+        CSVFormat format = builder.build();
+        quote = builder.getQuote();
 
         try {
             if (getReader() != null) {
@@ -133,51 +72,42 @@ public class CsvResultInput extends ResultInputBase implements CsvResultFormat {
         } catch (IOException exception) {
             throw new ResultFormatException(exception);
         }
+        iterator = parser.iterator();
     }
 
-    public ColumnDataModel read() {
-        Iterator<CSVRecord> iterator = parser.iterator();
-        List<String> columns = Lists.newArrayList();
+
+    @Override
+    protected void doReadBegin() {
+        ColumnSetModel columnSetModel = null;
         if (iterator.hasNext()) {
+            List<String> columns = Lists.newArrayList();
             for (String column : iterator.next()) {
                 columns.add(column);
             }
+            int[] columnTypes = new int[columns.size()];
+            Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeCode());
+            columnSetModel = ColumnSetModelFactory.create(columns.toArray(new String[columns.size()]), columnTypes);
         }
-        return new ColumnDataModelImpl(columns);
+        setColumnSetModel(columnSetModel);
     }
 
-    public boolean bind(final PreparedStatement statement, ColumnSetModel model) throws SQLException {
-        final Connection connection = statement.getConnection();
-        Iterator<CSVRecord> iterator = parser.iterator();
-        if (iterator.hasNext()) {
-            final CSVRecord record = iterator.next();
-            for (int column = 0; column < model.getColumnCount(); column++) {
-                final String value = record.get(column);
-//                jdbcTypeAccess.bind(statement, column + 1, model.getColumnType(column),
-//                        new JdbcTypeSet<Object>() {
-//                            @Override
-//                            public Object provide(PreparedStatement preparedStatement, int column,
-//                                                  JdbcType<Object> jdbcType) {
-//                                JdbcTypeFormat format = getJdbcTypeFormat(jdbcType.getTypeCode());
-//                                if (format == null) {
-//                                    format = getDefaultJdbcTypeFormat();
-//                                }
-//                                return format.parse(value, column, jdbcType, connection);
-//                            }
-//                        });
-            }
-            return true;
-        } else {
-            return false;
+    @Override
+    public boolean canReadRead() {
+        return iterator.hasNext();
+    }
+
+    @Override
+    public void readRow() {
+        String[] values = new String[getColumnSetModel().getColumnCount()];
+        Iterator<String> iterator = this.iterator.next().iterator();
+        int column = 0;
+        while (iterator.hasNext()) {
+            values[column++] = iterator.next();
         }
-
+        readRow(values);
     }
 
-    public JdbcTypeAccessor getJdbcTypeAccess() {
-        return jdbcTypeAccess;
-    }
-
-    public void setJdbcTypeAccess(JdbcTypeAccessor jdbcTypeAccess) {
-        this.jdbcTypeAccess = jdbcTypeAccess;
+    @Override
+    protected void doReadEnd() {
     }
 }

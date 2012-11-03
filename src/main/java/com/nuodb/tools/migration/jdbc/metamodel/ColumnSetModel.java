@@ -34,11 +34,15 @@ public interface ColumnSetModel {
 
     boolean hasColumn(String column);
 
-    int getColumnType(int column);
+    int getColumnType(int index);
+
+    void setColumnType(int index, int columnType);
 
     int[] getColumnTypes();
 
     String getColumn(int index);
+
+    void setColumn(int index, String column);
 
     String[] getColumns();
 

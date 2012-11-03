@@ -27,16 +27,87 @@
  */
 package com.nuodb.tools.migration.result.format;
 
+import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModel;
+import com.nuodb.tools.migration.jdbc.type.JdbcType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.PreparedStatement;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public abstract class ResultInputBase extends ResultFormatBase implements ResultInput {
+
+    private transient final Log log = LogFactory.getLog(getClass());
 
     private Reader reader;
     private InputStream inputStream;
+    private PreparedStatement preparedStatement;
+    private ResultFormatModel resultFormatModel;
+
+    @Override
+    public void initInput() {
+        doInitInput();
+    }
+
+    protected abstract void doInitInput();
+
+    @Override
+    public final void initModel() {
+        doInitModel();
+    }
+
+    protected void doInitModel() {
+        ResultFormatModel resultFormatModel = getResultFormatModel();
+        if (resultFormatModel == null) {
+            setResultFormatModel(createResultFormatModel());
+        }
+    }
+
+    protected ResultFormatModel createResultFormatModel() {
+        ColumnSetModel columnSetModel = getColumnSetModel();
+        int columnCount = columnSetModel.getColumnCount();
+        JdbcTypeValue[] columnValues = new JdbcTypeValue[columnCount];
+        JdbcTypeFormat[] columnFormats = new JdbcTypeFormat[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            int columnType = columnSetModel.getColumnType(i);
+            JdbcType jdbcType = getJdbcTypeAccessor().getJdbcType(columnType);
+            columnValues[i] = new JdbcTypeValueImpl(
+                    getJdbcTypeAccessor().getJdbcTypeSet(jdbcType), preparedStatement, i + 1);
+            columnFormats[i] = getJdbcTypeFormat(jdbcType);
+        }
+        return new ResultFormatModelImpl(columnValues, columnFormats, columnSetModel);
+    }
+
+    @Override
+    public final void readBegin() {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Read input %s", getClass().getName()));
+        }
+        doReadBegin();
+    }
+
+    protected abstract void doReadBegin();
+
+    protected void readRow(String[] values) {
+        ResultFormatModel model = getResultFormatModel();
+        for (int index = 0; index < model.getColumnCount(); index++) {
+            JdbcTypeValue value = model.getColumnValue(index);
+            JdbcTypeFormat format = model.getColumnFormat(index);
+            format.setValue(value, values[index]);
+        }
+    }
+
+    @Override
+    public final void readEnd() {
+        doReadEnd();
+    }
+
+    protected abstract void doReadEnd();
 
     public Reader getReader() {
         return reader;
@@ -56,4 +127,20 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
         this.inputStream = inputStream;
     }
 
+    public PreparedStatement getPreparedStatement() {
+        return preparedStatement;
+    }
+
+    @Override
+    public void setPreparedStatement(PreparedStatement preparedStatement) {
+        this.preparedStatement = preparedStatement;
+    }
+
+    public ResultFormatModel getResultFormatModel() {
+        return resultFormatModel;
+    }
+
+    public void setResultFormatModel(ResultFormatModel resultFormatModel) {
+        this.resultFormatModel = resultFormatModel;
+    }
 }

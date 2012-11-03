@@ -28,12 +28,10 @@
 package com.nuodb.tools.migration.result.format;
 
 import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModel;
-import com.nuodb.tools.migration.jdbc.metamodel.ResultSetModel;
+import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModelFactory;
 import com.nuodb.tools.migration.jdbc.type.JdbcType;
-import com.nuodb.tools.migration.jdbc.type.JdbcTypeAccessor;
-import com.nuodb.tools.migration.result.format.jdbc.JdbcTypeFormat;
-import com.nuodb.tools.migration.result.format.jdbc.JdbcTypeValue;
-import com.nuodb.tools.migration.result.format.jdbc.JdbcTypeValueImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.OutputStream;
 import java.io.Writer;
@@ -46,107 +44,114 @@ import java.sql.SQLException;
 @SuppressWarnings("unchecked")
 public abstract class ResultOutputBase extends ResultFormatBase implements ResultOutput {
 
+    private transient final Log log = LogFactory.getLog(getClass());
+
     private Writer writer;
     private OutputStream outputStream;
-    private JdbcTypeAccessor jdbcTypeAccessor;
     private ResultSet resultSet;
-    private ColumnSetModel columnSetModel;
-    private JdbcTypeValueAndFormat[] columnValuesAndFormats;
+    private ResultFormatModel resultFormatModel;
 
-    class JdbcTypeValueAndFormat {
-        private JdbcTypeValue jdbcTypeValue;
-        private JdbcTypeFormat jdbcTypeFormat;
+    @Override
+    public final void initOutput() {
+        doInitOutput();
+    }
 
-        public JdbcTypeValueAndFormat(JdbcTypeValue jdbcTypeValue, JdbcTypeFormat jdbcTypeFormat) {
-            this.jdbcTypeValue = jdbcTypeValue;
-            this.jdbcTypeFormat = jdbcTypeFormat;
+    protected abstract void doInitOutput();
+
+    @Override
+    public final void initModel() {
+        doInitModel();
+    }
+
+    protected void doInitModel() {
+        ColumnSetModel columnSetModel = getColumnSetModel();
+        if (columnSetModel == null) {
+            setColumnSetModel(createColumnSetModel());
         }
-
-        public JdbcTypeValue getJdbcTypeValue() {
-            return jdbcTypeValue;
-        }
-
-        public JdbcTypeFormat getJdbcTypeFormat() {
-            return jdbcTypeFormat;
+        ResultFormatModel resultFormatModel = getResultFormatModel();
+        if (resultFormatModel == null) {
+            setResultFormatModel(createResultFormatModel());
         }
     }
 
-    @Override
-    public final void setResultSet(ResultSet resultSet) {
-        this.resultSet = resultSet;
-    }
-
-    @Override
-    public final void outputStart() {
-        doInitColumnModel();
-        doOutputStart();
+    protected ColumnSetModel createColumnSetModel() {
+        ColumnSetModel columnSetModel;
+        try {
+            columnSetModel = ColumnSetModelFactory.create(resultSet);
+        } catch (SQLException exception) {
+            throw new ResultFormatException(exception);
+        }
+        return columnSetModel;
     }
 
     /**
      * Try to dump data with resultSet.getString() value extraction, as it much faster <tt>JdbcType jdbcType =
      * JdbcCharType.INSTANCE;<tt/>
      */
-    protected void doInitColumnModel() {
-        ColumnSetModel columnSetModel;
-        try {
-            columnSetModel = new ResultSetModel(resultSet);
-        } catch (SQLException exception) {
-            throw new ResultFormatException(exception);
-        }
+    protected ResultFormatModel createResultFormatModel() {
+        ColumnSetModel columnSetModel = getColumnSetModel();
         int columnCount = columnSetModel.getColumnCount();
-        JdbcTypeValueAndFormat[] columnValuesAndFormats = new JdbcTypeValueAndFormat[columnCount];
+        JdbcTypeValue[] columnValues = new JdbcTypeValue[columnCount];
+        JdbcTypeFormat[] columnFormats = new JdbcTypeFormat[columnCount];
         for (int i = 0; i < columnCount; i++) {
             int columnType = columnSetModel.getColumnType(i);
             JdbcType jdbcType = getJdbcTypeAccessor().getJdbcType(columnType);
-            JdbcTypeFormat jdbcTypeFormat = getJdbcTypeFormat(jdbcType);
-            JdbcTypeValueImpl jdbcTypeValue = new JdbcTypeValueImpl(
+            columnValues[i] = new JdbcTypeValueImpl(
                     getJdbcTypeAccessor().getJdbcTypeGet(jdbcType), resultSet, i + 1);
-            columnValuesAndFormats[i] = new JdbcTypeValueAndFormat(jdbcTypeValue, jdbcTypeFormat);
+            columnFormats[i] = getJdbcTypeFormat(jdbcType);
         }
-        this.columnSetModel = columnSetModel;
-        this.columnValuesAndFormats = columnValuesAndFormats;
+        return new ResultFormatModelImpl(columnValues, columnFormats, columnSetModel);
     }
-
-    protected ColumnSetModel getColumnSetModel() {
-        return columnSetModel;
-    }
-
-    protected JdbcTypeValueAndFormat[] getColumnValuesAndFormats() {
-        return columnValuesAndFormats;
-    }
-
-    protected abstract void doOutputStart();
 
     @Override
-    public final void outputRow() {
-        doOutputRow();
+    public final void writeBegin() {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Write begin %s", getClass().getName()));
+        }
+        doWriteBegin();
     }
 
-    protected abstract void doOutputRow();
+    protected abstract void doWriteBegin();
 
     @Override
-    public void outputEnd() {
-        doReleaseColumnModel();
-        doOutputEnd();
+    public final void writeRow() {
+        doWriteRow(getColumnValues());
     }
 
-    protected void doReleaseColumnModel() {
-        resultSet = null;
-        columnSetModel = null;
-        columnValuesAndFormats = null;
-    }
-
-    protected abstract void doOutputEnd();
-
-    protected String[] getRowValues() {
-        final String[] values = new String[columnSetModel.getColumnCount()];
-        for (int i = 0; i < columnSetModel.getColumnCount(); i++) {
-            JdbcTypeValueAndFormat columnValueAndFormat = columnValuesAndFormats[i];
-            JdbcTypeFormat jdbcTypeFormat = columnValueAndFormat.getJdbcTypeFormat();
-            JdbcTypeValue jdbcTypeValue = columnValueAndFormat.getJdbcTypeValue();
-            values[i] = jdbcTypeFormat.format(jdbcTypeValue);
+    protected String[] getColumnValues() {
+        ResultFormatModel model = getResultFormatModel();
+        final String[] values = new String[model.getColumnCount()];
+        for (int index = 0; index < model.getColumnCount(); index++) {
+            JdbcTypeFormat format = model.getColumnFormat(index);
+            JdbcTypeValue value = model.getColumnValue(index);
+            values[index] = format.getValue(value);
         }
         return values;
+    }
+
+    protected abstract void doWriteRow(String[] values);
+
+    @Override
+    public void writeEnd() {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("End result output %s", getClass().getName()));
+        }
+        doWriteEnd();
+    }
+
+    protected abstract void doWriteEnd();
+
+    @Override
+    public final void setResultSet(ResultSet resultSet) {
+        this.resultSet = resultSet;
+    }
+
+    public ResultFormatModel getResultFormatModel() {
+        return resultFormatModel;
+    }
+
+    public void setResultFormatModel(ResultFormatModel resultFormatModel) {
+        this.resultFormatModel = resultFormatModel;
     }
 
     public Writer getWriter() {
@@ -165,14 +170,5 @@ public abstract class ResultOutputBase extends ResultFormatBase implements Resul
     @Override
     public void setOutputStream(OutputStream outputStream) {
         this.outputStream = outputStream;
-    }
-
-    public JdbcTypeAccessor getJdbcTypeAccessor() {
-        return jdbcTypeAccessor;
-    }
-
-    @Override
-    public void setJdbcTypeAccessor(JdbcTypeAccessor jdbcTypeAccessor) {
-        this.jdbcTypeAccessor = jdbcTypeAccessor;
     }
 }
