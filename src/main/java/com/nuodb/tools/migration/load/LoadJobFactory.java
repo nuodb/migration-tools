@@ -29,19 +29,15 @@ package com.nuodb.tools.migration.load;
 
 import com.nuodb.tools.migration.jdbc.JdbcServices;
 import com.nuodb.tools.migration.jdbc.JdbcServicesImpl;
-import com.nuodb.tools.migration.job.JobExecutor;
-import com.nuodb.tools.migration.job.JobExecutors;
 import com.nuodb.tools.migration.job.JobFactory;
-import com.nuodb.tools.migration.job.TraceJobExecutionListener;
 import com.nuodb.tools.migration.result.catalog.ResultCatalog;
 import com.nuodb.tools.migration.result.catalog.ResultCatalogImpl;
 import com.nuodb.tools.migration.result.format.ResultFormatFactory;
 import com.nuodb.tools.migration.result.format.ResultFormatFactoryImpl;
-import com.nuodb.tools.migration.result.format.csv.CsvAttributes;
-import com.nuodb.tools.migration.spec.*;
-
-import java.util.Collections;
-import java.util.HashMap;
+import com.nuodb.tools.migration.spec.ConnectionSpec;
+import com.nuodb.tools.migration.spec.DriverManagerConnectionSpec;
+import com.nuodb.tools.migration.spec.FormatSpec;
+import com.nuodb.tools.migration.spec.LoadSpec;
 
 /**
  * @author Sergey Bushik
@@ -87,35 +83,5 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
 
     public void setResultFormatFactory(ResultFormatFactory resultFormatFactory) {
         this.resultFormatFactory = resultFormatFactory;
-    }
-
-    public static void main(String[] args) throws LoadException {
-        DriverManagerConnectionSpec connectionSpec = new DriverManagerConnectionSpec();
-        connectionSpec.setDriver("com.mysql.jdbc.Driver");
-        connectionSpec.setUrl("jdbc:mysql://localhost:3306/enron-load");
-        connectionSpec.setUsername("root");
-        connectionSpec.setCatalog("enron-load");
-
-        FormatSpec inputSpec = new FormatSpecBase();
-        inputSpec.setType(CsvAttributes.TYPE);
-        inputSpec.setPath("/tmp/test/dump.cat");
-        inputSpec.setAttributes(new HashMap<String, String>() {
-            {
-                put("csv.quote", "\"");
-                put("csv.delimiter", ",");
-                put("csv.quoting", "false");
-                put("csv.escape", "|");
-            }
-        });
-        LoadSpec loadSpec = new LoadSpec();
-        loadSpec.setConnectionSpec(connectionSpec);
-        loadSpec.setInputSpec(inputSpec);
-
-        LoadJobFactory jobFactory = new LoadJobFactory();
-        jobFactory.setLoadSpec(loadSpec);
-
-        JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());
-        executor.addJobExecutionListener(new TraceJobExecutionListener());
-        executor.execute(Collections.<String, Object>emptyMap());
     }
 }
