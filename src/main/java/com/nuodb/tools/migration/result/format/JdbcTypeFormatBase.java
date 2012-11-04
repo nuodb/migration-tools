@@ -56,8 +56,8 @@ public abstract class JdbcTypeFormatBase<T> implements JdbcTypeFormat<T> {
 
     protected abstract void doParse(JdbcTypeValue<T> jdbcTypeValue, String value) throws Exception;
 
-    protected ResultFormatException newResultFormatFailure(JdbcType jdbcType, Exception exception) {
-        return new ResultFormatException(
+    protected ResultInputException newResultFormatFailure(JdbcType jdbcType, Exception exception) {
+        return new ResultInputException(
                 String.format("Failed processing jdbc type %s", jdbcType.getClass().getName()), exception);
     }
 }

@@ -104,8 +104,11 @@ public class ResultEntryWriterImpl implements ResultEntryWriter {
     public OutputStream getEntryOutput(ResultEntry entry) {
         OutputStream entryOutput;
         try {
-            entryOutput = new BufferedOutputStream(
-                    openOutputStream(getFile(catalogDir, valueOf(entry))));
+            File file = getFile(catalogDir, valueOf(entry));
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Opening file %s", file.getPath()));
+            }
+            entryOutput = new BufferedOutputStream(openOutputStream(file));
         } catch (IOException e) {
             throw new ResultCatalogException("Failed opening entry output", e);
         }

@@ -36,11 +36,11 @@ import java.sql.SQLException;
  */
 public class ColumnSetModelFactory {
 
-    public static ColumnSetModel create(ResultSet resultSet) throws SQLException {
-        return create(resultSet.getMetaData());
+    public static ColumnSetModel createColumnSetModel(ResultSet resultSet) throws SQLException {
+        return createColumnSetModel(resultSet.getMetaData());
     }
 
-    public static ColumnSetModel create(ResultSetMetaData metaData) throws SQLException {
+    public static ColumnSetModel createColumnSetModel(ResultSetMetaData metaData) throws SQLException {
         int columnCount = metaData.getColumnCount();
 
         String[] columns = new String[columnCount];
@@ -53,7 +53,7 @@ public class ColumnSetModelFactory {
         return new ColumnSetModelImpl(columns, columnTypes);
     }
 
-    public static ColumnSetModel create(String[] columns, int[] columnTypes) {
+    public static ColumnSetModel createColumnSetModel(String[] columns, int[] columnTypes) {
         return new ColumnSetModelImpl(columns, columnTypes);
     }
 }

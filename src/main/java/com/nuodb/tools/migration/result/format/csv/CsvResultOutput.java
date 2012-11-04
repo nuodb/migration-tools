@@ -27,7 +27,7 @@
  */
 package com.nuodb.tools.migration.result.format.csv;
 
-import com.nuodb.tools.migration.result.format.ResultFormatException;
+import com.nuodb.tools.migration.result.format.ResultInputException;
 import com.nuodb.tools.migration.result.format.ResultOutputBase;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -44,7 +44,7 @@ import static java.lang.String.valueOf;
 public class CsvResultOutput extends ResultOutputBase implements CsvAttributes {
 
     private CSVPrinter printer;
-    private Character quote;
+    private String doubleQuote;
 
     @Override
     public String getType() {
@@ -55,7 +55,8 @@ public class CsvResultOutput extends ResultOutputBase implements CsvAttributes {
     protected void doInitOutput() {
         CsvFormatBuilder builder = new CsvFormatBuilder(this);
         CSVFormat format = builder.build();
-        quote = builder.getQuote();
+        Character quote = builder.getQuote();
+        doubleQuote = valueOf(quote) + valueOf(quote);
 
         if (getWriter() != null) {
             printer = new CSVPrinter(getWriter(), format);
@@ -69,7 +70,7 @@ public class CsvResultOutput extends ResultOutputBase implements CsvAttributes {
         try {
             printer.printRecord(getColumnSetModel().getColumns());
         } catch (IOException e) {
-            throw new ResultFormatException(e);
+            throw new ResultInputException(e);
         }
     }
 
@@ -79,12 +80,12 @@ public class CsvResultOutput extends ResultOutputBase implements CsvAttributes {
             for (int i = 0; i < columnValues.length; i++) {
                 String column = columnValues[i];
                 if (column != null && column.length() == 0) {
-                    columnValues[i] = valueOf(quote) + valueOf(quote);
+                    columnValues[i] = doubleQuote;
                 }
             }
             printer.printRecord(columnValues);
         } catch (IOException e) {
-            throw new ResultFormatException(e);
+            throw new ResultInputException(e);
         }
     }
 
@@ -93,7 +94,7 @@ public class CsvResultOutput extends ResultOutputBase implements CsvAttributes {
         try {
             printer.flush();
         } catch (IOException e) {
-            throw new ResultFormatException(e);
+            throw new ResultInputException(e);
         }
     }
 }

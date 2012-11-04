@@ -36,12 +36,16 @@ import com.nuodb.tools.migration.cli.parse.Option;
 import com.nuodb.tools.migration.cli.parse.OptionException;
 import com.nuodb.tools.migration.cli.parse.option.*;
 import com.nuodb.tools.migration.context.support.ApplicationSupport;
+import com.nuodb.tools.migration.jdbc.vendor.NuoDB;
 import com.nuodb.tools.migration.spec.*;
 import com.nuodb.tools.migration.utils.Priority;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -400,6 +404,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
         DriverManagerConnectionSpec connection = new DriverManagerConnectionSpec();
+        connection.setDriver(NuoDB.DRIVER);
         connection.setSchema(commandLine.<String>getValue(TARGET_SCHEMA_OPTION));
         connection.setUrl(commandLine.<String>getValue(TARGET_URL_OPTION));
         connection.setUsername(commandLine.<String>getValue(TARGET_USERNAME_OPTION));

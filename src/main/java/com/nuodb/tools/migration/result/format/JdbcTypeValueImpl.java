@@ -69,7 +69,7 @@ public class JdbcTypeValueImpl<T> implements JdbcTypeValue<T> {
     @Override
     public T getValue() throws SQLException {
         if (jdbcTypeGet == null) {
-            throw new ResultFormatException("Get value is unsupported");
+            throw new ResultInputException("Get value is unsupported");
         }
         return jdbcTypeGet.getValue(resultSet, column);
     }
@@ -77,7 +77,7 @@ public class JdbcTypeValueImpl<T> implements JdbcTypeValue<T> {
     @Override
     public <X> X getValue(Class<X> valueClass) throws SQLException {
         if (jdbcTypeGet == null) {
-            throw new ResultFormatException("Get value is unsupported");
+            throw new ResultInputException("Get value is unsupported");
         }
         return jdbcTypeGet.getValue(resultSet, column, valueClass);
     }
@@ -85,7 +85,7 @@ public class JdbcTypeValueImpl<T> implements JdbcTypeValue<T> {
     @Override
     public <X> void setValue(X value) throws SQLException {
         if (jdbcTypeSet == null) {
-            throw new ResultFormatException("Set value is unsupported");
+            throw new ResultInputException("Set value is unsupported");
         }
         jdbcTypeSet.setValue(preparedStatement, column, value);
     }

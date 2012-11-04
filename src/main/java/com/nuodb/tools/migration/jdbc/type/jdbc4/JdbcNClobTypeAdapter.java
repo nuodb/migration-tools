@@ -58,21 +58,21 @@ public class JdbcNClobTypeAdapter extends JdbcTypeAdapterBase<NClob> {
         NClob clob;
         if (String.class.isInstance(value)) {
             clob = connection.createNClob();
-            clob.setString(0, (String) value);
+            clob.setString(1, (String) value);
         } else if (char[].class.isInstance(value)) {
             clob = connection.createNClob();
-            clob.setString(0, new String((char[]) value));
+            clob.setString(1, new String((char[]) value));
         } else if (Reader.class.isInstance(value)) {
             clob = connection.createNClob();
             try {
-                IOUtils.copy((Reader) value, clob.setCharacterStream(0));
+                IOUtils.copy((Reader) value, clob.setCharacterStream(1));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
         } else if (InputStream.class.isInstance(value)) {
             clob = connection.createNClob();
             try {
-                IOUtils.copy((InputStream) value, clob.setAsciiStream(0));
+                IOUtils.copy((InputStream) value, clob.setAsciiStream(1));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }

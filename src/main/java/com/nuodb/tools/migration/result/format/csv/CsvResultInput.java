@@ -29,13 +29,12 @@ package com.nuodb.tools.migration.result.format.csv;
 
 import com.google.common.collect.Lists;
 import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModel;
-import com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModelFactory;
-import com.nuodb.tools.migration.jdbc.type.jdbc2.JdbcCharType;
-import com.nuodb.tools.migration.result.format.ResultFormatException;
 import com.nuodb.tools.migration.result.format.ResultInputBase;
+import com.nuodb.tools.migration.result.format.ResultInputException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,13 +42,17 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModelFactory.createColumnSetModel;
+import static com.nuodb.tools.migration.jdbc.type.jdbc2.JdbcCharType.INSTANCE;
+import static java.lang.String.valueOf;
+
 /**
  * @author Sergey Bushik
  */
 public class CsvResultInput extends ResultInputBase implements CsvAttributes {
 
     private CSVParser parser;
-    private Character quote;
+    private String doubleQuote;
     private Iterator<CSVRecord> iterator;
 
     @Override
@@ -61,8 +64,8 @@ public class CsvResultInput extends ResultInputBase implements CsvAttributes {
     protected void doInitInput() {
         CsvFormatBuilder builder = new CsvFormatBuilder(this);
         CSVFormat format = builder.build();
-        quote = builder.getQuote();
-
+        Character quote = builder.getQuote();
+        doubleQuote = valueOf(quote) + valueOf(quote);
         try {
             if (getReader() != null) {
                 parser = new CSVParser(getReader(), format);
@@ -70,11 +73,10 @@ public class CsvResultInput extends ResultInputBase implements CsvAttributes {
                 parser = new CSVParser(new InputStreamReader(getInputStream()), format);
             }
         } catch (IOException exception) {
-            throw new ResultFormatException(exception);
+            throw new ResultInputException(exception);
         }
         iterator = parser.iterator();
     }
-
 
     @Override
     protected void doReadBegin() {
@@ -85,14 +87,14 @@ public class CsvResultInput extends ResultInputBase implements CsvAttributes {
                 columns.add(column);
             }
             int[] columnTypes = new int[columns.size()];
-            Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeCode());
-            columnSetModel = ColumnSetModelFactory.create(columns.toArray(new String[columns.size()]), columnTypes);
+            Arrays.fill(columnTypes, INSTANCE.getTypeCode());
+            columnSetModel = createColumnSetModel(columns.toArray(new String[columns.size()]), columnTypes);
         }
         setColumnSetModel(columnSetModel);
     }
 
     @Override
-    public boolean canReadRead() {
+    public boolean canReadRow() {
         return iterator.hasNext();
     }
 
@@ -102,7 +104,12 @@ public class CsvResultInput extends ResultInputBase implements CsvAttributes {
         Iterator<String> iterator = this.iterator.next().iterator();
         int column = 0;
         while (iterator.hasNext()) {
-            values[column++] = iterator.next();
+            String value = iterator.next();
+            if (doubleQuote.equals(value)) {
+                value = StringUtils.EMPTY;
+            }
+            values[column++] = value;
+
         }
         readRow(values);
     }

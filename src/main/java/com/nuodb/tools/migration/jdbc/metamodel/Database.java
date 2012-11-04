@@ -38,6 +38,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
+
 public class Database {
 
     private Map<Name, Catalog> catalogs = Maps.newHashMap();
@@ -157,7 +159,7 @@ public class Database {
         return Lists.newArrayList(Iterables.filter(listTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table table) {
-                return StringUtils.equals(table.getName(), tableName);
+                return equalsIgnoreCase(table.getName(), tableName);
             }
         }));
     }
@@ -166,8 +168,8 @@ public class Database {
         return Lists.newArrayList(Iterables.find(listTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table table) {
-                return StringUtils.equals(table.getSchema().getName(), schemaName) &&
-                        StringUtils.equals(table.getName(), tableName);
+                return equalsIgnoreCase(table.getSchema().getName(), schemaName) &&
+                        equalsIgnoreCase(table.getName(), tableName);
             }
         }));
     }
@@ -176,9 +178,9 @@ public class Database {
         return Lists.newArrayList(Iterables.find(listTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table table) {
-                return StringUtils.equals(table.getCatalog().getName(), catalogName) &&
-                        StringUtils.equals(table.getSchema().getName(), schemaName) &&
-                        StringUtils.equals(table.getName(), tableName);
+                return equalsIgnoreCase(table.getCatalog().getName(), catalogName) &&
+                        equalsIgnoreCase(table.getSchema().getName(), schemaName) &&
+                        equalsIgnoreCase(table.getName(), tableName);
             }
         }));
     }

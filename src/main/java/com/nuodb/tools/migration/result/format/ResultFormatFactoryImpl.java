@@ -28,6 +28,9 @@
 package com.nuodb.tools.migration.result.format;
 
 import com.google.common.collect.Maps;
+import com.nuodb.tools.migration.result.format.bson.BsonAttributes;
+import com.nuodb.tools.migration.result.format.bson.BsonResultInput;
+import com.nuodb.tools.migration.result.format.bson.BsonResultOutput;
 import com.nuodb.tools.migration.result.format.csv.CsvAttributes;
 import com.nuodb.tools.migration.result.format.csv.CsvResultInput;
 import com.nuodb.tools.migration.result.format.csv.CsvResultOutput;
@@ -55,8 +58,11 @@ public class ResultFormatFactoryImpl implements ResultFormatFactory {
     public ResultFormatFactoryImpl() {
         registerInput(CsvAttributes.TYPE, CsvResultInput.class);
         registerInput(XmlAttributes.TYPE, XmlResultInput.class);
+        registerInput(BsonAttributes.TYPE, BsonResultInput.class);
+
         registerOutput(CsvAttributes.TYPE, CsvResultOutput.class);
         registerOutput(XmlAttributes.TYPE, XmlResultOutput.class);
+        registerOutput(BsonAttributes.TYPE, BsonResultOutput.class);
     }
 
     @Override
@@ -93,7 +99,7 @@ public class ResultFormatFactoryImpl implements ResultFormatFactory {
                 }
             }
             if (formatClass == null) {
-                throw new ResultFormatException(String.format("Format %1$s is not recognized", formatType));
+                throw new ResultInputException(String.format("Format %1$s is not recognized", formatType));
             }
         }
         return ClassUtils.newInstance(formatClass);

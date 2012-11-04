@@ -57,15 +57,15 @@ public class Name {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Name name1 = (Name) o;
+        Name name = (Name) o;
 
-        if (value != null ? !value.equalsIgnoreCase(name1.value) : name1.value != null) return false;
+        if (value != null ? !value.equalsIgnoreCase(name.value) : name.value != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return value != null ? value.hashCode() : 0;
+        return value != null ? value.toLowerCase().hashCode() : 0;
     }
 }

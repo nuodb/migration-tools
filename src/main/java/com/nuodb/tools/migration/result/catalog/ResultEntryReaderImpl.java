@@ -27,7 +27,7 @@
  */
 package com.nuodb.tools.migration.result.catalog;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,8 +35,8 @@ import org.apache.commons.logging.LogFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 import static java.lang.String.valueOf;
 import static org.apache.commons.io.FileUtils.getFile;
@@ -72,7 +72,7 @@ public class ResultEntryReaderImpl implements ResultEntryReader {
 
     @Override
     public ResultEntry[] getEntries() {
-        Set<ResultEntry> entries = Sets.newHashSet();
+        List<ResultEntry> entries = Lists.newArrayList();
         Scanner scanner = new Scanner(input);
         scanner.useDelimiter(System.getProperty("line.separator"));
         while (scanner.hasNext()) {
@@ -95,7 +95,11 @@ public class ResultEntryReaderImpl implements ResultEntryReader {
     public InputStream getEntryInput(ResultEntry entry) {
         InputStream entryInput;
         try {
-            entryInput = openInputStream(getFile(catalogDir, valueOf(entry)));
+            File file = getFile(catalogDir, valueOf(entry));
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Opening file %s", file.getPath()));
+            }
+            entryInput = openInputStream(file);
         } catch (IOException e) {
             throw new ResultCatalogException("Failed opening entry input", e);
         }

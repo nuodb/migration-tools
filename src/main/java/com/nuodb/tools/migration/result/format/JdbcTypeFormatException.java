@@ -27,12 +27,12 @@
  */
 package com.nuodb.tools.migration.result.format;
 
-import com.nuodb.tools.migration.result.format.ResultFormatException;
+import com.nuodb.tools.migration.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeFormatException extends ResultFormatException {
+public class JdbcTypeFormatException extends MigrationException {
 
     public JdbcTypeFormatException(String message) {
         super(message);

@@ -27,7 +27,7 @@
  */
 package com.nuodb.tools.migration.result.format.xml;
 
-import com.nuodb.tools.migration.result.format.ResultFormatException;
+import com.nuodb.tools.migration.result.format.ResultInputException;
 import com.nuodb.tools.migration.result.format.ResultOutputBase;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -41,10 +41,10 @@ import static javax.xml.XMLConstants.*;
  */
 public class XmlResultOutput extends ResultOutputBase implements XmlAttributes {
 
-    private XMLStreamWriter writer;
-
     private String encoding;
     private String version;
+
+    private XMLStreamWriter writer;
 
     @Override
     public String getType() {
@@ -64,7 +64,7 @@ public class XmlResultOutput extends ResultOutputBase implements XmlAttributes {
                 writer = xmlOutputFactory.createXMLStreamWriter(getOutputStream(), getEncoding());
             }
         } catch (XMLStreamException e) {
-            throw new ResultFormatException(e);
+            throw new ResultInputException(e);
         }
     }
 
@@ -72,8 +72,9 @@ public class XmlResultOutput extends ResultOutputBase implements XmlAttributes {
     protected void doWriteBegin() {
         try {
             writer.writeStartDocument(getEncoding(), getVersion());
-            writer.writeStartElement(DOCUMENT_ELEMENT);
-            writer.writeStartElement(MODEL_ELEMENT);
+            writer.writeStartElement(RESULT_SET_ELEMENT);
+            writer.writeNamespace("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
+            writer.writeStartElement(COLUMNS_ELEMENT);
             for (String column : getResultFormatModel().getColumns()) {
                 writer.writeEmptyElement(COLUMN_ELEMENT);
                 writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
@@ -81,7 +82,7 @@ public class XmlResultOutput extends ResultOutputBase implements XmlAttributes {
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
-            throw new ResultFormatException(e);
+            throw new ResultInputException(e);
         }
     }
 
@@ -94,17 +95,17 @@ public class XmlResultOutput extends ResultOutputBase implements XmlAttributes {
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
-            throw new ResultFormatException(e);
+            throw new ResultInputException(e);
         }
     }
 
     protected void doWriteColumn(String value) throws XMLStreamException {
         if (value == null) {
             writer.writeEmptyElement(COLUMN_ELEMENT);
-            writer.setPrefix("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
-            writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil", "true");
+            writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE, "true");
         } else {
             writer.writeStartElement(COLUMN_ELEMENT);
+            // TODO: escape StringEscapeUtils.escapeXml
             writer.writeCharacters(value);
             writer.writeEndElement();
         }
@@ -116,8 +117,9 @@ public class XmlResultOutput extends ResultOutputBase implements XmlAttributes {
             writer.writeEndElement();
             writer.writeEndDocument();
             writer.flush();
+            writer.close();
         } catch (XMLStreamException e) {
-            throw new ResultFormatException(e);
+            throw new ResultInputException(e);
         }
     }
 

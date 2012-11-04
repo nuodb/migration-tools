@@ -133,7 +133,7 @@ public class LoadJob extends JobBase {
                         resultInput.setPreparedStatement(preparedStatement);
 
                         resultInput.initModel();
-                        while (resultInput.canReadRead() && execution.isRunning()) {
+                        while (resultInput.canReadRow() && execution.isRunning()) {
                             resultInput.readRow();
                             preparedStatement.executeUpdate();
                         }

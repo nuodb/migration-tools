@@ -25,24 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.result.format;
-
-import com.nuodb.tools.migration.MigrationException;
+package com.nuodb.tools.migration.result.format.bson;
 
 /**
  * @author Sergey Bushik
  */
-public class ResultFormatException extends MigrationException {
+public interface BsonAttributes {
 
-    public ResultFormatException(String message) {
-        super(message);
-    }
+    final String TYPE = "bson";
 
-    public ResultFormatException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ResultFormatException(Throwable cause) {
-        super(cause);
-    }
+    final String COLUMNS_FIELD = "columns";
+    final String COLUMN_FIELD = "column";
+    final String ROWS_FIELD = "rows";
 }

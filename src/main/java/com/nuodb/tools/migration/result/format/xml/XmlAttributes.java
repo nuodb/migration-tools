@@ -31,16 +31,18 @@ package com.nuodb.tools.migration.result.format.xml;
  * @author Sergey Bushik
  */
 public interface XmlAttributes {
-    static final String TYPE = "xml";
+
+    final String SCHEMA_NIL_ATTRIBUTE = "nil";
+    final String TYPE = "xml";
 
     final String ATTRIBUTE_ENCODING = "xml.encoding";
     final String ATTRIBUTE_VERSION = "xml.version";
 
     final String ENCODING = "utf-8";
     final String VERSION = "1.0";
-    final String DOCUMENT_ELEMENT = "rows";
-    final String MODEL_ELEMENT = "model";
-    final String ROW_ELEMENT = "row";
+    final String RESULT_SET_ELEMENT = "result-set";
+    final String COLUMNS_ELEMENT = "columns";
     final String COLUMN_ELEMENT = "column";
     final String ATTRIBUTE_NAME = "name";
+    final String ROW_ELEMENT = "row";
 }

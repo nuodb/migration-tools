@@ -25,30 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.tools.migration.result.format;
-
-import java.io.InputStream;
-import java.io.Reader;
-import java.sql.PreparedStatement;
+package com.nuodb.tools.migration.jdbc.vendor;
 
 /**
  * @author Sergey Bushik
  */
-public interface ResultInput extends ResultFormat {
+public interface NuoDB {
 
-    void initInput();
-
-    void readBegin();
-
-    boolean canReadRow();
-
-    void readRow();
-
-    void readEnd();
-
-    void setReader(Reader reader);
-
-    void setInputStream(InputStream inputStream);
-
-    void setPreparedStatement(PreparedStatement preparedStatement);
+    final String DRIVER = "com.nuodb.jdbc.Driver";
 }

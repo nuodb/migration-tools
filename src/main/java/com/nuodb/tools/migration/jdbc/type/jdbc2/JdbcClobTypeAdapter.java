@@ -60,21 +60,21 @@ public class JdbcClobTypeAdapter extends JdbcTypeAdapterBase<Clob> {
         Clob clob;
         if (String.class.isInstance(value)) {
             clob = connection.createClob();
-            clob.setString(0, (String) value);
+            clob.setString(1, (String) value);
         } else if (char[].class.isInstance(value)) {
             clob = connection.createClob();
-            clob.setString(0, new String((char[]) value));
+            clob.setString(1, new String((char[]) value));
         } else if (Reader.class.isInstance(value)) {
             clob = connection.createClob();
             try {
-                CharStreams.copy((Reader) value, clob.setCharacterStream(0));
+                CharStreams.copy((Reader) value, clob.setCharacterStream(1));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
         } else if (InputStream.class.isInstance(value)) {
             clob = connection.createClob();
             try {
-                ByteStreams.copy((InputStream) value, clob.setAsciiStream(0));
+                ByteStreams.copy((InputStream) value, clob.setAsciiStream(1));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }

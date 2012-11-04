@@ -77,9 +77,9 @@ public abstract class ResultOutputBase extends ResultFormatBase implements Resul
     protected ColumnSetModel createColumnSetModel() {
         ColumnSetModel columnSetModel;
         try {
-            columnSetModel = ColumnSetModelFactory.create(resultSet);
+            columnSetModel = ColumnSetModelFactory.createColumnSetModel(resultSet);
         } catch (SQLException exception) {
-            throw new ResultFormatException(exception);
+            throw new ResultOutputException(exception);
         }
         return columnSetModel;
     }

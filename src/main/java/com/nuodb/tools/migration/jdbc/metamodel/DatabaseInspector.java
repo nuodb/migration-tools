@@ -42,6 +42,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.nuodb.tools.migration.jdbc.metamodel.ColumnSetModelFactory.createColumnSetModel;
+
 /**
  * Reads mockDatabase meta data and creates its meta meta. Root meta meta object is {@link Database} containing setValue of
  * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
@@ -216,7 +218,7 @@ public class DatabaseInspector {
         ResultSet columns = metaData.getColumns(catalog, schema, table.getName(), null);
         try {
             while (columns.next()) {
-                ColumnSetModel model = ColumnSetModelFactory.create(columns.getMetaData());
+                ColumnSetModel model = createColumnSetModel(columns.getMetaData());
 
                 Column column = table.createColumn(columns.getString("COLUMN_NAME"));
                 column.setType(new ColumnType(columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME")));

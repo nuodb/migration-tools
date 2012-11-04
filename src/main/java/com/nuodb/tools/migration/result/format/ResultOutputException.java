@@ -27,28 +27,22 @@
  */
 package com.nuodb.tools.migration.result.format;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.sql.PreparedStatement;
+import com.nuodb.tools.migration.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public interface ResultInput extends ResultFormat {
+public class ResultOutputException extends MigrationException {
 
-    void initInput();
+    public ResultOutputException(String message) {
+        super(message);
+    }
 
-    void readBegin();
+    public ResultOutputException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    boolean canReadRow();
-
-    void readRow();
-
-    void readEnd();
-
-    void setReader(Reader reader);
-
-    void setInputStream(InputStream inputStream);
-
-    void setPreparedStatement(PreparedStatement preparedStatement);
+    public ResultOutputException(Throwable cause) {
+        super(cause);
+    }
 }

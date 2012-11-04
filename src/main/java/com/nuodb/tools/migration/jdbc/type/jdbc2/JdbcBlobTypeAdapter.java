@@ -57,11 +57,11 @@ public class JdbcBlobTypeAdapter extends JdbcTypeAdapterBase<Blob> {
         Blob blob;
         if (byte[].class.isInstance(value)) {
             blob = connection.createBlob();
-            blob.setBytes(0, (byte[]) value);
+            blob.setBytes(1, (byte[]) value);
         } else if (InputStream.class.isInstance(value)) {
             blob = connection.createBlob();
             try {
-                ByteStreams.copy((InputStream) value, blob.setBinaryStream(0));
+                ByteStreams.copy((InputStream) value, blob.setBinaryStream(1));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
