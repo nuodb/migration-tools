@@ -1,0 +1,4 @@
+com.nuodb.migration.config.xml.handler.XmlMigrationHandler
+com.nuodb.migration.config.xml.handler.XmlJdbcConnectionHandler
+com.nuodb.migration.config.xml.handler.XmlDumpTaskHandler
+com.nuodb.migration.config.xml.handler.XmlTransformerHandler

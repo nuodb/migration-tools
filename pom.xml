@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <name>NuoDB Customer Data Migration Tools</name>
     <groupId>com.nuodb</groupId>
-    <artifactId>data-migration-tool</artifactId>
+    <artifactId>nuodb-migration</artifactId>
     <version>1.0</version>
     <repositories>
         <repository>
@@ -30,7 +30,6 @@
             <groupId>com.nuodb</groupId>
             <artifactId>nuodb-jdbc</artifactId>
             <version>1.0</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -48,16 +47,6 @@
             <version>2.6.6</version>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.20</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>4.1.6.Final</version>
-        </dependency>
-        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.7</version>
@@ -73,11 +62,6 @@
             <version>2.4</version>
         </dependency>
         <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-            <version>1.4</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>1.0-SNAPSHOT</version>
@@ -88,9 +72,9 @@
             <version>13.0</version>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.0</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>de.undercouch</groupId>
@@ -109,6 +93,23 @@
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>4.1.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.20</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>commons-dbcp</groupId>-->
+        <!--<artifactId>commons-dbcp</artifactId>-->
+        <!--<version>1.4</version>-->
+        <!--</dependency>-->
     </dependencies>
     <reporting>
         <plugins>
@@ -146,13 +147,33 @@
     <build>
         <plugins>
             <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                    <finalName>nuodb</finalName>
+                    <outputDirectory>target</outputDirectory>
+                    <workDirectory>target/assembly/work</workDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.4</version>
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.nuodb.tools.migration.cli.CliHandler</mainClass>
+                            <mainClass>com.nuodb.migration.cli.CliHandler</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -194,7 +215,7 @@
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>com.nuodb.tools.migration.cli.CliHandler</mainClass>
+                                    <mainClass>com.nuodb.migration.cli.CliHandler</mainClass>
                                     <arguments>
                                         <argument>--help</argument>
                                     </arguments>
@@ -220,7 +241,7 @@
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>com.nuodb.tools.migration.cli.CliHandler</mainClass>
+                                    <mainClass>com.nuodb.migration.cli.CliHandler</mainClass>
                                     <arguments>
                                         <argument>dump</argument>
                                         <argument>--source.driver=com.mysql.jdbc.Driver</argument>
