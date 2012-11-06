@@ -30,8 +30,8 @@ package com.nuodb.migration.jdbc;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.migration.jdbc.metamodel.DatabaseInspector;
-import com.nuodb.migration.jdbc.type.JdbcTypeAccessor;
-import com.nuodb.migration.jdbc.type.JdbcTypeAccessorImpl;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeAccessor;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeAccessorImpl;
 import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DriverManagerConnectionSpec;
 

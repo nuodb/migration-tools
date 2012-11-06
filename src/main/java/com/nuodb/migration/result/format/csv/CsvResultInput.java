@@ -28,8 +28,8 @@
 package com.nuodb.migration.result.format.csv;
 
 import com.google.common.collect.Lists;
+import com.nuodb.migration.jdbc.metamodel.ValueModelFactory;
 import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
-import com.nuodb.migration.jdbc.metamodel.ValueSetModelFactory;
 import com.nuodb.migration.result.format.ResultInputBase;
 import com.nuodb.migration.result.format.ResultInputException;
 import org.apache.commons.csv.CSVFormat;
@@ -88,7 +88,7 @@ public class CsvResultInput extends ResultInputBase implements CsvAttributes {
             }
             int[] columnTypes = new int[columns.size()];
             Arrays.fill(columnTypes, INSTANCE.getTypeCode());
-            valueSetModel = ValueSetModelFactory.createValueSetModel(columns.toArray(new String[columns.size()]),
+            valueSetModel = ValueModelFactory.createValueSetModel(columns.toArray(new String[columns.size()]),
                     columnTypes);
         }
         setValueSetModel(valueSetModel);

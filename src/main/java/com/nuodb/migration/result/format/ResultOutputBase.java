@@ -27,10 +27,13 @@
  */
 package com.nuodb.migration.result.format;
 
+import com.nuodb.migration.jdbc.metamodel.ValueModelFactory;
 import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
-import com.nuodb.migration.jdbc.metamodel.ValueSetModelFactory;
 import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.result.format.jdbc.*;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueSetModel;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueSetModelImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -78,7 +81,7 @@ public abstract class ResultOutputBase extends ResultFormatBase implements Resul
     protected ValueSetModel createColumnSetModel() {
         ValueSetModel valueSetModel;
         try {
-            valueSetModel = ValueSetModelFactory.createValueSetModel(resultSet);
+            valueSetModel = ValueModelFactory.createValueSetModel(resultSet);
         } catch (SQLException exception) {
             throw new ResultOutputException(exception);
         }
@@ -92,16 +95,16 @@ public abstract class ResultOutputBase extends ResultFormatBase implements Resul
     protected JdbcTypeValueSetModel createJdbcTypeValueSetModel() {
         final ValueSetModel valueSetModel = getValueSetModel();
         final int valueCount = valueSetModel.getLength();
-        JdbcTypeValueAccessor[] jdbcTypeValueAccessors = new JdbcTypeValueAccessor[valueCount];
-        JdbcTypeValueFormat[] jdbcTypeValueFormats = new JdbcTypeValueFormat[valueCount];
+        JdbcTypeValueAccessor[] accessors = new JdbcTypeValueAccessor[valueCount];
+        JdbcTypeValueFormat[] formats = new JdbcTypeValueFormat[valueCount];
         for (int index = 0; index < valueCount; index++) {
-            int columnType = valueSetModel.getTypeCode(index);
-            JdbcType jdbcType = getJdbcTypeAccessor().getJdbcType(columnType);
-            jdbcTypeValueAccessors[index] = new JdbcTypeValueAccessorImpl(
-                    getJdbcTypeAccessor().getJdbcTypeGet(jdbcType), resultSet, index + 1, valueSetModel.item(index));
-            jdbcTypeValueFormats[index] = getJdbcTypeValueFormat(jdbcType);
+            int typeCode = valueSetModel.getTypeCode(index);
+            JdbcType jdbcType = getJdbcTypeAccessor().getJdbcType(typeCode);
+            accessors[index] =  getJdbcTypeAccessor().createResultSetAccessor(
+                    resultSet, index + 1, valueSetModel.item(index));
+            formats[index] = getJdbcTypeValueFormat(jdbcType);
         }
-        return new JdbcTypeValueSetModelImpl(jdbcTypeValueAccessors, jdbcTypeValueFormats, valueSetModel);
+        return new JdbcTypeValueSetModelImpl(accessors, formats, valueSetModel);
     }
 
     @Override
@@ -123,9 +126,9 @@ public abstract class ResultOutputBase extends ResultFormatBase implements Resul
         JdbcTypeValueSetModel model = getJdbcTypeValueSetModel();
         final String[] values = new String[model.getLength()];
         for (int index = 0; index < model.getLength(); index++) {
-            JdbcTypeValueFormat jdbcTypeValueFormat = model.getJdbcTypeValueFormat(index);
+            JdbcTypeValueFormat format = model.getJdbcTypeValueFormat(index);
             JdbcTypeValueAccessor accessor = model.getJdbcTypeValueAccessor(index);
-            values[index] = jdbcTypeValueFormat.getValue(accessor);
+            values[index] = format.getValue(accessor);
         }
         return values;
     }

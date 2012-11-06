@@ -42,7 +42,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.nuodb.migration.jdbc.metamodel.ValueSetModelFactory.createValueSetModel;
+import static com.nuodb.migration.jdbc.metamodel.ValueModelFactory.createValueSetModel;
 
 /**
  * Reads mockDatabase meta data and creates its meta meta. Root meta meta object is {@link Database} containing setValue of
@@ -217,7 +217,7 @@ public class DatabaseInspector {
     protected void readTableColumns(DatabaseMetaData metaData, Table table) throws SQLException {
         ResultSet columns = metaData.getColumns(catalog, schema, table.getName(), null);
         try {
-            ValueSetModel columnsModel = ValueSetModelFactory.createValueSetModel(columns.getMetaData());
+            ValueSetModel columnsModel = ValueModelFactory.createValueSetModel(columns.getMetaData());
             while (columns.next()) {
                 Column column = table.createColumn(columns.getString("COLUMN_NAME"));
                 column.setTypeCode(columns.getInt("DATA_TYPE"));

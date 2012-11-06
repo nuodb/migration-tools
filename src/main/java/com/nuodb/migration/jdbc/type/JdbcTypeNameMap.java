@@ -27,17 +27,57 @@
  */
 package com.nuodb.migration.jdbc.type;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.google.common.collect.Maps;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeGet<T> {
+public class JdbcTypeNameMap {
 
-    JdbcType<T> getJdbcType();
+    private static final Map<Integer, String> TYPE_CODE_NAMES = Maps.newHashMap();
 
-    T getValue(ResultSet resultSet, int column) throws SQLException;
+    private static final Log log = LogFactory.getLog(JdbcTypeNameMap.class);
 
-    <X> X getValue(ResultSet resultSet, int column, Class<X> valueClass) throws SQLException;
+    static {
+        Field[] fields = Types.class.getFields();
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
+                try {
+                    TYPE_CODE_NAMES.put((Integer) field.get(null), field.getName());
+                } catch (IllegalAccessException exception) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Failed accessing jdbc type code field", exception);
+                    }
+                }
+            }
+        }
+    }
+
+    public static final JdbcTypeNameMap INSTANCE = new JdbcTypeNameMap();
+
+    private Map<Integer, String> typeCodeNames;
+
+    public JdbcTypeNameMap() {
+        this.typeCodeNames = Maps.newHashMap(TYPE_CODE_NAMES);
+    }
+
+    public String getTypeName(int typeCode) {
+        String typeName = typeCodeNames.get(typeCode);
+        return typeName == null ? getUnknownTypeName(typeCode) : typeName;
+    }
+
+    public void addTypeCodeName(int typeCode, String typeName) {
+        typeCodeNames.put(typeCode, typeName);
+    }
+
+    protected String getUnknownTypeName(int typeCode) {
+        return "TYPE:" + typeCode;
+    }
 }

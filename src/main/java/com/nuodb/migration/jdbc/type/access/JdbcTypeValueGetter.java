@@ -25,17 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type;
+package com.nuodb.migration.jdbc.type.access;
 
-import java.sql.PreparedStatement;
+import com.nuodb.migration.jdbc.type.JdbcType;
+
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeSet<T> {
+public interface JdbcTypeValueGetter<T> {
 
     JdbcType<T> getJdbcType();
 
-    <X> void setValue(PreparedStatement statement, int column, X value) throws SQLException;
+    T getValue(ResultSet resultSet, int column) throws SQLException;
+
+    <X> X getValue(ResultSet resultSet, int column, Class<X> valueClass) throws SQLException;
 }

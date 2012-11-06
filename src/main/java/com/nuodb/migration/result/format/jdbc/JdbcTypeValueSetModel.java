@@ -28,6 +28,7 @@
 package com.nuodb.migration.result.format.jdbc;
 
 import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
 
 /**
  * @author Sergey Bushik

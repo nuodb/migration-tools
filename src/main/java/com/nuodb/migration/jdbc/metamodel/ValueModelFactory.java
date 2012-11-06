@@ -34,26 +34,42 @@ import java.sql.SQLException;
 /**
  * @author Sergey Bushik
  */
-public class ColumnSetModelFactory {
+public class ValueModelFactory {
 
-    public static ColumnSetModel createColumnSetModel(ResultSet resultSet) throws SQLException {
-        return createColumnSetModel(resultSet.getMetaData());
+    public static ValueModel createValueModel(ResultSet resultSet, int column) throws SQLException {
+        return createValueModel(resultSet.getMetaData(), column);
     }
 
-    public static ColumnSetModel createColumnSetModel(ResultSetMetaData metaData) throws SQLException {
-        int columnCount = metaData.getColumnCount();
+    public static ValueModel createValueModel(ResultSetMetaData metaData, int column) throws SQLException {
+        return new ValueModelImpl(
+                metaData.getColumnLabel(column), metaData.getColumnType(column),
+                metaData.getPrecision(column), metaData.getScale(column));
+    }
 
-        String[] columns = new String[columnCount];
-        int[] columnTypes = new int[columnCount];
+    public static ValueSetModel createValueSetModel(ResultSet resultSet) throws SQLException {
+        return createValueSetModel(resultSet.getMetaData());
+    }
+
+    public static ValueSetModel createValueSetModel(ResultSetMetaData metaData) throws SQLException {
+        final int columnCount = metaData.getColumnCount();
+        final ValueModel[] values = new ValueModel[columnCount];
         for (int i = 0; i < columnCount; i++) {
-            int column = i + 1;
-            columns[i] = metaData.getColumnLabel(column);
-            columnTypes[i] = metaData.getColumnType(column);
+            values[i] = createValueModel(metaData, i + 1);
         }
-        return new ColumnSetModelImpl(columns, columnTypes);
+        return new ValueSetModelImpl(values);
     }
 
-    public static ColumnSetModel createColumnSetModel(String[] columns, int[] columnTypes) {
-        return new ColumnSetModelImpl(columns, columnTypes);
+    public static ValueSetModel createValueSetModel(String[] names, int[] typeCodes) {
+        final int length = names.length;
+        return createValueSetModel(names, typeCodes, new int[length], new int[length]);
+    }
+
+    public static ValueSetModel createValueSetModel(String[] names, int[] typeCodes, int[] precisions, int[] scales) {
+        final int columnCount = names.length;
+        final ValueModel[] values = new ValueModel[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            values[i] = new ValueModelImpl(names[i], typeCodes[i], precisions[i], scales[i]);
+        }
+        return new ValueSetModelImpl(values);
     }
 }

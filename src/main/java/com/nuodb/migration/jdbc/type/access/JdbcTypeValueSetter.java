@@ -25,18 +25,19 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type;
+package com.nuodb.migration.jdbc.type.access;
+
+import com.nuodb.migration.jdbc.type.JdbcType;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeAccessor extends JdbcTypeRegistry {
+public interface JdbcTypeValueSetter<T> {
 
-    <T> JdbcTypeGet<T> getJdbcTypeGet(int typeCode);
+    JdbcType<T> getJdbcType();
 
-    <T> JdbcTypeGet<T> getJdbcTypeGet(JdbcType<T> jdbcType);
-
-    <T> JdbcTypeSet<T> getJdbcTypeSet(int typeCode);
-
-    <T> JdbcTypeSet<T> getJdbcTypeSet(JdbcType<T> jdbcType);
+    <X> void setValue(PreparedStatement statement, int column, X value) throws SQLException;
 }

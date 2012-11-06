@@ -27,9 +27,12 @@
  */
 package com.nuodb.migration.result.format;
 
+import com.nuodb.migration.jdbc.metamodel.ValueModel;
 import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.result.format.jdbc.*;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueSetModel;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueSetModelImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -72,17 +75,15 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
     protected JdbcTypeValueSetModel createJdbcTypeValueSetModel() {
         final ValueSetModel valueSetModel = getValueSetModel();
         final int valueCount = valueSetModel.getLength();
-        JdbcTypeValueAccessor[] jdbcTypeValueAccessors = new JdbcTypeValueAccessor[valueCount];
-        JdbcTypeValueFormat[] jdbcTypeValueFormats = new JdbcTypeValueFormat[valueCount];
+        JdbcTypeValueAccessor[] accessors = new JdbcTypeValueAccessor[valueCount];
+        JdbcTypeValueFormat[] formats = new JdbcTypeValueFormat[valueCount];
         for (int index = 0; index < valueCount; index++) {
-            int type = valueSetModel.getTypeCode(index);
-            JdbcType jdbcType = getJdbcTypeAccessor().getJdbcType(type);
-            jdbcTypeValueAccessors[index] = new JdbcTypeValueAccessorImpl(
-                    getJdbcTypeAccessor().getJdbcTypeSet(jdbcType), preparedStatement, index + 1,
-                    valueSetModel.item(index));
-            jdbcTypeValueFormats[index] = getJdbcTypeValueFormat(jdbcType);
+            ValueModel valueModel = valueSetModel.item(index);
+            formats[index] = getJdbcTypeValueFormat(valueModel.getTypeCode());
+            accessors[index] = getJdbcTypeAccessor().createStatementAccessor(
+                    preparedStatement, index + 1, valueModel);
         }
-        return new JdbcTypeValueSetModelImpl(jdbcTypeValueAccessors, jdbcTypeValueFormats, valueSetModel);
+        return new JdbcTypeValueSetModelImpl(accessors, formats, valueSetModel);
     }
 
     @Override

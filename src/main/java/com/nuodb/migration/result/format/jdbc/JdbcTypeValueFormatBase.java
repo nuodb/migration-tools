@@ -27,7 +27,9 @@
  */
 package com.nuodb.migration.result.format.jdbc;
 
-import static com.nuodb.migration.jdbc.type.JdbcTypeCodeNameMap.INSTANCE;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
+
+import static com.nuodb.migration.jdbc.type.JdbcTypeNameMap.INSTANCE;
 
 /**
  * @author Sergey Bushik
@@ -38,6 +40,8 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
     public String getValue(JdbcTypeValueAccessor<T> accessor) {
         try {
             return doGetValue(accessor);
+        } catch (JdbcTypeValueException exception) {
+            throw exception;
         } catch (Exception exception) {
             throw newColumnValueFormatFailure(accessor, exception);
         }
@@ -49,6 +53,8 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
     public void setValue(JdbcTypeValueAccessor<T> accessor, String value) {
         try {
             doSetValue(accessor, value);
+        } catch (JdbcTypeValueException exception) {
+            throw exception;
         } catch (Exception exception) {
             throw newColumnValueFormatFailure(accessor, exception);
         }

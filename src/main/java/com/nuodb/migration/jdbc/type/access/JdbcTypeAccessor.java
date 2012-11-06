@@ -25,44 +25,33 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metamodel;
+package com.nuodb.migration.jdbc.type.access;
 
+import com.nuodb.migration.jdbc.metamodel.ValueModel;
+import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public class ValueSetModelFactory {
+public interface JdbcTypeAccessor extends JdbcTypeRegistry {
 
-    public static ValueSetModel createValueSetModel(ResultSet resultSet) throws SQLException {
-        return createValueSetModel(resultSet.getMetaData());
-    }
+    <T> JdbcTypeValueGetter<T> createValueGetter(int typeCode);
 
-    public static ValueSetModel createValueSetModel(ResultSetMetaData metaData) throws SQLException {
-        final int columnCount = metaData.getColumnCount();
-        final ValueModel[] values = new ValueModel[columnCount];
-        for (int i = 0; i < columnCount; i++) {
-            int column = i + 1;
-            values[i] = new ValueModelImpl(
-                    metaData.getColumnLabel(column), metaData.getColumnType(column),
-                    metaData.getPrecision(column), metaData.getScale(column));
-        }
-        return new ValueSetModelImpl(values);
-    }
+    <T> JdbcTypeValueGetter<T> createValueGetter(JdbcType<T> jdbcType);
 
-    public static ValueSetModel createValueSetModel(String[] names, int[] typeCodes) {
-        final int length = names.length;
-        return createValueSetModel(names, typeCodes, new int[length], new int[length]);
-    }
+    <T> JdbcTypeValueSetter<T> createValueSetter(int typeCode);
 
-    public static ValueSetModel createValueSetModel(String[] names, int[] typeCodes, int[] precisions, int[] scales) {
-        final int columnCount = names.length;
-        final ValueModel[] values = new ValueModel[columnCount];
-        for (int i = 0; i < columnCount; i++) {
-            values[i] = new ValueModelImpl(names[i], typeCodes[i], precisions[i], scales[i]);
-        }
-        return new ValueSetModelImpl(values);
-    }
+    <T> JdbcTypeValueSetter<T> createValueSetter(JdbcType<T> jdbcType);
+
+    <T> JdbcTypeValueAccessor<T> createResultSetAccessor(ResultSet resultSet, int column);
+
+    <T> JdbcTypeValueAccessor<T> createResultSetAccessor(ResultSet resultSet, int column, ValueModel valueModel);
+
+    <T> JdbcTypeValueAccessor<T> createStatementAccessor(PreparedStatement statement, int column);
+
+    <T> JdbcTypeValueAccessor<T> createStatementAccessor(PreparedStatement statement, int column, ValueModel valueModel);
 }

@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.result.format.jdbc;
 
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
+
 /**
  * @author Sergey Bushik
  */

@@ -27,19 +27,18 @@
  */
 package com.nuodb.migration.result.format.jdbc;
 
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.sql.rowset.serial.SerialRef;
 import java.io.*;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Ref;
 import java.sql.RowId;
-import java.sql.SQLException;
 import java.sql.Types;
 
-import static com.nuodb.migration.jdbc.type.JdbcTypeCodeNameMap.INSTANCE;
+import static com.nuodb.migration.jdbc.type.JdbcTypeNameMap.INSTANCE;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -47,14 +46,13 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class JdbcTypeValueFormatImpl implements JdbcTypeValueFormat<Object> {
+public class JdbcTypeValueFormatImpl extends JdbcTypeValueFormatBase<Object> {
 
     @Override
-    public String getValue(JdbcTypeValueAccessor accessor) {
-        final int typeCode = accessor.getValueModel().getTypeCode();
+    protected String doGetValue(JdbcTypeValueAccessor<Object> accessor) throws Exception {
         Object jdbcValue;
         String value = null;
-        switch (typeCode) {
+        switch (accessor.getValueModel().getTypeCode()) {
             case Types.BIT:
             case Types.TINYINT:
             case Types.SMALLINT:
@@ -65,13 +63,9 @@ public class JdbcTypeValueFormatImpl implements JdbcTypeValueFormat<Object> {
             case Types.DOUBLE:
             case Types.NUMERIC:
             case Types.DECIMAL:
-                try {
-                    jdbcValue = accessor.getValue();
-                    if (jdbcValue != null) {
-                        value = jdbcValue.toString();
-                    }
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
+                jdbcValue = accessor.getValue();
+                if (jdbcValue != null) {
+                    value = jdbcValue.toString();
                 }
                 break;
             case Types.CHAR:
@@ -80,176 +74,100 @@ public class JdbcTypeValueFormatImpl implements JdbcTypeValueFormat<Object> {
             case Types.NVARCHAR:
             case Types.LONGNVARCHAR:
             case Types.NCHAR:
-                try {
-                    jdbcValue = accessor.getValue();
-                    if (jdbcValue != null) {
-                        value = jdbcValue.toString();
-                    }
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                value = accessor.getValue(String.class);
                 break;
             case Types.DATE:
             case Types.TIME:
             case Types.TIMESTAMP:
-                try {
-                    jdbcValue = accessor.getValue(Long.class);
-                    if (jdbcValue != null) {
-                        value = jdbcValue.toString();
-                    }
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
+                jdbcValue = accessor.getValue(Long.class);
+                if (jdbcValue != null) {
+                    value = jdbcValue.toString();
                 }
                 break;
             case Types.BINARY:
             case Types.VARBINARY:
             case Types.LONGVARBINARY:
             case Types.BLOB:
-                try {
-                    jdbcValue = accessor.getValue(byte[].class);
-                    if (jdbcValue != null) {
-                        value = encode((byte[]) jdbcValue);
-                    }
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
+                jdbcValue = accessor.getValue(byte[].class);
+                if (jdbcValue != null) {
+                    value = encode((byte[]) jdbcValue);
                 }
                 break;
             case Types.OTHER:
             case Types.JAVA_OBJECT:
             case Types.STRUCT:
-                try {
-                    jdbcValue = accessor.getValue();
-                    if (jdbcValue != null) {
-                        value = encode(write(jdbcValue));
-                    }
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                } catch (IOException exception) {
-                    throw new JdbcTypeValueException(exception);
+                jdbcValue = accessor.getValue();
+                if (jdbcValue != null) {
+                    value = encode(write(jdbcValue));
                 }
                 break;
             case Types.CLOB:
             case Types.NCLOB:
-                try {
-                    value = (String) accessor.getValue(String.class);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                value = accessor.getValue(String.class);
                 break;
             case Types.REF:
-                try {
-                    jdbcValue = accessor.getValue();
-                    if (jdbcValue != null) {
-                        Ref ref = new SerialRef((Ref) jdbcValue);
-                        value = encode(write(ref));
-                    }
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                } catch (IOException exception) {
-                    throw new JdbcTypeValueException(exception);
+                jdbcValue = accessor.getValue();
+                if (jdbcValue != null) {
+                    Ref ref = new SerialRef((Ref) jdbcValue);
+                    value = encode(write(ref));
                 }
                 break;
             case Types.DATALINK:
-                try {
-                    jdbcValue = accessor.getValue();
-                    if (jdbcValue != null) {
-                        value = jdbcValue.toString();
-                    }
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
+                jdbcValue = accessor.getValue();
+                if (jdbcValue != null) {
+                    value = jdbcValue.toString();
                 }
                 break;
             case Types.BOOLEAN:
-                try {
-                    jdbcValue = accessor.getValue();
-                    if (jdbcValue != null) {
-                        value = jdbcValue.toString();
-                    }
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
+                jdbcValue = accessor.getValue();
+                if (jdbcValue != null) {
+                    value = jdbcValue.toString();
                 }
                 break;
             case Types.ROWID:
-                try {
-                    jdbcValue = accessor.getValue();
-                    if (jdbcValue != null) {
-                        value = encode(((RowId) jdbcValue).getBytes());
-                    }
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
+                jdbcValue = accessor.getValue();
+                if (jdbcValue != null) {
+                    value = encode(((RowId) jdbcValue).getBytes());
                 }
                 break;
             case Types.SQLXML:
-                try {
-                    value = (String) accessor.getValue(String.class);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                value = accessor.getValue(String.class);
                 break;
             default:
                 throw new JdbcTypeValueException(
-                        String.format("Unsupported jdbc type %s", INSTANCE.getTypeName(typeCode)));
+                        String.format("Unsupported jdbc type %s",
+                                INSTANCE.getTypeName(accessor.getValueModel().getTypeCode())));
         }
         return value;
     }
 
     @Override
-    public void setValue(JdbcTypeValueAccessor<Object> accessor, String value) {
-        final int typeCode = accessor.getValueModel().getTypeCode();
-        switch (typeCode) {
+    protected void doSetValue(JdbcTypeValueAccessor<Object> accessor, String value) throws Exception {
+        switch (accessor.getValueModel().getTypeCode()) {
             case Types.BIT:
             case Types.BOOLEAN:
-                try {
-                    accessor.setValue(!isEmpty(value) ? Boolean.parseBoolean(value) : null);
-                    accessor.setValue(!isEmpty(value) ? Boolean.parseBoolean(value) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? Boolean.parseBoolean(value) : null);
                 break;
             case Types.TINYINT:
             case Types.SMALLINT:
-                try {
-                    accessor.setValue(!isEmpty(value) ? Short.parseShort(value) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? Short.parseShort(value) : null);
                 break;
             case Types.INTEGER:
-                try {
-                    accessor.setValue(!isEmpty(value) ? Integer.parseInt(value) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? Integer.parseInt(value) : null);
                 break;
             case Types.BIGINT:
-                try {
-                    accessor.setValue(!isEmpty(value) ? Long.parseLong(value) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? Long.parseLong(value) : null);
                 break;
             case Types.FLOAT:
             case Types.REAL:
-                try {
-                    accessor.setValue(!isEmpty(value) ? Float.parseFloat(value) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? Float.parseFloat(value) : null);
                 break;
             case Types.DOUBLE:
-                try {
-                    accessor.setValue(!isEmpty(value) ? Double.parseDouble(value) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? Double.parseDouble(value) : null);
                 break;
             case Types.NUMERIC:
             case Types.DECIMAL:
-                try {
-                    accessor.setValue(!isEmpty(value) ? new BigDecimal(value) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? new BigDecimal(value) : null);
                 break;
             case Types.CHAR:
             case Types.VARCHAR:
@@ -257,94 +175,45 @@ public class JdbcTypeValueFormatImpl implements JdbcTypeValueFormat<Object> {
             case Types.NVARCHAR:
             case Types.LONGNVARCHAR:
             case Types.NCHAR:
-                try {
-                    accessor.setValue(!isEmpty(value) ? value : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? value : null);
                 break;
             case Types.DATE:
             case Types.TIME:
             case Types.TIMESTAMP:
-                try {
-                    accessor.setValue(!isEmpty(value) ? Long.parseLong(value) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? Long.parseLong(value) : null);
                 break;
             case Types.BINARY:
             case Types.VARBINARY:
             case Types.LONGVARBINARY:
-                try {
-                    accessor.setValue(!isEmpty(value) ? decode(value) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? decode(value) : null);
                 break;
             case Types.OTHER:
             case Types.JAVA_OBJECT:
             case Types.STRUCT:
-                try {
-                    accessor.setValue(read(decode(value)));
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                } catch (ClassNotFoundException exception) {
-                    throw new JdbcTypeValueException(exception);
-                } catch (IOException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(read(decode(value)));
                 break;
             case Types.BLOB:
-                try {
-                    accessor.setValue(decode(value));
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(decode(value));
                 break;
             case Types.CLOB:
-                try {
-                    accessor.setValue(value);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(value);
                 break;
             case Types.NCLOB:
-                try {
-                    accessor.setValue(value);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(value);
                 break;
             case Types.REF:
-                try {
-                    accessor.setValue(!isEmpty(value) ? read(decode(value)) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                } catch (ClassNotFoundException exception) {
-                    throw new JdbcTypeValueException(exception);
-                } catch (IOException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? read(decode(value)) : null);
                 break;
             case Types.DATALINK:
-                try {
-                    accessor.setValue(!isEmpty(value) ? new URL(value) : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                } catch (MalformedURLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? new URL(value) : null);
                 break;
             case Types.SQLXML:
-                try {
-                    accessor.setValue(!isEmpty(value) ? value : null);
-                } catch (SQLException exception) {
-                    throw new JdbcTypeValueException(exception);
-                }
+                accessor.setValue(!isEmpty(value) ? value : null);
                 break;
             default:
                 throw new JdbcTypeValueException(
-                        String.format("Unsupported jdbc type %s", INSTANCE.getTypeName(typeCode)));
+                        String.format("Unsupported jdbc type %s",
+                                INSTANCE.getTypeName(accessor.getValueModel().getTypeCode())));
         }
     }
 

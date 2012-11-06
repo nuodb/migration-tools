@@ -30,9 +30,9 @@ package com.nuodb.migration.result.format;
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
 import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeAccessor;
-import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeAccessor;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormatImpl;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
 
 import java.util.Map;
 

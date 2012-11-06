@@ -29,7 +29,7 @@ package com.nuodb.migration.jdbc;
 
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.metamodel.DatabaseInspector;
-import com.nuodb.migration.jdbc.type.JdbcTypeAccessor;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeAccessor;
 
 /**
  * @author Sergey Bushik
