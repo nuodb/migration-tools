@@ -103,7 +103,6 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.20</version>
-            <scope>provided</scope>
         </dependency>
         <!--<dependency>-->
         <!--<groupId>commons-dbcp</groupId>-->
@@ -247,7 +246,7 @@
                                         <argument>--source.driver=com.mysql.jdbc.Driver</argument>
                                         <argument>--source.url=jdbc:mysql://localhost:3306/test</argument>
                                         <argument>--source.username=root</argument>
-                                        <argument>--output.type=csv</argument>
+                                        <argument>--output.typeCode=csv</argument>
                                         <argument>--output.path=/tmp/test/</argument>
                                         <argument>--output.csv.delimiter=,</argument>
                                         <argument>--output.csv.quoting=false</argument>

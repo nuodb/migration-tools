@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
+import com.nuodb.migration.jdbc.type.JdbcTypeAdapter;
 import com.nuodb.migration.jdbc.type.JdbcTypeAdapterBase;
 import com.nuodb.migration.jdbc.type.JdbcTypeException;
 
@@ -46,7 +47,7 @@ import java.sql.SQLException;
 @SuppressWarnings("unchecked")
 public class JdbcClobTypeAdapter extends JdbcTypeAdapterBase<Clob> {
 
-    public static final JdbcClobTypeAdapter INSTANCE = new JdbcClobTypeAdapter();
+    public static final JdbcTypeAdapter INSTANCE = new JdbcClobTypeAdapter();
 
     public JdbcClobTypeAdapter() {
         super(Clob.class);

@@ -25,9 +25,9 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.result.format;
+package com.nuodb.migration.result.format.jdbc;
 
-import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.metamodel.ValueModel;
 import com.nuodb.migration.jdbc.type.JdbcTypeGet;
 import com.nuodb.migration.jdbc.type.JdbcTypeSet;
 
@@ -38,38 +38,35 @@ import java.sql.SQLException;
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeValueImpl<T> implements JdbcTypeValue<T> {
+public class JdbcTypeValueAccessorImpl<T> implements JdbcTypeValueAccessor<T> {
 
-    private JdbcType<T> jdbcType;
     private JdbcTypeGet<T> jdbcTypeGet;
     private ResultSet resultSet;
     private JdbcTypeSet<T> jdbcTypeSet;
     private PreparedStatement preparedStatement;
+    private ValueModel valueModel;
     private int column;
 
-    public JdbcTypeValueImpl(JdbcTypeGet<T> jdbcTypeGet, ResultSet resultSet, int column) {
-        this.jdbcType = jdbcTypeGet.getJdbcType();
+    public JdbcTypeValueAccessorImpl(JdbcTypeGet<T> jdbcTypeGet, ResultSet resultSet,
+                                     int column, ValueModel valueModel) {
         this.jdbcTypeGet = jdbcTypeGet;
         this.resultSet = resultSet;
+        this.valueModel = valueModel;
         this.column = column;
     }
 
-    public JdbcTypeValueImpl(JdbcTypeSet<T> jdbcTypeSet, PreparedStatement preparedStatement, int column) {
-        this.jdbcType = jdbcTypeSet.getJdbcType();
+    public JdbcTypeValueAccessorImpl(JdbcTypeSet<T> jdbcTypeSet, PreparedStatement preparedStatement,
+                                     int column, ValueModel valueModel) {
         this.jdbcTypeSet = jdbcTypeSet;
         this.preparedStatement = preparedStatement;
+        this.valueModel = valueModel;
         this.column = column;
-    }
-
-    @Override
-    public int getColumn() {
-        return column;
     }
 
     @Override
     public T getValue() throws SQLException {
         if (jdbcTypeGet == null) {
-            throw new ResultInputException("Get value is unsupported");
+            throw new JdbcTypeValueException("Get value is unsupported");
         }
         return jdbcTypeGet.getValue(resultSet, column);
     }
@@ -77,7 +74,7 @@ public class JdbcTypeValueImpl<T> implements JdbcTypeValue<T> {
     @Override
     public <X> X getValue(Class<X> valueClass) throws SQLException {
         if (jdbcTypeGet == null) {
-            throw new ResultInputException("Get value is unsupported");
+            throw new JdbcTypeValueException("Get value is unsupported");
         }
         return jdbcTypeGet.getValue(resultSet, column, valueClass);
     }
@@ -85,13 +82,13 @@ public class JdbcTypeValueImpl<T> implements JdbcTypeValue<T> {
     @Override
     public <X> void setValue(X value) throws SQLException {
         if (jdbcTypeSet == null) {
-            throw new ResultInputException("Set value is unsupported");
+            throw new JdbcTypeValueException("Set value is unsupported");
         }
         jdbcTypeSet.setValue(preparedStatement, column, value);
     }
 
     @Override
-    public JdbcType<T> getJdbcType() {
-        return jdbcType;
+    public ValueModel getValueModel() {
+        return valueModel;
     }
 }

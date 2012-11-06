@@ -27,56 +27,42 @@
  */
 package com.nuodb.migration.jdbc.metamodel;
 
-import java.util.Arrays;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public class ColumnSetModelImpl implements ColumnSetModel {
+public class ValueSetModelFactory {
 
-    private String[] columns;
-    private int[] columnTypes;
-
-    public ColumnSetModelImpl(ColumnSetModel model) {
-        this(model.getColumns(), model.getColumnTypes());
+    public static ValueSetModel createValueSetModel(ResultSet resultSet) throws SQLException {
+        return createValueSetModel(resultSet.getMetaData());
     }
 
-    public ColumnSetModelImpl(String[] columns, int[] columnTypes) {
-        this.columns = columns;
-        this.columnTypes = columnTypes;
+    public static ValueSetModel createValueSetModel(ResultSetMetaData metaData) throws SQLException {
+        final int columnCount = metaData.getColumnCount();
+        final ValueModel[] values = new ValueModel[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            int column = i + 1;
+            values[i] = new ValueModelImpl(
+                    metaData.getColumnLabel(column), metaData.getColumnType(column),
+                    metaData.getPrecision(column), metaData.getScale(column));
+        }
+        return new ValueSetModelImpl(values);
     }
 
-    public boolean hasColumn(String column) {
-        return Arrays.binarySearch(columns, column) >= 0;
+    public static ValueSetModel createValueSetModel(String[] names, int[] typeCodes) {
+        final int length = names.length;
+        return createValueSetModel(names, typeCodes, new int[length], new int[length]);
     }
 
-    public int getColumnType(int index) {
-        return columnTypes[index];
-    }
-
-    @Override
-    public void setColumnType(int index, int columnType) {
-        columnTypes[index] = columnType;
-    }
-
-    public int[] getColumnTypes() {
-        return columnTypes;
-    }
-
-    public String getColumn(int index) {
-        return columns[index];
-    }
-
-    @Override
-    public void setColumn(int index, String column) {
-        columns[index] = column;
-    }
-
-    public String[] getColumns() {
-        return columns;
-    }
-
-    public int getColumnCount() {
-        return columns.length;
+    public static ValueSetModel createValueSetModel(String[] names, int[] typeCodes, int[] precisions, int[] scales) {
+        final int columnCount = names.length;
+        final ValueModel[] values = new ValueModel[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            values[i] = new ValueModelImpl(names[i], typeCodes[i], precisions[i], scales[i]);
+        }
+        return new ValueSetModelImpl(values);
     }
 }

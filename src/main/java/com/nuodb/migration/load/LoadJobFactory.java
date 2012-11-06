@@ -27,17 +27,18 @@
  */
 package com.nuodb.migration.load;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.JdbcServices;
 import com.nuodb.migration.jdbc.JdbcServicesImpl;
+import com.nuodb.migration.job.JobExecutor;
+import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
+import com.nuodb.migration.job.TraceJobExecutionListener;
 import com.nuodb.migration.result.catalog.ResultCatalog;
 import com.nuodb.migration.result.catalog.ResultCatalogImpl;
 import com.nuodb.migration.result.format.ResultFormatFactory;
 import com.nuodb.migration.result.format.ResultFormatFactoryImpl;
-import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverManagerConnectionSpec;
-import com.nuodb.migration.spec.FormatSpec;
-import com.nuodb.migration.spec.LoadSpec;
+import com.nuodb.migration.spec.*;
 
 /**
  * @author Sergey Bushik
@@ -83,5 +84,25 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
 
     public void setResultFormatFactory(ResultFormatFactory resultFormatFactory) {
         this.resultFormatFactory = resultFormatFactory;
+    }
+
+    public static void main(String[] args) {
+        LoadJobFactory loadJobFactory = new LoadJobFactory();
+        loadJobFactory.setLoadSpec(new LoadSpec() {
+            {
+                DriverManagerConnectionSpec connectionSpec = new DriverManagerConnectionSpec();
+                connectionSpec.setDriver("com.mysql.jdbc.Driver");
+                connectionSpec.setUrl("jdbc:mysql://localhost:3306/enron-load");
+                connectionSpec.setUsername("root");
+                setConnectionSpec(connectionSpec);
+
+                FormatSpecBase inputSpec = new FormatSpecBase();
+                inputSpec.setPath("/tmp/test/dump_sales_fact.cat");
+                setInputSpec(inputSpec);
+            }
+        });
+        JobExecutor executor = JobExecutors.createJobExecutor(loadJobFactory.createJob());
+        executor.addJobExecutionListener(new TraceJobExecutionListener());
+        executor.execute(Maps.<String, Object>newHashMap());
     }
 }

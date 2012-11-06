@@ -30,7 +30,8 @@ package com.nuodb.migration.result.format.bson;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.metamodel.ColumnSetModel;
+import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
+import com.nuodb.migration.jdbc.metamodel.ValueSetModelFactory;
 import com.nuodb.migration.result.format.ResultInputBase;
 import com.nuodb.migration.result.format.ResultInputException;
 import de.undercouch.bson4jackson.BsonFactory;
@@ -41,7 +42,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.fasterxml.jackson.core.JsonToken.*;
-import static com.nuodb.migration.jdbc.metamodel.ColumnSetModelFactory.createColumnSetModel;
 import static com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType.INSTANCE;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 
@@ -80,7 +80,7 @@ public class BsonResultInput extends ResultInputBase implements BsonAttributes {
 
     @Override
     protected void doReadBegin() {
-        ColumnSetModel columnSetModel = null;
+        ValueSetModel valueSetModel = null;
         try {
             if (isNextToken(START_OBJECT) && isNextField(COLUMNS_FIELD) && isNextToken(START_OBJECT)) {
                 List<String> columns = Lists.newArrayList();
@@ -90,14 +90,15 @@ public class BsonResultInput extends ResultInputBase implements BsonAttributes {
                 parser.nextToken();
                 int[] columnTypes = new int[columns.size()];
                 Arrays.fill(columnTypes, INSTANCE.getTypeCode());
-                columnSetModel = createColumnSetModel(columns.toArray(new String[columns.size()]), columnTypes);
+                valueSetModel = ValueSetModelFactory.createValueSetModel(columns.toArray(new String[columns.size()]),
+                        columnTypes);
             }
             parser.nextToken();
             parser.nextToken();
         } catch (IOException exception) {
             throw new ResultInputException(exception);
         }
-        setColumnSetModel(columnSetModel);
+        setValueSetModel(valueSetModel);
     }
 
     protected boolean isCurrentToken(JsonToken token) {
@@ -126,7 +127,7 @@ public class BsonResultInput extends ResultInputBase implements BsonAttributes {
         String[] values = null;
         try {
             if (isCurrentToken(START_ARRAY)) {
-                values = new String[getColumnSetModel().getColumnCount()];
+                values = new String[getValueSetModel().getLength()];
                 int column = 0;
                 parser.nextToken();
                 while (isCurrentToken(VALUE_NULL) || isCurrentToken(VALUE_STRING)) {

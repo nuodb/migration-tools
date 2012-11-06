@@ -25,14 +25,40 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.result.format;
+package com.nuodb.migration.jdbc.metamodel;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeFormat<T> {
+public interface ValueSetModel {
 
-    String getValue(JdbcTypeValue<T> jdbcTypeValue) throws JdbcTypeFormatException;
+    String getName(int index);
 
-    void setValue(JdbcTypeValue<T> jdbcTypeValue, String value) throws JdbcTypeFormatException;
+    void setName(int index, String name);
+
+    String[] getNames();
+
+    int getTypeCode(int index);
+
+    void setTypeCode(int index, int typeCode);
+
+    int[] getTypeCodes();
+
+    int getPrecision(int index);
+
+    void setPrecision(int index, int precision);
+
+    int[] getPrecisions();
+
+    int getScale(int index);
+
+    void setScale(int index, int scale);
+
+    int[] getScales();
+
+    ValueModel item(int index);
+
+    ValueModel item(String name);
+
+    int getLength();
 }

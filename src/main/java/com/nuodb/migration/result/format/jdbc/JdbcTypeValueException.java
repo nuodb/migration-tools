@@ -25,50 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.result.format;
+package com.nuodb.migration.result.format.jdbc;
 
-import com.nuodb.migration.jdbc.metamodel.ColumnSetModel;
-import com.nuodb.migration.jdbc.metamodel.ColumnSetModelImpl;
+import com.nuodb.migration.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public class ResultFormatModelImpl extends ColumnSetModelImpl implements ResultFormatModel {
+public class JdbcTypeValueException extends MigrationException {
 
-    private JdbcTypeValue[] columnValues;
-    private JdbcTypeFormat[] columnFormats;
-
-    public ResultFormatModelImpl(JdbcTypeValue[] columnValues, JdbcTypeFormat[] columnFormats,
-                                 String[] columns, int[] columnTypes) {
-        super(columns, columnTypes);
-        this.columnValues = columnValues;
-        this.columnFormats = columnFormats;
+    public JdbcTypeValueException(String message) {
+        super(message);
     }
 
-    public ResultFormatModelImpl(JdbcTypeValue[] columnValues, JdbcTypeFormat[] columnFormats,
-                                 ColumnSetModel columnSetModel) {
-        super(columnSetModel);
-        this.columnValues = columnValues;
-        this.columnFormats = columnFormats;
+    public JdbcTypeValueException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    public JdbcTypeValue getColumnValue(int column) {
-        return columnValues[column];
-    }
-
-    @Override
-    public JdbcTypeValue[] getColumnValues() {
-        return columnValues;
-    }
-
-    @Override
-    public JdbcTypeFormat getColumnFormat(int column) {
-        return columnFormats[column];
-    }
-
-    @Override
-    public JdbcTypeFormat[] getColumnFormats() {
-        return columnFormats;
+    public JdbcTypeValueException(Throwable cause) {
+        super(cause);
     }
 }

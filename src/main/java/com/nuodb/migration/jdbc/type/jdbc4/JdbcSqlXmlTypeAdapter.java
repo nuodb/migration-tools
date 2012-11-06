@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.type.jdbc4;
 
+import com.nuodb.migration.jdbc.type.JdbcTypeAdapter;
 import com.nuodb.migration.jdbc.type.JdbcTypeAdapterBase;
 import com.nuodb.migration.jdbc.type.JdbcTypeException;
 import org.apache.commons.io.IOUtils;
@@ -44,7 +45,7 @@ import java.sql.SQLXML;
 @SuppressWarnings("unchecked")
 public class JdbcSqlXmlTypeAdapter extends JdbcTypeAdapterBase<SQLXML> {
 
-    public static final JdbcSqlXmlTypeAdapter INSTANCE = new JdbcSqlXmlTypeAdapter();
+    public static final JdbcTypeAdapter INSTANCE = new JdbcSqlXmlTypeAdapter();
 
     public JdbcSqlXmlTypeAdapter() {
         super(SQLXML.class);

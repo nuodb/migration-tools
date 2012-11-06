@@ -36,8 +36,14 @@ public class Column extends HasNameBase {
     public static final int DEFAULT_RADIX = 10;
 
     private Table table;
-
-    private ColumnType type;
+    /**
+     * SQL type from java.sql.Types
+     */
+    private int typeCode;
+    /**
+     * Data source dependent type name
+     */
+    private String typeName;
     /**
      * Holds column size.
      */
@@ -91,12 +97,20 @@ public class Column extends HasNameBase {
         return table;
     }
 
-    public ColumnType getType() {
-        return type;
+    public int getTypeCode() {
+        return typeCode;
     }
 
-    public void setType(ColumnType type) {
-        this.type = type;
+    public void setTypeCode(int typeCode) {
+        this.typeCode = typeCode;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     public int getSize() {

@@ -25,24 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.result.format;
-
-import com.nuodb.migration.MigrationException;
+package com.nuodb.migration.jdbc.metamodel;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeFormatException extends MigrationException {
+public interface ValueModel {
+    
+    String getName();
 
-    public JdbcTypeFormatException(String message) {
-        super(message);
-    }
+    void setName(String name);
 
-    public JdbcTypeFormatException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    int getTypeCode();
 
-    public JdbcTypeFormatException(Throwable cause) {
-        super(cause);
-    }
+    void setTypeCode(int type);
+    
+    int getPrecision();
+
+    void setPrecision(int precision);
+
+    int getScale();
+
+    void setScale(int scale);
 }

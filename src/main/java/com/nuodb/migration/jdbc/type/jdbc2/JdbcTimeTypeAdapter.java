@@ -27,65 +27,60 @@
  */
 package com.nuodb.migration.jdbc.type.jdbc2;
 
-import com.google.common.io.ByteStreams;
 import com.nuodb.migration.jdbc.type.JdbcTypeAdapter;
 import com.nuodb.migration.jdbc.type.JdbcTypeAdapterBase;
-import com.nuodb.migration.jdbc.type.JdbcTypeException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
-public class JdbcBlobTypeAdapter extends JdbcTypeAdapterBase<Blob> {
+@SuppressWarnings({"unchecked"})
+public class JdbcTimeTypeAdapter extends JdbcTypeAdapterBase<Time> {
 
-    public static final JdbcTypeAdapter INSTANCE = new JdbcBlobTypeAdapter();
+    public static final JdbcTypeAdapter INSTANCE = new JdbcTimeTypeAdapter();
 
-    public JdbcBlobTypeAdapter() {
-        super(Blob.class);
+    public JdbcTimeTypeAdapter() {
+        super(Time.class);
     }
 
     @Override
-    public <X> Blob wrap(X value, Connection connection) throws SQLException {
+    public <X> Time wrap(X value, Connection connection) throws SQLException {
         if (value == null) {
             return null;
-        }
-        Blob blob;
-        if (byte[].class.isInstance(value)) {
-            blob = connection.createBlob();
-            blob.setBytes(1, (byte[]) value);
-        } else if (InputStream.class.isInstance(value)) {
-            blob = connection.createBlob();
-            try {
-                ByteStreams.copy((InputStream) value, blob.setBinaryStream(1));
-            } catch (IOException exception) {
-                throw new JdbcTypeException(exception);
-            }
+        } else if (Long.class.isInstance(value)) {
+            return new Time((Long) value);
+        } else if (Time.class.isInstance(value)) {
+            return (Time) value;
+        } else if (java.util.Date.class.isInstance(value)) {
+            return new Time(((java.util.Date) value).getTime());
+        } else if (Calendar.class.isInstance(value)) {
+            return new Time(((Calendar) value).getTimeInMillis());
         } else {
             throw newWrapFailure(value);
         }
-        return blob;
     }
 
     @Override
-    public <X> X unwrap(Blob value, Class<X> valueClass, Connection connection) throws SQLException {
+    public <X> X unwrap(Time value, Class<X> valueClass, Connection connection) throws SQLException {
         if (value == null) {
             return null;
-        } else if (valueClass.isAssignableFrom(Blob.class)) {
+        } else if (valueClass.isAssignableFrom(java.util.Date.class)) {
             return (X) value;
-        } else if (valueClass.isAssignableFrom(byte[].class)) {
-            try {
-                return (X) ByteStreams.toByteArray(value.getBinaryStream());
-            } catch (IOException exception) {
-                throw new JdbcTypeException(exception);
-            }
-        } else if (valueClass.isAssignableFrom(InputStream.class)) {
-            return (X) value.getBinaryStream();
+        } else if (valueClass.isAssignableFrom(Long.class)) {
+            return (X) Long.valueOf(value.getTime());
+        } else if (valueClass.isAssignableFrom(Date.class)) {
+            return (X) new Date(value.getTime());
+        } else if (valueClass.isAssignableFrom(Time.class)) {
+            return (X) new Time(value.getTime());
+        } else if (valueClass.isAssignableFrom(Timestamp.class)) {
+            return (X) new Timestamp(value.getTime());
+        } else if (valueClass.isAssignableFrom(Calendar.class)) {
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeInMillis(value.getTime());
+            return (X) calendar;
         } else {
             throw newUnwrapFailure(valueClass);
         }

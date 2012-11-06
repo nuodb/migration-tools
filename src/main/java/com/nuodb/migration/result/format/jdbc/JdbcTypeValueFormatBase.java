@@ -25,41 +25,40 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.jdbc3;
+package com.nuodb.migration.result.format.jdbc;
 
-import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeBase;
-
-import java.net.URL;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import static com.nuodb.migration.jdbc.type.JdbcTypeCodeNameMap.INSTANCE;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcUrlType extends JdbcTypeBase<URL> {
-
-    public static final JdbcType INSTANCE = new JdbcUrlType();
+public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<T> {
 
     @Override
-    public int getTypeCode() {
-        return Types.DATALINK;
+    public String getValue(JdbcTypeValueAccessor<T> accessor) {
+        try {
+            return doGetValue(accessor);
+        } catch (Exception exception) {
+            throw newColumnValueFormatFailure(accessor, exception);
+        }
     }
 
-    @Override
-    public Class<? extends URL> getTypeClass() {
-        return URL.class;
-    }
+    protected abstract String doGetValue(JdbcTypeValueAccessor<T> accessor) throws Exception;
 
     @Override
-    public URL getValue(ResultSet resultSet, int column) throws SQLException {
-        return resultSet.getURL(column);
+    public void setValue(JdbcTypeValueAccessor<T> accessor, String value) {
+        try {
+            doSetValue(accessor, value);
+        } catch (Exception exception) {
+            throw newColumnValueFormatFailure(accessor, exception);
+        }
     }
 
-    @Override
-    protected void setNullSafeValue(PreparedStatement statement, URL value, int column) throws SQLException {
-        statement.setURL(column, value);
+    protected abstract void doSetValue(JdbcTypeValueAccessor<T> accessor, String value) throws Exception;
+
+    protected JdbcTypeValueException newColumnValueFormatFailure(JdbcTypeValueAccessor accessor, Exception exception) {
+        int typeCode = accessor.getValueModel().getTypeCode();
+        return new JdbcTypeValueException(
+                String.format("Failed processing jdbc type %s", INSTANCE.getTypeName(typeCode)), exception);
     }
 }

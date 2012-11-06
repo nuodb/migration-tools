@@ -28,7 +28,8 @@
 package com.nuodb.migration.result.format.csv;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.metamodel.ColumnSetModel;
+import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
+import com.nuodb.migration.jdbc.metamodel.ValueSetModelFactory;
 import com.nuodb.migration.result.format.ResultInputBase;
 import com.nuodb.migration.result.format.ResultInputException;
 import org.apache.commons.csv.CSVFormat;
@@ -42,7 +43,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.nuodb.migration.jdbc.metamodel.ColumnSetModelFactory.createColumnSetModel;
 import static com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType.INSTANCE;
 import static java.lang.String.valueOf;
 
@@ -80,7 +80,7 @@ public class CsvResultInput extends ResultInputBase implements CsvAttributes {
 
     @Override
     protected void doReadBegin() {
-        ColumnSetModel columnSetModel = null;
+        ValueSetModel valueSetModel = null;
         if (iterator.hasNext()) {
             List<String> columns = Lists.newArrayList();
             for (String column : iterator.next()) {
@@ -88,9 +88,10 @@ public class CsvResultInput extends ResultInputBase implements CsvAttributes {
             }
             int[] columnTypes = new int[columns.size()];
             Arrays.fill(columnTypes, INSTANCE.getTypeCode());
-            columnSetModel = createColumnSetModel(columns.toArray(new String[columns.size()]), columnTypes);
+            valueSetModel = ValueSetModelFactory.createValueSetModel(columns.toArray(new String[columns.size()]),
+                    columnTypes);
         }
-        setColumnSetModel(columnSetModel);
+        setValueSetModel(valueSetModel);
     }
 
     @Override
@@ -100,7 +101,7 @@ public class CsvResultInput extends ResultInputBase implements CsvAttributes {
 
     @Override
     public void readRow() {
-        String[] values = new String[getColumnSetModel().getColumnCount()];
+        String[] values = new String[getValueSetModel().getLength()];
         Iterator<String> iterator = this.iterator.next().iterator();
         int column = 0;
         while (iterator.hasNext()) {

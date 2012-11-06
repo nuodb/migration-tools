@@ -25,39 +25,45 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.result.format;
+package com.nuodb.migration.result.format.jdbc;
 
-import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
+import com.nuodb.migration.jdbc.metamodel.ValueSetModelImpl;
+import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
+import com.nuodb.migration.jdbc.metamodel.ValueSetModelImpl;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class JdbcTypeFormatBase<T> implements JdbcTypeFormat<T> {
+public class JdbcTypeValueSetModelImpl extends ValueSetModelImpl implements JdbcTypeValueSetModel {
 
-    @Override
-    public String getValue(JdbcTypeValue<T> jdbcTypeValue) {
-        try {
-            return doFormat(jdbcTypeValue);
-        } catch (Exception exception) {
-            throw newResultFormatFailure(jdbcTypeValue.getJdbcType(), exception);
-        }
+    private JdbcTypeValueAccessor[] jdbcTypeValueAccessors;
+    private JdbcTypeValueFormat[] jdbcTypeValueFormats;
+
+    public JdbcTypeValueSetModelImpl(JdbcTypeValueAccessor[] jdbcTypeValueAccessors,
+                                     JdbcTypeValueFormat[] jdbcTypeValueFormats, ValueSetModel valueSetModel) {
+        super(valueSetModel);
+        this.jdbcTypeValueAccessors = jdbcTypeValueAccessors;
+        this.jdbcTypeValueFormats = jdbcTypeValueFormats;
     }
 
-    protected abstract String doFormat(JdbcTypeValue<T> jdbcTypeValue) throws Exception;
-
     @Override
-    public void setValue(JdbcTypeValue<T> jdbcTypeValue, String value) {
-        try {
-            doParse(jdbcTypeValue, value);
-        } catch (Exception exception) {
-            throw newResultFormatFailure(jdbcTypeValue.getJdbcType(), exception);
-        }
+    public JdbcTypeValueAccessor getJdbcTypeValueAccessor(int index) {
+        return jdbcTypeValueAccessors[index];
     }
 
-    protected abstract void doParse(JdbcTypeValue<T> jdbcTypeValue, String value) throws Exception;
+    @Override
+    public JdbcTypeValueAccessor[] getJdbcTypeValueAccessors() {
+        return jdbcTypeValueAccessors;
+    }
 
-    protected ResultInputException newResultFormatFailure(JdbcType jdbcType, Exception exception) {
-        return new ResultInputException(
-                String.format("Failed processing jdbc type %s", jdbcType.getClass().getName()), exception);
+    @Override
+    public JdbcTypeValueFormat getJdbcTypeValueFormat(int index) {
+        return jdbcTypeValueFormats[index];
+    }
+
+    @Override
+    public JdbcTypeValueFormat[] getJdbcTypeValueFormat() {
+        return jdbcTypeValueFormats;
     }
 }

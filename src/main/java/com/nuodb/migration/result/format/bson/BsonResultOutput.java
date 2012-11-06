@@ -28,7 +28,6 @@
 package com.nuodb.migration.result.format.bson;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.nuodb.migration.jdbc.metamodel.ColumnSetModel;
 import com.nuodb.migration.result.format.ResultInputException;
 import com.nuodb.migration.result.format.ResultOutputBase;
 import de.undercouch.bson4jackson.BsonFactory;
@@ -71,9 +70,8 @@ public class BsonResultOutput extends ResultOutputBase implements BsonAttributes
             generator.writeStartObject();
             generator.writeFieldName(COLUMNS_FIELD);
             generator.writeStartObject();
-            ColumnSetModel columnSetModel = getColumnSetModel();
-            for (int index = 0; index < columnSetModel.getColumnCount(); index++) {
-                generator.writeStringField(COLUMN_FIELD, columnSetModel.getColumn(index));
+            for (String name : getValueSetModel().getNames()) {
+                generator.writeStringField(COLUMN_FIELD, name);
             }
             generator.writeEndObject();
             generator.writeFieldName(ROWS_FIELD);

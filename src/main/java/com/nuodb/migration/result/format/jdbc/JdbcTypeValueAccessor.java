@@ -25,24 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.result.format;
+package com.nuodb.migration.result.format.jdbc;
 
-import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.metamodel.ValueModel;
 
 import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValue<T> {
-
-    int getColumn();
-
-    JdbcType<T> getJdbcType();
+public interface JdbcTypeValueAccessor<T> {
 
     T getValue() throws SQLException;
 
     <X> X getValue(Class<X> valueClass) throws SQLException;
 
     <X> void setValue(X value) throws SQLException;
+
+    ValueModel getValueModel();
 }

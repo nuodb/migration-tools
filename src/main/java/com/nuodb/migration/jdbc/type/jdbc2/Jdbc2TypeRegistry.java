@@ -65,6 +65,10 @@ public class Jdbc2TypeRegistry extends JdbcTypeRegistryBase {
         addJdbcType(JdbcTinyIntType.INSTANCE);
         addJdbcType(JdbcTimestampType.INSTANCE);
         addJdbcType(JdbcTimeType.INSTANCE);
+
+        addJdbcTypeAdapter(JdbcDateTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(JdbcTimeTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(JdbcTimestampTypeAdapter.INSTANCE);
         addJdbcTypeAdapter(JdbcBlobTypeAdapter.INSTANCE);
         addJdbcTypeAdapter(JdbcClobTypeAdapter.INSTANCE);
     }

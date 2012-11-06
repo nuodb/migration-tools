@@ -27,13 +27,11 @@
  */
 package com.nuodb.migration.load;
 
+import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.JdbcServices;
 import com.nuodb.migration.jdbc.connection.ConnectionCallback;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.metamodel.ColumnSetModel;
-import com.nuodb.migration.jdbc.metamodel.Database;
-import com.nuodb.migration.jdbc.metamodel.DatabaseInspector;
-import com.nuodb.migration.jdbc.metamodel.Table;
+import com.nuodb.migration.jdbc.metamodel.*;
 import com.nuodb.migration.jdbc.query.*;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
@@ -49,7 +47,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.io.Closeables.closeQuietly;
@@ -111,10 +109,10 @@ public class LoadJob extends JobBase {
     protected void load(final JobExecution execution, Connection connection, Database database,
                         final ResultInput resultInput, String tableName) throws SQLException {
         resultInput.readBegin();
-        ColumnSetModel columnSetModel = resultInput.getColumnSetModel();
+        ValueSetModel valueSetModel = resultInput.getValueSetModel();
         Table table = database.findTable(tableName);
-        mergeColumnSetModel(table, columnSetModel);
-        final InsertQuery query = createInsertQuery(table, columnSetModel);
+        mergeColumnSetModel(table, valueSetModel);
+        final InsertQuery query = createInsertQuery(table, valueSetModel);
 
         QueryTemplate queryTemplate = new QueryTemplate(connection);
         queryTemplate.execute(
@@ -143,20 +141,28 @@ public class LoadJob extends JobBase {
         );
     }
 
-    protected void mergeColumnSetModel(Table table, ColumnSetModel columnSetModel) {
-        for (int index = 0; index < columnSetModel.getColumnCount(); index++) {
-            String column = columnSetModel.getColumn(index);
-            int columnType = table.getColumn(column).getType().getTypeCode();
-            columnSetModel.setColumnType(index, columnType);
+    protected void mergeColumnSetModel(Table table, ValueSetModel valueSetModel) {
+        for (int index = 0; index < valueSetModel.getLength(); index++) {
+            String name = valueSetModel.getName(index);
+            Column column = table.getColumn(name);
+            valueSetModel.setTypeCode(index, column.getTypeCode());
+            valueSetModel.setPrecision(index, column.getPrecision());
+            valueSetModel.setScale(index, column.getScale());
         }
     }
 
-    protected InsertQuery createInsertQuery(Table table, ColumnSetModel columnSetModel) {
+    protected InsertQuery createInsertQuery(Table table, ValueSetModel valueSetModel) {
         InsertQueryBuilder builder = new InsertQueryBuilder();
         builder.setQualifyNames(true);
         builder.setTable(table);
-        if (columnSetModel != null) {
-            builder.setColumns(Arrays.asList(columnSetModel.getColumns()));
+        if (valueSetModel != null) {
+            int columnCount = valueSetModel.getLength();
+            List<String> columns = Lists.newArrayList();
+            for (int index = 0; index < columnCount; index++) {
+                ValueModel valueModel = valueSetModel.item(index);
+                columns.add(valueModel.getName());
+            }
+            builder.setColumns(columns);
         }
         return builder.build();
     }

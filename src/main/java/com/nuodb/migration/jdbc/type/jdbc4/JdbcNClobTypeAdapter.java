@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.type.jdbc4;
 
+import com.nuodb.migration.jdbc.type.JdbcTypeAdapter;
 import com.nuodb.migration.jdbc.type.JdbcTypeAdapterBase;
 import com.nuodb.migration.jdbc.type.JdbcTypeException;
 import org.apache.commons.io.IOUtils;
@@ -44,7 +45,7 @@ import java.sql.SQLException;
  */
 public class JdbcNClobTypeAdapter extends JdbcTypeAdapterBase<NClob> {
 
-    public static final JdbcNClobTypeAdapter INSTANCE = new JdbcNClobTypeAdapter();
+    public static final JdbcTypeAdapter INSTANCE = new JdbcNClobTypeAdapter();
 
     public JdbcNClobTypeAdapter() {
         super(NClob.class);

@@ -27,8 +27,9 @@
  */
 package com.nuodb.migration.result.format;
 
-import com.nuodb.migration.jdbc.metamodel.ColumnSetModel;
+import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
 import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.result.format.jdbc.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,7 +48,7 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
     private Reader reader;
     private InputStream inputStream;
     private PreparedStatement preparedStatement;
-    private ResultFormatModel resultFormatModel;
+    private JdbcTypeValueSetModel jdbcTypeValueSetModel;
 
     @Override
     public void initInput() {
@@ -62,25 +63,26 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
     }
 
     protected void doInitModel() {
-        ResultFormatModel resultFormatModel = getResultFormatModel();
-        if (resultFormatModel == null) {
-            setResultFormatModel(createResultFormatModel());
+        JdbcTypeValueSetModel jdbcTypeValueModel = getJdbcTypeValueSetModel();
+        if (jdbcTypeValueModel == null) {
+            setJdbcTypeValueSetModel(createJdbcTypeValueSetModel());
         }
     }
 
-    protected ResultFormatModel createResultFormatModel() {
-        ColumnSetModel columnSetModel = getColumnSetModel();
-        int columnCount = columnSetModel.getColumnCount();
-        JdbcTypeValue[] columnValues = new JdbcTypeValue[columnCount];
-        JdbcTypeFormat[] columnFormats = new JdbcTypeFormat[columnCount];
-        for (int i = 0; i < columnCount; i++) {
-            int columnType = columnSetModel.getColumnType(i);
-            JdbcType jdbcType = getJdbcTypeAccessor().getJdbcType(columnType);
-            columnValues[i] = new JdbcTypeValueImpl(
-                    getJdbcTypeAccessor().getJdbcTypeSet(jdbcType), preparedStatement, i + 1);
-            columnFormats[i] = getJdbcTypeFormat(jdbcType);
+    protected JdbcTypeValueSetModel createJdbcTypeValueSetModel() {
+        final ValueSetModel valueSetModel = getValueSetModel();
+        final int valueCount = valueSetModel.getLength();
+        JdbcTypeValueAccessor[] jdbcTypeValueAccessors = new JdbcTypeValueAccessor[valueCount];
+        JdbcTypeValueFormat[] jdbcTypeValueFormats = new JdbcTypeValueFormat[valueCount];
+        for (int index = 0; index < valueCount; index++) {
+            int type = valueSetModel.getTypeCode(index);
+            JdbcType jdbcType = getJdbcTypeAccessor().getJdbcType(type);
+            jdbcTypeValueAccessors[index] = new JdbcTypeValueAccessorImpl(
+                    getJdbcTypeAccessor().getJdbcTypeSet(jdbcType), preparedStatement, index + 1,
+                    valueSetModel.item(index));
+            jdbcTypeValueFormats[index] = getJdbcTypeValueFormat(jdbcType);
         }
-        return new ResultFormatModelImpl(columnValues, columnFormats, columnSetModel);
+        return new JdbcTypeValueSetModelImpl(jdbcTypeValueAccessors, jdbcTypeValueFormats, valueSetModel);
     }
 
     @Override
@@ -94,11 +96,11 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
     protected abstract void doReadBegin();
 
     protected void readRow(String[] values) {
-        ResultFormatModel model = getResultFormatModel();
-        for (int index = 0; index < model.getColumnCount(); index++) {
-            JdbcTypeValue value = model.getColumnValue(index);
-            JdbcTypeFormat format = model.getColumnFormat(index);
-            format.setValue(value, values[index]);
+        JdbcTypeValueSetModel model = getJdbcTypeValueSetModel();
+        for (int index = 0; index < model.getLength(); index++) {
+            JdbcTypeValueAccessor accessor = model.getJdbcTypeValueAccessor(index);
+            JdbcTypeValueFormat jdbcTypeValueFormat = model.getJdbcTypeValueFormat(index);
+            jdbcTypeValueFormat.setValue(accessor, values[index]);
         }
     }
 
@@ -136,11 +138,11 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
         this.preparedStatement = preparedStatement;
     }
 
-    public ResultFormatModel getResultFormatModel() {
-        return resultFormatModel;
+    public JdbcTypeValueSetModel getJdbcTypeValueSetModel() {
+        return jdbcTypeValueSetModel;
     }
 
-    public void setResultFormatModel(ResultFormatModel resultFormatModel) {
-        this.resultFormatModel = resultFormatModel;
+    public void setJdbcTypeValueSetModel(JdbcTypeValueSetModel jdbcTypeValueSetModel) {
+        this.jdbcTypeValueSetModel = jdbcTypeValueSetModel;
     }
 }

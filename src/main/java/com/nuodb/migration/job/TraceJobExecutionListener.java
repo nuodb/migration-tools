@@ -44,7 +44,7 @@ public class TraceJobExecutionListener implements JobExecutionListener {
         JobExecution execution = event.getJobExecution();
         JobStatus jobStatus = execution.getJobStatus();
         if (log.isInfoEnabled()) {
-            log.info(String.format("Job %1s status type is %2s",
+            log.info(String.format("Job %s status type is %s",
                     execution.getJob().getName(), jobStatus.getJobStatusType()));
         }
         if (!jobStatus.isRunning()) {

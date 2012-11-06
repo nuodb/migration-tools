@@ -25,26 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metamodel;
+package com.nuodb.migration.result.format.jdbc;
 
 /**
  * @author Sergey Bushik
  */
-public interface ColumnSetModel {
+public interface JdbcTypeValueFormat<T> {
 
-    boolean hasColumn(String column);
+    String getValue(JdbcTypeValueAccessor<T> accessor) throws JdbcTypeValueException;
 
-    int getColumnType(int index);
-
-    void setColumnType(int index, int columnType);
-
-    int[] getColumnTypes();
-
-    String getColumn(int index);
-
-    void setColumn(int index, String column);
-
-    String[] getColumns();
-
-    int getColumnCount();
+    void setValue(JdbcTypeValueAccessor<T> accessor, String value) throws JdbcTypeValueException;
 }
