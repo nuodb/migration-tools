@@ -46,13 +46,13 @@ import static com.nuodb.migration.jdbc.metamodel.ValueModelFactory.createValueMo
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class JdbcTypeAccessorImpl extends JdbcTypeRegistryBase implements JdbcTypeAccessor {
+public class JdbcTypeValueAccessImpl extends JdbcTypeRegistryBase implements JdbcTypeValueAccess {
 
-    public JdbcTypeAccessorImpl() {
+    public JdbcTypeValueAccessImpl() {
         this(Jdbc4TypeRegistry.INSTANCE);
     }
 
-    public JdbcTypeAccessorImpl(JdbcTypeRegistry jdbcTypeRegistry) {
+    public JdbcTypeValueAccessImpl(JdbcTypeRegistry jdbcTypeRegistry) {
         super(jdbcTypeRegistry);
     }
 

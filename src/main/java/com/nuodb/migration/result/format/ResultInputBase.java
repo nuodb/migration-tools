@@ -80,7 +80,7 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
         for (int index = 0; index < valueCount; index++) {
             ValueModel valueModel = valueSetModel.item(index);
             formats[index] = getJdbcTypeValueFormat(valueModel.getTypeCode());
-            accessors[index] = getJdbcTypeAccessor().createStatementAccessor(
+            accessors[index] = getJdbcTypeValueAccess().createStatementAccessor(
                     preparedStatement, index + 1, valueModel);
         }
         return new JdbcTypeValueSetModelImpl(accessors, formats, valueSetModel);

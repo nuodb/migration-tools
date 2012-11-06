@@ -61,6 +61,7 @@ import java.util.Map;
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.metamodel.ObjectType.COLUMN;
 import static com.nuodb.migration.jdbc.metamodel.ObjectType.TABLE;
+import static com.nuodb.util.StringUtils.isEmpty;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
@@ -128,7 +129,7 @@ public class DumpJob extends JobBase {
         try {
             ResultOutput resultOutput = resultFormatFactory.createOutput(outputType);
             resultOutput.setAttributes(outputAttributes);
-            resultOutput.setJdbcTypeAccessor(jdbcServices.getJdbcTypeAccessor());
+            resultOutput.setJdbcTypeValueAccess(jdbcServices.getJdbcTypeValueAccess());
             resultOutput.setOutputStream(output);
             resultOutput.initOutput();
             dump(execution, connection, database, query, resultOutput);
@@ -201,7 +202,9 @@ public class DumpJob extends JobBase {
         builder.setQualifyNames(true);
         builder.setTable(database.findTable(tableName));
         builder.setColumns(selectQuerySpec.getColumns());
-        builder.addFilter(selectQuerySpec.getFilter());
+        if (!isEmpty(selectQuerySpec.getFilter())) {
+            builder.addFilter(selectQuerySpec.getFilter());
+        }
         return builder.build();
     }
 

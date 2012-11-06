@@ -37,7 +37,7 @@ import java.sql.ResultSet;
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeAccessor extends JdbcTypeRegistry {
+public interface JdbcTypeValueAccess extends JdbcTypeRegistry {
 
     <T> JdbcTypeValueGetter<T> createValueGetter(int typeCode);
 

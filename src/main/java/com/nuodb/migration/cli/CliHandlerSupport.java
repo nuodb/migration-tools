@@ -49,8 +49,8 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
 
     protected transient final Log log = LogFactory.getLog(getClass());
 
-    public static final String MIGRATION_EXECUTABLE = "migration";
-    public static final String MIGRATION_EXECUTABLE_COMMAND = "migration %1$s";
+    public static final String MIGRATION_EXECUTABLE = "nuodb-migration";
+    public static final String MIGRATION_EXECUTABLE_COMMAND = "nuodb-migration %1$s";
 
     private OptionToolkit optionToolkit;
     private CliRunFactoryLookup cliRunFactoryLookup;

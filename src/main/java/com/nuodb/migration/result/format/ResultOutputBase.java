@@ -29,7 +29,6 @@ package com.nuodb.migration.result.format;
 
 import com.nuodb.migration.jdbc.metamodel.ValueModelFactory;
 import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueSetModel;
@@ -99,10 +98,9 @@ public abstract class ResultOutputBase extends ResultFormatBase implements Resul
         JdbcTypeValueFormat[] formats = new JdbcTypeValueFormat[valueCount];
         for (int index = 0; index < valueCount; index++) {
             int typeCode = valueSetModel.getTypeCode(index);
-            JdbcType jdbcType = getJdbcTypeAccessor().getJdbcType(typeCode);
-            accessors[index] =  getJdbcTypeAccessor().createResultSetAccessor(
+            accessors[index] =  getJdbcTypeValueAccess().createResultSetAccessor(
                     resultSet, index + 1, valueSetModel.item(index));
-            formats[index] = getJdbcTypeValueFormat(jdbcType);
+            formats[index] = getJdbcTypeValueFormat(typeCode);
         }
         return new JdbcTypeValueSetModelImpl(accessors, formats, valueSetModel);
     }

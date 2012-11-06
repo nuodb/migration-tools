@@ -97,7 +97,7 @@ public class LoadJob extends JobBase {
             final ResultInput resultInput = resultFormatFactory.createInput(entry.getType());
             resultInput.setAttributes(inputAttributes);
             resultInput.setInputStream(entryInput);
-            resultInput.setJdbcTypeAccessor(jdbcServices.getJdbcTypeAccessor());
+            resultInput.setJdbcTypeValueAccess(jdbcServices.getJdbcTypeValueAccess());
             resultInput.initInput();
 
             load(execution, connection, database, resultInput, entry.getName());

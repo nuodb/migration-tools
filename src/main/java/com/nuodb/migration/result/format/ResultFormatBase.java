@@ -30,7 +30,7 @@ package com.nuodb.migration.result.format;
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
 import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeAccessor;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormatImpl;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
 
@@ -44,7 +44,7 @@ public abstract class ResultFormatBase implements ResultFormat {
     private Map<String, String> attributes;
     private Map<Integer, JdbcTypeValueFormat> jdbcTypeValueFormats = Maps.newHashMap();
     private JdbcTypeValueFormat defaultJdbcTypeValueFormat = new JdbcTypeValueFormatImpl();
-    private JdbcTypeAccessor jdbcTypeAccessor;
+    private JdbcTypeValueAccess jdbcTypeValueAccess;
     private ValueSetModel valueSetModel;
 
     @Override
@@ -106,13 +106,13 @@ public abstract class ResultFormatBase implements ResultFormat {
     }
 
     @Override
-    public JdbcTypeAccessor getJdbcTypeAccessor() {
-        return jdbcTypeAccessor;
+    public JdbcTypeValueAccess getJdbcTypeValueAccess() {
+        return jdbcTypeValueAccess;
     }
 
     @Override
-    public void setJdbcTypeAccessor(JdbcTypeAccessor jdbcTypeAccessor) {
-        this.jdbcTypeAccessor = jdbcTypeAccessor;
+    public void setJdbcTypeValueAccess(JdbcTypeValueAccess jdbcTypeValueAccess) {
+        this.jdbcTypeValueAccess = jdbcTypeValueAccess;
     }
 
     @Override

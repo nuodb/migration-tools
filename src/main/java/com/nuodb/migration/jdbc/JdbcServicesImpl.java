@@ -30,8 +30,8 @@ package com.nuodb.migration.jdbc;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.migration.jdbc.metamodel.DatabaseInspector;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeAccessor;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeAccessorImpl;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessImpl;
 import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DriverManagerConnectionSpec;
 
@@ -44,21 +44,21 @@ public class JdbcServicesImpl implements JdbcServices {
 
     private ConnectionSpec connectionSpec;
     private ConnectionProvider connectionProvider;
-    private JdbcTypeAccessor jdbcTypeAccessor;
+    private JdbcTypeValueAccess jdbcTypeValueAccess;
 
     public JdbcServicesImpl(DriverManagerConnectionSpec connectionSpec) {
         this(connectionSpec, new DriverManagerConnectionProvider(connectionSpec, false, TRANSACTION_READ_COMMITTED));
     }
 
     public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider) {
-        this(connectionSpec, connectionProvider, new JdbcTypeAccessorImpl());
+        this(connectionSpec, connectionProvider, new JdbcTypeValueAccessImpl());
     }
 
     public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider,
-                            JdbcTypeAccessor jdbcTypeAccessor) {
+                            JdbcTypeValueAccess jdbcTypeValueAccess) {
         this.connectionSpec = connectionSpec;
         this.connectionProvider = connectionProvider;
-        this.jdbcTypeAccessor = jdbcTypeAccessor;
+        this.jdbcTypeValueAccess = jdbcTypeValueAccess;
     }
 
     @Override
@@ -67,8 +67,8 @@ public class JdbcServicesImpl implements JdbcServices {
     }
 
     @Override
-    public JdbcTypeAccessor getJdbcTypeAccessor() {
-        return jdbcTypeAccessor;
+    public JdbcTypeValueAccess getJdbcTypeValueAccess() {
+        return jdbcTypeValueAccess;
     }
 
     @Override

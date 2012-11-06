@@ -29,16 +29,16 @@ package com.nuodb.migration.jdbc;
 
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.metamodel.DatabaseInspector;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeAccessor;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 /**
  * @author Sergey Bushik
  */
 public interface JdbcServices {
 
-    JdbcTypeAccessor getJdbcTypeAccessor();
+    DatabaseInspector getDatabaseIntrospector();
 
     ConnectionProvider getConnectionProvider();
 
-    DatabaseInspector getDatabaseIntrospector();
+    JdbcTypeValueAccess getJdbcTypeValueAccess();
 }
