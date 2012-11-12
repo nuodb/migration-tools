@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.nuodb.migration.jdbc.metamodel.Name.valueOf;
+import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang.StringUtils.split;
 
@@ -98,7 +99,7 @@ public class Database {
             if (create) {
                 catalog = doCreateCatalog(name);
             } else {
-                throw new MetaModelException(String.format("Catalog %s doesn't exist", name));
+                throw new MetaModelException(format("Catalog %s doesn't exist", name));
             }
         }
         return catalog;
@@ -108,6 +109,30 @@ public class Database {
         Catalog catalog = new Catalog(this, name);
         catalogs.put(name, catalog);
         return catalog;
+    }
+
+    public Table findTable(String table) {
+        List<Table> tables = findTables(table);
+        if (tables.isEmpty()) {
+            throw new MetaModelException(format("Table %s doesn't exist", table));
+        } else if (tables.size() > 1) {
+            throw new MetaModelException(format("Multiple tables %s correspond to %s", tables, table));
+        }
+        return tables.get(0);
+    }
+
+    public List<Table> findTables(String name) {
+        String[] parts = split(name, ".");
+        List<Table> tables = Lists.newArrayList();
+        if (parts.length == 1) {
+            tables.addAll(listTables(parts[0]));
+        } else if (parts.length == 2) {
+            tables.addAll(listTables(parts[0], parts[1]));
+            tables.addAll(listTables(parts[0], null, parts[1]));
+        } else if (parts.length > 2) {
+            tables.addAll(listTables(parts[0], parts[1], parts[2]));
+        }
+        return tables;
     }
 
     public List<Catalog> listCatalogs() {
@@ -132,35 +157,11 @@ public class Database {
         return tables;
     }
 
-    public Table findTable(String table) {
-        List<Table> tables = findTables(table);
-        if (tables.isEmpty()) {
-            throw new MetaModelException(String.format("Table %s doesn't exist", table));
-        } else if (tables.size() > 1) {
-            throw new MetaModelException(String.format("Multiple tables %s correspond to %s", tables, table));
-        }
-        return tables.get(0);
-    }
-
-    public List<Table> findTables(String name) {
-        String[] parts = split(name, ".");
-        List<Table> tables = Lists.newArrayList();
-        if (parts.length == 1) {
-            tables.addAll(listTables(parts[0]));
-        } else if (parts.length == 2) {
-            tables.addAll(listTables(parts[0], parts[1]));
-            tables.addAll(listTables(parts[0], null, parts[1]));
-        } else if (parts.length > 2) {
-            tables.addAll(listTables(parts[0], parts[1], parts[2]));
-        }
-        return tables;
-    }
-
-    public List<Table> listTables(final String tableName) {
+    public List<Table> listTables(final String table) {
         return Lists.newArrayList(Iterables.filter(listTables(), new Predicate<Table>() {
             @Override
-            public boolean apply(Table table) {
-                return equalsIgnoreCase(table.getName(), tableName);
+            public boolean apply(Table input) {
+                return equalsIgnoreCase(input.getName(), table);
             }
         }));
     }

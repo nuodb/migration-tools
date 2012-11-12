@@ -43,8 +43,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Reads mockDatabase meta data and creates its meta meta. Root meta meta object is {@link Database} containing setValue
- * of catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
+ * Reads database meta data and creates its meta meta. Root meta meta object is {@link Database} containing set of
+ * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
  *
  * @author Sergey Bushik
  */

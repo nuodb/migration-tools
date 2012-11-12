@@ -148,7 +148,6 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         Option path = newOption().
                 withName(OUTPUT_PATH_OPTION).
                 withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
-                withRequired(true).
                 withArgument(
                         newArgument().
                                 withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).build()
@@ -364,6 +363,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected Option createInputGroup() {
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
+
         // Option type = newOption().
         //  withName(INPUT_TYPE_OPTION).
         //  withDescription(getMessage(INPUT_TYPE_OPTION_DESCRIPTION)).

@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.nuodb.migration.jdbc.metamodel.Name.valueOf;
+import static java.lang.String.format;
 
 public class Catalog extends HasNameBase {
 
@@ -62,11 +63,11 @@ public class Catalog extends HasNameBase {
     }
 
     public Schema createSchema(String name) {
-        return getOrCreateSchema(valueOf(name), false);
+        return getOrCreateSchema(valueOf(name), true);
     }
 
     public Schema createSchema(Name name) {
-        return getOrCreateSchema(name, false);
+        return getOrCreateSchema(name, true);
     }
 
     protected Schema getOrCreateSchema(Name name, boolean create) {
@@ -75,7 +76,7 @@ public class Catalog extends HasNameBase {
             if (create) {
                 schema = doCreateSchema(name);
             } else {
-                throw new MetaModelException(String.format("Schema %s doesn't exist", name));
+                throw new MetaModelException(format("Schema %s doesn't exist", name));
             }
         }
         return schema;

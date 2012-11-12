@@ -35,6 +35,7 @@ import java.util.Map;
 
 import static com.nuodb.migration.jdbc.metamodel.Name.valueOf;
 import static com.nuodb.migration.jdbc.metamodel.Table.TABLE;
+import static java.lang.String.format;
 
 public class Schema extends HasNameBase {
     private Map<Name, Table> tables = Maps.newHashMap();
@@ -77,7 +78,7 @@ public class Schema extends HasNameBase {
         if (table == null && create) {
             table = doCreateTable(name, type);
         } else {
-            throw new MetaModelException(String.format("Table %s doesn't exist", name));
+            throw new MetaModelException(format("Table %s doesn't exist", name));
         }
         return table;
     }

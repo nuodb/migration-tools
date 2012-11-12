@@ -27,15 +27,12 @@
  */
 package com.nuodb.migration.result.catalog;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 
-import static org.apache.commons.io.FileUtils.getUserDirectoryPath;
-import static org.apache.commons.io.FilenameUtils.getFullPath;
-import static org.apache.commons.io.FilenameUtils.getName;
+import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
  * @author Sergey Bushik
@@ -57,16 +54,17 @@ public class ResultCatalogImpl implements ResultCatalog {
     }
 
     protected File getCatalogDir() {
-        String dirPath = path == null ? getUserDirectoryPath() : path;
-        return new File(getFullPath(dirPath));
+        File catalogDir = new File(path == null ? getCurrentDirectory() : path);
+        return catalogDir.isFile() ? catalogDir.getParentFile() : catalogDir;
     }
 
     protected File getCatalogFile() {
-        String fileName = getName(path);
-        if (StringUtils.isEmpty(fileName)) {
-            fileName = CATALOG_FILE_NAME;
-        }
-        return new File(catalogDir, fileName);
+        String catalogFile = catalogDir.isFile() ? catalogDir.getName() : CATALOG_FILE_NAME;
+        return new File(catalogDir, catalogFile);
+    }
+
+    private static String getCurrentDirectory() {
+        return new File(EMPTY).getAbsolutePath();
     }
 
     public String getPath() {
