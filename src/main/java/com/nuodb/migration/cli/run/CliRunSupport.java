@@ -364,15 +364,15 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected Option createInputGroup() {
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
-        Option type = newOption().
-                withName(INPUT_TYPE_OPTION).
-                withDescription(getMessage(INPUT_TYPE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgument().
-                                withName(getMessage(INPUT_TYPE_ARGUMENT_NAME)).
-                                withRequired(true).
-                                withMinimum(1).build()
-                ).build();
+        // Option type = newOption().
+        //  withName(INPUT_TYPE_OPTION).
+        //  withDescription(getMessage(INPUT_TYPE_OPTION_DESCRIPTION)).
+        //  withArgument(
+        //   newArgument().
+        //    withName(getMessage(INPUT_TYPE_ARGUMENT_NAME)).
+        //    withRequired(true).
+        //    withMinimum(1).build()
+        //  ).build();
 
         Option path = newOption().
                 withName(INPUT_PATH_OPTION).
@@ -397,7 +397,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withName(getMessage(INPUT_GROUP_NAME)).
                 withRequired(true).
                 withMinimum(1).
-                withOption(type).
+                // withOption(type).
                 withOption(path).
                 withOption(attributes).build();
     }
@@ -419,7 +419,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected FormatSpec parseInputGroup(CommandLine commandLine, Option cliLoad) {
         FormatSpec format = new FormatSpecBase();
-        format.setType(commandLine.<String>getValue(INPUT_TYPE_OPTION));
+        // format.setType(commandLine.<String>getValue(INPUT_TYPE_OPTION));
         format.setPath(commandLine.<String>getValue(INPUT_PATH_OPTION));
         format.setAttributes(parseFormatAttributes(
                 commandLine.getOption(INPUT_OPTION), commandLine.<String>getValues(INPUT_OPTION)));

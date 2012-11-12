@@ -27,10 +27,16 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import java.sql.DatabaseMetaData;
+
 /**
  * @author Sergey Bushik
  */
 public class SQLServerDialect extends DatabaseDialectBase {
+
+    public SQLServerDialect(DatabaseMetaData metaData) {
+        super(metaData);
+    }
 
     @Override
     public char closeQuote() {

@@ -27,7 +27,8 @@
  */
 package com.nuodb.migration.jdbc.type.access;
 
-import com.nuodb.migration.jdbc.metamodel.ValueModel;
+import com.nuodb.migration.jdbc.metamodel.ColumnModel;
+import com.nuodb.migration.jdbc.metamodel.ColumnModelFactory;
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeAdapter;
 import com.nuodb.migration.jdbc.type.JdbcTypeException;
@@ -40,7 +41,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static com.nuodb.migration.jdbc.metamodel.ValueModelFactory.createValueModel;
+import static com.nuodb.migration.jdbc.metamodel.ColumnModelFactory.createColumnModel;
 
 /**
  * @author Sergey Bushik
@@ -79,7 +80,7 @@ public class JdbcTypeValueAccessImpl extends JdbcTypeRegistryBase implements Jdb
     @Override
     public <T> JdbcTypeValueAccessor<T> createResultSetAccessor(ResultSet resultSet, int column) {
         try {
-            return createResultSetAccessor(resultSet, column, createValueModel(resultSet, column));
+            return createResultSetAccessor(resultSet, column, ColumnModelFactory.createColumnModel(resultSet, column));
         } catch (SQLException exception) {
             throw new JdbcTypeException(exception);
         }
@@ -87,15 +88,15 @@ public class JdbcTypeValueAccessImpl extends JdbcTypeRegistryBase implements Jdb
 
     @Override
     public <T> JdbcTypeValueAccessor<T> createResultSetAccessor(ResultSet resultSet, int column,
-                                                                ValueModel valueModel) {
+                                                                ColumnModel columnModel) {
         return new JdbcTypeValueAccessorImpl<T>(
-                (JdbcTypeValueGetter<T>) createValueGetter(valueModel.getTypeCode()), resultSet, column, valueModel);
+                (JdbcTypeValueGetter<T>) createValueGetter(columnModel.getTypeCode()), resultSet, column, columnModel);
     }
 
     @Override
     public <T> JdbcTypeValueAccessor<T> createStatementAccessor(PreparedStatement statement, int column) {
         try {
-            return createStatementAccessor(statement, column, createValueModel(statement.getMetaData(), column));
+            return createStatementAccessor(statement, column, createColumnModel(statement.getMetaData(), column));
         } catch (SQLException exception) {
             throw new JdbcTypeException(exception);
         }
@@ -103,9 +104,9 @@ public class JdbcTypeValueAccessImpl extends JdbcTypeRegistryBase implements Jdb
 
     @Override
     public <T> JdbcTypeValueAccessor<T> createStatementAccessor(PreparedStatement statement, int column,
-                                                                ValueModel valueModel) {
+                                                                ColumnModel columnModel) {
         return new JdbcTypeValueAccessorImpl<T>(
-                (JdbcTypeValueSetter<T>) createValueSetter(valueModel.getTypeCode()), statement, column, valueModel);
+                (JdbcTypeValueSetter<T>) createValueSetter(columnModel.getTypeCode()), statement, column, columnModel);
     }
 
     protected <T> JdbcTypeAdapter<T> getJdbcTypeAdapter(Class valueClass, Class typeClass) {
@@ -190,22 +191,22 @@ public class JdbcTypeValueAccessImpl extends JdbcTypeRegistryBase implements Jdb
         private ResultSet resultSet;
         private JdbcTypeValueSetter<T> jdbcTypeValueSetter;
         private PreparedStatement statement;
-        private ValueModel valueModel;
+        private ColumnModel columnModel;
         private int column;
 
         public JdbcTypeValueAccessorImpl(JdbcTypeValueGetter<T> jdbcTypeValueGetter, ResultSet resultSet, int column,
-                                         ValueModel valueModel) {
+                                         ColumnModel columnModel) {
             this.jdbcTypeValueGetter = jdbcTypeValueGetter;
             this.resultSet = resultSet;
-            this.valueModel = valueModel;
+            this.columnModel = columnModel;
             this.column = column;
         }
 
         public JdbcTypeValueAccessorImpl(JdbcTypeValueSetter<T> jdbcTypeValueSetter, PreparedStatement statement,
-                                         int column, ValueModel valueModel) {
+                                         int column, ColumnModel columnModel) {
             this.jdbcTypeValueSetter = jdbcTypeValueSetter;
             this.statement = statement;
-            this.valueModel = valueModel;
+            this.columnModel = columnModel;
             this.column = column;
         }
 
@@ -234,8 +235,8 @@ public class JdbcTypeValueAccessImpl extends JdbcTypeRegistryBase implements Jdb
         }
 
         @Override
-        public ValueModel getValueModel() {
-            return valueModel;
+        public ColumnModel getColumnModel() {
+            return columnModel;
         }
     }
 

@@ -27,8 +27,14 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import java.sql.DatabaseMetaData;
+
 /**
  * @author Sergey Bushik
  */
 public class OracleDialect extends DatabaseDialectBase {
+
+    public OracleDialect(DatabaseMetaData metaData) {
+        super(metaData);
+    }
 }

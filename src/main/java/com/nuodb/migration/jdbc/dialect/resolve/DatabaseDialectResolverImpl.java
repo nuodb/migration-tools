@@ -91,13 +91,13 @@ public class DatabaseDialectResolverImpl implements DatabaseDialectResolver {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Database dialect resolved %1$s", databaseInfoMatcherEntry.getValue().getName()));
                 }
-                return ClassUtils.newInstance(databaseInfoMatcherEntry.getValue());
+                return ClassUtils.newInstance(databaseInfoMatcherEntry.getValue(), metaData);
             }
         }
         if (log.isWarnEnabled()) {
             log.warn(String.format("Database dialect defaulted to %1$s", defaultDatabaseDialect.getName()));
         }
-        return ClassUtils.newInstance(defaultDatabaseDialect);
+        return ClassUtils.newInstance(defaultDatabaseDialect, metaData);
     }
 
     public Class<? extends DatabaseDialect> getDefaultDatabaseDialect() {

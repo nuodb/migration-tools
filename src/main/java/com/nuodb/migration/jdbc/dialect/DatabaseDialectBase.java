@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -34,6 +36,12 @@ import java.sql.Statement;
  * @author Sergey Bushik
  */
 public class DatabaseDialectBase implements DatabaseDialect {
+
+    protected final DatabaseMetaData metaData;
+
+    public DatabaseDialectBase(DatabaseMetaData metaData) {
+        this.metaData = metaData;
+    }
 
     @Override
     public char openQuote() {
@@ -66,6 +74,24 @@ public class DatabaseDialectBase implements DatabaseDialect {
     @Override
     public boolean supportsReadSchemas() {
         return true;
+    }
+
+    @Override
+    public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) throws SQLException {
+        return metaData.supportsTransactionIsolationLevel(transactionIsolationLevel);
+    }
+
+    @Override
+    public void setTransactionIsolationLevel(Connection connection,
+                                             int[] transactionIsolationLevels) throws SQLException {
+        if (transactionIsolationLevels != null) {
+            for (int transactionIsolationLevel : transactionIsolationLevels) {
+                if (supportsTransactionIsolationLevel(transactionIsolationLevel)) {
+                    connection.setTransactionIsolation(transactionIsolationLevel);
+                    return;
+                }
+            }
+        }
     }
 
     @Override

@@ -52,7 +52,7 @@ public class JdbcTypeValueFormatImpl extends JdbcTypeValueFormatBase<Object> {
     protected String doGetValue(JdbcTypeValueAccessor<Object> accessor) throws Exception {
         Object jdbcValue;
         String value = null;
-        switch (accessor.getValueModel().getTypeCode()) {
+        switch (accessor.getColumnModel().getTypeCode()) {
             case Types.BIT:
             case Types.TINYINT:
             case Types.SMALLINT:
@@ -136,14 +136,14 @@ public class JdbcTypeValueFormatImpl extends JdbcTypeValueFormatBase<Object> {
             default:
                 throw new JdbcTypeValueException(
                         String.format("Unsupported jdbc type %s",
-                                INSTANCE.getTypeName(accessor.getValueModel().getTypeCode())));
+                                INSTANCE.getTypeName(accessor.getColumnModel().getTypeCode())));
         }
         return value;
     }
 
     @Override
     protected void doSetValue(JdbcTypeValueAccessor<Object> accessor, String value) throws Exception {
-        switch (accessor.getValueModel().getTypeCode()) {
+        switch (accessor.getColumnModel().getTypeCode()) {
             case Types.BIT:
             case Types.BOOLEAN:
                 accessor.setValue(!isEmpty(value) ? Boolean.parseBoolean(value) : null);
@@ -213,7 +213,7 @@ public class JdbcTypeValueFormatImpl extends JdbcTypeValueFormatBase<Object> {
             default:
                 throw new JdbcTypeValueException(
                         String.format("Unsupported jdbc type %s",
-                                INSTANCE.getTypeName(accessor.getValueModel().getTypeCode())));
+                                INSTANCE.getTypeName(accessor.getColumnModel().getTypeCode())));
         }
     }
 

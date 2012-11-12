@@ -42,8 +42,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.nuodb.migration.jdbc.metamodel.ValueModelFactory.createValueSetModel;
-
 /**
  * Reads mockDatabase meta data and creates its meta meta. Root meta meta object is {@link Database} containing setValue of
  * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
@@ -217,19 +215,21 @@ public class DatabaseInspector {
     protected void readTableColumns(DatabaseMetaData metaData, Table table) throws SQLException {
         ResultSet columns = metaData.getColumns(catalog, schema, table.getName(), null);
         try {
-            ValueSetModel columnsModel = ValueModelFactory.createValueSetModel(columns.getMetaData());
+            ColumnModelSet model = ColumnModelFactory.createColumnModelSet(columns.getMetaData());
             while (columns.next()) {
                 Column column = table.createColumn(columns.getString("COLUMN_NAME"));
                 column.setTypeCode(columns.getInt("DATA_TYPE"));
                 column.setTypeName(columns.getString("TYPE_NAME"));
-                column.setSize(columns.getInt("COLUMN_SIZE"));
+                int columnSize = columns.getInt("COLUMN_SIZE");
+                column.setSize(columnSize);
+                column.setPrecision(columnSize);
                 column.setDefaultValue(columns.getString("COLUMN_DEF"));
                 column.setScale(columns.getInt("DECIMAL_DIGITS"));
                 column.setComment(columns.getString("REMARKS"));
                 column.setPosition(columns.getInt("ORDINAL_POSITION"));
                 String nullable = columns.getString("IS_NULLABLE");
                 column.setNullable("YES".equals(nullable));
-                String autoIncrement = columnsModel.item("IS_AUTOINCREMENT") != null ? columns.getString("IS_AUTOINCREMENT") : null;
+                String autoIncrement = model.item("IS_AUTOINCREMENT") != null ? columns.getString("IS_AUTOINCREMENT") : null;
                 column.setAutoIncrement("YES".equals(autoIncrement));
             }
         } finally {

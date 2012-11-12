@@ -70,7 +70,7 @@ public class BsonResultOutput extends ResultOutputBase implements BsonAttributes
             generator.writeStartObject();
             generator.writeFieldName(COLUMNS_FIELD);
             generator.writeStartObject();
-            for (String name : getValueSetModel().getNames()) {
+            for (String name : getColumnModelSet().getNames()) {
                 generator.writeStringField(COLUMN_FIELD, name);
             }
             generator.writeEndObject();

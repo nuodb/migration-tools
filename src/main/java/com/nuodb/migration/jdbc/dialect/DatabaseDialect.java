@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -45,9 +46,14 @@ public interface DatabaseDialect {
 
     String getNoColumnsInsertString();
 
+    void enableStreaming(Statement statement) throws SQLException;
+
     boolean supportsReadCatalogs();
 
     boolean supportsReadSchemas();
 
-    void enableStreaming(Statement statement) throws SQLException;
+    boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) throws SQLException;
+
+    void setTransactionIsolationLevel(Connection connection,
+                                      int[] transactionIsolationLevels) throws SQLException;
 }

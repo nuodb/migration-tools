@@ -27,21 +27,22 @@
  */
 package com.nuodb.migration.result.format.jdbc;
 
-import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
-import com.nuodb.migration.jdbc.metamodel.ValueSetModelImpl;
+import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
+import com.nuodb.migration.jdbc.metamodel.ColumnModelSetImpl;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeValueSetModelImpl extends ValueSetModelImpl implements JdbcTypeValueSetModel {
+public class JdbcTypeValueModelSetImpl extends ColumnModelSetImpl implements JdbcTypeValueModelSet {
 
     private JdbcTypeValueAccessor[] jdbcTypeValueAccessors;
     private JdbcTypeValueFormat[] jdbcTypeValueFormats;
 
-    public JdbcTypeValueSetModelImpl(JdbcTypeValueAccessor[] jdbcTypeValueAccessors,
-                                     JdbcTypeValueFormat[] jdbcTypeValueFormats, ValueSetModel valueSetModel) {
-        super(valueSetModel);
+    public JdbcTypeValueModelSetImpl(JdbcTypeValueAccessor[] jdbcTypeValueAccessors,
+                                     JdbcTypeValueFormat[] jdbcTypeValueFormats,
+                                     ColumnModelSet columnModelSet) {
+        super(columnModelSet);
         this.jdbcTypeValueAccessors = jdbcTypeValueAccessors;
         this.jdbcTypeValueFormats = jdbcTypeValueFormats;
     }
@@ -62,7 +63,7 @@ public class JdbcTypeValueSetModelImpl extends ValueSetModelImpl implements Jdbc
     }
 
     @Override
-    public JdbcTypeValueFormat[] getJdbcTypeValueFormat() {
+    public JdbcTypeValueFormat[] getJdbcTypeValueFormats() {
         return jdbcTypeValueFormats;
     }
 }

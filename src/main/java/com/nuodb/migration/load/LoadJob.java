@@ -109,10 +109,10 @@ public class LoadJob extends JobBase {
     protected void load(final JobExecution execution, Connection connection, Database database,
                         final ResultInput resultInput, String tableName) throws SQLException {
         resultInput.readBegin();
-        ValueSetModel valueSetModel = resultInput.getValueSetModel();
+        ColumnModelSet columnModelSet = resultInput.getColumnModelSet();
         Table table = database.findTable(tableName);
-        mergeColumnSetModel(table, valueSetModel);
-        final InsertQuery query = createInsertQuery(table, valueSetModel);
+        mergeColumnSetModel(table, columnModelSet);
+        final InsertQuery query = createInsertQuery(table, columnModelSet);
 
         QueryTemplate queryTemplate = new QueryTemplate(connection);
         queryTemplate.execute(
@@ -141,26 +141,26 @@ public class LoadJob extends JobBase {
         );
     }
 
-    protected void mergeColumnSetModel(Table table, ValueSetModel valueSetModel) {
-        for (int index = 0; index < valueSetModel.getLength(); index++) {
-            String name = valueSetModel.getName(index);
+    protected void mergeColumnSetModel(Table table, ColumnModelSet columnModelSet) {
+        for (int index = 0; index < columnModelSet.getLength(); index++) {
+            String name = columnModelSet.getName(index);
             Column column = table.getColumn(name);
-            valueSetModel.setTypeCode(index, column.getTypeCode());
-            valueSetModel.setPrecision(index, column.getPrecision());
-            valueSetModel.setScale(index, column.getScale());
+            columnModelSet.setTypeCode(index, column.getTypeCode());
+            columnModelSet.setPrecision(index, column.getPrecision());
+            columnModelSet.setScale(index, column.getScale());
         }
     }
 
-    protected InsertQuery createInsertQuery(Table table, ValueSetModel valueSetModel) {
+    protected InsertQuery createInsertQuery(Table table, ColumnModelSet columnModelSet) {
         InsertQueryBuilder builder = new InsertQueryBuilder();
         builder.setQualifyNames(true);
         builder.setTable(table);
-        if (valueSetModel != null) {
-            int columnCount = valueSetModel.getLength();
+        if (columnModelSet != null) {
+            int columnCount = columnModelSet.getLength();
             List<String> columns = Lists.newArrayList();
             for (int index = 0; index < columnCount; index++) {
-                ValueModel valueModel = valueSetModel.item(index);
-                columns.add(valueModel.getName());
+                ColumnModel columnModel = columnModelSet.item(index);
+                columns.add(columnModel.getName());
             }
             builder.setColumns(columns);
         }

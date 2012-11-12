@@ -27,7 +27,8 @@
  */
 package com.nuodb.migration.result.format;
 
-import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
+import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
+import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
@@ -67,7 +68,7 @@ public interface ResultFormat {
 
     void setDefaultJdbcTypeValueFormat(JdbcTypeValueFormat defaultJdbcTypeValueFormat);
 
-    ValueSetModel getValueSetModel();
+    ColumnModelSet getColumnModelSet();
 
-    void setValueSetModel(ValueSetModel valueSetModel);
+    void setColumnModelSet(ColumnModelSet columnModelSet);
 }

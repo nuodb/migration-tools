@@ -30,14 +30,14 @@ package com.nuodb.migration.jdbc.metamodel;
 /**
  * @author Sergey Bushik
  */
-public class ValueModelImpl implements ValueModel {
+public class ColumnModelImpl implements ColumnModel {
 
     private String name;
     private int typeCode;
     private int precision;
     private int scale;
 
-    public ValueModelImpl(String name, int typeCode, int precision, int scale) {
+    public ColumnModelImpl(String name, int typeCode, int precision, int scale) {
         this.name = name;
         this.typeCode = typeCode;
         this.precision = precision;
@@ -47,11 +47,6 @@ public class ValueModelImpl implements ValueModel {
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override
@@ -89,7 +84,7 @@ public class ValueModelImpl implements ValueModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ValueModelImpl that = (ValueModelImpl) o;
+        ColumnModelImpl that = (ColumnModelImpl) o;
 
         if (precision != that.precision) return false;
         if (scale != that.scale) return false;

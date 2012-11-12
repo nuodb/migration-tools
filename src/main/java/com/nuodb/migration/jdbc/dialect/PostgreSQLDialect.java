@@ -27,8 +27,14 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import java.sql.DatabaseMetaData;
+
 /**
  * @author Sergey Bushik
  */
 public class PostgreSQLDialect extends DatabaseDialectBase {
+
+    public PostgreSQLDialect(DatabaseMetaData metaData) {
+        super(metaData);
+    }
 }

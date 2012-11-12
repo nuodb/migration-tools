@@ -68,7 +68,7 @@ public class CsvResultOutput extends ResultOutputBase implements CsvAttributes {
     @Override
     protected void doWriteBegin() {
         try {
-            printer.printRecord(getValueSetModel().getNames());
+            printer.printRecord(getColumnModelSet().getNames());
         } catch (IOException e) {
             throw new ResultInputException(e);
         }

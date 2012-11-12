@@ -30,35 +30,19 @@ package com.nuodb.migration.jdbc.metamodel;
 /**
  * @author Sergey Bushik
  */
-public interface ValueSetModel {
+public interface ColumnModel {
+    
+    String getName();
 
-    String getName(int index);
+    int getTypeCode();
 
-    void setName(int index, String name);
+    void setTypeCode(int type);
+    
+    int getPrecision();
 
-    String[] getNames();
+    void setPrecision(int precision);
 
-    int getTypeCode(int index);
+    int getScale();
 
-    void setTypeCode(int index, int typeCode);
-
-    int[] getTypeCodes();
-
-    int getPrecision(int index);
-
-    void setPrecision(int index, int precision);
-
-    int[] getPrecisions();
-
-    int getScale(int index);
-
-    void setScale(int index, int scale);
-
-    int[] getScales();
-
-    ValueModel item(int index);
-
-    ValueModel item(String name);
-
-    int getLength();
+    void setScale(int scale);
 }

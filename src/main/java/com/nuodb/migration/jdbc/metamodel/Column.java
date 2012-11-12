@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.metamodel;
 
-public class Column extends HasNameBase {
+public class Column extends HasNameBase implements ColumnModel {
     /**
      * Default precision is maximum value
      */

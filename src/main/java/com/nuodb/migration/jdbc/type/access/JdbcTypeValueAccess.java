@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.type.access;
 
-import com.nuodb.migration.jdbc.metamodel.ValueModel;
+import com.nuodb.migration.jdbc.metamodel.ColumnModel;
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 
@@ -49,9 +49,9 @@ public interface JdbcTypeValueAccess extends JdbcTypeRegistry {
 
     <T> JdbcTypeValueAccessor<T> createResultSetAccessor(ResultSet resultSet, int column);
 
-    <T> JdbcTypeValueAccessor<T> createResultSetAccessor(ResultSet resultSet, int column, ValueModel valueModel);
+    <T> JdbcTypeValueAccessor<T> createResultSetAccessor(ResultSet resultSet, int column, ColumnModel columnModel);
 
     <T> JdbcTypeValueAccessor<T> createStatementAccessor(PreparedStatement statement, int column);
 
-    <T> JdbcTypeValueAccessor<T> createStatementAccessor(PreparedStatement statement, int column, ValueModel valueModel);
+    <T> JdbcTypeValueAccessor<T> createStatementAccessor(PreparedStatement statement, int column, ColumnModel columnModel);
 }

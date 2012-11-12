@@ -75,7 +75,7 @@ public class XmlResultOutput extends ResultOutputBase implements XmlAttributes {
             writer.writeStartElement(RESULT_SET_ELEMENT);
             writer.writeNamespace("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
             writer.writeStartElement(COLUMNS_ELEMENT);
-            for (String column : getValueSetModel().getNames()) {
+            for (String column : getColumnModelSet().getNames()) {
                 writer.writeEmptyElement(COLUMN_ELEMENT);
                 writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
                 writer.writeAttribute(ATTRIBUTE_NAME, column);

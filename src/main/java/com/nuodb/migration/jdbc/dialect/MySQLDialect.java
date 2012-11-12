@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -34,6 +35,10 @@ import java.sql.Statement;
  * @author Sergey Bushik
  */
 public class MySQLDialect extends DatabaseDialectBase {
+
+    public MySQLDialect(DatabaseMetaData metaData) {
+        super(metaData);
+    }
 
     @Override
     public char openQuote() {

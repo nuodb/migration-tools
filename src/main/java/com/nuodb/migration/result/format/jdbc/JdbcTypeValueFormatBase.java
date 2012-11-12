@@ -63,7 +63,7 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
     protected abstract void doSetValue(JdbcTypeValueAccessor<T> accessor, String value) throws Exception;
 
     protected JdbcTypeValueException newColumnValueFormatFailure(JdbcTypeValueAccessor accessor, Exception exception) {
-        int typeCode = accessor.getValueModel().getTypeCode();
+        int typeCode = accessor.getColumnModel().getTypeCode();
         return new JdbcTypeValueException(
                 String.format("Failed processing jdbc type %s", INSTANCE.getTypeName(typeCode)), exception);
     }

@@ -28,11 +28,11 @@
 package com.nuodb.migration.result.format;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.metamodel.ValueSetModel;
+import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
-import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormatImpl;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormatImpl;
 
 import java.util.Map;
 
@@ -45,7 +45,7 @@ public abstract class ResultFormatBase implements ResultFormat {
     private Map<Integer, JdbcTypeValueFormat> jdbcTypeValueFormats = Maps.newHashMap();
     private JdbcTypeValueFormat defaultJdbcTypeValueFormat = new JdbcTypeValueFormatImpl();
     private JdbcTypeValueAccess jdbcTypeValueAccess;
-    private ValueSetModel valueSetModel;
+    private ColumnModelSet columnModelSet;
 
     @Override
     public final void setAttributes(Map<String, String> attributes) {
@@ -116,12 +116,12 @@ public abstract class ResultFormatBase implements ResultFormat {
     }
 
     @Override
-    public ValueSetModel getValueSetModel() {
-        return valueSetModel;
+    public ColumnModelSet getColumnModelSet() {
+        return columnModelSet;
     }
 
     @Override
-    public void setValueSetModel(ValueSetModel valueSetModel) {
-        this.valueSetModel = valueSetModel;
+    public void setColumnModelSet(ColumnModelSet columnModelSet) {
+        this.columnModelSet = columnModelSet;
     }
 }

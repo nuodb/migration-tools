@@ -34,6 +34,7 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.service.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.service.jdbc.dialect.spi.DialectResolver;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -93,6 +94,17 @@ public class HibernateDialectResolverImpl implements DatabaseDialectResolver {
 
         @Override
         public boolean supportsReadSchemas() {
+            throw new DatabaseDialectException("Feature is not supported");
+        }
+
+        @Override
+        public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) throws SQLException {
+            throw new DatabaseDialectException("Feature is not supported");
+        }
+
+        @Override
+        public void setTransactionIsolationLevel(Connection connection,
+                                                 int[] transactionIsolationLevels) throws SQLException {
             throw new DatabaseDialectException("Feature is not supported");
         }
 

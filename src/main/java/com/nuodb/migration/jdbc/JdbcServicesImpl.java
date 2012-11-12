@@ -35,7 +35,7 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessImpl;
 import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DriverManagerConnectionSpec;
 
-import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 
 /**
  * @author Sergey Bushik
@@ -47,7 +47,7 @@ public class JdbcServicesImpl implements JdbcServices {
     private JdbcTypeValueAccess jdbcTypeValueAccess;
 
     public JdbcServicesImpl(DriverManagerConnectionSpec connectionSpec) {
-        this(connectionSpec, new DriverManagerConnectionProvider(connectionSpec, false, TRANSACTION_READ_COMMITTED));
+        this(connectionSpec, new DriverManagerConnectionProvider(connectionSpec, false));
     }
 
     public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider) {

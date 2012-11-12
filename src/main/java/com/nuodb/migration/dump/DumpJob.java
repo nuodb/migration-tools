@@ -62,6 +62,8 @@ import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.metamodel.ObjectType.COLUMN;
 import static com.nuodb.migration.jdbc.metamodel.ObjectType.TABLE;
 import static com.nuodb.util.StringUtils.isEmpty;
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
@@ -92,6 +94,9 @@ public class DumpJob extends JobBase {
                 databaseInspector.withObjectTypes(TABLE, COLUMN);
                 databaseInspector.withConnection(connection);
                 Database database = databaseInspector.inspect();
+                DatabaseDialect dialect = database.getDatabaseDialect();
+                dialect.setTransactionIsolationLevel(connection,
+                        new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
 
                 ResultEntryWriter writer = resultCatalog.openWriter();
                 try {

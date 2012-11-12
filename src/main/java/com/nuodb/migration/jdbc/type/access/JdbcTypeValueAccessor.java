@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.type.access;
 
-import com.nuodb.migration.jdbc.metamodel.ValueModel;
+import com.nuodb.migration.jdbc.metamodel.ColumnModel;
 
 import java.sql.SQLException;
 
@@ -36,7 +36,7 @@ import java.sql.SQLException;
  */
 public interface JdbcTypeValueAccessor<T> {
 
-    ValueModel getValueModel();
+    ColumnModel getColumnModel();
 
     T getValue() throws SQLException;
 

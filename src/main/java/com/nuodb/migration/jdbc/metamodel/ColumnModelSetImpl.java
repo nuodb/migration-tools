@@ -34,31 +34,26 @@ import java.util.Arrays;
 /**
  * @author Sergey Bushik
  */
-public class ValueSetModelImpl implements ValueSetModel {
+public class ColumnModelSetImpl implements ColumnModelSet {
 
-    private final ValueModel[] values;
+    private final ColumnModel[] columns;
 
-    public ValueSetModelImpl(ValueModel[] values) {
-        this.values = values;
+    public ColumnModelSetImpl(ColumnModel[] columns) {
+        this.columns = columns;
     }
 
-    public ValueSetModelImpl(ValueSetModel valueSetModel) {
-        int columnCount = valueSetModel.getLength();
-        ValueModel[] valueModels = new ValueModel[columnCount];
+    public ColumnModelSetImpl(ColumnModelSet columnModelSet) {
+        int columnCount = columnModelSet.getLength();
+        ColumnModel[] columnModels = new ColumnModel[columnCount];
         for (int index = 0; index < columnCount; index++) {
-            valueModels[index] = valueSetModel.item(index);
+            columnModels[index] = columnModelSet.item(index);
         }
-        this.values = valueModels;
+        this.columns = columnModels;
     }
 
     @Override
     public String getName(int index) {
-        return values[index].getName();
-    }
-
-    @Override
-    public void setName(int index, String name) {
-        values[index].setName(name);
+        return columns[index].getName();
     }
 
     @Override
@@ -73,12 +68,12 @@ public class ValueSetModelImpl implements ValueSetModel {
 
     @Override
     public int getTypeCode(int index) {
-        return values[index].getTypeCode();
+        return columns[index].getTypeCode();
     }
 
     @Override
     public void setTypeCode(int index, int typeCode) {
-        values[index].setTypeCode(typeCode);
+        columns[index].setTypeCode(typeCode);
     }
 
     @Override
@@ -93,12 +88,12 @@ public class ValueSetModelImpl implements ValueSetModel {
 
     @Override
     public int getPrecision(int index) {
-        return values[index].getPrecision();
+        return columns[index].getPrecision();
     }
 
     @Override
     public void setPrecision(int index, int precision) {
-        values[index].setPrecision(precision);
+        columns[index].setPrecision(precision);
     }
 
     @Override
@@ -113,12 +108,12 @@ public class ValueSetModelImpl implements ValueSetModel {
 
     @Override
     public int getScale(int index) {
-        return values[index].getScale();
+        return columns[index].getScale();
     }
 
     @Override
     public void setScale(int index, int scale) {
-        values[index].setScale(scale);
+        columns[index].setScale(scale);
     }
 
     @Override
@@ -133,19 +128,19 @@ public class ValueSetModelImpl implements ValueSetModel {
 
     @Override
     public int getLength() {
-        return values.length;
+        return columns.length;
     }
 
     @Override
-    public ValueModel item(int index) {
-        return values[index];
+    public ColumnModel item(int index) {
+        return columns[index];
     }
 
     @Override
-    public ValueModel item(String name) {
-        for (ValueModel value : values) {
-            if (StringUtils.equals(value.getName(), name)) {
-                return value;
+    public ColumnModel item(String name) {
+        for (ColumnModel column : columns) {
+            if (StringUtils.equals(column.getName(), name)) {
+                return column;
             }
         }
         return null;
@@ -155,18 +150,18 @@ public class ValueSetModelImpl implements ValueSetModel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ValueSetModelImpl that = (ValueSetModelImpl) o;
-        if (!Arrays.equals(values, that.values)) return false;
+        ColumnModelSetImpl that = (ColumnModelSetImpl) o;
+        if (!Arrays.equals(columns, that.columns)) return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        return values != null ? Arrays.hashCode(values) : 0;
+        return columns != null ? Arrays.hashCode(columns) : 0;
     }
 
     @Override
     public String toString() {
-        return Arrays.asList(values).toString();
+        return Arrays.asList(columns).toString();
     }
 }

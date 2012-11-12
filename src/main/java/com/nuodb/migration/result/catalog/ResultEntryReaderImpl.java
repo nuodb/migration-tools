@@ -66,7 +66,7 @@ public class ResultEntryReaderImpl implements ResultEntryReader {
         try {
             input = openInputStream(catalogFile);
         } catch (IOException e) {
-            throw new ResultCatalogException("Error opening catalog file for writing", e);
+            throw new ResultCatalogException("Error opening catalog file for reading", e);
         }
     }
 

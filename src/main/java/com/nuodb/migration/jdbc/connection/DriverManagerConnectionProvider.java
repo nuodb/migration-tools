@@ -44,8 +44,8 @@ public class DriverManagerConnectionProvider extends ConnectionProviderBase {
     private transient final Log log = LogFactory.getLog(this.getClass());
 
     private DriverManagerConnectionSpec connectionSpec;
-    private boolean autoCommit = Boolean.FALSE;
-    private int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
+    private Boolean autoCommit;
+    private Integer transactionIsolation;
 
     public DriverManagerConnectionProvider() {
     }
@@ -55,13 +55,13 @@ public class DriverManagerConnectionProvider extends ConnectionProviderBase {
     }
 
     public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec,
-                                           boolean autoCommit) {
+                                           Boolean autoCommit) {
         this.connectionSpec = connectionSpec;
         this.autoCommit = autoCommit;
     }
 
     public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec,
-                                           boolean autoCommit, int transactionIsolation) {
+                                           Boolean autoCommit, Integer transactionIsolation) {
         this.connectionSpec = connectionSpec;
         this.autoCommit = autoCommit;
         this.transactionIsolation = transactionIsolation;
@@ -100,8 +100,12 @@ public class DriverManagerConnectionProvider extends ConnectionProviderBase {
             log.debug(String.format("Creating new connection at %s", url));
         }
         Connection connection = DriverManager.getConnection(url, properties);
-        connection.setTransactionIsolation(transactionIsolation);
-        connection.setAutoCommit(autoCommit);
+        if (autoCommit != null) {
+            connection.setAutoCommit(autoCommit);
+        }
+        if (transactionIsolation != null) {
+            connection.setTransactionIsolation(transactionIsolation);
+        }
         return connection;
     }
 

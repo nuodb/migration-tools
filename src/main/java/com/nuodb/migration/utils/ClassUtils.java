@@ -28,6 +28,10 @@
 package com.nuodb.migration.utils;
 
 import com.nuodb.migration.MigrationException;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.reflect.ConstructorUtils;
+
+import java.lang.reflect.InvocationTargetException;
 
 @SuppressWarnings("unchecked")
 public class ClassUtils {
@@ -46,7 +50,7 @@ public class ClassUtils {
     public static <T> T newInstance(String className) {
         try {
             return (T) newInstance(getClassLoader().loadClass(className));
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException exception) {
             throw new MigrationException("Class not found " + className);
         }
     }
@@ -54,10 +58,39 @@ public class ClassUtils {
     public static <T> T newInstance(Class<T> type) {
         try {
             return type.newInstance();
-        } catch (InstantiationException e) {
+        } catch (InstantiationException exception) {
             throw new MigrationException("Failed instantiating class " + type);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException exception) {
             throw new MigrationException("Failed instantiating class " + type);
+        }
+    }
+
+    public static <T> T newInstance(Class<T> type, Object argument) {
+        return newInstance(type, new Object[]{argument});
+    }
+
+    public static <T> T newInstance(Class<T> type, Object[] arguments) {
+        if (arguments == null) {
+            arguments = ArrayUtils.EMPTY_OBJECT_ARRAY;
+        }
+        Class argumentTypes[] = new Class[arguments.length];
+        for (int i = 0; i < arguments.length; i++) {
+            argumentTypes[i] = arguments[i].getClass();
+        }
+        return newInstance(type, arguments, argumentTypes);
+    }
+
+    public static <T> T newInstance(Class<T> type, Object[] arguments, Class[] argumentTypes) {
+        try {
+            return (T) ConstructorUtils.invokeConstructor(type, arguments, argumentTypes);
+        } catch (NoSuchMethodException exception) {
+            throw new MigrationException(exception);
+        } catch (IllegalAccessException exception) {
+            throw new MigrationException(exception);
+        } catch (InvocationTargetException exception) {
+            throw new MigrationException(exception);
+        } catch (InstantiationException exception) {
+            throw new MigrationException(exception);
         }
     }
 }

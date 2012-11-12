@@ -25,26 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metamodel;
+package com.nuodb.migration.result.format.jdbc;
+
+import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
 
 /**
  * @author Sergey Bushik
  */
-public interface ValueModel {
-    
-    String getName();
 
-    void setName(String name);
+public interface JdbcTypeValueModelSet extends ColumnModelSet {
 
-    int getTypeCode();
+    JdbcTypeValueAccessor getJdbcTypeValueAccessor(int index);
 
-    void setTypeCode(int type);
-    
-    int getPrecision();
+    JdbcTypeValueAccessor[] getJdbcTypeValueAccessors();
 
-    void setPrecision(int precision);
+    JdbcTypeValueFormat getJdbcTypeValueFormat(int index);
 
-    int getScale();
-
-    void setScale(int scale);
+    JdbcTypeValueFormat[] getJdbcTypeValueFormats();
 }

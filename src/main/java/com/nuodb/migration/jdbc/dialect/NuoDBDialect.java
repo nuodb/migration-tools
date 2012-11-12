@@ -27,10 +27,16 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import java.sql.DatabaseMetaData;
+
 /**
  * @author Sergey Bushik
  */
 public class NuoDBDialect extends DatabaseDialectBase {
+
+    public NuoDBDialect(DatabaseMetaData metaData) {
+        super(metaData);
+    }
 
     @Override
     public boolean supportsReadSchemas() {
