@@ -42,11 +42,6 @@ public abstract class HasNameBase implements HasName {
     }
 
     @Override
-    public Name getNameObject() {
-        return name;
-    }
-
-    @Override
     public String getName() {
         return name != null ? name.value() : null;
     }

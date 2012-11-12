@@ -28,8 +28,8 @@
 package com.nuodb.migration.load;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.JdbcServices;
-import com.nuodb.migration.jdbc.JdbcServicesImpl;
+import com.nuodb.migration.jdbc.JdbcConnectionServices;
+import com.nuodb.migration.jdbc.JdbcConnectionServicesImpl;
 import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
@@ -54,7 +54,7 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         FormatSpec inputSpec = loadSpec.getInputSpec();
 
         LoadJob job = new LoadJob();
-        job.setJdbcServices(createJdbcServices(connectionSpec));
+        job.setJdbcConnectionServices(createJdbcServices(connectionSpec));
         job.setInputType(inputSpec.getType());
         job.setInputAttributes(inputSpec.getAttributes());
         job.setResultCatalog(createResultCatalog(inputSpec.getPath()));
@@ -62,8 +62,8 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         return job;
     }
 
-    protected JdbcServices createJdbcServices(ConnectionSpec connectionSpec) {
-        return new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec);
+    protected JdbcConnectionServices createJdbcServices(ConnectionSpec connectionSpec) {
+        return new JdbcConnectionServicesImpl((DriverManagerConnectionSpec) connectionSpec);
     }
 
     protected ResultCatalog createResultCatalog(String path) {

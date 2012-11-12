@@ -34,11 +34,11 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 /**
  * @author Sergey Bushik
  */
-public interface JdbcServices {
-
-    DatabaseInspector getDatabaseIntrospector();
+public interface JdbcConnectionServices {
 
     ConnectionProvider getConnectionProvider();
+
+    DatabaseInspector getDatabaseIntrospector();
 
     JdbcTypeValueAccess getJdbcTypeValueAccess();
 }

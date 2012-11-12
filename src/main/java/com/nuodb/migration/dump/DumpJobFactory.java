@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.dump;
 
-import com.nuodb.migration.jdbc.JdbcServices;
-import com.nuodb.migration.jdbc.JdbcServicesImpl;
+import com.nuodb.migration.jdbc.JdbcConnectionServices;
+import com.nuodb.migration.jdbc.JdbcConnectionServicesImpl;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.result.catalog.ResultCatalog;
 import com.nuodb.migration.result.catalog.ResultCatalogImpl;
@@ -58,7 +58,7 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         FormatSpec outputSpec = dumpSpec.getOutputSpec();
 
         DumpJob job = new DumpJob();
-        job.setJdbcServices(createJdbcServices(connectionSpec));
+        job.setJdbcConnectionServices(createJdbcServices(connectionSpec));
         job.setSelectQuerySpecs(selectQuerySpecs);
         job.setNativeQuerySpecs(nativeQuerySpecs);
         job.setOutputType(outputSpec.getType());
@@ -68,8 +68,8 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         return job;
     }
 
-    protected JdbcServices createJdbcServices(ConnectionSpec connectionSpec) {
-        return new JdbcServicesImpl((DriverManagerConnectionSpec) connectionSpec);
+    protected JdbcConnectionServices createJdbcServices(ConnectionSpec connectionSpec) {
+        return new JdbcConnectionServicesImpl((DriverManagerConnectionSpec) connectionSpec);
     }
 
     protected ResultCatalog createResultCatalog(String path) {

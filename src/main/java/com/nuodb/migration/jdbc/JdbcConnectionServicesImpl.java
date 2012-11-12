@@ -35,27 +35,25 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessImpl;
 import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DriverManagerConnectionSpec;
 
-import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
-
 /**
  * @author Sergey Bushik
  */
-public class JdbcServicesImpl implements JdbcServices {
+public class JdbcConnectionServicesImpl implements JdbcConnectionServices {
 
     private ConnectionSpec connectionSpec;
     private ConnectionProvider connectionProvider;
     private JdbcTypeValueAccess jdbcTypeValueAccess;
 
-    public JdbcServicesImpl(DriverManagerConnectionSpec connectionSpec) {
+    public JdbcConnectionServicesImpl(DriverManagerConnectionSpec connectionSpec) {
         this(connectionSpec, new DriverManagerConnectionProvider(connectionSpec, false));
     }
 
-    public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider) {
+    public JdbcConnectionServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider) {
         this(connectionSpec, connectionProvider, new JdbcTypeValueAccessImpl());
     }
 
-    public JdbcServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider,
-                            JdbcTypeValueAccess jdbcTypeValueAccess) {
+    public JdbcConnectionServicesImpl(ConnectionSpec connectionSpec, ConnectionProvider connectionProvider,
+                                      JdbcTypeValueAccess jdbcTypeValueAccess) {
         this.connectionSpec = connectionSpec;
         this.connectionProvider = connectionProvider;
         this.jdbcTypeValueAccess = jdbcTypeValueAccess;

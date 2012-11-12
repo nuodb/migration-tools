@@ -33,6 +33,9 @@ import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.nuodb.migration.jdbc.metamodel.Name.valueOf;
+import static com.nuodb.migration.jdbc.metamodel.Table.TABLE;
+
 public class Schema extends HasNameBase {
     private Map<Name, Table> tables = Maps.newHashMap();
 
@@ -40,7 +43,7 @@ public class Schema extends HasNameBase {
     private Catalog catalog;
 
     public Schema(Database database, Catalog catalog, String name) {
-        this(database, catalog, Name.valueOf(name));
+        this(database, catalog, valueOf(name));
     }
 
     public Schema(Database database, Catalog catalog, Name name) {
@@ -58,28 +61,28 @@ public class Schema extends HasNameBase {
     }
 
     public Table getTable(String name) {
-        return getTable(name, false);
+        return getOrCreateTable(valueOf(name), TABLE, false);
     }
 
-    public Table getTable(String name, boolean create) {
-        return getTable(Name.valueOf(name), create);
+    public Table getTable(Name name) {
+        return getOrCreateTable(name, TABLE, false);
     }
 
-    public Table getTable(Name name, boolean create) {
+    public Table createTable(String name, String type) {
+        return getOrCreateTable(valueOf(name), type, true);
+    }
+
+    protected Table getOrCreateTable(Name name, String type, boolean create) {
         Table table = tables.get(name);
         if (table == null && create) {
-            table = createTable(name, Table.TABLE);
+            table = doCreateTable(name, type);
         } else {
             throw new MetaModelException(String.format("Table %s doesn't exist", name));
         }
         return table;
     }
 
-    public Table createTable(String name, String type) {
-        return createTable(Name.valueOf(name), type);
-    }
-
-    public Table createTable(Name name, String type) {
+    protected Table doCreateTable(Name name, String type) {
         Table table = new Table(database, catalog, this, name, type);
         tables.put(name, table);
         return table;

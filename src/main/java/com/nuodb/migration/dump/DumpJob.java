@@ -28,7 +28,7 @@
 package com.nuodb.migration.dump;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.JdbcServices;
+import com.nuodb.migration.jdbc.JdbcConnectionServices;
 import com.nuodb.migration.jdbc.connection.ConnectionCallback;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
@@ -59,8 +59,7 @@ import java.util.Date;
 import java.util.Map;
 
 import static com.google.common.io.Closeables.closeQuietly;
-import static com.nuodb.migration.jdbc.metamodel.ObjectType.COLUMN;
-import static com.nuodb.migration.jdbc.metamodel.ObjectType.TABLE;
+import static com.nuodb.migration.jdbc.metamodel.ObjectType.*;
 import static com.nuodb.util.StringUtils.isEmpty;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
@@ -76,7 +75,7 @@ public class DumpJob extends JobBase {
 
     protected final Log log = LogFactory.getLog(getClass());
 
-    private JdbcServices jdbcServices;
+    private JdbcConnectionServices jdbcConnectionServices;
     private ResultCatalog resultCatalog;
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
@@ -86,12 +85,12 @@ public class DumpJob extends JobBase {
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
-        ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
+        ConnectionProvider connectionProvider = jdbcConnectionServices.getConnectionProvider();
         connectionProvider.execute(new ConnectionCallback() {
             @Override
             public void execute(Connection connection) throws SQLException {
-                DatabaseInspector databaseInspector = jdbcServices.getDatabaseIntrospector();
-                databaseInspector.withObjectTypes(TABLE, COLUMN);
+                DatabaseInspector databaseInspector = jdbcConnectionServices.getDatabaseIntrospector();
+                databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
                 databaseInspector.withConnection(connection);
                 Database database = databaseInspector.inspect();
                 DatabaseDialect dialect = database.getDatabaseDialect();
@@ -134,7 +133,7 @@ public class DumpJob extends JobBase {
         try {
             ResultOutput resultOutput = resultFormatFactory.createOutput(outputType);
             resultOutput.setAttributes(outputAttributes);
-            resultOutput.setJdbcTypeValueAccess(jdbcServices.getJdbcTypeValueAccess());
+            resultOutput.setJdbcTypeValueAccess(jdbcConnectionServices.getJdbcTypeValueAccess());
             resultOutput.setOutputStream(output);
             resultOutput.initOutput();
             dump(execution, connection, database, query, resultOutput);
@@ -224,12 +223,12 @@ public class DumpJob extends JobBase {
         return queries;
     }
 
-    public JdbcServices getJdbcServices() {
-        return jdbcServices;
+    public JdbcConnectionServices getJdbcConnectionServices() {
+        return jdbcConnectionServices;
     }
 
-    public void setJdbcServices(JdbcServices jdbcServices) {
-        this.jdbcServices = jdbcServices;
+    public void setJdbcConnectionServices(JdbcConnectionServices jdbcConnectionServices) {
+        this.jdbcConnectionServices = jdbcConnectionServices;
     }
 
     public ResultCatalog getResultCatalog() {

@@ -33,13 +33,15 @@ import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.nuodb.migration.jdbc.metamodel.Name.valueOf;
+
 public class Catalog extends HasNameBase {
 
     private Map<Name, Schema> schemas = Maps.newHashMap();
     private Database database;
 
     public Catalog(Database database, String name) {
-        this(database, Name.valueOf(name));
+        this(database, valueOf(name));
     }
 
     public Catalog(Database database, Name name) {
@@ -52,22 +54,26 @@ public class Catalog extends HasNameBase {
     }
 
     public Schema getSchema(String name) {
-        return getSchema(name, false);
+        return getOrCreateSchema(valueOf(name), false);
     }
 
     public Schema getSchema(Name name) {
-        return getSchema(name, false);
+        return getOrCreateSchema(name, false);
     }
 
-    public Schema getSchema(String name, boolean create) {
-        return getSchema(Name.valueOf(name), create);
+    public Schema createSchema(String name) {
+        return getOrCreateSchema(valueOf(name), false);
     }
 
-    public Schema getSchema(Name name, boolean create) {
+    public Schema createSchema(Name name) {
+        return getOrCreateSchema(name, false);
+    }
+
+    protected Schema getOrCreateSchema(Name name, boolean create) {
         Schema schema = schemas.get(name);
         if (schema == null) {
             if (create) {
-                schema = createSchema(name);
+                schema = doCreateSchema(name);
             } else {
                 throw new MetaModelException(String.format("Schema %s doesn't exist", name));
             }
@@ -75,7 +81,7 @@ public class Catalog extends HasNameBase {
         return schema;
     }
 
-    public Schema createSchema(Name name) {
+    protected Schema doCreateSchema(Name name) {
         Schema schema = new Schema(database, this, name);
         schemas.put(name, schema);
         return schema;

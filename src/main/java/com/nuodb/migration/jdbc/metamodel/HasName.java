@@ -34,8 +34,6 @@ import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
  */
 public interface HasName {
 
-    Name getNameObject();
-
     String getName();
 
     String getQuotedName();

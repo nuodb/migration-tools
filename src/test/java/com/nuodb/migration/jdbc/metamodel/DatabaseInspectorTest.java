@@ -58,26 +58,26 @@ public class DatabaseInspectorTest {
 
         when(database.createSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME)).thenReturn(schema);
         when(schema.createTable(TEST_TABLE_NAME, TEST_TABLE_TYPE)).thenReturn(table);
-        when(table.getNameObject()).thenReturn(Name.valueOf(TEST_TABLE_NAME));
+        when(table.getName()).thenReturn(Name.valueOf(TEST_TABLE_NAME).value());
     }
 
     @Test
     public void testReadCatalogs() throws Exception {
         // databaseInspector.readCatalogs(metaData, database);
-        // verify(database, times(1)).createCatalog(TEST_CATALOG_NAME);
+        // verify(database, times(1)).getOrCreateCatalog(TEST_CATALOG_NAME);
     }
 
     @Test
     public void testReadSchemas() throws Exception {
         // databaseInspector.readSchemas(metaData, database);
-        // verify(database, times(1)).createSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME);
+        // verify(database, times(1)).getOrCreateSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME);
     }
 
     @Test
     public void testReadTables() throws Exception {
         // databaseInspector.readTables(metaData, database);
-        // verify(database, times(1)).createSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME);
-        // verify(schema, times(1)).createTable(TEST_TABLE_NAME, TEST_TABLE_TYPE);
+        // verify(database, times(1)).getOrCreateSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME);
+        // verify(schema, times(1)).doCreateTable(TEST_TABLE_NAME, TEST_TABLE_TYPE);
     }
 
     @Test

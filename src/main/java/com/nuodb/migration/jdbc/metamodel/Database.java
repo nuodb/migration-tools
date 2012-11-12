@@ -32,13 +32,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static com.nuodb.migration.jdbc.metamodel.Name.valueOf;
 import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang.StringUtils.split;
 
 public class Database {
 
@@ -72,30 +73,30 @@ public class Database {
     }
 
     public Catalog createCatalog(String catalog) {
-        return getCatalog(catalog, true);
+        return getOrCreateCatalog(valueOf(catalog), true);
+    }
+
+    public Catalog createCatalog(Name catalog) {
+        return getOrCreateCatalog(catalog, true);
     }
 
     public Schema createSchema(String catalog, String schema) {
-        return getCatalog(catalog, true).getSchema(schema, true);
+        return createCatalog(catalog).createSchema(schema);
     }
 
     public Catalog getCatalog(String name) {
-        return getCatalog(Name.valueOf(name));
+        return getOrCreateCatalog(valueOf(name), false);
     }
 
     public Catalog getCatalog(Name name) {
-        return getCatalog(name, false);
+        return getOrCreateCatalog(name, false);
     }
 
-    public Catalog getCatalog(String catalog, boolean create) {
-        return getCatalog(Name.valueOf(catalog), create);
-    }
-
-    public Catalog getCatalog(Name name, boolean create) {
+    protected Catalog getOrCreateCatalog(Name name, boolean create) {
         Catalog catalog = catalogs.get(name);
         if (catalog == null) {
             if (create) {
-                catalog = createCatalog(name);
+                catalog = doCreateCatalog(name);
             } else {
                 throw new MetaModelException(String.format("Catalog %s doesn't exist", name));
             }
@@ -103,7 +104,7 @@ public class Database {
         return catalog;
     }
 
-    private Catalog createCatalog(Name name) {
+    protected Catalog doCreateCatalog(Name name) {
         Catalog catalog = new Catalog(this, name);
         catalogs.put(name, catalog);
         return catalog;
@@ -141,8 +142,8 @@ public class Database {
         return tables.get(0);
     }
 
-    public List<Table> findTables(String table) {
-        String[] parts = StringUtils.split(table, ".");
+    public List<Table> findTables(String name) {
+        String[] parts = split(name, ".");
         List<Table> tables = Lists.newArrayList();
         if (parts.length == 1) {
             tables.addAll(listTables(parts[0]));
@@ -164,23 +165,23 @@ public class Database {
         }));
     }
 
-    public List<Table> listTables(final String schemaName, final String tableName) {
+    public List<Table> listTables(final String schema, final String table) {
         return Lists.newArrayList(Iterables.find(listTables(), new Predicate<Table>() {
             @Override
-            public boolean apply(Table table) {
-                return equalsIgnoreCase(table.getSchema().getName(), schemaName) &&
-                        equalsIgnoreCase(table.getName(), tableName);
+            public boolean apply(Table input) {
+                return equalsIgnoreCase(input.getSchema().getName(), schema) &&
+                        equalsIgnoreCase(input.getName(), table);
             }
         }));
     }
 
-    public List<Table> listTables(final String catalogName, final String schemaName, final String tableName) {
+    public List<Table> listTables(final String catalog, final String schema, final String table) {
         return Lists.newArrayList(Iterables.find(listTables(), new Predicate<Table>() {
             @Override
-            public boolean apply(Table table) {
-                return equalsIgnoreCase(table.getCatalog().getName(), catalogName) &&
-                        equalsIgnoreCase(table.getSchema().getName(), schemaName) &&
-                        equalsIgnoreCase(table.getName(), tableName);
+            public boolean apply(Table input) {
+                return equalsIgnoreCase(input.getCatalog().getName(), catalog) &&
+                        equalsIgnoreCase(input.getSchema().getName(), schema) &&
+                        equalsIgnoreCase(input.getName(), table);
             }
         }));
     }

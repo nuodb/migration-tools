@@ -200,6 +200,6 @@ public class Column extends HasNameBase implements ColumnModel {
 
     @Override
     public String toString() {
-        return getNameObject().toString();
+        return getName().toString();
     }
 }

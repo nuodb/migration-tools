@@ -43,8 +43,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Reads mockDatabase meta data and creates its meta meta. Root meta meta object is {@link Database} containing setValue of
- * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
+ * Reads mockDatabase meta data and creates its meta meta. Root meta meta object is {@link Database} containing setValue
+ * of catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
  *
  * @author Sergey Bushik
  */
@@ -173,6 +173,9 @@ public class DatabaseInspector {
             } finally {
                 catalogs.close();
             }
+            if (catalog != null) {
+                database.getCatalog(catalog);
+            }
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Read catalogs is unsupported");
@@ -189,6 +192,9 @@ public class DatabaseInspector {
                 }
             } finally {
                 schemas.close();
+            }
+            if (schema != null) {
+                database.getCatalog(catalog).getSchema(schema);
             }
         } else {
             if (log.isDebugEnabled()) {
@@ -229,7 +235,8 @@ public class DatabaseInspector {
                 column.setPosition(columns.getInt("ORDINAL_POSITION"));
                 String nullable = columns.getString("IS_NULLABLE");
                 column.setNullable("YES".equals(nullable));
-                String autoIncrement = model.item("IS_AUTOINCREMENT") != null ? columns.getString("IS_AUTOINCREMENT") : null;
+                String autoIncrement = model.item("IS_AUTOINCREMENT") != null ? columns.getString(
+                        "IS_AUTOINCREMENT") : null;
                 column.setAutoIncrement("YES".equals(autoIncrement));
             }
         } finally {

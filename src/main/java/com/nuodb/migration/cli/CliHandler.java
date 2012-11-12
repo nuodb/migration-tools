@@ -44,7 +44,7 @@ import java.util.Arrays;
  */
 public class CliHandler extends CliHandlerSupport {
 
-    public static final int ERROR_EXIT_STATUS = 1;
+    public static final int EXIT_STATUS_ERROR = 1;
 
     public CliHandler() {
     }
@@ -67,9 +67,9 @@ public class CliHandler extends CliHandlerSupport {
             handleOptionSet(options, root);
         } catch (OptionException exception) {
             handleOptionException(exception);
-            System.exit(ERROR_EXIT_STATUS);
+            System.exit(EXIT_STATUS_ERROR);
         } catch (Throwable exception) {
-            System.exit(ERROR_EXIT_STATUS);
+            System.exit(EXIT_STATUS_ERROR);
         }
     }
 

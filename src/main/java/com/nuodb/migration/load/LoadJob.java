@@ -28,7 +28,7 @@
 package com.nuodb.migration.load;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.JdbcServices;
+import com.nuodb.migration.jdbc.JdbcConnectionServices;
 import com.nuodb.migration.jdbc.connection.ConnectionCallback;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.metamodel.*;
@@ -60,7 +60,7 @@ import static com.nuodb.migration.jdbc.metamodel.ObjectType.TABLE;
 public class LoadJob extends JobBase {
 
     protected final Log log = LogFactory.getLog(getClass());
-    private JdbcServices jdbcServices;
+    private JdbcConnectionServices jdbcConnectionServices;
     private String inputType;
     private Map<String, String> inputAttributes;
     private ResultCatalog resultCatalog;
@@ -68,11 +68,11 @@ public class LoadJob extends JobBase {
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
-        ConnectionProvider connectionProvider = jdbcServices.getConnectionProvider();
+        ConnectionProvider connectionProvider = jdbcConnectionServices.getConnectionProvider();
         connectionProvider.execute(new ConnectionCallback() {
             @Override
             public void execute(Connection connection) throws SQLException {
-                DatabaseInspector databaseInspector = jdbcServices.getDatabaseIntrospector();
+                DatabaseInspector databaseInspector = jdbcConnectionServices.getDatabaseIntrospector();
                 databaseInspector.withObjectTypes(TABLE, COLUMN);
                 databaseInspector.withConnection(connection);
                 Database database = databaseInspector.inspect();
@@ -97,7 +97,7 @@ public class LoadJob extends JobBase {
             final ResultInput resultInput = resultFormatFactory.createInput(entry.getType());
             resultInput.setAttributes(inputAttributes);
             resultInput.setInputStream(entryInput);
-            resultInput.setJdbcTypeValueAccess(jdbcServices.getJdbcTypeValueAccess());
+            resultInput.setJdbcTypeValueAccess(jdbcConnectionServices.getJdbcTypeValueAccess());
             resultInput.initInput();
 
             load(execution, connection, database, resultInput, entry.getName());
@@ -167,12 +167,12 @@ public class LoadJob extends JobBase {
         return builder.build();
     }
 
-    public JdbcServices getJdbcServices() {
-        return jdbcServices;
+    public JdbcConnectionServices getJdbcConnectionServices() {
+        return jdbcConnectionServices;
     }
 
-    public void setJdbcServices(JdbcServices jdbcServices) {
-        this.jdbcServices = jdbcServices;
+    public void setJdbcConnectionServices(JdbcConnectionServices jdbcConnectionServices) {
+        this.jdbcConnectionServices = jdbcConnectionServices;
     }
 
     public ResultCatalog getResultCatalog() {
