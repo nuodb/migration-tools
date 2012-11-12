@@ -19,7 +19,7 @@ public class DriverManagerConnectionProviderTest {
     private DriverManagerConnectionSpec connectionSpec;
     private Connection connection;
     private Driver driver;
-    private static final int TRANSACTION_ISOLATION = Connection.TRANSACTION_READ_COMMITTED;
+    private static final int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
 
     @Before
     public void setUp() throws Exception {
@@ -39,6 +39,8 @@ public class DriverManagerConnectionProviderTest {
         DriverManagerConnectionProvider connectionProvider =
                 new DriverManagerConnectionProvider();
         connectionProvider.setConnectionSpec(connectionSpec);
+        connectionProvider.setTransactionIsolation(transactionIsolation);
+        connectionProvider.setAutoCommit(false);
         final Connection connection = connectionProvider.getConnection();
         Assert.assertNotNull(connection);
         Assert.assertTrue(this.connection == connection);
