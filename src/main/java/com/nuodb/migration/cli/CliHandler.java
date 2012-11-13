@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.cli;
 
+import com.nuodb.migration.bootstrap.Bootstrap;
 import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.OptionSet;
@@ -44,7 +45,11 @@ import java.util.Arrays;
  */
 public class CliHandler extends CliHandlerSupport {
 
-    public static final int EXIT_STATUS_ERROR = 1;
+    public static final int CLI_ERROR = 1;
+
+    public static final int BOOTSTRAP_ERROR = 2;
+
+    private Bootstrap bootstrap = new Bootstrap();
 
     public CliHandler() {
     }
@@ -58,8 +63,18 @@ public class CliHandler extends CliHandlerSupport {
     }
 
     public void handle(String[] arguments) throws OptionException {
-        Option root = createOption();
         try {
+            bootstrap.boot();
+            bootstrap.expand(arguments);
+        } catch (IOException exception) {
+            if (log.isErrorEnabled()) {
+                log.error("Bootstrap failed", exception);
+            }
+            System.exit(BOOTSTRAP_ERROR);
+        }
+
+        try {
+            Option root = createOption();
             if (log.isTraceEnabled()) {
                 log.trace(String.format("Parsing cli arguments: %1$s", Arrays.asList(arguments)));
             }
@@ -67,9 +82,9 @@ public class CliHandler extends CliHandlerSupport {
             handleOptionSet(options, root);
         } catch (OptionException exception) {
             handleOptionException(exception);
-            System.exit(EXIT_STATUS_ERROR);
+            System.exit(CLI_ERROR);
         } catch (Throwable exception) {
-            System.exit(EXIT_STATUS_ERROR);
+            System.exit(CLI_ERROR);
         }
     }
 

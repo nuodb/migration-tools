@@ -40,11 +40,11 @@ public class ClassUtils {
     }
 
     public static ClassLoader getClassLoader() {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        if (loader == null) {
-            loader = ClassUtils.class.getClassLoader();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = ClassUtils.class.getClassLoader();
         }
-        return loader;
+        return classLoader;
     }
 
     public static <T> T newInstance(String className) {

@@ -60,11 +60,11 @@ import java.util.Map;
 
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.metamodel.ObjectType.*;
-import static com.nuodb.util.StringUtils.isEmpty;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik

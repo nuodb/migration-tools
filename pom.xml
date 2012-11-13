@@ -26,11 +26,11 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.nuodb</groupId>
-            <artifactId>nuodb-jdbc</artifactId>
-            <version>1.0</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.nuodb</groupId>-->
+            <!--<artifactId>nuodb-jdbc</artifactId>-->
+            <!--<version>1.0</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>

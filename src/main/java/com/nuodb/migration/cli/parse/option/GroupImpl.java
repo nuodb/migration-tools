@@ -171,7 +171,6 @@ public class GroupImpl extends OptionBase implements Group {
     @SuppressWarnings("StringEquality")
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
         String previous = null;
-        // init withConnection each executable line token
         while (arguments.hasNext()) {
             // grab the next argument
             String argument = arguments.next();

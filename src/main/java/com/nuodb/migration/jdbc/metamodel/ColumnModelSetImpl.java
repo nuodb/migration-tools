@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.metamodel;
 
-import com.nuodb.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
 
