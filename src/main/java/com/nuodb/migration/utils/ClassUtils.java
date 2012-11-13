@@ -27,7 +27,6 @@
  */
 package com.nuodb.migration.utils;
 
-import com.nuodb.migration.MigrationException;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.reflect.ConstructorUtils;
 
@@ -47,11 +46,19 @@ public class ClassUtils {
         return classLoader;
     }
 
+    public static <T> Class<T> loadClass(String className) {
+        try {
+            return (Class<T>) getClassLoader().loadClass(className);
+        } catch (ClassNotFoundException exception) {
+            throw new ReflectionException(exception);
+        }
+    }
+
     public static <T> T newInstance(String className) {
         try {
             return (T) newInstance(getClassLoader().loadClass(className));
         } catch (ClassNotFoundException exception) {
-            throw new MigrationException("Class not found " + className);
+            throw new ReflectionException("Class not found " + className);
         }
     }
 
@@ -59,9 +66,9 @@ public class ClassUtils {
         try {
             return type.newInstance();
         } catch (InstantiationException exception) {
-            throw new MigrationException("Failed instantiating class " + type);
+            throw new ReflectionException("Failed instantiating class " + type);
         } catch (IllegalAccessException exception) {
-            throw new MigrationException("Failed instantiating class " + type);
+            throw new ReflectionException("Failed instantiating class " + type);
         }
     }
 
@@ -84,13 +91,13 @@ public class ClassUtils {
         try {
             return (T) ConstructorUtils.invokeConstructor(type, arguments, argumentTypes);
         } catch (NoSuchMethodException exception) {
-            throw new MigrationException(exception);
+            throw new ReflectionException(exception);
         } catch (IllegalAccessException exception) {
-            throw new MigrationException(exception);
+            throw new ReflectionException(exception);
         } catch (InvocationTargetException exception) {
-            throw new MigrationException(exception);
+            throw new ReflectionException(exception);
         } catch (InstantiationException exception) {
-            throw new MigrationException(exception);
+            throw new ReflectionException(exception);
         }
     }
 }

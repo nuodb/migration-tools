@@ -28,6 +28,8 @@
 package com.nuodb.migration.jdbc.connection;
 
 import com.nuodb.migration.spec.DriverManagerConnectionSpec;
+import com.nuodb.migration.utils.ClassUtils;
+import com.nuodb.migration.utils.ReflectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -73,10 +75,10 @@ public class DriverManagerConnectionProvider extends ConnectionProviderBase {
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Loading driver %s", driver));
             }
-            Class.forName(driver);
-        } catch (ClassNotFoundException e) {
+            ClassUtils.loadClass(driver);
+        } catch (ReflectionException exception) {
             if (log.isWarnEnabled()) {
-                log.warn("Driver can't be loaded", e);
+                log.warn("Driver can't be loaded", exception);
             }
         }
         return createConnection();
