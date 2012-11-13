@@ -96,7 +96,7 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
                 COMMAND_OPTION_ID, COMMAND_OPTION, getMessage(COMMAND_OPTION_DESCRIPTION), false,
                 cliRunFactoryLookup, optionToolkit);
         return optionToolkit.newGroup().
-                withName(getMessage(MIGRATION_GROUP_NAME)).
+                withName(getMessage(ROOT_GROUP_NAME)).
                 withOption(help).
                 withOption(list).
                 withOption(config).

@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class ResourcesTest {
 
-    public static final String RESOURCE_NAME = "com.nuodb.migration.cli.migration.group.name";
+    public static final String RESOURCE_NAME = "com.nuodb.migration.cli.root.group.name";
     public static final String BUNDLE_NAME = "com.nuodb.migration.i18n.messages";
 
     @Test

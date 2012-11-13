@@ -34,7 +34,7 @@ public interface CliResources {
     /**
      * Root options resources
      */
-    final String MIGRATION_GROUP_NAME = "com.nuodb.migration.cli.migration.group.name";
+    final String ROOT_GROUP_NAME = "com.nuodb.migration.cli.root.group.name";
     final String HELP_OPTION_DESCRIPTION = "com.nuodb.migration.cli.help.option.description";
     final String HELP_ARGUMENT_NAME = "com.nuodb.migration.cli.help.argument.name";
     final String LIST_OPTION_DESCRIPTION = "com.nuodb.migration.cli.list.option.description";
