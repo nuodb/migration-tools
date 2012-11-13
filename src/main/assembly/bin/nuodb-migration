@@ -27,6 +27,8 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # JAVA_HOME can optionally be set here
+
+# NUODB_HOME is set here
 NUODB_HOME=/opt/nuodb
 
 # Maximum heap size
@@ -42,8 +44,8 @@ if [ "x$NUODB_MIGRATION_CONF" = "x" ]; then
     NUODB_MIGRATION_CONF=$NUODB_MIGRATION/conf
 fi
 
-# Add configuration directory to the classpath
 CLASSPATH=$NUODB_HOME/jar/nuodbjdbc.jar
+# Add configuration directory to the classpath
 CLASSPATH=$CLASSPATH:$NUODB_MIGRATION_CONF
 
 # List jar files in libs directory

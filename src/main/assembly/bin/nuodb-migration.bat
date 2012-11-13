@@ -24,12 +24,21 @@
 @REM OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 @REM ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# JAVA_HOME can optionally be set here
+
+# NUODB_HOME is set here
+NUODB_HOME=C:\Program Files\NuoDB
+
+# Maximum heap size
 MAX_HEAP_SIZE="256M"
 
 if not defined JAVA_HOME goto :error
 if not defined NUODB_MIGRATION set NUODB_MIGRATION=%~dp0..
 
-CLASSPATH=%NUODB_MIGRATION%/conf
+CLASSPATH=%NUODB_HOME%/jar/nuodbjdbc.jar
+# Add configuration directory to the classpath
+CLASSPATH=%CLASSPATH%;%NUODB_MIGRATION%/conf
+
 for %%i in ("%NUODB_MIGRATION%\jar\*.jar") do set CLASSPATH=%CLASSPATH%;%%i
 
 JVM_OPTIONS=-Xmx$%MAX_HEAP_SIZE%
