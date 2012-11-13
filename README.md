@@ -52,7 +52,8 @@ The NuoDB Customer Migration Data tool is a command-line interface designed to a
 ## Connect to Third-party Databases ##
 
 To interface with third-party databases through JDBC-compliant drivers you should download & install appropriate JAR files.
-1. Add required dependency to pom.xml, clean & package project. For example, to add MySQL JDBC connector:
+
+Add required dependency to pom.xml, clean & package project. For example, to add MySQL JDBC connector:
 
     <?xml version="1.0" encoding="UTF-8"?>
     <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -75,7 +76,7 @@ To interface with third-party databases through JDBC-compliant drivers you shoul
     
 Required JAR file will be download to target/nuodb-migration/lib/ directory
 
-2. Alternatively, download & copy required JAR file to target/nuodb-migration/lib/ manually. For example, to install PosgreSQL JDBC4 Driver: 
+Alternatively, you can download & copy required JAR file to target/nuodb-migration/lib/ manually. For example, to install PosgreSQL JDBC4 Driver: 
 
     $ mvn clean install
     $ curl http://jdbc.postgresql.org/download/postgresql-9.2-1001.jdbc4.jar > target/nuodb-migration/lib/postgresql-9.2-1001.jdbc4.jar
