@@ -99,11 +99,6 @@
             <version>4.1.2</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.20</version>
-        </dependency>
         <!--<dependency>-->
         <!--<groupId>commons-dbcp</groupId>-->
         <!--<artifactId>commons-dbcp</artifactId>-->
@@ -217,45 +212,6 @@
                                     <mainClass>com.nuodb.migration.cli.CliHandler</mainClass>
                                     <arguments>
                                         <argument>--help</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>cli-handler-dump</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.2.1</version>
-                        <executions>
-                            <execution>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>java</goal>
-                                </goals>
-                                <configuration>
-                                    <mainClass>com.nuodb.migration.cli.CliHandler</mainClass>
-                                    <arguments>
-                                        <argument>dump</argument>
-                                        <argument>--source.driver=com.mysql.jdbc.Driver</argument>
-                                        <argument>--source.url=jdbc:mysql://localhost:3306/test</argument>
-                                        <argument>--source.username=root</argument>
-                                        <argument>--output.typeCode=csv</argument>
-                                        <argument>--output.path=/tmp/test/</argument>
-                                        <argument>--output.csv.delimiter=,</argument>
-                                        <argument>--output.csv.quoting=false</argument>
-                                        <argument>--output.csv.quote="</argument>
-                                        <argument>--output.csv.escape=|</argument>
-                                        <argument>--output.xml.document.element=rows</argument>
-                                        <argument>--output.xml.row.element=row</argument>
-                                        <argument>--output.xml.encoding=utf-8</argument>
-                                        <argument>--output.xml.version=1.0</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

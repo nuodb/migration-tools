@@ -10,7 +10,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>lib</outputDirectory>
+            <outputDirectory>jar</outputDirectory>
         </dependencySet>
     </dependencySets>
     <fileSets>

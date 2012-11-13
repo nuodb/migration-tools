@@ -74,12 +74,12 @@ Add required dependency to pom.xml, clean & package project. For example, to add
 
     $ mvn clean install
     
-Required JAR file will be download to target/nuodb-migration/lib/ directory
+Required JAR file will be download to target/nuodb-migration/jar/ directory
 
-Alternatively, you can download & copy required JAR file to target/nuodb-migration/lib/ manually. For example, to install PosgreSQL JDBC4 Driver: 
+Alternatively, you can download & copy required JAR file to target/nuodb-migration/jar/ manually. For example, to install PosgreSQL JDBC4 Driver:
 
     $ mvn clean install
-    $ curl http://jdbc.postgresql.org/download/postgresql-9.2-1001.jdbc4.jar > target/nuodb-migration/lib/postgresql-9.2-1001.jdbc4.jar
+    $ curl http://jdbc.postgresql.org/download/postgresql-9.2-1001.jdbc4.jar > target/nuodb-migration/jar/postgresql-9.2-1001.jdbc4.jar
     
 ## Examples ##
 

@@ -30,7 +30,7 @@ if not defined JAVA_HOME goto :error
 if not defined NUODB_MIGRATION set NUODB_MIGRATION=%~dp0..
 
 CLASSPATH=%NUODB_MIGRATION%/conf
-for %%i in ("%NUODB_MIGRATION%\lib\*.jar") do set CLASSPATH=%CLASSPATH%;%%i
+for %%i in ("%NUODB_MIGRATION%\jar\*.jar") do set CLASSPATH=%CLASSPATH%;%%i
 
 JVM_OPTIONS=-Xmx$%MAX_HEAP_SIZE%
 
