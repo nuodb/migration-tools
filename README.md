@@ -4,9 +4,17 @@
 
 The NuoDB Customer Migration Data tool is a command-line interface designed to assist you in migrating legacy data from any SQL database to a NuoDB database. Use nuodb-migration dump and nuodb-migration load to copy, normalize, and load data from an existing database to a NuoDB database.
 
+## Building from Source
+
+        $ git clone https://github.com/nuodb/migration-tools
+        $ cd migration-tools/
+    	$ mvn install
+        $ cd target/nuodb-migration/bin/
+        $ ./nuodb-migration --help
+        
 ## Synopsis ##
 
-    nuodb-migration 
+    $ ./nuodb-migration 
     	--help=<[dump] [load]> | 
     	--list | 
     	--config=<file> 
@@ -14,7 +22,7 @@ The NuoDB Customer Migration Data tool is a command-line interface designed to a
 
 --------
 
-    nuodb-migration dump 
+    $ ./nuodb-migration dump 
     	--source.driver=<driver> | 
     	--source.url=<url> | 
     	--source.username=<username> | 
@@ -31,7 +39,7 @@ The NuoDB Customer Migration Data tool is a command-line interface designed to a
 
 --------
 
-    nuodb-migration load 
+    $ ./nuodb-migration load 
     	--target.url=<url> |
     	--target.username=<username> | 
     	--target.password=<password> | 
@@ -48,7 +56,7 @@ The following examples show how to dump MySQL to a file (in the first case), and
 
 Example 1: Dump all tables from MySQL "enron" catalog in CSV format
 
-    ./nuodb-migration dump --source.driver=com.mysql.jdbc.Driver \
+    $ ./nuodb-migration dump --source.driver=com.mysql.jdbc.Driver \
         --source.url=jdbc:mysql://localhost:3306/enron --source.catalog=enron \
         --source.username=root --output.type=csv --output.path=/tmp/test/dump.cat
 
@@ -56,7 +64,7 @@ Example 1: Dump all tables from MySQL "enron" catalog in CSV format
 
 Example 2: Dump records from hockey table where "id" does not equal 25 from NuoDB "test" catalog in BSON format
 
-    ./nuodb-migration dump --source.driver=com.nuodb.jdbc.Driver \  
+    $ ./nuodb-migration dump --source.driver=com.nuodb.jdbc.Driver \  
         --source.url=jdbc:com.nuodb://localhost/test --source.username=dba \
         --source.password=goalie \ 
         --source.schema=hockey --table=hockey --table.hockey.filter=id<>25 \  
@@ -66,12 +74,12 @@ Example 2: Dump records from hockey table where "id" does not equal 25 from NuoD
 
 Example 3:  Load CSV data to the corresponding tables in NuoDB from /tmp/test/dump.cat
 
-    ./nuodb-migration load --target.url=jdbc:com.nuodb://localhost/test \
+    $ ./nuodb-migration load --target.url=jdbc:com.nuodb://localhost/test \
         --target.username=dba --target.password=goalie \
         --input.path=/tmp/test/dump.cat
 
 
-## Command line options ##
+## Command Line Options ##
 
 ### nuodb-migration
 
@@ -106,7 +114,7 @@ Executes specified migration command (dump or load)
 ### nuodb-migration dump
 <table>
 <tr><td colspan="2">
-source database connection options
+Source database connection options
 </td></tr>
 
 <tr><td>
@@ -152,7 +160,7 @@ Default database schema name to use output specification
 </td></tr>
 
 <tr><td colspan="2">
-output specification options
+Output specification options
 </td></tr>
 
 <tr><td>
@@ -170,11 +178,11 @@ Path on the file system
 <tr><td>
 &nbsp;&nbsp;&nbsp;&nbsp;[--output.*=[attribute value]]
 </td><td>
-Output format attributes
+Output format attributes, i.e. -output.csv.delimiter, -output.csv.quoting, -output.csv.quote, -output.csv.escape, -output.csv.line.separator overriding attributes from com.nuodb.migration.result.format.csv.CsvAttributes; -output.xml.encoding, -output.xml.version options for XML to override default values of com.nuodb.migration.result.format.xml.XmlAttributes
 </td></tr>
 
 <tr><td colspan="2">
-table names and select filters
+Table names and select filters
 </td></tr>
 
 <tr><td>
@@ -235,7 +243,7 @@ Default database schema name to use input specification
 </td></tr>
 
 <tr><td colspan="2">
-input specification options
+Input specification options
 </td></tr>
 
 <tr><td>
