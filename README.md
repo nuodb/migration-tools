@@ -9,7 +9,7 @@ The NuoDB Customer Migration Data tool is a command-line interface designed to a
         $ git clone https://github.com/nuodb/migration-tools
         $ cd migration-tools/
     	$ mvn install
-        $ cd target/nuodb-migration/bin/
+        $ cd assembly/target/nuodb-migration/bin/
         $ ./nuodb-migration --help
         
 ## Synopsis ##
@@ -74,12 +74,12 @@ Add required dependency to pom.xml, clean & package project. For example, to add
 
     $ mvn clean install
     
-Required JAR file will be download to target/nuodb-migration/jar/ directory
+Required JAR file will be download to assembly/target/nuodb-migration/jar/ directory
 
-Alternatively, you can download & copy required JAR file to target/nuodb-migration/jar/ manually. For example, to install PosgreSQL JDBC4 Driver:
+Alternatively, you can download & copy required JAR file to assembly/target/nuodb-migration/jar/ manually. For example, to install PosgreSQL JDBC4 Driver:
 
     $ mvn clean install
-    $ curl http://jdbc.postgresql.org/download/postgresql-9.2-1001.jdbc4.jar > target/nuodb-migration/jar/postgresql-9.2-1001.jdbc4.jar
+    $ curl http://jdbc.postgresql.org/download/postgresql-9.2-1001.jdbc4.jar > assembly/target/nuodb-migration/jar/postgresql-9.2-1001.jdbc4.jar
     
 ## Examples ##
 
