@@ -30,17 +30,7 @@ package com.nuodb.migration.bootstrap.config;
 /**
  * @author Sergey Bushik
  */
-public interface Config {
+public interface PlaceholderReplacement {
 
-    final String NUODB_MIGRATION_HOME = "nuodb.migration.home";
-
-    final String CONFIG_PROPERTY = "bootstrap.config";
-
-    final String CONFIG = "bootstrap.properties";
-
-    final String CONFIG_FOLDER = "conf";
-
-    String getProperty(String property);
-
-    String getProperty(String property, String defaultValue);
+    String getReplacement(String placeholder);
 }

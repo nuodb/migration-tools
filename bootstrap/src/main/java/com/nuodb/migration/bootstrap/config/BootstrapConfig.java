@@ -30,7 +30,15 @@ package com.nuodb.migration.bootstrap.config;
 /**
  * @author Sergey Bushik
  */
-public interface ReplacementProvider {
+public interface BootstrapConfig {
 
-    String getReplacement(String placeholder);
+    final String HOME = "nuodb.migration.home";
+
+    final String LOADER = "com.nuodb.migration.bootstrap.loader";
+
+    final String BOOTABLE = "com.nuodb.migration.bootstrap.bootable";
+
+    String getProperty(String property);
+
+    String getProperty(String property, String defaultValue);
 }

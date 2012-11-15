@@ -32,23 +32,16 @@ import java.util.Properties;
 /**
  * @author Sergey Bushik
  */
-public class PlaceholderReplacingConfig implements Config {
+public class PropertiesPlaceholderReplacement implements PlaceholderReplacement {
 
     private Properties properties;
-    private PlaceholderReplacer placeholderReplacer;
 
-    public PlaceholderReplacingConfig(Properties properties, PlaceholderReplacer placeholderReplacer) {
+    public PropertiesPlaceholderReplacement(Properties properties) {
         this.properties = properties;
-        this.placeholderReplacer = placeholderReplacer;
     }
 
     @Override
-    public String getProperty(String property) {
-        return placeholderReplacer.replace(properties.getProperty(property));
-    }
-
-    @Override
-    public String getProperty(String property, String defaultValue) {
-        return placeholderReplacer.replace(properties.getProperty(property, defaultValue));
+    public String getReplacement(String placeholder) {
+        return properties.getProperty(placeholder);
     }
 }

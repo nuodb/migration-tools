@@ -25,12 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.bootstrap.bootable;
+package com.nuodb.migration.bootstrap;
+
+import com.nuodb.migration.bootstrap.config.BootstrapConfig;
 
 /**
  * @author Sergey Bushik
  */
 public interface Bootable {
 
-    void boot(String[] arguments) throws Exception;
+    void boot(BootstrapConfig config, String[] arguments);
 }

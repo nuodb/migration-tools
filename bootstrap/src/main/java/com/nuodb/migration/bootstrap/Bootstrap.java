@@ -27,11 +27,10 @@
  */
 package com.nuodb.migration.bootstrap;
 
-import com.nuodb.migration.bootstrap.bootable.Bootable;
-import com.nuodb.migration.bootstrap.config.Config;
-import com.nuodb.migration.bootstrap.config.ConfigLoader;
+import com.nuodb.migration.bootstrap.config.BootstrapConfig;
+import com.nuodb.migration.bootstrap.config.BootstrapConfigLoader;
 import com.nuodb.migration.bootstrap.config.PlaceholderReplacer;
-import com.nuodb.migration.bootstrap.config.PropertiesReplacementProvider;
+import com.nuodb.migration.bootstrap.config.PropertiesPlaceholderReplacement;
 import com.nuodb.migration.bootstrap.loader.DynamicClassLoaderFactory;
 import com.nuodb.migration.bootstrap.loader.DynamicClassLoaderType;
 import com.nuodb.migration.bootstrap.log.Log;
@@ -45,6 +44,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import static com.nuodb.migration.bootstrap.config.BootstrapConfig.BOOTABLE;
+import static com.nuodb.migration.bootstrap.config.BootstrapConfig.LOADER;
+
 /**
  * @author Sergey Bushik
  */
@@ -53,15 +55,11 @@ public class Bootstrap {
 
     private static final Log log = LogFactory.getLog(Bootstrap.class);
 
-    public static final String LOADER = "com.nuodb.migration.bootstrap.loader";
-
-    public static final String BOOTABLE = "com.nuodb.migration.bootstrap.bootable";
-
     private ClassLoader classLoader;
 
     private static final int BOOT_ERROR = 1;
 
-    private Config config;
+    private BootstrapConfig config;
 
     public void boot(String[] arguments) throws Exception {
         if (log.isDebugEnabled()) {
@@ -70,7 +68,7 @@ public class Bootstrap {
         config = loadConfig();
 
         if (log.isDebugEnabled()) {
-            log.debug("Initializing class loader");
+            log.debug("Creating class loader");
         }
         classLoader = createClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
@@ -79,17 +77,17 @@ public class Bootstrap {
             log.debug("Creating bootable");
         }
         Bootable bootable = createBootable();
-        bootable.boot(arguments);
+        bootable.boot(config, arguments);
     }
 
-    protected Config loadConfig() {
+    protected BootstrapConfig loadConfig() {
         PlaceholderReplacer placeholderReplacer = new PlaceholderReplacer();
-        placeholderReplacer.setReplacementProvider(
-                new PropertiesReplacementProvider(System.getProperties()));
+        placeholderReplacer.setPlaceholderReplacement(
+                new PropertiesPlaceholderReplacement(System.getProperties()));
 
-        ConfigLoader configLoader = new ConfigLoader();
-        configLoader.setPlaceholderReplacer(placeholderReplacer);
-        return configLoader.loadConfig();
+        BootstrapConfigLoader bootstrapConfigLoader = new BootstrapConfigLoader();
+        bootstrapConfigLoader.setPlaceholderReplacer(placeholderReplacer);
+        return bootstrapConfigLoader.loadConfig();
     }
 
     protected ClassLoader createClassLoader() throws IOException {
@@ -124,7 +122,7 @@ public class Bootstrap {
         return constructor.newInstance();
     }
 
-    private Config getConfig() {
+    private BootstrapConfig getConfig() {
         return config;
     }
 

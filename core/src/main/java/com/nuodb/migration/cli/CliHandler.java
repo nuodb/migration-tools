@@ -27,7 +27,8 @@
  */
 package com.nuodb.migration.cli;
 
-import com.nuodb.migration.bootstrap.bootable.Bootable;
+import com.nuodb.migration.bootstrap.Bootable;
+import com.nuodb.migration.bootstrap.config.BootstrapConfig;
 import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.OptionSet;
@@ -53,7 +54,7 @@ public class CliHandler extends CliHandlerSupport implements Bootable {
     }
 
     @Override
-    public void boot(String[] arguments) throws Exception {
+    public void boot(BootstrapConfig config, String[] arguments) {
         try {
             Option root = createOption();
             if (log.isTraceEnabled()) {

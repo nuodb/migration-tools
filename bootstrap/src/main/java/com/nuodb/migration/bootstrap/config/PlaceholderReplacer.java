@@ -42,7 +42,7 @@ public class PlaceholderReplacer {
 
     private boolean ignoreUnknownPlaceholders;
 
-    private ReplacementProvider replacementProvider;
+    private PlaceholderReplacement placeholderReplacement;
 
     public String replace(String property) {
         if (property == null) {
@@ -74,7 +74,7 @@ public class PlaceholderReplacer {
     }
 
     protected String getReplacement(String placeholder) {
-        return replacementProvider != null ? replacementProvider.getReplacement(placeholder) : null;
+        return placeholderReplacement != null ? placeholderReplacement.getReplacement(placeholder) : null;
     }
 
     public String getPlaceholderPrefix() {
@@ -101,12 +101,12 @@ public class PlaceholderReplacer {
         this.ignoreUnknownPlaceholders = ignoreUnknownPlaceholders;
     }
 
-    public ReplacementProvider getReplacementProvider() {
-        return replacementProvider;
+    public PlaceholderReplacement getPlaceholderReplacement() {
+        return placeholderReplacement;
     }
 
-    public void setReplacementProvider(ReplacementProvider replacementProvider) {
-        this.replacementProvider = replacementProvider;
+    public void setPlaceholderReplacement(PlaceholderReplacement placeholderReplacement) {
+        this.placeholderReplacement = placeholderReplacement;
     }
 
     public static void main(String[] args) {
@@ -114,7 +114,7 @@ public class PlaceholderReplacer {
         System.setProperty("nuodb.home", "/opt/nuodb");
 
         PlaceholderReplacer placeholderReplacer = new PlaceholderReplacer();
-        placeholderReplacer.setReplacementProvider(new PropertiesReplacementProvider(System.getProperties()));
+        placeholderReplacer.setPlaceholderReplacement(new PropertiesPlaceholderReplacement(System.getProperties()));
 
         StringBuilder property = new StringBuilder();
         property.append("${nuodb.home}/jar/nuodbjdbc.jar,");

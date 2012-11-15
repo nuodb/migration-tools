@@ -10,12 +10,18 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
-import static com.nuodb.migration.bootstrap.config.Config.*;
+import static com.nuodb.migration.bootstrap.config.BootstrapConfig.HOME;
 
 @SuppressWarnings("unchecked")
-public class ConfigLoader {
+public class BootstrapConfigLoader {
 
-    private static final Log log = LogFactory.getLog(ConfigLoader.class);
+    public static final String CONFIG_PROPERTY = "bootstrap.config";
+
+    public static final String CONFIG = "bootstrap.properties";
+
+    public static final String CONFIG_FOLDER = "conf";
+
+    private static final Log log = LogFactory.getLog(BootstrapConfigLoader.class);
 
     private PlaceholderReplacer placeholderReplacer;
 
@@ -24,21 +30,21 @@ public class ConfigLoader {
     }
 
     private static void setHome() {
-        if (System.getProperty(NUODB_MIGRATION_HOME) != null) {
+        if (System.getProperty(HOME) != null) {
             return;
         }
         try {
-            System.setProperty(NUODB_MIGRATION_HOME, new File(System.getProperty("user.dir"), "..").getCanonicalPath());
+            System.setProperty(HOME, new File(System.getProperty("user.dir"), "..").getCanonicalPath());
         } catch (IOException e) {
-            System.setProperty(NUODB_MIGRATION_HOME, System.getProperty("user.dir"));
+            System.setProperty(HOME, System.getProperty("user.dir"));
         }
     }
 
     private static String getHome() {
-        return System.getProperty(NUODB_MIGRATION_HOME);
+        return System.getProperty(HOME);
     }
 
-    public Config loadConfig() {
+    public BootstrapConfig loadConfig() {
         InputStream is = getConfigFromProperty();
         if (is == null) {
             is = getConfigFromHome();
@@ -60,7 +66,7 @@ public class ConfigLoader {
                 log.warn("Failed to load bootstrap config", error);
             }
         }
-        return new PlaceholderReplacingConfig(properties, placeholderReplacer);
+        return new PropertiesBootstrapConfig(properties, placeholderReplacer);
     }
 
     private static InputStream getConfigFromProperty() {
@@ -109,7 +115,7 @@ public class ConfigLoader {
         InputStream stream = null;
         try {
             String config = CONFIG;
-            stream = ConfigLoader.class.getResourceAsStream(config);
+            stream = BootstrapConfigLoader.class.getResourceAsStream(config);
             if (stream != null) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Default bootstrap config found at %s", config));
