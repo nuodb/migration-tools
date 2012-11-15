@@ -49,7 +49,7 @@ public class XmlJdbcConnectionHandler extends XmlReadWriteHandlerBase<DriverMana
         set(output, TYPE_ATTRIBUTE, connection.getType());
         output.getChild("catalog").setValue(connection.getCatalog());
         output.getChild("schema").setValue(connection.getSchema());
-        output.getChild("driver").setValue(connection.getDriver());
+        output.getChild("driver").setValue(connection.getDriverClassName());
         output.getChild("url").setValue(connection.getUrl());
         output.getChild("username").setValue(connection.getUsername());
         output.getChild("password").setValue(connection.getPassword());

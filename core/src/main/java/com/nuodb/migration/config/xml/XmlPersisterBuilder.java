@@ -69,7 +69,7 @@ public class XmlPersisterBuilder implements XmlConstants {
         MigrationSpec migrationSpec = new MigrationSpec();
         DriverManagerConnectionSpec connection = new DriverManagerConnectionSpec();
         connection.setId("mysql");
-        connection.setDriver("com.mysql.jdbc.Driver");
+        connection.setDriverClassName("com.mysql.jdbc.Driver");
         connection.setUrl("jdbc:mysql://localhost:3306/test");
         connection.setUsername("root");
         migrationSpec.setConnectionSpecs(Arrays.asList(connection));

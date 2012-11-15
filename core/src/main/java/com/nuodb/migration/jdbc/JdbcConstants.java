@@ -32,5 +32,5 @@ package com.nuodb.migration.jdbc;
  */
 public interface JdbcConstants {
 
-    final String NUODB_DRIVER = "com.nuodb.jdbc.Driver";
+    final String NUODB_DRIVER_CLASS_NAME = "com.nuodb.jdbc.Driver";
 }

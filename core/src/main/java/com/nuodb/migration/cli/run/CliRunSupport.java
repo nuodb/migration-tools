@@ -230,7 +230,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         DriverManagerConnectionSpec connection = new DriverManagerConnectionSpec();
         connection.setCatalog(commandLine.<String>getValue(SOURCE_CATALOG_OPTION));
         connection.setSchema(commandLine.<String>getValue(SOURCE_SCHEMA_OPTION));
-        connection.setDriver(commandLine.<String>getValue(SOURCE_DRIVER_OPTION));
+        connection.setDriverClassName(commandLine.<String>getValue(SOURCE_DRIVER_OPTION));
         connection.setUrl(commandLine.<String>getValue(SOURCE_URL_OPTION));
         connection.setUsername(commandLine.<String>getValue(SOURCE_USERNAME_OPTION));
         connection.setPassword(commandLine.<String>getValue(SOURCE_PASSWORD_OPTION));
@@ -404,7 +404,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
         DriverManagerConnectionSpec connection = new DriverManagerConnectionSpec();
-        connection.setDriver(JdbcConstants.NUODB_DRIVER);
+        connection.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
         connection.setSchema(commandLine.<String>getValue(TARGET_SCHEMA_OPTION));
         connection.setUrl(commandLine.<String>getValue(TARGET_URL_OPTION));
         connection.setUsername(commandLine.<String>getValue(TARGET_USERNAME_OPTION));

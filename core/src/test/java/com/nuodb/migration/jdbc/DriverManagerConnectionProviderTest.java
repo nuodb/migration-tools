@@ -8,6 +8,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -16,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 public class DriverManagerConnectionProviderTest {
 
+    public static final String URL = "jdbc:test";
     private DriverManagerConnectionSpec connectionSpec;
     private Connection connection;
     private Driver driver;
@@ -23,15 +27,28 @@ public class DriverManagerConnectionProviderTest {
 
     @Before
     public void setUp() throws Exception {
+        connection = mock(Connection.class);
+
+        driver = (Driver) Proxy.newProxyInstance(getClass().getClassLoader(),
+                new Class[]{Driver.class}, new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                String name = method.getName();
+                if ("connect".equals(name)) {
+                    return connection;
+                } else if ("acceptsURL".equals(name)) {
+                    return URL;
+                }
+                return null;
+            }
+        });
+        DriverManager.registerDriver(driver);
+
         connectionSpec = mock(DriverManagerConnectionSpec.class);
-        when(connectionSpec.getDriver()).thenReturn(JdbcDriverMock.class.getName());
-        when(connectionSpec.getUrl()).thenReturn(JdbcDriverMock.URL);
+        when(connectionSpec.getDriver()).thenReturn(driver);
+        when(connectionSpec.getUrl()).thenReturn(URL);
         when(connectionSpec.getUsername()).thenReturn("user");
         when(connectionSpec.getPassword()).thenReturn("pass");
-
-        connection = mock(Connection.class);
-        driver = new JdbcDriverMock(connection);
-        DriverManager.registerDriver(driver);
     }
 
     @Test
@@ -50,24 +67,6 @@ public class DriverManagerConnectionProviderTest {
         verify(connectionSpec, times(1)).getPassword();
         verify(connection, times(1)).setTransactionIsolation(anyInt());
         verify(connection, times(1)).setAutoCommit(false);
-    }
-
-    @Test
-    public void testCreation() throws Exception {
-        final DriverManagerConnectionProvider connectionProvider =
-                new DriverManagerConnectionProvider();
-        connectionProvider.setConnectionSpec(connectionSpec);
-        connectionProvider.setAutoCommit(true);
-        connectionProvider.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-        final Connection connection = connectionProvider.getConnection();
-        Assert.assertNotNull(connection);
-        Assert.assertTrue(this.connection == connection);
-        verify(connectionSpec, times(1)).getDriver();
-        verify(connectionSpec, times(1)).getUsername();
-        verify(connectionSpec, times(1)).getUrl();
-        verify(connectionSpec, times(1)).getPassword();
-        verify(connection, times(1)).setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-        verify(connection, times(1)).setAutoCommit(true);
     }
 
     @After

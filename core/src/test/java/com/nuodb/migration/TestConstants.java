@@ -30,7 +30,7 @@ public class TestConstants {
         connectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
         connectionSpec.setUsername("dba");
         connectionSpec.setPassword("goalie");
-        connectionSpec.setDriver("com.nuodb.jdbc.Driver");
+        connectionSpec.setDriverClassName("com.nuodb.jdbc.Driver");
         return connectionSpec;
     }
 

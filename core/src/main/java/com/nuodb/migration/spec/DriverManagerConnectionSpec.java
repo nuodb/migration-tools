@@ -29,22 +29,32 @@ package com.nuodb.migration.spec;
 
 import com.google.common.collect.Maps;
 
+import java.sql.Driver;
 import java.util.Map;
 
 public class DriverManagerConnectionSpec extends ConnectionSpecBase {
 
-    private String driver;
+    private String driverClassName;
+    private Driver driver;
     private String url;
     private String username;
     private String password;
     private Map<String, String> properties = Maps.newHashMap();
 
-    public String getDriver() {
+    public Driver getDriver() {
         return driver;
     }
 
-    public void setDriver(String driver) {
+    public void setDriver(Driver driver) {
         this.driver = driver;
+    }
+
+    public String getDriverClassName() {
+        return driverClassName;
+    }
+
+    public void setDriverClassName(String driverClassName) {
+        this.driverClassName = driverClassName;
     }
 
     public String getUrl() {

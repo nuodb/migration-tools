@@ -32,6 +32,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.Quote;
 
 import static java.lang.Boolean.parseBoolean;
+import static org.apache.commons.csv.CSVFormat.CSVFormatBuilder;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
@@ -82,13 +83,14 @@ class CsvFormatBuilder implements CsvAttributes {
         }
         lineSeparator = format.getAttribute(ATTRIBUTE_LINE_SEPARATOR, LINE_SEPARATOR);
 
-        CSVFormat format = new CSVFormat(delimiter);
+        CSVFormatBuilder builder = CSVFormat.newBuilder(delimiter);
         if (quoting && quote != null) {
-            format = format.withQuotePolicy(Quote.MINIMAL);
-            format = format.withQuoteChar(quote);
+            builder.withQuotePolicy(Quote.MINIMAL);
+            builder.withQuoteChar(quote);
         }
-        format = format.withRecordSeparator(lineSeparator);
-        return format.withEscape(escape);
+        builder.withRecordSeparator(lineSeparator);
+        builder.withEscape(escape);
+        return builder.build();
     }
 
     public Character getDelimiter() {

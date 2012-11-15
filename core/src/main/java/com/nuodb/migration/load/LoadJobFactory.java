@@ -91,7 +91,7 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         loadJobFactory.setLoadSpec(new LoadSpec() {
             {
                 DriverManagerConnectionSpec connectionSpec = new DriverManagerConnectionSpec();
-                connectionSpec.setDriver("com.mysql.jdbc.Driver");
+                connectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
                 connectionSpec.setUrl("jdbc:mysql://localhost:3306/enron-load");
                 connectionSpec.setUsername("root");
                 setConnectionSpec(connectionSpec);

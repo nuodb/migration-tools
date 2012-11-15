@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -48,6 +49,7 @@ public class DriverManagerConnectionProvider extends ConnectionProviderBase {
     private DriverManagerConnectionSpec connectionSpec;
     private Boolean autoCommit;
     private Integer transactionIsolation;
+    private boolean driverLoaded;
 
     public DriverManagerConnectionProvider() {
     }
@@ -70,18 +72,29 @@ public class DriverManagerConnectionProvider extends ConnectionProviderBase {
     }
 
     public Connection getConnection() throws SQLException {
+        if (!driverLoaded) {
+            loadDriver();
+            driverLoaded = true;
+        }
+        return createConnection();
+    }
+
+    protected void loadDriver() throws SQLException {
         try {
-            String driver = connectionSpec.getDriver();
-            if (log.isDebugEnabled()) {
-                log.debug(String.format("Loading driver %s", driver));
+            Driver driver = connectionSpec.getDriver();
+            if (driver == null) {
+                String driverClassName = connectionSpec.getDriverClassName();
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Loading driver %s", driverClassName));
+                }
+                driver = ClassUtils.newInstance(driverClassName);
             }
-            ClassUtils.loadClass(driver);
+            DriverManager.registerDriver(driver);
         } catch (ReflectionException exception) {
             if (log.isWarnEnabled()) {
                 log.warn("Driver can't be loaded", exception);
             }
         }
-        return createConnection();
     }
 
     protected Connection createConnection() throws SQLException {

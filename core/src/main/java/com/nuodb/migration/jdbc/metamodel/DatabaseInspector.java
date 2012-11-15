@@ -246,12 +246,12 @@ public class DatabaseInspector {
 
     public static void main(String[] args) throws Exception {
         DriverManagerConnectionSpec mysql = new DriverManagerConnectionSpec();
-        mysql.setDriver("com.mysql.jdbc.Driver");
+        mysql.setDriverClassName("com.mysql.jdbc.Driver");
         mysql.setUrl("jdbc:mysql://localhost:3306/test");
         mysql.setUsername("root");
 
         DriverManagerConnectionSpec nuodb = new DriverManagerConnectionSpec();
-        nuodb.setDriver("com.nuodb.jdbc.Driver");
+        nuodb.setDriverClassName("com.nuodb.jdbc.Driver");
         nuodb.setUrl("jdbc:com.nuodb://localhost/test");
         nuodb.setUsername("dba");
         nuodb.setPassword("goalie");

@@ -89,28 +89,28 @@ public class HibernateDialectResolverImpl implements DatabaseDialectResolver {
 
         @Override
         public boolean supportsReadCatalogs() {
-            throw new DatabaseDialectException("Feature is not supported");
+            throw new DatabaseDialectException("Method is not supported");
         }
 
         @Override
         public boolean supportsReadSchemas() {
-            throw new DatabaseDialectException("Feature is not supported");
+            throw new DatabaseDialectException("Method is not supported");
         }
 
         @Override
         public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) throws SQLException {
-            throw new DatabaseDialectException("Feature is not supported");
+            throw new DatabaseDialectException("Method is not supported");
         }
 
         @Override
         public void setTransactionIsolationLevel(Connection connection,
                                                  int[] transactionIsolationLevels) throws SQLException {
-            throw new DatabaseDialectException("Feature is not supported");
+            throw new DatabaseDialectException("Method is not supported");
         }
 
         @Override
         public void enableStreaming(Statement statement) throws SQLException {
-            throw new DatabaseDialectException("Feature is not supported");
+            throw new DatabaseDialectException("Method is not supported");
         }
     }
 }

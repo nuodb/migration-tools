@@ -23,7 +23,7 @@ public class DatabaseIntrospectorIntegrationTest {
     @Before
     public void setUp() throws Exception {
         DriverManagerConnectionSpec mysql = new DriverManagerConnectionSpec();
-        mysql.setDriver("com.mysql.jdbc.Driver");
+        mysql.setDriverClassName("com.mysql.jdbc.Driver");
         mysql.setUrl("jdbc:mysql://localhost:3306/test");
         mysql.setUsername("root");
 

@@ -13,14 +13,6 @@
     <artifactId>nuodb-migration-bootstrap</artifactId>
     <version>1.0</version>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>3.0.1.RELEASE</version>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
