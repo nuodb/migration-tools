@@ -18,8 +18,8 @@ public class DumpCatalogIntegrationTest extends TestConstants {
     private static final String TEST_DIR = "/tmp/migration-tool";
     private static final String TEST_PATH = TEST_DIR + "/migration-tool-test";
 
-    private ResultCatalogImpl catalogFile;
-    private ResultEntryWriterImpl writer;
+    private CatalogImpl catalogFile;
+    private CatalogWriterImpl writer;
     private FormatSpec outputSpec;
 
     @Before
@@ -29,22 +29,22 @@ public class DumpCatalogIntegrationTest extends TestConstants {
         outputSpec.setType(CsvAttributes.TYPE);
         this.outputSpec = outputSpec;
 
-        ResultCatalogImpl catalogFile = new ResultCatalogImpl(outputSpec.getType());
+        CatalogImpl catalogFile = new CatalogImpl(outputSpec.getType());
         Assert.assertEquals(catalogFile.getPath(), TEST_PATH);
     }
 
     @Test
     public void testOpen() throws Exception {
         try {
-            writer = (ResultEntryWriterImpl) catalogFile.openWriter();
-        } catch (ResultCatalogException e) {
+            writer = (CatalogWriterImpl) catalogFile.getEntryWriter();
+        } catch (CatalogException e) {
             Assert.fail(e.getMessage());
         }
     }
 
-    @Test(expected = ResultCatalogException.class)
+    @Test(expected = CatalogException.class)
     public void testOpenError() throws Exception {
-        new ResultCatalogImpl("").openWriter();
+        new CatalogImpl("").getEntryWriter();
     }
 
     @After

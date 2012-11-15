@@ -32,17 +32,17 @@ import com.nuodb.migration.MigrationException;
 /**
  * @author Sergey Bushik
  */
-public class ResultCatalogException extends MigrationException {
+public class CatalogException extends MigrationException {
 
-    public ResultCatalogException(String message) {
+    public CatalogException(String message) {
         super(message);
     }
 
-    public ResultCatalogException(String message, Throwable cause) {
+    public CatalogException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public ResultCatalogException(Throwable cause) {
+    public CatalogException(Throwable cause) {
         super(cause);
     }
 }

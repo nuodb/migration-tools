@@ -38,10 +38,10 @@ import com.nuodb.migration.jdbc.metamodel.Table;
 import com.nuodb.migration.jdbc.query.*;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
-import com.nuodb.migration.result.catalog.ResultCatalog;
-import com.nuodb.migration.result.catalog.ResultEntry;
-import com.nuodb.migration.result.catalog.ResultEntryImpl;
-import com.nuodb.migration.result.catalog.ResultEntryWriter;
+import com.nuodb.migration.result.catalog.Catalog;
+import com.nuodb.migration.result.catalog.CatalogEntry;
+import com.nuodb.migration.result.catalog.CatalogEntryImpl;
+import com.nuodb.migration.result.catalog.CatalogWriter;
 import com.nuodb.migration.result.format.ResultFormatFactory;
 import com.nuodb.migration.result.format.ResultOutput;
 import com.nuodb.migration.spec.NativeQuerySpec;
@@ -49,7 +49,6 @@ import com.nuodb.migration.spec.SelectQuerySpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -76,7 +75,7 @@ public class DumpJob extends JobBase {
     protected final Log log = LogFactory.getLog(getClass());
 
     private JdbcConnectionServices jdbcConnectionServices;
-    private ResultCatalog resultCatalog;
+    private Catalog catalog;
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
@@ -89,91 +88,93 @@ public class DumpJob extends JobBase {
         connectionProvider.execute(new ConnectionCallback() {
             @Override
             public void execute(Connection connection) throws SQLException {
-                DatabaseInspector databaseInspector = jdbcConnectionServices.getDatabaseIntrospector();
-                databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-                databaseInspector.withConnection(connection);
-                Database database = databaseInspector.inspect();
-                DatabaseDialect dialect = database.getDatabaseDialect();
-                dialect.setTransactionIsolationLevel(connection,
-                        new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
-
-                ResultEntryWriter writer = resultCatalog.openWriter();
-                try {
-                    for (SelectQuery selectQuery : createSelectQueries(database, selectQuerySpecs)) {
-                        OutputStream output = getEntryOutput(writer, createEntry(selectQuery, outputType));
-                        dump(execution, connection, database, selectQuery, output);
-                    }
-                    for (NativeQuery nativeQuery : createNativeQueries(database, nativeQuerySpecs)) {
-                        OutputStream output = getEntryOutput(writer, createEntry(nativeQuery, outputType));
-                        dump(execution, connection, database, nativeQuery, output);
-                    }
-                } finally {
-                    closeQuietly(writer);
-                }
+                dump(execution, connection);
             }
         });
     }
 
-    protected ResultEntry createEntry(SelectQuery selectQuery, String type) {
-        Table table = selectQuery.getTables().get(0);
-        return new ResultEntryImpl(table.getName(), type);
-    }
-
-    protected ResultEntry createEntry(NativeQuery nativeQuery, String type) {
-        return new ResultEntryImpl(String.format(QUERY_ENTRY_NAME, new Date()), type);
-    }
-
-    protected OutputStream getEntryOutput(ResultEntryWriter writer, ResultEntry entry) {
-        writer.addEntry(entry);
-        return writer.getEntryOutput(entry);
-    }
-
-    protected void dump(JobExecution execution, Connection connection, Database database, Query query,
-                        OutputStream output) throws SQLException {
+    protected void dump(final JobExecution execution, final Connection connection) throws SQLException {
+        DatabaseInspector databaseInspector = jdbcConnectionServices.getDatabaseIntrospector();
+        databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+        databaseInspector.withConnection(connection);
+        Database database = databaseInspector.inspect();
+        DatabaseDialect dialect = database.getDatabaseDialect();
+        dialect.setTransactionIsolationLevel(connection,
+                new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
+        CatalogWriter writer = catalog.getEntryWriter();
         try {
-            ResultOutput resultOutput = resultFormatFactory.createOutput(outputType);
-            resultOutput.setAttributes(outputAttributes);
-            resultOutput.setJdbcTypeValueAccess(jdbcConnectionServices.getJdbcTypeValueAccess());
-            resultOutput.setOutputStream(output);
-            resultOutput.initOutput();
-            dump(execution, connection, database, query, resultOutput);
+            for (SelectQuery selectQuery : createSelectQueries(database, selectQuerySpecs)) {
+                dump(execution, connection, database, selectQuery, writer,
+                        createEntry(selectQuery, outputType));
+            }
+            for (NativeQuery nativeQuery : createNativeQueries(database, nativeQuerySpecs)) {
+                dump(execution, connection, database, nativeQuery, writer,
+                        createEntry(nativeQuery, outputType));
+            }
         } finally {
-            closeQuietly(output);
+            closeQuietly(writer);
         }
     }
 
+    protected CatalogEntry createEntry(SelectQuery query, String type) {
+        Table table = query.getTables().get(0);
+        return new CatalogEntryImpl(table.getName(), type);
+    }
+
+    protected CatalogEntry createEntry(NativeQuery query, String type) {
+        return new CatalogEntryImpl(String.format(QUERY_ENTRY_NAME, new Date()), type);
+    }
+
     protected void dump(final JobExecution execution, final Connection connection, final Database database,
-                        final Query query, final ResultOutput resultOutput) throws SQLException {
-        final DatabaseDialect databaseDialect = database.getDatabaseDialect();
+                        final Query query, final CatalogWriter writer, final CatalogEntry entry) throws SQLException {
+        final ResultOutput output = resultFormatFactory.createOutput(outputType);
+        output.setAttributes(outputAttributes);
+        output.setJdbcTypeValueAccess(jdbcConnectionServices.getJdbcTypeValueAccess());
+
         QueryTemplate queryTemplate = new QueryTemplate(connection);
         queryTemplate.execute(
-                new StatementBuilder<PreparedStatement>() {
+                new StatementCreator<PreparedStatement>() {
                     @Override
-                    public PreparedStatement build(Connection connection) throws SQLException {
-                        if (log.isDebugEnabled()) {
-                            log.debug(String.format("Preparing SQL query %s", query.toQuery()));
-                        }
-                        PreparedStatement statement = connection.prepareStatement(query.toQuery(),
-                                TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                        databaseDialect.enableStreaming(statement);
-                        return statement;
+                    public PreparedStatement create(Connection connection) throws SQLException {
+                        return createStatement(connection, database, query);
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        ResultSet resultSet = statement.executeQuery();
-                        resultOutput.setResultSet(resultSet);
-                        resultOutput.initModel();
-
-                        resultOutput.writeBegin();
-                        while (execution.isRunning() && resultSet.next()) {
-                            resultOutput.writeRow();
-                        }
-                        resultOutput.writeEnd();
+                        dump(execution, statement, writer, entry, output);
                     }
                 }
         );
+    }
+
+    protected PreparedStatement createStatement(final Connection connection, final Database database,
+                                                final Query query) throws SQLException {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Preparing SQL query %s", query.toQuery()));
+        }
+        PreparedStatement statement = connection.prepareStatement(query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        DatabaseDialect dialect = database.getDatabaseDialect();
+        dialect.enableStreaming(statement);
+        return statement;
+    }
+
+    protected void dump(final JobExecution execution, final PreparedStatement statement, final CatalogWriter writer,
+                        final CatalogEntry entry, final ResultOutput output) throws SQLException {
+        ResultSet resultSet = statement.executeQuery();
+
+        writer.addEntry(entry);
+        output.setOutputStream(writer.getEntryOutput(entry));
+        output.setResultSet(resultSet);
+
+        output.initOutput();
+        output.initModel();
+
+        output.writeBegin();
+        while (execution.isRunning() && resultSet.next()) {
+            output.writeRow();
+        }
+        output.writeEnd();
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database,
@@ -231,12 +232,12 @@ public class DumpJob extends JobBase {
         this.jdbcConnectionServices = jdbcConnectionServices;
     }
 
-    public ResultCatalog getResultCatalog() {
-        return resultCatalog;
+    public Catalog getCatalog() {
+        return catalog;
     }
 
-    public void setResultCatalog(ResultCatalog resultCatalog) {
-        this.resultCatalog = resultCatalog;
+    public void setCatalog(Catalog catalog) {
+        this.catalog = catalog;
     }
 
     public Collection<SelectQuerySpec> getSelectQuerySpecs() {

@@ -45,8 +45,8 @@ public class QueryTemplate {
         this.connection = connection;
     }
 
-    public <X extends Statement> void execute(StatementBuilder<X> builder, StatementCallback<X> callback) throws SQLException {
-        X statement = builder.build(connection);
+    public <X extends Statement> void execute(StatementCreator<X> creator, StatementCallback<X> callback) throws SQLException {
+        X statement = creator.create(connection);
         try {
             callback.execute(statement);
         } finally {

@@ -35,9 +35,9 @@ import com.nuodb.migration.jdbc.metamodel.*;
 import com.nuodb.migration.jdbc.query.*;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
-import com.nuodb.migration.result.catalog.ResultCatalog;
-import com.nuodb.migration.result.catalog.ResultEntry;
-import com.nuodb.migration.result.catalog.ResultEntryReader;
+import com.nuodb.migration.result.catalog.Catalog;
+import com.nuodb.migration.result.catalog.CatalogEntry;
+import com.nuodb.migration.result.catalog.CatalogReader;
 import com.nuodb.migration.result.format.ResultFormatFactory;
 import com.nuodb.migration.result.format.ResultInput;
 import org.apache.commons.logging.Log;
@@ -63,7 +63,7 @@ public class LoadJob extends JobBase {
     private JdbcConnectionServices jdbcConnectionServices;
     private String inputType;
     private Map<String, String> inputAttributes;
-    private ResultCatalog resultCatalog;
+    private Catalog catalog;
     private ResultFormatFactory resultFormatFactory;
 
     @Override
@@ -77,9 +77,9 @@ public class LoadJob extends JobBase {
                 databaseInspector.withConnection(connection);
                 Database database = databaseInspector.inspect();
 
-                ResultEntryReader reader = resultCatalog.openReader();
+                CatalogReader reader = catalog.getEntryReader();
                 try {
-                    for (ResultEntry entry : reader.getEntries()) {
+                    for (CatalogEntry entry : reader.getEntries()) {
                         load(execution, connection, database, reader, entry);
                     }
                     connection.commit();
@@ -91,7 +91,7 @@ public class LoadJob extends JobBase {
     }
 
     protected void load(final JobExecution execution, Connection connection, Database database,
-                        ResultEntryReader reader, ResultEntry entry) throws SQLException {
+                        CatalogReader reader, CatalogEntry entry) throws SQLException {
         InputStream entryInput = reader.getEntryInput(entry);
         try {
             final ResultInput resultInput = resultFormatFactory.createInput(entry.getType());
@@ -116,9 +116,9 @@ public class LoadJob extends JobBase {
 
         QueryTemplate queryTemplate = new QueryTemplate(connection);
         queryTemplate.execute(
-                new StatementBuilder<PreparedStatement>() {
+                new StatementCreator<PreparedStatement>() {
                     @Override
-                    public PreparedStatement build(Connection connection) throws SQLException {
+                    public PreparedStatement create(Connection connection) throws SQLException {
                         if (log.isDebugEnabled()) {
                             log.debug(String.format("Preparing SQL query %s", query.toQuery()));
                         }
@@ -175,12 +175,12 @@ public class LoadJob extends JobBase {
         this.jdbcConnectionServices = jdbcConnectionServices;
     }
 
-    public ResultCatalog getResultCatalog() {
-        return resultCatalog;
+    public Catalog getCatalog() {
+        return catalog;
     }
 
-    public void setResultCatalog(ResultCatalog resultCatalog) {
-        this.resultCatalog = resultCatalog;
+    public void setCatalog(Catalog catalog) {
+        this.catalog = catalog;
     }
 
     public String getInputType() {

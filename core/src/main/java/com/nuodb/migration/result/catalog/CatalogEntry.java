@@ -25,16 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.query;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+package com.nuodb.migration.result.catalog;
 
 /**
  * @author Sergey Bushik
  */
-public interface StatementBuilder<X extends Statement> {
+public interface CatalogEntry {
 
-    X build(Connection connection) throws SQLException;
+    String getName();
+
+    String getType();
 }

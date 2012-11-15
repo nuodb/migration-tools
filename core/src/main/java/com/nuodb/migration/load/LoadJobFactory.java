@@ -34,8 +34,8 @@ import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
-import com.nuodb.migration.result.catalog.ResultCatalog;
-import com.nuodb.migration.result.catalog.ResultCatalogImpl;
+import com.nuodb.migration.result.catalog.Catalog;
+import com.nuodb.migration.result.catalog.CatalogImpl;
 import com.nuodb.migration.result.format.ResultFormatFactory;
 import com.nuodb.migration.result.format.ResultFormatFactoryImpl;
 import com.nuodb.migration.spec.*;
@@ -57,7 +57,7 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         job.setJdbcConnectionServices(createJdbcServices(connectionSpec));
         job.setInputType(inputSpec.getType());
         job.setInputAttributes(inputSpec.getAttributes());
-        job.setResultCatalog(createResultCatalog(inputSpec.getPath()));
+        job.setCatalog(createResultCatalog(inputSpec.getPath()));
         job.setResultFormatFactory(resultFormatFactory);
         return job;
     }
@@ -66,8 +66,8 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         return new JdbcConnectionServicesImpl((DriverManagerConnectionSpec) connectionSpec);
     }
 
-    protected ResultCatalog createResultCatalog(String path) {
-        return new ResultCatalogImpl(path);
+    protected Catalog createResultCatalog(String path) {
+        return new CatalogImpl(path);
     }
 
     public LoadSpec getLoadSpec() {

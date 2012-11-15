@@ -33,11 +33,11 @@ import java.io.OutputStream;
 /**
  * @author Sergey Bushik
  */
-public interface ResultEntryWriter extends Closeable {
+public interface CatalogWriter extends Closeable {
 
-    void addEntry(ResultEntry entry);
+    void addEntry(CatalogEntry entry);
 
-    OutputStream getEntryOutput(ResultEntry entry);
+    OutputStream getEntryOutput(CatalogEntry entry);
 
     void close();
 }

@@ -30,12 +30,12 @@ package com.nuodb.migration.result.catalog;
 /**
  * @author Sergey Bushik
  */
-public class ResultEntryImpl implements ResultEntry {
+public class CatalogEntryImpl implements CatalogEntry {
 
     private String name;
     private String type;
 
-    public ResultEntryImpl(String name, String type) {
+    public CatalogEntryImpl(String name, String type) {
         this.name = name;
         this.type = type;
     }
@@ -53,7 +53,7 @@ public class ResultEntryImpl implements ResultEntry {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ResultEntryImpl that = (ResultEntryImpl) o;
+        CatalogEntryImpl that = (CatalogEntryImpl) o;
 
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (type != null ? !type.equals(that.type) : that.type != null) return false;

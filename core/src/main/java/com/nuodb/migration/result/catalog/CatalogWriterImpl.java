@@ -28,7 +28,6 @@
 package com.nuodb.migration.result.catalog;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,68 +39,73 @@ import java.io.OutputStream;
 import java.util.List;
 
 import static java.lang.String.valueOf;
-import static org.apache.commons.io.FileUtils.getFile;
-import static org.apache.commons.io.FileUtils.openOutputStream;
+import static org.apache.commons.io.FileUtils.*;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
  */
-public class ResultEntryWriterImpl implements ResultEntryWriter {
+public class CatalogWriterImpl implements CatalogWriter {
     protected final Log log = LogFactory.getLog(getClass());
 
     private OutputStream output;
-    private List<ResultEntry> entries = Lists.newArrayList();
+    private List<CatalogEntry> entries = Lists.newArrayList();
 
     private File catalogDir;
     private File catalogFile;
 
-    public ResultEntryWriterImpl(File catalogDir, File catalogFile) {
+    public CatalogWriterImpl(File catalogDir, File catalogFile) {
         this.catalogDir = catalogDir;
         this.catalogFile = catalogFile;
-        open();
-    }
-
-    protected void open() {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Opening entry catalog writer %s", catalogFile));
-        }
-        try {
-            FileUtils.forceMkdir(catalogDir);
-        } catch (IOException e) {
-            throw new ResultCatalogException("Can't open dump catalog dir", e);
-        }
-        try {
-            FileUtils.touch(catalogFile);
-        } catch (IOException e) {
-            throw new ResultCatalogException("Can't open dump catalog file", e);
-        }
-        try {
-            this.output = FileUtils.openOutputStream(catalogFile);
-        } catch (IOException e) {
-            throw new ResultCatalogException("Error opening catalog file for writing", e);
-        }
     }
 
     @Override
-    public void addEntry(ResultEntry entry) {
+    public void addEntry(CatalogEntry entry) {
         String entryName = valueOf(entry);
         if (log.isTraceEnabled()) {
             log.trace(String.format("Adding entry %1$s", entryName));
         }
         try {
+            initOutput();
             if (!entries.isEmpty()) {
                 IOUtils.write(System.getProperty("line.separator"), output);
             }
             entries.add(entry);
             IOUtils.write(entryName, output);
         } catch (IOException e) {
-            throw new ResultCatalogException("Failed writing entry to catalog", e);
+            throw new CatalogException("Failed writing entry to catalog", e);
+        }
+    }
+
+    protected void initOutput() {
+        if (output == null) {
+            output = getOutput();
+        }
+    }
+
+    protected OutputStream getOutput() {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Opening entry catalog writer %s", catalogFile));
+        }
+        try {
+            forceMkdir(catalogDir);
+        } catch (IOException e) {
+            throw new CatalogException("Can't open dump catalog dir", e);
+        }
+        try {
+            touch(catalogFile);
+        } catch (IOException e) {
+            throw new CatalogException("Can't open dump catalog file", e);
+        }
+        try {
+            return openOutputStream(catalogFile);
+        } catch (IOException e) {
+            throw new CatalogException("Error opening catalog file for writing", e);
         }
     }
 
     @Override
-    public OutputStream getEntryOutput(ResultEntry entry) {
+    public OutputStream getEntryOutput(CatalogEntry entry) {
         OutputStream entryOutput;
         try {
             File file = getFile(catalogDir, valueOf(entry));
@@ -110,7 +114,7 @@ public class ResultEntryWriterImpl implements ResultEntryWriter {
             }
             entryOutput = new BufferedOutputStream(openOutputStream(file));
         } catch (IOException e) {
-            throw new ResultCatalogException("Failed opening entry output", e);
+            throw new CatalogException("Failed opening entry output", e);
         }
         return entryOutput;
     }

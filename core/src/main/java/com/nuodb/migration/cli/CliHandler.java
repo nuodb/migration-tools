@@ -44,7 +44,7 @@ import java.util.Arrays;
  */
 public class CliHandler extends CliHandlerSupport implements Bootable {
 
-    public static final int CLI_ERROR = 1;
+    public static final int CLI_ERROR = 2;
 
     public CliHandler() {
     }

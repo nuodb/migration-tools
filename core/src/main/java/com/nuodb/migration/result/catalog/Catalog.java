@@ -27,17 +27,12 @@
  */
 package com.nuodb.migration.result.catalog;
 
-import java.io.Closeable;
-import java.io.InputStream;
-
 /**
  * @author Sergey Bushik
  */
-public interface ResultEntryReader extends Closeable {
+public interface Catalog {
 
-    ResultEntry[] getEntries();
+    CatalogReader getEntryReader();
 
-    InputStream getEntryInput(ResultEntry entry);
-
-    void close();
+    CatalogWriter getEntryWriter();
 }

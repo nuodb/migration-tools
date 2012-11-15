@@ -37,7 +37,7 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
 /**
  * @author Sergey Bushik
  */
-public class ResultCatalogImpl implements ResultCatalog {
+public class CatalogImpl implements Catalog {
 
     private static final String CATALOG_FILE_NAME = "dump.cat";
 
@@ -47,7 +47,7 @@ public class ResultCatalogImpl implements ResultCatalog {
     private File catalogDir;
     private File catalogFile;
 
-    public ResultCatalogImpl(String path) {
+    public CatalogImpl(String path) {
         this.path = path;
         this.catalogDir = getCatalogDir();
         this.catalogFile = getCatalogFile();
@@ -72,12 +72,12 @@ public class ResultCatalogImpl implements ResultCatalog {
     }
 
     @Override
-    public ResultEntryReader openReader() {
-        return new ResultEntryReaderImpl(catalogDir, catalogFile);
+    public CatalogReader getEntryReader() {
+        return new CatalogReaderImpl(catalogDir, catalogFile);
     }
 
     @Override
-    public ResultEntryWriter openWriter() {
-        return new ResultEntryWriterImpl(catalogDir, catalogFile);
+    public CatalogWriter getEntryWriter() {
+        return new CatalogWriterImpl(catalogDir, catalogFile);
     }
 }

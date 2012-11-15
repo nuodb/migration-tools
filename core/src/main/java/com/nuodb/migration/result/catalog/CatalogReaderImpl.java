@@ -28,7 +28,6 @@
 package com.nuodb.migration.result.catalog;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -41,58 +40,66 @@ import java.util.Scanner;
 import static java.lang.String.valueOf;
 import static org.apache.commons.io.FileUtils.getFile;
 import static org.apache.commons.io.FileUtils.openInputStream;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
  */
-public class ResultEntryReaderImpl implements ResultEntryReader {
+public class CatalogReaderImpl implements CatalogReader {
 
     protected final Log log = LogFactory.getLog(getClass());
 
     private File catalogDir;
     private File catalogFile;
-    private InputStream input;
 
-    public ResultEntryReaderImpl(File catalogDir, File catalogFile) {
+    public CatalogReaderImpl(File catalogDir, File catalogFile) {
         this.catalogDir = catalogDir;
         this.catalogFile = catalogFile;
-        open();
-    }
-
-    protected void open() {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Entry catalog file is %1$s", catalogFile.getPath()));
-        }
-        try {
-            input = openInputStream(catalogFile);
-        } catch (IOException e) {
-            throw new ResultCatalogException("Error opening catalog file for reading", e);
-        }
     }
 
     @Override
-    public ResultEntry[] getEntries() {
-        List<ResultEntry> entries = Lists.newArrayList();
+    public CatalogEntry[] getEntries() {
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Entry catalog file is %1$s", catalogFile.getPath()));
+        }
+        InputStream input = getInput();
+        try {
+            return readEntries(input);
+        } finally {
+            closeQuietly(input);
+        }
+    }
+
+    protected InputStream getInput() {
+        try {
+            return openInputStream(catalogFile);
+        } catch (IOException exception) {
+            throw new CatalogException("Error opening catalog file for reading", exception);
+        }
+    }
+
+    protected CatalogEntry[] readEntries(InputStream input) {
+        List<CatalogEntry> entries = Lists.newArrayList();
         Scanner scanner = new Scanner(input);
         scanner.useDelimiter(System.getProperty("line.separator"));
         while (scanner.hasNext()) {
             entries.add(getEntry(scanner.next()));
         }
         scanner.close();
-        return entries.toArray(new ResultEntry[entries.size()]);
+        return entries.toArray(new CatalogEntry[entries.size()]);
     }
 
-    protected ResultEntry getEntry(String entry) {
+    protected CatalogEntry getEntry(String entry) {
         int index = entry.lastIndexOf('.');
         if (index != -1) {
-            return new ResultEntryImpl(entry.substring(0, index), entry.substring(index + 1));
+            return new CatalogEntryImpl(entry.substring(0, index), entry.substring(index + 1));
         } else {
-            throw new ResultCatalogException(String.format("Entry %s doesn't match name.type pattern", entry));
+            throw new CatalogException(String.format("Entry %s doesn't match pattern", entry));
         }
     }
 
     @Override
-    public InputStream getEntryInput(ResultEntry entry) {
+    public InputStream getEntryInput(CatalogEntry entry) {
         InputStream entryInput;
         try {
             File file = getFile(catalogDir, valueOf(entry));
@@ -101,20 +108,19 @@ public class ResultEntryReaderImpl implements ResultEntryReader {
             }
             entryInput = openInputStream(file);
         } catch (IOException e) {
-            throw new ResultCatalogException("Failed opening entry input", e);
+            throw new CatalogException("Failed opening entry input", e);
         }
         return entryInput;
     }
 
     @Override
     public void close() {
-        IOUtils.closeQuietly(input);
     }
 
     public static void main(String[] args) {
-        ResultCatalog catalog = new ResultCatalogImpl("/tmp/test/dump.cat");
-        ResultEntryReader reader = catalog.openReader();
-        for (ResultEntry entry : reader.getEntries()) {
+        Catalog catalog = new CatalogImpl("/tmp/test/dump.cat");
+        CatalogReader reader = catalog.getEntryReader();
+        for (CatalogEntry entry : reader.getEntries()) {
             System.out.println(entry.getName() + "" + entry.getType());
         }
     }

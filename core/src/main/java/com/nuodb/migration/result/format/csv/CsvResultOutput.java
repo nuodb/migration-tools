@@ -92,7 +92,7 @@ public class CsvResultOutput extends ResultOutputBase implements CsvAttributes {
     @Override
     protected void doWriteEnd() {
         try {
-            printer.flush();
+            printer.close();
         } catch (IOException e) {
             throw new ResultInputException(e);
         }
