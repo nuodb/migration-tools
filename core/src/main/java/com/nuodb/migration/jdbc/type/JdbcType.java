@@ -38,6 +38,8 @@ public interface JdbcType<T> {
 
     int getTypeCode();
 
+    String getTypeName();
+
     Class<? extends T> getTypeClass();
 
     T getValue(ResultSet resultSet, int column) throws SQLException;

@@ -1,10 +1,10 @@
 package com.nuodb.migration;
 
 
-import com.nuodb.migration.jdbc.metamodel.Column;
-import com.nuodb.migration.jdbc.metamodel.Database;
-import com.nuodb.migration.jdbc.metamodel.Schema;
-import com.nuodb.migration.jdbc.metamodel.Table;
+import com.nuodb.migration.jdbc.model.Column;
+import com.nuodb.migration.jdbc.model.Database;
+import com.nuodb.migration.jdbc.model.Schema;
+import com.nuodb.migration.jdbc.model.Table;
 import com.nuodb.migration.jdbc.query.SelectQuery;
 import com.nuodb.migration.spec.DriverManagerConnectionSpec;
 

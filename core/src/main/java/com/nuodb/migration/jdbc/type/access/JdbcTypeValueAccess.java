@@ -27,31 +27,20 @@
  */
 package com.nuodb.migration.jdbc.type.access;
 
-import com.nuodb.migration.jdbc.metamodel.ColumnModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migration.jdbc.model.ColumnModel;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess extends JdbcTypeRegistry {
+public interface JdbcTypeValueAccess<T> {
 
-    <T> JdbcTypeValueGetter<T> createValueGetter(int typeCode);
+    ColumnModel getColumnModel();
 
-    <T> JdbcTypeValueGetter<T> createValueGetter(JdbcType<T> jdbcType);
+    T getValue() throws SQLException;
 
-    <T> JdbcTypeValueSetter<T> createValueSetter(int typeCode);
+    <X> X getValue(Class<X> valueClass) throws SQLException;
 
-    <T> JdbcTypeValueSetter<T> createValueSetter(JdbcType<T> jdbcType);
-
-    <T> JdbcTypeValueAccessor<T> createResultSetAccessor(ResultSet resultSet, int column);
-
-    <T> JdbcTypeValueAccessor<T> createResultSetAccessor(ResultSet resultSet, int column, ColumnModel columnModel);
-
-    <T> JdbcTypeValueAccessor<T> createStatementAccessor(PreparedStatement statement, int column);
-
-    <T> JdbcTypeValueAccessor<T> createStatementAccessor(PreparedStatement statement, int column, ColumnModel columnModel);
+    <X> void setValue(X value) throws SQLException;
 }

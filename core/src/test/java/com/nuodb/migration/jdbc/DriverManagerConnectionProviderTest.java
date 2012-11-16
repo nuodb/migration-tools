@@ -54,8 +54,7 @@ public class DriverManagerConnectionProviderTest {
     @Test
     public void testGetConnection() throws Exception {
         DriverManagerConnectionProvider connectionProvider =
-                new DriverManagerConnectionProvider();
-        connectionProvider.setConnectionSpec(connectionSpec);
+                new DriverManagerConnectionProvider(connectionSpec);
         connectionProvider.setTransactionIsolation(transactionIsolation);
         connectionProvider.setAutoCommit(false);
         final Connection connection = connectionProvider.getConnection();

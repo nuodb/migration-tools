@@ -27,6 +27,9 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -59,5 +62,10 @@ public class MySQLDialect extends DatabaseDialectBase {
     @Override
     public void enableStreaming(Statement statement) throws SQLException {
         statement.setFetchSize(Integer.MIN_VALUE);
+    }
+
+    @Override
+    public JdbcTypeRegistry getJdbcTypeRegistry() {
+        return MySQLTypeRegistry.INSTANCE;
     }
 }

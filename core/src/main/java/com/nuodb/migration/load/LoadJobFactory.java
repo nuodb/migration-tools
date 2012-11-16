@@ -28,8 +28,8 @@
 package com.nuodb.migration.load;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.JdbcConnectionServices;
-import com.nuodb.migration.jdbc.JdbcConnectionServicesImpl;
+import com.nuodb.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
@@ -54,19 +54,19 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         FormatSpec inputSpec = loadSpec.getInputSpec();
 
         LoadJob job = new LoadJob();
-        job.setJdbcConnectionServices(createJdbcServices(connectionSpec));
+        job.setConnectionProvider(createConnectionProvider(connectionSpec));
         job.setInputType(inputSpec.getType());
         job.setInputAttributes(inputSpec.getAttributes());
-        job.setCatalog(createResultCatalog(inputSpec.getPath()));
+        job.setCatalog(createCatalog(inputSpec.getPath()));
         job.setResultFormatFactory(resultFormatFactory);
         return job;
     }
 
-    protected JdbcConnectionServices createJdbcServices(ConnectionSpec connectionSpec) {
-        return new JdbcConnectionServicesImpl((DriverManagerConnectionSpec) connectionSpec);
+    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
+        return new DriverManagerConnectionProvider((DriverManagerConnectionSpec) connectionSpec);
     }
 
-    protected Catalog createResultCatalog(String path) {
+    protected Catalog createCatalog(String path) {
         return new CatalogImpl(path);
     }
 

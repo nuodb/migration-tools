@@ -28,8 +28,8 @@
 package com.nuodb.migration.result.format.csv;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.metamodel.ColumnModelFactory;
-import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
+import com.nuodb.migration.jdbc.model.ColumnModelFactory;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.result.format.ResultInputBase;
 import com.nuodb.migration.result.format.ResultInputException;
 import org.apache.commons.csv.CSVFormat;

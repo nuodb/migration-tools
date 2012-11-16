@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.result.format.jdbc;
 
-import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 /**
  * @author Sergey Bushik
@@ -36,9 +36,9 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
 
 public interface JdbcTypeValueModelSet extends ColumnModelSet {
 
-    JdbcTypeValueAccessor getJdbcTypeValueAccessor(int index);
+    JdbcTypeValueAccess getJdbcTypeValueAccessor(int index);
 
-    JdbcTypeValueAccessor[] getJdbcTypeValueAccessors();
+    JdbcTypeValueAccess[] getJdbcTypeValueAccesses();
 
     JdbcTypeValueFormat getJdbcTypeValueFormat(int index);
 

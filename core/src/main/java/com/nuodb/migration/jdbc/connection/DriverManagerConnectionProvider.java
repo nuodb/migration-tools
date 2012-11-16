@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
+import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DriverManagerConnectionSpec;
 import com.nuodb.migration.utils.ClassUtils;
 import com.nuodb.migration.utils.ReflectionException;
@@ -39,7 +40,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class DriverManagerConnectionProvider extends ConnectionProviderBase {
+public class DriverManagerConnectionProvider implements ConnectionProvider {
 
     public static final String USER_PROPERTY = "user";
     public static final String PASSWORD_PROPERTY = "password";
@@ -71,6 +72,7 @@ public class DriverManagerConnectionProvider extends ConnectionProviderBase {
         this.transactionIsolation = transactionIsolation;
     }
 
+    @Override
     public Connection getConnection() throws SQLException {
         if (!driverLoaded) {
             loadDriver();
@@ -124,6 +126,7 @@ public class DriverManagerConnectionProvider extends ConnectionProviderBase {
         return connection;
     }
 
+    @Override
     public void closeConnection(Connection connection) throws SQLException {
         if (log.isDebugEnabled()) {
             log.debug("Closing connection");
@@ -139,12 +142,9 @@ public class DriverManagerConnectionProvider extends ConnectionProviderBase {
         }
     }
 
-    public DriverManagerConnectionSpec getConnectionSpec() {
+    @Override
+    public ConnectionSpec getConnectionSpec() {
         return connectionSpec;
-    }
-
-    public void setConnectionSpec(DriverManagerConnectionSpec connectionSpec) {
-        this.connectionSpec = connectionSpec;
     }
 
     public boolean isAutoCommit() {

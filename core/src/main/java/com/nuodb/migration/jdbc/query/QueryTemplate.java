@@ -30,7 +30,10 @@ package com.nuodb.migration.jdbc.query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
@@ -45,7 +48,8 @@ public class QueryTemplate {
         this.connection = connection;
     }
 
-    public <X extends Statement> void execute(StatementCreator<X> creator, StatementCallback<X> callback) throws SQLException {
+    public <X extends Statement> void execute(StatementCreator<X> creator,
+                                              StatementCallback<X> callback) throws SQLException {
         X statement = creator.create(connection);
         try {
             callback.execute(statement);

@@ -28,9 +28,9 @@
 package com.nuodb.migration.result.format;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormatImpl;
 
@@ -44,7 +44,7 @@ public abstract class ResultFormatBase implements ResultFormat {
     private Map<String, String> attributes;
     private Map<Integer, JdbcTypeValueFormat> jdbcTypeValueFormats = Maps.newHashMap();
     private JdbcTypeValueFormat defaultJdbcTypeValueFormat = new JdbcTypeValueFormatImpl();
-    private JdbcTypeValueAccess jdbcTypeValueAccess;
+    private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider;
     private ColumnModelSet columnModelSet;
 
     @Override
@@ -87,8 +87,8 @@ public abstract class ResultFormatBase implements ResultFormat {
     }
 
     @Override
-    public JdbcTypeValueFormat getJdbcTypeValueFormat(int jdbcTypeCode) {
-        JdbcTypeValueFormat jdbcTypeValueFormat = jdbcTypeValueFormats.get(jdbcTypeCode);
+    public JdbcTypeValueFormat getJdbcTypeValueFormat(int typeCode) {
+        JdbcTypeValueFormat jdbcTypeValueFormat = jdbcTypeValueFormats.get(typeCode);
         if (jdbcTypeValueFormat == null) {
             jdbcTypeValueFormat = getDefaultJdbcTypeValueFormat();
         }
@@ -106,13 +106,13 @@ public abstract class ResultFormatBase implements ResultFormat {
     }
 
     @Override
-    public JdbcTypeValueAccess getJdbcTypeValueAccess() {
-        return jdbcTypeValueAccess;
+    public JdbcTypeValueAccessProvider getJdbcTypeValueAccessProvider() {
+        return jdbcTypeValueAccessProvider;
     }
 
     @Override
-    public void setJdbcTypeValueAccess(JdbcTypeValueAccess jdbcTypeValueAccess) {
-        this.jdbcTypeValueAccess = jdbcTypeValueAccess;
+    public void setJdbcTypeValueAccessProvider(JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider) {
+        this.jdbcTypeValueAccessProvider = jdbcTypeValueAccessProvider;
     }
 
     @Override

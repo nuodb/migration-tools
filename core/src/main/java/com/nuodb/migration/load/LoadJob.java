@@ -28,11 +28,13 @@
 package com.nuodb.migration.load;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.JdbcConnectionServices;
-import com.nuodb.migration.jdbc.connection.ConnectionCallback;
+import com.nuodb.migration.jdbc.ConnectionServices;
+import com.nuodb.migration.jdbc.ConnectionServicesCallback;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.metamodel.*;
+import com.nuodb.migration.jdbc.model.*;
 import com.nuodb.migration.jdbc.query.*;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
 import com.nuodb.migration.result.catalog.Catalog;
@@ -51,8 +53,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.io.Closeables.closeQuietly;
-import static com.nuodb.migration.jdbc.metamodel.ObjectType.COLUMN;
-import static com.nuodb.migration.jdbc.metamodel.ObjectType.TABLE;
+import static com.nuodb.migration.jdbc.ConnectionServicesFactory.createConnectionServices;
+import static com.nuodb.migration.jdbc.model.ObjectType.COLUMN;
+import static com.nuodb.migration.jdbc.model.ObjectType.TABLE;
 
 /**
  * @author Sergey Bushik
@@ -60,7 +63,7 @@ import static com.nuodb.migration.jdbc.metamodel.ObjectType.TABLE;
 public class LoadJob extends JobBase {
 
     protected final Log log = LogFactory.getLog(getClass());
-    private JdbcConnectionServices jdbcConnectionServices;
+    private ConnectionProvider connectionProvider;
     private String inputType;
     private Map<String, String> inputAttributes;
     private Catalog catalog;
@@ -68,53 +71,54 @@ public class LoadJob extends JobBase {
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
-        ConnectionProvider connectionProvider = jdbcConnectionServices.getConnectionProvider();
-        connectionProvider.execute(new ConnectionCallback() {
-            @Override
-            public void execute(Connection connection) throws SQLException {
-                DatabaseInspector databaseInspector = jdbcConnectionServices.getDatabaseIntrospector();
-                databaseInspector.withObjectTypes(TABLE, COLUMN);
-                databaseInspector.withConnection(connection);
-                Database database = databaseInspector.inspect();
+        ConnectionServicesCallback.execute(createConnectionServices(connectionProvider),
+                new ConnectionServicesCallback() {
+                    @Override
+                    public void execute(ConnectionServices services) throws SQLException {
+                        DatabaseInspector databaseInspector = services.getDatabaseInspector();
+                        databaseInspector.withObjectTypes(TABLE, COLUMN);
+                        Database database = databaseInspector.inspect();
 
-                CatalogReader reader = catalog.getEntryReader();
-                try {
-                    for (CatalogEntry entry : reader.getEntries()) {
-                        load(execution, connection, database, reader, entry);
+                        CatalogReader reader = catalog.getEntryReader();
+                        try {
+                            for (CatalogEntry entry : reader.getEntries()) {
+                                load(execution, services, database, reader, entry);
+                            }
+                            services.getConnection().commit();
+                        } finally {
+                            closeQuietly(reader);
+                        }
                     }
-                    connection.commit();
-                } finally {
-                    closeQuietly(reader);
-                }
-            }
-        });
+                });
     }
 
-    protected void load(final JobExecution execution, Connection connection, Database database,
-                        CatalogReader reader, CatalogEntry entry) throws SQLException {
+    protected void load(final JobExecution execution, final ConnectionServices services, final Database database,
+                        final CatalogReader reader, final CatalogEntry entry) throws SQLException {
         InputStream entryInput = reader.getEntryInput(entry);
         try {
             final ResultInput resultInput = resultFormatFactory.createInput(entry.getType());
             resultInput.setAttributes(inputAttributes);
             resultInput.setInputStream(entryInput);
-            resultInput.setJdbcTypeValueAccess(jdbcConnectionServices.getJdbcTypeValueAccess());
+
+            JdbcTypeRegistry jdbcTypeRegistry = database.getDatabaseDialect().getJdbcTypeRegistry();
+            resultInput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
             resultInput.initInput();
 
-            load(execution, connection, database, resultInput, entry.getName());
+            load(execution, services, database, resultInput, entry.getName());
         } finally {
             closeQuietly(entryInput);
         }
     }
 
-    protected void load(final JobExecution execution, Connection connection, Database database,
-                        final ResultInput resultInput, String tableName) throws SQLException {
+    protected void load(final JobExecution execution, final ConnectionServices services, final Database database,
+                        final ResultInput resultInput, final String tableName) throws SQLException {
         resultInput.readBegin();
         ColumnModelSet columnModelSet = resultInput.getColumnModelSet();
         Table table = database.findTable(tableName);
         mergeColumnSetModel(table, columnModelSet);
         final InsertQuery query = createInsertQuery(table, columnModelSet);
 
-        QueryTemplate queryTemplate = new QueryTemplate(connection);
+        QueryTemplate queryTemplate = new QueryTemplate(services.getConnection());
         queryTemplate.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
@@ -167,12 +171,12 @@ public class LoadJob extends JobBase {
         return builder.build();
     }
 
-    public JdbcConnectionServices getJdbcConnectionServices() {
-        return jdbcConnectionServices;
+    public ConnectionProvider getConnectionProvider() {
+        return connectionProvider;
     }
 
-    public void setJdbcConnectionServices(JdbcConnectionServices jdbcConnectionServices) {
-        this.jdbcConnectionServices = jdbcConnectionServices;
+    public void setConnectionProvider(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
     }
 
     public Catalog getCatalog() {

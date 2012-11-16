@@ -27,6 +27,9 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.dialect.nuodb.NuoDBTypeRegistry;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+
 import java.sql.DatabaseMetaData;
 
 /**
@@ -41,5 +44,10 @@ public class NuoDBDialect extends DatabaseDialectBase {
     @Override
     public boolean supportsReadSchemas() {
         return true;
+    }
+
+    @Override
+    public JdbcTypeRegistry getJdbcTypeRegistry() {
+        return NuoDBTypeRegistry.INSTANCE;
     }
 }

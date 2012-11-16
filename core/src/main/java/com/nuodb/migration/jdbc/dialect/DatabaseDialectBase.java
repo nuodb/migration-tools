@@ -27,6 +27,9 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migration.jdbc.type.jdbc4.Jdbc4TypeRegistry;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -82,8 +85,8 @@ public class DatabaseDialectBase implements DatabaseDialect {
     }
 
     @Override
-    public void setTransactionIsolationLevel(Connection connection,
-                                             int[] transactionIsolationLevels) throws SQLException {
+    public void setSupportedTransactionIsolationLevel(Connection connection,
+                                                      int[] transactionIsolationLevels) throws SQLException {
         if (transactionIsolationLevels != null) {
             for (int transactionIsolationLevel : transactionIsolationLevels) {
                 if (supportsTransactionIsolationLevel(transactionIsolationLevel)) {
@@ -92,6 +95,11 @@ public class DatabaseDialectBase implements DatabaseDialect {
                 }
             }
         }
+    }
+
+    @Override
+    public JdbcTypeRegistry getJdbcTypeRegistry() {
+        return Jdbc4TypeRegistry.INSTANCE;
     }
 
     @Override

@@ -108,7 +108,7 @@ public class JobExecutorImpl implements JobExecutor {
             fireJobExecutionEvent(new JobExecutionEvent(execution));
         } catch (Throwable error) {
             if (log.isErrorEnabled()) {
-                log.error(String.format("Job execution failed %1$s", job.getName()), error);
+                log.error(String.format("Job %1$s execution failed", job.getName()));
             }
             synchronized (jobStatus) {
                 jobStatus.setExecutionEndDate(new Date());

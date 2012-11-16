@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistryBase;
+import com.nuodb.migration.jdbc.type.adapter.*;
 
 /**
  * @author Sergey Bushik
@@ -66,10 +67,12 @@ public class Jdbc2TypeRegistry extends JdbcTypeRegistryBase {
         addJdbcType(JdbcTimestampType.INSTANCE);
         addJdbcType(JdbcTimeType.INSTANCE);
 
-        addJdbcTypeAdapter(JdbcDateTypeAdapter.INSTANCE);
-        addJdbcTypeAdapter(JdbcTimeTypeAdapter.INSTANCE);
-        addJdbcTypeAdapter(JdbcTimestampTypeAdapter.INSTANCE);
-        addJdbcTypeAdapter(JdbcBlobTypeAdapter.INSTANCE);
-        addJdbcTypeAdapter(JdbcClobTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(DateTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(TimeTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(TimestampTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(BlobTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(ClobTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(BigDecimalTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(BigIntegerTypeAdapter.INSTANCE);
     }
 }

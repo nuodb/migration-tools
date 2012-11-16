@@ -27,9 +27,8 @@
  */
 package com.nuodb.migration.result.format.jdbc;
 
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
-
-import static com.nuodb.migration.jdbc.type.JdbcTypeNameMap.INSTANCE;
+import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 /**
  * @author Sergey Bushik
@@ -37,34 +36,42 @@ import static com.nuodb.migration.jdbc.type.JdbcTypeNameMap.INSTANCE;
 public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<T> {
 
     @Override
-    public String getValue(JdbcTypeValueAccessor<T> accessor) {
+    public String getValue(JdbcTypeValueAccess<T> jdbcTypeValueAccess) {
         try {
-            return doGetValue(accessor);
+            return doGetValue(jdbcTypeValueAccess);
         } catch (JdbcTypeValueException exception) {
             throw exception;
         } catch (Exception exception) {
-            throw newColumnValueFormatFailure(accessor, exception);
+            throw newGetValueFailure(jdbcTypeValueAccess, exception);
         }
     }
 
-    protected abstract String doGetValue(JdbcTypeValueAccessor<T> accessor) throws Exception;
+    protected abstract String doGetValue(JdbcTypeValueAccess<T> jdbcTypeValueAccess) throws Exception;
+
+    protected JdbcTypeValueException newGetValueFailure(JdbcTypeValueAccess jdbcTypeValueAccess, Exception exception) {
+        ColumnModel column = jdbcTypeValueAccess.getColumnModel();
+        return new JdbcTypeValueException(
+                String.format("Can't get column %s type %s value",
+                        column.getName(), column.getTypeName()), exception);
+    }
 
     @Override
-    public void setValue(JdbcTypeValueAccessor<T> accessor, String value) {
+    public void setValue(JdbcTypeValueAccess<T> jdbcTypeValueAccess, String value) {
         try {
-            doSetValue(accessor, value);
+            doSetValue(jdbcTypeValueAccess, value);
         } catch (JdbcTypeValueException exception) {
             throw exception;
         } catch (Exception exception) {
-            throw newColumnValueFormatFailure(accessor, exception);
+            throw newSetValueFailure(jdbcTypeValueAccess, exception);
         }
     }
 
-    protected abstract void doSetValue(JdbcTypeValueAccessor<T> accessor, String value) throws Exception;
+    protected abstract void doSetValue(JdbcTypeValueAccess<T> jdbcTypeValueAccess, String value) throws Exception;
 
-    protected JdbcTypeValueException newColumnValueFormatFailure(JdbcTypeValueAccessor accessor, Exception exception) {
-        int typeCode = accessor.getColumnModel().getTypeCode();
+    protected JdbcTypeValueException newSetValueFailure(JdbcTypeValueAccess jdbcTypeValueAccess, Exception exception) {
+        ColumnModel column = jdbcTypeValueAccess.getColumnModel();
         return new JdbcTypeValueException(
-                String.format("Failed processing jdbc type %s", INSTANCE.getTypeName(typeCode)), exception);
+                String.format("Can't get column %s type %s value",
+                        column.getName(), column.getTypeName()), exception);
     }
 }

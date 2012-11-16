@@ -50,7 +50,7 @@ public abstract class CliRunJob extends CliRunAdapter {
         executor.execute(Collections.<String, Object>emptyMap());
         Throwable failure = executor.getJobStatus().getFailure();
         if (failure != null) {
-            throw new CliRunException(failure);
+            throw new CliRunException(failure.getMessage(), failure);
         }
     }
 

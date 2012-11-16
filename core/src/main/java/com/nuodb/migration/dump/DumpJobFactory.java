@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.dump;
 
-import com.nuodb.migration.jdbc.JdbcConnectionServices;
-import com.nuodb.migration.jdbc.JdbcConnectionServicesImpl;
+import com.nuodb.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.result.catalog.Catalog;
 import com.nuodb.migration.result.catalog.CatalogImpl;
@@ -58,21 +58,21 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         FormatSpec outputSpec = dumpSpec.getOutputSpec();
 
         DumpJob job = new DumpJob();
-        job.setJdbcConnectionServices(createJdbcServices(connectionSpec));
+        job.setConnectionProvider(createConnectionProvider(connectionSpec));
         job.setSelectQuerySpecs(selectQuerySpecs);
         job.setNativeQuerySpecs(nativeQuerySpecs);
         job.setOutputType(outputSpec.getType());
         job.setOutputAttributes(outputSpec.getAttributes());
-        job.setCatalog(createResultCatalog(outputSpec.getPath()));
+        job.setCatalog(createCatalog(outputSpec.getPath()));
         job.setResultFormatFactory(resultFormatFactory);
         return job;
     }
 
-    protected JdbcConnectionServices createJdbcServices(ConnectionSpec connectionSpec) {
-        return new JdbcConnectionServicesImpl((DriverManagerConnectionSpec) connectionSpec);
+    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
+        return new DriverManagerConnectionProvider((DriverManagerConnectionSpec) connectionSpec);
     }
 
-    protected Catalog createResultCatalog(String path) {
+    protected Catalog createCatalog(String path) {
         return new CatalogImpl(path);
     }
 

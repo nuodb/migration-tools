@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.dialect.resolve;
 
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.dialect.*;
+import com.nuodb.migration.jdbc.dialect.MySQLDialect;
 import com.nuodb.migration.utils.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,7 +54,7 @@ public class DatabaseDialectResolverImpl implements DatabaseDialectResolver {
         register("PostgreSQL", PostgreSQLDialect.class);
         register("Microsoft SQL Server", SQLServerDialect.class);
         register("Oracle", OracleDialect.class);
-        register("NuoDBDialect", NuoDBDialect.class);
+        register("NuoDB", NuoDBDialect.class);
     }
 
     public void register(String productName, Class<? extends DatabaseDialect> databaseDialectType) {

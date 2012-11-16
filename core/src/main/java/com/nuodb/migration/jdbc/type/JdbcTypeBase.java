@@ -35,6 +35,13 @@ import java.sql.SQLException;
  */
 public abstract class JdbcTypeBase<T> implements JdbcType<T> {
 
+    private JdbcTypeNameMap jdbcTypeNameMap = JdbcTypeNameMap.INSTANCE;
+
+    @Override
+    public String getTypeName() {
+        return jdbcTypeNameMap.getTypeName(getTypeCode());
+    }
+
     @Override
     public void setValue(PreparedStatement statement, int column, T value) throws SQLException {
         if (value == null) {

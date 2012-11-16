@@ -28,14 +28,16 @@
 package com.nuodb.migration.dump;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.JdbcConnectionServices;
-import com.nuodb.migration.jdbc.connection.ConnectionCallback;
+import com.nuodb.migration.jdbc.ConnectionServices;
+import com.nuodb.migration.jdbc.ConnectionServicesCallback;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
-import com.nuodb.migration.jdbc.metamodel.Database;
-import com.nuodb.migration.jdbc.metamodel.DatabaseInspector;
-import com.nuodb.migration.jdbc.metamodel.Table;
+import com.nuodb.migration.jdbc.model.Database;
+import com.nuodb.migration.jdbc.model.DatabaseInspector;
+import com.nuodb.migration.jdbc.model.Table;
 import com.nuodb.migration.jdbc.query.*;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
 import com.nuodb.migration.result.catalog.Catalog;
@@ -58,7 +60,8 @@ import java.util.Date;
 import java.util.Map;
 
 import static com.google.common.io.Closeables.closeQuietly;
-import static com.nuodb.migration.jdbc.metamodel.ObjectType.*;
+import static com.nuodb.migration.jdbc.ConnectionServicesFactory.createConnectionServices;
+import static com.nuodb.migration.jdbc.model.ObjectType.*;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
@@ -74,41 +77,41 @@ public class DumpJob extends JobBase {
 
     protected final Log log = LogFactory.getLog(getClass());
 
-    private JdbcConnectionServices jdbcConnectionServices;
     private Catalog catalog;
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
     private Map<String, String> outputAttributes;
     private ResultFormatFactory resultFormatFactory;
+    private ConnectionProvider connectionProvider;
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
-        ConnectionProvider connectionProvider = jdbcConnectionServices.getConnectionProvider();
-        connectionProvider.execute(new ConnectionCallback() {
-            @Override
-            public void execute(Connection connection) throws SQLException {
-                dump(execution, connection);
-            }
-        });
+        ConnectionServicesCallback.execute(createConnectionServices(connectionProvider),
+                new ConnectionServicesCallback() {
+                    @Override
+                    public void execute(ConnectionServices services) throws SQLException {
+                        dump(execution, services);
+                    }
+                });
     }
 
-    protected void dump(final JobExecution execution, final Connection connection) throws SQLException {
-        DatabaseInspector databaseInspector = jdbcConnectionServices.getDatabaseIntrospector();
+    protected void dump(final JobExecution execution, final ConnectionServices services) throws SQLException {
+        DatabaseInspector databaseInspector = services.getDatabaseInspector();
         databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-        databaseInspector.withConnection(connection);
         Database database = databaseInspector.inspect();
-        DatabaseDialect dialect = database.getDatabaseDialect();
-        dialect.setTransactionIsolationLevel(connection,
+
+        DatabaseDialect databaseDialect = database.getDatabaseDialect();
+        databaseDialect.setSupportedTransactionIsolationLevel(services.getConnection(),
                 new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
         CatalogWriter writer = catalog.getEntryWriter();
         try {
             for (SelectQuery selectQuery : createSelectQueries(database, selectQuerySpecs)) {
-                dump(execution, connection, database, selectQuery, writer,
+                dump(execution, services, database, selectQuery, writer,
                         createEntry(selectQuery, outputType));
             }
             for (NativeQuery nativeQuery : createNativeQueries(database, nativeQuerySpecs)) {
-                dump(execution, connection, database, nativeQuery, writer,
+                dump(execution, services, database, nativeQuery, writer,
                         createEntry(nativeQuery, outputType));
             }
         } finally {
@@ -125,13 +128,15 @@ public class DumpJob extends JobBase {
         return new CatalogEntryImpl(String.format(QUERY_ENTRY_NAME, new Date()), type);
     }
 
-    protected void dump(final JobExecution execution, final Connection connection, final Database database,
+    protected void dump(final JobExecution execution, final ConnectionServices services, final Database database,
                         final Query query, final CatalogWriter writer, final CatalogEntry entry) throws SQLException {
         final ResultOutput output = resultFormatFactory.createOutput(outputType);
         output.setAttributes(outputAttributes);
-        output.setJdbcTypeValueAccess(jdbcConnectionServices.getJdbcTypeValueAccess());
 
-        QueryTemplate queryTemplate = new QueryTemplate(connection);
+        JdbcTypeRegistry jdbcTypeRegistry = database.getDatabaseDialect().getJdbcTypeRegistry();
+        output.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
+
+        QueryTemplate queryTemplate = new QueryTemplate(services.getConnection());
         queryTemplate.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
@@ -160,21 +165,21 @@ public class DumpJob extends JobBase {
     }
 
     protected void dump(final JobExecution execution, final PreparedStatement statement, final CatalogWriter writer,
-                        final CatalogEntry entry, final ResultOutput output) throws SQLException {
+                        final CatalogEntry entry, final ResultOutput resultOutput) throws SQLException {
         ResultSet resultSet = statement.executeQuery();
 
         writer.addEntry(entry);
-        output.setOutputStream(writer.getEntryOutput(entry));
-        output.setResultSet(resultSet);
+        resultOutput.setOutputStream(writer.getEntryOutput(entry));
+        resultOutput.initOutput();
 
-        output.initOutput();
-        output.initModel();
+        resultOutput.setResultSet(resultSet);
+        resultOutput.initModel();
 
-        output.writeBegin();
+        resultOutput.writeBegin();
         while (execution.isRunning() && resultSet.next()) {
-            output.writeRow();
+            resultOutput.writeRow();
         }
-        output.writeEnd();
+        resultOutput.writeEnd();
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database,
@@ -224,12 +229,12 @@ public class DumpJob extends JobBase {
         return queries;
     }
 
-    public JdbcConnectionServices getJdbcConnectionServices() {
-        return jdbcConnectionServices;
+    public ConnectionProvider getConnectionProvider() {
+        return connectionProvider;
     }
 
-    public void setJdbcConnectionServices(JdbcConnectionServices jdbcConnectionServices) {
-        this.jdbcConnectionServices = jdbcConnectionServices;
+    public void setConnectionProvider(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
     }
 
     public Catalog getCatalog() {

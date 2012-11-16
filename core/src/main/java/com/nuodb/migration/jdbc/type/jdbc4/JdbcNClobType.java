@@ -28,13 +28,14 @@
 package com.nuodb.migration.jdbc.type.jdbc4;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.*;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcNClobType implements JdbcType<NClob> {
+public class JdbcNClobType extends JdbcTypeBase<NClob> {
 
     public static final JdbcType INSTANCE = new JdbcNClobType();
 
@@ -54,7 +55,7 @@ public class JdbcNClobType implements JdbcType<NClob> {
     }
 
     @Override
-    public void setValue(PreparedStatement statement, int column, NClob value) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, NClob value, int column) throws SQLException {
         statement.setNClob(column, value);
     }
 }

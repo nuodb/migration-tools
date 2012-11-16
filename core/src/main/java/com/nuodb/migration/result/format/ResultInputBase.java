@@ -27,12 +27,12 @@
  */
 package com.nuodb.migration.result.format;
 
-import com.nuodb.migration.jdbc.metamodel.ColumnModel;
-import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
+import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueModelSet;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueModelSetImpl;
-import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -75,15 +75,15 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
     protected JdbcTypeValueModelSet createJdbcTypeValueModelSet() {
         final ColumnModelSet columnModelSet = getColumnModelSet();
         final int valueCount = columnModelSet.getLength();
-        JdbcTypeValueAccessor[] accessors = new JdbcTypeValueAccessor[valueCount];
+        JdbcTypeValueAccess[] accesses = new JdbcTypeValueAccess[valueCount];
         JdbcTypeValueFormat[] formats = new JdbcTypeValueFormat[valueCount];
         for (int index = 0; index < valueCount; index++) {
             ColumnModel columnModel = columnModelSet.item(index);
             formats[index] = getJdbcTypeValueFormat(columnModel.getTypeCode());
-            accessors[index] = getJdbcTypeValueAccess().createStatementAccessor(
+            accesses[index] = getJdbcTypeValueAccessProvider().getStatementAccess(
                     preparedStatement, index + 1, columnModel);
         }
-        return new JdbcTypeValueModelSetImpl(accessors, formats, columnModelSet);
+        return new JdbcTypeValueModelSetImpl(accesses, formats, columnModelSet);
     }
 
     @Override
@@ -99,9 +99,9 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
     protected void readRow(String[] values) {
         JdbcTypeValueModelSet model = getJdbcTypeValueModelSet();
         for (int index = 0; index < model.getLength(); index++) {
-            JdbcTypeValueAccessor accessor = model.getJdbcTypeValueAccessor(index);
+            JdbcTypeValueAccess jdbcTypeValueAccess = model.getJdbcTypeValueAccessor(index);
             JdbcTypeValueFormat jdbcTypeValueFormat = model.getJdbcTypeValueFormat(index);
-            jdbcTypeValueFormat.setValue(accessor, values[index]);
+            jdbcTypeValueFormat.setValue(jdbcTypeValueAccess, values[index]);
         }
     }
 

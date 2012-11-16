@@ -27,14 +27,16 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
+import com.nuodb.migration.spec.ConnectionSpec;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public interface ConnectionProvider {
 
-    Connection getConnection() throws SQLException;
+    ConnectionSpec getConnectionSpec();
 
-    void execute(ConnectionCallback callback) throws SQLException;
+    Connection getConnection() throws SQLException;
 
     void closeConnection(Connection connection) throws SQLException;
 }

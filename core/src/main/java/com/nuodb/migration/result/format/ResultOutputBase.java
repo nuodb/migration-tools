@@ -27,9 +27,9 @@
  */
 package com.nuodb.migration.result.format;
 
-import com.nuodb.migration.jdbc.metamodel.ColumnModelFactory;
-import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessor;
+import com.nuodb.migration.jdbc.model.ColumnModelFactory;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueModelSet;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueModelSetImpl;
@@ -94,15 +94,15 @@ public abstract class ResultOutputBase extends ResultFormatBase implements Resul
     protected JdbcTypeValueModelSet createJdbcTypeValueModelSet() {
         final ColumnModelSet columnModelSet = getColumnModelSet();
         final int valueCount = columnModelSet.getLength();
-        JdbcTypeValueAccessor[] accessors = new JdbcTypeValueAccessor[valueCount];
+        JdbcTypeValueAccess[] accesses = new JdbcTypeValueAccess[valueCount];
         JdbcTypeValueFormat[] formats = new JdbcTypeValueFormat[valueCount];
         for (int index = 0; index < valueCount; index++) {
             int typeCode = columnModelSet.getTypeCode(index);
-            accessors[index] =  getJdbcTypeValueAccess().createResultSetAccessor(
+            accesses[index] =  getJdbcTypeValueAccessProvider().getResultSetAccess(
                     resultSet, index + 1, columnModelSet.item(index));
             formats[index] = getJdbcTypeValueFormat(typeCode);
         }
-        return new JdbcTypeValueModelSetImpl(accessors, formats, columnModelSet);
+        return new JdbcTypeValueModelSetImpl(accesses, formats, columnModelSet);
     }
 
     @Override
@@ -125,8 +125,8 @@ public abstract class ResultOutputBase extends ResultFormatBase implements Resul
         final String[] values = new String[model.getLength()];
         for (int index = 0; index < model.getLength(); index++) {
             JdbcTypeValueFormat format = model.getJdbcTypeValueFormat(index);
-            JdbcTypeValueAccessor accessor = model.getJdbcTypeValueAccessor(index);
-            values[index] = format.getValue(accessor);
+            JdbcTypeValueAccess access = model.getJdbcTypeValueAccessor(index);
+            values[index] = format.getValue(access);
         }
         return values;
     }

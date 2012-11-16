@@ -27,9 +27,9 @@
  */
 package com.nuodb.migration.result.format;
 
-import com.nuodb.migration.jdbc.metamodel.ColumnModelSet;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
 
 import java.util.Map;
@@ -51,9 +51,9 @@ public interface ResultFormat {
 
     String getAttribute(String attribute, String defaultValue);
 
-    JdbcTypeValueAccess getJdbcTypeValueAccess();
+    JdbcTypeValueAccessProvider getJdbcTypeValueAccessProvider();
 
-    void setJdbcTypeValueAccess(JdbcTypeValueAccess jdbcTypeValueAccess);
+    void setJdbcTypeValueAccessProvider(JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider);
 
     void addJdbcTypeValueFormat(int typeCode, JdbcTypeValueFormat jdbcTypeValueFormat);
 
