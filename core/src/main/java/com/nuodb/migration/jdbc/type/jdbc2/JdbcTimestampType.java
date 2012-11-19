@@ -39,14 +39,8 @@ public class JdbcTimestampType extends JdbcTypeBase<Timestamp> {
 
     public static final JdbcType INSTANCE = new JdbcTimestampType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.TIMESTAMP;
-    }
-
-    @Override
-    public Class<? extends Timestamp> getTypeClass() {
-        return Timestamp.class;
+    public JdbcTimestampType() {
+        super(Types.TIMESTAMP, Timestamp.class);
     }
 
     @Override

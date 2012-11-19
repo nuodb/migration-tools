@@ -42,7 +42,6 @@ import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
 import com.nuodb.migration.result.catalog.Catalog;
 import com.nuodb.migration.result.catalog.CatalogEntry;
-import com.nuodb.migration.result.catalog.CatalogEntryImpl;
 import com.nuodb.migration.result.catalog.CatalogWriter;
 import com.nuodb.migration.result.format.ResultFormatFactory;
 import com.nuodb.migration.result.format.ResultOutput;
@@ -104,11 +103,11 @@ public class DumpJob extends JobBase {
         DatabaseDialect databaseDialect = database.getDatabaseDialect();
         databaseDialect.setSupportedTransactionIsolationLevel(services.getConnection(),
                 new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
-        CatalogWriter writer = catalog.getEntryWriter();
+        CatalogWriter writer = catalog.getWriter();
         try {
             for (SelectQuery selectQuery : createSelectQueries(database, selectQuerySpecs)) {
                 dump(execution, services, database, selectQuery, writer,
-                        createEntry(selectQuery, outputType));
+                        createCatalogEntry(selectQuery, outputType));
             }
             for (NativeQuery nativeQuery : createNativeQueries(database, nativeQuerySpecs)) {
                 dump(execution, services, database, nativeQuery, writer,
@@ -119,13 +118,13 @@ public class DumpJob extends JobBase {
         }
     }
 
-    protected CatalogEntry createEntry(SelectQuery query, String type) {
+    protected CatalogEntry createCatalogEntry(SelectQuery query, String type) {
         Table table = query.getTables().get(0);
-        return new CatalogEntryImpl(table.getName(), type);
+        return new CatalogEntry(table.getName(), type);
     }
 
     protected CatalogEntry createEntry(NativeQuery query, String type) {
-        return new CatalogEntryImpl(String.format(QUERY_ENTRY_NAME, new Date()), type);
+        return new CatalogEntry(String.format(QUERY_ENTRY_NAME, new Date()), type);
     }
 
     protected void dump(final JobExecution execution, final ConnectionServices services, final Database database,
@@ -198,10 +197,16 @@ public class DumpJob extends JobBase {
     protected Collection<SelectQuery> createSelectQueries(Database database) {
         Collection<SelectQuery> selectQueries = Lists.newArrayList();
         for (Table table : database.listTables()) {
-            SelectQueryBuilder builder = new SelectQueryBuilder();
-            builder.setTable(table);
-            builder.setQualifyNames(true);
-            selectQueries.add(builder.build());
+            if (Table.TABLE.equals(table.getType())) {
+                SelectQueryBuilder builder = new SelectQueryBuilder();
+                builder.setTable(table);
+                builder.setQualifyNames(true);
+                selectQueries.add(builder.build());
+            } else {
+                if (log.isTraceEnabled()) {
+                    log.trace(String.format("Skipping %s %s", table.getQualifiedName(), table.getType()));
+                }
+            }
         }
         return selectQueries;
     }

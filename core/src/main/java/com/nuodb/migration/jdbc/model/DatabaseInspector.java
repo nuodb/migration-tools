@@ -181,7 +181,7 @@ public class DatabaseInspector {
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Read catalogs is unsupported");
+                log.debug("Reading catalogs is unsupported");
             }
         }
     }
@@ -201,7 +201,7 @@ public class DatabaseInspector {
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Read schemas is unsupported");
+                log.debug("Reading schemas is unsupported");
             }
         }
     }
@@ -224,7 +224,7 @@ public class DatabaseInspector {
     protected void readTableColumns(DatabaseMetaData metaData, Table table) throws SQLException {
         ResultSet columns = metaData.getColumns(catalog, schema, table.getName(), null);
         try {
-            ColumnModelSet model = ColumnModelFactory.createColumnModelSet(columns.getMetaData());
+            ColumnSetModel model = ColumnModelFactory.createColumnSetModel(columns.getMetaData());
             while (columns.next()) {
                 Column column = table.createColumn(columns.getString("COLUMN_NAME"));
                 column.setTypeCode(columns.getInt("DATA_TYPE"));

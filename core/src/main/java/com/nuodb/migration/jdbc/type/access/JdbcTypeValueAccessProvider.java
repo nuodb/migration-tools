@@ -49,15 +49,31 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
     }
 
     public <T> JdbcTypeValueGetter<T> getJdbcTypeValueGetter(int typeCode) {
-        return getJdbcTypeValueGetter(getJdbcTypeRequired(typeCode));
+        return getJdbcTypeValueGetter(new JdbcTypeDescBase(typeCode));
     }
 
-    public <T> JdbcTypeValueSetter<T> getJdbcTypeValueSetter(int typeCode) {
-        return getJdbcTypeValueSetter(getJdbcTypeRequired(typeCode));
+    public <T> JdbcTypeValueGetter<T> getJdbcTypeValueGetter(int typeCode, String typeName) {
+        return getJdbcTypeValueGetter(new JdbcTypeDescBase(typeCode, typeName));
+    }
+
+    public <T> JdbcTypeValueGetter<T> getJdbcTypeValueGetter(JdbcTypeDesc jdbcTypeDesc) {
+        return getJdbcTypeValueGetter(getJdbcTypeRequired(jdbcTypeDesc));
     }
 
     public <T> JdbcTypeValueGetter<T> getJdbcTypeValueGetter(JdbcType<T> jdbcType) {
         return new JdbcTypeValueGetterImpl<T>(jdbcType);
+    }
+
+    public <T> JdbcTypeValueSetter<T> getJdbcTypeValueSetter(int typeCode) {
+        return getJdbcTypeValueSetter(new JdbcTypeDescBase(typeCode));
+    }
+
+    public <T> JdbcTypeValueSetter<T> getJdbcTypeValueSetter(int typeCode, String typeName) {
+        return getJdbcTypeValueSetter(new JdbcTypeDescBase(typeCode, typeName));
+    }
+
+    public <T> JdbcTypeValueSetter<T> getJdbcTypeValueSetter(JdbcTypeDesc jdbcTypeDesc) {
+        return getJdbcTypeValueSetter(getJdbcTypeRequired(jdbcTypeDesc));
     }
 
     public <T> JdbcTypeValueSetter<T> getJdbcTypeValueSetter(JdbcType<T> jdbcType) {
@@ -76,8 +92,8 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
     public <T> JdbcTypeValueAccess<T> getResultSetAccess(ResultSet resultSet, int column,
                                                          ColumnModel columnModel) {
         return new JdbcTypeValueAccessImpl<T>(
-                (JdbcTypeValueGetter<T>) getJdbcTypeValueGetter(columnModel.getTypeCode()), resultSet, column,
-                columnModel);
+                (JdbcTypeValueGetter<T>) getJdbcTypeValueGetter(
+                        columnModel.getTypeCode(), columnModel.getTypeName()), resultSet, column, columnModel);
     }
 
     public <T> JdbcTypeValueAccess<T> getStatementAccess(PreparedStatement statement, int column) {
@@ -91,8 +107,8 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
     public <T> JdbcTypeValueAccess<T> getStatementAccess(PreparedStatement statement, int column,
                                                          ColumnModel columnModel) {
         return new JdbcTypeValueAccessImpl<T>(
-                (JdbcTypeValueSetter<T>) getJdbcTypeValueSetter(columnModel.getTypeCode()), statement, column,
-                columnModel);
+                (JdbcTypeValueSetter<T>) getJdbcTypeValueSetter(
+                        columnModel.getTypeCode(), columnModel.getTypeName()), statement, column, columnModel);
     }
 
     protected <T> JdbcTypeAdapter<T> getJdbcTypeAdapter(Class valueClass, Class typeClass) {
@@ -108,11 +124,11 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         return jdbcTypeAdapter;
     }
 
-    protected JdbcType getJdbcTypeRequired(int typeCode) {
-        JdbcType jdbcType = getJdbcType(typeCode);
+    protected JdbcType getJdbcTypeRequired(JdbcTypeDesc jdbcTypeDesc) {
+        JdbcType jdbcType = getJdbcType(jdbcTypeDesc);
         if (jdbcType == null) {
             throw new JdbcTypeException(
-                    String.format("Jdbc type %s is not supported", getTypeName(typeCode)));
+                    String.format("Jdbc type %s is not supported", jdbcTypeDesc.getTypeName()));
         }
         return jdbcType;
     }

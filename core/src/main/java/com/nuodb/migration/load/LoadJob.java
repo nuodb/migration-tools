@@ -79,7 +79,7 @@ public class LoadJob extends JobBase {
                         databaseInspector.withObjectTypes(TABLE, COLUMN);
                         Database database = databaseInspector.inspect();
 
-                        CatalogReader reader = catalog.getEntryReader();
+                        CatalogReader reader = catalog.getReader();
                         try {
                             for (CatalogEntry entry : reader.getEntries()) {
                                 load(execution, services, database, reader, entry);
@@ -113,10 +113,10 @@ public class LoadJob extends JobBase {
     protected void load(final JobExecution execution, final ConnectionServices services, final Database database,
                         final ResultInput resultInput, final String tableName) throws SQLException {
         resultInput.readBegin();
-        ColumnModelSet columnModelSet = resultInput.getColumnModelSet();
+        ColumnSetModel columnSetModel = resultInput.getColumnSetModel();
         Table table = database.findTable(tableName);
-        mergeColumnSetModel(table, columnModelSet);
-        final InsertQuery query = createInsertQuery(table, columnModelSet);
+        mergeColumnSetModel(table, columnSetModel);
+        final InsertQuery query = createInsertQuery(table, columnSetModel);
 
         QueryTemplate queryTemplate = new QueryTemplate(services.getConnection());
         queryTemplate.execute(
@@ -145,25 +145,25 @@ public class LoadJob extends JobBase {
         );
     }
 
-    protected void mergeColumnSetModel(Table table, ColumnModelSet columnModelSet) {
-        for (int index = 0; index < columnModelSet.getLength(); index++) {
-            String name = columnModelSet.getName(index);
+    protected void mergeColumnSetModel(Table table, ColumnSetModel columnSetModel) {
+        for (int index = 0; index < columnSetModel.getLength(); index++) {
+            String name = columnSetModel.getName(index);
             Column column = table.getColumn(name);
-            columnModelSet.setTypeCode(index, column.getTypeCode());
-            columnModelSet.setPrecision(index, column.getPrecision());
-            columnModelSet.setScale(index, column.getScale());
+            columnSetModel.setTypeCode(index, column.getTypeCode());
+            columnSetModel.setPrecision(index, column.getPrecision());
+            columnSetModel.setScale(index, column.getScale());
         }
     }
 
-    protected InsertQuery createInsertQuery(Table table, ColumnModelSet columnModelSet) {
+    protected InsertQuery createInsertQuery(Table table, ColumnSetModel columnSetModel) {
         InsertQueryBuilder builder = new InsertQueryBuilder();
         builder.setQualifyNames(true);
         builder.setTable(table);
-        if (columnModelSet != null) {
-            int columnCount = columnModelSet.getLength();
+        if (columnSetModel != null) {
+            int columnCount = columnSetModel.getLength();
             List<String> columns = Lists.newArrayList();
             for (int index = 0; index < columnCount; index++) {
-                ColumnModel columnModel = columnModelSet.item(index);
+                ColumnModel columnModel = columnSetModel.item(index);
                 columns.add(columnModel.getName());
             }
             builder.setColumns(columns);

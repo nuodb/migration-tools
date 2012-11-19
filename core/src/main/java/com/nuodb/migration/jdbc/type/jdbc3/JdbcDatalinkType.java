@@ -25,12 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect.nuodb;
+package com.nuodb.migration.jdbc.type.jdbc3;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
 
-import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,27 +39,21 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class NuoDBBigIntType extends JdbcTypeBase<BigDecimal> {
+public class JdbcDataLinkType extends JdbcTypeBase<URL> {
 
-    public static final JdbcType INSTANCE = new NuoDBBigIntType();
+    public static final JdbcType INSTANCE = new JdbcDataLinkType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.BIGINT;
+    public JdbcDataLinkType() {
+        super(Types.DATALINK, URL.class);
     }
 
     @Override
-    public Class<? extends BigDecimal> getTypeClass() {
-        return BigDecimal.class;
+    public URL getValue(ResultSet resultSet, int column) throws SQLException {
+        return resultSet.getURL(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int column) throws SQLException {
-        statement.setBigDecimal(column, value);
-    }
-
-    @Override
-    public BigDecimal getValue(ResultSet resultSet, int column) throws SQLException {
-        return resultSet.getBigDecimal(column);
+    protected void setNullSafeValue(PreparedStatement statement, URL value, int column) throws SQLException {
+        statement.setURL(column, value);
     }
 }

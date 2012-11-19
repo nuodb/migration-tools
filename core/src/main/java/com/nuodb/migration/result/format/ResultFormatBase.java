@@ -28,8 +28,8 @@
 package com.nuodb.migration.result.format;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.model.ColumnModelSet;
-import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormatImpl;
@@ -42,10 +42,10 @@ import java.util.Map;
 public abstract class ResultFormatBase implements ResultFormat {
 
     private Map<String, String> attributes;
-    private Map<Integer, JdbcTypeValueFormat> jdbcTypeValueFormats = Maps.newHashMap();
-    private JdbcTypeValueFormat defaultJdbcTypeValueFormat = new JdbcTypeValueFormatImpl();
+    private ColumnSetModel columnSetModel;
     private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider;
-    private ColumnModelSet columnModelSet;
+    private Map<JdbcTypeDesc, JdbcTypeValueFormat> jdbcTypeValueFormats = Maps.newHashMap();
+    private JdbcTypeValueFormat defaultJdbcTypeValueFormat = new JdbcTypeValueFormatImpl();
 
     @Override
     public final void setAttributes(Map<String, String> attributes) {
@@ -72,23 +72,13 @@ public abstract class ResultFormatBase implements ResultFormat {
     }
 
     @Override
-    public void addJdbcTypeValueFormat(int jdbcTypeCode, JdbcTypeValueFormat jdbcTypeValueFormat) {
-        jdbcTypeValueFormats.put(jdbcTypeCode, jdbcTypeValueFormat);
+    public void addJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc, JdbcTypeValueFormat jdbcTypeValueFormat) {
+        jdbcTypeValueFormats.put(jdbcTypeDesc, jdbcTypeValueFormat);
     }
 
     @Override
-    public void addJdbcTypeValueFormat(JdbcType jdbcType, JdbcTypeValueFormat jdbcTypeValueFormat) {
-        addJdbcTypeValueFormat(jdbcType.getTypeCode(), jdbcTypeValueFormat);
-    }
-
-    @Override
-    public JdbcTypeValueFormat getJdbcTypeValueFormat(JdbcType jdbcType) {
-        return getJdbcTypeValueFormat(jdbcType.getTypeCode());
-    }
-
-    @Override
-    public JdbcTypeValueFormat getJdbcTypeValueFormat(int typeCode) {
-        JdbcTypeValueFormat jdbcTypeValueFormat = jdbcTypeValueFormats.get(typeCode);
+    public JdbcTypeValueFormat getJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc) {
+        JdbcTypeValueFormat jdbcTypeValueFormat = jdbcTypeValueFormats.get(jdbcTypeDesc);
         if (jdbcTypeValueFormat == null) {
             jdbcTypeValueFormat = getDefaultJdbcTypeValueFormat();
         }
@@ -116,12 +106,12 @@ public abstract class ResultFormatBase implements ResultFormat {
     }
 
     @Override
-    public ColumnModelSet getColumnModelSet() {
-        return columnModelSet;
+    public ColumnSetModel getColumnSetModel() {
+        return columnSetModel;
     }
 
     @Override
-    public void setColumnModelSet(ColumnModelSet columnModelSet) {
-        this.columnModelSet = columnModelSet;
+    public void setColumnSetModel(ColumnSetModel columnSetModel) {
+        this.columnSetModel = columnSetModel;
     }
 }

@@ -46,31 +46,31 @@ public class ColumnModelFactory {
                 metaData.getPrecision(column), metaData.getScale(column));
     }
 
-    public static ColumnModelSet createColumnModelSet(ResultSet resultSet) throws SQLException {
-        return createColumnModelSet(resultSet.getMetaData());
+    public static ColumnSetModel createColumnSetModel(ResultSet resultSet) throws SQLException {
+        return createColumnSetModel(resultSet.getMetaData());
     }
 
-    public static ColumnModelSet createColumnModelSet(ResultSetMetaData metaData) throws SQLException {
+    public static ColumnSetModel createColumnSetModel(ResultSetMetaData metaData) throws SQLException {
         final int columnCount = metaData.getColumnCount();
         final ColumnModel[] columns = new ColumnModel[columnCount];
         for (int i = 0; i < columnCount; i++) {
             columns[i] = createColumnModel(metaData, i + 1);
         }
-        return new ColumnModelSetImpl(columns);
+        return new ColumnSetModelImpl(columns);
     }
 
-    public static ColumnModelSet createColumnModelSet(String[] names, int[] typeCodes) {
+    public static ColumnSetModel createColumnSetModel(String[] names, int[] typeCodes) {
         final int length = names.length;
-        return createColumnModelSet(names, typeCodes, new String[length], new int[length], new int[length]);
+        return createColumnSetModel(names, typeCodes, new String[length], new int[length], new int[length]);
     }
 
-    public static ColumnModelSet createColumnModelSet(String[] names, int[] typeCodes, String[] typeNames,
+    public static ColumnSetModel createColumnSetModel(String[] names, int[] typeCodes, String[] typeNames,
                                                       int[] precisions, int[] scales) {
         final int columnCount = names.length;
         final ColumnModel[] columns = new ColumnModel[columnCount];
         for (int i = 0; i < columnCount; i++) {
             columns[i] = new ColumnModelImpl(names[i], typeCodes[i], typeNames[i], precisions[i], scales[i]);
         }
-        return new ColumnModelSetImpl(columns);
+        return new ColumnSetModelImpl(columns);
     }
 }

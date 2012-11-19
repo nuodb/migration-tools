@@ -36,9 +36,7 @@ import java.sql.SQLException;
  */
 public interface JdbcType<T> {
 
-    int getTypeCode();
-
-    String getTypeName();
+    JdbcTypeDesc getTypeDesc();
 
     Class<? extends T> getTypeClass();
 

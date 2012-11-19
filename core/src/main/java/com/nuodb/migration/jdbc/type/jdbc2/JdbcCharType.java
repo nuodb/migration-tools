@@ -42,14 +42,12 @@ public class JdbcCharType extends JdbcTypeBase<String> {
 
     public static final JdbcType INSTANCE = new JdbcCharType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.CHAR;
+    public JdbcCharType() {
+        super(Types.CHAR, String.class);
     }
 
-    @Override
-    public Class<? extends String> getTypeClass() {
-        return String.class;
+    public JdbcCharType(int typeCode) {
+        super(typeCode, String.class);
     }
 
     @Override

@@ -39,14 +39,8 @@ public class JdbcDateType extends JdbcTypeBase<Date> {
 
     public static final JdbcType INSTANCE = new JdbcDateType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.DATE;
-    }
-
-    @Override
-    public Class<? extends Date> getTypeClass() {
-        return Date.class;
+    public JdbcDateType() {
+        super(Types.DATE, Date.class);
     }
 
     @Override

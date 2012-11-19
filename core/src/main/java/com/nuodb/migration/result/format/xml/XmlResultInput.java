@@ -29,7 +29,8 @@ package com.nuodb.migration.result.format.xml;
 
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.model.ColumnModelFactory;
-import com.nuodb.migration.jdbc.model.ColumnModelSet;
+import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.result.format.ResultInputBase;
 import com.nuodb.migration.result.format.ResultInputException;
 import org.apache.commons.lang.StringUtils;
@@ -40,7 +41,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType.INSTANCE;
 import static javax.xml.XMLConstants.NULL_NS_URI;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
 
@@ -82,7 +82,7 @@ public class XmlResultInput extends ResultInputBase implements XmlAttributes {
 
     @Override
     protected void doReadBegin() {
-        ColumnModelSet columnModelSet = null;
+        ColumnSetModel columnSetModel = null;
         if (isNextElement(RESULT_SET_ELEMENT) && isNextElement(COLUMNS_ELEMENT)) {
             List<String> columns = Lists.newArrayList();
             while (isNextElement(COLUMN_ELEMENT)) {
@@ -98,11 +98,11 @@ public class XmlResultInput extends ResultInputBase implements XmlAttributes {
                 }
             }
             int[] columnTypes = new int[columns.size()];
-            Arrays.fill(columnTypes, INSTANCE.getTypeCode());
-            columnModelSet = ColumnModelFactory.createColumnModelSet(columns.toArray(new String[columns.size()]),
+            Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
+            columnSetModel = ColumnModelFactory.createColumnSetModel(columns.toArray(new String[columns.size()]),
                     columnTypes);
         }
-        setColumnModelSet(columnModelSet);
+        setColumnSetModel(columnSetModel);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class XmlResultInput extends ResultInputBase implements XmlAttributes {
     protected String[] doReadRow() {
         String[] values = null;
         if (isCurrentElement(ROW_ELEMENT) || isNextElement(ROW_ELEMENT)) {
-            values = new String[getColumnModelSet().getLength()];
+            values = new String[getColumnSetModel().getLength()];
             int column = 0;
             while (isNextElement(COLUMN_ELEMENT)) {
                 String nil = getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE);

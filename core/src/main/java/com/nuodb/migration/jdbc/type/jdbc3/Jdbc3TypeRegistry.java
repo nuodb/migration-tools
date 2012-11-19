@@ -40,6 +40,6 @@ public class Jdbc3TypeRegistry extends Jdbc2TypeRegistry {
     public Jdbc3TypeRegistry() {
         super();
         addJdbcType(JdbcBooleanType.INSTANCE);
-        addJdbcType(JdbcUrlType.INSTANCE);
+        addJdbcType(JdbcDataLinkType.INSTANCE);
     }
 }

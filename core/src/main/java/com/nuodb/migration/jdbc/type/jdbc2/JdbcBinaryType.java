@@ -29,8 +29,12 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * @author Sergey Bushik
@@ -39,14 +43,20 @@ public class JdbcBinaryType extends JdbcTypeBase<byte[]> {
 
     public static final JdbcType INSTANCE = new JdbcBinaryType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.BINARY;
+    public JdbcBinaryType() {
+        super(Types.BINARY, byte[].class);
     }
 
-    @Override
-    public Class<? extends byte[]> getTypeClass() {
-        return byte[].class;
+    public JdbcBinaryType(int typeCode) {
+        super(typeCode, byte[].class);
+    }
+
+    public JdbcBinaryType(int typeCode, String typeName) {
+        super(typeCode, typeName, byte[].class);
+    }
+
+    public JdbcBinaryType(JdbcTypeDesc typeDesc) {
+        super(typeDesc, byte[].class);
     }
 
     @Override

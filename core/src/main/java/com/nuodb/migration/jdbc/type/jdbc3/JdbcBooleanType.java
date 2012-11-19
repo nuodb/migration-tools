@@ -42,14 +42,8 @@ public class JdbcBooleanType extends JdbcTypeBase<Boolean> {
 
     public static final JdbcType INSTANCE = new JdbcBooleanType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.BOOLEAN;
-    }
-
-    @Override
-    public Class<? extends Boolean> getTypeClass() {
-        return Boolean.class;
+    public JdbcBooleanType() {
+        super(Types.BOOLEAN, Boolean.class);
     }
 
     @Override

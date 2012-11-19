@@ -30,7 +30,10 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * @author Sergey Bushik
@@ -39,14 +42,8 @@ public class JdbcBigIntType extends JdbcTypeBase<Long> {
 
     public static final JdbcType INSTANCE = new JdbcBigIntType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.BIGINT;
-    }
-
-    @Override
-    public Class<? extends Long> getTypeClass() {
-        return Long.class;
+    public JdbcBigIntType() {
+        super(Types.BIGINT, Long.class);
     }
 
     @Override

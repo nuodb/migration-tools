@@ -47,8 +47,4 @@ public class DumpException extends MigrationException {
     public DumpException(Throwable cause) {
         super(cause);
     }
-
-    public static void main(String[] args) {
-        System.out.println(URLConnection.getFileNameMap());
-    }
 }

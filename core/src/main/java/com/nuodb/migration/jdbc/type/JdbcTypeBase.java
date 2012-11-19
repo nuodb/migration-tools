@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.type;
 
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -35,11 +36,38 @@ import java.sql.SQLException;
  */
 public abstract class JdbcTypeBase<T> implements JdbcType<T> {
 
-    private JdbcTypeNameMap jdbcTypeNameMap = JdbcTypeNameMap.INSTANCE;
+    private final JdbcTypeDesc typeDesc;
+    private final Class<? extends T> typeClass;
+
+    protected JdbcTypeBase(int typeCode, Class<? extends T> typeClass) {
+        this(new JdbcTypeDescBase(typeCode), typeClass);
+    }
+
+    protected JdbcTypeBase(int typeCode, String typeName, Class<? extends T> typeClass) {
+        this(new JdbcTypeDescBase(typeCode, typeName), typeClass);
+    }
+
+    protected JdbcTypeBase(JdbcTypeDesc typeDesc, Class<? extends T> typeClass) {
+        this.typeDesc = typeDesc;
+        this.typeClass = typeClass;
+    }
+
+    protected final int getTypeCode() {
+        return typeDesc.getTypeCode();
+    }
+
+    protected final String getTypeName() {
+        return typeDesc.getTypeName();
+    }
 
     @Override
-    public String getTypeName() {
-        return jdbcTypeNameMap.getTypeName(getTypeCode());
+    public JdbcTypeDesc getTypeDesc() {
+        return typeDesc;
+    }
+
+    @Override
+    public Class<? extends T> getTypeClass() {
+        return typeClass;
     }
 
     @Override
@@ -64,18 +92,18 @@ public abstract class JdbcTypeBase<T> implements JdbcType<T> {
 
         JdbcTypeBase that = (JdbcTypeBase) o;
 
-        if (getTypeCode() != that.getTypeCode()) return false;
+        if (typeDesc != null ? !typeDesc.equals(that.typeDesc) : that.typeDesc != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return getTypeCode();
+        return typeDesc != null ? typeDesc.hashCode() : 0;
     }
 
     @Override
     public String toString() {
-        return getClass().getName();
+        return typeDesc.toString();
     }
 }

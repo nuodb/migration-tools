@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.result.format;
 
-import com.nuodb.migration.jdbc.model.ColumnModelSet;
-import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
 
@@ -38,8 +38,6 @@ import java.util.Map;
  * @author Sergey Bushik
  */
 public interface ResultFormat {
-
-    void initModel();
 
     String getType();
 
@@ -55,19 +53,15 @@ public interface ResultFormat {
 
     void setJdbcTypeValueAccessProvider(JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider);
 
-    void addJdbcTypeValueFormat(int typeCode, JdbcTypeValueFormat jdbcTypeValueFormat);
+    void addJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc, JdbcTypeValueFormat jdbcTypeValueFormat);
 
-    void addJdbcTypeValueFormat(JdbcType jdbcType, JdbcTypeValueFormat jdbcTypeValueFormat);
-
-    JdbcTypeValueFormat getJdbcTypeValueFormat(JdbcType jdbcType);
-
-    JdbcTypeValueFormat getJdbcTypeValueFormat(int typeCode);
+    JdbcTypeValueFormat getJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc);
 
     JdbcTypeValueFormat getDefaultJdbcTypeValueFormat();
 
     void setDefaultJdbcTypeValueFormat(JdbcTypeValueFormat defaultJdbcTypeValueFormat);
 
-    ColumnModelSet getColumnModelSet();
+    ColumnSetModel getColumnSetModel();
 
-    void setColumnModelSet(ColumnModelSet columnModelSet);
+    void setColumnSetModel(ColumnSetModel columnSetModel);
 }

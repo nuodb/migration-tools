@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect.mysql;
+package com.nuodb.migration.jdbc.dialect.nuodb;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
@@ -39,23 +39,25 @@ import java.sql.Types;
 /**
  * @author Sergey Bushik
  */
-public class MySQLBigIntType extends JdbcTypeBase<BigDecimal> {
+public class NuoDBDecimalType extends JdbcTypeBase<BigDecimal> {
 
-    public static JdbcType INSTANCE = new MySQLBigIntType();
+    public static final JdbcType INSTANCE = new NuoDBDecimalType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.BIGINT;
-    }
-
-    @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int column) throws SQLException {
-        statement.setBigDecimal(column, value);
+    /**
+     * Notice Types.BIGINT passed instead of Types.DECIMAL. Awaiting for DB-2288 to be resolved
+     */
+    public NuoDBDecimalType() {
+        super(Types.BIGINT, BigDecimal.class);
     }
 
     @Override
     public Class<? extends BigDecimal> getTypeClass() {
         return BigDecimal.class;
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int column) throws SQLException {
+        statement.setBigDecimal(column, value);
     }
 
     @Override

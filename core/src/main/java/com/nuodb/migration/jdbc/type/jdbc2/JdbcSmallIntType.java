@@ -42,14 +42,12 @@ public class JdbcSmallIntType extends JdbcTypeBase<Short> {
 
     public static final JdbcType INSTANCE = new JdbcSmallIntType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.SMALLINT;
+    public JdbcSmallIntType() {
+        super(Types.SMALLINT, Short.class);
     }
 
-    @Override
-    public Class<? extends Short> getTypeClass() {
-        return Short.class;
+    public JdbcSmallIntType(int typeCode) {
+        super(typeCode, Short.class);
     }
 
     @Override

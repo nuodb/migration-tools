@@ -29,11 +29,9 @@ package com.nuodb.migration.jdbc.type.jdbc4;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 /**
  * @author Sergey Bushik
@@ -42,14 +40,20 @@ public class JdbcNCharType extends JdbcTypeBase<String> {
 
     public static final JdbcType INSTANCE = new JdbcNCharType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.NCHAR;
+    public JdbcNCharType() {
+        super(Types.NCHAR, String.class);
     }
 
-    @Override
-    public Class<? extends String> getTypeClass() {
-        return String.class;
+    public JdbcNCharType(int typeCode) {
+        super(typeCode, String.class);
+    }
+
+    public JdbcNCharType(int typeCode, String typeName) {
+        super(typeCode, typeName, String.class);
+    }
+
+    public JdbcNCharType(JdbcTypeDesc typeDesc) {
+        super(typeDesc, String.class);
     }
 
     @Override

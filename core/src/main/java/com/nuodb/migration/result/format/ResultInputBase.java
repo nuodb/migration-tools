@@ -28,11 +28,13 @@
 package com.nuodb.migration.result.format;
 
 import com.nuodb.migration.jdbc.model.ColumnModel;
-import com.nuodb.migration.jdbc.model.ColumnModelSet;
+import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migration.jdbc.type.JdbcTypeDescBase;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.result.format.jdbc.JdbcTypeValueFormat;
-import com.nuodb.migration.result.format.jdbc.JdbcTypeValueModelSet;
-import com.nuodb.migration.result.format.jdbc.JdbcTypeValueModelSetImpl;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueSetModel;
+import com.nuodb.migration.result.format.jdbc.JdbcTypeValueSetModelImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -51,7 +53,7 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
     private Reader reader;
     private InputStream inputStream;
     private PreparedStatement preparedStatement;
-    private JdbcTypeValueModelSet jdbcTypeValueModelSet;
+    private JdbcTypeValueSetModel jdbcTypeValueSetModel;
 
     @Override
     public void initInput() {
@@ -66,24 +68,25 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
     }
 
     protected void doInitModel() {
-        JdbcTypeValueModelSet jdbcTypeValueModelSet = getJdbcTypeValueModelSet();
-        if (jdbcTypeValueModelSet == null) {
-            setJdbcTypeValueModelSet(createJdbcTypeValueModelSet());
+        JdbcTypeValueSetModel jdbcTypeValueSetModel = getJdbcTypeValueSetModel();
+        if (jdbcTypeValueSetModel == null) {
+            setJdbcTypeValueSetModel(createJdbcTypeValueSetModel());
         }
     }
 
-    protected JdbcTypeValueModelSet createJdbcTypeValueModelSet() {
-        final ColumnModelSet columnModelSet = getColumnModelSet();
-        final int valueCount = columnModelSet.getLength();
-        JdbcTypeValueAccess[] accesses = new JdbcTypeValueAccess[valueCount];
-        JdbcTypeValueFormat[] formats = new JdbcTypeValueFormat[valueCount];
+    protected JdbcTypeValueSetModel createJdbcTypeValueSetModel() {
+        final ColumnSetModel columnSetModel = getColumnSetModel();
+        final int valueCount = columnSetModel.getLength();
+        JdbcTypeValueAccess[] jdbcTypeValueAccesses = new JdbcTypeValueAccess[valueCount];
+        JdbcTypeValueFormat[] jdbcTypeValueFormats = new JdbcTypeValueFormat[valueCount];
         for (int index = 0; index < valueCount; index++) {
-            ColumnModel columnModel = columnModelSet.item(index);
-            formats[index] = getJdbcTypeValueFormat(columnModel.getTypeCode());
-            accesses[index] = getJdbcTypeValueAccessProvider().getStatementAccess(
+            ColumnModel columnModel = columnSetModel.item(index);
+            JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDescBase(columnModel.getTypeCode(), columnModel.getTypeName());
+            jdbcTypeValueFormats[index] = getJdbcTypeValueFormat(jdbcTypeDesc);
+            jdbcTypeValueAccesses[index] = getJdbcTypeValueAccessProvider().getStatementAccess(
                     preparedStatement, index + 1, columnModel);
         }
-        return new JdbcTypeValueModelSetImpl(accesses, formats, columnModelSet);
+        return new JdbcTypeValueSetModelImpl(jdbcTypeValueAccesses, jdbcTypeValueFormats, columnSetModel);
     }
 
     @Override
@@ -97,7 +100,7 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
     protected abstract void doReadBegin();
 
     protected void readRow(String[] values) {
-        JdbcTypeValueModelSet model = getJdbcTypeValueModelSet();
+        JdbcTypeValueSetModel model = getJdbcTypeValueSetModel();
         for (int index = 0; index < model.getLength(); index++) {
             JdbcTypeValueAccess jdbcTypeValueAccess = model.getJdbcTypeValueAccessor(index);
             JdbcTypeValueFormat jdbcTypeValueFormat = model.getJdbcTypeValueFormat(index);
@@ -139,11 +142,11 @@ public abstract class ResultInputBase extends ResultFormatBase implements Result
         this.preparedStatement = preparedStatement;
     }
 
-    public JdbcTypeValueModelSet getJdbcTypeValueModelSet() {
-        return jdbcTypeValueModelSet;
+    public JdbcTypeValueSetModel getJdbcTypeValueSetModel() {
+        return jdbcTypeValueSetModel;
     }
 
-    public void setJdbcTypeValueModelSet(JdbcTypeValueModelSet jdbcTypeValueModelSet) {
-        this.jdbcTypeValueModelSet = jdbcTypeValueModelSet;
+    public void setJdbcTypeValueSetModel(JdbcTypeValueSetModel jdbcTypeValueSetModel) {
+        this.jdbcTypeValueSetModel = jdbcTypeValueSetModel;
     }
 }

@@ -25,45 +25,67 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.result.format.jdbc;
+package com.nuodb.migration.jdbc.type;
 
-import com.nuodb.migration.jdbc.model.ColumnModelSet;
-import com.nuodb.migration.jdbc.model.ColumnModelSetImpl;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+import static com.nuodb.migration.jdbc.type.JdbcTypeNameMap.INSTANCE;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeValueModelSetImpl extends ColumnModelSetImpl implements JdbcTypeValueModelSet {
+public class JdbcTypeDescBase implements JdbcTypeDesc {
 
-    private JdbcTypeValueAccess[] jdbcTypeValueAccesses;
-    private JdbcTypeValueFormat[] jdbcTypeValueFormats;
+    private int typeCode;
+    private String typeName;
 
-    public JdbcTypeValueModelSetImpl(JdbcTypeValueAccess[] jdbcTypeValueAccesses,
-                                     JdbcTypeValueFormat[] jdbcTypeValueFormats,
-                                     ColumnModelSet columnModelSet) {
-        super(columnModelSet);
-        this.jdbcTypeValueAccesses = jdbcTypeValueAccesses;
-        this.jdbcTypeValueFormats = jdbcTypeValueFormats;
+    public JdbcTypeDescBase(int typeCode) {
+        this(typeCode, INSTANCE.getTypeName(typeCode));
+    }
+
+    public JdbcTypeDescBase(int typeCode, String typeName) {
+        this.typeCode = typeCode;
+        this.typeName = typeName;
+    }
+
+    public JdbcTypeDescBase(JdbcTypeDesc typeDesc) {
+        this.typeCode = typeDesc.getTypeCode();
+        this.typeName = typeDesc.getTypeName();
     }
 
     @Override
-    public JdbcTypeValueAccess getJdbcTypeValueAccessor(int index) {
-        return jdbcTypeValueAccesses[index];
+    public int getTypeCode() {
+        return typeCode;
     }
 
     @Override
-    public JdbcTypeValueAccess[] getJdbcTypeValueAccesses() {
-        return jdbcTypeValueAccesses;
+    public String getTypeName() {
+        return typeName;
     }
 
     @Override
-    public JdbcTypeValueFormat getJdbcTypeValueFormat(int index) {
-        return jdbcTypeValueFormats[index];
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JdbcTypeDescBase that = (JdbcTypeDescBase) o;
+
+        if (typeCode != that.typeCode) return false;
+        if (typeName != null ? !typeName.equalsIgnoreCase(that.typeName) : that.typeName != null) return false;
+
+        return true;
     }
 
     @Override
-    public JdbcTypeValueFormat[] getJdbcTypeValueFormats() {
-        return jdbcTypeValueFormats;
+    public int hashCode() {
+        int result = typeCode;
+        result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "JdbcTypeDesc{" +
+                "typeCode=" + typeCode +
+                ", typeName='" + typeName + '\'' +
+                '}';
     }
 }

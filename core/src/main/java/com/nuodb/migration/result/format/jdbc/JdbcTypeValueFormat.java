@@ -34,7 +34,7 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
  */
 public interface JdbcTypeValueFormat<T> {
 
-    String getValue(JdbcTypeValueAccess<T> jdbcTypeValueAccess) throws JdbcTypeValueException;
+    String getValue(JdbcTypeValueAccess<T> access) throws JdbcTypeValueException;
 
-    void setValue(JdbcTypeValueAccess<T> jdbcTypeValueAccess, String value) throws JdbcTypeValueException;
+    void setValue(JdbcTypeValueAccess<T> access, String value) throws JdbcTypeValueException;
 }

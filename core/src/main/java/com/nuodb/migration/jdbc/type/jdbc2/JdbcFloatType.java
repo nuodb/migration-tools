@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,14 +43,20 @@ public class JdbcFloatType extends JdbcTypeBase<Float> {
 
     public static final JdbcType INSTANCE = new JdbcFloatType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.FLOAT;
+    public JdbcFloatType() {
+        super(Types.FLOAT, Float.class);
     }
 
-    @Override
-    public Class<? extends Float> getTypeClass() {
-        return Float.class;
+    public JdbcFloatType(int typeCode) {
+        super(typeCode, Float.class);
+    }
+
+    public JdbcFloatType(int typeCode, String typeName) {
+        super(typeCode, typeName, Float.class);
+    }
+
+    public JdbcFloatType(JdbcTypeDesc typeDesc) {
+        super(typeDesc, Float.class);
     }
 
     @Override

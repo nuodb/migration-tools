@@ -39,14 +39,8 @@ public class JdbcClobType extends JdbcTypeBase<Clob> {
 
     public static final JdbcType INSTANCE = new JdbcClobType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.CLOB;
-    }
-
-    @Override
-    public Class<? extends Clob> getTypeClass() {
-        return Clob.class;
+    public JdbcClobType() {
+        super(Types.CLOB, Clob.class);
     }
 
     @Override

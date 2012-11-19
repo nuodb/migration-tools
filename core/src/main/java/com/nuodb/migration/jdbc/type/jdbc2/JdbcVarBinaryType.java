@@ -28,6 +28,7 @@
 package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.Types;
 
@@ -38,8 +39,7 @@ public class JdbcVarBinaryType extends JdbcBinaryType {
 
     public static final JdbcType INSTANCE = new JdbcVarBinaryType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.VARBINARY;
+    public JdbcVarBinaryType() {
+        super(Types.VARBINARY);
     }
 }

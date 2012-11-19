@@ -36,6 +36,8 @@ import java.sql.PreparedStatement;
  */
 public interface ResultInput extends ResultFormat {
 
+    void initModel();
+
     void initInput();
 
     void readBegin();

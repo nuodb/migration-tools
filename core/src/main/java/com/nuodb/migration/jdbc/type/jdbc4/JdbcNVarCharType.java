@@ -28,6 +28,7 @@
 package com.nuodb.migration.jdbc.type.jdbc4;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.Types;
 
@@ -38,8 +39,19 @@ public class JdbcNVarCharType extends JdbcNCharType {
 
     public static final JdbcType INSTANCE = new JdbcNVarCharType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.NVARCHAR;
+    public JdbcNVarCharType() {
+        super(Types.NVARCHAR);
+    }
+
+    public JdbcNVarCharType(int typeCode) {
+        super(typeCode);
+    }
+
+    public JdbcNVarCharType(int typeCode, String typeName) {
+        super(typeCode, typeName);
+    }
+
+    public JdbcNVarCharType(JdbcTypeDesc typeDesc) {
+        super(typeDesc);
     }
 }

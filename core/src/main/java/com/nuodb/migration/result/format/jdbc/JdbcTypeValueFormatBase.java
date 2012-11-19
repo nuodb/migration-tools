@@ -36,13 +36,13 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<T> {
 
     @Override
-    public String getValue(JdbcTypeValueAccess<T> jdbcTypeValueAccess) {
+    public String getValue(JdbcTypeValueAccess<T> access) {
         try {
-            return doGetValue(jdbcTypeValueAccess);
+            return doGetValue(access);
         } catch (JdbcTypeValueException exception) {
             throw exception;
         } catch (Exception exception) {
-            throw newGetValueFailure(jdbcTypeValueAccess, exception);
+            throw newGetValueFailure(access, exception);
         }
     }
 
@@ -56,13 +56,13 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
     }
 
     @Override
-    public void setValue(JdbcTypeValueAccess<T> jdbcTypeValueAccess, String value) {
+    public void setValue(JdbcTypeValueAccess<T> access, String value) {
         try {
-            doSetValue(jdbcTypeValueAccess, value);
+            doSetValue(access, value);
         } catch (JdbcTypeValueException exception) {
             throw exception;
         } catch (Exception exception) {
-            throw newSetValueFailure(jdbcTypeValueAccess, exception);
+            throw newSetValueFailure(access, exception);
         }
     }
 

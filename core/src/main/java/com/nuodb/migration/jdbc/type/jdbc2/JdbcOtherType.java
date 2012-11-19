@@ -28,6 +28,7 @@
 package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.Types;
 
@@ -38,8 +39,11 @@ public class JdbcOtherType extends JdbcObjectType {
 
     public static final JdbcType INSTANCE = new JdbcOtherType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.OTHER;
+    public JdbcOtherType() {
+        super(Types.OTHER);
+    }
+
+    public JdbcOtherType(int typeCode) {
+        super(typeCode);
     }
 }

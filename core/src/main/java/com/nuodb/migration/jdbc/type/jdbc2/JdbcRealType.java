@@ -38,8 +38,7 @@ public class JdbcRealType extends JdbcFloatType {
 
     public static final JdbcType INSTANCE = new JdbcRealType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.REAL;
+    public JdbcRealType() {
+        super(Types.REAL);
     }
 }

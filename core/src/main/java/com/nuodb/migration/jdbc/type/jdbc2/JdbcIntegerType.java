@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,14 +43,8 @@ public class JdbcIntegerType extends JdbcTypeBase<Integer> {
 
     public static final JdbcType INSTANCE = new JdbcIntegerType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.INTEGER;
-    }
-
-    @Override
-    public Class<? extends Integer> getTypeClass() {
-        return Integer.class;
+    public JdbcIntegerType() {
+        super(Types.INTEGER, Integer.class);
     }
 
     @Override

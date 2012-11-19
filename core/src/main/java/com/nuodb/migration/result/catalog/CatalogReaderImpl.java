@@ -92,7 +92,7 @@ public class CatalogReaderImpl implements CatalogReader {
     protected CatalogEntry getEntry(String entry) {
         int index = entry.lastIndexOf('.');
         if (index != -1) {
-            return new CatalogEntryImpl(entry.substring(0, index), entry.substring(index + 1));
+            return new CatalogEntry(entry.substring(0, index), entry.substring(index + 1));
         } else {
             throw new CatalogException(String.format("Entry %s doesn't match pattern", entry));
         }
@@ -119,7 +119,7 @@ public class CatalogReaderImpl implements CatalogReader {
 
     public static void main(String[] args) {
         Catalog catalog = new CatalogImpl("/tmp/test/dump.cat");
-        CatalogReader reader = catalog.getEntryReader();
+        CatalogReader reader = catalog.getReader();
         for (CatalogEntry entry : reader.getEntries()) {
             System.out.println(entry.getName() + "" + entry.getType());
         }

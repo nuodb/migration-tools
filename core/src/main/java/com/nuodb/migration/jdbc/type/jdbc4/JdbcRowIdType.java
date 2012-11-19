@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.type.jdbc4;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.*;
 
@@ -39,14 +40,20 @@ public class JdbcRowIdType extends JdbcTypeBase<RowId> {
 
     public static final JdbcType INSTANCE = new JdbcRowIdType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.ROWID;
+    public JdbcRowIdType() {
+        super(Types.ROWID, RowId.class);
     }
 
-    @Override
-    public Class<? extends RowId> getTypeClass() {
-        return RowId.class;
+    public JdbcRowIdType(int typeCode) {
+        super(typeCode, RowId.class);
+    }
+
+    public JdbcRowIdType(int typeCode, String typeName) {
+        super(typeCode, typeName, RowId.class);
+    }
+
+    public JdbcRowIdType(JdbcTypeDesc typeDesc) {
+        super(typeDesc, RowId.class);
     }
 
     @Override

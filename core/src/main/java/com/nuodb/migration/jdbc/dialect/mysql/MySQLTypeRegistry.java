@@ -39,6 +39,6 @@ public class MySQLTypeRegistry extends Jdbc4TypeRegistry {
 
     public MySQLTypeRegistry() {
         super();
-        addJdbcType(MySQLBigIntType.INSTANCE);
+        addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
     }
 }

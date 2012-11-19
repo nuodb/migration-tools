@@ -72,12 +72,12 @@ public class CatalogImpl implements Catalog {
     }
 
     @Override
-    public CatalogReader getEntryReader() {
+    public CatalogReader getReader() {
         return new CatalogReaderImpl(catalogDir, catalogFile);
     }
 
     @Override
-    public CatalogWriter getEntryWriter() {
+    public CatalogWriter getWriter() {
         return new CatalogWriterImpl(catalogDir, catalogFile);
     }
 }

@@ -29,8 +29,13 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * @author Sergey Bushik
@@ -39,14 +44,8 @@ public class JdbcRefType extends JdbcTypeBase<Ref> {
 
     public static final JdbcType INSTANCE = new JdbcRefType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.REF;
-    }
-
-    @Override
-    public Class<? extends Ref> getTypeClass() {
-        return Ref.class;
+    public JdbcRefType() {
+        super(Types.REF, Ref.class);
     }
 
     @Override

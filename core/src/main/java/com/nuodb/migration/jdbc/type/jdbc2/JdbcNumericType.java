@@ -43,14 +43,12 @@ public class JdbcNumericType extends JdbcTypeBase<BigDecimal> {
 
     public static final JdbcType INSTANCE = new JdbcNumericType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.NUMERIC;
+    public JdbcNumericType() {
+        super(Types.NUMERIC, BigDecimal.class);
     }
 
-    @Override
-    public Class<? extends BigDecimal> getTypeClass() {
-        return BigDecimal.class;
+    public JdbcNumericType(int typeCode) {
+        super(typeCode, BigDecimal.class);
     }
 
     @Override

@@ -25,41 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.jdbc3;
-
-import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeBase;
-
-import java.net.URL;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+package com.nuodb.migration.jdbc.type;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcUrlType extends JdbcTypeBase<URL> {
+public interface JdbcTypeDesc {
 
-    public static final JdbcType INSTANCE = new JdbcUrlType();
+    int getTypeCode();
 
-    @Override
-    public int getTypeCode() {
-        return Types.DATALINK;
-    }
-
-    @Override
-    public Class<? extends URL> getTypeClass() {
-        return URL.class;
-    }
-
-    @Override
-    public URL getValue(ResultSet resultSet, int column) throws SQLException {
-        return resultSet.getURL(column);
-    }
-
-    @Override
-    protected void setNullSafeValue(PreparedStatement statement, URL value, int column) throws SQLException {
-        statement.setURL(column, value);
-    }
+    String getTypeName();
 }

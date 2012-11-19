@@ -36,6 +36,10 @@ public interface JdbcTypeRegistry {
 
     JdbcType getJdbcType(int typeCode);
 
+    JdbcType getJdbcType(int typeCode, String typeName);
+
+    JdbcType getJdbcType(JdbcTypeDesc typeDesc);
+
     void addJdbcType(JdbcType jdbcType);
 
     void addJdbcTypes(Collection<JdbcType> jdbcTypes);

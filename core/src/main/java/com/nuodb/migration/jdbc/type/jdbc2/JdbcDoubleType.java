@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,16 +43,10 @@ public class JdbcDoubleType extends JdbcTypeBase<Double> {
 
     public static final JdbcType INSTANCE = new JdbcDoubleType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.DOUBLE;
+    public JdbcDoubleType() {
+        super(Types.DOUBLE, Double.class);
     }
-
-    @Override
-    public Class<? extends Double> getTypeClass() {
-        return Double.class;
-    }
-
+    
     @Override
     public Double getValue(ResultSet resultSet, int column) throws SQLException {
         double doubleValue = resultSet.getDouble(column);

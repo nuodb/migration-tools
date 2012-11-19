@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,14 +43,8 @@ public class JdbcBitType extends JdbcTypeBase<Boolean> {
 
     public static final JdbcType INSTANCE = new JdbcBitType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.BIT;
-    }
-
-    @Override
-    public Class<? extends Boolean> getTypeClass() {
-        return Boolean.class;
+    public JdbcBitType() {
+        super(Types.BIT, Boolean.class);
     }
 
     @Override

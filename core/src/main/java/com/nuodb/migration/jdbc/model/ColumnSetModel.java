@@ -25,14 +25,42 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.result.catalog;
+package com.nuodb.migration.jdbc.model;
 
 /**
  * @author Sergey Bushik
  */
-public interface Catalog {
+public interface ColumnSetModel {
 
-    CatalogReader getReader();
+    String getName(int index);
 
-    CatalogWriter getWriter();
+    String[] getNames();
+
+    int getTypeCode(int index);
+
+    void setTypeCode(int index, int typeCode);
+
+    String getTypeName(int index);
+
+    void setTypeName(int index, String typeName);
+
+    int[] getTypeCodes();
+
+    int getPrecision(int index);
+
+    void setPrecision(int index, int precision);
+
+    int[] getPrecisions();
+
+    int getScale(int index);
+
+    void setScale(int index, int scale);
+
+    int[] getScales();
+
+    ColumnModel item(int index);
+
+    ColumnModel item(String name);
+
+    int getLength();
 }

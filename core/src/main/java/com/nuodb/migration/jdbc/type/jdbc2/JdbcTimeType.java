@@ -39,14 +39,8 @@ public class JdbcTimeType extends JdbcTypeBase<Time> {
 
     public static final JdbcType INSTANCE = new JdbcTimeType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.TIME;
-    }
-
-    @Override
-    public Class<? extends Time> getTypeClass() {
-        return Time.class;
+    public JdbcTimeType() {
+        super(Types.TIME, Time.class);
     }
 
     @Override

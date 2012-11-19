@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.type.jdbc4;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.*;
 
@@ -39,14 +40,20 @@ public class JdbcSqlXmlType extends JdbcTypeBase<SQLXML> {
 
     public static final JdbcType INSTANCE = new JdbcSqlXmlType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.SQLXML;
+    public JdbcSqlXmlType() {
+        super(Types.SQLXML, SQLXML.class);
     }
 
-    @Override
-    public Class<? extends SQLXML> getTypeClass() {
-        return SQLXML.class;
+    public JdbcSqlXmlType(int typeCode) {
+        super(typeCode, SQLXML.class);
+    }
+
+    public JdbcSqlXmlType(int typeCode, String typeName) {
+        super(typeCode, typeName, SQLXML.class);
+    }
+
+    public JdbcSqlXmlType(JdbcTypeDesc typeDesc) {
+        super(typeDesc, SQLXML.class);
     }
 
     @Override

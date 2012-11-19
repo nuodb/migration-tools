@@ -34,19 +34,19 @@ import java.util.Arrays;
 /**
  * @author Sergey Bushik
  */
-public class ColumnModelSetImpl implements ColumnModelSet {
+public class ColumnSetModelImpl implements ColumnSetModel {
 
     private final ColumnModel[] columns;
 
-    public ColumnModelSetImpl(ColumnModel[] columns) {
+    public ColumnSetModelImpl(ColumnModel[] columns) {
         this.columns = columns;
     }
 
-    public ColumnModelSetImpl(ColumnModelSet columnModelSet) {
-        int columnCount = columnModelSet.getLength();
+    public ColumnSetModelImpl(ColumnSetModel columnSetModel) {
+        int columnCount = columnSetModel.getLength();
         ColumnModel[] columnModels = new ColumnModel[columnCount];
         for (int index = 0; index < columnCount; index++) {
-            columnModels[index] = columnModelSet.item(index);
+            columnModels[index] = columnSetModel.item(index);
         }
         this.columns = columnModels;
     }
@@ -74,6 +74,16 @@ public class ColumnModelSetImpl implements ColumnModelSet {
     @Override
     public void setTypeCode(int index, int typeCode) {
         columns[index].setTypeCode(typeCode);
+    }
+
+    @Override
+    public String getTypeName(int index) {
+        return columns[index].getTypeName();
+    }
+
+    @Override
+    public void setTypeName(int index, String typeName) {
+        columns[index].setTypeName(typeName);
     }
 
     @Override
@@ -150,7 +160,7 @@ public class ColumnModelSetImpl implements ColumnModelSet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ColumnModelSetImpl that = (ColumnModelSetImpl) o;
+        ColumnSetModelImpl that = (ColumnSetModelImpl) o;
         if (!Arrays.equals(columns, that.columns)) return false;
         return true;
     }

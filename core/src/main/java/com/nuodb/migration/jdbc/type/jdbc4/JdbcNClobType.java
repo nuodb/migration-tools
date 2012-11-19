@@ -29,8 +29,13 @@ package com.nuodb.migration.jdbc.type.jdbc4;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
-import java.sql.*;
+import java.sql.NClob;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * @author Sergey Bushik
@@ -39,14 +44,20 @@ public class JdbcNClobType extends JdbcTypeBase<NClob> {
 
     public static final JdbcType INSTANCE = new JdbcNClobType();
 
-    @Override
-    public int getTypeCode() {
-        return Types.NCLOB;
+    public JdbcNClobType() {
+        super(Types.NCLOB, NClob.class);
     }
 
-    @Override
-    public Class<? extends NClob> getTypeClass() {
-        return NClob.class;
+    public JdbcNClobType(int typeCode) {
+        super(typeCode, NClob.class);
+    }
+
+    public JdbcNClobType(int typeCode, String typeName) {
+        super(typeCode, typeName, NClob.class);
+    }
+
+    public JdbcNClobType(JdbcTypeDesc typeDesc) {
+        super(typeDesc, NClob.class);
     }
 
     @Override

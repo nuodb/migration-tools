@@ -36,6 +36,8 @@ import java.sql.ResultSet;
  */
 public interface ResultOutput extends ResultFormat {
 
+    void initModel();
+
     void initOutput();
     
     void writeBegin();

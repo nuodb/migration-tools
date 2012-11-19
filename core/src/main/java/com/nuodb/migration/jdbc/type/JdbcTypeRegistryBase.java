@@ -37,7 +37,8 @@ import java.util.Map;
  */
 public class JdbcTypeRegistryBase extends JdbcTypeNameMap implements JdbcTypeRegistry {
 
-    private Map<Integer, JdbcType> jdbcTypes = Maps.newHashMap();
+    private Map<JdbcTypeDesc, JdbcType> jdbcTypes = Maps.newHashMap();
+
     private Map<Class, JdbcTypeAdapter> jdbcTypeAdapters = Maps.newHashMap();
 
     public JdbcTypeRegistryBase() {
@@ -50,12 +51,27 @@ public class JdbcTypeRegistryBase extends JdbcTypeNameMap implements JdbcTypeReg
 
     @Override
     public JdbcType getJdbcType(int typeCode) {
-        return jdbcTypes.get(typeCode);
+        return jdbcTypes.get(new JdbcTypeDescBase(typeCode));
+    }
+
+    @Override
+    public JdbcType getJdbcType(int typeCode, String typeName) {
+        return getJdbcType(new JdbcTypeDescBase(typeCode, typeName));
+    }
+
+    @Override
+    public JdbcType getJdbcType(JdbcTypeDesc typeDesc) {
+        JdbcType jdbcType = jdbcTypes.get(typeDesc);
+        if (jdbcType == null) {
+            jdbcType = jdbcTypes.get(new JdbcTypeDescBase(typeDesc.getTypeCode()));
+        }
+        return jdbcType;
     }
 
     @Override
     public void addJdbcType(JdbcType jdbcType) {
-        jdbcTypes.put(jdbcType.getTypeCode(), jdbcType);
+        JdbcTypeDesc typeDesc = jdbcType.getTypeDesc();
+        jdbcTypes.put(typeDesc, jdbcType);
     }
 
     @Override

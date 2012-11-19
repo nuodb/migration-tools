@@ -33,11 +33,13 @@ import org.apache.commons.codec.binary.Base64;
 import javax.sql.rowset.serial.SerialRef;
 import java.io.*;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.URL;
 import java.sql.Ref;
 import java.sql.RowId;
 import java.sql.Types;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import static com.nuodb.migration.jdbc.type.JdbcTypeNameMap.INSTANCE;
 import static org.apache.commons.io.IOUtils.closeQuietly;
@@ -80,9 +82,11 @@ public class JdbcTypeValueFormatImpl extends JdbcTypeValueFormatBase<Object> {
             case Types.DATE:
             case Types.TIME:
             case Types.TIMESTAMP:
-                jdbcValue = access.getValue(Long.class);
+                jdbcValue = access.getValue();
                 if (jdbcValue != null) {
-                    value = jdbcValue.toString();
+                    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    calendar.setTime((Date) jdbcValue);
+                    value = Long.toString(calendar.getTimeInMillis());
                 }
                 break;
             case Types.BINARY:
@@ -156,8 +160,9 @@ public class JdbcTypeValueFormatImpl extends JdbcTypeValueFormatBase<Object> {
             case Types.INTEGER:
                 jdbcTypeValueAccess.setValue(!isEmpty(value) ? Integer.parseInt(value) : null);
                 break;
+            // see com.nuodb.migration.jdbc.dialect.nuodb.NuoDBDecimalType
             case Types.BIGINT:
-                jdbcTypeValueAccess.setValue(!isEmpty(value) ? new BigInteger(value) : null);
+                jdbcTypeValueAccess.setValue(!isEmpty(value) ? new BigDecimal(value) : null);
                 break;
             case Types.FLOAT:
             case Types.REAL:
