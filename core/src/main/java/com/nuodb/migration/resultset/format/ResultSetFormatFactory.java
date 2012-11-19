@@ -25,47 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
-
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+package com.nuodb.migration.resultset.format;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
+public interface ResultSetFormatFactory {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
-    }
+    ResultSetInput createResultSetInput(String formatType);
 
-    @Override
-    public char openQuote() {
-        return '`';
-    }
+    ResultSetOutput createResultSetOutput(String formatType);
 
-    @Override
-    public char closeQuote() {
-        return '`';
-    }
+    void registerResultSetInput(String formatType, Class<? extends ResultSetInput> inputClass);
 
-    /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
-     */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
-    }
-
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
-    }
+    void registerResultSetOutput(String formatType, Class<? extends ResultSetOutput> outputClass);
 }

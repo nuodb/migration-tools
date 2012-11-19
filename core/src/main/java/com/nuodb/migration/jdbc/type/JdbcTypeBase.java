@@ -40,11 +40,11 @@ public abstract class JdbcTypeBase<T> implements JdbcType<T> {
     private final Class<? extends T> typeClass;
 
     protected JdbcTypeBase(int typeCode, Class<? extends T> typeClass) {
-        this(new JdbcTypeDescBase(typeCode), typeClass);
+        this(new JdbcTypeDesc(typeCode), typeClass);
     }
 
     protected JdbcTypeBase(int typeCode, String typeName, Class<? extends T> typeClass) {
-        this(new JdbcTypeDescBase(typeCode, typeName), typeClass);
+        this(new JdbcTypeDesc(typeCode, typeName), typeClass);
     }
 
     protected JdbcTypeBase(JdbcTypeDesc typeDesc, Class<? extends T> typeClass) {

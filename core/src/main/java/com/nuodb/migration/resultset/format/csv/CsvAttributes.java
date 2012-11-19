@@ -25,47 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
-
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+package com.nuodb.migration.resultset.format.csv;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
+public interface CsvAttributes {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
-    }
-
-    @Override
-    public char openQuote() {
-        return '`';
-    }
-
-    @Override
-    public char closeQuote() {
-        return '`';
-    }
-
+    final String FORMAT_TYPE = "csv";
     /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
+     * The symbol used for value separation, must not be a line break character.
      */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
-    }
+    final String ATTRIBUTE_DELIMITER = "csv.delimiter";
+    /**
+     * Indicates whether quotation should be used.
+     */
+    final String ATTRIBUTE_QUOTING = "csv.quoting";
+    /**
+     * The symbol used as value encapsulation marker.
+     */
+    final String ATTRIBUTE_QUOTE = "csv.quote";
+    /**
+     * The symbol used to escape special characters in values.
+     */
+    final String ATTRIBUTE_ESCAPE = "csv.escape";
+    /**
+     * The record separator to use for withConnection.
+     */
+    final String ATTRIBUTE_LINE_SEPARATOR = "csv.line.separator";
 
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
-    }
+    final Character DELIMITER = ',';
+    final String LINE_SEPARATOR = "\r\n";
+    final boolean QUOTING = false;
+    final Character QUOTE = '"';
+    final Character ESCAPE = '|';
 }

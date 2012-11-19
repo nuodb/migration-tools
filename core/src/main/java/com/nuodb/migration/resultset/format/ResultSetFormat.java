@@ -25,47 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
 
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
+public interface ResultSetFormat {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
-    }
+    String getFormatType();
 
-    @Override
-    public char openQuote() {
-        return '`';
-    }
+    String getAttribute(String attribute);
 
-    @Override
-    public char closeQuote() {
-        return '`';
-    }
+    String getAttribute(String attribute, String defaultValue);
 
-    /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
-     */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
-    }
+    Map<String, String> getAttributes();
 
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
-    }
+    void setAttributes(Map<String, String> attributes);
+
+    ColumnSetModel getColumnSetModel();
+
+    void setColumnSetModel(ColumnSetModel columnSetModel);
+
+    JdbcTypeValueAccessProvider getJdbcTypeValueAccessProvider();
+
+    void setJdbcTypeValueAccessProvider(JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider);
+
+    JdbcTypeValueFormatRegistry getJdbcTypeValueFormatRegistry();
+
+    void setJdbcTypeValueFormatRegistry(JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry);
 }

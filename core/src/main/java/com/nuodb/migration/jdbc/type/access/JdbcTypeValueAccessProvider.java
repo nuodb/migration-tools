@@ -49,11 +49,11 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
     }
 
     public <T> JdbcTypeValueGetter<T> getJdbcTypeValueGetter(int typeCode) {
-        return getJdbcTypeValueGetter(new JdbcTypeDescBase(typeCode));
+        return getJdbcTypeValueGetter(new JdbcTypeDesc(typeCode));
     }
 
     public <T> JdbcTypeValueGetter<T> getJdbcTypeValueGetter(int typeCode, String typeName) {
-        return getJdbcTypeValueGetter(new JdbcTypeDescBase(typeCode, typeName));
+        return getJdbcTypeValueGetter(new JdbcTypeDesc(typeCode, typeName));
     }
 
     public <T> JdbcTypeValueGetter<T> getJdbcTypeValueGetter(JdbcTypeDesc jdbcTypeDesc) {
@@ -65,11 +65,11 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
     }
 
     public <T> JdbcTypeValueSetter<T> getJdbcTypeValueSetter(int typeCode) {
-        return getJdbcTypeValueSetter(new JdbcTypeDescBase(typeCode));
+        return getJdbcTypeValueSetter(new JdbcTypeDesc(typeCode));
     }
 
     public <T> JdbcTypeValueSetter<T> getJdbcTypeValueSetter(int typeCode, String typeName) {
-        return getJdbcTypeValueSetter(new JdbcTypeDescBase(typeCode, typeName));
+        return getJdbcTypeValueSetter(new JdbcTypeDesc(typeCode, typeName));
     }
 
     public <T> JdbcTypeValueSetter<T> getJdbcTypeValueSetter(JdbcTypeDesc jdbcTypeDesc) {

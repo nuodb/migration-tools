@@ -27,12 +27,62 @@
  */
 package com.nuodb.migration.jdbc.type;
 
+import static com.nuodb.migration.jdbc.type.JdbcTypeNameMap.INSTANCE;
+
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeDesc {
+public class JdbcTypeDesc {
 
-    int getTypeCode();
+    private int typeCode;
+    private String typeName;
 
-    String getTypeName();
+    public JdbcTypeDesc(int typeCode) {
+        this(typeCode, INSTANCE.getTypeName(typeCode));
+    }
+
+    public JdbcTypeDesc(int typeCode, String typeName) {
+        this.typeCode = typeCode;
+        this.typeName = typeName;
+    }
+
+    public JdbcTypeDesc(JdbcTypeDesc typeDesc) {
+        this.typeCode = typeDesc.getTypeCode();
+        this.typeName = typeDesc.getTypeName();
+    }
+
+    public int getTypeCode() {
+        return typeCode;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public static boolean isEqualTypeNames(String typeName1, String typeName2) {
+        return typeName1 != null ? typeName1.equalsIgnoreCase(typeName2) : typeName2 != null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JdbcTypeDesc)) return false;
+        JdbcTypeDesc that = (JdbcTypeDesc) o;
+        return typeCode == that.getTypeCode() && isEqualTypeNames(typeName, that.getTypeName());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = typeCode;
+        result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "JdbcTypeDesc{" +
+                "typeCode=" + typeCode +
+                ", typeName='" + typeName + '\'' +
+                '}';
+    }
 }

@@ -25,47 +25,42 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+import com.google.common.collect.Maps;
+import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
+public abstract class JdbcTypeValueFormatRegistryBase implements JdbcTypeValueFormatRegistry {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
+    private Map<JdbcTypeDesc, JdbcTypeValueFormat> jdbcTypeValueFormats = Maps.newHashMap();
+
+    @Override
+    public void addJdbcTypeValueFormat(JdbcType jdbcType, JdbcTypeValueFormat jdbcTypeValueFormat) {
+        addJdbcTypeValueFormat(jdbcType.getTypeDesc(), jdbcTypeValueFormat);
     }
 
     @Override
-    public char openQuote() {
-        return '`';
+    public void addJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc, JdbcTypeValueFormat jdbcTypeValueFormat) {
+        jdbcTypeValueFormats.put(jdbcTypeDesc, jdbcTypeValueFormat);
     }
 
     @Override
-    public char closeQuote() {
-        return '`';
+    public JdbcTypeValueFormat getJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc) {
+        JdbcTypeValueFormat jdbcTypeValueFormat = jdbcTypeValueFormats.get(jdbcTypeDesc);
+        if (jdbcTypeValueFormat == null) {
+            jdbcTypeValueFormat = jdbcTypeValueFormats.get(new JdbcTypeDesc(jdbcTypeDesc.getTypeCode()));
+        }
+        if (jdbcTypeValueFormat == null) {
+            jdbcTypeValueFormat = getDefaultJdbcTypeValueFormat();
+        }
+        return jdbcTypeValueFormat;
     }
 
-    /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
-     */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
-    }
-
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
-    }
+    protected abstract JdbcTypeValueFormat getDefaultJdbcTypeValueFormat();
 }

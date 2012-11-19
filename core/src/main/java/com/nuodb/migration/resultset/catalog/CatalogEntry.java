@@ -25,47 +25,55 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
-
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+package com.nuodb.migration.resultset.catalog;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
+public class CatalogEntry {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
+    private String name;
+    private String type;
+
+    public CatalogEntry(String name, String type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
     }
 
     @Override
-    public char openQuote() {
-        return '`';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CatalogEntry that = (CatalogEntry) o;
+
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+
+        return true;
     }
 
     @Override
-    public char closeQuote() {
-        return '`';
-    }
-
-    /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
-     */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        return result;
     }
 
     @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
+    public String toString() {
+        StringBuilder value = new StringBuilder();
+        value.append(name);
+        value.append('.');
+        value.append(type);
+        return value.toString();
     }
 }

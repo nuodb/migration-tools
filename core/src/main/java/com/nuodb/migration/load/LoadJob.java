@@ -33,15 +33,14 @@ import com.nuodb.migration.jdbc.ConnectionServicesCallback;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.model.*;
 import com.nuodb.migration.jdbc.query.*;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
-import com.nuodb.migration.result.catalog.Catalog;
-import com.nuodb.migration.result.catalog.CatalogEntry;
-import com.nuodb.migration.result.catalog.CatalogReader;
-import com.nuodb.migration.result.format.ResultFormatFactory;
-import com.nuodb.migration.result.format.ResultInput;
+import com.nuodb.migration.resultset.catalog.Catalog;
+import com.nuodb.migration.resultset.catalog.CatalogEntry;
+import com.nuodb.migration.resultset.catalog.CatalogReader;
+import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.ResultSetInput;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -67,7 +66,7 @@ public class LoadJob extends JobBase {
     private String inputType;
     private Map<String, String> inputAttributes;
     private Catalog catalog;
-    private ResultFormatFactory resultFormatFactory;
+    private ResultSetFormatFactory resultSetFormatFactory;
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
@@ -92,33 +91,35 @@ public class LoadJob extends JobBase {
                 });
     }
 
-    protected void load(final JobExecution execution, final ConnectionServices services, final Database database,
-                        final CatalogReader reader, final CatalogEntry entry) throws SQLException {
+    protected void load(final JobExecution execution, final ConnectionServices connectionServices,
+                        final Database database, final CatalogReader reader,
+                        final CatalogEntry entry) throws SQLException {
         InputStream entryInput = reader.getEntryInput(entry);
         try {
-            final ResultInput resultInput = resultFormatFactory.createInput(entry.getType());
-            resultInput.setAttributes(inputAttributes);
-            resultInput.setInputStream(entryInput);
-
-            JdbcTypeRegistry jdbcTypeRegistry = database.getDatabaseDialect().getJdbcTypeRegistry();
-            resultInput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
-            resultInput.initInput();
-
-            load(execution, services, database, resultInput, entry.getName());
+            final ResultSetInput resultSetInput = resultSetFormatFactory.createResultSetInput(entry.getType());
+            resultSetInput.setAttributes(inputAttributes);
+            resultSetInput.setInputStream(entryInput);
+            resultSetInput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(
+                    database.getDatabaseDialect().getJdbcTypeRegistry())
+            );
+            load(execution, connectionServices, database, resultSetInput, entry.getName());
         } finally {
             closeQuietly(entryInput);
         }
     }
 
-    protected void load(final JobExecution execution, final ConnectionServices services, final Database database,
-                        final ResultInput resultInput, final String tableName) throws SQLException {
-        resultInput.readBegin();
-        ColumnSetModel columnSetModel = resultInput.getColumnSetModel();
+    protected void load(final JobExecution execution, final ConnectionServices connectionServices,
+                        final Database database, final ResultSetInput resultSetInput,
+                        final String tableName) throws SQLException {
+        resultSetInput.readBegin();
+
+        ColumnSetModel columnSetModel = resultSetInput.getColumnSetModel();
         Table table = database.findTable(tableName);
         mergeColumnSetModel(table, columnSetModel);
+
         final InsertQuery query = createInsertQuery(table, columnSetModel);
 
-        QueryTemplate queryTemplate = new QueryTemplate(services.getConnection());
+        QueryTemplate queryTemplate = new QueryTemplate(connectionServices.getConnection());
         queryTemplate.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
@@ -132,14 +133,13 @@ public class LoadJob extends JobBase {
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement preparedStatement) throws SQLException {
-                        resultInput.setPreparedStatement(preparedStatement);
+                        resultSetInput.setPreparedStatement(preparedStatement);
 
-                        resultInput.initModel();
-                        while (resultInput.canReadRow() && execution.isRunning()) {
-                            resultInput.readRow();
+                        while (resultSetInput.readNextRow() && execution.isRunning()) {
+                            resultSetInput.readRow();
                             preparedStatement.executeUpdate();
                         }
-                        resultInput.readEnd();
+                        resultSetInput.readEnd();
                     }
                 }
         );
@@ -203,11 +203,11 @@ public class LoadJob extends JobBase {
         this.inputAttributes = inputAttributes;
     }
 
-    public ResultFormatFactory getResultFormatFactory() {
-        return resultFormatFactory;
+    public ResultSetFormatFactory getResultSetFormatFactory() {
+        return resultSetFormatFactory;
     }
 
-    public void setResultFormatFactory(ResultFormatFactory resultFormatFactory) {
-        this.resultFormatFactory = resultFormatFactory;
+    public void setResultSetFormatFactory(ResultSetFormatFactory resultSetFormatFactory) {
+        this.resultSetFormatFactory = resultSetFormatFactory;
     }
 }

@@ -51,19 +51,19 @@ public class JdbcTypeRegistryBase extends JdbcTypeNameMap implements JdbcTypeReg
 
     @Override
     public JdbcType getJdbcType(int typeCode) {
-        return jdbcTypes.get(new JdbcTypeDescBase(typeCode));
+        return jdbcTypes.get(new JdbcTypeDesc(typeCode));
     }
 
     @Override
     public JdbcType getJdbcType(int typeCode, String typeName) {
-        return getJdbcType(new JdbcTypeDescBase(typeCode, typeName));
+        return getJdbcType(new JdbcTypeDesc(typeCode, typeName));
     }
 
     @Override
     public JdbcType getJdbcType(JdbcTypeDesc typeDesc) {
         JdbcType jdbcType = jdbcTypes.get(typeDesc);
         if (jdbcType == null) {
-            jdbcType = jdbcTypes.get(new JdbcTypeDescBase(typeDesc.getTypeCode()));
+            jdbcType = jdbcTypes.get(new JdbcTypeDesc(typeDesc.getTypeCode()));
         }
         return jdbcType;
     }

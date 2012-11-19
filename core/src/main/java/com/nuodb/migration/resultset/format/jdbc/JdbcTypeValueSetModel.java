@@ -25,47 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
-    }
+public interface JdbcTypeValueSetModel extends ColumnSetModel {
 
-    @Override
-    public char openQuote() {
-        return '`';
-    }
+    JdbcTypeValueAccess getJdbcTypeValueAccess(int index);
 
-    @Override
-    public char closeQuote() {
-        return '`';
-    }
+    JdbcTypeValueAccess[] getValueAccesses();
 
-    /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
-     */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
-    }
+    JdbcTypeValueFormat getJdbcTypeValueFormat(int index);
 
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
-    }
+    JdbcTypeValueFormat[] getValueFormats();
 }

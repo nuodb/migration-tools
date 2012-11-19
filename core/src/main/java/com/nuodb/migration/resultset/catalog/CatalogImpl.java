@@ -25,47 +25,59 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.resultset.catalog;
 
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.File;
+
+import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
+public class CatalogImpl implements Catalog {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
+    private static final String CATALOG_FILE_NAME = "dump.cat";
+
+    protected final Log log = LogFactory.getLog(getClass());
+
+    private String path;
+    private File catalogDir;
+    private File catalogFile;
+
+    public CatalogImpl(String path) {
+        this.path = path;
+        this.catalogDir = getCatalogDir();
+        this.catalogFile = getCatalogFile();
+    }
+
+    protected File getCatalogDir() {
+        File catalogDir = new File(path == null ? getCurrentDirectory() : path);
+        return catalogDir.isFile() ? catalogDir.getParentFile() : catalogDir;
+    }
+
+    protected File getCatalogFile() {
+        String catalogFile = catalogDir.isFile() ? catalogDir.getName() : CATALOG_FILE_NAME;
+        return new File(catalogDir, catalogFile);
+    }
+
+    private static String getCurrentDirectory() {
+        return new File(EMPTY).getAbsolutePath();
+    }
+
+    public String getPath() {
+        return path;
     }
 
     @Override
-    public char openQuote() {
-        return '`';
+    public CatalogReader getReader() {
+        return new CatalogReaderImpl(catalogDir, catalogFile);
     }
 
     @Override
-    public char closeQuote() {
-        return '`';
-    }
-
-    /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
-     */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
-    }
-
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
+    public CatalogWriter getWriter() {
+        return new CatalogWriterImpl(catalogDir, catalogFile);
     }
 }

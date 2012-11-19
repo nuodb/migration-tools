@@ -34,8 +34,6 @@ public interface ColumnSetModel {
 
     String getName(int index);
 
-    String[] getNames();
-
     int getTypeCode(int index);
 
     void setTypeCode(int index, int typeCode);
@@ -44,19 +42,13 @@ public interface ColumnSetModel {
 
     void setTypeName(int index, String typeName);
 
-    int[] getTypeCodes();
-
     int getPrecision(int index);
 
     void setPrecision(int index, int precision);
 
-    int[] getPrecisions();
-
     int getScale(int index);
 
     void setScale(int index, int scale);
-
-    int[] getScales();
 
     ColumnModel item(int index);
 

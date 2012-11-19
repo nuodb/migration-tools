@@ -36,15 +36,14 @@ import com.nuodb.migration.jdbc.model.Database;
 import com.nuodb.migration.jdbc.model.DatabaseInspector;
 import com.nuodb.migration.jdbc.model.Table;
 import com.nuodb.migration.jdbc.query.*;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
-import com.nuodb.migration.result.catalog.Catalog;
-import com.nuodb.migration.result.catalog.CatalogEntry;
-import com.nuodb.migration.result.catalog.CatalogWriter;
-import com.nuodb.migration.result.format.ResultFormatFactory;
-import com.nuodb.migration.result.format.ResultOutput;
+import com.nuodb.migration.resultset.catalog.Catalog;
+import com.nuodb.migration.resultset.catalog.CatalogEntry;
+import com.nuodb.migration.resultset.catalog.CatalogWriter;
+import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.ResultSetOutput;
 import com.nuodb.migration.spec.NativeQuerySpec;
 import com.nuodb.migration.spec.SelectQuerySpec;
 import org.apache.commons.logging.Log;
@@ -81,7 +80,7 @@ public class DumpJob extends JobBase {
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
     private Map<String, String> outputAttributes;
-    private ResultFormatFactory resultFormatFactory;
+    private ResultSetFormatFactory resultSetFormatFactory;
     private ConnectionProvider connectionProvider;
 
     @Override
@@ -129,11 +128,11 @@ public class DumpJob extends JobBase {
 
     protected void dump(final JobExecution execution, final ConnectionServices services, final Database database,
                         final Query query, final CatalogWriter writer, final CatalogEntry entry) throws SQLException {
-        final ResultOutput output = resultFormatFactory.createOutput(outputType);
-        output.setAttributes(outputAttributes);
+        final ResultSetOutput resultSetOutput = resultSetFormatFactory.createResultSetOutput(outputType);
+        resultSetOutput.setAttributes(outputAttributes);
 
-        JdbcTypeRegistry jdbcTypeRegistry = database.getDatabaseDialect().getJdbcTypeRegistry();
-        output.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
+        resultSetOutput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(
+                database.getDatabaseDialect().getJdbcTypeRegistry()));
 
         QueryTemplate queryTemplate = new QueryTemplate(services.getConnection());
         queryTemplate.execute(
@@ -146,7 +145,7 @@ public class DumpJob extends JobBase {
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        dump(execution, statement, writer, entry, output);
+                        dump(execution, statement, writer, entry, resultSetOutput);
                     }
                 }
         );
@@ -164,21 +163,18 @@ public class DumpJob extends JobBase {
     }
 
     protected void dump(final JobExecution execution, final PreparedStatement statement, final CatalogWriter writer,
-                        final CatalogEntry entry, final ResultOutput resultOutput) throws SQLException {
+                        final CatalogEntry entry, final ResultSetOutput resultSetOutput) throws SQLException {
         ResultSet resultSet = statement.executeQuery();
 
         writer.addEntry(entry);
-        resultOutput.setOutputStream(writer.getEntryOutput(entry));
-        resultOutput.initOutput();
+        resultSetOutput.setOutputStream(writer.getEntryOutput(entry));
+        resultSetOutput.setResultSet(resultSet);
 
-        resultOutput.setResultSet(resultSet);
-        resultOutput.initModel();
-
-        resultOutput.writeBegin();
+        resultSetOutput.writeBegin();
         while (execution.isRunning() && resultSet.next()) {
-            resultOutput.writeRow();
+            resultSetOutput.writeRow();
         }
-        resultOutput.writeEnd();
+        resultSetOutput.writeEnd();
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database,
@@ -282,11 +278,11 @@ public class DumpJob extends JobBase {
         this.outputAttributes = outputAttributes;
     }
 
-    public ResultFormatFactory getResultFormatFactory() {
-        return resultFormatFactory;
+    public ResultSetFormatFactory getResultSetFormatFactory() {
+        return resultSetFormatFactory;
     }
 
-    public void setResultFormatFactory(ResultFormatFactory resultFormatFactory) {
-        this.resultFormatFactory = resultFormatFactory;
+    public void setResultSetFormatFactory(ResultSetFormatFactory resultSetFormatFactory) {
+        this.resultSetFormatFactory = resultSetFormatFactory;
     }
 }

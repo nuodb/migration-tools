@@ -25,47 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.sql.ResultSet;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
+public interface ResultSetOutput extends ResultSetFormat {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
-    }
+    void setResultSet(ResultSet resultSet);
 
-    @Override
-    public char openQuote() {
-        return '`';
-    }
+    void setWriter(Writer writer);
 
-    @Override
-    public char closeQuote() {
-        return '`';
-    }
+    void setOutputStream(OutputStream outputStream);
 
-    /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
-     */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
-    }
+    void writeBegin();
 
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
-    }
+    void writeRow();
+
+    void writeEnd();
 }

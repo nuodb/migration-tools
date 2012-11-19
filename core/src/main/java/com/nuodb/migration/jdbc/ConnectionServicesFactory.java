@@ -28,7 +28,9 @@
 package com.nuodb.migration.jdbc;
 
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.migration.jdbc.model.Database;
 import com.nuodb.migration.jdbc.model.DatabaseInspector;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.spec.ConnectionSpec;
 
 import java.sql.Connection;

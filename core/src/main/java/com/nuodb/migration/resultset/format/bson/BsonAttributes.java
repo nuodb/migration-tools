@@ -25,47 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
-
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+package com.nuodb.migration.resultset.format.bson;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
+public interface BsonAttributes {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
-    }
+    final String FORMAT_TYPE = "bson";
 
-    @Override
-    public char openQuote() {
-        return '`';
-    }
-
-    @Override
-    public char closeQuote() {
-        return '`';
-    }
-
-    /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
-     */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
-    }
-
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
-    }
+    final String COLUMNS_FIELD = "columns";
+    final String COLUMN_FIELD = "column";
+    final String ROWS_FIELD = "rows";
 }

@@ -25,47 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
-
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+package com.nuodb.migration.resultset.format.xml;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
+public interface XmlAttributes {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
-    }
+    final String FORMAT_TYPE = "xml";
+    final String SCHEMA_NIL_ATTRIBUTE = "nil";
 
-    @Override
-    public char openQuote() {
-        return '`';
-    }
+    final String ATTRIBUTE_ENCODING = "xml.encoding";
+    final String ATTRIBUTE_VERSION = "xml.version";
 
-    @Override
-    public char closeQuote() {
-        return '`';
-    }
-
-    /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
-     */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
-    }
-
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
-    }
+    final String ENCODING = "utf-8";
+    final String VERSION = "1.0";
+    final String RESULT_SET_ELEMENT = "result-set";
+    final String COLUMNS_ELEMENT = "columns";
+    final String COLUMN_ELEMENT = "column";
+    final String ATTRIBUTE_NAME = "name";
+    final String ROW_ELEMENT = "row";
 }

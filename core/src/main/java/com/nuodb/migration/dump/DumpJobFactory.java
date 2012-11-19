@@ -30,10 +30,10 @@ package com.nuodb.migration.dump;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.DriverManagerConnectionProvider;
 import com.nuodb.migration.job.JobFactory;
-import com.nuodb.migration.result.catalog.Catalog;
-import com.nuodb.migration.result.catalog.CatalogImpl;
-import com.nuodb.migration.result.format.ResultFormatFactory;
-import com.nuodb.migration.result.format.ResultFormatFactoryImpl;
+import com.nuodb.migration.resultset.catalog.Catalog;
+import com.nuodb.migration.resultset.catalog.CatalogImpl;
+import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.ResultSetFormatFactoryImpl;
 import com.nuodb.migration.spec.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,7 +49,7 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
     protected final Log log = LogFactory.getLog(getClass());
 
     private DumpSpec dumpSpec;
-    private ResultFormatFactory resultFormatFactory = new ResultFormatFactoryImpl();
+    private ResultSetFormatFactory resultSetFormatFactory = new ResultSetFormatFactoryImpl();
 
     public DumpJob createJob() {
         ConnectionSpec connectionSpec = dumpSpec.getConnectionSpec();
@@ -64,7 +64,7 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         job.setOutputType(outputSpec.getType());
         job.setOutputAttributes(outputSpec.getAttributes());
         job.setCatalog(createCatalog(outputSpec.getPath()));
-        job.setResultFormatFactory(resultFormatFactory);
+        job.setResultSetFormatFactory(resultSetFormatFactory);
         return job;
     }
 
@@ -84,11 +84,11 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         this.dumpSpec = dumpSpec;
     }
 
-    public ResultFormatFactory getResultFormatFactory() {
-        return resultFormatFactory;
+    public ResultSetFormatFactory getResultSetFormatFactory() {
+        return resultSetFormatFactory;
     }
 
-    public void setResultFormatFactory(ResultFormatFactory resultFormatFactory) {
-        this.resultFormatFactory = resultFormatFactory;
+    public void setResultSetFormatFactory(ResultSetFormatFactory resultSetFormatFactory) {
+        this.resultSetFormatFactory = resultSetFormatFactory;
     }
 }

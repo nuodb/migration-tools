@@ -57,16 +57,6 @@ public class ColumnSetModelImpl implements ColumnSetModel {
     }
 
     @Override
-    public String[] getNames() {
-        int columnCount = getLength();
-        String[] names = new String[columnCount];
-        for (int index = 0; index < columnCount; index++) {
-            names[index] = getName(index);
-        }
-        return names;
-    }
-
-    @Override
     public int getTypeCode(int index) {
         return columns[index].getTypeCode();
     }
@@ -87,16 +77,6 @@ public class ColumnSetModelImpl implements ColumnSetModel {
     }
 
     @Override
-    public int[] getTypeCodes() {
-        int columnCount = getLength();
-        int[] typeCodes = new int[columnCount];
-        for (int index = 0; index < columnCount; index++) {
-            typeCodes[index] = getTypeCode(index);
-        }
-        return typeCodes;
-    }
-
-    @Override
     public int getPrecision(int index) {
         return columns[index].getPrecision();
     }
@@ -107,16 +87,6 @@ public class ColumnSetModelImpl implements ColumnSetModel {
     }
 
     @Override
-    public int[] getPrecisions() {
-        int columnCount = getLength();
-        int[] precisions = new int[columnCount];
-        for (int index = 0; index < columnCount; index++) {
-            precisions[index] = getPrecision(index);
-        }
-        return precisions;
-    }
-
-    @Override
     public int getScale(int index) {
         return columns[index].getScale();
     }
@@ -124,16 +94,6 @@ public class ColumnSetModelImpl implements ColumnSetModel {
     @Override
     public void setScale(int index, int scale) {
         columns[index].setScale(scale);
-    }
-
-    @Override
-    public int[] getScales() {
-        int columnCount = getLength();
-        int[] scales = new int[columnCount];
-        for (int index = 0; index < columnCount; index++) {
-            scales[index] = getScale(index);
-        }
-        return scales;
     }
 
     @Override

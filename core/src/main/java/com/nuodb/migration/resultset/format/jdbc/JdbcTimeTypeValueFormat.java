@@ -25,47 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.Time;
+
+import static java.lang.String.format;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DatabaseDialectBase {
+public class JdbcTimeTypeValueFormat extends JdbcTypeValueFormatBase<Time> {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
+    public static final JdbcTypeValueFormat<Time> INSTANCE = new JdbcTimeTypeValueFormat();
+
+    @Override
+    protected String doGetValue(JdbcTypeValueAccess<Time> access) throws SQLException {
+        Time time = access.getValue();
+        return time != null ? time.toString() : null;
     }
 
     @Override
-    public char openQuote() {
-        return '`';
-    }
-
-    @Override
-    public char closeQuote() {
-        return '`';
-    }
-
-    /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
-     *
-     * @param statement to stream resultset set
-     * @throws SQLException
-     */
-    @Override
-    public void enableStreaming(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
-    }
-
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
+    protected void doSetValue(JdbcTypeValueAccess<Time> access, String value) throws SQLException {
+        try {
+            access.setValue(!isEmpty(value) ? Time.valueOf(value) : null);
+        } catch (IllegalArgumentException exception) {
+            throw new JdbcTypeValueException(
+                    format("Value %s is not in the hh:mm:ss format", value));
+        }
     }
 }

@@ -28,8 +28,8 @@
 package com.nuodb.migration.jdbc.type.jdbc4;
 
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-import com.nuodb.migration.jdbc.type.adapter.NClobTypeAdapter;
-import com.nuodb.migration.jdbc.type.adapter.SqlXmlTypeAdapter;
+import com.nuodb.migration.jdbc.type.adapter.JdbcNClobTypeAdapter;
+import com.nuodb.migration.jdbc.type.adapter.JdbcSqlXmlTypeAdapter;
 import com.nuodb.migration.jdbc.type.jdbc3.Jdbc3TypeRegistry;
 
 /**
@@ -47,7 +47,7 @@ public class Jdbc4TypeRegistry extends Jdbc3TypeRegistry {
         addJdbcType(JdbcNClobType.INSTANCE);
         addJdbcType(JdbcRowIdType.INSTANCE);
         addJdbcType(JdbcSqlXmlType.INSTANCE);
-        addJdbcTypeAdapter(NClobTypeAdapter.INSTANCE);
-        addJdbcTypeAdapter(SqlXmlTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(JdbcNClobTypeAdapter.INSTANCE);
+        addJdbcTypeAdapter(JdbcSqlXmlTypeAdapter.INSTANCE);
     }
 }

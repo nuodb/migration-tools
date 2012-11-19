@@ -34,10 +34,10 @@ import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
-import com.nuodb.migration.result.catalog.Catalog;
-import com.nuodb.migration.result.catalog.CatalogImpl;
-import com.nuodb.migration.result.format.ResultFormatFactory;
-import com.nuodb.migration.result.format.ResultFormatFactoryImpl;
+import com.nuodb.migration.resultset.catalog.Catalog;
+import com.nuodb.migration.resultset.catalog.CatalogImpl;
+import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.ResultSetFormatFactoryImpl;
 import com.nuodb.migration.spec.*;
 
 /**
@@ -46,7 +46,7 @@ import com.nuodb.migration.spec.*;
 public class LoadJobFactory implements JobFactory<LoadJob> {
 
     private LoadSpec loadSpec;
-    private ResultFormatFactory resultFormatFactory = new ResultFormatFactoryImpl();
+    private ResultSetFormatFactory resultSetFormatFactory = new ResultSetFormatFactoryImpl();
 
     @Override
     public LoadJob createJob() {
@@ -58,7 +58,7 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         job.setInputType(inputSpec.getType());
         job.setInputAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));
-        job.setResultFormatFactory(resultFormatFactory);
+        job.setResultSetFormatFactory(resultSetFormatFactory);
         return job;
     }
 
@@ -78,12 +78,12 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         this.loadSpec = loadSpec;
     }
 
-    public ResultFormatFactory getResultFormatFactory() {
-        return resultFormatFactory;
+    public ResultSetFormatFactory getResultSetFormatFactory() {
+        return resultSetFormatFactory;
     }
 
-    public void setResultFormatFactory(ResultFormatFactory resultFormatFactory) {
-        this.resultFormatFactory = resultFormatFactory;
+    public void setResultSetFormatFactory(ResultSetFormatFactory resultSetFormatFactory) {
+        this.resultSetFormatFactory = resultSetFormatFactory;
     }
 
     public static void main(String[] args) {
