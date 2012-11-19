@@ -62,5 +62,10 @@ public abstract class JdbcTypeValueFormatRegistryBase implements JdbcTypeValueFo
         return jdbcTypeValueFormat;
     }
 
+    @Override
+    public Map<JdbcTypeDesc, JdbcTypeValueFormat> getJdbcTypeValueFormats() {
+        return jdbcTypeValueFormats;
+    }
+
     protected abstract JdbcTypeValueFormat getDefaultJdbcTypeValueFormat();
 }

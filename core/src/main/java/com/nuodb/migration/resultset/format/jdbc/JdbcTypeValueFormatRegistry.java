@@ -30,6 +30,8 @@ package com.nuodb.migration.resultset.format.jdbc;
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
+import java.util.Map;
+
 /**
  * @author Sergey Bushik
  */
@@ -40,4 +42,6 @@ public interface JdbcTypeValueFormatRegistry {
     void addJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc, JdbcTypeValueFormat jdbcTypeValueFormat);
 
     JdbcTypeValueFormat getJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc);
+
+    Map<JdbcTypeDesc, JdbcTypeValueFormat> getJdbcTypeValueFormats();
 }

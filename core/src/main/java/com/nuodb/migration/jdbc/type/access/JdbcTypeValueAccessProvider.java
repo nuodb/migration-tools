@@ -187,7 +187,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         }
     }
 
-    class JdbcTypeValueAccessImpl<T> implements JdbcTypeValueAccess<T> {
+    static class JdbcTypeValueAccessImpl<T> implements JdbcTypeValueAccess<T> {
 
         private JdbcTypeValueGetter<T> getter;
         private ResultSet resultSet;

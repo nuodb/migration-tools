@@ -38,7 +38,9 @@ import javax.sql.rowset.serial.SerialRef;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Ref;
+import java.sql.RowId;
+import java.sql.Types;
 
 import static java.lang.String.format;
 import static org.apache.commons.io.IOUtils.closeQuietly;
@@ -49,9 +51,15 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistryBase {
 
-    private JdbcTypeValueFormat defaultJdbcTypeValueFormat = new JdbcTypeValueFormatImpl();
+    private JdbcTypeValueFormat defaultJdbcTypeValueFormat;
 
     public JdbcTypeValueFormatRegistryImpl() {
+        this(new DefaultJdbcTypeValueFormat());
+    }
+
+    public JdbcTypeValueFormatRegistryImpl(JdbcTypeValueFormat defaultJdbcTypeValueFormat) {
+        this.defaultJdbcTypeValueFormat = defaultJdbcTypeValueFormat;
+
         addJdbcTypeValueFormat(JdbcTimestampType.INSTANCE, JdbcTimestampTypeValueFormat.INSTANCE);
         addJdbcTypeValueFormat(JdbcTimeType.INSTANCE, JdbcTimeTypeValueFormat.INSTANCE);
         addJdbcTypeValueFormat(JdbcDateType.INSTANCE, JdbcDateTypeValueFormat.INSTANCE);
@@ -62,7 +70,7 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
         return defaultJdbcTypeValueFormat;
     }
 
-    class JdbcTypeValueFormatImpl extends JdbcTypeValueFormatBase<Object> {
+    static class DefaultJdbcTypeValueFormat extends JdbcTypeValueFormatBase<Object> {
 
         @Override
         protected String doGetValue(JdbcTypeValueAccess<Object> access) throws Exception {
@@ -92,14 +100,6 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
                 case Types.LONGNVARCHAR:
                 case Types.NCHAR:
                     value = access.getValue(String.class);
-                    break;
-                case Types.DATE:
-                case Types.TIME:
-                case Types.TIMESTAMP:
-                    jdbcValue = access.getValue();
-                    if (jdbcValue != null) {
-                        value = jdbcValue.toString();
-                    }
                     break;
                 case Types.BINARY:
                 case Types.VARBINARY:
@@ -195,21 +195,6 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
                 case Types.NCHAR:
                     access.setValue(!isEmpty(value) ? value : null);
                     break;
-                case Types.DATE:
-                    try {
-                        access.setValue(!isEmpty(value) ? Date.valueOf(value) : null);
-                    } catch (IllegalArgumentException exception) {
-                        throw new JdbcTypeValueException(
-                                format("Value %s is not in the yyyy-mm-dd format", value));
-                    }
-                    break;
-                case Types.TIME:
-                    try {
-                        access.setValue(!isEmpty(value) ? Time.valueOf(value) : null);
-                    } catch (IllegalArgumentException exception) {
-                        throw new JdbcTypeValueException(
-                                format("Value %s is not in the hh:mm:ss format", value));
-                    }
                 case Types.BINARY:
                 case Types.VARBINARY:
                 case Types.LONGVARBINARY:
