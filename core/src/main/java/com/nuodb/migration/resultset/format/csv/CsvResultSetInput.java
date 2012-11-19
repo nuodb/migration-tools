@@ -95,7 +95,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
     }
 
     @Override
-    public boolean readNextRow() {
+    public boolean hasNextRow() {
         return iterator.hasNext();
     }
 

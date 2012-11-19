@@ -114,7 +114,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
     }
 
     @Override
-    public boolean readNextRow() {
+    public boolean hasNextRow() {
         return iterator != null && iterator.hasNext();
     }
 

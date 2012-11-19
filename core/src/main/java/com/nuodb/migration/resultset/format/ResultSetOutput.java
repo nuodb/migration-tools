@@ -36,15 +36,15 @@ import java.sql.ResultSet;
  */
 public interface ResultSetOutput extends ResultSetFormat {
 
-    void setResultSet(ResultSet resultSet);
-
-    void setWriter(Writer writer);
-
-    void setOutputStream(OutputStream outputStream);
-
     void writeBegin();
 
     void writeRow();
 
     void writeEnd();
+
+    void setWriter(Writer writer);
+
+    void setOutputStream(OutputStream outputStream);
+
+    void setResultSet(ResultSet resultSet);
 }

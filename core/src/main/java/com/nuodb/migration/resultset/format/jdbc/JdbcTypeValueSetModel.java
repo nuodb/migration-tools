@@ -38,9 +38,5 @@ public interface JdbcTypeValueSetModel extends ColumnSetModel {
 
     JdbcTypeValueAccess getJdbcTypeValueAccess(int index);
 
-    JdbcTypeValueAccess[] getValueAccesses();
-
     JdbcTypeValueFormat getJdbcTypeValueFormat(int index);
-
-    JdbcTypeValueFormat[] getValueFormats();
 }

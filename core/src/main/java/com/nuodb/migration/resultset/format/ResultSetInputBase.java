@@ -61,7 +61,6 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     @Override
     public void setReader(Reader reader) {
         this.reader = reader;
-        doInitInput();
     }
 
     public InputStream getInputStream() {
@@ -86,15 +85,7 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
         doInitJdbcTypeValueSetModel();
     }
 
-    public JdbcTypeValueSetModel getJdbcTypeValueSetModel() {
-        return jdbcTypeValueSetModel;
-    }
-
-    public void setJdbcTypeValueSetModel(JdbcTypeValueSetModel jdbcTypeValueSetModel) {
-        this.jdbcTypeValueSetModel = jdbcTypeValueSetModel;
-    }
-
-    protected final void doInitJdbcTypeValueSetModel() {
+    protected void doInitJdbcTypeValueSetModel() {
         JdbcTypeValueSetModel jdbcTypeValueSetModel = getJdbcTypeValueSetModel();
         if (jdbcTypeValueSetModel == null) {
             setJdbcTypeValueSetModel(createJdbcTypeValueSetModel());
@@ -142,4 +133,12 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     }
 
     protected abstract void doReadEnd();
+
+    public JdbcTypeValueSetModel getJdbcTypeValueSetModel() {
+        return jdbcTypeValueSetModel;
+    }
+
+    public void setJdbcTypeValueSetModel(JdbcTypeValueSetModel jdbcTypeValueSetModel) {
+        this.jdbcTypeValueSetModel = jdbcTypeValueSetModel;
+    }
 }

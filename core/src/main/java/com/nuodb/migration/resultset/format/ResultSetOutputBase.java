@@ -81,7 +81,7 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
     @Override
     public final void setResultSet(ResultSet resultSet) {
         this.resultSet = resultSet;
-        initJdbcTypeValueSetModel();
+        doInitModel();
     }
 
     public JdbcTypeValueSetModel getJdbcTypeValueSetModel() {
@@ -92,7 +92,7 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
         this.jdbcTypeValueSetModel = jdbcTypeValueSetModel;
     }
 
-    protected void initJdbcTypeValueSetModel() {
+    protected void doInitModel() {
         ColumnSetModel columnSetModel = getColumnSetModel();
         if (columnSetModel == null) {
             setColumnSetModel(createColumnSetModel());

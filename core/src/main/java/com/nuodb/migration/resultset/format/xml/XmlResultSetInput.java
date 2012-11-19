@@ -106,7 +106,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
     }
 
     @Override
-    public boolean readNextRow() {
+    public boolean hasNextRow() {
         return iterator != null && iterator.hasNext();
     }
 

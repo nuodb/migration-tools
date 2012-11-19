@@ -53,8 +53,7 @@ import java.util.Map;
 
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.ConnectionServicesFactory.createConnectionServices;
-import static com.nuodb.migration.jdbc.model.ObjectType.COLUMN;
-import static com.nuodb.migration.jdbc.model.ObjectType.TABLE;
+import static com.nuodb.migration.jdbc.model.ObjectType.*;
 
 /**
  * @author Sergey Bushik
@@ -75,7 +74,7 @@ public class LoadJob extends JobBase {
                     @Override
                     public void execute(ConnectionServices services) throws SQLException {
                         DatabaseInspector databaseInspector = services.getDatabaseInspector();
-                        databaseInspector.withObjectTypes(TABLE, COLUMN);
+                        databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
                         Database database = databaseInspector.inspect();
 
                         CatalogReader reader = catalog.getReader();
@@ -132,12 +131,12 @@ public class LoadJob extends JobBase {
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void execute(PreparedStatement preparedStatement) throws SQLException {
-                        resultSetInput.setPreparedStatement(preparedStatement);
+                    public void execute(PreparedStatement statement) throws SQLException {
+                        resultSetInput.setPreparedStatement(statement);
 
-                        while (resultSetInput.readNextRow() && execution.isRunning()) {
+                        while (resultSetInput.hasNextRow() && execution.isRunning()) {
                             resultSetInput.readRow();
-                            preparedStatement.executeUpdate();
+                            statement.executeUpdate();
                         }
                         resultSetInput.readEnd();
                     }
@@ -150,6 +149,7 @@ public class LoadJob extends JobBase {
             String name = columnSetModel.getName(index);
             Column column = table.getColumn(name);
             columnSetModel.setTypeCode(index, column.getTypeCode());
+            columnSetModel.setTypeName(index, column.getTypeName());
             columnSetModel.setPrecision(index, column.getPrecision());
             columnSetModel.setScale(index, column.getScale());
         }

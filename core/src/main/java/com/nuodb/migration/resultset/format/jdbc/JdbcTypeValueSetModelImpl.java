@@ -36,32 +36,24 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
  */
 public class JdbcTypeValueSetModelImpl extends ColumnSetModelImpl implements JdbcTypeValueSetModel {
 
-    private JdbcTypeValueAccess[] valueAccesses;
+    private JdbcTypeValueAccess[] jdbcTypeValueAccesses;
     private JdbcTypeValueFormat[] valueFormats;
 
-    public JdbcTypeValueSetModelImpl(JdbcTypeValueAccess[] valueAccesses, JdbcTypeValueFormat[] valueFormats, ColumnSetModel columnSetModel) {
+    public JdbcTypeValueSetModelImpl(JdbcTypeValueAccess[] jdbcTypeValueAccesses,
+                                     JdbcTypeValueFormat[] jdbcTypeValueFormats,
+                                     ColumnSetModel columnSetModel) {
         super(columnSetModel);
-        this.valueAccesses = valueAccesses;
-        this.valueFormats = valueFormats;
+        this.jdbcTypeValueAccesses = jdbcTypeValueAccesses;
+        this.valueFormats = jdbcTypeValueFormats;
     }
 
     @Override
     public JdbcTypeValueAccess getJdbcTypeValueAccess(int index) {
-        return valueAccesses[index];
-    }
-
-    @Override
-    public JdbcTypeValueAccess[] getValueAccesses() {
-        return valueAccesses;
+        return jdbcTypeValueAccesses[index];
     }
 
     @Override
     public JdbcTypeValueFormat getJdbcTypeValueFormat(int index) {
         return valueFormats[index];
-    }
-
-    @Override
-    public JdbcTypeValueFormat[] getValueFormats() {
-        return valueFormats;
     }
 }

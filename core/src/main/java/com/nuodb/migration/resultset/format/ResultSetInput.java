@@ -38,7 +38,7 @@ public interface ResultSetInput extends ResultSetFormat {
 
     void readBegin();
 
-    boolean readNextRow();
+    boolean hasNextRow();
 
     void readRow();
 
