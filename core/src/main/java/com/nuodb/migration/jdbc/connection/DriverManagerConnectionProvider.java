@@ -31,9 +31,14 @@ import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DriverManagerConnectionSpec;
 import com.nuodb.migration.utils.ClassUtils;
 import com.nuodb.migration.utils.ReflectionException;
+import org.apache.commons.dbcp.DriverManagerConnectionFactory;
+import org.apache.commons.dbcp.PoolableConnectionFactory;
+import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.pool.impl.GenericObjectPool;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -50,7 +55,7 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
     private DriverManagerConnectionSpec connectionSpec;
     private Boolean autoCommit;
     private Integer transactionIsolation;
-    private boolean driverLoaded;
+    private DataSource dataSource;
 
     public DriverManagerConnectionProvider() {
     }
@@ -60,7 +65,7 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
     }
 
     public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec,
-                                           Boolean autoCommit) {
+                                           boolean autoCommit) {
         this.connectionSpec = connectionSpec;
         this.autoCommit = autoCommit;
     }
@@ -74,14 +79,13 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
 
     @Override
     public Connection getConnection() throws SQLException {
-        if (!driverLoaded) {
-            loadDriver();
-            driverLoaded = true;
+        if (dataSource == null) {
+            dataSource = createDataSource();
         }
         return createConnection();
     }
 
-    protected void loadDriver() throws SQLException {
+    protected DataSource createDataSource() throws SQLException {
         try {
             Driver driver = connectionSpec.getDriver();
             if (driver == null) {
@@ -97,9 +101,7 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
                 log.warn("Driver can't be loaded", exception);
             }
         }
-    }
 
-    protected Connection createConnection() throws SQLException {
         String url = connectionSpec.getUrl();
         Properties properties = new Properties();
         if (connectionSpec.getProperties() != null) {
@@ -114,9 +116,16 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
             properties.setProperty(PASSWORD_PROPERTY, password);
         }
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Creating new connection at %s", url));
+            log.debug(String.format("Creating connection pool at %s", url));
         }
-        Connection connection = DriverManager.getConnection(url, properties);
+        PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(
+                new DriverManagerConnectionFactory(url, properties),
+                new GenericObjectPool(null), null, null, false, true);
+        return new PoolingDataSource(poolableConnectionFactory.getPool());
+    }
+
+    protected Connection createConnection() throws SQLException {
+        Connection connection = dataSource.getConnection();
         if (autoCommit != null) {
             connection.setAutoCommit(autoCommit);
         }
@@ -132,13 +141,7 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
             log.debug("Closing connection");
         }
         if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException exception) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Failed closing connection", exception);
-                }
-            }
+            connection.close();
         }
     }
 

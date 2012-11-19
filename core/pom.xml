@@ -81,6 +81,16 @@
             <version>2.0.0</version>
         </dependency>
         <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.nuodb</groupId>
+            <artifactId>nuodb-migration-bootstrap</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.9.0</version>
@@ -92,27 +102,6 @@
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.nuodb</groupId>
-            <artifactId>nuodb-migration-bootstrap</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>4.1.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.21</version>
-        </dependency>
-        <!--<dependency>-->
-        <!--<groupId>commons-dbcp</groupId>-->
-        <!--<artifactId>commons-dbcp</artifactId>-->
-        <!--<version>1.4</version>-->
-        <!--</dependency>-->
     </dependencies>
 
     <build>
