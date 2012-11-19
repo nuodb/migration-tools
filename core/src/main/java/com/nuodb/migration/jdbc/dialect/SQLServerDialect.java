@@ -32,7 +32,7 @@ import java.sql.DatabaseMetaData;
 /**
  * @author Sergey Bushik
  */
-public class SQLServerDialect extends DatabaseDialectBase {
+public class SQLServerDialect extends DialectBase {
 
     public SQLServerDialect(DatabaseMetaData metaData) {
         super(metaData);
@@ -49,7 +49,7 @@ public class SQLServerDialect extends DatabaseDialectBase {
     }
 
     @Override
-    public String getNoColumnsInsertString() {
+    public String getNoColumnsInsertClause() {
         return "default values";
     }
 }

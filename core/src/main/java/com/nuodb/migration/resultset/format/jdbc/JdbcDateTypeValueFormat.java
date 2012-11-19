@@ -31,29 +31,31 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import static com.nuodb.migration.jdbc.type.JdbcTypeDesc.isTypeNameEquals;
+import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static com.nuodb.migration.jdbc.type.JdbcTypeDesc.isEqualTypeNames;
 
 /**
  * @author Sergey Bushik
  */
 public class JdbcDateTypeValueFormat extends JdbcTypeValueFormatBase<Date> {
 
-    private static final String YEAR_TYPE = "YEAR";
-
     public static final JdbcTypeValueFormat<Date> INSTANCE = new JdbcDateTypeValueFormat();
 
-    private static final SimpleDateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
+    private static final String YEAR_TYPE = "YEAR";
+
+    private static final DateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
 
     @Override
     protected String doGetValue(JdbcTypeValueAccess<Date> access) throws SQLException {
         Date date = access.getValue();
         if (date == null) {
             return null;
-        } else if (isEqualTypeNames(access.getColumnModel().getTypeName(), YEAR_TYPE)) {
+        } else if (isTypeNameEquals(access.getColumnModel().getTypeName(), YEAR_TYPE)) {
             return YEAR_FORMAT.format(date);
         } else {
             return date.toString();
@@ -63,8 +65,7 @@ public class JdbcDateTypeValueFormat extends JdbcTypeValueFormatBase<Date> {
     @Override
     protected void doSetValue(JdbcTypeValueAccess<Date> access, String value) throws SQLException {
         if (!(doSetValueAsDate(access, value) || doSetValueAsYear(access, value))) {
-            throw new JdbcTypeValueException(
-                    String.format("Value %s is not date or year", value));
+            throw new JdbcTypeValueException(format("Value %s is not date or year", value));
         }
     }
 

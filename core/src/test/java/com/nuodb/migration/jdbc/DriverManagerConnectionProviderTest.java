@@ -59,13 +59,12 @@ public class DriverManagerConnectionProviderTest {
         connectionProvider.setAutoCommit(false);
         final Connection connection = connectionProvider.getConnection();
         Assert.assertNotNull(connection);
-        Assert.assertTrue(this.connection == connection);
         verify(connectionSpec, times(1)).getDriver();
         verify(connectionSpec, times(1)).getUsername();
         verify(connectionSpec, times(1)).getUrl();
         verify(connectionSpec, times(1)).getPassword();
-        verify(connection, times(1)).setTransactionIsolation(anyInt());
-        verify(connection, times(1)).setAutoCommit(false);
+        verify(this.connection, times(1)).setTransactionIsolation(anyInt());
+        verify(this.connection, times(1)).setAutoCommit(false);
     }
 
     @After

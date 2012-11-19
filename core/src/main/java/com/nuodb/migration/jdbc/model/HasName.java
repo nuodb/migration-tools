@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.model;
 
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 
 /**
  * @author Sergey Bushik
@@ -38,5 +38,5 @@ public interface HasName {
 
     String getQuotedName();
 
-    String getQuotedName(DatabaseDialect dialect);
+    String getQuotedName(Dialect dialect);
 }

@@ -190,8 +190,9 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
     static class JdbcTypeValueAccessImpl<T> implements JdbcTypeValueAccess<T> {
 
         private JdbcTypeValueGetter<T> getter;
-        private ResultSet resultSet;
         private JdbcTypeValueSetter<T> setter;
+        private JdbcType<T> jdbcType;
+        private ResultSet resultSet;
         private PreparedStatement statement;
         private ColumnModel columnModel;
         private int column;
@@ -199,6 +200,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         public JdbcTypeValueAccessImpl(JdbcTypeValueGetter<T> getter, ResultSet resultSet,
                                        int column, ColumnModel columnModel) {
             this.getter = getter;
+            this.jdbcType = getter.getJdbcType();
             this.resultSet = resultSet;
             this.columnModel = columnModel;
             this.column = column;
@@ -207,9 +209,15 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         public JdbcTypeValueAccessImpl(JdbcTypeValueSetter<T> setter, PreparedStatement statement,
                                        int column, ColumnModel columnModel) {
             this.setter = setter;
+            this.jdbcType = setter.getJdbcType();
             this.statement = statement;
             this.columnModel = columnModel;
             this.column = column;
+        }
+
+        @Override
+        public int getColumn() {
+            return column;
         }
 
         @Override
@@ -234,6 +242,21 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
                 throw new JdbcTypeException("Set value is unsupported");
             }
             setter.setValue(statement, column, value);
+        }
+
+        @Override
+        public JdbcType<T> getJdbcType() {
+            return jdbcType;
+        }
+
+        @Override
+        public PreparedStatement getStatement() {
+            return statement;
+        }
+
+        @Override
+        public ResultSet getResultSet() {
+            return resultSet;
         }
 
         @Override

@@ -30,8 +30,8 @@ package com.nuodb.migration.jdbc.model;
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.DriverManagerConnectionProvider;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
-import com.nuodb.migration.jdbc.dialect.resolve.DatabaseDialectResolverImpl;
+import com.nuodb.migration.jdbc.dialect.DialectResolver;
+import com.nuodb.migration.jdbc.dialect.resolve.DialectResolverImpl;
 import com.nuodb.migration.spec.DriverManagerConnectionSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,7 +65,7 @@ public class DatabaseInspector {
     protected String[] tableTypes = TABLE_TYPES;
     protected Connection connection;
     protected ConnectionProvider connectionProvider;
-    protected DatabaseDialectResolver databaseDialectResolver = new DatabaseDialectResolverImpl();
+    protected DialectResolver dialectResolver = new DialectResolverImpl();
 
     public DatabaseInspector withObjectTypes(ObjectType... types) {
         this.objectTypes = Arrays.asList(types);
@@ -98,8 +98,8 @@ public class DatabaseInspector {
         return this;
     }
 
-    public DatabaseInspector withDatabaseDialectResolver(DatabaseDialectResolver databaseDialectResolver) {
-        this.databaseDialectResolver = databaseDialectResolver;
+    public DatabaseInspector withDatabaseDialectResolver(DialectResolver dialectResolver) {
+        this.dialectResolver = dialectResolver;
         return this;
     }
 
@@ -151,7 +151,7 @@ public class DatabaseInspector {
     }
 
     protected void readDialect(DatabaseMetaData metaData, Database database) throws SQLException {
-        database.setDatabaseDialect(databaseDialectResolver.resolve(metaData));
+        database.setDialect(dialectResolver.resolve(metaData));
     }
 
     protected void readObjects(DatabaseMetaData metaData, Database database) throws SQLException {
@@ -167,7 +167,7 @@ public class DatabaseInspector {
     }
 
     protected void readCatalogs(DatabaseMetaData metaData, Database database) throws SQLException {
-        if (database.getDatabaseDialect().supportsReadCatalogs()) {
+        if (database.getDialect().supportsReadCatalogs()) {
             ResultSet catalogs = metaData.getCatalogs();
             try {
                 while (catalogs.next()) {
@@ -187,7 +187,7 @@ public class DatabaseInspector {
     }
 
     protected void readSchemas(DatabaseMetaData metaData, Database database) throws SQLException {
-        if (database.getDatabaseDialect().supportsReadSchemas()) {
+        if (database.getDialect().supportsReadSchemas()) {
             ResultSet schemas = catalog != null ? metaData.getSchemas(catalog, null) : metaData.getSchemas();
             try {
                 while (schemas.next()) {

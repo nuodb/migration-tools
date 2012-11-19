@@ -28,7 +28,10 @@
 package com.nuodb.migration.jdbc.type.access;
 
 import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.type.JdbcType;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -36,11 +39,19 @@ import java.sql.SQLException;
  */
 public interface JdbcTypeValueAccess<T> {
 
+    int getColumn();
+
     ColumnModel getColumnModel();
+
+    JdbcType<T> getJdbcType();
 
     T getValue() throws SQLException;
 
     <X> X getValue(Class<X> valueClass) throws SQLException;
 
     <X> void setValue(X value) throws SQLException;
+
+    ResultSet getResultSet();
+
+    PreparedStatement getStatement();
 }

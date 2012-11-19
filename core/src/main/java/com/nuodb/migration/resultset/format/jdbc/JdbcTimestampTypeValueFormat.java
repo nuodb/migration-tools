@@ -32,9 +32,11 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
@@ -44,7 +46,7 @@ public class JdbcTimestampTypeValueFormat extends JdbcTypeValueFormatBase<Timest
 
     public static final JdbcTypeValueFormat<Timestamp> INSTANCE = new JdbcTimestampTypeValueFormat();
 
-    private static final SimpleDateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
+    private static final DateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
 
     @Override
     protected String doGetValue(JdbcTypeValueAccess<Timestamp> access) throws SQLException {
@@ -56,8 +58,7 @@ public class JdbcTimestampTypeValueFormat extends JdbcTypeValueFormatBase<Timest
     protected void doSetValue(JdbcTypeValueAccess<Timestamp> access, String value) throws SQLException {
         if (!(doSetValueAsTimestamp(access, value) || doSetValueAsDate(access, value) || doSetValueAsYear(access,
                 value))) {
-            throw new JdbcTypeValueException(
-                    String.format("Value %s is not timestamp, date or year", value));
+            throw new JdbcTypeValueException(format("Value %s is not timestamp, date or year", value));
         }
     }
 

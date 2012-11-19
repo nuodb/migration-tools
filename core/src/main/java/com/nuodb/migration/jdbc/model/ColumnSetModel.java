@@ -32,27 +32,27 @@ package com.nuodb.migration.jdbc.model;
  */
 public interface ColumnSetModel {
 
-    String getName(int index);
+    String getName(int column);
 
-    int getTypeCode(int index);
+    int getTypeCode(int column);
 
-    void setTypeCode(int index, int typeCode);
+    void setTypeCode(int column, int typeCode);
 
-    String getTypeName(int index);
+    String getTypeName(int column);
 
-    void setTypeName(int index, String typeName);
+    void setTypeName(int column, String typeName);
 
-    int getPrecision(int index);
+    int getPrecision(int column);
 
-    void setPrecision(int index, int precision);
+    void setPrecision(int column, int precision);
 
-    int getScale(int index);
+    int getScale(int column);
 
-    void setScale(int index, int scale);
+    void setScale(int column, int scale);
 
-    ColumnModel item(int index);
+    ColumnModel item(int column);
 
-    ColumnModel item(String name);
+    ColumnModel item(String column);
 
     int getLength();
 }

@@ -41,15 +41,15 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class DatabaseDialectResolverImpl implements DatabaseDialectResolver {
+public class DialectResolverImpl implements DialectResolver {
 
     private final transient Log log = LogFactory.getLog(getClass());
 
-    private Map<DatabaseInfoMatcher, Class<? extends DatabaseDialect>> databaseInfoMatchers = Maps.newHashMap();
+    private Map<DatabaseInfoMatcher, Class<? extends Dialect>> databaseInfoMatchers = Maps.newHashMap();
 
-    private Class<? extends DatabaseDialect> defaultDatabaseDialect = DatabaseDialectBase.class;
+    private Class<? extends Dialect> defaultDatabaseDialect = DialectBase.class;
 
-    public DatabaseDialectResolverImpl() {
+    public DialectResolverImpl() {
         register("MySQL", MySQLDialect.class);
         register("PostgreSQL", PostgreSQLDialect.class);
         register("Microsoft SQL Server", SQLServerDialect.class);
@@ -57,36 +57,36 @@ public class DatabaseDialectResolverImpl implements DatabaseDialectResolver {
         register("NuoDB", NuoDBDialect.class);
     }
 
-    public void register(String productName, Class<? extends DatabaseDialect> databaseDialectType) {
+    public void register(String productName, Class<? extends Dialect> databaseDialectType) {
         register(new DatabaseInfoMatcherImpl(productName), databaseDialectType);
     }
 
     public void register(String productName, String productVersion,
-                         Class<? extends DatabaseDialect> databaseDialectType) {
+                         Class<? extends Dialect> databaseDialectType) {
         register(new DatabaseInfoMatcherImpl(productName, productVersion), databaseDialectType);
     }
 
     public void register(String productName, String productVersion, int majorVersion,
-                         Class<? extends DatabaseDialect> databaseDialectType) {
+                         Class<? extends Dialect> databaseDialectType) {
         register(new DatabaseInfoMatcherImpl(productName, productVersion, majorVersion), databaseDialectType);
     }
 
     public void register(String productName, String productVersion, int majorVersion, int minorVersion,
-                         Class<? extends DatabaseDialect> databaseDialectType) {
+                         Class<? extends Dialect> databaseDialectType) {
         register(new DatabaseInfoMatcherImpl(productName, productVersion, majorVersion, minorVersion), databaseDialectType);
     }
 
-    public void register(DatabaseInfoMatcher databaseInfoMatcher, Class<? extends DatabaseDialect> databaseDialectType) {
+    public void register(DatabaseInfoMatcher databaseInfoMatcher, Class<? extends Dialect> databaseDialectType) {
         databaseInfoMatchers.put(databaseInfoMatcher, databaseDialectType);
     }
 
     @Override
-    public DatabaseDialect resolve(DatabaseMetaData metaData) throws SQLException {
+    public Dialect resolve(DatabaseMetaData metaData) throws SQLException {
         String productName = metaData.getDatabaseProductName();
         String productVersion = metaData.getDatabaseProductVersion();
         int minorVersion = metaData.getDatabaseMinorVersion();
         int majorVersion = metaData.getDatabaseMajorVersion();
-        for (Map.Entry<DatabaseInfoMatcher, Class<? extends DatabaseDialect>> databaseInfoMatcherEntry : databaseInfoMatchers.entrySet()) {
+        for (Map.Entry<DatabaseInfoMatcher, Class<? extends Dialect>> databaseInfoMatcherEntry : databaseInfoMatchers.entrySet()) {
             DatabaseInfoMatcher databaseInfoMatcher = databaseInfoMatcherEntry.getKey();
             if (databaseInfoMatcher.matches(productName, productVersion, minorVersion, majorVersion)) {
                 if (log.isDebugEnabled()) {
@@ -101,11 +101,11 @@ public class DatabaseDialectResolverImpl implements DatabaseDialectResolver {
         return ClassUtils.newInstance(defaultDatabaseDialect, metaData);
     }
 
-    public Class<? extends DatabaseDialect> getDefaultDatabaseDialect() {
+    public Class<? extends Dialect> getDefaultDatabaseDialect() {
         return defaultDatabaseDialect;
     }
 
-    public void setDefaultDatabaseDialect(Class<? extends DatabaseDialect> defaultDatabaseDialect) {
+    public void setDefaultDatabaseDialect(Class<? extends Dialect> defaultDatabaseDialect) {
         this.defaultDatabaseDialect = defaultDatabaseDialect;
     }
 }

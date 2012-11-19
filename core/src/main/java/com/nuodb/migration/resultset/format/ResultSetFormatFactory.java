@@ -32,11 +32,9 @@ package com.nuodb.migration.resultset.format;
  */
 public interface ResultSetFormatFactory {
 
-    ResultSetInput createResultSetInput(String formatType);
+    ResultSetInput createInput(String formatType);
 
-    ResultSetOutput createResultSetOutput(String formatType);
+    ResultSetOutput createOutput(String formatType);
 
-    void registerResultSetInput(String formatType, Class<? extends ResultSetInput> inputClass);
-
-    void registerResultSetOutput(String formatType, Class<? extends ResultSetOutput> outputClass);
+    void registerFormat(String formatType, Class<? extends ResultSetFormat> formatClass);
 }

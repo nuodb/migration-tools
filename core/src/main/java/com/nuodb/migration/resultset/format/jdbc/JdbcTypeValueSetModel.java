@@ -36,7 +36,7 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 public interface JdbcTypeValueSetModel extends ColumnSetModel {
 
-    JdbcTypeValueAccess getJdbcTypeValueAccess(int index);
+    JdbcTypeValueAccess getJdbcTypeValueAccess(int column);
 
-    JdbcTypeValueFormat getJdbcTypeValueFormat(int index);
+    JdbcTypeValueFormat getJdbcTypeValueFormat(int column);
 }

@@ -27,36 +27,13 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-
-import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
- * Vendor specific dialect
- *
  * @author Sergey Bushik
  */
-public interface DatabaseDialect {
+public interface DialectResolver {
 
-    char openQuote();
-
-    char closeQuote();
-
-    String quote(String name);
-
-    String getNoColumnsInsertString();
-
-    void enableStreaming(Statement statement) throws SQLException;
-
-    boolean supportsReadCatalogs();
-
-    boolean supportsReadSchemas();
-
-    boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) throws SQLException;
-
-    void setSupportedTransactionIsolationLevel(Connection connection, int[] transactionIsolationLevels) throws SQLException;
-
-    JdbcTypeRegistry getJdbcTypeRegistry();
+    Dialect resolve(DatabaseMetaData metaData) throws SQLException;
 }

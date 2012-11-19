@@ -28,7 +28,7 @@
 package com.nuodb.migration.resultset.format.xml;
 
 import com.nuodb.migration.jdbc.model.ColumnSetModel;
-import com.nuodb.migration.resultset.format.ResultSetInputException;
+import com.nuodb.migration.resultset.format.ResultSetOutputException;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -65,7 +65,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
                 writer = xmlOutputFactory.createXMLStreamWriter(getOutputStream(), getEncoding());
             }
         } catch (XMLStreamException e) {
-            throw new ResultSetInputException(e);
+            throw new ResultSetOutputException(e);
         }
     }
 
@@ -84,7 +84,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
-            throw new ResultSetInputException(e);
+            throw new ResultSetOutputException(e);
         }
     }
 
@@ -97,7 +97,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
-            throw new ResultSetInputException(e);
+            throw new ResultSetOutputException(e);
         }
     }
 
@@ -121,7 +121,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             writer.flush();
             writer.close();
         } catch (XMLStreamException e) {
-            throw new ResultSetInputException(e);
+            throw new ResultSetOutputException(e);
         }
     }
 

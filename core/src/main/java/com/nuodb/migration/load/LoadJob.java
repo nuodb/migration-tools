@@ -62,14 +62,13 @@ public class LoadJob extends JobBase {
 
     protected final Log log = LogFactory.getLog(getClass());
     private ConnectionProvider connectionProvider;
-    private String inputType;
     private Map<String, String> inputAttributes;
     private Catalog catalog;
     private ResultSetFormatFactory resultSetFormatFactory;
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
-        ConnectionServicesCallback.execute(createConnectionServices(connectionProvider),
+        ConnectionServicesCallback.execute(createConnectionServices(getConnectionProvider()),
                 new ConnectionServicesCallback() {
                     @Override
                     public void execute(ConnectionServices services) throws SQLException {
@@ -77,7 +76,7 @@ public class LoadJob extends JobBase {
                         databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
                         Database database = databaseInspector.inspect();
 
-                        CatalogReader reader = catalog.getReader();
+                        CatalogReader reader = getCatalog().getReader();
                         try {
                             for (CatalogEntry entry : reader.getEntries()) {
                                 load(execution, services, database, reader, entry);
@@ -95,11 +94,11 @@ public class LoadJob extends JobBase {
                         final CatalogEntry entry) throws SQLException {
         InputStream entryInput = reader.getEntryInput(entry);
         try {
-            final ResultSetInput resultSetInput = resultSetFormatFactory.createResultSetInput(entry.getType());
-            resultSetInput.setAttributes(inputAttributes);
+            final ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(entry.getType());
+            resultSetInput.setAttributes(getInputAttributes());
             resultSetInput.setInputStream(entryInput);
             resultSetInput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(
-                    database.getDatabaseDialect().getJdbcTypeRegistry())
+                    database.getDialect().getJdbcTypeRegistry())
             );
             load(execution, connectionServices, database, resultSetInput, entry.getName());
         } finally {
@@ -114,7 +113,7 @@ public class LoadJob extends JobBase {
 
         ColumnSetModel columnSetModel = resultSetInput.getColumnSetModel();
         Table table = database.findTable(tableName);
-        mergeColumnSetModel(table, columnSetModel);
+        enhanceColumnSetModel(table, columnSetModel);
 
         final InsertQuery query = createInsertQuery(table, columnSetModel);
 
@@ -144,7 +143,7 @@ public class LoadJob extends JobBase {
         );
     }
 
-    protected void mergeColumnSetModel(Table table, ColumnSetModel columnSetModel) {
+    protected void enhanceColumnSetModel(Table table, ColumnSetModel columnSetModel) {
         for (int index = 0; index < columnSetModel.getLength(); index++) {
             String name = columnSetModel.getName(index);
             Column column = table.getColumn(name);
@@ -160,11 +159,9 @@ public class LoadJob extends JobBase {
         builder.setQualifyNames(true);
         builder.setTable(table);
         if (columnSetModel != null) {
-            int columnCount = columnSetModel.getLength();
             List<String> columns = Lists.newArrayList();
-            for (int index = 0; index < columnCount; index++) {
-                ColumnModel columnModel = columnSetModel.item(index);
-                columns.add(columnModel.getName());
+            for (int index = 0, length = columnSetModel.getLength(); index < length; index++) {
+                columns.add(columnSetModel.item(index).getName());
             }
             builder.setColumns(columns);
         }
@@ -185,14 +182,6 @@ public class LoadJob extends JobBase {
 
     public void setCatalog(Catalog catalog) {
         this.catalog = catalog;
-    }
-
-    public String getInputType() {
-        return inputType;
-    }
-
-    public void setInputType(String inputType) {
-        this.inputType = inputType;
     }
 
     public Map<String, String> getInputAttributes() {

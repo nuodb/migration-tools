@@ -38,21 +38,19 @@ import java.sql.Statement;
 /**
  * @author Sergey Bushik
  */
-public class DatabaseDialectBase implements DatabaseDialect {
+public class DialectBase implements Dialect {
 
     protected final DatabaseMetaData metaData;
 
-    public DatabaseDialectBase(DatabaseMetaData metaData) {
+    public DialectBase(DatabaseMetaData metaData) {
         this.metaData = metaData;
     }
 
-    @Override
-    public char openQuote() {
+    protected char openQuote() {
         return '"';
     }
 
-    @Override
-    public char closeQuote() {
+    protected char closeQuote() {
         return '"';
     }
 
@@ -61,11 +59,11 @@ public class DatabaseDialectBase implements DatabaseDialect {
         if (name == null) {
             return null;
         }
-        return openQuote() + name.substring(1, name.length() - 1) + closeQuote();
+        return openQuote() + name + closeQuote();
     }
 
     @Override
-    public String getNoColumnsInsertString() {
+    public String getNoColumnsInsertClause() {
         return "values ()";
     }
 
@@ -80,16 +78,16 @@ public class DatabaseDialectBase implements DatabaseDialect {
     }
 
     @Override
-    public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) throws SQLException {
+    public boolean supportsTransactionIsolation(int transactionIsolationLevel) throws SQLException {
         return metaData.supportsTransactionIsolationLevel(transactionIsolationLevel);
     }
 
     @Override
-    public void setSupportedTransactionIsolationLevel(Connection connection,
-                                                      int[] transactionIsolationLevels) throws SQLException {
+    public void setSupportedTransactionIsolation(Connection connection,
+                                                 int[] transactionIsolationLevels) throws SQLException {
         if (transactionIsolationLevels != null) {
             for (int transactionIsolationLevel : transactionIsolationLevels) {
-                if (supportsTransactionIsolationLevel(transactionIsolationLevel)) {
+                if (supportsTransactionIsolation(transactionIsolationLevel)) {
                     connection.setTransactionIsolation(transactionIsolationLevel);
                     return;
                 }

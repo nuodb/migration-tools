@@ -105,7 +105,7 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
             jdbcTypeValueAccesses[index] = getJdbcTypeValueAccessProvider().
                     getStatementAccess(preparedStatement, index + 1, columnModel);
         }
-        return new JdbcTypeValueSetModelImpl(jdbcTypeValueAccesses, jdbcTypeValueFormats, columnSetModel);
+        return new JdbcTypeValueSetModelImpl(columnSetModel, jdbcTypeValueAccesses, jdbcTypeValueFormats);
     }
 
     @Override

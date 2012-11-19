@@ -51,41 +51,41 @@ public class ResultSetFormatFactoryImpl implements ResultSetFormatFactory {
 
     protected final Log log = LogFactory.getLog(getClass());
 
-    private Map<String, Class<? extends ResultSetInput>> resultSetInputClasses = Maps.newHashMap();
+    private Map<String, Class<? extends ResultSetInput>> inputClasses = Maps.newHashMap();
 
-    private Map<String, Class<? extends ResultSetOutput>> resultSetOutputClasses = Maps.newHashMap();
+    private Map<String, Class<? extends ResultSetOutput>> outputClasses = Maps.newHashMap();
 
     public ResultSetFormatFactoryImpl() {
-        registerResultSetInput(CsvAttributes.FORMAT_TYPE, CsvResultSetInput.class);
-        registerResultSetInput(XmlAttributes.FORMAT_TYPE, XmlResultSetInput.class);
-        registerResultSetInput(BsonAttributes.FORMAT_TYPE, BsonResultSetInput.class);
+        registerFormat(CsvAttributes.FORMAT_TYPE, CsvResultSetInput.class);
+        registerFormat(XmlAttributes.FORMAT_TYPE, XmlResultSetInput.class);
+        registerFormat(BsonAttributes.FORMAT_TYPE, BsonResultSetInput.class);
 
-        registerResultSetOutput(CsvAttributes.FORMAT_TYPE, CsvResultSetOutput.class);
-        registerResultSetOutput(XmlAttributes.FORMAT_TYPE, XmlResultSetOutput.class);
-        registerResultSetOutput(BsonAttributes.FORMAT_TYPE, BsonResultSetOutput.class);
+        registerFormat(CsvAttributes.FORMAT_TYPE, CsvResultSetOutput.class);
+        registerFormat(XmlAttributes.FORMAT_TYPE, XmlResultSetOutput.class);
+        registerFormat(BsonAttributes.FORMAT_TYPE, BsonResultSetOutput.class);
     }
 
     @Override
-    public ResultSetInput createResultSetInput(String formatType) {
-        return createResultSetFormat(formatType, resultSetInputClasses.get(formatType));
+    public ResultSetInput createInput(String formatType) {
+        return createFormat(formatType, inputClasses.get(formatType));
     }
 
     @Override
-    public ResultSetOutput createResultSetOutput(String formatType) {
-        return createResultSetFormat(formatType, resultSetOutputClasses.get(formatType));
+    public ResultSetOutput createOutput(String formatType) {
+        return createFormat(formatType, outputClasses.get(formatType));
     }
 
     @Override
-    public void registerResultSetInput(String formatType, Class<? extends ResultSetInput> inputClass) {
-        resultSetInputClasses.put(formatType, inputClass);
+    public void registerFormat(String formatType, Class<? extends ResultSetFormat> formatClass) {
+        if (ResultSetOutput.class.isAssignableFrom(formatClass)) {
+            outputClasses.put(formatType, (Class<? extends ResultSetOutput>) formatClass);
+        }
+        if (ResultSetInput.class.isAssignableFrom(formatClass)) {
+            inputClasses.put(formatType, (Class<? extends ResultSetInput>) formatClass);
+        }
     }
 
-    @Override
-    public void registerResultSetOutput(String formatType, Class<? extends ResultSetOutput> outputClass) {
-        resultSetOutputClasses.put(formatType, outputClass);
-    }
-
-    protected <T extends ResultSetFormat> T createResultSetFormat(String formatType, Class<T> formatClass) {
+    protected <T extends ResultSetFormat> T createFormat(String formatType, Class<T> formatClass) {
         if (formatClass == null) {
             if (log.isTraceEnabled()) {
                 log.trace(String.format("Can't resolve format type %1$s to a class", formatType));

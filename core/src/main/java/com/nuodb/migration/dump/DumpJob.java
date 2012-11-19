@@ -31,7 +31,7 @@ import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.ConnectionServices;
 import com.nuodb.migration.jdbc.ConnectionServicesCallback;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.model.Database;
 import com.nuodb.migration.jdbc.model.DatabaseInspector;
 import com.nuodb.migration.jdbc.model.Table;
@@ -85,7 +85,7 @@ public class DumpJob extends JobBase {
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
-        ConnectionServicesCallback.execute(createConnectionServices(connectionProvider),
+        ConnectionServicesCallback.execute(createConnectionServices(getConnectionProvider()),
                 new ConnectionServicesCallback() {
                     @Override
                     public void execute(ConnectionServices services) throws SQLException {
@@ -99,25 +99,23 @@ public class DumpJob extends JobBase {
         databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
         Database database = databaseInspector.inspect();
 
-        DatabaseDialect databaseDialect = database.getDatabaseDialect();
-        databaseDialect.setSupportedTransactionIsolationLevel(services.getConnection(),
+        Dialect dialect = database.getDialect();
+        dialect.setSupportedTransactionIsolation(services.getConnection(),
                 new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
-        CatalogWriter writer = catalog.getWriter();
+        CatalogWriter writer = getCatalog().getWriter();
         try {
-            for (SelectQuery selectQuery : createSelectQueries(database, selectQuerySpecs)) {
-                dump(execution, services, database, selectQuery, writer,
-                        createCatalogEntry(selectQuery, outputType));
+            for (SelectQuery selectQuery : createSelectQueries(database, getSelectQuerySpecs())) {
+                dump(execution, services, database, selectQuery, writer, createEntry(selectQuery, getOutputType()));
             }
-            for (NativeQuery nativeQuery : createNativeQueries(database, nativeQuerySpecs)) {
-                dump(execution, services, database, nativeQuery, writer,
-                        createEntry(nativeQuery, outputType));
+            for (NativeQuery nativeQuery : createNativeQueries(database, getNativeQuerySpecs())) {
+                dump(execution, services, database, nativeQuery, writer, createEntry(nativeQuery, getOutputType()));
             }
         } finally {
             closeQuietly(writer);
         }
     }
 
-    protected CatalogEntry createCatalogEntry(SelectQuery query, String type) {
+    protected CatalogEntry createEntry(SelectQuery query, String type) {
         Table table = query.getTables().get(0);
         return new CatalogEntry(table.getName(), type);
     }
@@ -126,15 +124,15 @@ public class DumpJob extends JobBase {
         return new CatalogEntry(String.format(QUERY_ENTRY_NAME, new Date()), type);
     }
 
-    protected void dump(final JobExecution execution, final ConnectionServices services, final Database database,
-                        final Query query, final CatalogWriter writer, final CatalogEntry entry) throws SQLException {
-        final ResultSetOutput resultSetOutput = resultSetFormatFactory.createResultSetOutput(outputType);
-        resultSetOutput.setAttributes(outputAttributes);
-
+    protected void dump(final JobExecution execution, final ConnectionServices connectionServices,
+                        final Database database, final Query query, final CatalogWriter writer,
+                        final CatalogEntry entry) throws SQLException {
+        final ResultSetOutput resultSetOutput = getResultSetFormatFactory().createOutput(getOutputType());
+        resultSetOutput.setAttributes(getOutputAttributes());
         resultSetOutput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(
-                database.getDatabaseDialect().getJdbcTypeRegistry()));
+                database.getDialect().getJdbcTypeRegistry()));
 
-        QueryTemplate queryTemplate = new QueryTemplate(services.getConnection());
+        QueryTemplate queryTemplate = new QueryTemplate(connectionServices.getConnection());
         queryTemplate.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
@@ -157,7 +155,7 @@ public class DumpJob extends JobBase {
             log.debug(String.format("Preparing SQL query %s", query.toQuery()));
         }
         PreparedStatement statement = connection.prepareStatement(query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-        DatabaseDialect dialect = database.getDatabaseDialect();
+        Dialect dialect = database.getDialect();
         dialect.enableStreaming(statement);
         return statement;
     }

@@ -76,10 +76,7 @@ public class DatabaseInfoMatcherImpl implements DatabaseInfoMatcher {
     }
 
     protected boolean matchesProductName(String productName) {
-        if (!StringUtils.startsWithIgnoreCase(this.productName, productName)) {
-            return true;
-        }
-        return false;
+        return !StringUtils.startsWithIgnoreCase(this.productName, productName);
     }
 
     protected boolean matchesProductVersion(String productVersion) {

@@ -53,8 +53,7 @@ public class JdbcTimeTypeValueFormat extends JdbcTypeValueFormatBase<Time> {
         try {
             access.setValue(!isEmpty(value) ? Time.valueOf(value) : null);
         } catch (IllegalArgumentException exception) {
-            throw new JdbcTypeValueException(
-                    format("Value %s is not in the hh:mm:ss format", value));
+            throw new JdbcTypeValueException(format("Value %s is not in the hh:mm:ss format", value));
         }
     }
 }

@@ -28,7 +28,7 @@
 package com.nuodb.migration.jdbc.model;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -66,20 +66,20 @@ public class Table extends HasNameBase {
     }
 
     public String getQualifiedName() {
-        return getQualifiedName(database.getDatabaseDialect());
+        return getQualifiedName(database.getDialect());
     }
 
-    public String getQualifiedName(DatabaseDialect databaseDialect) {
+    public String getQualifiedName(Dialect dialect) {
         StringBuilder qualifiedName = new StringBuilder();
         if (catalog.getName() != null) {
-            qualifiedName.append(catalog.getQuotedName(databaseDialect));
+            qualifiedName.append(catalog.getQuotedName(dialect));
             qualifiedName.append('.');
         }
         if (schema.getName() != null) {
-            qualifiedName.append(schema.getQuotedName(databaseDialect));
+            qualifiedName.append(schema.getQuotedName(dialect));
             qualifiedName.append('.');
         }
-        qualifiedName.append(getQuotedName(databaseDialect));
+        qualifiedName.append(getQuotedName(dialect));
         return qualifiedName.toString();
     }
 

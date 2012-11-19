@@ -52,48 +52,48 @@ public class ColumnSetModelImpl implements ColumnSetModel {
     }
 
     @Override
-    public String getName(int index) {
-        return columns[index].getName();
+    public String getName(int column) {
+        return columns[column].getName();
     }
 
     @Override
-    public int getTypeCode(int index) {
-        return columns[index].getTypeCode();
+    public int getTypeCode(int column) {
+        return columns[column].getTypeCode();
     }
 
     @Override
-    public void setTypeCode(int index, int typeCode) {
-        columns[index].setTypeCode(typeCode);
+    public void setTypeCode(int column, int typeCode) {
+        columns[column].setTypeCode(typeCode);
     }
 
     @Override
-    public String getTypeName(int index) {
-        return columns[index].getTypeName();
+    public String getTypeName(int column) {
+        return columns[column].getTypeName();
     }
 
     @Override
-    public void setTypeName(int index, String typeName) {
-        columns[index].setTypeName(typeName);
+    public void setTypeName(int column, String typeName) {
+        columns[column].setTypeName(typeName);
     }
 
     @Override
-    public int getPrecision(int index) {
-        return columns[index].getPrecision();
+    public int getPrecision(int column) {
+        return columns[column].getPrecision();
     }
 
     @Override
-    public void setPrecision(int index, int precision) {
-        columns[index].setPrecision(precision);
+    public void setPrecision(int column, int precision) {
+        columns[column].setPrecision(precision);
     }
 
     @Override
-    public int getScale(int index) {
-        return columns[index].getScale();
+    public int getScale(int column) {
+        return columns[column].getScale();
     }
 
     @Override
-    public void setScale(int index, int scale) {
-        columns[index].setScale(scale);
+    public void setScale(int column, int scale) {
+        columns[column].setScale(scale);
     }
 
     @Override
@@ -102,8 +102,8 @@ public class ColumnSetModelImpl implements ColumnSetModel {
     }
 
     @Override
-    public ColumnModel item(int index) {
-        return columns[index];
+    public ColumnModel item(int column) {
+        return columns[column];
     }
 
     @Override

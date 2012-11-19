@@ -30,7 +30,6 @@ package com.nuodb.migration.resultset.format.bson;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.model.ColumnModelFactory;
 import com.nuodb.migration.jdbc.model.ColumnSetModel;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
@@ -43,6 +42,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.fasterxml.jackson.core.JsonToken.*;
+import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnSetModel;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 
 /**
@@ -75,7 +75,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
     }
 
     protected Iterator<String[]> createRowsIterator() {
-        return new BsonIterator();
+        return new BsonInputIterator();
     }
 
     @Override
@@ -90,8 +90,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
                 parser.nextToken();
                 int[] columnTypes = new int[columns.size()];
                 Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-                columnSetModel = ColumnModelFactory.createColumnSetModel(columns.toArray(new String[columns.size()]),
-                        columnTypes);
+                columnSetModel = createColumnSetModel(columns.toArray(new String[columns.size()]), columnTypes);
             }
             parser.nextToken();
             parser.nextToken();
@@ -152,7 +151,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
     }
 
 
-    class BsonIterator implements Iterator<String[]> {
+    class BsonInputIterator implements Iterator<String[]> {
 
         private String[] current;
 

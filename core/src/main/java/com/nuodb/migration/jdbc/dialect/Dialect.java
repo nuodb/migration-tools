@@ -27,22 +27,32 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.MigrationException;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
+ * Vendor specific dialect
+ *
  * @author Sergey Bushik
  */
-public class DatabaseDialectException extends MigrationException {
+public interface Dialect {
 
-    public DatabaseDialectException(String message) {
-        super(message);
-    }
+    boolean supportsReadCatalogs();
 
-    public DatabaseDialectException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    boolean supportsReadSchemas();
 
-    public DatabaseDialectException(Throwable cause) {
-        super(cause);
-    }
+    boolean supportsTransactionIsolation(int transactionIsolationLevel) throws SQLException;
+
+    void setSupportedTransactionIsolation(Connection connection, int[] transactionIsolationLevels) throws SQLException;
+
+    String quote(String name);
+
+    String getNoColumnsInsertClause();
+
+    JdbcTypeRegistry getJdbcTypeRegistry();
+
+    void enableStreaming(Statement statement) throws SQLException;
 }

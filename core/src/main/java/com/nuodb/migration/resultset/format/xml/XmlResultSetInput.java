@@ -28,7 +28,6 @@
 package com.nuodb.migration.resultset.format.xml;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.model.ColumnModelFactory;
 import com.nuodb.migration.jdbc.model.ColumnSetModel;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
@@ -41,6 +40,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnSetModel;
 import static javax.xml.XMLConstants.NULL_NS_URI;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
 
@@ -77,7 +77,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
     }
 
     protected Iterator<String[]> createIterator() {
-        return new XmlIterator();
+        return new XmlInputIterator();
     }
 
     @Override
@@ -99,8 +99,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
             }
             int[] columnTypes = new int[columns.size()];
             Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-            columnSetModel = ColumnModelFactory.createColumnSetModel(columns.toArray(new String[columns.size()]),
-                    columnTypes);
+            columnSetModel = createColumnSetModel(columns.toArray(new String[columns.size()]), columnTypes);
         }
         setColumnSetModel(columnSetModel);
     }
@@ -173,7 +172,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
         }
     }
 
-    class XmlIterator implements Iterator<String[]> {
+    class XmlInputIterator implements Iterator<String[]> {
 
         private String[] current;
 

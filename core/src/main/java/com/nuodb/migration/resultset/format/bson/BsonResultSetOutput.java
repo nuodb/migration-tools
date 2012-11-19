@@ -29,7 +29,7 @@ package com.nuodb.migration.resultset.format.bson;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.nuodb.migration.jdbc.model.ColumnSetModel;
-import com.nuodb.migration.resultset.format.ResultSetInputException;
+import com.nuodb.migration.resultset.format.ResultSetOutputException;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
 import de.undercouch.bson4jackson.BsonFactory;
 
@@ -60,7 +60,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
                 generator = generatorFactory.createJsonGenerator(getOutputStream());
             }
         } catch (IOException exception) {
-            throw new ResultSetInputException(exception);
+            throw new ResultSetOutputException(exception);
         }
 
     }
@@ -79,7 +79,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
             generator.writeFieldName(ROWS_FIELD);
             generator.writeStartArray();
         } catch (IOException exception) {
-            throw new ResultSetInputException(exception);
+            throw new ResultSetOutputException(exception);
         }
     }
 
@@ -96,7 +96,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
             }
             generator.writeEndArray();
         } catch (IOException exception) {
-            throw new ResultSetInputException(exception);
+            throw new ResultSetOutputException(exception);
         }
     }
 
@@ -108,7 +108,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
             generator.flush();
             generator.close();
         } catch (IOException exception) {
-            throw new ResultSetInputException(exception);
+            throw new ResultSetOutputException(exception);
         }
     }
 }

@@ -28,7 +28,6 @@
 package com.nuodb.migration.resultset.format.csv;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.model.ColumnModelFactory;
 import com.nuodb.migration.jdbc.model.ColumnSetModel;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
@@ -44,6 +43,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnSetModel;
 import static java.lang.String.valueOf;
 
 /**
@@ -88,8 +88,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
             }
             int[] columnTypes = new int[columns.size()];
             Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-            columnSetModel = ColumnModelFactory.createColumnSetModel(columns.toArray(new String[columns.size()]),
-                    columnTypes);
+            columnSetModel = createColumnSetModel(columns.toArray(new String[columns.size()]), columnTypes);
         }
         setColumnSetModel(columnSetModel);
     }

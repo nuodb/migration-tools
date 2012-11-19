@@ -28,7 +28,7 @@
 package com.nuodb.migration.resultset.format.csv;
 
 import com.nuodb.migration.jdbc.model.ColumnSetModel;
-import com.nuodb.migration.resultset.format.ResultSetInputException;
+import com.nuodb.migration.resultset.format.ResultSetOutputException;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -75,7 +75,7 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
             }
             printer.println();
         } catch (IOException e) {
-            throw new ResultSetInputException(e);
+            throw new ResultSetOutputException(e);
         }
     }
 
@@ -90,7 +90,7 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
             }
             printer.printRecord(columnValues);
         } catch (IOException e) {
-            throw new ResultSetInputException(e);
+            throw new ResultSetOutputException(e);
         }
     }
 
@@ -99,7 +99,7 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
         try {
             printer.close();
         } catch (IOException e) {
-            throw new ResultSetInputException(e);
+            throw new ResultSetOutputException(e);
         }
     }
 }
