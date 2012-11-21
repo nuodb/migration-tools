@@ -71,16 +71,14 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
         return value == null ? defaultValue : value;
     }
 
-    protected abstract void initColumnValueModelSet();
-
-    protected void visitColumnValueModel(ColumnValueModel columnValue) {
-        int typeCode = columnValue.getTypeCode();
+    protected void visitColumnValueModel(ColumnValueModel columnValueModel) {
+        int typeCode = columnValueModel.getTypeCode();
         if (typeCode == Types.TIME || typeCode == Types.TIMESTAMP || typeCode == Types.DATE) {
             TimeZone timeZone = getTimeZone();
             if (timeZone != null) {
                 Map<String, Object> options = Maps.newHashMap();
                 options.put(JdbcDateTypeBase.CALENDAR, Calendar.getInstance(timeZone));
-                columnValue.setValueAccessOptions(options);
+                columnValueModel.setValueAccessOptions(options);
             }
         }
     }

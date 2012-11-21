@@ -42,7 +42,7 @@ import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
  */
 public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttributes {
 
-    private JsonGenerator generator;
+    private JsonGenerator writer;
 
     @Override
     public String getFormatType() {
@@ -51,13 +51,13 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
 
     @Override
     protected void initOutput() {
-        BsonFactory generatorFactory = new BsonFactory();
-        generatorFactory.enable(ENABLE_STREAMING);
+        BsonFactory factory = new BsonFactory();
+        factory.enable(ENABLE_STREAMING);
         try {
             if (getWriter() != null) {
-                generator = generatorFactory.createJsonGenerator(getWriter());
+                writer = factory.createJsonGenerator(getWriter());
             } else if (getOutputStream() != null) {
-                generator = generatorFactory.createJsonGenerator(getOutputStream());
+                writer = factory.createJsonGenerator(getOutputStream());
             }
         } catch (IOException exception) {
             throw new ResultSetOutputException(exception);
@@ -68,15 +68,15 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
     @Override
     protected void doWriteBegin() {
         try {
-            generator.writeStartObject();
-            generator.writeFieldName(COLUMNS_FIELD);
-            generator.writeStartObject();
-            for (ColumnModel column : getColumnModelSet()) {
-                generator.writeStringField(COLUMN_FIELD, column.getName());
+            writer.writeStartObject();
+            writer.writeFieldName(COLUMNS_FIELD);
+            writer.writeStartObject();
+            for (ColumnModel columnModel : getColumnModelSet()) {
+                writer.writeStringField(COLUMN_FIELD, columnModel.getName());
             }
-            generator.writeEndObject();
-            generator.writeFieldName(ROWS_FIELD);
-            generator.writeStartArray();
+            writer.writeEndObject();
+            writer.writeFieldName(ROWS_FIELD);
+            writer.writeStartArray();
         } catch (IOException exception) {
             throw new ResultSetOutputException(exception);
         }
@@ -85,15 +85,15 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
     @Override
     protected void writeColumnValues(String[] columnValues) {
         try {
-            generator.writeStartArray();
+            writer.writeStartArray();
             for (String columnValue : columnValues) {
                 if (columnValue == null) {
-                    generator.writeNull();
+                    writer.writeNull();
                 } else {
-                    generator.writeString(columnValue);
+                    writer.writeString(columnValue);
                 }
             }
-            generator.writeEndArray();
+            writer.writeEndArray();
         } catch (IOException exception) {
             throw new ResultSetOutputException(exception);
         }
@@ -102,10 +102,10 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
     @Override
     protected void doWriteEnd() {
         try {
-            generator.writeEndArray();
-            generator.writeEndObject();
-            generator.flush();
-            generator.close();
+            writer.writeEndArray();
+            writer.writeEndObject();
+            writer.flush();
+            writer.close();
         } catch (IOException exception) {
             throw new ResultSetOutputException(exception);
         }

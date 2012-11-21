@@ -145,8 +145,8 @@ public class DumpJob extends JobBase {
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
-                        dump(execution, statement, writer, entry, resultSetOutput);
+                    public void execute(PreparedStatement preparedStatement) throws SQLException {
+                        dump(execution, preparedStatement, writer, entry, resultSetOutput);
                     }
                 }
         );
@@ -157,15 +157,17 @@ public class DumpJob extends JobBase {
         if (log.isDebugEnabled()) {
             log.debug(String.format("Prepare SQL: %s", query.toQuery()));
         }
-        PreparedStatement statement = connection.prepareStatement(query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
         Dialect dialect = database.getDialect();
-        dialect.enableStreaming(statement);
-        return statement;
+        dialect.enableStreaming(preparedStatement);
+        return preparedStatement;
     }
 
-    protected void dump(final JobExecution execution, final PreparedStatement statement, final CatalogWriter writer,
-                        final CatalogEntry entry, final ResultSetOutput resultSetOutput) throws SQLException {
-        ResultSet resultSet = statement.executeQuery();
+    protected void dump(final JobExecution execution, final PreparedStatement preparedStatement,
+                        final CatalogWriter writer, final CatalogEntry entry,
+                        final ResultSetOutput resultSetOutput) throws SQLException {
+        ResultSet resultSet = preparedStatement.executeQuery();
 
         writer.addEntry(entry);
         resultSetOutput.setOutputStream(writer.getEntryOutput(entry));

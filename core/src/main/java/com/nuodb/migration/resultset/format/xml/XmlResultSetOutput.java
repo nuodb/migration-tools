@@ -57,12 +57,12 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
         version = getAttribute(ATTRIBUTE_VERSION, VERSION);
         encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
 
-        XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
+        XMLOutputFactory factory = XMLOutputFactory.newInstance();
         try {
             if (getWriter() != null) {
-                writer = xmlOutputFactory.createXMLStreamWriter(getWriter());
+                writer = factory.createXMLStreamWriter(getWriter());
             } else if (getOutputStream() != null) {
-                writer = xmlOutputFactory.createXMLStreamWriter(getOutputStream(), getEncoding());
+                writer = factory.createXMLStreamWriter(getOutputStream(), getEncoding());
             }
         } catch (XMLStreamException e) {
             throw new ResultSetOutputException(e);
@@ -76,10 +76,10 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             writer.writeStartElement(RESULT_SET_ELEMENT);
             writer.writeNamespace("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
             writer.writeStartElement(COLUMNS_ELEMENT);
-            for (ColumnModel column : getColumnModelSet()) {
+            for (ColumnModel columnModel : getColumnModelSet()) {
                 writer.writeEmptyElement(COLUMN_ELEMENT);
                 writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
-                writer.writeAttribute(ATTRIBUTE_NAME, column.getName());
+                writer.writeAttribute(ATTRIBUTE_NAME, columnModel.getName());
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {

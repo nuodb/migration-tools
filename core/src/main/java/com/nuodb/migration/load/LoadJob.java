@@ -142,12 +142,12 @@ public class LoadJob extends JobBase {
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
-                        resultSetInput.setPreparedStatement(statement);
+                    public void execute(PreparedStatement preparedStatement) throws SQLException {
+                        resultSetInput.setPreparedStatement(preparedStatement);
 
                         while (resultSetInput.hasNextRow() && execution.isRunning()) {
                             resultSetInput.readRow();
-                            statement.executeUpdate();
+                            preparedStatement.executeUpdate();
                         }
                         resultSetInput.readEnd();
                     }

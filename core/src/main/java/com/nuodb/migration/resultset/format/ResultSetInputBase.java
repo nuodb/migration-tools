@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.model.ColumnModelFactory;
 import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
@@ -40,9 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.PreparedStatement;
-import java.util.List;
-
-import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnModelSet;
 
 /**
  * @author Sergey Bushik
@@ -87,7 +84,6 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
         initColumnValueModelSet();
     }
 
-    @Override
     protected void initColumnValueModelSet() {
         ColumnModelSet<ColumnValueModel> columnValueModelSet = getColumnValueModelSet();
         if (columnValueModelSet == null) {
@@ -96,23 +92,23 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     }
 
     protected ColumnModelSet<ColumnValueModel> createColumnValueModelSet() {
-        final List<ColumnValueModel> columnValues = Lists.newArrayList();
+        final ColumnModelSet<ColumnValueModel> columnModelSet = ColumnModelFactory.createColumnModelSet();
         int index = 0;
-        for (ColumnModel column : getColumnModelSet()) {
-            ColumnValueModel columnValue = createColumnValueModel(column, index++);
-            visitColumnValueModel(columnValue);
-            columnValues.add(columnValue);
+        for (ColumnModel columnModel : getColumnModelSet()) {
+            ColumnValueModel columnValueModel = createColumnValueModel(columnModel, index++);
+            visitColumnValueModel(columnValueModel);
+            columnModelSet.add(columnValueModel);
         }
-        return createColumnModelSet(columnValues);
+        return columnModelSet;
     }
 
-    protected ColumnValueModel createColumnValueModel(ColumnModel column, int index) {
-        JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(column.getTypeCode(), column.getTypeName());
+    protected ColumnValueModel createColumnValueModel(ColumnModel columnModel, int index) {
+        JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(columnModel.getTypeCode(), columnModel.getTypeName());
         JdbcTypeValueFormat columnValueFormat =
                 getJdbcTypeValueFormatRegistry().getJdbcTypeValueFormat(jdbcTypeDesc);
         JdbcTypeValueAccess<Object> columnValueAccess =
-                getJdbcTypeValueAccessProvider().getPreparedStatementAccess(getPreparedStatement(), column, index + 1);
-        return new ColumnValueModelImpl(column, columnValueFormat, columnValueAccess, null);
+                getJdbcTypeValueAccessProvider().getPreparedStatementAccess(getPreparedStatement(), columnModel, index + 1);
+        return new ColumnValueModelImpl(columnModel, columnValueFormat, columnValueAccess, null);
     }
 
     @Override
@@ -126,12 +122,12 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     protected abstract void doReadBegin();
 
     protected void readRow(String[] values) {
-        ColumnModelSet<ColumnValueModel> columnValues = getColumnValueModelSet();
+        ColumnModelSet<ColumnValueModel> columnValueModelSet = getColumnValueModelSet();
         for (int index = 0; index < values.length; index++) {
-            ColumnValueModel columnValue = columnValues.get(index);
+            ColumnValueModel columnValueModel = columnValueModelSet.get(index);
             String value = XmlEscape.INSTANCE.unescape(values[index]);
-            columnValue.getValueFormat().setValue(
-                    columnValue.getValueAccess(), value, columnValue.getValueAccessOptions());
+            columnValueModel.getValueFormat().setValue(
+                    columnValueModel.getValueAccess(), value, columnValueModel.getValueAccessOptions());
         }
     }
 

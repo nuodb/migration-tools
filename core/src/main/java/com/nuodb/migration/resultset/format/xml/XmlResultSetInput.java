@@ -63,12 +63,12 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
     protected void initInput() {
         encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
 
-        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+        XMLInputFactory factory = XMLInputFactory.newInstance();
         try {
             if (getReader() != null) {
-                reader = xmlInputFactory.createXMLStreamReader(getReader());
+                reader = factory.createXMLStreamReader(getReader());
             } else if (getInputStream() != null) {
-                reader = xmlInputFactory.createXMLStreamReader(getInputStream());
+                reader = factory.createXMLStreamReader(getInputStream());
             }
         } catch (XMLStreamException e) {
             throw new ResultSetInputException(e);

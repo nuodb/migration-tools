@@ -74,6 +74,10 @@ public class ColumnModelFactory {
         return createColumnModelSet(columns);
     }
 
+    public static <T extends ColumnModel> ColumnModelSet<T> createColumnModelSet() {
+        return new ColumnModelSetImpl<T>();
+    }
+
     public static <T extends ColumnModel> ColumnModelSet<T> createColumnModelSet(T... columns) {
         return new ColumnModelSetImpl<T>(columns);
     }

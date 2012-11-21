@@ -38,8 +38,8 @@ public class ColumnModelImpl implements ColumnModel {
     private int precision;
     private int scale;
 
-    public ColumnModelImpl(ColumnModel column) {
-        copy(column);
+    public ColumnModelImpl(ColumnModel columnModel) {
+        copy(columnModel);
     }
 
     public ColumnModelImpl(String name, int typeCode, String typeName, int precision, int scale) {

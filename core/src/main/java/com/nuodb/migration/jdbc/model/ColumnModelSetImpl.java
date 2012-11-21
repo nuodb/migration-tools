@@ -42,6 +42,9 @@ public class ColumnModelSetImpl<T extends ColumnModel> implements ColumnModelSet
 
     private List<T> columns = newArrayList();
 
+    public ColumnModelSetImpl() {
+    }
+
     public ColumnModelSetImpl(T... columns) {
         this.columns.addAll(newArrayList(columns));
     }
