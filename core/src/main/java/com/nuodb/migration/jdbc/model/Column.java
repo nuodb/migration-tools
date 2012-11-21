@@ -84,33 +84,66 @@ public class Column extends HasNameBase implements ColumnModel {
 
     private String defaultValue;
 
+    public Column(Table table, String name) {
+        this(table, Name.valueOf(name));
+    }
+
     public Column(Table table, Name name) {
         super(name);
         this.table = table;
     }
 
-    public Column(Table table, String name) {
-        this(table, Name.valueOf(name));
-    }
-
-    public Table getTable() {
-        return table;
-    }
-
+    @Override
     public int getTypeCode() {
         return typeCode;
     }
 
+    @Override
     public void setTypeCode(int typeCode) {
         this.typeCode = typeCode;
     }
 
+    @Override
     public String getTypeName() {
         return typeName;
     }
 
+    @Override
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    @Override
+    public int getPrecision() {
+        return precision;
+    }
+
+    @Override
+    public void setPrecision(int precision) {
+        this.precision = precision;
+    }
+
+    @Override
+    public int getScale() {
+        return scale;
+    }
+
+    @Override
+    public void setScale(int scale) {
+        this.scale = scale;
+    }
+
+    @Override
+    public void copy(ColumnModel column) {
+        setName(column.getName());
+        setTypeCode(column.getTypeCode());
+        setTypeName(column.getTypeName());
+        setPrecision(column.getPrecision());
+        setScale(column.getScale());
+    }
+
+    public Table getTable() {
+        return table;
     }
 
     public int getSize() {
@@ -119,22 +152,6 @@ public class Column extends HasNameBase implements ColumnModel {
 
     public void setSize(int size) {
         this.size = size;
-    }
-
-    public int getPrecision() {
-        return precision;
-    }
-
-    public void setPrecision(int precision) {
-        this.precision = precision;
-    }
-
-    public int getScale() {
-        return scale;
-    }
-
-    public void setScale(int scale) {
-        this.scale = scale;
     }
 
     public String getComment() {

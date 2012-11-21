@@ -34,6 +34,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -47,13 +48,13 @@ public class JdbcBigIntType extends JdbcTypeBase<Long> {
     }
 
     @Override
-    public Long getValue(ResultSet resultSet, int column) throws SQLException {
+    public Long getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         long longValue = resultSet.getLong(column);
         return resultSet.wasNull() ? null : longValue;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Long value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Long value, int column, Map<String, Object> options) throws SQLException {
         statement.setLong(column, value);
     }
 }

@@ -29,86 +29,35 @@ package com.nuodb.migration.jdbc.model;
 
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
  */
-public class ColumnSetModelImpl implements ColumnSetModel {
+public class ColumnModelSetImpl<T extends ColumnModel> implements ColumnModelSet<T> {
 
-    private final ColumnModel[] columns;
+    private List<T> columns = newArrayList();
 
-    public ColumnSetModelImpl(ColumnModel[] columns) {
-        this.columns = columns;
+    public ColumnModelSetImpl(T... columns) {
+        this.columns.addAll(newArrayList(columns));
     }
 
-    public ColumnSetModelImpl(ColumnSetModel columnSetModel) {
-        int columnCount = columnSetModel.getLength();
-        ColumnModel[] columnModels = new ColumnModel[columnCount];
-        for (int index = 0; index < columnCount; index++) {
-            columnModels[index] = columnSetModel.item(index);
-        }
-        this.columns = columnModels;
+    public ColumnModelSetImpl(Iterable<T> columns) {
+        this.columns.addAll(newArrayList(columns));
     }
 
     @Override
-    public String getName(int column) {
-        return columns[column].getName();
+    public T get(int index) {
+        return columns.get(index);
     }
 
     @Override
-    public int getTypeCode(int column) {
-        return columns[column].getTypeCode();
-    }
-
-    @Override
-    public void setTypeCode(int column, int typeCode) {
-        columns[column].setTypeCode(typeCode);
-    }
-
-    @Override
-    public String getTypeName(int column) {
-        return columns[column].getTypeName();
-    }
-
-    @Override
-    public void setTypeName(int column, String typeName) {
-        columns[column].setTypeName(typeName);
-    }
-
-    @Override
-    public int getPrecision(int column) {
-        return columns[column].getPrecision();
-    }
-
-    @Override
-    public void setPrecision(int column, int precision) {
-        columns[column].setPrecision(precision);
-    }
-
-    @Override
-    public int getScale(int column) {
-        return columns[column].getScale();
-    }
-
-    @Override
-    public void setScale(int column, int scale) {
-        columns[column].setScale(scale);
-    }
-
-    @Override
-    public int getLength() {
-        return columns.length;
-    }
-
-    @Override
-    public ColumnModel item(int column) {
-        return columns[column];
-    }
-
-    @Override
-    public ColumnModel item(String name) {
-        for (ColumnModel column : columns) {
+    public T get(String name) {
+        for (T column : columns) {
             if (StringUtils.equals(column.getName(), name)) {
                 return column;
             }
@@ -117,21 +66,91 @@ public class ColumnSetModelImpl implements ColumnSetModel {
     }
 
     @Override
+    public T set(int index, T element) {
+        return columns.set(index, element);
+    }
+
+    @Override
+    public int size() {
+        return columns.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return columns.isEmpty();
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        return columns.contains(o);
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return columns.iterator();
+    }
+
+    public boolean add(T t) {
+        return columns.add(t);
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        return columns.remove(o);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return columns.containsAll(c);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends T> c) {
+        return columns.addAll(c);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        return columns.removeAll(c);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return columns.retainAll(c);
+    }
+
+    @Override
+    public void clear() {
+        columns.clear();
+    }
+
+    @Override
+    public Object[] toArray() {
+        return columns.toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return columns.toArray(a);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ColumnSetModelImpl that = (ColumnSetModelImpl) o;
-        if (!Arrays.equals(columns, that.columns)) return false;
+        ColumnModelSetImpl that = (ColumnModelSetImpl) o;
+        if (columns.equals(that.columns)) return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        return columns != null ? Arrays.hashCode(columns) : 0;
+        return columns.hashCode();
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public String toString() {
-        return Arrays.asList(columns).toString();
+        return columns.toString();
     }
 }

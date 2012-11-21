@@ -31,6 +31,7 @@ import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.*;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -44,12 +45,12 @@ public class JdbcClobType extends JdbcTypeBase<Clob> {
     }
 
     @Override
-    public Clob getValue(ResultSet resultSet, int column) throws SQLException {
+    public Clob getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         return resultSet.getClob(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Clob value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Clob value, int column, Map<String, Object> options) throws SQLException {
         statement.setClob(column, value);
     }
 }

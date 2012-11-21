@@ -25,41 +25,54 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.jdbc2;
+package com.nuodb.migration.schema;
 
-import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.job.JobFactory;
 
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Map;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcNumericType extends JdbcTypeBase<BigDecimal> {
-
-    public static final JdbcType INSTANCE = new JdbcNumericType();
-
-    public JdbcNumericType() {
-        super(Types.NUMERIC, BigDecimal.class);
-    }
-
-    public JdbcNumericType(int typeCode) {
-        super(typeCode, BigDecimal.class);
-    }
+public class GenerateSchemaJobFactory implements JobFactory<GenerateSchemaJob> {
 
     @Override
-    public BigDecimal getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
-        return resultSet.getBigDecimal(column);
+    public GenerateSchemaJob createJob() {
+        GenerateSchemaJob job = new GenerateSchemaJob();
+
+//        --time.zone=<time zone code>,optional;
+//
+//        ResultSet resultSet;
+//        Date date = resultSet.getTime(column) (or resultSet.getDate(column) or resultSet.getTimestamp(column));
+//
+//        String timeZoneValue == <--time.zone>;
+//        if (timeZoneValue != null) {
+//            <dump date as is>;
+//        } else {
+//            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone( < timeZoneValue >));
+//
+//
+//        }
+
+        return job;
     }
 
-    @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value,
-                                    int column, Map<String, Object> options) throws SQLException {
-        statement.setBigDecimal(column, value);
+    public static void main(String[] args) {
+        Date now = new Date();
+        System.out.println(now);
+        Calendar calendar = Calendar.getInstance(
+                TimeZone.getTimeZone("America/New_York"));
+        calendar.setTimeInMillis(now.getTime());
+
+        ResultSet resultSet;
+        // PreparedStatement preparedStatement;
+        // preparedStatement.setDate
+
+        System.out.println(calendar.toString());
+        System.out.println(calendar.getTime());
+
     }
 }

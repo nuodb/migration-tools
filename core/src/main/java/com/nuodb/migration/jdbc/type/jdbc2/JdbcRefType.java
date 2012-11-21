@@ -29,13 +29,13 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
-import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -49,12 +49,12 @@ public class JdbcRefType extends JdbcTypeBase<Ref> {
     }
 
     @Override
-    public Ref getValue(ResultSet resultSet, int column) throws SQLException {
+    public Ref getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         return resultSet.getRef(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Ref value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Ref value, int column, Map<String, Object> options) throws SQLException {
         statement.setRef(column, value);
     }
 }

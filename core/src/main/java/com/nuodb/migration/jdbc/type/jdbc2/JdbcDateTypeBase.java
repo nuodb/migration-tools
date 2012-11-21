@@ -25,18 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.jdbc.type.jdbc2;
 
-import com.nuodb.migration.jdbc.model.ColumnSetModel;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+
+import java.util.Calendar;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author Sergey Bushik
  */
+public abstract class JdbcDateTypeBase<T> extends JdbcTypeBase<T> {
 
-public interface JdbcTypeValueSetModel extends ColumnSetModel {
+    public static final String CALENDAR = "CALENDAR";
 
-    JdbcTypeValueAccess getJdbcTypeValueAccess(int column);
+    public static final String TIMEZONE = "TIMEZONE";
 
-    JdbcTypeValueFormat getJdbcTypeValueFormat(int column);
+    protected JdbcDateTypeBase(int typeCode, Class<? extends T> typeClass) {
+        super(typeCode, typeClass);
+    }
+
+    protected Calendar getCalendar(Map<String, Object> options) {
+        if (options == null) {
+            return null;
+        }
+        Calendar calendar = getOption(options, CALENDAR);
+        if (calendar == null) {
+            TimeZone timeZone = getOption(options, TIMEZONE);
+            if (timeZone != null) {
+                calendar = Calendar.getInstance(timeZone);
+            }
+        }
+        return calendar;
+    }
 }

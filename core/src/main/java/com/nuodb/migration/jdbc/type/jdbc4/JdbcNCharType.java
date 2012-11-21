@@ -32,6 +32,7 @@ import com.nuodb.migration.jdbc.type.JdbcTypeBase;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.*;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -57,12 +58,12 @@ public class JdbcNCharType extends JdbcTypeBase<String> {
     }
 
     @Override
-    public String getValue(ResultSet resultSet, int column) throws SQLException {
+    public String getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         return resultSet.getNString(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, String value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, String value, int column, Map<String, Object> options) throws SQLException {
         statement.setNString(column, value);
     }
 }

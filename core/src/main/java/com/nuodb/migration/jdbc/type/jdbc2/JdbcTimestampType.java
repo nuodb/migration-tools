@@ -28,14 +28,15 @@
 package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.*;
+import java.util.Calendar;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTimestampType extends JdbcTypeBase<Timestamp> {
+public class JdbcTimestampType extends JdbcDateTypeBase<Timestamp> {
 
     public static final JdbcType INSTANCE = new JdbcTimestampType();
 
@@ -44,13 +45,23 @@ public class JdbcTimestampType extends JdbcTypeBase<Timestamp> {
     }
 
     @Override
-    public Timestamp getValue(ResultSet resultSet, int column) throws SQLException {
-        return resultSet.getTimestamp(column);
+    public Timestamp getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+        Calendar calendar = getCalendar(options);
+        if (calendar != null) {
+            return resultSet.getTimestamp(column, calendar);
+        } else {
+            return resultSet.getTimestamp(column);
+        }
     }
 
     @Override
     protected void setNullSafeValue(PreparedStatement statement, Timestamp value,
-                                    int column) throws SQLException {
-        statement.setTimestamp(column, value);
+                                    int column, Map<String, Object> options) throws SQLException {
+        Calendar calendar = getCalendar(options);
+        if (calendar == null) {
+            statement.setTimestamp(column, value);
+        } else {
+            statement.setTimestamp(column, value, calendar);
+        }
     }
 }

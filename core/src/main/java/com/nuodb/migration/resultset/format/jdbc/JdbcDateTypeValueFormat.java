@@ -34,6 +34,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 import static com.nuodb.migration.jdbc.type.JdbcTypeDesc.isTypeNameEquals;
 import static java.lang.String.format;
@@ -44,15 +45,13 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 public class JdbcDateTypeValueFormat extends JdbcTypeValueFormatBase<Date> {
 
-    public static final JdbcTypeValueFormat<Date> INSTANCE = new JdbcDateTypeValueFormat();
-
     private static final String YEAR_TYPE = "YEAR";
 
     private static final DateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
 
     @Override
-    protected String doGetValue(JdbcTypeValueAccess<Date> access) throws SQLException {
-        Date date = access.getValue();
+    protected String doGetValue(JdbcTypeValueAccess<Date> access, Map<String, Object> options) throws SQLException {
+        Date date = access.getValue(options);
         if (date == null) {
             return null;
         } else if (isTypeNameEquals(access.getColumnModel().getTypeName(), YEAR_TYPE)) {
@@ -63,24 +62,27 @@ public class JdbcDateTypeValueFormat extends JdbcTypeValueFormatBase<Date> {
     }
 
     @Override
-    protected void doSetValue(JdbcTypeValueAccess<Date> access, String value) throws SQLException {
-        if (!(doSetValueAsDate(access, value) || doSetValueAsYear(access, value))) {
+    protected void doSetValue(JdbcTypeValueAccess<Date> access, String value,
+                              Map<String, Object> options) throws SQLException {
+        if (!(doSetValueAsDate(access, value, options) || doSetValueAsYear(access, value, options))) {
             throw new JdbcTypeValueException(format("Value %s is not date or year", value));
         }
     }
 
-    protected boolean doSetValueAsDate(JdbcTypeValueAccess<Date> access, String value) throws SQLException {
+    protected boolean doSetValueAsDate(JdbcTypeValueAccess<Date> access, String value,
+                                       Map<String, Object> options) throws SQLException {
         try {
-            access.setValue(!isEmpty(value) ? Date.valueOf(value) : null);
+            access.setValue(!isEmpty(value) ? Date.valueOf(value) : null, options);
             return true;
         } catch (IllegalArgumentException exception) {
             return false;
         }
     }
 
-    protected boolean doSetValueAsYear(JdbcTypeValueAccess<Date> access, String value) throws SQLException {
+    protected boolean doSetValueAsYear(JdbcTypeValueAccess<Date> access, String value,
+                                       Map<String, Object> options) throws SQLException {
         try {
-            access.setValue(YEAR_FORMAT.parse(value));
+            access.setValue(YEAR_FORMAT.parse(value), options);
             return true;
         } catch (ParseException e) {
             return false;

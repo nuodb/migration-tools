@@ -29,12 +29,14 @@ package com.nuodb.migration.resultset.format.jdbc;
 
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
+import java.util.Map;
+
 /**
  * @author Sergey Bushik
  */
 public interface JdbcTypeValueFormat<T> {
 
-    String getValue(JdbcTypeValueAccess<T> access) throws JdbcTypeValueException;
+    String getValue(JdbcTypeValueAccess<T> access, Map<String, Object> options) throws JdbcTypeValueException;
 
-    void setValue(JdbcTypeValueAccess<T> access, String value) throws JdbcTypeValueException;
+    void setValue(JdbcTypeValueAccess<T> access, String value, Map<String, Object> options) throws JdbcTypeValueException;
 }

@@ -30,6 +30,7 @@ package com.nuodb.migration.spec;
 import com.google.common.collect.Lists;
 
 import java.util.Collection;
+import java.util.TimeZone;
 
 /**
  * @author Sergey Bushik
@@ -37,6 +38,7 @@ import java.util.Collection;
 public class DumpSpec extends TaskSpecBase {
 
     private ConnectionSpec connectionSpec;
+    private TimeZone timeZone;
     private Collection<SelectQuerySpec> selectQuerySpecs = Lists.newArrayList();
     private Collection<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
     private FormatSpec outputSpec;
@@ -47,6 +49,14 @@ public class DumpSpec extends TaskSpecBase {
 
     public void setConnectionSpec(ConnectionSpec connectionSpec) {
         this.connectionSpec = connectionSpec;
+    }
+
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
     }
 
     public Collection<SelectQuerySpec> getSelectQuerySpecs() {

@@ -35,6 +35,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -48,12 +49,12 @@ public class JdbcDataLinkType extends JdbcTypeBase<URL> {
     }
 
     @Override
-    public URL getValue(ResultSet resultSet, int column) throws SQLException {
+    public URL getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         return resultSet.getURL(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, URL value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, URL value, int column, Map<String, Object> options) throws SQLException {
         statement.setURL(column, value);
     }
 }

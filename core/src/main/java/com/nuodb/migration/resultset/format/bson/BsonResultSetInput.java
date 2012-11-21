@@ -30,7 +30,8 @@ package com.nuodb.migration.resultset.format.bson;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.nuodb.migration.jdbc.model.ColumnModelFactory;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
@@ -42,7 +43,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.fasterxml.jackson.core.JsonToken.*;
-import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnSetModel;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 
 /**
@@ -59,7 +59,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
     }
 
     @Override
-    protected void doInitInput() {
+    protected void initInput() {
         BsonFactory generatorFactory = new BsonFactory();
         generatorFactory.enable(ENABLE_STREAMING);
         try {
@@ -71,16 +71,16 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
         } catch (IOException exception) {
             throw new ResultSetInputException(exception);
         }
-        iterator = createRowsIterator();
+        iterator = createInputIterator();
     }
 
-    protected Iterator<String[]> createRowsIterator() {
+    protected Iterator<String[]> createInputIterator() {
         return new BsonInputIterator();
     }
 
     @Override
     protected void doReadBegin() {
-        ColumnSetModel columnSetModel = null;
+        ColumnModelSet columnModelSet = null;
         try {
             if (isNextToken(START_OBJECT) && isNextField(COLUMNS_FIELD) && isNextToken(START_OBJECT)) {
                 List<String> columns = Lists.newArrayList();
@@ -90,14 +90,15 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
                 parser.nextToken();
                 int[] columnTypes = new int[columns.size()];
                 Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-                columnSetModel = createColumnSetModel(columns.toArray(new String[columns.size()]), columnTypes);
+                columnModelSet = ColumnModelFactory.createColumnModelSet(columns.toArray(new String[columns.size()]),
+                        columnTypes);
             }
             parser.nextToken();
             parser.nextToken();
         } catch (IOException exception) {
             throw new ResultSetInputException(exception);
         }
-        setColumnSetModel(columnSetModel);
+        setColumnModelSet(columnModelSet);
     }
 
     protected boolean isCurrentToken(JsonToken token) {
@@ -126,7 +127,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
         String[] values = null;
         try {
             if (isCurrentToken(START_ARRAY)) {
-                values = new String[getColumnSetModel().getLength()];
+                values = new String[getColumnModelSet().size()];
                 int column = 0;
                 parser.nextToken();
                 while (isCurrentToken(VALUE_NULL) || isCurrentToken(VALUE_STRING)) {

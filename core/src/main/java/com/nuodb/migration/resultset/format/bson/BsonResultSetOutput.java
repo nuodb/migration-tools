@@ -28,9 +28,9 @@
 package com.nuodb.migration.resultset.format.bson;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.nuodb.migration.jdbc.model.ColumnSetModel;
-import com.nuodb.migration.resultset.format.ResultSetOutputException;
+import com.nuodb.migration.jdbc.model.ColumnModel;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
+import com.nuodb.migration.resultset.format.ResultSetOutputException;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
     }
 
     @Override
-    protected void doInitOutput() {
+    protected void initOutput() {
         BsonFactory generatorFactory = new BsonFactory();
         generatorFactory.enable(ENABLE_STREAMING);
         try {
@@ -71,9 +71,8 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
             generator.writeStartObject();
             generator.writeFieldName(COLUMNS_FIELD);
             generator.writeStartObject();
-            ColumnSetModel columnSetModel = getColumnSetModel();
-            for (int index = 0, length = columnSetModel.getLength(); index < length; index++) {
-                generator.writeStringField(COLUMN_FIELD, columnSetModel.getName(index));
+            for (ColumnModel column : getColumnModelSet()) {
+                generator.writeStringField(COLUMN_FIELD, column.getName());
             }
             generator.writeEndObject();
             generator.writeFieldName(ROWS_FIELD);
@@ -84,14 +83,14 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
     }
 
     @Override
-    protected void doWriteRow(String[] values) {
+    protected void writeColumnValues(String[] columnValues) {
         try {
             generator.writeStartArray();
-            for (String value : values) {
-                if (value == null) {
+            for (String columnValue : columnValues) {
+                if (columnValue == null) {
                     generator.writeNull();
                 } else {
-                    generator.writeString(value);
+                    generator.writeString(columnValue);
                 }
             }
             generator.writeEndArray();

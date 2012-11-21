@@ -34,6 +34,8 @@ public interface ColumnModel {
     
     String getName();
 
+    void setName(String name);
+
     int getTypeCode();
 
     void setTypeCode(int typeCode);
@@ -49,4 +51,6 @@ public interface ColumnModel {
     int getScale();
 
     void setScale(int scale);
+
+    void copy(ColumnModel column);
 }

@@ -31,6 +31,7 @@ import com.nuodb.migration.jdbc.type.JdbcType;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -39,5 +40,5 @@ public interface JdbcTypeValueSetter<T> {
 
     JdbcType<T> getJdbcType();
 
-    <X> void setValue(PreparedStatement statement, int column, X value) throws SQLException;
+    <X> void setValue(PreparedStatement statement, int column, X value, Map<String, Object> options) throws SQLException;
 }

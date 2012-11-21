@@ -34,6 +34,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -51,12 +52,12 @@ public class JdbcCharType extends JdbcTypeBase<String> {
     }
 
     @Override
-    public String getValue(ResultSet resultSet, int column) throws SQLException {
+    public String getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         return resultSet.getString(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, String value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, String value, int column, Map<String, Object> options) throws SQLException {
         statement.setString(column, value);
     }
 }

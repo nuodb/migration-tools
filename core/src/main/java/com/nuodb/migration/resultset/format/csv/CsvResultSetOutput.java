@@ -27,9 +27,9 @@
  */
 package com.nuodb.migration.resultset.format.csv;
 
-import com.nuodb.migration.jdbc.model.ColumnSetModel;
-import com.nuodb.migration.resultset.format.ResultSetOutputException;
+import com.nuodb.migration.jdbc.model.ColumnModel;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
+import com.nuodb.migration.resultset.format.ResultSetOutputException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -53,7 +53,7 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
     }
 
     @Override
-    protected void doInitOutput() {
+    protected void initOutput() {
         CsvFormatBuilder builder = new CsvFormatBuilder(this);
         CSVFormat format = builder.build();
         Character quote = builder.getQuote();
@@ -69,9 +69,8 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
     @Override
     protected void doWriteBegin() {
         try {
-            ColumnSetModel columnSetModel = getColumnSetModel();
-            for (int index = 0, length = columnSetModel.getLength(); index < length; index++) {
-                printer.print(columnSetModel.getName(index));
+            for (ColumnModel column : getColumnModelSet()) {
+                printer.print(column.getName());
             }
             printer.println();
         } catch (IOException e) {
@@ -80,11 +79,11 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
     }
 
     @Override
-    protected void doWriteRow(String[] columnValues) {
+    protected void writeColumnValues(String[] columnValues) {
         try {
             for (int i = 0; i < columnValues.length; i++) {
-                String column = columnValues[i];
-                if (column != null && column.length() == 0) {
+                String columnValue = columnValues[i];
+                if (columnValue != null && columnValue.length() == 0) {
                     columnValues[i] = doubleQuote;
                 }
             }

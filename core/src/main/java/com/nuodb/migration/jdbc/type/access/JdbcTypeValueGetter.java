@@ -31,6 +31,7 @@ import com.nuodb.migration.jdbc.type.JdbcType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -39,7 +40,8 @@ public interface JdbcTypeValueGetter<T> {
 
     JdbcType<T> getJdbcType();
 
-    T getValue(ResultSet resultSet, int column) throws SQLException;
+    T getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException;
 
-    <X> X getValue(ResultSet resultSet, int column, Class<X> valueClass) throws SQLException;
+    <X> X getValue(ResultSet resultSet, int column, Class<X> valueClass,
+                   Map<String, Object> options) throws SQLException;
 }

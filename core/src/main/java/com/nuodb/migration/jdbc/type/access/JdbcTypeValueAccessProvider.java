@@ -28,13 +28,13 @@
 package com.nuodb.migration.jdbc.type.access;
 
 import com.nuodb.migration.jdbc.model.ColumnModel;
-import com.nuodb.migration.jdbc.model.ColumnModelFactory;
 import com.nuodb.migration.jdbc.type.*;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 
 import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnModel;
 
@@ -82,33 +82,31 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
 
     public <T> JdbcTypeValueAccess<T> getResultSetAccess(ResultSet resultSet, int column) {
         try {
-            return getResultSetAccess(resultSet, column,
-                    ColumnModelFactory.createColumnModel(resultSet, column));
+            return getResultSetAccess(resultSet, createColumnModel(resultSet, column), column);
         } catch (SQLException exception) {
             throw new JdbcTypeException(exception);
         }
     }
 
-    public <T> JdbcTypeValueAccess<T> getResultSetAccess(ResultSet resultSet, int column,
-                                                         ColumnModel columnModel) {
+    public <T> JdbcTypeValueAccess<T> getResultSetAccess(ResultSet resultSet, ColumnModel columnModel, int column) {
         return new JdbcTypeValueAccessImpl<T>(
                 (JdbcTypeValueGetter<T>) getJdbcTypeValueGetter(
-                        columnModel.getTypeCode(), columnModel.getTypeName()), resultSet, column, columnModel);
+                        columnModel.getTypeCode(), columnModel.getTypeName()), resultSet, columnModel, column);
     }
 
-    public <T> JdbcTypeValueAccess<T> getStatementAccess(PreparedStatement statement, int column) {
+    public <T> JdbcTypeValueAccess<T> getPreparedStatementAccess(PreparedStatement statement, int column) {
         try {
-            return getStatementAccess(statement, column, createColumnModel(statement.getMetaData(), column));
+            return getPreparedStatementAccess(statement, createColumnModel(statement.getMetaData(), column), column);
         } catch (SQLException exception) {
             throw new JdbcTypeException(exception);
         }
     }
 
-    public <T> JdbcTypeValueAccess<T> getStatementAccess(PreparedStatement statement, int column,
-                                                         ColumnModel columnModel) {
+    public <T> JdbcTypeValueAccess<T> getPreparedStatementAccess(PreparedStatement statement, ColumnModel columnModel,
+                                                                 int column) {
         return new JdbcTypeValueAccessImpl<T>(
                 (JdbcTypeValueSetter<T>) getJdbcTypeValueSetter(
-                        columnModel.getTypeCode(), columnModel.getTypeName()), statement, column, columnModel);
+                        columnModel.getTypeCode(), columnModel.getTypeName()), statement, columnModel, column);
     }
 
     protected <T> JdbcTypeAdapter<T> getJdbcTypeAdapter(Class valueClass, Class typeClass) {
@@ -147,13 +145,14 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         }
 
         @Override
-        public T getValue(ResultSet resultSet, int column) throws SQLException {
-            return jdbcType.getValue(resultSet, column);
+        public T getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+            return jdbcType.getValue(resultSet, column, options);
         }
 
         @Override
-        public <X> X getValue(ResultSet resultSet, int column, Class<X> valueClass) throws SQLException {
-            X value = (X) jdbcType.getValue(resultSet, column);
+        public <X> X getValue(ResultSet resultSet, int column, Class<X> valueClass,
+                              Map<String, Object> options) throws SQLException {
+            X value = (X) jdbcType.getValue(resultSet, column, options);
             JdbcTypeAdapter<X> adapter = getJdbcTypeAdapter(valueClass, jdbcType.getTypeClass());
             if (adapter != null) {
                 Statement statement = resultSet.getStatement();
@@ -177,13 +176,14 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         }
 
         @Override
-        public <X> void setValue(PreparedStatement statement, int column, X value) throws SQLException {
+        public <X> void setValue(PreparedStatement preparedStatement, int column, X value,
+                                 Map<String, Object> options) throws SQLException {
             JdbcTypeAdapter<X> adapter = getJdbcTypeAdapter(value != null ? value.getClass() : null,
                     jdbcType.getTypeClass());
             if (adapter != null) {
-                value = adapter.wrap(value, statement.getConnection());
+                value = adapter.wrap(value, preparedStatement.getConnection());
             }
-            jdbcType.setValue(statement, column, (T) value);
+            jdbcType.setValue(preparedStatement, column, (T) value, options);
         }
     }
 
@@ -198,7 +198,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         private int column;
 
         public JdbcTypeValueAccessImpl(JdbcTypeValueGetter<T> getter, ResultSet resultSet,
-                                       int column, ColumnModel columnModel) {
+                                       ColumnModel columnModel, int column) {
             this.getter = getter;
             this.jdbcType = getter.getJdbcType();
             this.resultSet = resultSet;
@@ -207,7 +207,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         }
 
         public JdbcTypeValueAccessImpl(JdbcTypeValueSetter<T> setter, PreparedStatement statement,
-                                       int column, ColumnModel columnModel) {
+                                       ColumnModel columnModel, int column) {
             this.setter = setter;
             this.jdbcType = setter.getJdbcType();
             this.statement = statement;
@@ -216,32 +216,27 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         }
 
         @Override
-        public int getColumn() {
-            return column;
-        }
-
-        @Override
-        public T getValue() throws SQLException {
+        public T getValue(Map<String, Object> options) throws SQLException {
             if (getter == null) {
                 throw new JdbcTypeException("Get value is unsupported");
             }
-            return getter.getValue(resultSet, column);
+            return getter.getValue(resultSet, column, options);
         }
 
         @Override
-        public <X> X getValue(Class<X> valueClass) throws SQLException {
+        public <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException {
             if (getter == null) {
                 throw new JdbcTypeException("Get value is unsupported");
             }
-            return getter.getValue(resultSet, column, valueClass);
+            return getter.getValue(resultSet, column, valueClass, options);
         }
 
         @Override
-        public <X> void setValue(X value) throws SQLException {
+        public <X> void setValue(X value, Map<String, Object> options) throws SQLException {
             if (setter == null) {
                 throw new JdbcTypeException("Set value is unsupported");
             }
-            setter.setValue(statement, column, value);
+            setter.setValue(statement, column, value, options);
         }
 
         @Override
@@ -250,18 +245,13 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         }
 
         @Override
-        public PreparedStatement getStatement() {
-            return statement;
-        }
-
-        @Override
-        public ResultSet getResultSet() {
-            return resultSet;
-        }
-
-        @Override
         public ColumnModel getColumnModel() {
             return columnModel;
+        }
+
+        @Override
+        public int getColumn() {
+            return column;
         }
     }
 }

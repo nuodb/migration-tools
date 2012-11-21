@@ -81,6 +81,7 @@ public class CliDumpJobFactory implements CliRunFactory, CliResources {
                     .withOption(createOutputGroup())
                     .withOption(createSelectQueryGroup())
                     .withOption(createNativeQueryGroup())
+                    .withOption(createTimeZoneOption())
                     .withRequired(true).build();
         }
 
@@ -91,6 +92,7 @@ public class CliDumpJobFactory implements CliRunFactory, CliResources {
             dumpSpec.setOutputSpec(parseOutputGroup(commandLine, this));
             dumpSpec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
             dumpSpec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine, this));
+            dumpSpec.setTimeZone(parseTimeZone(commandLine, this));
             dumpJobFactory.setDumpSpec(dumpSpec);
         }
 

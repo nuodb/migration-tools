@@ -35,6 +35,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -44,45 +45,49 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 public class JdbcTimestampTypeValueFormat extends JdbcTypeValueFormatBase<Timestamp> {
 
-    public static final JdbcTypeValueFormat<Timestamp> INSTANCE = new JdbcTimestampTypeValueFormat();
-
     private static final DateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
 
     @Override
-    protected String doGetValue(JdbcTypeValueAccess<Timestamp> access) throws SQLException {
-        Timestamp timestamp = access.getValue();
+    protected String doGetValue(JdbcTypeValueAccess<Timestamp> access,
+                                Map<String, Object> options) throws SQLException {
+        Timestamp timestamp = access.getValue(options);
         return timestamp != null ? timestamp.toString() : null;
     }
 
     @Override
-    protected void doSetValue(JdbcTypeValueAccess<Timestamp> access, String value) throws SQLException {
-        if (!(doSetValueAsTimestamp(access, value) || doSetValueAsDate(access, value) || doSetValueAsYear(access,
-                value))) {
+    protected void doSetValue(JdbcTypeValueAccess<Timestamp> access, String value,
+                              Map<String, Object> options) throws SQLException {
+        if (!(doSetValueAsTimestamp(access, value, options) || doSetValueAsDate(access, value,
+                options) || doSetValueAsYear(access,
+                value, options))) {
             throw new JdbcTypeValueException(format("Value %s is not timestamp, date or year", value));
         }
     }
 
-    protected boolean doSetValueAsTimestamp(JdbcTypeValueAccess<Timestamp> access, String value) throws SQLException {
+    protected boolean doSetValueAsTimestamp(JdbcTypeValueAccess<Timestamp> access, String value,
+                                            Map<String, Object> options) throws SQLException {
         try {
-            access.setValue(!isEmpty(value) ? Timestamp.valueOf(value) : null);
+            access.setValue(!isEmpty(value) ? Timestamp.valueOf(value) : null, options);
             return true;
         } catch (IllegalArgumentException exception) {
             return false;
         }
     }
 
-    protected boolean doSetValueAsDate(JdbcTypeValueAccess<Timestamp> access, String value) throws SQLException {
+    protected boolean doSetValueAsDate(JdbcTypeValueAccess<Timestamp> access, String value,
+                                       Map<String, Object> options) throws SQLException {
         try {
-            access.setValue(!isEmpty(value) ? Date.valueOf(value) : null);
+            access.setValue(!isEmpty(value) ? Date.valueOf(value) : null, options);
             return true;
         } catch (IllegalArgumentException exception) {
             return false;
         }
     }
 
-    protected boolean doSetValueAsYear(JdbcTypeValueAccess<Timestamp> access, String value) throws SQLException {
+    protected boolean doSetValueAsYear(JdbcTypeValueAccess<Timestamp> access, String value,
+                                       Map<String, Object> options) throws SQLException {
         try {
-            access.setValue(YEAR_FORMAT.parse(value));
+            access.setValue(YEAR_FORMAT.parse(value), options);
             return true;
         } catch (ParseException e) {
             return false;

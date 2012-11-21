@@ -55,8 +55,9 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
 
         LoadJob job = new LoadJob();
         job.setConnectionProvider(createConnectionProvider(connectionSpec));
-        job.setInputAttributes(inputSpec.getAttributes());
+        job.setAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));
+        job.setTimeZone(loadSpec.getTimeZone());
         job.setResultSetFormatFactory(resultSetFormatFactory);
         return job;
     }

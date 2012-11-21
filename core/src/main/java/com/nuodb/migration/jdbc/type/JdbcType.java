@@ -30,6 +30,7 @@ package com.nuodb.migration.jdbc.type;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -40,7 +41,7 @@ public interface JdbcType<T> {
 
     Class<? extends T> getTypeClass();
 
-    T getValue(ResultSet resultSet, int column) throws SQLException;
+    T getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException;
 
-    void setValue(PreparedStatement statement, int column, T value) throws SQLException;
+    void setValue(PreparedStatement statement, int column, T value, Map<String, Object> options) throws SQLException;
 }

@@ -27,32 +27,16 @@
  */
 package com.nuodb.migration.jdbc.model;
 
+import java.util.Collection;
+
 /**
  * @author Sergey Bushik
  */
-public interface ColumnSetModel {
+public interface ColumnModelSet<T extends ColumnModel> extends Collection<T> {
 
-    String getName(int column);
+    T get(int index);
 
-    int getTypeCode(int column);
+    T get(String column);
 
-    void setTypeCode(int column, int typeCode);
-
-    String getTypeName(int column);
-
-    void setTypeName(int column, String typeName);
-
-    int getPrecision(int column);
-
-    void setPrecision(int column, int precision);
-
-    int getScale(int column);
-
-    void setScale(int column, int scale);
-
-    ColumnModel item(int column);
-
-    ColumnModel item(String column);
-
-    int getLength();
+    T set(int index, T column);
 }

@@ -224,7 +224,7 @@ public class DatabaseInspector {
     protected void readTableColumns(DatabaseMetaData metaData, Table table) throws SQLException {
         ResultSet columns = metaData.getColumns(catalog, schema, table.getName(), null);
         try {
-            ColumnSetModel model = ColumnModelFactory.createColumnSetModel(columns.getMetaData());
+            ColumnModelSet modelSet = ColumnModelFactory.createColumnModelSet(columns.getMetaData());
             while (columns.next()) {
                 Column column = table.createColumn(columns.getString("COLUMN_NAME"));
                 column.setTypeCode(columns.getInt("DATA_TYPE"));
@@ -238,7 +238,7 @@ public class DatabaseInspector {
                 column.setPosition(columns.getInt("ORDINAL_POSITION"));
                 String nullable = columns.getString("IS_NULLABLE");
                 column.setNullable("YES".equals(nullable));
-                String autoIncrement = model.item("IS_AUTOINCREMENT") != null ? columns.getString(
+                String autoIncrement = modelSet.get("IS_AUTOINCREMENT") != null ? columns.getString(
                         "IS_AUTOINCREMENT") : null;
                 column.setAutoIncrement("YES".equals(autoIncrement));
             }

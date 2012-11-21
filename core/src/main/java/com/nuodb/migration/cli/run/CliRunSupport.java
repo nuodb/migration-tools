@@ -42,10 +42,7 @@ import com.nuodb.migration.utils.Priority;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Sergey Bushik
@@ -284,6 +281,23 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
             nativeQuerySpecs.add(nativeQuerySpec);
         }
         return nativeQuerySpecs;
+    }
+
+    protected Option createTimeZoneOption() {
+        return newOption().
+                withName(TIME_ZONE_OPTION).
+                withDescription(getMessage(TIME_ZONE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgument().
+                                withName(getMessage(TIME_ZONE_ARGUMENT_NAME)).
+                                withMinimum(1).
+                                withRequired(true).build()
+                ).build();
+    }
+
+    protected TimeZone parseTimeZone(CommandLine commandLine, Option option) {
+        String timeZone = commandLine.getValue(TIME_ZONE_OPTION);
+        return timeZone != null ? TimeZone.getTimeZone(timeZone) : null;
     }
 
     /**

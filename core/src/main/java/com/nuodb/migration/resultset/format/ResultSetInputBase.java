@@ -27,19 +27,21 @@
  */
 package com.nuodb.migration.resultset.format;
 
+import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.model.ColumnModel;
-import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueSetModel;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueSetModelImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.PreparedStatement;
+import java.util.List;
+
+import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnModelSet;
 
 /**
  * @author Sergey Bushik
@@ -52,7 +54,6 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     private Reader reader;
     private InputStream inputStream;
     private PreparedStatement preparedStatement;
-    private JdbcTypeValueSetModel jdbcTypeValueSetModel;
 
     public Reader getReader() {
         return reader;
@@ -70,10 +71,10 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     @Override
     public void setInputStream(InputStream inputStream) {
         this.inputStream = inputStream;
-        doInitInput();
+        initInput();
     }
 
-    protected abstract void doInitInput();
+    protected abstract void initInput();
 
     public PreparedStatement getPreparedStatement() {
         return preparedStatement;
@@ -82,30 +83,35 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     @Override
     public void setPreparedStatement(PreparedStatement preparedStatement) {
         this.preparedStatement = preparedStatement;
-        doInitJdbcTypeValueSetModel();
+        initColumnValueModelSet();
     }
 
-    protected void doInitJdbcTypeValueSetModel() {
-        JdbcTypeValueSetModel jdbcTypeValueSetModel = getJdbcTypeValueSetModel();
-        if (jdbcTypeValueSetModel == null) {
-            setJdbcTypeValueSetModel(createJdbcTypeValueSetModel());
+    @Override
+    protected void initColumnValueModelSet() {
+        ColumnModelSet<ColumnValueModel> columnValueModelSet = getColumnValueModelSet();
+        if (columnValueModelSet == null) {
+            setColumnValueModelSet(createColumnValueModelSet());
         }
     }
 
-    protected JdbcTypeValueSetModel createJdbcTypeValueSetModel() {
-        final ColumnSetModel columnSetModel = getColumnSetModel();
-        final int valueCount = columnSetModel.getLength();
-        JdbcTypeValueAccess[] jdbcTypeValueAccesses = new JdbcTypeValueAccess[valueCount];
-        JdbcTypeValueFormat[] jdbcTypeValueFormats = new JdbcTypeValueFormat[valueCount];
-        for (int index = 0; index < valueCount; index++) {
-            ColumnModel columnModel = columnSetModel.item(index);
-            JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(columnModel.getTypeCode(), columnModel.getTypeName());
-            jdbcTypeValueFormats[index] = getJdbcTypeValueFormatRegistry().
-                    getJdbcTypeValueFormat(jdbcTypeDesc);
-            jdbcTypeValueAccesses[index] = getJdbcTypeValueAccessProvider().
-                    getStatementAccess(preparedStatement, index + 1, columnModel);
+    protected ColumnModelSet<ColumnValueModel> createColumnValueModelSet() {
+        int index = 0;
+        List<ColumnValueModel> columnValues = Lists.newArrayList();
+        for (ColumnModel column : getColumnModelSet()) {
+            ColumnValueModel columnValue = createColumnValueModel(column, index);
+            visitColumnValueModel(columnValue);
+            columnValues.add(index, columnValue);
         }
-        return new JdbcTypeValueSetModelImpl(columnSetModel, jdbcTypeValueAccesses, jdbcTypeValueFormats);
+        return createColumnModelSet(columnValues);
+    }
+
+    protected ColumnValueModel createColumnValueModel(ColumnModel column, int index) {
+        JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(column.getTypeCode(), column.getTypeName());
+        JdbcTypeValueFormat columnValueFormat =
+                getJdbcTypeValueFormatRegistry().getJdbcTypeValueFormat(jdbcTypeDesc);
+        JdbcTypeValueAccess<Object> columnValueAccess =
+                getJdbcTypeValueAccessProvider().getPreparedStatementAccess(getPreparedStatement(), column, index + 1);
+        return new ColumnValueModelImpl(column, columnValueFormat, columnValueAccess, null);
     }
 
     @Override
@@ -119,11 +125,11 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     protected abstract void doReadBegin();
 
     protected void readRow(String[] values) {
-        JdbcTypeValueSetModel model = getJdbcTypeValueSetModel();
-        for (int index = 0; index < model.getLength(); index++) {
-            JdbcTypeValueAccess jdbcTypeValueAccess = model.getJdbcTypeValueAccess(index);
-            JdbcTypeValueFormat jdbcTypeValueFormat = model.getJdbcTypeValueFormat(index);
-            jdbcTypeValueFormat.setValue(jdbcTypeValueAccess, values[index]);
+        ColumnModelSet<ColumnValueModel> columnValues = getColumnValueModelSet();
+        for (int index = 0; index < values.length; index++) {
+            ColumnValueModel columnValue = columnValues.get(index);
+            columnValue.getValueFormat().setValue(
+                    columnValue.getValueAccess(), values[index], columnValue.getOptions());
         }
     }
 
@@ -133,12 +139,4 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     }
 
     protected abstract void doReadEnd();
-
-    public JdbcTypeValueSetModel getJdbcTypeValueSetModel() {
-        return jdbcTypeValueSetModel;
-    }
-
-    public void setJdbcTypeValueSetModel(JdbcTypeValueSetModel jdbcTypeValueSetModel) {
-        this.jdbcTypeValueSetModel = jdbcTypeValueSetModel;
-    }
 }

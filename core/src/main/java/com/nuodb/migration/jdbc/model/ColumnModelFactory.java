@@ -46,31 +46,39 @@ public class ColumnModelFactory {
                 metaData.getPrecision(column), metaData.getScale(column));
     }
 
-    public static ColumnSetModel createColumnSetModel(ResultSet resultSet) throws SQLException {
-        return createColumnSetModel(resultSet.getMetaData());
+    public static ColumnModelSet<ColumnModel> createColumnModelSet(ResultSet resultSet) throws SQLException {
+        return createColumnModelSet(resultSet.getMetaData());
     }
 
-    public static ColumnSetModel createColumnSetModel(ResultSetMetaData metaData) throws SQLException {
-        final int columnCount = metaData.getColumnCount();
-        final ColumnModel[] columns = new ColumnModel[columnCount];
-        for (int i = 0; i < columnCount; i++) {
+    public static ColumnModelSet<ColumnModel> createColumnModelSet(ResultSetMetaData metaData) throws SQLException {
+        final int size = metaData.getColumnCount();
+        final ColumnModel[] columns = new ColumnModel[size];
+        for (int i = 0; i < size; i++) {
             columns[i] = createColumnModel(metaData, i + 1);
         }
-        return new ColumnSetModelImpl(columns);
+        return new ColumnModelSetImpl<ColumnModel>(columns);
     }
 
-    public static ColumnSetModel createColumnSetModel(String[] names, int[] typeCodes) {
-        final int length = names.length;
-        return createColumnSetModel(names, typeCodes, new String[length], new int[length], new int[length]);
+    public static ColumnModelSet<ColumnModel> createColumnModelSet(String[] names, int[] typeCodes) {
+        final int size = names.length;
+        return createColumnModelSet(names, typeCodes, new String[size], new int[size], new int[size]);
     }
 
-    public static ColumnSetModel createColumnSetModel(String[] names, int[] typeCodes, String[] typeNames,
-                                                      int[] precisions, int[] scales) {
-        final int columnCount = names.length;
-        final ColumnModel[] columns = new ColumnModel[columnCount];
-        for (int i = 0; i < columnCount; i++) {
+    public static ColumnModelSet<ColumnModel> createColumnModelSet(
+            String[] names, int[] typeCodes, String[] typeNames, int[] precisions, int[] scales) {
+        final int size = names.length;
+        final ColumnModel[] columns = new ColumnModel[size];
+        for (int i = 0; i < size; i++) {
             columns[i] = new ColumnModelImpl(names[i], typeCodes[i], typeNames[i], precisions[i], scales[i]);
         }
-        return new ColumnSetModelImpl(columns);
+        return createColumnModelSet(columns);
+    }
+
+    public static <T extends ColumnModel> ColumnModelSet<T> createColumnModelSet(T... columns) {
+        return new ColumnModelSetImpl<T>(columns);
+    }
+
+    public static <T extends ColumnModel> ColumnModelSet<T> createColumnModelSet(Iterable<T> columns) {
+        return new ColumnModelSetImpl<T>(columns);
     }
 }

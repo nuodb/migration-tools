@@ -25,41 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.jdbc2;
+package com.nuodb.migration.schema;
 
-import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeBase;
-
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Map;
+import com.nuodb.migration.job.JobBase;
+import com.nuodb.migration.job.JobExecution;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcNumericType extends JdbcTypeBase<BigDecimal> {
+public class GenerateSchemaJob extends JobBase {
 
-    public static final JdbcType INSTANCE = new JdbcNumericType();
-
-    public JdbcNumericType() {
-        super(Types.NUMERIC, BigDecimal.class);
-    }
-
-    public JdbcNumericType(int typeCode) {
-        super(typeCode, BigDecimal.class);
-    }
+    protected final Log log = LogFactory.getLog(getClass());
 
     @Override
-    public BigDecimal getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
-        return resultSet.getBigDecimal(column);
-    }
+    public void execute(JobExecution execution) throws Exception {
 
-    @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value,
-                                    int column, Map<String, Object> options) throws SQLException {
-        statement.setBigDecimal(column, value);
     }
 }

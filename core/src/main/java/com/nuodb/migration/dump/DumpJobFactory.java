@@ -59,10 +59,11 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
 
         DumpJob job = new DumpJob();
         job.setConnectionProvider(createConnectionProvider(connectionSpec));
+        job.setTimeZone(dumpSpec.getTimeZone());
         job.setSelectQuerySpecs(selectQuerySpecs);
         job.setNativeQuerySpecs(nativeQuerySpecs);
         job.setOutputType(outputSpec.getType());
-        job.setOutputAttributes(outputSpec.getAttributes());
+        job.setAttributes(outputSpec.getAttributes());
         job.setCatalog(createCatalog(outputSpec.getPath()));
         job.setResultSetFormatFactory(resultSetFormatFactory);
         return job;

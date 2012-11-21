@@ -29,12 +29,12 @@ package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeBase;
-import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -48,12 +48,12 @@ public class JdbcNullType extends JdbcTypeBase<Object> {
     }
 
     @Override
-    public Object getValue(ResultSet resultSet, int column) throws SQLException {
+    public Object getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         return null;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Object value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Object value, int column, Map<String, Object> options) throws SQLException {
         statement.setNull(column, getTypeCode());
     }
 }

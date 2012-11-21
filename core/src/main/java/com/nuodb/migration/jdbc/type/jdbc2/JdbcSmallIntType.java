@@ -34,6 +34,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -51,13 +52,13 @@ public class JdbcSmallIntType extends JdbcTypeBase<Short> {
     }
 
     @Override
-    public Short getValue(ResultSet resultSet, int column) throws SQLException {
+    public Short getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         short shortValue = resultSet.getShort(column);
         return resultSet.wasNull() ? null : shortValue;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Short value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Short value, int column, Map<String, Object> options) throws SQLException {
         statement.setShort(column, value);
     }
 }

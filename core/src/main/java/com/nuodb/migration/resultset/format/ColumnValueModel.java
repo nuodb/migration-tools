@@ -25,35 +25,28 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.model.ColumnSetModel;
-import com.nuodb.migration.jdbc.model.ColumnSetModelImpl;
+import com.nuodb.migration.jdbc.model.ColumnModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
+
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeValueSetModelImpl extends ColumnSetModelImpl implements JdbcTypeValueSetModel {
+public interface ColumnValueModel extends ColumnModel {
 
-    private JdbcTypeValueAccess[] jdbcTypeValueAccesses;
-    private JdbcTypeValueFormat[] jdbcTypeValueFormats;
+    JdbcTypeValueAccess getValueAccess();
 
-    public JdbcTypeValueSetModelImpl(ColumnSetModel columnSetModel,
-                                     JdbcTypeValueAccess[] jdbcTypeValueAccesses,
-                                     JdbcTypeValueFormat[] jdbcTypeValueFormats) {
-        super(columnSetModel);
-        this.jdbcTypeValueAccesses = jdbcTypeValueAccesses;
-        this.jdbcTypeValueFormats = jdbcTypeValueFormats;
-    }
+    void setValueAccess(JdbcTypeValueAccess valueAccess);
 
-    @Override
-    public JdbcTypeValueAccess getJdbcTypeValueAccess(int column) {
-        return jdbcTypeValueAccesses[column];
-    }
+    JdbcTypeValueFormat getValueFormat();
 
-    @Override
-    public JdbcTypeValueFormat getJdbcTypeValueFormat(int column) {
-        return jdbcTypeValueFormats[column];
-    }
+    void setValueFormat(JdbcTypeValueFormat valueFormat);
+
+    Map<String, Object> getOptions();
+
+    void setOptions(Map<String, Object> valueAccessOptions);
 }

@@ -30,6 +30,7 @@ package com.nuodb.migration.jdbc.type;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -71,19 +72,26 @@ public abstract class JdbcTypeBase<T> implements JdbcType<T> {
     }
 
     @Override
-    public void setValue(PreparedStatement statement, int column, T value) throws SQLException {
+    public void setValue(PreparedStatement statement, int column, T value,
+                         Map<String, Object> options) throws SQLException {
         if (value == null) {
             setNullValue(statement, column);
         } else {
-            setNullSafeValue(statement, value, column);
+            setNullSafeValue(statement, value, column, options);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T> T getOption(Map<String, Object> options, String option) {
+        return options != null ? (T) options.get(option) : null;
     }
 
     protected void setNullValue(PreparedStatement statement, int column) throws SQLException {
         statement.setNull(column, getTypeCode());
     }
 
-    protected abstract void setNullSafeValue(PreparedStatement statement, T value, int column) throws SQLException;
+    protected abstract void setNullSafeValue(PreparedStatement statement, T value, int column,
+                                             Map<String, Object> options) throws SQLException;
 
     @Override
     public boolean equals(Object o) {

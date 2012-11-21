@@ -31,6 +31,7 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 import java.sql.SQLException;
 import java.sql.Time;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -40,18 +41,17 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 public class JdbcTimeTypeValueFormat extends JdbcTypeValueFormatBase<Time> {
 
-    public static final JdbcTypeValueFormat<Time> INSTANCE = new JdbcTimeTypeValueFormat();
-
     @Override
-    protected String doGetValue(JdbcTypeValueAccess<Time> access) throws SQLException {
-        Time time = access.getValue();
+    protected String doGetValue(JdbcTypeValueAccess<Time> access, Map<String, Object> options) throws SQLException {
+        Time time = access.getValue(options);
         return time != null ? time.toString() : null;
     }
 
     @Override
-    protected void doSetValue(JdbcTypeValueAccess<Time> access, String value) throws SQLException {
+    protected void doSetValue(JdbcTypeValueAccess<Time> access, String value,
+                              Map<String, Object> options) throws SQLException {
         try {
-            access.setValue(!isEmpty(value) ? Time.valueOf(value) : null);
+            access.setValue(!isEmpty(value) ? Time.valueOf(value) : null, options);
         } catch (IllegalArgumentException exception) {
             throw new JdbcTypeValueException(format("Value %s is not in the hh:mm:ss format", value));
         }

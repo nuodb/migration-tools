@@ -27,12 +27,18 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.google.common.collect.Maps;
+import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
+import com.nuodb.migration.jdbc.type.jdbc2.JdbcDateTypeBase;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryImpl;
 
+import java.sql.Types;
+import java.util.Calendar;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author Sergey Bushik
@@ -40,7 +46,9 @@ import java.util.Map;
 public abstract class ResultSetFormatBase implements ResultSetFormat {
 
     private Map<String, String> attributes;
-    private ColumnSetModel columnSetModel;
+    private TimeZone timeZone;
+    private ColumnModelSet<ColumnModel> columnModelSet;
+    private ColumnModelSet<ColumnValueModel> columnValueModelSet;
     private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider;
     private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry = new JdbcTypeValueFormatRegistryImpl();
 
@@ -49,10 +57,12 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
         this.attributes = attributes;
     }
 
+    @Override
     public String getAttribute(String attribute) {
         return attributes.get(attribute);
     }
 
+    @Override
     public String getAttribute(String attribute, String defaultValue) {
         String value = null;
         if (attributes != null) {
@@ -61,8 +71,33 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
         return value == null ? defaultValue : value;
     }
 
+    protected abstract void initColumnValueModelSet();
+
+    protected void visitColumnValueModel(ColumnValueModel columnValue) {
+        int typeCode = columnValue.getTypeCode();
+        if (typeCode == Types.TIME || typeCode == Types.TIMESTAMP || typeCode == Types.DATE) {
+            TimeZone timeZone = getTimeZone();
+            if (timeZone != null) {
+                Map<String, Object> options = Maps.newHashMap();
+                options.put(JdbcDateTypeBase.CALENDAR, Calendar.getInstance(timeZone));
+                columnValue.setOptions(options);
+            }
+        }
+    }
+
+    @Override
     public Map<String, String> getAttributes() {
         return attributes;
+    }
+
+    @Override
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    @Override
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
     }
 
     @Override
@@ -86,12 +121,22 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
     }
 
     @Override
-    public ColumnSetModel getColumnSetModel() {
-        return columnSetModel;
+    public ColumnModelSet<ColumnModel> getColumnModelSet() {
+        return columnModelSet;
     }
 
     @Override
-    public void setColumnSetModel(ColumnSetModel columnSetModel) {
-        this.columnSetModel = columnSetModel;
+    public void setColumnModelSet(ColumnModelSet<ColumnModel> columnModelSet) {
+        this.columnModelSet = columnModelSet;
+    }
+
+    @Override
+    public ColumnModelSet<ColumnValueModel> getColumnValueModelSet() {
+        return columnValueModelSet;
+    }
+
+    @Override
+    public void setColumnValueModelSet(ColumnModelSet<ColumnValueModel> columnValueModelSet) {
+        this.columnValueModelSet = columnValueModelSet;
     }
 }

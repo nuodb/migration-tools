@@ -25,41 +25,59 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.jdbc2;
+package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.model.ColumnModelImpl;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
 
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcNumericType extends JdbcTypeBase<BigDecimal> {
+public class ColumnValueModelImpl extends ColumnModelImpl implements ColumnValueModel {
 
-    public static final JdbcType INSTANCE = new JdbcNumericType();
+    private JdbcTypeValueFormat valueFormat;
+    private JdbcTypeValueAccess valueAccess;
+    private Map<String, Object> options;
 
-    public JdbcNumericType() {
-        super(Types.NUMERIC, BigDecimal.class);
-    }
-
-    public JdbcNumericType(int typeCode) {
-        super(typeCode, BigDecimal.class);
-    }
-
-    @Override
-    public BigDecimal getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
-        return resultSet.getBigDecimal(column);
+    public ColumnValueModelImpl(ColumnModel column, JdbcTypeValueFormat valueFormat, JdbcTypeValueAccess valueAccess,
+                                Map<String, Object> options) {
+        super(column);
+        this.valueFormat = valueFormat;
+        this.valueAccess = valueAccess;
+        this.options = options;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value,
-                                    int column, Map<String, Object> options) throws SQLException {
-        statement.setBigDecimal(column, value);
+    public JdbcTypeValueFormat getValueFormat() {
+        return valueFormat;
+    }
+
+    @Override
+    public void setValueFormat(JdbcTypeValueFormat valueFormat) {
+        this.valueFormat = valueFormat;
+    }
+
+    @Override
+    public JdbcTypeValueAccess getValueAccess() {
+        return valueAccess;
+    }
+
+    @Override
+    public void setValueAccess(JdbcTypeValueAccess valueAccess) {
+        this.valueAccess = valueAccess;
+    }
+
+    @Override
+    public Map<String, Object> getOptions() {
+        return options;
+    }
+
+    @Override
+    public void setOptions(Map<String, Object> options) {
+        this.options = options;
     }
 }

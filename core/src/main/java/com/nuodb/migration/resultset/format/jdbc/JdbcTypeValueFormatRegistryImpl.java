@@ -41,6 +41,7 @@ import java.net.URL;
 import java.sql.Ref;
 import java.sql.RowId;
 import java.sql.Types;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.io.IOUtils.closeQuietly;
@@ -60,9 +61,9 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
     public JdbcTypeValueFormatRegistryImpl(JdbcTypeValueFormat defaultJdbcTypeValueFormat) {
         this.defaultJdbcTypeValueFormat = defaultJdbcTypeValueFormat;
 
-        addJdbcTypeValueFormat(JdbcTimestampType.INSTANCE, JdbcTimestampTypeValueFormat.INSTANCE);
-        addJdbcTypeValueFormat(JdbcTimeType.INSTANCE, JdbcTimeTypeValueFormat.INSTANCE);
-        addJdbcTypeValueFormat(JdbcDateType.INSTANCE, JdbcDateTypeValueFormat.INSTANCE);
+        addJdbcTypeValueFormat(JdbcTimestampType.INSTANCE, new JdbcTimestampTypeValueFormat());
+        addJdbcTypeValueFormat(JdbcTimeType.INSTANCE, new JdbcTimeTypeValueFormat());
+        addJdbcTypeValueFormat(JdbcDateType.INSTANCE, new JdbcDateTypeValueFormat());
     }
 
     @Override
@@ -73,7 +74,7 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
     static class DefaultJdbcTypeValueFormat extends JdbcTypeValueFormatBase<Object> {
 
         @Override
-        protected String doGetValue(JdbcTypeValueAccess<Object> access) throws Exception {
+        protected String doGetValue(JdbcTypeValueAccess<Object> access, Map<String, Object> options) throws Exception {
             Object jdbcValue;
             String value = null;
             ColumnModel column = access.getColumnModel();
@@ -88,7 +89,7 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
                 case Types.DOUBLE:
                 case Types.NUMERIC:
                 case Types.DECIMAL:
-                    jdbcValue = access.getValue();
+                    jdbcValue = access.getValue(options);
                     if (jdbcValue != null) {
                         value = jdbcValue.toString();
                     }
@@ -99,13 +100,13 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
                 case Types.NVARCHAR:
                 case Types.LONGNVARCHAR:
                 case Types.NCHAR:
-                    value = access.getValue(String.class);
+                    value = access.getValue(String.class, options);
                     break;
                 case Types.BINARY:
                 case Types.VARBINARY:
                 case Types.LONGVARBINARY:
                 case Types.BLOB:
-                    jdbcValue = access.getValue(byte[].class);
+                    jdbcValue = access.getValue(byte[].class, options);
                     if (jdbcValue != null) {
                         value = encode((byte[]) jdbcValue);
                     }
@@ -113,42 +114,42 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
                 case Types.OTHER:
                 case Types.JAVA_OBJECT:
                 case Types.STRUCT:
-                    jdbcValue = access.getValue();
+                    jdbcValue = access.getValue(options);
                     if (jdbcValue != null) {
                         value = encode(write(jdbcValue));
                     }
                     break;
                 case Types.CLOB:
                 case Types.NCLOB:
-                    value = access.getValue(String.class);
+                    value = access.getValue(String.class, options);
                     break;
                 case Types.REF:
-                    jdbcValue = access.getValue();
+                    jdbcValue = access.getValue(options);
                     if (jdbcValue != null) {
                         Ref ref = new SerialRef((Ref) jdbcValue);
                         value = encode(write(ref));
                     }
                     break;
                 case Types.DATALINK:
-                    jdbcValue = access.getValue();
+                    jdbcValue = access.getValue(options);
                     if (jdbcValue != null) {
                         value = jdbcValue.toString();
                     }
                     break;
                 case Types.BOOLEAN:
-                    jdbcValue = access.getValue();
+                    jdbcValue = access.getValue(options);
                     if (jdbcValue != null) {
                         value = jdbcValue.toString();
                     }
                     break;
                 case Types.ROWID:
-                    jdbcValue = access.getValue();
+                    jdbcValue = access.getValue(options);
                     if (jdbcValue != null) {
                         value = encode(((RowId) jdbcValue).getBytes());
                     }
                     break;
                 case Types.SQLXML:
-                    value = access.getValue(String.class);
+                    value = access.getValue(String.class, options);
                     break;
                 default:
                     throw new JdbcTypeValueException(
@@ -158,34 +159,35 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
         }
 
         @Override
-        protected void doSetValue(JdbcTypeValueAccess<Object> access, String value) throws Exception {
+        protected void doSetValue(JdbcTypeValueAccess<Object> access, String value,
+                                  Map<String, Object> options) throws Exception {
             ColumnModel column = access.getColumnModel();
             switch (column.getTypeCode()) {
                 case Types.BIT:
                 case Types.BOOLEAN:
-                    access.setValue(!isEmpty(value) ? Boolean.parseBoolean(value) : null);
+                    access.setValue(!isEmpty(value) ? Boolean.parseBoolean(value) : null, options);
                     break;
                 case Types.TINYINT:
                 case Types.SMALLINT:
-                    access.setValue(!isEmpty(value) ? Short.parseShort(value) : null);
+                    access.setValue(!isEmpty(value) ? Short.parseShort(value) : null, options);
                     break;
                 case Types.INTEGER:
-                    access.setValue(!isEmpty(value) ? Integer.parseInt(value) : null);
+                    access.setValue(!isEmpty(value) ? Integer.parseInt(value) : null, options);
                     break;
                 case Types.BIGINT:
                     // see com.nuodb.migration.jdbc.dialect.nuodb.NuoDBDecimalType
-                    access.setValue(!isEmpty(value) ? new BigDecimal(value) : null);
+                    access.setValue(!isEmpty(value) ? new BigDecimal(value) : null, options);
                     break;
                 case Types.FLOAT:
                 case Types.REAL:
-                    access.setValue(!isEmpty(value) ? Float.parseFloat(value) : null);
+                    access.setValue(!isEmpty(value) ? Float.parseFloat(value) : null, options);
                     break;
                 case Types.DOUBLE:
-                    access.setValue(!isEmpty(value) ? Double.parseDouble(value) : null);
+                    access.setValue(!isEmpty(value) ? Double.parseDouble(value) : null, options);
                     break;
                 case Types.NUMERIC:
                 case Types.DECIMAL:
-                    access.setValue(!isEmpty(value) ? new BigDecimal(value) : null);
+                    access.setValue(!isEmpty(value) ? new BigDecimal(value) : null, options);
                     break;
                 case Types.CHAR:
                 case Types.VARCHAR:
@@ -193,35 +195,35 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
                 case Types.NVARCHAR:
                 case Types.LONGNVARCHAR:
                 case Types.NCHAR:
-                    access.setValue(!isEmpty(value) ? value : null);
+                    access.setValue(!isEmpty(value) ? value : null, options);
                     break;
                 case Types.BINARY:
                 case Types.VARBINARY:
                 case Types.LONGVARBINARY:
-                    access.setValue(!isEmpty(value) ? decode(value) : null);
+                    access.setValue(!isEmpty(value) ? decode(value) : null, options);
                     break;
                 case Types.OTHER:
                 case Types.JAVA_OBJECT:
                 case Types.STRUCT:
-                    access.setValue(read(decode(value)));
+                    access.setValue(read(decode(value)), options);
                     break;
                 case Types.BLOB:
-                    access.setValue(decode(value));
+                    access.setValue(decode(value), options);
                     break;
                 case Types.CLOB:
-                    access.setValue(value);
+                    access.setValue(value, options);
                     break;
                 case Types.NCLOB:
-                    access.setValue(value);
+                    access.setValue(value, options);
                     break;
                 case Types.REF:
-                    access.setValue(!isEmpty(value) ? read(decode(value)) : null);
+                    access.setValue(!isEmpty(value) ? read(decode(value)) : null, options);
                     break;
                 case Types.DATALINK:
-                    access.setValue(!isEmpty(value) ? new URL(value) : null);
+                    access.setValue(!isEmpty(value) ? new URL(value) : null, options);
                     break;
                 case Types.SQLXML:
-                    access.setValue(!isEmpty(value) ? value : null);
+                    access.setValue(!isEmpty(value) ? value : null, options);
                     break;
                 default:
                     throw new JdbcTypeValueException(

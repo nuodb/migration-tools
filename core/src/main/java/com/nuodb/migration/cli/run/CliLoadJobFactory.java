@@ -66,6 +66,7 @@ public class CliLoadJobFactory implements CliRunFactory, CliResources {
                     .withName(getResources().getMessage(LOAD_GROUP_NAME))
                     .withOption(createTargetGroup())
                     .withOption(createInputGroup())
+                    .withOption(createTimeZoneOption())
                     .withRequired(true).build();
         }
 
@@ -74,7 +75,7 @@ public class CliLoadJobFactory implements CliRunFactory, CliResources {
             LoadSpec loadSpec = new LoadSpec();
             loadSpec.setConnectionSpec(parseTargetGroup(commandLine, this));
             loadSpec.setInputSpec(parseInputGroup(commandLine, this));
-
+            loadSpec.setTimeZone(parseTimeZone(commandLine, this));
             loadJobFactory.setLoadSpec(loadSpec);
         }
 

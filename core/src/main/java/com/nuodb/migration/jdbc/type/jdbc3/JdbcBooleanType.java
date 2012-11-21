@@ -34,6 +34,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -47,14 +48,14 @@ public class JdbcBooleanType extends JdbcTypeBase<Boolean> {
     }
 
     @Override
-    public Boolean getValue(ResultSet resultSet, int column) throws SQLException {
+    public Boolean getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         boolean booleanValue = resultSet.getBoolean(column);
         return resultSet.wasNull() ? null : booleanValue;
     }
 
     @Override
     protected void setNullSafeValue(PreparedStatement statement, Boolean value,
-                                    int column) throws SQLException {
+                                    int column, Map<String, Object> options) throws SQLException {
         statement.setBoolean(column, value);
     }
 }

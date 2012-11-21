@@ -35,6 +35,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -48,7 +49,8 @@ public class MySQLBigIntUnsignedType extends JdbcTypeBase<BigDecimal> {
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int column,
+                                    Map<String, Object> options) throws SQLException {
         statement.setBigDecimal(column, value);
     }
 
@@ -58,7 +60,7 @@ public class MySQLBigIntUnsignedType extends JdbcTypeBase<BigDecimal> {
     }
 
     @Override
-    public BigDecimal getValue(ResultSet resultSet, int column) throws SQLException {
+    public BigDecimal getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         return resultSet.getBigDecimal(column);
     }
 }

@@ -30,9 +30,8 @@ package com.nuodb.migration.jdbc.type.access;
 import com.nuodb.migration.jdbc.model.ColumnModel;
 import com.nuodb.migration.jdbc.type.JdbcType;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -45,13 +44,9 @@ public interface JdbcTypeValueAccess<T> {
 
     JdbcType<T> getJdbcType();
 
-    T getValue() throws SQLException;
+    T getValue(Map<String, Object> options) throws SQLException;
 
-    <X> X getValue(Class<X> valueClass) throws SQLException;
+    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
 
-    <X> void setValue(X value) throws SQLException;
-
-    ResultSet getResultSet();
-
-    PreparedStatement getStatement();
+    <X> void setValue(X vue, Map<String, Object> options) throws SQLException;
 }

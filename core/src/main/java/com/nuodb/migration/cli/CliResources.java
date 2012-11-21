@@ -69,6 +69,9 @@ public interface CliResources {
     final String OUTPUT_OPTION_DESCRIPTION = "com.nuodb.migration.cli.output.option.description";
     final String OUTPUT_OPTION_ARGUMENT_NAME = "com.nuodb.migration.cli.output.argument.description";
 
+    final String TIME_ZONE_OPTION_DESCRIPTION = "com.nuodb.migration.time.zone.option.description";
+    final String TIME_ZONE_ARGUMENT_NAME = "com.nuodb.migration.time.zone.argument.name";
+
     final String TABLE_GROUP_NAME = "com.nuodb.migration.cli.table.group.name";
     final String TABLE_OPTION_DESCRIPTION = "com.nuodb.migration.cli.table.option.description";
     final String TABLE_ARGUMENT_NAME = "com.nuodb.migration.cli.table.argument.name";

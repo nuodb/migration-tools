@@ -28,14 +28,15 @@
 package com.nuodb.migration.jdbc.type.jdbc2;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeBase;
 
 import java.sql.*;
+import java.util.Calendar;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTimeType extends JdbcTypeBase<Time> {
+public class JdbcTimeType extends JdbcDateTypeBase<Time> {
 
     public static final JdbcType INSTANCE = new JdbcTimeType();
 
@@ -44,12 +45,23 @@ public class JdbcTimeType extends JdbcTypeBase<Time> {
     }
 
     @Override
-    public Time getValue(ResultSet resultSet, int column) throws SQLException {
-        return resultSet.getTime(column);
+    public Time getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+        Calendar calendar = getCalendar(options);
+        if (calendar != null) {
+            return resultSet.getTime(column, calendar);
+        } else {
+            return resultSet.getTime(column);
+        }
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Time value, int column) throws SQLException {
-        statement.setTime(column, value);
+    protected void setNullSafeValue(PreparedStatement preparedStatement, Time value,
+                                    int column, Map<String, Object> options) throws SQLException {
+        Calendar calendar = getCalendar(options);
+        if (calendar == null) {
+            preparedStatement.setTime(column, value);
+        } else {
+            preparedStatement.setTime(column, value, calendar);
+        }
     }
 }

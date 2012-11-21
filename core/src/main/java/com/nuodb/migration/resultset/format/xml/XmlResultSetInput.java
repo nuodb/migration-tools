@@ -28,7 +28,9 @@
 package com.nuodb.migration.resultset.format.xml;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.model.ColumnModelFactory;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
@@ -40,7 +42,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnSetModel;
 import static javax.xml.XMLConstants.NULL_NS_URI;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
 
@@ -59,7 +60,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
     }
 
     @Override
-    protected void doInitInput() {
+    protected void initInput() {
         encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
 
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
@@ -72,17 +73,17 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
         } catch (XMLStreamException e) {
             throw new ResultSetInputException(e);
         }
-        iterator = createIterator();
+        iterator = createInputIterator();
 
     }
 
-    protected Iterator<String[]> createIterator() {
+    protected Iterator<String[]> createInputIterator() {
         return new XmlInputIterator();
     }
 
     @Override
     protected void doReadBegin() {
-        ColumnSetModel columnSetModel = null;
+        ColumnModelSet<ColumnModel> columnModelSet = null;
         if (isNextElement(RESULT_SET_ELEMENT) && isNextElement(COLUMNS_ELEMENT)) {
             List<String> columns = Lists.newArrayList();
             while (isNextElement(COLUMN_ELEMENT)) {
@@ -99,9 +100,10 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
             }
             int[] columnTypes = new int[columns.size()];
             Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-            columnSetModel = createColumnSetModel(columns.toArray(new String[columns.size()]), columnTypes);
+            columnModelSet = ColumnModelFactory.createColumnModelSet(
+                    columns.toArray(new String[columns.size()]), columnTypes);
         }
-        setColumnSetModel(columnSetModel);
+        setColumnModelSet(columnModelSet);
     }
 
     @Override
@@ -117,7 +119,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
     protected String[] doReadRow() {
         String[] values = null;
         if (isCurrentElement(ROW_ELEMENT) || isNextElement(ROW_ELEMENT)) {
-            values = new String[getColumnSetModel().getLength()];
+            values = new String[getColumnModelSet().size()];
             int column = 0;
             while (isNextElement(COLUMN_ELEMENT)) {
                 String nil = getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE);

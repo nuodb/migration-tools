@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.ConnectionServicesFactory.createConnectionServices;
@@ -75,13 +76,14 @@ public class DumpJob extends JobBase {
 
     protected final Log log = LogFactory.getLog(getClass());
 
+    private ConnectionProvider connectionProvider;
+    private TimeZone timeZone;
     private Catalog catalog;
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
-    private Map<String, String> outputAttributes;
+    private Map<String, String> attributes;
     private ResultSetFormatFactory resultSetFormatFactory;
-    private ConnectionProvider connectionProvider;
 
     @Override
     public void execute(final JobExecution execution) throws Exception {
@@ -128,7 +130,8 @@ public class DumpJob extends JobBase {
                         final Database database, final Query query, final CatalogWriter writer,
                         final CatalogEntry entry) throws SQLException {
         final ResultSetOutput resultSetOutput = getResultSetFormatFactory().createOutput(getOutputType());
-        resultSetOutput.setAttributes(getOutputAttributes());
+        resultSetOutput.setAttributes(getAttributes());
+        resultSetOutput.setTimeZone(getTimeZone());
         resultSetOutput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(
                 database.getDialect().getJdbcTypeRegistry()));
 
@@ -236,6 +239,14 @@ public class DumpJob extends JobBase {
         this.connectionProvider = connectionProvider;
     }
 
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
+    }
+
     public Catalog getCatalog() {
         return catalog;
     }
@@ -268,12 +279,12 @@ public class DumpJob extends JobBase {
         this.outputType = outputType;
     }
 
-    public Map<String, String> getOutputAttributes() {
-        return outputAttributes;
+    public Map<String, String> getAttributes() {
+        return attributes;
     }
 
-    public void setOutputAttributes(Map<String, String> outputAttributes) {
-        this.outputAttributes = outputAttributes;
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
     }
 
     public ResultSetFormatFactory getResultSetFormatFactory() {

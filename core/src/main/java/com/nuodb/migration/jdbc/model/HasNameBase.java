@@ -46,6 +46,12 @@ public abstract class HasNameBase implements HasName {
         return name != null ? name.value() : null;
     }
 
+    @Override
+    public void setName(String name) {
+        this.name = Name.valueOf(name);
+    }
+
+    @Override
     public String getQuotedName() {
         return getQuotedName(getDialect());
     }

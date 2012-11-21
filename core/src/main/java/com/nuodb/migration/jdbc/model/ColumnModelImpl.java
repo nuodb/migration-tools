@@ -38,6 +38,10 @@ public class ColumnModelImpl implements ColumnModel {
     private int precision;
     private int scale;
 
+    public ColumnModelImpl(ColumnModel column) {
+        copy(column);
+    }
+
     public ColumnModelImpl(String name, int typeCode, String typeName, int precision, int scale) {
         this.name = name;
         this.typeCode = typeCode;
@@ -49,6 +53,11 @@ public class ColumnModelImpl implements ColumnModel {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -87,6 +96,15 @@ public class ColumnModelImpl implements ColumnModel {
     @Override
     public void setScale(int scale) {
         this.scale = scale;
+    }
+
+    @Override
+    public void copy(ColumnModel column) {
+        setName(column.getName());
+        setTypeCode(column.getTypeCode());
+        setTypeName(column.getTypeName());
+        setPrecision(column.getPrecision());
+        setScale(column.getScale());
     }
 
     @Override

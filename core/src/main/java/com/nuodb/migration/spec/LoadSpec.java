@@ -27,12 +27,15 @@
  */
 package com.nuodb.migration.spec;
 
+import java.util.TimeZone;
+
 /**
  * @author Sergey Bushik
  */
 public class LoadSpec extends TaskSpecBase {
 
     private ConnectionSpec connectionSpec;
+    private TimeZone timeZone;
     private FormatSpec inputSpec;
 
     public ConnectionSpec getConnectionSpec() {
@@ -41,6 +44,14 @@ public class LoadSpec extends TaskSpecBase {
 
     public void setConnectionSpec(ConnectionSpec connectionSpec) {
         this.connectionSpec = connectionSpec;
+    }
+
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
     }
 
     public FormatSpec getInputSpec() {

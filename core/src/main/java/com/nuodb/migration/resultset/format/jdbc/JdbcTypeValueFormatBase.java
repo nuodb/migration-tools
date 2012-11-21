@@ -30,15 +30,17 @@ package com.nuodb.migration.resultset.format.jdbc;
 import com.nuodb.migration.jdbc.model.ColumnModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
+import java.util.Map;
+
 /**
  * @author Sergey Bushik
  */
 public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<T> {
 
     @Override
-    public String getValue(JdbcTypeValueAccess<T> access) {
+    public String getValue(JdbcTypeValueAccess<T> access, Map<String, Object> options) {
         try {
-            return doGetValue(access);
+            return doGetValue(access, options);
         } catch (JdbcTypeValueException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -46,19 +48,19 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
         }
     }
 
-    protected abstract String doGetValue(JdbcTypeValueAccess<T> jdbcTypeValueAccess) throws Exception;
+    protected abstract String doGetValue(JdbcTypeValueAccess<T> access, Map<String, Object> options) throws Exception;
 
-    protected JdbcTypeValueException newGetValueFailure(JdbcTypeValueAccess jdbcTypeValueAccess, Exception exception) {
-        ColumnModel column = jdbcTypeValueAccess.getColumnModel();
+    protected JdbcTypeValueException newGetValueFailure(JdbcTypeValueAccess access, Exception exception) {
+        ColumnModel column = access.getColumnModel();
         return new JdbcTypeValueException(
                 String.format("Can't get column %s type %s value",
                         column.getName(), column.getTypeName()), exception);
     }
 
     @Override
-    public void setValue(JdbcTypeValueAccess<T> access, String value) {
+    public void setValue(JdbcTypeValueAccess<T> access, String value, Map<String, Object> options) {
         try {
-            doSetValue(access, value);
+            doSetValue(access, value, options);
         } catch (JdbcTypeValueException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -66,10 +68,11 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
         }
     }
 
-    protected abstract void doSetValue(JdbcTypeValueAccess<T> jdbcTypeValueAccess, String value) throws Exception;
+    protected abstract void doSetValue(JdbcTypeValueAccess<T> access, String value,
+                                       Map<String, Object> options) throws Exception;
 
-    protected JdbcTypeValueException newSetValueFailure(JdbcTypeValueAccess jdbcTypeValueAccess, Exception exception) {
-        ColumnModel column = jdbcTypeValueAccess.getColumnModel();
+    protected JdbcTypeValueException newSetValueFailure(JdbcTypeValueAccess access, Exception exception) {
+        ColumnModel column = access.getColumnModel();
         return new JdbcTypeValueException(
                 String.format("Can't get column %s type %s value",
                         column.getName(), column.getTypeName()), exception);

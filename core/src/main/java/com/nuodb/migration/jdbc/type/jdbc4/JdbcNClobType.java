@@ -36,6 +36,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -61,12 +62,12 @@ public class JdbcNClobType extends JdbcTypeBase<NClob> {
     }
 
     @Override
-    public NClob getValue(ResultSet resultSet, int column) throws SQLException {
+    public NClob getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         return resultSet.getNClob(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, NClob value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, NClob value, int column, Map<String, Object> options) throws SQLException {
         statement.setNClob(column, value);
     }
 }

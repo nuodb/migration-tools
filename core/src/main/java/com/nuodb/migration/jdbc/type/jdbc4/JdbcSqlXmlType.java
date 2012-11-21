@@ -32,6 +32,7 @@ import com.nuodb.migration.jdbc.type.JdbcTypeBase;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.*;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -57,12 +58,12 @@ public class JdbcSqlXmlType extends JdbcTypeBase<SQLXML> {
     }
 
     @Override
-    public SQLXML getValue(ResultSet resultSet, int column) throws SQLException {
+    public SQLXML getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         return resultSet.getSQLXML(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, SQLXML value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, SQLXML value, int column, Map<String, Object> options) throws SQLException {
         statement.setSQLXML(column, value);
     }
 }

@@ -27,9 +27,9 @@
  */
 package com.nuodb.migration.resultset.format.xml;
 
-import com.nuodb.migration.jdbc.model.ColumnSetModel;
-import com.nuodb.migration.resultset.format.ResultSetOutputException;
+import com.nuodb.migration.jdbc.model.ColumnModel;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
+import com.nuodb.migration.resultset.format.ResultSetOutputException;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -53,7 +53,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
     }
 
     @Override
-    protected void doInitOutput() {
+    protected void initOutput() {
         version = getAttribute(ATTRIBUTE_VERSION, VERSION);
         encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
 
@@ -76,11 +76,10 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             writer.writeStartElement(RESULT_SET_ELEMENT);
             writer.writeNamespace("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
             writer.writeStartElement(COLUMNS_ELEMENT);
-            ColumnSetModel columnSetModel = getColumnSetModel();
-            for (int index = 0, length = columnSetModel.getLength(); index < length; index++) {
+            for (ColumnModel column : getColumnModelSet()) {
                 writer.writeEmptyElement(COLUMN_ELEMENT);
                 writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
-                writer.writeAttribute(ATTRIBUTE_NAME, columnSetModel.getName(index));
+                writer.writeAttribute(ATTRIBUTE_NAME, column.getName());
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
@@ -89,11 +88,11 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
     }
 
     @Override
-    protected void doWriteRow(String[] values) {
+    protected void writeColumnValues(String[] columnValues) {
         try {
             writer.writeStartElement(ROW_ELEMENT);
-            for (String columnValue : values) {
-                doWriteColumn(columnValue);
+            for (String columnValue : columnValues) {
+                writeColumnValue(columnValue);
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
@@ -101,7 +100,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
         }
     }
 
-    protected void doWriteColumn(String value) throws XMLStreamException {
+    protected void writeColumnValue(String value) throws XMLStreamException {
         if (value == null) {
             writer.writeEmptyElement(COLUMN_ELEMENT);
             writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE, "true");

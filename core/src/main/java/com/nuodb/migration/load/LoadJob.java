@@ -50,6 +50,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.ConnectionServicesFactory.createConnectionServices;
@@ -62,7 +63,8 @@ public class LoadJob extends JobBase {
 
     protected final Log log = LogFactory.getLog(getClass());
     private ConnectionProvider connectionProvider;
-    private Map<String, String> inputAttributes;
+    private TimeZone timeZone;
+    private Map<String, String> attributes;
     private Catalog catalog;
     private ResultSetFormatFactory resultSetFormatFactory;
 
@@ -95,7 +97,8 @@ public class LoadJob extends JobBase {
         InputStream entryInput = reader.getEntryInput(entry);
         try {
             final ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(entry.getType());
-            resultSetInput.setAttributes(getInputAttributes());
+            resultSetInput.setAttributes(getAttributes());
+            resultSetInput.setTimeZone(getTimeZone());
             resultSetInput.setInputStream(entryInput);
             resultSetInput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(
                     database.getDialect().getJdbcTypeRegistry())
@@ -111,11 +114,13 @@ public class LoadJob extends JobBase {
                         final String tableName) throws SQLException {
         resultSetInput.readBegin();
 
-        ColumnSetModel columnSetModel = resultSetInput.getColumnSetModel();
+        ColumnModelSet<ColumnModel> columns = resultSetInput.getColumnModelSet();
         Table table = database.findTable(tableName);
-        enhanceColumnSetModel(table, columnSetModel);
+        for (ColumnModel column : columns) {
+            column.copy(table.getColumn(column.getName()));
+        }
 
-        final InsertQuery query = createInsertQuery(table, columnSetModel);
+        final InsertQuery query = createInsertQuery(table, columns);
 
         QueryTemplate queryTemplate = new QueryTemplate(connectionServices.getConnection());
         queryTemplate.execute(
@@ -143,25 +148,14 @@ public class LoadJob extends JobBase {
         );
     }
 
-    protected void enhanceColumnSetModel(Table table, ColumnSetModel columnSetModel) {
-        for (int index = 0; index < columnSetModel.getLength(); index++) {
-            String name = columnSetModel.getName(index);
-            Column column = table.getColumn(name);
-            columnSetModel.setTypeCode(index, column.getTypeCode());
-            columnSetModel.setTypeName(index, column.getTypeName());
-            columnSetModel.setPrecision(index, column.getPrecision());
-            columnSetModel.setScale(index, column.getScale());
-        }
-    }
-
-    protected InsertQuery createInsertQuery(Table table, ColumnSetModel columnSetModel) {
+    protected InsertQuery createInsertQuery(Table table, ColumnModelSet columnModelSet) {
         InsertQueryBuilder builder = new InsertQueryBuilder();
         builder.setQualifyNames(true);
         builder.setTable(table);
-        if (columnSetModel != null) {
+        if (columnModelSet != null) {
             List<String> columns = Lists.newArrayList();
-            for (int index = 0, length = columnSetModel.getLength(); index < length; index++) {
-                columns.add(columnSetModel.item(index).getName());
+            for (int index = 0, length = columnModelSet.size(); index < length; index++) {
+                columns.add(columnModelSet.get(index).getName());
             }
             builder.setColumns(columns);
         }
@@ -176,6 +170,14 @@ public class LoadJob extends JobBase {
         this.connectionProvider = connectionProvider;
     }
 
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
+    }
+
     public Catalog getCatalog() {
         return catalog;
     }
@@ -184,12 +186,12 @@ public class LoadJob extends JobBase {
         this.catalog = catalog;
     }
 
-    public Map<String, String> getInputAttributes() {
-        return inputAttributes;
+    public Map<String, String> getAttributes() {
+        return attributes;
     }
 
-    public void setInputAttributes(Map<String, String> inputAttributes) {
-        this.inputAttributes = inputAttributes;
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
     }
 
     public ResultSetFormatFactory getResultSetFormatFactory() {

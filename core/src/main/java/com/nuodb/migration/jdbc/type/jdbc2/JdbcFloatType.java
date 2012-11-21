@@ -35,6 +35,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -60,13 +61,13 @@ public class JdbcFloatType extends JdbcTypeBase<Float> {
     }
 
     @Override
-    public Float getValue(ResultSet resultSet, int column) throws SQLException {
+    public Float getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
         float floatValue = resultSet.getFloat(column);
         return resultSet.wasNull() ? null : floatValue;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Float value, int column) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Float value, int column, Map<String, Object> options) throws SQLException {
         statement.setFloat(column, value);
     }
 }

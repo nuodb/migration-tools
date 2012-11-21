@@ -26,6 +26,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>4.1.7.Final</version>
+        </dependency>
+        <dependency>
             <groupId>com.nuodb</groupId>
             <artifactId>nuodb-jdbc</artifactId>
             <version>1.0</version>

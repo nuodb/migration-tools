@@ -28,7 +28,8 @@
 package com.nuodb.migration.resultset.format.csv;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.model.ColumnSetModel;
+import com.nuodb.migration.jdbc.model.ColumnModelFactory;
+import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
@@ -43,7 +44,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnSetModel;
 import static java.lang.String.valueOf;
 
 /**
@@ -61,7 +61,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
     }
 
     @Override
-    protected void doInitInput() {
+    protected void initInput() {
         CsvFormatBuilder builder = new CsvFormatBuilder(this);
         CSVFormat format = builder.build();
         Character quote = builder.getQuote();
@@ -80,7 +80,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
 
     @Override
     protected void doReadBegin() {
-        ColumnSetModel columnSetModel = null;
+        ColumnModelSet columnModelSet = null;
         if (iterator.hasNext()) {
             List<String> columns = Lists.newArrayList();
             for (String column : iterator.next()) {
@@ -88,9 +88,10 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
             }
             int[] columnTypes = new int[columns.size()];
             Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-            columnSetModel = createColumnSetModel(columns.toArray(new String[columns.size()]), columnTypes);
+            columnModelSet = ColumnModelFactory.createColumnModelSet(columns.toArray(new String[columns.size()]),
+                    columnTypes);
         }
-        setColumnSetModel(columnSetModel);
+        setColumnModelSet(columnModelSet);
     }
 
     @Override
@@ -100,7 +101,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
 
     @Override
     public void readRow() {
-        String[] values = new String[getColumnSetModel().getLength()];
+        String[] values = new String[getColumnModelSet().size()];
         Iterator<String> iterator = this.iterator.next().iterator();
         int column = 0;
         while (iterator.hasNext()) {
