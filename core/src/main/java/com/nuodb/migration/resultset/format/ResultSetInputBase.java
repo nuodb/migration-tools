@@ -33,6 +33,7 @@ import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
+import com.nuodb.migration.resultset.format.xml.XmlEscape;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -95,12 +96,12 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     }
 
     protected ColumnModelSet<ColumnValueModel> createColumnValueModelSet() {
+        final List<ColumnValueModel> columnValues = Lists.newArrayList();
         int index = 0;
-        List<ColumnValueModel> columnValues = Lists.newArrayList();
         for (ColumnModel column : getColumnModelSet()) {
-            ColumnValueModel columnValue = createColumnValueModel(column, index);
+            ColumnValueModel columnValue = createColumnValueModel(column, index++);
             visitColumnValueModel(columnValue);
-            columnValues.add(index, columnValue);
+            columnValues.add(columnValue);
         }
         return createColumnModelSet(columnValues);
     }
@@ -128,8 +129,9 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
         ColumnModelSet<ColumnValueModel> columnValues = getColumnValueModelSet();
         for (int index = 0; index < values.length; index++) {
             ColumnValueModel columnValue = columnValues.get(index);
+            String value = XmlEscape.INSTANCE.unescape(values[index]);
             columnValue.getValueFormat().setValue(
-                    columnValue.getValueAccess(), values[index], columnValue.getValueAccessOptions());
+                    columnValue.getValueAccess(), value, columnValue.getValueAccessOptions());
         }
     }
 

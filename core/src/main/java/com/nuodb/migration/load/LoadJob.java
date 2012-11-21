@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.ConnectionServices;
 import com.nuodb.migration.jdbc.ConnectionServicesCallback;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.model.*;
 import com.nuodb.migration.jdbc.query.*;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
@@ -55,6 +56,8 @@ import java.util.TimeZone;
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.ConnectionServicesFactory.createConnectionServices;
 import static com.nuodb.migration.jdbc.model.ObjectType.*;
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 
 /**
  * @author Sergey Bushik
@@ -77,6 +80,10 @@ public class LoadJob extends JobBase {
                         DatabaseInspector databaseInspector = services.getDatabaseInspector();
                         databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
                         Database database = databaseInspector.inspect();
+
+                        Dialect dialect = database.getDialect();
+                        dialect.setSupportedTransactionIsolation(services.getConnection(),
+                                new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
 
                         CatalogReader reader = getCatalog().getReader();
                         try {
@@ -128,7 +135,7 @@ public class LoadJob extends JobBase {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
                         if (log.isDebugEnabled()) {
-                            log.debug(String.format("Preparing SQL query %s", query.toQuery()));
+                            log.debug(String.format("Prepare SQL: %s", query.toQuery()));
                         }
                         return connection.prepareStatement(query.toQuery());
                     }

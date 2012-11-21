@@ -155,7 +155,7 @@ public class DumpJob extends JobBase {
     protected PreparedStatement createStatement(final Connection connection, final Database database,
                                                 final Query query) throws SQLException {
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Preparing SQL query %s", query.toQuery()));
+            log.debug(String.format("Prepare SQL: %s", query.toQuery()));
         }
         PreparedStatement statement = connection.prepareStatement(query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
         Dialect dialect = database.getDialect();
@@ -201,7 +201,7 @@ public class DumpJob extends JobBase {
                 selectQueries.add(builder.build());
             } else {
                 if (log.isTraceEnabled()) {
-                    log.trace(String.format("Skipping %s %s", table.getQualifiedName(), table.getType()));
+                    log.trace(String.format("Skip %s %s", table.getQualifiedName(), table.getType()));
                 }
             }
         }

@@ -125,7 +125,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
                 String nil = getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE);
                 if (!StringUtils.equals(nil, "true")) {
                     try {
-                        values[column] = reader.getElementText();
+                        values[column] = XmlEscape.INSTANCE.unescape(reader.getElementText());
                     } catch (XMLStreamException exception) {
                         throw new ResultSetInputException(exception);
                     }

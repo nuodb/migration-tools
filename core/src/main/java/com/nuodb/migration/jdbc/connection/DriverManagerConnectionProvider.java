@@ -61,11 +61,10 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
     }
 
     public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec) {
-        this.connectionSpec = connectionSpec;
+        this(connectionSpec, false);
     }
 
-    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec,
-                                           boolean autoCommit) {
+    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec, Boolean autoCommit) {
         this.connectionSpec = connectionSpec;
         this.autoCommit = autoCommit;
     }

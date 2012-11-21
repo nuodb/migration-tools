@@ -40,6 +40,8 @@ import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactoryImpl;
 import com.nuodb.migration.spec.*;
 
+import java.util.TimeZone;
+
 /**
  * @author Sergey Bushik
  */
@@ -97,7 +99,8 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
                 setConnectionSpec(connectionSpec);
 
                 FormatSpecBase inputSpec = new FormatSpecBase();
-                inputSpec.setPath("/tmp/test/dump_sales_fact.cat");
+                inputSpec.setPath("/tmp/test/dump.cat");
+                setTimeZone(TimeZone.getTimeZone("UTC"));
                 setInputSpec(inputSpec);
             }
         });

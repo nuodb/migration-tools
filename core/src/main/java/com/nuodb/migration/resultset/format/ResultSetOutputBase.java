@@ -97,10 +97,10 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
     }
 
     protected ColumnModelSet<ColumnValueModel> createColumnValueModelSet() {
+        final List<ColumnValueModel> columnValues = Lists.newArrayList();
         int index = 0;
-        List<ColumnValueModel> columnValues = Lists.newArrayList();
         for (ColumnModel column : getColumnModelSet()) {
-            ColumnValueModel columnValue = createColumnValueModel(column, index);
+            ColumnValueModel columnValue = createColumnValueModel(column, index++);
             visitColumnValueModel(columnValue);
             columnValues.add(columnValue);
         }
@@ -142,10 +142,11 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
     }
 
     protected String[] getColumnValues() {
-        ColumnModelSet<ColumnValueModel> columnValues = getColumnValueModelSet();
-        String[] values = new String[columnValues.size()];
+        int index = 0;
+        final ColumnModelSet<ColumnValueModel> columnValues = getColumnValueModelSet();
+        final String[] values = new String[columnValues.size()];
         for (ColumnValueModel columnValue : columnValues) {
-            columnValue.getValueFormat().getValue(
+            values[index++] = columnValue.getValueFormat().getValue(
                     columnValue.getValueAccess(), columnValue.getValueAccessOptions());
         }
         return values;

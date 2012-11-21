@@ -106,8 +106,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE, "true");
         } else {
             writer.writeStartElement(COLUMN_ELEMENT);
-            // TODO: escape StringEscapeUtils.escapeXml
-            writer.writeCharacters(value);
+            writer.writeCharacters(XmlEscape.INSTANCE.escape(value));
             writer.writeEndElement();
         }
     }
