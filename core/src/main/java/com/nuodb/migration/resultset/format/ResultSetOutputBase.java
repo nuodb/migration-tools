@@ -146,7 +146,7 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
         String[] values = new String[columnValues.size()];
         for (ColumnValueModel columnValue : columnValues) {
             columnValue.getValueFormat().getValue(
-                    columnValue.getValueAccess(), columnValue.getOptions());
+                    columnValue.getValueAccess(), columnValue.getValueAccessOptions());
         }
         return values;
     }

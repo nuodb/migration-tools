@@ -46,7 +46,7 @@ public interface ColumnValueModel extends ColumnModel {
 
     void setValueFormat(JdbcTypeValueFormat valueFormat);
 
-    Map<String, Object> getOptions();
+    Map<String, Object> getValueAccessOptions();
 
-    void setOptions(Map<String, Object> valueAccessOptions);
+    void setValueAccessOptions(Map<String, Object> valueAccessOptions);
 }

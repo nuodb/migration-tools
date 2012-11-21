@@ -41,14 +41,14 @@ public class ColumnValueModelImpl extends ColumnModelImpl implements ColumnValue
 
     private JdbcTypeValueFormat valueFormat;
     private JdbcTypeValueAccess valueAccess;
-    private Map<String, Object> options;
+    private Map<String, Object> valueAccessOptions;
 
     public ColumnValueModelImpl(ColumnModel column, JdbcTypeValueFormat valueFormat, JdbcTypeValueAccess valueAccess,
-                                Map<String, Object> options) {
+                                Map<String, Object> valueAccessOptions) {
         super(column);
         this.valueFormat = valueFormat;
         this.valueAccess = valueAccess;
-        this.options = options;
+        this.valueAccessOptions = valueAccessOptions;
     }
 
     @Override
@@ -72,12 +72,12 @@ public class ColumnValueModelImpl extends ColumnModelImpl implements ColumnValue
     }
 
     @Override
-    public Map<String, Object> getOptions() {
-        return options;
+    public Map<String, Object> getValueAccessOptions() {
+        return valueAccessOptions;
     }
 
     @Override
-    public void setOptions(Map<String, Object> options) {
-        this.options = options;
+    public void setValueAccessOptions(Map<String, Object> valueAccessOptions) {
+        this.valueAccessOptions = valueAccessOptions;
     }
 }

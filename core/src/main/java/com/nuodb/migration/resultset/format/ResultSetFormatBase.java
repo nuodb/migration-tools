@@ -80,7 +80,7 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
             if (timeZone != null) {
                 Map<String, Object> options = Maps.newHashMap();
                 options.put(JdbcDateTypeBase.CALENDAR, Calendar.getInstance(timeZone));
-                columnValue.setOptions(options);
+                columnValue.setValueAccessOptions(options);
             }
         }
     }

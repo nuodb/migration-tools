@@ -129,7 +129,7 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
         for (int index = 0; index < values.length; index++) {
             ColumnValueModel columnValue = columnValues.get(index);
             columnValue.getValueFormat().setValue(
-                    columnValue.getValueAccess(), values[index], columnValue.getOptions());
+                    columnValue.getValueAccess(), values[index], columnValue.getValueAccessOptions());
         }
     }
 
