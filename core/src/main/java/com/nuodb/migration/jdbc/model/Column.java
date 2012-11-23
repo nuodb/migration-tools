@@ -211,11 +211,6 @@ public class Column extends HasNameBase implements ColumnModel {
     }
 
     @Override
-    protected Database getDatabase() {
-        return table.getDatabase();
-    }
-
-    @Override
     public String toString() {
         return getName().toString();
     }

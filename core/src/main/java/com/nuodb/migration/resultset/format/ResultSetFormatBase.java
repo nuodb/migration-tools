@@ -33,7 +33,6 @@ import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcDateTypeBase;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryImpl;
 
 import java.sql.Types;
 import java.util.Calendar;
@@ -50,7 +49,7 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
     private ColumnModelSet<ColumnModel> columnModelSet;
     private ColumnModelSet<ColumnValueModel> columnValueModelSet;
     private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider;
-    private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry = new JdbcTypeValueFormatRegistryImpl();
+    private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;
 
     @Override
     public final void setAttributes(Map<String, String> attributes) {

@@ -39,6 +39,8 @@ public class NuoDBTypeRegistry extends Jdbc4TypeRegistry {
 
     public NuoDBTypeRegistry() {
         super();
-        addJdbcType(NuoDBDecimalType.INSTANCE);
+        addJdbcType(NuoDBIntegerType.INSTANCE);
+        addJdbcType(NuoDBBigIntType.INSTANCE);
+        addJdbcType(NuoDBTimeType.INSTANCE);
     }
 }

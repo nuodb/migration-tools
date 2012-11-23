@@ -32,7 +32,7 @@ import java.sql.DatabaseMetaData;
 /**
  * @author Sergey Bushik
  */
-public class PostgreSQLDialect extends DialectBase {
+public class PostgreSQLDialect extends StandardDialect {
 
     public PostgreSQLDialect(DatabaseMetaData metaData) {
         super(metaData);

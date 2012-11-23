@@ -33,7 +33,7 @@ import org.apache.commons.csv.Quote;
 
 import static java.lang.Boolean.parseBoolean;
 import static org.apache.commons.csv.CSVFormat.CSVFormatBuilder;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik

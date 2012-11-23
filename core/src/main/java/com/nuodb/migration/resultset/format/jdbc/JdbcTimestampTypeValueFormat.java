@@ -28,6 +28,8 @@
 package com.nuodb.migration.resultset.format.jdbc;
 
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueException;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatBase;
 
 import java.sql.Date;
 import java.sql.SQLException;
@@ -38,7 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik

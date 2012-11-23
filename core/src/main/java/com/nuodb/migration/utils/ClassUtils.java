@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.utils;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.reflect.ConstructorUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.reflect.ConstructorUtils;
 
 import java.lang.reflect.InvocationTargetException;
 

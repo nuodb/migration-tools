@@ -74,7 +74,9 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
     protected JdbcTypeValueException newSetValueFailure(JdbcTypeValueAccess access, Exception exception) {
         ColumnModel column = access.getColumnModel();
         return new JdbcTypeValueException(
-                String.format("Can't get column %s type %s value",
+                String.format("Can't set column %s type %s value",
                         column.getName(), column.getTypeName()), exception);
     }
 }
+
+

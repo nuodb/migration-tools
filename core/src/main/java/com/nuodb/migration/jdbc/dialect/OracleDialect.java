@@ -32,7 +32,7 @@ import java.sql.DatabaseMetaData;
 /**
  * @author Sergey Bushik
  */
-public class OracleDialect extends DialectBase {
+public class OracleDialect extends StandardDialect {
 
     public OracleDialect(DatabaseMetaData metaData) {
         super(metaData);

@@ -42,9 +42,9 @@ public class XmlEscape {
 
     public static final XmlEscape INSTANCE = new XmlEscape();
 
-    protected EntityMap entityMap = new EntityMap();
+    private EntityMap entityMap = new EntityMap();
 
-    protected XmlEscape() {
+    public XmlEscape() {
         String[][] entities = {
                 {"quot", "34"},
                 {"amp", "38"},

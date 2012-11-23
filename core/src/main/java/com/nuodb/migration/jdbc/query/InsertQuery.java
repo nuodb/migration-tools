@@ -28,7 +28,7 @@
 package com.nuodb.migration.jdbc.query;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 import com.nuodb.migration.jdbc.model.Column;
 import com.nuodb.migration.jdbc.model.Table;
 
@@ -40,17 +40,17 @@ import java.util.Map;
  */
 public class InsertQuery implements Query {
 
-    private Dialect dialect;
+    private DatabaseDialect databaseDialect;
     private Table table;
     private boolean qualifyNames;
     private Map<Column, String> columns = Maps.newLinkedHashMap();
 
-    public Dialect getDialect() {
-        return dialect;
+    public DatabaseDialect getDatabaseDialect() {
+        return databaseDialect;
     }
 
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
+    public void setDatabaseDialect(DatabaseDialect databaseDialect) {
+        this.databaseDialect = databaseDialect;
     }
 
     public Table getTable() {
@@ -89,15 +89,15 @@ public class InsertQuery implements Query {
     public String toQuery() {
         StringBuilder query = new StringBuilder();
         query.append("insert into ")
-                .append(qualifyNames ? table.getQualifiedName(dialect) : table.getQuotedName(dialect));
+                .append(qualifyNames ? table.getQualifiedName(databaseDialect) : table.getQuotedName(databaseDialect));
         if (columns.size() == 0) {
-            query.append(' ').append(dialect.getNoColumnsInsertClause());
+            query.append(' ').append(databaseDialect.getNoColumnsInsertClause());
         } else {
             query.append(" (");
             Iterator<Column> names = columns.keySet().iterator();
             while (names.hasNext()) {
                 Column column = names.next();
-                query.append(column.getQuotedName(dialect));
+                query.append(column.getQuotedName(databaseDialect));
                 if (names.hasNext()) {
                     query.append(", ");
                 }

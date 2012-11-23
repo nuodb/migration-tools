@@ -1,8 +1,8 @@
 package com.nuodb.migration.jdbc;
 
 
-import com.nuodb.migration.jdbc.connection.DriverManagerConnectionProvider;
-import com.nuodb.migration.spec.DriverManagerConnectionSpec;
+import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 public class DriverManagerConnectionProviderTest {
 
     public static final String URL = "jdbc:test";
-    private DriverManagerConnectionSpec connectionSpec;
+    private JdbcConnectionSpec connectionSpec;
     private Connection connection;
     private Driver driver;
     private static final int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
@@ -44,7 +44,7 @@ public class DriverManagerConnectionProviderTest {
         });
         DriverManager.registerDriver(driver);
 
-        connectionSpec = mock(DriverManagerConnectionSpec.class);
+        connectionSpec = mock(JdbcConnectionSpec.class);
         when(connectionSpec.getDriver()).thenReturn(driver);
         when(connectionSpec.getUrl()).thenReturn(URL);
         when(connectionSpec.getUsername()).thenReturn("user");
@@ -53,8 +53,8 @@ public class DriverManagerConnectionProviderTest {
 
     @Test
     public void testGetConnection() throws Exception {
-        DriverManagerConnectionProvider connectionProvider =
-                new DriverManagerConnectionProvider(connectionSpec);
+        JdbcConnectionProvider connectionProvider =
+                new JdbcConnectionProvider(connectionSpec);
         connectionProvider.setTransactionIsolation(transactionIsolation);
         connectionProvider.setAutoCommit(false);
         final Connection connection = connectionProvider.getConnection();

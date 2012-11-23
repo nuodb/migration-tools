@@ -32,7 +32,7 @@ import java.sql.DatabaseMetaData;
 /**
  * @author Sergey Bushik
  */
-public class SQLServerDialect extends DialectBase {
+public class SQLServerDialect extends StandardDialect {
 
     public SQLServerDialect(DatabaseMetaData metaData) {
         super(metaData);

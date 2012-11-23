@@ -33,7 +33,6 @@ import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
-import com.nuodb.migration.resultset.format.xml.XmlEscape;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -107,7 +106,8 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
         JdbcTypeValueFormat columnValueFormat =
                 getJdbcTypeValueFormatRegistry().getJdbcTypeValueFormat(jdbcTypeDesc);
         JdbcTypeValueAccess<Object> columnValueAccess =
-                getJdbcTypeValueAccessProvider().getPreparedStatementAccess(getPreparedStatement(), columnModel, index + 1);
+                getJdbcTypeValueAccessProvider().getPreparedStatementAccess(getPreparedStatement(), columnModel,
+                        index + 1);
         return new ColumnValueModelImpl(columnModel, columnValueFormat, columnValueAccess, null);
     }
 
@@ -125,9 +125,8 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
         ColumnModelSet<ColumnValueModel> columnValueModelSet = getColumnValueModelSet();
         for (int index = 0; index < values.length; index++) {
             ColumnValueModel columnValueModel = columnValueModelSet.get(index);
-            String value = XmlEscape.INSTANCE.unescape(values[index]);
             columnValueModel.getValueFormat().setValue(
-                    columnValueModel.getValueAccess(), value, columnValueModel.getValueAccessOptions());
+                    columnValueModel.getValueAccess(), values[index], columnValueModel.getValueAccessOptions());
         }
     }
 

@@ -29,10 +29,10 @@ package com.nuodb.migration.jdbc.model;
 
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.connection.DriverManagerConnectionProvider;
-import com.nuodb.migration.jdbc.dialect.DialectResolver;
-import com.nuodb.migration.jdbc.dialect.resolve.DialectResolverImpl;
-import com.nuodb.migration.spec.DriverManagerConnectionSpec;
+import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolverImpl;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -52,7 +52,6 @@ import java.util.List;
 public class DatabaseInspector {
 
     public static final List<ObjectType> OBJECT_TYPES_ALL = Lists.newArrayList(ObjectType.values());
-    public static final List<ObjectType> OBJECT_TYPES_EMPTY = Lists.newArrayList();
 
     private static final String[] TABLE_TYPES = null;
 
@@ -65,7 +64,7 @@ public class DatabaseInspector {
     protected String[] tableTypes = TABLE_TYPES;
     protected Connection connection;
     protected ConnectionProvider connectionProvider;
-    protected DialectResolver dialectResolver = new DialectResolverImpl();
+    protected DatabaseDialectResolver databaseDialectResolver = new DatabaseDialectResolverImpl();
 
     public DatabaseInspector withObjectTypes(ObjectType... types) {
         this.objectTypes = Arrays.asList(types);
@@ -98,8 +97,8 @@ public class DatabaseInspector {
         return this;
     }
 
-    public DatabaseInspector withDatabaseDialectResolver(DialectResolver dialectResolver) {
-        this.dialectResolver = dialectResolver;
+    public DatabaseInspector withDatabaseDialectResolver(DatabaseDialectResolver databaseDialectResolver) {
+        this.databaseDialectResolver = databaseDialectResolver;
         return this;
     }
 
@@ -113,8 +112,8 @@ public class DatabaseInspector {
         }
         try {
             DatabaseMetaData metaData = connection.getMetaData();
-            readDialect(metaData, database);
             readInfo(metaData, database);
+            resolveDialect(metaData, database);
             readObjects(metaData, database);
         } finally {
             if (closeConnection) {
@@ -150,8 +149,8 @@ public class DatabaseInspector {
         database.setDatabaseInfo(databaseInfo);
     }
 
-    protected void readDialect(DatabaseMetaData metaData, Database database) throws SQLException {
-        database.setDialect(dialectResolver.resolve(metaData));
+    protected void resolveDialect(DatabaseMetaData metaData, Database database) throws SQLException {
+        database.setDatabaseDialect(databaseDialectResolver.resolve(metaData));
     }
 
     protected void readObjects(DatabaseMetaData metaData, Database database) throws SQLException {
@@ -167,7 +166,7 @@ public class DatabaseInspector {
     }
 
     protected void readCatalogs(DatabaseMetaData metaData, Database database) throws SQLException {
-        if (database.getDialect().supportsReadCatalogs()) {
+        if (database.getDatabaseDialect().supportsReadCatalogs()) {
             ResultSet catalogs = metaData.getCatalogs();
             try {
                 while (catalogs.next()) {
@@ -187,7 +186,7 @@ public class DatabaseInspector {
     }
 
     protected void readSchemas(DatabaseMetaData metaData, Database database) throws SQLException {
-        if (database.getDialect().supportsReadSchemas()) {
+        if (database.getDatabaseDialect().supportsReadSchemas()) {
             ResultSet schemas = catalog != null ? metaData.getSchemas(catalog, null) : metaData.getSchemas();
             try {
                 while (schemas.next()) {
@@ -248,18 +247,18 @@ public class DatabaseInspector {
     }
 
     public static void main(String[] args) throws Exception {
-        DriverManagerConnectionSpec mysql = new DriverManagerConnectionSpec();
+        JdbcConnectionSpec mysql = new JdbcConnectionSpec();
         mysql.setDriverClassName("com.mysql.jdbc.Driver");
         mysql.setUrl("jdbc:mysql://localhost:3306/test");
         mysql.setUsername("root");
 
-        DriverManagerConnectionSpec nuodb = new DriverManagerConnectionSpec();
+        JdbcConnectionSpec nuodb = new JdbcConnectionSpec();
         nuodb.setDriverClassName("com.nuodb.jdbc.Driver");
         nuodb.setUrl("jdbc:com.nuodb://localhost/test");
         nuodb.setUsername("dba");
         nuodb.setPassword("goalie");
 
-        DriverManagerConnectionProvider connectionProvider = new DriverManagerConnectionProvider(nuodb);
+        JdbcConnectionProvider connectionProvider = new JdbcConnectionProvider(nuodb);
         Connection connection = connectionProvider.getConnection();
         try {
             DatabaseInspector inspector = new DatabaseInspector();

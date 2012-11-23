@@ -38,11 +38,11 @@ import java.sql.Statement;
 /**
  * @author Sergey Bushik
  */
-public class DialectBase implements Dialect {
+public class StandardDialect implements DatabaseDialect {
 
     protected final DatabaseMetaData metaData;
 
-    public DialectBase(DatabaseMetaData metaData) {
+    public StandardDialect(DatabaseMetaData metaData) {
         this.metaData = metaData;
     }
 

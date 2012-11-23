@@ -25,24 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.connection;
+package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.MigrationException;
+import com.nuodb.migration.jdbc.resolve.DatabaseObjectResolver;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionProviderException extends MigrationException {
-
-    public ConnectionProviderException(String message) {
-        super(message);
-    }
-
-    public ConnectionProviderException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ConnectionProviderException(Throwable cause) {
-        super(cause);
-    }
+public interface DatabaseDialectResolver extends DatabaseObjectResolver<DatabaseDialect> {
 }

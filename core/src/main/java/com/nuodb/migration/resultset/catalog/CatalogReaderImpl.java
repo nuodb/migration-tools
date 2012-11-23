@@ -119,7 +119,7 @@ public class CatalogReaderImpl implements CatalogReader {
 
     public static void main(String[] args) {
         Catalog catalog = new CatalogImpl("/tmp/test/dump.cat");
-        CatalogReader reader = catalog.getReader();
+        CatalogReader reader = catalog.getCatalogReader();
         for (CatalogEntry entry : reader.getEntries()) {
             System.out.println(entry.getName() + "" + entry.getType());
         }

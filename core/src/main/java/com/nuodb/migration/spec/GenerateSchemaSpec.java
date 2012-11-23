@@ -25,28 +25,28 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.access;
-
-import com.nuodb.migration.jdbc.model.ColumnModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
-
-import java.sql.SQLException;
-import java.util.Map;
+package com.nuodb.migration.spec;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess<T> {
+public class GenerateSchemaSpec extends TaskSpecBase {
+    private ConnectionSpec sourceSpec;
+    private ConnectionSpec targetSpec;
 
-    int getColumn();
+    public ConnectionSpec getSourceSpec() {
+        return sourceSpec;
+    }
 
-    ColumnModel getColumnModel();
+    public void setSourceSpec(ConnectionSpec sourceSpec) {
+        this.sourceSpec = sourceSpec;
+    }
 
-    JdbcType<T> getJdbcType();
+    public ConnectionSpec getTargetSpec() {
+        return targetSpec;
+    }
 
-    T getValue(Map<String, Object> options) throws SQLException;
-
-    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
-
-    <X> void setValue(X value, Map<String, Object> options) throws SQLException;
+    public void setTargetSpec(ConnectionSpec targetSpec) {
+        this.targetSpec = targetSpec;
+    }
 }

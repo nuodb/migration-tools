@@ -37,7 +37,7 @@ import java.sql.Statement;
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends DialectBase {
+public class MySQLDialect extends StandardDialect {
 
     public MySQLDialect(DatabaseMetaData metaData) {
         super(metaData);

@@ -25,23 +25,31 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc;
+package com.nuodb.migration.resultset.format.jdbc;
 
-import java.sql.SQLException;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
+ * Temporary fix which screens program from incorrect decimal<->(bigint or integer) type mapping for DB-2288 "column
+ * metadata type does not match DDL type"
+ *
  * @author Sergey Bushik
  */
-public abstract class ConnectionServicesCallback {
+public class NuoDBBigIntTypeValueFormat extends JdbcTypeValueFormatBase<Number> {
 
-    public abstract void execute(ConnectionServices services) throws SQLException;
+    @Override
+    protected String doGetValue(JdbcTypeValueAccess<Number> access, Map<String, Object> options) throws Exception {
+        Number value = access.getValue(options);
+        return value != null ? value.toString() : null;
+    }
 
-    public static void execute(ConnectionServices services, ConnectionServicesCallback callback) throws SQLException {
-        services.prepare();
-        try {
-            callback.execute(services);
-        } finally {
-            services.release();
-        }
+    @Override
+    protected void doSetValue(JdbcTypeValueAccess<Number> access, String value,
+                              Map<String, Object> options) throws Exception {
+        access.setValue(!isEmpty(value) ? Double.parseDouble(value) : null, options);
     }
 }

@@ -36,9 +36,17 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public abstract class JdbcTypeValueFormatRegistryBase implements JdbcTypeValueFormatRegistry {
+public class JdbcTypeValueFormatRegistryBase implements JdbcTypeValueFormatRegistry {
 
     private Map<JdbcTypeDesc, JdbcTypeValueFormat> jdbcTypeValueFormats = Maps.newHashMap();
+    private JdbcTypeValueFormat defaultJdbcTypeValueFormat;
+
+    public JdbcTypeValueFormatRegistryBase() {
+    }
+
+    public JdbcTypeValueFormatRegistryBase(JdbcTypeValueFormat defaultJdbcTypeValueFormat) {
+        this.defaultJdbcTypeValueFormat = defaultJdbcTypeValueFormat;
+    }
 
     @Override
     public void addJdbcTypeValueFormat(JdbcType jdbcType, JdbcTypeValueFormat jdbcTypeValueFormat) {
@@ -67,5 +75,11 @@ public abstract class JdbcTypeValueFormatRegistryBase implements JdbcTypeValueFo
         return jdbcTypeValueFormats;
     }
 
-    protected abstract JdbcTypeValueFormat getDefaultJdbcTypeValueFormat();
+    public JdbcTypeValueFormat getDefaultJdbcTypeValueFormat() {
+        return defaultJdbcTypeValueFormat;
+    }
+
+    public void setDefaultJdbcTypeValueFormat(JdbcTypeValueFormat defaultJdbcTypeValueFormat) {
+        this.defaultJdbcTypeValueFormat = defaultJdbcTypeValueFormat;
+    }
 }

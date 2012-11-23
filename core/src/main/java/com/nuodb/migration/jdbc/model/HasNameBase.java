@@ -28,7 +28,7 @@
 package com.nuodb.migration.jdbc.model;
 
 
-import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 
 /**
  * @author Sergey Bushik
@@ -52,24 +52,12 @@ public abstract class HasNameBase implements HasName {
     }
 
     @Override
-    public String getQuotedName() {
-        return getQuotedName(getDialect());
+    public String getQuotedName(DatabaseDialect databaseDialect) {
+        return databaseDialect != null ? databaseDialect.quote(getName()) : getName();
     }
-
-    @Override
-    public String getQuotedName(Dialect dialect) {
-        return dialect != null ? dialect.quote(getName()) : getName();
-    }
-
-    protected Dialect getDialect() {
-        Database database = getDatabase();
-        return database != null ? database.getDialect() : null;
-    }
-
-    protected abstract Database getDatabase();
 
     @Override
     public String toString() {
-        return getQuotedName();
+        return getName();
     }
 }

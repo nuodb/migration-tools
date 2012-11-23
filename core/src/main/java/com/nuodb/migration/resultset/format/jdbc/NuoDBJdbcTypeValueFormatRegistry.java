@@ -25,23 +25,20 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc;
+package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.model.DatabaseInspector;
-
-import java.sql.Connection;
-import java.sql.SQLException;
+import com.nuodb.migration.jdbc.dialect.nuodb.NuoDBBigIntType;
+import com.nuodb.migration.jdbc.dialect.nuodb.NuoDBIntegerType;
+import com.nuodb.migration.jdbc.dialect.nuodb.NuoDBTimeType;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionServices {
+public class NuoDBJdbcTypeValueFormatRegistry extends StandardJdbcTypeValueFormatRegistry {
 
-    void prepare() throws SQLException;
-
-    Connection getConnection() throws SQLException;
-
-    DatabaseInspector getDatabaseInspector() throws SQLException;
-
-    void release() throws SQLException;
+    public NuoDBJdbcTypeValueFormatRegistry() {
+        addJdbcTypeValueFormat(NuoDBTimeType.INSTANCE, new NuoDBTimeTypeValueFormat());
+        addJdbcTypeValueFormat(NuoDBBigIntType.INSTANCE, new NuoDBBigIntTypeValueFormat());
+        addJdbcTypeValueFormat(NuoDBIntegerType.INSTANCE, new NuoDBIntegerTypeValueFormat());
+    }
 }

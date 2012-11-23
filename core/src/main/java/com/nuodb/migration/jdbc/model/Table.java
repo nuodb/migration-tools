@@ -28,12 +28,14 @@
 package com.nuodb.migration.jdbc.model;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.lang.String.format;
 
 public class Table extends HasNameBase {
 
@@ -65,21 +67,17 @@ public class Table extends HasNameBase {
         this.type = type;
     }
 
-    public String getQualifiedName() {
-        return getQualifiedName(database.getDialect());
-    }
-
-    public String getQualifiedName(Dialect dialect) {
+    public String getQualifiedName(DatabaseDialect databaseDialect) {
         StringBuilder qualifiedName = new StringBuilder();
         if (catalog.getName() != null) {
-            qualifiedName.append(catalog.getQuotedName(dialect));
+            qualifiedName.append(catalog.getQuotedName(databaseDialect));
             qualifiedName.append('.');
         }
         if (schema.getName() != null) {
-            qualifiedName.append(schema.getQuotedName(dialect));
+            qualifiedName.append(schema.getQuotedName(databaseDialect));
             qualifiedName.append('.');
         }
-        qualifiedName.append(getQuotedName(dialect));
+        qualifiedName.append(getQuotedName(databaseDialect));
         return qualifiedName.toString();
     }
 
@@ -113,8 +111,7 @@ public class Table extends HasNameBase {
             if (create) {
                 column = createColumn(name);
             } else {
-                throw new ModelException(
-                        String.format("Table %s doesn't contain %s column", getQualifiedName(), name));
+                throw new ModelException(format("Table %s doesn't contain %s column", getName(), name));
             }
         }
         return column;

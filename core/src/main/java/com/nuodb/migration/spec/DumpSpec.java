@@ -37,18 +37,18 @@ import java.util.TimeZone;
  */
 public class DumpSpec extends TaskSpecBase {
 
-    private ConnectionSpec connectionSpec;
+    private ConnectionSpec sourceSpec;
     private TimeZone timeZone;
     private Collection<SelectQuerySpec> selectQuerySpecs = Lists.newArrayList();
     private Collection<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
     private FormatSpec outputSpec;
 
-    public ConnectionSpec getConnectionSpec() {
-        return connectionSpec;
+    public ConnectionSpec getSourceSpec() {
+        return sourceSpec;
     }
 
-    public void setConnectionSpec(ConnectionSpec connectionSpec) {
-        this.connectionSpec = connectionSpec;
+    public void setSourceSpec(ConnectionSpec sourceSpec) {
+        this.sourceSpec = sourceSpec;
     }
 
     public TimeZone getTimeZone() {

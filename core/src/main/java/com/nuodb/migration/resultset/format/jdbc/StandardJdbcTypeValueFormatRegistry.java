@@ -45,30 +45,18 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.io.IOUtils.closeQuietly;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistryBase {
+public class StandardJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegistryBase {
 
-    private JdbcTypeValueFormat defaultJdbcTypeValueFormat;
-
-    public JdbcTypeValueFormatRegistryImpl() {
-        this(new DefaultJdbcTypeValueFormat());
-    }
-
-    public JdbcTypeValueFormatRegistryImpl(JdbcTypeValueFormat defaultJdbcTypeValueFormat) {
-        this.defaultJdbcTypeValueFormat = defaultJdbcTypeValueFormat;
-
+    public StandardJdbcTypeValueFormatRegistry() {
+        super(new DefaultJdbcTypeValueFormat());
         addJdbcTypeValueFormat(JdbcTimestampType.INSTANCE, new JdbcTimestampTypeValueFormat());
         addJdbcTypeValueFormat(JdbcTimeType.INSTANCE, new JdbcTimeTypeValueFormat());
         addJdbcTypeValueFormat(JdbcDateType.INSTANCE, new JdbcDateTypeValueFormat());
-    }
-
-    @Override
-    protected JdbcTypeValueFormat getDefaultJdbcTypeValueFormat() {
-        return defaultJdbcTypeValueFormat;
     }
 
     static class DefaultJdbcTypeValueFormat extends JdbcTypeValueFormatBase<Object> {
@@ -175,8 +163,7 @@ public class JdbcTypeValueFormatRegistryImpl extends JdbcTypeValueFormatRegistry
                     access.setValue(!isEmpty(value) ? Integer.parseInt(value) : null, options);
                     break;
                 case Types.BIGINT:
-                    // see com.nuodb.migration.jdbc.dialect.nuodb.NuoDBDecimalType
-                    access.setValue(!isEmpty(value) ? new BigDecimal(value) : null, options);
+                    access.setValue(!isEmpty(value) ? Long.parseLong(value) : null, options);
                     break;
                 case Types.FLOAT:
                 case Types.REAL:

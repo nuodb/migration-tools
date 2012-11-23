@@ -28,12 +28,16 @@
 package com.nuodb.migration.dump;
 
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.connection.DriverManagerConnectionProvider;
+import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolverImpl;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.CatalogImpl;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactoryImpl;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolverImpl;
 import com.nuodb.migration.spec.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,10 +53,16 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
     protected final Log log = LogFactory.getLog(getClass());
 
     private DumpSpec dumpSpec;
-    private ResultSetFormatFactory resultSetFormatFactory = new ResultSetFormatFactoryImpl();
+
+    private DatabaseDialectResolver databaseDialectResolver =
+            new DatabaseDialectResolverImpl();
+    private ResultSetFormatFactory resultSetFormatFactory =
+            new ResultSetFormatFactoryImpl();
+    private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver =
+            new JdbcTypeValueFormatRegistryResolverImpl();
 
     public DumpJob createJob() {
-        ConnectionSpec connectionSpec = dumpSpec.getConnectionSpec();
+        ConnectionSpec connectionSpec = dumpSpec.getSourceSpec();
         Collection<SelectQuerySpec> selectQuerySpecs = dumpSpec.getSelectQuerySpecs();
         Collection<NativeQuerySpec> nativeQuerySpecs = dumpSpec.getNativeQuerySpecs();
         FormatSpec outputSpec = dumpSpec.getOutputSpec();
@@ -65,12 +75,14 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         job.setOutputType(outputSpec.getType());
         job.setAttributes(outputSpec.getAttributes());
         job.setCatalog(createCatalog(outputSpec.getPath()));
+        job.setDatabaseDialectResolver(databaseDialectResolver);
         job.setResultSetFormatFactory(resultSetFormatFactory);
+        job.setJdbcTypeValueFormatRegistryResolver(jdbcTypeValueFormatRegistryResolver);
         return job;
     }
 
     protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return new DriverManagerConnectionProvider((DriverManagerConnectionSpec) connectionSpec);
+        return new JdbcConnectionProvider((JdbcConnectionSpec) connectionSpec);
     }
 
     protected Catalog createCatalog(String path) {
@@ -85,11 +97,28 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         this.dumpSpec = dumpSpec;
     }
 
+    public DatabaseDialectResolver getDatabaseDialectResolver() {
+        return databaseDialectResolver;
+    }
+
+    public void setDatabaseDialectResolver(DatabaseDialectResolver databaseDialectResolver) {
+        this.databaseDialectResolver = databaseDialectResolver;
+    }
+
     public ResultSetFormatFactory getResultSetFormatFactory() {
         return resultSetFormatFactory;
     }
 
     public void setResultSetFormatFactory(ResultSetFormatFactory resultSetFormatFactory) {
         this.resultSetFormatFactory = resultSetFormatFactory;
+    }
+
+    public JdbcTypeValueFormatRegistryResolver getJdbcTypeValueFormatRegistryResolver() {
+        return jdbcTypeValueFormatRegistryResolver;
+    }
+
+    public void setJdbcTypeValueFormatRegistryResolver(
+            JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver) {
+        this.jdbcTypeValueFormatRegistryResolver = jdbcTypeValueFormatRegistryResolver;
     }
 }

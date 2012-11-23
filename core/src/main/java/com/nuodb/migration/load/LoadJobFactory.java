@@ -29,7 +29,9 @@ package com.nuodb.migration.load;
 
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.connection.DriverManagerConnectionProvider;
+import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolverImpl;
 import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
@@ -38,9 +40,9 @@ import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.CatalogImpl;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactoryImpl;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolverImpl;
 import com.nuodb.migration.spec.*;
-
-import java.util.TimeZone;
 
 /**
  * @author Sergey Bushik
@@ -48,24 +50,30 @@ import java.util.TimeZone;
 public class LoadJobFactory implements JobFactory<LoadJob> {
 
     private LoadSpec loadSpec;
-    private ResultSetFormatFactory resultSetFormatFactory = new ResultSetFormatFactoryImpl();
+    private DatabaseDialectResolver databaseDialectResolver =
+            new DatabaseDialectResolverImpl();
+    private ResultSetFormatFactory resultSetFormatFactory =
+            new ResultSetFormatFactoryImpl();
+    private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver =
+            new JdbcTypeValueFormatRegistryResolverImpl();
 
     @Override
     public LoadJob createJob() {
-        ConnectionSpec connectionSpec = loadSpec.getConnectionSpec();
         FormatSpec inputSpec = loadSpec.getInputSpec();
 
         LoadJob job = new LoadJob();
-        job.setConnectionProvider(createConnectionProvider(connectionSpec));
+        job.setConnectionProvider(createConnectionProvider(loadSpec.getTargetSpec()));
         job.setAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));
         job.setTimeZone(loadSpec.getTimeZone());
+        job.setDatabaseDialectResolver(databaseDialectResolver);
         job.setResultSetFormatFactory(resultSetFormatFactory);
+        job.setJdbcTypeValueFormatRegistryResolver(jdbcTypeValueFormatRegistryResolver);
         return job;
     }
 
     protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return new DriverManagerConnectionProvider((DriverManagerConnectionSpec) connectionSpec);
+        return new JdbcConnectionProvider((JdbcConnectionSpec) connectionSpec, false);
     }
 
     protected Catalog createCatalog(String path) {
@@ -80,6 +88,14 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         this.loadSpec = loadSpec;
     }
 
+    public DatabaseDialectResolver getDatabaseDialectResolver() {
+        return databaseDialectResolver;
+    }
+
+    public void setDatabaseDialectResolver(DatabaseDialectResolver databaseDialectResolver) {
+        this.databaseDialectResolver = databaseDialectResolver;
+    }
+
     public ResultSetFormatFactory getResultSetFormatFactory() {
         return resultSetFormatFactory;
     }
@@ -88,23 +104,31 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         this.resultSetFormatFactory = resultSetFormatFactory;
     }
 
+    public JdbcTypeValueFormatRegistryResolver getJdbcTypeValueFormatRegistryResolver() {
+        return jdbcTypeValueFormatRegistryResolver;
+    }
+
+    public void setJdbcTypeValueFormatRegistryResolver(
+            JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver) {
+        this.jdbcTypeValueFormatRegistryResolver = jdbcTypeValueFormatRegistryResolver;
+    }
+
     public static void main(String[] args) {
-        LoadJobFactory loadJobFactory = new LoadJobFactory();
-        loadJobFactory.setLoadSpec(new LoadSpec() {
+        LoadJobFactory jobFactory = new LoadJobFactory();
+        jobFactory.setLoadSpec(new LoadSpec() {
             {
-                DriverManagerConnectionSpec connectionSpec = new DriverManagerConnectionSpec();
+                JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
                 connectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
                 connectionSpec.setUrl("jdbc:mysql://localhost:3306/enron-load");
                 connectionSpec.setUsername("root");
-                setConnectionSpec(connectionSpec);
+                setTargetSpec(connectionSpec);
 
                 FormatSpecBase inputSpec = new FormatSpecBase();
                 inputSpec.setPath("/tmp/test/dump.cat");
-                setTimeZone(TimeZone.getTimeZone("UTC"));
                 setInputSpec(inputSpec);
             }
         });
-        JobExecutor executor = JobExecutors.createJobExecutor(loadJobFactory.createJob());
+        JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());
         executor.addJobExecutionListener(new TraceJobExecutionListener());
         executor.execute(Maps.<String, Object>newHashMap());
     }

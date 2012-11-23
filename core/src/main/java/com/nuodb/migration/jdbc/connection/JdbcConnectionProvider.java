@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
-import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverManagerConnectionSpec;
+import com.nuodb.migration.jdbc.model.DatabaseInspector;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.utils.ClassUtils;
 import com.nuodb.migration.utils.ReflectionException;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
@@ -45,33 +45,29 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class DriverManagerConnectionProvider implements ConnectionProvider {
+public class JdbcConnectionProvider implements ConnectionProvider {
 
     public static final String USER_PROPERTY = "user";
     public static final String PASSWORD_PROPERTY = "password";
 
     private transient final Log log = LogFactory.getLog(this.getClass());
 
-    private DriverManagerConnectionSpec connectionSpec;
+    private JdbcConnectionSpec jdbcConnectionSpec;
     private Boolean autoCommit;
     private Integer transactionIsolation;
     private DataSource dataSource;
 
-    public DriverManagerConnectionProvider() {
+    public JdbcConnectionProvider(JdbcConnectionSpec jdbcConnectionSpec) {
+        this(jdbcConnectionSpec, false);
     }
 
-    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec) {
-        this(connectionSpec, false);
-    }
-
-    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec, Boolean autoCommit) {
-        this.connectionSpec = connectionSpec;
+    public JdbcConnectionProvider(JdbcConnectionSpec jdbcConnectionSpec, boolean autoCommit) {
+        this.jdbcConnectionSpec = jdbcConnectionSpec;
         this.autoCommit = autoCommit;
     }
 
-    public DriverManagerConnectionProvider(DriverManagerConnectionSpec connectionSpec,
-                                           Boolean autoCommit, Integer transactionIsolation) {
-        this.connectionSpec = connectionSpec;
+    public JdbcConnectionProvider(JdbcConnectionSpec jdbcConnectionSpec, boolean autoCommit, int transactionIsolation) {
+        this.jdbcConnectionSpec = jdbcConnectionSpec;
         this.autoCommit = autoCommit;
         this.transactionIsolation = transactionIsolation;
     }
@@ -84,11 +80,37 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
         return createConnection();
     }
 
+    @Override
+    public ConnectionServices getConnectionServices() throws SQLException {
+        final Connection connection = getConnection();
+        return new ConnectionServices() {
+
+            @Override
+            public Connection getConnection() throws SQLException {
+                return connection;
+            }
+
+            @Override
+            public DatabaseInspector getDatabaseInspector() throws SQLException {
+                DatabaseInspector databaseInspector = new DatabaseInspector();
+                databaseInspector.withConnection(getConnection());
+                databaseInspector.withCatalog(jdbcConnectionSpec.getCatalog());
+                databaseInspector.withSchema(jdbcConnectionSpec.getSchema());
+                return databaseInspector;
+            }
+
+            @Override
+            public void close() throws SQLException {
+                closeConnection(connection);
+            }
+        };
+    }
+
     protected DataSource createDataSource() throws SQLException {
         try {
-            Driver driver = connectionSpec.getDriver();
+            Driver driver = jdbcConnectionSpec.getDriver();
             if (driver == null) {
-                String driverClassName = connectionSpec.getDriverClassName();
+                String driverClassName = jdbcConnectionSpec.getDriverClassName();
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Loading driver %s", driverClassName));
                 }
@@ -101,13 +123,13 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
             }
         }
 
-        String url = connectionSpec.getUrl();
+        String url = jdbcConnectionSpec.getUrl();
         Properties properties = new Properties();
-        if (connectionSpec.getProperties() != null) {
-            properties.putAll(connectionSpec.getProperties());
+        if (jdbcConnectionSpec.getProperties() != null) {
+            properties.putAll(jdbcConnectionSpec.getProperties());
         }
-        String username = connectionSpec.getUsername();
-        String password = connectionSpec.getPassword();
+        String username = jdbcConnectionSpec.getUsername();
+        String password = jdbcConnectionSpec.getPassword();
         if (username != null) {
             properties.setProperty(USER_PROPERTY, username);
         }
@@ -142,11 +164,6 @@ public class DriverManagerConnectionProvider implements ConnectionProvider {
         if (connection != null) {
             connection.close();
         }
-    }
-
-    @Override
-    public ConnectionSpec getConnectionSpec() {
-        return connectionSpec;
     }
 
     public boolean isAutoCommit() {

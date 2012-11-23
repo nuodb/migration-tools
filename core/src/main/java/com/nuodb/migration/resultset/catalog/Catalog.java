@@ -32,7 +32,7 @@ package com.nuodb.migration.resultset.catalog;
  */
 public interface Catalog {
 
-    CatalogReader getReader();
+    CatalogReader getCatalogReader();
 
-    CatalogWriter getWriter();
+    CatalogWriter getCatalogWriter();
 }

@@ -28,7 +28,7 @@
 package com.nuodb.migration.config.xml;
 
 import com.nuodb.migration.config.xml.handler.XmlAliasTypeMapper;
-import com.nuodb.migration.spec.DriverManagerConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.spec.DumpSpec;
 import com.nuodb.migration.spec.MigrationSpec;
 import com.nuodb.migration.spec.Spec;
@@ -54,7 +54,7 @@ public class XmlPersisterBuilder implements XmlConstants {
         parser.parse(registry);
 
         XmlAliasTypeMapper<Spec> handler = new XmlAliasTypeMapper<Spec>();
-        handler.bind(MIGRATION_NAMESPACE, CONNECTION_ELEMENT, JDBC, DriverManagerConnectionSpec.class);
+        handler.bind(MIGRATION_NAMESPACE, CONNECTION_ELEMENT, JDBC, JdbcConnectionSpec.class);
         handler.bind(MIGRATION_NAMESPACE, TASK_ELEMENT, DUMP, DumpSpec.class);
         registry.registerHandler(handler, Priority.LOW);
 
@@ -67,7 +67,7 @@ public class XmlPersisterBuilder implements XmlConstants {
         XmlPersister persister = builder.build();
 
         MigrationSpec migrationSpec = new MigrationSpec();
-        DriverManagerConnectionSpec connection = new DriverManagerConnectionSpec();
+        JdbcConnectionSpec connection = new JdbcConnectionSpec();
         connection.setId("mysql");
         connection.setDriverClassName("com.mysql.jdbc.Driver");
         connection.setUrl("jdbc:mysql://localhost:3306/test");

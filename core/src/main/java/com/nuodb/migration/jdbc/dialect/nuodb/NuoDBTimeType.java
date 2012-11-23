@@ -25,28 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.access;
+package com.nuodb.migration.jdbc.dialect.nuodb;
 
-import com.nuodb.migration.jdbc.model.ColumnModel;
 import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.JdbcTypeBase;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess<T> {
+public class NuoDBTimeType extends JdbcTypeBase<String> {
 
-    int getColumn();
+    public static final JdbcType INSTANCE = new NuoDBTimeType();
 
-    ColumnModel getColumnModel();
+    /**
+     * Notice Types.BIGINT passed instead of Types.DECIMAL. Awaiting for DB-2288 to be resolved
+     */
+    public NuoDBTimeType() {
+        super(Types.TIME, String.class);
+    }
 
-    JdbcType<T> getJdbcType();
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, String value, int column,
+                                    Map<String, Object> options) throws SQLException {
+        statement.setString(column, value);
+    }
 
-    T getValue(Map<String, Object> options) throws SQLException;
-
-    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
-
-    <X> void setValue(X value, Map<String, Object> options) throws SQLException;
+    @Override
+    public String getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+        return resultSet.getString(column);
+    }
 }

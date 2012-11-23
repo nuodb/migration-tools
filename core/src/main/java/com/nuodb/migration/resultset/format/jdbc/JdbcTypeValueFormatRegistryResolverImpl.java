@@ -25,45 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect.nuodb;
+package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeBase;
-
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Map;
+import com.nuodb.migration.jdbc.resolve.DatabaseObjectResolverSupport;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBDecimalType extends JdbcTypeBase<BigDecimal> {
+public class JdbcTypeValueFormatRegistryResolverImpl extends DatabaseObjectResolverSupport<JdbcTypeValueFormatRegistry>
+        implements JdbcTypeValueFormatRegistryResolver {
 
-    public static final JdbcType INSTANCE = new NuoDBDecimalType();
-
-    /**
-     * Notice Types.BIGINT passed instead of Types.DECIMAL. Awaiting for DB-2288 to be resolved
-     */
-    public NuoDBDecimalType() {
-        super(Types.BIGINT, BigDecimal.class);
-    }
-
-    @Override
-    public Class<? extends BigDecimal> getTypeClass() {
-        return BigDecimal.class;
-    }
-
-    @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int column,
-                                    Map<String, Object> options) throws SQLException {
-        statement.setBigDecimal(column, value);
-    }
-
-    @Override
-    public BigDecimal getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
-        return resultSet.getBigDecimal(column);
+    public JdbcTypeValueFormatRegistryResolverImpl() {
+        super(StandardJdbcTypeValueFormatRegistry.class);
+        register("NuoDB", NuoDBJdbcTypeValueFormatRegistry.class);
     }
 }

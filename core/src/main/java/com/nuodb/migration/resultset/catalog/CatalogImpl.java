@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 
-import static org.apache.commons.lang.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * @author Sergey Bushik
@@ -72,12 +72,12 @@ public class CatalogImpl implements Catalog {
     }
 
     @Override
-    public CatalogReader getReader() {
+    public CatalogReader getCatalogReader() {
         return new CatalogReaderImpl(catalogDir, catalogFile);
     }
 
     @Override
-    public CatalogWriter getWriter() {
+    public CatalogWriter getCatalogWriter() {
         return new CatalogWriterImpl(catalogDir, catalogFile);
     }
 }

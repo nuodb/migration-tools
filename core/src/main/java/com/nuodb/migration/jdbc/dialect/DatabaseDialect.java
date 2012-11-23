@@ -25,28 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.access;
+package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.model.ColumnModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
+import java.sql.Statement;
 
 /**
+ * Vendor specific dialect
+ *
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess<T> {
+public interface DatabaseDialect {
 
-    int getColumn();
+    boolean supportsReadCatalogs();
 
-    ColumnModel getColumnModel();
+    boolean supportsReadSchemas();
 
-    JdbcType<T> getJdbcType();
+    boolean supportsTransactionIsolation(int transactionIsolationLevel) throws SQLException;
 
-    T getValue(Map<String, Object> options) throws SQLException;
+    void setSupportedTransactionIsolation(Connection connection, int[] transactionIsolationLevels) throws SQLException;
 
-    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
+    String quote(String name);
 
-    <X> void setValue(X value, Map<String, Object> options) throws SQLException;
+    String getNoColumnsInsertClause();
+
+    JdbcTypeRegistry getJdbcTypeRegistry();
+
+    void enableStreaming(Statement statement) throws SQLException;
 }

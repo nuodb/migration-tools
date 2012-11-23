@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.schema;
 
+import com.nuodb.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
 import org.apache.commons.logging.Log;
@@ -39,8 +41,28 @@ public class GenerateSchemaJob extends JobBase {
 
     protected final Log log = LogFactory.getLog(getClass());
 
+    private ConnectionProvider sourceConnectionProvider;
+    private ConnectionProvider targetConnectionProvider;
+
     @Override
     public void execute(JobExecution execution) throws Exception {
+        ConnectionServices targetConnection = sourceConnectionProvider.getConnectionServices();
+        ConnectionServices sourceConnection = targetConnectionProvider.getConnectionServices();
+    }
 
+    public ConnectionProvider getSourceConnectionProvider() {
+        return sourceConnectionProvider;
+    }
+
+    public void setSourceConnectionProvider(ConnectionProvider sourceConnectionProvider) {
+        this.sourceConnectionProvider = sourceConnectionProvider;
+    }
+
+    public ConnectionProvider getTargetConnectionProvider() {
+        return targetConnectionProvider;
+    }
+
+    public void setTargetConnectionProvider(ConnectionProvider targetConnectionProvider) {
+        this.targetConnectionProvider = targetConnectionProvider;
     }
 }

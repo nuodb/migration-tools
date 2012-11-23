@@ -32,8 +32,7 @@ import com.google.common.collect.Maps;
 import java.sql.Driver;
 import java.util.Map;
 
-public class DriverManagerConnectionSpec extends ConnectionSpecBase {
-
+public class JdbcConnectionSpec extends ConnectionSpecBase {
     private String driverClassName;
     private Driver driver;
     private String url;

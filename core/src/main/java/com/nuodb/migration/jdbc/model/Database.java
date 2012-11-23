@@ -31,7 +31,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,15 +39,15 @@ import java.util.Map;
 
 import static com.nuodb.migration.jdbc.model.Name.valueOf;
 import static java.lang.String.format;
-import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
-import static org.apache.commons.lang.StringUtils.split;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.split;
 
 public class Database {
 
     private Map<Name, Catalog> catalogs = Maps.newHashMap();
     private DriverInfo driverInfo;
     private DatabaseInfo databaseInfo;
-    private Dialect dialect;
+    private DatabaseDialect databaseDialect;
 
     public DriverInfo getDriverInfo() {
         return driverInfo;
@@ -65,12 +65,12 @@ public class Database {
         this.databaseInfo = databaseInfo;
     }
 
-    public Dialect getDialect() {
-        return dialect;
+    public DatabaseDialect getDatabaseDialect() {
+        return databaseDialect;
     }
 
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
+    public void setDatabaseDialect(DatabaseDialect databaseDialect) {
+        this.databaseDialect = databaseDialect;
     }
 
     public Catalog createCatalog(String catalog) {

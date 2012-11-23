@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.jdbc.resolve;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -33,7 +33,17 @@ import java.sql.SQLException;
 /**
  * @author Sergey Bushik
  */
-public interface DialectResolver {
+public interface DatabaseObjectResolver<T> {
 
-    Dialect resolve(DatabaseMetaData metaData) throws SQLException;
+    void register(String productName, Class<? extends T> objectClass);
+
+    void register(String productName, String productVersion, Class<? extends T> objectClass);
+
+    void register(String productName, String productVersion, int majorVersion, Class<? extends T> objectClass);
+
+    void register(String productName, String productVersion, int majorVersion, int minorVersion, Class<? extends T> objectClass);
+
+    void register(DatabaseInfoMatcher databaseInfoMatcher, Class<? extends T> objectClass);
+
+    T resolve(DatabaseMetaData metaData) throws SQLException;
 }

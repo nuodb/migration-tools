@@ -27,52 +27,64 @@
  */
 package com.nuodb.migration.schema;
 
+import com.google.common.collect.Maps;
+import com.nuodb.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
+import com.nuodb.migration.job.JobExecutor;
+import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
-
-import java.sql.ResultSet;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import com.nuodb.migration.job.TraceJobExecutionListener;
+import com.nuodb.migration.spec.ConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
+import com.nuodb.migration.spec.GenerateSchemaSpec;
 
 /**
  * @author Sergey Bushik
  */
 public class GenerateSchemaJobFactory implements JobFactory<GenerateSchemaJob> {
 
+    private GenerateSchemaSpec generateSchemaSpec;
+
     @Override
     public GenerateSchemaJob createJob() {
         GenerateSchemaJob job = new GenerateSchemaJob();
-
-//        --time.zone=<time zone code>,optional;
-//
-//        ResultSet resultSet;
-//        Date date = resultSet.getTime(column) (or resultSet.getDate(column) or resultSet.getTimestamp(column));
-//
-//        String timeZoneValue == <--time.zone>;
-//        if (timeZoneValue != null) {
-//            <dump date as is>;
-//        } else {
-//            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone( < timeZoneValue >));
-//
-//
-//        }
-
+        job.setSourceConnectionProvider(createConnectionProvider(generateSchemaSpec.getSourceSpec()));
+        job.setTargetConnectionProvider(createConnectionProvider(generateSchemaSpec.getTargetSpec()));
         return job;
     }
 
+    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
+        return new JdbcConnectionProvider((JdbcConnectionSpec) connectionSpec, false);
+    }
+
+    public GenerateSchemaSpec getGenerateSchemaSpec() {
+        return generateSchemaSpec;
+    }
+
+    public void setGenerateSchemaSpec(GenerateSchemaSpec generateSchemaSpec) {
+        this.generateSchemaSpec = generateSchemaSpec;
+    }
+
     public static void main(String[] args) {
-        Date now = new Date();
-        System.out.println(now);
-        Calendar calendar = Calendar.getInstance(
-                TimeZone.getTimeZone("America/New_York"));
-        calendar.setTimeInMillis(now.getTime());
+        GenerateSchemaJobFactory jobFactory = new GenerateSchemaJobFactory();
+        jobFactory.setGenerateSchemaSpec(new GenerateSchemaSpec() {
+            {
+                JdbcConnectionSpec sourceSpec = new JdbcConnectionSpec();
+                sourceSpec.setDriverClassName("com.mysql.jdbc.Driver");
+                sourceSpec.setUrl("jdbc:mysql://localhost:3306/enron-load");
+                sourceSpec.setUsername("root");
+                setSourceSpec(sourceSpec);
 
-        ResultSet resultSet;
-        // PreparedStatement preparedStatement;
-        // preparedStatement.setDate
-
-        System.out.println(calendar.toString());
-        System.out.println(calendar.getTime());
-
+                JdbcConnectionSpec targetSpec = new JdbcConnectionSpec();
+                targetSpec.setDriverClassName("com.nuodb.jdbc.Driver");
+                targetSpec.setUrl("jdbc:com.nuodb://localhost/test");
+                targetSpec.setUsername("dba");
+                targetSpec.setPassword("goalie");
+                setTargetSpec(targetSpec);
+            }
+        });
+        JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());
+        executor.addJobExecutionListener(new TraceJobExecutionListener());
+        executor.execute(Maps.<String, Object>newHashMap());
     }
 }

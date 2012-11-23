@@ -28,7 +28,7 @@
 package com.nuodb.migration.jdbc.query;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 import com.nuodb.migration.jdbc.model.Column;
 import com.nuodb.migration.jdbc.model.Table;
 
@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class SelectQuery implements Query {
 
-    private Dialect dialect;
+    private DatabaseDialect databaseDialect;
     private boolean qualifyNames;
     private List<Table> tables = Lists.newArrayList();
     private List<Column> columns = Lists.newArrayList();
@@ -64,7 +64,7 @@ public class SelectQuery implements Query {
         query.append("select ");
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            query.append(column.getQuotedName(dialect));
+            query.append(column.getQuotedName(databaseDialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }
@@ -72,7 +72,7 @@ public class SelectQuery implements Query {
         query.append(" from ");
         for (Iterator<Table> iterator = tables.iterator(); iterator.hasNext(); ) {
             Table table = iterator.next();
-            query.append(qualifyNames ? table.getQualifiedName(dialect) : table.getQuotedName(dialect));
+            query.append(qualifyNames ? table.getQualifiedName(databaseDialect) : table.getQuotedName(databaseDialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }
@@ -89,12 +89,12 @@ public class SelectQuery implements Query {
         return query.toString();
     }
 
-    public Dialect getDialect() {
-        return dialect;
+    public DatabaseDialect getDatabaseDialect() {
+        return databaseDialect;
     }
 
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
+    public void setDatabaseDialect(DatabaseDialect databaseDialect) {
+        this.databaseDialect = databaseDialect;
     }
 
     public boolean isQualifyNames() {

@@ -6,7 +6,7 @@ import com.nuodb.migration.jdbc.model.Database;
 import com.nuodb.migration.jdbc.model.Schema;
 import com.nuodb.migration.jdbc.model.Table;
 import com.nuodb.migration.jdbc.query.SelectQuery;
-import com.nuodb.migration.spec.DriverManagerConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 
 public class TestConstants {
 
@@ -25,8 +25,8 @@ public class TestConstants {
     public static final String FIRST_COLUMN_NAME = "ID";
     public static final String SECOND_COLUMN_NAME = "Name";
 
-    public static DriverManagerConnectionSpec createTestNuoDBConnectionSpec() {
-        final DriverManagerConnectionSpec connectionSpec = new DriverManagerConnectionSpec();
+    public static JdbcConnectionSpec createTestNuoDBConnectionSpec() {
+        final JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
         connectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
         connectionSpec.setUsername("dba");
         connectionSpec.setPassword("goalie");

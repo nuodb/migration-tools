@@ -25,28 +25,30 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.access;
+package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.model.ColumnModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.resolve.DatabaseObjectResolverSupport;
+import com.nuodb.migration.utils.ClassUtils;
 
-import java.sql.SQLException;
-import java.util.Map;
+import java.sql.DatabaseMetaData;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess<T> {
+public class DatabaseDialectResolverImpl extends DatabaseObjectResolverSupport<DatabaseDialect>
+        implements DatabaseDialectResolver {
 
-    int getColumn();
+    public DatabaseDialectResolverImpl() {
+        super(StandardDialect.class);
+        register("MySQL", MySQLDialect.class);
+        register("PostgreSQL", PostgreSQLDialect.class);
+        register("Microsoft SQL Server", SQLServerDialect.class);
+        register("Oracle", OracleDialect.class);
+        register("NuoDB", NuoDBDialect.class);
+    }
 
-    ColumnModel getColumnModel();
-
-    JdbcType<T> getJdbcType();
-
-    T getValue(Map<String, Object> options) throws SQLException;
-
-    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
-
-    <X> void setValue(X value, Map<String, Object> options) throws SQLException;
+    @Override
+    protected DatabaseDialect createObject(Class<? extends DatabaseDialect> objectType, DatabaseMetaData metaData) {
+        return ClassUtils.newInstance(objectType, metaData);
+    }
 }

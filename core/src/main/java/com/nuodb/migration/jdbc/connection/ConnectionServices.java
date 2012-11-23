@@ -25,34 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.jdbc.connection;
 
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migration.jdbc.model.DatabaseInspector;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
- * Vendor specific dialect
- *
  * @author Sergey Bushik
  */
-public interface Dialect {
+public interface ConnectionServices {
 
-    boolean supportsReadCatalogs();
+    Connection getConnection() throws SQLException;
 
-    boolean supportsReadSchemas();
+    DatabaseInspector getDatabaseInspector() throws SQLException;
 
-    boolean supportsTransactionIsolation(int transactionIsolationLevel) throws SQLException;
-
-    void setSupportedTransactionIsolation(Connection connection, int[] transactionIsolationLevels) throws SQLException;
-
-    String quote(String name);
-
-    String getNoColumnsInsertClause();
-
-    JdbcTypeRegistry getJdbcTypeRegistry();
-
-    void enableStreaming(Statement statement) throws SQLException;
+    void close() throws SQLException;
 }

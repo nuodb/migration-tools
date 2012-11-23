@@ -35,7 +35,7 @@ import java.sql.DatabaseMetaData;
 /**
  * @author Sergey Bushik
  */
-public class NuoDBDialect extends DialectBase {
+public class NuoDBDialect extends StandardDialect {
 
     public NuoDBDialect(DatabaseMetaData metaData) {
         super(metaData);

@@ -36,7 +36,7 @@ public class DumpCatalogIntegrationTest extends TestConstants {
     @Test
     public void testOpen() throws Exception {
         try {
-            writer = (CatalogWriterImpl) catalogFile.getWriter();
+            writer = (CatalogWriterImpl) catalogFile.getCatalogWriter();
         } catch (CatalogException e) {
             Assert.fail(e.getMessage());
         }
@@ -44,7 +44,7 @@ public class DumpCatalogIntegrationTest extends TestConstants {
 
     @Test(expected = CatalogException.class)
     public void testOpenError() throws Exception {
-        new CatalogImpl("").getWriter();
+        new CatalogImpl("").getCatalogWriter();
     }
 
     @After

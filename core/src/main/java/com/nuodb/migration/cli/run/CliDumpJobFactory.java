@@ -88,7 +88,7 @@ public class CliDumpJobFactory implements CliRunFactory, CliResources {
         @Override
         protected void bind(CommandLine commandLine) {
             DumpSpec dumpSpec = new DumpSpec();
-            dumpSpec.setConnectionSpec(parseSourceGroup(commandLine, this));
+            dumpSpec.setSourceSpec(parseSourceGroup(commandLine, this));
             dumpSpec.setOutputSpec(parseOutputGroup(commandLine, this));
             dumpSpec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
             dumpSpec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine, this));

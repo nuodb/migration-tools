@@ -28,7 +28,7 @@
 package com.nuodb.migration.jdbc.query;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 import com.nuodb.migration.jdbc.model.Column;
 import com.nuodb.migration.jdbc.model.Database;
 import com.nuodb.migration.jdbc.model.Table;
@@ -40,7 +40,7 @@ import java.util.Collection;
  */
 public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
 
-    private Dialect dialect;
+    private DatabaseDialect databaseDialect;
     private Table table;
     private boolean qualifyNames;
     private Collection<String> columns = Lists.newArrayList();
@@ -51,10 +51,10 @@ public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
         insertQuery.setQualifyNames(qualifyNames);
         insertQuery.setTable(table);
         Database database = table.getDatabase();
-        if (dialect != null) {
-            insertQuery.setDialect(dialect);
+        if (databaseDialect != null) {
+            insertQuery.setDatabaseDialect(databaseDialect);
         } else if (database != null) {
-            insertQuery.setDialect(database.getDialect());
+            insertQuery.setDatabaseDialect(database.getDatabaseDialect());
         }
         if (columns != null && !columns.isEmpty()) {
             for (String column : columns) {
@@ -68,12 +68,12 @@ public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
         return insertQuery;
     }
 
-    public Dialect getDialect() {
-        return dialect;
+    public DatabaseDialect getDatabaseDialect() {
+        return databaseDialect;
     }
 
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
+    public void setDatabaseDialect(DatabaseDialect databaseDialect) {
+        this.databaseDialect = databaseDialect;
     }
 
     public Table getTable() {

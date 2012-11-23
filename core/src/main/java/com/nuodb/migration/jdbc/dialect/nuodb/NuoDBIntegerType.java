@@ -25,12 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect.resolve;
+package com.nuodb.migration.jdbc.dialect.nuodb;
+
+import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.JdbcTypeBase;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface DatabaseInfoMatcher {
+public class NuoDBIntegerType extends JdbcTypeBase<Double> {
 
-    boolean matches(String productName, String productVersion, int majorVersion, int minorVersion);
+    public static final JdbcType INSTANCE = new NuoDBIntegerType();
+
+    /**
+     * Notice Types.BIGINT passed instead of Types.DECIMAL. Awaiting for DB-2288 to be resolved
+     */
+    public NuoDBIntegerType() {
+        super(Types.INTEGER, Double.class);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Double value, int column,
+                                    Map<String, Object> options) throws SQLException {
+        statement.setDouble(column, value);
+    }
+
+    @Override
+    public Double getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+        return resultSet.getDouble(column);
+    }
 }

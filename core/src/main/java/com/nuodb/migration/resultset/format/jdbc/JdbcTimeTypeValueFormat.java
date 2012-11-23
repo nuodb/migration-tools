@@ -34,7 +34,7 @@ import java.sql.Time;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
@@ -51,7 +51,7 @@ public class JdbcTimeTypeValueFormat extends JdbcTypeValueFormatBase<Time> {
     protected void doSetValue(JdbcTypeValueAccess<Time> access, String value,
                               Map<String, Object> options) throws SQLException {
         try {
-            access.setValue(!isEmpty(value) ? Time.valueOf(value) : null, options);
+            access.setValue(!isEmpty(value) ? value : null, options);
         } catch (IllegalArgumentException exception) {
             throw new JdbcTypeValueException(format("Value %s is not in the hh:mm:ss format", value));
         }

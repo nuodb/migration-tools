@@ -30,20 +30,20 @@ package com.nuodb.migration.config.xml.handler;
 import com.nuodb.migration.config.xml.XmlConstants;
 import com.nuodb.migration.config.xml.XmlReadContext;
 import com.nuodb.migration.config.xml.XmlWriteContext;
-import com.nuodb.migration.spec.DriverManagerConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Map;
 
-public class XmlJdbcConnectionHandler extends XmlReadWriteHandlerBase<DriverManagerConnectionSpec> implements XmlConstants {
+public class XmlJdbcConnectionHandler extends XmlReadWriteHandlerBase<JdbcConnectionSpec> implements XmlConstants {
 
     public XmlJdbcConnectionHandler() {
-        super(DriverManagerConnectionSpec.class);
+        super(JdbcConnectionSpec.class);
     }
 
     @Override
-    protected boolean write(DriverManagerConnectionSpec connection, OutputNode output, XmlWriteContext context) throws Exception {
+    protected boolean write(JdbcConnectionSpec connection, OutputNode output, XmlWriteContext context) throws Exception {
         output.getNamespaces().setReference(MIGRATION_NAMESPACE);
         set(output, ID_ATTRIBUTE, connection.getId());
         set(output, TYPE_ATTRIBUTE, connection.getType());
@@ -62,7 +62,7 @@ public class XmlJdbcConnectionHandler extends XmlReadWriteHandlerBase<DriverMana
     }
 
     @Override
-    protected void read(InputNode input, DriverManagerConnectionSpec connection, XmlReadContext context) throws Exception {
+    protected void read(InputNode input, JdbcConnectionSpec connection, XmlReadContext context) throws Exception {
         connection.setId(get(input, ID_ATTRIBUTE));
         connection.setType(get(input, TYPE_ATTRIBUTE));
         // TODO: implement

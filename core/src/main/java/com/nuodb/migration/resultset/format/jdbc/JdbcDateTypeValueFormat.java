@@ -38,7 +38,7 @@ import java.util.Map;
 
 import static com.nuodb.migration.jdbc.type.JdbcTypeDesc.isTypeNameEquals;
 import static java.lang.String.format;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
