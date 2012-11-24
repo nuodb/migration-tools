@@ -28,7 +28,7 @@
 package com.nuodb.migration.config.xml;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.utils.Assertions;
+import com.nuodb.migration.utils.Validate;
 import com.nuodb.migration.utils.ClassUtils;
 import com.nuodb.migration.utils.Priority;
 import org.apache.commons.logging.Log;
@@ -52,7 +52,7 @@ public class XmlHandlerRegistryParser {
     }
 
     public void addRegistry(URL resource) {
-        Assertions.assertNotNull(resource, "Handler registry resource is required");
+        Validate.isNotNull(resource, "Handler registry resource is required");
         resources.add(resource);
     }
 

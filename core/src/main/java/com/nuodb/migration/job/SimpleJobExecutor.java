@@ -36,16 +36,16 @@ import java.util.*;
 /**
  * @author Sergey Bushik
  */
-public class JobExecutorImpl implements JobExecutor {
+public class SimpleJobExecutor implements JobExecutor {
 
     private transient final Log log = LogFactory.getLog(getClass());
     private final Job job;
-    private final JobStatusImpl jobStatus;
+    private final SimpleJobStatus jobStatus;
     private List<JobExecutionListener> listeners = Lists.newArrayList();
 
-    public JobExecutorImpl(Job job) {
+    public SimpleJobExecutor(Job job) {
         this.job = job;
-        this.jobStatus = new JobStatusImpl();
+        this.jobStatus = new SimpleJobStatus();
     }
 
     @Override
@@ -121,7 +121,7 @@ public class JobExecutorImpl implements JobExecutor {
     }
 
     protected JobExecution createJobExecution(Map<String, Object> context) {
-        return new JobExecutionImpl(job, jobStatus, context);
+        return new SimpleJobExecution(job, jobStatus, context);
     }
 
     protected void fireJobExecutionEvent(JobExecutionEvent event) {

@@ -39,7 +39,7 @@ public class DatabaseDialectResolverImpl extends DatabaseObjectResolverSupport<D
         implements DatabaseDialectResolver {
 
     public DatabaseDialectResolverImpl() {
-        super(StandardDialect.class);
+        super(DatabaseDialect.class, StandardDialect.class);
         register("MySQL", MySQLDialect.class);
         register("PostgreSQL", PostgreSQLDialect.class);
         register("Microsoft SQL Server", SQLServerDialect.class);

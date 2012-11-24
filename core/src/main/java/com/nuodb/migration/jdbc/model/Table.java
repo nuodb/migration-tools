@@ -67,6 +67,10 @@ public class Table extends HasNameBase {
         this.type = type;
     }
 
+    public String getQualifiedName() {
+        return getQualifiedName(null);
+    }
+
     public String getQualifiedName(DatabaseDialect databaseDialect) {
         StringBuilder qualifiedName = new StringBuilder();
         if (catalog.getName() != null) {
@@ -129,5 +133,9 @@ public class Table extends HasNameBase {
 
     public Collection<Column> listColumns() {
         return Lists.newArrayList(columns.values());
+    }
+
+    public String toString() {
+        return getQualifiedName();
     }
 }

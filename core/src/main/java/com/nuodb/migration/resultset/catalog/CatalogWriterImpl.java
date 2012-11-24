@@ -61,12 +61,12 @@ public class CatalogWriterImpl implements CatalogWriter {
 
     @Override
     public void addEntry(CatalogEntry entry) {
-        String entryName = valueOf(entry);
-        if (log.isTraceEnabled()) {
-            log.trace(String.format("Adding entry %1$s", entryName));
-        }
         try {
-            initOutput();
+            initEntriesOutput();
+            String entryName = valueOf(entry);
+            if (log.isTraceEnabled()) {
+                log.trace(String.format("Adding entry %1$s", entryName));
+            }
             if (!entries.isEmpty()) {
                 IOUtils.write(System.getProperty("line.separator"), output);
             }
@@ -77,13 +77,13 @@ public class CatalogWriterImpl implements CatalogWriter {
         }
     }
 
-    protected void initOutput() {
+    protected void initEntriesOutput() {
         if (output == null) {
-            output = getOutput();
+            output = getEntriesOutput();
         }
     }
 
-    protected OutputStream getOutput() {
+    protected OutputStream getEntriesOutput() {
         if (log.isDebugEnabled()) {
             log.debug(String.format("Opening entry catalog writer %s", catalogFile));
         }

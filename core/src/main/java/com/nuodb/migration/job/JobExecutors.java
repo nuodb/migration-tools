@@ -33,6 +33,6 @@ package com.nuodb.migration.job;
 public class JobExecutors {
 
     public static JobExecutor createJobExecutor(Job job) {
-        return new JobExecutorImpl(job);
+        return new SimpleJobExecutor(job);
     }
 }

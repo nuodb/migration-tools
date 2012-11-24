@@ -25,36 +25,52 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.job;
 
-import java.sql.DatabaseMetaData;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class SQLServerDialect extends StandardDialect {
+public class SimpleJobExecution implements JobExecution {
 
-    public SQLServerDialect(DatabaseMetaData metaData) {
-        super(metaData);
+    private Job job;
+    private JobStatus jobStatus;
+    private Map<String, Object> context;
+
+    public SimpleJobExecution(Job job, JobStatus jobStatus, Map<String, Object> context) {
+        this.job = job;
+        this.jobStatus = jobStatus;
+        this.context = context;
     }
 
     @Override
-    public char closeQuote() {
-        return ']';
+    public boolean isRunning() {
+        return jobStatus.isRunning();
     }
 
     @Override
-    public char openQuote() {
-        return '[';
+    public boolean isPaused() {
+        return jobStatus.isPaused();
     }
 
     @Override
-    public String getNoColumnsInsertClause() {
-        return "default values";
+    public boolean isStopped() {
+        return jobStatus.isStopped();
     }
 
     @Override
-    public boolean supportsSessionTimeZone() {
-        return false;
+    public Job getJob() {
+        return job;
+    }
+
+    @Override
+    public JobStatus getJobStatus() {
+        return jobStatus;
+    }
+
+    @Override
+    public Map<String, Object> getContext() {
+        return context;
     }
 }

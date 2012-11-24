@@ -27,7 +27,11 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.TimeZone;
 
 /**
  * @author Sergey Bushik
@@ -36,5 +40,51 @@ public class PostgreSQLDialect extends StandardDialect {
 
     public PostgreSQLDialect(DatabaseMetaData metaData) {
         super(metaData);
+    }
+
+    @Override
+    public boolean supportsSessionTimeZone() {
+        return true;
+    }
+
+    @Override
+    public void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException {
+        Statement statement = connection.createStatement();
+        try {
+            String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL";
+            statement.execute("SET TIME ZONE " + timeZoneAsValue);
+        } finally {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException exception) {
+                    if (log.isErrorEnabled()) {
+                        log.error("Failed closing statement", exception);
+                    }
+                }
+            }
+        }
+    }
+
+    protected String timeZoneAsValue(TimeZone timeZone) {
+        int rawOffset = timeZone.getRawOffset();
+        int dstSavings = timeZone.getDSTSavings();
+        int absOffset = Math.abs(rawOffset + dstSavings);
+        String zeros = "00";
+        String hoursOffset = Integer.toString(absOffset / 3600000);
+        String minutesOffset = Integer.toString((absOffset % 3600000) / 60000);
+
+        StringBuilder value = new StringBuilder(32);
+        value.append("INTERVAL ");
+        value.append(rawOffset >= 0 ? '+' : '-');
+        value.append("'");
+        value.append(zeros.substring(0, zeros.length() - hoursOffset.length()));
+        value.append(hoursOffset);
+        value.append(':');
+        value.append(zeros.substring(0, zeros.length() - minutesOffset.length()));
+        value.append(minutesOffset);
+        value.append("'");
+        value.append(" HOUR TO MINUTE");
+        return value.toString();
     }
 }

@@ -25,36 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.utils;
 
-import java.sql.DatabaseMetaData;
+public class Validate {
 
-/**
- * @author Sergey Bushik
- */
-public class SQLServerDialect extends StandardDialect {
-
-    public SQLServerDialect(DatabaseMetaData metaData) {
-        super(metaData);
+    private Validate() {
     }
 
-    @Override
-    public char closeQuote() {
-        return ']';
+    public static void isNotNull(Object object) {
+        isNotNull(object, "Not null value is required");
     }
 
-    @Override
-    public char openQuote() {
-        return '[';
+    public static void isNotNull(Object object, String message) {
+        if (object == null) {
+            fail(message);
+        }
     }
 
-    @Override
-    public String getNoColumnsInsertClause() {
-        return "default values";
+    public static void isTrue(boolean expression) {
+        isTrue(expression, "Boolean true is expected");
     }
 
-    @Override
-    public boolean supportsSessionTimeZone() {
-        return false;
+    public static void isTrue(boolean expression, String message) {
+        if (!expression) {
+            fail(message);
+        }
+    }
+
+    public static void fail(String message) {
+        throw new AssertionException(message);
     }
 }

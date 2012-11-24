@@ -32,6 +32,7 @@ import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.TimeZone;
 
 /**
  * Vendor specific dialect
@@ -44,9 +45,13 @@ public interface DatabaseDialect {
 
     boolean supportsReadSchemas();
 
+    boolean supportsSessionTimeZone();
+
+    void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
+
     boolean supportsTransactionIsolation(int transactionIsolationLevel) throws SQLException;
 
-    void setSupportedTransactionIsolation(Connection connection, int[] transactionIsolationLevels) throws SQLException;
+    void setTransactionIsolation(Connection connection, int[] transactionIsolationLevels) throws SQLException;
 
     String quote(String name);
 

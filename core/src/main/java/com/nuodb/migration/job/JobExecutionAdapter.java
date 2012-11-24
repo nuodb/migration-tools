@@ -25,34 +25,48 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.utils;
+package com.nuodb.migration.job;
 
-public class Assertions {
+import java.util.Map;
 
-    private Assertions() {
+/**
+ * @author Sergey Bushik
+ */
+public class JobExecutionAdapter implements JobExecution {
+
+    private JobExecution jobExecution;
+
+    public JobExecutionAdapter(JobExecution jobExecution) {
+        this.jobExecution = jobExecution;
     }
 
-    public static void assertNotNull(Object object) {
-        assertNotNull(object, "Not null value is required");
+    @Override
+    public boolean isRunning() {
+        return jobExecution.isRunning();
     }
 
-    public static void assertNotNull(Object object, String message) {
-        if (object == null) {
-            fail(message);
-        }
+    @Override
+    public boolean isPaused() {
+        return jobExecution.isPaused();
     }
 
-    public static void assertTrue(boolean expression) {
-        assertTrue(expression, "Boolean true is expected");
+    @Override
+    public boolean isStopped() {
+        return jobExecution.isStopped();
     }
 
-    public static void assertTrue(boolean expression, String message) {
-        if (!expression) {
-            fail(message);
-        }
+    @Override
+    public Job getJob() {
+        return jobExecution.getJob();
     }
 
-    public static void fail(String message) {
-        throw new AssertionException(message);
+    @Override
+    public JobStatus getJobStatus() {
+        return jobExecution.getJobStatus();
+    }
+
+    @Override
+    public Map<String, Object> getContext() {
+        return jobExecution.getContext();
     }
 }

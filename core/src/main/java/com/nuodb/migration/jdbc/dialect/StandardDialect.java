@@ -29,17 +29,21 @@ package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.jdbc4.Jdbc4TypeRegistry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.TimeZone;
 
 /**
  * @author Sergey Bushik
  */
 public class StandardDialect implements DatabaseDialect {
 
+    protected final Log log = LogFactory.getLog(getClass());
     protected final DatabaseMetaData metaData;
 
     public StandardDialect(DatabaseMetaData metaData) {
@@ -78,13 +82,22 @@ public class StandardDialect implements DatabaseDialect {
     }
 
     @Override
+    public boolean supportsSessionTimeZone() {
+        return false;
+    }
+
+    @Override
+    public void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException {
+    }
+
+    @Override
     public boolean supportsTransactionIsolation(int transactionIsolationLevel) throws SQLException {
         return metaData.supportsTransactionIsolationLevel(transactionIsolationLevel);
     }
 
     @Override
-    public void setSupportedTransactionIsolation(Connection connection,
-                                                 int[] transactionIsolationLevels) throws SQLException {
+    public void setTransactionIsolation(Connection connection,
+                                        int[] transactionIsolationLevels) throws SQLException {
         if (transactionIsolationLevels != null) {
             for (int transactionIsolationLevel : transactionIsolationLevels) {
                 if (supportsTransactionIsolation(transactionIsolationLevel)) {

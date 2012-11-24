@@ -62,7 +62,7 @@ public class CatalogReaderImpl implements CatalogReader {
         if (log.isDebugEnabled()) {
             log.debug(String.format("Entry catalog file is %1$s", catalogFile.getPath()));
         }
-        InputStream input = getInput();
+        InputStream input = getEntriesInput();
         try {
             return readEntries(input);
         } finally {
@@ -70,7 +70,7 @@ public class CatalogReaderImpl implements CatalogReader {
         }
     }
 
-    protected InputStream getInput() {
+    protected InputStream getEntriesInput() {
         try {
             return openInputStream(catalogFile);
         } catch (IOException exception) {
@@ -78,9 +78,9 @@ public class CatalogReaderImpl implements CatalogReader {
         }
     }
 
-    protected CatalogEntry[] readEntries(InputStream input) {
+    protected CatalogEntry[] readEntries(InputStream entriesInput) {
         List<CatalogEntry> entries = Lists.newArrayList();
-        Scanner scanner = new Scanner(input);
+        Scanner scanner = new Scanner(entriesInput);
         scanner.useDelimiter(System.getProperty("line.separator"));
         while (scanner.hasNext()) {
             entries.add(getEntry(scanner.next()));
@@ -115,13 +115,5 @@ public class CatalogReaderImpl implements CatalogReader {
 
     @Override
     public void close() {
-    }
-
-    public static void main(String[] args) {
-        Catalog catalog = new CatalogImpl("/tmp/test/dump.cat");
-        CatalogReader reader = catalog.getCatalogReader();
-        for (CatalogEntry entry : reader.getEntries()) {
-            System.out.println(entry.getName() + "" + entry.getType());
-        }
     }
 }

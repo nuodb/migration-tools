@@ -82,28 +82,7 @@ public class JdbcConnectionProvider implements ConnectionProvider {
 
     @Override
     public ConnectionServices getConnectionServices() throws SQLException {
-        final Connection connection = getConnection();
-        return new ConnectionServices() {
-
-            @Override
-            public Connection getConnection() throws SQLException {
-                return connection;
-            }
-
-            @Override
-            public DatabaseInspector getDatabaseInspector() throws SQLException {
-                DatabaseInspector databaseInspector = new DatabaseInspector();
-                databaseInspector.withConnection(getConnection());
-                databaseInspector.withCatalog(jdbcConnectionSpec.getCatalog());
-                databaseInspector.withSchema(jdbcConnectionSpec.getSchema());
-                return databaseInspector;
-            }
-
-            @Override
-            public void close() throws SQLException {
-                closeConnection(connection);
-            }
-        };
+        return new JdbcConnectionServices();
     }
 
     protected DataSource createDataSource() throws SQLException {
@@ -163,6 +142,39 @@ public class JdbcConnectionProvider implements ConnectionProvider {
         }
         if (connection != null) {
             connection.close();
+        }
+    }
+
+    class JdbcConnectionServices implements ConnectionServices {
+
+        private Connection connection;
+
+        @Override
+        public Connection getConnection() throws SQLException {
+            Connection current = connection;
+            if (current == null) {
+                synchronized (this) {
+                    current = connection;
+                    if (current == null) {
+                        current = connection = JdbcConnectionProvider.this.getConnection();
+                    }
+                }
+            }
+            return current;
+        }
+
+        @Override
+        public DatabaseInspector getDatabaseInspector() throws SQLException {
+            DatabaseInspector databaseInspector = new DatabaseInspector();
+            databaseInspector.withConnection(getConnection());
+            databaseInspector.withCatalog(jdbcConnectionSpec.getCatalog());
+            databaseInspector.withSchema(jdbcConnectionSpec.getSchema());
+            return databaseInspector;
+        }
+
+        @Override
+        public void close() throws SQLException {
+            closeConnection(connection);
         }
     }
 

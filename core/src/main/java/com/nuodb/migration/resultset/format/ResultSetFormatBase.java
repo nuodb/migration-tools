@@ -58,7 +58,7 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
 
     @Override
     public String getAttribute(String attribute) {
-        return attributes.get(attribute);
+        return attributes != null ? attributes.get(attribute) : null;
     }
 
     @Override
@@ -75,8 +75,10 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
         if (typeCode == Types.TIME || typeCode == Types.TIMESTAMP || typeCode == Types.DATE) {
             TimeZone timeZone = getTimeZone();
             if (timeZone != null) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeZone(timeZone);
                 Map<String, Object> options = Maps.newHashMap();
-                options.put(JdbcDateTypeBase.CALENDAR, Calendar.getInstance(timeZone));
+                options.put(JdbcDateTypeBase.CALENDAR, calendar);
                 columnValueModel.setValueAccessOptions(options);
             }
         }

@@ -28,8 +28,7 @@
 package com.nuodb.migration.resultset.format.jdbc;
 
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueException;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatBase;
+import hirondelle.date4j.DateTime;
 
 import java.sql.Date;
 import java.sql.SQLException;
@@ -59,9 +58,8 @@ public class JdbcTimestampTypeValueFormat extends JdbcTypeValueFormatBase<Timest
     @Override
     protected void doSetValue(JdbcTypeValueAccess<Timestamp> access, String value,
                               Map<String, Object> options) throws SQLException {
-        if (!(doSetValueAsTimestamp(access, value, options) || doSetValueAsDate(access, value,
-                options) || doSetValueAsYear(access,
-                value, options))) {
+        if (!(doSetValueAsTimestamp(access, value, options) || doSetValueAsDate(access, value, options) ||
+                doSetValueAsYear(access, value, options))) {
             throw new JdbcTypeValueException(format("Value %s is not timestamp, date or year", value));
         }
     }
@@ -94,5 +92,12 @@ public class JdbcTimestampTypeValueFormat extends JdbcTypeValueFormatBase<Timest
         } catch (ParseException e) {
             return false;
         }
+    }
+
+    public static void main(String[] args) {
+        DateTime dateTime = new DateTime("2012");
+        System.out.println(dateTime);
+        System.out.println(dateTime.getYear());
+        System.out.println(dateTime.getPrecision());
     }
 }

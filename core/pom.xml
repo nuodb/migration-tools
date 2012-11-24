@@ -15,29 +15,12 @@
 
     <repositories>
         <repository>
-            <id>nuodb.migration.tools</id>
-            <url>file://${basedir}/.m2</url>
-        </repository>
-        <repository>
             <id>apache.snapshots</id>
             <url>https://repository.apache.org/content/groups/snapshots</url>
         </repository>
     </repositories>
 
     <dependencies>
-        <!-- JDBC -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.20</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nuodb</groupId>
-            <artifactId>nuodb-jdbc</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <!-- JDBC -->
-
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>

@@ -30,9 +30,11 @@ package com.nuodb.migration.jdbc.dialect;
 import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.TimeZone;
 
 /**
  * @author Sergey Bushik
@@ -53,10 +55,52 @@ public class MySQLDialect extends StandardDialect {
         return '`';
     }
 
+    @Override
+    public boolean supportsSessionTimeZone() {
+        return true;
+    }
+
+    @Override
+    public void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException {
+        Statement statement = connection.createStatement();
+        try {
+            String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "SYSTEM";
+            statement.execute("SET @@session.time_zone = '" + timeZoneAsValue + "'");
+        } finally {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException exception) {
+                    if (log.isErrorEnabled()) {
+                        log.error("Failed closing statement", exception);
+                    }
+                }
+            }
+        }
+    }
+
+    protected String timeZoneAsValue(TimeZone timeZone) {
+        int rawOffset = timeZone.getRawOffset();
+        int dstSavings = timeZone.getDSTSavings();
+        int absOffset = Math.abs(rawOffset + dstSavings);
+        String zeros = "00";
+        String hoursOffset = Integer.toString(absOffset / 3600000);
+        String minutesOffset = Integer.toString((absOffset % 3600000) / 60000);
+
+        StringBuilder value = new StringBuilder(6);
+        value.append(rawOffset >= 0 ? '+' : '-');
+        value.append(zeros.substring(0, zeros.length() - hoursOffset.length()));
+        value.append(hoursOffset);
+        value.append(':');
+        value.append(zeros.substring(0, zeros.length() - minutesOffset.length()));
+        value.append(minutesOffset);
+        return value.toString();
+    }
+
     /**
-     * Forces driver to stream resultset http://goo.gl/kl1Nr
+     * Forces driver to stream ResultSet http://goo.gl/kl1Nr
      *
-     * @param statement to stream resultset set
+     * @param statement to stream ResultSet
      * @throws SQLException
      */
     @Override

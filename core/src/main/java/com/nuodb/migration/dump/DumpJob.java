@@ -45,7 +45,6 @@ import com.nuodb.migration.resultset.catalog.CatalogEntry;
 import com.nuodb.migration.resultset.catalog.CatalogWriter;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetOutput;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.spec.NativeQuerySpec;
 import com.nuodb.migration.spec.SelectQuerySpec;
@@ -76,23 +75,24 @@ public class DumpJob extends JobBase {
 
     protected final Log log = LogFactory.getLog(getClass());
 
-    private ConnectionProvider connectionProvider;
     private TimeZone timeZone;
     private Catalog catalog;
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
     private Map<String, String> attributes;
+    private ConnectionProvider connectionProvider;
     private DatabaseDialectResolver databaseDialectResolver;
     private ResultSetFormatFactory resultSetFormatFactory;
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver;
 
     @Override
-    public void execute(final JobExecution execution) throws Exception {
-        ConnectionServices connectionServices = null;
+    public void execute(JobExecution jobExecution) throws Exception {
+        DumpJobExecution dumpJobExecution = new DumpJobExecution(jobExecution);
+        ConnectionServices connectionServices = connectionProvider.getConnectionServices();
+        dumpJobExecution.setConnectionServices(connectionServices);
         try {
-            connectionServices = connectionProvider.getConnectionServices();
-            dump(execution, connectionServices);
+            dump(dumpJobExecution);
         } finally {
             if (connectionServices != null) {
                 connectionServices.close();
@@ -100,76 +100,104 @@ public class DumpJob extends JobBase {
         }
     }
 
-    protected void dump(JobExecution execution, ConnectionServices connectionServices) throws SQLException {
+    protected void dump(DumpJobExecution dumpJobExecution) throws SQLException {
+        ConnectionServices connectionServices = dumpJobExecution.getConnectionServices();
         DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();
         databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
         databaseInspector.withDatabaseDialectResolver(databaseDialectResolver);
+
         Database database = databaseInspector.inspect();
+        dumpJobExecution.setDatabase(database);
 
-        DatabaseDialect databaseDialect = database.getDatabaseDialect();
-        databaseDialect.setSupportedTransactionIsolation(connectionServices.getConnection(),
-                new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
-
-        DatabaseMetaData metaData = connectionServices.getConnection().getMetaData();
-        JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry =
-                jdbcTypeValueFormatRegistryResolver.resolve(metaData);
+        Connection connection = connectionServices.getConnection();
+        DatabaseMetaData metaData = connection.getMetaData();
+        dumpJobExecution.setJdbcTypeValueFormatRegistry(jdbcTypeValueFormatRegistryResolver.resolve(metaData));
 
         CatalogWriter catalogWriter = getCatalog().getCatalogWriter();
+        dumpJobExecution.setCatalogWriter(catalogWriter);
+
+        DatabaseDialect databaseDialect = database.getDatabaseDialect();
         try {
+            databaseDialect.setTransactionIsolation(connection,
+                    new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
+
+            if (databaseDialect.supportsSessionTimeZone()) {
+                databaseDialect.setSessionTimeZone(connection, timeZone);
+            }
+
             for (SelectQuery selectQuery : createSelectQueries(database, getSelectQuerySpecs())) {
-                dump(execution, connectionServices, jdbcTypeValueFormatRegistry, database, selectQuery, catalogWriter,
-                        createEntry(selectQuery, getOutputType()));
+                dump(dumpJobExecution, selectQuery, createCatalogEntry(selectQuery, getOutputType()));
             }
             for (NativeQuery nativeQuery : createNativeQueries(getNativeQuerySpecs())) {
-                dump(execution, connectionServices, jdbcTypeValueFormatRegistry, database, nativeQuery, catalogWriter,
-                        createEntry(nativeQuery, getOutputType()));
+                dump(dumpJobExecution, nativeQuery, createCatalogEntry(nativeQuery, getOutputType()));
             }
         } finally {
             closeQuietly(catalogWriter);
+
+            if (databaseDialect.supportsSessionTimeZone()) {
+                databaseDialect.setSessionTimeZone(connection, null);
+            }
         }
     }
 
-    protected CatalogEntry createEntry(SelectQuery query, String type) {
-        Table table = query.getTables().get(0);
+    protected CatalogEntry createCatalogEntry(SelectQuery selectQuery, String type) {
+        Table table = selectQuery.getTables().get(0);
         return new CatalogEntry(table.getName(), type);
     }
 
-    protected CatalogEntry createEntry(NativeQuery query, String type) {
+    protected CatalogEntry createCatalogEntry(NativeQuery nativeQuery, String type) {
         return new CatalogEntry(format(QUERY_ENTRY_NAME, new Date()), type);
     }
 
-    protected void dump(final JobExecution execution, final ConnectionServices connectionServices,
-                        final JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry,
-                        final Database database, final Query query,
-                        final CatalogWriter catalogWriter, final CatalogEntry catalogEntry) throws SQLException {
-        final ResultSetOutput resultSetOutput = getResultSetFormatFactory().createOutput(getOutputType());
-        resultSetOutput.setAttributes(getAttributes());
-        resultSetOutput.setTimeZone(getTimeZone());
-        resultSetOutput.setJdbcTypeValueFormatRegistry(jdbcTypeValueFormatRegistry);
-
-        JdbcTypeRegistry jdbcTypeRegistry = database.getDatabaseDialect().getJdbcTypeRegistry();
-        JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider = new JdbcTypeValueAccessProvider(jdbcTypeRegistry);
-        resultSetOutput.setJdbcTypeValueAccessProvider(jdbcTypeValueAccessProvider);
-
-        QueryTemplate queryTemplate = new QueryTemplate(connectionServices.getConnection());
+    protected void dump(final DumpJobExecution dumpJobExecution, final Query query,
+                        final CatalogEntry catalogEntry) throws SQLException {
+        final Database database = dumpJobExecution.getDatabase();
+        QueryTemplate queryTemplate = new QueryTemplate(dumpJobExecution.getConnectionServices().getConnection());
         queryTemplate.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
-                        return createStatement(connection, database, query);
+                        return prepareStatement(connection, database, query);
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement preparedStatement) throws SQLException {
-                        dump(execution, preparedStatement, catalogWriter, catalogEntry, resultSetOutput);
+                        dump(dumpJobExecution, preparedStatement, catalogEntry);
                     }
                 }
         );
     }
 
-    protected PreparedStatement createStatement(Connection connection, Database database,
-                                                Query query) throws SQLException {
+    protected void dump(DumpJobExecution dumpJobExecution, PreparedStatement preparedStatement,
+                        CatalogEntry catalogEntry) throws SQLException {
+        final ResultSetOutput resultSetOutput = getResultSetFormatFactory().createOutput(getOutputType());
+        resultSetOutput.setAttributes(getAttributes());
+        resultSetOutput.setJdbcTypeValueFormatRegistry(dumpJobExecution.getJdbcTypeValueFormatRegistry());
+
+        DatabaseDialect databaseDialect = dumpJobExecution.getDatabase().getDatabaseDialect();
+        if (!databaseDialect.supportsSessionTimeZone()) {
+            resultSetOutput.setTimeZone(getTimeZone());
+        }
+        JdbcTypeRegistry jdbcTypeRegistry = databaseDialect.getJdbcTypeRegistry();
+        resultSetOutput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
+
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        CatalogWriter catalogWriter = dumpJobExecution.getCatalogWriter();
+        catalogWriter.addEntry(catalogEntry);
+        resultSetOutput.setOutputStream(catalogWriter.getEntryOutput(catalogEntry));
+        resultSetOutput.setResultSet(resultSet);
+
+        resultSetOutput.writeBegin();
+        while (dumpJobExecution.isRunning() && resultSet.next()) {
+            resultSetOutput.writeRow();
+        }
+        resultSetOutput.writeEnd();
+    }
+
+    protected PreparedStatement prepareStatement(Connection connection, Database database,
+                                                 Query query) throws SQLException {
         if (log.isDebugEnabled()) {
             log.debug(format("Prepare SQL: %s", query.toQuery()));
         }
@@ -178,21 +206,6 @@ public class DumpJob extends JobBase {
         DatabaseDialect databaseDialect = database.getDatabaseDialect();
         databaseDialect.enableStreaming(preparedStatement);
         return preparedStatement;
-    }
-
-    protected void dump(JobExecution execution, PreparedStatement preparedStatement, CatalogWriter writer,
-                        CatalogEntry entry, ResultSetOutput resultSetOutput) throws SQLException {
-        ResultSet resultSet = preparedStatement.executeQuery();
-
-        writer.addEntry(entry);
-        resultSetOutput.setOutputStream(writer.getEntryOutput(entry));
-        resultSetOutput.setResultSet(resultSet);
-
-        resultSetOutput.writeBegin();
-        while (execution.isRunning() && resultSet.next()) {
-            resultSetOutput.writeRow();
-        }
-        resultSetOutput.writeEnd();
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database,

@@ -37,6 +37,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Map;
 
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
@@ -46,12 +48,11 @@ public class DatabaseObjectResolverSupport<T> implements DatabaseObjectResolver<
 
     private Map<DatabaseInfoMatcher, Class<? extends T>> databaseInfoMatchers = Maps.newHashMap();
 
+    private Class<? extends T> targetObjectClass;
     private Class<? extends T> defaultObjectClass;
 
-    public DatabaseObjectResolverSupport() {
-    }
-
-    public DatabaseObjectResolverSupport(Class<? extends T> defaultObjectClass) {
+    public DatabaseObjectResolverSupport(Class<? extends T> targetObjectClass, Class<? extends T> defaultObjectClass) {
+        this.targetObjectClass = targetObjectClass;
         this.defaultObjectClass = defaultObjectClass;
     }
 
@@ -92,11 +93,11 @@ public class DatabaseObjectResolverSupport<T> implements DatabaseObjectResolver<
         }
         if (objectClass != null) {
             if (log.isDebugEnabled()) {
-                log.debug(String.format("Resolved object %1$s", objectClass.getName()));
+                log.debug(format("Resolved %s to %s", targetObjectClass.getName(), objectClass.getName()));
             }
         } else if (defaultObjectClass != null) {
             if (log.isWarnEnabled()) {
-                log.warn(String.format("Defaulted to object %1$s", defaultObjectClass.getName()));
+                log.warn(format("Defaulted %s to %s", targetObjectClass.getName(), defaultObjectClass.getName()));
             }
             objectClass = defaultObjectClass;
         }

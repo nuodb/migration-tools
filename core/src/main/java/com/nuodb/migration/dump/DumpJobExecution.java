@@ -25,52 +25,58 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.job;
+package com.nuodb.migration.dump;
 
-import java.util.Map;
+import com.nuodb.migration.jdbc.connection.ConnectionServices;
+import com.nuodb.migration.jdbc.model.Database;
+import com.nuodb.migration.job.JobExecution;
+import com.nuodb.migration.job.JobExecutionAdapter;
+import com.nuodb.migration.resultset.catalog.CatalogWriter;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
 
 /**
  * @author Sergey Bushik
  */
-public class JobExecutionImpl implements JobExecution {
+public class DumpJobExecution extends JobExecutionAdapter {
 
-    private Job job;
-    private JobStatus jobStatus;
-    private Map<String, Object> context;
+    private ConnectionServices connectionServices;
+    private Database database;
+    private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;
+    private CatalogWriter catalogWriter;
 
-    public JobExecutionImpl(Job job, JobStatus jobStatus, Map<String, Object> context) {
-        this.job = job;
-        this.jobStatus = jobStatus;
-        this.context = context;
+    public DumpJobExecution(JobExecution jobExecution) {
+        super(jobExecution);
     }
 
-    @Override
-    public boolean isRunning() {
-        return jobStatus.isRunning();
+    public ConnectionServices getConnectionServices() {
+        return connectionServices;
     }
 
-    @Override
-    public boolean isPaused() {
-        return jobStatus.isPaused();
+    public void setConnectionServices(ConnectionServices connectionServices) {
+        this.connectionServices = connectionServices;
     }
 
-    @Override
-    public boolean isStopped() {
-        return jobStatus.isStopped();
+    public Database getDatabase() {
+        return database;
     }
 
-    @Override
-    public Job getJob() {
-        return job;
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 
-    @Override
-    public JobStatus getJobStatus() {
-        return jobStatus;
+    public JdbcTypeValueFormatRegistry getJdbcTypeValueFormatRegistry() {
+        return jdbcTypeValueFormatRegistry;
     }
 
-    @Override
-    public Map<String, Object> getContext() {
-        return context;
+    public void setJdbcTypeValueFormatRegistry(JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry) {
+        this.jdbcTypeValueFormatRegistry = jdbcTypeValueFormatRegistry;
+    }
+
+    public CatalogWriter getCatalogWriter() {
+        return catalogWriter;
+    }
+
+    public void setCatalogWriter(CatalogWriter catalogWriter) {
+        this.catalogWriter = catalogWriter;
     }
 }

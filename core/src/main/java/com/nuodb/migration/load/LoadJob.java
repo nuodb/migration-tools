@@ -43,7 +43,6 @@ import com.nuodb.migration.resultset.catalog.CatalogEntry;
 import com.nuodb.migration.resultset.catalog.CatalogReader;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetInput;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,8 +58,6 @@ import java.util.TimeZone;
 
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.model.ObjectType.*;
-import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
-import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 
 /**
  * @author Sergey Bushik
@@ -77,11 +74,12 @@ public class LoadJob extends JobBase {
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver;
 
     @Override
-    public void execute(final JobExecution execution) throws Exception {
-        ConnectionServices connectionServices = null;
+    public void execute(JobExecution jobExecution) throws Exception {
+        LoadJobExecution loadJobExecution = new LoadJobExecution(jobExecution);
+        ConnectionServices connectionServices = connectionProvider.getConnectionServices();
+        loadJobExecution.setConnectionServices(connectionServices);
         try {
-            connectionServices = connectionProvider.getConnectionServices();
-            load(execution, connectionServices);
+            load(loadJobExecution);
         } finally {
             if (connectionServices != null) {
                 connectionServices.close();
@@ -89,64 +87,75 @@ public class LoadJob extends JobBase {
         }
     }
 
-    protected void load(JobExecution execution, ConnectionServices connectionServices) throws SQLException {
+    protected void load(LoadJobExecution loadJobExecution) throws SQLException {
+        ConnectionServices connectionServices = loadJobExecution.getConnectionServices();
         DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();
         databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
         databaseInspector.withDatabaseDialectResolver(databaseDialectResolver);
+
         Database database = databaseInspector.inspect();
+        loadJobExecution.setDatabase(database);
 
-        DatabaseDialect databaseDialect = database.getDatabaseDialect();
-        databaseDialect.setSupportedTransactionIsolation(connectionServices.getConnection(),
-                new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
-
-        DatabaseMetaData metaData = connectionServices.getConnection().getMetaData();
-        JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry =
-                jdbcTypeValueFormatRegistryResolver.resolve(metaData);
+        Connection connection = connectionServices.getConnection();
+        DatabaseMetaData metaData = connection.getMetaData();
+        loadJobExecution.setJdbcTypeValueFormatRegistry(jdbcTypeValueFormatRegistryResolver.resolve(metaData));
 
         CatalogReader catalogReader = getCatalog().getCatalogReader();
+        loadJobExecution.setCatalogReader(catalogReader);
+
+        DatabaseDialect databaseDialect = database.getDatabaseDialect();
         try {
-            for (CatalogEntry catalogEntry : catalogReader.getEntries()) {
-                load(execution, connectionServices, jdbcTypeValueFormatRegistry, database, catalogReader, catalogEntry);
+            if (databaseDialect.supportsSessionTimeZone()) {
+                databaseDialect.setSessionTimeZone(connection, timeZone);
             }
-            connectionServices.getConnection().commit();
+            for (CatalogEntry catalogEntry : catalogReader.getEntries()) {
+                load(loadJobExecution, catalogEntry);
+            }
+            connection.commit();
         } finally {
             closeQuietly(catalogReader);
+
+            if (databaseDialect.supportsSessionTimeZone()) {
+                databaseDialect.setSessionTimeZone(connection, null);
+            }
         }
     }
 
-    protected void load(JobExecution execution, ConnectionServices connectionServices,
-                        JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry, Database database,
-                        CatalogReader catalogReader, CatalogEntry catalogEntry) throws SQLException {
+    protected void load(LoadJobExecution loadJobExecution, CatalogEntry catalogEntry) throws SQLException {
+        CatalogReader catalogReader = loadJobExecution.getCatalogReader();
         InputStream entryInput = catalogReader.getEntryInput(catalogEntry);
         try {
-            final ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(catalogEntry.getType());
+            DatabaseDialect databaseDialect = loadJobExecution.getDatabase().getDatabaseDialect();
+            ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(catalogEntry.getType());
             resultSetInput.setAttributes(getAttributes());
-            resultSetInput.setTimeZone(getTimeZone());
+            if (!databaseDialect.supportsSessionTimeZone()) {
+                resultSetInput.setTimeZone(getTimeZone());
+            }
             resultSetInput.setInputStream(entryInput);
-            resultSetInput.setJdbcTypeValueFormatRegistry(jdbcTypeValueFormatRegistry);
+            resultSetInput.setJdbcTypeValueFormatRegistry(loadJobExecution.getJdbcTypeValueFormatRegistry());
 
-            JdbcTypeRegistry jdbcTypeRegistry = database.getDatabaseDialect().getJdbcTypeRegistry();
-            JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider = new JdbcTypeValueAccessProvider(jdbcTypeRegistry);
-            resultSetInput.setJdbcTypeValueAccessProvider(jdbcTypeValueAccessProvider);
+            JdbcTypeRegistry jdbcTypeRegistry = databaseDialect.getJdbcTypeRegistry();
+            resultSetInput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
 
-            load(execution, connectionServices, database, resultSetInput, catalogEntry.getName());
+            load(loadJobExecution, resultSetInput, catalogEntry.getName());
         } finally {
             closeQuietly(entryInput);
         }
     }
 
-    protected void load(final JobExecution execution, ConnectionServices connectionServices, Database database,
-                        final ResultSetInput resultSetInput, String tableName) throws SQLException {
+    protected void load(final LoadJobExecution loadJobExecution, final ResultSetInput resultSetInput,
+                        String tableName) throws SQLException {
         resultSetInput.readBegin();
 
         ColumnModelSet<ColumnModel> columns = resultSetInput.getColumnModelSet();
+        Database database = loadJobExecution.getDatabase();
         Table table = database.findTable(tableName);
         for (ColumnModel column : columns) {
             column.copy(table.getColumn(column.getName()));
         }
         final InsertQuery query = createInsertQuery(table, columns);
 
-        QueryTemplate queryTemplate = new QueryTemplate(connectionServices.getConnection());
+        QueryTemplate queryTemplate = new QueryTemplate(loadJobExecution.getConnectionServices().getConnection());
         queryTemplate.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
@@ -157,7 +166,7 @@ public class LoadJob extends JobBase {
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement preparedStatement) throws SQLException {
-                        load(preparedStatement, resultSetInput, execution);
+                        load(loadJobExecution, preparedStatement, resultSetInput);
                     }
                 }
         );
@@ -170,10 +179,10 @@ public class LoadJob extends JobBase {
         return connection.prepareStatement(query.toQuery());
     }
 
-    protected void load(PreparedStatement preparedStatement, ResultSetInput resultSetInput,
-                        JobExecution execution) throws SQLException {
+    protected void load(LoadJobExecution loadJobExecution, PreparedStatement preparedStatement,
+                        ResultSetInput resultSetInput) throws SQLException {
         resultSetInput.setPreparedStatement(preparedStatement);
-        while (resultSetInput.hasNextRow() && execution.isRunning()) {
+        while (loadJobExecution.isRunning() && resultSetInput.hasNextRow()) {
             resultSetInput.readRow();
             preparedStatement.executeUpdate();
         }

@@ -25,36 +25,58 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.load;
 
-import java.sql.DatabaseMetaData;
+import com.nuodb.migration.jdbc.connection.ConnectionServices;
+import com.nuodb.migration.jdbc.model.Database;
+import com.nuodb.migration.job.JobExecution;
+import com.nuodb.migration.job.JobExecutionAdapter;
+import com.nuodb.migration.resultset.catalog.CatalogReader;
+import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
 
 /**
  * @author Sergey Bushik
  */
-public class SQLServerDialect extends StandardDialect {
+public class LoadJobExecution extends JobExecutionAdapter {
 
-    public SQLServerDialect(DatabaseMetaData metaData) {
-        super(metaData);
+    private ConnectionServices connectionServices;
+    private Database database;
+    private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;
+    private CatalogReader catalogReader;
+
+    public LoadJobExecution(JobExecution jobExecution) {
+        super(jobExecution);
     }
 
-    @Override
-    public char closeQuote() {
-        return ']';
+    public ConnectionServices getConnectionServices() {
+        return connectionServices;
     }
 
-    @Override
-    public char openQuote() {
-        return '[';
+    public void setConnectionServices(ConnectionServices connectionServices) {
+        this.connectionServices = connectionServices;
     }
 
-    @Override
-    public String getNoColumnsInsertClause() {
-        return "default values";
+    public Database getDatabase() {
+        return database;
     }
 
-    @Override
-    public boolean supportsSessionTimeZone() {
-        return false;
+    public void setDatabase(Database database) {
+        this.database = database;
+    }
+
+    public JdbcTypeValueFormatRegistry getJdbcTypeValueFormatRegistry() {
+        return jdbcTypeValueFormatRegistry;
+    }
+
+    public void setJdbcTypeValueFormatRegistry(JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry) {
+        this.jdbcTypeValueFormatRegistry = jdbcTypeValueFormatRegistry;
+    }
+
+    public CatalogReader getCatalogReader() {
+        return catalogReader;
+    }
+
+    public void setCatalogReader(CatalogReader catalogReader) {
+        this.catalogReader = catalogReader;
     }
 }

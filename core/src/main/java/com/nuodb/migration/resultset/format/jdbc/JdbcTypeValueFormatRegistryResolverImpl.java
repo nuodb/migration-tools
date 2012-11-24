@@ -36,7 +36,7 @@ public class JdbcTypeValueFormatRegistryResolverImpl extends DatabaseObjectResol
         implements JdbcTypeValueFormatRegistryResolver {
 
     public JdbcTypeValueFormatRegistryResolverImpl() {
-        super(StandardJdbcTypeValueFormatRegistry.class);
+        super(JdbcTypeValueFormatRegistry.class, StandardJdbcTypeValueFormatRegistry.class);
         register("NuoDB", NuoDBJdbcTypeValueFormatRegistry.class);
     }
 }

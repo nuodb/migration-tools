@@ -114,7 +114,7 @@ public class Database {
     public Table findTable(String table) {
         List<Table> tables = findTables(table);
         if (tables.isEmpty()) {
-            throw new ModelException(format("Table %s doesn't exist", table));
+            throw new ModelException(format("Can't find table %s", table));
         } else if (tables.size() > 1) {
             throw new ModelException(format("Multiple tables %s correspond to %s", tables, table));
         }

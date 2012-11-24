@@ -32,7 +32,7 @@ import java.util.Date;
 /**
  * @author Sergey Bushik
  */
-public class JobStatusImpl implements JobStatus {
+public class SimpleJobStatus implements JobStatus {
 
     private JobStatusType jobStatusType;
     private boolean running;
