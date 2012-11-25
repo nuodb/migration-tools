@@ -27,32 +27,8 @@
  */
 package com.nuodb.migration.utils;
 
+/**
+ * @author Sergey Bushik
+ */
 public class Validate {
-
-    private Validate() {
-    }
-
-    public static void isNotNull(Object object) {
-        isNotNull(object, "Not null value is required");
-    }
-
-    public static void isNotNull(Object object, String message) {
-        if (object == null) {
-            fail(message);
-        }
-    }
-
-    public static void isTrue(boolean expression) {
-        isTrue(expression, "Boolean true is expected");
-    }
-
-    public static void isTrue(boolean expression, String message) {
-        if (!expression) {
-            fail(message);
-        }
-    }
-
-    public static void fail(String message) {
-        throw new AssertionException(message);
-    }
 }
