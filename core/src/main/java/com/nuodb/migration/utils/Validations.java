@@ -25,44 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.schema;
+package com.nuodb.migration.utils;
 
-import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.connection.ConnectionServices;
-import com.nuodb.migration.job.JobBase;
-import com.nuodb.migration.job.JobExecution;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+public class Validations {
 
-/**
- * @author Sergey Bushik
- */
-public class GenerateSchemaJob extends JobBase {
-
-    protected final Log log = LogFactory.getLog(getClass());
-
-    private ConnectionProvider sourceConnectionProvider;
-    private ConnectionProvider targetConnectionProvider;
-
-    @Override
-    public void execute(JobExecution execution) throws Exception {
-        ConnectionServices targetConnection = sourceConnectionProvider.getConnectionServices();
-        ConnectionServices sourceConnection = targetConnectionProvider.getConnectionServices();
+    private Validations() {
     }
 
-    public ConnectionProvider getSourceConnectionProvider() {
-        return sourceConnectionProvider;
+    public static void isNotNull(Object object) {
+        isNotNull(object, "Not null value is required");
     }
 
-    public void setSourceConnectionProvider(ConnectionProvider sourceConnectionProvider) {
-        this.sourceConnectionProvider = sourceConnectionProvider;
+    public static void isNotNull(Object object, String message) {
+        if (object == null) {
+            fail(message);
+        }
     }
 
-    public ConnectionProvider getTargetConnectionProvider() {
-        return targetConnectionProvider;
+    public static void isTrue(boolean expression) {
+        isTrue(expression, "Boolean true is expected");
     }
 
-    public void setTargetConnectionProvider(ConnectionProvider targetConnectionProvider) {
-        this.targetConnectionProvider = targetConnectionProvider;
+    public static void isTrue(boolean expression, String message) {
+        if (!expression) {
+            fail(message);
+        }
+    }
+
+    public static void fail(String message) {
+        throw new ValidationException(message);
     }
 }

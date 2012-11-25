@@ -28,8 +28,8 @@
 package com.nuodb.migration.resultset.catalog;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +47,7 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
  */
 public class CatalogReaderImpl implements CatalogReader {
 
-    protected final Log log = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private File catalogDir;
     private File catalogFile;
@@ -59,8 +59,8 @@ public class CatalogReaderImpl implements CatalogReader {
 
     @Override
     public CatalogEntry[] getEntries() {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Entry catalog file is %1$s", catalogFile.getPath()));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Entry catalog file is %1$s", catalogFile.getPath()));
         }
         InputStream input = getEntriesInput();
         try {
@@ -103,8 +103,8 @@ public class CatalogReaderImpl implements CatalogReader {
         InputStream entryInput;
         try {
             File file = getFile(catalogDir, valueOf(entry));
-            if (log.isDebugEnabled()) {
-                log.debug(String.format("Opening file %s", file.getPath()));
+            if (logger.isDebugEnabled()) {
+                logger.debug(String.format("Opening file %s", file.getPath()));
             }
             entryInput = openInputStream(file);
         } catch (IOException e) {

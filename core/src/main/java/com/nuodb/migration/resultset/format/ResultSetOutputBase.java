@@ -33,8 +33,8 @@ import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
 import java.io.Writer;
@@ -47,7 +47,7 @@ import java.sql.SQLException;
 @SuppressWarnings("unchecked")
 public abstract class ResultSetOutputBase extends ResultSetFormatBase implements ResultSetOutput {
 
-    private transient final Log log = LogFactory.getLog(getClass());
+    private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     private Writer writer;
     private OutputStream outputStream;
@@ -124,8 +124,8 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
 
     @Override
     public final void writeBegin() {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Write begin %s", getClass().getName()));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Write begin %s", getClass().getName()));
         }
         doWriteBegin();
     }
@@ -152,8 +152,8 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
 
     @Override
     public void writeEnd() {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("End result output %s", getClass().getName()));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("End result output %s", getClass().getName()));
         }
         doWriteEnd();
     }

@@ -21,8 +21,8 @@ import com.nuodb.migration.cli.parse.Help;
 import com.nuodb.migration.cli.parse.HelpHint;
 import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.OptionException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -81,7 +81,7 @@ public class HelpFormatter extends HelpHint {
                 ));
     }
 
-    protected transient final Log log = LogFactory.getLog(getClass());
+    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
     protected Set<HelpHint> usageOutputHints = Sets.newHashSet(USAGE_OUTPUT_HINTS);
     protected Set<HelpHint> helpOutputHints = Sets.newHashSet(HELP_OUTPUT_HINTS);
     protected Set<HelpHint> optionOutputHints = Sets.newHashSet(OPTION_OUTPUT_HINTS);
@@ -108,8 +108,8 @@ public class HelpFormatter extends HelpHint {
             footer(writer);
             writer.flush();
         } catch (IOException e) {
-            if (log.isWarnEnabled()) {
-                log.warn("Failed formatting help", e);
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed formatting help", e);
             }
         }
     }

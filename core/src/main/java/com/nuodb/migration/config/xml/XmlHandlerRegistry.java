@@ -29,7 +29,7 @@ package com.nuodb.migration.config.xml;
 
 import com.nuodb.migration.utils.Priority;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 import org.simpleframework.xml.convert.Converter;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
@@ -37,8 +37,8 @@ import org.simpleframework.xml.stream.OutputNode;
 @SuppressWarnings("unchecked")
 public class XmlHandlerRegistry {
 
-    private PriorityList<XmlReadHandler> readers = new PriorityListImpl<XmlReadHandler>();
-    private PriorityList<XmlWriteHandler> writers = new PriorityListImpl<XmlWriteHandler>();
+    private PriorityList<XmlReadHandler> readers = new SimplePriorityList();
+    private PriorityList<XmlWriteHandler> writers = new SimplePriorityList<XmlWriteHandler>();
 
     public XmlHandlerRegistry registerHandler(XmlHandler handler) {
         return registerHandler(handler, Priority.NORMAL);

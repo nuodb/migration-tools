@@ -58,8 +58,8 @@ public class PostgreSQLDialect extends StandardDialect {
                 try {
                     statement.close();
                 } catch (SQLException exception) {
-                    if (log.isErrorEnabled()) {
-                        log.error("Failed closing statement", exception);
+                    if (logger.isErrorEnabled()) {
+                        logger.error("Failed closing statement", exception);
                     }
                 }
             }

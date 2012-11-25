@@ -37,9 +37,9 @@ import com.nuodb.migration.resultset.format.csv.CsvResultSetOutput;
 import com.nuodb.migration.resultset.format.xml.XmlAttributes;
 import com.nuodb.migration.resultset.format.xml.XmlResultSetInput;
 import com.nuodb.migration.resultset.format.xml.XmlResultSetOutput;
-import com.nuodb.migration.utils.ClassUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.nuodb.migration.utils.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -49,7 +49,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class ResultSetFormatFactoryImpl implements ResultSetFormatFactory {
 
-    protected final Log log = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private Map<String, Class<? extends ResultSetInput>> inputClasses = Maps.newHashMap();
 
@@ -87,21 +87,21 @@ public class ResultSetFormatFactoryImpl implements ResultSetFormatFactory {
 
     protected <T extends ResultSetFormat> T createFormat(String formatType, Class<T> formatClass) {
         if (formatClass == null) {
-            if (log.isTraceEnabled()) {
-                log.trace(String.format("Can't resolve format type %1$s to a class", formatType));
+            if (logger.isTraceEnabled()) {
+                logger.trace(String.format("Can't resolve format type %1$s to a class", formatType));
             }
-            ClassLoader classLoader = ClassUtils.getClassLoader();
+            ClassLoader classLoader = Reflections.getClassLoader();
             try {
                 formatClass = (Class<T>) classLoader.loadClass(formatType);
             } catch (ClassNotFoundException e) {
-                if (log.isWarnEnabled()) {
-                    log.warn(String.format("Loading %1$s as class failed", formatType));
+                if (logger.isWarnEnabled()) {
+                    logger.warn(String.format("Loading %1$s as class failed", formatType));
                 }
             }
             if (formatClass == null) {
                 throw new ResultSetInputException(String.format("Format %1$s is not recognized", formatType));
             }
         }
-        return ClassUtils.newInstance(formatClass);
+        return Reflections.newInstance(formatClass);
     }
 }

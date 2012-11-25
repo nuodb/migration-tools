@@ -53,7 +53,7 @@ import static com.nuodb.migration.bootstrap.config.BootstrapConfig.LOADER;
 @SuppressWarnings("unchecked")
 public class Bootstrap {
 
-    private static final Log log = LogFactory.getLog(Bootstrap.class);
+    private static final Log log = LogFactory.getLogger(Bootstrap.class);
 
     private ClassLoader classLoader;
 

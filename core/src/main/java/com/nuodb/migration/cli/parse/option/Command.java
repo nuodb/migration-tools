@@ -30,7 +30,7 @@ package com.nuodb.migration.cli.parse.option;
 import com.google.common.collect.Lists;
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.util.*;
 
@@ -67,7 +67,7 @@ public class Command extends ContainerBase {
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
         triggers.addAll(super.getTriggers());
         triggers.add(new TriggerImpl(getName()));
         Set<String> aliases = getAliases();

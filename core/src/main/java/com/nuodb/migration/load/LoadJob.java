@@ -44,8 +44,9 @@ import com.nuodb.migration.resultset.catalog.CatalogReader;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetInput;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.nuodb.migration.utils.Validations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -64,7 +65,7 @@ import static com.nuodb.migration.jdbc.model.ObjectType.*;
  */
 public class LoadJob extends JobBase {
 
-    protected final Log log = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     private ConnectionProvider connectionProvider;
     private TimeZone timeZone;
     private Map<String, String> attributes;
@@ -75,14 +76,26 @@ public class LoadJob extends JobBase {
 
     @Override
     public void execute(JobExecution jobExecution) throws Exception {
+        Validations.isNotNull(getCatalog(), "Catalog is required");
+        Validations.isNotNull(getConnectionProvider(), "Connection provider is required");
+        Validations.isNotNull(getDatabaseDialectResolver(), "Database dialect resolver is required");
+        Validations.isNotNull(getJdbcTypeValueFormatRegistryResolver(),
+                "JDBC type value format registry resolver is required");
+
         LoadJobExecution loadJobExecution = new LoadJobExecution(jobExecution);
-        ConnectionServices connectionServices = connectionProvider.getConnectionServices();
+        ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
         loadJobExecution.setConnectionServices(connectionServices);
         try {
             load(loadJobExecution);
         } finally {
-            if (connectionServices != null) {
-                connectionServices.close();
+            try {
+                if (connectionServices != null) {
+                    connectionServices.close();
+                }
+            } catch (SQLException exception) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Failed closing connection services", exception);
+                }
             }
         }
     }
@@ -91,14 +104,14 @@ public class LoadJob extends JobBase {
         ConnectionServices connectionServices = loadJobExecution.getConnectionServices();
         DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();
         databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-        databaseInspector.withDatabaseDialectResolver(databaseDialectResolver);
+        databaseInspector.withDatabaseDialectResolver(getDatabaseDialectResolver());
 
         Database database = databaseInspector.inspect();
         loadJobExecution.setDatabase(database);
 
         Connection connection = connectionServices.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        loadJobExecution.setJdbcTypeValueFormatRegistry(jdbcTypeValueFormatRegistryResolver.resolve(metaData));
+        loadJobExecution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(metaData));
 
         CatalogReader catalogReader = getCatalog().getCatalogReader();
         loadJobExecution.setCatalogReader(catalogReader);
@@ -166,21 +179,21 @@ public class LoadJob extends JobBase {
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement preparedStatement) throws SQLException {
-                        load(loadJobExecution, preparedStatement, resultSetInput);
+                        load(loadJobExecution, resultSetInput, preparedStatement);
                     }
                 }
         );
     }
 
     protected PreparedStatement createStatement(Connection connection, Query query) throws SQLException {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Prepare SQL: %s", query.toQuery()));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Prepare SQL: %s", query.toQuery()));
         }
         return connection.prepareStatement(query.toQuery());
     }
 
-    protected void load(LoadJobExecution loadJobExecution, PreparedStatement preparedStatement,
-                        ResultSetInput resultSetInput) throws SQLException {
+    protected void load(LoadJobExecution loadJobExecution, ResultSetInput resultSetInput,
+                        PreparedStatement preparedStatement) throws SQLException {
         resultSetInput.setPreparedStatement(preparedStatement);
         while (loadJobExecution.isRunning() && resultSetInput.hasNextRow()) {
             resultSetInput.readRow();

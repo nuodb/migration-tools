@@ -21,7 +21,7 @@ public class BootstrapConfigLoader {
 
     public static final String CONFIG_FOLDER = "conf";
 
-    private static final Log log = LogFactory.getLog(BootstrapConfigLoader.class);
+    private static final Log log = LogFactory.getLogger(BootstrapConfigLoader.class);
 
     private PlaceholderReplacer placeholderReplacer;
 

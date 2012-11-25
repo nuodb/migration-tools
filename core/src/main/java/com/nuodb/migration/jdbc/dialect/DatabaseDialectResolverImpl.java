@@ -28,7 +28,7 @@
 package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.resolve.DatabaseObjectResolverSupport;
-import com.nuodb.migration.utils.ClassUtils;
+import com.nuodb.migration.utils.Reflections;
 
 import java.sql.DatabaseMetaData;
 
@@ -49,6 +49,6 @@ public class DatabaseDialectResolverImpl extends DatabaseObjectResolverSupport<D
 
     @Override
     protected DatabaseDialect createObject(Class<? extends DatabaseDialect> objectType, DatabaseMetaData metaData) {
-        return ClassUtils.newInstance(objectType, metaData);
+        return Reflections.newInstance(objectType, metaData);
     }
 }

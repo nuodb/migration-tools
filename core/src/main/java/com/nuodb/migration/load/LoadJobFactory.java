@@ -60,15 +60,15 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
     @Override
     public LoadJob createJob() {
         FormatSpec inputSpec = loadSpec.getInputSpec();
-
         LoadJob job = new LoadJob();
         job.setConnectionProvider(createConnectionProvider(loadSpec.getTargetSpec()));
+
         job.setAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));
         job.setTimeZone(loadSpec.getTimeZone());
         job.setDatabaseDialectResolver(databaseDialectResolver);
         job.setResultSetFormatFactory(resultSetFormatFactory);
-        job.setJdbcTypeValueFormatRegistryResolver(jdbcTypeValueFormatRegistryResolver);
+        //job.setJdbcTypeValueFormatRegistryResolver(jdbcTypeValueFormatRegistryResolver);
         return job;
     }
 

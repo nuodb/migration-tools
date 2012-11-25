@@ -31,8 +31,8 @@ import com.nuodb.migration.config.xml.XmlPersisterException;
 import com.nuodb.migration.config.xml.XmlReadContext;
 import com.nuodb.migration.config.xml.XmlReadWriteHandler;
 import com.nuodb.migration.config.xml.XmlWriteContext;
-import com.nuodb.migration.utils.Validate;
-import com.nuodb.migration.utils.ClassUtils;
+import com.nuodb.migration.utils.Reflections;
+import com.nuodb.migration.utils.Validations;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
@@ -42,13 +42,13 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     private Class type;
 
     protected XmlReadWriteHandlerBase(Class type) {
-        Validate.isNotNull(type, "Type is required");
+        Validations.isNotNull(type, "Type is required");
         this.type = type;
     }
 
     @Override
     public T read(InputNode input, Class<? extends T> type, XmlReadContext context) {
-        T target = ClassUtils.newInstance(type);
+        T target = Reflections.newInstance(type);
         try {
             read(input, target, context);
         } catch (XmlPersisterException e) {

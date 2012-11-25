@@ -29,14 +29,13 @@ package com.nuodb.migration.jdbc.connection;
 
 import com.nuodb.migration.jdbc.model.DatabaseInspector;
 import com.nuodb.migration.spec.JdbcConnectionSpec;
-import com.nuodb.migration.utils.ClassUtils;
-import com.nuodb.migration.utils.ReflectionException;
+import com.nuodb.migration.utils.Reflections;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
 import org.apache.commons.dbcp.PoolingDataSource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -50,7 +49,7 @@ public class JdbcConnectionProvider implements ConnectionProvider {
     public static final String USER_PROPERTY = "user";
     public static final String PASSWORD_PROPERTY = "password";
 
-    private transient final Log log = LogFactory.getLog(this.getClass());
+    private transient final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private JdbcConnectionSpec jdbcConnectionSpec;
     private Boolean autoCommit;
@@ -86,21 +85,15 @@ public class JdbcConnectionProvider implements ConnectionProvider {
     }
 
     protected DataSource createDataSource() throws SQLException {
-        try {
-            Driver driver = jdbcConnectionSpec.getDriver();
-            if (driver == null) {
-                String driverClassName = jdbcConnectionSpec.getDriverClassName();
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Loading driver %s", driverClassName));
-                }
-                driver = ClassUtils.newInstance(driverClassName);
+        Driver driver = jdbcConnectionSpec.getDriver();
+        if (driver == null) {
+            String driverClassName = jdbcConnectionSpec.getDriverClassName();
+            if (logger.isDebugEnabled()) {
+                logger.debug(String.format("Loading driver %s", driverClassName));
             }
-            DriverManager.registerDriver(driver);
-        } catch (ReflectionException exception) {
-            if (log.isWarnEnabled()) {
-                log.warn("Driver can't be loaded", exception);
-            }
+            driver = Reflections.newInstance(driverClassName);
         }
+        DriverManager.registerDriver(driver);
 
         String url = jdbcConnectionSpec.getUrl();
         Properties properties = new Properties();
@@ -115,8 +108,8 @@ public class JdbcConnectionProvider implements ConnectionProvider {
         if (password != null) {
             properties.setProperty(PASSWORD_PROPERTY, password);
         }
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Creating connection pool at %s", url));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Creating connection pool at %s", url));
         }
         PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(
                 new DriverManagerConnectionFactory(url, properties),
@@ -137,10 +130,10 @@ public class JdbcConnectionProvider implements ConnectionProvider {
 
     @Override
     public void closeConnection(Connection connection) throws SQLException {
-        if (log.isDebugEnabled()) {
-            log.debug("Closing connection");
-        }
         if (connection != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Closing connection");
+            }
             connection.close();
         }
     }

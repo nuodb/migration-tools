@@ -28,10 +28,10 @@
 package com.nuodb.migration.jdbc.resolve;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.utils.ClassUtils;
+import com.nuodb.migration.utils.Reflections;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -44,7 +44,7 @@ import static java.lang.String.format;
  */
 public class DatabaseObjectResolverSupport<T> implements DatabaseObjectResolver<T> {
 
-    private final transient Log log = LogFactory.getLog(getClass());
+    private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     private Map<DatabaseInfoMatcher, Class<? extends T>> databaseInfoMatchers = Maps.newHashMap();
 
@@ -92,12 +92,12 @@ public class DatabaseObjectResolverSupport<T> implements DatabaseObjectResolver<
             }
         }
         if (objectClass != null) {
-            if (log.isDebugEnabled()) {
-                log.debug(format("Resolved %s to %s", targetObjectClass.getName(), objectClass.getName()));
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Resolved %s to %s", targetObjectClass.getName(), objectClass.getName()));
             }
         } else if (defaultObjectClass != null) {
-            if (log.isWarnEnabled()) {
-                log.warn(format("Defaulted %s to %s", targetObjectClass.getName(), defaultObjectClass.getName()));
+            if (logger.isWarnEnabled()) {
+                logger.warn(format("Defaulted %s to %s", targetObjectClass.getName(), defaultObjectClass.getName()));
             }
             objectClass = defaultObjectClass;
         }
@@ -105,7 +105,7 @@ public class DatabaseObjectResolverSupport<T> implements DatabaseObjectResolver<
     }
 
     protected T createObject(Class<? extends T> objectClass, DatabaseMetaData metaData) {
-        return ClassUtils.newInstance(objectClass);
+        return Reflections.newInstance(objectClass);
     }
 
     static class DatabaseInfoMatcherImpl implements DatabaseInfoMatcher {

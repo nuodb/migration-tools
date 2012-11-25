@@ -28,8 +28,8 @@
 package com.nuodb.migration.job;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -38,7 +38,7 @@ import java.util.*;
  */
 public class SimpleJobExecutor implements JobExecutor {
 
-    private transient final Log log = LogFactory.getLog(getClass());
+    private transient final Logger logger = LoggerFactory.getLogger(getClass());
     private final Job job;
     private final SimpleJobStatus jobStatus;
     private List<JobExecutionListener> listeners = Lists.newArrayList();
@@ -88,14 +88,14 @@ public class SimpleJobExecutor implements JobExecutor {
                 jobStatus.setRunning(true);
                 jobStatus.setExecutionStartDate(new Date());
             } else {
-                if (log.isDebugEnabled()) {
-                    log.info(String.format("Job %1$s is already running or it has been stop", job.getName()));
+                if (logger.isDebugEnabled()) {
+                    logger.info(String.format("Job %1$s is already running or it has been stop", job.getName()));
                 }
                 return false;
             }
         }
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Starting execution of %1$s job", job.getName()));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Starting execution of job %1$s", job.getName()));
         }
         JobExecution execution = createJobExecution(context);
         try {
@@ -107,8 +107,8 @@ public class SimpleJobExecutor implements JobExecutor {
             }
             fireJobExecutionEvent(new JobExecutionEvent(execution));
         } catch (Throwable error) {
-            if (log.isErrorEnabled()) {
-                log.error(String.format("Job %1$s execution failed", job.getName()), error);
+            if (logger.isErrorEnabled()) {
+                logger.error(String.format("Job %1$s execution failed", job.getName()), error);
             }
             synchronized (jobStatus) {
                 jobStatus.setExecutionEndDate(new Date());

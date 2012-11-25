@@ -33,8 +33,8 @@ import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolverImpl;
 import com.nuodb.migration.spec.JdbcConnectionSpec;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -45,7 +45,7 @@ import java.util.List;
 
 /**
  * Reads database meta data and creates its meta meta. Root meta meta object is {@link Database} containing set of
- * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
+ * catalogs, each catalog has a collection of schemas and generate is a wrapper of collection of a tables.
  *
  * @author Sergey Bushik
  */
@@ -55,7 +55,7 @@ public class DatabaseInspector {
 
     private static final String[] TABLE_TYPES = null;
 
-    private transient final Log log = LogFactory.getLog(getClass());
+    private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected String catalog;
     protected String schema;
@@ -133,8 +133,8 @@ public class DatabaseInspector {
         driverInfo.setVersion(metaData.getDriverVersion());
         driverInfo.setMinorVersion(metaData.getDriverMinorVersion());
         driverInfo.setMajorVersion(metaData.getDriverMajorVersion());
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("DriverInfo: %s", driverInfo));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("DriverInfo: %s", driverInfo));
         }
         database.setDriverInfo(driverInfo);
 
@@ -143,8 +143,8 @@ public class DatabaseInspector {
         databaseInfo.setProductVersion(metaData.getDatabaseProductVersion());
         databaseInfo.setMinorVersion(metaData.getDatabaseMinorVersion());
         databaseInfo.setMajorVersion(metaData.getDatabaseMajorVersion());
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("DatabaseInfo: %s", databaseInfo));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("DatabaseInfo: %s", databaseInfo));
         }
         database.setDatabaseInfo(databaseInfo);
     }
@@ -179,8 +179,8 @@ public class DatabaseInspector {
                 database.getCatalog(catalog);
             }
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Reading catalogs is unsupported");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Reading catalogs is unsupported");
             }
         }
     }
@@ -199,8 +199,8 @@ public class DatabaseInspector {
                 database.getCatalog(catalog).getSchema(schema);
             }
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Reading schemas is unsupported");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Reading schemas is unsupported");
             }
         }
     }

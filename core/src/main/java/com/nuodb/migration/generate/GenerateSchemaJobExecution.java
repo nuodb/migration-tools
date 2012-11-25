@@ -25,21 +25,37 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.utils;
+package com.nuodb.migration.generate;
 
-import com.nuodb.migration.MigrationException;
+import com.nuodb.migration.jdbc.connection.ConnectionServices;
+import com.nuodb.migration.job.JobExecution;
+import com.nuodb.migration.job.JobExecutionDelegate;
 
-public class AssertionException extends MigrationException {
+/**
+ * @author Sergey Bushik
+ */
+public class GenerateSchemaJobExecution extends JobExecutionDelegate {
 
-    public AssertionException(String message) {
-        super(message);
+    private ConnectionServices sourceConnectionServices;
+    private ConnectionServices targetConnectionServices;
+
+    public GenerateSchemaJobExecution(JobExecution jobExecution) {
+        super(jobExecution);
     }
 
-    public AssertionException(String message, Throwable cause) {
-        super(message, cause);
+    public ConnectionServices getSourceConnectionServices() {
+        return sourceConnectionServices;
     }
 
-    public AssertionException(Throwable cause) {
-        super(cause);
+    public void setSourceConnectionServices(ConnectionServices sourceConnectionServices) {
+        this.sourceConnectionServices = sourceConnectionServices;
+    }
+
+    public ConnectionServices getTargetConnectionServices() {
+        return targetConnectionServices;
+    }
+
+    public void setTargetConnectionServices(ConnectionServices targetConnectionServices) {
+        this.targetConnectionServices = targetConnectionServices;
     }
 }

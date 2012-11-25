@@ -77,7 +77,7 @@ public class DatabaseInspectorTest {
     public void testReadTables() throws Exception {
         // databaseInspector.readTables(metaData, database);
         // verify(database, times(1)).getOrCreateSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME);
-        // verify(schema, times(1)).doCreateTable(TEST_TABLE_NAME, TEST_TABLE_TYPE);
+        // verify(generate, times(1)).doCreateTable(TEST_TABLE_NAME, TEST_TABLE_TYPE);
     }
 
     @Test

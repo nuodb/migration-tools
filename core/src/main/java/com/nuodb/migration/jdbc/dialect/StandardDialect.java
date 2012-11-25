@@ -29,8 +29,8 @@ package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.jdbc4.Jdbc4TypeRegistry;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -43,7 +43,7 @@ import java.util.TimeZone;
  */
 public class StandardDialect implements DatabaseDialect {
 
-    protected final Log log = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected final DatabaseMetaData metaData;
 
     public StandardDialect(DatabaseMetaData metaData) {

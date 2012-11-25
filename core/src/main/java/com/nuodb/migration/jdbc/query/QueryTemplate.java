@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.jdbc.query;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -40,7 +40,7 @@ import java.sql.Statement;
  */
 public class QueryTemplate {
 
-    private transient final Log log = LogFactory.getLog(getClass());
+    private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final Connection connection;
 
@@ -65,8 +65,8 @@ public class QueryTemplate {
                 resultSet.close();
             }
         } catch (SQLException exception) {
-            if (log.isDebugEnabled()) {
-                log.debug("Failed closing result set", exception);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed closing result set", exception);
             }
         }
     }
@@ -77,8 +77,8 @@ public class QueryTemplate {
                 statement.close();
             }
         } catch (SQLException exception) {
-            if (log.isDebugEnabled()) {
-                log.debug("Failed closing statement", exception);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed closing statement", exception);
             }
         }
     }

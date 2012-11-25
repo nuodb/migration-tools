@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.schema;
+package com.nuodb.migration.generate;
 
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
@@ -48,8 +48,8 @@ public class GenerateSchemaJobFactory implements JobFactory<GenerateSchemaJob> {
     @Override
     public GenerateSchemaJob createJob() {
         GenerateSchemaJob job = new GenerateSchemaJob();
-        job.setSourceConnectionProvider(createConnectionProvider(generateSchemaSpec.getSourceSpec()));
-        job.setTargetConnectionProvider(createConnectionProvider(generateSchemaSpec.getTargetSpec()));
+        job.setSourceConnectionProvider(createConnectionProvider(generateSchemaSpec.getSourceConnectionSpec()));
+        job.setTargetConnectionProvider(createConnectionProvider(generateSchemaSpec.getTargetConnectionSpec()));
         return job;
     }
 
@@ -73,14 +73,14 @@ public class GenerateSchemaJobFactory implements JobFactory<GenerateSchemaJob> {
                 sourceSpec.setDriverClassName("com.mysql.jdbc.Driver");
                 sourceSpec.setUrl("jdbc:mysql://localhost:3306/enron-load");
                 sourceSpec.setUsername("root");
-                setSourceSpec(sourceSpec);
+                setSourceConnectionSpec(sourceSpec);
 
                 JdbcConnectionSpec targetSpec = new JdbcConnectionSpec();
                 targetSpec.setDriverClassName("com.nuodb.jdbc.Driver");
                 targetSpec.setUrl("jdbc:com.nuodb://localhost/test");
                 targetSpec.setUsername("dba");
                 targetSpec.setPassword("goalie");
-                setTargetSpec(targetSpec);
+                setTargetConnectionSpec(targetSpec);
             }
         });
         JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());

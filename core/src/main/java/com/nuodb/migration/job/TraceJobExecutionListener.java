@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.job;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
@@ -37,14 +37,14 @@ import java.util.Date;
  */
 public class TraceJobExecutionListener implements JobExecutionListener {
 
-    private transient final Log log = LogFactory.getLog(getClass());
+    private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public void onJobExecuted(JobExecutionEvent event) {
         JobExecution execution = event.getJobExecution();
         JobStatus jobStatus = execution.getJobStatus();
-        if (log.isInfoEnabled()) {
-            log.info(String.format("Job %s status type is %s",
+        if (logger.isInfoEnabled()) {
+            logger.info(String.format("Job %s status is %s",
                     execution.getJob().getName(), jobStatus.getJobStatusType()));
         }
         if (!jobStatus.isRunning()) {
@@ -56,7 +56,7 @@ public class TraceJobExecutionListener implements JobExecutionListener {
     }
 
     protected void duration(JobExecution execution, long duration) {
-        if (log.isInfoEnabled()) {
+        if (logger.isInfoEnabled()) {
             long left = duration;
             long millis = duration % 1000;
             left = left / 1000;
@@ -65,7 +65,7 @@ public class TraceJobExecutionListener implements JobExecutionListener {
             long minutes = left % 60;
             left = left / 60;
             long hours = left / 60;
-            log.info(String.format("Job %1s execution duration %02d:%02d:%02d.%03d",
+            logger.info(String.format("Job %1s execution duration %02d:%02d:%02d.%03d",
                     execution.getJob().getName(), hours, minutes, seconds, millis));
         }
     }

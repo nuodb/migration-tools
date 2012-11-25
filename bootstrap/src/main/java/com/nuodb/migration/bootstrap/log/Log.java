@@ -1,39 +1,39 @@
 package com.nuodb.migration.bootstrap.log;
 
 public interface Log {
-    abstract boolean isDebugEnabled();
+    boolean isDebugEnabled();
 
-    abstract boolean isErrorEnabled();
+    boolean isErrorEnabled();
 
-    abstract boolean isFatalEnabled();
+    boolean isFatalEnabled();
 
-    abstract boolean isInfoEnabled();
+    boolean isInfoEnabled();
 
-    abstract boolean isTraceEnabled();
+    boolean isTraceEnabled();
 
-    abstract boolean isWarnEnabled();
+    boolean isWarnEnabled();
 
-    abstract void trace(Object obj);
+    void trace(Object obj);
 
-    abstract void trace(Object obj, Throwable throwable);
+    void trace(Object obj, Throwable throwable);
 
-    abstract void debug(Object obj);
+    void debug(Object obj);
 
-    abstract void debug(Object obj, Throwable throwable);
+    void debug(Object obj, Throwable throwable);
 
-    abstract void info(Object obj);
+    void info(Object obj);
 
-    abstract void info(Object obj, Throwable throwable);
+    void info(Object obj, Throwable throwable);
 
-    abstract void warn(Object obj);
+    void warn(Object obj);
 
-    abstract void warn(Object obj, Throwable throwable);
+    void warn(Object obj, Throwable throwable);
 
-    abstract void error(Object obj);
+    void error(Object obj);
 
-    abstract void error(Object obj, Throwable throwable);
+    void error(Object obj, Throwable throwable);
 
-    abstract void fatal(Object obj);
+    void fatal(Object obj);
 
-    abstract void fatal(Object obj, Throwable throwable);
+    void fatal(Object obj, Throwable throwable);
 }

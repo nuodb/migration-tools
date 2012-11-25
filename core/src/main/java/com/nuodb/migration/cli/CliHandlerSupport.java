@@ -37,8 +37,8 @@ import com.nuodb.migration.cli.run.CliRun;
 import com.nuodb.migration.cli.run.CliRunFactory;
 import com.nuodb.migration.cli.run.CliRunFactoryLookup;
 import com.nuodb.migration.context.support.ApplicationSupport;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -49,7 +49,7 @@ import static java.lang.String.format;
  */
 public class CliHandlerSupport extends ApplicationSupport implements CliResources, CliOptions {
 
-    protected transient final Log log = LogFactory.getLog(getClass());
+    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     public static final String MIGRATION_EXECUTABLE = "nuodb-migration";
     public static final String MIGRATION_EXECUTABLE_COMMAND = "nuodb-migration %1$s";
@@ -107,29 +107,29 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
     }
 
     protected void handleOptionSet(OptionSet options, Option root) {
-        if (log.isTraceEnabled()) {
-            log.trace("Options successfully parsed");
+        if (logger.isTraceEnabled()) {
+            logger.trace("Options successfully parsed");
         }
         if (options.getOptions().isEmpty()) {
             handleHelp(options, root);
         } else if (options.hasOption(HELP_OPTION)) {
-            if (log.isTraceEnabled()) {
-                log.trace("Handling --help option");
+            if (logger.isTraceEnabled()) {
+                logger.trace("Handling --help option");
             }
             handleHelp(options, root);
         } else if (options.hasOption(COMMAND_OPTION)) {
             CliRun runnable = options.getValue(COMMAND_OPTION);
-            if (log.isTraceEnabled()) {
-                log.trace(format("Running %1$s command", runnable.getCommand()));
+            if (logger.isTraceEnabled()) {
+                logger.trace(format("Running %1$s command", runnable.getCommand()));
             }
             runnable.run();
         } else if (options.hasOption(CONFIG_OPTION)) {
-            if (log.isTraceEnabled()) {
-                log.trace(format("Handling --config %1$s option", options.getValue("config")));
+            if (logger.isTraceEnabled()) {
+                logger.trace(format("Handling --config %1$s option", options.getValue("config")));
             }
         } else if (options.hasOption(LIST_OPTION)) {
-            if (log.isTraceEnabled()) {
-                log.trace(format("Handling --list option"));
+            if (logger.isTraceEnabled()) {
+                logger.trace(format("Handling --list option"));
             }
             Collection<String> commands = cliRunFactoryLookup.getCommands();
             for (String command : commands) {

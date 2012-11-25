@@ -48,8 +48,9 @@ import com.nuodb.migration.resultset.format.ResultSetOutput;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.spec.NativeQuerySpec;
 import com.nuodb.migration.spec.SelectQuerySpec;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.nuodb.migration.utils.Validations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.Collection;
@@ -73,7 +74,7 @@ public class DumpJob extends JobBase {
 
     private static final String QUERY_ENTRY_NAME = "query-%1$tH-%1$tM-%1$tS";
 
-    protected final Log log = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private TimeZone timeZone;
     private Catalog catalog;
@@ -88,14 +89,26 @@ public class DumpJob extends JobBase {
 
     @Override
     public void execute(JobExecution jobExecution) throws Exception {
+        Validations.isNotNull(getCatalog(), "Catalog is required");
+        Validations.isNotNull(getConnectionProvider(), "Connection provider is required");
+        Validations.isNotNull(getDatabaseDialectResolver(), "Database dialect resolver is required");
+        Validations.isNotNull(getJdbcTypeValueFormatRegistryResolver(),
+                "JDBC type value format registry resolver is required");
+
         DumpJobExecution dumpJobExecution = new DumpJobExecution(jobExecution);
-        ConnectionServices connectionServices = connectionProvider.getConnectionServices();
+        ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
         dumpJobExecution.setConnectionServices(connectionServices);
         try {
             dump(dumpJobExecution);
         } finally {
-            if (connectionServices != null) {
-                connectionServices.close();
+            try {
+                if (connectionServices != null) {
+                    connectionServices.close();
+                }
+            } catch (SQLException exception) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Failed closing connection services", exception);
+                }
             }
         }
     }
@@ -104,14 +117,14 @@ public class DumpJob extends JobBase {
         ConnectionServices connectionServices = dumpJobExecution.getConnectionServices();
         DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();
         databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-        databaseInspector.withDatabaseDialectResolver(databaseDialectResolver);
+        databaseInspector.withDatabaseDialectResolver(getDatabaseDialectResolver());
 
         Database database = databaseInspector.inspect();
         dumpJobExecution.setDatabase(database);
 
         Connection connection = connectionServices.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        dumpJobExecution.setJdbcTypeValueFormatRegistry(jdbcTypeValueFormatRegistryResolver.resolve(metaData));
+        dumpJobExecution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(metaData));
 
         CatalogWriter catalogWriter = getCatalog().getCatalogWriter();
         dumpJobExecution.setCatalogWriter(catalogWriter);
@@ -198,8 +211,8 @@ public class DumpJob extends JobBase {
 
     protected PreparedStatement prepareStatement(Connection connection, Database database,
                                                  Query query) throws SQLException {
-        if (log.isDebugEnabled()) {
-            log.debug(format("Prepare SQL: %s", query.toQuery()));
+        if (logger.isDebugEnabled()) {
+            logger.debug(query.toQuery());
         }
         PreparedStatement preparedStatement = connection.prepareStatement(
                 query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
@@ -232,8 +245,8 @@ public class DumpJob extends JobBase {
                 builder.setQualifyNames(true);
                 selectQueries.add(builder.build());
             } else {
-                if (log.isTraceEnabled()) {
-                    log.trace(format("Skip %s %s", table.getQualifiedName(databaseDialect), table.getType()));
+                if (logger.isTraceEnabled()) {
+                    logger.trace(format("Skip %s %s", table.getQualifiedName(databaseDialect), table.getType()));
                 }
             }
         }

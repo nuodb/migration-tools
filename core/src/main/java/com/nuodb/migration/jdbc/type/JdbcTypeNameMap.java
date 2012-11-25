@@ -28,8 +28,8 @@
 package com.nuodb.migration.jdbc.type;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -43,7 +43,7 @@ public class JdbcTypeNameMap {
 
     private static final Map<Integer, String> TYPE_CODE_NAMES = Maps.newHashMap();
 
-    private static final Log log = LogFactory.getLog(JdbcTypeNameMap.class);
+    private static final Logger logger = LoggerFactory.getLogger(JdbcTypeNameMap.class);
 
     static {
         Field[] fields = Types.class.getFields();
@@ -52,8 +52,8 @@ public class JdbcTypeNameMap {
                 try {
                     TYPE_CODE_NAMES.put((Integer) field.get(null), field.getName());
                 } catch (IllegalAccessException exception) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Failed accessing jdbc type code field", exception);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed accessing jdbc type code field", exception);
                     }
                 }
             }

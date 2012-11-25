@@ -31,22 +31,22 @@ package com.nuodb.migration.spec;
  * @author Sergey Bushik
  */
 public class GenerateSchemaSpec extends TaskSpecBase {
-    private ConnectionSpec sourceSpec;
-    private ConnectionSpec targetSpec;
+    private ConnectionSpec sourceConnectionSpec;
+    private ConnectionSpec targetConnectionSpec;
 
-    public ConnectionSpec getSourceSpec() {
-        return sourceSpec;
+    public ConnectionSpec getSourceConnectionSpec() {
+        return sourceConnectionSpec;
     }
 
-    public void setSourceSpec(ConnectionSpec sourceSpec) {
-        this.sourceSpec = sourceSpec;
+    public void setSourceConnectionSpec(ConnectionSpec sourceConnectionSpec) {
+        this.sourceConnectionSpec = sourceConnectionSpec;
     }
 
-    public ConnectionSpec getTargetSpec() {
-        return targetSpec;
+    public ConnectionSpec getTargetConnectionSpec() {
+        return targetConnectionSpec;
     }
 
-    public void setTargetSpec(ConnectionSpec targetSpec) {
-        this.targetSpec = targetSpec;
+    public void setTargetConnectionSpec(ConnectionSpec targetConnectionSpec) {
+        this.targetConnectionSpec = targetConnectionSpec;
     }
 }

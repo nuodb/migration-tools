@@ -29,15 +29,15 @@ package com.nuodb.migration.load;
 
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.model.Database;
+import com.nuodb.migration.job.JobExecutionDelegate;
 import com.nuodb.migration.job.JobExecution;
-import com.nuodb.migration.job.JobExecutionAdapter;
 import com.nuodb.migration.resultset.catalog.CatalogReader;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadJobExecution extends JobExecutionAdapter {
+public class LoadJobExecution extends JobExecutionDelegate {
 
     private ConnectionServices connectionServices;
     private Database database;

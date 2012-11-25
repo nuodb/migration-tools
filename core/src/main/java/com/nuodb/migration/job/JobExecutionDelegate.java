@@ -32,11 +32,11 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class JobExecutionAdapter implements JobExecution {
+public class JobExecutionDelegate implements JobExecution {
 
     private JobExecution jobExecution;
 
-    public JobExecutionAdapter(JobExecution jobExecution) {
+    public JobExecutionDelegate(JobExecution jobExecution) {
         this.jobExecution = jobExecution;
     }
 

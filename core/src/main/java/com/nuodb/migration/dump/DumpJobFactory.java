@@ -39,8 +39,8 @@ import com.nuodb.migration.resultset.format.ResultSetFormatFactoryImpl;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolverImpl;
 import com.nuodb.migration.spec.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -50,7 +50,7 @@ import java.util.Collection;
 @SuppressWarnings("unchecked")
 public class DumpJobFactory implements JobFactory<DumpJob> {
 
-    protected final Log log = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private DumpSpec dumpSpec;
 

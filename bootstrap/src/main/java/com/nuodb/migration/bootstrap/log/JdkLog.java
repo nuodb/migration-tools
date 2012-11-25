@@ -8,7 +8,7 @@ public class JdkLog implements Log {
     private final Logger logger;
 
     public JdkLog(String name) {
-        this.logger = Logger.getLogger(name);
+        this.logger = java.util.logging.Logger.getLogger(name);
     }
 
     public final boolean isErrorEnabled() {

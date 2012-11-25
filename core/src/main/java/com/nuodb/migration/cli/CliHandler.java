@@ -57,8 +57,8 @@ public class CliHandler extends CliHandlerSupport implements Bootable {
     public void boot(BootstrapConfig config, String[] arguments) {
         try {
             Option root = createOption();
-            if (log.isTraceEnabled()) {
-                log.trace(String.format("Parsing cli arguments: %1$s", Arrays.asList(arguments)));
+            if (logger.isTraceEnabled()) {
+                logger.trace(String.format("Parsing cli arguments: %1$s", Arrays.asList(arguments)));
             }
             OptionSet options = new ParserImpl().parse(arguments, root);
             handleOptionSet(options, root);

@@ -24,7 +24,7 @@ import com.nuodb.migration.cli.parse.OptionProcessor;
 import com.nuodb.migration.cli.parse.Trigger;
 import com.nuodb.migration.utils.Priority;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -41,7 +41,7 @@ public abstract class OptionBase implements Option {
     private String description;
     private boolean required;
     private OptionProcessor optionProcessor;
-    private PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+    private PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
 
     protected OptionBase() {
     }

@@ -20,7 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.util.*;
 
@@ -39,7 +39,7 @@ public class GroupImpl extends OptionBase implements Group {
     private List<Option> options = Lists.newArrayList();
     private Set<String> prefixes = Sets.newHashSet();
     private List<Argument> arguments = Lists.newArrayList();
-    private PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+    private PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
 
     public GroupImpl() {
     }

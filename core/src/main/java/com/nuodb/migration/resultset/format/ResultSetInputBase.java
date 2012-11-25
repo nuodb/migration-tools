@@ -33,8 +33,8 @@ import com.nuodb.migration.jdbc.model.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -46,7 +46,7 @@ import java.sql.PreparedStatement;
 @SuppressWarnings("unchecked")
 public abstract class ResultSetInputBase extends ResultSetFormatBase implements ResultSetInput {
 
-    private transient final Log log = LogFactory.getLog(getClass());
+    private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     private Reader reader;
     private InputStream inputStream;
@@ -113,8 +113,8 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
 
     @Override
     public final void readBegin() {
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Read input %s", getClass().getName()));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Read input %s", getClass().getName()));
         }
         doReadBegin();
     }

@@ -33,15 +33,15 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import java.lang.reflect.InvocationTargetException;
 
 @SuppressWarnings("unchecked")
-public class ClassUtils {
+public class Reflections {
 
-    private ClassUtils() {
+    private Reflections() {
     }
 
     public static ClassLoader getClassLoader() {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
-            classLoader = ClassUtils.class.getClassLoader();
+            classLoader = Reflections.class.getClassLoader();
         }
         return classLoader;
     }
@@ -58,7 +58,7 @@ public class ClassUtils {
         try {
             return (T) newInstance(getClassLoader().loadClass(className));
         } catch (ClassNotFoundException exception) {
-            throw new ReflectionException("Class not found " + className);
+            throw new ReflectionException("Class is not found " + className, exception);
         }
     }
 
@@ -66,9 +66,9 @@ public class ClassUtils {
         try {
             return type.newInstance();
         } catch (InstantiationException exception) {
-            throw new ReflectionException("Failed instantiating class " + type);
+            throw new ReflectionException("Failed creating instance of " + type, exception);
         } catch (IllegalAccessException exception) {
-            throw new ReflectionException("Failed instantiating class " + type);
+            throw new ReflectionException("Failed creating instance of " + type, exception);
         }
     }
 
@@ -89,7 +89,7 @@ public class ClassUtils {
 
     public static <T> T newInstance(Class<T> type, Object[] arguments, Class[] argumentTypes) {
         try {
-            return (T) ConstructorUtils.invokeConstructor(type, arguments, argumentTypes);
+            return ConstructorUtils.invokeConstructor(type, arguments, argumentTypes);
         } catch (NoSuchMethodException exception) {
             throw new ReflectionException(exception);
         } catch (IllegalAccessException exception) {

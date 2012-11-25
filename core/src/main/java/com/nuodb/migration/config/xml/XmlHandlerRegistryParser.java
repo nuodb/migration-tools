@@ -28,11 +28,11 @@
 package com.nuodb.migration.config.xml;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.utils.Validate;
-import com.nuodb.migration.utils.ClassUtils;
+import com.nuodb.migration.utils.Reflections;
+import com.nuodb.migration.utils.Validations;
 import com.nuodb.migration.utils.Priority;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,16 +43,16 @@ import java.util.List;
 
 public class XmlHandlerRegistryParser {
 
-    protected transient final Log log = LogFactory.getLog(this.getClass());
+    protected transient final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     protected final List<URL> resources = Lists.newArrayList();
 
     public void addRegistry(String resource) {
-        addRegistry(ClassUtils.getClassLoader().getResource(resource));
+        addRegistry(Reflections.getClassLoader().getResource(resource));
     }
 
     public void addRegistry(URL resource) {
-        Validate.isNotNull(resource, "Handler registry resource is required");
+        Validations.isNotNull(resource, "Handler registry resource is required");
         resources.add(resource);
     }
 
@@ -79,8 +79,8 @@ public class XmlHandlerRegistryParser {
             try {
                 input.close();
             } catch (IOException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Failed closing input stream", e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed closing input stream", e);
                 }
             }
         }
@@ -100,7 +100,7 @@ public class XmlHandlerRegistryParser {
                 priority = Integer.parseInt(priorityAsText);
             }
         }
-        XmlHandler handler = ClassUtils.newInstance(handlerClassAsText);
+        XmlHandler handler = Reflections.newInstance(handlerClassAsText);
         registry.registerHandler(handler, priority);
     }
 }
