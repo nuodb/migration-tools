@@ -68,7 +68,7 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         job.setTimeZone(loadSpec.getTimeZone());
         job.setDatabaseDialectResolver(databaseDialectResolver);
         job.setResultSetFormatFactory(resultSetFormatFactory);
-        //job.setJdbcTypeValueFormatRegistryResolver(jdbcTypeValueFormatRegistryResolver);
+        job.setJdbcTypeValueFormatRegistryResolver(jdbcTypeValueFormatRegistryResolver);
         return job;
     }
 
