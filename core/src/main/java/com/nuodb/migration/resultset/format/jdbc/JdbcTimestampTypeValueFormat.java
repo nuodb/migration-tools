@@ -93,11 +93,4 @@ public class JdbcTimestampTypeValueFormat extends JdbcTypeValueFormatBase<Timest
             return false;
         }
     }
-
-    public static void main(String[] args) {
-        DateTime dateTime = new DateTime("2012");
-        System.out.println(dateTime);
-        System.out.println(dateTime.getYear());
-        System.out.println(dateTime.getPrecision());
-    }
 }

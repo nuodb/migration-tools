@@ -33,7 +33,7 @@ import com.nuodb.migration.match.AntRegexCompiler;
 import com.nuodb.migration.match.Match;
 import com.nuodb.migration.match.RegexCompiler;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.SimplePriorityList;
+import com.nuodb.migration.utils.PriorityListImpl;
 
 import java.util.*;
 
@@ -113,7 +113,7 @@ public class RegexOption extends ContainerBase {
         if (optional) {
             help.append('[');
         }
-        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
+        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
         createTriggers(triggers, getPrefixes(), getName());
         join(help, triggers);
 

@@ -30,7 +30,7 @@ package com.nuodb.migration.cli.parse.option;
 import com.google.common.collect.Lists;
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.SimplePriorityList;
+import com.nuodb.migration.utils.PriorityListImpl;
 
 import java.util.*;
 
@@ -68,7 +68,7 @@ public class OptionImpl extends ContainerBase {
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new SimplePriorityList();
+        PriorityList<Trigger> triggers = new PriorityListImpl();
         triggers.addAll(super.getTriggers());
         Set<String> prefixes = getPrefixes();
         createTriggers(triggers, prefixes, getName());
@@ -100,7 +100,7 @@ public class OptionImpl extends ContainerBase {
             help.append('[');
         }
         Set<String> prefixes = getPrefixes();
-        PriorityList<Trigger> triggers = new SimplePriorityList();
+        PriorityList<Trigger> triggers = new PriorityListImpl();
         createTriggers(triggers, prefixes, getName());
         join(help, triggers);
         Set<String> aliases = getAliases();
@@ -110,7 +110,7 @@ public class OptionImpl extends ContainerBase {
             Collections.sort(list);
             for (Iterator<String> i = list.iterator(); i.hasNext(); ) {
                 String alias = i.next();
-                triggers = new SimplePriorityList<Trigger>();
+                triggers = new PriorityListImpl<Trigger>();
                 createTriggers(triggers, prefixes, alias);
                 join(help, triggers);
                 if (i.hasNext()) {

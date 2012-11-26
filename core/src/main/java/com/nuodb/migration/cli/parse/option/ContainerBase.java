@@ -31,7 +31,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.SimplePriorityList;
+import com.nuodb.migration.utils.PriorityListImpl;
 
 import java.util.*;
 
@@ -100,7 +100,7 @@ public abstract class ContainerBase extends OptionBase implements Container {
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
+        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
         triggers.addAll(super.getTriggers());
         if (group != null) {
             triggers.addAll(group.getTriggers());

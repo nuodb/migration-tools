@@ -31,9 +31,9 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SimplePriorityList<T> extends AbstractCollection<T> implements PriorityList<T>, Serializable {
+public class PriorityListImpl<T> extends AbstractCollection<T> implements PriorityList<T>, Serializable {
 
-    public static final PriorityList EMPTY_LIST = new SimplePriorityList();
+    public static final PriorityList EMPTY_LIST = new PriorityListImpl();
 
     @SuppressWarnings("unchecked")
     public static <T> PriorityList<T> emptyList() {
@@ -50,7 +50,7 @@ public class SimplePriorityList<T> extends AbstractCollection<T> implements Prio
 
     @Override
     public Iterator<T> iterator() {
-        return new ItemIteratorImpl<T>(items.iterator());
+        return new IteratorImpl<T>(items.iterator());
     }
 
     @Override
@@ -77,11 +77,11 @@ public class SimplePriorityList<T> extends AbstractCollection<T> implements Prio
         return items;
     }
 
-    class ItemIteratorImpl<T> implements Iterator<T> {
+    class IteratorImpl<T> implements Iterator<T> {
 
         private Iterator<Item<T>> iterator;
 
-        public ItemIteratorImpl(Iterator<Item<T>> iterator) {
+        public IteratorImpl(Iterator<Item<T>> iterator) {
             this.iterator = iterator;
         }
 
