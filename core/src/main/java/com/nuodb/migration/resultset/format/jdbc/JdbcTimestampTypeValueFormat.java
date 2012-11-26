@@ -28,7 +28,6 @@
 package com.nuodb.migration.resultset.format.jdbc;
 
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
-import hirondelle.date4j.DateTime;
 
 import java.sql.Date;
 import java.sql.SQLException;
