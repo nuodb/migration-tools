@@ -27,5 +27,51 @@
  */
 package com.nuodb.migration.jdbc.model;
 
-public class Index {
+import com.google.common.collect.Maps;
+
+import java.util.Collection;
+import java.util.Map;
+
+public class Index extends HasIdentifierBase {
+
+    private boolean unique;
+    private String filterCondition;
+    private IndexSortOrder sortOrder;
+    private Map<Integer, Column> columns = Maps.newTreeMap();
+
+    public Index(Identifier identifier) {
+        super(identifier);
+    }
+
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public void setUnique(boolean unique) {
+        this.unique = unique;
+    }
+
+    public void addColumn(Column column, int position) {
+        columns.put(position, column);
+    }
+
+    public Collection<Column> getColumns() {
+        return columns.values();
+    }
+
+    public String getFilterCondition() {
+        return filterCondition;
+    }
+
+    public void setFilterCondition(String filterCondition) {
+        this.filterCondition = filterCondition;
+    }
+
+    public IndexSortOrder getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(IndexSortOrder sortOrder) {
+        this.sortOrder = sortOrder;
+    }
 }

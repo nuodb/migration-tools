@@ -44,6 +44,7 @@ import com.nuodb.migration.resultset.catalog.CatalogReader;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetInput;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
+import com.nuodb.migration.jdbc.JdbcUtils;
 import com.nuodb.migration.utils.Validations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,15 +89,7 @@ public class LoadJob extends JobBase {
         try {
             load(loadJobExecution);
         } finally {
-            try {
-                if (connectionServices != null) {
-                    connectionServices.close();
-                }
-            } catch (SQLException exception) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Failed closing connection services", exception);
-                }
-            }
+            JdbcUtils.close(connectionServices);
         }
     }
 
@@ -168,7 +161,7 @@ public class LoadJob extends JobBase {
         }
         final InsertQuery query = createInsertQuery(table, columns);
 
-        QueryTemplate queryTemplate = new QueryTemplate(loadJobExecution.getConnectionServices().getConnection());
+        StatementTemplate queryTemplate = new StatementTemplate(loadJobExecution.getConnectionServices().getConnection());
         queryTemplate.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override

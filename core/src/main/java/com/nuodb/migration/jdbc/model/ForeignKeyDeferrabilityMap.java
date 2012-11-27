@@ -25,59 +25,43 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type;
+package com.nuodb.migration.jdbc.model;
 
 import com.google.common.collect.Maps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.sql.Types;
 import java.util.Map;
+
+import static com.nuodb.migration.jdbc.model.ForeignKeyDeferrability.*;
+import static java.sql.DatabaseMetaData.*;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeNameMap {
+public class ForeignKeyDeferrabilityMap {
 
-    private static final Map<Integer, String> TYPE_CODE_NAMES = Maps.newHashMap();
+    private static ForeignKeyDeferrabilityMap INSTANCE;
+    private Map<Integer, ForeignKeyDeferrability> foreignKeyDeferrabilityMap = Maps.newHashMap();
 
-    private static final Logger logger = LoggerFactory.getLogger(JdbcTypeNameMap.class);
-
-    static {
-        Field[] fields = Types.class.getFields();
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
-                try {
-                    TYPE_CODE_NAMES.put((Integer) field.get(null), field.getName());
-                } catch (IllegalAccessException exception) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Failed accessing jdbc type code field", exception);
-                    }
-                }
-            }
+    public static ForeignKeyDeferrabilityMap getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = createInstance();
         }
+        return INSTANCE;
     }
 
-    public static final JdbcTypeNameMap INSTANCE = new JdbcTypeNameMap();
-
-    private Map<Integer, String> typeCodeNameMap = Maps.newHashMap();
-
-    public JdbcTypeNameMap() {
-        this.typeCodeNameMap = TYPE_CODE_NAMES;
+    private static ForeignKeyDeferrabilityMap createInstance() {
+        ForeignKeyDeferrabilityMap instance = new ForeignKeyDeferrabilityMap();
+        instance.addDeferrability(importedKeyInitiallyDeferred, INITIALLY_DEFERRED);
+        instance.addDeferrability(importedKeyInitiallyImmediate, INITIALLY_IMMEDIATE);
+        instance.addDeferrability(importedKeyNotDeferrable, NOT_DEFERRABLE);
+        return instance;
     }
 
-    public String getTypeName(int typeCode) {
-        String typeName = typeCodeNameMap.get(typeCode);
-        return typeName == null ? getUnknownTypeName(typeCode) : typeName;
+    public void addDeferrability(int value, ForeignKeyDeferrability deferrability) {
+        foreignKeyDeferrabilityMap.put(value, deferrability);
     }
 
-    public void addTypeCodeName(int typeCode, String typeName) {
-        typeCodeNameMap.put(typeCode, typeName);
-    }
-
-    protected String getUnknownTypeName(int typeCode) {
-        return "TYPE:" + typeCode;
+    public ForeignKeyDeferrability getDeferrability(int value) {
+        return foreignKeyDeferrabilityMap.get(value);
     }
 }

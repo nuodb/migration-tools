@@ -39,7 +39,7 @@ public class TestConstants {
         final SelectQuery query = new SelectQuery();
         final Database database = new Database();
         final Schema schema = database.createSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME);
-        final Table table = schema.createTable(TEST_TABLE_NAME, Table.TABLE);
+        final Table table = schema.createTable(TEST_TABLE_NAME);
         //testTable.createColumn(FIRST_COLUMN_NAME);
         //testTable.createColumn(SECOND_COLUMN_NAME);
         query.addTable(table);

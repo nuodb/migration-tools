@@ -27,18 +27,17 @@
  */
 package com.nuodb.migration.jdbc.model;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.Collection;
 import java.util.Map;
 
-import static com.nuodb.migration.jdbc.model.Name.valueOf;
-import static com.nuodb.migration.jdbc.model.Table.TABLE;
+import static com.nuodb.migration.jdbc.model.Identifier.valueOf;
 import static java.lang.String.format;
 
-public class Schema extends HasNameBase {
-    private Map<Name, Table> tables = Maps.newHashMap();
+public class Schema extends HasIdentifierBase {
+
+    private Map<Identifier, Table> tables = Maps.newLinkedHashMap();
 
     private Database database;
     private Catalog catalog;
@@ -47,8 +46,8 @@ public class Schema extends HasNameBase {
         this(database, catalog, valueOf(name));
     }
 
-    public Schema(Database database, Catalog catalog, Name name) {
-        super(name);
+    public Schema(Database database, Catalog catalog, Identifier identifier) {
+        super(identifier);
         this.database = database;
         this.catalog = catalog;
     }
@@ -62,34 +61,31 @@ public class Schema extends HasNameBase {
     }
 
     public Table getTable(String name) {
-        return getOrCreateTable(valueOf(name), TABLE, false);
+        return createTable(valueOf(name), false);
     }
 
-    public Table getTable(Name name) {
-        return getOrCreateTable(name, TABLE, false);
+    public Table getTable(Identifier identifier) {
+        return createTable(identifier, false);
     }
 
-    public Table createTable(String name, String type) {
-        return getOrCreateTable(valueOf(name), type, true);
+    public Table createTable(String name) {
+        return createTable(valueOf(name), true);
     }
 
-    protected Table getOrCreateTable(Name name, String type, boolean create) {
-        Table table = tables.get(name);
-        if (table == null && create) {
-            table = doCreateTable(name, type);
-        } else {
-            throw new ModelException(format("Table %s doesn't exist", name));
+    protected Table createTable(Identifier identifier, boolean create) {
+        Table table = tables.get(identifier);
+        if (table == null) {
+            if (create) {
+                table = new Table(database, catalog, this, identifier);
+                tables.put(identifier, table);
+            } else {
+                throw new ModelException(format("Table %s doesn't exist", identifier));
+            }
         }
         return table;
     }
 
-    protected Table doCreateTable(Name name, String type) {
-        Table table = new Table(database, catalog, this, name, type);
-        tables.put(name, table);
-        return table;
-    }
-
     public Collection<Table> listTables() {
-        return Lists.newArrayList(tables.values());
+        return tables.values();
     }
 }

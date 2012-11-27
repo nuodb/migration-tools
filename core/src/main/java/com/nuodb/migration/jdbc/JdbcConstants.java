@@ -10,7 +10,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the value of NuoDB, Inc. nor the names of its contributors may
+ *     * Neither the name of NuoDB, Inc. nor the names of its contributors may
  *       be used to endorse or promote products derived from this software
  *       without specific prior written permission.
  *
@@ -25,47 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.model;
+package com.nuodb.migration.jdbc;
 
-public class Name {
+/**
+ * @author Sergey Bushik
+ */
+public interface JdbcConstants {
 
-    private String value;
-
-    protected Name(String value) {
-        this.value = value;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    private static boolean isEmpty(String value) {
-        return value == null || value.length() == 0;
-    }
-
-    public static Name valueOf(String value) {
-        return isEmpty(value) ? null : new Name(value);
-    }
-
-    @Override
-    public String toString() {
-        return value();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Name name = (Name) o;
-
-        if (value != null ? !value.equalsIgnoreCase(name.value) : name.value != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return value != null ? value.toLowerCase().hashCode() : 0;
-    }
+    final String NUODB_DRIVER_CLASS_NAME = "com.nuodb.jdbc.Driver";
 }

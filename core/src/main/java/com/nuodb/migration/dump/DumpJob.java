@@ -28,6 +28,7 @@
 package com.nuodb.migration.dump;
 
 import com.google.common.collect.Lists;
+import com.nuodb.migration.jdbc.JdbcUtils;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
@@ -101,15 +102,7 @@ public class DumpJob extends JobBase {
         try {
             dump(dumpJobExecution);
         } finally {
-            try {
-                if (connectionServices != null) {
-                    connectionServices.close();
-                }
-            } catch (SQLException exception) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Failed closing connection services", exception);
-                }
-            }
+            JdbcUtils.close(connectionServices);
         }
     }
 
@@ -165,7 +158,7 @@ public class DumpJob extends JobBase {
     protected void dump(final DumpJobExecution dumpJobExecution, final Query query,
                         final CatalogEntry catalogEntry) throws SQLException {
         final Database database = dumpJobExecution.getDatabase();
-        QueryTemplate queryTemplate = new QueryTemplate(dumpJobExecution.getConnectionServices().getConnection());
+        StatementTemplate queryTemplate = new StatementTemplate(dumpJobExecution.getConnectionServices().getConnection());
         queryTemplate.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override

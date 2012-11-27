@@ -25,61 +25,13 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.query;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+package com.nuodb.migration.jdbc.model;
 
 /**
  * @author Sergey Bushik
  */
-public class QueryTemplate {
-
-    private transient final Logger logger = LoggerFactory.getLogger(getClass());
-
-    private final Connection connection;
-
-    public QueryTemplate(Connection connection) {
-        this.connection = connection;
-    }
-
-    public <X extends Statement> void execute(StatementCreator<X> creator,
-                                              StatementCallback<X> callback) throws SQLException {
-        X statement = creator.create(connection);
-        try {
-            callback.execute(statement);
-        } finally {
-            close(statement.getResultSet());
-            close(statement);
-        }
-    }
-
-    private void close(ResultSet resultSet) {
-        try {
-            if (resultSet != null && !resultSet.isClosed()) {
-                resultSet.close();
-            }
-        } catch (SQLException exception) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed closing result set", exception);
-            }
-        }
-    }
-
-    private void close(Statement statement) {
-        try {
-            if (statement != null && !statement.isClosed()) {
-                statement.close();
-            }
-        } catch (SQLException exception) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed closing statement", exception);
-            }
-        }
-    }
+public enum ForeignKeyDeferrability {
+    INITIALLY_DEFERRED,
+    INITIALLY_IMMEDIATE,
+    NOT_DEFERRABLE
 }

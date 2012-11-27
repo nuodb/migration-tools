@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.model;
 
-public class Column extends HasNameBase implements ColumnModel {
+public class Column extends HasIdentifierBase implements ColumnModel {
     /**
      * Default precision is maximum value
      */
@@ -85,11 +85,11 @@ public class Column extends HasNameBase implements ColumnModel {
     private String defaultValue;
 
     public Column(Table table, String name) {
-        this(table, Name.valueOf(name));
+        this(table, Identifier.valueOf(name));
     }
 
-    public Column(Table table, Name name) {
-        super(name);
+    public Column(Table table, Identifier identifier) {
+        super(identifier);
         this.table = table;
     }
 
@@ -211,7 +211,50 @@ public class Column extends HasNameBase implements ColumnModel {
     }
 
     @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof Column)) return false;
+
+        Column column = (Column) object;
+
+        if (autoIncrement != column.autoIncrement) return false;
+        if (nullable != column.nullable) return false;
+        if (position != column.position) return false;
+        if (precision != column.precision) return false;
+        if (radix != column.radix) return false;
+        if (scale != column.scale) return false;
+        if (size != column.size) return false;
+        if (typeCode != column.typeCode) return false;
+        if (unique != column.unique) return false;
+        if (comment != null ? !comment.equals(column.comment) : column.comment != null) return false;
+        if (defaultValue != null ? !defaultValue.equals(column.defaultValue) : column.defaultValue != null)
+            return false;
+        if (table != null ? !table.equals(column.table) : column.table != null) return false;
+        if (typeName != null ? !typeName.equals(column.typeName) : column.typeName != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = table != null ? table.hashCode() : 0;
+        result = 31 * result + typeCode;
+        result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
+        result = 31 * result + size;
+        result = 31 * result + precision;
+        result = 31 * result + scale;
+        result = 31 * result + (comment != null ? comment.hashCode() : 0);
+        result = 31 * result + radix;
+        result = 31 * result + position;
+        result = 31 * result + (nullable ? 1 : 0);
+        result = 31 * result + (autoIncrement ? 1 : 0);
+        result = 31 * result + (unique ? 1 : 0);
+        result = 31 * result + (defaultValue != null ? defaultValue.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
-        return getName().toString();
+        return getName();
     }
 }

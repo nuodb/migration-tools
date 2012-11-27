@@ -27,37 +27,20 @@
  */
 package com.nuodb.migration.jdbc.model;
 
-
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class HasNameBase implements HasName {
+public interface HasIdentifier extends Comparable<HasIdentifier> {
 
-    private Name name;
+    String getName();
 
-    protected HasNameBase(Name name) {
-        this.name = name;
-    }
+    void setName(String name);
 
-    @Override
-    public String getName() {
-        return name != null ? name.value() : null;
-    }
+    Identifier getIdentifier();
 
-    @Override
-    public void setName(String name) {
-        this.name = Name.valueOf(name);
-    }
+    void setIdentifier(Identifier identifier);
 
-    @Override
-    public String getQuotedName(DatabaseDialect databaseDialect) {
-        return databaseDialect != null ? databaseDialect.quote(getName()) : getName();
-    }
-
-    @Override
-    public String toString() {
-        return getName();
-    }
+    String getQuotedName(DatabaseDialect databaseDialect);
 }

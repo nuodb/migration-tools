@@ -10,7 +10,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of NuoDB, Inc. nor the names of its contributors may
+ *     * Neither the value of NuoDB, Inc. nor the names of its contributors may
  *       be used to endorse or promote products derived from this software
  *       without specific prior written permission.
  *
@@ -25,12 +25,58 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc;
+package com.nuodb.migration.jdbc.model;
 
-/**
- * @author Sergey Bushik
- */
-public interface Constants {
+public class Identifier implements Comparable<Identifier> {
 
-    final String NUODB_DRIVER_CLASS_NAME = "com.nuodb.jdbc.Driver";
+    private static final String EMPTY = "";
+
+    private String value;
+
+    protected Identifier(String value) {
+        this.value = value;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    private static boolean isEmpty(String value) {
+        return value == null || value.length() == 0;
+    }
+
+    public static Identifier valueOf(String value) {
+        return isEmpty(value) ? null : new Identifier(value);
+    }
+
+    @Override
+    public String toString() {
+        return value();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Identifier identifier = (Identifier) o;
+
+        if (value != null ? !value.equalsIgnoreCase(identifier.value) : identifier.value != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return value != null ? value.toLowerCase().hashCode() : 0;
+    }
+
+    @Override
+    public int compareTo(Identifier identifier) {
+        if (identifier != null) {
+            return value.compareTo(identifier.value());
+        } else {
+            return value.compareTo(EMPTY);
+        }
+    }
 }

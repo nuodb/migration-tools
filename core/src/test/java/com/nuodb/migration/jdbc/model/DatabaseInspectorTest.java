@@ -57,14 +57,14 @@ public class DatabaseInspectorTest {
         when(metaData.getColumns(null, null, TEST_TABLE_NAME, null)).thenReturn(mockResultSet);
 
         when(database.createSchema(TEST_CATALOG_NAME, TEST_SCHEMA_NAME)).thenReturn(schema);
-        when(schema.createTable(TEST_TABLE_NAME, TEST_TABLE_TYPE)).thenReturn(table);
-        when(table.getName()).thenReturn(Name.valueOf(TEST_TABLE_NAME).value());
+        when(schema.createTable(TEST_TABLE_NAME)).thenReturn(table);
+        when(table.getName()).thenReturn(Identifier.valueOf(TEST_TABLE_NAME).value());
     }
 
     @Test
     public void testReadCatalogs() throws Exception {
         // databaseInspector.readCatalogs(metaData, database);
-        // verify(database, times(1)).getOrCreateCatalog(TEST_CATALOG_NAME);
+        // verify(database, times(1)).createCatalog(TEST_CATALOG_NAME);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class DatabaseInspectorTest {
         final Column mockColumn = mock(Column.class);
         stub(table.createColumn(TEST_COLUMN_NAME)).toReturn(mockColumn);
 
-        databaseInspector.readTableColumns(metaData, table);
+        databaseInspector.readColumns(metaData, database, table.getName());
         verify(table, times(1)).createColumn(TEST_COLUMN_NAME);
     }
 

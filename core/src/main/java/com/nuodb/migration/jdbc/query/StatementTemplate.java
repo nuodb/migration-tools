@@ -25,8 +25,33 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.model;
+package com.nuodb.migration.jdbc.query;
 
-public enum ObjectType {
-    CATALOG, SCHEMA, TABLE, COLUMN, FOREIGN_KEY, INDEX
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import static com.nuodb.migration.jdbc.JdbcUtils.close;
+
+/**
+ * @author Sergey Bushik
+ */
+public class StatementTemplate {
+
+    private final Connection connection;
+
+    public StatementTemplate(Connection connection) {
+        this.connection = connection;
+    }
+
+    public <X extends Statement> void execute(StatementCreator<X> creator,
+                                              StatementCallback<X> callback) throws SQLException {
+        X statement = creator.create(connection);
+        try {
+            callback.execute(statement);
+        } finally {
+            close(statement.getResultSet());
+            close(statement);
+        }
+    }
 }

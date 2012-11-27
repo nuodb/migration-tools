@@ -43,6 +43,11 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static com.nuodb.migration.jdbc.model.Identifier.valueOf;
+import static com.nuodb.migration.jdbc.model.ObjectType.*;
+import static java.sql.DatabaseMetaData.tableIndexStatistic;
+
 /**
  * Reads database meta data and creates its meta meta. Root meta meta object is {@link Database} containing set of
  * catalogs, each catalog has a collection of schemas and generate is a wrapper of collection of a tables.
@@ -64,6 +69,8 @@ public class DatabaseInspector {
     protected String[] tableTypes = TABLE_TYPES;
     protected Connection connection;
     protected ConnectionProvider connectionProvider;
+    protected ForeignKeyRuleMap foreignKeyRuleMap;
+    protected ForeignKeyDeferrabilityMap foreignKeyDeferrabilityMap;
     protected DatabaseDialectResolver databaseDialectResolver = new DatabaseDialectResolverImpl();
 
     public DatabaseInspector withObjectTypes(ObjectType... types) {
@@ -94,6 +101,16 @@ public class DatabaseInspector {
 
     public DatabaseInspector withConnectionProvider(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
+        return this;
+    }
+
+    public DatabaseInspector withForeignKeyRuleMap(ForeignKeyRuleMap foreignKeyRuleMap) {
+        this.foreignKeyRuleMap = foreignKeyRuleMap;
+        return this;
+    }
+
+    public DatabaseInspector withForeignKeyDeferrabilityMap(ForeignKeyDeferrabilityMap foreignKeyDeferrabilityMap) {
+        this.foreignKeyDeferrabilityMap = foreignKeyDeferrabilityMap;
         return this;
     }
 
@@ -154,14 +171,23 @@ public class DatabaseInspector {
     }
 
     protected void readObjects(DatabaseMetaData metaData, Database database) throws SQLException {
-        if (objectTypes.contains(ObjectType.CATALOG)) {
+        if (objectTypes.contains(CATALOG)) {
             readCatalogs(metaData, database);
         }
-        if (objectTypes.contains(ObjectType.SCHEMA)) {
+        if (objectTypes.contains(SCHEMA)) {
             readSchemas(metaData, database);
         }
-        if (objectTypes.contains(ObjectType.TABLE)) {
+        if (objectTypes.contains(TABLE)) {
             readTables(metaData, database);
+        }
+        if (objectTypes.contains(COLUMN)) {
+            readColumns(metaData, database);
+        }
+        if (objectTypes.contains(INDEX)) {
+            readIndexes(metaData, database);
+        }
+        if (objectTypes.contains(FOREIGN_KEY)) {
+            readForeignKeys(metaData, database);
         }
     }
 
@@ -173,7 +199,7 @@ public class DatabaseInspector {
                     database.createCatalog(catalogs.getString("TABLE_CAT"));
                 }
             } finally {
-                catalogs.close();
+                close(catalogs);
             }
             if (catalog != null) {
                 database.getCatalog(catalog);
@@ -193,7 +219,7 @@ public class DatabaseInspector {
                     database.createSchema(schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
                 }
             } finally {
-                schemas.close();
+                close(schemas);
             }
             if (schema != null) {
                 database.getCatalog(catalog).getSchema(schema);
@@ -210,21 +236,29 @@ public class DatabaseInspector {
         try {
             while (tables.next()) {
                 Schema schema = database.createSchema(tables.getString("TABLE_CAT"), tables.getString("TABLE_SCHEM"));
-                Table table = schema.createTable(tables.getString("TABLE_NAME"), tables.getString("TABLE_TYPE"));
-                if (objectTypes.contains(ObjectType.COLUMN)) {
-                    readTableColumns(metaData, table);
-                }
+                Table table = schema.createTable(tables.getString("TABLE_NAME"));
+                table.setType(tables.getString("TABLE_TYPE"));
+
             }
         } finally {
-            tables.close();
+            close(tables);
         }
     }
 
-    protected void readTableColumns(DatabaseMetaData metaData, Table table) throws SQLException {
-        ResultSet columns = metaData.getColumns(catalog, schema, table.getName(), null);
+    protected void readColumns(DatabaseMetaData metaData, Database database) throws SQLException {
+        for (Table table : database.listTables()) {
+            readColumns(metaData, database, table.getName());
+        }
+    }
+
+    protected void readColumns(DatabaseMetaData metaData, Database database, String tableName) throws SQLException {
+        ResultSet columns = metaData.getColumns(catalog, schema, tableName, null);
         try {
             ColumnModelSet modelSet = ColumnModelFactory.createColumnModelSet(columns.getMetaData());
             while (columns.next()) {
+                Table table = database.createCatalog(columns.getString("TABLE_CAT")).createSchema(
+                        columns.getString("TABLE_SCHEM")).createTable(columns.getString("TABLE_NAME"));
+
                 Column column = table.createColumn(columns.getString("COLUMN_NAME"));
                 column.setTypeCode(columns.getInt("DATA_TYPE"));
                 column.setTypeName(columns.getString("TYPE_NAME"));
@@ -242,7 +276,94 @@ public class DatabaseInspector {
                 column.setAutoIncrement("YES".equals(autoIncrement));
             }
         } finally {
-            columns.close();
+            close(columns);
+        }
+    }
+
+    protected void readIndexes(DatabaseMetaData metaData, Database database) throws SQLException {
+        for (Table table : database.listTables()) {
+            readIndexes(metaData, database, table.getName());
+        }
+    }
+
+    protected void readIndexes(DatabaseMetaData metaData, Database database, String tableName) throws SQLException {
+        ResultSet indexes = metaData.getIndexInfo(catalog, schema, tableName, false, true);
+        try {
+            while (indexes.next()) {
+                if (indexes.getShort("TYPE") == tableIndexStatistic) {
+                    continue;
+                }
+                Table table = database.createCatalog(indexes.getString("TABLE_CAT")).createSchema(
+                        indexes.getString("TABLE_SCHEM")).getTable(indexes.getString("TABLE_NAME"));
+                Identifier identifier = valueOf(indexes.getString("INDEX_NAME"));
+                Index index = table.getIndex(identifier);
+                if (index == null) {
+                    table.addIndex(index = new Index(identifier));
+                    index.setUnique(!indexes.getBoolean("NON_UNIQUE"));
+                    index.setFilterCondition(indexes.getString("FILTER_CONDITION"));
+                    index.setSortOrder(getIndexSortOrder(indexes.getString("ASC_OR_DESC")));
+                }
+                index.addColumn(table.createColumn(indexes.getString("COLUMN_NAME")), indexes.getInt("ORDINAL_POSITION"));
+
+            }
+        } finally {
+            close(indexes);
+        }
+    }
+
+    protected void readForeignKeys(DatabaseMetaData metaData, Database database) throws SQLException {
+        for (Table table : database.listTables()) {
+            readForeignKeys(metaData, database, table.getName());
+        }
+    }
+
+    protected void readForeignKeys(DatabaseMetaData metaData, Database database, String tableName) throws SQLException {
+        ResultSet foreignKeys = metaData.getImportedKeys(catalog, schema, tableName);
+        try {
+            while (foreignKeys.next()) {
+                Identifier identifier = valueOf(foreignKeys.getString("FK_NAME"));
+                Table targetTable = database.createCatalog(foreignKeys.getString("FKTABLE_CAT")).createSchema(
+                        foreignKeys.getString("FKTABLE_SCHEM")).createTable(foreignKeys.getString("FKTABLE_NAME"));
+
+                ForeignKey foreignKey = targetTable.getForeignKey(identifier);
+                if (foreignKey == null) {
+                    targetTable.addForeignKey(foreignKey = new ForeignKey(identifier));
+                    foreignKey.setUpdateRule(getForeignKeyRule(foreignKeys.getInt("UPDATE_RULE")));
+                    foreignKey.setDeleteRule(getForeignKeyRule(foreignKeys.getInt("DELETE_RULE")));
+                    foreignKey.setDeferrability(getForeignKeyDeferrability(foreignKeys.getInt("DEFERRABILITY")));
+                }
+                Column targetColumn = targetTable.createColumn(foreignKeys.getString("FKCOLUMN_NAME"));
+
+                Table sourceTable = database.createCatalog(foreignKeys.getString("PKTABLE_CAT")).createSchema(
+                        foreignKeys.getString("PKTABLE_SCHEM")).createTable(foreignKeys.getString("PKTABLE_NAME"));
+                Column sourceColumn = sourceTable.createColumn(foreignKeys.getString("PKCOLUMN_NAME"));
+
+                foreignKey.addReference(
+                        sourceColumn, foreignKeys.getString("PK_NAME"),
+                        targetColumn, foreignKeys.getString("FK_NAME"), foreignKeys.getShort("KEY_SEQ"));
+            }
+        } finally {
+            close(foreignKeys);
+        }
+    }
+
+    protected ForeignKeyRule getForeignKeyRule(int ruleValue) {
+        ForeignKeyRuleMap foreignKeyRuleMap = this.foreignKeyRuleMap != null ?
+                this.foreignKeyRuleMap : ForeignKeyRuleMap.getInstance();
+        return foreignKeyRuleMap.get(ruleValue);
+    }
+
+    protected ForeignKeyDeferrability getForeignKeyDeferrability(int deferrabilityValue) {
+        ForeignKeyDeferrabilityMap foreignKeyDeferrabilityMap = this.foreignKeyDeferrabilityMap != null ?
+                this.foreignKeyDeferrabilityMap : ForeignKeyDeferrabilityMap.getInstance();
+        return foreignKeyDeferrabilityMap.getDeferrability(deferrabilityValue);
+    }
+
+    protected IndexSortOrder getIndexSortOrder(String ascOrDesc) {
+        if (ascOrDesc != null) {
+            return ascOrDesc.equals("A") ? IndexSortOrder.ASC : IndexSortOrder.DESC;
+        } else {
+            return null;
         }
     }
 

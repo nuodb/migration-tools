@@ -36,7 +36,7 @@ import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.option.*;
 import com.nuodb.migration.context.support.ApplicationSupport;
-import com.nuodb.migration.jdbc.Constants;
+import com.nuodb.migration.jdbc.JdbcConstants;
 import com.nuodb.migration.spec.*;
 import com.nuodb.migration.utils.Priority;
 
@@ -418,7 +418,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
         JdbcConnectionSpec connection = new JdbcConnectionSpec();
-        connection.setDriverClassName(Constants.NUODB_DRIVER_CLASS_NAME);
+        connection.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
         connection.setSchema(commandLine.<String>getValue(TARGET_SCHEMA_OPTION));
         connection.setUrl(commandLine.<String>getValue(TARGET_URL_OPTION));
         connection.setUsername(commandLine.<String>getValue(TARGET_USERNAME_OPTION));

@@ -25,59 +25,46 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type;
+package com.nuodb.migration.jdbc.model;
 
 import com.google.common.collect.Maps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.sql.Types;
 import java.util.Map;
+
+import static com.nuodb.migration.jdbc.model.ForeignKeyRule.*;
+import static java.sql.DatabaseMetaData.*;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeNameMap {
+public class ForeignKeyRuleMap {
 
-    private static final Map<Integer, String> TYPE_CODE_NAMES = Maps.newHashMap();
+    private Map<Integer, ForeignKeyRule> foreignKeyRuleMap = Maps.newHashMap();
 
-    private static final Logger logger = LoggerFactory.getLogger(JdbcTypeNameMap.class);
+    private static ForeignKeyRuleMap INSTANCE;
 
-    static {
-        Field[] fields = Types.class.getFields();
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
-                try {
-                    TYPE_CODE_NAMES.put((Integer) field.get(null), field.getName());
-                } catch (IllegalAccessException exception) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Failed accessing jdbc type code field", exception);
-                    }
-                }
-            }
+    public static ForeignKeyRuleMap getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = createInstance();
         }
+        return INSTANCE;
     }
 
-    public static final JdbcTypeNameMap INSTANCE = new JdbcTypeNameMap();
-
-    private Map<Integer, String> typeCodeNameMap = Maps.newHashMap();
-
-    public JdbcTypeNameMap() {
-        this.typeCodeNameMap = TYPE_CODE_NAMES;
+    private static ForeignKeyRuleMap createInstance() {
+        ForeignKeyRuleMap instance = new ForeignKeyRuleMap();
+        instance.put(importedKeyNoAction, NO_ACTION);
+        instance.put(importedKeyCascade, CASCADE);
+        instance.put(importedKeySetNull, SET_NULL);
+        instance.put(importedKeyRestrict, RESTRICT);
+        instance.put(importedKeySetDefault, SET_DEFAULT);
+        return instance;
     }
 
-    public String getTypeName(int typeCode) {
-        String typeName = typeCodeNameMap.get(typeCode);
-        return typeName == null ? getUnknownTypeName(typeCode) : typeName;
+    public void put(int value, ForeignKeyRule rule) {
+        foreignKeyRuleMap.put(value, rule);
     }
 
-    public void addTypeCodeName(int typeCode, String typeName) {
-        typeCodeNameMap.put(typeCode, typeName);
-    }
-
-    protected String getUnknownTypeName(int typeCode) {
-        return "TYPE:" + typeCode;
+    public ForeignKeyRule get(int ruleValue) {
+        return foreignKeyRuleMap.get(ruleValue);
     }
 }

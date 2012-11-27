@@ -35,8 +35,8 @@ import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
 import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.spec.GenerateSchemaSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 
 /**
  * @author Sergey Bushik
@@ -69,18 +69,22 @@ public class GenerateSchemaJobFactory implements JobFactory<GenerateSchemaJob> {
         GenerateSchemaJobFactory jobFactory = new GenerateSchemaJobFactory();
         jobFactory.setGenerateSchemaSpec(new GenerateSchemaSpec() {
             {
-                JdbcConnectionSpec sourceSpec = new JdbcConnectionSpec();
-                sourceSpec.setDriverClassName("com.mysql.jdbc.Driver");
-                sourceSpec.setUrl("jdbc:mysql://localhost:3306/enron-load");
-                sourceSpec.setUsername("root");
-                setSourceConnectionSpec(sourceSpec);
+                JdbcConnectionSpec sourceConnectionSpec = new JdbcConnectionSpec();
+                sourceConnectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
+                sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/generate-schema");
+                sourceConnectionSpec.setUsername("root");
 
-                JdbcConnectionSpec targetSpec = new JdbcConnectionSpec();
-                targetSpec.setDriverClassName("com.nuodb.jdbc.Driver");
-                targetSpec.setUrl("jdbc:com.nuodb://localhost/test");
-                targetSpec.setUsername("dba");
-                targetSpec.setPassword("goalie");
-                setTargetConnectionSpec(targetSpec);
+                JdbcConnectionSpec targetConnectionSpec = new JdbcConnectionSpec();
+                targetConnectionSpec.setDriverClassName("com.nuodb.jdbc.Driver");
+                targetConnectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
+                targetConnectionSpec.setUsername("dba");
+                targetConnectionSpec.setPassword("goalie");
+                targetConnectionSpec.setSchema("hockey");
+
+                setSourceConnectionSpec(targetConnectionSpec);
+                setTargetConnectionSpec(sourceConnectionSpec);
+                //setSourceConnectionSpec(sourceConnectionSpec);
+                //setTargetConnectionSpec(targetConnectionSpec);
             }
         });
         JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());

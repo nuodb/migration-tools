@@ -27,6 +27,9 @@
  */
 package com.nuodb.migration.jdbc.model;
 
-public enum ObjectType {
-    CATALOG, SCHEMA, TABLE, COLUMN, FOREIGN_KEY, INDEX
+/**
+ * @author Sergey Bushik
+ */
+public enum ForeignKeyRule {
+    NO_ACTION, CASCADE, SET_NULL, RESTRICT, SET_DEFAULT
 }

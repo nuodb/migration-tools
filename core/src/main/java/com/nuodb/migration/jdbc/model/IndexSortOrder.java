@@ -27,16 +27,9 @@
  */
 package com.nuodb.migration.jdbc.model;
 
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
-
 /**
  * @author Sergey Bushik
  */
-public interface HasName {
-
-    String getName();
-
-    void setName(String name);
-
-    String getQuotedName(DatabaseDialect databaseDialect);
+public enum IndexSortOrder {
+    ASC, DESC
 }

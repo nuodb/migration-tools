@@ -27,26 +27,25 @@
  */
 package com.nuodb.migration.jdbc.model;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.Collection;
 import java.util.Map;
 
-import static com.nuodb.migration.jdbc.model.Name.valueOf;
+import static com.nuodb.migration.jdbc.model.Identifier.valueOf;
 import static java.lang.String.format;
 
-public class Catalog extends HasNameBase {
+public class Catalog extends HasIdentifierBase {
 
-    private Map<Name, Schema> schemas = Maps.newHashMap();
+    private Map<Identifier, Schema> schemas = Maps.newLinkedHashMap();
     private Database database;
 
     public Catalog(Database database, String name) {
         this(database, valueOf(name));
     }
 
-    public Catalog(Database database, Name name) {
-        super(name);
+    public Catalog(Database database, Identifier identifier) {
+        super(identifier);
         this.database = database;
     }
 
@@ -55,40 +54,34 @@ public class Catalog extends HasNameBase {
     }
 
     public Schema getSchema(String name) {
-        return getOrCreateSchema(valueOf(name), false);
+        return createSchema(valueOf(name), false);
     }
 
-    public Schema getSchema(Name name) {
-        return getOrCreateSchema(name, false);
+    public Schema getSchema(Identifier identifier) {
+        return createSchema(identifier, false);
     }
 
     public Schema createSchema(String name) {
-        return getOrCreateSchema(valueOf(name), true);
+        return createSchema(valueOf(name), true);
     }
 
-    public Schema createSchema(Name name) {
-        return getOrCreateSchema(name, true);
+    public Schema createSchema(Identifier identifier) {
+        return createSchema(identifier, true);
     }
 
-    protected Schema getOrCreateSchema(Name name, boolean create) {
-        Schema schema = schemas.get(name);
+    protected Schema createSchema(final Identifier identifier, boolean create) {
+        Schema schema = schemas.get(identifier);
         if (schema == null) {
             if (create) {
-                schema = doCreateSchema(name);
+                schemas.put(identifier, schema = new Schema(database, this, identifier));
             } else {
-                throw new ModelException(format("Schema %s doesn't exist", name));
+                throw new ModelException(format("Schema %s doesn't exist", identifier));
             }
         }
         return schema;
     }
 
-    protected Schema doCreateSchema(Name name) {
-        Schema schema = new Schema(database, this, name);
-        schemas.put(name, schema);
-        return schema;
-    }
-
     public Collection<Schema> listSchemas() {
-        return Lists.newArrayList(schemas.values());
+        return schemas.values();
     }
 }

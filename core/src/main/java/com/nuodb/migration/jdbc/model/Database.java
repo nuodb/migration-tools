@@ -34,17 +34,16 @@ import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
-import static com.nuodb.migration.jdbc.model.Name.valueOf;
+import static com.nuodb.migration.jdbc.model.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.split;
 
 public class Database {
 
-    private Map<Name, Catalog> catalogs = Maps.newHashMap();
+    private Map<Identifier, Catalog> catalogs = Maps.newLinkedHashMap();
     private DriverInfo driverInfo;
     private DatabaseInfo databaseInfo;
     private DatabaseDialect databaseDialect;
@@ -74,11 +73,11 @@ public class Database {
     }
 
     public Catalog createCatalog(String catalog) {
-        return getOrCreateCatalog(valueOf(catalog), true);
+        return createCatalog(valueOf(catalog), true);
     }
 
-    public Catalog createCatalog(Name catalog) {
-        return getOrCreateCatalog(catalog, true);
+    public Catalog createCatalog(Identifier catalog) {
+        return createCatalog(catalog, true);
     }
 
     public Schema createSchema(String catalog, String schema) {
@@ -86,44 +85,38 @@ public class Database {
     }
 
     public Catalog getCatalog(String name) {
-        return getOrCreateCatalog(valueOf(name), false);
+        return createCatalog(valueOf(name), false);
     }
 
-    public Catalog getCatalog(Name name) {
-        return getOrCreateCatalog(name, false);
+    public Catalog getCatalog(Identifier identifier) {
+        return createCatalog(identifier, false);
     }
 
-    protected Catalog getOrCreateCatalog(Name name, boolean create) {
-        Catalog catalog = catalogs.get(name);
+    protected Catalog createCatalog(final Identifier identifier, boolean create) {
+        Catalog catalog = catalogs.get(identifier);
         if (catalog == null) {
             if (create) {
-                catalog = doCreateCatalog(name);
+                catalogs.put(identifier, catalog = new Catalog(this, identifier));
             } else {
-                throw new ModelException(format("Catalog %s doesn't exist", name));
+                throw new ModelException(format("Catalog %s doesn't exist", identifier));
             }
         }
         return catalog;
     }
 
-    protected Catalog doCreateCatalog(Name name) {
-        Catalog catalog = new Catalog(this, name);
-        catalogs.put(name, catalog);
-        return catalog;
-    }
-
     public Table findTable(String table) {
-        List<Table> tables = findTables(table);
+        Collection<Table> tables = findTables(table);
         if (tables.isEmpty()) {
             throw new ModelException(format("Can't find table %s", table));
         } else if (tables.size() > 1) {
             throw new ModelException(format("Multiple tables %s correspond to %s", tables, table));
         }
-        return tables.get(0);
+        return tables.iterator().next();
     }
 
-    public List<Table> findTables(String name) {
+    public Collection<Table> findTables(String name) {
         String[] parts = split(name, "");
-        List<Table> tables = Lists.newArrayList();
+        Collection<Table> tables = Lists.newArrayList();
         if (parts.length == 1) {
             tables.addAll(listTables(parts[0]));
         } else if (parts.length == 2) {
@@ -135,29 +128,28 @@ public class Database {
         return tables;
     }
 
-    public List<Catalog> listCatalogs() {
-        return Lists.newArrayList(catalogs.values());
+    public Collection<Catalog> listCatalogs() {
+        return catalogs.values();
     }
 
-    public List<Schema> listSchemas() {
-        Collection<Catalog> catalogs = listCatalogs();
-        List<Schema> schemas = Lists.newArrayList();
-        for (Catalog catalog : catalogs) {
+    public Collection<Schema> listSchemas() {
+        Collection<Schema> schemas = Lists.newArrayList();
+        for (Catalog catalog : listCatalogs()) {
             schemas.addAll(catalog.listSchemas());
         }
         return schemas;
     }
 
-    public List<Table> listTables() {
+    public Collection<Table> listTables() {
         Collection<Schema> schemas = listSchemas();
-        List<Table> tables = Lists.newArrayList();
+        Collection<Table> tables = Lists.newArrayList();
         for (Schema schema : schemas) {
             tables.addAll(schema.listTables());
         }
         return tables;
     }
 
-    public List<Table> listTables(final String table) {
+    public Collection<Table> listTables(final String table) {
         return Lists.newArrayList(Iterables.filter(listTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table input) {
@@ -166,7 +158,7 @@ public class Database {
         }));
     }
 
-    public List<Table> listTables(final String schema, final String table) {
+    public Collection<Table> listTables(final String schema, final String table) {
         return Lists.newArrayList(Iterables.find(listTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table input) {
@@ -176,7 +168,7 @@ public class Database {
         }));
     }
 
-    public List<Table> listTables(final String catalog, final String schema, final String table) {
+    public Collection<Table> listTables(final String catalog, final String schema, final String table) {
         return Lists.newArrayList(Iterables.find(listTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table input) {

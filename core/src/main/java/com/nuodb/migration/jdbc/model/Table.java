@@ -28,43 +28,36 @@
 package com.nuodb.migration.jdbc.model;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
 
-public class Table extends HasNameBase {
+public class Table extends HasIdentifierBase {
 
     public static final String TABLE = "TABLE";
     public static final String VIEW = "VIEW";
 
-    private final Map<Name, Column> columns = new LinkedHashMap<Name, Column>();
-    private final Map<Name, Index> indexes = new LinkedHashMap<Name, Index>();
-    private final Map<Name, UniqueKey> uniqueKeys = new LinkedHashMap<Name, UniqueKey>();
-    private final List<Constraint> constraints = Lists.newArrayList();
+    private final Map<Identifier, Column> columns = Maps.newLinkedHashMap();
+    private final Map<Identifier, Index> indexes = Maps.newLinkedHashMap();
+    private final Map<Identifier, ForeignKey> foreignKeys = Maps.newLinkedHashMap();
     private final Database database;
     private final Catalog catalog;
     private Schema schema;
-    private String type;
+    private String type = TABLE;
 
     public Table(Database database, Catalog catalog, Schema schema, String name) {
-        this(database, catalog, schema, Name.valueOf(name));
+        this(database, catalog, schema, Identifier.valueOf(name));
     }
 
-    public Table(Database database, Catalog catalog, Schema schema, Name name) {
-        this(database, catalog, schema, name, TABLE);
-    }
-
-    public Table(Database database, Catalog catalog, Schema schema, Name name, String type) {
-        super(name);
+    public Table(Database database, Catalog catalog, Schema schema, Identifier identifier) {
+        super(identifier);
         this.database = database;
         this.catalog = catalog;
         this.schema = schema;
-        this.type = type;
     }
 
     public String getQualifiedName() {
@@ -85,6 +78,30 @@ public class Table extends HasNameBase {
         return qualifiedName.toString();
     }
 
+    public void addForeignKey(ForeignKey foreignKey) {
+        foreignKeys.put(foreignKey.getIdentifier(), foreignKey);
+    }
+
+    public ForeignKey getForeignKey(Identifier identifier) {
+        return foreignKeys.get(identifier);
+    }
+
+    public Collection<ForeignKey> getForeignKeys() {
+        return foreignKeys.values();
+    }
+
+    public Index getIndex(Identifier identifier) {
+        return indexes.get(identifier);
+    }
+
+    public void addIndex(Index index) {
+        indexes.put(index.getIdentifier(), index);
+    }
+
+    public Collection<Index> getIndexes() {
+        return indexes.values();
+    }
+
     public Database getDatabase() {
         return database;
     }
@@ -101,33 +118,32 @@ public class Table extends HasNameBase {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public Column getColumn(String name) {
         return getColumn(name, false);
     }
 
-    public Column getColumn(String name, boolean create) {
-        return getColumn(Name.valueOf(name), create);
+    public Column createColumn(String name) {
+        return getColumn(name, true);
     }
 
-    public Column getColumn(Name name, boolean create) {
-        Column column = columns.get(name);
+    public Column getColumn(String name, boolean create) {
+        return getColumn(Identifier.valueOf(name), create);
+    }
+
+    public Column getColumn(Identifier identifier, boolean create) {
+        Column column = columns.get(identifier);
         if (column == null) {
             if (create) {
-                column = createColumn(name);
+                column = new Column(this, identifier);
+                columns.put(identifier, column);
             } else {
-                throw new ModelException(format("Table %s doesn't contain %s column", getName(), name));
+                throw new ModelException(format("Table %s doesn't contain %s column", getName(), identifier));
             }
         }
-        return column;
-    }
-
-    public Column createColumn(String name) {
-        return createColumn(Name.valueOf(name));
-    }
-
-    public Column createColumn(Name name) {
-        Column column = new Column(this, name);
-        columns.put(name, column);
         return column;
     }
 

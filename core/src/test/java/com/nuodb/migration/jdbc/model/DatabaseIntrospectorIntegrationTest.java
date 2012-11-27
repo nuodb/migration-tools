@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Connection;
-import java.util.List;
+import java.util.Collection;
 
 public class DatabaseIntrospectorIntegrationTest {
 
@@ -71,13 +71,13 @@ public class DatabaseIntrospectorIntegrationTest {
         final Database database = new Database();
         inspector.readObjects(connection.getMetaData(), database);
 
-        final List<Catalog> catalogs = database.listCatalogs();
+        final Collection<Catalog> catalogs = database.listCatalogs();
         Assert.assertFalse(catalogs.isEmpty());
 
-        final List<Schema> schemas = database.listSchemas();
+        final Collection<Schema> schemas = database.listSchemas();
         Assert.assertFalse(schemas.isEmpty());
 
-        final List<Table> tables = database.listTables();
+        final Collection<Table> tables = database.listTables();
         Assert.assertFalse(tables.isEmpty());
     }
 
