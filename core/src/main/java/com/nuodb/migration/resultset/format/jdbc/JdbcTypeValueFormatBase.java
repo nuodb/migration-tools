@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.metadata.ColumnModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 import java.util.Map;

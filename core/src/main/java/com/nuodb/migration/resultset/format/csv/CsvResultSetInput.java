@@ -28,8 +28,8 @@
 package com.nuodb.migration.resultset.format.csv;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.model.ColumnModel;
-import com.nuodb.migration.jdbc.model.ColumnModelSet;
+import com.nuodb.migration.jdbc.metadata.ColumnModel;
+import com.nuodb.migration.jdbc.metadata.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
@@ -44,7 +44,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnModelSet;
+import static com.nuodb.migration.jdbc.metadata.ColumnModelFactory.createColumnModelSet;
 import static java.lang.String.valueOf;
 
 /**

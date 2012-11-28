@@ -28,9 +28,9 @@
 package com.nuodb.migration.resultset.format.xml;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.model.ColumnModel;
-import com.nuodb.migration.jdbc.model.ColumnModelFactory;
-import com.nuodb.migration.jdbc.model.ColumnModelSet;
+import com.nuodb.migration.jdbc.metadata.ColumnModel;
+import com.nuodb.migration.jdbc.metadata.ColumnModelFactory;
+import com.nuodb.migration.jdbc.metadata.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;

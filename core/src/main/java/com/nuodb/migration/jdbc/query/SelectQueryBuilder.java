@@ -29,9 +29,9 @@ package com.nuodb.migration.jdbc.query;
 
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
-import com.nuodb.migration.jdbc.model.Column;
-import com.nuodb.migration.jdbc.model.Database;
-import com.nuodb.migration.jdbc.model.Table;
+import com.nuodb.migration.jdbc.metadata.Column;
+import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.Table;
 
 import java.util.Collection;
 import java.util.List;
@@ -50,7 +50,7 @@ public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
     @Override
     public SelectQuery build() {
         Collection<Column> selectQueryColumns;
-        Collection<Column> tableColumns = table.listColumns();
+        Collection<Column> tableColumns = table.getColumns();
         if (columns == null || columns.isEmpty()) {
             selectQueryColumns = tableColumns;
         } else {

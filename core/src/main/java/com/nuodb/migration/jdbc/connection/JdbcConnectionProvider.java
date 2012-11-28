@@ -27,9 +27,9 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
-import com.nuodb.migration.jdbc.model.DatabaseInspector;
+import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 import com.nuodb.migration.spec.JdbcConnectionSpec;
-import com.nuodb.migration.utils.Reflections;
+import com.nuodb.migration.utils.ReflectionUtils;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
 import org.apache.commons.dbcp.PoolingDataSource;
@@ -71,17 +71,25 @@ public class JdbcConnectionProvider implements ConnectionProvider {
         this.transactionIsolation = transactionIsolation;
     }
 
+    protected String getCatalog() {
+        return jdbcConnectionSpec != null ? jdbcConnectionSpec.getCatalog() : null;
+    }
+
+    protected String getSchema() {
+        return jdbcConnectionSpec != null ? jdbcConnectionSpec.getSchema() : null;
+    }
+
+    @Override
+    public ConnectionServices getConnectionServices() {
+        return new JdbcConnectionServices();
+    }
+
     @Override
     public Connection getConnection() throws SQLException {
         if (dataSource == null) {
             dataSource = createDataSource();
         }
         return createConnection();
-    }
-
-    @Override
-    public ConnectionServices getConnectionServices() throws SQLException {
-        return new JdbcConnectionServices();
     }
 
     protected DataSource createDataSource() throws SQLException {
@@ -91,7 +99,7 @@ public class JdbcConnectionProvider implements ConnectionProvider {
             if (logger.isDebugEnabled()) {
                 logger.debug(String.format("Loading driver %s", driverClassName));
             }
-            driver = Reflections.newInstance(driverClassName);
+            driver = ReflectionUtils.newInstance(driverClassName);
         }
         DriverManager.registerDriver(driver);
 
@@ -138,39 +146,6 @@ public class JdbcConnectionProvider implements ConnectionProvider {
         }
     }
 
-    class JdbcConnectionServices implements ConnectionServices {
-
-        private Connection connection;
-
-        @Override
-        public Connection getConnection() throws SQLException {
-            Connection current = connection;
-            if (current == null) {
-                synchronized (this) {
-                    current = connection;
-                    if (current == null) {
-                        current = connection = JdbcConnectionProvider.this.getConnection();
-                    }
-                }
-            }
-            return current;
-        }
-
-        @Override
-        public DatabaseInspector getDatabaseInspector() throws SQLException {
-            DatabaseInspector databaseInspector = new DatabaseInspector();
-            databaseInspector.withConnection(getConnection());
-            databaseInspector.withCatalog(jdbcConnectionSpec.getCatalog());
-            databaseInspector.withSchema(jdbcConnectionSpec.getSchema());
-            return databaseInspector;
-        }
-
-        @Override
-        public void close() throws SQLException {
-            closeConnection(connection);
-        }
-    }
-
     public boolean isAutoCommit() {
         return autoCommit;
     }
@@ -185,5 +160,39 @@ public class JdbcConnectionProvider implements ConnectionProvider {
 
     public void setTransactionIsolation(int transactionIsolation) {
         this.transactionIsolation = transactionIsolation;
+    }
+
+    class JdbcConnectionServices implements ConnectionServices {
+
+        private Connection connection;
+
+        @Override
+        public Connection getConnection() throws SQLException {
+            Connection connection = this.connection;
+            if (connection == null) {
+                synchronized (this) {
+                    connection = this.connection;
+                    if (connection == null) {
+                        connection = this.connection = JdbcConnectionProvider.this.getConnection();
+                    }
+                }
+            }
+            return connection;
+        }
+
+        @Override
+        public DatabaseInspector createDatabaseInspector() throws SQLException {
+            DatabaseInspector databaseInspector = new DatabaseInspector();
+            databaseInspector.withCatalog(getCatalog());
+            databaseInspector.withSchema(getSchema());
+            databaseInspector.withConnection(getConnection());
+            return databaseInspector;
+        }
+
+        @Override
+        public void close() throws SQLException {
+            JdbcConnectionProvider.this.closeConnection(connection);
+            connection = null;
+        }
     }
 }

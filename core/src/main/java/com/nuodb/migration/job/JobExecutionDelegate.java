@@ -34,39 +34,39 @@ import java.util.Map;
  */
 public class JobExecutionDelegate implements JobExecution {
 
-    private JobExecution jobExecution;
+    private JobExecution execution;
 
-    public JobExecutionDelegate(JobExecution jobExecution) {
-        this.jobExecution = jobExecution;
+    public JobExecutionDelegate(JobExecution execution) {
+        this.execution = execution;
     }
 
     @Override
     public boolean isRunning() {
-        return jobExecution.isRunning();
+        return execution.isRunning();
     }
 
     @Override
     public boolean isPaused() {
-        return jobExecution.isPaused();
+        return execution.isPaused();
     }
 
     @Override
     public boolean isStopped() {
-        return jobExecution.isStopped();
+        return execution.isStopped();
     }
 
     @Override
     public Job getJob() {
-        return jobExecution.getJob();
+        return execution.getJob();
     }
 
     @Override
     public JobStatus getJobStatus() {
-        return jobExecution.getJobStatus();
+        return execution.getJobStatus();
     }
 
     @Override
     public Map<String, Object> getContext() {
-        return jobExecution.getContext();
+        return execution.getContext();
     }
 }

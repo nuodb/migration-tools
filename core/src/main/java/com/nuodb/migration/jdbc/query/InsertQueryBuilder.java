@@ -29,9 +29,9 @@ package com.nuodb.migration.jdbc.query;
 
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
-import com.nuodb.migration.jdbc.model.Column;
-import com.nuodb.migration.jdbc.model.Database;
-import com.nuodb.migration.jdbc.model.Table;
+import com.nuodb.migration.jdbc.metadata.Column;
+import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.Table;
 
 import java.util.Collection;
 
@@ -61,7 +61,7 @@ public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
                 insertQuery.addColumn(table.getColumn(column));
             }
         } else {
-            for (Column column : table.listColumns()) {
+            for (Column column : table.getColumns()) {
                 insertQuery.addColumn(column);
             }
         }

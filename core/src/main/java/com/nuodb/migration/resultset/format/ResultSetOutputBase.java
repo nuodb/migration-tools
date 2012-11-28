@@ -27,9 +27,9 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.model.ColumnModel;
-import com.nuodb.migration.jdbc.model.ColumnModelFactory;
-import com.nuodb.migration.jdbc.model.ColumnModelSet;
+import com.nuodb.migration.jdbc.metadata.ColumnModel;
+import com.nuodb.migration.jdbc.metadata.ColumnModelFactory;
+import com.nuodb.migration.jdbc.metadata.ColumnModelSet;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
@@ -119,7 +119,7 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
                 getJdbcTypeValueFormatRegistry().getJdbcTypeValueFormat(jdbcTypeDesc);
         JdbcTypeValueAccess<Object> columnValueAccess =
                 getJdbcTypeValueAccessProvider().getResultSetAccess(resultSet, columnModel, index + 1);
-        return new ColumnValueModelImpl(columnModel, columnValueFormat, columnValueAccess, null);
+        return new SimpleColumnValueModel(columnModel, columnValueFormat, columnValueAccess, null);
     }
 
     @Override

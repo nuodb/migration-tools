@@ -42,11 +42,6 @@ public class NuoDBDialect extends StandardDialect {
     }
 
     @Override
-    public boolean supportsReadSchemas() {
-        return true;
-    }
-
-    @Override
     public JdbcTypeRegistry getJdbcTypeRegistry() {
         return NuoDBTypeRegistry.INSTANCE;
     }

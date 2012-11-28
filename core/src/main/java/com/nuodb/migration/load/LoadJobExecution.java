@@ -28,7 +28,7 @@
 package com.nuodb.migration.load;
 
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
-import com.nuodb.migration.jdbc.model.Database;
+import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.job.JobExecutionDelegate;
 import com.nuodb.migration.job.JobExecution;
 import com.nuodb.migration.resultset.catalog.CatalogReader;
@@ -44,8 +44,8 @@ public class LoadJobExecution extends JobExecutionDelegate {
     private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;
     private CatalogReader catalogReader;
 
-    public LoadJobExecution(JobExecution jobExecution) {
-        super(jobExecution);
+    public LoadJobExecution(JobExecution execution) {
+        super(execution);
     }
 
     public ConnectionServices getConnectionServices() {

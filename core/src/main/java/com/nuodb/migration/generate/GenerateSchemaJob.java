@@ -29,15 +29,16 @@ package com.nuodb.migration.generate;
 
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
-import com.nuodb.migration.jdbc.model.Database;
-import com.nuodb.migration.jdbc.model.DatabaseInspector;
+import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
-import com.nuodb.migration.utils.Validations;
+import com.nuodb.migration.utils.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+
+import static com.nuodb.migration.jdbc.JdbcUtils.close;
 
 /**
  * @author Sergey Bushik
@@ -50,54 +51,38 @@ public class GenerateSchemaJob extends JobBase {
     private ConnectionProvider targetConnectionProvider;
 
     @Override
-    public void execute(JobExecution jobExecution) throws Exception {
-        Validations.isNotNull(getSourceConnectionProvider(), "Source connection provider is required");
-        Validations.isNotNull(getTargetConnectionProvider(), "Target connection provider is required");
+    public void execute(JobExecution execution) throws Exception {
+        ValidationUtils.isNotNull(getSourceConnectionProvider(), "Source connection provider is required");
+        ValidationUtils.isNotNull(getTargetConnectionProvider(), "Target connection provider is required");
+        execution(new GenerateSchemaJobExecution(execution));
+    }
 
+    protected void execution(GenerateSchemaJobExecution execution) throws SQLException {
         ConnectionServices sourceConnectionServices = getSourceConnectionProvider().getConnectionServices();
         ConnectionServices targetConnectionServices = getTargetConnectionProvider().getConnectionServices();
-
-        GenerateSchemaJobExecution generateSchemaJobExecution = new GenerateSchemaJobExecution(jobExecution);
-        generateSchemaJobExecution.setSourceConnectionServices(sourceConnectionServices);
-        generateSchemaJobExecution.setTargetConnectionServices(targetConnectionServices);
         try {
-            generate(generateSchemaJobExecution);
+            execution.setSourceConnectionServices(sourceConnectionServices);
+            execution.setTargetConnectionServices(targetConnectionServices);
+            generate(execution);
         } finally {
-            try {
-                if (sourceConnectionServices != null) {
-                    sourceConnectionServices.close();
-                }
-            } catch (SQLException exception) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Failed closing source connection services", exception);
-                }
-            }
-            try {
-                if (targetConnectionServices != null) {
-                    targetConnectionServices.close();
-                }
-            } catch (SQLException exception) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Failed closing target connection services", exception);
-                }
-            }
+            close(sourceConnectionServices);
+            close(targetConnectionServices);
         }
     }
 
-    protected void generate(GenerateSchemaJobExecution generateSchemaJobExecution) throws SQLException {
-        ConnectionServices sourceConnectionServices = generateSchemaJobExecution.getSourceConnectionServices();
-        DatabaseInspector sourceDatabaseInspector = sourceConnectionServices.getDatabaseInspector();
-        Database sourceDatabase = sourceDatabaseInspector.inspect();
+    protected void generate(GenerateSchemaJobExecution execution) throws SQLException {
+        ConnectionServices sourceConnectionServices = execution.getSourceConnectionServices();
+        Database sourceDatabase = sourceConnectionServices.createDatabaseInspector().inspect();
         if (logger.isInfoEnabled()) {
             logger.info("Source database inspected");
         }
-
-        ConnectionServices targetConnectionServices = generateSchemaJobExecution.getTargetConnectionServices();
-        DatabaseInspector targetDatabaseInspector = targetConnectionServices.getDatabaseInspector();
-        Database targetDatabase = targetDatabaseInspector.inspect();
+        System.out.println(sourceDatabase);
+        ConnectionServices targetConnectionServices = execution.getTargetConnectionServices();
+        Database targetDatabase = targetConnectionServices.createDatabaseInspector().inspect();
         if (logger.isInfoEnabled()) {
             logger.info("Target database inspected");
         }
+        System.out.println(targetDatabase);
     }
 
     public ConnectionProvider getSourceConnectionProvider() {

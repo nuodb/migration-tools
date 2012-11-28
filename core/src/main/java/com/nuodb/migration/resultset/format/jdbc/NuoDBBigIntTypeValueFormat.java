@@ -39,17 +39,16 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  *
  * @author Sergey Bushik
  */
-public class NuoDBBigIntTypeValueFormat extends JdbcTypeValueFormatBase<Number> {
+public class NuoDBBigIntTypeValueFormat extends JdbcTypeValueFormatBase<String> {
 
     @Override
-    protected String doGetValue(JdbcTypeValueAccess<Number> access, Map<String, Object> options) throws Exception {
-        Number value = access.getValue(options);
-        return value != null ? value.toString() : null;
+    protected String doGetValue(JdbcTypeValueAccess<String> access, Map<String, Object> options) throws Exception {
+        return access.getValue(options);
     }
 
     @Override
-    protected void doSetValue(JdbcTypeValueAccess<Number> access, String value,
+    protected void doSetValue(JdbcTypeValueAccess<String> access, String value,
                               Map<String, Object> options) throws Exception {
-        access.setValue(!isEmpty(value) ? Double.parseDouble(value) : null, options);
+        access.setValue(!isEmpty(value) ? value : null, options);
     }
 }

@@ -7,41 +7,34 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.util.Properties;
 
 import static org.mockito.Mockito.*;
 
+@RunWith(MockitoJUnitRunner.class)
 public class DriverManagerConnectionProviderTest {
 
-    public static final String URL = "jdbc:test";
+    private static final int TRANSACTION_ISOLATION = Connection.TRANSACTION_READ_COMMITTED;
+    private static final String URL = "jdbc:test";
+
+    @Mock
     private JdbcConnectionSpec connectionSpec;
-    private Connection connection;
+    @Mock
     private Driver driver;
-    private static final int transactionIsolation = Connection.TRANSACTION_READ_COMMITTED;
+    @Mock
+    private Connection connection;
 
     @Before
     public void setUp() throws Exception {
-        connection = mock(Connection.class);
-
-        driver = (Driver) Proxy.newProxyInstance(getClass().getClassLoader(),
-                new Class[]{Driver.class}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                String name = method.getName();
-                if ("connect".equals(name)) {
-                    return connection;
-                } else if ("acceptsURL".equals(name)) {
-                    return URL;
-                }
-                return null;
-            }
-        });
+        when(driver.connect(anyString(), any(Properties.class))).thenReturn(connection);
+        when(driver.acceptsURL(URL)).thenReturn(true);
         DriverManager.registerDriver(driver);
 
         connectionSpec = mock(JdbcConnectionSpec.class);
@@ -55,16 +48,15 @@ public class DriverManagerConnectionProviderTest {
     public void testGetConnection() throws Exception {
         JdbcConnectionProvider connectionProvider =
                 new JdbcConnectionProvider(connectionSpec);
-        connectionProvider.setTransactionIsolation(transactionIsolation);
+        connectionProvider.setTransactionIsolation(TRANSACTION_ISOLATION);
         connectionProvider.setAutoCommit(false);
-        final Connection connection = connectionProvider.getConnection();
-        Assert.assertNotNull(connection);
-        verify(connectionSpec, times(1)).getDriver();
-        verify(connectionSpec, times(1)).getUsername();
-        verify(connectionSpec, times(1)).getUrl();
-        verify(connectionSpec, times(1)).getPassword();
-        verify(this.connection, times(1)).setTransactionIsolation(anyInt());
-        verify(this.connection, times(1)).setAutoCommit(false);
+        Assert.assertNotNull(connectionProvider.getConnection());
+        verify(connectionSpec).getDriver();
+        verify(connectionSpec).getUsername();
+        verify(connectionSpec).getUrl();
+        verify(connectionSpec).getPassword();
+        verify(connection).setTransactionIsolation(anyInt());
+        verify(connection).setAutoCommit(false);
     }
 
     @After

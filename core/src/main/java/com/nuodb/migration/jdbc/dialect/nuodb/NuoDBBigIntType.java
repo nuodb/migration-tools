@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class NuoDBBigIntType extends JdbcTypeBase<Double> {
+public class NuoDBBigIntType extends JdbcTypeBase<String> {
 
     public static final JdbcType INSTANCE = new NuoDBBigIntType();
 
@@ -47,17 +47,17 @@ public class NuoDBBigIntType extends JdbcTypeBase<Double> {
      * Notice Types.BIGINT passed instead of Types.DECIMAL. Awaiting for DB-2288 to be resolved
      */
     public NuoDBBigIntType() {
-        super(Types.BIGINT, Double.class);
+        super(Types.BIGINT, String.class);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Double value, int column,
+    protected void setNullSafeValue(PreparedStatement statement, String value, int column,
                                     Map<String, Object> options) throws SQLException {
-        statement.setDouble(column, value);
+        statement.setString(column, value);
     }
 
     @Override
-    public Double getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
-        return resultSet.getDouble(column);
+    public String getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+        return resultSet.getString(column);
     }
 }

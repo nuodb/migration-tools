@@ -28,7 +28,7 @@
 package com.nuodb.migration.resultset.format.bson;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.metadata.ColumnModel;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
 import com.nuodb.migration.resultset.format.ResultSetOutputException;
 import de.undercouch.bson4jackson.BsonFactory;

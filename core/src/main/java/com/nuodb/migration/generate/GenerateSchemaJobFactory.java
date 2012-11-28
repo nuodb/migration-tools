@@ -38,6 +38,8 @@ import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.GenerateSchemaSpec;
 import com.nuodb.migration.spec.JdbcConnectionSpec;
 
+import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
+
 /**
  * @author Sergey Bushik
  */
@@ -47,6 +49,7 @@ public class GenerateSchemaJobFactory implements JobFactory<GenerateSchemaJob> {
 
     @Override
     public GenerateSchemaJob createJob() {
+        isNotNull(generateSchemaSpec, "Generate schema spec is required");
         GenerateSchemaJob job = new GenerateSchemaJob();
         job.setSourceConnectionProvider(createConnectionProvider(generateSchemaSpec.getSourceConnectionSpec()));
         job.setTargetConnectionProvider(createConnectionProvider(generateSchemaSpec.getTargetConnectionSpec()));
@@ -71,7 +74,7 @@ public class GenerateSchemaJobFactory implements JobFactory<GenerateSchemaJob> {
             {
                 JdbcConnectionSpec sourceConnectionSpec = new JdbcConnectionSpec();
                 sourceConnectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
-                sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/generate-schema");
+                sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/generate-schema-2");
                 sourceConnectionSpec.setUsername("root");
 
                 JdbcConnectionSpec targetConnectionSpec = new JdbcConnectionSpec();

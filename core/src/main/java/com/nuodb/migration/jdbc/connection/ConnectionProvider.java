@@ -34,7 +34,7 @@ public interface ConnectionProvider {
 
     Connection getConnection() throws SQLException;
 
-    ConnectionServices getConnectionServices() throws SQLException;
+    ConnectionServices getConnectionServices();
 
     void closeConnection(Connection connection) throws SQLException;
 }

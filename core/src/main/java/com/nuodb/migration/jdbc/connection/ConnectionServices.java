@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
-import com.nuodb.migration.jdbc.model.DatabaseInspector;
+import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,7 +39,7 @@ public interface ConnectionServices {
 
     Connection getConnection() throws SQLException;
 
-    DatabaseInspector getDatabaseInspector() throws SQLException;
+    DatabaseInspector createDatabaseInspector() throws SQLException;
 
     void close() throws SQLException;
 }

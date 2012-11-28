@@ -72,16 +72,6 @@ public class StandardDialect implements DatabaseDialect {
     }
 
     @Override
-    public boolean supportsReadCatalogs() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsReadSchemas() {
-        return true;
-    }
-
-    @Override
     public boolean supportsSessionTimeZone() {
         return false;
     }

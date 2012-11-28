@@ -36,36 +36,40 @@ import java.lang.reflect.Modifier;
 import java.sql.Types;
 import java.util.Map;
 
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
 public class JdbcTypeNameMap {
 
-    private static final Map<Integer, String> TYPE_CODE_NAMES = Maps.newHashMap();
-
     private static final Logger logger = LoggerFactory.getLogger(JdbcTypeNameMap.class);
 
-    static {
+    private static final Map<Integer, String> TYPE_CODE_NAME_MAP = createTypeCodeNameMap();
+
+    private static Map<Integer, String> createTypeCodeNameMap() {
+        Map<Integer, String> typeCodeNameMap = Maps.newLinkedHashMap();
         Field[] fields = Types.class.getFields();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
                 try {
-                    TYPE_CODE_NAMES.put((Integer) field.get(null), field.getName());
+                    typeCodeNameMap.put((Integer) field.get(null), field.getName());
                 } catch (IllegalAccessException exception) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Failed accessing jdbc type code field", exception);
+                        logger.debug(format("Failed accessing %s field", Types.class), exception);
                     }
                 }
             }
         }
+        return typeCodeNameMap;
     }
-
-    public static final JdbcTypeNameMap INSTANCE = new JdbcTypeNameMap();
 
     private Map<Integer, String> typeCodeNameMap = Maps.newHashMap();
 
+    public static final JdbcTypeNameMap INSTANCE = new JdbcTypeNameMap();
+
     public JdbcTypeNameMap() {
-        this.typeCodeNameMap = TYPE_CODE_NAMES;
+        typeCodeNameMap.putAll(TYPE_CODE_NAME_MAP);
     }
 
     public String getTypeName(int typeCode) {

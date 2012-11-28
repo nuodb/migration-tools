@@ -28,8 +28,8 @@
 package com.nuodb.migration.config.xml;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.utils.Reflections;
-import com.nuodb.migration.utils.Validations;
+import com.nuodb.migration.utils.ReflectionUtils;
+import com.nuodb.migration.utils.ValidationUtils;
 import com.nuodb.migration.utils.Priority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +48,11 @@ public class XmlHandlerRegistryParser {
     protected final List<URL> resources = Lists.newArrayList();
 
     public void addRegistry(String resource) {
-        addRegistry(Reflections.getClassLoader().getResource(resource));
+        addRegistry(ReflectionUtils.getClassLoader().getResource(resource));
     }
 
     public void addRegistry(URL resource) {
-        Validations.isNotNull(resource, "Handler registry resource is required");
+        ValidationUtils.isNotNull(resource, "Handler registry resource is required");
         resources.add(resource);
     }
 
@@ -100,7 +100,7 @@ public class XmlHandlerRegistryParser {
                 priority = Integer.parseInt(priorityAsText);
             }
         }
-        XmlHandler handler = Reflections.newInstance(handlerClassAsText);
+        XmlHandler handler = ReflectionUtils.newInstance(handlerClassAsText);
         registry.registerHandler(handler, priority);
     }
 }

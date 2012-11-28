@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.resultset.format.xml;
 
-import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.metadata.ColumnModel;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
 import com.nuodb.migration.resultset.format.ResultSetOutputException;
 

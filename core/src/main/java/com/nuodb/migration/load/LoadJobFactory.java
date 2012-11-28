@@ -31,18 +31,20 @@ import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolverImpl;
+import com.nuodb.migration.jdbc.dialect.SimpleDatabaseDialectResolver;
 import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
 import com.nuodb.migration.resultset.catalog.Catalog;
-import com.nuodb.migration.resultset.catalog.CatalogImpl;
+import com.nuodb.migration.resultset.catalog.FileCatalog;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.ResultSetFormatFactoryImpl;
+import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolverImpl;
+import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.spec.*;
+
+import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
 /**
  * @author Sergey Bushik
@@ -51,14 +53,15 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
 
     private LoadSpec loadSpec;
     private DatabaseDialectResolver databaseDialectResolver =
-            new DatabaseDialectResolverImpl();
+            new SimpleDatabaseDialectResolver();
     private ResultSetFormatFactory resultSetFormatFactory =
-            new ResultSetFormatFactoryImpl();
+            new SimpleResultSetFormatFactory();
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver =
-            new JdbcTypeValueFormatRegistryResolverImpl();
+            new SimpleJdbcTypeValueFormatRegistryResolver();
 
     @Override
     public LoadJob createJob() {
+        isNotNull(loadSpec, "Load spec is required");
         FormatSpec inputSpec = loadSpec.getInputSpec();
         LoadJob job = new LoadJob();
         job.setConnectionProvider(createConnectionProvider(loadSpec.getTargetSpec()));
@@ -77,7 +80,7 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
     }
 
     protected Catalog createCatalog(String path) {
-        return new CatalogImpl(path);
+        return new FileCatalog(path);
     }
 
     public LoadSpec getLoadSpec() {

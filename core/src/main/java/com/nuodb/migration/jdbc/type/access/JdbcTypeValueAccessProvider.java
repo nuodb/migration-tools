@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.type.access;
 
-import com.nuodb.migration.jdbc.model.ColumnModel;
+import com.nuodb.migration.jdbc.metadata.ColumnModel;
 import com.nuodb.migration.jdbc.type.*;
 
 import java.sql.PreparedStatement;
@@ -36,7 +36,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-import static com.nuodb.migration.jdbc.model.ColumnModelFactory.createColumnModel;
+import static com.nuodb.migration.jdbc.metadata.ColumnModelFactory.createColumnModel;
 
 /**
  * @author Sergey Bushik

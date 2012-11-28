@@ -30,19 +30,21 @@ package com.nuodb.migration.dump;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolverImpl;
+import com.nuodb.migration.jdbc.dialect.SimpleDatabaseDialectResolver;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.resultset.catalog.Catalog;
-import com.nuodb.migration.resultset.catalog.CatalogImpl;
+import com.nuodb.migration.resultset.catalog.FileCatalog;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.ResultSetFormatFactoryImpl;
+import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolverImpl;
+import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.spec.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+
+import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
 /**
  * @author Sergey Bushik
@@ -55,13 +57,14 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
     private DumpSpec dumpSpec;
 
     private DatabaseDialectResolver databaseDialectResolver =
-            new DatabaseDialectResolverImpl();
+            new SimpleDatabaseDialectResolver();
     private ResultSetFormatFactory resultSetFormatFactory =
-            new ResultSetFormatFactoryImpl();
+            new SimpleResultSetFormatFactory();
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver =
-            new JdbcTypeValueFormatRegistryResolverImpl();
+            new SimpleJdbcTypeValueFormatRegistryResolver();
 
     public DumpJob createJob() {
+        isNotNull(dumpSpec, "Dump spec is required");
         ConnectionSpec connectionSpec = dumpSpec.getSourceSpec();
         Collection<SelectQuerySpec> selectQuerySpecs = dumpSpec.getSelectQuerySpecs();
         Collection<NativeQuerySpec> nativeQuerySpecs = dumpSpec.getNativeQuerySpecs();
@@ -86,7 +89,7 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
     }
 
     protected Catalog createCatalog(String path) {
-        return new CatalogImpl(path);
+        return new FileCatalog(path);
     }
 
     public DumpSpec getDumpSpec() {

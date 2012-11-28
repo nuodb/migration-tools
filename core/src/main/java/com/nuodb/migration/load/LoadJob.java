@@ -32,7 +32,8 @@ import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
-import com.nuodb.migration.jdbc.model.*;
+import com.nuodb.migration.jdbc.metadata.*;
+import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 import com.nuodb.migration.jdbc.query.*;
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
@@ -44,8 +45,6 @@ import com.nuodb.migration.resultset.catalog.CatalogReader;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetInput;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
-import com.nuodb.migration.jdbc.JdbcUtils;
-import com.nuodb.migration.utils.Validations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +58,9 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import static com.google.common.io.Closeables.closeQuietly;
-import static com.nuodb.migration.jdbc.model.ObjectType.*;
+import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static com.nuodb.migration.jdbc.metadata.inspector.MetaDataType.*;
+import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
 /**
  * @author Sergey Bushik
@@ -76,38 +77,44 @@ public class LoadJob extends JobBase {
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver;
 
     @Override
-    public void execute(JobExecution jobExecution) throws Exception {
-        Validations.isNotNull(getCatalog(), "Catalog is required");
-        Validations.isNotNull(getConnectionProvider(), "Connection provider is required");
-        Validations.isNotNull(getDatabaseDialectResolver(), "Database dialect resolver is required");
-        Validations.isNotNull(getJdbcTypeValueFormatRegistryResolver(),
-                "JDBC type value format registry resolver is required");
+    public void execute(JobExecution execution) throws Exception {
+        validate();
+        execute(new LoadJobExecution(execution));
+    }
 
-        LoadJobExecution loadJobExecution = new LoadJobExecution(jobExecution);
+    protected void validate() {
+        isNotNull(getCatalog(), "Catalog is required");
+        isNotNull(getConnectionProvider(), "Connection provider is required");
+        isNotNull(getDatabaseDialectResolver(), "Database dialect resolver is required");
+        isNotNull(getJdbcTypeValueFormatRegistryResolver(), "JDBC type value format registry resolver is required");
+    }
+
+    protected void execute(LoadJobExecution execution) throws SQLException {
         ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
-        loadJobExecution.setConnectionServices(connectionServices);
         try {
-            load(loadJobExecution);
+            execution.setConnectionServices(connectionServices);
+            load(execution);
         } finally {
-            JdbcUtils.close(connectionServices);
+            close(connectionServices);
         }
     }
 
-    protected void load(LoadJobExecution loadJobExecution) throws SQLException {
-        ConnectionServices connectionServices = loadJobExecution.getConnectionServices();
-        DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();
-        databaseInspector.withObjectTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+    protected void load(LoadJobExecution execution) throws SQLException {
+        ConnectionServices connectionServices = execution.getConnectionServices();
+
+        DatabaseInspector databaseInspector = connectionServices.createDatabaseInspector();
+        databaseInspector.withMetaDataTypes(CATALOG, SCHEMA, TABLE, COLUMN);
         databaseInspector.withDatabaseDialectResolver(getDatabaseDialectResolver());
 
         Database database = databaseInspector.inspect();
-        loadJobExecution.setDatabase(database);
+        execution.setDatabase(database);
 
         Connection connection = connectionServices.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        loadJobExecution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(metaData));
+        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(metaData));
 
         CatalogReader catalogReader = getCatalog().getCatalogReader();
-        loadJobExecution.setCatalogReader(catalogReader);
+        execution.setCatalogReader(catalogReader);
 
         DatabaseDialect databaseDialect = database.getDatabaseDialect();
         try {
@@ -115,7 +122,7 @@ public class LoadJob extends JobBase {
                 databaseDialect.setSessionTimeZone(connection, timeZone);
             }
             for (CatalogEntry catalogEntry : catalogReader.getEntries()) {
-                load(loadJobExecution, catalogEntry);
+                load(execution, catalogEntry);
             }
             connection.commit();
         } finally {
@@ -127,42 +134,42 @@ public class LoadJob extends JobBase {
         }
     }
 
-    protected void load(LoadJobExecution loadJobExecution, CatalogEntry catalogEntry) throws SQLException {
-        CatalogReader catalogReader = loadJobExecution.getCatalogReader();
+    protected void load(LoadJobExecution execution, CatalogEntry catalogEntry) throws SQLException {
+        CatalogReader catalogReader = execution.getCatalogReader();
         InputStream entryInput = catalogReader.getEntryInput(catalogEntry);
         try {
-            DatabaseDialect databaseDialect = loadJobExecution.getDatabase().getDatabaseDialect();
+            DatabaseDialect databaseDialect = execution.getDatabase().getDatabaseDialect();
             ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(catalogEntry.getType());
             resultSetInput.setAttributes(getAttributes());
             if (!databaseDialect.supportsSessionTimeZone()) {
                 resultSetInput.setTimeZone(getTimeZone());
             }
             resultSetInput.setInputStream(entryInput);
-            resultSetInput.setJdbcTypeValueFormatRegistry(loadJobExecution.getJdbcTypeValueFormatRegistry());
+            resultSetInput.setJdbcTypeValueFormatRegistry(execution.getJdbcTypeValueFormatRegistry());
 
             JdbcTypeRegistry jdbcTypeRegistry = databaseDialect.getJdbcTypeRegistry();
             resultSetInput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
 
-            load(loadJobExecution, resultSetInput, catalogEntry.getName());
+            load(execution, resultSetInput, catalogEntry.getName());
         } finally {
             closeQuietly(entryInput);
         }
     }
 
-    protected void load(final LoadJobExecution loadJobExecution, final ResultSetInput resultSetInput,
+    protected void load(final LoadJobExecution execution, final ResultSetInput resultSetInput,
                         String tableName) throws SQLException {
         resultSetInput.readBegin();
 
         ColumnModelSet<ColumnModel> columns = resultSetInput.getColumnModelSet();
-        Database database = loadJobExecution.getDatabase();
+        Database database = execution.getDatabase();
         Table table = database.findTable(tableName);
         for (ColumnModel column : columns) {
             column.copy(table.getColumn(column.getName()));
         }
         final InsertQuery query = createInsertQuery(table, columns);
 
-        StatementTemplate queryTemplate = new StatementTemplate(loadJobExecution.getConnectionServices().getConnection());
-        queryTemplate.execute(
+        StatementTemplate template = new StatementTemplate(execution.getConnectionServices().getConnection());
+        template.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
@@ -172,7 +179,7 @@ public class LoadJob extends JobBase {
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement preparedStatement) throws SQLException {
-                        load(loadJobExecution, resultSetInput, preparedStatement);
+                        load(execution, resultSetInput, preparedStatement);
                     }
                 }
         );
@@ -185,10 +192,10 @@ public class LoadJob extends JobBase {
         return connection.prepareStatement(query.toQuery());
     }
 
-    protected void load(LoadJobExecution loadJobExecution, ResultSetInput resultSetInput,
+    protected void load(LoadJobExecution execution, ResultSetInput resultSetInput,
                         PreparedStatement preparedStatement) throws SQLException {
         resultSetInput.setPreparedStatement(preparedStatement);
-        while (loadJobExecution.isRunning() && resultSetInput.hasNextRow()) {
+        while (execution.isRunning() && resultSetInput.hasNextRow()) {
             resultSetInput.readRow();
             preparedStatement.executeUpdate();
         }

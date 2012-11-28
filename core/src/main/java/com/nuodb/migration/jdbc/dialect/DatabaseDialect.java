@@ -41,10 +41,6 @@ import java.util.TimeZone;
  */
 public interface DatabaseDialect {
 
-    boolean supportsReadCatalogs();
-
-    boolean supportsReadSchemas();
-
     boolean supportsSessionTimeZone();
 
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;

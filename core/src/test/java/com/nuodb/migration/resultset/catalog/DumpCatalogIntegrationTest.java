@@ -1,7 +1,7 @@
 package com.nuodb.migration.resultset.catalog;
 
 
-import com.nuodb.migration.TestConstants;
+import com.nuodb.migration.TestUtils;
 import com.nuodb.migration.resultset.format.csv.CsvAttributes;
 import com.nuodb.migration.spec.FormatSpec;
 import com.nuodb.migration.spec.FormatSpecBase;
@@ -13,13 +13,13 @@ import org.junit.Test;
 
 import java.io.File;
 
-public class DumpCatalogIntegrationTest extends TestConstants {
+public class DumpCatalogIntegrationTest extends TestUtils {
 
     private static final String TEST_DIR = "/tmp/migration-tool";
     private static final String TEST_PATH = TEST_DIR + "/migration-tool-test";
 
-    private CatalogImpl catalogFile;
-    private CatalogWriterImpl writer;
+    private FileCatalog catalogFile;
+    private CatalogWriter writer;
     private FormatSpec outputSpec;
 
     @Before
@@ -29,14 +29,14 @@ public class DumpCatalogIntegrationTest extends TestConstants {
         outputSpec.setType(CsvAttributes.FORMAT_TYPE);
         this.outputSpec = outputSpec;
 
-        CatalogImpl catalogFile = new CatalogImpl(outputSpec.getType());
+        FileCatalog catalogFile = new FileCatalog(outputSpec.getType());
         Assert.assertEquals(catalogFile.getPath(), TEST_PATH);
     }
 
     @Test
     public void testOpen() throws Exception {
         try {
-            writer = (CatalogWriterImpl) catalogFile.getCatalogWriter();
+            writer = catalogFile.getCatalogWriter();
         } catch (CatalogException e) {
             Assert.fail(e.getMessage());
         }
@@ -44,7 +44,7 @@ public class DumpCatalogIntegrationTest extends TestConstants {
 
     @Test(expected = CatalogException.class)
     public void testOpenError() throws Exception {
-        new CatalogImpl("").getCatalogWriter();
+        new FileCatalog("").getCatalogWriter();
     }
 
     @After

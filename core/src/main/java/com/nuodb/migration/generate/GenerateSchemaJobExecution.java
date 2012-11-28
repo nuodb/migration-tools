@@ -39,8 +39,8 @@ public class GenerateSchemaJobExecution extends JobExecutionDelegate {
     private ConnectionServices sourceConnectionServices;
     private ConnectionServices targetConnectionServices;
 
-    public GenerateSchemaJobExecution(JobExecution jobExecution) {
-        super(jobExecution);
+    public GenerateSchemaJobExecution(JobExecution execution) {
+        super(execution);
     }
 
     public ConnectionServices getSourceConnectionServices() {

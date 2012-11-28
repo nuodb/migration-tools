@@ -11,7 +11,6 @@ import static org.mockito.Mockito.*;
 
 public class HelpFormatterTest {
 
-
     private HelpFormatter formatter;
 
     @Before

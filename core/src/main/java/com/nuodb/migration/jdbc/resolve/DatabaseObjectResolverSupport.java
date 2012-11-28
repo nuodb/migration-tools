@@ -28,7 +28,7 @@
 package com.nuodb.migration.jdbc.resolve;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.utils.Reflections;
+import com.nuodb.migration.utils.ReflectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +105,7 @@ public class DatabaseObjectResolverSupport<T> implements DatabaseObjectResolver<
     }
 
     protected T createObject(Class<? extends T> objectClass, DatabaseMetaData metaData) {
-        return Reflections.newInstance(objectClass);
+        return ReflectionUtils.newInstance(objectClass);
     }
 
     static class DatabaseInfoMatcherImpl implements DatabaseInfoMatcher {

@@ -14,9 +14,9 @@ public class OptionToolkitTest {
     private OptionToolkit toolkit;
     private OptionFormat optionFormat;
 
-    private final int OPTION_ID = 1;
-    private final int OPTION_MINIMUM = 0;
-    private final int OPTION_MAXIMUM = 1;
+    private static final int OPTION_ID = 1;
+    private static final int OPTION_MINIMUM = 0;
+    private static final int OPTION_MAXIMUM = 1;
 
     @Before
     public void setUp() throws Exception {

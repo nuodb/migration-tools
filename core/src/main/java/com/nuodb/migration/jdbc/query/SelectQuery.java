@@ -29,8 +29,8 @@ package com.nuodb.migration.jdbc.query;
 
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
-import com.nuodb.migration.jdbc.model.Column;
-import com.nuodb.migration.jdbc.model.Table;
+import com.nuodb.migration.jdbc.metadata.Column;
+import com.nuodb.migration.jdbc.metadata.Table;
 
 import java.util.Iterator;
 import java.util.List;
