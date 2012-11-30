@@ -45,15 +45,15 @@ public class JdbcTypeNameMap {
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcTypeNameMap.class);
 
-    private static final Map<Integer, String> TYPE_CODE_NAME_MAP = createTypeCodeNameMap();
+    private static final Map<Integer, String> TYPE_NAME_MAP = createTypeNameMap();
 
-    private static Map<Integer, String> createTypeCodeNameMap() {
-        Map<Integer, String> typeCodeNameMap = Maps.newLinkedHashMap();
+    private static Map<Integer, String> createTypeNameMap() {
+        Map<Integer, String> typeNameMap = Maps.newLinkedHashMap();
         Field[] fields = Types.class.getFields();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
                 try {
-                    typeCodeNameMap.put((Integer) field.get(null), field.getName());
+                    typeNameMap.put((Integer) field.get(null), field.getName().toLowerCase());
                 } catch (IllegalAccessException exception) {
                     if (logger.isDebugEnabled()) {
                         logger.debug(format("Failed accessing %s field", Types.class), exception);
@@ -61,27 +61,27 @@ public class JdbcTypeNameMap {
                 }
             }
         }
-        return typeCodeNameMap;
+        return typeNameMap;
     }
 
-    private Map<Integer, String> typeCodeNameMap = Maps.newHashMap();
+    private Map<Integer, String> typeNameMap = Maps.newHashMap();
 
     public static final JdbcTypeNameMap INSTANCE = new JdbcTypeNameMap();
 
     public JdbcTypeNameMap() {
-        typeCodeNameMap.putAll(TYPE_CODE_NAME_MAP);
+        typeNameMap.putAll(TYPE_NAME_MAP);
     }
 
     public String getTypeName(int typeCode) {
-        String typeName = typeCodeNameMap.get(typeCode);
+        String typeName = typeNameMap.get(typeCode);
         return typeName == null ? getUnknownTypeName(typeCode) : typeName;
     }
 
-    public void addTypeCodeName(int typeCode, String typeName) {
-        typeCodeNameMap.put(typeCode, typeName);
+    public void addTypeName(int typeCode, String typeName) {
+        typeNameMap.put(typeCode, typeName.toLowerCase());
     }
 
     protected String getUnknownTypeName(int typeCode) {
-        return "TYPE:" + typeCode;
+        return "type(" + typeCode + ")";
     }
 }

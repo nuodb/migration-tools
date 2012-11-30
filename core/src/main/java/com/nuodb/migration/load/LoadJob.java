@@ -34,6 +34,8 @@ import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
 import com.nuodb.migration.jdbc.metadata.*;
 import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.query.*;
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
@@ -160,13 +162,13 @@ public class LoadJob extends JobBase {
                         String tableName) throws SQLException {
         resultSetInput.readBegin();
 
-        ColumnModelSet<ColumnModel> columns = resultSetInput.getColumnModelSet();
+        ValueModelList<ValueModel> values = resultSetInput.getValueModelList();
         Database database = execution.getDatabase();
         Table table = database.findTable(tableName);
-        for (ColumnModel column : columns) {
-            column.copy(table.getColumn(column.getName()));
+        for (ValueModel value : values) {
+            value.copy(table.getColumn(value.getName()));
         }
-        final InsertQuery query = createInsertQuery(table, columns);
+        final InsertQuery query = createInsertQuery(table, values);
 
         StatementTemplate template = new StatementTemplate(execution.getConnectionServices().getConnection());
         template.execute(
@@ -202,14 +204,14 @@ public class LoadJob extends JobBase {
         resultSetInput.readEnd();
     }
 
-    protected InsertQuery createInsertQuery(Table table, ColumnModelSet columnModelSet) {
+    protected InsertQuery createInsertQuery(Table table, ValueModelList valueModelList) {
         InsertQueryBuilder builder = new InsertQueryBuilder();
         builder.setQualifyNames(true);
         builder.setTable(table);
-        if (columnModelSet != null) {
+        if (valueModelList != null) {
             List<String> columns = Lists.newArrayList();
-            for (int index = 0, length = columnModelSet.size(); index < length; index++) {
-                columns.add(columnModelSet.get(index).getName());
+            for (int index = 0, length = valueModelList.size(); index < length; index++) {
+                columns.add(valueModelList.get(index).getName());
             }
             builder.setColumns(columns);
         }

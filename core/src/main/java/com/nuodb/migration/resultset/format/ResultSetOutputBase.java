@@ -27,9 +27,9 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
-import com.nuodb.migration.jdbc.metadata.ColumnModelFactory;
-import com.nuodb.migration.jdbc.metadata.ColumnModelSet;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelFactory;
+import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
@@ -78,48 +78,48 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
     @Override
     public final void setResultSet(ResultSet resultSet) {
         this.resultSet = resultSet;
-        initColumnValueModelSet();
+        initValueFormatModelList();
     }
 
-    protected void initColumnValueModelSet() {
-        ColumnModelSet<ColumnModel> columnModelSet = getColumnModelSet();
-        if (columnModelSet == null) {
-            setColumnModelSet(createColumnSetModel());
+    protected void initValueFormatModelList() {
+        ValueModelList<ValueModel> valueModelList = getValueModelList();
+        if (valueModelList == null) {
+            setValueModelList(createValueModelList());
         }
-        ColumnModelSet<ColumnValueModel> columnValueModelSet = getColumnValueModelSet();
-        if (columnValueModelSet == null) {
-            setColumnValueModelSet(createColumnValueModelSet());
+        ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
+        if (valueFormatModelList == null) {
+            setValueFormatModelList(createColumnValueModelList());
         }
     }
 
-    protected ColumnModelSet<ColumnValueModel> createColumnValueModelSet() {
+    protected ValueModelList<ValueFormatModel> createColumnValueModelList() {
         int index = 0;
-        final ColumnModelSet<ColumnValueModel> columnModelSet = ColumnModelFactory.createColumnModelSet();
-        for (ColumnModel columnModel : getColumnModelSet()) {
-            ColumnValueModel columnValueModel = createColumnValueModel(columnModel, index++);
-            visitColumnValueModel(columnValueModel);
-            columnModelSet.add(columnValueModel);
+        final ValueModelList<ValueFormatModel> valueFormatModelList = ValueModelFactory.createValueModelList();
+        ValueFormatModel valueFormatModel;
+        for (ValueModel valueModel : getValueModelList()) {
+            visitValueFormatModel(valueFormatModel = createColumnValueModel(valueModel, index++));
+            valueFormatModelList.add(valueFormatModel);
         }
-        return columnModelSet;
+        return valueFormatModelList;
     }
 
-    protected ColumnModelSet<ColumnModel> createColumnSetModel() {
-        ColumnModelSet columnModelSet;
+    protected ValueModelList<ValueModel> createValueModelList() {
+        ValueModelList valueModelList;
         try {
-            columnModelSet = ColumnModelFactory.createColumnModelSet(resultSet);
+            valueModelList = ValueModelFactory.createValueModelList(resultSet);
         } catch (SQLException exception) {
             throw new ResultSetOutputException(exception);
         }
-        return columnModelSet;
+        return valueModelList;
     }
 
-    protected ColumnValueModel createColumnValueModel(ColumnModel columnModel, int index) {
-        JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(columnModel.getTypeCode(), columnModel.getTypeName());
+    protected ValueFormatModel createColumnValueModel(ValueModel valueModel, int index) {
+        JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(valueModel.getTypeCode(), valueModel.getTypeName());
         JdbcTypeValueFormat columnValueFormat =
                 getJdbcTypeValueFormatRegistry().getJdbcTypeValueFormat(jdbcTypeDesc);
         JdbcTypeValueAccess<Object> columnValueAccess =
-                getJdbcTypeValueAccessProvider().getResultSetAccess(resultSet, columnModel, index + 1);
-        return new SimpleColumnValueModel(columnModel, columnValueFormat, columnValueAccess, null);
+                getJdbcTypeValueAccessProvider().getResultSetAccess(resultSet, valueModel, index + 1);
+        return new SimpleValueFormatModel(valueModel, columnValueFormat, columnValueAccess, null);
     }
 
     @Override
@@ -139,11 +139,11 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
 
     protected String[] getColumnValues() {
         int index = 0;
-        final ColumnModelSet<ColumnValueModel> columnValueModelSet = getColumnValueModelSet();
-        final String[] values = new String[columnValueModelSet.size()];
-        for (ColumnValueModel columnValueModel : columnValueModelSet) {
-            values[index++] = columnValueModel.getValueFormat().getValue(
-                    columnValueModel.getValueAccess(), columnValueModel.getValueAccessOptions());
+        final ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
+        final String[] values = new String[valueFormatModelList.size()];
+        for (ValueFormatModel columnValueFormatModel : valueFormatModelList) {
+            values[index++] = columnValueFormatModel.getValueFormat().getValue(
+                    columnValueFormatModel.getValueAccess(), columnValueFormatModel.getValueAccessOptions());
         }
         return values;
     }

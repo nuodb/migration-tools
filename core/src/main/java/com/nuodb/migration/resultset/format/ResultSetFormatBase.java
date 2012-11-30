@@ -28,8 +28,8 @@
 package com.nuodb.migration.resultset.format;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
-import com.nuodb.migration.jdbc.metadata.ColumnModelSet;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcDateTypeBase;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
@@ -46,8 +46,8 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
 
     private Map<String, String> attributes;
     private TimeZone timeZone;
-    private ColumnModelSet<ColumnModel> columnModelSet;
-    private ColumnModelSet<ColumnValueModel> columnValueModelSet;
+    private ValueModelList<ValueModel> valueModelList;
+    private ValueModelList<ValueFormatModel> valueFormatModelList;
     private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider;
     private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;
 
@@ -70,8 +70,8 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
         return value == null ? defaultValue : value;
     }
 
-    protected void visitColumnValueModel(ColumnValueModel columnValueModel) {
-        int typeCode = columnValueModel.getTypeCode();
+    protected void visitValueFormatModel(ValueFormatModel valueFormatModel) {
+        int typeCode = valueFormatModel.getTypeCode();
         if (typeCode == Types.TIME || typeCode == Types.TIMESTAMP || typeCode == Types.DATE) {
             TimeZone timeZone = getTimeZone();
             if (timeZone != null) {
@@ -79,7 +79,7 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
                 calendar.setTimeZone(timeZone);
                 Map<String, Object> options = Maps.newHashMap();
                 options.put(JdbcDateTypeBase.CALENDAR, calendar);
-                columnValueModel.setValueAccessOptions(options);
+                valueFormatModel.setValueAccessOptions(options);
             }
         }
     }
@@ -120,22 +120,22 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
     }
 
     @Override
-    public ColumnModelSet<ColumnModel> getColumnModelSet() {
-        return columnModelSet;
+    public ValueModelList<ValueModel> getValueModelList() {
+        return valueModelList;
     }
 
     @Override
-    public void setColumnModelSet(ColumnModelSet<ColumnModel> columnModelSet) {
-        this.columnModelSet = columnModelSet;
+    public void setValueModelList(ValueModelList<ValueModel> valueModelList) {
+        this.valueModelList = valueModelList;
     }
 
     @Override
-    public ColumnModelSet<ColumnValueModel> getColumnValueModelSet() {
-        return columnValueModelSet;
+    public ValueModelList<ValueFormatModel> getValueFormatModelList() {
+        return valueFormatModelList;
     }
 
     @Override
-    public void setColumnValueModelSet(ColumnModelSet<ColumnValueModel> columnValueModelSet) {
-        this.columnValueModelSet = columnValueModelSet;
+    public void setValueFormatModelList(ValueModelList<ValueFormatModel> valueFormatModelList) {
+        this.valueFormatModelList = valueFormatModelList;
     }
 }

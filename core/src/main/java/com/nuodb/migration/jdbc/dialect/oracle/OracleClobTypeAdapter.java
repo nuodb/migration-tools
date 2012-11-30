@@ -25,18 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata;
+package com.nuodb.migration.jdbc.dialect.oracle;
 
-import java.util.Collection;
+import com.nuodb.migration.jdbc.type.adapter.JdbcClobTypeAdapter;
 
 /**
  * @author Sergey Bushik
  */
-public interface ColumnModelSet<T extends ColumnModel> extends Collection<T> {
+public class OracleClobTypeAdapter extends JdbcClobTypeAdapter {
 
-    T get(int index);
-
-    T get(String column);
-
-    T set(int index, T column);
+    public OracleClobTypeAdapter() {
+        super(new OracleLobTypeSupport());
+    }
 }

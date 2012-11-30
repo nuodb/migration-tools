@@ -28,17 +28,19 @@
 package com.nuodb.migration.generate;
 
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
+import com.nuodb.migration.jdbc.connection.ConnectionProxy;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
-import com.nuodb.migration.utils.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
 /**
  * @author Sergey Bushik
@@ -52,9 +54,13 @@ public class GenerateSchemaJob extends JobBase {
 
     @Override
     public void execute(JobExecution execution) throws Exception {
-        ValidationUtils.isNotNull(getSourceConnectionProvider(), "Source connection provider is required");
-        ValidationUtils.isNotNull(getTargetConnectionProvider(), "Target connection provider is required");
+        validate();
         execution(new GenerateSchemaJobExecution(execution));
+    }
+
+    protected void validate() {
+        isNotNull(getSourceConnectionProvider(), "Source connection provider is required");
+        isNotNull(getTargetConnectionProvider(), "Target connection provider is required");
     }
 
     protected void execution(GenerateSchemaJobExecution execution) throws SQLException {
@@ -73,6 +79,11 @@ public class GenerateSchemaJob extends JobBase {
     protected void generate(GenerateSchemaJobExecution execution) throws SQLException {
         ConnectionServices sourceConnectionServices = execution.getSourceConnectionServices();
         Database sourceDatabase = sourceConnectionServices.createDatabaseInspector().inspect();
+        Connection connection = sourceConnectionServices.getConnection();
+        if (connection instanceof ConnectionProxy) {
+            Connection connection1 = ((ConnectionProxy) connection).getConnection();
+            System.out.println(connection1);
+        }
         if (logger.isInfoEnabled()) {
             logger.info("Source database inspected");
         }

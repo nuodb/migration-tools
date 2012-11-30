@@ -54,7 +54,7 @@ public class JdbcDateTypeValueFormat extends JdbcTypeValueFormatBase<Date> {
         Date date = access.getValue(options);
         if (date == null) {
             return null;
-        } else if (isTypeNameEquals(access.getColumnModel().getTypeName(), YEAR_TYPE)) {
+        } else if (isTypeNameEquals(access.getValueModel().getTypeName(), YEAR_TYPE)) {
             return YEAR_FORMAT.format(date);
         } else {
             return date.toString();

@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
-import com.nuodb.migration.jdbc.metadata.ColumnModelSet;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
 
@@ -54,13 +54,13 @@ public interface ResultSetFormat {
 
     void setTimeZone(TimeZone timeZone);
 
-    ColumnModelSet<ColumnModel> getColumnModelSet();
+    ValueModelList<ValueModel> getValueModelList();
 
-    void setColumnModelSet(ColumnModelSet<ColumnModel> columnModelSet);
+    void setValueModelList(ValueModelList<ValueModel> valueModelList);
 
-    ColumnModelSet<ColumnValueModel> getColumnValueModelSet();
+    ValueModelList<ValueFormatModel> getValueFormatModelList();
 
-    void setColumnValueModelSet(ColumnModelSet<ColumnValueModel> columnValueSetModel);
+    void setValueFormatModelList(ValueModelList<ValueFormatModel> valueSetFormatModel);
 
     JdbcTypeValueAccessProvider getJdbcTypeValueAccessProvider();
 

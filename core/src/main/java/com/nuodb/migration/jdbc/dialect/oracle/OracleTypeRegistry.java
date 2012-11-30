@@ -25,28 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.access;
+package com.nuodb.migration.jdbc.dialect.oracle;
 
-import com.nuodb.migration.jdbc.model.ValueModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
-
-import java.sql.SQLException;
-import java.util.Map;
+import com.nuodb.migration.jdbc.type.jdbc4.Jdbc4TypeRegistry;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess<T> {
+public class OracleTypeRegistry extends Jdbc4TypeRegistry {
 
-    int getColumn();
-
-    ValueModel getValueModel();
-
-    JdbcType<T> getJdbcType();
-
-    T getValue(Map<String, Object> options) throws SQLException;
-
-    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
-
-    <X> void setValue(X value, Map<String, Object> options) throws SQLException;
+    public OracleTypeRegistry() {
+        super();
+        addJdbcTypeAdapter(new OracleBlobTypeAdapter());
+        addJdbcTypeAdapter(new OracleClobTypeAdapter());
+    }
 }

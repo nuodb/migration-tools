@@ -28,8 +28,9 @@
 package com.nuodb.migration.resultset.format.csv;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
-import com.nuodb.migration.jdbc.metadata.ColumnModelSet;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelFactory;
+import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
@@ -44,7 +45,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.nuodb.migration.jdbc.metadata.ColumnModelFactory.createColumnModelSet;
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 import static java.lang.String.valueOf;
 
 /**
@@ -81,7 +82,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
 
     @Override
     protected void doReadBegin() {
-        ColumnModelSet<ColumnModel> columnModelSet = null;
+        ValueModelList<ValueModel> valueModelList = null;
         if (iterator.hasNext()) {
             List<String> columns = Lists.newArrayList();
             for (String column : iterator.next()) {
@@ -89,9 +90,10 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
             }
             int[] columnTypes = new int[columns.size()];
             Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-            columnModelSet = createColumnModelSet(columns.toArray(new String[columns.size()]), columnTypes);
+            valueModelList = ValueModelFactory.createValueModelList(columns.toArray(new String[columns.size()]),
+                    columnTypes);
         }
-        setColumnModelSet(columnModelSet);
+        setValueModelList(valueModelList);
     }
 
     @Override
@@ -101,7 +103,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
 
     @Override
     public void readRow() {
-        String[] values = new String[getColumnModelSet().size()];
+        String[] values = new String[getValueModelList().size()];
         Iterator<String> iterator = this.iterator.next().iterator();
         int column = 0;
         while (iterator.hasNext()) {

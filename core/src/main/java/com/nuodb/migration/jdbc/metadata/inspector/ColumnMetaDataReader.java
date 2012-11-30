@@ -27,13 +27,17 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.metadata.*;
+import com.nuodb.migration.jdbc.metadata.Column;
+import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.Table;
+import com.nuodb.migration.jdbc.model.ValueModelList;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 
 /**
  * @author Sergey Bushik
@@ -55,7 +59,7 @@ public class ColumnMetaDataReader extends MetaDataReaderBase {
                             Table table) throws SQLException {
         ResultSet columns = metaData.getColumns(inspector.getCatalog(), inspector.getSchema(), table.getName(), null);
         try {
-            ColumnModelSet modelSet = ColumnModelFactory.createColumnModelSet(columns.getMetaData());
+            ValueModelList valueModelList = createValueModelList(columns.getMetaData());
             while (columns.next()) {
                 table = database.createCatalog(columns.getString("TABLE_CAT")).createSchema(
                         columns.getString("TABLE_SCHEM")).createTable(columns.getString("TABLE_NAME"));
@@ -72,7 +76,7 @@ public class ColumnMetaDataReader extends MetaDataReaderBase {
                 column.setPosition(columns.getInt("ORDINAL_POSITION"));
                 String nullable = columns.getString("IS_NULLABLE");
                 column.setNullable("YES".equals(nullable));
-                String autoIncrement = modelSet.get("IS_AUTOINCREMENT") != null ? columns.getString(
+                String autoIncrement = valueModelList.get("IS_AUTOINCREMENT") != null ? columns.getString(
                         "IS_AUTOINCREMENT") : null;
                 column.setAutoIncrement("YES".equals(autoIncrement));
             }

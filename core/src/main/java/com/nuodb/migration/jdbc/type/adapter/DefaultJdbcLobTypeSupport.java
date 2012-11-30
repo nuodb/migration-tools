@@ -25,28 +25,49 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.access;
+package com.nuodb.migration.jdbc.type.adapter;
 
-import com.nuodb.migration.jdbc.model.ValueModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
-
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess<T> {
+public class DefaultJdbcLobTypeSupport implements JdbcLobTypeSupport {
 
-    int getColumn();
+    @Override
+    public Clob createClob(Connection connection) throws SQLException {
+        return connection.createClob();
+    }
 
-    ValueModel getValueModel();
+    @Override
+    public Blob createBlob(Connection connection) throws SQLException {
+        return connection.createBlob();
+    }
 
-    JdbcType<T> getJdbcType();
+    @Override
+    public void closeClob(Connection connection, Clob clob) throws SQLException {
+    }
 
-    T getValue(Map<String, Object> options) throws SQLException;
+    @Override
+    public void closeBlob(Connection connection, Blob clob) throws SQLException {
+    }
 
-    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
+    @Override
+    public void initClobBeforeAccess(Connection connection, Clob clob) throws SQLException {
+    }
 
-    <X> void setValue(X value, Map<String, Object> options) throws SQLException;
+    @Override
+    public void initBlobBeforeAccess(Connection connection, Blob blob) throws SQLException {
+    }
+
+    @Override
+    public void releaseClobAfterAccess(Connection connection, Clob clob) throws SQLException {
+    }
+
+    @Override
+    public void releaseBlobAfterAccess(Connection connection, Blob blob) throws SQLException {
+    }
 }

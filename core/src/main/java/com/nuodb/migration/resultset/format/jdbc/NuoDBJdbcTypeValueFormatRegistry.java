@@ -34,7 +34,7 @@ import com.nuodb.migration.jdbc.dialect.nuodb.NuoDBTimeType;
 /**
  * @author Sergey Bushik
  */
-public class NuoDBJdbcTypeValueFormatRegistry extends SimpleJdbcTypeValueFormatRegistry {
+public class NuoDBJdbcTypeValueFormatRegistry extends DefaultJdbcTypeValueFormatRegistry {
 
     public NuoDBJdbcTypeValueFormatRegistry() {
         addJdbcTypeValueFormat(NuoDBTimeType.INSTANCE, new NuoDBTimeTypeValueFormat());

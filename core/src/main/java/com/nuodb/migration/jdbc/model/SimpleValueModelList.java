@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata;
+package com.nuodb.migration.jdbc.model;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,29 +38,29 @@ import static com.google.common.collect.Lists.newArrayList;
 /**
  * @author Sergey Bushik
  */
-public class SimpleColumnModelSet<T extends ColumnModel> implements ColumnModelSet<T> {
+public class SimpleValueModelList<T extends ValueModel> implements ValueModelList<T> {
 
-    private List<T> columns = newArrayList();
+    private List<T> values = newArrayList();
 
-    public SimpleColumnModelSet() {
+    public SimpleValueModelList() {
     }
 
-    public SimpleColumnModelSet(T... columns) {
-        this.columns.addAll(newArrayList(columns));
+    public SimpleValueModelList(T... values) {
+        this.values.addAll(newArrayList(values));
     }
 
-    public SimpleColumnModelSet(Iterable<T> columns) {
-        this.columns.addAll(newArrayList(columns));
+    public SimpleValueModelList(Iterable<T> values) {
+        this.values.addAll(newArrayList(values));
     }
 
     @Override
     public T get(int index) {
-        return columns.get(index);
+        return values.get(index);
     }
 
     @Override
     public T get(String name) {
-        for (T column : columns) {
+        for (T column : values) {
             if (StringUtils.equals(column.getName(), name)) {
                 return column;
             }
@@ -70,90 +70,90 @@ public class SimpleColumnModelSet<T extends ColumnModel> implements ColumnModelS
 
     @Override
     public T set(int index, T element) {
-        return columns.set(index, element);
+        return values.set(index, element);
     }
 
     @Override
     public int size() {
-        return columns.size();
+        return values.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return columns.isEmpty();
+        return values.isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
-        return columns.contains(o);
+        return values.contains(o);
     }
 
     @Override
     public Iterator<T> iterator() {
-        return columns.iterator();
+        return values.iterator();
     }
 
     public boolean add(T t) {
-        return columns.add(t);
+        return values.add(t);
     }
 
     @Override
     public boolean remove(Object o) {
-        return columns.remove(o);
+        return values.remove(o);
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        return columns.containsAll(c);
+        return values.containsAll(c);
     }
 
     @Override
     public boolean addAll(Collection<? extends T> c) {
-        return columns.addAll(c);
+        return values.addAll(c);
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return columns.removeAll(c);
+        return values.removeAll(c);
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        return columns.retainAll(c);
+        return values.retainAll(c);
     }
 
     @Override
     public void clear() {
-        columns.clear();
+        values.clear();
     }
 
     @Override
     public Object[] toArray() {
-        return columns.toArray();
+        return values.toArray();
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        return columns.toArray(a);
+        return values.toArray(a);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SimpleColumnModelSet that = (SimpleColumnModelSet) o;
-        if (columns.equals(that.columns)) return false;
+        SimpleValueModelList that = (SimpleValueModelList) o;
+        if (values.equals(that.values)) return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        return columns.hashCode();
+        return values.hashCode();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public String toString() {
-        return columns.toString();
+        return values.toString();
     }
 }

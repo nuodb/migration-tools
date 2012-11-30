@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.resultset.format.xml;
 
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
+import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
 import com.nuodb.migration.resultset.format.ResultSetOutputException;
 
@@ -76,10 +76,10 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             writer.writeStartElement(RESULT_SET_ELEMENT);
             writer.writeNamespace("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
             writer.writeStartElement(COLUMNS_ELEMENT);
-            for (ColumnModel columnModel : getColumnModelSet()) {
+            for (ValueModel valueModel : getValueModelList()) {
                 writer.writeEmptyElement(COLUMN_ELEMENT);
                 writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
-                writer.writeAttribute(ATTRIBUTE_NAME, columnModel.getName());
+                writer.writeAttribute(ATTRIBUTE_NAME, valueModel.getName());
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {

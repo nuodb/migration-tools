@@ -45,9 +45,15 @@ import java.sql.SQLException;
 public class JdbcBlobTypeAdapter extends JdbcTypeAdapterBase<Blob> {
 
     public static final JdbcTypeAdapter INSTANCE = new JdbcBlobTypeAdapter();
+    private JdbcLobTypeSupport jdbcLobTypeSupport;
 
     public JdbcBlobTypeAdapter() {
+        this(new DefaultJdbcLobTypeSupport());
+    }
+
+    public JdbcBlobTypeAdapter(JdbcLobTypeSupport jdbcLobTypeSupport) {
         super(Blob.class);
+        this.jdbcLobTypeSupport = jdbcLobTypeSupport;
     }
 
     @Override
@@ -57,15 +63,17 @@ public class JdbcBlobTypeAdapter extends JdbcTypeAdapterBase<Blob> {
         }
         Blob blob;
         if (byte[].class.isInstance(value)) {
-            blob = connection.createBlob();
+            blob = createBlob(connection);
             blob.setBytes(1, (byte[]) value);
+            closeBlob(connection, blob);
         } else if (InputStream.class.isInstance(value)) {
-            blob = connection.createBlob();
+            blob = createBlob(connection);
             try {
                 ByteStreams.copy((InputStream) value, blob.setBinaryStream(1));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
+            closeBlob(connection, blob);
         } else {
             throw newWrapFailure(value);
         }
@@ -80,14 +88,36 @@ public class JdbcBlobTypeAdapter extends JdbcTypeAdapterBase<Blob> {
             return (X) value;
         } else if (valueClass.isAssignableFrom(byte[].class)) {
             try {
-                return (X) ByteStreams.toByteArray(value.getBinaryStream());
+                initBlobBeforeAccess(connection, value);
+                X x = (X) ByteStreams.toByteArray(value.getBinaryStream());
+                releaseBlobAfterAccess(connection, value);
+                return x;
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
         } else if (valueClass.isAssignableFrom(InputStream.class)) {
-            return (X) value.getBinaryStream();
+            initBlobBeforeAccess(connection, value);
+            X x = (X) value.getBinaryStream();
+            releaseBlobAfterAccess(connection, value);
+            return x;
         } else {
             throw newUnwrapFailure(valueClass);
         }
+    }
+
+    protected Blob createBlob(Connection connection) throws SQLException {
+        return jdbcLobTypeSupport.createBlob(connection);
+    }
+
+    private void closeBlob(Connection connection, Blob blob) throws SQLException {
+        jdbcLobTypeSupport.closeBlob(connection, blob);
+    }
+
+    protected void initBlobBeforeAccess(Connection connection, Blob blob) throws SQLException {
+        jdbcLobTypeSupport.initBlobBeforeAccess(connection, blob);
+    }
+
+    protected void releaseBlobAfterAccess(Connection connection, Blob blob) throws SQLException {
+        jdbcLobTypeSupport.releaseBlobAfterAccess(connection, blob);
     }
 }

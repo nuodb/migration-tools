@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeRegistryBase extends JdbcTypeNameMap implements JdbcTypeRegistry {
+public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
 
     private Map<JdbcTypeDesc, JdbcType> jdbcTypes = Maps.newHashMap();
 

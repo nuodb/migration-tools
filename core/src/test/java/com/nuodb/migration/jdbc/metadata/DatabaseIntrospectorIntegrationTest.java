@@ -2,9 +2,10 @@ package com.nuodb.migration.jdbc.metadata;
 
 
 import com.nuodb.migration.TestUtils;
-import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
+import com.nuodb.migration.jdbc.connection.DriverConnectionProvider;
+import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
 import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
-import com.nuodb.migration.spec.JdbcConnectionSpec;
+import com.nuodb.migration.spec.DriverConnectionSpec;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -18,14 +19,14 @@ public class DatabaseIntrospectorIntegrationTest {
 
     @Before
     public void setUp() throws Exception {
-        JdbcConnectionSpec mysql = new JdbcConnectionSpec();
+        DriverConnectionSpec mysql = new DriverConnectionSpec();
         mysql.setDriverClassName("com.mysql.jdbc.Driver");
         mysql.setUrl("jdbc:mysql://localhost:3306/test");
         mysql.setUsername("root");
 
-        JdbcConnectionSpec nuodb = TestUtils.createTestNuoDBConnectionSpec();
+        DriverConnectionSpec nuodb = TestUtils.createTestNuoDBConnectionSpec();
 
-        final JdbcConnectionProvider connectionProvider = new JdbcConnectionProvider(nuodb);
+        final DriverConnectionProvider connectionProvider = new DriverPoolingConnectionProvider(nuodb);
         connection = connectionProvider.getConnection();
 
         Assert.assertNotNull(connection);

@@ -27,6 +27,9 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.dialect.oracle.OracleTypeRegistry;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -81,5 +84,10 @@ public class OracleDialect extends StandardDialect {
         value.append(':');
         value.append(zeros.substring(0, zeros.length() - minutesOffset.length()));
         return value.toString();
+    }
+
+    @Override
+    public JdbcTypeRegistry getJdbcTypeRegistry() {
+        return new OracleTypeRegistry();
     }
 }

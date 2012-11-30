@@ -25,12 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata;
+package com.nuodb.migration.jdbc.model;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleColumnModel implements ColumnModel {
+public class SimpleValueModel implements ValueModel {
 
     private String name;
     private int typeCode;
@@ -38,11 +38,11 @@ public class SimpleColumnModel implements ColumnModel {
     private int precision;
     private int scale;
 
-    public SimpleColumnModel(ColumnModel columnModel) {
-        copy(columnModel);
+    public SimpleValueModel(ValueModel valueModel) {
+        copy(valueModel);
     }
 
-    public SimpleColumnModel(String name, int typeCode, String typeName, int precision, int scale) {
+    public SimpleValueModel(String name, int typeCode, String typeName, int precision, int scale) {
         this.name = name;
         this.typeCode = typeCode;
         this.typeName = typeName;
@@ -99,12 +99,12 @@ public class SimpleColumnModel implements ColumnModel {
     }
 
     @Override
-    public void copy(ColumnModel column) {
-        setName(column.getName());
-        setTypeCode(column.getTypeCode());
-        setTypeName(column.getTypeName());
-        setPrecision(column.getPrecision());
-        setScale(column.getScale());
+    public void copy(ValueModel valueModel) {
+        setName(valueModel.getName());
+        setTypeCode(valueModel.getTypeCode());
+        setTypeName(valueModel.getTypeName());
+        setPrecision(valueModel.getPrecision());
+        setScale(valueModel.getScale());
     }
 
     @Override
@@ -112,7 +112,7 @@ public class SimpleColumnModel implements ColumnModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        SimpleColumnModel that = (SimpleColumnModel) o;
+        SimpleValueModel that = (SimpleValueModel) o;
 
         if (precision != that.precision) return false;
         if (scale != that.scale) return false;

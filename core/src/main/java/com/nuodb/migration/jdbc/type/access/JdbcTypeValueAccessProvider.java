@@ -27,16 +27,16 @@
  */
 package com.nuodb.migration.jdbc.type.access;
 
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
+import com.nuodb.migration.jdbc.connection.ConnectionProxy;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelFactory;
 import com.nuodb.migration.jdbc.type.*;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Map;
 
-import static com.nuodb.migration.jdbc.metadata.ColumnModelFactory.createColumnModel;
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModel;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -82,31 +82,31 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
 
     public <T> JdbcTypeValueAccess<T> getResultSetAccess(ResultSet resultSet, int column) {
         try {
-            return getResultSetAccess(resultSet, createColumnModel(resultSet, column), column);
+            return getResultSetAccess(resultSet, ValueModelFactory.createValueModel(resultSet, column), column);
         } catch (SQLException exception) {
             throw new JdbcTypeException(exception);
         }
     }
 
-    public <T> JdbcTypeValueAccess<T> getResultSetAccess(ResultSet resultSet, ColumnModel columnModel, int column) {
+    public <T> JdbcTypeValueAccess<T> getResultSetAccess(ResultSet resultSet, ValueModel valueModel, int column) {
         return new JdbcTypeValueAccessImpl<T>(
                 (JdbcTypeValueGetter<T>) getJdbcTypeValueGetter(
-                        columnModel.getTypeCode(), columnModel.getTypeName()), resultSet, columnModel, column);
+                        valueModel.getTypeCode(), valueModel.getTypeName()), resultSet, valueModel, column);
     }
 
     public <T> JdbcTypeValueAccess<T> getPreparedStatementAccess(PreparedStatement statement, int column) {
         try {
-            return getPreparedStatementAccess(statement, createColumnModel(statement.getMetaData(), column), column);
+            return getPreparedStatementAccess(statement, createValueModel(statement.getMetaData(), column), column);
         } catch (SQLException exception) {
             throw new JdbcTypeException(exception);
         }
     }
 
-    public <T> JdbcTypeValueAccess<T> getPreparedStatementAccess(PreparedStatement statement, ColumnModel columnModel,
+    public <T> JdbcTypeValueAccess<T> getPreparedStatementAccess(PreparedStatement statement, ValueModel valueModel,
                                                                  int column) {
         return new JdbcTypeValueAccessImpl<T>(
                 (JdbcTypeValueSetter<T>) getJdbcTypeValueSetter(
-                        columnModel.getTypeCode(), columnModel.getTypeName()), statement, columnModel, column);
+                        valueModel.getTypeCode(), valueModel.getTypeName()), statement, valueModel, column);
     }
 
     protected <T> JdbcTypeAdapter<T> getJdbcTypeAdapter(Class valueClass, Class typeClass) {
@@ -115,7 +115,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
             jdbcTypeAdapter = getJdbcTypeAdapter(typeClass);
             if (jdbcTypeAdapter == null) {
                 throw new JdbcTypeException(
-                        String.format("Jdbc type %s adapter not found to adapt %s type",
+                        format("Jdbc type %s adapter not found to adapt %s type",
                                 typeClass.getName(), valueClass.getName()));
             }
         }
@@ -126,7 +126,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         JdbcType jdbcType = getJdbcType(jdbcTypeDesc);
         if (jdbcType == null) {
             throw new JdbcTypeException(
-                    String.format("Jdbc type %s is not supported", jdbcTypeDesc.getTypeName()));
+                    format("Jdbc type %s is not supported", jdbcTypeDesc.getTypeName()));
         }
         return jdbcType;
     }
@@ -156,7 +156,8 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
             JdbcTypeAdapter<X> adapter = getJdbcTypeAdapter(valueClass, jdbcType.getTypeClass());
             if (adapter != null) {
                 Statement statement = resultSet.getStatement();
-                value = adapter.unwrap(value, valueClass, statement.getConnection());
+                Connection connection = statement.getConnection();
+                value = adapter.unwrap(value, valueClass, getConnection(connection));
             }
             return value;
         }
@@ -181,9 +182,18 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
             JdbcTypeAdapter<X> adapter = getJdbcTypeAdapter(value != null ? value.getClass() : null,
                     jdbcType.getTypeClass());
             if (adapter != null) {
-                value = adapter.wrap(value, preparedStatement.getConnection());
+                Connection connection = preparedStatement.getConnection();
+                value = adapter.wrap(value, getConnection(connection));
             }
             jdbcType.setValue(preparedStatement, column, (T) value, options);
+        }
+    }
+
+    protected Connection getConnection(Connection connection) {
+        if (connection instanceof ConnectionProxy) {
+            return ((ConnectionProxy) connection).getConnection();
+        } else {
+            return connection;
         }
     }
 
@@ -194,24 +204,24 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         private JdbcType<T> jdbcType;
         private ResultSet resultSet;
         private PreparedStatement statement;
-        private ColumnModel columnModel;
+        private ValueModel valueModel;
         private int column;
 
         public JdbcTypeValueAccessImpl(JdbcTypeValueGetter<T> getter, ResultSet resultSet,
-                                       ColumnModel columnModel, int column) {
+                                       ValueModel valueModel, int column) {
             this.getter = getter;
             this.jdbcType = getter.getJdbcType();
             this.resultSet = resultSet;
-            this.columnModel = columnModel;
+            this.valueModel = valueModel;
             this.column = column;
         }
 
         public JdbcTypeValueAccessImpl(JdbcTypeValueSetter<T> setter, PreparedStatement statement,
-                                       ColumnModel columnModel, int column) {
+                                       ValueModel valueModel, int column) {
             this.setter = setter;
             this.jdbcType = setter.getJdbcType();
             this.statement = statement;
-            this.columnModel = columnModel;
+            this.valueModel = valueModel;
             this.column = column;
         }
 
@@ -245,8 +255,8 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         }
 
         @Override
-        public ColumnModel getColumnModel() {
-            return columnModel;
+        public ValueModel getValueModel() {
+            return valueModel;
         }
 
         @Override

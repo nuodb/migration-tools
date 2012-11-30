@@ -27,7 +27,11 @@
  */
 package com.nuodb.migration.jdbc.metadata;
 
-public class Column extends HasIdentifierBase implements ColumnModel {
+import com.nuodb.migration.jdbc.model.ValueModel;
+
+import static java.lang.String.format;
+
+public class Column extends HasIdentifierBase implements ValueModel {
     /**
      * Default precision is maximum value
      */
@@ -134,12 +138,12 @@ public class Column extends HasIdentifierBase implements ColumnModel {
     }
 
     @Override
-    public void copy(ColumnModel column) {
-        setName(column.getName());
-        setTypeCode(column.getTypeCode());
-        setTypeName(column.getTypeName());
-        setPrecision(column.getPrecision());
-        setScale(column.getScale());
+    public void copy(ValueModel valueModel) {
+        setName(valueModel.getName());
+        setTypeCode(valueModel.getTypeCode());
+        setTypeName(valueModel.getTypeName());
+        setPrecision(valueModel.getPrecision());
+        setScale(valueModel.getScale());
     }
 
     public Table getTable() {
@@ -263,5 +267,12 @@ public class Column extends HasIdentifierBase implements ColumnModel {
             buffer.append(' ');
             buffer.append("not null");
         }
+        if (unique) {
+            buffer.append(", unique");
+        }
+        buffer.append(format(", size=%d", size));
+        buffer.append(format(", precision=%d", precision));
+        buffer.append(format(", scale=%d", scale));
     }
 }
+

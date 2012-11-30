@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
+import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 import java.util.Map;
@@ -51,10 +51,10 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
     protected abstract String doGetValue(JdbcTypeValueAccess<T> access, Map<String, Object> options) throws Exception;
 
     protected JdbcTypeValueException newGetValueFailure(JdbcTypeValueAccess access, Exception exception) {
-        ColumnModel column = access.getColumnModel();
+        ValueModel value = access.getValueModel();
         return new JdbcTypeValueException(
                 String.format("Can't get column %s type %s value",
-                        column.getName(), column.getTypeName()), exception);
+                        value.getName(), value.getTypeName()), exception);
     }
 
     @Override
@@ -72,10 +72,10 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
                                        Map<String, Object> options) throws Exception;
 
     protected JdbcTypeValueException newSetValueFailure(JdbcTypeValueAccess access, Exception exception) {
-        ColumnModel column = access.getColumnModel();
+        ValueModel value = access.getValueModel();
         return new JdbcTypeValueException(
                 String.format("Can't set column %s type %s value",
-                        column.getName(), column.getTypeName()), exception);
+                        value.getName(), value.getTypeName()), exception);
     }
 }
 

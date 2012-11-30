@@ -25,70 +25,51 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.spec;
+package com.nuodb.migration.jdbc.connection;
 
-import com.google.common.collect.Maps;
+import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 
-import java.sql.Driver;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-public class JdbcConnectionSpec extends ConnectionSpecBase {
-    private String driverClassName;
-    private Driver driver;
-    private String url;
-    private String username;
-    private String password;
-    private Map<String, String> properties = Maps.newHashMap();
+/**
+ * @author Sergey Bushik
+ */
+public class DriverConnectionServices implements ConnectionServices {
 
-    public Driver getDriver() {
-        return driver;
+    private final DriverConnectionProvider driverConnectionProvider;
+    private Connection connection;
+
+    public DriverConnectionServices(DriverConnectionProvider driverConnectionProvider) {
+        this.driverConnectionProvider = driverConnectionProvider;
     }
 
-    public void setDriver(Driver driver) {
-        this.driver = driver;
+    @Override
+    public Connection getConnection() throws SQLException {
+        Connection connection = this.connection;
+        if (connection == null) {
+            synchronized (this) {
+                connection = this.connection;
+                if (connection == null) {
+                    connection = this.connection = driverConnectionProvider.getConnection();
+                }
+            }
+        }
+        return connection;
     }
 
-    public String getDriverClassName() {
-        return driverClassName;
+    @Override
+    public DatabaseInspector createDatabaseInspector() throws SQLException {
+        DatabaseInspector databaseInspector = new DatabaseInspector();
+        databaseInspector.withCatalog(driverConnectionProvider.getCatalog());
+        databaseInspector.withSchema(driverConnectionProvider.getSchema());
+        databaseInspector.withConnection(getConnection());
+        return databaseInspector;
     }
 
-    public void setDriverClassName(String driverClassName) {
-        this.driverClassName = driverClassName;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void addProperty(String property, String value) {
-        properties.put(property, value);
-    }
-
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
+    @Override
+    public void close() throws SQLException {
+        driverConnectionProvider.closeConnection(connection);
+        connection = null;
     }
 }

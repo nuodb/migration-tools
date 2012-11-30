@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.resultset.format.csv;
 
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
+import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
 import com.nuodb.migration.resultset.format.ResultSetOutputException;
 import org.apache.commons.csv.CSVFormat;
@@ -69,8 +69,8 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
     @Override
     protected void doWriteBegin() {
         try {
-            for (ColumnModel columnModel : getColumnModelSet()) {
-                printer.print(columnModel.getName());
+            for (ValueModel valueModel : getValueModelList()) {
+                printer.print(valueModel.getName());
             }
             printer.println();
         } catch (IOException e) {

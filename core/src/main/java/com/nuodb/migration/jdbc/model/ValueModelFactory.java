@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata;
+package com.nuodb.migration.jdbc.model;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -34,55 +34,55 @@ import java.sql.SQLException;
 /**
  * @author Sergey Bushik
  */
-public class ColumnModelFactory {
+public class ValueModelFactory {
 
-    public static ColumnModel createColumnModel(ResultSet resultSet, int column) throws SQLException {
-        return createColumnModel(resultSet.getMetaData(), column);
+    public static ValueModel createValueModel(ResultSet resultSet, int column) throws SQLException {
+        return createValueModel(resultSet.getMetaData(), column);
     }
 
-    public static ColumnModel createColumnModel(ResultSetMetaData metaData, int column) throws SQLException {
-        return new SimpleColumnModel(
+    public static ValueModel createValueModel(ResultSetMetaData metaData, int column) throws SQLException {
+        return new SimpleValueModel(
                 metaData.getColumnLabel(column), metaData.getColumnType(column), metaData.getColumnTypeName(column),
                 metaData.getPrecision(column), metaData.getScale(column));
     }
 
-    public static ColumnModelSet<ColumnModel> createColumnModelSet(ResultSet resultSet) throws SQLException {
-        return createColumnModelSet(resultSet.getMetaData());
+    public static ValueModelList<ValueModel> createValueModelList(ResultSet resultSet) throws SQLException {
+        return createValueModelList(resultSet.getMetaData());
     }
 
-    public static ColumnModelSet<ColumnModel> createColumnModelSet(ResultSetMetaData metaData) throws SQLException {
+    public static ValueModelList<ValueModel> createValueModelList(ResultSetMetaData metaData) throws SQLException {
         final int size = metaData.getColumnCount();
-        final ColumnModel[] columns = new ColumnModel[size];
+        final ValueModel[] values = new ValueModel[size];
         for (int i = 0; i < size; i++) {
-            columns[i] = createColumnModel(metaData, i + 1);
+            values[i] = createValueModel(metaData, i + 1);
         }
-        return new SimpleColumnModelSet<ColumnModel>(columns);
+        return new SimpleValueModelList<ValueModel>(values);
     }
 
-    public static ColumnModelSet<ColumnModel> createColumnModelSet(String[] names, int[] typeCodes) {
+    public static ValueModelList<ValueModel> createValueModelList(String[] names, int[] typeCodes) {
         final int size = names.length;
-        return createColumnModelSet(names, typeCodes, new String[size], new int[size], new int[size]);
+        return createValueModelList(names, typeCodes, new String[size], new int[size], new int[size]);
     }
 
-    public static ColumnModelSet<ColumnModel> createColumnModelSet(
+    public static ValueModelList<ValueModel> createValueModelList(
             String[] names, int[] typeCodes, String[] typeNames, int[] precisions, int[] scales) {
         final int size = names.length;
-        final ColumnModel[] columns = new ColumnModel[size];
+        final ValueModel[] values = new ValueModel[size];
         for (int i = 0; i < size; i++) {
-            columns[i] = new SimpleColumnModel(names[i], typeCodes[i], typeNames[i], precisions[i], scales[i]);
+            values[i] = new SimpleValueModel(names[i], typeCodes[i], typeNames[i], precisions[i], scales[i]);
         }
-        return createColumnModelSet(columns);
+        return createValueModelList(values);
     }
 
-    public static <T extends ColumnModel> ColumnModelSet<T> createColumnModelSet() {
-        return new SimpleColumnModelSet<T>();
+    public static <T extends ValueModel> ValueModelList<T> createValueModelList() {
+        return new SimpleValueModelList<T>();
     }
 
-    public static <T extends ColumnModel> ColumnModelSet<T> createColumnModelSet(T... columns) {
-        return new SimpleColumnModelSet<T>(columns);
+    public static <T extends ValueModel> ValueModelList<T> createValueModelList(T... values) {
+        return new SimpleValueModelList<T>(values);
     }
 
-    public static <T extends ColumnModel> ColumnModelSet<T> createColumnModelSet(Iterable<T> columns) {
-        return new SimpleColumnModelSet<T>(columns);
+    public static <T extends ValueModel> ValueModelList<T> createValueModelList(Iterable<T> values) {
+        return new SimpleValueModelList<T>(values);
     }
 }

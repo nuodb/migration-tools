@@ -27,7 +27,8 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.SimpleValueModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
 
@@ -36,17 +37,48 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public interface ColumnValueModel extends ColumnModel {
+public class SimpleValueFormatModel extends SimpleValueModel implements ValueFormatModel {
 
-    JdbcTypeValueAccess getValueAccess();
+    private JdbcTypeValueFormat valueFormat;
+    private JdbcTypeValueAccess valueAccess;
+    private Map<String, Object> valueAccessOptions;
 
-    void setValueAccess(JdbcTypeValueAccess valueAccess);
+    public SimpleValueFormatModel(ValueModel valueModel, JdbcTypeValueFormat valueFormat,
+                                  JdbcTypeValueAccess valueAccess,
+                                  Map<String, Object> valueAccessOptions) {
+        super(valueModel);
+        this.valueFormat = valueFormat;
+        this.valueAccess = valueAccess;
+        this.valueAccessOptions = valueAccessOptions;
+    }
 
-    JdbcTypeValueFormat getValueFormat();
+    @Override
+    public JdbcTypeValueFormat getValueFormat() {
+        return valueFormat;
+    }
 
-    void setValueFormat(JdbcTypeValueFormat valueFormat);
+    @Override
+    public void setValueFormat(JdbcTypeValueFormat valueFormat) {
+        this.valueFormat = valueFormat;
+    }
 
-    Map<String, Object> getValueAccessOptions();
+    @Override
+    public JdbcTypeValueAccess getValueAccess() {
+        return valueAccess;
+    }
 
-    void setValueAccessOptions(Map<String, Object> valueAccessOptions);
+    @Override
+    public void setValueAccess(JdbcTypeValueAccess valueAccess) {
+        this.valueAccess = valueAccess;
+    }
+
+    @Override
+    public Map<String, Object> getValueAccessOptions() {
+        return valueAccessOptions;
+    }
+
+    @Override
+    public void setValueAccessOptions(Map<String, Object> valueAccessOptions) {
+        this.valueAccessOptions = valueAccessOptions;
+    }
 }

@@ -25,28 +25,31 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.access;
+package com.nuodb.migration.jdbc.type.adapter;
 
-import com.nuodb.migration.jdbc.model.ValueModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
-
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess<T> {
+public interface JdbcLobTypeSupport {
 
-    int getColumn();
+    Clob createClob(Connection connection) throws SQLException;
 
-    ValueModel getValueModel();
+    Blob createBlob(Connection connection) throws SQLException;
 
-    JdbcType<T> getJdbcType();
+    void closeClob(Connection connection, Clob clob) throws SQLException;
 
-    T getValue(Map<String, Object> options) throws SQLException;
+    void closeBlob(Connection connection, Blob clob) throws SQLException;
 
-    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
+    void initClobBeforeAccess(Connection connection, Clob clob) throws SQLException;
 
-    <X> void setValue(X value, Map<String, Object> options) throws SQLException;
+    void initBlobBeforeAccess(Connection connection, Blob blob) throws SQLException;
+
+    void releaseClobAfterAccess(Connection connection, Clob clob) throws SQLException;
+
+    void releaseBlobAfterAccess(Connection connection, Blob blob) throws SQLException;
 }

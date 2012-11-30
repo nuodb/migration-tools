@@ -43,6 +43,6 @@ public class NuoDBDialect extends StandardDialect {
 
     @Override
     public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return NuoDBTypeRegistry.INSTANCE;
+        return new NuoDBTypeRegistry();
     }
 }

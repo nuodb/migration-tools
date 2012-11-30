@@ -35,8 +35,6 @@ import com.nuodb.migration.jdbc.type.jdbc4.Jdbc4TypeRegistry;
  */
 public class NuoDBTypeRegistry extends Jdbc4TypeRegistry {
 
-    public static final JdbcTypeRegistry INSTANCE = new NuoDBTypeRegistry();
-
     public NuoDBTypeRegistry() {
         super();
         addJdbcType(NuoDBIntegerType.INSTANCE);

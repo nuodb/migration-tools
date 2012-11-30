@@ -29,8 +29,10 @@ package com.nuodb.migration.utils;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 @SuppressWarnings("unchecked")
 public class ReflectionUtils {
@@ -97,6 +99,32 @@ public class ReflectionUtils {
         } catch (InvocationTargetException exception) {
             throw new ReflectionException(exception);
         } catch (InstantiationException exception) {
+            throw new ReflectionException(exception);
+        }
+    }
+
+
+    public static <T> T invokeExactMethod(Object object, String methodName, Object... args) {
+        try {
+            return (T) MethodUtils.invokeExactMethod(object, methodName, args);
+        } catch (NoSuchMethodException exception) {
+            throw new ReflectionException(exception);
+        } catch (IllegalAccessException exception) {
+            throw new ReflectionException(exception);
+        } catch (InvocationTargetException exception) {
+            throw new ReflectionException(exception);
+        }
+    }
+
+    public static <T> T invokeMethod(Object object, Method method, Object... args) {
+        try {
+            if (args == null) {
+                args = ArrayUtils.EMPTY_OBJECT_ARRAY;
+            }
+            return (T) method.invoke(object, args);
+        } catch (IllegalAccessException exception) {
+            throw new ReflectionException(exception);
+        } catch (InvocationTargetException exception) {
             throw new ReflectionException(exception);
         }
     }

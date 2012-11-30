@@ -25,18 +25,30 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.resolve.DatabaseObjectResolverSupport;
+import com.nuodb.migration.utils.ReflectionUtils;
+
+import java.sql.DatabaseMetaData;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleJdbcTypeValueFormatRegistryResolver extends DatabaseObjectResolverSupport<JdbcTypeValueFormatRegistry>
-        implements JdbcTypeValueFormatRegistryResolver {
+public class DefaultDatabaseDialectResolver extends DatabaseObjectResolverSupport<DatabaseDialect>
+        implements DatabaseDialectResolver {
 
-    public SimpleJdbcTypeValueFormatRegistryResolver() {
-        super(JdbcTypeValueFormatRegistry.class, SimpleJdbcTypeValueFormatRegistry.class);
-        register("NuoDB", NuoDBJdbcTypeValueFormatRegistry.class);
+    public DefaultDatabaseDialectResolver() {
+        super(DatabaseDialect.class, StandardDialect.class);
+        register("MySQL", MySQLDialect.class);
+        register("PostgreSQL", PostgreSQLDialect.class);
+        register("Microsoft SQL Server", SQLServerDialect.class);
+        register("Oracle", OracleDialect.class);
+        register("NuoDB", NuoDBDialect.class);
+    }
+
+    @Override
+    protected DatabaseDialect createObject(Class<? extends DatabaseDialect> objectType, DatabaseMetaData metaData) {
+        return ReflectionUtils.newInstance(objectType, metaData);
     }
 }

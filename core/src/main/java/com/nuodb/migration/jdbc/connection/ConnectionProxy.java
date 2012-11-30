@@ -25,32 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata;
+package com.nuodb.migration.jdbc.connection;
+
+import java.sql.Connection;
 
 /**
  * @author Sergey Bushik
  */
-public interface ColumnModel {
+public interface ConnectionProxy extends Connection {
 
-    String getName();
-
-    void setName(String name);
-
-    int getTypeCode();
-
-    void setTypeCode(int typeCode);
-
-    String getTypeName();
-
-    void setTypeName(String typeName);
-
-    int getPrecision();
-
-    void setPrecision(int precision);
-
-    int getScale();
-
-    void setScale(int scale);
-
-    void copy(ColumnModel column);
+    Connection getConnection();
 }

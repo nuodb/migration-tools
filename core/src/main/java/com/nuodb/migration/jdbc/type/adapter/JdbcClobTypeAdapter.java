@@ -49,8 +49,15 @@ public class JdbcClobTypeAdapter extends JdbcTypeAdapterBase<Clob> {
 
     public static final JdbcTypeAdapter INSTANCE = new JdbcClobTypeAdapter();
 
+    private JdbcLobTypeSupport jdbcLobTypeSupport;
+
     public JdbcClobTypeAdapter() {
+        this(new DefaultJdbcLobTypeSupport());
+    }
+
+    public JdbcClobTypeAdapter(JdbcLobTypeSupport jdbcLobTypeSupport) {
         super(Clob.class);
+        this.jdbcLobTypeSupport = jdbcLobTypeSupport;
     }
 
     @Override
@@ -60,25 +67,29 @@ public class JdbcClobTypeAdapter extends JdbcTypeAdapterBase<Clob> {
         }
         Clob clob;
         if (String.class.isInstance(value)) {
-            clob = connection.createClob();
+            clob = createClob(connection);
             clob.setString(1, (String) value);
+            closeClob(connection, clob);
         } else if (char[].class.isInstance(value)) {
-            clob = connection.createClob();
+            clob = createClob(connection);
             clob.setString(1, new String((char[]) value));
+            closeClob(connection, clob);
         } else if (Reader.class.isInstance(value)) {
-            clob = connection.createClob();
+            clob = createClob(connection);
             try {
                 CharStreams.copy((Reader) value, clob.setCharacterStream(1));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
+            closeClob(connection, clob);
         } else if (InputStream.class.isInstance(value)) {
-            clob = connection.createClob();
+            clob = createClob(connection);
             try {
                 ByteStreams.copy((InputStream) value, clob.setAsciiStream(1));
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
+            closeClob(connection, clob);
         } else {
             throw newWrapFailure(value);
         }
@@ -87,28 +98,58 @@ public class JdbcClobTypeAdapter extends JdbcTypeAdapterBase<Clob> {
 
     @Override
     public <X> X unwrap(Clob value, Class<X> valueClass, Connection connection) throws SQLException {
-        if ( value == null ) {
+        if (value == null) {
             return null;
-        } else if (valueClass.isAssignableFrom(Clob.class)) {
+        }
+        if (valueClass.isAssignableFrom(Clob.class)) {
             return (X) value;
-        } else if (valueClass.isAssignableFrom(char[].class)) {
+        }
+        if (valueClass.isAssignableFrom(char[].class)) {
             try {
-                return (X) CharStreams.toString(value.getCharacterStream()).toCharArray();
+                initClobBeforeAccess(connection, value);
+                X x = (X) CharStreams.toString(value.getCharacterStream()).toCharArray();
+                releaseClobAfterAccess(connection, value);
+                return x;
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
         } else if (valueClass.isAssignableFrom(String.class)) {
             try {
-                return (X) CharStreams.toString(value.getCharacterStream());
+                initClobBeforeAccess(connection, value);
+                X x = (X) CharStreams.toString(value.getCharacterStream());
+                releaseClobAfterAccess(connection, value);
+                return x;
             } catch (IOException exception) {
                 throw new JdbcTypeException(exception);
             }
         } else if (valueClass.isAssignableFrom(Reader.class)) {
-            return (X) value.getCharacterStream();
+            initClobBeforeAccess(connection, value);
+            X x = (X) value.getCharacterStream();
+            releaseClobAfterAccess(connection, value);
+            return x;
         } else if (valueClass.isAssignableFrom(OutputStream.class)) {
-            return (X) value.getAsciiStream();
+            initClobBeforeAccess(connection, value);
+            X x = (X) value.getAsciiStream();
+            releaseClobAfterAccess(connection, value);
+            return x;
         } else {
             throw newUnwrapFailure(valueClass);
         }
+    }
+
+    protected Clob createClob(Connection connection) throws SQLException {
+        return jdbcLobTypeSupport.createClob(connection);
+    }
+
+    protected void closeClob(Connection connection, Clob clob) throws SQLException {
+        jdbcLobTypeSupport.closeClob(connection, clob);
+    }
+
+    protected void initClobBeforeAccess(Connection connection, Clob clob) throws SQLException {
+        jdbcLobTypeSupport.initClobBeforeAccess(connection, clob);
+    }
+
+    protected void releaseClobAfterAccess(Connection connection, Clob clob) throws SQLException {
+        jdbcLobTypeSupport.releaseClobAfterAccess(connection, clob);
     }
 }

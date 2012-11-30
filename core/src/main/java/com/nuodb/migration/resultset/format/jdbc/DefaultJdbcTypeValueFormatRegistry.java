@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
+import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcDateType;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcTimeType;
@@ -50,9 +50,9 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 /**
  * @author Sergey Bushik
  */
-public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegistryBase {
+public class DefaultJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegistryBase {
 
-    public SimpleJdbcTypeValueFormatRegistry() {
+    public DefaultJdbcTypeValueFormatRegistry() {
         super(new DefaultJdbcTypeValueFormat());
         addJdbcTypeValueFormat(JdbcTimestampType.INSTANCE, new JdbcTimestampTypeValueFormat());
         addJdbcTypeValueFormat(JdbcTimeType.INSTANCE, new JdbcTimeTypeValueFormat());
@@ -65,7 +65,7 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
         protected String doGetValue(JdbcTypeValueAccess<Object> access, Map<String, Object> options) throws Exception {
             Object jdbcValue;
             String value = null;
-            ColumnModel column = access.getColumnModel();
+            ValueModel column = access.getValueModel();
             switch (column.getTypeCode()) {
                 case Types.BIT:
                 case Types.TINYINT:
@@ -149,7 +149,7 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
         @Override
         protected void doSetValue(JdbcTypeValueAccess<Object> access, String value,
                                   Map<String, Object> options) throws Exception {
-            ColumnModel column = access.getColumnModel();
+            ValueModel column = access.getValueModel();
             switch (column.getTypeCode()) {
                 case Types.BIT:
                 case Types.BOOLEAN:

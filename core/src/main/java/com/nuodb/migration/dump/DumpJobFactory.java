@@ -28,16 +28,16 @@
 package com.nuodb.migration.dump;
 
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
+import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
-import com.nuodb.migration.jdbc.dialect.SimpleDatabaseDialectResolver;
+import com.nuodb.migration.jdbc.dialect.DefaultDatabaseDialectResolver;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.FileCatalog;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.jdbc.DefaultJdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
-import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.spec.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +57,11 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
     private DumpSpec dumpSpec;
 
     private DatabaseDialectResolver databaseDialectResolver =
-            new SimpleDatabaseDialectResolver();
+            new DefaultDatabaseDialectResolver();
     private ResultSetFormatFactory resultSetFormatFactory =
             new SimpleResultSetFormatFactory();
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver =
-            new SimpleJdbcTypeValueFormatRegistryResolver();
+            new DefaultJdbcTypeValueFormatRegistryResolver();
 
     public DumpJob createJob() {
         isNotNull(dumpSpec, "Dump spec is required");
@@ -85,7 +85,7 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
     }
 
     protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return new JdbcConnectionProvider((JdbcConnectionSpec) connectionSpec);
+        return new DriverPoolingConnectionProvider((DriverConnectionSpec) connectionSpec);
     }
 
     protected Catalog createCatalog(String path) {

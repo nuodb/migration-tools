@@ -28,9 +28,9 @@
 package com.nuodb.migration.resultset.format.xml;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
-import com.nuodb.migration.jdbc.metadata.ColumnModelFactory;
-import com.nuodb.migration.jdbc.metadata.ColumnModelSet;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelList;
+import com.nuodb.migration.jdbc.model.ValueModelFactory;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
@@ -83,7 +83,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
 
     @Override
     protected void doReadBegin() {
-        ColumnModelSet<ColumnModel> columnModelSet = null;
+        ValueModelList<ValueModel> valueModelList = null;
         if (isNextElement(RESULT_SET_ELEMENT) && isNextElement(COLUMNS_ELEMENT)) {
             List<String> columns = Lists.newArrayList();
             while (isNextElement(COLUMN_ELEMENT)) {
@@ -100,10 +100,10 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
             }
             int[] columnTypes = new int[columns.size()];
             Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-            columnModelSet = ColumnModelFactory.createColumnModelSet(
+            valueModelList = ValueModelFactory.createValueModelList(
                     columns.toArray(new String[columns.size()]), columnTypes);
         }
-        setColumnModelSet(columnModelSet);
+        setValueModelList(valueModelList);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
     protected String[] doReadRow() {
         String[] values = null;
         if (isCurrentElement(ROW_ELEMENT) || isNextElement(ROW_ELEMENT)) {
-            values = new String[getColumnModelSet().size()];
+            values = new String[getValueModelList().size()];
             int column = 0;
             while (isNextElement(COLUMN_ELEMENT)) {
                 String nil = getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE);

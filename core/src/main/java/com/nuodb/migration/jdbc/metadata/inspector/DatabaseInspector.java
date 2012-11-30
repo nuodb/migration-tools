@@ -28,14 +28,15 @@
 package com.nuodb.migration.jdbc.metadata.inspector;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
+import com.nuodb.migration.jdbc.connection.DriverConnectionProvider;
+import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
 import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
-import com.nuodb.migration.jdbc.dialect.SimpleDatabaseDialectResolver;
+import com.nuodb.migration.jdbc.dialect.DefaultDatabaseDialectResolver;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migration.jdbc.metadata.DriverInfo;
 import com.nuodb.migration.jdbc.metadata.MetaModelException;
-import com.nuodb.migration.spec.JdbcConnectionSpec;
+import com.nuodb.migration.spec.DriverConnectionSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,7 @@ public class DatabaseInspector {
     private String table;
     private String[] tableTypes;
     private Connection connection;
-    private DatabaseDialectResolver databaseDialectResolver = new SimpleDatabaseDialectResolver();
+    private DatabaseDialectResolver databaseDialectResolver = new DefaultDatabaseDialectResolver();
     private Map<MetaDataType, MetaDataReader> metaDataReaderMap = Maps.newLinkedHashMap();
     private MetaDataType[] metaDataTypes = MetaDataType.ALL_OBJECTS;
 
@@ -206,18 +207,18 @@ public class DatabaseInspector {
     }
 
     public static void main(String[] args) throws Exception {
-        JdbcConnectionSpec mysql = new JdbcConnectionSpec();
+        DriverConnectionSpec mysql = new DriverConnectionSpec();
         mysql.setDriverClassName("com.mysql.jdbc.Driver");
         mysql.setUrl("jdbc:mysql://localhost:3306/test");
         mysql.setUsername("root");
 
-        JdbcConnectionSpec nuodb = new JdbcConnectionSpec();
+        DriverConnectionSpec nuodb = new DriverConnectionSpec();
         nuodb.setDriverClassName("com.nuodb.jdbc.Driver");
         nuodb.setUrl("jdbc:com.nuodb://localhost/test");
         nuodb.setUsername("dba");
         nuodb.setPassword("goalie");
 
-        JdbcConnectionProvider connectionProvider = new JdbcConnectionProvider(nuodb);
+        DriverConnectionProvider connectionProvider = new DriverPoolingConnectionProvider(nuodb);
         Connection connection = connectionProvider.getConnection();
         try {
             DatabaseInspector inspector = new DatabaseInspector();

@@ -25,60 +25,70 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format;
+package com.nuodb.migration.spec;
 
-import com.nuodb.migration.jdbc.metadata.ColumnModel;
-import com.nuodb.migration.jdbc.metadata.SimpleColumnModel;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
+import com.google.common.collect.Maps;
 
+import java.sql.Driver;
 import java.util.Map;
 
-/**
- * @author Sergey Bushik
- */
-public class SimpleColumnValueModel extends SimpleColumnModel implements ColumnValueModel {
+public class DriverConnectionSpec extends ConnectionSpecBase {
+    private String driverClassName;
+    private Driver driver;
+    private String url;
+    private String username;
+    private String password;
+    private Map<String, String> properties = Maps.newHashMap();
 
-    private JdbcTypeValueFormat valueFormat;
-    private JdbcTypeValueAccess valueAccess;
-    private Map<String, Object> valueAccessOptions;
-
-    public SimpleColumnValueModel(ColumnModel columnModel, JdbcTypeValueFormat valueFormat,
-                                  JdbcTypeValueAccess valueAccess,
-                                  Map<String, Object> valueAccessOptions) {
-        super(columnModel);
-        this.valueFormat = valueFormat;
-        this.valueAccess = valueAccess;
-        this.valueAccessOptions = valueAccessOptions;
+    public Driver getDriver() {
+        return driver;
     }
 
-    @Override
-    public JdbcTypeValueFormat getValueFormat() {
-        return valueFormat;
+    public void setDriver(Driver driver) {
+        this.driver = driver;
     }
 
-    @Override
-    public void setValueFormat(JdbcTypeValueFormat valueFormat) {
-        this.valueFormat = valueFormat;
+    public String getDriverClassName() {
+        return driverClassName;
     }
 
-    @Override
-    public JdbcTypeValueAccess getValueAccess() {
-        return valueAccess;
+    public void setDriverClassName(String driverClassName) {
+        this.driverClassName = driverClassName;
     }
 
-    @Override
-    public void setValueAccess(JdbcTypeValueAccess valueAccess) {
-        this.valueAccess = valueAccess;
+    public String getUrl() {
+        return url;
     }
 
-    @Override
-    public Map<String, Object> getValueAccessOptions() {
-        return valueAccessOptions;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    @Override
-    public void setValueAccessOptions(Map<String, Object> valueAccessOptions) {
-        this.valueAccessOptions = valueAccessOptions;
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void addProperty(String property, String value) {
+        properties.put(property, value);
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 }
