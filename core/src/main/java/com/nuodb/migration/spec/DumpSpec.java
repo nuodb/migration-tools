@@ -41,7 +41,7 @@ public class DumpSpec extends TaskSpecBase {
     private TimeZone timeZone;
     private Collection<SelectQuerySpec> selectQuerySpecs = Lists.newArrayList();
     private Collection<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
-    private FormatSpec outputSpec;
+    private ResourceSpec outputSpec;
 
     public ConnectionSpec getSourceSpec() {
         return sourceSpec;
@@ -75,11 +75,11 @@ public class DumpSpec extends TaskSpecBase {
         this.nativeQuerySpecs = nativeQuerySpecs;
     }
 
-    public FormatSpec getOutputSpec() {
+    public ResourceSpec getOutputSpec() {
         return outputSpec;
     }
 
-    public void setOutputSpec(FormatSpec outputSpec) {
+    public void setOutputSpec(ResourceSpec outputSpec) {
         this.outputSpec = outputSpec;
     }
 }

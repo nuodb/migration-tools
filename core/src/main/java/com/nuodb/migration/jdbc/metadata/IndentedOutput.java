@@ -28,6 +28,8 @@
 package com.nuodb.migration.jdbc.metadata;
 
 /**
+ * Indented output for debugging purposes.
+ *
  * @author Sergey Bushik
  */
 public interface IndentedOutput {

@@ -28,8 +28,7 @@
 package com.nuodb.migration.generate;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
+import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
@@ -43,21 +42,21 @@ import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 /**
  * @author Sergey Bushik
  */
-public class GenerateSchemaJobFactory implements JobFactory<GenerateSchemaJob> {
+public class GenerateSchemaJobFactory extends ConnectionProviderFactory implements JobFactory<GenerateSchemaJob> {
 
     private GenerateSchemaSpec generateSchemaSpec;
 
     @Override
     public GenerateSchemaJob createJob() {
         isNotNull(generateSchemaSpec, "Generate schema spec is required");
-        GenerateSchemaJob job = new GenerateSchemaJob();
-        job.setSourceConnectionProvider(createConnectionProvider(generateSchemaSpec.getSourceConnectionSpec()));
-        job.setTargetConnectionProvider(createConnectionProvider(generateSchemaSpec.getTargetConnectionSpec()));
-        return job;
-    }
 
-    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return new DriverPoolingConnectionProvider((DriverConnectionSpec) connectionSpec, false);
+        GenerateSchemaJob job = new GenerateSchemaJob();
+        ConnectionSpec sourceConnectionSpec = generateSchemaSpec.getSourceConnectionSpec();
+        job.setSourceConnectionProvider(createConnectionProvider(sourceConnectionSpec, false));
+
+        ConnectionSpec targetConnectionSpec = generateSchemaSpec.getTargetConnectionSpec();
+        job.setTargetConnectionProvider(createConnectionProvider(targetConnectionSpec, false));
+        return job;
     }
 
     public GenerateSchemaSpec getGenerateSchemaSpec() {
@@ -74,7 +73,7 @@ public class GenerateSchemaJobFactory implements JobFactory<GenerateSchemaJob> {
             {
                 DriverConnectionSpec sourceConnectionSpec = new DriverConnectionSpec();
                 sourceConnectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
-                sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/generate-schema-2");
+                sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/mysql");
                 sourceConnectionSpec.setUsername("root");
 
                 DriverConnectionSpec targetConnectionSpec = new DriverConnectionSpec();
@@ -85,9 +84,6 @@ public class GenerateSchemaJobFactory implements JobFactory<GenerateSchemaJob> {
                 targetConnectionSpec.setSchema("hockey");
 
                 setSourceConnectionSpec(targetConnectionSpec);
-                setTargetConnectionSpec(sourceConnectionSpec);
-                //setSourceConnectionSpec(sourceConnectionSpec);
-                //setTargetConnectionSpec(targetConnectionSpec);
             }
         });
         JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());

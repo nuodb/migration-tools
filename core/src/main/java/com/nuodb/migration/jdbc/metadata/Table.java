@@ -29,9 +29,10 @@ package com.nuodb.migration.jdbc.metadata;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -45,10 +46,12 @@ public class Table extends HasIdentifierBase {
     private final Map<Identifier, Column> columns = Maps.newLinkedHashMap();
     private final Map<Identifier, Index> indexes = Maps.newLinkedHashMap();
     private final Collection<ForeignKey> foreignKeys = Sets.newLinkedHashSet();
+    private final Collection<String> checks = Sets.newHashSet();
     private final Database database;
     private final Catalog catalog;
     private Schema schema;
     private String type = TABLE;
+    private String comment;
 
     public Table(Database database, Catalog catalog, Schema schema, String name) {
         this(database, catalog, schema, Identifier.valueOf(name));
@@ -61,22 +64,22 @@ public class Table extends HasIdentifierBase {
         this.schema = schema;
     }
 
-    public String getQualifiedName() {
-        return getQualifiedName(null);
+    public String getQualifiedName(Dialect dialect) {
+        return getQualifiedName(dialect, catalog.getName(), schema.getName());
     }
 
-    public String getQualifiedName(DatabaseDialect databaseDialect) {
-        StringBuilder qualifiedName = new StringBuilder();
-        if (catalog.getName() != null) {
-            qualifiedName.append(catalog.getQuotedName(databaseDialect));
-            qualifiedName.append('.');
+    public String getQualifiedName(Dialect dialect, String catalog, String schema) {
+        StringBuilder buffer = new StringBuilder();
+        if (catalog != null) {
+            buffer.append(dialect != null ? dialect.quote(catalog) : catalog);
+            buffer.append('.');
         }
-        if (schema.getName() != null) {
-            qualifiedName.append(schema.getQuotedName(databaseDialect));
-            qualifiedName.append('.');
+        if (schema != null) {
+            buffer.append(dialect != null ? dialect.quote(schema) : schema);
+            buffer.append('.');
         }
-        qualifiedName.append(getQuotedName(databaseDialect));
-        return qualifiedName.toString();
+        buffer.append(getQuotedName(dialect));
+        return buffer.toString();
     }
 
     public void addForeignKey(ForeignKey foreignKey) {
@@ -122,6 +125,14 @@ public class Table extends HasIdentifierBase {
         return schema;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     public String getType() {
         return type;
     }
@@ -149,7 +160,7 @@ public class Table extends HasIdentifierBase {
                 column = new Column(this, identifier);
                 columns.put(identifier, column);
             } else {
-                throw new MetaModelException(format("Table %s doesn't contain %s column", getName(), identifier));
+                throw new MetaDataException(format("Table %s doesn't contain %s column", getName(), identifier));
             }
         }
         return column;
@@ -157,6 +168,10 @@ public class Table extends HasIdentifierBase {
 
     public Collection<Column> getColumns() {
         return columns.values();
+    }
+
+    public Collection<String> getChecks() {
+        return checks;
     }
 
     @Override
@@ -168,31 +183,35 @@ public class Table extends HasIdentifierBase {
         outputNewLine(buffer);
 
         indent += INDENT;
-        output(indent, buffer, "column(s)");
+        output(indent, buffer, "columns");
         buffer.append(' ');
         output(indent, buffer, getColumns());
-        buffer.append(',');
-        outputNewLine(buffer);
 
-        output(indent, buffer, "primary key");
         PrimaryKey primaryKey = getPrimaryKey();
         if (primaryKey != null) {
+            buffer.append(',');
+            outputNewLine(buffer);
+            output(indent, buffer, "primary key");
             buffer.append(' ');
-            buffer.append("column(s)");
-            buffer.append(' ');
-            output(indent, buffer, primaryKey.getColumns());
+            output(indent, buffer, Collections.singleton(primaryKey));
         }
-        buffer.append(',');
-        outputNewLine(buffer);
 
-        output(indent, buffer, "index(s)");
-        buffer.append(' ');
-        output(indent, buffer, getIndexes());
-        buffer.append(',');
-        outputNewLine(buffer);
+        Collection<Index> indexes = getIndexes();
+        if (indexes != null && !indexes.isEmpty()) {
+            buffer.append(',');
+            outputNewLine(buffer);
+            output(indent, buffer, "indexes");
+            buffer.append(' ');
+            output(indent, buffer, indexes);
+        }
 
-        output(indent, buffer, "foreign key(s)");
-        buffer.append(' ');
-        output(indent, buffer, getForeignKeys());
+        Collection<ForeignKey> foreignKeys = getForeignKeys();
+        if (foreignKeys != null && !foreignKeys.isEmpty()) {
+            buffer.append(',');
+            outputNewLine(buffer);
+            output(indent, buffer, "foreign keys");
+            buffer.append(' ');
+            output(indent, buffer, getForeignKeys());
+        }
     }
 }

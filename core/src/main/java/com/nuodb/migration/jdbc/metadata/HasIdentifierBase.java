@@ -28,26 +28,12 @@
 package com.nuodb.migration.jdbc.metadata;
 
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
-import org.apache.commons.lang3.ObjectUtils;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 
 /**
  * @author Sergey Bushik
  */
 public class HasIdentifierBase extends IndentedOutputBase implements HasIdentifier {
-
-    public static <T extends HasIdentifier> T find(Iterable<T> hasIdentifier, final Identifier identifier) {
-        Optional<T> optional = Iterables.tryFind(hasIdentifier, new Predicate<T>() {
-            @Override
-            public boolean apply(T input) {
-                return ObjectUtils.equals(identifier, input.getIdentifier());
-            }
-        });
-        return optional.isPresent() ? optional.get() : null;
-    }
 
     private Identifier identifier;
 
@@ -83,8 +69,8 @@ public class HasIdentifierBase extends IndentedOutputBase implements HasIdentifi
     }
 
     @Override
-    public String getQuotedName(DatabaseDialect databaseDialect) {
-        return databaseDialect != null ? databaseDialect.quote(getName()) : getName();
+    public String getQuotedName(Dialect dialect) {
+        return dialect != null ? dialect.quote(getName()) : getName();
     }
 
     @Override
@@ -109,6 +95,6 @@ public class HasIdentifierBase extends IndentedOutputBase implements HasIdentifi
 
     @Override
     public void output(int indent, StringBuilder buffer) {
-        output(indent, buffer, identifier != null ? identifier.value() : "<empty>");
+        output(indent, buffer, identifier != null ? identifier.value() : "");
     }
 }

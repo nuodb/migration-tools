@@ -27,10 +27,10 @@
  */
 package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.resolve.DatabaseObjectResolver;
+import com.nuodb.migration.jdbc.resolve.DatabaseAwareServiceResolver;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueFormatRegistryResolver extends DatabaseObjectResolver<JdbcTypeValueFormatRegistry> {
+public interface JdbcTypeValueFormatRegistryResolver extends DatabaseAwareServiceResolver<JdbcTypeValueFormatRegistry> {
 }

@@ -27,9 +27,6 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.dialect.mysql.MySQLTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -39,10 +36,10 @@ import java.util.TimeZone;
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends StandardDialect {
+public class MySQLDialect extends SQL2003Dialect {
 
-    public MySQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
+    public MySQLDialect() {
+        addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
     }
 
     @Override
@@ -61,11 +58,26 @@ public class MySQLDialect extends StandardDialect {
     }
 
     @Override
+    public boolean supportsColumnCheck() {
+        return false;
+    }
+
+    @Override
+    public String getTableComment(String comment) {
+        return " COMMENT='" + comment + "'";
+    }
+
+    @Override
+    public String getColumnComment(String comment) {
+        return " COMMENT '" + comment + "'";
+    }
+
+    @Override
     public void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException {
         Statement statement = connection.createStatement();
         try {
             String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "SYSTEM";
-            statement.execute("SET @@session.time_zone = '" + timeZoneAsValue + "'");
+            statement.execute("SET @@SESSION.TIME_ZONE = '" + timeZoneAsValue + "'");
         } finally {
             if (statement != null) {
                 try {
@@ -104,12 +116,12 @@ public class MySQLDialect extends StandardDialect {
      * @throws SQLException
      */
     @Override
-    public void enableStreaming(Statement statement) throws SQLException {
+    public void stream(Statement statement) throws SQLException {
         statement.setFetchSize(Integer.MIN_VALUE);
     }
 
     @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return MySQLTypeRegistry.INSTANCE;
+    public boolean supportsIfExistsBeforeTable() {
+        return true;
     }
 }

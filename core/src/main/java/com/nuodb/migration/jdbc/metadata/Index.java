@@ -30,15 +30,17 @@ package com.nuodb.migration.jdbc.metadata;
 import com.google.common.collect.Maps;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
+import static com.nuodb.util.StringUtils.isEmpty;
 import static java.lang.String.format;
 
 public class Index extends ConstraintBase {
 
     private boolean unique;
     private String filterCondition;
-    private IndexSortOrder sortOrder;
+    private SortOrder sortOrder;
     private Map<Integer, Column> columns = Maps.newTreeMap();
 
     public Index(Identifier identifier) {
@@ -70,11 +72,11 @@ public class Index extends ConstraintBase {
         this.filterCondition = filterCondition;
     }
 
-    public IndexSortOrder getSortOrder() {
+    public SortOrder getSortOrder() {
         return sortOrder;
     }
 
-    public void setSortOrder(IndexSortOrder sortOrder) {
+    public void setSortOrder(SortOrder sortOrder) {
         this.sortOrder = sortOrder;
     }
 
@@ -108,18 +110,25 @@ public class Index extends ConstraintBase {
     @Override
     public void output(int indent, StringBuilder buffer) {
         super.output(indent, buffer);
+
         buffer.append(' ');
         buffer.append(unique ? "unique" : "non-unique");
-        if (filterCondition != null) {
+
+        if (!isEmpty(filterCondition)) {
             buffer.append(' ');
             buffer.append(format("filter %s", filterCondition));
         }
+
         Collection<Column> columns = getColumns();
         buffer.append(' ');
-        buffer.append(format("%d column(s)", columns.size()));
-        if (!columns.isEmpty()) {
-            buffer.append(' ');
-            output(indent, buffer, columns);
+        buffer.append('(');
+        for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
+            Column column = iterator.next();
+            buffer.append(column.getName());
+            if (iterator.hasNext()) {
+                buffer.append(", ");
+            }
         }
+        buffer.append(')');
     }
 }

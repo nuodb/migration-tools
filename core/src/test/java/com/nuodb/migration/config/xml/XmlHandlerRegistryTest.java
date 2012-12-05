@@ -1,8 +1,8 @@
 package com.nuodb.migration.config.xml;
 
 
+import com.nuodb.migration.config.xml.handler.XmlDriverConnectionHandler;
 import com.nuodb.migration.config.xml.handler.XmlDumpTaskHandler;
-import com.nuodb.migration.config.xml.handler.XmlJdbcConnectionHandler;
 import com.nuodb.migration.config.xml.handler.XmlMigrationHandler;
 import junit.framework.Assert;
 import org.junit.Before;
@@ -26,9 +26,9 @@ public class XmlHandlerRegistryTest {
 
     @Test
     public void testRegister() throws Exception {
-        xmlHandlerRegistry.registerHandler(mock(XmlJdbcConnectionHandler.class));
-        xmlHandlerRegistry.registerHandler(mock(XmlJdbcConnectionHandler.class), 1);
-        xmlHandlerRegistry.registerHandler(mock(XmlJdbcConnectionHandler.class), -1);
+        xmlHandlerRegistry.registerHandler(mock(XmlDriverConnectionHandler.class));
+        xmlHandlerRegistry.registerHandler(mock(XmlDriverConnectionHandler.class), 1);
+        xmlHandlerRegistry.registerHandler(mock(XmlDriverConnectionHandler.class), -1);
         xmlHandlerRegistry.registerHandler(mock(XmlDumpTaskHandler.class));
         xmlHandlerRegistry.registerHandler(mock(XmlMigrationHandler.class));
         xmlHandlerRegistry.registerHandler(mock(XmlHandlerRegistry.ConverterAdapter.class));
@@ -38,53 +38,53 @@ public class XmlHandlerRegistryTest {
     public void testLookupReader() throws Exception {
         XmlReadHandler xmlReadHandler = xmlHandlerRegistry.lookupReader(
                 mock(InputNode.class),
-                XmlJdbcConnectionHandler.class,
+                XmlDriverConnectionHandler.class,
                 mock(XmlReadContext.class)
         );
         Assert.assertNull(xmlReadHandler);
 
-        final XmlJdbcConnectionHandler mock = mock(XmlJdbcConnectionHandler.class);
+        final XmlDriverConnectionHandler mock = mock(XmlDriverConnectionHandler.class);
 
         when(mock.canRead(any(InputNode.class),
-                eq(XmlJdbcConnectionHandler.class),
+                eq(XmlDriverConnectionHandler.class),
                 any(XmlReadContext.class))).thenReturn(true);
 
         xmlHandlerRegistry.registerHandler(mock);
 
         xmlReadHandler = xmlHandlerRegistry.lookupReader(
                 mock(InputNode.class),
-                XmlJdbcConnectionHandler.class,
+                XmlDriverConnectionHandler.class,
                 mock(XmlReadContext.class)
         );
 
         Assert.assertNotNull(xmlReadHandler);
         Assert.assertTrue(xmlReadHandler == mock);
         verify(xmlReadHandler).canRead(any(InputNode.class),
-                eq(XmlJdbcConnectionHandler.class), any(XmlReadContext.class));
+                eq(XmlDriverConnectionHandler.class), any(XmlReadContext.class));
     }
 
 
     @Test
     public void testLookupWriter() throws Exception {
-        final XmlJdbcConnectionHandler mock = mock(XmlJdbcConnectionHandler.class);
+        final XmlDriverConnectionHandler mock = mock(XmlDriverConnectionHandler.class);
 
         XmlWriteHandler xmlWriteHandler = xmlHandlerRegistry.lookupWriter(
                 mock(Object.class),
-                XmlJdbcConnectionHandler.class,
+                XmlDriverConnectionHandler.class,
                 mock(OutputNode.class),
                 mock(XmlWriteContext.class)
         );
         Assert.assertNull(xmlWriteHandler);
 
         when(mock.canWrite(anyObject(),
-                eq(XmlJdbcConnectionHandler.class),
+                eq(XmlDriverConnectionHandler.class),
                 any(OutputNode.class),
                 any(XmlWriteContext.class))).thenReturn(true);
         xmlHandlerRegistry.registerHandler(mock);
 
         xmlWriteHandler = xmlHandlerRegistry.lookupWriter(
                 mock(Object.class),
-                XmlJdbcConnectionHandler.class,
+                XmlDriverConnectionHandler.class,
                 mock(OutputNode.class),
                 mock(XmlWriteContext.class)
         );
@@ -92,7 +92,7 @@ public class XmlHandlerRegistryTest {
         Assert.assertNotNull(xmlWriteHandler);
         Assert.assertTrue(xmlWriteHandler == mock);
         verify(xmlWriteHandler).canWrite(anyObject(),
-                eq(XmlJdbcConnectionHandler.class),
+                eq(XmlDriverConnectionHandler.class),
                 any(OutputNode.class), any(XmlWriteContext.class));
     }
 

@@ -239,13 +239,13 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return connection;
     }
 
-    protected FormatSpec parseOutputGroup(CommandLine commandLine, Option option) {
-        FormatSpec format = new FormatSpecBase();
-        format.setType(commandLine.<String>getValue(OUTPUT_TYPE_OPTION));
-        format.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
-        format.setAttributes(parseFormatAttributes(
+    protected ResourceSpec parseOutputGroup(CommandLine commandLine, Option option) {
+        ResourceSpec resource = new ResourceSpecBase();
+        resource.setType(commandLine.<String>getValue(OUTPUT_TYPE_OPTION));
+        resource.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
+        resource.setAttributes(parseFormatAttributes(
                 commandLine.getOption(OUTPUT_OPTION), commandLine.<String>getValues(OUTPUT_OPTION)));
-        return format;
+        return resource;
     }
 
     protected Map<String, String> parseFormatAttributes(Option option, List<String> values) {
@@ -431,13 +431,13 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return connection;
     }
 
-    protected FormatSpec parseInputGroup(CommandLine commandLine, Option cliLoad) {
-        FormatSpec format = new FormatSpecBase();
+    protected ResourceSpec parseInputGroup(CommandLine commandLine, Option cliLoad) {
+        ResourceSpec resource = new ResourceSpecBase();
         // format.setType(commandLine.<String>getValue(INPUT_TYPE_OPTION));
-        format.setPath(commandLine.<String>getValue(INPUT_PATH_OPTION));
-        format.setAttributes(parseFormatAttributes(
+        resource.setPath(commandLine.<String>getValue(INPUT_PATH_OPTION));
+        resource.setAttributes(parseFormatAttributes(
                 commandLine.getOption(INPUT_OPTION), commandLine.<String>getValues(INPUT_OPTION)));
-        return format;
+        return resource;
     }
 
     protected OptionBuilder newOption() {

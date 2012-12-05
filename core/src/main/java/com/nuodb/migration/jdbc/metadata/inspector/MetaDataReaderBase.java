@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

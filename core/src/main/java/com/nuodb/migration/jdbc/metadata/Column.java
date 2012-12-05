@@ -30,6 +30,7 @@ package com.nuodb.migration.jdbc.metadata;
 import com.nuodb.migration.jdbc.model.ValueModel;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.upperCase;
 
 public class Column extends HasIdentifierBase implements ValueModel {
     /**
@@ -82,9 +83,9 @@ public class Column extends HasIdentifierBase implements ValueModel {
      */
     private boolean autoIncrement;
     /**
-     * Specifies whether column value is unique in the table.
+     * Check constraint.
      */
-    private boolean unique;
+    private String check;
 
     private String defaultValue;
 
@@ -198,12 +199,16 @@ public class Column extends HasIdentifierBase implements ValueModel {
         this.autoIncrement = autoIncrement;
     }
 
-    public boolean isUnique() {
-        return unique;
+    public boolean isIdentity() {
+        return isAutoIncrement();
     }
 
-    public void setUnique(boolean unique) {
-        this.unique = unique;
+    public String getCheck() {
+        return check;
+    }
+
+    public void setCheck(String check) {
+        this.check = check;
     }
 
     public String getDefaultValue() {
@@ -215,11 +220,12 @@ public class Column extends HasIdentifierBase implements ValueModel {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (!(object instanceof Column)) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
-        Column column = (Column) object;
+        Column column = (Column) o;
 
         if (autoIncrement != column.autoIncrement) return false;
         if (nullable != column.nullable) return false;
@@ -229,7 +235,7 @@ public class Column extends HasIdentifierBase implements ValueModel {
         if (scale != column.scale) return false;
         if (size != column.size) return false;
         if (typeCode != column.typeCode) return false;
-        if (unique != column.unique) return false;
+        if (check != null ? !check.equals(column.check) : column.check != null) return false;
         if (comment != null ? !comment.equals(column.comment) : column.comment != null) return false;
         if (defaultValue != null ? !defaultValue.equals(column.defaultValue) : column.defaultValue != null)
             return false;
@@ -241,7 +247,8 @@ public class Column extends HasIdentifierBase implements ValueModel {
 
     @Override
     public int hashCode() {
-        int result = table != null ? table.hashCode() : 0;
+        int result = super.hashCode();
+        result = 31 * result + (table != null ? table.hashCode() : 0);
         result = 31 * result + typeCode;
         result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
         result = 31 * result + size;
@@ -252,7 +259,7 @@ public class Column extends HasIdentifierBase implements ValueModel {
         result = 31 * result + position;
         result = 31 * result + (nullable ? 1 : 0);
         result = 31 * result + (autoIncrement ? 1 : 0);
-        result = 31 * result + (unique ? 1 : 0);
+        result = 31 * result + (check != null ? check.hashCode() : 0);
         result = 31 * result + (defaultValue != null ? defaultValue.hashCode() : 0);
         return result;
     }
@@ -262,13 +269,12 @@ public class Column extends HasIdentifierBase implements ValueModel {
         super.output(indent, buffer);
 
         buffer.append(' ');
-        buffer.append(getTypeName());
-        if (!nullable) {
-            buffer.append(' ');
-            buffer.append("not null");
+        buffer.append(format("type=%d, %s", getTypeCode(), upperCase(getTypeName())));
+        if (!isNullable()) {
+            buffer.append(", not null");
         }
-        if (unique) {
-            buffer.append(", unique");
+        if (isAutoIncrement()) {
+            buffer.append(", auto increment");
         }
         buffer.append(format(", size=%d", size));
         buffer.append(format(", precision=%d", precision));

@@ -36,7 +36,7 @@ public class LoadSpec extends TaskSpecBase {
 
     private ConnectionSpec targetSpec;
     private TimeZone timeZone;
-    private FormatSpec inputSpec;
+    private ResourceSpec inputSpec;
 
     public ConnectionSpec getTargetSpec() {
         return targetSpec;
@@ -54,11 +54,11 @@ public class LoadSpec extends TaskSpecBase {
         this.timeZone = timeZone;
     }
 
-    public FormatSpec getInputSpec() {
+    public ResourceSpec getInputSpec() {
         return inputSpec;
     }
 
-    public void setInputSpec(FormatSpec inputSpec) {
+    public void setInputSpec(ResourceSpec inputSpec) {
         this.inputSpec = inputSpec;
     }
 }

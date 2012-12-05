@@ -31,7 +31,7 @@ import com.google.common.collect.Maps;
 
 import java.util.Map;
 
-import static com.nuodb.migration.jdbc.metadata.ReferentialAction.*;
+import static com.nuodb.migration.jdbc.metadata.ReferenceAction.*;
 import static java.sql.DatabaseMetaData.*;
 
 /**
@@ -39,7 +39,7 @@ import static java.sql.DatabaseMetaData.*;
  */
 public class ReferentialActionMap {
 
-    private Map<Integer, ReferentialAction> foreignKeyRuleMap = Maps.newHashMap();
+    private Map<Integer, ReferenceAction> foreignKeyRuleMap = Maps.newHashMap();
 
     private static ReferentialActionMap INSTANCE;
 
@@ -60,11 +60,11 @@ public class ReferentialActionMap {
         return instance;
     }
 
-    public void put(int value, ReferentialAction action) {
+    public void put(int value, ReferenceAction action) {
         foreignKeyRuleMap.put(value, action);
     }
 
-    public ReferentialAction get(int value) {
+    public ReferenceAction get(int value) {
         return foreignKeyRuleMap.get(value);
     }
 }

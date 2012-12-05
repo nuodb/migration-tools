@@ -30,6 +30,7 @@ package com.nuodb.migration.jdbc.metadata;
 import com.google.common.collect.Maps;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -76,9 +77,14 @@ public class PrimaryKey extends ConstraintBase {
     public void output(int indent, StringBuilder buffer) {
         super.output(indent, buffer);
 
-        buffer.append(' ');
-        buffer.append("column(s)");
-        buffer.append(' ');
-        output(indent, buffer, getColumns());
+        buffer.append('(');
+        for (Iterator<Column> iterator = getColumns().iterator(); iterator.hasNext(); ) {
+            Column column = iterator.next();
+            buffer.append(column.getName());
+            if (iterator.hasNext()) {
+                buffer.append(", ");
+            }
+        }
+        buffer.append(')');
     }
 }

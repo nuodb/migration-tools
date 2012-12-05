@@ -30,8 +30,8 @@ package com.nuodb.migration.dump;
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
+import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.dialect.DialectResolver;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 import com.nuodb.migration.jdbc.metadata.Table;
@@ -59,7 +59,7 @@ import java.util.TimeZone;
 
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
-import static com.nuodb.migration.jdbc.metadata.inspector.MetaDataType.*;
+import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
@@ -84,7 +84,7 @@ public class DumpJob extends JobBase {
     private String outputType;
     private Map<String, String> attributes;
     private ConnectionProvider connectionProvider;
-    private DatabaseDialectResolver databaseDialectResolver;
+    private DialectResolver dialectResolver;
     private ResultSetFormatFactory resultSetFormatFactory;
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver;
 
@@ -97,7 +97,7 @@ public class DumpJob extends JobBase {
     protected void validate() {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
-        isNotNull(getDatabaseDialectResolver(), "Database dialect resolver is required");
+        isNotNull(getDialectResolver(), "Database dialect resolver is required");
         isNotNull(getJdbcTypeValueFormatRegistryResolver(), "JDBC type value format registry resolver is required");
     }
 
@@ -116,25 +116,25 @@ public class DumpJob extends JobBase {
 
         DatabaseInspector databaseInspector = connectionServices.createDatabaseInspector();
         databaseInspector.withMetaDataTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-        databaseInspector.withDatabaseDialectResolver(getDatabaseDialectResolver());
+        databaseInspector.withDatabaseDialectResolver(getDialectResolver());
 
         Database database = databaseInspector.inspect();
         execution.setDatabase(database);
 
         Connection connection = connectionServices.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(metaData));
+        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolveService(metaData));
 
         CatalogWriter catalogWriter = getCatalog().getCatalogWriter();
         execution.setCatalogWriter(catalogWriter);
 
-        DatabaseDialect databaseDialect = database.getDatabaseDialect();
+        Dialect dialect = database.getDialect();
         try {
-            databaseDialect.setTransactionIsolation(connection,
+            dialect.setTransactionIsolationLevel(connection,
                     new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
 
-            if (databaseDialect.supportsSessionTimeZone()) {
-                databaseDialect.setSessionTimeZone(connection, timeZone);
+            if (dialect.supportsSessionTimeZone()) {
+                dialect.setSessionTimeZone(connection, timeZone);
             }
 
             for (SelectQuery selectQuery : createSelectQueries(database, getSelectQuerySpecs())) {
@@ -146,8 +146,8 @@ public class DumpJob extends JobBase {
         } finally {
             closeQuietly(catalogWriter);
 
-            if (databaseDialect.supportsSessionTimeZone()) {
-                databaseDialect.setSessionTimeZone(connection, null);
+            if (dialect.supportsSessionTimeZone()) {
+                dialect.setSessionTimeZone(connection, null);
             }
         }
     }
@@ -187,11 +187,11 @@ public class DumpJob extends JobBase {
         resultSetOutput.setAttributes(getAttributes());
         resultSetOutput.setJdbcTypeValueFormatRegistry(execution.getJdbcTypeValueFormatRegistry());
 
-        DatabaseDialect databaseDialect = execution.getDatabase().getDatabaseDialect();
-        if (!databaseDialect.supportsSessionTimeZone()) {
+        Dialect dialect = execution.getDatabase().getDialect();
+        if (!dialect.supportsSessionTimeZone()) {
             resultSetOutput.setTimeZone(getTimeZone());
         }
-        JdbcTypeRegistry jdbcTypeRegistry = databaseDialect.getJdbcTypeRegistry();
+        JdbcTypeRegistry jdbcTypeRegistry = dialect.getJdbcTypeRegistry();
         resultSetOutput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
 
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -215,8 +215,8 @@ public class DumpJob extends JobBase {
         }
         PreparedStatement preparedStatement = connection.prepareStatement(
                 query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-        DatabaseDialect databaseDialect = database.getDatabaseDialect();
-        databaseDialect.enableStreaming(preparedStatement);
+        Dialect dialect = database.getDialect();
+        dialect.stream(preparedStatement);
         return preparedStatement;
     }
 
@@ -234,18 +234,18 @@ public class DumpJob extends JobBase {
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database) {
-        DatabaseDialect databaseDialect = database.getDatabaseDialect();
+        Dialect dialect = database.getDialect();
         Collection<SelectQuery> selectQueries = Lists.newArrayList();
         for (Table table : database.listTables()) {
             if (Table.TABLE.equals(table.getType())) {
                 SelectQueryBuilder builder = new SelectQueryBuilder();
-                builder.setDatabaseDialect(databaseDialect);
+                builder.setDialect(dialect);
                 builder.setTable(table);
                 builder.setQualifyNames(true);
                 selectQueries.add(builder.build());
             } else {
                 if (logger.isTraceEnabled()) {
-                    logger.trace(format("Skip %s %s", table.getQualifiedName(databaseDialect), table.getType()));
+                    logger.trace(format("Skip %s %s", table.getQualifiedName(dialect), table.getType()));
                 }
             }
         }
@@ -253,11 +253,11 @@ public class DumpJob extends JobBase {
     }
 
     protected SelectQuery createSelectQuery(Database database, SelectQuerySpec selectQuerySpec) {
-        DatabaseDialect databaseDialect = database.getDatabaseDialect();
+        Dialect dialect = database.getDialect();
         String tableName = selectQuerySpec.getTable();
         SelectQueryBuilder builder = new SelectQueryBuilder();
         builder.setQualifyNames(true);
-        builder.setDatabaseDialect(databaseDialect);
+        builder.setDialect(dialect);
         builder.setTable(database.findTable(tableName));
         builder.setColumns(selectQuerySpec.getColumns());
         if (!isEmpty(selectQuerySpec.getFilter())) {
@@ -332,12 +332,12 @@ public class DumpJob extends JobBase {
         this.attributes = attributes;
     }
 
-    public DatabaseDialectResolver getDatabaseDialectResolver() {
-        return databaseDialectResolver;
+    public DialectResolver getDialectResolver() {
+        return dialectResolver;
     }
 
-    public void setDatabaseDialectResolver(DatabaseDialectResolver databaseDialectResolver) {
-        this.databaseDialectResolver = databaseDialectResolver;
+    public void setDialectResolver(DialectResolver dialectResolver) {
+        this.dialectResolver = dialectResolver;
     }
 
     public ResultSetFormatFactory getResultSetFormatFactory() {

@@ -28,7 +28,7 @@
 package com.nuodb.migration.jdbc.query;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.Table;
 
@@ -40,17 +40,17 @@ import java.util.Map;
  */
 public class InsertQuery implements Query {
 
-    private DatabaseDialect databaseDialect;
+    private Dialect dialect;
     private Table table;
     private boolean qualifyNames;
     private Map<Column, String> columns = Maps.newLinkedHashMap();
 
-    public DatabaseDialect getDatabaseDialect() {
-        return databaseDialect;
+    public Dialect getDialect() {
+        return dialect;
     }
 
-    public void setDatabaseDialect(DatabaseDialect databaseDialect) {
-        this.databaseDialect = databaseDialect;
+    public void setDialect(Dialect dialect) {
+        this.dialect = dialect;
     }
 
     public Table getTable() {
@@ -88,21 +88,21 @@ public class InsertQuery implements Query {
     @Override
     public String toQuery() {
         StringBuilder query = new StringBuilder();
-        query.append("insert into ")
-                .append(qualifyNames ? table.getQualifiedName(databaseDialect) : table.getQuotedName(databaseDialect));
+        query.append("INSERT INTO ")
+                .append(qualifyNames ? table.getQualifiedName(dialect) : table.getQuotedName(dialect));
         if (columns.size() == 0) {
-            query.append(' ').append(databaseDialect.getNoColumnsInsertClause());
+            query.append(' ').append(dialect.getNoColumnsInsertString());
         } else {
             query.append(" (");
             Iterator<Column> names = columns.keySet().iterator();
             while (names.hasNext()) {
                 Column column = names.next();
-                query.append(column.getQuotedName(databaseDialect));
+                query.append(column.getQuotedName(dialect));
                 if (names.hasNext()) {
                     query.append(", ");
                 }
             }
-            query.append(") values (");
+            query.append(") VALUES (");
             Iterator<String> values = columns.values().iterator();
             while (values.hasNext()) {
                 query.append(values.next());

@@ -28,7 +28,7 @@
 package com.nuodb.migration.jdbc.query;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.Table;
 
@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class SelectQuery implements Query {
 
-    private DatabaseDialect databaseDialect;
+    private Dialect dialect;
     private boolean qualifyNames;
     private List<Table> tables = Lists.newArrayList();
     private List<Column> columns = Lists.newArrayList();
@@ -61,40 +61,40 @@ public class SelectQuery implements Query {
     @Override
     public String toQuery() {
         StringBuilder query = new StringBuilder();
-        query.append("select ");
+        query.append("SELECT ");
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            query.append(column.getQuotedName(databaseDialect));
+            query.append(column.getQuotedName(dialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }
         }
-        query.append(" from ");
+        query.append(" FROM ");
         for (Iterator<Table> iterator = tables.iterator(); iterator.hasNext(); ) {
             Table table = iterator.next();
-            query.append(qualifyNames ? table.getQualifiedName(databaseDialect) : table.getQuotedName(databaseDialect));
+            query.append(qualifyNames ? table.getQualifiedName(dialect) : table.getQuotedName(dialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }
         }
         if (conditions.size() > 0) {
-            query.append(" where ");
+            query.append(" WHERE ");
             for (Iterator<String> iterator = conditions.iterator(); iterator.hasNext(); ) {
                 query.append(iterator.next());
                 if (iterator.hasNext()) {
-                    query.append(" and ");
+                    query.append(" AND ");
                 }
             }
         }
         return query.toString();
     }
 
-    public DatabaseDialect getDatabaseDialect() {
-        return databaseDialect;
+    public Dialect getDialect() {
+        return dialect;
     }
 
-    public void setDatabaseDialect(DatabaseDialect databaseDialect) {
-        this.databaseDialect = databaseDialect;
+    public void setDialect(Dialect dialect) {
+        this.dialect = dialect;
     }
 
     public boolean isQualifyNames() {

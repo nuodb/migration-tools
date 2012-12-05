@@ -31,7 +31,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
@@ -41,12 +41,12 @@ import static com.nuodb.migration.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.split;
 
-public class Database extends IndentedOutputBase {
+public class Database extends IndentedOutputBase implements Relational {
 
     private Map<Identifier, Catalog> catalogs = Maps.newLinkedHashMap();
     private DriverInfo driverInfo;
     private DatabaseInfo databaseInfo;
-    private DatabaseDialect databaseDialect;
+    private Dialect dialect;
 
     public DriverInfo getDriverInfo() {
         return driverInfo;
@@ -64,12 +64,12 @@ public class Database extends IndentedOutputBase {
         this.databaseInfo = databaseInfo;
     }
 
-    public DatabaseDialect getDatabaseDialect() {
-        return databaseDialect;
+    public Dialect getDialect() {
+        return dialect;
     }
 
-    public void setDatabaseDialect(DatabaseDialect databaseDialect) {
-        this.databaseDialect = databaseDialect;
+    public void setDialect(Dialect dialect) {
+        this.dialect = dialect;
     }
 
     public Catalog createCatalog(String catalog) {
@@ -94,7 +94,7 @@ public class Database extends IndentedOutputBase {
             if (create) {
                 catalogs.put(identifier, catalog = new Catalog(this, identifier));
             } else {
-                throw new MetaModelException(format("Catalog %s doesn't exist", identifier));
+                throw new MetaDataException(format("Catalog %s doesn't exist", identifier));
             }
         }
         return catalog;
@@ -103,9 +103,9 @@ public class Database extends IndentedOutputBase {
     public Table findTable(String table) {
         Collection<Table> tables = findTables(table);
         if (tables.isEmpty()) {
-            throw new MetaModelException(format("Can't find table %s", table));
+            throw new MetaDataException(format("Can't find table %s", table));
         } else if (tables.size() > 1) {
-            throw new MetaModelException(format("Multiple tables %s correspond to %s", tables, table));
+            throw new MetaDataException(format("Multiple tables %s correspond to %s", tables, table));
         }
         return tables.iterator().next();
     }
@@ -183,10 +183,10 @@ public class Database extends IndentedOutputBase {
 
     @Override
     public void output(int indent, StringBuilder buffer) {
-        super.output(indent, buffer);
+        output(indent, buffer, "database");
 
         buffer.append(' ');
-        buffer.append("catalogs(s)");
+        buffer.append("catalogs");
         buffer.append(' ');
 
         output(indent, buffer, listCatalogs());

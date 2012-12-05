@@ -28,6 +28,7 @@
 package com.nuodb.migration.jdbc.type;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.Types;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 
@@ -43,45 +46,97 @@ import static java.lang.String.format;
  */
 public class JdbcTypeNameMap {
 
-    private static final Logger logger = LoggerFactory.getLogger(JdbcTypeNameMap.class);
+    public static final JdbcTypeNameMap STANDARD = new StandardJdbcTypeNameMap();
 
-    private static final Map<Integer, String> TYPE_NAME_MAP = createTypeNameMap();
+    public static final String LENGTH = "n";
+    public static final String PRECISION = "p";
+    public static final String SCALE = "s";
+    public static final String VARIABLE_PREFIX = "{";
+    public static final String VARIABLE_SUFFIX = "}";
 
-    private static Map<Integer, String> createTypeNameMap() {
-        Map<Integer, String> typeNameMap = Maps.newLinkedHashMap();
-        Field[] fields = Types.class.getFields();
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
-                try {
-                    typeNameMap.put((Integer) field.get(null), field.getName().toLowerCase());
-                } catch (IllegalAccessException exception) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(format("Failed accessing %s field", Types.class), exception);
-                    }
-                }
-            }
-        }
-        return typeNameMap;
-    }
-
-    private Map<Integer, String> typeNameMap = Maps.newHashMap();
-
-    public static final JdbcTypeNameMap INSTANCE = new JdbcTypeNameMap();
-
-    public JdbcTypeNameMap() {
-        typeNameMap.putAll(TYPE_NAME_MAP);
-    }
+    private Map<Integer, String> typeCodeMap = Maps.newHashMap();
+    private Map<Integer, Map<Integer, String>> typeCodeLengthMap = Maps.newHashMap();
 
     public String getTypeName(int typeCode) {
-        String typeName = typeNameMap.get(typeCode);
-        return typeName == null ? getUnknownTypeName(typeCode) : typeName;
+        return typeCodeMap.get(typeCode);
     }
 
     public void addTypeName(int typeCode, String typeName) {
-        typeNameMap.put(typeCode, typeName.toLowerCase());
+        typeCodeMap.put(typeCode, typeName);
     }
 
-    protected String getUnknownTypeName(int typeCode) {
-        return "type(" + typeCode + ")";
+    public void addTypeName(int typeCode, String typeName, int length) {
+        Map<Integer, String> lengthMap = typeCodeLengthMap.get(typeCode);
+        if (lengthMap == null) {
+            lengthMap = Maps.newTreeMap();
+            typeCodeLengthMap.put(typeCode, lengthMap);
+        }
+        lengthMap.put(length, typeName);
+    }
+
+    public String getTypeName(int typeCode, int length, int precision, int scale) {
+        Map<Integer, String> map = typeCodeLengthMap.get(typeCode);
+        if (map != null) {
+            for (Map.Entry<Integer, String> entry : map.entrySet()) {
+                if (length <= entry.getKey()) {
+                    return expandVariables(entry.getValue(), length, precision, scale);
+                }
+            }
+        }
+        return expandVariables(getTypeName(typeCode), length, precision, scale);
+    }
+
+    public static String expandVariables(String typeName, int length, int precision, int scale) {
+        if (!StringUtils.isEmpty(typeName)) {
+            typeName = expandVariable(typeName, LENGTH, Integer.toString(length));
+            typeName = expandVariable(typeName, PRECISION, Integer.toString(precision));
+            typeName = expandVariable(typeName, SCALE, Integer.toString(scale));
+        }
+        return typeName;
+    }
+
+    public static String expandVariable(String typeName, String variable, String value) {
+        Pattern compile = Pattern.compile(Pattern.quote(VARIABLE_PREFIX + variable + VARIABLE_SUFFIX),
+                Pattern.CASE_INSENSITIVE);
+        Matcher matcher = compile.matcher(typeName);
+        return matcher.find() ? matcher.replaceAll(value) : typeName;
+    }
+
+    static class StandardJdbcTypeNameMap extends JdbcTypeNameMap {
+
+        private static final Logger logger = LoggerFactory.getLogger(JdbcTypeNameMap.class);
+
+        private static Map<Integer, String> createTypeNameMap() {
+            Map<Integer, String> typeNameMap = Maps.newLinkedHashMap();
+            Field[] fields = Types.class.getFields();
+            for (Field field : fields) {
+                if (Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
+                    try {
+                        typeNameMap.put((Integer) field.get(null), field.getName());
+                    } catch (IllegalAccessException exception) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(format("Failed accessing %s field", Types.class), exception);
+                        }
+                    }
+                }
+            }
+            return typeNameMap;
+        }
+
+        private StandardJdbcTypeNameMap() {
+            for (Map.Entry<Integer, String> entry : createTypeNameMap().entrySet()) {
+                addTypeName(entry.getKey(), entry.getValue());
+            }
+        }
+
+        @Override
+        public String getTypeName(int typeCode) {
+            String typeName = super.getTypeName(typeCode);
+            return typeName != null ? typeName : getUnknownTypeName(typeCode);
+        }
+
+        protected String getUnknownTypeName(int typeCode) {
+            return "unknown(" + typeCode + ")";
+        }
     }
 }

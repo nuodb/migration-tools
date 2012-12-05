@@ -55,4 +55,6 @@ public interface JdbcTypeRegistry {
     Collection<JdbcTypeAdapter> getJdbcTypeAdapters();
 
     JdbcTypeAdapter getJdbcTypeAdapter(Class typeClass);
+
+    JdbcTypeNameMap getJdbcTypeNameMap();
 }

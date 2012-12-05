@@ -40,9 +40,11 @@ import java.util.Map;
 public class ForeignKey extends ConstraintBase {
 
     private Map<Integer, ForeignKeyReference> references = Maps.newTreeMap();
-    private ReferentialAction updateAction = ReferentialAction.NO_ACTION;
-    private ReferentialAction deleteAction = ReferentialAction.NO_ACTION;
+    private ReferenceAction updateAction = ReferenceAction.NO_ACTION;
+    private ReferenceAction deleteAction = ReferenceAction.NO_ACTION;
     private Deferrability deferrability;
+    private Table sourceTable;
+    private Table targetTable;
 
     public ForeignKey(Identifier name) {
         super(name);
@@ -53,23 +55,39 @@ public class ForeignKey extends ConstraintBase {
         return getTargetColumns();
     }
 
+    public Table getSourceTable() {
+        return sourceTable;
+    }
+
+    public void setSourceTable(Table sourceTable) {
+        this.sourceTable = sourceTable;
+    }
+
+    public Table getTargetTable() {
+        return targetTable;
+    }
+
+    public void setTargetTable(Table targetTable) {
+        this.targetTable = targetTable;
+    }
+
     public void addReference(Column sourceColumn, Column targetColumn, int position) {
         references.put(position, new ForeignKeyReference(sourceColumn, targetColumn));
     }
 
-    public ReferentialAction getUpdateAction() {
+    public ReferenceAction getUpdateAction() {
         return updateAction;
     }
 
-    public void setUpdateAction(ReferentialAction updateAction) {
+    public void setUpdateAction(ReferenceAction updateAction) {
         this.updateAction = updateAction;
     }
 
-    public ReferentialAction getDeleteAction() {
+    public ReferenceAction getDeleteAction() {
         return deleteAction;
     }
 
-    public void setDeleteAction(ReferentialAction deleteAction) {
+    public void setDeleteAction(ReferenceAction deleteAction) {
         this.deleteAction = deleteAction;
     }
 

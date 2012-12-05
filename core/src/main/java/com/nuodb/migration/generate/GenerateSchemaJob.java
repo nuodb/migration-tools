@@ -27,17 +27,19 @@
  */
 package com.nuodb.migration.generate;
 
+import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.connection.ConnectionProxy;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
+import com.nuodb.migration.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.generator.*;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
+import com.nuodb.migration.spec.ResourceSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Collection;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
@@ -47,10 +49,14 @@ import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
  */
 public class GenerateSchemaJob extends JobBase {
 
+    public static final String OUTPUT_ENCODING = "UTF-8";
+
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private ConnectionProvider sourceConnectionProvider;
     private ConnectionProvider targetConnectionProvider;
+    private ResourceSpec outputSpec;
+    private String outputEncoding = OUTPUT_ENCODING;
 
     @Override
     public void execute(JobExecution execution) throws Exception {
@@ -60,12 +66,14 @@ public class GenerateSchemaJob extends JobBase {
 
     protected void validate() {
         isNotNull(getSourceConnectionProvider(), "Source connection provider is required");
-        isNotNull(getTargetConnectionProvider(), "Target connection provider is required");
     }
 
-    protected void execution(GenerateSchemaJobExecution execution) throws SQLException {
+    protected void execution(GenerateSchemaJobExecution execution) throws Exception {
         ConnectionServices sourceConnectionServices = getSourceConnectionProvider().getConnectionServices();
-        ConnectionServices targetConnectionServices = getTargetConnectionProvider().getConnectionServices();
+        ConnectionServices targetConnectionServices = null;
+        if (getTargetConnectionProvider() != null) {
+            targetConnectionServices = getTargetConnectionProvider().getConnectionServices();
+        }
         try {
             execution.setSourceConnectionServices(sourceConnectionServices);
             execution.setTargetConnectionServices(targetConnectionServices);
@@ -76,24 +84,30 @@ public class GenerateSchemaJob extends JobBase {
         }
     }
 
-    protected void generate(GenerateSchemaJobExecution execution) throws SQLException {
+    protected void generate(GenerateSchemaJobExecution execution) throws Exception {
         ConnectionServices sourceConnectionServices = execution.getSourceConnectionServices();
         Database sourceDatabase = sourceConnectionServices.createDatabaseInspector().inspect();
-        Connection connection = sourceConnectionServices.getConnection();
-        if (connection instanceof ConnectionProxy) {
-            Connection connection1 = ((ConnectionProxy) connection).getConnection();
-            System.out.println(connection1);
+
+        Collection<ScriptExporter> scriptExporters = Lists.newArrayList();
+        if (execution.getTargetConnectionServices() != null) {
+            scriptExporters.add(new ConnectionScriptExporter(
+                    execution.getTargetConnectionServices()
+            ));
         }
-        if (logger.isInfoEnabled()) {
-            logger.info("Source database inspected");
+        if (outputSpec != null) {
+            scriptExporters.add(new FileScriptExporter(
+                    outputSpec.getPath(),
+                    outputEncoding != null ? outputEncoding : OUTPUT_ENCODING));
         }
-        System.out.println(sourceDatabase);
-        ConnectionServices targetConnectionServices = execution.getTargetConnectionServices();
-        Database targetDatabase = targetConnectionServices.createDatabaseInspector().inspect();
-        if (logger.isInfoEnabled()) {
-            logger.info("Target database inspected");
+        // Fallback to standard output if neither target connection nor target file are specified
+        if (scriptExporters.isEmpty()) {
+            scriptExporters.add(StdOutScriptExporter.INSTANCE);
         }
-        System.out.println(targetDatabase);
+
+        ScriptGenerate scriptGenerate = new ScriptGenerate();
+        scriptGenerate.setDialect(new NuoDBDialect());
+        scriptGenerate.setScriptExporter(new CompositeScriptExporter(scriptExporters));
+        scriptGenerate.generate(sourceDatabase);
     }
 
     public ConnectionProvider getSourceConnectionProvider() {
@@ -110,5 +124,21 @@ public class GenerateSchemaJob extends JobBase {
 
     public void setTargetConnectionProvider(ConnectionProvider targetConnectionProvider) {
         this.targetConnectionProvider = targetConnectionProvider;
+    }
+
+    public ResourceSpec getOutputSpec() {
+        return outputSpec;
+    }
+
+    public void setOutputSpec(ResourceSpec outputSpec) {
+        this.outputSpec = outputSpec;
+    }
+
+    public String getOutputEncoding() {
+        return outputEncoding;
+    }
+
+    public void setOutputEncoding(String outputEncoding) {
+        this.outputEncoding = outputEncoding;
     }
 }

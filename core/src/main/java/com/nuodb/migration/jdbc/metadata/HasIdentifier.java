@@ -27,12 +27,12 @@
  */
 package com.nuodb.migration.jdbc.metadata;
 
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 
 /**
  * @author Sergey Bushik
  */
-public interface HasIdentifier extends Comparable<HasIdentifier> {
+public interface HasIdentifier extends Relational, Comparable<HasIdentifier> {
 
     String getName();
 
@@ -42,5 +42,5 @@ public interface HasIdentifier extends Comparable<HasIdentifier> {
 
     void setIdentifier(Identifier identifier);
 
-    String getQuotedName(DatabaseDialect databaseDialect);
+    String getQuotedName(Dialect dialect);
 }

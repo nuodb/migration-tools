@@ -27,17 +27,16 @@
  */
 package com.nuodb.migration.dump;
 
-import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
-import com.nuodb.migration.jdbc.dialect.DefaultDatabaseDialectResolver;
+import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
+import com.nuodb.migration.jdbc.dialect.DialectResolver;
+import com.nuodb.migration.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.FileCatalog;
+import com.nuodb.migration.resultset.format.DefaultResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.jdbc.DefaultJdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
+import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.spec.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,42 +49,38 @@ import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DumpJobFactory implements JobFactory<DumpJob> {
+public class DumpJobFactory extends ConnectionProviderFactory implements JobFactory<DumpJob> {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private DumpSpec dumpSpec;
 
-    private DatabaseDialectResolver databaseDialectResolver =
-            new DefaultDatabaseDialectResolver();
+    private DialectResolver dialectResolver =
+            new SimpleDialectResolver();
     private ResultSetFormatFactory resultSetFormatFactory =
-            new SimpleResultSetFormatFactory();
+            new DefaultResultSetFormatFactory();
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver =
-            new DefaultJdbcTypeValueFormatRegistryResolver();
+            new SimpleJdbcTypeValueFormatRegistryResolver();
 
     public DumpJob createJob() {
         isNotNull(dumpSpec, "Dump spec is required");
         ConnectionSpec connectionSpec = dumpSpec.getSourceSpec();
         Collection<SelectQuerySpec> selectQuerySpecs = dumpSpec.getSelectQuerySpecs();
         Collection<NativeQuerySpec> nativeQuerySpecs = dumpSpec.getNativeQuerySpecs();
-        FormatSpec outputSpec = dumpSpec.getOutputSpec();
 
+        ResourceSpec outputSpec = dumpSpec.getOutputSpec();
         DumpJob job = new DumpJob();
-        job.setConnectionProvider(createConnectionProvider(connectionSpec));
+        job.setConnectionProvider(createConnectionProvider(connectionSpec, false));
         job.setTimeZone(dumpSpec.getTimeZone());
         job.setSelectQuerySpecs(selectQuerySpecs);
         job.setNativeQuerySpecs(nativeQuerySpecs);
         job.setOutputType(outputSpec.getType());
         job.setAttributes(outputSpec.getAttributes());
         job.setCatalog(createCatalog(outputSpec.getPath()));
-        job.setDatabaseDialectResolver(databaseDialectResolver);
+        job.setDialectResolver(dialectResolver);
         job.setResultSetFormatFactory(resultSetFormatFactory);
         job.setJdbcTypeValueFormatRegistryResolver(jdbcTypeValueFormatRegistryResolver);
         return job;
-    }
-
-    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return new DriverPoolingConnectionProvider((DriverConnectionSpec) connectionSpec);
     }
 
     protected Catalog createCatalog(String path) {
@@ -100,12 +95,12 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         this.dumpSpec = dumpSpec;
     }
 
-    public DatabaseDialectResolver getDatabaseDialectResolver() {
-        return databaseDialectResolver;
+    public DialectResolver getDialectResolver() {
+        return dialectResolver;
     }
 
-    public void setDatabaseDialectResolver(DatabaseDialectResolver databaseDialectResolver) {
-        this.databaseDialectResolver = databaseDialectResolver;
+    public void setDialectResolver(DialectResolver dialectResolver) {
+        this.dialectResolver = dialectResolver;
     }
 
     public ResultSetFormatFactory getResultSetFormatFactory() {

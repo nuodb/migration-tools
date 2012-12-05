@@ -27,11 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.dialect.oracle.OracleTypeRegistry;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
-
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimeZone;
@@ -39,10 +35,11 @@ import java.util.TimeZone;
 /**
  * @author Sergey Bushik
  */
-public class OracleDialect extends StandardDialect {
+public class OracleDialect extends SQL2003Dialect {
 
-    public OracleDialect(DatabaseMetaData metaData) {
-        super(metaData);
+    public OracleDialect() {
+        addJdbcTypeAdapter(new OracleBlobTypeAdapter());
+        addJdbcTypeAdapter(new OracleClobTypeAdapter());
     }
 
     @Override
@@ -55,7 +52,7 @@ public class OracleDialect extends StandardDialect {
         Statement statement = connection.createStatement();
         try {
             String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL";
-            statement.execute("ALTER SESSION SET TIME_Z0NE = '" + timeZoneAsValue + "'");
+            statement.execute("ALTER SESSION SET TIME_ZONE = '" + timeZoneAsValue + "'");
         } finally {
             if (statement != null) {
                 try {
@@ -67,6 +64,16 @@ public class OracleDialect extends StandardDialect {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean dropConstraints() {
+        return false;
+    }
+
+    @Override
+    public String getCascadeConstraintsString() {
+        return "CASCADE CONSTRAINTS";
     }
 
     protected String timeZoneAsValue(TimeZone timeZone) {
@@ -84,10 +91,5 @@ public class OracleDialect extends StandardDialect {
         value.append(':');
         value.append(zeros.substring(0, zeros.length() - minutesOffset.length()));
         return value.toString();
-    }
-
-    @Override
-    public JdbcTypeRegistry getJdbcTypeRegistry() {
-        return new OracleTypeRegistry();
     }
 }

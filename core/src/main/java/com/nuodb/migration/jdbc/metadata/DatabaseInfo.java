@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.jdbc.metadata;
 
+import static java.lang.String.format;
+
 public class DatabaseInfo {
     private String productName;
     private String productVersion;
@@ -67,7 +69,7 @@ public class DatabaseInfo {
 
     @Override
     public String toString() {
-        return String.format("product name=%s, product version=%s, major version=%d, minor version=%d",
+        return format("product name=%s, product version=%s, major version=%d, minor version=%d",
                 productName, productVersion, majorVersion, minorVersion);
     }
 

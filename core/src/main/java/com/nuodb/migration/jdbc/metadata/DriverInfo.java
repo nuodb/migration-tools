@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.jdbc.metadata;
 
+import static java.lang.String.format;
+
 public class DriverInfo {
     private String name;
     private String version;
@@ -67,7 +69,7 @@ public class DriverInfo {
 
     @Override
     public String toString() {
-        return String.format("name=%s, version=%s, minor version=%s, major version=%s",
+        return format("name=%s, version=%s, minor version=%s, major version=%s",
                 name, version, minorVersion, majorVersion);
     }
 

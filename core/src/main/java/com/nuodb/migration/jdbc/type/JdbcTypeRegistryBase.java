@@ -41,12 +41,19 @@ public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
 
     private Map<Class, JdbcTypeAdapter> jdbcTypeAdapters = Maps.newHashMap();
 
+    private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
+
     public JdbcTypeRegistryBase() {
     }
 
     public JdbcTypeRegistryBase(JdbcTypeRegistry jdbcTypeRegistry) {
         addJdbcTypes(jdbcTypeRegistry.getJdbcTypes());
         addJdbcTypeAdapters(jdbcTypeRegistry.getJdbcTypeAdapters());
+    }
+
+    @Override
+    public JdbcTypeNameMap getJdbcTypeNameMap() {
+        return jdbcTypeNameMap;
     }
 
     @Override

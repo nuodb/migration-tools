@@ -87,7 +87,7 @@ public class ForeignKeyReference extends IndentedOutputBase {
     protected String qualify(Column column) {
         StringBuilder buffer = new StringBuilder();
         if (column.getTable() != null) {
-            buffer.append(column.getTable().getQualifiedName());
+            buffer.append(column.getTable().getQualifiedName(null));
             buffer.append('.');
         }
         buffer.append(column.getName());

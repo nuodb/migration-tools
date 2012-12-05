@@ -79,7 +79,7 @@ public class Schema extends HasIdentifierBase {
                 table = new Table(database, catalog, this, identifier);
                 tables.put(identifier, table);
             } else {
-                throw new MetaModelException(format("Table %s doesn't exist", identifier));
+                throw new MetaDataException(format("Table %s doesn't exist", identifier));
             }
         }
         return table;
@@ -94,7 +94,7 @@ public class Schema extends HasIdentifierBase {
         super.output(indent, buffer);
 
         buffer.append(' ');
-        buffer.append("table(s)");
+        buffer.append("tables");
         buffer.append(' ');
 
         output(indent, buffer, listTables());

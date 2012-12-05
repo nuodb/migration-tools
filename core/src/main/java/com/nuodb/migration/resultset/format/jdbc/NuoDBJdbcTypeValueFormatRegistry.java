@@ -27,14 +27,14 @@
  */
 package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.dialect.nuodb.NuoDBBigIntType;
-import com.nuodb.migration.jdbc.dialect.nuodb.NuoDBIntegerType;
-import com.nuodb.migration.jdbc.dialect.nuodb.NuoDBTimeType;
+import com.nuodb.migration.jdbc.dialect.NuoDBBigIntType;
+import com.nuodb.migration.jdbc.dialect.NuoDBIntegerType;
+import com.nuodb.migration.jdbc.dialect.NuoDBTimeType;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBJdbcTypeValueFormatRegistry extends DefaultJdbcTypeValueFormatRegistry {
+public class NuoDBJdbcTypeValueFormatRegistry extends SimpleJdbcTypeValueFormatRegistry {
 
     public NuoDBJdbcTypeValueFormatRegistry() {
         addJdbcTypeValueFormat(NuoDBTimeType.INSTANCE, new NuoDBTimeTypeValueFormat());

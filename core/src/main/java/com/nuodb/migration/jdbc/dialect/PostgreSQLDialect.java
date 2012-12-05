@@ -36,11 +36,7 @@ import java.util.TimeZone;
 /**
  * @author Sergey Bushik
  */
-public class PostgreSQLDialect extends StandardDialect {
-
-    public PostgreSQLDialect(DatabaseMetaData metaData) {
-        super(metaData);
-    }
+public class PostgreSQLDialect extends SQL2003Dialect {
 
     @Override
     public boolean supportsSessionTimeZone() {
@@ -64,6 +60,21 @@ public class PostgreSQLDialect extends StandardDialect {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean dropConstraints() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsIfExistsBeforeTable() {
+        return true;
+    }
+
+    @Override
+    public String getCascadeConstraintsString() {
+        return "CASCADE";
     }
 
     protected String timeZoneAsValue(TimeZone timeZone) {

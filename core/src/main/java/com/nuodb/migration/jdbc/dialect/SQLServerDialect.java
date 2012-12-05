@@ -32,11 +32,7 @@ import java.sql.DatabaseMetaData;
 /**
  * @author Sergey Bushik
  */
-public class SQLServerDialect extends StandardDialect {
-
-    public SQLServerDialect(DatabaseMetaData metaData) {
-        super(metaData);
-    }
+public class SQLServerDialect extends SQL2003Dialect {
 
     @Override
     public char closeQuote() {
@@ -49,8 +45,8 @@ public class SQLServerDialect extends StandardDialect {
     }
 
     @Override
-    public String getNoColumnsInsertClause() {
-        return "default values";
+    public String getNoColumnsInsertString() {
+        return "DEFAULT VALUES";
     }
 
     @Override

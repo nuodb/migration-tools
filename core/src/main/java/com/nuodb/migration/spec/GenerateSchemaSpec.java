@@ -33,6 +33,7 @@ package com.nuodb.migration.spec;
 public class GenerateSchemaSpec extends TaskSpecBase {
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;
+    private String targetFile;
 
     public ConnectionSpec getSourceConnectionSpec() {
         return sourceConnectionSpec;
@@ -48,5 +49,13 @@ public class GenerateSchemaSpec extends TaskSpecBase {
 
     public void setTargetConnectionSpec(ConnectionSpec targetConnectionSpec) {
         this.targetConnectionSpec = targetConnectionSpec;
+    }
+
+    public String getTargetFile() {
+        return targetFile;
+    }
+
+    public void setTargetFile(String targetFile) {
+        this.targetFile = targetFile;
     }
 }

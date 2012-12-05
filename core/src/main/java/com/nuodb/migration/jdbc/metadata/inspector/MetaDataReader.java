@@ -28,6 +28,7 @@
 package com.nuodb.migration.jdbc.metadata.inspector;
 
 import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;

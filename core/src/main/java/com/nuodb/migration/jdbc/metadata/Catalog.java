@@ -75,7 +75,7 @@ public class Catalog extends HasIdentifierBase {
             if (create) {
                 schemas.put(identifier, schema = new Schema(database, this, identifier));
             } else {
-                throw new MetaModelException(format("Schema %s doesn't exist", identifier));
+                throw new MetaDataException(format("Schema %s doesn't exist", identifier));
             }
         }
         return schema;
@@ -90,7 +90,7 @@ public class Catalog extends HasIdentifierBase {
         super.output(indent, buffer);
 
         buffer.append(' ');
-        buffer.append("schema(s)");
+        buffer.append("schemas");
         buffer.append(' ');
 
         output(indent, buffer, listSchemas());

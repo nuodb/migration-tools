@@ -30,8 +30,8 @@ package com.nuodb.migration.load;
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialect;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
+import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.dialect.DialectResolver;
 import com.nuodb.migration.jdbc.metadata.*;
 import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 import com.nuodb.migration.jdbc.model.ValueModel;
@@ -61,7 +61,7 @@ import java.util.TimeZone;
 
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
-import static com.nuodb.migration.jdbc.metadata.inspector.MetaDataType.*;
+import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
 /**
@@ -74,7 +74,7 @@ public class LoadJob extends JobBase {
     private TimeZone timeZone;
     private Map<String, String> attributes;
     private Catalog catalog;
-    private DatabaseDialectResolver databaseDialectResolver;
+    private DialectResolver dialectResolver;
     private ResultSetFormatFactory resultSetFormatFactory;
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver;
 
@@ -87,7 +87,7 @@ public class LoadJob extends JobBase {
     protected void validate() {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
-        isNotNull(getDatabaseDialectResolver(), "Database dialect resolver is required");
+        isNotNull(getDialectResolver(), "Database dialect resolver is required");
         isNotNull(getJdbcTypeValueFormatRegistryResolver(), "JDBC type value format registry resolver is required");
     }
 
@@ -106,22 +106,22 @@ public class LoadJob extends JobBase {
 
         DatabaseInspector databaseInspector = connectionServices.createDatabaseInspector();
         databaseInspector.withMetaDataTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-        databaseInspector.withDatabaseDialectResolver(getDatabaseDialectResolver());
+        databaseInspector.withDatabaseDialectResolver(getDialectResolver());
 
         Database database = databaseInspector.inspect();
         execution.setDatabase(database);
 
         Connection connection = connectionServices.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(metaData));
+        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolveService(metaData));
 
         CatalogReader catalogReader = getCatalog().getCatalogReader();
         execution.setCatalogReader(catalogReader);
 
-        DatabaseDialect databaseDialect = database.getDatabaseDialect();
+        Dialect dialect = database.getDialect();
         try {
-            if (databaseDialect.supportsSessionTimeZone()) {
-                databaseDialect.setSessionTimeZone(connection, timeZone);
+            if (dialect.supportsSessionTimeZone()) {
+                dialect.setSessionTimeZone(connection, timeZone);
             }
             for (CatalogEntry catalogEntry : catalogReader.getEntries()) {
                 load(execution, catalogEntry);
@@ -130,8 +130,8 @@ public class LoadJob extends JobBase {
         } finally {
             closeQuietly(catalogReader);
 
-            if (databaseDialect.supportsSessionTimeZone()) {
-                databaseDialect.setSessionTimeZone(connection, null);
+            if (dialect.supportsSessionTimeZone()) {
+                dialect.setSessionTimeZone(connection, null);
             }
         }
     }
@@ -140,16 +140,16 @@ public class LoadJob extends JobBase {
         CatalogReader catalogReader = execution.getCatalogReader();
         InputStream entryInput = catalogReader.getEntryInput(catalogEntry);
         try {
-            DatabaseDialect databaseDialect = execution.getDatabase().getDatabaseDialect();
+            Dialect dialect = execution.getDatabase().getDialect();
             ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(catalogEntry.getType());
             resultSetInput.setAttributes(getAttributes());
-            if (!databaseDialect.supportsSessionTimeZone()) {
+            if (!dialect.supportsSessionTimeZone()) {
                 resultSetInput.setTimeZone(getTimeZone());
             }
             resultSetInput.setInputStream(entryInput);
             resultSetInput.setJdbcTypeValueFormatRegistry(execution.getJdbcTypeValueFormatRegistry());
 
-            JdbcTypeRegistry jdbcTypeRegistry = databaseDialect.getJdbcTypeRegistry();
+            JdbcTypeRegistry jdbcTypeRegistry = dialect.getJdbcTypeRegistry();
             resultSetInput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
 
             load(execution, resultSetInput, catalogEntry.getName());
@@ -250,12 +250,12 @@ public class LoadJob extends JobBase {
         this.catalog = catalog;
     }
 
-    public DatabaseDialectResolver getDatabaseDialectResolver() {
-        return databaseDialectResolver;
+    public DialectResolver getDialectResolver() {
+        return dialectResolver;
     }
 
-    public void setDatabaseDialectResolver(DatabaseDialectResolver databaseDialectResolver) {
-        this.databaseDialectResolver = databaseDialectResolver;
+    public void setDialectResolver(DialectResolver dialectResolver) {
+        this.dialectResolver = dialectResolver;
     }
 
     public ResultSetFormatFactory getResultSetFormatFactory() {

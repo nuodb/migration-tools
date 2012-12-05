@@ -119,8 +119,8 @@ public class DriverPoolingConnectionProvider extends DriverConnectionProvider {
                 }
             }
             Method method = connectionClass.getMethod(GET_INNERMOST_DELEGATE, (Class[]) null);
-            Connection targetConnection = ReflectionUtils.invokeMethod(connection, method);
-            return (targetConnection != null ? targetConnection : connection);
+            Connection delegate = ReflectionUtils.invokeMethod(connection, method);
+            return (delegate != null ? delegate : connection);
         } catch (NoSuchMethodException exception) {
             return connection;
         }

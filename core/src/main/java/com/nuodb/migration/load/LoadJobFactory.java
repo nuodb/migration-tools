@@ -28,55 +28,54 @@
 package com.nuodb.migration.load;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
-import com.nuodb.migration.jdbc.dialect.DatabaseDialectResolver;
-import com.nuodb.migration.jdbc.dialect.DefaultDatabaseDialectResolver;
+import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
+import com.nuodb.migration.jdbc.dialect.DialectResolver;
+import com.nuodb.migration.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.FileCatalog;
+import com.nuodb.migration.resultset.format.DefaultResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.jdbc.DefaultJdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
-import com.nuodb.migration.spec.*;
+import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
+import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.spec.ResourceSpec;
+import com.nuodb.migration.spec.ResourceSpecBase;
+import com.nuodb.migration.spec.LoadSpec;
 
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadJobFactory implements JobFactory<LoadJob> {
+public class LoadJobFactory extends ConnectionProviderFactory implements JobFactory<LoadJob> {
 
     private LoadSpec loadSpec;
-    private DatabaseDialectResolver databaseDialectResolver =
-            new DefaultDatabaseDialectResolver();
+    private DialectResolver dialectResolver =
+            new SimpleDialectResolver();
     private ResultSetFormatFactory resultSetFormatFactory =
-            new SimpleResultSetFormatFactory();
+            new DefaultResultSetFormatFactory();
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver =
-            new DefaultJdbcTypeValueFormatRegistryResolver();
+            new SimpleJdbcTypeValueFormatRegistryResolver();
 
     @Override
     public LoadJob createJob() {
         isNotNull(loadSpec, "Load spec is required");
-        FormatSpec inputSpec = loadSpec.getInputSpec();
+
+        ResourceSpec inputSpec = loadSpec.getInputSpec();
         LoadJob job = new LoadJob();
-        job.setConnectionProvider(createConnectionProvider(loadSpec.getTargetSpec()));
+        job.setConnectionProvider(createConnectionProvider(loadSpec.getTargetSpec(), false));
 
         job.setAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));
         job.setTimeZone(loadSpec.getTimeZone());
-        job.setDatabaseDialectResolver(databaseDialectResolver);
+        job.setDialectResolver(dialectResolver);
         job.setResultSetFormatFactory(resultSetFormatFactory);
         job.setJdbcTypeValueFormatRegistryResolver(jdbcTypeValueFormatRegistryResolver);
         return job;
-    }
-
-    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return new DriverPoolingConnectionProvider((DriverConnectionSpec) connectionSpec, false);
     }
 
     protected Catalog createCatalog(String path) {
@@ -91,12 +90,12 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
         this.loadSpec = loadSpec;
     }
 
-    public DatabaseDialectResolver getDatabaseDialectResolver() {
-        return databaseDialectResolver;
+    public DialectResolver getDialectResolver() {
+        return dialectResolver;
     }
 
-    public void setDatabaseDialectResolver(DatabaseDialectResolver databaseDialectResolver) {
-        this.databaseDialectResolver = databaseDialectResolver;
+    public void setDialectResolver(DialectResolver dialectResolver) {
+        this.dialectResolver = dialectResolver;
     }
 
     public ResultSetFormatFactory getResultSetFormatFactory() {
@@ -126,7 +125,7 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
                 connectionSpec.setUsername("root");
                 setTargetSpec(connectionSpec);
 
-                FormatSpecBase inputSpec = new FormatSpecBase();
+                ResourceSpecBase inputSpec = new ResourceSpecBase();
                 inputSpec.setPath("/tmp/test/dump.cat");
                 setInputSpec(inputSpec);
             }

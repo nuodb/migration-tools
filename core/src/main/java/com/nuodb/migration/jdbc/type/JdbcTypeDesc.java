@@ -27,8 +27,6 @@
  */
 package com.nuodb.migration.jdbc.type;
 
-import static com.nuodb.migration.jdbc.type.JdbcTypeNameMap.INSTANCE;
-
 /**
  * @author Sergey Bushik
  */
@@ -38,7 +36,7 @@ public class JdbcTypeDesc {
     private String typeName;
 
     public JdbcTypeDesc(int typeCode) {
-        this(typeCode, INSTANCE.getTypeName(typeCode));
+        this(typeCode, JdbcTypeNameMap.STANDARD.getTypeName(typeCode));
     }
 
     public JdbcTypeDesc(int typeCode, String typeName) {
