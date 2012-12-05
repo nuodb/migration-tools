@@ -40,6 +40,7 @@ import java.nio.charset.Charset;
 public class FileScriptExporter implements ScriptExporter {
 
     private static final String SEMICOLON = ";";
+    private int lines = 0;
     private File file;
     private String encoding;
     private BufferedWriter writer;
@@ -55,6 +56,7 @@ public class FileScriptExporter implements ScriptExporter {
 
     @Override
     public void open() throws Exception {
+        lines = 0;
         writer = Files.newWriter(file, Charset.forName(encoding));
     }
 
@@ -68,13 +70,14 @@ public class FileScriptExporter implements ScriptExporter {
         }
         for (int i = 0, length = scripts.length; i < length; i++) {
             String script = scripts[i];
+            if (lines++ > 0) {
+                writer.newLine();
+            }
             writer.write(script);
             if (!script.endsWith(";")) {
                 writer.write(SEMICOLON);
             }
-            if (i + 1 < length) {
-                writer.newLine();
-            }
+
         }
     }
 

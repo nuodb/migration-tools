@@ -33,8 +33,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.nuodb.util.StringUtils.isEmpty;
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class Index extends ConstraintBase {
 

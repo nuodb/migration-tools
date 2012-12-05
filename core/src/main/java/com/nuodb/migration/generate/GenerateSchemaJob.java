@@ -43,6 +43,7 @@ import java.util.Collection;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -56,7 +57,6 @@ public class GenerateSchemaJob extends JobBase {
     private ConnectionProvider sourceConnectionProvider;
     private ConnectionProvider targetConnectionProvider;
     private ResourceSpec outputSpec;
-    private String outputEncoding = OUTPUT_ENCODING;
 
     @Override
     public void execute(JobExecution execution) throws Exception {
@@ -90,14 +90,19 @@ public class GenerateSchemaJob extends JobBase {
 
         Collection<ScriptExporter> scriptExporters = Lists.newArrayList();
         if (execution.getTargetConnectionServices() != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exporting schema to the target database");
+            }
             scriptExporters.add(new ConnectionScriptExporter(
                     execution.getTargetConnectionServices()
             ));
         }
         if (outputSpec != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Exporting schema to file %s", outputSpec.getPath()));
+            }
             scriptExporters.add(new FileScriptExporter(
-                    outputSpec.getPath(),
-                    outputEncoding != null ? outputEncoding : OUTPUT_ENCODING));
+                    outputSpec.getPath(), OUTPUT_ENCODING));
         }
         // Fallback to standard output if neither target connection nor target file are specified
         if (scriptExporters.isEmpty()) {
@@ -132,13 +137,5 @@ public class GenerateSchemaJob extends JobBase {
 
     public void setOutputSpec(ResourceSpec outputSpec) {
         this.outputSpec = outputSpec;
-    }
-
-    public String getOutputEncoding() {
-        return outputEncoding;
-    }
-
-    public void setOutputEncoding(String outputEncoding) {
-        this.outputEncoding = outputEncoding;
     }
 }

@@ -33,9 +33,7 @@ import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
-import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverConnectionSpec;
-import com.nuodb.migration.spec.GenerateSchemaSpec;
+import com.nuodb.migration.spec.*;
 
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
@@ -51,6 +49,8 @@ public class GenerateSchemaJobFactory extends ConnectionProviderFactory implemen
         isNotNull(generateSchemaSpec, "Generate schema spec is required");
 
         GenerateSchemaJob job = new GenerateSchemaJob();
+        job.setOutputSpec(getGenerateSchemaSpec().getOutputSpec());
+
         ConnectionSpec sourceConnectionSpec = generateSchemaSpec.getSourceConnectionSpec();
         job.setSourceConnectionProvider(createConnectionProvider(sourceConnectionSpec, false));
 
@@ -83,6 +83,9 @@ public class GenerateSchemaJobFactory extends ConnectionProviderFactory implemen
                 targetConnectionSpec.setPassword("goalie");
                 targetConnectionSpec.setSchema("hockey");
 
+                ResourceSpec outputSpec = new ResourceSpecBase();
+                outputSpec.setPath("/tmp/test/schema.sql");
+                setOutputSpec(outputSpec);
                 setSourceConnectionSpec(targetConnectionSpec);
             }
         });
