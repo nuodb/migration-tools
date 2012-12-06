@@ -180,7 +180,7 @@ public class SimpleSqlGeneratorContext implements SqlGeneratorContext {
             type = (Class<? extends Relational>) type.getSuperclass();
         }
         if (generatorService == null) {
-            throw new ScriptGeneratorException(format("Generator service not found for %s", objectType));
+            throw new SqlGeneratorException(format("Generator service not found for %s", objectType));
         }
         if (!objectType.equals(generatorService.getObjectType())) {
             generatorServiceMap.put(objectType, generatorService);

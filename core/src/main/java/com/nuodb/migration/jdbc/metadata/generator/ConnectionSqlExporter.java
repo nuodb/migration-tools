@@ -62,7 +62,7 @@ public class ConnectionSqlExporter implements SqlExporter {
     @Override
     public void export(String[] queries) throws Exception {
         if (connection == null) {
-            throw new ScriptGeneratorException("Database connection is not opened");
+            throw new SqlGeneratorException("Database connection is not opened");
         }
         if (queries == null) {
             return;

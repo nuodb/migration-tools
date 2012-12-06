@@ -63,7 +63,7 @@ public class FileSqlExporter implements SqlExporter {
     @Override
     public void export(String[] queries) throws Exception {
         if (writer == null) {
-            throw new ScriptGeneratorException("File is not opened");
+            throw new SqlGeneratorException("File is not opened");
         }
         if (queries == null) {
             return;
