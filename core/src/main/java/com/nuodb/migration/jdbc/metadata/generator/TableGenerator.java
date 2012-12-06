@@ -38,7 +38,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
-import static com.nuodb.util.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
