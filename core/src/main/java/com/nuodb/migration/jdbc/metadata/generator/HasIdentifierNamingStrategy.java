@@ -25,25 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.resolve;
+package com.nuodb.migration.jdbc.metadata.generator;
 
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import com.nuodb.migration.jdbc.metadata.HasIdentifier;
 
 /**
  * @author Sergey Bushik
  */
-public interface DatabaseAwareServiceResolver<T> {
+public class HasIdentifierNamingStrategy extends NamingStrategyBase<HasIdentifier> {
 
-    void registerService(String productName, Class<? extends T> serviceClass);
+    public HasIdentifierNamingStrategy() {
+        super(HasIdentifier.class);
+    }
 
-    void registerService(String productName, String productVersion, Class<? extends T> serviceClass);
-
-    void registerService(String productName, String productVersion, int majorVersion, Class<? extends T> serviceClass);
-
-    void registerService(String productName, String productVersion, int majorVersion, int minorVersion, Class<? extends T> serviceClass);
-
-    void registerService(DatabaseMatcher databaseMatcher, Class<? extends T> serviceClass);
-
-    T resolveService(DatabaseMetaData metaData) throws SQLException;
+    @Override
+    public String getName(HasIdentifier hasIdentifier, SqlGeneratorContext context) {
+        return hasIdentifier.getQuotedName(context.getDialect());
+    }
 }

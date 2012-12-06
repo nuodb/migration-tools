@@ -25,68 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata;
+package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.google.common.collect.Maps;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-
-import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.System.out;
 
 /**
  * @author Sergey Bushik
  */
-public class PrimaryKey extends ConstraintBase {
+public class StdOutSqlExporter implements SqlExporter {
 
-    private Map<Integer, Column> columns = Maps.newTreeMap();
+    public static final SqlExporter INSTANCE = new StdOutSqlExporter();
 
-    public PrimaryKey(Identifier identifier) {
-        super(identifier);
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private static final String SEMICOLON = ";";
+
+    private StdOutSqlExporter() {
     }
 
     @Override
-    public Collection<Column> getColumns() {
-        return newArrayList(columns.values());
-    }
-
-    public void addColumn(Column column, int position) {
-        columns.put(position, column);
+    public void open() throws Exception {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        PrimaryKey that = (PrimaryKey) o;
-
-        if (columns != null ? !columns.equals(that.columns) : that.columns != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (columns != null ? columns.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public void output(int indent, StringBuilder buffer) {
-        super.output(indent, buffer);
-
-        buffer.append('(');
-        for (Iterator<Column> iterator = getColumns().iterator(); iterator.hasNext(); ) {
-            Column column = iterator.next();
-            buffer.append(column.getName());
-            if (iterator.hasNext()) {
-                buffer.append(", ");
+    public void export(String[] queries) throws Exception {
+        for (String script : queries) {
+            out.print(script);
+            if (!script.endsWith(SEMICOLON)) {
+                out.print(SEMICOLON);
             }
+            out.print(LINE_SEPARATOR);
         }
-        buffer.append(')');
+    }
+
+    @Override
+    public void close() throws Exception {
     }
 }

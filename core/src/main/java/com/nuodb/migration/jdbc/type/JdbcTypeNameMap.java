@@ -83,7 +83,12 @@ public class JdbcTypeNameMap {
                 }
             }
         }
-        return expandVariables(getTypeName(typeCode), length, precision, scale);
+        String typeName = expandVariables(getTypeName(typeCode), length, precision, scale);
+        return typeName != null ? typeName : getUnknownTypeName(typeCode);
+    }
+
+    protected String getUnknownTypeName(int typeCode) {
+        throw new JdbcTypeException(format("Unsupported jdbc type %d", typeCode));
     }
 
     public static String expandVariables(String typeName, int length, int precision, int scale) {

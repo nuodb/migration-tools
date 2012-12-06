@@ -42,9 +42,8 @@ import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.spec.DriverConnectionSpec;
-import com.nuodb.migration.spec.ResourceSpec;
-import com.nuodb.migration.spec.ResourceSpecBase;
 import com.nuodb.migration.spec.LoadSpec;
+import com.nuodb.migration.spec.ResourceSpec;
 
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
@@ -125,7 +124,7 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
                 connectionSpec.setUsername("root");
                 setTargetSpec(connectionSpec);
 
-                ResourceSpecBase inputSpec = new ResourceSpecBase();
+                ResourceSpec inputSpec = new ResourceSpec();
                 inputSpec.setPath("/tmp/test/dump.cat");
                 setInputSpec(inputSpec);
             }

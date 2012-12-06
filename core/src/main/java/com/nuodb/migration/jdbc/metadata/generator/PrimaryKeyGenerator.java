@@ -27,7 +27,6 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.PrimaryKey;
 
@@ -39,17 +38,16 @@ import java.util.Iterator;
 public class PrimaryKeyGenerator implements ConstraintGenerator<PrimaryKey> {
 
     @Override
-    public Class<PrimaryKey> getRelationalType() {
+    public Class<PrimaryKey> getObjectType() {
         return PrimaryKey.class;
     }
 
     @Override
-    public String getConstraintSql(PrimaryKey primaryKey, ScriptGeneratorContext context) {
-        Dialect dialect = context.getDialect();
+    public String getConstraintSql(PrimaryKey primaryKey, SqlGeneratorContext context) {
         StringBuilder buffer = new StringBuilder("PRIMARY KEY (");
         for (Iterator<Column> iterator = primaryKey.getColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            buffer.append(column.getQuotedName(dialect));
+            buffer.append(context.getIdentifier(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }
@@ -58,12 +56,21 @@ public class PrimaryKeyGenerator implements ConstraintGenerator<PrimaryKey> {
     }
 
     @Override
-    public String[] getCreateSql(PrimaryKey primaryKey, ScriptGeneratorContext context) {
-        return new String[]{};
+    public String[] getCreateSql(PrimaryKey primaryKey, SqlGeneratorContext context) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("ALTER TABLE ");
+        buffer.append(context.getIdentifier(primaryKey.getTable()));
+        buffer.append(" ADD ");
+        buffer.append(getConstraintSql(primaryKey, context));
+        return new String[]{buffer.toString()};
     }
 
     @Override
-    public String[] getDropSql(PrimaryKey primaryKey, ScriptGeneratorContext context) {
-        return new String[]{};
+    public String[] getDropSql(PrimaryKey primaryKey, SqlGeneratorContext context) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("ALTER TABLE ");
+        buffer.append(context.getIdentifier(primaryKey.getTable()));
+        buffer.append(" DROP PRIMARY KEY");
+        return new String[]{buffer.toString()};
     }
 }

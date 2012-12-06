@@ -25,24 +25,28 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.connection;
+package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.MigrationException;
+import com.nuodb.migration.jdbc.metadata.ForeignKey;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionProviderException extends MigrationException {
+public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
 
-    public ConnectionProviderException(String message) {
-        super(message);
+    public ForeignKeyNamingStrategy() {
+        super(ForeignKey.class);
     }
 
-    public ConnectionProviderException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public String getName(ForeignKey foreignKey, SqlGeneratorContext context) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("FK");
+        buffer.append('_');
+        buffer.append(context.getName(foreignKey.getSourceTable()));
+        buffer.append('_');
+        buffer.append(context.getName(foreignKey.getTargetTable()));
+        return buffer.toString();
     }
 
-    public ConnectionProviderException(Throwable cause) {
-        super(cause);
-    }
 }

@@ -25,20 +25,65 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.spec;
+package com.nuodb.migration.jdbc.metadata.generator;
+
+
+import com.google.common.io.Files;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.nio.charset.Charset;
 
 /**
  * @author Sergey Bushik
  */
-public class ResourceSpecBase extends SpecBase implements ResourceSpec {
+public class FileSqlExporter implements SqlExporter {
 
-    private String path;
+    private static final String SEMICOLON = ";";
+    private int lines = 0;
+    private File file;
+    private String encoding;
+    private BufferedWriter writer;
 
-    public String getPath() {
-        return path;
+    public FileSqlExporter(String file, String encoding) {
+        this(new File(file), encoding);
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public FileSqlExporter(File file, String encoding) {
+        this.file = file;
+        this.encoding = encoding;
+    }
+
+    @Override
+    public void open() throws Exception {
+        lines = 0;
+        writer = Files.newWriter(file, Charset.forName(encoding));
+    }
+
+    @Override
+    public void export(String[] queries) throws Exception {
+        if (writer == null) {
+            throw new ScriptGeneratorException("File is not opened");
+        }
+        if (queries == null) {
+            return;
+        }
+        for (int i = 0, length = queries.length; i < length; i++) {
+            String query = queries[i];
+            if (lines++ > 0) {
+                writer.newLine();
+            }
+            writer.write(query);
+            if (!query.endsWith(";")) {
+                writer.write(SEMICOLON);
+            }
+
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        writer.flush();
+        writer.close();
     }
 }

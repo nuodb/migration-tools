@@ -28,10 +28,7 @@
 package com.nuodb.migration.cli.run;
 
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.migration.job.Job;
-import com.nuodb.migration.job.JobExecutor;
-import com.nuodb.migration.job.JobExecutors;
-import com.nuodb.migration.job.TraceJobExecutionListener;
+import com.nuodb.migration.job.*;
 
 import java.util.Collections;
 
@@ -40,8 +37,11 @@ import java.util.Collections;
  */
 public abstract class CliRunJob extends CliRunAdapter {
 
-    public CliRunJob(OptionToolkit optionToolkit, String command) {
+    private JobFactory jobFactory;
+
+    public CliRunJob(OptionToolkit optionToolkit, String command, JobFactory jobFactory) {
         super(optionToolkit, command);
+        this.jobFactory = jobFactory;
     }
 
     public void run() {
@@ -54,5 +54,15 @@ public abstract class CliRunJob extends CliRunAdapter {
         }
     }
 
-    protected abstract Job createJob();
+    protected Job createJob() {
+        return jobFactory.createJob();
+    }
+
+    public JobFactory getJobFactory() {
+        return jobFactory;
+    }
+
+    public void setJobFactory(JobFactory jobFactory) {
+        this.jobFactory = jobFactory;
+    }
 }

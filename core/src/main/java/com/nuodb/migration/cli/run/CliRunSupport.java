@@ -240,7 +240,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected ResourceSpec parseOutputGroup(CommandLine commandLine, Option option) {
-        ResourceSpec resource = new ResourceSpecBase();
+        ResourceSpec resource = new ResourceSpec();
         resource.setType(commandLine.<String>getValue(OUTPUT_TYPE_OPTION));
         resource.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
         resource.setAttributes(parseFormatAttributes(
@@ -432,7 +432,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected ResourceSpec parseInputGroup(CommandLine commandLine, Option cliLoad) {
-        ResourceSpec resource = new ResourceSpecBase();
+        ResourceSpec resource = new ResourceSpec();
         // format.setType(commandLine.<String>getValue(INPUT_TYPE_OPTION));
         resource.setPath(commandLine.<String>getValue(INPUT_PATH_OPTION));
         resource.setAttributes(parseFormatAttributes(

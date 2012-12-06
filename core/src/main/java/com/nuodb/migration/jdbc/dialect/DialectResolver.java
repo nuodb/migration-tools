@@ -27,10 +27,10 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.resolve.DatabaseAwareServiceResolver;
+import com.nuodb.migration.jdbc.resolve.DatabaseAwareObjectResolver;
 
 /**
  * @author Sergey Bushik
  */
-public interface DialectResolver extends DatabaseAwareServiceResolver<Dialect> {
+public interface DialectResolver extends DatabaseAwareObjectResolver<Dialect> {
 }

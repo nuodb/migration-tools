@@ -27,43 +27,15 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.dialect.Dialect;
-import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Relational;
-
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface ScriptGeneratorContext {
+public abstract class SqlGeneratorBase<T extends Relational> extends GeneratorServiceBase<T> implements SqlGenerator<T> {
 
-    Dialect getDialect();
+    protected SqlGeneratorBase(Class<T> objectType) {
+        super(objectType);
+    }
 
-    void setDialect(Dialect dialect);
-
-    String getCatalog();
-
-    void setCatalog(String catalog);
-
-    String getSchema();
-
-    void setSchema(String catalog);
-
-    Collection<MetaDataType> getMetaDataTypes();
-
-    void setMetaDataTypes(Collection<MetaDataType> metaDataTypes);
-
-    <R extends Relational> String[] getCreateSql(R relational);
-
-    <R extends Relational> String[] getDropSql(R relational);
-
-    <R extends Relational> void addScriptGenerator(ScriptGenerator<R> scriptGenerator);
-
-    <R extends Relational> ScriptGenerator<R> getScriptGenerator(R relational);
-
-    <R extends Relational> ScriptGenerator<R> getScriptGenerator(Class<R> objectType);
-
-    Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> getScriptGenerators();
 }

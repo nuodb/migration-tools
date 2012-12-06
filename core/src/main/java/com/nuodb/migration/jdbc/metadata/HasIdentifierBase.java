@@ -70,7 +70,7 @@ public class HasIdentifierBase extends IndentedOutputBase implements HasIdentifi
 
     @Override
     public String getQuotedName(Dialect dialect) {
-        return dialect != null ? dialect.quote(getName()) : getName();
+        return dialect != null ? dialect.getIdentifier(getName()) : getName();
     }
 
     @Override

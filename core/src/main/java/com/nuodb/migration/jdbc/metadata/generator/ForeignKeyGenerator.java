@@ -39,41 +39,54 @@ import java.util.Iterator;
 public class ForeignKeyGenerator implements ConstraintGenerator<ForeignKey> {
 
     @Override
-    public Class<ForeignKey> getRelationalType() {
+    public Class<ForeignKey> getObjectType() {
         return ForeignKey.class;
     }
 
     @Override
-    public String[] getCreateSql(ForeignKey foreignKey, ScriptGeneratorContext context) {
-        return new String[]{};
+    public String[] getCreateSql(ForeignKey foreignKey, SqlGeneratorContext context) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("ALTER TABLE ");
+        buffer.append(context.getIdentifier(foreignKey.getSourceTable()));
+        buffer.append(" ADD CONSTRAINT ");
+        buffer.append(context.getIdentifier(foreignKey));
+        buffer.append(' ');
+        buffer.append(getConstraintSql(foreignKey, context));
+        return new String[]{buffer.toString()};
     }
 
     @Override
-    public String[] getDropSql(ForeignKey foreignKey, ScriptGeneratorContext context) {
-        return new String[]{};
-    }
-
-    @Override
-    public String getConstraintSql(ForeignKey foreignKey, ScriptGeneratorContext context) {
+    public String[] getDropSql(ForeignKey foreignKey, SqlGeneratorContext context) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("ALTER TABLE ");
         Dialect dialect = context.getDialect();
-        String catalog = context.getCatalog();
-        String schema = context.getSchema();
+        buffer.append(context.getIdentifier(foreignKey.getSourceTable()));
+        buffer.append(' ');
+        buffer.append(dialect.getDropForeignKeyString());
+        buffer.append(' ');
+        buffer.append(context.getIdentifier(foreignKey));
+        return new String[]{buffer.toString()};
+    }
+
+    @Override
+    public String getConstraintSql(ForeignKey foreignKey, SqlGeneratorContext context) {
+        Dialect dialect = context.getDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("FOREIGN KEY (");
         for (Iterator<Column> iterator = foreignKey.getSourceColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            buffer.append(column.getQuotedName(dialect));
+            buffer.append(context.getIdentifier(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }
         }
         buffer.append(")");
         buffer.append(" REFERENCES ");
-        buffer.append(foreignKey.getTargetTable().getQualifiedName(dialect, catalog, schema));
+        buffer.append(context.getIdentifier(foreignKey.getTargetTable()));
         buffer.append(" (");
         for (Iterator<Column> iterator = foreignKey.getTargetColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            buffer.append(column.getQuotedName(dialect));
+            buffer.append(context.getIdentifier(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }

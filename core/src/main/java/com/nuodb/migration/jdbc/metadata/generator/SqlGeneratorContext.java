@@ -25,68 +25,55 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata;
+package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.google.common.collect.Maps;
+import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
+import com.nuodb.migration.jdbc.metadata.Relational;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
  */
-public class PrimaryKey extends ConstraintBase {
+public interface SqlGeneratorContext {
 
-    private Map<Integer, Column> columns = Maps.newTreeMap();
+    Dialect getDialect();
 
-    public PrimaryKey(Identifier identifier) {
-        super(identifier);
-    }
+    void setDialect(Dialect dialect);
 
-    @Override
-    public Collection<Column> getColumns() {
-        return newArrayList(columns.values());
-    }
+    String getCatalog();
 
-    public void addColumn(Column column, int position) {
-        columns.put(position, column);
-    }
+    void setCatalog(String catalog);
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+    String getSchema();
 
-        PrimaryKey that = (PrimaryKey) o;
+    void setSchema(String catalog);
 
-        if (columns != null ? !columns.equals(that.columns) : that.columns != null) return false;
+    Collection<MetaDataType> getMetaDataTypes();
 
-        return true;
-    }
+    void setMetaDataTypes(Collection<MetaDataType> metaDataTypes);
 
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (columns != null ? columns.hashCode() : 0);
-        return result;
-    }
+    <R extends Relational> String[] getCreateSql(R object);
 
-    @Override
-    public void output(int indent, StringBuilder buffer) {
-        super.output(indent, buffer);
+    <R extends Relational> String[] getDropSql(R object);
 
-        buffer.append('(');
-        for (Iterator<Column> iterator = getColumns().iterator(); iterator.hasNext(); ) {
-            Column column = iterator.next();
-            buffer.append(column.getName());
-            if (iterator.hasNext()) {
-                buffer.append(", ");
-            }
-        }
-        buffer.append(')');
-    }
+    <R extends Relational> void addSqlGenerator(SqlGenerator<R> sqlGenerator);
+
+    <R extends Relational> SqlGenerator<R> getSqlGenerator(R object);
+
+    <R extends Relational> SqlGenerator<R> getSqlGenerator(Class<R> objectType);
+
+    Map<Class<? extends Relational>, SqlGenerator<? extends Relational>> getSqlGenerators();
+
+    <R extends Relational> String getName(R object);
+
+    <R extends Relational> String getIdentifier(R object);
+
+    <R extends Relational> void addNamingStrategy(NamingStrategy<R> namingStrategy);
+
+    <R extends Relational> GeneratorService<R> getNamingStrategy(R object);
+
+    Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> getNamingStrategies();
 }

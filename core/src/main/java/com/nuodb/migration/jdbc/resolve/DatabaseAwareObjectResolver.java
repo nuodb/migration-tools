@@ -25,27 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.connection;
+package com.nuodb.migration.jdbc.resolve;
 
-import com.nuodb.migration.MigrationException;
-import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverConnectionSpec;
-
-import static java.lang.String.format;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionProviderFactory {
+public interface DatabaseAwareObjectResolver<T> {
 
-    public static ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec, boolean autoCommit) {
-        if (connectionSpec == null) {
-            return null;
-        }
-        if (connectionSpec instanceof DriverConnectionSpec) {
-            return new DriverPoolingConnectionProvider((DriverConnectionSpec) connectionSpec, autoCommit);
-        } else {
-            throw new MigrationException(format("Connection specification is not supported %s", connectionSpec));
-        }
-    }
+    void registerObject(String productName, Class<? extends T> serviceClass);
+
+    void registerObject(String productName, String productVersion, Class<? extends T> serviceClass);
+
+    void registerObject(String productName, String productVersion, int majorVersion, Class<? extends T> serviceClass);
+
+    void registerObject(String productName, String productVersion, int majorVersion, int minorVersion,
+                        Class<? extends T> serviceClass);
+
+    void registerObject(DatabaseMatcher databaseMatcher, Class<? extends T> serviceClass);
+
+    T resolveObject(DatabaseMetaData metaData) throws SQLException;
 }

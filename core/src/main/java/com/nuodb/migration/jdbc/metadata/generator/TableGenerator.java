@@ -30,7 +30,6 @@ package com.nuodb.migration.jdbc.metadata.generator;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.*;
 import com.nuodb.migration.jdbc.type.JdbcTypeNameMap;
@@ -39,32 +38,30 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.util.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class TableGenerator implements ScriptGenerator<Table> {
+public class TableGenerator extends SqlGeneratorBase<Table> {
 
-    @Override
-    public Class<Table> getRelationalType() {
-        return Table.class;
+    public TableGenerator() {
+        super(Table.class);
     }
 
     @Override
-    public String[] getCreateSql(Table table, ScriptGeneratorContext context) {
+    public String[] getCreateSql(Table table, SqlGeneratorContext context) {
         Dialect dialect = context.getDialect();
         Collection<MetaDataType> metaDataTypes = context.getMetaDataTypes();
-        String catalog = context.getCatalog();
-        String schema = context.getSchema();
 
         StringBuilder buffer = new StringBuilder("CREATE TABLE");
-        buffer.append(' ').append(table.getQualifiedName(dialect, catalog, schema)).append(" (");
+        buffer.append(' ').append(context.getIdentifier(table)).append(" (");
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeRegistry().getJdbcTypeNameMap();
         Collection<Column> columns = table.getColumns();
-        Collection<Index> indexes = Lists.newArrayList(table.getIndexes());
+        final Collection<Index> indexes = table.getIndexes();
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();
-            buffer.append(column.getQuotedName(dialect));
+            buffer.append(context.getIdentifier(column));
             buffer.append(' ');
             buffer.append(jdbcTypeNameMap.getTypeName(column.getTypeCode(), column.getSize(), column.getPrecision(),
                     column.getScale()));
@@ -72,9 +69,9 @@ public class TableGenerator implements ScriptGenerator<Table> {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumnString());
             }
-            String defaultValue = column.getDefaultValue();
+            String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue());
             if (defaultValue != null) {
-                buffer.append(" DEFAULT ").append(dialect.getDefaultValue(column.getTypeCode(), defaultValue));
+                buffer.append(" DEFAULT ").append(defaultValue);
             }
             if (column.isNullable()) {
                 buffer.append(dialect.getNullColumnString());
@@ -87,12 +84,12 @@ public class TableGenerator implements ScriptGenerator<Table> {
                     public boolean apply(Index index) {
                         Collection<Column> columns = index.getColumns();
                         return columns.size() == 1 && columns.contains(column) &&
-                                index.getSortOrder() == null && index.getFilterCondition() == null;
+                                !index.isPrimary() && index.isUnique();
                     }
                 });
                 boolean unique = index.isPresent() && (!column.isNullable() || dialect.supportsNotNullUnique());
                 if (unique) {
-                    if (dialect.supportsUnique()) {
+                    if (dialect.supportsUniqueInCreateTable()) {
                         buffer.append(" UNIQUE");
                         indexes.remove(index.get());
                     }
@@ -106,7 +103,7 @@ public class TableGenerator implements ScriptGenerator<Table> {
                 }
             }
             String comment = column.getComment();
-            if (comment != null) {
+            if (!isEmpty(comment)) {
                 buffer.append(dialect.getColumnComment(comment));
             }
             if (iterator.hasNext()) {
@@ -116,13 +113,18 @@ public class TableGenerator implements ScriptGenerator<Table> {
         PrimaryKey primaryKey = table.getPrimaryKey();
         if (primaryKey != null) {
             ConstraintGenerator<PrimaryKey> generator = (ConstraintGenerator<PrimaryKey>)
-                    context.getScriptGenerator(primaryKey);
+                    context.getSqlGenerator(primaryKey);
             buffer.append(", ").append(generator.getConstraintSql(primaryKey, context));
         }
         if (metaDataTypes.contains(INDEX) && dialect.supportsIndexInCreateTable()) {
+            boolean primary = false;
             for (Index index : indexes) {
+                if (!primary && index.isPrimary()) {
+                    primary = true;
+                    continue;
+                }
                 ConstraintGenerator<Index> generator = (ConstraintGenerator<Index>)
-                        context.getScriptGenerator(index);
+                        context.getSqlGenerator(index);
                 String constraint = generator.getConstraintSql(index, context);
                 if (constraint != null) {
                     buffer.append(", ").append(constraint);
@@ -133,7 +135,7 @@ public class TableGenerator implements ScriptGenerator<Table> {
         if (metaDataTypes.contains(FOREIGN_KEY)) {
             for (ForeignKey foreignKey : table.getForeignKeys()) {
                 ConstraintGenerator<ForeignKey> generator = (ConstraintGenerator<ForeignKey>)
-                        context.getScriptGenerator(foreignKey);
+                        context.getSqlGenerator(foreignKey);
                 String constraint = generator.getConstraintSql(foreignKey, context);
                 if (constraint != null) {
                     buffer.append(", ").append(constraint);
@@ -150,29 +152,29 @@ public class TableGenerator implements ScriptGenerator<Table> {
         }
         buffer.append(')');
         String comment = table.getComment();
-        if (comment != null) {
+        if (!isEmpty(comment)) {
             buffer.append(dialect.getTableComment(comment));
         }
         return new String[]{buffer.toString()};
     }
 
     @Override
-    public String[] getDropSql(Table table, ScriptGeneratorContext context) {
+    public String[] getDropSql(Table table, SqlGeneratorContext context) {
         Dialect dialect = context.getDialect();
         StringBuilder buffer = new StringBuilder("DROP TABLE");
         buffer.append(' ');
         boolean ifExistsBeforeTable;
-        if (ifExistsBeforeTable = dialect.supportsIfExistsBeforeTable()) {
+        if (ifExistsBeforeTable = dialect.supportsIfExistsBeforeDropTable()) {
             buffer.append("IF EXISTS");
             buffer.append(' ');
         }
-        buffer.append(table.getQualifiedName(dialect));
+        buffer.append(context.getName(table));
         String cascadeConstraints = dialect.getCascadeConstraintsString();
         if (cascadeConstraints != null) {
             buffer.append(' ');
             buffer.append(cascadeConstraints);
         }
-        if (!ifExistsBeforeTable && dialect.supportsIfExistsAfterTable()) {
+        if (!ifExistsBeforeTable && dialect.supportsIfExistsAfterDropTable()) {
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }

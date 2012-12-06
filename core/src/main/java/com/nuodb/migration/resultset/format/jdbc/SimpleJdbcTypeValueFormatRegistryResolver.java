@@ -27,16 +27,16 @@
  */
 package com.nuodb.migration.resultset.format.jdbc;
 
-import com.nuodb.migration.jdbc.resolve.SimpleDatabaseAwareServiceResolver;
+import com.nuodb.migration.jdbc.resolve.SimpleDatabaseAwareObjectResolver;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleJdbcTypeValueFormatRegistryResolver extends SimpleDatabaseAwareServiceResolver<JdbcTypeValueFormatRegistry>
+public class SimpleJdbcTypeValueFormatRegistryResolver extends SimpleDatabaseAwareObjectResolver<JdbcTypeValueFormatRegistry>
         implements JdbcTypeValueFormatRegistryResolver {
 
     public SimpleJdbcTypeValueFormatRegistryResolver() {
         super(JdbcTypeValueFormatRegistry.class, SimpleJdbcTypeValueFormatRegistry.class);
-        registerService("NuoDB", NuoDBJdbcTypeValueFormatRegistry.class);
+        registerObject("NuoDB", NuoDBJdbcTypeValueFormatRegistry.class);
     }
 }

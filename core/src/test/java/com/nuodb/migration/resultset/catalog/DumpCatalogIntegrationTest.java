@@ -4,7 +4,6 @@ package com.nuodb.migration.resultset.catalog;
 import com.nuodb.migration.TestUtils;
 import com.nuodb.migration.resultset.format.csv.CsvAttributes;
 import com.nuodb.migration.spec.ResourceSpec;
-import com.nuodb.migration.spec.ResourceSpecBase;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -24,7 +23,7 @@ public class DumpCatalogIntegrationTest extends TestUtils {
 
     @Before
     public void setUp() throws Exception {
-        ResourceSpec outputSpec = new ResourceSpecBase();
+        ResourceSpec outputSpec = new ResourceSpec();
         outputSpec.setPath(TEST_PATH);
         outputSpec.setType(CsvAttributes.FORMAT_TYPE);
         this.outputSpec = outputSpec;

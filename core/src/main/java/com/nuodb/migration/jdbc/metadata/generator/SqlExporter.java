@@ -27,37 +27,14 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import static java.lang.System.out;
-
 /**
  * @author Sergey Bushik
  */
-public class StdOutScriptExporter implements ScriptExporter {
+public interface SqlExporter {
 
-    public static final ScriptExporter INSTANCE = new StdOutScriptExporter();
+    void open() throws Exception;
 
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-    private static final String SEMICOLON = ";";
+    void export(String[] queries) throws Exception;
 
-    private StdOutScriptExporter() {
-    }
-
-    @Override
-    public void open() throws Exception {
-    }
-
-    @Override
-    public void export(String[] scripts) throws Exception {
-        for (String script : scripts) {
-            out.print(script);
-            if (!script.endsWith(SEMICOLON)) {
-                out.print(SEMICOLON);
-            }
-            out.print(LINE_SEPARATOR);
-        }
-    }
-
-    @Override
-    public void close() throws Exception {
-    }
+    void close() throws Exception;
 }

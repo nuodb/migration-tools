@@ -25,27 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.connection;
+package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.MigrationException;
-import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverConnectionSpec;
-
-import static java.lang.String.format;
+import com.nuodb.migration.jdbc.metadata.Relational;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionProviderFactory {
+public interface NamingStrategy<T extends Relational> extends GeneratorService<T> {
 
-    public static ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec, boolean autoCommit) {
-        if (connectionSpec == null) {
-            return null;
-        }
-        if (connectionSpec instanceof DriverConnectionSpec) {
-            return new DriverPoolingConnectionProvider((DriverConnectionSpec) connectionSpec, autoCommit);
-        } else {
-            throw new MigrationException(format("Connection specification is not supported %s", connectionSpec));
-        }
-    }
+    String getName(T object, SqlGeneratorContext context);
 }

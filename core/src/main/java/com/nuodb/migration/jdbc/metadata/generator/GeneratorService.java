@@ -27,62 +27,12 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newLinkedHashSet;
+import com.nuodb.migration.jdbc.metadata.Relational;
 
 /**
  * @author Sergey Bushik
  */
-public class CompositeScriptExporter implements ScriptExporter {
+public interface GeneratorService<T extends Relational> {
 
-    private final transient Logger logger = LoggerFactory.getLogger(getClass());
-    private Collection<ScriptExporter> scriptExporters = newLinkedHashSet();
-
-    public CompositeScriptExporter() {
-    }
-
-    public CompositeScriptExporter(ScriptExporter... scriptExporters) {
-        this(newArrayList(scriptExporters));
-    }
-
-    public CompositeScriptExporter(Collection<ScriptExporter> scriptExporters) {
-        this.scriptExporters.addAll(scriptExporters);
-    }
-
-    public void addScriptExporter(ScriptExporter scriptExporter) {
-        this.scriptExporters.add(scriptExporter);
-    }
-
-
-    @Override
-    public void open() throws Exception {
-        for (ScriptExporter scriptExporter : scriptExporters) {
-            scriptExporter.open();
-        }
-    }
-
-    @Override
-    public void export(String[] scripts) throws Exception {
-        for (ScriptExporter scriptExporter : scriptExporters) {
-            scriptExporter.export(scripts);
-        }
-    }
-
-    @Override
-    public void close() throws Exception {
-        for (ScriptExporter scriptExporter : scriptExporters) {
-            try {
-                scriptExporter.close();
-            } catch (Exception exception) {
-                if (logger.isErrorEnabled()) {
-                    logger.error("Error closing script exporter", exception);
-                }
-            }
-        }
-    }
+    Class<T> getObjectType();
 }

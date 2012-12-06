@@ -32,11 +32,9 @@ import com.nuodb.migration.jdbc.metadata.Relational;
 /**
  * @author Sergey Bushik
  */
-public interface ScriptGenerator<T extends Relational> {
+public interface SqlGenerator<T extends Relational> extends GeneratorService<T> {
 
-    Class<T> getRelationalType();
+    String[] getCreateSql(T object, SqlGeneratorContext context);
 
-    String[] getCreateSql(T relational, ScriptGeneratorContext context);
-
-    String[] getDropSql(T relational, ScriptGeneratorContext context);
+    String[] getDropSql(T object, SqlGeneratorContext context);
 }

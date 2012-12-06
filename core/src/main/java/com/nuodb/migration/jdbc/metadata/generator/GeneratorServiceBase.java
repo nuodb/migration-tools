@@ -25,68 +25,23 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata;
+package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.google.common.collect.Maps;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-
-import static com.google.common.collect.Lists.newArrayList;
+import com.nuodb.migration.jdbc.metadata.Relational;
 
 /**
  * @author Sergey Bushik
  */
-public class PrimaryKey extends ConstraintBase {
+public class GeneratorServiceBase<T extends Relational> implements GeneratorService<T> {
 
-    private Map<Integer, Column> columns = Maps.newTreeMap();
+    private Class<T> objectType;
 
-    public PrimaryKey(Identifier identifier) {
-        super(identifier);
+    protected GeneratorServiceBase(Class<T> objectType) {
+        this.objectType = objectType;
     }
 
     @Override
-    public Collection<Column> getColumns() {
-        return newArrayList(columns.values());
-    }
-
-    public void addColumn(Column column, int position) {
-        columns.put(position, column);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        PrimaryKey that = (PrimaryKey) o;
-
-        if (columns != null ? !columns.equals(that.columns) : that.columns != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (columns != null ? columns.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public void output(int indent, StringBuilder buffer) {
-        super.output(indent, buffer);
-
-        buffer.append('(');
-        for (Iterator<Column> iterator = getColumns().iterator(); iterator.hasNext(); ) {
-            Column column = iterator.next();
-            buffer.append(column.getName());
-            if (iterator.hasNext()) {
-                buffer.append(", ");
-            }
-        }
-        buffer.append(')');
+    public Class<T> getObjectType() {
+        return objectType;
     }
 }

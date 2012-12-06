@@ -31,7 +31,6 @@ import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.CommandLine;
 import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.migration.job.Job;
 import com.nuodb.migration.load.LoadJobFactory;
 import com.nuodb.migration.spec.LoadSpec;
 
@@ -40,7 +39,7 @@ import com.nuodb.migration.spec.LoadSpec;
  */
 public class CliLoadJobFactory implements CliRunFactory, CliResources {
 
-    public static final String COMMAND = "load";
+    private static final String COMMAND = "load";
 
     @Override
     public String getCommand() {
@@ -54,10 +53,8 @@ public class CliLoadJobFactory implements CliRunFactory, CliResources {
 
     class CliLoad extends CliRunJob {
 
-        private LoadJobFactory loadJobFactory = new LoadJobFactory();
-
         public CliLoad(OptionToolkit optionToolkit) {
-            super(optionToolkit, COMMAND);
+            super(optionToolkit, COMMAND, new LoadJobFactory());
         }
 
         @Override
@@ -76,12 +73,8 @@ public class CliLoadJobFactory implements CliRunFactory, CliResources {
             loadSpec.setTargetSpec(parseTargetGroup(commandLine, this));
             loadSpec.setInputSpec(parseInputGroup(commandLine, this));
             loadSpec.setTimeZone(parseTimeZone(commandLine, this));
-            loadJobFactory.setLoadSpec(loadSpec);
-        }
 
-        @Override
-        protected Job createJob() {
-            return loadJobFactory.createJob();
+            ((LoadJobFactory)getJobFactory()).setLoadSpec(loadSpec);
         }
     }
 }

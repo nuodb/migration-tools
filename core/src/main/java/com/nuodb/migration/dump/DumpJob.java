@@ -123,7 +123,7 @@ public class DumpJob extends JobBase {
 
         Connection connection = connectionServices.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolveService(metaData));
+        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolveObject(metaData));
 
         CatalogWriter catalogWriter = getCatalog().getCatalogWriter();
         execution.setCatalogWriter(catalogWriter);

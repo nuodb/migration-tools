@@ -97,9 +97,9 @@ public interface CliResources {
     final String TARGET_SCHEMA_OPTION_DESCRIPTION = "com.nuodb.migration.cli.target.schema.option.description";
     final String TARGET_SCHEMA_ARGUMENT_NAME = "com.nuodb.migration.cli.target.schema.argument.name";
 
+    final String GENERATE_SCHEMA_GROUP_NAME = "com.nuodb.migration.cli.generate.schema.group.name";
+
     final String INPUT_GROUP_NAME = "com.nuodb.migration.cli.input.group";
-    final String INPUT_TYPE_OPTION_DESCRIPTION = "com.nuodb.migration.cli.input.type.option.description";
-    final String INPUT_TYPE_ARGUMENT_NAME = "com.nuodb.migration.cli.input.type.argument.name";
     final String INPUT_PATH_OPTION_DESCRIPTION = "com.nuodb.migration.cli.input.path.option.description";
     final String INPUT_PATH_ARGUMENT_NAME = "com.nuodb.migration.cli.input.path.argument.name";
     final String INPUT_OPTION_DESCRIPTION = "com.nuodb.migration.cli.input.option.description";

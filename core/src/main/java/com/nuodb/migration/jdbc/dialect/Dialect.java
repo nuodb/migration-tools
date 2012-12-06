@@ -42,7 +42,7 @@ import java.util.TimeZone;
  */
 public interface Dialect {
 
-    boolean supportsUnique();
+    boolean supportsUniqueInCreateTable();
 
     boolean supportsNotNullUnique();
 
@@ -56,9 +56,9 @@ public interface Dialect {
 
     boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) throws SQLException;
 
-    boolean supportsIfExistsBeforeTable();
+    boolean supportsIfExistsBeforeDropTable();
 
-    boolean supportsIfExistsAfterTable();
+    boolean supportsIfExistsAfterDropTable();
 
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
 
@@ -68,7 +68,7 @@ public interface Dialect {
 
     boolean dropConstraints();
 
-    String quote(String name);
+    String getIdentifier(String identifier);
 
     String getNullColumnString();
 
@@ -77,6 +77,8 @@ public interface Dialect {
     String getColumnComment(String comment);
 
     String getCascadeConstraintsString();
+
+    String getDropForeignKeyString();
 
     String getTableComment(String comment);
 
@@ -93,4 +95,8 @@ public interface Dialect {
     String getUpdateAction(ReferenceAction updateAction);
 
     JdbcTypeRegistry getJdbcTypeRegistry();
+
+    boolean supportsDropIndexIfExists();
+
+    boolean supportsDropIndexOnTable();
 }

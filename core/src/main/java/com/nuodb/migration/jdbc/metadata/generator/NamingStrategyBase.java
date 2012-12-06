@@ -27,14 +27,14 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
+import com.nuodb.migration.jdbc.metadata.Relational;
+
 /**
  * @author Sergey Bushik
  */
-public interface ScriptExporter {
+public abstract class NamingStrategyBase<T extends Relational> extends GeneratorServiceBase<T> implements NamingStrategy<T> {
 
-    void open() throws Exception;
-
-    void export(String[] scripts) throws Exception;
-
-    void close() throws Exception;
+    protected NamingStrategyBase(Class<T> objectType) {
+        super(objectType);
+    }
 }

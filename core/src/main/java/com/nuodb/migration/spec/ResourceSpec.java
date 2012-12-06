@@ -27,9 +27,15 @@
  */
 package com.nuodb.migration.spec;
 
-public interface ResourceSpec extends Spec {
+public class ResourceSpec extends SpecBase implements Spec {
 
-    public String getPath();
+    private String path;
 
-    public void setPath(String path);
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
 }

@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -59,9 +60,14 @@ public class Index extends ConstraintBase {
         columns.put(position, column);
     }
 
+    public boolean isPrimary() {
+        PrimaryKey primaryKey = getTable().getPrimaryKey();
+        return primaryKey != null && getColumns().equals(primaryKey.getColumns());
+    }
+
     @Override
     public Collection<Column> getColumns() {
-        return columns.values();
+        return newArrayList(columns.values());
     }
 
     public String getFilterCondition() {

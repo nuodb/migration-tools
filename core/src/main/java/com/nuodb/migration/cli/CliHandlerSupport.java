@@ -118,11 +118,11 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
             }
             handleHelp(options, root);
         } else if (options.hasOption(COMMAND_OPTION)) {
-            CliRun runnable = options.getValue(COMMAND_OPTION);
+            CliRun cliRun = options.getValue(COMMAND_OPTION);
             if (logger.isTraceEnabled()) {
-                logger.trace(format("Running %1$s command", runnable.getCommand()));
+                logger.trace(format("Running %1$s command", cliRun.getCommand()));
             }
-            runnable.run();
+            cliRun.run();
         } else if (options.hasOption(CONFIG_OPTION)) {
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Handling --config %1$s option", options.getValue("config")));

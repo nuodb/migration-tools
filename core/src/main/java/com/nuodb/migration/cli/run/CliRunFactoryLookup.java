@@ -42,6 +42,7 @@ public class CliRunFactoryLookup {
     public CliRunFactoryLookup() {
         register(new CliDumpJobFactory());
         register(new CliLoadJobFactory());
+        register(new CliGenerateSchemaJobFactory());
     }
 
     public Collection<String> getCommands() {

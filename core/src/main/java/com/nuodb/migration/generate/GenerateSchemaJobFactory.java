@@ -33,7 +33,10 @@ import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
-import com.nuodb.migration.spec.*;
+import com.nuodb.migration.spec.ConnectionSpec;
+import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.spec.GenerateSchemaSpec;
+import com.nuodb.migration.spec.ResourceSpec;
 
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
@@ -48,15 +51,15 @@ public class GenerateSchemaJobFactory extends ConnectionProviderFactory implemen
     public GenerateSchemaJob createJob() {
         isNotNull(generateSchemaSpec, "Generate schema spec is required");
 
-        GenerateSchemaJob job = new GenerateSchemaJob();
-        job.setOutputSpec(getGenerateSchemaSpec().getOutputSpec());
+        GenerateSchemaJob generateSchemaJob = new GenerateSchemaJob();
+        generateSchemaJob.setOutputSpec(getGenerateSchemaSpec().getOutputSpec());
 
         ConnectionSpec sourceConnectionSpec = generateSchemaSpec.getSourceConnectionSpec();
-        job.setSourceConnectionProvider(createConnectionProvider(sourceConnectionSpec, false));
+        generateSchemaJob.setSourceConnectionProvider(createConnectionProvider(sourceConnectionSpec, false));
 
         ConnectionSpec targetConnectionSpec = generateSchemaSpec.getTargetConnectionSpec();
-        job.setTargetConnectionProvider(createConnectionProvider(targetConnectionSpec, false));
-        return job;
+        generateSchemaJob.setTargetConnectionProvider(createConnectionProvider(targetConnectionSpec, false));
+        return generateSchemaJob;
     }
 
     public GenerateSchemaSpec getGenerateSchemaSpec() {
@@ -67,13 +70,13 @@ public class GenerateSchemaJobFactory extends ConnectionProviderFactory implemen
         this.generateSchemaSpec = generateSchemaSpec;
     }
 
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) {
         GenerateSchemaJobFactory jobFactory = new GenerateSchemaJobFactory();
         jobFactory.setGenerateSchemaSpec(new GenerateSchemaSpec() {
             {
                 DriverConnectionSpec sourceConnectionSpec = new DriverConnectionSpec();
                 sourceConnectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
-                sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/mysql");
+                sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/generate-schema-2");
                 sourceConnectionSpec.setUsername("root");
 
                 DriverConnectionSpec targetConnectionSpec = new DriverConnectionSpec();
@@ -83,8 +86,9 @@ public class GenerateSchemaJobFactory extends ConnectionProviderFactory implemen
                 targetConnectionSpec.setPassword("goalie");
                 targetConnectionSpec.setSchema("hockey");
 
-                ResourceSpec outputSpec = new ResourceSpecBase();
+                ResourceSpec outputSpec = new ResourceSpec();
                 outputSpec.setPath("/tmp/test/schema.sql");
+
                 setOutputSpec(outputSpec);
                 setSourceConnectionSpec(targetConnectionSpec);
             }

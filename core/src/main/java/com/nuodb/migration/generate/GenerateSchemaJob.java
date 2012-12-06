@@ -88,12 +88,12 @@ public class GenerateSchemaJob extends JobBase {
         ConnectionServices sourceConnectionServices = execution.getSourceConnectionServices();
         Database sourceDatabase = sourceConnectionServices.createDatabaseInspector().inspect();
 
-        Collection<ScriptExporter> scriptExporters = Lists.newArrayList();
+        Collection<SqlExporter> sqlExporters = Lists.newArrayList();
         if (execution.getTargetConnectionServices() != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Exporting schema to the target database");
             }
-            scriptExporters.add(new ConnectionScriptExporter(
+            sqlExporters.add(new ConnectionSqlExporter(
                     execution.getTargetConnectionServices()
             ));
         }
@@ -101,18 +101,18 @@ public class GenerateSchemaJob extends JobBase {
             if (logger.isDebugEnabled()) {
                 logger.debug(format("Exporting schema to file %s", outputSpec.getPath()));
             }
-            scriptExporters.add(new FileScriptExporter(
+            sqlExporters.add(new FileSqlExporter(
                     outputSpec.getPath(), OUTPUT_ENCODING));
         }
         // Fallback to standard output if neither target connection nor target file are specified
-        if (scriptExporters.isEmpty()) {
-            scriptExporters.add(StdOutScriptExporter.INSTANCE);
+        if (sqlExporters.isEmpty()) {
+            sqlExporters.add(StdOutSqlExporter.INSTANCE);
         }
 
-        ScriptGenerate scriptGenerate = new ScriptGenerate();
-        scriptGenerate.setDialect(new NuoDBDialect());
-        scriptGenerate.setScriptExporter(new CompositeScriptExporter(scriptExporters));
-        scriptGenerate.generate(sourceDatabase);
+        SchemaGenerate schemaGenerate = new SchemaGenerate();
+        schemaGenerate.setDialect(new NuoDBDialect());
+        schemaGenerate.setSqlExporter(new CompositeSqlExporter(sqlExporters));
+        schemaGenerate.generate(sourceDatabase);
     }
 
     public ConnectionProvider getSourceConnectionProvider() {

@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 
 public class Table extends HasIdentifierBase {
@@ -71,11 +72,11 @@ public class Table extends HasIdentifierBase {
     public String getQualifiedName(Dialect dialect, String catalog, String schema) {
         StringBuilder buffer = new StringBuilder();
         if (catalog != null) {
-            buffer.append(dialect != null ? dialect.quote(catalog) : catalog);
+            buffer.append(dialect != null ? dialect.getIdentifier(catalog) : catalog);
             buffer.append('.');
         }
         if (schema != null) {
-            buffer.append(dialect != null ? dialect.quote(schema) : schema);
+            buffer.append(dialect != null ? dialect.getIdentifier(schema) : schema);
             buffer.append('.');
         }
         buffer.append(getQuotedName(dialect));
@@ -167,7 +168,7 @@ public class Table extends HasIdentifierBase {
     }
 
     public Collection<Column> getColumns() {
-        return columns.values();
+        return newArrayList(columns.values());
     }
 
     public Collection<String> getChecks() {

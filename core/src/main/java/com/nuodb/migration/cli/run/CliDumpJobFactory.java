@@ -32,24 +32,20 @@ import com.nuodb.migration.cli.parse.CommandLine;
 import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.dump.DumpJobFactory;
-import com.nuodb.migration.job.Job;
 import com.nuodb.migration.spec.DumpSpec;
 
 /**
- * The Factory instantiates a {@link CliDumpJobFactory.CliDumpJob} which is a setValue of groups of options for source database connection spec
- * {@link CliRunSupport#createSourceGroup}, spec of withConnection getValue & type via {@link CliRunSupport#createOutputGroup},
- * table option {@link CliRunSupport#createSelectQueryGroup} and after a validation is passed assembles command line
- * option arguments into a {@link DumpSpec} object.
+ * The factory instantiates a {@link CliDumpJobFactory.CliDumpJob}.
  *
  * @author Sergey Bushik
  */
 public class CliDumpJobFactory implements CliRunFactory, CliResources {
 
     /**
-     * The "withConnection" literal command which is matched against the value on the command line. If matched the CliDump
-     * object is constructed with {@link #createCliRun(OptionToolkit)} method.
+     * The "dump" literal command which is matched against the value on the command line. If matched the CliDump object
+     * is constructed with {@link #createCliRun(OptionToolkit)} method.
      */
-    public static final String COMMAND = "dump";
+    private static final String COMMAND = "dump";
 
     @Override
     public String getCommand() {
@@ -62,15 +58,13 @@ public class CliDumpJobFactory implements CliRunFactory, CliResources {
     }
 
     /**
-     * An implementation of {@link CliRunAdapter} which assembles withConnection spec from provided command line after the
-     * validation is passed.
+     * An implementation of {@link CliRunAdapter} which assembles withConnection spec from provided command line after
+     * the validation is passed.
      */
     class CliDumpJob extends CliRunJob {
 
-        private DumpJobFactory dumpJobFactory = new DumpJobFactory();
-
         public CliDumpJob(OptionToolkit optionToolkit) {
-            super(optionToolkit, COMMAND);
+            super(optionToolkit, COMMAND, new DumpJobFactory());
         }
 
         @Override
@@ -93,12 +87,8 @@ public class CliDumpJobFactory implements CliRunFactory, CliResources {
             dumpSpec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
             dumpSpec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine, this));
             dumpSpec.setTimeZone(parseTimeZone(commandLine, this));
-            dumpJobFactory.setDumpSpec(dumpSpec);
-        }
 
-        @Override
-        protected Job createJob() {
-            return dumpJobFactory.createJob();
+            ((DumpJobFactory) getJobFactory()).setDumpSpec(dumpSpec);
         }
     }
 }

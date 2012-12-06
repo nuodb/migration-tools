@@ -28,7 +28,6 @@
 package com.nuodb.migration.jdbc.dialect;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimeZone;
@@ -40,6 +39,11 @@ public class MySQLDialect extends SQL2003Dialect {
 
     public MySQLDialect() {
         addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
+    }
+
+    @Override
+    public String getDropForeignKeyString() {
+        return "DROP FOREIGN KEY";
     }
 
     @Override
@@ -121,7 +125,7 @@ public class MySQLDialect extends SQL2003Dialect {
     }
 
     @Override
-    public boolean supportsIfExistsBeforeTable() {
+    public boolean supportsIfExistsBeforeDropTable() {
         return true;
     }
 }

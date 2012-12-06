@@ -25,65 +25,52 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata.generator;
+package com.nuodb.migration.cli.run;
 
-
-import com.google.common.io.Files;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.nio.charset.Charset;
+import com.nuodb.migration.cli.CliResources;
+import com.nuodb.migration.cli.parse.CommandLine;
+import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.option.OptionToolkit;
+import com.nuodb.migration.generate.GenerateSchemaJobFactory;
+import com.nuodb.migration.spec.GenerateSchemaSpec;
 
 /**
  * @author Sergey Bushik
  */
-public class FileScriptExporter implements ScriptExporter {
+public class CliGenerateSchemaJobFactory extends GenerateSchemaJobFactory implements CliRunFactory, CliResources {
 
-    private static final String SEMICOLON = ";";
-    private int lines = 0;
-    private File file;
-    private String encoding;
-    private BufferedWriter writer;
+    private static final String COMMAND = "generate";
 
-    public FileScriptExporter(String file, String encoding) {
-        this(new File(file), encoding);
-    }
-
-    public FileScriptExporter(File file, String encoding) {
-        this.file = file;
-        this.encoding = encoding;
+    @Override
+    public String getCommand() {
+        return COMMAND;
     }
 
     @Override
-    public void open() throws Exception {
-        lines = 0;
-        writer = Files.newWriter(file, Charset.forName(encoding));
+    public CliRun createCliRun(OptionToolkit optionToolkit) {
+        return new CliGenerateSchema(optionToolkit);
     }
 
-    @Override
-    public void export(String[] scripts) throws Exception {
-        if (writer == null) {
-            throw new ScriptGeneratorException("File is not opened");
-        }
-        if (scripts == null) {
-            return;
-        }
-        for (int i = 0, length = scripts.length; i < length; i++) {
-            String script = scripts[i];
-            if (lines++ > 0) {
-                writer.newLine();
-            }
-            writer.write(script);
-            if (!script.endsWith(";")) {
-                writer.write(SEMICOLON);
-            }
+    class CliGenerateSchema extends CliRunJob {
 
+        public CliGenerateSchema(OptionToolkit optionToolkit) {
+            super(optionToolkit, COMMAND, new GenerateSchemaJobFactory());
         }
-    }
 
-    @Override
-    public void close() throws Exception {
-        writer.flush();
-        writer.close();
+        @Override
+        protected Option createOption() {
+            return newGroup()
+                    .withName(getResources().getMessage(GENERATE_SCHEMA_GROUP_NAME))
+                    .withOption(createSourceGroup())
+                    .withRequired(true).build();
+        }
+
+        @Override
+        protected void bind(CommandLine commandLine) {
+            GenerateSchemaSpec generateSchemaSpec = new GenerateSchemaSpec();
+            generateSchemaSpec.setSourceConnectionSpec(parseSourceGroup(commandLine, this));
+            ((GenerateSchemaJobFactory) getJobFactory()).setGenerateSchemaSpec(generateSchemaSpec);
+        }
     }
 }
+

@@ -54,7 +54,7 @@ import static com.nuodb.migration.utils.ReflectionUtils.newInstance;
 import static java.lang.String.format;
 
 /**
- * Reads database meta data and creates its meta model. Root meta model object is {@link Database} containing set of
+ * Reads database meta data and creates its meta model. Root meta model object is {@link com.nuodb.migration.jdbc.metadata.Database} containing set of
  * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
  *
  * @author Sergey Bushik
@@ -83,7 +83,7 @@ public class DatabaseInspector {
         withMetaDataReader(new PrimaryKeyReader());
 
         MetaDataReaderResolver metaDataReader = new MetaDataReaderResolver(COLUMN_CHECK);
-        metaDataReader.registerService("NuoDB", NuoDBColumnCheckReader.class);
+        metaDataReader.registerObject("NuoDB", NuoDBColumnCheckReader.class);
         withMetaDataReader(metaDataReader);
     }
 
@@ -121,7 +121,7 @@ public class DatabaseInspector {
             logger.debug(format("DatabaseInfo: %s", databaseInfo));
         }
         database.setDatabaseInfo(databaseInfo);
-        database.setDialect(getDialectResolver().resolveService(metaData));
+        database.setDialect(getDialectResolver().resolveObject(metaData));
     }
 
     protected void readMetaData(Database database) throws SQLException {

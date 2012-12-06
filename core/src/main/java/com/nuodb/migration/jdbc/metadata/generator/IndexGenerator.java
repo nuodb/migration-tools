@@ -36,18 +36,66 @@ import java.util.Iterator;
 /**
  * @author Sergey Bushik
  */
-public class IndexGenerator implements ConstraintGenerator<Index>{
+public class IndexGenerator implements ConstraintGenerator<Index> {
 
     @Override
-    public Class<Index> getRelationalType() {
+    public Class<Index> getObjectType() {
         return Index.class;
     }
 
     @Override
-    public String getConstraintSql(Index index, ScriptGeneratorContext context) {
-        boolean nullable = false;
+    public String[] getCreateSql(Index index, SqlGeneratorContext context) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("CREATE");
+        if (index.isUnique()) {
+            buffer.append(" UNIQUE");
+        }
+        buffer.append(" INDEX ");
+        buffer.append(context.getIdentifier(index));
+        buffer.append(" ON ");
+        buffer.append(context.getIdentifier(index.getTable()));
+        buffer.append(" (");
+        for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext(); ) {
+            Column column = iterator.next();
+            buffer.append(context.getIdentifier(column));
+            if (iterator.hasNext()) {
+                buffer.append(", ");
+            }
+        }
+        buffer.append(')');
+        return new String[]{buffer.toString()};
+    }
+
+    @Override
+    public String[] getDropSql(Index index, SqlGeneratorContext context) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("DROP INDEX ");
+        buffer.append(context.getIdentifier(index));
+
         Dialect dialect = context.getDialect();
-        StringBuilder buffer = new StringBuilder("UNIQUE (");
+        if (dialect.supportsDropIndexOnTable()) {
+            buffer.append(" ON ");
+            buffer.append(context.getIdentifier(index.getTable()));
+            buffer.append(' ');
+        }
+
+        if (dialect.supportsDropIndexIfExists()) {
+            buffer.append(' ');
+            buffer.append("IF EXISTS");
+        }
+        return new String[]{buffer.toString()};
+    }
+
+    public String getConstraintSql(Index index, SqlGeneratorContext context) {
+        Dialect dialect = context.getDialect();
+        StringBuilder buffer = new StringBuilder();
+        if (index.isUnique()) {
+            buffer.append("UNIQUE");
+        } else {
+            buffer.append("INDEX");
+        }
+        buffer.append(" (");
+        boolean nullable = false;
         for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
             if (column.isNullable()) {
@@ -60,15 +108,5 @@ public class IndexGenerator implements ConstraintGenerator<Index>{
         }
         buffer.append(')');
         return !nullable || dialect.supportsNotNullUnique() ? buffer.toString() : null;
-    }
-
-    @Override
-    public String[] getCreateSql(Index index, ScriptGeneratorContext context) {
-        return new String[]{};
-    }
-
-    @Override
-    public String[] getDropSql(Index index, ScriptGeneratorContext context) {
-        return new String[]{};
     }
 }

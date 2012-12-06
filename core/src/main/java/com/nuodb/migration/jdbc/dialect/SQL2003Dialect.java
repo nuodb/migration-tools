@@ -40,6 +40,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.Collection;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 import static java.sql.Connection.*;
 import static org.apache.commons.lang3.StringUtils.endsWith;
@@ -50,6 +51,7 @@ import static org.apache.commons.lang3.StringUtils.startsWith;
  */
 public class SQL2003Dialect implements Dialect {
 
+    private static final Pattern IDENTIFIER = Pattern.compile("[a-zA-Z0-9_]*");
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private JdbcTypeRegistry jdbcTypeRegistry;
 
@@ -68,6 +70,7 @@ public class SQL2003Dialect implements Dialect {
         addTypeName(Types.BIGINT, "BIGINT");
         addTypeName(Types.FLOAT, "FLOAT({P})");
         addTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
+        addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
         addTypeName(Types.REAL, "REAL");
 
         addTypeName(Types.DATE, "DATE");
@@ -89,20 +92,32 @@ public class SQL2003Dialect implements Dialect {
         addTypeName(Types.NCLOB, "NCLOB");
     }
 
+    @Override
+    public String getIdentifier(String identifier) {
+        if (identifier == null) {
+            return null;
+        }
+        if (IDENTIFIER.matcher(identifier).matches()) {
+            return getUnquotedIdentifier(identifier);
+        } else {
+            return getQuotedIdentifier(identifier);
+        }
+    }
+
+    protected String getUnquotedIdentifier(String identifier) {
+        return identifier.toUpperCase();
+    }
+
+    protected String getQuotedIdentifier(String identifier) {
+        return openQuote() + identifier + closeQuote();
+    }
+
     protected char openQuote() {
         return '"';
     }
 
     protected char closeQuote() {
         return '"';
-    }
-
-    @Override
-    public String quote(String name) {
-        if (name == null) {
-            return null;
-        }
-        return openQuote() + name + closeQuote();
     }
 
     @Override
@@ -116,7 +131,7 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public boolean supportsUnique() {
+    public boolean supportsUniqueInCreateTable() {
         return true;
     }
 
@@ -168,6 +183,16 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
+    public boolean supportsDropIndexIfExists() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsDropIndexOnTable() {
+        return false;
+    }
+
+    @Override
     public String getColumnComment(String comment) {
         return "";
     }
@@ -194,6 +219,9 @@ public class SQL2003Dialect implements Dialect {
 
     @Override
     public String getDefaultValue(int typeCode, String defaultValue) {
+        if (defaultValue == null) {
+            return null;
+        }
         StringBuilder buffer = new StringBuilder(defaultValue.length() + 2);
         if (!startsWith(defaultValue, "'")) {
             buffer.append("'");
@@ -211,18 +239,23 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public boolean supportsIfExistsBeforeTable() {
+    public boolean supportsIfExistsBeforeDropTable() {
         return false;
     }
 
     @Override
-    public boolean supportsIfExistsAfterTable() {
+    public boolean supportsIfExistsAfterDropTable() {
         return false;
     }
 
     @Override
     public String getCascadeConstraintsString() {
-        return "";
+        return null;
+    }
+
+    @Override
+    public String getDropForeignKeyString() {
+        return "DROP CONSTRAINT";
     }
 
     @Override

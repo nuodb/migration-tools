@@ -32,7 +32,7 @@ import com.nuodb.migration.jdbc.metadata.Constraint;
 /**
  * @author Sergey Bushik
  */
-public interface ConstraintGenerator<T extends Constraint> extends ScriptGenerator<T> {
+public interface ConstraintGenerator<T extends Constraint> extends SqlGenerator<T> {
 
-    String getConstraintSql(T constraint, ScriptGeneratorContext context);
+    String getConstraintSql(T constraint, SqlGeneratorContext sqlGeneratorContext);
 }

@@ -68,7 +68,7 @@ public class PostgreSQLDialect extends SQL2003Dialect {
     }
 
     @Override
-    public boolean supportsIfExistsBeforeTable() {
+    public boolean supportsIfExistsBeforeDropTable() {
         return true;
     }
 

@@ -27,22 +27,19 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.resolve.SimpleDatabaseAwareServiceResolver;
-import com.nuodb.migration.utils.ReflectionUtils;
-
-import java.sql.DatabaseMetaData;
+import com.nuodb.migration.jdbc.resolve.SimpleDatabaseAwareObjectResolver;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleDialectResolver extends SimpleDatabaseAwareServiceResolver<Dialect> implements DialectResolver {
+public class SimpleDialectResolver extends SimpleDatabaseAwareObjectResolver<Dialect> implements DialectResolver {
 
     public SimpleDialectResolver() {
         super(Dialect.class, SQL2003Dialect.class);
-        registerService("MySQL", MySQLDialect.class);
-        registerService("PostgreSQL", PostgreSQLDialect.class);
-        registerService("Microsoft SQL Server", SQLServerDialect.class);
-        registerService("Oracle", OracleDialect.class);
-        registerService("NuoDB", NuoDBDialect.class);
+        registerObject("MySQL", MySQLDialect.class);
+        registerObject("PostgreSQL", PostgreSQLDialect.class);
+        registerObject("Microsoft SQL Server", SQLServerDialect.class);
+        registerObject("Oracle", OracleDialect.class);
+        registerObject("NuoDB", NuoDBDialect.class);
     }
 }
