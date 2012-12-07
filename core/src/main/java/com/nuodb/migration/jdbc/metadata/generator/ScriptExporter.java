@@ -27,21 +27,14 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.metadata.Table;
-
 /**
  * @author Sergey Bushik
  */
-public class TableNamingStrategy extends NamingStrategyBase<Table> {
+public interface ScriptExporter {
 
-    public TableNamingStrategy() {
-        super(Table.class);
-    }
+    void open() throws Exception;
 
-    @Override
-    public String getName(Table table, SqlGeneratorContext context) {
-        return table.getQualifiedName(context.getDialect(),
-                context.getCatalog(),
-                context.getSchema());
-    }
+    void exportScripts(String[] scripts) throws Exception;
+
+    void close() throws Exception;
 }

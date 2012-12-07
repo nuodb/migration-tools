@@ -38,8 +38,29 @@ public class SimpleValueModel implements ValueModel {
     private int precision;
     private int scale;
 
-    public SimpleValueModel(ValueModel valueModel) {
-        copy(valueModel);
+    public SimpleValueModel() {
+    }
+
+    public SimpleValueModel(String name) {
+        this.name = name;
+    }
+
+    public SimpleValueModel(String name, int typeCode) {
+        this.name = name;
+        this.typeCode = typeCode;
+    }
+
+    public SimpleValueModel(String name, int typeCode, String typeName) {
+        this.name = name;
+        this.typeCode = typeCode;
+        this.typeName = typeName;
+    }
+
+    public SimpleValueModel(String name, int typeCode, String typeName, int precision) {
+        this.name = name;
+        this.typeCode = typeCode;
+        this.typeName = typeName;
+        this.precision = precision;
     }
 
     public SimpleValueModel(String name, int typeCode, String typeName, int precision, int scale) {
@@ -48,6 +69,10 @@ public class SimpleValueModel implements ValueModel {
         this.typeName = typeName;
         this.precision = precision;
         this.scale = scale;
+    }
+
+    public SimpleValueModel(ValueModel valueModel) {
+        copy(valueModel);
     }
 
     @Override

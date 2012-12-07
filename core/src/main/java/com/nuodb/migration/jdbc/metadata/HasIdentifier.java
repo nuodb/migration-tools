@@ -34,6 +34,8 @@ import com.nuodb.migration.jdbc.dialect.Dialect;
  */
 public interface HasIdentifier extends Relational, Comparable<HasIdentifier> {
 
+    boolean isQualified();
+
     String getName();
 
     void setName(String name);
@@ -42,5 +44,11 @@ public interface HasIdentifier extends Relational, Comparable<HasIdentifier> {
 
     void setIdentifier(Identifier identifier);
 
-    String getQuotedName(Dialect dialect);
+    String getName(Dialect dialect);
+
+    String getQualifiedName(Dialect dialect);
+
+    String getQualifiedName(String catalog, String schema);
+
+    String getQualifiedName(Dialect dialect, String catalog, String schema);
 }

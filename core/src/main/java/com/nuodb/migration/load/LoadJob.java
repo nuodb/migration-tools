@@ -32,7 +32,8 @@ import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.dialect.DialectResolver;
-import com.nuodb.migration.jdbc.metadata.*;
+import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
@@ -106,7 +107,7 @@ public class LoadJob extends JobBase {
 
         DatabaseInspector databaseInspector = connectionServices.createDatabaseInspector();
         databaseInspector.withMetaDataTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-        databaseInspector.withDatabaseDialectResolver(getDialectResolver());
+        databaseInspector.withDialectResolver(getDialectResolver());
 
         Database database = databaseInspector.inspect();
         execution.setDatabase(database);
@@ -161,14 +162,16 @@ public class LoadJob extends JobBase {
     protected void load(final LoadJobExecution execution, final ResultSetInput resultSetInput,
                         String tableName) throws SQLException {
         resultSetInput.readBegin();
-
-        ValueModelList<ValueModel> values = resultSetInput.getValueModelList();
+        ValueModelList<ValueModel> valueModelList = resultSetInput.getValueModelList();
+        if (valueModelList.isEmpty()) {
+            return;
+        }
         Database database = execution.getDatabase();
         Table table = database.findTable(tableName);
-        for (ValueModel value : values) {
-            value.copy(table.getColumn(value.getName()));
+        for (ValueModel valueModel : valueModelList) {
+            valueModel.copy(table.getColumn(valueModel.getName()));
         }
-        final InsertQuery query = createInsertQuery(table, values);
+        final InsertQuery query = createInsertQuery(table, valueModelList);
 
         StatementTemplate template = new StatementTemplate(execution.getConnectionServices().getConnection());
         template.execute(

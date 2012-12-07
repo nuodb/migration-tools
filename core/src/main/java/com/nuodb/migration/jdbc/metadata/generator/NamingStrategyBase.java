@@ -37,4 +37,14 @@ public abstract class NamingStrategyBase<T extends Relational> extends Generator
     protected NamingStrategyBase(Class<T> objectType) {
         super(objectType);
     }
+
+    @Override
+    public String getName(T object, ScriptGeneratorContext context) {
+        return getName(object, context, true);
+    }
+
+    @Override
+    public String getQualifiedName(T object, ScriptGeneratorContext context) {
+        return getQualifiedName(object, context, true);
+    }
 }

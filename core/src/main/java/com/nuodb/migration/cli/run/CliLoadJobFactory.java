@@ -70,7 +70,7 @@ public class CliLoadJobFactory implements CliRunFactory, CliResources {
         @Override
         protected void bind(CommandLine commandLine) {
             LoadSpec loadSpec = new LoadSpec();
-            loadSpec.setTargetSpec(parseTargetGroup(commandLine, this));
+            loadSpec.setTargetConnectionSpec(parseTargetGroup(commandLine, this));
             loadSpec.setInputSpec(parseInputGroup(commandLine, this));
             loadSpec.setTimeZone(parseTimeZone(commandLine, this));
 

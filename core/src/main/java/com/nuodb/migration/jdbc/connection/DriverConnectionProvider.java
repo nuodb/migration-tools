@@ -173,7 +173,7 @@ public class DriverConnectionProvider implements ConnectionProvider {
             if (GET_CONNECTION.equals(methodName)) {
                 return getConnection(connection);
             }
-            return ReflectionUtils.invokeExactMethod(connection, methodName, args);
+            return ReflectionUtils.invokeMethod(connection, method, args);
         }
     }
 

@@ -41,6 +41,8 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
+
 /**
  * @author Sergey Bushik
  */
@@ -82,14 +84,12 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
     }
 
     protected void initValueFormatModelList() {
-        ValueModelList<ValueModel> valueModelList = getValueModelList();
-        if (valueModelList == null) {
-            setValueModelList(createValueModelList());
+        try {
+            setValueModelList(createValueModelList(resultSet));
+        } catch (SQLException exception) {
+            throw new ResultSetOutputException(exception);
         }
-        ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
-        if (valueFormatModelList == null) {
-            setValueFormatModelList(createColumnValueModelList());
-        }
+        setValueFormatModelList(createColumnValueModelList());
     }
 
     protected ValueModelList<ValueFormatModel> createColumnValueModelList() {
@@ -101,16 +101,6 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
             valueFormatModelList.add(valueFormatModel);
         }
         return valueFormatModelList;
-    }
-
-    protected ValueModelList<ValueModel> createValueModelList() {
-        ValueModelList valueModelList;
-        try {
-            valueModelList = ValueModelFactory.createValueModelList(resultSet);
-        } catch (SQLException exception) {
-            throw new ResultSetOutputException(exception);
-        }
-        return valueModelList;
     }
 
     protected ValueFormatModel createColumnValueModel(ValueModel valueModel, int index) {
@@ -134,21 +124,21 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
 
     @Override
     public final void writeRow() {
-        writeColumnValues(getColumnValues());
+        writeRow(getColumnValues());
     }
 
     protected String[] getColumnValues() {
         int index = 0;
         final ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
         final String[] values = new String[valueFormatModelList.size()];
-        for (ValueFormatModel columnValueFormatModel : valueFormatModelList) {
-            values[index++] = columnValueFormatModel.getValueFormat().getValue(
-                    columnValueFormatModel.getValueAccess(), columnValueFormatModel.getValueAccessOptions());
+        for (ValueFormatModel valueFormatModel : valueFormatModelList) {
+            values[index++] = valueFormatModel.getValueFormat().getValue(
+                    valueFormatModel.getValueAccess(), valueFormatModel.getValueAccessOptions());
         }
         return values;
     }
 
-    protected abstract void writeColumnValues(String[] values);
+    protected abstract void writeRow(String[] values);
 
     @Override
     public void writeEnd() {

@@ -29,20 +29,17 @@ package com.nuodb.migration.resultset.format.bson;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
-import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
 import static com.fasterxml.jackson.core.JsonToken.*;
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModel;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 
@@ -81,18 +78,13 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
 
     @Override
     protected void doReadBegin() {
-        ValueModelList<ValueModel> valueModelList = null;
+        ValueModelList<ValueModel> valueModelList = createValueModelList();
         try {
             if (isNextToken(START_OBJECT) && isNextField(COLUMNS_FIELD) && isNextToken(START_OBJECT)) {
-                List<String> columns = Lists.newArrayList();
                 while (isNextField(COLUMN_FIELD) && isNextToken(VALUE_STRING)) {
-                    columns.add(reader.getText());
+                    valueModelList.add(createValueModel(reader.getText()));
                 }
                 reader.nextToken();
-                int[] columnTypes = new int[columns.size()];
-                Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-                valueModelList = createValueModelList(columns.toArray(new String[columns.size()]),
-                        columnTypes);
             }
             reader.nextToken();
             reader.nextToken();
@@ -121,7 +113,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
 
     @Override
     public void readRow() {
-        readRow(iterator.next());
+        setColumnValues(iterator.next());
     }
 
     protected String[] doReadRow() {

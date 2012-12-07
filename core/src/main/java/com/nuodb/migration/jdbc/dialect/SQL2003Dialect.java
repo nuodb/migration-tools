@@ -97,18 +97,18 @@ public class SQL2003Dialect implements Dialect {
         if (identifier == null) {
             return null;
         }
-        if (IDENTIFIER.matcher(identifier).matches()) {
-            return getUnquotedIdentifier(identifier);
+        if (isQuoteIdentifier(identifier)) {
+            return getIdentifierQuoted(identifier);
         } else {
-            return getQuotedIdentifier(identifier);
+            return identifier;
         }
     }
 
-    protected String getUnquotedIdentifier(String identifier) {
-        return identifier.toUpperCase();
+    protected boolean isQuoteIdentifier(String identifier) {
+        return !IDENTIFIER.matcher(identifier).matches();
     }
 
-    protected String getQuotedIdentifier(String identifier) {
+    public String getIdentifierQuoted(String identifier) {
         return openQuote() + identifier + closeQuote();
     }
 

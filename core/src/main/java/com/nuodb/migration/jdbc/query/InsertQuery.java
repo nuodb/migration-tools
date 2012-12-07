@@ -89,7 +89,7 @@ public class InsertQuery implements Query {
     public String toQuery() {
         StringBuilder query = new StringBuilder();
         query.append("INSERT INTO ")
-                .append(qualifyNames ? table.getQualifiedName(dialect) : table.getQuotedName(dialect));
+                .append(qualifyNames ? table.getQualifiedName(dialect) : table.getName(dialect));
         if (columns.size() == 0) {
             query.append(' ').append(dialect.getNoColumnsInsertString());
         } else {
@@ -97,7 +97,7 @@ public class InsertQuery implements Query {
             Iterator<Column> names = columns.keySet().iterator();
             while (names.hasNext()) {
                 Column column = names.next();
-                query.append(column.getQuotedName(dialect));
+                query.append(column.getName(dialect));
                 if (names.hasNext()) {
                     query.append(", ");
                 }

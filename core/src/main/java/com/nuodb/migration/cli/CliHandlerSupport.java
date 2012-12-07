@@ -27,16 +27,16 @@
  */
 package com.nuodb.migration.cli;
 
-import com.nuodb.migration.cli.parse.Group;
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionException;
-import com.nuodb.migration.cli.parse.OptionSet;
+import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.cli.parse.help.HelpFormatter;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
+import com.nuodb.migration.cli.parse.parser.ParserImpl;
 import com.nuodb.migration.cli.run.CliRun;
 import com.nuodb.migration.cli.run.CliRunFactory;
 import com.nuodb.migration.cli.run.CliRunFactoryLookup;
+import com.nuodb.migration.cli.run.CliRunJob;
 import com.nuodb.migration.context.support.ApplicationSupport;
+import com.nuodb.migration.job.JobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +56,7 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
 
     private OptionToolkit optionToolkit;
     private CliRunFactoryLookup cliRunFactoryLookup;
+    private Parser parser = new ParserImpl();
 
     protected CliHandlerSupport() {
         this(new OptionToolkit());
@@ -68,6 +69,10 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
     protected CliHandlerSupport(OptionToolkit optionToolkit, CliRunFactoryLookup cliRunFactoryLookup) {
         this.optionToolkit = optionToolkit;
         this.cliRunFactoryLookup = cliRunFactoryLookup;
+    }
+
+    public Parser getParser() {
+        return parser;
     }
 
     protected Group createOption() {
@@ -118,23 +123,11 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
             }
             handleHelp(options, root);
         } else if (options.hasOption(COMMAND_OPTION)) {
-            CliRun cliRun = options.getValue(COMMAND_OPTION);
-            if (logger.isTraceEnabled()) {
-                logger.trace(format("Running %1$s command", cliRun.getCommand()));
-            }
-            cliRun.run();
+            handleRun(options);
         } else if (options.hasOption(CONFIG_OPTION)) {
-            if (logger.isTraceEnabled()) {
-                logger.trace(format("Handling --config %1$s option", options.getValue("config")));
-            }
+            handleConfig(options);
         } else if (options.hasOption(LIST_OPTION)) {
-            if (logger.isTraceEnabled()) {
-                logger.trace(format("Handling --list option"));
-            }
-            Collection<String> commands = cliRunFactoryLookup.getCommands();
-            for (String command : commands) {
-                System.out.println(command);
-            }
+            handleList();
         }
     }
 
@@ -154,6 +147,39 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
             formatter.setExecutable(MIGRATION_EXECUTABLE);
         }
         formatter.format(System.out);
+    }
+
+    protected void handleList() {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Handling --list option"));
+        }
+        Collection<String> commands = cliRunFactoryLookup.getCommands();
+        for (String command : commands) {
+            System.out.println(command);
+        }
+    }
+
+    protected void handleConfig(OptionSet options) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Handling --config %1$s option", options.getValue("config")));
+        }
+    }
+
+    protected void handleRun(OptionSet options) {
+        CliRun cliRun = options.getValue(COMMAND_OPTION);
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Running %1$s command", cliRun.getCommand()));
+        }
+        if (cliRun instanceof CliRunJob) {
+            configure(((CliRunJob) cliRun).getJobFactory());
+        }
+        cliRun.run();
+    }
+
+    protected void configure(JobFactory jobFactory) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Configuring %1$s job factory", jobFactory.getClass()));
+        }
     }
 
     protected void handleOptionException(OptionException exception) {

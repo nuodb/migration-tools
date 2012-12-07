@@ -27,15 +27,57 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.metadata.Relational;
+
+import com.google.common.io.Files;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.nio.charset.Charset;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class SqlGeneratorBase<T extends Relational> extends GeneratorServiceBase<T> implements SqlGenerator<T> {
+public class FileScriptExporter extends CountingScriptExporter {
 
-    protected SqlGeneratorBase(Class<T> objectType) {
-        super(objectType);
+    private static final String SEMICOLON = ";";
+    private File file;
+    private String encoding;
+    private BufferedWriter writer;
+
+    public FileScriptExporter(String file, String encoding) {
+        this(new File(file), encoding);
     }
 
+    public FileScriptExporter(File file, String encoding) {
+        this.file = file;
+        this.encoding = encoding;
+    }
+
+    @Override
+    protected void doOpen() throws Exception {
+        Files.createParentDirs(file);
+        writer = Files.newWriter(file, Charset.forName(encoding));
+    }
+
+    @Override
+    protected void exportScript(String script) throws Exception {
+        if (writer == null) {
+            throw new ScriptGeneratorException("File is not opened");
+        }
+        if (getCount() > 0) {
+            writer.newLine();
+        }
+        writer.write(script);
+        if (!script.endsWith(";")) {
+            writer.write(SEMICOLON);
+        }
+    }
+
+    @Override
+    protected void doClose() throws Exception {
+        if (writer != null) {
+            writer.flush();
+            writer.close();
+        }
+    }
 }

@@ -32,17 +32,17 @@ import com.nuodb.migration.jdbc.metadata.MetaDataException;
 /**
  * @author Sergey Bushik
  */
-public class SqlGeneratorException extends MetaDataException {
+public class ScriptGeneratorException extends MetaDataException {
 
-    public SqlGeneratorException(String message) {
+    public ScriptGeneratorException(String message) {
         super(message);
     }
 
-    public SqlGeneratorException(String message, Throwable cause) {
+    public ScriptGeneratorException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public SqlGeneratorException(Throwable cause) {
+    public ScriptGeneratorException(Throwable cause) {
         super(cause);
     }
 }

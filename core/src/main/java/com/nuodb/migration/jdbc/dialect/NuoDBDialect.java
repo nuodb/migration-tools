@@ -49,7 +49,7 @@ public class NuoDBDialect extends SQL2003Dialect {
         addJdbcType(NuoDBBigIntType.INSTANCE);
         addJdbcType(NuoDBTimeType.INSTANCE);
 
-        addTypeName(Types.BIT, "SMALLINT");
+        addTypeName(Types.BIT, "BOOLEAN");
         addTypeName(Types.TINYINT, "SMALLINT");
         addTypeName(Types.SMALLINT, "SMALLINT");
         addTypeName(Types.INTEGER, "INTEGER");
@@ -60,7 +60,7 @@ public class NuoDBDialect extends SQL2003Dialect {
         addTypeName(Types.DOUBLE, "DOUBLE");
         addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
 
-        addTypeName(Types.CHAR, "CHAR");
+        addTypeName(Types.CHAR, "CHAR({N})");
 
         // addTypeName(Types.VARCHAR, "CHARACTER VARYING({N})");
         // addTypeName(Types.LONGVARCHAR, "CHARACTER VARYING({N})");

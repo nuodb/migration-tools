@@ -83,7 +83,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
     }
 
     @Override
-    protected void writeColumnValues(String[] columnValues) {
+    protected void writeRow(String[] columnValues) {
         try {
             writer.writeStartArray();
             for (String columnValue : columnValues) {

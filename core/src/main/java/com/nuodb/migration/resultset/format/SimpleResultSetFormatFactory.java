@@ -47,7 +47,7 @@ import java.util.Map;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DefaultResultSetFormatFactory implements ResultSetFormatFactory {
+public class SimpleResultSetFormatFactory implements ResultSetFormatFactory {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -55,7 +55,7 @@ public class DefaultResultSetFormatFactory implements ResultSetFormatFactory {
 
     private Map<String, Class<? extends ResultSetOutput>> outputClasses = Maps.newHashMap();
 
-    public DefaultResultSetFormatFactory() {
+    public SimpleResultSetFormatFactory() {
         registerFormat(CsvAttributes.FORMAT_TYPE, CsvResultSetInput.class);
         registerFormat(XmlAttributes.FORMAT_TYPE, XmlResultSetInput.class);
         registerFormat(BsonAttributes.FORMAT_TYPE, BsonResultSetInput.class);

@@ -33,7 +33,7 @@ import com.nuodb.migration.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.FileCatalog;
-import com.nuodb.migration.resultset.format.DefaultResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
@@ -58,13 +58,13 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
     private DialectResolver dialectResolver =
             new SimpleDialectResolver();
     private ResultSetFormatFactory resultSetFormatFactory =
-            new DefaultResultSetFormatFactory();
+            new SimpleResultSetFormatFactory();
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver =
             new SimpleJdbcTypeValueFormatRegistryResolver();
 
     public DumpJob createJob() {
         isNotNull(dumpSpec, "Dump spec is required");
-        ConnectionSpec connectionSpec = dumpSpec.getSourceSpec();
+        ConnectionSpec connectionSpec = dumpSpec.getSourceConnectionSpec();
         Collection<SelectQuerySpec> selectQuerySpecs = dumpSpec.getSelectQuerySpecs();
         Collection<NativeQuerySpec> nativeQuerySpecs = dumpSpec.getNativeQuerySpecs();
 

@@ -37,7 +37,7 @@ import com.nuodb.migration.spec.GenerateSchemaSpec;
 /**
  * @author Sergey Bushik
  */
-public class CliGenerateSchemaJobFactory extends GenerateSchemaJobFactory implements CliRunFactory, CliResources {
+public class CliGenerateSchemaJobFactory implements CliRunFactory, CliResources {
 
     private static final String COMMAND = "generate";
 

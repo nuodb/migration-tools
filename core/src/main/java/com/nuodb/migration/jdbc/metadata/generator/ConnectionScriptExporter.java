@@ -27,62 +27,57 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.nuodb.migration.jdbc.JdbcUtils;
+import com.nuodb.migration.jdbc.connection.ConnectionServices;
 
-import java.util.Collection;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newLinkedHashSet;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
-public class CompositeSqlExporter implements SqlExporter {
+public class ConnectionScriptExporter extends CountingScriptExporter {
 
-    private final transient Logger logger = LoggerFactory.getLogger(getClass());
-    private Collection<SqlExporter> sqlExporters = newLinkedHashSet();
+    private ConnectionServices connectionServices;
+    private Connection connection;
+    private Statement statement;
 
-    public CompositeSqlExporter() {
+    public ConnectionScriptExporter(ConnectionServices connectionServices) {
+        this.connectionServices = connectionServices;
     }
-
-    public CompositeSqlExporter(SqlExporter... sqlExporters) {
-        this(newArrayList(sqlExporters));
-    }
-
-    public CompositeSqlExporter(Collection<SqlExporter> sqlExporters) {
-        this.sqlExporters.addAll(sqlExporters);
-    }
-
-    public void addScriptExporter(SqlExporter sqlExporter) {
-        this.sqlExporters.add(sqlExporter);
-    }
-
 
     @Override
-    public void open() throws Exception {
-        for (SqlExporter sqlExporter : sqlExporters) {
-            sqlExporter.open();
+    protected void doOpen() throws Exception {
+        connection = connectionServices.getConnection();
+        statement = connection.createStatement();
+    }
+
+    @Override
+    public void exportScript(String script) throws Exception {
+        if (connection == null) {
+            throw new ScriptGeneratorException("Database connection is not opened");
         }
+        statement.executeUpdate(script);
+        processWarning(statement.getWarnings());
     }
 
-    @Override
-    public void export(String[] queries) throws Exception {
-        for (SqlExporter sqlExporter : sqlExporters) {
-            sqlExporter.export(queries);
-        }
-    }
-
-    @Override
-    public void close() throws Exception {
-        for (SqlExporter sqlExporter : sqlExporters) {
-            try {
-                sqlExporter.close();
-            } catch (Exception exception) {
-                if (logger.isErrorEnabled()) {
-                    logger.error("Error closing script exporter", exception);
-                }
+    protected void processWarning(SQLWarning warning) throws SQLException {
+        while (warning != null) {
+            if (logger.isWarnEnabled()) {
+                logger.warn(format("Warning code: %d, state: %s", warning.getErrorCode(), warning.getSQLState()));
             }
+            warning = warning.getNextWarning();
         }
+        connection.clearWarnings();
+    }
+
+    @Override
+    protected void doClose() throws Exception {
+        JdbcUtils.close(connectionServices);
+        JdbcUtils.close(statement);
     }
 }

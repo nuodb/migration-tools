@@ -27,21 +27,18 @@
  */
 package com.nuodb.migration.resultset.format.xml;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
-import com.nuodb.migration.jdbc.model.ValueModelFactory;
-import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.*;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModel;
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 import static javax.xml.XMLConstants.NULL_NS_URI;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
 
@@ -83,13 +80,12 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
 
     @Override
     protected void doReadBegin() {
-        ValueModelList<ValueModel> valueModelList = null;
+        ValueModelList<ValueModel> valueModelList = createValueModelList();
         if (isNextElement(RESULT_SET_ELEMENT) && isNextElement(COLUMNS_ELEMENT)) {
-            List<String> columns = Lists.newArrayList();
             while (isNextElement(COLUMN_ELEMENT)) {
                 String column = getAttributeValue(NULL_NS_URI, ATTRIBUTE_NAME);
                 if (column != null) {
-                    columns.add(column);
+                    valueModelList.add(createValueModel(column));
                 } else {
                     Location location = reader.getLocation();
                     throw new ResultSetInputException(
@@ -98,10 +94,6 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
                                     location.getColumnNumber()));
                 }
             }
-            int[] columnTypes = new int[columns.size()];
-            Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-            valueModelList = ValueModelFactory.createValueModelList(
-                    columns.toArray(new String[columns.size()]), columnTypes);
         }
         setValueModelList(valueModelList);
     }
@@ -113,7 +105,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
 
     @Override
     public void readRow() {
-        readRow(iterator.next());
+        setColumnValues(iterator.next());
     }
 
     protected String[] doReadRow() {

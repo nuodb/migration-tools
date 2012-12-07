@@ -27,14 +27,61 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.metadata.Relational;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 
 /**
  * @author Sergey Bushik
  */
-public interface SqlGenerator<T extends Relational> extends GeneratorService<T> {
+public class CompositeScriptExporter implements ScriptExporter {
 
-    String[] getCreateSql(T object, SqlGeneratorContext context);
+    private final transient Logger logger = LoggerFactory.getLogger(getClass());
+    private Collection<ScriptExporter> scriptExporters = newLinkedHashSet();
 
-    String[] getDropSql(T object, SqlGeneratorContext context);
+    public CompositeScriptExporter() {
+    }
+
+    public CompositeScriptExporter(ScriptExporter... scriptExporters) {
+        this(newArrayList(scriptExporters));
+    }
+
+    public CompositeScriptExporter(Collection<ScriptExporter> scriptExporters) {
+        this.scriptExporters.addAll(scriptExporters);
+    }
+
+    public void addScriptExporter(ScriptExporter scriptExporter) {
+        this.scriptExporters.add(scriptExporter);
+    }
+
+    @Override
+    public void open() throws Exception {
+        for (ScriptExporter sqlExporter : scriptExporters) {
+            sqlExporter.open();
+        }
+    }
+
+    @Override
+    public void exportScripts(String[] scripts) throws Exception {
+        for (ScriptExporter scriptExporter : scriptExporters) {
+            scriptExporter.exportScripts(scripts);
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        for (ScriptExporter sqlExporter : scriptExporters) {
+            try {
+                sqlExporter.close();
+            } catch (Exception exception) {
+                if (logger.isErrorEnabled()) {
+                    logger.error("Error closing script exporter", exception);
+                }
+            }
+        }
+    }
 }

@@ -27,14 +27,14 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
+import com.nuodb.migration.jdbc.metadata.Relational;
+
 /**
  * @author Sergey Bushik
  */
-public interface SqlExporter {
+public interface ScriptGenerator<T extends Relational> extends GeneratorService<T> {
 
-    void open() throws Exception;
+    String[] getCreateScripts(T object, ScriptGeneratorContext context);
 
-    void export(String[] queries) throws Exception;
-
-    void close() throws Exception;
+    String[] getDropScripts(T object, ScriptGeneratorContext context);
 }

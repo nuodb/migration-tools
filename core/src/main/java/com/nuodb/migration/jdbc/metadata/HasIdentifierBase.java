@@ -35,16 +35,22 @@ import com.nuodb.migration.jdbc.dialect.Dialect;
  */
 public class HasIdentifierBase extends IndentedOutputBase implements HasIdentifier {
 
+    private boolean qualified;
     private Identifier identifier;
 
     public HasIdentifierBase() {
     }
 
     public HasIdentifierBase(String name) {
-        this.identifier = Identifier.valueOf(name);
+        this(Identifier.valueOf(name));
     }
 
     public HasIdentifierBase(Identifier identifier) {
+        this(identifier, false);
+    }
+
+    public HasIdentifierBase(Identifier identifier, boolean qualified) {
+        this.qualified = qualified;
         this.identifier = identifier;
     }
 
@@ -69,8 +75,42 @@ public class HasIdentifierBase extends IndentedOutputBase implements HasIdentifi
     }
 
     @Override
-    public String getQuotedName(Dialect dialect) {
-        return dialect != null ? dialect.getIdentifier(getName()) : getName();
+    public boolean isQualified() {
+        return qualified;
+    }
+
+    @Override
+    public String getName(Dialect dialect) {
+        return dialect.getIdentifier(getName());
+    }
+
+    @Override
+    public String getQualifiedName(Dialect dialect) {
+        return isQualified() ? getQualifiedName(dialect, null, null, getName()) : getName(dialect);
+    }
+
+    @Override
+    public String getQualifiedName(String catalog, String schema) {
+        return isQualified() ? getQualifiedName(null, catalog, schema, getName()) : getName();
+    }
+
+    @Override
+    public String getQualifiedName(Dialect dialect, String catalog, String schema) {
+        return isQualified() ? getQualifiedName(dialect, catalog, schema, getName()) : getName(dialect);
+    }
+
+    private static String getQualifiedName(Dialect dialect, String catalog, String schema, String name) {
+        StringBuilder buffer = new StringBuilder();
+        if (catalog != null) {
+            buffer.append(dialect != null ? dialect.getIdentifier(catalog) : catalog);
+            buffer.append('.');
+        }
+        if (schema != null) {
+            buffer.append(dialect != null ? dialect.getIdentifier(schema) : schema);
+            buffer.append('.');
+        }
+        buffer.append(dialect != null ? dialect.getIdentifier(name) : name);
+        return buffer.toString();
     }
 
     @Override

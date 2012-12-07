@@ -74,9 +74,9 @@ public class DatabaseInspector {
     private MetaDataType[] metaDataTypes = MetaDataType.ALL_TYPES;
 
     public DatabaseInspector() {
-        withMetaDataReader(new TableReader());
-        withMetaDataReader(new SchemaReader());
         withMetaDataReader(new CatalogReader());
+        withMetaDataReader(new SchemaReader());
+        withMetaDataReader(new TableReader());
         withMetaDataReader(new ColumnReader());
         withMetaDataReader(new IndexReader());
         withMetaDataReader(new ForeignKeyReader());
@@ -132,10 +132,6 @@ public class DatabaseInspector {
             MetaDataType metaDataType = metaDataReader.getMetaDataType();
             if (metaDataTypes.contains(metaDataType)) {
                 metaDataReader.read(this, database, metaData);
-            } else {
-                if (logger.isWarnEnabled()) {
-                    logger.warn(format("Meta data reader for '%s' is not found", metaDataType));
-                }
             }
         }
     }
@@ -193,7 +189,7 @@ public class DatabaseInspector {
         return dialectResolver;
     }
 
-    public DatabaseInspector withDatabaseDialectResolver(DialectResolver dialectResolver) {
+    public DatabaseInspector withDialectResolver(DialectResolver dialectResolver) {
         this.dialectResolver = dialectResolver;
         return this;
     }

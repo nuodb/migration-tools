@@ -84,10 +84,7 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     }
 
     protected void initValueFormatModelList() {
-        ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
-        if (valueFormatModelList == null) {
-            setValueFormatModelList(createValueFormatModelList());
-        }
+        setValueFormatModelList(createValueFormatModelList());
     }
 
     protected ValueModelList<ValueFormatModel> createValueFormatModelList() {
@@ -121,7 +118,7 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
 
     protected abstract void doReadBegin();
 
-    protected void readRow(String[] values) {
+    protected void setColumnValues(String[] values) {
         ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
         for (int index = 0; index < values.length; index++) {
             ValueFormatModel columnValueFormatModel = valueFormatModelList.get(index);

@@ -182,7 +182,7 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
                 case Types.NVARCHAR:
                 case Types.LONGNVARCHAR:
                 case Types.NCHAR:
-                    access.setValue(!isEmpty(value) ? value : null, options);
+                    access.setValue(value, options);
                     break;
                 case Types.BINARY:
                 case Types.VARBINARY:

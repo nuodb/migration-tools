@@ -34,16 +34,16 @@ import java.util.TimeZone;
  */
 public class LoadSpec extends TaskSpecBase {
 
-    private ConnectionSpec targetSpec;
+    private ConnectionSpec targetConnectionSpec;
     private TimeZone timeZone;
     private ResourceSpec inputSpec;
 
-    public ConnectionSpec getTargetSpec() {
-        return targetSpec;
+    public ConnectionSpec getTargetConnectionSpec() {
+        return targetConnectionSpec;
     }
 
-    public void setTargetSpec(ConnectionSpec targetSpec) {
-        this.targetSpec = targetSpec;
+    public void setTargetConnectionSpec(ConnectionSpec targetConnectionSpec) {
+        this.targetConnectionSpec = targetConnectionSpec;
     }
 
     public TimeZone getTimeZone() {

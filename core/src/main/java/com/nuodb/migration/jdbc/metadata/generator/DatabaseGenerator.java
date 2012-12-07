@@ -39,7 +39,7 @@ import static com.google.common.collect.Lists.newArrayList;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DatabaseGenerator implements SqlGenerator<Database> {
+public class DatabaseGenerator implements ScriptGenerator<Database> {
 
     @Override
     public Class<Database> getObjectType() {
@@ -47,7 +47,7 @@ public class DatabaseGenerator implements SqlGenerator<Database> {
     }
 
     @Override
-    public String[] getCreateSql(Database database, SqlGeneratorContext context) {
+    public String[] getCreateScripts(Database database, ScriptGeneratorContext context) {
         List<String> scripts = newArrayList();
         Collection<Table> tables = database.listTables();
         /**
@@ -55,10 +55,10 @@ public class DatabaseGenerator implements SqlGenerator<Database> {
          */
         Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.ALL_TYPES);
         metaDataTypes.remove(MetaDataType.FOREIGN_KEY);
-        SimpleSqlGeneratorContext tableContext = new SimpleSqlGeneratorContext(context);
+        SimpleScriptGeneratorContext tableContext = new SimpleScriptGeneratorContext(context);
         tableContext.setMetaDataTypes(metaDataTypes);
         for (Table table : tables) {
-            scripts.addAll(newArrayList(tableContext.getCreateSql(table)));
+            scripts.addAll(newArrayList(tableContext.getCreateScripts(table)));
         }
         for (Table table : tables) {
             if (!context.getDialect().supportsIndexInCreateTable()) {
@@ -68,30 +68,30 @@ public class DatabaseGenerator implements SqlGenerator<Database> {
                         primary = true;
                         continue;
                     }
-                    scripts.addAll(newArrayList(tableContext.getCreateSql(index)));
+                    scripts.addAll(newArrayList(tableContext.getCreateScripts(index)));
                 }
             }
             for (ForeignKey foreignKey : table.getForeignKeys()) {
-                scripts.addAll(newArrayList(tableContext.getCreateSql(foreignKey)));
+                scripts.addAll(newArrayList(tableContext.getCreateScripts(foreignKey)));
             }
         }
         return scripts.toArray(new String[scripts.size()]);
     }
 
     @Override
-    public String[] getDropSql(Database database, SqlGeneratorContext context) {
+    public String[] getDropScripts(Database database, ScriptGeneratorContext context) {
         List<String> scripts = newArrayList();
         Dialect dialect = context.getDialect();
         Collection<Table> tables = database.listTables();
         if (dialect.dropConstraints()) {
             for (Table table : tables) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
-                    scripts.addAll(newArrayList(context.getDropSql(foreignKey)));
+                    scripts.addAll(newArrayList(context.getDropScripts(foreignKey)));
                 }
             }
         }
         for (Table table : tables) {
-            scripts.addAll(newArrayList(context.getDropSql(table)));
+            scripts.addAll(newArrayList(context.getDropScripts(table)));
         }
         return scripts.toArray(new String[scripts.size()]);
     }

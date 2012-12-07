@@ -40,15 +40,24 @@ public class IndexNamingStrategy extends NamingStrategyBase<Index> {
     }
 
     @Override
-    public String getName(Index index, SqlGeneratorContext context) {
+    public String getName(Index index, ScriptGeneratorContext context, boolean quoteIfNeeded) {
+        return getIndexName(index, context, quoteIfNeeded);
+    }
+
+    @Override
+    public String getQualifiedName(Index index, ScriptGeneratorContext context, boolean quoteIfNeeded) {
+        return getIndexName(index, context, quoteIfNeeded);
+    }
+
+    protected String getIndexName(Index index, ScriptGeneratorContext context, boolean quoteIfNeeded) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("IDX");
         buffer.append('_');
-        buffer.append(index.getTable().getName());
+        buffer.append(context.getName(index.getTable(), false));
         for (Column column : index.getColumns()) {
             buffer.append("_");
-            buffer.append(context.getName(column));
+            buffer.append(context.getName(column, false));
         }
-        return context.getDialect().getIdentifier(buffer.toString());
+        return quoteIfNeeded ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

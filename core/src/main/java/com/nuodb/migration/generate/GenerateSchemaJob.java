@@ -30,7 +30,6 @@ package com.nuodb.migration.generate;
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
-import com.nuodb.migration.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.generator.*;
 import com.nuodb.migration.job.JobBase;
@@ -54,6 +53,7 @@ public class GenerateSchemaJob extends JobBase {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private ScriptGeneratorContext scriptGeneratorContext;
     private ConnectionProvider sourceConnectionProvider;
     private ConnectionProvider targetConnectionProvider;
     private ResourceSpec outputSpec;
@@ -65,6 +65,7 @@ public class GenerateSchemaJob extends JobBase {
     }
 
     protected void validate() {
+        isNotNull(getScriptGeneratorContext(), "Script generator context is required");
         isNotNull(getSourceConnectionProvider(), "Source connection provider is required");
     }
 
@@ -85,15 +86,26 @@ public class GenerateSchemaJob extends JobBase {
     }
 
     protected void generate(GenerateSchemaJobExecution execution) throws Exception {
-        ConnectionServices sourceConnectionServices = execution.getSourceConnectionServices();
-        Database sourceDatabase = sourceConnectionServices.createDatabaseInspector().inspect();
+        ConnectionServices connectionServices = execution.getSourceConnectionServices();
+        Database database = connectionServices.createDatabaseInspector().inspect();
 
-        Collection<SqlExporter> sqlExporters = Lists.newArrayList();
+        ScriptExporter scriptExporter = createScriptExporter(execution);
+        try {
+            scriptExporter.open();
+            scriptExporter.exportScripts(scriptGeneratorContext.getDropScripts(database));
+            scriptExporter.exportScripts(scriptGeneratorContext.getCreateScripts(database));
+        } finally {
+            scriptExporter.close();
+        }
+    }
+
+    protected ScriptExporter createScriptExporter(GenerateSchemaJobExecution execution) {
+        Collection<ScriptExporter> scriptExporters = Lists.newArrayList();
         if (execution.getTargetConnectionServices() != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Exporting schema to the target database");
             }
-            sqlExporters.add(new ConnectionSqlExporter(
+            scriptExporters.add(new ConnectionScriptExporter(
                     execution.getTargetConnectionServices()
             ));
         }
@@ -101,18 +113,22 @@ public class GenerateSchemaJob extends JobBase {
             if (logger.isDebugEnabled()) {
                 logger.debug(format("Exporting schema to file %s", outputSpec.getPath()));
             }
-            sqlExporters.add(new FileSqlExporter(
+            scriptExporters.add(new FileScriptExporter(
                     outputSpec.getPath(), OUTPUT_ENCODING));
         }
         // Fallback to standard output if neither target connection nor target file are specified
-        if (sqlExporters.isEmpty()) {
-            sqlExporters.add(StdOutSqlExporter.INSTANCE);
+        if (scriptExporters.isEmpty()) {
+            scriptExporters.add(SystemOutScriptExporter.INSTANCE);
         }
+        return new CompositeScriptExporter(scriptExporters);
+    }
 
-        SchemaGenerate schemaGenerate = new SchemaGenerate();
-        schemaGenerate.setDialect(new NuoDBDialect());
-        schemaGenerate.setSqlExporter(new CompositeSqlExporter(sqlExporters));
-        schemaGenerate.generate(sourceDatabase);
+    public ScriptGeneratorContext getScriptGeneratorContext() {
+        return scriptGeneratorContext;
+    }
+
+    public void setScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
+        this.scriptGeneratorContext = scriptGeneratorContext;
     }
 
     public ConnectionProvider getSourceConnectionProvider() {

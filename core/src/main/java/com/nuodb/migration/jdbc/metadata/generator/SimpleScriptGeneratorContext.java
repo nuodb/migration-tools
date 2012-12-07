@@ -27,8 +27,6 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Relational;
@@ -36,41 +34,42 @@ import com.nuodb.migration.jdbc.metadata.Relational;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class SimpleSqlGeneratorContext implements SqlGeneratorContext {
+public class SimpleScriptGeneratorContext implements ScriptGeneratorContext {
 
     private Dialect dialect;
     private String catalog;
     private String schema;
-    private Map<Class<? extends Relational>, SqlGenerator<? extends Relational>> sqlGeneratorMap = Maps.newHashMap();
-    private Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> namingStrategyMap = Maps.newHashMap();
-    private Collection<MetaDataType> metaDataTypes = Lists.newArrayList(MetaDataType.ALL_TYPES);
+    private Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> scriptGeneratorMap = newHashMap();
+    private Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> namingStrategyMap = newHashMap();
+    private Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.ALL_TYPES);
 
-    public SimpleSqlGeneratorContext() {
-        addSqlGenerator(new DatabaseGenerator());
-        addSqlGenerator(new TableGenerator());
-        addSqlGenerator(new PrimaryKeyGenerator());
-        addSqlGenerator(new IndexGenerator());
-        addSqlGenerator(new ForeignKeyGenerator());
+    public SimpleScriptGeneratorContext() {
+        addScriptGenerator(new DatabaseGenerator());
+        addScriptGenerator(new TableGenerator());
+        addScriptGenerator(new PrimaryKeyGenerator());
+        addScriptGenerator(new IndexGenerator());
+        addScriptGenerator(new ForeignKeyGenerator());
 
-        addNamingStrategy(new TableNamingStrategy());
         addNamingStrategy(new IndexNamingStrategy());
         addNamingStrategy(new ForeignKeyNamingStrategy());
         addNamingStrategy(new HasIdentifierNamingStrategy());
     }
 
-    public SimpleSqlGeneratorContext(SqlGeneratorContext context) {
+    public SimpleScriptGeneratorContext(ScriptGeneratorContext context) {
         this.dialect = context.getDialect();
         this.catalog = context.getCatalog();
         this.schema = context.getSchema();
 
         this.metaDataTypes = context.getMetaDataTypes();
-        this.sqlGeneratorMap.putAll(context.getSqlGenerators());
+        this.scriptGeneratorMap.putAll(context.getScriptGenerators());
         this.namingStrategyMap.putAll(context.getNamingStrategies());
     }
 
@@ -112,33 +111,33 @@ public class SimpleSqlGeneratorContext implements SqlGeneratorContext {
     }
 
     @Override
-    public <R extends Relational> void addSqlGenerator(SqlGenerator<R> sqlGenerator) {
-        sqlGeneratorMap.put(sqlGenerator.getObjectType(), sqlGenerator);
+    public <R extends Relational> void addScriptGenerator(ScriptGenerator<R> scriptGenerator) {
+        scriptGeneratorMap.put(scriptGenerator.getObjectType(), scriptGenerator);
     }
 
     @Override
-    public <R extends Relational> SqlGenerator<R> getSqlGenerator(R object) {
-        return getGeneratorService(sqlGeneratorMap, object);
+    public <R extends Relational> ScriptGenerator<R> getScriptGenerator(R object) {
+        return getGeneratorService(scriptGeneratorMap, object);
     }
 
     @Override
-    public <R extends Relational> String[] getCreateSql(R object) {
-        return getSqlGenerator(object).getCreateSql(object, this);
+    public <R extends Relational> String[] getCreateScripts(R object) {
+        return getScriptGenerator(object).getCreateScripts(object, this);
     }
 
     @Override
-    public <R extends Relational> String[] getDropSql(R object) {
-        return getSqlGenerator(object).getDropSql(object, this);
+    public <R extends Relational> String[] getDropScripts(R object) {
+        return getScriptGenerator(object).getDropScripts(object, this);
     }
 
     @Override
-    public <R extends Relational> SqlGenerator<R> getSqlGenerator(Class<R> objectType) {
-        return (SqlGenerator<R>) sqlGeneratorMap.get(objectType);
+    public <R extends Relational> ScriptGenerator<R> getScriptGenerator(Class<R> objectType) {
+        return (ScriptGenerator<R>) scriptGeneratorMap.get(objectType);
     }
 
     @Override
-    public Map<Class<? extends Relational>, SqlGenerator<? extends Relational>> getSqlGenerators() {
-        return sqlGeneratorMap;
+    public Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> getScriptGenerators() {
+        return scriptGeneratorMap;
     }
 
     @Override
@@ -147,9 +146,18 @@ public class SimpleSqlGeneratorContext implements SqlGeneratorContext {
     }
 
     @Override
-    public <R extends Relational> String getIdentifier(R object) {
-        String name = getName(object);
-        return getDialect().getIdentifier(name);
+    public <R extends Relational> String getName(R object, boolean quoteIfNeeded) {
+        return getNamingStrategy(object).getName(object, this, quoteIfNeeded);
+    }
+
+    @Override
+    public <R extends Relational> String getQualifiedName(R object) {
+        return getNamingStrategy(object).getQualifiedName(object, this);
+    }
+
+    @Override
+    public <R extends Relational> String getQualifiedName(R object, boolean quoteIfNeeded) {
+        return getNamingStrategy(object).getQualifiedName(object, this, quoteIfNeeded);
     }
 
     @Override
@@ -180,7 +188,7 @@ public class SimpleSqlGeneratorContext implements SqlGeneratorContext {
             type = (Class<? extends Relational>) type.getSuperclass();
         }
         if (generatorService == null) {
-            throw new SqlGeneratorException(format("Generator service not found for %s", objectType));
+            throw new ScriptGeneratorException(format("Generator service not found for %s", objectType));
         }
         if (!objectType.equals(generatorService.getObjectType())) {
             generatorServiceMap.put(objectType, generatorService);

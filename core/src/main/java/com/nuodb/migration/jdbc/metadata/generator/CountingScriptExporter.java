@@ -27,65 +27,57 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.JdbcUtils;
-import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
 
 import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionSqlExporter implements SqlExporter {
+public abstract class CountingScriptExporter implements ScriptExporter {
 
-    private final transient Logger logger = LoggerFactory.getLogger(getClass());
-    private ConnectionServices connectionServices;
-    private Connection connection;
-    private Statement statement;
+    protected final transient Logger logger = LoggerFactory.getLogger(getClass());
+    private int count;
 
-    public ConnectionSqlExporter(ConnectionServices connectionServices) {
-        this.connectionServices = connectionServices;
+    @Override
+    public final void open() throws Exception {
+        count = 0;
+        doOpen();
+    }
+
+    protected void doOpen() throws Exception {
     }
 
     @Override
-    public void open() throws Exception {
-        connection = connectionServices.getConnection();
-        statement = connection.createStatement();
-    }
-
-    @Override
-    public void export(String[] queries) throws Exception {
-        if (connection == null) {
-            throw new SqlGeneratorException("Database connection is not opened");
-        }
-        if (queries == null) {
+    public void exportScripts(String[] scripts) throws Exception {
+        if (scripts == null) {
             return;
         }
-        for (String script : queries) {
-            statement.executeUpdate(script);
-            processWarning(statement.getWarnings());
+        for (String script : scripts) {
+            try {
+                exportScript(script);
+                count++;
+            } catch (Exception exception) {
+                if (logger.isErrorEnabled()) {
+                    logger.error(format("Failed exporting script #%d of #%d %s", getCount(), scripts.length, script));
+                }
+                throw exception;
+            }
         }
     }
 
-    protected void processWarning(SQLWarning warning) throws SQLException {
-        while (warning != null) {
-            if (logger.isWarnEnabled()) {
-                logger.warn(format("Warning code: %d, state: %s", warning.getErrorCode(), warning.getSQLState()));
-            }
-            warning = warning.getNextWarning();
-        }
-        connection.clearWarnings();
+    public int getCount() {
+        return count;
     }
+
+    protected abstract void exportScript(String script) throws Exception;
 
     @Override
-    public void close() throws Exception {
-        JdbcUtils.close(connectionServices);
-        JdbcUtils.close(statement);
+    public final void close() throws Exception {
+        doClose();
+    }
+
+    protected void doClose() throws Exception {
     }
 }

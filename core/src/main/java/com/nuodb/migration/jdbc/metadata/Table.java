@@ -59,28 +59,15 @@ public class Table extends HasIdentifierBase {
     }
 
     public Table(Database database, Catalog catalog, Schema schema, Identifier identifier) {
-        super(identifier);
+        super(identifier, true);
         this.database = database;
         this.catalog = catalog;
         this.schema = schema;
     }
 
+    @Override
     public String getQualifiedName(Dialect dialect) {
-        return getQualifiedName(dialect, catalog.getName(), schema.getName());
-    }
-
-    public String getQualifiedName(Dialect dialect, String catalog, String schema) {
-        StringBuilder buffer = new StringBuilder();
-        if (catalog != null) {
-            buffer.append(dialect != null ? dialect.getIdentifier(catalog) : catalog);
-            buffer.append('.');
-        }
-        if (schema != null) {
-            buffer.append(dialect != null ? dialect.getIdentifier(schema) : schema);
-            buffer.append('.');
-        }
-        buffer.append(getQuotedName(dialect));
-        return buffer.toString();
+        return getQualifiedName(dialect, getCatalog().getName(), getSchema().getName());
     }
 
     public void addForeignKey(ForeignKey foreignKey) {

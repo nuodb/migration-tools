@@ -32,32 +32,22 @@ import static java.lang.System.out;
 /**
  * @author Sergey Bushik
  */
-public class StdOutSqlExporter implements SqlExporter {
+public class SystemOutScriptExporter extends CountingScriptExporter {
 
-    public static final SqlExporter INSTANCE = new StdOutSqlExporter();
+    public static final ScriptExporter INSTANCE = new SystemOutScriptExporter();
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
     private static final String SEMICOLON = ";";
 
-    private StdOutSqlExporter() {
+    private SystemOutScriptExporter() {
     }
 
     @Override
-    public void open() throws Exception {
-    }
-
-    @Override
-    public void export(String[] queries) throws Exception {
-        for (String script : queries) {
-            out.print(script);
-            if (!script.endsWith(SEMICOLON)) {
-                out.print(SEMICOLON);
-            }
-            out.print(LINE_SEPARATOR);
+    protected void exportScript(String script) throws Exception {
+        out.print(script);
+        if (!script.endsWith(SEMICOLON)) {
+            out.print(SEMICOLON);
         }
-    }
-
-    @Override
-    public void close() throws Exception {
+        out.print(LINE_SEPARATOR);
     }
 }

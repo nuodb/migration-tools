@@ -88,7 +88,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
     }
 
     @Override
-    protected void writeColumnValues(String[] columnValues) {
+    protected void writeRow(String[] columnValues) {
         try {
             writer.writeStartElement(ROW_ELEMENT);
             for (String columnValue : columnValues) {

@@ -29,6 +29,9 @@ package com.nuodb.migration.generate;
 
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
+import com.nuodb.migration.jdbc.dialect.NuoDBDialect;
+import com.nuodb.migration.jdbc.metadata.generator.ScriptGeneratorContext;
+import com.nuodb.migration.jdbc.metadata.generator.SimpleScriptGeneratorContext;
 import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
@@ -45,21 +48,39 @@ import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
  */
 public class GenerateSchemaJobFactory extends ConnectionProviderFactory implements JobFactory<GenerateSchemaJob> {
 
+    private ScriptGeneratorContext scriptGeneratorContext = new SimpleScriptGeneratorContext();
     private GenerateSchemaSpec generateSchemaSpec;
 
     @Override
     public GenerateSchemaJob createJob() {
         isNotNull(generateSchemaSpec, "Generate schema spec is required");
 
-        GenerateSchemaJob generateSchemaJob = new GenerateSchemaJob();
-        generateSchemaJob.setOutputSpec(getGenerateSchemaSpec().getOutputSpec());
-
+        GenerateSchemaJob job = new GenerateSchemaJob();
+        job.setOutputSpec(getGenerateSchemaSpec().getOutputSpec());
+        job.setScriptGeneratorContext(createScriptGeneratorContext());
         ConnectionSpec sourceConnectionSpec = generateSchemaSpec.getSourceConnectionSpec();
-        generateSchemaJob.setSourceConnectionProvider(createConnectionProvider(sourceConnectionSpec, false));
-
+        job.setSourceConnectionProvider(createConnectionProvider(sourceConnectionSpec, false));
         ConnectionSpec targetConnectionSpec = generateSchemaSpec.getTargetConnectionSpec();
-        generateSchemaJob.setTargetConnectionProvider(createConnectionProvider(targetConnectionSpec, false));
-        return generateSchemaJob;
+        job.setTargetConnectionProvider(createConnectionProvider(targetConnectionSpec, false));
+        return job;
+    }
+
+    protected ScriptGeneratorContext createScriptGeneratorContext() {
+        scriptGeneratorContext.setDialect(new NuoDBDialect());
+        ConnectionSpec targetConnectionSpec = getGenerateSchemaSpec().getTargetConnectionSpec();
+        if (targetConnectionSpec != null) {
+            scriptGeneratorContext.setCatalog(targetConnectionSpec.getCatalog());
+            scriptGeneratorContext.setSchema(targetConnectionSpec.getSchema());
+        }
+        return scriptGeneratorContext;
+    }
+
+    public ScriptGeneratorContext getScriptGeneratorContext() {
+        return scriptGeneratorContext;
+    }
+
+    public void setScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
+        this.scriptGeneratorContext = scriptGeneratorContext;
     }
 
     public GenerateSchemaSpec getGenerateSchemaSpec() {
@@ -76,7 +97,7 @@ public class GenerateSchemaJobFactory extends ConnectionProviderFactory implemen
             {
                 DriverConnectionSpec sourceConnectionSpec = new DriverConnectionSpec();
                 sourceConnectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
-                sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/generate-schema-2");
+                sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/mysql");
                 sourceConnectionSpec.setUsername("root");
 
                 DriverConnectionSpec targetConnectionSpec = new DriverConnectionSpec();
@@ -90,7 +111,8 @@ public class GenerateSchemaJobFactory extends ConnectionProviderFactory implemen
                 outputSpec.setPath("/tmp/test/schema.sql");
 
                 setOutputSpec(outputSpec);
-                setSourceConnectionSpec(targetConnectionSpec);
+                setSourceConnectionSpec(sourceConnectionSpec);
+                setTargetConnectionSpec(targetConnectionSpec);
             }
         });
         JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());

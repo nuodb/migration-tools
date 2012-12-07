@@ -33,8 +33,8 @@ import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.dialect.DialectResolver;
 import com.nuodb.migration.jdbc.metadata.Database;
-import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 import com.nuodb.migration.jdbc.metadata.Table;
+import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 import com.nuodb.migration.jdbc.query.*;
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
@@ -60,6 +60,7 @@ import java.util.TimeZone;
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
 import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
@@ -116,7 +117,7 @@ public class DumpJob extends JobBase {
 
         DatabaseInspector databaseInspector = connectionServices.createDatabaseInspector();
         databaseInspector.withMetaDataTypes(CATALOG, SCHEMA, TABLE, COLUMN);
-        databaseInspector.withDatabaseDialectResolver(getDialectResolver());
+        databaseInspector.withDialectResolver(getDialectResolver());
 
         Database database = databaseInspector.inspect();
         execution.setDatabase(database);

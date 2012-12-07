@@ -79,7 +79,7 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
     }
 
     @Override
-    protected void writeColumnValues(String[] columnValues) {
+    protected void writeRow(String[] columnValues) {
         try {
             for (int i = 0; i < columnValues.length; i++) {
                 String columnValue = columnValues[i];

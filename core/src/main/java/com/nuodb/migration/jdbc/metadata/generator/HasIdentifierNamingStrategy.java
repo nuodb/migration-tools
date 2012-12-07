@@ -39,7 +39,13 @@ public class HasIdentifierNamingStrategy extends NamingStrategyBase<HasIdentifie
     }
 
     @Override
-    public String getName(HasIdentifier hasIdentifier, SqlGeneratorContext context) {
-        return hasIdentifier.getQuotedName(context.getDialect());
+    public String getName(HasIdentifier object, ScriptGeneratorContext context, boolean quoteIfNeeded) {
+        return quoteIfNeeded ? object.getName(context.getDialect()) : object.getName();
+    }
+
+    @Override
+    public String getQualifiedName(HasIdentifier object, ScriptGeneratorContext context, boolean quoteIfNeeded) {
+        return quoteIfNeeded ? object.getQualifiedName(context.getDialect(), context.getCatalog(),
+                context.getSchema()) : object.getQualifiedName(context.getCatalog(), context.getSchema());
     }
 }

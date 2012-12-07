@@ -64,7 +64,7 @@ public class SelectQuery implements Query {
         query.append("SELECT ");
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            query.append(column.getQuotedName(dialect));
+            query.append(column.getName(dialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }
@@ -72,7 +72,7 @@ public class SelectQuery implements Query {
         query.append(" FROM ");
         for (Iterator<Table> iterator = tables.iterator(); iterator.hasNext(); ) {
             Table table = iterator.next();
-            query.append(qualifyNames ? table.getQualifiedName(dialect) : table.getQuotedName(dialect));
+            query.append(qualifyNames ? table.getQualifiedName(dialect) : table.getName(dialect));
             if (iterator.hasNext()) {
                 query.append(", ");
             }

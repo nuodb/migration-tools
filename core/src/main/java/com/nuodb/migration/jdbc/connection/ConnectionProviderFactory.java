@@ -38,14 +38,32 @@ import static java.lang.String.format;
  */
 public class ConnectionProviderFactory {
 
-    public static ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec, boolean autoCommit) {
+    private boolean pooling;
+
+    public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec, boolean autoCommit) {
         if (connectionSpec == null) {
             return null;
         }
         if (connectionSpec instanceof DriverConnectionSpec) {
-            return new DriverPoolingConnectionProvider((DriverConnectionSpec) connectionSpec, autoCommit);
+            return createConnectionProvider((DriverConnectionSpec) connectionSpec, autoCommit);
         } else {
             throw new MigrationException(format("Connection specification is not supported %s", connectionSpec));
         }
+    }
+
+    protected ConnectionProvider createConnectionProvider(DriverConnectionSpec connectionSpec, boolean autoCommit) {
+        if (isPooling()) {
+            return new DriverPoolingConnectionProvider(connectionSpec, autoCommit);
+        } else {
+            return new DriverConnectionProvider(connectionSpec, autoCommit);
+        }
+    }
+
+    public boolean isPooling() {
+        return pooling;
+    }
+
+    public void setPooling(boolean pooling) {
+        this.pooling = pooling;
     }
 }

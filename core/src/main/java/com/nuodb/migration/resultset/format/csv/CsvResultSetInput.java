@@ -27,11 +27,8 @@
  */
 package com.nuodb.migration.resultset.format.csv;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.model.ValueModel;
-import com.nuodb.migration.jdbc.model.ValueModelFactory;
 import com.nuodb.migration.jdbc.model.ValueModelList;
-import com.nuodb.migration.jdbc.type.jdbc2.JdbcCharType;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
 import org.apache.commons.csv.CSVFormat;
@@ -41,10 +38,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModel;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 import static java.lang.String.valueOf;
 
@@ -82,16 +78,11 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
 
     @Override
     protected void doReadBegin() {
-        ValueModelList<ValueModel> valueModelList = null;
+        ValueModelList<ValueModel> valueModelList = createValueModelList();
         if (iterator.hasNext()) {
-            List<String> columns = Lists.newArrayList();
             for (String column : iterator.next()) {
-                columns.add(column);
+                valueModelList.add(createValueModel(column));
             }
-            int[] columnTypes = new int[columns.size()];
-            Arrays.fill(columnTypes, JdbcCharType.INSTANCE.getTypeDesc().getTypeCode());
-            valueModelList = ValueModelFactory.createValueModelList(columns.toArray(new String[columns.size()]),
-                    columnTypes);
         }
         setValueModelList(valueModelList);
     }
@@ -112,9 +103,8 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
                 value = StringUtils.EMPTY;
             }
             values[column++] = value;
-
         }
-        readRow(values);
+        setColumnValues(values);
     }
 
     @Override

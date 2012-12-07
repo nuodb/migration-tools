@@ -37,7 +37,7 @@ import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.FileCatalog;
-import com.nuodb.migration.resultset.format.DefaultResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
@@ -56,7 +56,7 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
     private DialectResolver dialectResolver =
             new SimpleDialectResolver();
     private ResultSetFormatFactory resultSetFormatFactory =
-            new DefaultResultSetFormatFactory();
+            new SimpleResultSetFormatFactory();
     private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver =
             new SimpleJdbcTypeValueFormatRegistryResolver();
 
@@ -66,7 +66,7 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
 
         ResourceSpec inputSpec = loadSpec.getInputSpec();
         LoadJob job = new LoadJob();
-        job.setConnectionProvider(createConnectionProvider(loadSpec.getTargetSpec(), false));
+        job.setConnectionProvider(createConnectionProvider(loadSpec.getTargetConnectionSpec(), false));
 
         job.setAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));
@@ -119,10 +119,12 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
         jobFactory.setLoadSpec(new LoadSpec() {
             {
                 DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
-                connectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
-                connectionSpec.setUrl("jdbc:mysql://localhost:3306/");
-                connectionSpec.setUsername("root");
-                setTargetSpec(connectionSpec);
+                connectionSpec.setDriverClassName("com.nuodb.jdbc.Driver");
+                connectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
+                connectionSpec.setUsername("dba");
+                connectionSpec.setPassword("goalie");
+                connectionSpec.setSchema("hockey");
+                setTargetConnectionSpec(connectionSpec);
 
                 ResourceSpec inputSpec = new ResourceSpec();
                 inputSpec.setPath("/tmp/test/dump.cat");

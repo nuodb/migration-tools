@@ -27,97 +27,35 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.Database;
-import com.nuodb.migration.jdbc.metadata.Relational;
-import com.nuodb.migration.jdbc.metadata.MetaDataType;
-
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
 public class SchemaGenerate {
 
-    private SqlGeneratorContext sqlGeneratorContext;
-    private SqlExporter sqlExporter = StdOutSqlExporter.INSTANCE;
+    private ScriptGeneratorContext scriptGeneratorContext;
+    private ScriptExporter scriptExporter = SystemOutScriptExporter.INSTANCE;
 
     public SchemaGenerate() {
-        this(new SimpleSqlGeneratorContext());
+        this(new SimpleScriptGeneratorContext());
     }
 
-    public SchemaGenerate(SqlGeneratorContext sqlGeneratorContext) {
-        this.sqlGeneratorContext = sqlGeneratorContext;
+    public SchemaGenerate(ScriptGeneratorContext scriptGeneratorContext) {
+        this.scriptGeneratorContext = scriptGeneratorContext;
     }
 
     public void generate(Database database) throws Exception {
         try {
-            sqlExporter.open();
+            scriptExporter.open();
 
-            String[] dropSql = sqlGeneratorContext.getDropSql(database);
-            sqlExporter.export(dropSql);
+            String[] dropSql = scriptGeneratorContext.getDropScripts(database);
+            scriptExporter.exportScripts(dropSql);
 
-            String[] createSql = sqlGeneratorContext.getCreateSql(database);
-            sqlExporter.export(createSql);
+            String[] createSql = scriptGeneratorContext.getCreateScripts(database);
+            scriptExporter.exportScripts(createSql);
         } finally {
-            sqlExporter.close();
+            scriptExporter.close();
         }
-    }
-
-    public Dialect getDialect() {
-        return sqlGeneratorContext.getDialect();
-    }
-
-    public void setDialect(Dialect dialect) {
-        sqlGeneratorContext.setDialect(dialect);
-    }
-
-    public String getCatalog() {
-        return sqlGeneratorContext.getCatalog();
-    }
-
-    public void setCatalog(String catalog) {
-        sqlGeneratorContext.setCatalog(catalog);
-    }
-
-    public String getSchema() {
-        return sqlGeneratorContext.getSchema();
-    }
-
-    public void setSchema(String catalog) {
-        sqlGeneratorContext.setSchema(catalog);
-    }
-
-    public SqlExporter getSqlExporter() {
-        return sqlExporter;
-    }
-
-    public void setSqlExporter(SqlExporter sqlExporter) {
-        this.sqlExporter = sqlExporter;
-    }
-
-    public <R extends Relational> void addScriptGenerator(SqlGenerator<R> sqlGenerator) {
-        sqlGeneratorContext.addSqlGenerator(sqlGenerator);
-    }
-
-    public <R extends Relational> SqlGenerator<R> getScriptGenerator(R relational) {
-        return sqlGeneratorContext.getSqlGenerator(relational);
-    }
-
-    public <R extends Relational> SqlGenerator<R> getScriptGenerator(Class<R> objectType) {
-        return sqlGeneratorContext.getSqlGenerator(objectType);
-    }
-
-    public Map<Class<? extends Relational>, SqlGenerator<? extends Relational>> getScriptGenerators() {
-        return sqlGeneratorContext.getSqlGenerators();
-    }
-
-    public void setMetaDataTypes(Collection<MetaDataType> metaDataTypes) {
-        sqlGeneratorContext.setMetaDataTypes(metaDataTypes);
-    }
-
-    public Collection<MetaDataType> getMetaDataTypes() {
-        return sqlGeneratorContext.getMetaDataTypes();
     }
 }

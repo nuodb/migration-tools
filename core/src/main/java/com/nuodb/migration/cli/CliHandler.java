@@ -32,8 +32,6 @@ import com.nuodb.migration.bootstrap.config.BootstrapConfig;
 import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.OptionSet;
-import com.nuodb.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.migration.cli.parse.parser.ParserImpl;
 
 import java.util.Arrays;
 
@@ -49,10 +47,6 @@ public class CliHandler extends CliHandlerSupport implements Bootable {
     public CliHandler() {
     }
 
-    public CliHandler(OptionToolkit optionToolkit) {
-        super(optionToolkit);
-    }
-
     @Override
     public void boot(BootstrapConfig config, String[] arguments) {
         try {
@@ -60,7 +54,7 @@ public class CliHandler extends CliHandlerSupport implements Bootable {
             if (logger.isTraceEnabled()) {
                 logger.trace(String.format("Parsing cli arguments: %1$s", Arrays.asList(arguments)));
             }
-            OptionSet options = new ParserImpl().parse(arguments, root);
+            OptionSet options = getParser().parse(arguments, root);
             handleOptionSet(options, root);
         } catch (OptionException exception) {
             handleOptionException(exception);

@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public interface SqlGeneratorContext {
+public interface ScriptGeneratorContext {
 
     Dialect getDialect();
 
@@ -55,25 +55,29 @@ public interface SqlGeneratorContext {
 
     void setMetaDataTypes(Collection<MetaDataType> metaDataTypes);
 
-    <R extends Relational> String[] getCreateSql(R object);
+    <R extends Relational> String[] getCreateScripts(R object);
 
-    <R extends Relational> String[] getDropSql(R object);
+    <R extends Relational> String[] getDropScripts(R object);
 
-    <R extends Relational> void addSqlGenerator(SqlGenerator<R> sqlGenerator);
+    <R extends Relational> void addScriptGenerator(ScriptGenerator<R> scriptGenerator);
 
-    <R extends Relational> SqlGenerator<R> getSqlGenerator(R object);
-
-    <R extends Relational> SqlGenerator<R> getSqlGenerator(Class<R> objectType);
-
-    Map<Class<? extends Relational>, SqlGenerator<? extends Relational>> getSqlGenerators();
-
-    <R extends Relational> String getName(R object);
-
-    <R extends Relational> String getIdentifier(R object);
+    Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> getScriptGenerators();
 
     <R extends Relational> void addNamingStrategy(NamingStrategy<R> namingStrategy);
 
     <R extends Relational> GeneratorService<R> getNamingStrategy(R object);
 
     Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> getNamingStrategies();
+
+    <R extends Relational> ScriptGenerator<R> getScriptGenerator(R object);
+
+    <R extends Relational> ScriptGenerator<R> getScriptGenerator(Class<R> objectType);
+
+    <R extends Relational> String getName(R object);
+
+    <R extends Relational> String getName(R object, boolean quoteIfNeeded);
+
+    <R extends Relational> String getQualifiedName(R object);
+
+    <R extends Relational> String getQualifiedName(R object, boolean quoteIfNeeded);
 }

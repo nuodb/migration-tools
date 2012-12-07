@@ -36,6 +36,14 @@ import java.sql.SQLException;
  */
 public class ValueModelFactory {
 
+    public static ValueModel createValueModel() {
+        return new SimpleValueModel();
+    }
+
+    public static ValueModel createValueModel(String name) {
+        return new SimpleValueModel(name);
+    }
+
     public static ValueModel createValueModel(ResultSet resultSet, int column) throws SQLException {
         return createValueModel(resultSet.getMetaData(), column);
     }
@@ -57,21 +65,6 @@ public class ValueModelFactory {
             values[i] = createValueModel(metaData, i + 1);
         }
         return new SimpleValueModelList<ValueModel>(values);
-    }
-
-    public static ValueModelList<ValueModel> createValueModelList(String[] names, int[] typeCodes) {
-        final int size = names.length;
-        return createValueModelList(names, typeCodes, new String[size], new int[size], new int[size]);
-    }
-
-    public static ValueModelList<ValueModel> createValueModelList(
-            String[] names, int[] typeCodes, String[] typeNames, int[] precisions, int[] scales) {
-        final int size = names.length;
-        final ValueModel[] values = new ValueModel[size];
-        for (int i = 0; i < size; i++) {
-            values[i] = new SimpleValueModel(names[i], typeCodes[i], typeNames[i], precisions[i], scales[i]);
-        }
-        return createValueModelList(values);
     }
 
     public static <T extends ValueModel> ValueModelList<T> createValueModelList() {

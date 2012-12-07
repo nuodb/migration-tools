@@ -43,25 +43,25 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 /**
  * @author Sergey Bushik
  */
-public class TableGenerator extends SqlGeneratorBase<Table> {
+public class TableGenerator extends ScriptGeneratorBase<Table> {
 
     public TableGenerator() {
         super(Table.class);
     }
 
     @Override
-    public String[] getCreateSql(Table table, SqlGeneratorContext context) {
+    public String[] getCreateScripts(Table table, ScriptGeneratorContext context) {
         Dialect dialect = context.getDialect();
         Collection<MetaDataType> metaDataTypes = context.getMetaDataTypes();
 
         StringBuilder buffer = new StringBuilder("CREATE TABLE");
-        buffer.append(' ').append(context.getIdentifier(table)).append(" (");
+        buffer.append(' ').append(context.getQualifiedName(table)).append(" (");
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeRegistry().getJdbcTypeNameMap();
         Collection<Column> columns = table.getColumns();
         final Collection<Index> indexes = table.getIndexes();
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();
-            buffer.append(context.getIdentifier(column));
+            buffer.append(context.getName(column));
             buffer.append(' ');
             buffer.append(jdbcTypeNameMap.getTypeName(column.getTypeCode(), column.getSize(), column.getPrecision(),
                     column.getScale()));
@@ -69,14 +69,14 @@ public class TableGenerator extends SqlGeneratorBase<Table> {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumnString());
             }
-            String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue());
-            if (defaultValue != null) {
-                buffer.append(" DEFAULT ").append(defaultValue);
-            }
             if (column.isNullable()) {
                 buffer.append(dialect.getNullColumnString());
             } else {
                 buffer.append(" NOT NULL");
+            }
+            String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue());
+            if (defaultValue != null) {
+                buffer.append(" DEFAULT ").append(defaultValue);
             }
             if (metaDataTypes.contains(INDEX)) {
                 Optional<Index> index = Iterables.tryFind(indexes, new Predicate<Index>() {
@@ -113,7 +113,7 @@ public class TableGenerator extends SqlGeneratorBase<Table> {
         PrimaryKey primaryKey = table.getPrimaryKey();
         if (primaryKey != null) {
             ConstraintGenerator<PrimaryKey> generator = (ConstraintGenerator<PrimaryKey>)
-                    context.getSqlGenerator(primaryKey);
+                    context.getScriptGenerator(primaryKey);
             buffer.append(", ").append(generator.getConstraintSql(primaryKey, context));
         }
         if (metaDataTypes.contains(INDEX) && dialect.supportsIndexInCreateTable()) {
@@ -124,7 +124,7 @@ public class TableGenerator extends SqlGeneratorBase<Table> {
                     continue;
                 }
                 ConstraintGenerator<Index> generator = (ConstraintGenerator<Index>)
-                        context.getSqlGenerator(index);
+                        context.getScriptGenerator(index);
                 String constraint = generator.getConstraintSql(index, context);
                 if (constraint != null) {
                     buffer.append(", ").append(constraint);
@@ -135,7 +135,7 @@ public class TableGenerator extends SqlGeneratorBase<Table> {
         if (metaDataTypes.contains(FOREIGN_KEY)) {
             for (ForeignKey foreignKey : table.getForeignKeys()) {
                 ConstraintGenerator<ForeignKey> generator = (ConstraintGenerator<ForeignKey>)
-                        context.getSqlGenerator(foreignKey);
+                        context.getScriptGenerator(foreignKey);
                 String constraint = generator.getConstraintSql(foreignKey, context);
                 if (constraint != null) {
                     buffer.append(", ").append(constraint);
@@ -159,7 +159,7 @@ public class TableGenerator extends SqlGeneratorBase<Table> {
     }
 
     @Override
-    public String[] getDropSql(Table table, SqlGeneratorContext context) {
+    public String[] getDropScripts(Table table, ScriptGeneratorContext context) {
         Dialect dialect = context.getDialect();
         StringBuilder buffer = new StringBuilder("DROP TABLE");
         buffer.append(' ');
@@ -168,7 +168,7 @@ public class TableGenerator extends SqlGeneratorBase<Table> {
             buffer.append("IF EXISTS");
             buffer.append(' ');
         }
-        buffer.append(context.getName(table));
+        buffer.append(context.getQualifiedName(table));
         String cascadeConstraints = dialect.getCascadeConstraintsString();
         if (cascadeConstraints != null) {
             buffer.append(' ');

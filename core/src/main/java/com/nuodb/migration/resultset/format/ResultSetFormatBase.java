@@ -29,6 +29,7 @@ package com.nuodb.migration.resultset.format;
 
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelFactory;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcDateTypeBase;
@@ -46,7 +47,7 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
 
     private Map<String, String> attributes;
     private TimeZone timeZone;
-    private ValueModelList<ValueModel> valueModelList;
+    private ValueModelList<ValueModel> valueModelList = ValueModelFactory.createValueModelList();
     private ValueModelList<ValueFormatModel> valueFormatModelList;
     private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider;
     private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;

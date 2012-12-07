@@ -126,7 +126,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         JdbcType jdbcType = getJdbcType(jdbcTypeDesc);
         if (jdbcType == null) {
             throw new JdbcTypeException(
-                    format("Jdbc type %s is not supported", jdbcTypeDesc.getTypeName()));
+                    format("Jdbc type %s, code(%d) is not supported", jdbcTypeDesc.getTypeName(), jdbcTypeDesc.getTypeCode()));
         }
         return jdbcType;
     }
