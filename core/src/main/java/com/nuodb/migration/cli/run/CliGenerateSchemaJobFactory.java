@@ -29,10 +29,13 @@ package com.nuodb.migration.cli.run;
 
 import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.CommandLine;
+import com.nuodb.migration.cli.parse.Group;
 import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.option.GroupBuilder;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.generate.GenerateSchemaJobFactory;
 import com.nuodb.migration.spec.GenerateSchemaSpec;
+import com.nuodb.migration.spec.ResourceSpec;
 
 /**
  * @author Sergey Bushik
@@ -59,18 +62,104 @@ public class CliGenerateSchemaJobFactory implements CliRunFactory, CliResources 
 
         @Override
         protected Option createOption() {
-            return newGroup()
-                    .withName(getResources().getMessage(GENERATE_SCHEMA_GROUP_NAME))
-                    .withOption(createSourceGroup())
-                    .withRequired(true).build();
+            GroupBuilder builder = newGroup().withName(getResources().getMessage(GENERATE_SCHEMA_GROUP_NAME));
+            builder.withRequired(true);
+            builder.withOption(createSourceGroup());
+            builder.withOption(createTargetGroup());
+            builder.withOption(createOutputGroup());
+            return builder.build();
         }
 
         @Override
         protected void bind(CommandLine commandLine) {
             GenerateSchemaSpec generateSchemaSpec = new GenerateSchemaSpec();
             generateSchemaSpec.setSourceConnectionSpec(parseSourceGroup(commandLine, this));
+            generateSchemaSpec.setTargetConnectionSpec(parseTargetGroup(commandLine, this));
+            generateSchemaSpec.setOutputSpec(parseOutputGroup(commandLine, this));
             ((GenerateSchemaJobFactory) getJobFactory()).setGenerateSchemaSpec(generateSchemaSpec);
         }
+
+        @Override
+        protected Group createOutputGroup() {
+            GroupBuilder group = newGroup().withName(getMessage(GENERATE_SCHEMA_OUTPUT_GROUP_NAME));
+            Option path = newOption().
+                    withName(OUTPUT_PATH_OPTION).
+                    withRequired(true).
+                    withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
+                    withArgument(
+                            newArgument().
+                                    withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).
+                                    withMinimum(1).
+                                    withRequired(true).build()
+                    ).build();
+            group.withOption(path);
+            return group.build();
+        }
+
+        @Override
+        protected ResourceSpec parseOutputGroup(CommandLine commandLine, Option option) {
+            ResourceSpec resource = null;
+            if (commandLine.hasOption(OUTPUT_PATH_OPTION)) {
+                resource = new ResourceSpec();
+                resource.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
+            }
+            return resource;
+        }
+
+        @Override
+        protected Group createTargetGroup() {
+            GroupBuilder group = newGroup().withName(getMessage(TARGET_GROUP_NAME));
+
+            Option url = newOption().
+                    withName(TARGET_URL_OPTION).
+                    withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
+                    withRequired(true).
+                    withArgument(
+                            newArgument().
+                                    withName(getMessage(TARGET_URL_ARGUMENT_NAME)).
+                                    withRequired(true).
+                                    withMinimum(1).build()
+                    ).build();
+            group.withOption(url);
+
+            Option username = newOption().
+                    withName(TARGET_USERNAME_OPTION).
+                    withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
+                    withArgument(
+                            newArgument().
+                                    withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()
+                    ).build();
+            group.withOption(username);
+
+            Option password = newOption().
+                    withName(TARGET_PASSWORD_OPTION).
+                    withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
+                    withArgument(
+                            newArgument().
+                                    withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()
+                    ).build();
+            group.withOption(password);
+
+            Option properties = newOption().
+                    withName(TARGET_PROPERTIES_OPTION).
+                    withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
+                    withArgument(
+                            newArgument().
+                                    withName(getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build()
+                    ).build();
+            group.withOption(properties);
+
+            Option schema = newOption().
+                    withName(TARGET_SCHEMA_OPTION).
+                    withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
+                    withArgument(
+                            newArgument().
+                                    withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
+                    ).build();
+            group.withOption(schema);
+            return group.build();
+        }
     }
+
 }
 

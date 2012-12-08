@@ -25,6 +25,7 @@ import com.nuodb.migration.utils.PriorityListImpl;
 import java.util.*;
 
 import static com.nuodb.migration.cli.parse.HelpHint.*;
+import static java.lang.String.format;
 
 /**
  * An implementation of option of options.
@@ -225,11 +226,13 @@ public class GroupImpl extends OptionBase implements Group {
                     break;
                 }
             }
-            option.postProcess(commandLine);
+            if (isRequired()) {
+                option.postProcess(commandLine);
+            }
         }
         // too many options
         if (unexpected != null) {
-            throw new OptionException(this, String.format("Unexpected option %1$s", unexpected.getName()));
+            throw new OptionException(this, format("Unexpected option %1$s", unexpected.getName()));
         }
         // too few options
         if (present < this.minimum) {

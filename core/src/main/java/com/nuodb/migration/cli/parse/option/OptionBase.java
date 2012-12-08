@@ -31,6 +31,8 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Set;
 
+import static java.lang.String.format;
+
 /**
  * A base implementation of option providing limited ground work for further implementations.
  */
@@ -176,7 +178,7 @@ public abstract class OptionBase implements Option {
 
     protected void postProcessInternal(CommandLine commandLine) {
         if (isRequired() && !commandLine.hasOption(this)) {
-            throw new OptionException(this, String.format("Missing required option %1$s", getName()));
+            throw new OptionException(this, format("Missing required option %1$s", getName()));
         }
     }
 

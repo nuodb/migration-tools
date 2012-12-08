@@ -67,6 +67,9 @@ public class GenerateSchemaJob extends JobBase {
     protected void validate() {
         isNotNull(getScriptGeneratorContext(), "Script generator context is required");
         isNotNull(getSourceConnectionProvider(), "Source connection provider is required");
+        if (outputSpec != null) {
+            isNotNull(outputSpec.getPath(), "Script output file name is required");
+        }
     }
 
     protected void execution(GenerateSchemaJobExecution execution) throws Exception {
@@ -113,10 +116,9 @@ public class GenerateSchemaJob extends JobBase {
             if (logger.isDebugEnabled()) {
                 logger.debug(format("Exporting schema to file %s", outputSpec.getPath()));
             }
-            scriptExporters.add(new FileScriptExporter(
-                    outputSpec.getPath(), OUTPUT_ENCODING));
+            scriptExporters.add(new FileScriptExporter(outputSpec.getPath(), OUTPUT_ENCODING));
         }
-        // Fallback to standard output if neither target connection nor target file are specified
+        // Fallback to standard output if neither target connection nor target file were specified
         if (scriptExporters.isEmpty()) {
             scriptExporters.add(SystemOutScriptExporter.INSTANCE);
         }

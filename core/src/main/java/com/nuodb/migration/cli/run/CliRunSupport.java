@@ -32,6 +32,7 @@ import com.google.common.collect.Maps;
 import com.nuodb.migration.cli.CliOptions;
 import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.CommandLine;
+import com.nuodb.migration.cli.parse.Group;
 import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.option.*;
@@ -60,7 +61,9 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
      *
      * @return group of options for the source database.
      */
-    protected Option createSourceGroup() {
+    protected Group createSourceGroup() {
+        GroupBuilder group = newGroup().withName(getMessage(SOURCE_GROUP_NAME)).withRequired(true).withMinimum(1);
+
         Option driver = newOption().
                 withName(SOURCE_DRIVER_OPTION).
                 withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).
@@ -71,6 +74,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
+        group.withOption(driver);
+
         Option url = newOption().
                 withName(SOURCE_URL_OPTION).
                 withDescription(getMessage(SOURCE_URL_OPTION_DESCRIPTION)).
@@ -81,6 +86,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
+        group.withOption(url);
+
         Option username = newOption().
                 withName(SOURCE_USERNAME_OPTION).
                 withDescription(getMessage(SOURCE_USERNAME_OPTION_DESCRIPTION)).
@@ -88,6 +95,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         newArgument().
                                 withName(getMessage(SOURCE_USERNAME_ARGUMENT_NAME)).build()
                 ).build();
+        group.withOption(username);
+
         Option password = newOption().
                 withName(SOURCE_PASSWORD_OPTION).
                 withDescription(getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION)).
@@ -95,6 +104,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         newArgument().
                                 withName(getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).build()
                 ).build();
+        group.withOption(password);
+
         Option properties = newOption().
                 withName(SOURCE_PROPERTIES_OPTION).
                 withDescription(getMessage(SOURCE_PROPERTIES_OPTION_DESCRIPTION)).
@@ -102,6 +113,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         newArgument().
                                 withName(getMessage(SOURCE_PROPERTIES_ARGUMENT_NAME)).build()
                 ).build();
+        group.withOption(properties);
+
         Option catalog = newOption().
                 withName(SOURCE_CATALOG_OPTION).
                 withDescription(getMessage(SOURCE_CATALOG_OPTION_DESCRIPTION)).
@@ -109,6 +122,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         newArgument().
                                 withName(getMessage(SOURCE_CATALOG_ARGUMENT_NAME)).build()
                 ).build();
+        group.withOption(catalog);
+
         Option schema = newOption().
                 withName(SOURCE_SCHEMA_OPTION).
                 withDescription(getMessage(SOURCE_SCHEMA_OPTION_DESCRIPTION)).
@@ -116,20 +131,14 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         newArgument().
                                 withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).build()
                 ).build();
-        return newGroup().
-                withName(getMessage(SOURCE_GROUP_NAME)).
-                withRequired(true).
-                withMinimum(1).
-                withOption(driver).
-                withOption(url).
-                withOption(username).
-                withOption(password).
-                withOption(properties).
-                withOption(catalog).
-                withOption(schema).build();
+        group.withOption(schema);
+
+        return group.build();
     }
 
-    protected Option createOutputGroup() {
+    protected Group createOutputGroup() {
+        GroupBuilder group = newGroup().withName(getMessage(OUTPUT_GROUP_NAME)).withRequired(true).withMinimum(1);
+
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
         Option type = newOption().
                 withName(OUTPUT_TYPE_OPTION).
@@ -141,6 +150,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
+        group.withOption(type);
 
         Option path = newOption().
                 withName(OUTPUT_PATH_OPTION).
@@ -149,6 +159,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         newArgument().
                                 withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).build()
                 ).build();
+        group.withOption(path);
 
         RegexOption attributes = new RegexOption();
         attributes.setName(OUTPUT_OPTION);
@@ -160,20 +171,17 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 newArgument().
                         withName(getMessage(OUTPUT_OPTION_ARGUMENT_NAME)).
                         withValuesSeparator(null).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
-        return newGroup().
-                withName(getMessage(OUTPUT_GROUP_NAME)).
-                withRequired(true).
-                withMinimum(1).
-                withOption(type).
-                withOption(path).
-                withOption(attributes).build();
+        group.withOption(attributes);
+
+        return group.build();
     }
 
     /**
      * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
      */
-    protected Option createSelectQueryGroup() {
-        OptionFormat optionFormat = optionToolkit.getOptionFormat();
+    protected Group createSelectQueryGroup() {
+        GroupBuilder group = newGroup().withName(getMessage(TABLE_GROUP_NAME)).withMaximum(Integer.MAX_VALUE);
+
         Option table = newOption().
                 withName(TABLE_OPTION).
                 withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
@@ -183,7 +191,9 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                                 withMinimum(1).
                                 withRequired(true).build()
                 ).build();
+        group.withOption(table);
 
+        OptionFormat optionFormat = optionToolkit.getOptionFormat();
         RegexOption tableFilter = new RegexOption();
         tableFilter.setName(TABLE_FILTER_OPTION);
         tableFilter.setDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
@@ -197,15 +207,14 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         withMinimum(1).
                         withRequired(true).build()
         );
-        return newGroup().
-                withName(getMessage(TABLE_GROUP_NAME)).
-                withOption(table).
-                withOption(tableFilter).
-                withMaximum(Integer.MAX_VALUE).
-                build();
+        group.withOption(tableFilter);
+
+        return group.build();
     }
 
     protected Option createNativeQueryGroup() {
+        GroupBuilder group = newGroup().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(Integer.MAX_VALUE);
+
         Option query = newOption().
                 withName(QUERY_OPTION).
                 withDescription(getMessage(QUERY_OPTION_DESCRIPTION)).
@@ -216,11 +225,9 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                                 withValuesSeparator(null).
                                 withRequired(true).build()
                 ).build();
-        return newGroup().
-                withName(getMessage(QUERY_GROUP_NAME)).
-                withOption(query).
-                withMaximum(Integer.MAX_VALUE).build();
+        group.withOption(query);
 
+        return group.build();
     }
 
     protected ConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
@@ -325,7 +332,9 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return map;
     }
 
-    protected Option createTargetGroup() {
+    protected Group createTargetGroup() {
+        GroupBuilder group = newGroup().withName(getMessage(TARGET_GROUP_NAME));
+
         Option url = newOption().
                 withName(TARGET_URL_OPTION).
                 withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
@@ -336,6 +345,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
+        group.withOption(url);
+
         Option username = newOption().
                 withName(TARGET_USERNAME_OPTION).
                 withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
@@ -343,6 +354,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         newArgument().
                                 withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()
                 ).build();
+        group.withOption(username);
+
         Option password = newOption().
                 withName(TARGET_PASSWORD_OPTION).
                 withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
@@ -350,6 +363,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         newArgument().
                                 withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()
                 ).build();
+        group.withOption(password);
+
         Option properties = newOption().
                 withName(TARGET_PROPERTIES_OPTION).
                 withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
@@ -357,6 +372,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         newArgument().
                                 withName(getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build()
                 ).build();
+        group.withOption(properties);
+
         Option schema = newOption().
                 withName(TARGET_SCHEMA_OPTION).
                 withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
@@ -364,29 +381,14 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                         newArgument().
                                 withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
                 ).build();
-        return newGroup().
-                withName(getMessage(TARGET_GROUP_NAME)).
-                withRequired(true).
-                withMinimum(1).
-                withOption(url).
-                withOption(username).
-                withOption(password).
-                withOption(properties).
-                withOption(schema).build();
+        group.withOption(schema);
+        group.withRequired(true);
+        group.withMinimum(1);
+        return group.build();
     }
 
-    protected Option createInputGroup() {
+    protected Group createInputGroup() {
         OptionFormat optionFormat = optionToolkit.getOptionFormat();
-
-        // Option type = newOption().
-        //  withName(INPUT_TYPE_OPTION).
-        //  withDescription(getMessage(INPUT_TYPE_OPTION_DESCRIPTION)).
-        //  withArgument(
-        //   newArgument().
-        //    withName(getMessage(INPUT_TYPE_ARGUMENT_NAME)).
-        //    withRequired(true).
-        //    withMinimum(1).build()
-        //  ).build();
 
         Option path = newOption().
                 withName(INPUT_PATH_OPTION).
@@ -411,22 +413,24 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withName(getMessage(INPUT_GROUP_NAME)).
                 withRequired(true).
                 withMinimum(1).
-                // withOption(type).
                 withOption(path).
                 withOption(attributes).build();
     }
 
     protected ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
-        DriverConnectionSpec connection = new DriverConnectionSpec();
-        connection.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
-        connection.setSchema(commandLine.<String>getValue(TARGET_SCHEMA_OPTION));
-        connection.setUrl(commandLine.<String>getValue(TARGET_URL_OPTION));
-        connection.setUsername(commandLine.<String>getValue(TARGET_USERNAME_OPTION));
-        connection.setPassword(commandLine.<String>getValue(TARGET_PASSWORD_OPTION));
-        String properties = commandLine.getValue(TARGET_PROPERTIES_OPTION);
-        if (properties != null) {
-            Map<String, String> map = parseUrl(option, properties);
-            connection.setProperties(map);
+        DriverConnectionSpec connection = null;
+        if (commandLine.hasOption(TARGET_URL_OPTION)) {
+            connection = new DriverConnectionSpec();
+            connection.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
+            connection.setUrl(commandLine.<String>getValue(TARGET_URL_OPTION));
+            connection.setUsername(commandLine.<String>getValue(TARGET_USERNAME_OPTION));
+            connection.setPassword(commandLine.<String>getValue(TARGET_PASSWORD_OPTION));
+            String properties = commandLine.getValue(TARGET_PROPERTIES_OPTION);
+            connection.setSchema(commandLine.<String>getValue(TARGET_SCHEMA_OPTION));
+            if (properties != null) {
+                Map<String, String> map = parseUrl(option, properties);
+                connection.setProperties(map);
+            }
         }
         return connection;
     }
