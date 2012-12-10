@@ -27,10 +27,7 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.metadata.Database;
-import com.nuodb.migration.jdbc.metadata.ForeignKey;
-import com.nuodb.migration.jdbc.metadata.Index;
-import com.nuodb.migration.jdbc.metadata.Table;
+import com.nuodb.migration.jdbc.metadata.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -52,13 +49,14 @@ public class DatabaseGenerator implements ScriptGenerator<Database> {
     @Override
     public String[] getCreateScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
         List<String> scripts = newArrayList();
-        if (scriptGeneratorContext.getMetaDataTypes().contains(TABLE)) {
+        Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
+        if (metaDataTypes.contains(TABLE)) {
             ScriptGeneratorContext tableGeneratorContext = getTableGeneratorContext(scriptGeneratorContext);
             for (Table table : database.listTables()) {
                 scripts.addAll(newArrayList(tableGeneratorContext.getCreateScripts(table)));
             }
         }
-        if (scriptGeneratorContext.getMetaDataTypes().contains(INDEX)) {
+        if (metaDataTypes.contains(INDEX)) {
             for (Table table : database.listTables()) {
                 if (!scriptGeneratorContext.getDialect().supportsIndexInCreateTable()) {
                     boolean primary = false;
@@ -72,7 +70,7 @@ public class DatabaseGenerator implements ScriptGenerator<Database> {
                 }
             }
         }
-        if (scriptGeneratorContext.getMetaDataTypes().contains(FOREIGN_KEY)) {
+        if (metaDataTypes.contains(FOREIGN_KEY)) {
             for (Table table : database.listTables()) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
                     scripts.addAll(newArrayList(scriptGeneratorContext.getCreateScripts(foreignKey)));

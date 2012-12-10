@@ -57,6 +57,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeRegistry().getJdbcTypeNameMap();
         Collection<Column> columns = table.getColumns();
         final Collection<Index> indexes = table.getIndexes();
+        Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();
             buffer.append(scriptGeneratorContext.getName(column));
@@ -76,7 +77,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             if (defaultValue != null) {
                 buffer.append(" DEFAULT ").append(defaultValue);
             }
-            if (scriptGeneratorContext.getMetaDataTypes().contains(INDEX)) {
+            if (metaDataTypes.contains(INDEX)) {
                 Optional<Index> index = Iterables.tryFind(indexes, new Predicate<Index>() {
                     @Override
                     public boolean apply(Index index) {
@@ -93,7 +94,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                     }
                 }
             }
-            if (scriptGeneratorContext.getMetaDataTypes().contains(COLUMN_CHECK)) {
+            if (metaDataTypes.contains(COLUMN_CHECK)) {
                 String check = column.getCheck();
                 if (check != null && dialect.supportsColumnCheck()) {
                     buffer.append(" CHECK ");
@@ -108,13 +109,15 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(", ");
             }
         }
-        PrimaryKey primaryKey = table.getPrimaryKey();
-        if (primaryKey != null) {
-            ConstraintGenerator<PrimaryKey> generator = (ConstraintGenerator<PrimaryKey>)
-                    scriptGeneratorContext.getScriptGenerator(primaryKey);
-            buffer.append(", ").append(generator.getConstraintSql(primaryKey, scriptGeneratorContext));
+        if (metaDataTypes.contains(PRIMARY_KEY)) {
+            PrimaryKey primaryKey = table.getPrimaryKey();
+            if (primaryKey != null) {
+                ConstraintGenerator<PrimaryKey> generator = (ConstraintGenerator<PrimaryKey>)
+                        scriptGeneratorContext.getScriptGenerator(primaryKey);
+                buffer.append(", ").append(generator.getConstraintSql(primaryKey, scriptGeneratorContext));
+            }
         }
-        if (scriptGeneratorContext.getMetaDataTypes().contains(INDEX) && dialect.supportsIndexInCreateTable()) {
+        if (metaDataTypes.contains(INDEX) && dialect.supportsIndexInCreateTable()) {
             boolean primary = false;
             for (Index index : indexes) {
                 if (!primary && index.isPrimary()) {
@@ -130,7 +133,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
 
             }
         }
-        if (scriptGeneratorContext.getMetaDataTypes().contains(FOREIGN_KEY)) {
+        if (metaDataTypes.contains(FOREIGN_KEY)) {
             for (ForeignKey foreignKey : table.getForeignKeys()) {
                 ConstraintGenerator<ForeignKey> generator = (ConstraintGenerator<ForeignKey>)
                         scriptGeneratorContext.getScriptGenerator(foreignKey);
@@ -140,7 +143,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 }
             }
         }
-        if (scriptGeneratorContext.getMetaDataTypes().contains(TABLE_CHECK)) {
+        if (metaDataTypes.contains(TABLE_CHECK)) {
             if (dialect.supportsTableCheck()) {
                 for (String check : table.getChecks()) {
                     buffer.append(", CHECK ");
