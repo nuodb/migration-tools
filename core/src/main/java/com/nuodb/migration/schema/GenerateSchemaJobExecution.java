@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.generate;
+package com.nuodb.migration.schema;
 
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.job.JobExecution;

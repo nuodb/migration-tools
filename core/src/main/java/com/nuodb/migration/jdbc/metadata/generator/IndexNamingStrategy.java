@@ -40,16 +40,16 @@ public class IndexNamingStrategy extends NamingStrategyBase<Index> {
     }
 
     @Override
-    public String getName(Index index, ScriptGeneratorContext context, boolean quoteIfNeeded) {
-        return getIndexName(index, context, quoteIfNeeded);
+    public String getName(Index index, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
+        return getIndexName(index, scriptGeneratorContext, identifier);
     }
 
     @Override
-    public String getQualifiedName(Index index, ScriptGeneratorContext context, boolean quoteIfNeeded) {
-        return getIndexName(index, context, quoteIfNeeded);
+    public String getQualifiedName(Index index, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
+        return getIndexName(index, scriptGeneratorContext, identifier);
     }
 
-    protected String getIndexName(Index index, ScriptGeneratorContext context, boolean quoteIfNeeded) {
+    protected String getIndexName(Index index, ScriptGeneratorContext context, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("IDX");
         buffer.append('_');
@@ -58,6 +58,6 @@ public class IndexNamingStrategy extends NamingStrategyBase<Index> {
             buffer.append("_");
             buffer.append(context.getName(column, false));
         }
-        return quoteIfNeeded ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
+        return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

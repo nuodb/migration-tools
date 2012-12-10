@@ -63,7 +63,7 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
     }
 
     protected CliHandlerSupport(OptionToolkit optionToolkit) {
-        this(optionToolkit, new CliRunFactoryLookup());
+        this(optionToolkit, new CliRunFactoryLookup(optionToolkit));
     }
 
     protected CliHandlerSupport(OptionToolkit optionToolkit, CliRunFactoryLookup cliRunFactoryLookup) {
@@ -101,7 +101,7 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
 
         Option command = new CliCommand(
                 COMMAND_OPTION_ID, COMMAND_OPTION, getMessage(COMMAND_OPTION_DESCRIPTION), false,
-                cliRunFactoryLookup, optionToolkit);
+                cliRunFactoryLookup);
         return optionToolkit.newGroup().
                 withName(getMessage(ROOT_GROUP_NAME)).
                 withOption(help).
@@ -137,7 +137,7 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
         if (command != null) {
             CliRunFactory cliRunFactory = cliRunFactoryLookup.lookup(command);
             if (cliRunFactory != null) {
-                formatter.setOption(cliRunFactory.createCliRun(optionToolkit));
+                formatter.setOption(cliRunFactory.createCliRun());
                 formatter.setExecutable(format(MIGRATION_EXECUTABLE_COMMAND, command));
             } else {
                 throw new OptionException(options.getOption(HELP_OPTION), format("Unknown command %s", command));

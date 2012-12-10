@@ -85,4 +85,8 @@ public interface CliOptions {
     final String INPUT_OPTION = "input.*";
     final String INPUT_TYPE_OPTION = "input.type";
     final String INPUT_PATH_OPTION = "input.path";
+
+    final String GENERATE_META_DATA_OPTION = "generate.*";
+    final String DROP_BEFORE_CREATE_OPTION = "drop.before.create";
+
 }

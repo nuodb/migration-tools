@@ -27,14 +27,24 @@
  */
 package com.nuodb.migration.spec;
 
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
+
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
+
 /**
  * @author Sergey Bushik
  */
 public class GenerateSchemaSpec extends TaskSpecBase {
 
+    public static final boolean DROP_BEFORE_CREATE = true;
+
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;
     private ResourceSpec outputSpec;
+    private Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.ALL_TYPES);
+    private boolean dropBeforeCreate = DROP_BEFORE_CREATE;
 
     public ConnectionSpec getSourceConnectionSpec() {
         return sourceConnectionSpec;
@@ -58,5 +68,21 @@ public class GenerateSchemaSpec extends TaskSpecBase {
 
     public void setOutputSpec(ResourceSpec outputSpec) {
         this.outputSpec = outputSpec;
+    }
+
+    public Collection<MetaDataType> getMetaDataTypes() {
+        return metaDataTypes;
+    }
+
+    public void setMetaDataTypes(Collection<MetaDataType> metaDataTypes) {
+        this.metaDataTypes = metaDataTypes;
+    }
+
+    public boolean isDropBeforeCreate() {
+        return dropBeforeCreate;
+    }
+
+    public void setDropBeforeCreate(boolean dropBeforeCreate) {
+        this.dropBeforeCreate = dropBeforeCreate;
     }
 }

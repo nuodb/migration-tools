@@ -27,8 +27,6 @@
  */
 package com.nuodb.migration.cli.run;
 
-import com.nuodb.migration.cli.parse.option.OptionToolkit;
-
 /**
  * @author Sergey Bushik
  */
@@ -36,5 +34,5 @@ public interface CliRunFactory {
 
     String getCommand();
 
-    CliRun createCliRun(OptionToolkit optionToolkit);
+    CliRun createCliRun();
 }

@@ -28,7 +28,6 @@
 package com.nuodb.migration.cli.run;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.nuodb.migration.cli.CliOptions;
 import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.CommandLine;
@@ -44,6 +43,8 @@ import com.nuodb.migration.utils.Priority;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
+
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * @author Sergey Bushik
@@ -238,11 +239,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         connection.setUrl(commandLine.<String>getValue(SOURCE_URL_OPTION));
         connection.setUsername(commandLine.<String>getValue(SOURCE_USERNAME_OPTION));
         connection.setPassword(commandLine.<String>getValue(SOURCE_PASSWORD_OPTION));
-        String properties = commandLine.getValue(SOURCE_PROPERTIES_OPTION);
-        if (properties != null) {
-            Map<String, String> map = parseUrl(option, properties);
-            connection.setProperties(map);
-        }
+        parseProperties(connection, commandLine, SOURCE_PROPERTIES_OPTION, option);
         return connection;
     }
 
@@ -251,12 +248,12 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         resource.setType(commandLine.<String>getValue(OUTPUT_TYPE_OPTION));
         resource.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
         resource.setAttributes(parseFormatAttributes(
-                commandLine.getOption(OUTPUT_OPTION), commandLine.<String>getValues(OUTPUT_OPTION)));
+                commandLine.<String>getValues(OUTPUT_OPTION), commandLine.getOption(OUTPUT_OPTION)));
         return resource;
     }
 
-    protected Map<String, String> parseFormatAttributes(Option option, List<String> values) {
-        Map<String, String> attributes = Maps.newHashMap();
+    protected Map<String, String> parseFormatAttributes(List<String> values, Option option) {
+        Map<String, String> attributes = newHashMap();
         for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
             attributes.put(iterator.next(), iterator.next());
         }
@@ -264,7 +261,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected Collection<SelectQuerySpec> parseSelectQueryGroup(CommandLine commandLine, Option option) {
-        Map<String, SelectQuerySpec> tableQueryMapping = Maps.newHashMap();
+        Map<String, SelectQuerySpec> tableQueryMapping = newHashMap();
         for (String table : commandLine.<String>getValues(TABLE_OPTION)) {
             tableQueryMapping.put(table, new SelectQuerySpec(table));
         }
@@ -310,26 +307,30 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     /**
      * Parses url name1=value1&name2=value2 encoded string.
      *
-     * @param option the option which contains parsed url
-     * @param url    to be parsed
-     * @return map of strings to strings formed from key value pairs from url
+     * @param connection  driver connection spec to store URL encoded properties in.
+     * @param commandLine holding command line options.
+     * @param trigger     key to key value pairs
+     * @param option      the option which contains parsed url
      */
-    protected Map<String, String> parseUrl(Option option, String url) {
-        try {
-            url = URLDecoder.decode(url, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new OptionException(option, e.getMessage());
-        }
-        String[] params = url.split("&");
-        Map<String, String> map = Maps.newHashMap();
-        for (String param : params) {
-            String[] pair = param.split("=");
-            if (pair.length != 2) {
-                throw new OptionException(option, String.format("Malformed name-value pair %1$s", pair));
+    protected void parseProperties(DriverConnectionSpec connection, CommandLine commandLine, String trigger, Option option) {
+        String url = commandLine.getValue(trigger);
+        if (url != null) {
+            try {
+                url = URLDecoder.decode(url, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new OptionException(option, e.getMessage());
             }
-            map.put(pair[0], pair[1]);
+            String[] params = url.split("&");
+            Map<String, String> properties = newHashMap();
+            for (String param : params) {
+                String[] pair = param.split("=");
+                if (pair.length != 2) {
+                    throw new OptionException(option, String.format("Malformed name-value pair %1$s", pair));
+                }
+                properties.put(pair[0], pair[1]);
+            }
+            connection.setProperties(properties);
         }
-        return map;
     }
 
     protected Group createTargetGroup() {
@@ -425,22 +426,17 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
             connection.setUrl(commandLine.<String>getValue(TARGET_URL_OPTION));
             connection.setUsername(commandLine.<String>getValue(TARGET_USERNAME_OPTION));
             connection.setPassword(commandLine.<String>getValue(TARGET_PASSWORD_OPTION));
-            String properties = commandLine.getValue(TARGET_PROPERTIES_OPTION);
             connection.setSchema(commandLine.<String>getValue(TARGET_SCHEMA_OPTION));
-            if (properties != null) {
-                Map<String, String> map = parseUrl(option, properties);
-                connection.setProperties(map);
-            }
+            parseProperties(connection, commandLine, TARGET_PROPERTIES_OPTION, option);
         }
         return connection;
     }
 
-    protected ResourceSpec parseInputGroup(CommandLine commandLine, Option cliLoad) {
+    protected ResourceSpec parseInputGroup(CommandLine commandLine, Option option) {
         ResourceSpec resource = new ResourceSpec();
-        // format.setType(commandLine.<String>getValue(INPUT_TYPE_OPTION));
         resource.setPath(commandLine.<String>getValue(INPUT_PATH_OPTION));
         resource.setAttributes(parseFormatAttributes(
-                commandLine.getOption(INPUT_OPTION), commandLine.<String>getValues(INPUT_OPTION)));
+                commandLine.<String>getValues(INPUT_OPTION), commandLine.getOption(INPUT_OPTION)));
         return resource;
     }
 

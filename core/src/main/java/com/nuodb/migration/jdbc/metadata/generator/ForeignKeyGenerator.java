@@ -44,27 +44,27 @@ public class ForeignKeyGenerator implements ConstraintGenerator<ForeignKey> {
     }
 
     @Override
-    public String[] getCreateScripts(ForeignKey foreignKey, ScriptGeneratorContext context) {
+    public String[] getCreateScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        buffer.append(context.getQualifiedName(foreignKey.getSourceTable()));
+        buffer.append(scriptGeneratorContext.getQualifiedName(foreignKey.getSourceTable()));
         buffer.append(" ADD CONSTRAINT ");
-        buffer.append(context.getName(foreignKey));
+        buffer.append(scriptGeneratorContext.getName(foreignKey));
         buffer.append(' ');
-        buffer.append(getConstraintSql(foreignKey, context));
+        buffer.append(getConstraintSql(foreignKey, scriptGeneratorContext));
         return new String[]{buffer.toString()};
     }
 
     @Override
-    public String[] getDropScripts(ForeignKey foreignKey, ScriptGeneratorContext context) {
+    public String[] getDropScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        Dialect dialect = context.getDialect();
-        buffer.append(context.getQualifiedName(foreignKey.getSourceTable()));
+        Dialect dialect = scriptGeneratorContext.getDialect();
+        buffer.append(scriptGeneratorContext.getQualifiedName(foreignKey.getSourceTable()));
         buffer.append(' ');
         buffer.append(dialect.getDropForeignKeyString());
         buffer.append(' ');
-        buffer.append(context.getName(foreignKey));
+        buffer.append(scriptGeneratorContext.getName(foreignKey));
         return new String[]{buffer.toString()};
     }
 

@@ -39,22 +39,22 @@ public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
     }
 
     @Override
-    public String getName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean quoteIfNeeded) {
-        return getForeignKeyName(foreignKey, context, quoteIfNeeded);
+    public String getName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
+        return getForeignKeyName(foreignKey, scriptGeneratorContext, identifier);
     }
 
     @Override
-    public String getQualifiedName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean quoteIfNeeded) {
-        return getForeignKeyName(foreignKey, context, quoteIfNeeded);
+    public String getQualifiedName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
+        return getForeignKeyName(foreignKey, scriptGeneratorContext, identifier);
     }
 
-    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean quoteIfNeeded) {
+    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("FK");
         buffer.append('_');
         buffer.append(context.getName(foreignKey.getSourceTable(), false));
         buffer.append('_');
         buffer.append(context.getName(foreignKey.getTargetTable(), false));
-        return quoteIfNeeded ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
+        return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

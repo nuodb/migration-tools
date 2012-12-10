@@ -97,12 +97,17 @@ public interface CliResources {
     final String TARGET_SCHEMA_OPTION_DESCRIPTION = "com.nuodb.migration.cli.target.schema.option.description";
     final String TARGET_SCHEMA_ARGUMENT_NAME = "com.nuodb.migration.cli.target.schema.argument.name";
 
-    final String GENERATE_SCHEMA_GROUP_NAME = "com.nuodb.migration.cli.generate.schema.group.name";
-    final String GENERATE_SCHEMA_OUTPUT_GROUP_NAME = "com.nuodb.migration.cli.generate.schema.output.group.name";
-
-    final String INPUT_GROUP_NAME = "com.nuodb.migration.cli.input.group";
+    final String INPUT_GROUP_NAME = "com.nuodb.migration.cli.input.group.name";
     final String INPUT_PATH_OPTION_DESCRIPTION = "com.nuodb.migration.cli.input.path.option.description";
     final String INPUT_PATH_ARGUMENT_NAME = "com.nuodb.migration.cli.input.path.argument.name";
     final String INPUT_OPTION_DESCRIPTION = "com.nuodb.migration.cli.input.option.description";
     final String INPUT_OPTION_ARGUMENT_NAME = "com.nuodb.migration.cli.input.argument.description";
+
+    final String GENERATE_SCHEMA_GROUP_NAME = "com.nuodb.migration.cli.generate.schema.group.name";
+    final String GENERATE_SCHEMA_OUTPUT_GROUP_NAME = "com.nuodb.migration.cli.generate.schema.output.group.name";
+    final String GENERATE_SCHEMA_META_DATA_OPTION_DESCRIPTION = "com.nuodb.migration.cli.generate.schema.meta.data.option.description";
+    final String GENERATE_SCHEMA_META_DATA_ARGUMENT_NAME = "com.nuodb.migration.cli.generate.schema.meta.data.argument.name";
+
+    final String GENERATE_SCHEMA_DROP_BEFORE_CREATE_DESCRIPTION = "com.nuodb.migration.cli.generate.schema.drop.before.create.option.description";
+    final String GENERATE_SCHEMA_DROP_BEFORE_CREATE_ARGUMENT_NAME = "com.nuodb.migration.cli.generate.schema.drop.before.create.argument.name";
 }

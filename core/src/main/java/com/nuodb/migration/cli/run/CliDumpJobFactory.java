@@ -39,13 +39,17 @@ import com.nuodb.migration.spec.DumpSpec;
  *
  * @author Sergey Bushik
  */
-public class CliDumpJobFactory implements CliRunFactory, CliResources {
+public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, CliResources {
 
     /**
      * The "dump" literal command which is matched against the value on the command line. If matched the CliDump object
-     * is constructed with {@link #createCliRun(OptionToolkit)} method.
+     * is constructed with {@link #createCliRun()} method.
      */
     private static final String COMMAND = "dump";
+
+    public CliDumpJobFactory(OptionToolkit optionToolkit) {
+        super(optionToolkit);
+    }
 
     @Override
     public String getCommand() {
@@ -53,8 +57,8 @@ public class CliDumpJobFactory implements CliRunFactory, CliResources {
     }
 
     @Override
-    public CliRun createCliRun(OptionToolkit optionToolkit) {
-        return new CliDumpJob(optionToolkit);
+    public CliRun createCliRun() {
+        return new CliDumpJob();
     }
 
     /**
@@ -63,8 +67,8 @@ public class CliDumpJobFactory implements CliRunFactory, CliResources {
      */
     class CliDumpJob extends CliRunJob {
 
-        public CliDumpJob(OptionToolkit optionToolkit) {
-            super(optionToolkit, COMMAND, new DumpJobFactory());
+        public CliDumpJob() {
+            super(COMMAND, new DumpJobFactory());
         }
 
         @Override
@@ -81,14 +85,14 @@ public class CliDumpJobFactory implements CliRunFactory, CliResources {
 
         @Override
         protected void bind(CommandLine commandLine) {
-            DumpSpec dumpSpec = new DumpSpec();
-            dumpSpec.setSourceConnectionSpec(parseSourceGroup(commandLine, this));
-            dumpSpec.setOutputSpec(parseOutputGroup(commandLine, this));
-            dumpSpec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
-            dumpSpec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine, this));
-            dumpSpec.setTimeZone(parseTimeZone(commandLine, this));
+            DumpSpec spec = new DumpSpec();
+            spec.setSourceConnectionSpec(parseSourceGroup(commandLine, this));
+            spec.setOutputSpec(parseOutputGroup(commandLine, this));
+            spec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
+            spec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine, this));
+            spec.setTimeZone(parseTimeZone(commandLine, this));
 
-            ((DumpJobFactory) getJobFactory()).setDumpSpec(dumpSpec);
+            ((DumpJobFactory) getJobFactory()).setDumpSpec(spec);
         }
     }
 }

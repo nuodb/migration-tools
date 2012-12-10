@@ -44,20 +44,20 @@ public class IndexGenerator implements ConstraintGenerator<Index> {
     }
 
     @Override
-    public String[] getCreateScripts(Index index, ScriptGeneratorContext context) {
+    public String[] getCreateScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE");
         if (index.isUnique()) {
             buffer.append(" UNIQUE");
         }
         buffer.append(" INDEX ");
-        buffer.append(context.getName(index));
+        buffer.append(scriptGeneratorContext.getName(index));
         buffer.append(" ON ");
-        buffer.append(context.getQualifiedName(index.getTable()));
+        buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
         buffer.append(" (");
         for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            buffer.append(context.getName(column));
+            buffer.append(scriptGeneratorContext.getName(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }
@@ -67,15 +67,15 @@ public class IndexGenerator implements ConstraintGenerator<Index> {
     }
 
     @Override
-    public String[] getDropScripts(Index index, ScriptGeneratorContext context) {
+    public String[] getDropScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP INDEX ");
-        buffer.append(context.getName(index));
+        buffer.append(scriptGeneratorContext.getName(index));
 
-        Dialect dialect = context.getDialect();
+        Dialect dialect = scriptGeneratorContext.getDialect();
         if (dialect.supportsDropIndexOnTable()) {
             buffer.append(" ON ");
-            buffer.append(context.getQualifiedName(index.getTable()));
+            buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
             buffer.append(' ');
         }
 

@@ -31,7 +31,6 @@ import com.nuodb.migration.cli.parse.CommandLine;
 import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.Trigger;
 import com.nuodb.migration.cli.parse.option.ArgumentImpl;
-import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.cli.parse.option.TriggerImpl;
 import com.nuodb.migration.cli.run.CliRun;
 import com.nuodb.migration.cli.run.CliRunFactory;
@@ -46,52 +45,49 @@ import java.util.ListIterator;
  */
 public class CliCommand extends ArgumentImpl {
 
-    private CliRunFactoryLookup runFactoryLookup;
-    private OptionToolkit optionToolkit;
+    private CliRunFactoryLookup cliRunFactoryLookup;
 
-    public CliCommand(CliRunFactoryLookup runFactoryLookup, OptionToolkit optionToolkit) {
-        this.runFactoryLookup = runFactoryLookup;
-        this.optionToolkit = optionToolkit;
+    public CliCommand(CliRunFactoryLookup cliRunFactoryLookup) {
+        this.cliRunFactoryLookup = cliRunFactoryLookup;
     }
 
     public CliCommand(int id, String name, String description, boolean required,
-                      CliRunFactoryLookup runFactoryLookup, OptionToolkit optionToolkit) {
+                      CliRunFactoryLookup cliRunFactoryLookup) {
         super(id, name, description, required);
-        this.runFactoryLookup = runFactoryLookup;
-        this.optionToolkit = optionToolkit;
+        this.cliRunFactoryLookup = cliRunFactoryLookup;
     }
 
     @Override
     public PriorityList<Trigger> getTriggers() {
         PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
-        for (String command : runFactoryLookup.getCommands()) {
-            triggers.add(new TriggerImpl(command));
+        for (String cliCommand : cliRunFactoryLookup.getCommands()) {
+            triggers.add(new TriggerImpl(cliCommand));
         }
         return triggers;
     }
 
     @Override
     public boolean canProcess(CommandLine commandLine, String argument) {
-        return runFactoryLookup.lookup(argument) != null;
+        return cliRunFactoryLookup.lookup(argument) != null;
     }
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        CliRunFactory cliRunFactory = runFactoryLookup.lookup(arguments.next());
-        CliRun cliRun = cliRunFactory.createCliRun(optionToolkit);
+        CliRunFactory cliRunFactory = cliRunFactoryLookup.lookup(arguments.next());
+        CliRun cliRun = cliRunFactory.createCliRun();
         cliRun.process(commandLine, arguments);
         commandLine.addValue(this, cliRun);
     }
 
     @Override
     public void postProcess(CommandLine commandLine) {
-        CliRun command = commandLine.getValue(this);
+        CliRun cliRun = commandLine.getValue(this);
         try {
-            if (command != null) {
-                command.postProcess(commandLine);
+            if (cliRun != null) {
+                cliRun.postProcess(commandLine);
             }
         } catch (OptionException exception) {
-            throw new OptionException(command, exception.getMessage());
+            throw new OptionException(cliRun, exception.getMessage());
         }
     }
 }

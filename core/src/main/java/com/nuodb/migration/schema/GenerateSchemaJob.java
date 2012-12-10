@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.generate;
+package com.nuodb.migration.schema;
 
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
@@ -54,6 +54,7 @@ public class GenerateSchemaJob extends JobBase {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private ScriptGeneratorContext scriptGeneratorContext;
+    private boolean dropBeforeCreate;
     private ConnectionProvider sourceConnectionProvider;
     private ConnectionProvider targetConnectionProvider;
     private ResourceSpec outputSpec;
@@ -95,7 +96,9 @@ public class GenerateSchemaJob extends JobBase {
         ScriptExporter scriptExporter = createScriptExporter(execution);
         try {
             scriptExporter.open();
-            scriptExporter.exportScripts(scriptGeneratorContext.getDropScripts(database));
+            if (dropBeforeCreate) {
+                scriptExporter.exportScripts(scriptGeneratorContext.getDropScripts(database));
+            }
             scriptExporter.exportScripts(scriptGeneratorContext.getCreateScripts(database));
         } finally {
             scriptExporter.close();
@@ -131,6 +134,14 @@ public class GenerateSchemaJob extends JobBase {
 
     public void setScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
         this.scriptGeneratorContext = scriptGeneratorContext;
+    }
+
+    public boolean isDropBeforeCreate() {
+        return dropBeforeCreate;
+    }
+
+    public void setDropBeforeCreate(boolean dropBeforeCreate) {
+        this.dropBeforeCreate = dropBeforeCreate;
     }
 
     public ConnectionProvider getSourceConnectionProvider() {

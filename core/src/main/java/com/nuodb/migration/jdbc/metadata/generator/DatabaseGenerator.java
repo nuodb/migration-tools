@@ -27,13 +27,16 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.dialect.Dialect;
-import com.nuodb.migration.jdbc.metadata.*;
+import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.ForeignKey;
+import com.nuodb.migration.jdbc.metadata.Index;
+import com.nuodb.migration.jdbc.metadata.Table;
 
 import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
 
 /**
  * @author Sergey Bushik
@@ -47,51 +50,66 @@ public class DatabaseGenerator implements ScriptGenerator<Database> {
     }
 
     @Override
-    public String[] getCreateScripts(Database database, ScriptGeneratorContext context) {
+    public String[] getCreateScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
         List<String> scripts = newArrayList();
-        Collection<Table> tables = database.listTables();
-        /**
-         * Indexes and foreign keys are generated after tables
-         */
-        Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.ALL_TYPES);
-        metaDataTypes.remove(MetaDataType.FOREIGN_KEY);
-        SimpleScriptGeneratorContext tableContext = new SimpleScriptGeneratorContext(context);
-        tableContext.setMetaDataTypes(metaDataTypes);
-        for (Table table : tables) {
-            scripts.addAll(newArrayList(tableContext.getCreateScripts(table)));
+        if (scriptGeneratorContext.getMetaDataTypes().contains(TABLE)) {
+            ScriptGeneratorContext tableGeneratorContext = getTableGeneratorContext(scriptGeneratorContext);
+            for (Table table : database.listTables()) {
+                scripts.addAll(newArrayList(tableGeneratorContext.getCreateScripts(table)));
+            }
         }
-        for (Table table : tables) {
-            if (!context.getDialect().supportsIndexInCreateTable()) {
-                boolean primary = false;
-                for (Index index : table.getIndexes()) {
-                    if (!primary && index.isPrimary()) {
-                        primary = true;
-                        continue;
+        if (scriptGeneratorContext.getMetaDataTypes().contains(INDEX)) {
+            for (Table table : database.listTables()) {
+                if (!scriptGeneratorContext.getDialect().supportsIndexInCreateTable()) {
+                    boolean primary = false;
+                    for (Index index : table.getIndexes()) {
+                        if (!primary && index.isPrimary()) {
+                            primary = true;
+                            continue;
+                        }
+                        scripts.addAll(newArrayList(scriptGeneratorContext.getCreateScripts(index)));
                     }
-                    scripts.addAll(newArrayList(tableContext.getCreateScripts(index)));
                 }
             }
-            for (ForeignKey foreignKey : table.getForeignKeys()) {
-                scripts.addAll(newArrayList(tableContext.getCreateScripts(foreignKey)));
+        }
+        if (scriptGeneratorContext.getMetaDataTypes().contains(FOREIGN_KEY)) {
+            for (Table table : database.listTables()) {
+                for (ForeignKey foreignKey : table.getForeignKeys()) {
+                    scripts.addAll(newArrayList(scriptGeneratorContext.getCreateScripts(foreignKey)));
+                }
             }
         }
         return scripts.toArray(new String[scripts.size()]);
     }
 
+    /**
+     * Indexes and foreign keys are generated after tables.
+     *
+     * @param scriptGeneratorContext original script generator context.
+     * @return script generator context for tables.
+     */
+    protected ScriptGeneratorContext getTableGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
+        ScriptGeneratorContext tableGeneratorContext = new SimpleScriptGeneratorContext(scriptGeneratorContext);
+        tableGeneratorContext.getMetaDataTypes().remove(FOREIGN_KEY);
+        return tableGeneratorContext;
+    }
+
     @Override
-    public String[] getDropScripts(Database database, ScriptGeneratorContext context) {
+    public String[] getDropScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
         List<String> scripts = newArrayList();
-        Dialect dialect = context.getDialect();
         Collection<Table> tables = database.listTables();
-        if (dialect.dropConstraints()) {
+        if (scriptGeneratorContext.getMetaDataTypes().contains(FOREIGN_KEY) &&
+                scriptGeneratorContext.getDialect().dropConstraints()) {
             for (Table table : tables) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
-                    scripts.addAll(newArrayList(context.getDropScripts(foreignKey)));
+                    scripts.addAll(newArrayList(scriptGeneratorContext.getDropScripts(foreignKey)));
                 }
             }
         }
-        for (Table table : tables) {
-            scripts.addAll(newArrayList(context.getDropScripts(table)));
+        if (scriptGeneratorContext.getMetaDataTypes().contains(TABLE)) {
+            for (Table table : tables) {
+                scripts.addAll(newArrayList(scriptGeneratorContext.getDropScripts(table)));
+            }
         }
         return scripts.toArray(new String[scripts.size()]);
     }

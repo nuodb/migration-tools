@@ -39,8 +39,8 @@ public abstract class CliRunJob extends CliRunAdapter {
 
     private JobFactory jobFactory;
 
-    public CliRunJob(OptionToolkit optionToolkit, String command, JobFactory jobFactory) {
-        super(optionToolkit, command);
+    public CliRunJob(String command, JobFactory jobFactory) {
+        super(command);
         this.jobFactory = jobFactory;
     }
 

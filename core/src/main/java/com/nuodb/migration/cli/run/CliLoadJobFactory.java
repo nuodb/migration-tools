@@ -37,9 +37,13 @@ import com.nuodb.migration.spec.LoadSpec;
 /**
  * @author Sergey Bushik
  */
-public class CliLoadJobFactory implements CliRunFactory, CliResources {
+public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, CliResources {
 
     private static final String COMMAND = "load";
+
+    public CliLoadJobFactory(OptionToolkit optionToolkit) {
+        super(optionToolkit);
+    }
 
     @Override
     public String getCommand() {
@@ -47,14 +51,14 @@ public class CliLoadJobFactory implements CliRunFactory, CliResources {
     }
 
     @Override
-    public CliRun createCliRun(OptionToolkit optionToolkit) {
-        return new CliLoad(optionToolkit);
+    public CliRun createCliRun() {
+        return new CliLoad();
     }
 
     class CliLoad extends CliRunJob {
 
-        public CliLoad(OptionToolkit optionToolkit) {
-            super(optionToolkit, COMMAND, new LoadJobFactory());
+        public CliLoad() {
+            super(COMMAND, new LoadJobFactory());
         }
 
         @Override
@@ -74,7 +78,7 @@ public class CliLoadJobFactory implements CliRunFactory, CliResources {
             loadSpec.setInputSpec(parseInputGroup(commandLine, this));
             loadSpec.setTimeZone(parseTimeZone(commandLine, this));
 
-            ((LoadJobFactory)getJobFactory()).setLoadSpec(loadSpec);
+            ((LoadJobFactory) getJobFactory()).setLoadSpec(loadSpec);
         }
     }
 }

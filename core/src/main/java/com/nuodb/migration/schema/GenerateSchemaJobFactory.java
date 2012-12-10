@@ -25,9 +25,10 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.generate;
+package com.nuodb.migration.schema;
 
 import com.google.common.collect.Maps;
+import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migration.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migration.jdbc.metadata.generator.ScriptGeneratorContext;
@@ -56,22 +57,30 @@ public class GenerateSchemaJobFactory extends ConnectionProviderFactory implemen
         isNotNull(generateSchemaSpec, "Generate schema spec is required");
 
         GenerateSchemaJob job = new GenerateSchemaJob();
+        job.setDropBeforeCreate(getGenerateSchemaSpec().isDropBeforeCreate());
         job.setOutputSpec(getGenerateSchemaSpec().getOutputSpec());
+        job.setSourceConnectionProvider(createSourceConnectionProvider());
+        job.setTargetConnectionProvider(createTargetConnectionProvider());
         job.setScriptGeneratorContext(createScriptGeneratorContext());
-        ConnectionSpec sourceConnectionSpec = generateSchemaSpec.getSourceConnectionSpec();
-        job.setSourceConnectionProvider(createConnectionProvider(sourceConnectionSpec, false));
-        ConnectionSpec targetConnectionSpec = generateSchemaSpec.getTargetConnectionSpec();
-        job.setTargetConnectionProvider(createConnectionProvider(targetConnectionSpec, false));
         return job;
     }
 
+    protected ConnectionProvider createSourceConnectionProvider() {
+        return createConnectionProvider(generateSchemaSpec.getSourceConnectionSpec(), false);
+    }
+
+    protected ConnectionProvider createTargetConnectionProvider() {
+        return createConnectionProvider(generateSchemaSpec.getTargetConnectionSpec(), false);
+    }
+
     protected ScriptGeneratorContext createScriptGeneratorContext() {
-        scriptGeneratorContext.setDialect(new NuoDBDialect());
         ConnectionSpec targetConnectionSpec = getGenerateSchemaSpec().getTargetConnectionSpec();
         if (targetConnectionSpec != null) {
             scriptGeneratorContext.setCatalog(targetConnectionSpec.getCatalog());
             scriptGeneratorContext.setSchema(targetConnectionSpec.getSchema());
         }
+        scriptGeneratorContext.setMetaDataTypes(getGenerateSchemaSpec().getMetaDataTypes());
+        scriptGeneratorContext.setDialect(new NuoDBDialect());
         return scriptGeneratorContext;
     }
 

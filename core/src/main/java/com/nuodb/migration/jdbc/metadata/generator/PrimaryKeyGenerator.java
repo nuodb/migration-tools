@@ -56,20 +56,20 @@ public class PrimaryKeyGenerator implements ConstraintGenerator<PrimaryKey> {
     }
 
     @Override
-    public String[] getCreateScripts(PrimaryKey primaryKey, ScriptGeneratorContext context) {
+    public String[] getCreateScripts(PrimaryKey primaryKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        buffer.append(context.getName(primaryKey.getTable()));
+        buffer.append(scriptGeneratorContext.getName(primaryKey.getTable()));
         buffer.append(" ADD ");
-        buffer.append(getConstraintSql(primaryKey, context));
+        buffer.append(getConstraintSql(primaryKey, scriptGeneratorContext));
         return new String[]{buffer.toString()};
     }
 
     @Override
-    public String[] getDropScripts(PrimaryKey primaryKey, ScriptGeneratorContext context) {
+    public String[] getDropScripts(PrimaryKey primaryKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        buffer.append(context.getName(primaryKey.getTable()));
+        buffer.append(scriptGeneratorContext.getName(primaryKey.getTable()));
         buffer.append(" DROP PRIMARY KEY");
         return new String[]{buffer.toString()};
     }

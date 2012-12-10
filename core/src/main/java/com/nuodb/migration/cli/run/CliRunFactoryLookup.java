@@ -27,37 +27,35 @@
  */
 package com.nuodb.migration.cli.run;
 
-import com.google.common.collect.Maps;
+import com.nuodb.migration.cli.parse.option.OptionToolkit;
 
 import java.util.Collection;
 import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * @author Sergey Bushik
  */
 public class CliRunFactoryLookup {
 
-    private Map<String, CliRunFactory> factories = Maps.newHashMap();
+    private Map<String, CliRunFactory> cliRunFactoryMap = newHashMap();
 
-    public CliRunFactoryLookup() {
-        register(new CliDumpJobFactory());
-        register(new CliLoadJobFactory());
-        register(new CliGenerateSchemaJobFactory());
+    public CliRunFactoryLookup(OptionToolkit optionToolkit) {
+        register(new CliDumpJobFactory(optionToolkit));
+        register(new CliLoadJobFactory(optionToolkit));
+        register(new CliGenerateSchemaJobFactory(optionToolkit));
     }
 
     public Collection<String> getCommands() {
-        return factories.keySet();
-    }
-
-    public Collection<CliRunFactory> getFactories() {
-        return factories.values();
+        return cliRunFactoryMap.keySet();
     }
 
     public CliRunFactory lookup(String command) {
-        return factories.get(command);
+        return cliRunFactoryMap.get(command);
     }
 
-    public void register(CliRunFactory factory) {
-        factories.put(factory.getCommand(), factory);
+    public void register(CliRunFactory cliRunFactory) {
+        cliRunFactoryMap.put(cliRunFactory.getCommand(), cliRunFactory);
     }
 }

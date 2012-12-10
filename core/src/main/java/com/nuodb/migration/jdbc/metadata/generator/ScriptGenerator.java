@@ -34,7 +34,7 @@ import com.nuodb.migration.jdbc.metadata.Relational;
  */
 public interface ScriptGenerator<T extends Relational> extends GeneratorService<T> {
 
-    String[] getCreateScripts(T object, ScriptGeneratorContext context);
+    String[] getCreateScripts(T object, ScriptGeneratorContext scriptGeneratorContext);
 
-    String[] getDropScripts(T object, ScriptGeneratorContext context);
+    String[] getDropScripts(T object, ScriptGeneratorContext scriptGeneratorContext);
 }
