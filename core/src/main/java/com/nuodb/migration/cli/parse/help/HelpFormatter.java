@@ -33,6 +33,8 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class HelpFormatter extends HelpHint {
 
+    public final static String GUTTER = "    ";
+
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private static Set<HelpHint> USAGE_OUTPUT_HINTS;
@@ -40,8 +42,6 @@ public class HelpFormatter extends HelpHint {
     private static Set<HelpHint> HELP_OUTPUT_HINTS;
 
     private static Set<HelpHint> OPTION_OUTPUT_HINTS;
-
-    private final static String GUTTER = "    ";
 
     static {
         USAGE_OUTPUT_HINTS = Collections.unmodifiableSet(

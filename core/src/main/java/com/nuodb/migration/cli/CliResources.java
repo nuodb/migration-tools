@@ -31,13 +31,16 @@ package com.nuodb.migration.cli;
  * @author Sergey Bushik
  */
 public interface CliResources {
+
     /**
      * Root options resources
      */
     final String ROOT_GROUP_NAME = "com.nuodb.migration.cli.root.group.name";
+
     final String HELP_OPTION_DESCRIPTION = "com.nuodb.migration.cli.help.option.description";
     final String HELP_ARGUMENT_NAME = "com.nuodb.migration.cli.help.argument.name";
     final String LIST_OPTION_DESCRIPTION = "com.nuodb.migration.cli.list.option.description";
+    final String LIST_OPTION_OUTPUT = "com.nuodb.migration.cli.list.option.output";
     final String CONFIG_OPTION_DESCRIPTION = "com.nuodb.migration.cli.config.option.description";
     final String CONFIG_ARGUMENT_NAME = "com.nuodb.migration.cli.config.argument.name";
     final String COMMAND_OPTION_DESCRIPTION = "com.nuodb.migration.cli.command.option.description";

@@ -40,6 +40,7 @@ import com.nuodb.migration.job.JobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintStream;
 import java.util.Collection;
 
 import static java.lang.String.format;
@@ -154,8 +155,10 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
             logger.trace(format("Handling --list option"));
         }
         Collection<String> commands = cliRunFactoryLookup.getCommands();
+        PrintStream writer = System.out;
+        writer.println(getMessage(LIST_OPTION_OUTPUT));
         for (String command : commands) {
-            System.out.println(command);
+            writer.println(HelpFormatter.GUTTER + command);
         }
     }
 
