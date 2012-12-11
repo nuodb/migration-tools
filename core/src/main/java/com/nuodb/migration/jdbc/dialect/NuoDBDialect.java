@@ -105,6 +105,16 @@ public class NuoDBDialect extends SQL2003Dialect {
     }
 
     @Override
+    protected String normalize(String identifier) {
+        return identifier.toUpperCase();
+    }
+
+    @Override
+    public boolean supportsWithTimezone() {
+        return false;
+    }
+
+    @Override
     public boolean dropConstraints() {
         return false;
     }

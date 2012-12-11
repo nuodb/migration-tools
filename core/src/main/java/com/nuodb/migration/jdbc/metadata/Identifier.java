@@ -46,7 +46,14 @@ public class Identifier implements Comparable<Identifier> {
     }
 
     public static Identifier valueOf(String value) {
-        return isEmpty(value) ? null : new Identifier(value);
+        if (isEmpty(value)) {
+            return null;
+        }
+        if ((value.startsWith("`") && value.endsWith("`")) ||
+                (value.startsWith("\"") && value.endsWith("\""))) {
+            value = value.substring(1, value.length() - 1);
+        }
+        return new Identifier(value);
     }
 
     @Override

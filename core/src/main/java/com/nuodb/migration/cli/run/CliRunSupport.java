@@ -304,12 +304,16 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected TimeZone parseTimeZone(CommandLine commandLine, Option option) {
         String timeZone = commandLine.getValue(TIME_ZONE_OPTION);
-        TimeZone defaultSystemTimeZone = TimeZone.getDefault();
-        try {
-            TimeZone.setDefault(defaultTimeZone);
-            return TimeZone.getTimeZone(timeZone);
-        } finally {
-            TimeZone.setDefault(defaultSystemTimeZone);
+        if (timeZone != null) {
+            TimeZone defaultSystemTimeZone = TimeZone.getDefault();
+            try {
+                TimeZone.setDefault(defaultTimeZone);
+                return TimeZone.getTimeZone(timeZone);
+            } finally {
+                TimeZone.setDefault(defaultSystemTimeZone);
+            }
+        } else {
+            return defaultTimeZone;
         }
     }
 

@@ -99,4 +99,6 @@ public interface Dialect {
     boolean supportsDropIndexIfExists();
 
     boolean supportsDropIndexOnTable();
+
+    boolean supportsWithTimezone();
 }

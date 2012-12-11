@@ -27,14 +27,18 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
+import com.nuodb.migration.jdbc.metadata.Catalog;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelList;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 
 /**
  * @author Sergey Bushik
@@ -47,12 +51,14 @@ public class SchemaReader extends MetaDataReaderBase {
 
     @Override
     public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
-        String catalog = inspector.getCatalog();
-        ResultSet schemas = catalog != null ? metaData.getSchemas(catalog, null) : metaData.getSchemas();
+        ResultSet schemas = inspector.getCatalog() != null ?
+                metaData.getSchemas(inspector.getCatalog(), null) : metaData.getSchemas();
+        ValueModelList<ValueModel> columns = createValueModelList(schemas);
         try {
             while (schemas.next()) {
-                database.createCatalog(schemas.getString("TABLE_CATALOG")).createSchema(
-                        schemas.getString("TABLE_SCHEM"));
+                Catalog catalog = database.createCatalog(
+                        columns.get("TABLE_CATALOG") != null ? schemas.getString("TABLE_CATALOG") : null);
+                catalog.createSchema(schemas.getString("TABLE_SCHEM"));
             }
         } finally {
             close(schemas);

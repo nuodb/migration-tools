@@ -28,15 +28,35 @@
 package com.nuodb.migration.jdbc.dialect;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimeZone;
+
+import static com.nuodb.migration.jdbc.JdbcUtils.close;
 
 /**
  * @author Sergey Bushik
  */
 public class PostgreSQLDialect extends SQL2003Dialect {
+
+    /**
+     * The standard says that unquoted identifiers should be normalized to upper case but PostgreSQL normalizes to lower
+     * case.
+     *
+     * @param identifier to be normalized.
+     * @return boolean indicating whether quoting is required.
+     */
+    @Override
+    protected boolean isQuote(String identifier) {
+        boolean quote = false;
+        for (int i = 0, length = identifier.length(); i < length; i++) {
+            if (Character.isUpperCase(identifier.charAt(i))) {
+                quote = true;
+                break;
+            }
+        }
+        return super.isQuote(identifier) || quote;
+    }
 
     @Override
     public boolean supportsSessionTimeZone() {
@@ -47,18 +67,10 @@ public class PostgreSQLDialect extends SQL2003Dialect {
     public void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException {
         Statement statement = connection.createStatement();
         try {
-            String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL";
+            String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL;";
             statement.execute("SET TIME ZONE " + timeZoneAsValue);
         } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException exception) {
-                    if (logger.isErrorEnabled()) {
-                        logger.error("Failed closing statement", exception);
-                    }
-                }
-            }
+            close(statement);
         }
     }
 
@@ -87,8 +99,8 @@ public class PostgreSQLDialect extends SQL2003Dialect {
 
         StringBuilder value = new StringBuilder(32);
         value.append("INTERVAL ");
-        value.append(rawOffset >= 0 ? '+' : '-');
         value.append("'");
+        value.append(rawOffset >= 0 ? '+' : '-');
         value.append(zeros.substring(0, zeros.length() - hoursOffset.length()));
         value.append(hoursOffset);
         value.append(':');

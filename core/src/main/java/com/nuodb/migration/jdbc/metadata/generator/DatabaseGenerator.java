@@ -53,6 +53,9 @@ public class DatabaseGenerator implements ScriptGenerator<Database> {
         if (metaDataTypes.contains(TABLE)) {
             ScriptGeneratorContext tableGeneratorContext = getTableGeneratorContext(scriptGeneratorContext);
             for (Table table : database.listTables()) {
+                if (!Table.TABLE.equals(table.getType())) {
+                    continue;
+                }
                 scripts.addAll(newArrayList(tableGeneratorContext.getCreateScripts(table)));
             }
         }
@@ -106,6 +109,9 @@ public class DatabaseGenerator implements ScriptGenerator<Database> {
         }
         if (scriptGeneratorContext.getMetaDataTypes().contains(TABLE)) {
             for (Table table : tables) {
+                if (!Table.TABLE.equals(table.getType())) {
+                    continue;
+                }
                 scripts.addAll(newArrayList(scriptGeneratorContext.getDropScripts(table)));
             }
         }

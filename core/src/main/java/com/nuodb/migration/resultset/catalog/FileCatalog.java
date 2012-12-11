@@ -55,7 +55,7 @@ public class FileCatalog implements Catalog {
 
     protected File getCatalogDir() {
         File catalogDir = new File(path == null ? getCurrentDirectory() : path);
-        return catalogDir.isFile() ? catalogDir.getParentFile() : catalogDir;
+        return catalogDir.exists() && catalogDir.isFile() ? catalogDir.getParentFile() : catalogDir;
     }
 
     protected File getCatalogFile() {

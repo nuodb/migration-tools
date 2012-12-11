@@ -32,6 +32,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimeZone;
 
+import static com.nuodb.migration.jdbc.JdbcUtils.close;
+
 /**
  * @author Sergey Bushik
  */
@@ -54,15 +56,7 @@ public class OracleDialect extends SQL2003Dialect {
             String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL";
             statement.execute("ALTER SESSION SET TIME_ZONE = '" + timeZoneAsValue + "'");
         } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException exception) {
-                    if (logger.isErrorEnabled()) {
-                        logger.error("Failed closing statement", exception);
-                    }
-                }
-            }
+            close(statement);
         }
     }
 

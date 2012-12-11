@@ -27,8 +27,6 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import java.sql.DatabaseMetaData;
-
 /**
  * @author Sergey Bushik
  */

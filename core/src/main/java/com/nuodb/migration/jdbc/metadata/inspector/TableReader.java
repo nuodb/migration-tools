@@ -58,7 +58,6 @@ public class TableReader extends MetaDataReaderBase {
                 Table table = schema.createTable(tables.getString("TABLE_NAME"));
                 table.setComment(tables.getString("REMARKS"));
                 table.setType(tables.getString("TABLE_TYPE"));
-
             }
         } finally {
             close(tables);

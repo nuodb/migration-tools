@@ -27,13 +27,12 @@
  */
 package com.nuodb.migration.jdbc.model;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 /**
  * @author Sergey Bushik
@@ -61,7 +60,7 @@ public class SimpleValueModelList<T extends ValueModel> implements ValueModelLis
     @Override
     public T get(String name) {
         for (T column : values) {
-            if (StringUtils.equals(column.getName(), name)) {
+            if (equalsIgnoreCase(column.getName(), name)) {
                 return column;
             }
         }

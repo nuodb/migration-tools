@@ -97,19 +97,23 @@ public class SQL2003Dialect implements Dialect {
         if (identifier == null) {
             return null;
         }
-        if (isQuoteIdentifier(identifier)) {
-            return getIdentifierQuoted(identifier);
+        if (isQuote(identifier)) {
+            return quote(identifier);
         } else {
-            return identifier;
+            return normalize(identifier);
         }
     }
 
-    protected boolean isQuoteIdentifier(String identifier) {
+    protected boolean isQuote(String identifier) {
         return !IDENTIFIER.matcher(identifier).matches();
     }
 
-    public String getIdentifierQuoted(String identifier) {
+    protected String quote(String identifier) {
         return openQuote() + identifier + closeQuote();
+    }
+
+    protected String normalize(String identifier) {
+        return identifier;
     }
 
     protected char openQuote() {
@@ -190,6 +194,11 @@ public class SQL2003Dialect implements Dialect {
     @Override
     public boolean supportsDropIndexOnTable() {
         return false;
+    }
+
+    @Override
+    public boolean supportsWithTimezone() {
+        return true;
     }
 
     @Override

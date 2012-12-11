@@ -60,7 +60,6 @@ import java.util.TimeZone;
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
 import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
-import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
@@ -119,10 +118,11 @@ public class DumpJob extends JobBase {
         databaseInspector.withMetaDataTypes(CATALOG, SCHEMA, TABLE, COLUMN);
         databaseInspector.withDialectResolver(getDialectResolver());
 
+        Connection connection = connectionServices.getConnection();
         Database database = databaseInspector.inspect();
         execution.setDatabase(database);
+        connection.commit();
 
-        Connection connection = connectionServices.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
         execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolveObject(metaData));
 
@@ -144,12 +144,9 @@ public class DumpJob extends JobBase {
             for (NativeQuery nativeQuery : createNativeQueries(getNativeQuerySpecs())) {
                 dump(execution, nativeQuery, createCatalogEntry(nativeQuery, getOutputType()));
             }
+            connection.commit();
         } finally {
             closeQuietly(catalogWriter);
-
-            if (dialect.supportsSessionTimeZone()) {
-                dialect.setSessionTimeZone(connection, null);
-            }
         }
     }
 
@@ -189,7 +186,7 @@ public class DumpJob extends JobBase {
         resultSetOutput.setJdbcTypeValueFormatRegistry(execution.getJdbcTypeValueFormatRegistry());
 
         Dialect dialect = execution.getDatabase().getDialect();
-        if (!dialect.supportsSessionTimeZone()) {
+        if (!dialect.supportsSessionTimeZone() && dialect.supportsWithTimezone()) {
             resultSetOutput.setTimeZone(getTimeZone());
         }
         JdbcTypeRegistry jdbcTypeRegistry = dialect.getJdbcTypeRegistry();

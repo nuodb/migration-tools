@@ -73,10 +73,11 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             } else {
                 buffer.append(" NOT NULL");
             }
-            String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue());
-            if (defaultValue != null) {
-                buffer.append(" DEFAULT ").append(defaultValue);
-            }
+            // TODO: handle default value
+            // String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue());
+            // if (defaultValue != null) {
+            //      buffer.append(" DEFAULT ").append(defaultValue);
+            // }
             if (metaDataTypes.contains(INDEX)) {
                 Optional<Index> index = Iterables.tryFind(indexes, new Predicate<Index>() {
                     @Override

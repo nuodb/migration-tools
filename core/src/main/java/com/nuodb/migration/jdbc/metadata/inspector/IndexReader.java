@@ -75,7 +75,6 @@ public class IndexReader extends MetaDataReaderBase {
                 }
                 index.addColumn(table.createColumn(indexes.getString("COLUMN_NAME")),
                         indexes.getInt("ORDINAL_POSITION"));
-
             }
         } finally {
             close(indexes);

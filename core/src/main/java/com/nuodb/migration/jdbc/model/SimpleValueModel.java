@@ -142,7 +142,7 @@ public class SimpleValueModel implements ValueModel {
         if (precision != that.precision) return false;
         if (scale != that.scale) return false;
         if (typeCode != that.typeCode) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (name != null ? !name.equalsIgnoreCase(that.name) : that.name != null) return false;
 
         return true;
     }
