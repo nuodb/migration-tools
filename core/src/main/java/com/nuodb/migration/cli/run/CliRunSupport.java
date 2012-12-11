@@ -51,7 +51,10 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 public class CliRunSupport extends ApplicationSupport implements CliResources, CliOptions {
 
+    public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone("UTC");
+
     private OptionToolkit optionToolkit;
+    private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
 
     protected CliRunSupport(OptionToolkit optionToolkit) {
         this.optionToolkit = optionToolkit;
@@ -301,7 +304,13 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected TimeZone parseTimeZone(CommandLine commandLine, Option option) {
         String timeZone = commandLine.getValue(TIME_ZONE_OPTION);
-        return timeZone != null ? TimeZone.getTimeZone(timeZone) : null;
+        TimeZone defaultSystemTimeZone = TimeZone.getDefault();
+        try {
+            TimeZone.setDefault(defaultTimeZone);
+            return TimeZone.getTimeZone(timeZone);
+        } finally {
+            TimeZone.setDefault(defaultSystemTimeZone);
+        }
     }
 
     /**
@@ -312,7 +321,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
      * @param trigger     key to key value pairs
      * @param option      the option which contains parsed url
      */
-    protected void parseProperties(DriverConnectionSpec connection, CommandLine commandLine, String trigger, Option option) {
+    protected void parseProperties(DriverConnectionSpec connection, CommandLine commandLine, String trigger,
+                                   Option option) {
         String url = commandLine.getValue(trigger);
         if (url != null) {
             try {
@@ -438,6 +448,14 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         resource.setAttributes(parseFormatAttributes(
                 commandLine.<String>getValues(INPUT_OPTION), commandLine.getOption(INPUT_OPTION)));
         return resource;
+    }
+
+    public TimeZone getDefaultTimeZone() {
+        return defaultTimeZone;
+    }
+
+    public void setDefaultTimeZone(TimeZone defaultTimeZone) {
+        this.defaultTimeZone = defaultTimeZone;
     }
 
     protected OptionBuilder newOption() {
