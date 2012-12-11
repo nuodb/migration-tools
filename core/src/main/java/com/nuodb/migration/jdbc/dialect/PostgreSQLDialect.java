@@ -67,7 +67,7 @@ public class PostgreSQLDialect extends SQL2003Dialect {
     public void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException {
         Statement statement = connection.createStatement();
         try {
-            String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL;";
+            String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL";
             statement.execute("SET TIME ZONE " + timeZoneAsValue);
         } finally {
             close(statement);

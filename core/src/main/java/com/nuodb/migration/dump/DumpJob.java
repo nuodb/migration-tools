@@ -121,7 +121,6 @@ public class DumpJob extends JobBase {
         Connection connection = connectionServices.getConnection();
         Database database = databaseInspector.inspect();
         execution.setDatabase(database);
-        connection.commit();
 
         DatabaseMetaData metaData = connection.getMetaData();
         execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolveObject(metaData));
@@ -146,6 +145,9 @@ public class DumpJob extends JobBase {
             }
             connection.commit();
         } finally {
+            if (dialect.supportsSessionTimeZone()) {
+                dialect.setSessionTimeZone(connection, null);
+            }
             closeQuietly(catalogWriter);
         }
     }

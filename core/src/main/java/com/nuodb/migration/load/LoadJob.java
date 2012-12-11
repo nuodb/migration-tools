@@ -129,11 +129,10 @@ public class LoadJob extends JobBase {
             }
             connection.commit();
         } finally {
-            closeQuietly(catalogReader);
-
             if (dialect.supportsSessionTimeZone()) {
                 dialect.setSessionTimeZone(connection, null);
             }
+            closeQuietly(catalogReader);
         }
     }
 

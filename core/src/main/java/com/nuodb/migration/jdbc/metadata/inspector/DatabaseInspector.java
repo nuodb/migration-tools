@@ -97,6 +97,7 @@ public class DatabaseInspector {
         if (schema != null) {
             database.getCatalog(catalog).getSchema(schema);
         }
+        connection.commit();
         return database;
     }
 
