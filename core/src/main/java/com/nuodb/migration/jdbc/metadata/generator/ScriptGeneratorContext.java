@@ -55,13 +55,17 @@ public interface ScriptGeneratorContext {
 
     void setMetaDataTypes(Collection<MetaDataType> metaDataTypes);
 
+    <R extends Relational> String getName(R object);
+
+    <R extends Relational> String getName(R object, boolean identifier);
+
+    <R extends Relational> String getQualifiedName(R object);
+
+    <R extends Relational> String getQualifiedName(R object, boolean identifier);
+
     <R extends Relational> String[] getCreateScripts(R object);
 
     <R extends Relational> String[] getDropScripts(R object);
-
-    <R extends Relational> void addScriptGenerator(ScriptGenerator<R> scriptGenerator);
-
-    Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> getScriptGenerators();
 
     <R extends Relational> void addNamingStrategy(NamingStrategy<R> namingStrategy);
 
@@ -69,15 +73,11 @@ public interface ScriptGeneratorContext {
 
     Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> getNamingStrategies();
 
+    <R extends Relational> void addScriptGenerator(ScriptGenerator<R> scriptGenerator);
+
     <R extends Relational> ScriptGenerator<R> getScriptGenerator(R object);
 
     <R extends Relational> ScriptGenerator<R> getScriptGenerator(Class<R> objectType);
 
-    <R extends Relational> String getName(R object);
-
-    <R extends Relational> String getName(R object, boolean quoteIfNeeded);
-
-    <R extends Relational> String getQualifiedName(R object);
-
-    <R extends Relational> String getQualifiedName(R object, boolean quoteIfNeeded);
+    Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> getScriptGenerators();
 }

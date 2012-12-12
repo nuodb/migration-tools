@@ -47,8 +47,8 @@ public class SimpleScriptGeneratorContext implements ScriptGeneratorContext {
     private Dialect dialect;
     private String catalog;
     private String schema;
-    private Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> scriptGeneratorMap = newHashMap();
     private Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> namingStrategyMap = newHashMap();
+    private Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> scriptGeneratorMap = newHashMap();
     private Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.ALL_TYPES);
 
     public SimpleScriptGeneratorContext() {
@@ -146,8 +146,8 @@ public class SimpleScriptGeneratorContext implements ScriptGeneratorContext {
     }
 
     @Override
-    public <R extends Relational> String getName(R object, boolean quoteIfNeeded) {
-        return getNamingStrategy(object).getName(object, this, quoteIfNeeded);
+    public <R extends Relational> String getName(R object, boolean identifier) {
+        return getNamingStrategy(object).getName(object, this, identifier);
     }
 
     @Override
@@ -156,8 +156,8 @@ public class SimpleScriptGeneratorContext implements ScriptGeneratorContext {
     }
 
     @Override
-    public <R extends Relational> String getQualifiedName(R object, boolean quoteIfNeeded) {
-        return getNamingStrategy(object).getQualifiedName(object, this, quoteIfNeeded);
+    public <R extends Relational> String getQualifiedName(R object, boolean identifier) {
+        return getNamingStrategy(object).getQualifiedName(object, this, identifier);
     }
 
     @Override
