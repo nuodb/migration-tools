@@ -34,15 +34,22 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.nio.charset.Charset;
 
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
 public class FileScriptExporter extends CountingScriptExporter {
 
+    public static final String OUTPUT_ENCODING = "UTF-8";
     private static final String SEMICOLON = ";";
     private File file;
     private String encoding;
     private BufferedWriter writer;
+
+    public FileScriptExporter(String file) {
+        this(file, OUTPUT_ENCODING);
+    }
 
     public FileScriptExporter(String file, String encoding) {
         this(new File(file), encoding);
@@ -55,6 +62,9 @@ public class FileScriptExporter extends CountingScriptExporter {
 
     @Override
     protected void doOpen() throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Exporting scripts to file %s", file));
+        }
         Files.createParentDirs(file);
         writer = Files.newWriter(file, Charset.forName(encoding));
     }

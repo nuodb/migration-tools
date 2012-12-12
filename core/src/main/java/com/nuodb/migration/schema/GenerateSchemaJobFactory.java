@@ -27,12 +27,12 @@
  */
 package com.nuodb.migration.schema;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migration.jdbc.dialect.NuoDBDialect;
-import com.nuodb.migration.jdbc.metadata.generator.ScriptGeneratorContext;
-import com.nuodb.migration.jdbc.metadata.generator.SimpleScriptGeneratorContext;
+import com.nuodb.migration.jdbc.metadata.generator.*;
 import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
@@ -41,6 +41,10 @@ import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DriverConnectionSpec;
 import com.nuodb.migration.spec.GenerateSchemaSpec;
 import com.nuodb.migration.spec.ResourceSpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
 
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
@@ -49,20 +53,19 @@ import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
  */
 public class GenerateSchemaJobFactory extends ConnectionProviderFactory implements JobFactory<GenerateSchemaJob> {
 
-    private ScriptGeneratorContext scriptGeneratorContext = new SimpleScriptGeneratorContext();
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     private GenerateSchemaSpec generateSchemaSpec;
 
     @Override
     public GenerateSchemaJob createJob() {
         isNotNull(generateSchemaSpec, "Generate schema spec is required");
-
-        GenerateSchemaJob job = new GenerateSchemaJob();
-        job.setDropBeforeCreate(getGenerateSchemaSpec().isDropBeforeCreate());
-        job.setOutputSpec(getGenerateSchemaSpec().getOutputSpec());
-        job.setSourceConnectionProvider(createSourceConnectionProvider());
-        job.setTargetConnectionProvider(createTargetConnectionProvider());
-        job.setScriptGeneratorContext(createScriptGeneratorContext());
-        return job;
+        GenerateSchemaJob generateSchemaJob = new GenerateSchemaJob();
+        generateSchemaJob.setDropBeforeCreate(getGenerateSchemaSpec().isDropBeforeCreate());
+        generateSchemaJob.setSourceConnectionProvider(createSourceConnectionProvider());
+        generateSchemaJob.setScriptGeneratorContext(createScriptGeneratorContext());
+        generateSchemaJob.setScriptExporter(createScriptExporter());
+        return generateSchemaJob;
     }
 
     protected ConnectionProvider createSourceConnectionProvider() {
@@ -74,22 +77,32 @@ public class GenerateSchemaJobFactory extends ConnectionProviderFactory implemen
     }
 
     protected ScriptGeneratorContext createScriptGeneratorContext() {
-        ConnectionSpec targetConnectionSpec = getGenerateSchemaSpec().getTargetConnectionSpec();
-        if (targetConnectionSpec != null) {
-            scriptGeneratorContext.setCatalog(targetConnectionSpec.getCatalog());
-            scriptGeneratorContext.setSchema(targetConnectionSpec.getSchema());
+        ScriptGeneratorContext scriptGeneratorContext = new SimpleScriptGeneratorContext();
+        ConnectionSpec connectionSpec = getGenerateSchemaSpec().getTargetConnectionSpec();
+        if (connectionSpec != null) {
+            scriptGeneratorContext.setCatalog(connectionSpec.getCatalog());
+            scriptGeneratorContext.setSchema(connectionSpec.getSchema());
         }
         scriptGeneratorContext.setMetaDataTypes(getGenerateSchemaSpec().getMetaDataTypes());
         scriptGeneratorContext.setDialect(new NuoDBDialect());
         return scriptGeneratorContext;
     }
 
-    public ScriptGeneratorContext getScriptGeneratorContext() {
-        return scriptGeneratorContext;
-    }
-
-    public void setScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
-        this.scriptGeneratorContext = scriptGeneratorContext;
+    protected ScriptExporter createScriptExporter() {
+        Collection<ScriptExporter> scriptExporters = Lists.newArrayList();
+        ConnectionProvider connectionProvider = createTargetConnectionProvider();
+        if (connectionProvider != null) {
+            scriptExporters.add(new ConnectionScriptExporter(connectionProvider.getConnectionServices()));
+        }
+        ResourceSpec outputSpec = generateSchemaSpec.getOutputSpec();
+        if (outputSpec != null) {
+            scriptExporters.add(new FileScriptExporter(outputSpec.getPath()));
+        }
+        // Fallback to standard output if neither target connection nor target file were specified
+        if (scriptExporters.isEmpty()) {
+            scriptExporters.add(WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER);
+        }
+        return new CompositeScriptExporter(scriptExporters);
     }
 
     public GenerateSchemaSpec getGenerateSchemaSpec() {

@@ -188,7 +188,7 @@ public class DumpJob extends JobBase {
         resultSetOutput.setJdbcTypeValueFormatRegistry(execution.getJdbcTypeValueFormatRegistry());
 
         Dialect dialect = execution.getDatabase().getDialect();
-        if (!dialect.supportsSessionTimeZone() && dialect.supportsWithTimezone()) {
+        if (!dialect.supportsSessionTimeZone() && dialect.supportsStatementWithTimezone()) {
             resultSetOutput.setTimeZone(getTimeZone());
         }
         JdbcTypeRegistry jdbcTypeRegistry = dialect.getJdbcTypeRegistry();

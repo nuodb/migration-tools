@@ -35,7 +35,7 @@ import com.nuodb.migration.jdbc.metadata.Database;
 public class SchemaGenerate {
 
     private ScriptGeneratorContext scriptGeneratorContext;
-    private ScriptExporter scriptExporter = SystemOutScriptExporter.INSTANCE;
+    private ScriptExporter scriptExporter = WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER;
 
     public SchemaGenerate() {
         this(new SimpleScriptGeneratorContext());

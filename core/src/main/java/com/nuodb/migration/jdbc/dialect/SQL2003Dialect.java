@@ -159,7 +159,7 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) throws SQLException {
+    public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) {
         return Lists.newArrayList(
                 TRANSACTION_NONE,
                 TRANSACTION_READ_UNCOMMITTED,
@@ -197,7 +197,7 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public boolean supportsWithTimezone() {
+    public boolean supportsStatementWithTimezone() {
         return true;
     }
 
@@ -299,7 +299,7 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public boolean dropConstraints() {
+    public boolean supportsDropConstraints() {
         return true;
     }
 

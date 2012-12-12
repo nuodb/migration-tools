@@ -72,4 +72,9 @@ public class DriverConnectionServices implements ConnectionServices {
         driverConnectionProvider.closeConnection(connection);
         connection = null;
     }
+
+    @Override
+    public String toString() {
+        return driverConnectionProvider.getDriverConnectionSpec().getUrl();
+    }
 }

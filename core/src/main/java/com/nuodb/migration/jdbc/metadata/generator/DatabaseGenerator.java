@@ -100,7 +100,7 @@ public class DatabaseGenerator implements ScriptGenerator<Database> {
         List<String> scripts = newArrayList();
         Collection<Table> tables = database.listTables();
         if (scriptGeneratorContext.getMetaDataTypes().contains(FOREIGN_KEY) &&
-                scriptGeneratorContext.getDialect().dropConstraints()) {
+                scriptGeneratorContext.getDialect().supportsDropConstraints()) {
             for (Table table : tables) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
                     scripts.addAll(newArrayList(scriptGeneratorContext.getDropScripts(foreignKey)));

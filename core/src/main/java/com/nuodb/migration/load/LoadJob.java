@@ -143,7 +143,7 @@ public class LoadJob extends JobBase {
             Dialect dialect = execution.getDatabase().getDialect();
             ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(catalogEntry.getType());
             resultSetInput.setAttributes(getAttributes());
-            if (!dialect.supportsSessionTimeZone() && dialect.supportsWithTimezone()) {
+            if (!dialect.supportsSessionTimeZone() && dialect.supportsStatementWithTimezone()) {
                 resultSetInput.setTimeZone(getTimeZone());
             }
             resultSetInput.setInputStream(entryInput);

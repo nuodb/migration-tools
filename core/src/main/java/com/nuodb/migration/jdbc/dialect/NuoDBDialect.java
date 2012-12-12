@@ -30,7 +30,6 @@ package com.nuodb.migration.jdbc.dialect;
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
 
-import java.sql.SQLException;
 import java.sql.Types;
 
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
@@ -96,7 +95,7 @@ public class NuoDBDialect extends SQL2003Dialect {
     }
 
     @Override
-    public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) throws SQLException {
+    public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) {
         return Lists.newArrayList(
                 WRITE_COMMITTED,
                 CONSISTENT_READ,
@@ -110,12 +109,12 @@ public class NuoDBDialect extends SQL2003Dialect {
     }
 
     @Override
-    public boolean supportsWithTimezone() {
+    public boolean supportsStatementWithTimezone() {
         return false;
     }
 
     @Override
-    public boolean dropConstraints() {
+    public boolean supportsDropConstraints() {
         return false;
     }
 

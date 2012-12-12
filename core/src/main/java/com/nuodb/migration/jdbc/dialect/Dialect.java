@@ -54,19 +54,19 @@ public interface Dialect {
 
     boolean supportsTableCheck();
 
-    boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) throws SQLException;
+    boolean supportsTransactionIsolationLevel(int transactionIsolationLevel);
 
     boolean supportsIfExistsBeforeDropTable();
 
     boolean supportsIfExistsAfterDropTable();
 
-    void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
+    boolean supportsDropIndexIfExists();
 
-    void setTransactionIsolationLevel(Connection connection, int[] transactionIsolationLevels) throws SQLException;
+    boolean supportsDropIndexOnTable();
 
-    void stream(Statement statement) throws SQLException;
+    boolean supportsDropConstraints();
 
-    boolean dropConstraints();
+    boolean supportsStatementWithTimezone();
 
     String getIdentifier(String identifier);
 
@@ -96,9 +96,9 @@ public interface Dialect {
 
     JdbcTypeRegistry getJdbcTypeRegistry();
 
-    boolean supportsDropIndexIfExists();
+    void stream(Statement statement) throws SQLException;
 
-    boolean supportsDropIndexOnTable();
+    void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
 
-    boolean supportsWithTimezone();
+    void setTransactionIsolationLevel(Connection connection, int[] transactionIsolationLevels) throws SQLException;
 }

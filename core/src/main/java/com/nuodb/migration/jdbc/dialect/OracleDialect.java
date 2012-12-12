@@ -61,7 +61,7 @@ public class OracleDialect extends SQL2003Dialect {
     }
 
     @Override
-    public boolean dropConstraints() {
+    public boolean supportsDropConstraints() {
         return false;
     }
 

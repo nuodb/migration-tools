@@ -37,7 +37,6 @@ import com.nuodb.migration.job.JobExecutionDelegate;
 public class GenerateSchemaJobExecution extends JobExecutionDelegate {
 
     private ConnectionServices sourceConnectionServices;
-    private ConnectionServices targetConnectionServices;
 
     public GenerateSchemaJobExecution(JobExecution execution) {
         super(execution);
@@ -49,13 +48,5 @@ public class GenerateSchemaJobExecution extends JobExecutionDelegate {
 
     public void setSourceConnectionServices(ConnectionServices sourceConnectionServices) {
         this.sourceConnectionServices = sourceConnectionServices;
-    }
-
-    public ConnectionServices getTargetConnectionServices() {
-        return targetConnectionServices;
-    }
-
-    public void setTargetConnectionServices(ConnectionServices targetConnectionServices) {
-        this.targetConnectionServices = targetConnectionServices;
     }
 }

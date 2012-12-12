@@ -46,12 +46,16 @@ public class ConnectionScriptExporter extends CountingScriptExporter {
     private Connection connection;
     private Statement statement;
 
+
     public ConnectionScriptExporter(ConnectionServices connectionServices) {
         this.connectionServices = connectionServices;
     }
 
     @Override
     protected void doOpen() throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Exporting scripts to the database %s", connectionServices));
+        }
         connection = connectionServices.getConnection();
         statement = connection.createStatement();
     }
