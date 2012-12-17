@@ -27,10 +27,14 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
+import com.google.common.base.Supplier;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Sets;
+import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.*;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
@@ -39,82 +43,205 @@ import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DatabaseGenerator implements ScriptGenerator<Database> {
+public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
 
-    @Override
-    public Class<Database> getObjectType() {
-        return Database.class;
+    private static final String PROCESSED_TABLES = "PROCESSED_TABLES";
+
+    private static final String PENDING_FOREIGN_KEYS = "PENDING_FOREIGN_KEYS";
+
+    public static enum GroupScriptsBy {
+        META_DATA_TYPE, TABLE
+    }
+
+    private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
+
+    public DatabaseGenerator() {
+        super(Database.class);
     }
 
     @Override
-    public String[] getCreateScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
-        List<String> scripts = newArrayList();
-        Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
-        if (metaDataTypes.contains(TABLE)) {
-            ScriptGeneratorContext tableGeneratorContext = getTableGeneratorContext(scriptGeneratorContext);
-            for (Table table : database.listTables()) {
-                if (!Table.TABLE.equals(table.getType())) {
-                    continue;
+    public Collection<String> getCreateScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
+        initScriptGeneratorContext(scriptGeneratorContext);
+        Collection<String> scripts = newArrayList();
+        switch (groupScriptsBy) {
+            case TABLE:
+                for (Table table : database.listTables()) {
+                    Collection<Table> tables = Collections.singleton(table);
+                    addCreateScripts(scriptGeneratorContext, scripts, tables);
                 }
-                scripts.addAll(newArrayList(tableGeneratorContext.getCreateScripts(table)));
-            }
+                addPendingForeignKeysScripts(scriptGeneratorContext, scripts, true);
+                break;
+            case META_DATA_TYPE:
+                Collection<Table> tables = database.listTables();
+                addCreateScripts(scriptGeneratorContext, scripts, tables);
+                break;
         }
-        if (metaDataTypes.contains(INDEX)) {
-            for (Table table : database.listTables()) {
-                if (!scriptGeneratorContext.getDialect().supportsIndexInCreateTable()) {
-                    boolean primary = false;
-                    for (Index index : table.getIndexes()) {
-                        if (!primary && index.isPrimary()) {
-                            primary = true;
-                            continue;
-                        }
-                        scripts.addAll(newArrayList(scriptGeneratorContext.getCreateScripts(index)));
+        releaseScriptGeneratorContext(scriptGeneratorContext);
+        return scripts;
+    }
+
+    @Override
+    public Collection<String> getDropScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
+        initScriptGeneratorContext(scriptGeneratorContext);
+        Collection<String> scripts = newArrayList();
+        switch (groupScriptsBy) {
+            case TABLE:
+                for (Table table : database.listTables()) {
+                    Collection<Table> tables = Collections.singleton(table);
+                    addDropScripts(scriptGeneratorContext, scripts, tables);
+                }
+                break;
+            case META_DATA_TYPE:
+                Collection<Table> tables = database.listTables();
+                addCreateScripts(scriptGeneratorContext, scripts, tables);
+                break;
+        }
+        releaseScriptGeneratorContext(scriptGeneratorContext);
+        return scripts;
+    }
+
+    @Override
+    public Collection<String> getDropCreateScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
+        initScriptGeneratorContext(scriptGeneratorContext);
+        Collection<String> scripts = newArrayList();
+        switch (groupScriptsBy) {
+            case TABLE:
+                for (Table table : database.listTables()) {
+                    Collection<Table> tables = Collections.singleton(table);
+                    addDropScripts(scriptGeneratorContext, scripts, tables);
+                    addCreateScripts(scriptGeneratorContext, scripts, tables);
+                }
+                addPendingForeignKeysScripts(scriptGeneratorContext, scripts, true);
+                break;
+            case META_DATA_TYPE:
+                Collection<Table> tables = database.listTables();
+                addDropScripts(scriptGeneratorContext, scripts, tables);
+                addCreateScripts(scriptGeneratorContext, scripts, tables);
+                break;
+        }
+        releaseScriptGeneratorContext(scriptGeneratorContext);
+        return scripts;
+    }
+
+    protected void addCreateScripts(ScriptGeneratorContext scriptGeneratorContext,
+                                    Collection<String> scripts, Collection<Table> tables) {
+        Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
+        Dialect dialect = scriptGeneratorContext.getDialect();
+        if (metaDataTypes.contains(SEQUENCE)) {
+            for (Table table : tables) {
+                for (Column column : table.getColumns()) {
+                    if (column.getSequence() != null) {
+                        scripts.addAll(scriptGeneratorContext.getCreateScripts(column.getSequence()));
                     }
                 }
             }
         }
+        if (metaDataTypes.contains(TABLE)) {
+            ScriptGeneratorContext tableScriptGeneratorContext =
+                    new SimpleScriptGeneratorContext(scriptGeneratorContext);
+            Collection<Table> processedTables = (Collection<Table>)
+                    tableScriptGeneratorContext.get(PROCESSED_TABLES);
+            tableScriptGeneratorContext.getMetaDataTypes().remove(FOREIGN_KEY);
+            for (Table table : tables) {
+                processedTables.add(table);
+                if (Table.TABLE.equals(table.getType())) {
+                    scripts.addAll(tableScriptGeneratorContext.getCreateScripts(table));
+                }
+            }
+        }
+        if (metaDataTypes.contains(INDEX) && !dialect.supportsIndexInCreateTable()) {
+            for (Table table : tables) {
+                boolean primary = false;
+                for (Index index : table.getIndexes()) {
+                    if (!primary && index.isPrimary()) {
+                        primary = true;
+                        continue;
+                    }
+                    scripts.addAll(scriptGeneratorContext.getCreateScripts(index));
+                }
+            }
+        }
         if (metaDataTypes.contains(FOREIGN_KEY)) {
-            for (Table table : database.listTables()) {
-                for (ForeignKey foreignKey : table.getForeignKeys()) {
-                    scripts.addAll(newArrayList(scriptGeneratorContext.getCreateScripts(foreignKey)));
-                }
-            }
-        }
-        return scripts.toArray(new String[scripts.size()]);
-    }
-
-    /**
-     * Indexes and foreign keys are generated after tables.
-     *
-     * @param scriptGeneratorContext original script generator context.
-     * @return script generator context for tables.
-     */
-    protected ScriptGeneratorContext getTableGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
-        ScriptGeneratorContext tableGeneratorContext = new SimpleScriptGeneratorContext(scriptGeneratorContext);
-        tableGeneratorContext.getMetaDataTypes().remove(FOREIGN_KEY);
-        return tableGeneratorContext;
-    }
-
-    @Override
-    public String[] getDropScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
-        List<String> scripts = newArrayList();
-        Collection<Table> tables = database.listTables();
-        if (scriptGeneratorContext.getMetaDataTypes().contains(FOREIGN_KEY) &&
-                scriptGeneratorContext.getDialect().supportsDropConstraints()) {
+            Collection<Table> processedTables =
+                    (Collection<Table>) scriptGeneratorContext.get(PROCESSED_TABLES);
+            Multimap<Table, ForeignKey> pendingForeignKeys =
+                    (Multimap<Table, ForeignKey>) scriptGeneratorContext.get(PENDING_FOREIGN_KEYS);
             for (Table table : tables) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
-                    scripts.addAll(newArrayList(scriptGeneratorContext.getDropScripts(foreignKey)));
+                    Table targetTable = foreignKey.getTargetTable();
+                    if (processedTables.contains(targetTable)) {
+                        scripts.addAll(scriptGeneratorContext.getCreateScripts(foreignKey));
+                    } else {
+                        pendingForeignKeys.put(targetTable, foreignKey);
+                    }
                 }
             }
         }
-        if (scriptGeneratorContext.getMetaDataTypes().contains(TABLE)) {
+        addPendingForeignKeysScripts(scriptGeneratorContext, scripts, false);
+    }
+
+    protected void addPendingForeignKeysScripts(ScriptGeneratorContext scriptGeneratorContext,
+                                                Collection<String> scripts, boolean forceAdd) {
+        Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
+        if (metaDataTypes.contains(FOREIGN_KEY)) {
+            Collection<Table> processedTables =
+                    (Collection<Table>) scriptGeneratorContext.get(PROCESSED_TABLES);
+            Multimap<Table, ForeignKey> pendingForeignKeys =
+                    (Multimap<Table, ForeignKey>) scriptGeneratorContext.get(PENDING_FOREIGN_KEYS);
+            for (ForeignKey foreignKey : newArrayList(pendingForeignKeys.values())) {
+                Table targetTable = foreignKey.getTargetTable();
+                if (processedTables.contains(targetTable) || forceAdd) {
+                    scripts.addAll(scriptGeneratorContext.getCreateScripts(foreignKey));
+                    pendingForeignKeys.remove(targetTable, foreignKey);
+                }
+            }
+        }
+    }
+
+    protected void addDropScripts(ScriptGeneratorContext scriptGeneratorContext,
+                                  Collection<String> scripts, Collection<Table> tables) {
+        Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
+        Dialect dialect = scriptGeneratorContext.getDialect();
+        if (metaDataTypes.contains(FOREIGN_KEY) && dialect.supportsDropConstraints()) {
             for (Table table : tables) {
-                if (!Table.TABLE.equals(table.getType())) {
-                    continue;
+                for (ForeignKey foreignKey : table.getForeignKeys()) {
+                    scripts.addAll(scriptGeneratorContext.getDropScripts(foreignKey));
                 }
-                scripts.addAll(newArrayList(scriptGeneratorContext.getDropScripts(table)));
             }
         }
-        return scripts.toArray(new String[scripts.size()]);
+        if (metaDataTypes.contains(TABLE)) {
+            for (Table table : tables) {
+                if (Table.TABLE.equals(table.getType())) {
+                    scripts.addAll(scriptGeneratorContext.getDropScripts(table));
+                }
+            }
+        }
+        if (metaDataTypes.contains(SEQUENCE) && dialect.supportsSequence()) {
+            for (Table table : tables) {
+                for (Column column : table.getColumns()) {
+                    if (column.getSequence() != null) {
+                        scripts.addAll(scriptGeneratorContext.getDropScripts(column.getSequence()));
+                    }
+                }
+            }
+        }
+    }
+
+    protected void initScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
+        scriptGeneratorContext.put(PROCESSED_TABLES, Sets.newLinkedHashSet());
+        scriptGeneratorContext.put(PENDING_FOREIGN_KEYS,
+                Multimaps.<Table, ForeignKey>newSetMultimap(new HashMap<Table, Collection<ForeignKey>>(),
+                        new Supplier<Set<ForeignKey>>() {
+                            @Override
+                            public Set<ForeignKey> get() {
+                                return new HashSet<ForeignKey>();
+                            }
+                        })
+        );
+    }
+
+    protected void releaseScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
+        scriptGeneratorContext.remove(PROCESSED_TABLES);
+        scriptGeneratorContext.remove(PENDING_FOREIGN_KEYS);
     }
 }

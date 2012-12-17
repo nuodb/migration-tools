@@ -215,8 +215,7 @@ public class DumpJob extends JobBase {
         }
         PreparedStatement preparedStatement = connection.prepareStatement(
                 query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-        Dialect dialect = database.getDialect();
-        dialect.stream(preparedStatement);
+        database.getDialect().setStreamResults(preparedStatement, true);
         return preparedStatement;
     }
 

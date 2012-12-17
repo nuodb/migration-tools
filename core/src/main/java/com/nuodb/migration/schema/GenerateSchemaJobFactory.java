@@ -132,7 +132,7 @@ public class GenerateSchemaJobFactory extends ConnectionProviderFactory implemen
                 ResourceSpec outputSpec = new ResourceSpec();
                 outputSpec.setPath("/tmp/test/schema.sql");
 
-                //setOutputSpec(outputSpec);
+                setOutputSpec(outputSpec);
                 setSourceConnectionSpec(sourceConnectionSpec);
                 //setTargetConnectionSpec(targetConnectionSpec);
             }

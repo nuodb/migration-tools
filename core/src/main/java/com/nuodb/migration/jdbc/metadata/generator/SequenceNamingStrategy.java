@@ -27,21 +27,38 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.metadata.Relational;
+import com.nuodb.migration.jdbc.metadata.Column;
+import com.nuodb.migration.jdbc.metadata.Sequence;
 
 /**
  * @author Sergey Bushik
  */
-public class GeneratorServiceBase<T extends Relational> implements GeneratorService<T> {
+public class SequenceNamingStrategy extends NamingStrategyBase<Sequence> {
 
-    private Class<T> objectType;
-
-    protected GeneratorServiceBase(Class<T> objectType) {
-        this.objectType = objectType;
+    public SequenceNamingStrategy() {
+        super(Sequence.class);
     }
 
     @Override
-    public Class<T> getRelationalType() {
-        return objectType;
+    public String getName(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
+        return getSequenceName(sequence, scriptGeneratorContext, identifier);
+    }
+
+    @Override
+    public String getQualifiedName(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext,
+                                   boolean identifier) {
+        return getSequenceName(sequence, scriptGeneratorContext, identifier);
+    }
+
+    protected String getSequenceName(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext,
+                                     boolean identifier) {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("seq");
+        buffer.append('_');
+        Column column = sequence.getColumn();
+        buffer.append(scriptGeneratorContext.getName(column.getTable(), false));
+        buffer.append('_');
+        buffer.append(scriptGeneratorContext.getName(column, false));
+        return identifier ? scriptGeneratorContext.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

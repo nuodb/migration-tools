@@ -63,7 +63,7 @@ public class FileScriptExporter extends CountingScriptExporter {
     @Override
     protected void doOpen() throws Exception {
         if (logger.isDebugEnabled()) {
-            logger.debug(format("Exporting scripts to file %s", file));
+            logger.debug(format("Exporting scripts to the file %s", file));
         }
         Files.createParentDirs(file);
         writer = Files.newWriter(file, Charset.forName(encoding));

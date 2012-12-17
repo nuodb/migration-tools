@@ -68,21 +68,25 @@ public interface Dialect {
 
     boolean supportsStatementWithTimezone();
 
+    boolean supportsDropSequenceIfExists();
+
+    boolean supportsSequence();
+
     String getIdentifier(String identifier);
 
     String getNullColumnString();
 
-    String getNoColumnsInsertString();
+    String getNoColumnsInsert();
+
+    String getCascadeConstraints();
+
+    String getDropForeignKey();
 
     String getColumnComment(String comment);
 
-    String getCascadeConstraintsString();
-
-    String getDropForeignKeyString();
-
     String getTableComment(String comment);
 
-    String getIdentityColumnString();
+    String getIdentityColumn(String sequence);
 
     String getTableCheck(String check);
 
@@ -94,9 +98,25 @@ public interface Dialect {
 
     String getUpdateAction(ReferenceAction updateAction);
 
+    String getSequenceStartWith(Long startWith);
+
+    String getSequenceIncrementBy(Long incrementBy);
+
+    String getSequenceMinValue(Long minValue);
+
+    String getSequenceMaxValue(Long maxValue);
+
+    String getSequenceCycle(boolean cycle);
+
+    String getSequenceCache(Integer cache);
+
+    String getSequenceOrder(boolean order);
+
+    SQLKeywords getSQLKeywords();
+
     JdbcTypeRegistry getJdbcTypeRegistry();
 
-    void stream(Statement statement) throws SQLException;
+    void setStreamResults(Statement statement, boolean streamResults) throws SQLException;
 
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
 

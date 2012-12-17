@@ -49,15 +49,19 @@ public class IndexNamingStrategy extends NamingStrategyBase<Index> {
         return getIndexName(index, scriptGeneratorContext, identifier);
     }
 
-    protected String getIndexName(Index index, ScriptGeneratorContext context, boolean identifier) {
+    protected String getIndexName(Index index, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("IDX");
+        buffer.append("idx");
         buffer.append('_');
-        buffer.append(context.getName(index.getTable(), false));
+        if (index.isUnique()) {
+            buffer.append("unique");
+            buffer.append("_");
+        }
+        buffer.append(scriptGeneratorContext.getName(index.getTable(), false));
         for (Column column : index.getColumns()) {
             buffer.append("_");
-            buffer.append(context.getName(column, false));
+            buffer.append(scriptGeneratorContext.getName(column, false));
         }
-        return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
+        return identifier ? scriptGeneratorContext.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

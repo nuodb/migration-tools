@@ -48,13 +48,13 @@ public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
         return getForeignKeyName(foreignKey, scriptGeneratorContext, identifier);
     }
 
-    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
+    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("FK");
+        buffer.append("fk");
         buffer.append('_');
-        buffer.append(context.getName(foreignKey.getSourceTable(), false));
+        buffer.append(scriptGeneratorContext.getName(foreignKey.getSourceTable(), false));
         buffer.append('_');
-        buffer.append(context.getName(foreignKey.getTargetTable(), false));
-        return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
+        buffer.append(scriptGeneratorContext.getName(foreignKey.getTargetTable(), false));
+        return identifier ? scriptGeneratorContext.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

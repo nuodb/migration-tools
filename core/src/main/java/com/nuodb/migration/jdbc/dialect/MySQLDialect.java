@@ -44,7 +44,7 @@ public class MySQLDialect extends SQL2003Dialect {
     }
 
     @Override
-    public String getDropForeignKeyString() {
+    public String getDropForeignKey() {
         return "DROP FOREIGN KEY";
     }
 
@@ -114,8 +114,8 @@ public class MySQLDialect extends SQL2003Dialect {
      * @throws SQLException
      */
     @Override
-    public void stream(Statement statement) throws SQLException {
-        statement.setFetchSize(Integer.MIN_VALUE);
+    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
+        statement.setFetchSize(streamResults ? Integer.MIN_VALUE : 0);
     }
 
     @Override

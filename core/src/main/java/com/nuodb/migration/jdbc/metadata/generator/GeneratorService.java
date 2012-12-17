@@ -32,7 +32,7 @@ import com.nuodb.migration.jdbc.metadata.Relational;
 /**
  * @author Sergey Bushik
  */
-public interface GeneratorService<T extends Relational> {
+public interface GeneratorService<R extends Relational> {
 
-    Class<T> getObjectType();
+    Class<R> getRelationalType();
 }

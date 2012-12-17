@@ -31,6 +31,7 @@ import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
+import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 
 import java.sql.DatabaseMetaData;
@@ -60,7 +61,7 @@ public class ColumnReader extends MetaDataReaderBase {
                             Table table) throws SQLException {
         ResultSet columns = metaData.getColumns(inspector.getCatalog(), inspector.getSchema(), table.getName(), null);
         try {
-            ValueModelList valueModelList = createValueModelList(columns.getMetaData());
+            ValueModelList<ValueModel> valueModelList = createValueModelList(columns.getMetaData());
             while (columns.next()) {
                 table = database.createCatalog(columns.getString("TABLE_CAT")).createSchema(
                         columns.getString("TABLE_SCHEM")).createTable(columns.getString("TABLE_NAME"));

@@ -31,20 +31,22 @@ import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.ForeignKey;
 
+import java.util.Collection;
 import java.util.Iterator;
+
+import static java.util.Collections.singleton;
 
 /**
  * @author Sergey Bushik
  */
-public class ForeignKeyGenerator implements ConstraintGenerator<ForeignKey> {
+public class ForeignKeyGenerator extends ScriptGeneratorBase<ForeignKey> implements ConstraintGenerator<ForeignKey> {
 
-    @Override
-    public Class<ForeignKey> getObjectType() {
-        return ForeignKey.class;
+    public ForeignKeyGenerator() {
+        super(ForeignKey.class);
     }
 
     @Override
-    public String[] getCreateScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
         buffer.append(scriptGeneratorContext.getQualifiedName(foreignKey.getSourceTable()));
@@ -52,20 +54,20 @@ public class ForeignKeyGenerator implements ConstraintGenerator<ForeignKey> {
         buffer.append(scriptGeneratorContext.getName(foreignKey));
         buffer.append(' ');
         buffer.append(getConstraintSql(foreignKey, scriptGeneratorContext));
-        return new String[]{buffer.toString()};
+        return singleton(buffer.toString());
     }
 
     @Override
-    public String[] getDropScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getDropScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
         Dialect dialect = scriptGeneratorContext.getDialect();
         buffer.append(scriptGeneratorContext.getQualifiedName(foreignKey.getSourceTable()));
         buffer.append(' ');
-        buffer.append(dialect.getDropForeignKeyString());
+        buffer.append(dialect.getDropForeignKey());
         buffer.append(' ');
         buffer.append(scriptGeneratorContext.getName(foreignKey));
-        return new String[]{buffer.toString()};
+        return singleton(buffer.toString());
     }
 
     @Override

@@ -91,7 +91,7 @@ public class InsertQuery implements Query {
         query.append("INSERT INTO ")
                 .append(qualifyNames ? table.getQualifiedName(dialect) : table.getName(dialect));
         if (columns.size() == 0) {
-            query.append(' ').append(dialect.getNoColumnsInsertString());
+            query.append(' ').append(dialect.getNoColumnsInsert());
         } else {
             query.append(" (");
             Iterator<Column> names = columns.keySet().iterator();

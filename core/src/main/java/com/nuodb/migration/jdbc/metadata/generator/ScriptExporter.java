@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
+import java.util.Collection;
+
 /**
  * @author Sergey Bushik
  */
@@ -34,7 +36,7 @@ public interface ScriptExporter {
 
     void open() throws Exception;
 
-    void exportScripts(String[] scripts) throws Exception;
+    void exportScripts(Collection<String> scripts) throws Exception;
 
     void close() throws Exception;
 }

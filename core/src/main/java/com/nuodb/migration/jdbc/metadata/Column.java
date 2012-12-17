@@ -83,6 +83,10 @@ public class Column extends HasIdentifierBase implements ValueModel {
      */
     private boolean autoIncrement;
     /**
+     * Associated auto increment offset
+     */
+    private Sequence sequence;
+    /**
      * Check constraint.
      */
     private String check;
@@ -199,6 +203,17 @@ public class Column extends HasIdentifierBase implements ValueModel {
         this.autoIncrement = autoIncrement;
     }
 
+    public Sequence getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Sequence sequence) {
+        if (sequence != null) {
+            sequence.setColumn(this);
+        }
+        this.sequence = sequence;
+    }
+
     public boolean isIdentity() {
         return isAutoIncrement();
     }
@@ -228,6 +243,7 @@ public class Column extends HasIdentifierBase implements ValueModel {
         Column column = (Column) o;
 
         if (autoIncrement != column.autoIncrement) return false;
+        if (sequence != null ? !sequence.equals(column.sequence) : column.sequence != null) return false;
         if (nullable != column.nullable) return false;
         if (position != column.position) return false;
         if (precision != column.precision) return false;
@@ -274,7 +290,8 @@ public class Column extends HasIdentifierBase implements ValueModel {
             buffer.append(", not null");
         }
         if (isAutoIncrement()) {
-            buffer.append(", auto increment");
+            Long currentValue = sequence != null ? sequence.getStartWith() : null;
+            buffer.append(format(", auto increment=%d", currentValue != null ? currentValue : 0));
         }
         buffer.append(format(", size=%d", size));
         buffer.append(format(", precision=%d", precision));

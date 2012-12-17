@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
+import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -50,7 +51,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
     }
 
     @Override
-    public String[] getCreateScripts(Table table, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(Table table, ScriptGeneratorContext scriptGeneratorContext) {
         Dialect dialect = scriptGeneratorContext.getDialect();
         StringBuilder buffer = new StringBuilder("CREATE TABLE");
         buffer.append(' ').append(scriptGeneratorContext.getQualifiedName(table)).append(" (");
@@ -64,14 +65,17 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             buffer.append(' ');
             buffer.append(jdbcTypeNameMap.getTypeName(column.getTypeCode(), column.getSize(), column.getPrecision(),
                     column.getScale()));
-            if (column.isIdentity()) {
+            if (column.isIdentity() && metaDataTypes.contains(SEQUENCE)) {
                 buffer.append(' ');
-                buffer.append(dialect.getIdentityColumnString());
+                buffer.append(dialect.getIdentityColumn(
+                        column.getSequence() != null ?
+                                scriptGeneratorContext.getQualifiedName(column.getSequence()) : null));
             }
             if (column.isNullable()) {
                 buffer.append(dialect.getNullColumnString());
             } else {
-                buffer.append(" NOT NULL");
+                buffer.append(' ');
+                buffer.append("NOT NULL");
             }
             // TODO: handle default value
             // String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue());
@@ -90,7 +94,8 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 boolean unique = index.isPresent() && (!column.isNullable() || dialect.supportsNotNullUnique());
                 if (unique) {
                     if (dialect.supportsUniqueInCreateTable()) {
-                        buffer.append(" UNIQUE");
+                        buffer.append(' ');
+                        buffer.append("UNIQUE");
                         indexes.remove(index.get());
                     }
                 }
@@ -157,11 +162,11 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
         if (!isEmpty(comment)) {
             buffer.append(dialect.getTableComment(comment));
         }
-        return new String[]{buffer.toString()};
+        return singleton(buffer.toString());
     }
 
     @Override
-    public String[] getDropScripts(Table table, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getDropScripts(Table table, ScriptGeneratorContext scriptGeneratorContext) {
         Dialect dialect = scriptGeneratorContext.getDialect();
         StringBuilder buffer = new StringBuilder("DROP TABLE");
         buffer.append(' ');
@@ -171,7 +176,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             buffer.append(' ');
         }
         buffer.append(scriptGeneratorContext.getQualifiedName(table));
-        String cascadeConstraints = dialect.getCascadeConstraintsString();
+        String cascadeConstraints = dialect.getCascadeConstraints();
         if (cascadeConstraints != null) {
             buffer.append(' ');
             buffer.append(cascadeConstraints);
@@ -180,6 +185,6 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }
-        return new String[]{buffer.toString()};
+        return singleton(buffer.toString());
     }
 }

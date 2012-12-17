@@ -30,6 +30,8 @@ package com.nuodb.migration.jdbc.metadata.generator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 import static java.lang.String.format;
 
 /**
@@ -50,7 +52,7 @@ public abstract class CountingScriptExporter implements ScriptExporter {
     }
 
     @Override
-    public void exportScripts(String[] scripts) throws Exception {
+    public void exportScripts(Collection<String> scripts) throws Exception {
         if (scripts == null) {
             return;
         }
@@ -60,7 +62,7 @@ public abstract class CountingScriptExporter implements ScriptExporter {
                 count++;
             } catch (Exception exception) {
                 if (logger.isErrorEnabled()) {
-                    logger.error(format("Failed exporting script #%d of #%d %s", getCount(), scripts.length, script));
+                    logger.error(format("Failed exporting script #%d of #%d %s", getCount(), scripts.size(), script));
                 }
                 throw exception;
             }

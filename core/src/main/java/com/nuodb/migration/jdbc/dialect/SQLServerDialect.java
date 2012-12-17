@@ -43,7 +43,7 @@ public class SQLServerDialect extends SQL2003Dialect {
     }
 
     @Override
-    public String getNoColumnsInsertString() {
+    public String getNoColumnsInsert() {
         return "DEFAULT VALUES";
     }
 

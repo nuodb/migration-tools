@@ -60,16 +60,6 @@ public class OracleDialect extends SQL2003Dialect {
         }
     }
 
-    @Override
-    public boolean supportsDropConstraints() {
-        return false;
-    }
-
-    @Override
-    public String getCascadeConstraintsString() {
-        return "CASCADE CONSTRAINTS";
-    }
-
     protected String timeZoneAsValue(TimeZone timeZone) {
         int rawOffset = timeZone.getRawOffset();
         int dstSavings = timeZone.getDSTSavings();
@@ -85,5 +75,30 @@ public class OracleDialect extends SQL2003Dialect {
         value.append(':');
         value.append(zeros.substring(0, zeros.length() - minutesOffset.length()));
         return value.toString();
+    }
+
+    @Override
+    public boolean supportsDropConstraints() {
+        return false;
+    }
+
+    @Override
+    public String getCascadeConstraints() {
+        return "CASCADE CONSTRAINTS";
+    }
+
+    @Override
+    public String getSequenceMinValue(Long minValue) {
+        return minValue != null ? "MINVALUE " + minValue : "NOMINVALUE";
+    }
+
+    @Override
+    public String getSequenceMaxValue(Long maxValue) {
+        return maxValue != null ? "MAXVALUE " + maxValue : "NOMAXVALUE";
+    }
+
+    @Override
+    public String getSequenceCycle(boolean cycle) {
+        return cycle ? "CYCLE" : "NOCYCLE";
     }
 }

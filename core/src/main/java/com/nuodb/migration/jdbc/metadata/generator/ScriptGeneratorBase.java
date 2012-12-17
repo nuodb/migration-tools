@@ -27,15 +27,25 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
+import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.metadata.Relational;
+
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
 public abstract class ScriptGeneratorBase<T extends Relational> extends GeneratorServiceBase<T> implements ScriptGenerator<T> {
 
-    protected ScriptGeneratorBase(Class<T> objectType) {
-        super(objectType);
+    protected ScriptGeneratorBase(Class<T> relationalType) {
+        super(relationalType);
     }
 
+    @Override
+    public Collection<String> getDropCreateScripts(T relational, ScriptGeneratorContext scriptGeneratorContext) {
+        Collection<String> scripts = Lists.newArrayList();
+        scripts.addAll(getDropScripts(relational, scriptGeneratorContext));
+        scripts.addAll(getCreateScripts(relational, scriptGeneratorContext));
+        return scripts;
+    }
 }

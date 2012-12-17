@@ -25,37 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata.generator;
+package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public class SchemaGenerate {
+public class DialectException extends MigrationException {
 
-    private ScriptGeneratorContext scriptGeneratorContext;
-    private ScriptExporter scriptExporter = WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER;
-
-    public SchemaGenerate() {
-        this(new SimpleScriptGeneratorContext());
+    public DialectException(String message) {
+        super(message);
     }
 
-    public SchemaGenerate(ScriptGeneratorContext scriptGeneratorContext) {
-        this.scriptGeneratorContext = scriptGeneratorContext;
+    public DialectException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public void generate(Database database) throws Exception {
-        try {
-            scriptExporter.open();
-
-            String[] dropSql = scriptGeneratorContext.getDropScripts(database);
-            scriptExporter.exportScripts(dropSql);
-
-            String[] createSql = scriptGeneratorContext.getCreateScripts(database);
-            scriptExporter.exportScripts(createSql);
-        } finally {
-            scriptExporter.close();
-        }
+    public DialectException(Throwable cause) {
+        super(cause);
     }
 }

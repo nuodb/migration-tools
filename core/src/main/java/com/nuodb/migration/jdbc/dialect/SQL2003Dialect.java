@@ -98,14 +98,22 @@ public class SQL2003Dialect implements Dialect {
             return null;
         }
         if (isQuote(identifier)) {
-            return quote(identifier);
+            return quote(normalize(identifier));
         } else {
             return normalize(identifier);
         }
     }
 
     protected boolean isQuote(String identifier) {
-        return !IDENTIFIER.matcher(identifier).matches();
+        return !isIdentifier(identifier) || isSQLKeyword(identifier);
+    }
+
+    protected boolean isIdentifier(String identifier) {
+        return IDENTIFIER.matcher(identifier).matches();
+    }
+
+    protected boolean isSQLKeyword(String identifier) {
+        return getSQLKeywords().contains(identifier);
     }
 
     protected String quote(String identifier) {
@@ -125,7 +133,7 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public String getNoColumnsInsertString() {
+    public String getNoColumnsInsert() {
         return "VALUES ()";
     }
 
@@ -202,6 +210,16 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
+    public boolean supportsDropSequenceIfExists() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsSequence() {
+        return false;
+    }
+
+    @Override
     public String getColumnComment(String comment) {
         return "";
     }
@@ -212,7 +230,7 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public String getIdentityColumnString() {
+    public String getIdentityColumn(String sequence) {
         return "";
     }
 
@@ -248,6 +266,46 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
+    public String getSequenceStartWith(Long startWith) {
+        return startWith != null ? "START WITH " + startWith : null;
+    }
+
+    @Override
+    public String getSequenceIncrementBy(Long incrementBy) {
+        return incrementBy != null ? "INCREMENT BY " + incrementBy : null;
+    }
+
+    @Override
+    public String getSequenceMinValue(Long minValue) {
+        return minValue != null ? "MINVALUE " + minValue : "NO MINVALUE";
+    }
+
+    @Override
+    public String getSequenceMaxValue(Long maxValue) {
+        return maxValue != null ? "MAXVALUE " + maxValue : "NO MAXVALUE";
+    }
+
+    @Override
+    public String getSequenceCycle(boolean cycle) {
+        return cycle ? "CYCLE" : "NO CYCLE";
+    }
+
+    @Override
+    public String getSequenceCache(Integer cache) {
+        return null;
+    }
+
+    @Override
+    public String getSequenceOrder(boolean order) {
+        return null;
+    }
+
+    @Override
+    public SQLKeywords getSQLKeywords() {
+        return SQLKeywords.SQL_2003_KEYWORDS;
+    }
+
+    @Override
     public boolean supportsIfExistsBeforeDropTable() {
         return false;
     }
@@ -258,12 +316,12 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public String getCascadeConstraintsString() {
+    public String getCascadeConstraints() {
         return null;
     }
 
     @Override
-    public String getDropForeignKeyString() {
+    public String getDropForeignKey() {
         return "DROP CONSTRAINT";
     }
 
@@ -295,7 +353,7 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public void stream(Statement statement) throws SQLException {
+    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
     }
 
     @Override

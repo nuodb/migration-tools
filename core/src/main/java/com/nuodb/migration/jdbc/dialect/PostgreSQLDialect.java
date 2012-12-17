@@ -55,7 +55,7 @@ public class PostgreSQLDialect extends SQL2003Dialect {
                 break;
             }
         }
-        return super.isQuote(identifier) || quote;
+        return quote || super.isQuote(identifier);
     }
 
     @Override
@@ -72,21 +72,6 @@ public class PostgreSQLDialect extends SQL2003Dialect {
         } finally {
             close(statement);
         }
-    }
-
-    @Override
-    public boolean supportsDropConstraints() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsIfExistsBeforeDropTable() {
-        return true;
-    }
-
-    @Override
-    public String getCascadeConstraintsString() {
-        return "CASCADE";
     }
 
     protected String timeZoneAsValue(TimeZone timeZone) {
@@ -109,5 +94,25 @@ public class PostgreSQLDialect extends SQL2003Dialect {
         value.append("'");
         value.append(" HOUR TO MINUTE");
         return value.toString();
+    }
+
+    @Override
+    public String getCascadeConstraints() {
+        return "CASCADE";
+    }
+
+    @Override
+    public boolean supportsDropConstraints() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsIfExistsBeforeDropTable() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDropSequenceIfExists() {
+        return true;
     }
 }

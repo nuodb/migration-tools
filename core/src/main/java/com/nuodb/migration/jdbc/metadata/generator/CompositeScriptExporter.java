@@ -60,13 +60,13 @@ public class CompositeScriptExporter implements ScriptExporter {
 
     @Override
     public void open() throws Exception {
-        for (ScriptExporter sqlExporter : scriptExporters) {
-            sqlExporter.open();
+        for (ScriptExporter scriptExporter : scriptExporters) {
+            scriptExporter.open();
         }
     }
 
     @Override
-    public void exportScripts(String[] scripts) throws Exception {
+    public void exportScripts(Collection<String> scripts) throws Exception {
         for (ScriptExporter scriptExporter : scriptExporters) {
             scriptExporter.exportScripts(scripts);
         }

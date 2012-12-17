@@ -31,20 +31,22 @@ import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.Index;
 
+import java.util.Collection;
 import java.util.Iterator;
+
+import static java.util.Collections.singleton;
 
 /**
  * @author Sergey Bushik
  */
-public class IndexGenerator implements ConstraintGenerator<Index> {
+public class IndexGenerator extends ScriptGeneratorBase<Index> implements ConstraintGenerator<Index> {
 
-    @Override
-    public Class<Index> getObjectType() {
-        return Index.class;
+    public IndexGenerator() {
+        super(Index.class);
     }
 
     @Override
-    public String[] getCreateScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE");
         if (index.isUnique()) {
@@ -63,11 +65,11 @@ public class IndexGenerator implements ConstraintGenerator<Index> {
             }
         }
         buffer.append(')');
-        return new String[]{buffer.toString()};
+        return singleton(buffer.toString());
     }
 
     @Override
-    public String[] getDropScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getDropScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP INDEX ");
         buffer.append(scriptGeneratorContext.getName(index));
@@ -83,7 +85,7 @@ public class IndexGenerator implements ConstraintGenerator<Index> {
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }
-        return new String[]{buffer.toString()};
+        return singleton(buffer.toString());
     }
 
     public String getConstraintSql(Index index, ScriptGeneratorContext context) {

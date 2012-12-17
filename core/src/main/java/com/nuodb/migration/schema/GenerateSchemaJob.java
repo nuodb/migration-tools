@@ -37,6 +37,8 @@ import com.nuodb.migration.job.JobExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
@@ -77,13 +79,18 @@ public class GenerateSchemaJob extends JobBase {
     protected void generate(GenerateSchemaJobExecution execution) throws Exception {
         ConnectionServices connectionServices = execution.getSourceConnectionServices();
         Database database = connectionServices.createDatabaseInspector().inspect();
+
+        Collection<String> scripts;
+        if (isDropBeforeCreate()) {
+            scripts = getScriptGeneratorContext().getDropCreateScripts(database);
+        } else {
+            scripts = getScriptGeneratorContext().getCreateScripts(database);
+        }
+
         ScriptExporter scriptExporter = getScriptExporter();
         try {
             scriptExporter.open();
-            if (isDropBeforeCreate()) {
-                scriptExporter.exportScripts(getScriptGeneratorContext().getDropScripts(database));
-            }
-            scriptExporter.exportScripts(getScriptGeneratorContext().getCreateScripts(database));
+            scriptExporter.exportScripts(scripts);
         } finally {
             scriptExporter.close();
         }

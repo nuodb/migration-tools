@@ -27,12 +27,14 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Relational;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
@@ -50,27 +52,32 @@ public class SimpleScriptGeneratorContext implements ScriptGeneratorContext {
     private Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> namingStrategyMap = newHashMap();
     private Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> scriptGeneratorMap = newHashMap();
     private Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.ALL_TYPES);
+    private Map map = Maps.newHashMap();
 
     public SimpleScriptGeneratorContext() {
         addScriptGenerator(new DatabaseGenerator());
         addScriptGenerator(new TableGenerator());
+        addScriptGenerator(new SequenceGenerator());
         addScriptGenerator(new PrimaryKeyGenerator());
         addScriptGenerator(new IndexGenerator());
         addScriptGenerator(new ForeignKeyGenerator());
 
         addNamingStrategy(new IndexNamingStrategy());
+        addNamingStrategy(new SequenceNamingStrategy());
         addNamingStrategy(new ForeignKeyNamingStrategy());
         addNamingStrategy(new HasIdentifierNamingStrategy());
     }
 
-    public SimpleScriptGeneratorContext(ScriptGeneratorContext context) {
-        this.dialect = context.getDialect();
-        this.catalog = context.getCatalog();
-        this.schema = context.getSchema();
+    public SimpleScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
+        this.dialect = scriptGeneratorContext.getDialect();
+        this.catalog = scriptGeneratorContext.getCatalog();
+        this.schema = scriptGeneratorContext.getSchema();
 
-        this.metaDataTypes = context.getMetaDataTypes();
-        this.scriptGeneratorMap.putAll(context.getScriptGenerators());
-        this.namingStrategyMap.putAll(context.getNamingStrategies());
+        this.metaDataTypes.addAll(scriptGeneratorContext.getMetaDataTypes());
+        this.namingStrategyMap.putAll(scriptGeneratorContext.getNamingStrategies());
+        this.scriptGeneratorMap.putAll(scriptGeneratorContext.getScriptGenerators());
+
+        this.putAll(scriptGeneratorContext);
     }
 
     @Override
@@ -112,27 +119,32 @@ public class SimpleScriptGeneratorContext implements ScriptGeneratorContext {
 
     @Override
     public <R extends Relational> void addScriptGenerator(ScriptGenerator<R> scriptGenerator) {
-        scriptGeneratorMap.put(scriptGenerator.getObjectType(), scriptGenerator);
+        scriptGeneratorMap.put(scriptGenerator.getRelationalType(), scriptGenerator);
     }
 
     @Override
-    public <R extends Relational> ScriptGenerator<R> getScriptGenerator(R object) {
-        return getGeneratorService(scriptGeneratorMap, object);
+    public <R extends Relational> ScriptGenerator<R> getScriptGenerator(R relational) {
+        return getGeneratorService(scriptGeneratorMap, relational);
     }
 
     @Override
-    public <R extends Relational> String[] getCreateScripts(R object) {
-        return getScriptGenerator(object).getCreateScripts(object, this);
+    public <R extends Relational> Collection<String> getCreateScripts(R relational) {
+        return getScriptGenerator(relational).getCreateScripts(relational, this);
     }
 
     @Override
-    public <R extends Relational> String[] getDropScripts(R object) {
-        return getScriptGenerator(object).getDropScripts(object, this);
+    public <R extends Relational> Collection<String> getDropScripts(R relational) {
+        return getScriptGenerator(relational).getDropScripts(relational, this);
     }
 
     @Override
-    public <R extends Relational> ScriptGenerator<R> getScriptGenerator(Class<R> objectType) {
-        return (ScriptGenerator<R>) scriptGeneratorMap.get(objectType);
+    public <R extends Relational> Collection<String> getDropCreateScripts(R relational) {
+        return getScriptGenerator(relational).getDropCreateScripts(relational, this);
+    }
+
+    @Override
+    public <R extends Relational> ScriptGenerator<R> getScriptGenerator(Class<R> relationalType) {
+        return (ScriptGenerator<R>) scriptGeneratorMap.get(relationalType);
     }
 
     @Override
@@ -141,33 +153,33 @@ public class SimpleScriptGeneratorContext implements ScriptGeneratorContext {
     }
 
     @Override
-    public <R extends Relational> String getName(R object) {
-        return getNamingStrategy(object).getName(object, this);
+    public <R extends Relational> String getName(R relational) {
+        return getNamingStrategy(relational).getName(relational, this);
     }
 
     @Override
-    public <R extends Relational> String getName(R object, boolean identifier) {
-        return getNamingStrategy(object).getName(object, this, identifier);
+    public <R extends Relational> String getName(R relational, boolean identifier) {
+        return getNamingStrategy(relational).getName(relational, this, identifier);
     }
 
     @Override
-    public <R extends Relational> String getQualifiedName(R object) {
-        return getNamingStrategy(object).getQualifiedName(object, this);
+    public <R extends Relational> String getQualifiedName(R relational) {
+        return getNamingStrategy(relational).getQualifiedName(relational, this);
     }
 
     @Override
-    public <R extends Relational> String getQualifiedName(R object, boolean identifier) {
-        return getNamingStrategy(object).getQualifiedName(object, this, identifier);
+    public <R extends Relational> String getQualifiedName(R relational, boolean identifier) {
+        return getNamingStrategy(relational).getQualifiedName(relational, this, identifier);
     }
 
     @Override
     public <R extends Relational> void addNamingStrategy(NamingStrategy<R> namingStrategy) {
-        namingStrategyMap.put(namingStrategy.getObjectType(), namingStrategy);
+        namingStrategyMap.put(namingStrategy.getRelationalType(), namingStrategy);
     }
 
     @Override
-    public <R extends Relational> NamingStrategy<R> getNamingStrategy(R object) {
-        return getGeneratorService(namingStrategyMap, object);
+    public <R extends Relational> NamingStrategy<R> getNamingStrategy(R relational) {
+        return getGeneratorService(namingStrategyMap, relational);
     }
 
     @Override
@@ -175,10 +187,70 @@ public class SimpleScriptGeneratorContext implements ScriptGeneratorContext {
         return namingStrategyMap;
     }
 
+    @Override
+    public Set entrySet() {
+        return map.entrySet();
+    }
+
+    @Override
+    public int size() {
+        return map.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        return map.containsKey(key);
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        return map.containsValue(value);
+    }
+
+    @Override
+    public Object get(Object key) {
+        return map.get(key);
+    }
+
+    @Override
+    public Object put(Object key, Object value) {
+        return map.put(key, value);
+    }
+
+    @Override
+    public Object remove(Object key) {
+        return map.remove(key);
+    }
+
+    @Override
+    public void putAll(Map m) {
+        map.putAll(m);
+    }
+
+    @Override
+    public void clear() {
+        map.clear();
+    }
+
+    @Override
+    public Set keySet() {
+        return map.keySet();
+    }
+
+    @Override
+    public Collection values() {
+        return map.values();
+    }
+
     protected <R extends Relational, T extends GeneratorService<R>> T getGeneratorService(
-            Map generatorServiceMap, R object) {
-        Class<? extends Relational> objectType = object.getClass();
-        Class<? extends Relational> type = objectType;
+            Map generatorServiceMap, R relational) {
+        Class<? extends Relational> relationalType = relational.getClass();
+        Class<? extends Relational> type = relationalType;
         GeneratorService<R> generatorService = null;
         while (generatorService == null && type != null) {
             generatorService = (GeneratorService<R>) generatorServiceMap.get(type);
@@ -188,10 +260,10 @@ public class SimpleScriptGeneratorContext implements ScriptGeneratorContext {
             type = (Class<? extends Relational>) type.getSuperclass();
         }
         if (generatorService == null) {
-            throw new ScriptGeneratorException(format("Generator service not found for %s", objectType));
+            throw new ScriptGeneratorException(format("Generator service not found for %s", relationalType));
         }
-        if (!objectType.equals(generatorService.getObjectType())) {
-            generatorServiceMap.put(objectType, generatorService);
+        if (!relationalType.equals(generatorService.getRelationalType())) {
+            generatorServiceMap.put(relationalType, generatorService);
         }
         return (T) generatorService;
     }

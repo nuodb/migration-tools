@@ -59,4 +59,9 @@ public class WriterScriptExporter extends CountingScriptExporter {
         }
         writer.write(LINE_SEPARATOR);
     }
+
+    @Override
+    protected void doClose() throws Exception {
+        writer.flush();
+    }
 }

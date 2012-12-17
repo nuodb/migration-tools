@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public interface ScriptGeneratorContext {
+public interface ScriptGeneratorContext extends Map {
 
     Dialect getDialect();
 
@@ -55,29 +55,31 @@ public interface ScriptGeneratorContext {
 
     void setMetaDataTypes(Collection<MetaDataType> metaDataTypes);
 
-    <R extends Relational> String getName(R object);
+    <R extends Relational> String getName(R relational);
 
-    <R extends Relational> String getName(R object, boolean identifier);
+    <R extends Relational> String getName(R relational, boolean identifier);
 
-    <R extends Relational> String getQualifiedName(R object);
+    <R extends Relational> String getQualifiedName(R relational);
 
-    <R extends Relational> String getQualifiedName(R object, boolean identifier);
+    <R extends Relational> String getQualifiedName(R relational, boolean identifier);
 
-    <R extends Relational> String[] getCreateScripts(R object);
+    <R extends Relational> Collection<String> getCreateScripts(R relational);
 
-    <R extends Relational> String[] getDropScripts(R object);
+    <R extends Relational> Collection<String> getDropScripts(R relational);
+
+    <R extends Relational> Collection<String> getDropCreateScripts(R relational);
 
     <R extends Relational> void addNamingStrategy(NamingStrategy<R> namingStrategy);
 
-    <R extends Relational> GeneratorService<R> getNamingStrategy(R object);
+    <R extends Relational> GeneratorService<R> getNamingStrategy(R relational);
 
     Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> getNamingStrategies();
 
     <R extends Relational> void addScriptGenerator(ScriptGenerator<R> scriptGenerator);
 
-    <R extends Relational> ScriptGenerator<R> getScriptGenerator(R object);
+    <R extends Relational> ScriptGenerator<R> getScriptGenerator(R relational);
 
-    <R extends Relational> ScriptGenerator<R> getScriptGenerator(Class<R> objectType);
+    <R extends Relational> ScriptGenerator<R> getScriptGenerator(Class<R> relationalType);
 
     Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> getScriptGenerators();
 }

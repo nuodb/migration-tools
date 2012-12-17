@@ -48,14 +48,14 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migration.jdbc.metadata.MetaDataType.ALL_TYPES;
-import static com.nuodb.migration.jdbc.metadata.MetaDataType.COLUMN_CHECK;
+import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migration.utils.ReflectionUtils.newInstance;
 import static java.lang.String.format;
 
 /**
- * Reads database meta data and creates its meta model. Root meta model object is {@link com.nuodb.migration.jdbc.metadata.Database} containing set of
- * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
+ * Reads database meta data and creates its meta model. Root meta model object is {@link
+ * com.nuodb.migration.jdbc.metadata.Database} containing set of catalogs, each catalog has a collection of schemas and
+ * schema is a wrapper of collection of a tables.
  *
  * @author Sergey Bushik
  */
@@ -82,9 +82,13 @@ public class DatabaseInspector {
         withMetaDataReader(new ForeignKeyReader());
         withMetaDataReader(new PrimaryKeyReader());
 
-        MetaDataReaderResolver metaDataReader = new MetaDataReaderResolver(COLUMN_CHECK);
-        metaDataReader.registerObject("NuoDB", NuoDBColumnCheckReader.class);
-        withMetaDataReader(metaDataReader);
+        MetaDataReaderResolver columnCheckReader = new MetaDataReaderResolver(COLUMN_CHECK);
+        columnCheckReader.registerObject("NuoDB", NuoDBColumnCheckReader.class);
+        withMetaDataReader(columnCheckReader);
+
+        MetaDataReaderResolver sequenceReader = new MetaDataReaderResolver(SEQUENCE);
+        sequenceReader.registerObject("MySQL", MySQLAutoIncrementReader.class);
+        withMetaDataReader(sequenceReader);
     }
 
     public Database inspect() throws SQLException {
