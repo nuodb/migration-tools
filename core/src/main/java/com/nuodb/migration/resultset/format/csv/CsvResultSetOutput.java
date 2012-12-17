@@ -34,7 +34,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 
 import static java.lang.String.valueOf;
 
@@ -62,7 +63,9 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
         if (getWriter() != null) {
             printer = new CSVPrinter(getWriter(), format);
         } else if (getOutputStream() != null) {
-            printer = new CSVPrinter(new PrintWriter(getOutputStream()), format);
+            String encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
+            printer = new CSVPrinter(new OutputStreamWriter(getOutputStream(), Charset.forName(encoding)), format);
+
         }
     }
 

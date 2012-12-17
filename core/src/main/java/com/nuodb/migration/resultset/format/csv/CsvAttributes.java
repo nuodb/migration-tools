@@ -32,6 +32,8 @@ package com.nuodb.migration.resultset.format.csv;
  */
 public interface CsvAttributes {
 
+    final String ENCODING = "utf-8";
+
     final String FORMAT_TYPE = "csv";
     /**
      * The symbol used for value separation, must not be a line break character.
@@ -41,6 +43,10 @@ public interface CsvAttributes {
      * Indicates whether quotation should be used.
      */
     final String ATTRIBUTE_QUOTING = "csv.quoting";
+    /**
+     * Output stream encoding
+     */
+    final String ATTRIBUTE_ENCODING = "csv.encoding";
     /**
      * The symbol used as value encapsulation marker.
      */

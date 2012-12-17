@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
+import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -63,8 +64,12 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             final Column column = iterator.next();
             buffer.append(scriptGeneratorContext.getName(column));
             buffer.append(' ');
-            buffer.append(jdbcTypeNameMap.getTypeName(column.getTypeCode(), column.getSize(), column.getPrecision(),
-                    column.getScale()));
+            String typeName = jdbcTypeNameMap.getTypeName(
+                    column.getTypeCode(), column.getSize(), column.getPrecision(), column.getScale());
+            if (typeName == null) {
+                typeName = getColumnTypeName(scriptGeneratorContext, column);
+            }
+            buffer.append(typeName);
             if (column.isIdentity() && metaDataTypes.contains(SEQUENCE)) {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
@@ -163,6 +168,14 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             buffer.append(dialect.getTableComment(comment));
         }
         return singleton(buffer.toString());
+    }
+
+    protected String getColumnTypeName(ScriptGeneratorContext scriptGeneratorContext, Column column) {
+        throw new ScriptGeneratorException(
+                format("Unsupported type name %s, type code %d found on table %s column %s",
+                        column.getTypeName(), column.getTypeCode(),
+                        scriptGeneratorContext.getQualifiedName(column.getTable(), false),
+                        scriptGeneratorContext.getName(column, false)));
     }
 
     @Override

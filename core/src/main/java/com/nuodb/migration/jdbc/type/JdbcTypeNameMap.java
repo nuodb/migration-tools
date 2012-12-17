@@ -88,7 +88,7 @@ public class JdbcTypeNameMap {
     }
 
     protected String getUnknownTypeName(int typeCode) {
-        throw new JdbcTypeException(format("Unsupported jdbc type %d", typeCode));
+        return null;
     }
 
     public static String expandVariables(String typeName, int length, int precision, int scale) {

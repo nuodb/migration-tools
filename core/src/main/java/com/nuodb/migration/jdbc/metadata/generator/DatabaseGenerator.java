@@ -53,7 +53,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
         META_DATA_TYPE, TABLE
     }
 
-    private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
+    private GroupScriptsBy groupScriptsBy = GroupScriptsBy.META_DATA_TYPE;
 
     public DatabaseGenerator() {
         super(Database.class);
