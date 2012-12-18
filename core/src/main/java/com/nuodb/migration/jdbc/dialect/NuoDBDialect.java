@@ -49,6 +49,8 @@ public class NuoDBDialect extends SQL2003Dialect {
         addJdbcType(NuoDBTimeType.INSTANCE);
 
         addJdbcTypeName(Types.BIT, "BOOLEAN", 1);
+        removeJdbcTypeName(Types.BIT);
+
         addJdbcTypeName(Types.TINYINT, "SMALLINT");
         addJdbcTypeName(Types.SMALLINT, "SMALLINT");
         addJdbcTypeName(Types.INTEGER, "INTEGER");

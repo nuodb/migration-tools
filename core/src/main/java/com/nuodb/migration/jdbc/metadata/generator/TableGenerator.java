@@ -194,11 +194,11 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 column.getTypeCode(), column.getSize(), column.getPrecision(), column.getScale());
         if (typeName == null) {
             throw new ScriptGeneratorException(
-                    format("Unsupported type %s code %d on table %s column %s",
-                            column.getTypeName(), column.getTypeCode(),
+                    format("Unsupported type %s, length %d on table %s column %s",
+                            column.getTypeName(), column.getSize(),
                             scriptGeneratorContext.getQualifiedName(column.getTable(), false),
                             scriptGeneratorContext.getName(column, false)));
         }
-        return null;
+        return typeName;
     }
 }

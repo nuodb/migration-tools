@@ -393,6 +393,10 @@ public class SQL2003Dialect implements Dialect {
         jdbcTypeRegistry.getJdbcTypeNameMap().addTypeName(typeCode, typeName, size);
     }
 
+    protected void removeJdbcTypeName(int typeCode) {
+        jdbcTypeRegistry.getJdbcTypeNameMap().removeJdbcTypeName(typeCode);
+    }
+
     public void addJdbcTypeDescAlias(int typeCode, int typeCodeAlias) {
         getJdbcTypeRegistry().addJdbcTypeDescAlias(typeCode, typeCodeAlias);
     }

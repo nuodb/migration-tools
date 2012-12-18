@@ -62,12 +62,16 @@ public class JdbcTypeNameMap {
     }
 
     public void addTypeName(int typeCode, String typeName, int length) {
-        Map<Integer, String> lengthMap = typeCodeLengthMap.get(typeCode);
-        if (lengthMap == null) {
-            lengthMap = Maps.newTreeMap();
-            typeCodeLengthMap.put(typeCode, lengthMap);
+        Map<Integer, String> typeLengthMap = typeCodeLengthMap.get(typeCode);
+        if (typeLengthMap == null) {
+            typeLengthMap = Maps.newTreeMap();
+            typeCodeLengthMap.put(typeCode, typeLengthMap);
         }
-        lengthMap.put(length, typeName);
+        typeLengthMap.put(length, typeName);
+    }
+
+    public void removeJdbcTypeName(int typeCode) {
+        typeCodeMap.remove(typeCode);
     }
 
     public String getTypeName(int typeCode) {
