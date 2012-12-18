@@ -40,7 +40,6 @@ public interface CliOptions {
     final int LIST_OPTION_ID = 2;
     final int CONFIG_OPTION_ID = 3;
     final int COMMAND_OPTION_ID = 4;
-
     /**
      * Formats and shows help.
      */
@@ -83,10 +82,9 @@ public interface CliOptions {
     final String TARGET_SCHEMA_OPTION = "target.schema";
 
     final String INPUT_OPTION = "input.*";
-    final String INPUT_TYPE_OPTION = "input.type";
     final String INPUT_PATH_OPTION = "input.path";
 
-    final String GENERATE_META_DATA_OPTION = "generate.*";
-    final String DROP_BEFORE_CREATE_OPTION = "drop.before.create";
-
+    final String SCHEMA_META_DATA_OPTION = "meta.data.*";
+    final String SCHEMA_DROP_BEFORE_CREATE_OPTION = "drop.before.create";
+    final String SCHEMA_GROUP_SCRIPTS_BY_OPTION = "group.scripts.by";
 }

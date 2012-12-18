@@ -27,34 +27,39 @@
  */
 package com.nuodb.migration.cli.run;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.CommandLine;
 import com.nuodb.migration.cli.parse.Group;
 import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.option.GroupBuilder;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.cli.parse.option.RegexOption;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
-import com.nuodb.migration.schema.GenerateSchemaJobFactory;
-import com.nuodb.migration.spec.GenerateSchemaSpec;
+import com.nuodb.migration.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migration.schema.SchemaJobFactory;
+import com.nuodb.migration.spec.SchemaSpec;
 import com.nuodb.migration.spec.ResourceSpec;
 import com.nuodb.migration.utils.Priority;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.replace;
 
 /**
  * @author Sergey Bushik
  */
-public class CliGenerateSchemaJobFactory extends CliRunSupport implements CliRunFactory, CliResources {
+public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory, CliResources {
 
     private static final String COMMAND = "schema";
 
-    public CliGenerateSchemaJobFactory(OptionToolkit optionToolkit) {
+    public CliSchemaJobFactory(OptionToolkit optionToolkit) {
         super(optionToolkit);
     }
 
@@ -71,12 +76,12 @@ public class CliGenerateSchemaJobFactory extends CliRunSupport implements CliRun
     class CliGenerateSchema extends CliRunJob {
 
         public CliGenerateSchema() {
-            super(COMMAND, new GenerateSchemaJobFactory());
+            super(COMMAND, new SchemaJobFactory());
         }
 
         @Override
         protected Option createOption() {
-            GroupBuilder group = newGroup().withName(getResources().getMessage(GENERATE_SCHEMA_GROUP_NAME));
+            GroupBuilder group = newGroup().withName(getResources().getMessage(SCHEMA_GROUP_NAME));
             group.withRequired(true);
             group.withOption(createSourceGroup());
             group.withOption(createTargetGroup());
@@ -87,18 +92,18 @@ public class CliGenerateSchemaJobFactory extends CliRunSupport implements CliRun
 
         @Override
         protected void bind(CommandLine commandLine) {
-            GenerateSchemaSpec generateSchemaSpec = new GenerateSchemaSpec();
-            generateSchemaSpec.setSourceConnectionSpec(parseSourceGroup(commandLine, this));
-            generateSchemaSpec.setTargetConnectionSpec(parseTargetGroup(commandLine, this));
-            generateSchemaSpec.setOutputSpec(parseOutputGroup(commandLine, this));
-            parserGenerateSchemaOptions(generateSchemaSpec, commandLine, this);
-            ((GenerateSchemaJobFactory) getJobFactory()).setGenerateSchemaSpec(generateSchemaSpec);
+            SchemaSpec schemaSpec = new SchemaSpec();
+            schemaSpec.setSourceConnectionSpec(parseSourceGroup(commandLine, this));
+            schemaSpec.setTargetConnectionSpec(parseTargetGroup(commandLine, this));
+            schemaSpec.setOutputSpec(parseOutputGroup(commandLine, this));
+            parserGenerateSchemaOptions(schemaSpec, commandLine, this);
+            ((SchemaJobFactory) getJobFactory()).setSchemaSpec(schemaSpec);
         }
     }
 
     @Override
     protected Group createOutputGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(GENERATE_SCHEMA_OUTPUT_GROUP_NAME));
+        GroupBuilder group = newGroup().withName(getMessage(SCHEMA_OUTPUT_GROUP_NAME));
         Option path = newOption().
                 withName(OUTPUT_PATH_OPTION).
                 withRequired(true).
@@ -115,30 +120,39 @@ public class CliGenerateSchemaJobFactory extends CliRunSupport implements CliRun
 
     protected void createGenerateSchemaOptions(GroupBuilder group) {
         RegexOption generate = new RegexOption();
-        generate.setName(GENERATE_META_DATA_OPTION);
-        generate.setDescription(getMessage(GENERATE_SCHEMA_META_DATA_OPTION_DESCRIPTION));
+        generate.setName(SCHEMA_META_DATA_OPTION);
+        generate.setDescription(getMessage(SCHEMA_META_DATA_OPTION_DESCRIPTION));
         generate.setPrefixes(getOptionFormat().getOptionPrefixes());
         generate.setArgumentSeparator(getOptionFormat().getArgumentSeparator());
-        generate.addRegex(GENERATE_META_DATA_OPTION, 1, Priority.LOW);
+        generate.addRegex(SCHEMA_META_DATA_OPTION, 1, Priority.LOW);
         generate.setArgument(
                 newArgument().
-                        withName(getMessage(GENERATE_SCHEMA_META_DATA_ARGUMENT_NAME)).
+                        withName(getMessage(SCHEMA_META_DATA_ARGUMENT_NAME)).
                         withValuesSeparator(null).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
         group.withOption(generate);
 
         Option dropBeforeCreate = newOption().
-                withName(DROP_BEFORE_CREATE_OPTION).
-                withDescription(getMessage(GENERATE_SCHEMA_DROP_BEFORE_CREATE_DESCRIPTION)).
+                withName(SCHEMA_DROP_BEFORE_CREATE_OPTION).
+                withDescription(getMessage(SCHEMA_DROP_BEFORE_CREATE_DESCRIPTION)).
                 withArgument(
                         newArgument().
-                                withName(getMessage(GENERATE_SCHEMA_DROP_BEFORE_CREATE_ARGUMENT_NAME)).build()
+                                withName(getMessage(SCHEMA_DROP_BEFORE_CREATE_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(dropBeforeCreate);
+
+        Option groupScriptsBy = newOption().
+                withName(SCHEMA_GROUP_SCRIPTS_BY_OPTION).
+                withDescription(getMessage(SCHEMA_GROUP_SCRIPTS_BY_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgument().
+                                withName(getMessage(SCHEMA_GROUP_SCRIPTS_BY_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(groupScriptsBy);
     }
 
-    protected void parserGenerateSchemaOptions(GenerateSchemaSpec generateSchemaSpec, CommandLine commandLine, Option option) {
-        if (commandLine.hasOption(GENERATE_META_DATA_OPTION)) {
-            Collection<String> values = commandLine.getValues(GENERATE_META_DATA_OPTION);
+    protected void parserGenerateSchemaOptions(SchemaSpec schemaSpec, CommandLine commandLine, Option option) {
+        if (commandLine.hasOption(SCHEMA_META_DATA_OPTION)) {
+            Collection<String> values = commandLine.getValues(SCHEMA_META_DATA_OPTION);
             Set<MetaDataType> metaDataTypes = newHashSet(MetaDataType.ALL_TYPES);
             for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
                 MetaDataType metaDataType = new MetaDataType(replace(iterator.next(), ".", " "));
@@ -149,12 +163,29 @@ public class CliGenerateSchemaJobFactory extends CliRunSupport implements CliRun
                     metaDataTypes.remove(metaDataType);
                 }
             }
-            generateSchemaSpec.setMetaDataTypes(metaDataTypes);
+            schemaSpec.setMetaDataTypes(metaDataTypes);
         }
-        String dropBeforeCreate = commandLine.getValue(DROP_BEFORE_CREATE_OPTION);
+        String dropBeforeCreate = commandLine.getValue(SCHEMA_DROP_BEFORE_CREATE_OPTION);
         if (dropBeforeCreate != null) {
-            generateSchemaSpec.setDropBeforeCreate(Boolean.parseBoolean(dropBeforeCreate));
+            schemaSpec.setDropBeforeCreate(Boolean.parseBoolean(dropBeforeCreate));
         }
+        Map<String, GroupScriptsBy> groupScriptsByConditionMap = Maps.newHashMap();
+        for (GroupScriptsBy groupScriptsBy : GroupScriptsBy.values()) {
+            groupScriptsByConditionMap.put(groupScriptsBy.getCondition(), groupScriptsBy);
+        }
+        String groupScriptsByCondition = commandLine.getValue(SCHEMA_GROUP_SCRIPTS_BY_OPTION);
+        GroupScriptsBy groupScriptsBy;
+        if (groupScriptsByCondition != null) {
+            groupScriptsBy = groupScriptsByConditionMap.get(groupScriptsByCondition);
+            if (groupScriptsBy == null) {
+                throw new OptionException(option,
+                        format("Unexpected value for %s option, valid values are %s",
+                                SCHEMA_GROUP_SCRIPTS_BY_OPTION, groupScriptsByConditionMap.keySet()));
+            }
+        } else {
+            groupScriptsBy = GroupScriptsBy.TABLE;
+        }
+        schemaSpec.setGroupScriptsBy(groupScriptsBy);
     }
 
     @Override

@@ -27,6 +27,9 @@
  */
 package com.nuodb.migration.jdbc.type;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 /**
  * @author Sergey Bushik
  */
@@ -36,7 +39,7 @@ public class JdbcTypeDesc {
     private String typeName;
 
     public JdbcTypeDesc(int typeCode) {
-        this(typeCode, JdbcTypeNameMap.STANDARD.getTypeName(typeCode));
+        this.typeCode = typeCode;
     }
 
     public JdbcTypeDesc(int typeCode, String typeName) {
@@ -58,7 +61,7 @@ public class JdbcTypeDesc {
     }
 
     public static boolean isTypeNameEquals(String typeName1, String typeName2) {
-        return typeName1 != null ? typeName1.equalsIgnoreCase(typeName2) : typeName2 != null;
+        return StringUtils.equalsIgnoreCase(typeName1, typeName2);
     }
 
     @Override
@@ -78,9 +81,6 @@ public class JdbcTypeDesc {
 
     @Override
     public String toString() {
-        return "JdbcTypeDesc{" +
-                "typeCode=" + typeCode +
-                ", typeName='" + typeName + '\'' +
-                '}';
+        return ReflectionToStringBuilder.toString(this);
     }
 }

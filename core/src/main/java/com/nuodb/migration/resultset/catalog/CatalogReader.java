@@ -35,9 +35,9 @@ import java.io.InputStream;
  */
 public interface CatalogReader extends Closeable {
 
-    CatalogEntry[] getEntries();
+    InputStream getInputStream(CatalogEntry catalogEntry);
 
-    InputStream getEntryInput(CatalogEntry entry);
+    CatalogEntry[] readAll();
 
     void close();
 }

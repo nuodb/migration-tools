@@ -37,18 +37,18 @@ import java.util.Map;
  */
 public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
 
-    private Map<JdbcTypeDesc, JdbcType> jdbcTypes = Maps.newHashMap();
-
-    private Map<Class, JdbcTypeAdapter> jdbcTypeAdapters = Maps.newHashMap();
-
+    private Map<JdbcTypeDesc, JdbcType> jdbcTypeMap = Maps.newHashMap();
+    private Map<JdbcTypeDesc, JdbcTypeDesc> jdbcTypeDescAliasMap = Maps.newHashMap();
+    private Map<Class, JdbcTypeAdapter> jdbcTypeAdapterMap = Maps.newHashMap();
     private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
 
     public JdbcTypeRegistryBase() {
     }
 
     public JdbcTypeRegistryBase(JdbcTypeRegistry jdbcTypeRegistry) {
-        addJdbcTypes(jdbcTypeRegistry.getJdbcTypes());
-        addJdbcTypeAdapters(jdbcTypeRegistry.getJdbcTypeAdapters());
+        addJdbcTypes(jdbcTypeRegistry.getJdbcTypeMap());
+        addJdbcTypeAdapters(jdbcTypeRegistry.getJdbcTypeAdapterMap());
+        addJdbcTypeDescAliases(jdbcTypeRegistry.getJdbcTypeDescAliases());
     }
 
     @Override
@@ -58,7 +58,7 @@ public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
 
     @Override
     public JdbcType getJdbcType(int typeCode) {
-        return jdbcTypes.get(new JdbcTypeDesc(typeCode));
+        return getJdbcType(new JdbcTypeDesc(typeCode));
     }
 
     @Override
@@ -67,10 +67,14 @@ public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
     }
 
     @Override
-    public JdbcType getJdbcType(JdbcTypeDesc typeDesc) {
-        JdbcType jdbcType = jdbcTypes.get(typeDesc);
+    public JdbcType getJdbcType(JdbcTypeDesc jdbcTypeDesc) {
+        return findJdbcType(findJdbcTypeDescAlias(jdbcTypeDesc));
+    }
+
+    protected JdbcType findJdbcType(JdbcTypeDesc jdbcTypeDesc) {
+        JdbcType jdbcType = jdbcTypeMap.get(jdbcTypeDesc);
         if (jdbcType == null) {
-            jdbcType = jdbcTypes.get(new JdbcTypeDesc(typeDesc.getTypeCode()));
+            jdbcType = jdbcTypeMap.get(new JdbcTypeDesc(jdbcTypeDesc.getTypeCode()));
         }
         return jdbcType;
     }
@@ -78,17 +82,17 @@ public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
     @Override
     public void addJdbcType(JdbcType jdbcType) {
         JdbcTypeDesc typeDesc = jdbcType.getTypeDesc();
-        jdbcTypes.put(typeDesc, jdbcType);
+        jdbcTypeMap.put(typeDesc, jdbcType);
     }
 
     @Override
-    public Collection<JdbcType> getJdbcTypes() {
-        return jdbcTypes.values();
+    public Collection<JdbcType> getJdbcTypeMap() {
+        return jdbcTypeMap.values();
     }
 
     @Override
     public void addJdbcTypeAdapter(JdbcTypeAdapter jdbcTypeAdapter) {
-        jdbcTypeAdapters.put(jdbcTypeAdapter.getTypeClass(), jdbcTypeAdapter);
+        jdbcTypeAdapterMap.put(jdbcTypeAdapter.getTypeClass(), jdbcTypeAdapter);
     }
 
     @Override
@@ -99,18 +103,18 @@ public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
     }
 
     @Override
-    public Collection<JdbcTypeAdapter> getJdbcTypeAdapters() {
-        return jdbcTypeAdapters.values();
+    public Collection<JdbcTypeAdapter> getJdbcTypeAdapterMap() {
+        return jdbcTypeAdapterMap.values();
     }
 
     @Override
     public JdbcTypeAdapter getJdbcTypeAdapter(Class typeClass) {
-        return jdbcTypeAdapters.get(typeClass);
+        return jdbcTypeAdapterMap.get(typeClass);
     }
 
     @Override
     public void addJdbcTypes(JdbcTypeRegistry jdbcTypeRegistry) {
-        addJdbcTypes(jdbcTypeRegistry.getJdbcTypes());
+        addJdbcTypes(jdbcTypeRegistry.getJdbcTypeMap());
     }
 
     @Override
@@ -118,5 +122,57 @@ public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
         for (JdbcType jdbcType : jdbcTypes) {
             addJdbcType(jdbcType);
         }
+    }
+
+    @Override
+    public void addJdbcTypeDescAlias(int typeCode, int typeCodeAlias) {
+        addJdbcTypeDescAlias(new JdbcTypeDesc(typeCode, null), new JdbcTypeDesc(typeCodeAlias, null));
+    }
+
+    @Override
+    public void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias) {
+        addJdbcTypeDescAlias(new JdbcTypeDesc(typeCode, typeName), new JdbcTypeDesc(typeCodeAlias, typeName));
+    }
+
+    @Override
+    public void addJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc, JdbcTypeDesc jdbcTypeDescAlias) {
+        jdbcTypeDescAliasMap.put(jdbcTypeDesc, jdbcTypeDescAlias);
+    }
+
+    @Override
+    public JdbcTypeDesc getJdbcTypeDescAlias(int typeCode) {
+        return getJdbcTypeDescAlias(new JdbcTypeDesc(typeCode, null));
+    }
+
+    @Override
+    public JdbcTypeDesc getJdbcTypeDescAlias(int typeCode, String typeName) {
+        return getJdbcTypeDescAlias(new JdbcTypeDesc(typeCode, typeName));
+    }
+
+    @Override
+    public JdbcTypeDesc getJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc) {
+        return findJdbcTypeDescAlias(jdbcTypeDesc);
+    }
+
+    @Override
+    public Map<JdbcTypeDesc, JdbcTypeDesc> getJdbcTypeDescAliases() {
+        return jdbcTypeDescAliasMap;
+    }
+
+    protected void addJdbcTypeDescAliases(Map<JdbcTypeDesc, JdbcTypeDesc> jdbcTypeDescAliases) {
+        for (Map.Entry<JdbcTypeDesc, JdbcTypeDesc> entry : jdbcTypeDescAliases.entrySet()) {
+            addJdbcTypeDescAlias(entry.getKey(), entry.getValue());
+        }
+    }
+
+    protected JdbcTypeDesc findJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc) {
+        JdbcTypeDesc jdbcTypeDescAlias = jdbcTypeDescAliasMap.get(jdbcTypeDesc);
+        if (jdbcTypeDescAlias == null) {
+            jdbcTypeDescAlias = jdbcTypeDescAliasMap.get(new JdbcTypeDesc(jdbcTypeDesc.getTypeCode()));
+        }
+        if (jdbcTypeDescAlias == null) {
+            jdbcTypeDescAlias = jdbcTypeDesc;
+        }
+        return jdbcTypeDescAlias;
     }
 }

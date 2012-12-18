@@ -35,82 +35,83 @@ public interface CliResources {
     /**
      * Root options resources
      */
-    final String ROOT_GROUP_NAME = "com.nuodb.migration.cli.root.group.name";
+    final String ROOT_GROUP_NAME = "com.nuodb.migration.root.group.name";
 
-    final String HELP_OPTION_DESCRIPTION = "com.nuodb.migration.cli.help.option.description";
-    final String HELP_ARGUMENT_NAME = "com.nuodb.migration.cli.help.argument.name";
-    final String LIST_OPTION_DESCRIPTION = "com.nuodb.migration.cli.list.option.description";
-    final String LIST_OPTION_OUTPUT = "com.nuodb.migration.cli.list.option.output";
-    final String CONFIG_OPTION_DESCRIPTION = "com.nuodb.migration.cli.config.option.description";
-    final String CONFIG_ARGUMENT_NAME = "com.nuodb.migration.cli.config.argument.name";
-    final String COMMAND_OPTION_DESCRIPTION = "com.nuodb.migration.cli.command.option.description";
+    final String HELP_OPTION_DESCRIPTION = "com.nuodb.migration.help.option.description";
+    final String HELP_ARGUMENT_NAME = "com.nuodb.migration.help.argument.name";
+    final String LIST_OPTION_DESCRIPTION = "com.nuodb.migration.list.option.description";
+    final String LIST_OPTION_OUTPUT = "com.nuodb.migration.list.option.output";
+    final String CONFIG_OPTION_DESCRIPTION = "com.nuodb.migration.config.option.description";
+    final String CONFIG_ARGUMENT_NAME = "com.nuodb.migration.config.argument.name";
+    final String COMMAND_OPTION_DESCRIPTION = "com.nuodb.migration.command.option.description";
     /**
      * Dump plugin resources
      */
-    final String DUMP_GROUP_NAME = "com.nuodb.migration.cli.dump.group.name";
-    final String SOURCE_GROUP_NAME = "com.nuodb.migration.cli.source.group.name";
-    final String SOURCE_DRIVER_OPTION_DESCRIPTION = "com.nuodb.migration.cli.source.driver.option.description";
-    final String SOURCE_DRIVER_ARGUMENT_NAME = "com.nuodb.migration.cli.source.driver.argument.name";
-    final String SOURCE_URL_OPTION_DESCRIPTION = "com.nuodb.migration.cli.source.url.option.description";
-    final String SOURCE_URL_ARGUMENT_NAME = "com.nuodb.migration.cli.source.url.argument.name";
-    final String SOURCE_USERNAME_OPTION_DESCRIPTION = "com.nuodb.migration.cli.source.username.option.description";
-    final String SOURCE_USERNAME_ARGUMENT_NAME = "com.nuodb.migration.cli.source.username.argument.name";
-    final String SOURCE_PASSWORD_OPTION_DESCRIPTION = "com.nuodb.migration.cli.source.password.option.description";
-    final String SOURCE_PASSWORD_ARGUMENT_NAME = "com.nuodb.migration.cli.source.password.argument.name";
-    final String SOURCE_PROPERTIES_OPTION_DESCRIPTION = "com.nuodb.migration.cli.source.properties.option.description";
-    final String SOURCE_PROPERTIES_ARGUMENT_NAME = "com.nuodb.migration.cli.source.properties.argument.name";
-    final String SOURCE_CATALOG_OPTION_DESCRIPTION = "com.nuodb.migration.cli.source.catalog.option.description";
-    final String SOURCE_CATALOG_ARGUMENT_NAME = "com.nuodb.migration.cli.source.catalog.argument.name";
-    final String SOURCE_SCHEMA_OPTION_DESCRIPTION = "com.nuodb.migration.cli.source.schema.option.description";
-    final String SOURCE_SCHEMA_ARGUMENT_NAME = "com.nuodb.migration.cli.source.schema.argument.name";
+    final String DUMP_GROUP_NAME = "com.nuodb.migration.dump.group.name";
+    final String SOURCE_GROUP_NAME = "com.nuodb.migration.source.group.name";
+    final String SOURCE_DRIVER_OPTION_DESCRIPTION = "com.nuodb.migration.source.driver.option.description";
+    final String SOURCE_DRIVER_ARGUMENT_NAME = "com.nuodb.migration.source.driver.argument.name";
+    final String SOURCE_URL_OPTION_DESCRIPTION = "com.nuodb.migration.source.url.option.description";
+    final String SOURCE_URL_ARGUMENT_NAME = "com.nuodb.migration.source.url.argument.name";
+    final String SOURCE_USERNAME_OPTION_DESCRIPTION = "com.nuodb.migration.source.username.option.description";
+    final String SOURCE_USERNAME_ARGUMENT_NAME = "com.nuodb.migration.source.username.argument.name";
+    final String SOURCE_PASSWORD_OPTION_DESCRIPTION = "com.nuodb.migration.source.password.option.description";
+    final String SOURCE_PASSWORD_ARGUMENT_NAME = "com.nuodb.migration.source.password.argument.name";
+    final String SOURCE_PROPERTIES_OPTION_DESCRIPTION = "com.nuodb.migration.source.properties.option.description";
+    final String SOURCE_PROPERTIES_ARGUMENT_NAME = "com.nuodb.migration.source.properties.argument.name";
+    final String SOURCE_CATALOG_OPTION_DESCRIPTION = "com.nuodb.migration.source.catalog.option.description";
+    final String SOURCE_CATALOG_ARGUMENT_NAME = "com.nuodb.migration.source.catalog.argument.name";
+    final String SOURCE_SCHEMA_OPTION_DESCRIPTION = "com.nuodb.migration.source.schema.option.description";
+    final String SOURCE_SCHEMA_ARGUMENT_NAME = "com.nuodb.migration.source.schema.argument.name";
 
-    final String OUTPUT_GROUP_NAME = "com.nuodb.migration.cli.output.group";
-    final String OUTPUT_TYPE_OPTION_DESCRIPTION = "com.nuodb.migration.cli.output.type.option.description";
-    final String OUTPUT_TYPE_ARGUMENT_NAME = "com.nuodb.migration.cli.output.type.argument.name";
-    final String OUTPUT_PATH_OPTION_DESCRIPTION = "com.nuodb.migration.cli.output.path.option.description";
-    final String OUTPUT_PATH_ARGUMENT_NAME = "com.nuodb.migration.cli.output.path.argument.name";
-    final String OUTPUT_OPTION_DESCRIPTION = "com.nuodb.migration.cli.output.option.description";
-    final String OUTPUT_OPTION_ARGUMENT_NAME = "com.nuodb.migration.cli.output.argument.description";
+    final String OUTPUT_GROUP_NAME = "com.nuodb.migration.output.group";
+    final String OUTPUT_TYPE_OPTION_DESCRIPTION = "com.nuodb.migration.output.type.option.description";
+    final String OUTPUT_TYPE_ARGUMENT_NAME = "com.nuodb.migration.output.type.argument.name";
+    final String OUTPUT_PATH_OPTION_DESCRIPTION = "com.nuodb.migration.output.path.option.description";
+    final String OUTPUT_PATH_ARGUMENT_NAME = "com.nuodb.migration.output.path.argument.name";
+    final String OUTPUT_OPTION_DESCRIPTION = "com.nuodb.migration.output.option.description";
+    final String OUTPUT_OPTION_ARGUMENT_NAME = "com.nuodb.migration.output.argument.description";
 
     final String TIME_ZONE_OPTION_DESCRIPTION = "com.nuodb.migration.time.zone.option.description";
     final String TIME_ZONE_ARGUMENT_NAME = "com.nuodb.migration.time.zone.argument.name";
 
-    final String TABLE_GROUP_NAME = "com.nuodb.migration.cli.table.group.name";
-    final String TABLE_OPTION_DESCRIPTION = "com.nuodb.migration.cli.table.option.description";
-    final String TABLE_ARGUMENT_NAME = "com.nuodb.migration.cli.table.argument.name";
-    final String TABLE_FILTER_OPTION_DESCRIPTION = "com.nuodb.migration.cli.table.filter.option.description";
-    final String TABLE_FILTER_ARGUMENT_NAME = "com.nuodb.migration.cli.table.filter.argument.name";
+    final String TABLE_GROUP_NAME = "com.nuodb.migration.table.group.name";
+    final String TABLE_OPTION_DESCRIPTION = "com.nuodb.migration.table.option.description";
+    final String TABLE_ARGUMENT_NAME = "com.nuodb.migration.table.argument.name";
+    final String TABLE_FILTER_OPTION_DESCRIPTION = "com.nuodb.migration.table.filter.option.description";
+    final String TABLE_FILTER_ARGUMENT_NAME = "com.nuodb.migration.table.filter.argument.name";
 
-    final String QUERY_GROUP_NAME = "com.nuodb.migration.cli.query.group.name";
-    final String QUERY_OPTION_DESCRIPTION = "com.nuodb.migration.cli.query.option.description";
-    final String QUERY_ARGUMENT_NAME = "com.nuodb.migration.cli.query.argument.name";
-    /**
-     * Load plugin resources
-     */
-    final String LOAD_GROUP_NAME = "com.nuodb.migration.cli.load.group.name";
-    final String TARGET_GROUP_NAME = "com.nuodb.migration.cli.target.group.name";
-    final String TARGET_URL_OPTION_DESCRIPTION = "com.nuodb.migration.cli.target.url.option.description";
-    final String TARGET_URL_ARGUMENT_NAME = "com.nuodb.migration.cli.target.url.argument.name";
-    final String TARGET_USERNAME_OPTION_DESCRIPTION = "com.nuodb.migration.cli.target.username.option.description";
-    final String TARGET_USERNAME_ARGUMENT_NAME = "com.nuodb.migration.cli.target.username.argument.name";
-    final String TARGET_PASSWORD_OPTION_DESCRIPTION = "com.nuodb.migration.cli.target.password.option.description";
-    final String TARGET_PASSWORD_ARGUMENT_NAME = "com.nuodb.migration.cli.target.password.argument.name";
-    final String TARGET_PROPERTIES_OPTION_DESCRIPTION = "com.nuodb.migration.cli.target.properties.option.description";
-    final String TARGET_PROPERTIES_ARGUMENT_NAME = "com.nuodb.migration.cli.target.properties.argument.name";
-    final String TARGET_SCHEMA_OPTION_DESCRIPTION = "com.nuodb.migration.cli.target.schema.option.description";
-    final String TARGET_SCHEMA_ARGUMENT_NAME = "com.nuodb.migration.cli.target.schema.argument.name";
+    final String QUERY_GROUP_NAME = "com.nuodb.migration.query.group.name";
+    final String QUERY_OPTION_DESCRIPTION = "com.nuodb.migration.query.option.description";
+    final String QUERY_ARGUMENT_NAME = "com.nuodb.migration.query.argument.name";
+    
+    final String LOAD_GROUP_NAME = "com.nuodb.migration.load.group.name";
+    final String TARGET_GROUP_NAME = "com.nuodb.migration.target.group.name";
+    final String TARGET_URL_OPTION_DESCRIPTION = "com.nuodb.migration.target.url.option.description";
+    final String TARGET_URL_ARGUMENT_NAME = "com.nuodb.migration.target.url.argument.name";
+    final String TARGET_USERNAME_OPTION_DESCRIPTION = "com.nuodb.migration.target.username.option.description";
+    final String TARGET_USERNAME_ARGUMENT_NAME = "com.nuodb.migration.target.username.argument.name";
+    final String TARGET_PASSWORD_OPTION_DESCRIPTION = "com.nuodb.migration.target.password.option.description";
+    final String TARGET_PASSWORD_ARGUMENT_NAME = "com.nuodb.migration.target.password.argument.name";
+    final String TARGET_PROPERTIES_OPTION_DESCRIPTION = "com.nuodb.migration.target.properties.option.description";
+    final String TARGET_PROPERTIES_ARGUMENT_NAME = "com.nuodb.migration.target.properties.argument.name";
+    final String TARGET_SCHEMA_OPTION_DESCRIPTION = "com.nuodb.migration.target.schema.option.description";
+    final String TARGET_SCHEMA_ARGUMENT_NAME = "com.nuodb.migration.target.schema.argument.name";
 
-    final String INPUT_GROUP_NAME = "com.nuodb.migration.cli.input.group.name";
-    final String INPUT_PATH_OPTION_DESCRIPTION = "com.nuodb.migration.cli.input.path.option.description";
-    final String INPUT_PATH_ARGUMENT_NAME = "com.nuodb.migration.cli.input.path.argument.name";
-    final String INPUT_OPTION_DESCRIPTION = "com.nuodb.migration.cli.input.option.description";
-    final String INPUT_OPTION_ARGUMENT_NAME = "com.nuodb.migration.cli.input.argument.description";
+    final String INPUT_GROUP_NAME = "com.nuodb.migration.input.group.name";
+    final String INPUT_PATH_OPTION_DESCRIPTION = "com.nuodb.migration.input.path.option.description";
+    final String INPUT_PATH_ARGUMENT_NAME = "com.nuodb.migration.input.path.argument.name";
+    final String INPUT_OPTION_DESCRIPTION = "com.nuodb.migration.input.option.description";
+    final String INPUT_OPTION_ARGUMENT_NAME = "com.nuodb.migration.input.argument.description";
 
-    final String GENERATE_SCHEMA_GROUP_NAME = "com.nuodb.migration.cli.generate.schema.group.name";
-    final String GENERATE_SCHEMA_OUTPUT_GROUP_NAME = "com.nuodb.migration.cli.generate.schema.output.group.name";
-    final String GENERATE_SCHEMA_META_DATA_OPTION_DESCRIPTION = "com.nuodb.migration.cli.generate.schema.meta.data.option.description";
-    final String GENERATE_SCHEMA_META_DATA_ARGUMENT_NAME = "com.nuodb.migration.cli.generate.schema.meta.data.argument.name";
+    final String SCHEMA_GROUP_NAME = "com.nuodb.migration.schema.group.name";
+    final String SCHEMA_OUTPUT_GROUP_NAME = "com.nuodb.migration.schema.output.group.name";
+    final String SCHEMA_META_DATA_OPTION_DESCRIPTION = "com.nuodb.migration.schema.meta.data.option.description";
+    final String SCHEMA_META_DATA_ARGUMENT_NAME = "com.nuodb.migration.schema.meta.data.argument.name";
 
-    final String GENERATE_SCHEMA_DROP_BEFORE_CREATE_DESCRIPTION = "com.nuodb.migration.cli.generate.schema.drop.before.create.option.description";
-    final String GENERATE_SCHEMA_DROP_BEFORE_CREATE_ARGUMENT_NAME = "com.nuodb.migration.cli.generate.schema.drop.before.create.argument.name";
+    final String SCHEMA_DROP_BEFORE_CREATE_DESCRIPTION = "com.nuodb.migration.schema.drop.before.create.option.description";
+    final String SCHEMA_DROP_BEFORE_CREATE_ARGUMENT_NAME = "com.nuodb.migration.schema.drop.before.create.argument.name";
+    
+    final String SCHEMA_GROUP_SCRIPTS_BY_OPTION_DESCRIPTION = "com.nuodb.migration.schema.group.scripts.by.option.description";
+    final String SCHEMA_GROUP_SCRIPTS_BY_ARGUMENT_NAME = "com.nuodb.migration.schema.group.scripts.by.argument.name";
 }

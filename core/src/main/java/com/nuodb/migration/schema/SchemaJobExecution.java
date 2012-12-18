@@ -25,37 +25,28 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.cli.run;
+package com.nuodb.migration.schema;
 
-import com.nuodb.migration.cli.parse.option.OptionToolkit;
-
-import java.util.Collection;
-import java.util.Map;
-
-import static com.google.common.collect.Maps.newHashMap;
+import com.nuodb.migration.jdbc.connection.ConnectionServices;
+import com.nuodb.migration.job.JobExecution;
+import com.nuodb.migration.job.JobExecutionDelegate;
 
 /**
  * @author Sergey Bushik
  */
-public class CliRunFactoryLookup {
+public class SchemaJobExecution extends JobExecutionDelegate {
 
-    private Map<String, CliRunFactory> cliRunFactoryMap = newHashMap();
+    private ConnectionServices sourceConnectionServices;
 
-    public CliRunFactoryLookup(OptionToolkit optionToolkit) {
-        register(new CliDumpJobFactory(optionToolkit));
-        register(new CliLoadJobFactory(optionToolkit));
-        register(new CliSchemaJobFactory(optionToolkit));
+    public SchemaJobExecution(JobExecution execution) {
+        super(execution);
     }
 
-    public Collection<String> getCommands() {
-        return cliRunFactoryMap.keySet();
+    public ConnectionServices getSourceConnectionServices() {
+        return sourceConnectionServices;
     }
 
-    public CliRunFactory lookup(String command) {
-        return cliRunFactoryMap.get(command);
-    }
-
-    public void register(CliRunFactory cliRunFactory) {
-        cliRunFactoryMap.put(cliRunFactory.getCommand(), cliRunFactory);
+    public void setSourceConnectionServices(ConnectionServices sourceConnectionServices) {
+        this.sourceConnectionServices = sourceConnectionServices;
     }
 }

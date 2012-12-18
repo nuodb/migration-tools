@@ -32,7 +32,8 @@ import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcDateType;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcTimeType;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcTimestampType;
-import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 
 import javax.sql.rowset.serial.SerialRef;
 import java.io.*;
@@ -65,8 +66,8 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
         protected String doGetValue(JdbcTypeValueAccess<Object> access, Map<String, Object> options) throws Exception {
             Object jdbcValue;
             String value = null;
-            ValueModel column = access.getValueModel();
-            switch (column.getTypeCode()) {
+            ValueModel valueModel = access.getValueModel();
+            switch (valueModel.getTypeCode()) {
                 case Types.BIT:
                 case Types.TINYINT:
                 case Types.SMALLINT:
@@ -141,7 +142,7 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
                     break;
                 default:
                     throw new JdbcTypeValueException(
-                            format("Unsupported JDBC type %s, code %d", column.getTypeName(), column.getTypeCode()));
+                            format("Unsupported JDBC type %s, code %d", valueModel.getTypeName(), valueModel.getTypeCode()));
             }
             return value;
         }
@@ -149,8 +150,8 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
         @Override
         protected void doSetValue(JdbcTypeValueAccess<Object> access, String value,
                                   Map<String, Object> options) throws Exception {
-            ValueModel column = access.getValueModel();
-            switch (column.getTypeCode()) {
+            ValueModel valueModel = access.getValueModel();
+            switch (valueModel.getTypeCode()) {
                 case Types.BIT:
                 case Types.BOOLEAN:
                     access.setValue(!isEmpty(value) ? Boolean.parseBoolean(value) : null, options);
@@ -214,12 +215,12 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
                     break;
                 default:
                     throw new JdbcTypeValueException(
-                            format("Unsupported JDBC type %s, code %d", column.getTypeName(), column.getTypeCode()));
+                            format("Unsupported JDBC type %s, code %d", valueModel.getTypeName(), valueModel.getTypeCode()));
             }
         }
 
         protected String encode(byte[] value) {
-            return Base64.encodeBase64String(value);
+            return new String(Hex.encodeHex(value, false));
         }
 
         protected byte[] write(Object object) throws IOException {
@@ -236,7 +237,11 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
         }
 
         protected byte[] decode(String value) {
-            return Base64.decodeBase64(value);
+            try {
+                return Hex.decodeHex(value.toCharArray());
+            } catch (DecoderException exception) {
+                throw new JdbcTypeValueException(exception);
+            }
         }
 
         protected Object read(byte[] value) throws ClassNotFoundException, IOException {

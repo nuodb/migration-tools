@@ -197,8 +197,9 @@ public class DumpJob extends JobBase {
         ResultSet resultSet = preparedStatement.executeQuery();
 
         CatalogWriter catalogWriter = execution.getCatalogWriter();
-        catalogWriter.addEntry(catalogEntry);
-        resultSetOutput.setOutputStream(catalogWriter.getEntryOutput(catalogEntry));
+        catalogWriter.write(catalogEntry);
+
+        resultSetOutput.setOutputStream(catalogWriter.getOutputStream(catalogEntry));
         resultSetOutput.setResultSet(resultSet);
 
         resultSetOutput.writeBegin();

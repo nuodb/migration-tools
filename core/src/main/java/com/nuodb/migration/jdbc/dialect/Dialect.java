@@ -112,13 +112,13 @@ public interface Dialect {
 
     String getSequenceOrder(boolean order);
 
-    SQLKeywords getSQLKeywords();
-
-    JdbcTypeRegistry getJdbcTypeRegistry();
-
     void setStreamResults(Statement statement, boolean streamResults) throws SQLException;
 
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
 
     void setTransactionIsolationLevel(Connection connection, int[] transactionIsolationLevels) throws SQLException;
+
+    SQLKeywords getSQLKeywords();
+
+    JdbcTypeRegistry getJdbcTypeRegistry();
 }

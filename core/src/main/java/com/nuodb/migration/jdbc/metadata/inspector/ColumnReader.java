@@ -33,6 +33,8 @@ import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -60,6 +62,7 @@ public class ColumnReader extends MetaDataReaderBase {
     public void readColumns(DatabaseInspector inspector, Database database, DatabaseMetaData metaData,
                             Table table) throws SQLException {
         ResultSet columns = metaData.getColumns(inspector.getCatalog(), inspector.getSchema(), table.getName(), null);
+        JdbcTypeRegistry jdbcTypeRegistry = database.getDialect().getJdbcTypeRegistry();
         try {
             ValueModelList<ValueModel> valueModelList = createValueModelList(columns.getMetaData());
             while (columns.next()) {
@@ -67,8 +70,11 @@ public class ColumnReader extends MetaDataReaderBase {
                         columns.getString("TABLE_SCHEM")).createTable(columns.getString("TABLE_NAME"));
 
                 Column column = table.createColumn(columns.getString("COLUMN_NAME"));
-                column.setTypeCode(columns.getInt("DATA_TYPE"));
-                column.setTypeName(columns.getString("TYPE_NAME"));
+                JdbcTypeDesc jdbcTypeDescAlias = jdbcTypeRegistry.getJdbcTypeDescAlias(
+                        columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
+                column.setTypeCode(jdbcTypeDescAlias.getTypeCode());
+                column.setTypeName(jdbcTypeDescAlias.getTypeName());
+
                 int columnSize = columns.getInt("COLUMN_SIZE");
                 column.setSize(columnSize);
                 column.setPrecision(columnSize);
@@ -78,8 +84,8 @@ public class ColumnReader extends MetaDataReaderBase {
                 column.setPosition(columns.getInt("ORDINAL_POSITION"));
                 String nullable = columns.getString("IS_NULLABLE");
                 column.setNullable("YES".equals(nullable));
-                String autoIncrement = valueModelList.get("IS_AUTOINCREMENT") != null ? columns.getString(
-                        "IS_AUTOINCREMENT") : null;
+                String autoIncrement = valueModelList.get("IS_AUTOINCREMENT") != null ?
+                        columns.getString("IS_AUTOINCREMENT") : null;
                 column.setAutoIncrement("YES".equals(autoIncrement));
             }
         } finally {

@@ -124,7 +124,7 @@ public class LoadJob extends JobBase {
             if (dialect.supportsSessionTimeZone()) {
                 dialect.setSessionTimeZone(connection, timeZone);
             }
-            for (CatalogEntry catalogEntry : catalogReader.getEntries()) {
+            for (CatalogEntry catalogEntry : catalogReader.readAll()) {
                 load(execution, catalogEntry);
             }
             connection.commit();
@@ -138,7 +138,7 @@ public class LoadJob extends JobBase {
 
     protected void load(LoadJobExecution execution, CatalogEntry catalogEntry) throws SQLException {
         CatalogReader catalogReader = execution.getCatalogReader();
-        InputStream entryInput = catalogReader.getEntryInput(catalogEntry);
+        InputStream entryInput = catalogReader.getInputStream(catalogEntry);
         try {
             Dialect dialect = execution.getDatabase().getDialect();
             ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(catalogEntry.getType());

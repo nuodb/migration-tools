@@ -62,34 +62,34 @@ public class SQL2003Dialect implements Dialect {
     public SQL2003Dialect(JdbcTypeRegistry jdbcTypeRegistry) {
         this.jdbcTypeRegistry = jdbcTypeRegistry;
 
-        addTypeName(Types.BIT, "BIT");
-        addTypeName(Types.BOOLEAN, "BOOLEAN");
-        addTypeName(Types.TINYINT, "TINYINT");
-        addTypeName(Types.SMALLINT, "SMALLINT");
-        addTypeName(Types.INTEGER, "INTEGER");
-        addTypeName(Types.BIGINT, "BIGINT");
-        addTypeName(Types.FLOAT, "FLOAT({P})");
-        addTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
-        addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
-        addTypeName(Types.REAL, "REAL");
+        addJdbcTypeName(Types.BIT, "BIT");
+        addJdbcTypeName(Types.BOOLEAN, "BOOLEAN");
+        addJdbcTypeName(Types.TINYINT, "TINYINT");
+        addJdbcTypeName(Types.SMALLINT, "SMALLINT");
+        addJdbcTypeName(Types.INTEGER, "INTEGER");
+        addJdbcTypeName(Types.BIGINT, "BIGINT");
+        addJdbcTypeName(Types.FLOAT, "FLOAT({P})");
+        addJdbcTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
+        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+        addJdbcTypeName(Types.REAL, "REAL");
 
-        addTypeName(Types.DATE, "DATE");
-        addTypeName(Types.TIME, "TIME");
-        addTypeName(Types.TIMESTAMP, "TIMESTAMP");
+        addJdbcTypeName(Types.DATE, "DATE");
+        addJdbcTypeName(Types.TIME, "TIME");
+        addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP");
 
-        addTypeName(Types.BLOB, "BLOB");
+        addJdbcTypeName(Types.BLOB, "BLOB");
 
-        addTypeName(Types.CHAR, "CHAR({N})");
-        addTypeName(Types.NCHAR, "NCHAR({N})");
+        addJdbcTypeName(Types.CHAR, "CHAR({N})");
+        addJdbcTypeName(Types.NCHAR, "NCHAR({N})");
 
-        addTypeName(Types.VARCHAR, "VARCHAR({N})");
-        addTypeName(Types.NVARCHAR, "NVARCHAR({N})");
+        addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(Types.NVARCHAR, "NVARCHAR({N})");
 
-        addTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
-        addTypeName(Types.LONGNVARCHAR, "NVARCHAR({N})");
+        addJdbcTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(Types.LONGNVARCHAR, "NVARCHAR({N})");
 
-        addTypeName(Types.CLOB, "CLOB");
-        addTypeName(Types.NCLOB, "NCLOB");
+        addJdbcTypeName(Types.CLOB, "CLOB");
+        addJdbcTypeName(Types.NCLOB, "NCLOB");
     }
 
     @Override
@@ -361,67 +361,47 @@ public class SQL2003Dialect implements Dialect {
         return true;
     }
 
-    public JdbcType getJdbcType(int typeCode) {
+    protected JdbcType getJdbcType(int typeCode) {
         return jdbcTypeRegistry.getJdbcType(typeCode);
     }
 
-    public JdbcType getJdbcType(int typeCode, String typeName) {
+    protected JdbcType getJdbcType(int typeCode, String typeName) {
         return jdbcTypeRegistry.getJdbcType(typeCode, typeName);
     }
 
-    public JdbcType getJdbcType(JdbcTypeDesc typeDesc) {
+    protected JdbcType getJdbcType(JdbcTypeDesc typeDesc) {
         return jdbcTypeRegistry.getJdbcType(typeDesc);
     }
 
-    public void addJdbcType(JdbcType jdbcType) {
+    protected void addJdbcType(JdbcType jdbcType) {
         jdbcTypeRegistry.addJdbcType(jdbcType);
     }
 
-    public void addJdbcTypes(Collection<JdbcType> jdbcTypes) {
-        jdbcTypeRegistry.addJdbcTypes(jdbcTypes);
+    protected Collection<JdbcType> getJdbcTypes() {
+        return jdbcTypeRegistry.getJdbcTypeMap();
     }
 
-    public void addJdbcTypes(JdbcTypeRegistry jdbcTypeRegistry) {
-        this.jdbcTypeRegistry.addJdbcTypes(jdbcTypeRegistry);
-    }
-
-    public Collection<JdbcType> getJdbcTypes() {
-        return jdbcTypeRegistry.getJdbcTypes();
-    }
-
-    public void addJdbcTypeAdapter(JdbcTypeAdapter jdbcTypeAdapter) {
+    protected void addJdbcTypeAdapter(JdbcTypeAdapter jdbcTypeAdapter) {
         jdbcTypeRegistry.addJdbcTypeAdapter(jdbcTypeAdapter);
     }
 
-    public void addJdbcTypeAdapters(Collection<JdbcTypeAdapter> jdbcTypeAdapters) {
-        jdbcTypeRegistry.addJdbcTypeAdapters(jdbcTypeAdapters);
+    protected void addJdbcTypeName(int typeCode, String typeName) {
+        jdbcTypeRegistry.getJdbcTypeNameMap().addTypeName(typeCode, typeName);
     }
 
-    public Collection<JdbcTypeAdapter> getJdbcTypeAdapters() {
-        return jdbcTypeRegistry.getJdbcTypeAdapters();
+    protected void addJdbcTypeName(int typeCode, String typeName, int size) {
+        jdbcTypeRegistry.getJdbcTypeNameMap().addTypeName(typeCode, typeName, size);
     }
 
-    public JdbcTypeAdapter getJdbcTypeAdapter(Class typeClass) {
-        return jdbcTypeRegistry.getJdbcTypeAdapter(typeClass);
+    public void addJdbcTypeDescAlias(int typeCode, int typeCodeAlias) {
+        getJdbcTypeRegistry().addJdbcTypeDescAlias(typeCode, typeCodeAlias);
     }
 
-    public JdbcTypeNameMap getJdbcTypeNameMap() {
-        return getJdbcTypeRegistry().getJdbcTypeNameMap();
+    public void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias) {
+        getJdbcTypeRegistry().addJdbcTypeDescAlias(typeCode, typeName, typeCodeAlias);
     }
 
-    public String getTypeName(int typeCode) {
-        return getJdbcTypeNameMap().getTypeName(typeCode);
-    }
-
-    public String getTypeName(int typeCode, int size, int precision, int scale) {
-        return getJdbcTypeNameMap().getTypeName(typeCode, size, precision, scale);
-    }
-
-    public void addTypeName(int typeCode, String typeName) {
-        getJdbcTypeNameMap().addTypeName(typeCode, typeName);
-    }
-
-    public void addTypeName(int typeCode, String typeName, int size) {
-        getJdbcTypeNameMap().addTypeName(typeCode, typeName, size);
+    public void addJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc, JdbcTypeDesc jdbcTypeDescAlias) {
+        getJdbcTypeRegistry().addJdbcTypeDescAlias(jdbcTypeDesc, jdbcTypeDescAlias);
     }
 }

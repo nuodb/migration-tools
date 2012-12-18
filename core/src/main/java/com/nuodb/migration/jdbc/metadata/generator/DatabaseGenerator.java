@@ -49,11 +49,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
 
     private static final String PENDING_FOREIGN_KEYS = "PENDING_FOREIGN_KEYS";
 
-    public static enum GroupScriptsBy {
-        META_DATA_TYPE, TABLE
-    }
-
-    private GroupScriptsBy groupScriptsBy = GroupScriptsBy.META_DATA_TYPE;
+    private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
 
     public DatabaseGenerator() {
         super(Database.class);
@@ -71,7 +67,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
                 }
                 addPendingForeignKeysScripts(scriptGeneratorContext, scripts, true);
                 break;
-            case META_DATA_TYPE:
+            case META_DATA:
                 Collection<Table> tables = database.listTables();
                 addCreateScripts(scriptGeneratorContext, scripts, tables);
                 break;
@@ -91,7 +87,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
                     addDropScripts(scriptGeneratorContext, scripts, tables);
                 }
                 break;
-            case META_DATA_TYPE:
+            case META_DATA:
                 Collection<Table> tables = database.listTables();
                 addCreateScripts(scriptGeneratorContext, scripts, tables);
                 break;
@@ -113,7 +109,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
                 }
                 addPendingForeignKeysScripts(scriptGeneratorContext, scripts, true);
                 break;
-            case META_DATA_TYPE:
+            case META_DATA:
                 Collection<Table> tables = database.listTables();
                 addDropScripts(scriptGeneratorContext, scripts, tables);
                 addCreateScripts(scriptGeneratorContext, scripts, tables);
@@ -243,5 +239,13 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
     protected void releaseScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
         scriptGeneratorContext.remove(PROCESSED_TABLES);
         scriptGeneratorContext.remove(PENDING_FOREIGN_KEYS);
+    }
+
+    public GroupScriptsBy getGroupScriptsBy() {
+        return groupScriptsBy;
+    }
+
+    public void setGroupScriptsBy(GroupScriptsBy groupScriptsBy) {
+        this.groupScriptsBy = groupScriptsBy;
     }
 }

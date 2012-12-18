@@ -35,9 +35,9 @@ import java.io.OutputStream;
  */
 public interface CatalogWriter extends Closeable {
 
-    void addEntry(CatalogEntry entry);
+    OutputStream getOutputStream(CatalogEntry catalogEntry);
 
-    OutputStream getEntryOutput(CatalogEntry entry);
+    void write(CatalogEntry catalogEntry);
 
     void close();
 }

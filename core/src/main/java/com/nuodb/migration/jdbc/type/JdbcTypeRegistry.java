@@ -28,33 +28,48 @@
 package com.nuodb.migration.jdbc.type;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
 public interface JdbcTypeRegistry {
 
+    void addJdbcType(JdbcType jdbcType);
+
     JdbcType getJdbcType(int typeCode);
 
     JdbcType getJdbcType(int typeCode, String typeName);
 
-    JdbcType getJdbcType(JdbcTypeDesc typeDesc);
-
-    void addJdbcType(JdbcType jdbcType);
+    JdbcType getJdbcType(JdbcTypeDesc jdbcTypeDesc);
 
     void addJdbcTypes(Collection<JdbcType> jdbcTypes);
 
     void addJdbcTypes(JdbcTypeRegistry jdbcTypeRegistry);
 
-    Collection<JdbcType> getJdbcTypes();
+    Collection<JdbcType> getJdbcTypeMap();
 
     void addJdbcTypeAdapter(JdbcTypeAdapter jdbcTypeAdapter);
 
     void addJdbcTypeAdapters(Collection<JdbcTypeAdapter> jdbcTypeAdapters);
 
-    Collection<JdbcTypeAdapter> getJdbcTypeAdapters();
+    Collection<JdbcTypeAdapter> getJdbcTypeAdapterMap();
 
     JdbcTypeAdapter getJdbcTypeAdapter(Class typeClass);
+
+    void addJdbcTypeDescAlias(int typeCode, int typeCodeAlias);
+
+    void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias);
+
+    void addJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc, JdbcTypeDesc jdbcTypeDescAlias);
+
+    JdbcTypeDesc getJdbcTypeDescAlias(int typeCode);
+
+    JdbcTypeDesc getJdbcTypeDescAlias(int typeCode, String typeName);
+
+    JdbcTypeDesc getJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc);
+
+    Map<JdbcTypeDesc, JdbcTypeDesc> getJdbcTypeDescAliases();
 
     JdbcTypeNameMap getJdbcTypeNameMap();
 }

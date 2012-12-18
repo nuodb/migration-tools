@@ -58,7 +58,7 @@ public class FileCatalogReader implements CatalogReader {
     }
 
     @Override
-    public CatalogEntry[] getEntries() {
+    public CatalogEntry[] readAll() {
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("Entry catalog file is %1$s", catalogFile.getPath()));
         }
@@ -99,10 +99,10 @@ public class FileCatalogReader implements CatalogReader {
     }
 
     @Override
-    public InputStream getEntryInput(CatalogEntry entry) {
+    public InputStream getInputStream(CatalogEntry catalogEntry) {
         InputStream entryInput;
         try {
-            File file = getFile(catalogDir, valueOf(entry));
+            File file = getFile(catalogDir, valueOf(catalogEntry));
             if (logger.isDebugEnabled()) {
                 logger.debug(String.format("Opening file %s", file.getPath()));
             }

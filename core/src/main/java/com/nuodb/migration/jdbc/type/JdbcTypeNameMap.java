@@ -57,10 +57,6 @@ public class JdbcTypeNameMap {
     private Map<Integer, String> typeCodeMap = Maps.newHashMap();
     private Map<Integer, Map<Integer, String>> typeCodeLengthMap = Maps.newHashMap();
 
-    public String getTypeName(int typeCode) {
-        return typeCodeMap.get(typeCode);
-    }
-
     public void addTypeName(int typeCode, String typeName) {
         typeCodeMap.put(typeCode, typeName);
     }
@@ -74,6 +70,10 @@ public class JdbcTypeNameMap {
         lengthMap.put(length, typeName);
     }
 
+    public String getTypeName(int typeCode) {
+        return typeCodeMap.get(typeCode);
+    }
+
     public String getTypeName(int typeCode, int length, int precision, int scale) {
         Map<Integer, String> map = typeCodeLengthMap.get(typeCode);
         if (map != null) {
@@ -83,15 +83,10 @@ public class JdbcTypeNameMap {
                 }
             }
         }
-        String typeName = expandVariables(getTypeName(typeCode), length, precision, scale);
-        return typeName != null ? typeName : getUnknownTypeName(typeCode);
+        return expandVariables(getTypeName(typeCode), length, precision, scale);
     }
 
-    protected String getUnknownTypeName(int typeCode) {
-        return null;
-    }
-
-    public static String expandVariables(String typeName, int length, int precision, int scale) {
+    protected String expandVariables(String typeName, int length, int precision, int scale) {
         if (!StringUtils.isEmpty(typeName)) {
             typeName = expandVariable(typeName, LENGTH, Integer.toString(length));
             typeName = expandVariable(typeName, PRECISION, Integer.toString(precision));
@@ -100,9 +95,9 @@ public class JdbcTypeNameMap {
         return typeName;
     }
 
-    public static String expandVariable(String typeName, String variable, String value) {
-        Pattern compile = Pattern.compile(Pattern.quote(VARIABLE_PREFIX + variable + VARIABLE_SUFFIX),
-                Pattern.CASE_INSENSITIVE);
+    protected String expandVariable(String typeName, String variable, String value) {
+        Pattern compile = Pattern.compile(
+                Pattern.quote(VARIABLE_PREFIX + variable + VARIABLE_SUFFIX), Pattern.CASE_INSENSITIVE);
         Matcher matcher = compile.matcher(typeName);
         return matcher.find() ? matcher.replaceAll(value) : typeName;
     }
@@ -135,13 +130,9 @@ public class JdbcTypeNameMap {
         }
 
         @Override
-        public String getTypeName(int typeCode) {
-            String typeName = super.getTypeName(typeCode);
-            return typeName != null ? typeName : getUnknownTypeName(typeCode);
-        }
-
-        protected String getUnknownTypeName(int typeCode) {
-            return "unknown(" + typeCode + ")";
+        public String getTypeName(int typeCode, int length, int precision, int scale) {
+            String typeName = super.getTypeName(typeCode, length, precision, scale);
+            return typeName != null ? typeName : "type(" + typeCode + ")";
         }
     }
 }

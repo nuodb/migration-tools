@@ -100,12 +100,16 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
 
     protected ValueFormatModel createValueFormatModel(ValueModel valueModel, int index) {
         JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(valueModel.getTypeCode(), valueModel.getTypeName());
-        JdbcTypeValueFormat columnValueFormat =
-                getJdbcTypeValueFormatRegistry().getJdbcTypeValueFormat(jdbcTypeDesc);
-        JdbcTypeValueAccess<Object> columnValueAccess =
-                getJdbcTypeValueAccessProvider().getPreparedStatementAccess(getPreparedStatement(), valueModel,
-                        index + 1);
-        return new SimpleValueFormatModel(valueModel, columnValueFormat, columnValueAccess, null);
+        JdbcTypeDesc jdbcTypeDescAlias = getJdbcTypeValueAccessProvider().getJdbcTypeDescAlias(jdbcTypeDesc);
+
+        valueModel.setTypeCode(jdbcTypeDescAlias.getTypeCode());
+        valueModel.setTypeName(jdbcTypeDescAlias.getTypeName());
+
+        JdbcTypeValueFormat jdbcTypeValueFormat =
+                getJdbcTypeValueFormatRegistry().getJdbcTypeValueFormat(jdbcTypeDescAlias);
+        JdbcTypeValueAccess<Object> jdbcTypeValueAccess =
+                getJdbcTypeValueAccessProvider().getPreparedStatementAccess(getPreparedStatement(), valueModel, index + 1);
+        return new SimpleValueFormatModel(valueModel, jdbcTypeValueFormat, jdbcTypeValueAccess, null);
     }
 
     @Override

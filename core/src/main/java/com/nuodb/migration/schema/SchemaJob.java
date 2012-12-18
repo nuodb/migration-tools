@@ -45,7 +45,7 @@ import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 /**
  * @author Sergey Bushik
  */
-public class GenerateSchemaJob extends JobBase {
+public class SchemaJob extends JobBase {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -57,7 +57,7 @@ public class GenerateSchemaJob extends JobBase {
     @Override
     public void execute(JobExecution execution) throws Exception {
         validate();
-        execution(new GenerateSchemaJobExecution(execution));
+        execution(new SchemaJobExecution(execution));
     }
 
     protected void validate() {
@@ -66,7 +66,7 @@ public class GenerateSchemaJob extends JobBase {
         isNotNull(getScriptExporter(), "Script exporter is required");
     }
 
-    protected void execution(GenerateSchemaJobExecution execution) throws Exception {
+    protected void execution(SchemaJobExecution execution) throws Exception {
         ConnectionServices sourceConnectionServices = getSourceConnectionProvider().getConnectionServices();
         try {
             execution.setSourceConnectionServices(sourceConnectionServices);
@@ -76,7 +76,7 @@ public class GenerateSchemaJob extends JobBase {
         }
     }
 
-    protected void generate(GenerateSchemaJobExecution execution) throws Exception {
+    protected void generate(SchemaJobExecution execution) throws Exception {
         ConnectionServices connectionServices = execution.getSourceConnectionServices();
         Database database = connectionServices.createDatabaseInspector().inspect();
 

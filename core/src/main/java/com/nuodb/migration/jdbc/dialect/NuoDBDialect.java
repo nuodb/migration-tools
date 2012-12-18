@@ -48,50 +48,50 @@ public class NuoDBDialect extends SQL2003Dialect {
         addJdbcType(NuoDBBigIntType.INSTANCE);
         addJdbcType(NuoDBTimeType.INSTANCE);
 
-        addTypeName(Types.BIT, "BOOLEAN", 1);
-        addTypeName(Types.TINYINT, "SMALLINT");
-        addTypeName(Types.SMALLINT, "SMALLINT");
-        addTypeName(Types.INTEGER, "INTEGER");
-        addTypeName(Types.BIGINT, "BIGINT");
+        addJdbcTypeName(Types.BIT, "BOOLEAN", 1);
+        addJdbcTypeName(Types.TINYINT, "SMALLINT");
+        addJdbcTypeName(Types.SMALLINT, "SMALLINT");
+        addJdbcTypeName(Types.INTEGER, "INTEGER");
+        addJdbcTypeName(Types.BIGINT, "BIGINT");
 
-        addTypeName(Types.REAL, "REAL");
-        addTypeName(Types.FLOAT, "FLOAT");
-        addTypeName(Types.DOUBLE, "DOUBLE");
-        addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+        addJdbcTypeName(Types.REAL, "REAL");
+        addJdbcTypeName(Types.FLOAT, "FLOAT");
+        addJdbcTypeName(Types.DOUBLE, "DOUBLE");
+        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
 
-        addTypeName(Types.CHAR, "CHAR({N})");
+        addJdbcTypeName(Types.CHAR, "CHAR({N})");
 
         // addTypeName(Types.VARCHAR, "CHARACTER VARYING({N})");
         // addTypeName(Types.LONGVARCHAR, "CHARACTER VARYING({N})");
-        addTypeName(Types.VARCHAR, "VARCHAR({N})");
-        addTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
 
-        addTypeName(Types.DATE, "DATE");
-        addTypeName(Types.TIME, "TIME({S})");
-        addTypeName(Types.TIMESTAMP, "TIMESTAMP({S})");
+        addJdbcTypeName(Types.DATE, "DATE");
+        addJdbcTypeName(Types.TIME, "TIME({S})");
+        addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP({S})");
 
-        addTypeName(Types.BINARY, "BINARY({N})");
+        addJdbcTypeName(Types.BINARY, "BINARY({N})");
 
         // addTypeName(Types.VARBINARY, "BINARY VARYING({N})");
         // addTypeName(Types.LONGVARBINARY, "BINARY VARYING({N})");
-        addTypeName(Types.VARBINARY, "VARBINARY({N})");
-        addTypeName(Types.LONGVARBINARY, "VARBINARY({N})");
+        addJdbcTypeName(Types.VARBINARY, "VARBINARY({N})");
+        addJdbcTypeName(Types.LONGVARBINARY, "VARBINARY({N})");
 
-        addTypeName(Types.NULL, "NULL");
+        addJdbcTypeName(Types.NULL, "NULL");
 
         // addTypeName(Types.BLOB, "BINARY LARGE OBJECT");
         // addTypeName(Types.CLOB, "CHARACTER LARGE OBJECT");
         // addTypeName(Types.BOOLEAN, "BOOLEAN");
-        addTypeName(Types.BLOB, "BLOB");
-        addTypeName(Types.CLOB, "CLOB");
-        addTypeName(Types.BOOLEAN, "BOOLEAN");
+        addJdbcTypeName(Types.BLOB, "BLOB");
+        addJdbcTypeName(Types.CLOB, "CLOB");
+        addJdbcTypeName(Types.BOOLEAN, "BOOLEAN");
 
         // addTypeName(Types.NCHAR, "NATIONAL CHARACTER");
         // addTypeName(Types.NVARCHAR, "NATIONAL CHARACTER VARYING({N})");
         // addTypeName(Types.NCLOB, "NATIONAL CHARACTER LARGE OBJECT");
-        addTypeName(Types.NCHAR, "NCHAR");
-        addTypeName(Types.NVARCHAR, "NVARCHAR({N})");
-        addTypeName(Types.NCLOB, "NCLOB");
+        addJdbcTypeName(Types.NCHAR, "NCHAR");
+        addJdbcTypeName(Types.NVARCHAR, "NVARCHAR({N})");
+        addJdbcTypeName(Types.NCLOB, "NCLOB");
     }
 
     @Override

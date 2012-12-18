@@ -25,28 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.schema;
-
-import com.nuodb.migration.jdbc.connection.ConnectionServices;
-import com.nuodb.migration.job.JobExecution;
-import com.nuodb.migration.job.JobExecutionDelegate;
+package com.nuodb.migration.jdbc.metadata.generator;
 
 /**
  * @author Sergey Bushik
  */
-public class GenerateSchemaJobExecution extends JobExecutionDelegate {
+public enum GroupScriptsBy {
+    TABLE("table"), META_DATA("meta.data");
 
-    private ConnectionServices sourceConnectionServices;
+    private final String condition;
 
-    public GenerateSchemaJobExecution(JobExecution execution) {
-        super(execution);
+    GroupScriptsBy(String condition) {
+        this.condition = condition;
     }
 
-    public ConnectionServices getSourceConnectionServices() {
-        return sourceConnectionServices;
-    }
-
-    public void setSourceConnectionServices(ConnectionServices sourceConnectionServices) {
-        this.sourceConnectionServices = sourceConnectionServices;
+    public String getCondition() {
+        return condition;
     }
 }

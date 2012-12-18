@@ -60,17 +60,17 @@ public class FileCatalogWriter implements CatalogWriter {
     }
 
     @Override
-    public void addEntry(CatalogEntry entry) {
+    public void write(CatalogEntry catalogEntry) {
         try {
             initCatalogOutput();
-            String entryName = valueOf(entry);
+            String entryName = valueOf(catalogEntry);
             if (logger.isTraceEnabled()) {
                 logger.trace(String.format("Adding entry %1$s", entryName));
             }
             if (!entries.isEmpty()) {
                 IOUtils.write(System.getProperty("line.separator"), output);
             }
-            entries.add(entry);
+            entries.add(catalogEntry);
             IOUtils.write(entryName, output);
         } catch (IOException e) {
             throw new CatalogException("Failed writing entry to catalog", e);
@@ -105,10 +105,10 @@ public class FileCatalogWriter implements CatalogWriter {
     }
 
     @Override
-    public OutputStream getEntryOutput(CatalogEntry entry) {
+    public OutputStream getOutputStream(CatalogEntry catalogEntry) {
         OutputStream entryOutput;
         try {
-            File file = getFile(catalogDir, valueOf(entry));
+            File file = getFile(catalogDir, valueOf(catalogEntry));
             if (logger.isDebugEnabled()) {
                 logger.debug(String.format("Opening file %s", file.getPath()));
             }

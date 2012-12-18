@@ -30,6 +30,7 @@ package com.nuodb.migration.jdbc.dialect;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.TimeZone;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
@@ -41,6 +42,16 @@ public class MySQLDialect extends SQL2003Dialect {
 
     public MySQLDialect() {
         addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
+
+        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TINYTEXT", Types.CLOB);
+        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
+        addJdbcTypeDescAlias(Types.LONGVARCHAR, "MEDIUMTEXT", Types.CLOB);
+        addJdbcTypeDescAlias(Types.LONGVARCHAR, "LONGTEXT", Types.CLOB);
+
+        addJdbcTypeDescAlias(Types.LONGVARBINARY, "TINYBLOB", Types.BLOB);
+        addJdbcTypeDescAlias(Types.LONGVARBINARY, "BLOB", Types.BLOB);
+        addJdbcTypeDescAlias(Types.LONGVARBINARY, "MEDIUMBLOB", Types.BLOB);
+        addJdbcTypeDescAlias(Types.LONGVARBINARY, "LONGBLOB", Types.BLOB);
     }
 
     @Override
