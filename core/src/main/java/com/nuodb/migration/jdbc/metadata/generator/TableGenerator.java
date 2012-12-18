@@ -64,12 +64,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             final Column column = iterator.next();
             buffer.append(scriptGeneratorContext.getName(column));
             buffer.append(' ');
-            String typeName = jdbcTypeNameMap.getTypeName(
-                    column.getTypeCode(), column.getSize(), column.getPrecision(), column.getScale());
-            if (typeName == null) {
-                typeName = getColumnTypeName(scriptGeneratorContext, column);
-            }
-            buffer.append(typeName);
+            buffer.append(getColumnTypeName(scriptGeneratorContext, column));
             if (column.isIdentity() && metaDataTypes.contains(SEQUENCE)) {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
@@ -170,14 +165,6 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
         return singleton(buffer.toString());
     }
 
-    protected String getColumnTypeName(ScriptGeneratorContext scriptGeneratorContext, Column column) {
-        throw new ScriptGeneratorException(
-                format("Unsupported type name %s, type code %d found on table %s column %s",
-                        column.getTypeName(), column.getTypeCode(),
-                        scriptGeneratorContext.getQualifiedName(column.getTable(), false),
-                        scriptGeneratorContext.getName(column, false)));
-    }
-
     @Override
     public Collection<String> getDropScripts(Table table, ScriptGeneratorContext scriptGeneratorContext) {
         Dialect dialect = scriptGeneratorContext.getDialect();
@@ -199,5 +186,19 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             buffer.append("IF EXISTS");
         }
         return singleton(buffer.toString());
+    }
+
+    protected String getColumnTypeName(ScriptGeneratorContext scriptGeneratorContext, Column column) {
+        JdbcTypeNameMap jdbcTypeNameMap = scriptGeneratorContext.getDialect().getJdbcTypeRegistry().getJdbcTypeNameMap();
+        String typeName = jdbcTypeNameMap.getTypeName(
+                column.getTypeCode(), column.getSize(), column.getPrecision(), column.getScale());
+        if (typeName == null) {
+            throw new ScriptGeneratorException(
+                    format("Unsupported type %s code %d on table %s column %s",
+                            column.getTypeName(), column.getTypeCode(),
+                            scriptGeneratorContext.getQualifiedName(column.getTable(), false),
+                            scriptGeneratorContext.getName(column, false)));
+        }
+        return null;
     }
 }
