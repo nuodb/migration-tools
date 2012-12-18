@@ -61,6 +61,7 @@ public class NuoDBDialect extends SQL2003Dialect {
         addJdbcTypeName(Types.DOUBLE, "DOUBLE");
         addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
 
+        addJdbcTypeName(Types.CHAR, "CHAR", 1);
         addJdbcTypeName(Types.CHAR, "CHAR({N})");
 
         // addTypeName(Types.VARCHAR, "CHARACTER VARYING({N})");
@@ -91,7 +92,8 @@ public class NuoDBDialect extends SQL2003Dialect {
         // addTypeName(Types.NCHAR, "NATIONAL CHARACTER");
         // addTypeName(Types.NVARCHAR, "NATIONAL CHARACTER VARYING({N})");
         // addTypeName(Types.NCLOB, "NATIONAL CHARACTER LARGE OBJECT");
-        addJdbcTypeName(Types.NCHAR, "NCHAR");
+        addJdbcTypeName(Types.NCHAR, "NCHAR", 1);
+        addJdbcTypeName(Types.NCHAR, "NCHAR({N})");
         addJdbcTypeName(Types.NVARCHAR, "NVARCHAR({N})");
         addJdbcTypeName(Types.NCLOB, "NCLOB");
     }
