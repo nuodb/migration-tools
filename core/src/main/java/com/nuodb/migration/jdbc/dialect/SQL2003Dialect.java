@@ -27,9 +27,11 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
-import com.nuodb.migration.jdbc.type.*;
+import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.JdbcTypeAdapter;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.jdbc4.Jdbc4TypeRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,7 @@ import java.util.Collection;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.sql.Connection.*;
 import static org.apache.commons.lang3.StringUtils.endsWith;
 import static org.apache.commons.lang3.StringUtils.startsWith;
@@ -168,7 +171,7 @@ public class SQL2003Dialect implements Dialect {
 
     @Override
     public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) {
-        return Lists.newArrayList(
+        return newArrayList(
                 TRANSACTION_NONE,
                 TRANSACTION_READ_UNCOMMITTED,
                 TRANSACTION_READ_COMMITTED,

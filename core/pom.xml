@@ -15,12 +15,36 @@
 
     <repositories>
         <repository>
-            <id>apache.snapshots</id>
+            <id>apache.org snapshots</id>
             <url>https://repository.apache.org/content/groups/snapshots</url>
+        </repository>
+        <repository>
+            <id>code.lds.org main</id>
+            <url>https://code.lds.org/nexus/content/groups/main-repo</url>
         </repository>
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.2.0.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.22</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.jtds</groupId>
+            <artifactId>jtds</artifactId>
+            <version>1.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.1-901.jdbc4</version>
+        </dependency>
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
