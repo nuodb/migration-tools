@@ -38,13 +38,14 @@ import com.nuodb.migration.cli.parse.option.*;
 import com.nuodb.migration.context.support.ApplicationSupport;
 import com.nuodb.migration.jdbc.JdbcConstants;
 import com.nuodb.migration.spec.*;
-import com.nuodb.migration.utils.Priority;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.nuodb.migration.utils.Priority.LOW;
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  * @author Sergey Bushik
@@ -151,8 +152,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withArgument(
                         newArgument().
                                 withName(getMessage(OUTPUT_TYPE_ARGUMENT_NAME)).
-                                withRequired(true).
-                                withMinimum(1).build()
+                                withRequired(true).withMinimum(1).build()
                 ).build();
         group.withOption(type);
 
@@ -170,11 +170,11 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         attributes.setDescription(getMessage(OUTPUT_OPTION_DESCRIPTION));
         attributes.setPrefixes(optionFormat.getOptionPrefixes());
         attributes.setArgumentSeparator(optionFormat.getArgumentSeparator());
-        attributes.addRegex(OUTPUT_OPTION, 1, Priority.LOW);
+        attributes.addRegex(OUTPUT_OPTION, 1, LOW);
         attributes.setArgument(
                 newArgument().
                         withName(getMessage(OUTPUT_OPTION_ARGUMENT_NAME)).
-                        withValuesSeparator(null).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
+                        withValuesSeparator(null).withMinimum(1).withMaximum(MAX_VALUE).build());
         group.withOption(attributes);
 
         return group.build();
@@ -184,7 +184,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
      * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
      */
     protected Group createSelectQueryGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(TABLE_GROUP_NAME)).withMaximum(Integer.MAX_VALUE);
+        GroupBuilder group = newGroup().withName(getMessage(TABLE_GROUP_NAME)).withMaximum(MAX_VALUE);
 
         Option table = newOption().
                 withName(TABLE_OPTION).
@@ -203,7 +203,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         tableFilter.setDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
         tableFilter.setPrefixes(optionFormat.getOptionPrefixes());
         tableFilter.setArgumentSeparator(optionFormat.getArgumentSeparator());
-        tableFilter.addRegex(TABLE_FILTER_OPTION, 1, Priority.LOW);
+        tableFilter.addRegex(TABLE_FILTER_OPTION, 1, LOW);
         tableFilter.setArgument(
                 newArgument().
                         withName(getMessage(TABLE_FILTER_ARGUMENT_NAME)).
@@ -217,7 +217,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected Option createNativeQueryGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(Integer.MAX_VALUE);
+        GroupBuilder group = newGroup().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(MAX_VALUE);
 
         Option query = newOption().
                 withName(QUERY_OPTION).
@@ -305,23 +305,23 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     protected TimeZone parseTimeZone(CommandLine commandLine, Option option) {
         String timeZone = commandLine.getValue(TIME_ZONE_OPTION);
         if (timeZone != null) {
-            TimeZone defaultSystemTimeZone = TimeZone.getDefault();
+            TimeZone systemTimeZone = TimeZone.getDefault();
             try {
-                TimeZone.setDefault(defaultTimeZone);
+                TimeZone.setDefault(getDefaultTimeZone());
                 return TimeZone.getTimeZone(timeZone);
             } finally {
-                TimeZone.setDefault(defaultSystemTimeZone);
+                TimeZone.setDefault(systemTimeZone);
             }
         } else {
-            return defaultTimeZone;
+            return getDefaultTimeZone();
         }
     }
 
     /**
-     * Parses url name1=value1&name2=value2 encoded string.
+     * Parses URL encoded properties name1=value1&name2=value2
      *
-     * @param connection  driver connection spec to store URL encoded properties in.
-     * @param commandLine holding command line options.
+     * @param connection  driver connection spec to store URL encoded properties in
+     * @param commandLine holding command line options
      * @param trigger     key to key value pairs
      * @param option      the option which contains parsed url
      */
@@ -331,8 +331,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         if (url != null) {
             try {
                 url = URLDecoder.decode(url, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new OptionException(option, e.getMessage());
+            } catch (UnsupportedEncodingException exception) {
+                throw new OptionException(option, exception.getMessage());
             }
             String[] params = url.split("&");
             Map<String, String> properties = newHashMap();
@@ -419,11 +419,11 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         attributes.setDescription(getMessage(INPUT_OPTION_DESCRIPTION));
         attributes.setPrefixes(optionFormat.getOptionPrefixes());
         attributes.setArgumentSeparator(optionFormat.getArgumentSeparator());
-        attributes.addRegex(INPUT_OPTION, 1, Priority.LOW);
+        attributes.addRegex(INPUT_OPTION, 1, LOW);
         attributes.setArgument(
                 newArgument().
                         withName(getMessage(INPUT_OPTION_ARGUMENT_NAME)).
-                        withValuesSeparator(null).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
+                        withValuesSeparator(null).withMinimum(1).withMaximum(MAX_VALUE).build());
         return newGroup().
                 withName(getMessage(INPUT_GROUP_NAME)).
                 withRequired(true).
@@ -454,14 +454,6 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return resource;
     }
 
-    public TimeZone getDefaultTimeZone() {
-        return defaultTimeZone;
-    }
-
-    public void setDefaultTimeZone(TimeZone defaultTimeZone) {
-        this.defaultTimeZone = defaultTimeZone;
-    }
-
     protected OptionBuilder newOption() {
         return optionToolkit.newOption();
     }
@@ -476,5 +468,13 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected OptionFormat getOptionFormat() {
         return optionToolkit.getOptionFormat();
+    }
+
+    public TimeZone getDefaultTimeZone() {
+        return defaultTimeZone;
+    }
+
+    public void setDefaultTimeZone(TimeZone defaultTimeZone) {
+        this.defaultTimeZone = defaultTimeZone;
     }
 }

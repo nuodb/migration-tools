@@ -45,11 +45,13 @@ import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
 @SuppressWarnings("unchecked")
 public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
 
+    public static final String GROUP_SCRIPTS_BY = "GROUP_SCRIPTS_BY";
+
+    public static final String TABLE_TYPES = "TABLE_TYPES";
+
     private static final String PROCESSED_TABLES = "PROCESSED_TABLES";
 
     private static final String PENDING_FOREIGN_KEYS = "PENDING_FOREIGN_KEYS";
-
-    private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
 
     public DatabaseGenerator() {
         super(Database.class);
@@ -59,13 +61,14 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
     public Collection<String> getCreateScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
         initScriptGeneratorContext(scriptGeneratorContext);
         Collection<String> scripts = newArrayList();
+        GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorContext);
         switch (groupScriptsBy) {
             case TABLE:
                 for (Table table : database.listTables()) {
                     Collection<Table> tables = Collections.singleton(table);
                     addCreateScripts(scriptGeneratorContext, scripts, tables);
                 }
-                addPendingForeignKeysScripts(scriptGeneratorContext, scripts, true);
+                addForeignKeysScripts(scriptGeneratorContext, scripts, true);
                 break;
             case META_DATA:
                 Collection<Table> tables = database.listTables();
@@ -80,6 +83,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
     public Collection<String> getDropScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
         initScriptGeneratorContext(scriptGeneratorContext);
         Collection<String> scripts = newArrayList();
+        GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorContext);
         switch (groupScriptsBy) {
             case TABLE:
                 for (Table table : database.listTables()) {
@@ -100,6 +104,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
     public Collection<String> getDropCreateScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
         initScriptGeneratorContext(scriptGeneratorContext);
         Collection<String> scripts = newArrayList();
+        GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorContext.get(GROUP_SCRIPTS_BY);
         switch (groupScriptsBy) {
             case TABLE:
                 for (Table table : database.listTables()) {
@@ -107,7 +112,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
                     addDropScripts(scriptGeneratorContext, scripts, tables);
                     addCreateScripts(scriptGeneratorContext, scripts, tables);
                 }
-                addPendingForeignKeysScripts(scriptGeneratorContext, scripts, true);
+                addForeignKeysScripts(scriptGeneratorContext, scripts, true);
                 break;
             case META_DATA:
                 Collection<Table> tables = database.listTables();
@@ -119,12 +124,15 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
         return scripts;
     }
 
-    protected void addCreateScripts(ScriptGeneratorContext scriptGeneratorContext,
-                                    Collection<String> scripts, Collection<Table> tables) {
+    protected void addCreateScripts(ScriptGeneratorContext scriptGeneratorContext, Collection<String> scripts,
+                                    Collection<Table> tables) {
         Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
         Dialect dialect = scriptGeneratorContext.getDialect();
         if (metaDataTypes.contains(SEQUENCE)) {
             for (Table table : tables) {
+                if (!isTableSupported(table, scriptGeneratorContext)) {
+                    continue;
+                }
                 for (Column column : table.getColumns()) {
                     if (column.getSequence() != null) {
                         scripts.addAll(scriptGeneratorContext.getCreateScripts(column.getSequence()));
@@ -133,16 +141,16 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
             }
         }
         if (metaDataTypes.contains(TABLE)) {
-            ScriptGeneratorContext tableScriptGeneratorContext =
-                    new SimpleScriptGeneratorContext(scriptGeneratorContext);
+            ScriptGeneratorContext tableScriptGeneratorContext = new ScriptGeneratorContext(scriptGeneratorContext);
             Collection<Table> processedTables = (Collection<Table>)
                     tableScriptGeneratorContext.get(PROCESSED_TABLES);
             tableScriptGeneratorContext.getMetaDataTypes().remove(FOREIGN_KEY);
             for (Table table : tables) {
-                processedTables.add(table);
-                if (Table.TABLE.equals(table.getType())) {
-                    scripts.addAll(tableScriptGeneratorContext.getCreateScripts(table));
+                if (!isTableSupported(table, scriptGeneratorContext)) {
+                    continue;
                 }
+                processedTables.add(table);
+                scripts.addAll(tableScriptGeneratorContext.getCreateScripts(table));
             }
         }
         if (metaDataTypes.contains(INDEX) && !dialect.supportsIndexInCreateTable()) {
@@ -151,6 +159,9 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
                 for (Index index : table.getIndexes()) {
                     if (!primary && index.isPrimary()) {
                         primary = true;
+                        continue;
+                    }
+                    if (!isTableSupported(index.getTable(), scriptGeneratorContext)) {
                         continue;
                     }
                     scripts.addAll(scriptGeneratorContext.getCreateScripts(index));
@@ -165,6 +176,9 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
             for (Table table : tables) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
                     Table targetTable = foreignKey.getTargetTable();
+                    if (!isTableSupported(targetTable, scriptGeneratorContext)) {
+                        continue;
+                    }
                     if (processedTables.contains(targetTable)) {
                         scripts.addAll(scriptGeneratorContext.getCreateScripts(foreignKey));
                     } else {
@@ -173,11 +187,11 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
                 }
             }
         }
-        addPendingForeignKeysScripts(scriptGeneratorContext, scripts, false);
+        addForeignKeysScripts(scriptGeneratorContext, scripts, false);
     }
 
-    protected void addPendingForeignKeysScripts(ScriptGeneratorContext scriptGeneratorContext,
-                                                Collection<String> scripts, boolean forceAdd) {
+    protected void addForeignKeysScripts(ScriptGeneratorContext scriptGeneratorContext,
+                                         Collection<String> scripts, boolean force) {
         Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
         if (metaDataTypes.contains(FOREIGN_KEY)) {
             Collection<Table> processedTables =
@@ -185,10 +199,13 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
             Multimap<Table, ForeignKey> pendingForeignKeys =
                     (Multimap<Table, ForeignKey>) scriptGeneratorContext.get(PENDING_FOREIGN_KEYS);
             for (ForeignKey foreignKey : newArrayList(pendingForeignKeys.values())) {
-                Table targetTable = foreignKey.getTargetTable();
-                if (processedTables.contains(targetTable) || forceAdd) {
+                Table table = foreignKey.getTargetTable();
+                if (!isTableSupported(table, scriptGeneratorContext)) {
+                    continue;
+                }
+                if (processedTables.contains(table) || force) {
                     scripts.addAll(scriptGeneratorContext.getCreateScripts(foreignKey));
-                    pendingForeignKeys.remove(targetTable, foreignKey);
+                    pendingForeignKeys.remove(table, foreignKey);
                 }
             }
         }
@@ -200,6 +217,9 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
         Dialect dialect = scriptGeneratorContext.getDialect();
         if (metaDataTypes.contains(FOREIGN_KEY) && dialect.supportsDropConstraints()) {
             for (Table table : tables) {
+                if (!isTableSupported(table, scriptGeneratorContext)) {
+                    continue;
+                }
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
                     scripts.addAll(scriptGeneratorContext.getDropScripts(foreignKey));
                 }
@@ -207,13 +227,17 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
         }
         if (metaDataTypes.contains(TABLE)) {
             for (Table table : tables) {
-                if (Table.TABLE.equals(table.getType())) {
-                    scripts.addAll(scriptGeneratorContext.getDropScripts(table));
+                if (!isTableSupported(table, scriptGeneratorContext)) {
+                    continue;
                 }
+                scripts.addAll(scriptGeneratorContext.getDropScripts(table));
             }
         }
         if (metaDataTypes.contains(SEQUENCE) && dialect.supportsSequence()) {
             for (Table table : tables) {
+                if (!isTableSupported(table, scriptGeneratorContext)) {
+                    continue;
+                }
                 for (Column column : table.getColumns()) {
                     if (column.getSequence() != null) {
                         scripts.addAll(scriptGeneratorContext.getDropScripts(column.getSequence()));
@@ -221,6 +245,16 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
                 }
             }
         }
+    }
+
+    protected GroupScriptsBy getGroupScriptsBy(ScriptGeneratorContext scriptGeneratorContext) {
+        GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorContext.get(GROUP_SCRIPTS_BY);
+        return groupScriptsBy != null ? GroupScriptsBy.TABLE : null;
+    }
+
+    protected boolean isTableSupported(Table table, ScriptGeneratorContext scriptGeneratorContext) {
+        Collection<String> tableTypes = (Collection<String>) scriptGeneratorContext.get(TABLE_TYPES);
+        return tableTypes != null ? tableTypes.contains(table.getType()) : Table.TABLE.equals(table.getType());
     }
 
     protected void initScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
@@ -239,13 +273,5 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
     protected void releaseScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
         scriptGeneratorContext.remove(PROCESSED_TABLES);
         scriptGeneratorContext.remove(PENDING_FOREIGN_KEYS);
-    }
-
-    public GroupScriptsBy getGroupScriptsBy() {
-        return groupScriptsBy;
-    }
-
-    public void setGroupScriptsBy(GroupScriptsBy groupScriptsBy) {
-        this.groupScriptsBy = groupScriptsBy;
     }
 }

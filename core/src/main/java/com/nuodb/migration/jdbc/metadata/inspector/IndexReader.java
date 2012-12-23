@@ -50,14 +50,13 @@ public class IndexReader extends MetaDataReaderBase {
     public void read(DatabaseInspector inspector, Database database,
                      DatabaseMetaData metaData) throws SQLException {
         for (Table table : database.listTables()) {
-            readIndexes(inspector, database, metaData, table);
+            readIndexes(database, metaData, table);
         }
     }
 
-    protected void readIndexes(DatabaseInspector inspector, Database database, DatabaseMetaData metaData,
-                               Table table) throws SQLException {
+    protected void readIndexes(Database database, DatabaseMetaData metaData, Table table) throws SQLException {
         ResultSet indexes = metaData.getIndexInfo(
-                inspector.getCatalog(), inspector.getSchema(), table.getName(), false, true);
+                table.getCatalog().getName(), table.getSchema().getName(), table.getName(), false, true);
         try {
             while (indexes.next()) {
                 if (indexes.getShort("TYPE") == tableIndexStatistic) {

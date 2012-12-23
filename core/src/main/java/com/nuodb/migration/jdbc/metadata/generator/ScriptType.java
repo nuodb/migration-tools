@@ -25,24 +25,11 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.load;
-
-import com.nuodb.migration.MigrationException;
+package com.nuodb.migration.jdbc.metadata.generator;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadException extends MigrationException {
-
-    public LoadException(String message) {
-        super(message);
-    }
-
-    public LoadException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public LoadException(Throwable cause) {
-        super(cause);
-    }
+public enum ScriptType {
+    CREATE, DROP
 }

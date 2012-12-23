@@ -109,8 +109,8 @@ public interface CliResources {
     final String SCHEMA_META_DATA_OPTION_DESCRIPTION = "com.nuodb.migration.schema.meta.data.option.description";
     final String SCHEMA_META_DATA_ARGUMENT_NAME = "com.nuodb.migration.schema.meta.data.argument.name";
 
-    final String SCHEMA_DROP_BEFORE_CREATE_DESCRIPTION = "com.nuodb.migration.schema.drop.before.create.option.description";
-    final String SCHEMA_DROP_BEFORE_CREATE_ARGUMENT_NAME = "com.nuodb.migration.schema.drop.before.create.argument.name";
+    final String SCHEMA_SCRIPT_TYPE_OPTION_DESCRIPTION = "com.nuodb.migration.schema.script.type.option.description";
+    final String SCHEMA_SCRIPT_TYPE_ARGUMENT_NAME = "com.nuodb.migration.schema.script.type.argument.name";
     
     final String SCHEMA_GROUP_SCRIPTS_BY_OPTION_DESCRIPTION = "com.nuodb.migration.schema.group.scripts.by.option.description";
     final String SCHEMA_GROUP_SCRIPTS_BY_ARGUMENT_NAME = "com.nuodb.migration.schema.group.scripts.by.argument.name";

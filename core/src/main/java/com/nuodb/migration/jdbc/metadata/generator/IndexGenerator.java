@@ -88,7 +88,7 @@ public class IndexGenerator extends ScriptGeneratorBase<Index> implements Constr
         return singleton(buffer.toString());
     }
 
-    public String getConstraintSql(Index index, ScriptGeneratorContext context) {
+    public String getConstraintScript(Index index, ScriptGeneratorContext context) {
         Dialect dialect = context.getDialect();
         StringBuilder buffer = new StringBuilder();
         if (index.isUnique()) {

@@ -47,13 +47,13 @@ public class PrimaryKeyReader extends MetaDataReaderBase {
     @Override
     public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
         for (Table table : database.listTables()) {
-            readPrimaryKeys(inspector, database, metaData, table);
+            readPrimaryKeys(database, metaData, table);
         }
     }
 
-    protected void readPrimaryKeys(DatabaseInspector inspector, Database database, DatabaseMetaData metaData,
-                                   Table table) throws SQLException {
-        ResultSet primaryKeys = metaData.getPrimaryKeys(inspector.getCatalog(), inspector.getSchema(), table.getName());
+    protected void readPrimaryKeys(Database database, DatabaseMetaData metaData, Table table) throws SQLException {
+        ResultSet primaryKeys = metaData.getPrimaryKeys(table.getCatalog().getName(), table.getSchema().getName(),
+                table.getName());
         try {
             while (primaryKeys.next()) {
                 table = database.createCatalog(primaryKeys.getString("TABLE_CAT")).createSchema(

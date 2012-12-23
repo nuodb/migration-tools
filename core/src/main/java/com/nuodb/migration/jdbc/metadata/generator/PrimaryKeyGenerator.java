@@ -45,7 +45,7 @@ public class PrimaryKeyGenerator extends ScriptGeneratorBase<PrimaryKey> impleme
     }
 
     @Override
-    public String getConstraintSql(PrimaryKey primaryKey, ScriptGeneratorContext context) {
+    public String getConstraintScript(PrimaryKey primaryKey, ScriptGeneratorContext context) {
         StringBuilder buffer = new StringBuilder("PRIMARY KEY (");
         for (Iterator<Column> iterator = primaryKey.getColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
@@ -63,7 +63,7 @@ public class PrimaryKeyGenerator extends ScriptGeneratorBase<PrimaryKey> impleme
         buffer.append("ALTER TABLE ");
         buffer.append(scriptGeneratorContext.getName(primaryKey.getTable()));
         buffer.append(" ADD ");
-        buffer.append(getConstraintSql(primaryKey, scriptGeneratorContext));
+        buffer.append(getConstraintScript(primaryKey, scriptGeneratorContext));
         return singleton(buffer.toString());
     }
 

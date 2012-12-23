@@ -29,23 +29,23 @@ package com.nuodb.migration.spec;
 
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migration.jdbc.metadata.generator.ScriptType;
 
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * @author Sergey Bushik
  */
 public class SchemaSpec extends TaskSpecBase {
 
-    public static final boolean DROP_BEFORE_CREATE = true;
-
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;
     private ResourceSpec outputSpec;
     private Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.ALL_TYPES);
-    private boolean dropBeforeCreate = DROP_BEFORE_CREATE;
+    private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
 
     public ConnectionSpec getSourceConnectionSpec() {
@@ -80,12 +80,12 @@ public class SchemaSpec extends TaskSpecBase {
         this.metaDataTypes = metaDataTypes;
     }
 
-    public boolean isDropBeforeCreate() {
-        return dropBeforeCreate;
+    public Collection<ScriptType> getScriptTypes() {
+        return scriptTypes;
     }
 
-    public void setDropBeforeCreate(boolean dropBeforeCreate) {
-        this.dropBeforeCreate = dropBeforeCreate;
+    public void setScriptTypes(Collection<ScriptType> scriptTypes) {
+        this.scriptTypes = scriptTypes;
     }
 
     public GroupScriptsBy getGroupScriptsBy() {

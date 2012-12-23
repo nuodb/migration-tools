@@ -85,6 +85,6 @@ public interface CliOptions {
     final String INPUT_PATH_OPTION = "input.path";
 
     final String SCHEMA_META_DATA_OPTION = "meta.data.*";
-    final String SCHEMA_DROP_BEFORE_CREATE_OPTION = "drop.before.create";
+    final String SCHEMA_SCRIPT_TYPE_OPTION = "script.type";
     final String SCHEMA_GROUP_SCRIPTS_BY_OPTION = "group.scripts.by";
 }

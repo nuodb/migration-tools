@@ -47,10 +47,11 @@ import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
  */
 public class SchemaJob extends JobBase {
 
+    public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private boolean dropBeforeCreate;
-    private ConnectionProvider sourceConnectionProvider;
+    private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
+    private ConnectionProvider connectionProvider;
     private ScriptGeneratorContext scriptGeneratorContext;
     private ScriptExporter scriptExporter;
 
@@ -61,32 +62,28 @@ public class SchemaJob extends JobBase {
     }
 
     protected void validate() {
-        isNotNull(getSourceConnectionProvider(), "Source connection provider is required");
+        isNotNull(getConnectionProvider(), "Source connection provider is required");
         isNotNull(getScriptGeneratorContext(), "Script generator context is required");
         isNotNull(getScriptExporter(), "Script exporter is required");
     }
 
     protected void execution(SchemaJobExecution execution) throws Exception {
-        ConnectionServices sourceConnectionServices = getSourceConnectionProvider().getConnectionServices();
+        ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
         try {
-            execution.setSourceConnectionServices(sourceConnectionServices);
+            execution.setConnectionServices(connectionServices);
             generate(execution);
         } finally {
-            close(sourceConnectionServices);
+            close(connectionServices);
         }
     }
 
     protected void generate(SchemaJobExecution execution) throws Exception {
-        ConnectionServices connectionServices = execution.getSourceConnectionServices();
+        ConnectionServices connectionServices = execution.getConnectionServices();
         Database database = connectionServices.createDatabaseInspector().inspect();
-
-        Collection<String> scripts;
-        if (isDropBeforeCreate()) {
-            scripts = getScriptGeneratorContext().getDropCreateScripts(database);
-        } else {
-            scripts = getScriptGeneratorContext().getCreateScripts(database);
+        Collection<String> scripts = scriptGeneratorContext.getScripts(database);
+        if (failOnEmptyScripts && scripts.isEmpty()) {
+            throw new SchemaJobException("Schema scripts are empty");
         }
-
         ScriptExporter scriptExporter = getScriptExporter();
         try {
             scriptExporter.open();
@@ -96,28 +93,28 @@ public class SchemaJob extends JobBase {
         }
     }
 
+    public boolean isFailOnEmptyScripts() {
+        return failOnEmptyScripts;
+    }
+
+    public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
+        this.failOnEmptyScripts = failOnEmptyScripts;
+    }
+
+    public ConnectionProvider getConnectionProvider() {
+        return connectionProvider;
+    }
+
+    public void setConnectionProvider(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
+    }
+
     public ScriptGeneratorContext getScriptGeneratorContext() {
         return scriptGeneratorContext;
     }
 
     public void setScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
         this.scriptGeneratorContext = scriptGeneratorContext;
-    }
-
-    public boolean isDropBeforeCreate() {
-        return dropBeforeCreate;
-    }
-
-    public void setDropBeforeCreate(boolean dropBeforeCreate) {
-        this.dropBeforeCreate = dropBeforeCreate;
-    }
-
-    public ConnectionProvider getSourceConnectionProvider() {
-        return sourceConnectionProvider;
-    }
-
-    public void setSourceConnectionProvider(ConnectionProvider sourceConnectionProvider) {
-        this.sourceConnectionProvider = sourceConnectionProvider;
     }
 
     public ScriptExporter getScriptExporter() {

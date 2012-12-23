@@ -25,26 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.dump;
+package com.nuodb.migration.schema;
 
 import com.nuodb.migration.MigrationException;
-
-import java.net.URLConnection;
 
 /**
  * @author Sergey Bushik
  */
-public class DumpException extends MigrationException {
+public class SchemaJobException extends MigrationException {
 
-    public DumpException(String message) {
+    public SchemaJobException(String message) {
         super(message);
     }
 
-    public DumpException(String message, Throwable cause) {
+    public SchemaJobException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public DumpException(Throwable cause) {
+    public SchemaJobException(Throwable cause) {
         super(cause);
     }
 }

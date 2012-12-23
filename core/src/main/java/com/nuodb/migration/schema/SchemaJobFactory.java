@@ -27,7 +27,6 @@
  */
 package com.nuodb.migration.schema;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
@@ -39,13 +38,16 @@ import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
 import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DriverConnectionSpec;
-import com.nuodb.migration.spec.SchemaSpec;
 import com.nuodb.migration.spec.ResourceSpec;
+import com.nuodb.migration.spec.SchemaSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migration.jdbc.metadata.generator.DatabaseGenerator.GROUP_SCRIPTS_BY;
+import static com.nuodb.migration.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
 /**
@@ -61,23 +63,18 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
     public SchemaJob createJob() {
         isNotNull(schemaSpec, "Generate schema spec is required");
         SchemaJob schemaJob = new SchemaJob();
-        schemaJob.setDropBeforeCreate(getSchemaSpec().isDropBeforeCreate());
-        schemaJob.setSourceConnectionProvider(createSourceConnectionProvider());
+        schemaJob.setConnectionProvider(createConnectionProvider(schemaSpec.getSourceConnectionSpec()));
         schemaJob.setScriptGeneratorContext(createScriptGeneratorContext());
         schemaJob.setScriptExporter(createScriptExporter());
         return schemaJob;
     }
 
-    protected ConnectionProvider createSourceConnectionProvider() {
-        return createConnectionProvider(schemaSpec.getSourceConnectionSpec(), false);
-    }
-
-    protected ConnectionProvider createTargetConnectionProvider() {
-        return createConnectionProvider(schemaSpec.getTargetConnectionSpec(), false);
+    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
+        return connectionSpec != null ? createConnectionProvider(connectionSpec, false) : null;
     }
 
     protected ScriptGeneratorContext createScriptGeneratorContext() {
-        ScriptGeneratorContext scriptGeneratorContext = new SimpleScriptGeneratorContext();
+        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext();
         scriptGeneratorContext.setMetaDataTypes(getSchemaSpec().getMetaDataTypes());
 
         ConnectionSpec connectionSpec = getSchemaSpec().getTargetConnectionSpec();
@@ -85,17 +82,16 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
             scriptGeneratorContext.setCatalog(connectionSpec.getCatalog());
             scriptGeneratorContext.setSchema(connectionSpec.getSchema());
         }
+        scriptGeneratorContext.setScriptTypes(getSchemaSpec().getScriptTypes());
         scriptGeneratorContext.setDialect(new NuoDBDialect());
 
-        DatabaseGenerator databaseGenerator = new DatabaseGenerator();
-        databaseGenerator.setGroupScriptsBy(getSchemaSpec().getGroupScriptsBy());
-        scriptGeneratorContext.addScriptGenerator(databaseGenerator);
+        scriptGeneratorContext.put(GROUP_SCRIPTS_BY, getSchemaSpec().getGroupScriptsBy());
         return scriptGeneratorContext;
     }
 
     protected ScriptExporter createScriptExporter() {
-        Collection<ScriptExporter> scriptExporters = Lists.newArrayList();
-        ConnectionProvider connectionProvider = createTargetConnectionProvider();
+        Collection<ScriptExporter> scriptExporters = newArrayList();
+        ConnectionProvider connectionProvider = createConnectionProvider(schemaSpec.getTargetConnectionSpec());
         if (connectionProvider != null) {
             scriptExporters.add(new ConnectionScriptExporter(connectionProvider.getConnectionServices()));
         }
@@ -105,7 +101,7 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         }
         // Fallback to standard output if neither target connection nor target file were specified
         if (scriptExporters.isEmpty()) {
-            scriptExporters.add(WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER);
+            scriptExporters.add(SYSTEM_OUT_SCRIPT_EXPORTER);
         }
         return new CompositeScriptExporter(scriptExporters);
     }

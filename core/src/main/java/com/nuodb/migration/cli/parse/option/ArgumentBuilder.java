@@ -48,7 +48,7 @@ public interface ArgumentBuilder {
 
     ArgumentBuilder withDefaultValue(Object defaultValue);
 
-    Argument build();
-
     ArgumentBuilder withValuesSeparator(String valuesSeparator);
+
+    Argument build();
 }

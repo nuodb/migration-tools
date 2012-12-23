@@ -36,17 +36,17 @@ import com.nuodb.migration.job.JobExecutionDelegate;
  */
 public class SchemaJobExecution extends JobExecutionDelegate {
 
-    private ConnectionServices sourceConnectionServices;
+    private ConnectionServices connectionServices;
 
     public SchemaJobExecution(JobExecution execution) {
         super(execution);
     }
 
-    public ConnectionServices getSourceConnectionServices() {
-        return sourceConnectionServices;
+    public ConnectionServices getConnectionServices() {
+        return connectionServices;
     }
 
-    public void setSourceConnectionServices(ConnectionServices sourceConnectionServices) {
-        this.sourceConnectionServices = sourceConnectionServices;
+    public void setConnectionServices(ConnectionServices connectionServices) {
+        this.connectionServices = connectionServices;
     }
 }

@@ -38,17 +38,16 @@ import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.cli.parse.option.RegexOption;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migration.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migration.schema.SchemaJobFactory;
-import com.nuodb.migration.spec.SchemaSpec;
 import com.nuodb.migration.spec.ResourceSpec;
+import com.nuodb.migration.spec.SchemaSpec;
 import com.nuodb.migration.utils.Priority;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migration.jdbc.metadata.generator.ScriptType.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.replace;
 
@@ -131,14 +130,15 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
                         withValuesSeparator(null).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
         group.withOption(generate);
 
-        Option dropBeforeCreate = newOption().
-                withName(SCHEMA_DROP_BEFORE_CREATE_OPTION).
-                withDescription(getMessage(SCHEMA_DROP_BEFORE_CREATE_DESCRIPTION)).
+        Option scriptType = newOption().
+                withName(SCHEMA_SCRIPT_TYPE_OPTION).
+                withDescription(getMessage(SCHEMA_SCRIPT_TYPE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgument().
-                                withName(getMessage(SCHEMA_DROP_BEFORE_CREATE_ARGUMENT_NAME)).build()
+                                withName(getMessage(SCHEMA_SCRIPT_TYPE_ARGUMENT_NAME)).
+                                withMaximum(Integer.MAX_VALUE).build()
                 ).build();
-        group.withOption(dropBeforeCreate);
+        group.withOption(scriptType);
 
         Option groupScriptsBy = newOption().
                 withName(SCHEMA_GROUP_SCRIPTS_BY_OPTION).
@@ -165,10 +165,17 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             }
             schemaSpec.setMetaDataTypes(metaDataTypes);
         }
-        String dropBeforeCreate = commandLine.getValue(SCHEMA_DROP_BEFORE_CREATE_OPTION);
-        if (dropBeforeCreate != null) {
-            schemaSpec.setDropBeforeCreate(Boolean.parseBoolean(dropBeforeCreate));
+
+        List<String> scriptTypeValues = commandLine.getValues(SCHEMA_SCRIPT_TYPE_OPTION);
+        Collection<ScriptType> scriptTypes = newHashSet();
+        for (String scriptTypeValue : scriptTypeValues) {
+            scriptTypes.add(valueOf(scriptTypeValue.toUpperCase()));
         }
+        if (scriptTypes.isEmpty()) {
+            scriptTypes = newHashSet(ScriptType.values());
+        }
+        schemaSpec.setScriptTypes(scriptTypes);
+
         Map<String, GroupScriptsBy> groupScriptsByConditionMap = Maps.newHashMap();
         for (GroupScriptsBy groupScriptsBy : GroupScriptsBy.values()) {
             groupScriptsByConditionMap.put(groupScriptsBy.getCondition(), groupScriptsBy);

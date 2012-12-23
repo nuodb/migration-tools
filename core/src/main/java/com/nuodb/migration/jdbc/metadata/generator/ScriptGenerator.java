@@ -36,9 +36,5 @@ import java.util.Collection;
  */
 public interface ScriptGenerator<R extends Relational> extends GeneratorService<R> {
 
-    Collection<String> getDropScripts(R relational, ScriptGeneratorContext scriptGeneratorContext);
-
-    Collection<String> getCreateScripts(R relational, ScriptGeneratorContext scriptGeneratorContext);
-
-    Collection<String> getDropCreateScripts(R relational, ScriptGeneratorContext scriptGeneratorContext);
+    Collection<String> getScripts(R relational, ScriptGeneratorContext scriptGeneratorContext);
 }

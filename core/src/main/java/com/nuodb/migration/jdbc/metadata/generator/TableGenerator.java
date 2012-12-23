@@ -56,7 +56,6 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
         Dialect dialect = scriptGeneratorContext.getDialect();
         StringBuilder buffer = new StringBuilder("CREATE TABLE");
         buffer.append(' ').append(scriptGeneratorContext.getQualifiedName(table)).append(" (");
-        JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeRegistry().getJdbcTypeNameMap();
         Collection<Column> columns = table.getColumns();
         final Collection<Index> indexes = table.getIndexes();
         Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
@@ -64,7 +63,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             final Column column = iterator.next();
             buffer.append(scriptGeneratorContext.getName(column));
             buffer.append(' ');
-            buffer.append(getColumnTypeName(scriptGeneratorContext, column));
+            buffer.append(getTypeName(column, scriptGeneratorContext));
             if (column.isIdentity() && metaDataTypes.contains(SEQUENCE)) {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
@@ -120,7 +119,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             if (primaryKey != null) {
                 ConstraintGenerator<PrimaryKey> generator = (ConstraintGenerator<PrimaryKey>)
                         scriptGeneratorContext.getScriptGenerator(primaryKey);
-                buffer.append(", ").append(generator.getConstraintSql(primaryKey, scriptGeneratorContext));
+                buffer.append(", ").append(generator.getConstraintScript(primaryKey, scriptGeneratorContext));
             }
         }
         if (metaDataTypes.contains(INDEX) && dialect.supportsIndexInCreateTable()) {
@@ -132,7 +131,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 }
                 ConstraintGenerator<Index> generator = (ConstraintGenerator<Index>)
                         scriptGeneratorContext.getScriptGenerator(index);
-                String constraint = generator.getConstraintSql(index, scriptGeneratorContext);
+                String constraint = generator.getConstraintScript(index, scriptGeneratorContext);
                 if (constraint != null) {
                     buffer.append(", ").append(constraint);
                 }
@@ -143,7 +142,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             for (ForeignKey foreignKey : table.getForeignKeys()) {
                 ConstraintGenerator<ForeignKey> generator = (ConstraintGenerator<ForeignKey>)
                         scriptGeneratorContext.getScriptGenerator(foreignKey);
-                String constraint = generator.getConstraintSql(foreignKey, scriptGeneratorContext);
+                String constraint = generator.getConstraintScript(foreignKey, scriptGeneratorContext);
                 if (constraint != null) {
                     buffer.append(", ").append(constraint);
                 }
@@ -188,7 +187,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
         return singleton(buffer.toString());
     }
 
-    protected String getColumnTypeName(ScriptGeneratorContext scriptGeneratorContext, Column column) {
+    protected String getTypeName(Column column, ScriptGeneratorContext scriptGeneratorContext) {
         JdbcTypeNameMap jdbcTypeNameMap = scriptGeneratorContext.getDialect().getJdbcTypeRegistry().getJdbcTypeNameMap();
         String typeName = jdbcTypeNameMap.getTypeName(
                 column.getTypeCode(), column.getSize(), column.getPrecision(), column.getScale());

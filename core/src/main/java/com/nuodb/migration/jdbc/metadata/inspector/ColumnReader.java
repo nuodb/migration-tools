@@ -55,13 +55,13 @@ public class ColumnReader extends MetaDataReaderBase {
     @Override
     public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
         for (Table table : database.listTables()) {
-            readColumns(inspector, database, metaData, table);
+            readColumns(database, metaData, table);
         }
     }
 
-    public void readColumns(DatabaseInspector inspector, Database database, DatabaseMetaData metaData,
-                            Table table) throws SQLException {
-        ResultSet columns = metaData.getColumns(inspector.getCatalog(), inspector.getSchema(), table.getName(), null);
+    public void readColumns(Database database, DatabaseMetaData metaData, Table table) throws SQLException {
+        ResultSet columns = metaData.getColumns(table.getCatalog().getName(), table.getSchema().getName(),
+                table.getName(), null);
         JdbcTypeRegistry jdbcTypeRegistry = database.getDialect().getJdbcTypeRegistry();
         try {
             ValueModelList<ValueModel> valueModelList = createValueModelList(columns.getMetaData());

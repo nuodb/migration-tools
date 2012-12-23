@@ -53,7 +53,7 @@ public class ForeignKeyGenerator extends ScriptGeneratorBase<ForeignKey> impleme
         buffer.append(" ADD CONSTRAINT ");
         buffer.append(scriptGeneratorContext.getName(foreignKey));
         buffer.append(' ');
-        buffer.append(getConstraintSql(foreignKey, scriptGeneratorContext));
+        buffer.append(getConstraintScript(foreignKey, scriptGeneratorContext));
         return singleton(buffer.toString());
     }
 
@@ -71,7 +71,7 @@ public class ForeignKeyGenerator extends ScriptGeneratorBase<ForeignKey> impleme
     }
 
     @Override
-    public String getConstraintSql(ForeignKey foreignKey, ScriptGeneratorContext context) {
+    public String getConstraintScript(ForeignKey foreignKey, ScriptGeneratorContext context) {
         Dialect dialect = context.getDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("FOREIGN KEY (");

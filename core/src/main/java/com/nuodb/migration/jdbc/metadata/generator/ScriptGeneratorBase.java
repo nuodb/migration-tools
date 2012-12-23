@@ -27,25 +27,52 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.metadata.Relational;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migration.jdbc.metadata.generator.ScriptType.CREATE;
+import static com.nuodb.migration.jdbc.metadata.generator.ScriptType.DROP;
+import static java.util.Collections.emptySet;
+
 /**
  * @author Sergey Bushik
  */
-public abstract class ScriptGeneratorBase<T extends Relational> extends GeneratorServiceBase<T> implements ScriptGenerator<T> {
+public abstract class ScriptGeneratorBase<R extends Relational> extends GeneratorServiceBase<R> implements ScriptGenerator<R> {
 
-    protected ScriptGeneratorBase(Class<T> relationalType) {
+    protected ScriptGeneratorBase(Class<R> relationalType) {
         super(relationalType);
     }
 
     @Override
-    public Collection<String> getDropCreateScripts(T relational, ScriptGeneratorContext scriptGeneratorContext) {
-        Collection<String> scripts = Lists.newArrayList();
+    public Collection<String> getScripts(R relational, ScriptGeneratorContext scriptGeneratorContext) {
+        Collection<String> scripts;
+        if (isScriptType(DROP, scriptGeneratorContext) && isScriptType(CREATE, scriptGeneratorContext)) {
+            scripts = getDropCreateScripts(relational, scriptGeneratorContext);
+        } else if (isScriptType(DROP, scriptGeneratorContext)) {
+            scripts = getDropScripts(relational, scriptGeneratorContext);
+        } else if (isScriptType(CREATE, scriptGeneratorContext)) {
+            scripts = getCreateScripts(relational, scriptGeneratorContext);
+        } else {
+            scripts = emptySet();
+        }
+        return scripts;
+    }
+
+    protected Collection<String> getDropCreateScripts(R relational, ScriptGeneratorContext scriptGeneratorContext) {
+        Collection<String> scripts = newArrayList();
         scripts.addAll(getDropScripts(relational, scriptGeneratorContext));
         scripts.addAll(getCreateScripts(relational, scriptGeneratorContext));
         return scripts;
     }
+
+    protected boolean isScriptType(ScriptType scriptType, ScriptGeneratorContext scriptGeneratorContext) {
+        Collection<ScriptType> scriptTypes = scriptGeneratorContext.getScriptTypes();
+        return scriptTypes != null && scriptTypes.contains(scriptType);
+    }
+
+    protected abstract Collection<String> getDropScripts(R relational, ScriptGeneratorContext scriptGeneratorContext);
+
+    protected abstract Collection<String> getCreateScripts(R relational, ScriptGeneratorContext scriptGeneratorContext);
 }

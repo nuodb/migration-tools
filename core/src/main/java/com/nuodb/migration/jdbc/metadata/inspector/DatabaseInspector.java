@@ -82,13 +82,13 @@ public class DatabaseInspector {
         withMetaDataReader(new ForeignKeyReader());
         withMetaDataReader(new PrimaryKeyReader());
 
-        MetaDataReaderResolver columnCheckReader = new MetaDataReaderResolver(COLUMN_CHECK);
-        columnCheckReader.registerObject("NuoDB", NuoDBColumnCheckReader.class);
-        withMetaDataReader(columnCheckReader);
+        MetaDataReaderResolver columnCheck = new MetaDataReaderResolver(COLUMN_CHECK);
+        columnCheck.registerObject("NuoDB", NuoDBColumnCheckReader.class);
+        withMetaDataReader(columnCheck);
 
-        MetaDataReaderResolver sequenceReader = new MetaDataReaderResolver(SEQUENCE);
-        sequenceReader.registerObject("MySQL", MySQLAutoIncrementReader.class);
-        withMetaDataReader(sequenceReader);
+        MetaDataReaderResolver sequence = new MetaDataReaderResolver(SEQUENCE);
+        sequence.registerObject("MySQL", MySQLAutoIncrementReader.class);
+        withMetaDataReader(sequence);
     }
 
     public Database inspect() throws SQLException {

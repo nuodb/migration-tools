@@ -55,14 +55,13 @@ public class ForeignKeyReader extends MetaDataReaderBase {
     public void read(DatabaseInspector inspector, Database database,
                      DatabaseMetaData metaData) throws SQLException {
         for (Table table : database.listTables()) {
-            readForeignKeys(inspector, database, metaData, table);
+            readForeignKeys(database, metaData, table);
         }
     }
 
-    protected void readForeignKeys(DatabaseInspector inspector, Database database, DatabaseMetaData metaData,
-                                   Table table) throws SQLException {
-        ResultSet foreignKeys = metaData.getImportedKeys(inspector.getCatalog(), inspector.getSchema(),
-                table.getName());
+    protected void readForeignKeys(Database database, DatabaseMetaData metaData, Table table) throws SQLException {
+        ResultSet foreignKeys = metaData.getImportedKeys(
+                table.getCatalog().getName(), table.getSchema().getName(), table.getName());
         try {
             boolean fixPosition = false;
             while (foreignKeys.next()) {

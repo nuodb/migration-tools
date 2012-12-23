@@ -32,13 +32,13 @@ import com.nuodb.migration.jdbc.metadata.Relational;
 /**
  * @author Sergey Bushik
  */
-public interface NamingStrategy<T extends Relational> extends GeneratorService<T> {
+public interface NamingStrategy<R extends Relational> extends GeneratorService<R> {
 
-    String getName(T object, ScriptGeneratorContext scriptGeneratorContext);
+    String getName(R relational, ScriptGeneratorContext scriptGeneratorContext);
 
-    String getName(T object, ScriptGeneratorContext scriptGeneratorContext, boolean identifier);
+    String getName(R relational, ScriptGeneratorContext scriptGeneratorContext, boolean identifier);
 
-    String getQualifiedName(T object, ScriptGeneratorContext scriptGeneratorContext);
+    String getQualifiedName(R relational, ScriptGeneratorContext scriptGeneratorContext);
 
-    String getQualifiedName(T object, ScriptGeneratorContext scriptGeneratorContext, boolean identifier);
+    String getQualifiedName(R relational, ScriptGeneratorContext scriptGeneratorContext, boolean identifier);
 }
