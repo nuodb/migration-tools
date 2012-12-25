@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.spec;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 import java.util.Map;
 
 public class SpecBase implements Spec {
@@ -57,5 +59,10 @@ public class SpecBase implements Spec {
 
     public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
+    }
+
+    @Override
+    public String toString() {
+        return ReflectionToStringBuilder.toString(this);
     }
 }

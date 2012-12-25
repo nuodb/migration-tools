@@ -27,10 +27,10 @@
  */
 package com.nuodb.migration.bootstrap;
 
-import com.nuodb.migration.bootstrap.config.BootstrapConfig;
-import com.nuodb.migration.bootstrap.config.BootstrapConfigLoader;
-import com.nuodb.migration.bootstrap.config.PlaceholderReplacer;
-import com.nuodb.migration.bootstrap.config.PropertiesPlaceholderReplacement;
+import com.nuodb.migration.bootstrap.config.Config;
+import com.nuodb.migration.bootstrap.config.PropertiesConfigLoader;
+import com.nuodb.migration.bootstrap.config.Replacer;
+import com.nuodb.migration.bootstrap.config.PropertiesReplacement;
 import com.nuodb.migration.bootstrap.loader.DynamicClassLoaderFactory;
 import com.nuodb.migration.bootstrap.loader.DynamicClassLoaderType;
 import com.nuodb.migration.bootstrap.log.Log;
@@ -44,8 +44,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import static com.nuodb.migration.bootstrap.config.BootstrapConfig.BOOTABLE;
-import static com.nuodb.migration.bootstrap.config.BootstrapConfig.LOADER;
+import static com.nuodb.migration.bootstrap.config.Config.BOOTABLE;
+import static com.nuodb.migration.bootstrap.config.Config.LOADER;
 
 /**
  * @author Sergey Bushik
@@ -53,13 +53,13 @@ import static com.nuodb.migration.bootstrap.config.BootstrapConfig.LOADER;
 @SuppressWarnings("unchecked")
 public class Bootstrap {
 
-    private static final Log log = LogFactory.getLogger(Bootstrap.class);
+    private static final Log log = LogFactory.getLog(Bootstrap.class);
 
     private ClassLoader classLoader;
 
     private static final int BOOT_ERROR = 1;
 
-    private BootstrapConfig config;
+    private Config config;
 
     public void boot(String[] arguments) throws Exception {
         if (log.isDebugEnabled()) {
@@ -80,14 +80,13 @@ public class Bootstrap {
         bootable.boot(config, arguments);
     }
 
-    protected BootstrapConfig loadConfig() {
-        PlaceholderReplacer placeholderReplacer = new PlaceholderReplacer();
-        placeholderReplacer.setPlaceholderReplacement(
-                new PropertiesPlaceholderReplacement(System.getProperties()));
+    protected Config loadConfig() {
+        Replacer replacer = new Replacer();
+        replacer.setReplacement(new PropertiesReplacement(System.getProperties()));
 
-        BootstrapConfigLoader bootstrapConfigLoader = new BootstrapConfigLoader();
-        bootstrapConfigLoader.setPlaceholderReplacer(placeholderReplacer);
-        return bootstrapConfigLoader.loadConfig();
+        PropertiesConfigLoader loader = new PropertiesConfigLoader();
+        loader.setReplacer(replacer);
+        return loader.loadConfig();
     }
 
     protected ClassLoader createClassLoader() throws IOException {
@@ -122,7 +121,7 @@ public class Bootstrap {
         return constructor.newInstance();
     }
 
-    private BootstrapConfig getConfig() {
+    private Config getConfig() {
         return config;
     }
 

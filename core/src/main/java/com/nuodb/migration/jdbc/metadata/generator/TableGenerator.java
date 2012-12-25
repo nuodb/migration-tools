@@ -76,7 +76,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(' ');
                 buffer.append("NOT NULL");
             }
-            // TODO: handle default value
+            // TODO: CDMT-43 handle default value
             // String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue());
             // if (defaultValue != null) {
             //      buffer.append(" DEFAULT ").append(defaultValue);

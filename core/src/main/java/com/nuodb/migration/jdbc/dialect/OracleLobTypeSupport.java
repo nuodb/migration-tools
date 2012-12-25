@@ -117,7 +117,7 @@ public class OracleLobTypeSupport implements JdbcLobTypeSupport {
         try {
             Method createTemporary = lobClass.getMethod(
                     "createTemporary", Connection.class, boolean.class, int.class);
-            Object lob = createTemporary.invoke(null, connection, cache, durationSessionConstants.get(lobClass));
+            Object lob = createTemporary.invoke(null, connection, isCache(), durationSessionConstants.get(lobClass));
             Method open = lobClass.getMethod("open", int.class);
             return (T) open.invoke(lob, modeReadWriteConstants.get(lobClass));
         } catch (InvocationTargetException exception) {
@@ -130,7 +130,7 @@ public class OracleLobTypeSupport implements JdbcLobTypeSupport {
     }
 
     private void initLobBeforeAccess(Connection connection, Object lob) {
-        if (releaseLobAfterAccess) {
+        if (isReleaseLobAfterAccess()) {
             initLobClasses(connection);
             try {
                 Method isTemporary = lob.getClass().getMethod("isTemporary");
@@ -150,7 +150,7 @@ public class OracleLobTypeSupport implements JdbcLobTypeSupport {
     }
 
     private void releaseLobAfterAccess(Connection connection, Object lob) {
-        if (releaseLobAfterAccess) {
+        if (isReleaseLobAfterAccess()) {
             initLobClasses(connection);
             Boolean temporary;
             try {
@@ -214,11 +214,11 @@ public class OracleLobTypeSupport implements JdbcLobTypeSupport {
         this.cache = cache;
     }
 
-    public boolean isInitLobClasses() {
-        return initLobClasses;
+    public boolean isReleaseLobAfterAccess() {
+        return releaseLobAfterAccess;
     }
 
-    public void setInitLobClasses(boolean initLobClasses) {
-        this.initLobClasses = initLobClasses;
+    public void setReleaseLobAfterAccess(boolean releaseLobAfterAccess) {
+        this.releaseLobAfterAccess = releaseLobAfterAccess;
     }
 }

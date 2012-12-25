@@ -55,9 +55,12 @@ import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
  */
 public class SchemaJobFactory extends ConnectionProviderFactory implements JobFactory<SchemaJob> {
 
+    public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
+
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private SchemaSpec schemaSpec;
+    private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
 
     @Override
     public SchemaJob createJob() {
@@ -65,6 +68,7 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         SchemaJob schemaJob = new SchemaJob();
         schemaJob.setConnectionProvider(createConnectionProvider(schemaSpec.getSourceConnectionSpec()));
         schemaJob.setScriptGeneratorContext(createScriptGeneratorContext());
+        schemaJob.setFailOnEmptyScripts(isFailOnEmptyScripts());
         schemaJob.setScriptExporter(createScriptExporter());
         return schemaJob;
     }
@@ -75,17 +79,15 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
 
     protected ScriptGeneratorContext createScriptGeneratorContext() {
         ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext();
+        scriptGeneratorContext.setDialect(new NuoDBDialect());
         scriptGeneratorContext.setMetaDataTypes(getSchemaSpec().getMetaDataTypes());
-
         ConnectionSpec connectionSpec = getSchemaSpec().getTargetConnectionSpec();
         if (connectionSpec != null) {
             scriptGeneratorContext.setCatalog(connectionSpec.getCatalog());
             scriptGeneratorContext.setSchema(connectionSpec.getSchema());
         }
         scriptGeneratorContext.setScriptTypes(getSchemaSpec().getScriptTypes());
-        scriptGeneratorContext.setDialect(new NuoDBDialect());
-
-        scriptGeneratorContext.put(GROUP_SCRIPTS_BY, getSchemaSpec().getGroupScriptsBy());
+        scriptGeneratorContext.getAttributes().put(GROUP_SCRIPTS_BY, getSchemaSpec().getGroupScriptsBy());
         return scriptGeneratorContext;
     }
 
@@ -99,7 +101,7 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         if (outputSpec != null) {
             scriptExporters.add(new FileScriptExporter(outputSpec.getPath()));
         }
-        // Fallback to standard output if neither target connection nor target file were specified
+        // Fallback to the standard output if neither target connection nor target file were specified
         if (scriptExporters.isEmpty()) {
             scriptExporters.add(SYSTEM_OUT_SCRIPT_EXPORTER);
         }
@@ -112,6 +114,14 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
 
     public void setSchemaSpec(SchemaSpec schemaSpec) {
         this.schemaSpec = schemaSpec;
+    }
+
+    public boolean isFailOnEmptyScripts() {
+        return failOnEmptyScripts;
+    }
+
+    public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
+        this.failOnEmptyScripts = failOnEmptyScripts;
     }
 
     public static void main(String[] args) {

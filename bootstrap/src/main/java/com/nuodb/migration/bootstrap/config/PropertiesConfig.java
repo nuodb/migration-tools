@@ -27,10 +27,38 @@
  */
 package com.nuodb.migration.bootstrap.config;
 
+import java.util.Map;
+import java.util.Properties;
+
 /**
  * @author Sergey Bushik
  */
-public interface PlaceholderReplacement {
+public class PropertiesConfig implements Config {
 
-    String getReplacement(String placeholder);
+    private Properties properties;
+    private Replacer replacer;
+
+    public PropertiesConfig(Properties properties, Replacer replacer) {
+        this.properties = properties;
+        this.replacer = replacer;
+    }
+
+    @Override
+    public String getProperty(String property) {
+        return replacer.replace(properties.getProperty(property));
+    }
+
+    @Override
+    public String getProperty(String property, String defaultValue) {
+        return replacer.replace(properties.getProperty(property, defaultValue));
+    }
+
+    @Override
+    public Properties getProperties(Properties properties) {
+        Properties target = new Properties();
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            target.setProperty((String) entry.getKey(), replacer.replace((String) entry.getValue()));
+        }
+        return target;
+    }
 }

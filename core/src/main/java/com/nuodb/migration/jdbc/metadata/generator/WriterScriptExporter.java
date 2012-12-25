@@ -36,19 +36,29 @@ import java.io.Writer;
  */
 public class WriterScriptExporter extends CountingScriptExporter {
 
-    public static final ScriptExporter SYSTEM_OUT_SCRIPT_EXPORTER = new WriterScriptExporter(System.out);
+    public static final ScriptExporter SYSTEM_OUT_SCRIPT_EXPORTER = new WriterScriptExporter(System.out, false);
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
     private static final String SEMICOLON = ";";
 
-    private Writer writer;
+    private final Writer writer;
+    private final boolean close;
 
     public WriterScriptExporter(OutputStream outputStream) {
-        this(new OutputStreamWriter(outputStream));
+        this(outputStream, true);
     }
 
     public WriterScriptExporter(Writer writer) {
+        this(writer, true);
+    }
+
+    public WriterScriptExporter(OutputStream outputStream, boolean close) {
+        this(new OutputStreamWriter(outputStream), close);
+    }
+
+    public WriterScriptExporter(Writer writer, boolean close) {
         this.writer = writer;
+        this.close = close;
     }
 
     @Override
@@ -63,5 +73,8 @@ public class WriterScriptExporter extends CountingScriptExporter {
     @Override
     protected void doClose() throws Exception {
         writer.flush();
+        if (close) {
+            writer.close();
+        }
     }
 }

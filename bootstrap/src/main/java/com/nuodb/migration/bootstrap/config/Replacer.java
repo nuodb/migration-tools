@@ -30,7 +30,7 @@ package com.nuodb.migration.bootstrap.config;
 /**
  * @author Sergey Bushik
  */
-public class PlaceholderReplacer {
+public class Replacer {
 
     public static final String PLACEHOLDER_PREFIX = "${";
 
@@ -42,7 +42,7 @@ public class PlaceholderReplacer {
 
     private boolean ignoreUnknownPlaceholders;
 
-    private PlaceholderReplacement placeholderReplacement;
+    private Replacement replacement;
 
     public String replace(String property) {
         if (property == null) {
@@ -57,7 +57,7 @@ public class PlaceholderReplacer {
                 String placeholder = buffer.substring(replacementStart, suffixStart);
                 String replacement = getReplacement(placeholder);
                 if (replacement == null) {
-                    if (this.ignoreUnknownPlaceholders) {
+                    if (isIgnoreUnknownPlaceholders()) {
                         prefixStart = buffer.indexOf(placeholderPrefix, suffixStart);
                     } else {
                         throw new IllegalArgumentException(String.format("Can't find replacement for %s", placeholder));
@@ -74,7 +74,7 @@ public class PlaceholderReplacer {
     }
 
     protected String getReplacement(String placeholder) {
-        return placeholderReplacement != null ? placeholderReplacement.getReplacement(placeholder) : null;
+        return replacement != null ? replacement.getReplacement(placeholder) : null;
     }
 
     public String getPlaceholderPrefix() {
@@ -101,20 +101,20 @@ public class PlaceholderReplacer {
         this.ignoreUnknownPlaceholders = ignoreUnknownPlaceholders;
     }
 
-    public PlaceholderReplacement getPlaceholderReplacement() {
-        return placeholderReplacement;
+    public Replacement getReplacement() {
+        return replacement;
     }
 
-    public void setPlaceholderReplacement(PlaceholderReplacement placeholderReplacement) {
-        this.placeholderReplacement = placeholderReplacement;
+    public void setReplacement(Replacement replacement) {
+        this.replacement = replacement;
     }
 
     public static void main(String[] args) {
         System.setProperty("nuodb.migration.home", "../bin");
         System.setProperty("nuodb.home", "/opt/nuodb");
 
-        PlaceholderReplacer placeholderReplacer = new PlaceholderReplacer();
-        placeholderReplacer.setPlaceholderReplacement(new PropertiesPlaceholderReplacement(System.getProperties()));
+        Replacer replacer = new Replacer();
+        replacer.setReplacement(new PropertiesReplacement(System.getProperties()));
 
         StringBuilder property = new StringBuilder();
         property.append("${nuodb.home}/jar/nuodbjdbc.jar,");
@@ -122,6 +122,6 @@ public class PlaceholderReplacer {
         property.append("${nuodb.migration.home}/jar,");
         property.append("${nuodb.migration.home}/jar/*.jar");
 
-        System.out.println(placeholderReplacer.replace(property.toString()));
+        System.out.println(replacer.replace(property.toString()));
     }
 }

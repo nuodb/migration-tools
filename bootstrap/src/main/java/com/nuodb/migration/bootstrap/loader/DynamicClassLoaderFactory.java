@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class DynamicClassLoaderFactory {
 
-    private static final Log log = LogFactory.getLogger(DynamicClassLoaderFactory.class);
+    private static final Log log = LogFactory.getLog(DynamicClassLoaderFactory.class);
 
     public static DynamicClassLoader createClassLoader(Map<String, DynamicClassLoaderType> loaderTypes,
                                                        ClassLoader parent) throws IOException {

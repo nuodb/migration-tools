@@ -47,10 +47,9 @@ import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
  */
 public class SchemaJob extends JobBase {
 
-    public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
+    private boolean failOnEmptyScripts;
     private ConnectionProvider connectionProvider;
     private ScriptGeneratorContext scriptGeneratorContext;
     private ScriptExporter scriptExporter;
@@ -80,8 +79,8 @@ public class SchemaJob extends JobBase {
     protected void generate(SchemaJobExecution execution) throws Exception {
         ConnectionServices connectionServices = execution.getConnectionServices();
         Database database = connectionServices.createDatabaseInspector().inspect();
-        Collection<String> scripts = scriptGeneratorContext.getScripts(database);
-        if (failOnEmptyScripts && scripts.isEmpty()) {
+        Collection<String> scripts = getScriptGeneratorContext().getScripts(database);
+        if (isFailOnEmptyScripts() && scripts.isEmpty()) {
             throw new SchemaJobException("Schema scripts are empty");
         }
         ScriptExporter scriptExporter = getScriptExporter();

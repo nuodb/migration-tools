@@ -32,16 +32,17 @@ import java.util.Properties;
 /**
  * @author Sergey Bushik
  */
-public class PropertiesPlaceholderReplacement implements PlaceholderReplacement {
+public interface Config {
 
-    private Properties properties;
+    final String HOME = "nuodb.migration.home";
 
-    public PropertiesPlaceholderReplacement(Properties properties) {
-        this.properties = properties;
-    }
+    final String LOADER = "com.nuodb.migration.bootstrap.loader";
 
-    @Override
-    public String getReplacement(String placeholder) {
-        return properties.getProperty(placeholder);
-    }
+    final String BOOTABLE = "com.nuodb.migration.bootstrap.bootable";
+
+    String getProperty(String property);
+
+    String getProperty(String property, String defaultValue);
+
+    Properties getProperties(Properties properties);
 }

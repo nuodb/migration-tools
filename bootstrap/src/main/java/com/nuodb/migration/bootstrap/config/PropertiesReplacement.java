@@ -32,23 +32,16 @@ import java.util.Properties;
 /**
  * @author Sergey Bushik
  */
-public class PropertiesBootstrapConfig implements BootstrapConfig {
+public class PropertiesReplacement implements Replacement {
 
     private Properties properties;
-    private PlaceholderReplacer placeholderReplacer;
 
-    public PropertiesBootstrapConfig(Properties properties, PlaceholderReplacer placeholderReplacer) {
+    public PropertiesReplacement(Properties properties) {
         this.properties = properties;
-        this.placeholderReplacer = placeholderReplacer;
     }
 
     @Override
-    public String getProperty(String property) {
-        return placeholderReplacer.replace(properties.getProperty(property));
-    }
-
-    @Override
-    public String getProperty(String property, String defaultValue) {
-        return placeholderReplacer.replace(properties.getProperty(property, defaultValue));
+    public String getReplacement(String placeholder) {
+        return properties.getProperty(placeholder);
     }
 }

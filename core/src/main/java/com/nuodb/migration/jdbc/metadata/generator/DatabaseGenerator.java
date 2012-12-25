@@ -104,7 +104,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
     public Collection<String> getDropCreateScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
         initScriptGeneratorContext(scriptGeneratorContext);
         Collection<String> scripts = newArrayList();
-        GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorContext.get(GROUP_SCRIPTS_BY);
+        GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorContext.getAttributes().get(GROUP_SCRIPTS_BY);
         switch (groupScriptsBy) {
             case TABLE:
                 for (Table table : database.listTables()) {
@@ -143,7 +143,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
         if (metaDataTypes.contains(TABLE)) {
             ScriptGeneratorContext tableScriptGeneratorContext = new ScriptGeneratorContext(scriptGeneratorContext);
             Collection<Table> processedTables = (Collection<Table>)
-                    tableScriptGeneratorContext.get(PROCESSED_TABLES);
+                    tableScriptGeneratorContext.getAttributes().get(PROCESSED_TABLES);
             tableScriptGeneratorContext.getMetaDataTypes().remove(FOREIGN_KEY);
             for (Table table : tables) {
                 if (!isTableSupported(table, scriptGeneratorContext)) {
@@ -170,9 +170,9 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
         }
         if (metaDataTypes.contains(FOREIGN_KEY)) {
             Collection<Table> processedTables =
-                    (Collection<Table>) scriptGeneratorContext.get(PROCESSED_TABLES);
+                    (Collection<Table>) scriptGeneratorContext.getAttributes().get(PROCESSED_TABLES);
             Multimap<Table, ForeignKey> pendingForeignKeys =
-                    (Multimap<Table, ForeignKey>) scriptGeneratorContext.get(PENDING_FOREIGN_KEYS);
+                    (Multimap<Table, ForeignKey>) scriptGeneratorContext.getAttributes().get(PENDING_FOREIGN_KEYS);
             for (Table table : tables) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
                     Table targetTable = foreignKey.getTargetTable();
@@ -195,9 +195,9 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
         Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
         if (metaDataTypes.contains(FOREIGN_KEY)) {
             Collection<Table> processedTables =
-                    (Collection<Table>) scriptGeneratorContext.get(PROCESSED_TABLES);
+                    (Collection<Table>) scriptGeneratorContext.getAttributes().get(PROCESSED_TABLES);
             Multimap<Table, ForeignKey> pendingForeignKeys =
-                    (Multimap<Table, ForeignKey>) scriptGeneratorContext.get(PENDING_FOREIGN_KEYS);
+                    (Multimap<Table, ForeignKey>) scriptGeneratorContext.getAttributes().get(PENDING_FOREIGN_KEYS);
             for (ForeignKey foreignKey : newArrayList(pendingForeignKeys.values())) {
                 Table table = foreignKey.getTargetTable();
                 if (!isTableSupported(table, scriptGeneratorContext)) {
@@ -248,18 +248,19 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
     }
 
     protected GroupScriptsBy getGroupScriptsBy(ScriptGeneratorContext scriptGeneratorContext) {
-        GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorContext.get(GROUP_SCRIPTS_BY);
+        GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorContext.getAttributes().get(GROUP_SCRIPTS_BY);
         return groupScriptsBy != null ? GroupScriptsBy.TABLE : null;
     }
 
     protected boolean isTableSupported(Table table, ScriptGeneratorContext scriptGeneratorContext) {
-        Collection<String> tableTypes = (Collection<String>) scriptGeneratorContext.get(TABLE_TYPES);
+        Collection<String> tableTypes = (Collection<String>) scriptGeneratorContext.getAttributes().get(TABLE_TYPES);
         return tableTypes != null ? tableTypes.contains(table.getType()) : Table.TABLE.equals(table.getType());
     }
 
     protected void initScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
-        scriptGeneratorContext.put(PROCESSED_TABLES, Sets.newLinkedHashSet());
-        scriptGeneratorContext.put(PENDING_FOREIGN_KEYS,
+        Map<String, Object> attributes = scriptGeneratorContext.getAttributes();
+        attributes.put(PROCESSED_TABLES, Sets.newLinkedHashSet());
+        attributes.put(PENDING_FOREIGN_KEYS,
                 Multimaps.<Table, ForeignKey>newSetMultimap(new HashMap<Table, Collection<ForeignKey>>(),
                         new Supplier<Set<ForeignKey>>() {
                             @Override
@@ -271,7 +272,8 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
     }
 
     protected void releaseScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
-        scriptGeneratorContext.remove(PROCESSED_TABLES);
-        scriptGeneratorContext.remove(PENDING_FOREIGN_KEYS);
+        Map<String, Object> attributes = scriptGeneratorContext.getAttributes();
+        attributes.remove(PROCESSED_TABLES);
+        attributes.remove(PENDING_FOREIGN_KEYS);
     }
 }

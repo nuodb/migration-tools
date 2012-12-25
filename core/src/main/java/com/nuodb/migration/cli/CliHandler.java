@@ -28,15 +28,13 @@
 package com.nuodb.migration.cli;
 
 import com.nuodb.migration.bootstrap.Bootable;
-import com.nuodb.migration.bootstrap.config.BootstrapConfig;
+import com.nuodb.migration.bootstrap.config.Config;
 import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.OptionSet;
 
-import java.util.Arrays;
-
 /**
- * Main entry point for the command line interface, for the names of the available options see {@link CliOptions}.
+ * Main entry point of the command line interface, for the names of the available options see {@link CliOptions}.
  *
  * @author Sergey Bushik
  */
@@ -48,12 +46,9 @@ public class CliHandler extends CliHandlerSupport implements Bootable {
     }
 
     @Override
-    public void boot(BootstrapConfig config, String[] arguments) {
+    public void boot(Config config, String[] arguments) throws Exception {
         try {
             Option root = createOption();
-            if (logger.isTraceEnabled()) {
-                logger.trace(String.format("Parsing cli arguments: %1$s", Arrays.asList(arguments)));
-            }
             OptionSet options = getParser().parse(arguments, root);
             handleOptionSet(options, root);
         } catch (OptionException exception) {

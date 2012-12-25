@@ -27,10 +27,10 @@
  */
 package com.nuodb.migration.cli.run;
 
-import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.job.*;
 
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -44,10 +44,16 @@ public abstract class CliRunJob extends CliRunAdapter {
         this.jobFactory = jobFactory;
     }
 
+    @Override
     public void run() {
+        run(Collections.<String, Object>emptyMap());
+    }
+
+    @Override
+    public void run(Map<String, Object> context) {
         JobExecutor executor = JobExecutors.createJobExecutor(createJob());
         executor.addJobExecutionListener(new TraceJobExecutionListener());
-        executor.execute(Collections.<String, Object>emptyMap());
+        executor.execute(context);
         Throwable failure = executor.getJobStatus().getFailure();
         if (failure != null) {
             throw new CliRunException(failure.getMessage(), failure);

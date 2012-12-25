@@ -52,7 +52,7 @@ public class JdbcClobTypeAdapter extends JdbcTypeAdapterBase<Clob> {
     private JdbcLobTypeSupport jdbcLobTypeSupport;
 
     public JdbcClobTypeAdapter() {
-        this(new DefaultJdbcLobTypeSupport());
+        this(new SimpleJdbcLobTypeSupport());
     }
 
     public JdbcClobTypeAdapter(JdbcLobTypeSupport jdbcLobTypeSupport) {

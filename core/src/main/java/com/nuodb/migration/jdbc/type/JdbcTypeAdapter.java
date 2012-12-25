@@ -35,7 +35,7 @@ import java.sql.SQLException;
  */
 public interface JdbcTypeAdapter<T> {
 
-    public Class<T> getTypeClass();
+    Class<T> getTypeClass();
 
     <X> T wrap(X value, Connection connection) throws SQLException;
 

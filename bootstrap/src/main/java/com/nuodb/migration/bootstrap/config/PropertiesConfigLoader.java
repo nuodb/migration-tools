@@ -10,10 +10,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
-import static com.nuodb.migration.bootstrap.config.BootstrapConfig.HOME;
+import static com.nuodb.migration.bootstrap.config.Config.HOME;
 
 @SuppressWarnings("unchecked")
-public class BootstrapConfigLoader {
+public class PropertiesConfigLoader {
 
     public static final String CONFIG_PROPERTY = "bootstrap.config";
 
@@ -21,9 +21,9 @@ public class BootstrapConfigLoader {
 
     public static final String CONFIG_FOLDER = "conf";
 
-    private static final Log log = LogFactory.getLogger(BootstrapConfigLoader.class);
+    private static final Log log = LogFactory.getLog(PropertiesConfigLoader.class);
 
-    private PlaceholderReplacer placeholderReplacer;
+    private Replacer replacer;
 
     static {
         setHome();
@@ -44,7 +44,7 @@ public class BootstrapConfigLoader {
         return System.getProperty(HOME);
     }
 
-    public BootstrapConfig loadConfig() {
+    public Config loadConfig() {
         InputStream is = getConfigFromProperty();
         if (is == null) {
             is = getConfigFromHome();
@@ -58,15 +58,15 @@ public class BootstrapConfigLoader {
             try {
                 properties.load(is);
                 is.close();
-            } catch (Throwable t) {
-                error = t;
+            } catch (Throwable throwable) {
+                error = throwable;
             }
         if (is == null || error != null) {
             if (log.isWarnEnabled()) {
                 log.warn("Failed to load bootstrap config", error);
             }
         }
-        return new PropertiesBootstrapConfig(properties, placeholderReplacer);
+        return new PropertiesConfig(properties, replacer);
     }
 
     private static InputStream getConfigFromProperty() {
@@ -84,7 +84,7 @@ public class BootstrapConfigLoader {
                             CONFIG_PROPERTY));
                 }
             }
-        } catch (Throwable t) {
+        } catch (Throwable throwable) {
             // ignored
         }
         return stream;
@@ -115,7 +115,7 @@ public class BootstrapConfigLoader {
         InputStream stream = null;
         try {
             String config = CONFIG;
-            stream = BootstrapConfigLoader.class.getResourceAsStream(config);
+            stream = PropertiesConfigLoader.class.getResourceAsStream(config);
             if (stream != null) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Default bootstrap config found at %s", config));
@@ -125,17 +125,17 @@ public class BootstrapConfigLoader {
                     log.debug(String.format("Default bootstrap config can't be found at %s", config));
                 }
             }
-        } catch (Throwable t) {
+        } catch (Throwable throwable) {
             // ignored
         }
         return stream;
     }
 
-    public PlaceholderReplacer getPlaceholderReplacer() {
-        return placeholderReplacer;
+    public Replacer getReplacer() {
+        return replacer;
     }
 
-    public void setPlaceholderReplacer(PlaceholderReplacer placeholderReplacer) {
-        this.placeholderReplacer = placeholderReplacer;
+    public void setReplacer(Replacer replacer) {
+        this.replacer = replacer;
     }
 }

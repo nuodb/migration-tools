@@ -27,14 +27,12 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Relational;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
@@ -47,16 +45,16 @@ import static java.lang.String.format;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class ScriptGeneratorContext implements Map {
+public class ScriptGeneratorContext {
 
     private Dialect dialect;
     private String catalog;
     private String schema;
     private Collection<ScriptType> scriptTypes = newHashSet();
+    private Collection<MetaDataType> metaDataTypes = newHashSet(ALL_TYPES);
+    private Map<String, Object> attributes = newHashMap();
     private Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> namingStrategyMap = newHashMap();
     private Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> scriptGeneratorMap = newHashMap();
-    private Collection<MetaDataType> metaDataTypes = newHashSet(ALL_TYPES);
-    private Map map = Maps.newHashMap();
 
     public ScriptGeneratorContext() {
         addScriptGenerator(new DatabaseGenerator());
@@ -79,10 +77,10 @@ public class ScriptGeneratorContext implements Map {
 
         this.scriptTypes.addAll(scriptGeneratorContext.getScriptTypes());
         this.metaDataTypes.addAll(scriptGeneratorContext.getMetaDataTypes());
+
+        this.attributes.putAll(scriptGeneratorContext.getAttributes());
         this.namingStrategyMap.putAll(scriptGeneratorContext.getNamingStrategies());
         this.scriptGeneratorMap.putAll(scriptGeneratorContext.getScriptGenerators());
-
-        this.putAll(scriptGeneratorContext);
     }
 
     public String getCatalog() {
@@ -153,6 +151,14 @@ public class ScriptGeneratorContext implements Map {
         return namingStrategyMap;
     }
 
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
+
     protected <R extends Relational, T extends GeneratorService<R>> T getGeneratorService(
             Map generatorServiceMap, R relational) {
         Class<? extends Relational> relationalType = relational.getClass();
@@ -221,63 +227,5 @@ public class ScriptGeneratorContext implements Map {
         return getNamingStrategy(relational).getQualifiedName(relational, this, identifier);
     }
 
-    @Override
-    public Set entrySet() {
-        return map.entrySet();
-    }
 
-    @Override
-    public int size() {
-        return map.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
-
-    @Override
-    public boolean containsKey(Object key) {
-        return map.containsKey(key);
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return map.containsValue(value);
-    }
-
-    @Override
-    public Object get(Object key) {
-        return map.get(key);
-    }
-
-    @Override
-    public Object put(Object key, Object value) {
-        return map.put(key, value);
-    }
-
-    @Override
-    public Object remove(Object key) {
-        return map.remove(key);
-    }
-
-    @Override
-    public void putAll(Map m) {
-        map.putAll(m);
-    }
-
-    @Override
-    public void clear() {
-        map.clear();
-    }
-
-    @Override
-    public Set keySet() {
-        return map.keySet();
-    }
-
-    @Override
-    public Collection values() {
-        return map.values();
-    }
 }
