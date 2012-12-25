@@ -189,7 +189,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
 
     protected String getTypeName(Column column, ScriptGeneratorContext scriptGeneratorContext) {
         JdbcTypeNameMap jdbcTypeNameMap = scriptGeneratorContext.getDialect().getJdbcTypeRegistry().getJdbcTypeNameMap();
-        String typeName = jdbcTypeNameMap.getTypeName(
+        String typeName = jdbcTypeNameMap.getJdbcTypeName(
                 column.getTypeCode(), column.getSize(), column.getPrecision(), column.getScale());
         if (typeName == null) {
             throw new ScriptGeneratorException(

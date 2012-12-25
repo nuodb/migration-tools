@@ -389,11 +389,11 @@ public class SQL2003Dialect implements Dialect {
     }
 
     protected void addJdbcTypeName(int typeCode, String typeName) {
-        jdbcTypeRegistry.getJdbcTypeNameMap().addTypeName(typeCode, typeName);
+        jdbcTypeRegistry.getJdbcTypeNameMap().addJdbcTypeName(typeCode, typeName);
     }
 
     protected void addJdbcTypeName(int typeCode, String typeName, int size) {
-        jdbcTypeRegistry.getJdbcTypeNameMap().addTypeName(typeCode, typeName, size);
+        jdbcTypeRegistry.getJdbcTypeNameMap().addJdbcTypeName(typeCode, typeName, size);
     }
 
     protected void removeJdbcTypeName(int typeCode) {

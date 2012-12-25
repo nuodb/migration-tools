@@ -64,8 +64,8 @@ public class NuoDBDialect extends SQL2003Dialect {
         addJdbcTypeName(Types.CHAR, "CHAR", 1);
         addJdbcTypeName(Types.CHAR, "CHAR({N})");
 
-        // addTypeName(Types.VARCHAR, "CHARACTER VARYING({N})");
-        // addTypeName(Types.LONGVARCHAR, "CHARACTER VARYING({N})");
+        // addJdbcTypeName(Types.VARCHAR, "CHARACTER VARYING({N})");
+        // addJdbcTypeName(Types.LONGVARCHAR, "CHARACTER VARYING({N})");
         addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
         addJdbcTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
 
@@ -75,23 +75,23 @@ public class NuoDBDialect extends SQL2003Dialect {
 
         addJdbcTypeName(Types.BINARY, "BINARY({N})");
 
-        // addTypeName(Types.VARBINARY, "BINARY VARYING({N})");
-        // addTypeName(Types.LONGVARBINARY, "BINARY VARYING({N})");
+        // addJdbcTypeName(Types.VARBINARY, "BINARY VARYING({N})");
+        // addJdbcTypeName(Types.LONGVARBINARY, "BINARY VARYING({N})");
         addJdbcTypeName(Types.VARBINARY, "VARBINARY({N})");
         addJdbcTypeName(Types.LONGVARBINARY, "VARBINARY({N})");
 
         addJdbcTypeName(Types.NULL, "NULL");
 
-        // addTypeName(Types.BLOB, "BINARY LARGE OBJECT");
-        // addTypeName(Types.CLOB, "CHARACTER LARGE OBJECT");
-        // addTypeName(Types.BOOLEAN, "BOOLEAN");
+        // addJdbcTypeName(Types.BLOB, "BINARY LARGE OBJECT");
+        // addJdbcTypeName(Types.CLOB, "CHARACTER LARGE OBJECT");
+        // addJdbcTypeName(Types.BOOLEAN, "BOOLEAN");
         addJdbcTypeName(Types.BLOB, "BLOB");
         addJdbcTypeName(Types.CLOB, "CLOB");
         addJdbcTypeName(Types.BOOLEAN, "BOOLEAN");
 
-        // addTypeName(Types.NCHAR, "NATIONAL CHARACTER");
-        // addTypeName(Types.NVARCHAR, "NATIONAL CHARACTER VARYING({N})");
-        // addTypeName(Types.NCLOB, "NATIONAL CHARACTER LARGE OBJECT");
+        // addJdbcTypeName(Types.NCHAR, "NATIONAL CHARACTER");
+        // addJdbcTypeName(Types.NVARCHAR, "NATIONAL CHARACTER VARYING({N})");
+        // addJdbcTypeName(Types.NCLOB, "NATIONAL CHARACTER LARGE OBJECT");
         addJdbcTypeName(Types.NCHAR, "NCHAR", 1);
         addJdbcTypeName(Types.NCHAR, "NCHAR({N})");
         addJdbcTypeName(Types.NVARCHAR, "NVARCHAR({N})");

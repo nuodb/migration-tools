@@ -57,11 +57,11 @@ public class JdbcTypeNameMap {
     private Map<Integer, String> typeCodeMap = Maps.newHashMap();
     private Map<Integer, Map<Integer, String>> typeCodeLengthMap = Maps.newHashMap();
 
-    public void addTypeName(int typeCode, String typeName) {
+    public void addJdbcTypeName(int typeCode, String typeName) {
         typeCodeMap.put(typeCode, typeName);
     }
 
-    public void addTypeName(int typeCode, String typeName, int length) {
+    public void addJdbcTypeName(int typeCode, String typeName, int length) {
         Map<Integer, String> typeLengthMap = typeCodeLengthMap.get(typeCode);
         if (typeLengthMap == null) {
             typeLengthMap = Maps.newTreeMap();
@@ -74,11 +74,11 @@ public class JdbcTypeNameMap {
         typeCodeMap.remove(typeCode);
     }
 
-    public String getTypeName(int typeCode) {
+    public String getJdbcTypeName(int typeCode) {
         return typeCodeMap.get(typeCode);
     }
 
-    public String getTypeName(int typeCode, int length, int precision, int scale) {
+    public String getJdbcTypeName(int typeCode, int length, int precision, int scale) {
         Map<Integer, String> map = typeCodeLengthMap.get(typeCode);
         if (map != null) {
             for (Map.Entry<Integer, String> entry : map.entrySet()) {
@@ -87,7 +87,7 @@ public class JdbcTypeNameMap {
                 }
             }
         }
-        return expandVariables(getTypeName(typeCode), length, precision, scale);
+        return expandVariables(getJdbcTypeName(typeCode), length, precision, scale);
     }
 
     protected String expandVariables(String typeName, int length, int precision, int scale) {
@@ -108,9 +108,9 @@ public class JdbcTypeNameMap {
 
     static class StandardJdbcTypeNameMap extends JdbcTypeNameMap {
 
-        private static final Logger logger = LoggerFactory.getLogger(JdbcTypeNameMap.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(JdbcTypeNameMap.class);
 
-        private static Map<Integer, String> createTypeNameMap() {
+        private static Map<Integer, String> createJdbcTypeNameMap() {
             Map<Integer, String> typeNameMap = Maps.newLinkedHashMap();
             Field[] fields = Types.class.getFields();
             for (Field field : fields) {
@@ -118,8 +118,8 @@ public class JdbcTypeNameMap {
                     try {
                         typeNameMap.put((Integer) field.get(null), field.getName());
                     } catch (IllegalAccessException exception) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug(format("Failed accessing %s field", Types.class), exception);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug(format("Failed accessing %s field", Types.class), exception);
                         }
                     }
                 }
@@ -128,14 +128,14 @@ public class JdbcTypeNameMap {
         }
 
         private StandardJdbcTypeNameMap() {
-            for (Map.Entry<Integer, String> entry : createTypeNameMap().entrySet()) {
-                addTypeName(entry.getKey(), entry.getValue());
+            for (Map.Entry<Integer, String> entry : createJdbcTypeNameMap().entrySet()) {
+                addJdbcTypeName(entry.getKey(), entry.getValue());
             }
         }
 
         @Override
-        public String getTypeName(int typeCode, int length, int precision, int scale) {
-            String typeName = super.getTypeName(typeCode, length, precision, scale);
+        public String getJdbcTypeName(int typeCode, int length, int precision, int scale) {
+            String typeName = super.getJdbcTypeName(typeCode, length, precision, scale);
             return typeName != null ? typeName : "type(" + typeCode + ")";
         }
     }

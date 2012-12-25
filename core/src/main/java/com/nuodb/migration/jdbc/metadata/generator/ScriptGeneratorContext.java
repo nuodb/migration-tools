@@ -194,21 +194,21 @@ public class ScriptGeneratorContext {
     }
 
     public <R extends Relational> Collection<String> getCreateScripts(R relational) {
-        ScriptGeneratorContext context = new ScriptGeneratorContext(this);
-        context.setScriptTypes(newHashSet(CREATE));
-        return getScriptGenerator(relational).getScripts(relational, this);
+        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
+        scriptGeneratorContext.setScriptTypes(newHashSet(CREATE));
+        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
     }
 
     public <R extends Relational> Collection<String> getDropScripts(R relational) {
-        ScriptGeneratorContext context = new ScriptGeneratorContext(this);
-        context.setScriptTypes(newHashSet(DROP));
-        return getScriptGenerator(relational).getScripts(relational, this);
+        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
+        scriptGeneratorContext.setScriptTypes(newHashSet(DROP));
+        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
     }
 
     public <R extends Relational> Collection<String> getDropCreateScripts(R relational) {
-        ScriptGeneratorContext context = new ScriptGeneratorContext(this);
-        context.setScriptTypes(newHashSet(DROP, CREATE));
-        return getScriptGenerator(relational).getScripts(relational, this);
+        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
+        scriptGeneratorContext.setScriptTypes(newHashSet(DROP, CREATE));
+        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
     }
 
     public <R extends Relational> String getName(R relational) {
@@ -226,6 +226,4 @@ public class ScriptGeneratorContext {
     public <R extends Relational> String getQualifiedName(R relational, boolean identifier) {
         return getNamingStrategy(relational).getQualifiedName(relational, this, identifier);
     }
-
-
 }
