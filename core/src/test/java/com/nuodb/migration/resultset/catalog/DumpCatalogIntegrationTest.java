@@ -25,7 +25,7 @@ public class DumpCatalogIntegrationTest extends TestUtils {
     public void setUp() throws Exception {
         ResourceSpec outputSpec = new ResourceSpec();
         outputSpec.setPath(TEST_PATH);
-        outputSpec.setType(CsvAttributes.FORMAT_TYPE);
+        outputSpec.setType(CsvAttributes.FORMAT);
         this.outputSpec = outputSpec;
 
         FileCatalog catalogFile = new FileCatalog(outputSpec.getType());

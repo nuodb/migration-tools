@@ -28,7 +28,6 @@
 package com.nuodb.migration.resultset.format;
 
 import com.nuodb.migration.jdbc.model.ValueModel;
-import com.nuodb.migration.jdbc.model.ValueModelFactory;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
@@ -89,21 +88,21 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
         } catch (SQLException exception) {
             throw new ResultSetOutputException(exception);
         }
-        setValueFormatModelList(createColumnValueModelList());
+        setValueFormatModelList(createValueFormatModelList());
     }
 
-    protected ValueModelList<ValueFormatModel> createColumnValueModelList() {
+    protected ValueModelList<ValueFormatModel> createValueFormatModelList() {
         int index = 0;
-        final ValueModelList<ValueFormatModel> valueFormatModelList = ValueModelFactory.createValueModelList();
+        final ValueModelList<ValueFormatModel> valueFormatModelList = createValueModelList();
         ValueFormatModel valueFormatModel;
         for (ValueModel valueModel : getValueModelList()) {
-            visitValueFormatModel(valueFormatModel = createColumnValueModel(valueModel, index++));
+            visitValueFormatModel(valueFormatModel = createValueFormatModel(valueModel, index++));
             valueFormatModelList.add(valueFormatModel);
         }
         return valueFormatModelList;
     }
 
-    protected ValueFormatModel createColumnValueModel(ValueModel valueModel, int index) {
+    protected ValueFormatModel createValueFormatModel(ValueModel valueModel, int index) {
         JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(valueModel.getTypeCode(), valueModel.getTypeName());
         JdbcTypeDesc jdbcTypeDescAlias = getJdbcTypeValueAccessProvider().getJdbcTypeDescAlias(jdbcTypeDesc);
 
@@ -129,16 +128,16 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
 
     @Override
     public final void writeRow() {
-        writeRow(getColumnValues());
+        writeRow(getValues());
     }
 
-    protected String[] getColumnValues() {
+    protected String[] getValues() {
         int index = 0;
         final ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
         final String[] values = new String[valueFormatModelList.size()];
         for (ValueFormatModel valueFormatModel : valueFormatModelList) {
-            values[index++] = valueFormatModel.getValueFormat().getValue(
-                    valueFormatModel.getValueAccess(), valueFormatModel.getValueAccessOptions());
+            values[index++] = valueFormatModel.getJdbcTypeValueFormat().getValue(
+                    valueFormatModel.getJdbcTypeValueAccess(), valueFormatModel.getJdbcTypeValueAccessOptions());
         }
         return values;
     }

@@ -49,8 +49,8 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
     private String doubleQuote;
 
     @Override
-    public String getFormatType() {
-        return FORMAT_TYPE;
+    public String getFormat() {
+        return FORMAT;
     }
 
     @Override

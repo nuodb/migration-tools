@@ -45,8 +45,8 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
     private JsonGenerator writer;
 
     @Override
-    public String getFormatType() {
-        return FORMAT_TYPE;
+    public String getFormat() {
+        return FORMAT;
     }
 
     @Override

@@ -32,7 +32,7 @@ package com.nuodb.migration.resultset.format.xml;
  */
 public interface XmlAttributes {
 
-    final String FORMAT_TYPE = "xml";
+    final String FORMAT = "xml";
     final String SCHEMA_NIL_ATTRIBUTE = "nil";
 
     final String ATTRIBUTE_ENCODING = "xml.encoding";

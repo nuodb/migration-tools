@@ -56,13 +56,13 @@ public class SimpleResultSetFormatFactory implements ResultSetFormatFactory {
     private Map<String, Class<? extends ResultSetOutput>> outputClasses = Maps.newHashMap();
 
     public SimpleResultSetFormatFactory() {
-        registerFormat(CsvAttributes.FORMAT_TYPE, CsvResultSetInput.class);
-        registerFormat(XmlAttributes.FORMAT_TYPE, XmlResultSetInput.class);
-        registerFormat(BsonAttributes.FORMAT_TYPE, BsonResultSetInput.class);
+        registerFormat(CsvAttributes.FORMAT, CsvResultSetInput.class);
+        registerFormat(XmlAttributes.FORMAT, XmlResultSetInput.class);
+        registerFormat(BsonAttributes.FORMAT, BsonResultSetInput.class);
 
-        registerFormat(CsvAttributes.FORMAT_TYPE, CsvResultSetOutput.class);
-        registerFormat(XmlAttributes.FORMAT_TYPE, XmlResultSetOutput.class);
-        registerFormat(BsonAttributes.FORMAT_TYPE, BsonResultSetOutput.class);
+        registerFormat(CsvAttributes.FORMAT, CsvResultSetOutput.class);
+        registerFormat(XmlAttributes.FORMAT, XmlResultSetOutput.class);
+        registerFormat(BsonAttributes.FORMAT, BsonResultSetOutput.class);
     }
 
     @Override

@@ -29,7 +29,6 @@ package com.nuodb.migration.resultset.format;
 
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.model.ValueModel;
-import com.nuodb.migration.jdbc.model.ValueModelFactory;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcDateTypeBase;
@@ -40,6 +39,8 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
+
 /**
  * @author Sergey Bushik
  */
@@ -47,15 +48,10 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
 
     private Map<String, String> attributes;
     private TimeZone timeZone;
-    private ValueModelList<ValueModel> valueModelList = ValueModelFactory.createValueModelList();
+    private ValueModelList<ValueModel> valueModelList = createValueModelList();
     private ValueModelList<ValueFormatModel> valueFormatModelList;
     private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider;
     private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;
-
-    @Override
-    public final void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
-    }
 
     @Override
     public String getAttribute(String attribute) {
@@ -71,6 +67,11 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
         return value == null ? defaultValue : value;
     }
 
+    @Override
+    public final void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
     protected void visitValueFormatModel(ValueFormatModel valueFormatModel) {
         int typeCode = valueFormatModel.getTypeCode();
         if (typeCode == Types.TIME || typeCode == Types.TIMESTAMP || typeCode == Types.DATE) {
@@ -80,7 +81,7 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
                 calendar.setTimeZone(timeZone);
                 Map<String, Object> options = Maps.newHashMap();
                 options.put(JdbcDateTypeBase.CALENDAR, calendar);
-                valueFormatModel.setValueAccessOptions(options);
+                valueFormatModel.setJdbcTypeValueAccessOptions(options);
             }
         }
     }

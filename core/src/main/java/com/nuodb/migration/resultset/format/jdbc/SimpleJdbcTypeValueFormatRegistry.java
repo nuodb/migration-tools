@@ -142,7 +142,8 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
                     break;
                 default:
                     throw new JdbcTypeValueException(
-                            format("Unsupported JDBC type %s, code %d", valueModel.getTypeName(), valueModel.getTypeCode()));
+                            format("Unsupported JDBC type %s, code %d", valueModel.getTypeName(),
+                                    valueModel.getTypeCode()));
             }
             return value;
         }
@@ -215,7 +216,8 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
                     break;
                 default:
                     throw new JdbcTypeValueException(
-                            format("Unsupported JDBC type %s, code %d", valueModel.getTypeName(), valueModel.getTypeCode()));
+                            format("Unsupported JDBC type %s, code %d", valueModel.getTypeName(),
+                                    valueModel.getTypeCode()));
             }
         }
 

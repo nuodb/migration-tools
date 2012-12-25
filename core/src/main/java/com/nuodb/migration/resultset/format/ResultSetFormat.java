@@ -40,7 +40,11 @@ import java.util.TimeZone;
  */
 public interface ResultSetFormat {
 
-    String getFormatType();
+    String getFormat();
+
+    TimeZone getTimeZone();
+
+    void setTimeZone(TimeZone timeZone);
 
     String getAttribute(String attribute);
 
@@ -50,17 +54,13 @@ public interface ResultSetFormat {
 
     void setAttributes(Map<String, String> attributes);
 
-    TimeZone getTimeZone();
-
-    void setTimeZone(TimeZone timeZone);
-
     ValueModelList<ValueModel> getValueModelList();
 
     void setValueModelList(ValueModelList<ValueModel> valueModelList);
 
     ValueModelList<ValueFormatModel> getValueFormatModelList();
 
-    void setValueFormatModelList(ValueModelList<ValueFormatModel> valueSetFormatModel);
+    void setValueFormatModelList(ValueModelList<ValueFormatModel> valueFormatModelList);
 
     JdbcTypeValueAccessProvider getJdbcTypeValueAccessProvider();
 

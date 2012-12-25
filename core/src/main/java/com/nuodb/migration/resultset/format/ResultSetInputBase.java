@@ -28,7 +28,6 @@
 package com.nuodb.migration.resultset.format;
 
 import com.nuodb.migration.jdbc.model.ValueModel;
-import com.nuodb.migration.jdbc.model.ValueModelFactory;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
@@ -39,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.PreparedStatement;
+
+import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 
 /**
  * @author Sergey Bushik
@@ -90,7 +91,7 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     protected ValueModelList<ValueFormatModel> createValueFormatModelList() {
         int index = 0;
         ValueFormatModel valueFormatModel;
-        final ValueModelList<ValueFormatModel> valueFormatModelList = ValueModelFactory.createValueModelList();
+        final ValueModelList<ValueFormatModel> valueFormatModelList = createValueModelList();
         for (ValueModel valueModel : getValueModelList()) {
             visitValueFormatModel(valueFormatModel = createValueFormatModel(valueModel, index++));
             valueFormatModelList.add(valueFormatModel);
@@ -105,11 +106,11 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
         valueModel.setTypeCode(jdbcTypeDescAlias.getTypeCode());
         valueModel.setTypeName(jdbcTypeDescAlias.getTypeName());
 
-        JdbcTypeValueFormat jdbcTypeValueFormat =
-                getJdbcTypeValueFormatRegistry().getJdbcTypeValueFormat(jdbcTypeDescAlias);
+        JdbcTypeValueFormat valueFormat = getJdbcTypeValueFormatRegistry().getJdbcTypeValueFormat(jdbcTypeDescAlias);
         JdbcTypeValueAccess<Object> jdbcTypeValueAccess =
-                getJdbcTypeValueAccessProvider().getPreparedStatementAccess(getPreparedStatement(), valueModel, index + 1);
-        return new SimpleValueFormatModel(valueModel, jdbcTypeValueFormat, jdbcTypeValueAccess, null);
+                getJdbcTypeValueAccessProvider().getPreparedStatementAccess(getPreparedStatement(), valueModel,
+                        index + 1);
+        return new SimpleValueFormatModel(valueModel, valueFormat, jdbcTypeValueAccess, null);
     }
 
     @Override
@@ -125,9 +126,10 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     protected void setColumnValues(String[] values) {
         ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
         for (int index = 0; index < values.length; index++) {
-            ValueFormatModel columnValueFormatModel = valueFormatModelList.get(index);
-            columnValueFormatModel.getValueFormat().setValue(
-                    columnValueFormatModel.getValueAccess(), values[index], columnValueFormatModel.getValueAccessOptions());
+            ValueFormatModel valueFormatModel = valueFormatModelList.get(index);
+            valueFormatModel.getJdbcTypeValueFormat().setValue(
+                    valueFormatModel.getJdbcTypeValueAccess(), values[index],
+                    valueFormatModel.getJdbcTypeValueAccessOptions());
         }
     }
 

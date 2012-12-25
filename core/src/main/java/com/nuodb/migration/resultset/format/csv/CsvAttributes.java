@@ -34,7 +34,7 @@ public interface CsvAttributes {
 
     final String ENCODING = "utf-8";
 
-    final String FORMAT_TYPE = "csv";
+    final String FORMAT = "csv";
     /**
      * The symbol used for value separation, must not be a line break character.
      */

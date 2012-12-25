@@ -38,5 +38,6 @@ public interface JdbcTypeValueFormat<T> {
 
     String getValue(JdbcTypeValueAccess<T> access, Map<String, Object> options) throws JdbcTypeValueException;
 
-    void setValue(JdbcTypeValueAccess<T> access, String value, Map<String, Object> options) throws JdbcTypeValueException;
+    void setValue(JdbcTypeValueAccess<T> access, String value,
+                  Map<String, Object> options) throws JdbcTypeValueException;
 }

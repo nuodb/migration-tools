@@ -39,6 +39,7 @@ import java.util.Iterator;
 
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModel;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
+import static java.lang.String.format;
 import static javax.xml.XMLConstants.NULL_NS_URI;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
 
@@ -47,25 +48,24 @@ import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
  */
 public class XmlResultSetInput extends ResultSetInputBase implements XmlAttributes {
 
-    private String encoding;
     private XMLStreamReader reader;
     private Iterator<String[]> iterator;
 
     @Override
-    public String getFormatType() {
-        return FORMAT_TYPE;
+    public String getFormat() {
+        return FORMAT;
     }
 
     @Override
     protected void initInput() {
-        encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
+        String encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
 
         XMLInputFactory factory = XMLInputFactory.newInstance();
         try {
             if (getReader() != null) {
                 reader = factory.createXMLStreamReader(getReader());
             } else if (getInputStream() != null) {
-                reader = factory.createXMLStreamReader(getInputStream());
+                reader = factory.createXMLStreamReader(getInputStream(), encoding);
             }
         } catch (XMLStreamException e) {
             throw new ResultSetInputException(e);
@@ -89,9 +89,9 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
                 } else {
                     Location location = reader.getLocation();
                     throw new ResultSetInputException(
-                            String.format("Element %s doesn't have %s attribute [location at %d:%d]",
-                                    COLUMN_ELEMENT, ATTRIBUTE_NAME, location.getLineNumber(),
-                                    location.getColumnNumber()));
+                            format("Element %s doesn't have %s attribute [location at %d:%d]",
+                                    COLUMN_ELEMENT, ATTRIBUTE_NAME,
+                                    location.getLineNumber(), location.getColumnNumber()));
                 }
             }
         }
@@ -183,7 +183,6 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
             String[] next = current;
             current = null;
             if (next == null) {
-                // hasNext() wasn't called before
                 next = doReadRow();
                 if (next == null) {
                     throw new ResultSetInputException("No more rows available");
@@ -196,13 +195,5 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
         public void remove() {
             throw new ResultSetInputException("Removal is unsupported operation");
         }
-    }
-
-    public String getEncoding() {
-        return encoding;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
     }
 }

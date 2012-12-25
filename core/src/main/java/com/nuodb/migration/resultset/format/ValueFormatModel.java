@@ -38,15 +38,15 @@ import java.util.Map;
  */
 public interface ValueFormatModel extends ValueModel {
 
-    JdbcTypeValueAccess getValueAccess();
+    JdbcTypeValueAccess getJdbcTypeValueAccess();
 
-    void setValueAccess(JdbcTypeValueAccess valueAccess);
+    void setJdbcTypeValueAccess(JdbcTypeValueAccess jdbcTypeValueAccess);
 
-    JdbcTypeValueFormat getValueFormat();
+    JdbcTypeValueFormat getJdbcTypeValueFormat();
 
-    void setValueFormat(JdbcTypeValueFormat valueFormat);
+    void setJdbcTypeValueFormat(JdbcTypeValueFormat jdbcTypeValueFormat);
 
-    Map<String, Object> getValueAccessOptions();
+    Map<String, Object> getJdbcTypeValueAccessOptions();
 
-    void setValueAccessOptions(Map<String, Object> valueAccessOptions);
+    void setJdbcTypeValueAccessOptions(Map<String, Object> jdbcTypeValueAccessOptions);
 }

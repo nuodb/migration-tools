@@ -54,8 +54,8 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
     private Iterator<CSVRecord> iterator;
 
     @Override
-    public String getFormatType() {
-        return FORMAT_TYPE;
+    public String getFormat() {
+        return FORMAT;
     }
 
     @Override

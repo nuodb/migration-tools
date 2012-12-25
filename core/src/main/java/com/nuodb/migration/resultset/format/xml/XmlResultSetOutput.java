@@ -48,8 +48,8 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
     private XMLStreamWriter writer;
 
     @Override
-    public String getFormatType() {
-        return FORMAT_TYPE;
+    public String getFormat() {
+        return FORMAT;
     }
 
     @Override

@@ -52,8 +52,8 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
     private Iterator<String[]> iterator;
 
     @Override
-    public String getFormatType() {
-        return FORMAT_TYPE;
+    public String getFormat() {
+        return FORMAT;
     }
 
     @Override
