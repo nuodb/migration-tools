@@ -57,10 +57,10 @@ public class SequenceGenerator extends ScriptGeneratorBase<Sequence> {
         buffer.append(scriptGeneratorContext.getQualifiedName(sequence));
         Dialect dialect = scriptGeneratorContext.getDialect();
 
-        String startWith = dialect.getSequenceStartWith(sequence.getStartWith());
-        if (startWith != null) {
+        String currentValue = dialect.getSequenceStartWith(sequence.getLastValue());
+        if (currentValue != null) {
             buffer.append(' ');
-            buffer.append(startWith);
+            buffer.append(currentValue);
         }
 
         String incrementBy = dialect.getSequenceIncrementBy(sequence.getIncrementBy());

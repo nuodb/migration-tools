@@ -214,6 +214,9 @@ public class DumpJob extends JobBase {
         if (logger.isDebugEnabled()) {
             logger.debug(query.toQuery());
         }
+        if (query.toQuery().startsWith("SELECT SEQUENCE_CATALOG, SEQUENCE_SCHEMA, SEQUENCE_NAME, DATA_TYPE, NUMERIC_PRECISION, NUMERIC_PRECISION_RADIX, NUMERIC_SCALE")) {
+            System.out.println("f");
+        }
         PreparedStatement preparedStatement = connection.prepareStatement(
                 query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
         database.getDialect().setStreamResults(preparedStatement, true);
@@ -237,7 +240,7 @@ public class DumpJob extends JobBase {
         Dialect dialect = database.getDialect();
         Collection<SelectQuery> selectQueries = Lists.newArrayList();
         for (Table table : database.listTables()) {
-            if (Table.TABLE.equals(table.getType())) {
+            if (Table.TABLE.equals(table.getType()) || true) {
                 SelectQueryBuilder builder = new SelectQueryBuilder();
                 builder.setDialect(dialect);
                 builder.setTable(table);

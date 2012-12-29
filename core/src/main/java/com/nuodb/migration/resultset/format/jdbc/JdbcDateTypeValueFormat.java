@@ -65,7 +65,7 @@ public class JdbcDateTypeValueFormat extends JdbcTypeValueFormatBase<Date> {
     protected void doSetValue(JdbcTypeValueAccess<Date> access, String value,
                               Map<String, Object> options) throws SQLException {
         if (!(doSetValueAsDate(access, value, options) || doSetValueAsYear(access, value, options))) {
-            throw new JdbcTypeValueException(format("Value %s is not date or year", value));
+            throw new JdbcTypeValueException(format("Value %s is not a date nor year", value));
         }
     }
 

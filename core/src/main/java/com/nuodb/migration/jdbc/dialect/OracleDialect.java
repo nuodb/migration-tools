@@ -32,7 +32,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimeZone;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 
 /**
  * @author Sergey Bushik
@@ -45,6 +48,13 @@ public class OracleDialect extends SQL2003Dialect {
     }
 
     @Override
+    public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) {
+        return newArrayList(
+                TRANSACTION_READ_COMMITTED,
+                TRANSACTION_SERIALIZABLE).contains(transactionIsolationLevel);
+    }
+
+    @Override
     public boolean supportsSessionTimeZone() {
         return true;
     }
@@ -54,11 +64,12 @@ public class OracleDialect extends SQL2003Dialect {
         Statement statement = connection.createStatement();
         try {
             String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL";
-            statement.execute("ALTER SESSION SET TIME_ZONE = '" + timeZoneAsValue + "'");
+            statement.execute("ALTER SESSION SET TIME_ZONE = " + timeZoneAsValue);
         } finally {
             close(statement);
         }
     }
+
 
     protected String timeZoneAsValue(TimeZone timeZone) {
         int rawOffset = timeZone.getRawOffset();
@@ -68,18 +79,25 @@ public class OracleDialect extends SQL2003Dialect {
         String minutesOffset = Integer.toString((absOffset % 3600000) / 60000);
 
         String zeros = "00";
-        StringBuilder value = new StringBuilder(32);
+        StringBuilder value = new StringBuilder(34);
+        value.append("'");
         value.append(rawOffset >= 0 ? '+' : '-');
         value.append(zeros.substring(0, zeros.length() - hoursOffset.length()));
         value.append(hoursOffset);
         value.append(':');
         value.append(zeros.substring(0, zeros.length() - minutesOffset.length()));
+        value.append("'");
         return value.toString();
     }
 
     @Override
     public boolean supportsDropConstraints() {
         return false;
+    }
+
+    @Override
+    public boolean supportsNegativeScale() {
+        return true;
     }
 
     @Override

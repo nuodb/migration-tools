@@ -50,7 +50,7 @@ public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
 
     public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("fk");
+        buffer.append("FK");
         buffer.append('_');
         buffer.append(scriptGeneratorContext.getName(foreignKey.getSourceTable(), false));
         buffer.append('_');

@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.metadata;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.Collection;
@@ -83,6 +84,15 @@ public class Catalog extends HasIdentifierBase {
 
     public Collection<Schema> listSchemas() {
         return schemas.values();
+    }
+
+    public Collection<Table> listTables() {
+        Collection<Schema> schemas = listSchemas();
+        Collection<Table> tables = Lists.newArrayList();
+        for (Schema schema : schemas) {
+            tables.addAll(schema.listTables());
+        }
+        return tables;
     }
 
     @Override

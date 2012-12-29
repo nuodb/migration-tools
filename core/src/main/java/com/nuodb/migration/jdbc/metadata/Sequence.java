@@ -27,6 +27,13 @@
  */
 package com.nuodb.migration.jdbc.metadata;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
@@ -34,6 +41,7 @@ public class Sequence extends HasIdentifierBase {
 
     private Column column;
     private Long startWith;
+    private Long lastValue;
     private Long incrementBy;
     private Long minValue;
     private Long maxValue;
@@ -56,6 +64,14 @@ public class Sequence extends HasIdentifierBase {
 
     public void setStartWith(Long startWith) {
         this.startWith = startWith;
+    }
+
+    public Long getLastValue() {
+        return lastValue;
+    }
+
+    public void setLastValue(Long lastValue) {
+        this.lastValue = lastValue;
     }
 
     public Long getIncrementBy() {
@@ -127,6 +143,8 @@ public class Sequence extends HasIdentifierBase {
         if (temporary != sequence.temporary) return false;
         if (cache != null ? !cache.equals(sequence.cache) : sequence.cache != null) return false;
         if (column != null ? !column.equals(sequence.column) : sequence.column != null) return false;
+        if (lastValue != null ? !lastValue.equals(sequence.lastValue) : sequence.lastValue != null)
+            return false;
         if (incrementBy != null ? !incrementBy.equals(sequence.incrementBy) : sequence.incrementBy != null)
             return false;
         if (maxValue != null ? !maxValue.equals(sequence.maxValue) : sequence.maxValue != null) return false;
@@ -141,6 +159,7 @@ public class Sequence extends HasIdentifierBase {
         int result = super.hashCode();
         result = 31 * result + (column != null ? column.hashCode() : 0);
         result = 31 * result + (startWith != null ? startWith.hashCode() : 0);
+        result = 31 * result + (lastValue != null ? lastValue.hashCode() : 0);
         result = 31 * result + (incrementBy != null ? incrementBy.hashCode() : 0);
         result = 31 * result + (minValue != null ? minValue.hashCode() : 0);
         result = 31 * result + (maxValue != null ? maxValue.hashCode() : 0);
@@ -149,5 +168,35 @@ public class Sequence extends HasIdentifierBase {
         result = 31 * result + (temporary ? 1 : 0);
         result = 31 * result + (cache != null ? cache.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public void output(int indent, StringBuilder buffer) {
+        super.output(indent, buffer);
+
+        buffer.append(' ');
+        Collection<String> attributes = newArrayList();
+        if (startWith != null) {
+            attributes.add(format("start value=%d", startWith));
+        }
+        if (lastValue != null) {
+            attributes.add(format("last value=%d", lastValue));
+        }
+        if (incrementBy != null) {
+            attributes.add(format("increment by=%d", incrementBy));
+        }
+        if (minValue != null) {
+            attributes.add(format("min value=%d", minValue));
+        }
+        if (maxValue != null) {
+            attributes.add(format("max value=%d", maxValue));
+        }
+        attributes.add(format("cycle=%b", cycle));
+        attributes.add(format("order=%s", order ? "DESC" : "ASC"));
+        attributes.add(format("temporary=%b", temporary));
+        if (cache != null) {
+            attributes.add(format("cache=%d", cache));
+        }
+        buffer.append(StringUtils.join(attributes, ", "));
     }
 }

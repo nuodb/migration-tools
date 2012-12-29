@@ -64,7 +64,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             buffer.append(scriptGeneratorContext.getName(column));
             buffer.append(' ');
             buffer.append(getTypeName(column, scriptGeneratorContext));
-            if (column.isIdentity() && metaDataTypes.contains(SEQUENCE)) {
+            if (column.isIdentity() && metaDataTypes.contains(AUTO_INCREMENT)) {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
                         column.getSequence() != null ?
@@ -188,13 +188,18 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected String getTypeName(Column column, ScriptGeneratorContext scriptGeneratorContext) {
-        JdbcTypeNameMap jdbcTypeNameMap = scriptGeneratorContext.getDialect().getJdbcTypeRegistry().getJdbcTypeNameMap();
+        Dialect dialect = scriptGeneratorContext.getDialect();
+        int scale = column.getScale();
+        if (scale < 0 && !dialect.supportsNegativeScale()) {
+            scale = 0;
+        }
+        JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeRegistry().getJdbcTypeNameMap();
         String typeName = jdbcTypeNameMap.getJdbcTypeName(
-                column.getTypeCode(), column.getSize(), column.getPrecision(), column.getScale());
+                column.getTypeCode(), column.getSize(), column.getPrecision(), scale);
         if (typeName == null) {
             throw new ScriptGeneratorException(
-                    format("Unsupported type %s, length %d on table %s column %s",
-                            column.getTypeName(), column.getSize(),
+                    format("Unsupported type %s, type code %d, length %d on table %s column %s",
+                            column.getTypeName(), column.getTypeCode(), column.getSize(),
                             scriptGeneratorContext.getQualifiedName(column.getTable(), false),
                             scriptGeneratorContext.getName(column, false)));
         }

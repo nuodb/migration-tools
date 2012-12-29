@@ -59,7 +59,7 @@ public class JdbcTimestampTypeValueFormat extends JdbcTypeValueFormatBase<Timest
                               Map<String, Object> options) throws SQLException {
         if (!(doSetValueAsTimestamp(access, value, options) || doSetValueAsDate(access, value, options) ||
                 doSetValueAsYear(access, value, options))) {
-            throw new JdbcTypeValueException(format("Value %s is not timestamp, date or year", value));
+            throw new JdbcTypeValueException(format("Value %s is not a timestamp, date nor year", value));
         }
     }
 

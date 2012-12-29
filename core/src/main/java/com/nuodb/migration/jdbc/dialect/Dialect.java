@@ -72,6 +72,8 @@ public interface Dialect {
 
     boolean supportsSequence();
 
+    boolean supportsNegativeScale();
+
     String getIdentifier(String identifier);
 
     String getNullColumnString();

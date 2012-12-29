@@ -223,6 +223,11 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
+    public boolean supportsNegativeScale() {
+        return false;
+    }
+
+    @Override
     public String getColumnComment(String comment) {
         return "";
     }

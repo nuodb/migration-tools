@@ -27,10 +27,21 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import java.sql.Types;
+
 /**
  * @author Sergey Bushik
  */
 public class SQLServerDialect extends SQL2003Dialect {
+
+    public static final int DATETIMEOFFSET = -155;
+
+    public SQLServerDialect() {
+        addJdbcTypeDescAlias(Types.LONGVARBINARY, "IMAGE", Types.BLOB);
+        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
+        addJdbcTypeDescAlias(Types.LONGNVARCHAR, "XML", Types.CLOB);
+        addJdbcTypeDescAlias(DATETIMEOFFSET, "DATETIMEOFFSET", Types.TIMESTAMP);
+    }
 
     @Override
     public char closeQuote() {

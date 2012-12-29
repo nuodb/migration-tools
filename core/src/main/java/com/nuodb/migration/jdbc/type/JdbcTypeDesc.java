@@ -75,7 +75,7 @@ public class JdbcTypeDesc {
     @Override
     public int hashCode() {
         int result = typeCode;
-        result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
+        result = 31 * result + (typeName != null ? typeName.toUpperCase().hashCode() : 0);
         return result;
     }
 

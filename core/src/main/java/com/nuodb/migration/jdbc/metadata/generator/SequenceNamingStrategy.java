@@ -53,7 +53,7 @@ public class SequenceNamingStrategy extends NamingStrategyBase<Sequence> {
     protected String getSequenceName(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext,
                                      boolean identifier) {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("seq");
+        buffer.append("SEQ");
         buffer.append('_');
         Column column = sequence.getColumn();
         buffer.append(scriptGeneratorContext.getName(column.getTable(), false));

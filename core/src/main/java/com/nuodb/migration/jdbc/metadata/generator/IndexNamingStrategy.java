@@ -51,10 +51,10 @@ public class IndexNamingStrategy extends NamingStrategyBase<Index> {
 
     protected String getIndexName(Index index, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("idx");
+        buffer.append("IDX");
         buffer.append('_');
         if (index.isUnique()) {
-            buffer.append("unique");
+            buffer.append("UNIQUE");
             buffer.append("_");
         }
         buffer.append(scriptGeneratorContext.getName(index.getTable(), false));

@@ -86,8 +86,10 @@ public class DatabaseInspector {
         columnCheck.registerObject("NuoDB", NuoDBColumnCheckReader.class);
         withMetaDataReader(columnCheck);
 
-        MetaDataReaderResolver sequence = new MetaDataReaderResolver(SEQUENCE);
+        MetaDataReaderResolver sequence = new MetaDataReaderResolver(AUTO_INCREMENT);
         sequence.registerObject("MySQL", MySQLAutoIncrementReader.class);
+        sequence.registerObject("PostgreSQL", PostgreSQLAutoIncrementReader.class);
+        sequence.registerObject("Microsoft SQL Server", MSSQLAutoIncrementReader.class);
         withMetaDataReader(sequence);
     }
 

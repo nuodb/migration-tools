@@ -290,8 +290,8 @@ public class Column extends HasIdentifierBase implements ValueModel {
             buffer.append(", not null");
         }
         if (isAutoIncrement()) {
-            Long currentValue = sequence != null ? sequence.getStartWith() : null;
-            buffer.append(format(", auto increment=%d", currentValue != null ? currentValue : 0));
+            Long lastValue = sequence != null ? sequence.getLastValue() : null;
+            buffer.append(format(", auto increment=%d", lastValue != null ? lastValue : 0));
         }
         buffer.append(format(", size=%d", size));
         buffer.append(format(", precision=%d", precision));

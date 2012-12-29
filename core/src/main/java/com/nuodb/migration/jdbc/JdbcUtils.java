@@ -44,7 +44,7 @@ public class JdbcUtils {
 
     public static void close(ResultSet resultSet) {
         try {
-            if (resultSet != null && !resultSet.isClosed()) {
+            if (resultSet != null) {
                 resultSet.close();
             }
         } catch (SQLException exception) {
@@ -56,7 +56,7 @@ public class JdbcUtils {
 
     public static void close(Statement statement) {
         try {
-            if (statement != null && !statement.isClosed()) {
+            if (statement != null) {
                 statement.close();
             }
         } catch (SQLException exception) {

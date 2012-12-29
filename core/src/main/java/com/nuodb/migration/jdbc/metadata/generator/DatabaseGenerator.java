@@ -128,7 +128,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
                                     Collection<Table> tables) {
         Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
         Dialect dialect = scriptGeneratorContext.getDialect();
-        if (metaDataTypes.contains(SEQUENCE)) {
+        if (metaDataTypes.contains(AUTO_INCREMENT)) {
             for (Table table : tables) {
                 if (!isTableSupported(table, scriptGeneratorContext)) {
                     continue;
@@ -233,7 +233,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
                 scripts.addAll(scriptGeneratorContext.getDropScripts(table));
             }
         }
-        if (metaDataTypes.contains(SEQUENCE) && dialect.supportsSequence()) {
+        if (metaDataTypes.contains(AUTO_INCREMENT) && dialect.supportsSequence()) {
             for (Table table : tables) {
                 if (!isTableSupported(table, scriptGeneratorContext)) {
                     continue;
