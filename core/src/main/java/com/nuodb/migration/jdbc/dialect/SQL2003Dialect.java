@@ -41,13 +41,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Collection;
+import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.String.valueOf;
 import static java.sql.Connection.*;
-import static org.apache.commons.lang3.StringUtils.endsWith;
-import static org.apache.commons.lang3.StringUtils.startsWith;
 
 /**
  * @author Sergey Bushik
@@ -127,12 +127,12 @@ public class SQL2003Dialect implements Dialect {
         return identifier;
     }
 
-    protected char openQuote() {
-        return '"';
+    protected String openQuote() {
+        return valueOf('"');
     }
 
-    protected char closeQuote() {
-        return '"';
+    protected String closeQuote() {
+        return valueOf('"');
     }
 
     @Override
@@ -243,29 +243,47 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public String getTableCheck(String check) {
-        return getConstraint(check);
-    }
-
-    @Override
-    public String getColumnCheck(String check) {
-        return getConstraint(check);
+    public String getCheckClause(String checkClause) {
+        return normalizeQueryFragment(checkClause);
     }
 
     @Override
     public String getDefaultValue(int typeCode, String defaultValue) {
-        if (defaultValue == null) {
+        return normalizeQueryFragment(defaultValue);
+    }
+
+    protected String normalizeQueryFragment(String fragment) {
+        if (fragment == null) {
             return null;
         }
-        StringBuilder buffer = new StringBuilder(defaultValue.length() + 2);
-        if (!startsWith(defaultValue, "'")) {
-            buffer.append("'");
+        StringTokenizer tokens = new StringTokenizer(fragment, "+*/-=<>'`\"[](), \t\n\r\f", true);
+        StringBuilder result = new StringBuilder();
+        while (tokens.hasMoreTokens()) {
+            String token = tokens.nextToken();
+            boolean quote = false;
+            String closeQuote = null;
+            if ("\"".equals(token)) {
+                quote = true;
+                closeQuote = "\"";
+            } else if ("[".equals(token)) {
+                quote = true;
+                closeQuote = "]";
+            } else if ("`".equals(token)) {
+                quote = true;
+                closeQuote = "`";
+            }
+            if (quote) {
+                String identifier = null;
+                for (String next = tokens.nextToken(); !closeQuote.equals(next); next = tokens.nextToken()) {
+                    identifier = identifier == null ? next : identifier + next;
+                }
+                if (identifier != null) {
+                    token = getIdentifier(identifier);
+                }
+            }
+            result.append(token);
         }
-        buffer.append(defaultValue);
-        if (!endsWith(defaultValue, "'")) {
-            buffer.append("'");
-        }
-        return buffer.toString();
+        return result.toString();
     }
 
     @Override
@@ -336,18 +354,6 @@ public class SQL2003Dialect implements Dialect {
     @Override
     public String getDeleteAction(ReferenceAction deleteAction) {
         return null;
-    }
-
-    protected String getConstraint(String check) {
-        StringBuilder buffer = new StringBuilder(check.length() + 2);
-        if (!check.startsWith("(")) {
-            buffer.append("(");
-        }
-        buffer.append(check);
-        if (!check.endsWith(")")) {
-            buffer.append(")");
-        }
-        return buffer.toString();
     }
 
     @Override

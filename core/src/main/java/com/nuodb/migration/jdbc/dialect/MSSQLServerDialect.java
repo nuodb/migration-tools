@@ -29,14 +29,16 @@ package com.nuodb.migration.jdbc.dialect;
 
 import java.sql.Types;
 
+import static java.lang.String.valueOf;
+
 /**
  * @author Sergey Bushik
  */
-public class SQLServerDialect extends SQL2003Dialect {
+public class MSSQLServerDialect extends SQL2003Dialect {
 
     public static final int DATETIMEOFFSET = -155;
 
-    public SQLServerDialect() {
+    public MSSQLServerDialect() {
         addJdbcTypeDescAlias(Types.LONGVARBINARY, "IMAGE", Types.BLOB);
         addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
         addJdbcTypeDescAlias(Types.LONGNVARCHAR, "XML", Types.CLOB);
@@ -44,13 +46,13 @@ public class SQLServerDialect extends SQL2003Dialect {
     }
 
     @Override
-    public char closeQuote() {
-        return ']';
+    public String openQuote() {
+        return valueOf('[');
     }
 
     @Override
-    public char openQuote() {
-        return '[';
+    public String closeQuote() {
+        return valueOf(']');
     }
 
     @Override

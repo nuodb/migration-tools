@@ -33,15 +33,15 @@ import com.nuodb.migration.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.FileCatalog;
-import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
-import com.nuodb.migration.spec.*;
+import com.nuodb.migration.spec.ConnectionSpec;
+import com.nuodb.migration.spec.DumpSpec;
+import com.nuodb.migration.spec.ResourceSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
 
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
@@ -64,23 +64,22 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
 
     public DumpJob createJob() {
         isNotNull(dumpSpec, "Dump spec is required");
-        ConnectionSpec connectionSpec = dumpSpec.getSourceConnectionSpec();
-        Collection<SelectQuerySpec> selectQuerySpecs = dumpSpec.getSelectQuerySpecs();
-        Collection<NativeQuerySpec> nativeQuerySpecs = dumpSpec.getNativeQuerySpecs();
 
+        DumpJob dumpJob = new DumpJob();
+        ConnectionSpec connectionSpec = dumpSpec.getSourceConnectionSpec();
+        dumpJob.setConnectionProvider(createConnectionProvider(connectionSpec, false));
         ResourceSpec outputSpec = dumpSpec.getOutputSpec();
-        DumpJob job = new DumpJob();
-        job.setConnectionProvider(createConnectionProvider(connectionSpec, false));
-        job.setTimeZone(dumpSpec.getTimeZone());
-        job.setSelectQuerySpecs(selectQuerySpecs);
-        job.setNativeQuerySpecs(nativeQuerySpecs);
-        job.setOutputType(outputSpec.getType());
-        job.setAttributes(outputSpec.getAttributes());
-        job.setCatalog(createCatalog(outputSpec.getPath()));
-        job.setDialectResolver(dialectResolver);
-        job.setResultSetFormatFactory(resultSetFormatFactory);
-        job.setJdbcTypeValueFormatRegistryResolver(jdbcTypeValueFormatRegistryResolver);
-        return job;
+        dumpJob.setOutputType(outputSpec.getType());
+        dumpJob.setAttributes(outputSpec.getAttributes());
+        dumpJob.setCatalog(createCatalog(outputSpec.getPath()));
+        dumpJob.setTimeZone(dumpSpec.getTimeZone());
+        dumpJob.setSelectQuerySpecs(dumpSpec.getSelectQuerySpecs());
+        dumpJob.setNativeQuerySpecs(dumpSpec.getNativeQuerySpecs());
+        dumpJob.setTableTypes(dumpSpec.getTableTypes());
+        dumpJob.setDialectResolver(getDialectResolver());
+        dumpJob.setResultSetFormatFactory(getResultSetFormatFactory());
+        dumpJob.setJdbcTypeValueFormatRegistryResolver(getJdbcTypeValueFormatRegistryResolver());
+        return dumpJob;
     }
 
     protected Catalog createCatalog(String path) {

@@ -38,7 +38,7 @@ public class SimpleDialectResolver extends SimpleDatabaseAwareObjectResolver<Dia
         super(Dialect.class, SQL2003Dialect.class);
         registerObject("MySQL", MySQLDialect.class);
         registerObject("PostgreSQL", PostgreSQLDialect.class);
-        registerObject("Microsoft SQL Server", SQLServerDialect.class);
+        registerObject("Microsoft SQL Server", MSSQLServerDialect.class);
         registerObject("Oracle", OracleDialect.class);
         registerObject("NuoDB", NuoDBDialect.class);
     }

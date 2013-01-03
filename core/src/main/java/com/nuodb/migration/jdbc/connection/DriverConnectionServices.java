@@ -59,7 +59,7 @@ public class DriverConnectionServices implements ConnectionServices {
     }
 
     @Override
-    public DatabaseInspector createDatabaseInspector() throws SQLException {
+    public DatabaseInspector getDatabaseInspector() throws SQLException {
         DatabaseInspector databaseInspector = new DatabaseInspector();
         databaseInspector.withCatalog(driverConnectionProvider.getCatalog());
         databaseInspector.withSchema(driverConnectionProvider.getSchema());

@@ -71,6 +71,7 @@ public interface CliOptions {
     final String OUTPUT_PATH_OPTION = "output.path";
 
     final String TABLE_OPTION = "table";
+    final String TABLE_TYPE_OPTION = "table.type";
     final String TABLE_FILTER_OPTION = "table.*.filter";
 
     final String QUERY_OPTION = "query";

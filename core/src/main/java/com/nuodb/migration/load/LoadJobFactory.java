@@ -37,8 +37,8 @@ import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.FileCatalog;
-import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.spec.DriverConnectionSpec;
@@ -71,9 +71,9 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
         job.setAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));
         job.setTimeZone(loadSpec.getTimeZone());
-        job.setDialectResolver(dialectResolver);
-        job.setResultSetFormatFactory(resultSetFormatFactory);
-        job.setJdbcTypeValueFormatRegistryResolver(jdbcTypeValueFormatRegistryResolver);
+        job.setDialectResolver(getDialectResolver());
+        job.setResultSetFormatFactory(getResultSetFormatFactory());
+        job.setJdbcTypeValueFormatRegistryResolver(getJdbcTypeValueFormatRegistryResolver());
         return job;
     }
 

@@ -27,42 +27,35 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.metadata.*;
+import com.nuodb.migration.jdbc.metadata.Column;
+import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
+import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.query.StatementCallback;
 import com.nuodb.migration.jdbc.query.StatementCreator;
 import com.nuodb.migration.jdbc.query.StatementTemplate;
 
 import java.sql.*;
-import java.util.Collection;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLAutoIncrementReader extends MetaDataReaderBase {
+public class MSSQLServerColumnCheckReader extends MetaDataReaderBase {
 
-    private static final String QUERY = "SELECT AUTO_INCREMENT AS LAST_VALUE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=? && TABLE_NAME=?";
+    public static final String QUERY =
+            "SELECT COLUMN_NAME, CHECK_CLAUSE\n" +
+            "FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS\n" +
+            "ON CONSTRAINT_COLUMN_USAGE.CONSTRAINT_NAME = CHECK_CONSTRAINTS.CONSTRAINT_NAME WHERE TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?";
 
-    public MySQLAutoIncrementReader() {
-        super(MetaDataType.AUTO_INCREMENT);
+    public MSSQLServerColumnCheckReader() {
+        super(MetaDataType.COLUMN_CHECK);
     }
 
     @Override
-    public void read(DatabaseInspector inspector, final Database database,
+    public void read(final DatabaseInspector inspector, final Database database,
                      DatabaseMetaData metaData) throws SQLException {
-        final Collection<Column> columns = newArrayList();
-        for (Table table : database.listTables()) {
-            for (Column column : table.getColumns()) {
-                if (column.isAutoIncrement()) {
-                    columns.add(column);
-                }
-            }
-        }
-        if (columns.isEmpty()) {
-            return;
-        }
         StatementTemplate template = new StatementTemplate(metaData.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -72,16 +65,15 @@ public class MySQLAutoIncrementReader extends MetaDataReaderBase {
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
-
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (Column column : columns) {
-                            Table table = column.getTable();
+                        for (Table table : database.listTables()) {
                             statement.setString(1, table.getCatalog().getName());
-                            statement.setString(2, table.getName());
+                            statement.setString(2, table.getSchema().getName());
+                            statement.setString(3, table.getName());
                             ResultSet resultSet = statement.executeQuery();
                             try {
-                                read(column, resultSet);
+                                read(table, resultSet);
                             } finally {
                                 close(resultSet);
                             }
@@ -91,11 +83,10 @@ public class MySQLAutoIncrementReader extends MetaDataReaderBase {
         );
     }
 
-    protected void read(Column column, ResultSet resultSet) throws SQLException {
+    protected void read(Table table, ResultSet resultSet) throws SQLException {
         if (resultSet.next()) {
-            Sequence sequence = new Sequence();
-            sequence.setLastValue(resultSet.getLong("LAST_VALUE"));
-            column.setSequence(sequence);
+            Column column = table.createColumn(resultSet.getString("COLUMN_NAME"));
+            column.setCheck(resultSet.getString("CHECK_CLAUSE"));
         }
     }
 }

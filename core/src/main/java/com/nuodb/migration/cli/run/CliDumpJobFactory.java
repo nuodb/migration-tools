@@ -27,12 +27,30 @@
  */
 package com.nuodb.migration.cli.run;
 
+import com.google.common.collect.Lists;
 import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.CommandLine;
+import com.nuodb.migration.cli.parse.Group;
 import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.option.GroupBuilder;
+import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
+import com.nuodb.migration.cli.parse.option.RegexOption;
 import com.nuodb.migration.dump.DumpJobFactory;
+import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.spec.DumpSpec;
+import com.nuodb.migration.spec.NativeQuerySpec;
+import com.nuodb.migration.spec.SelectQuerySpec;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newTreeSet;
+import static com.nuodb.migration.utils.Priority.LOW;
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  * The factory instantiates a {@link CliDumpJobFactory.CliDumpJob}.
@@ -62,6 +80,103 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
     }
 
     /**
+     * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
+     */
+    protected Group createTableGroup() {
+        GroupBuilder group = newGroup().withName(getMessage(TABLE_GROUP_NAME)).withMaximum(MAX_VALUE);
+
+        Option table = newOption().
+                withName(TABLE_OPTION).
+                withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgument().
+                                withName(getMessage(TABLE_ARGUMENT_NAME)).
+                                withMinimum(1).
+                                withRequired(true).build()
+                ).build();
+        group.withOption(table);
+
+        Option tableType = newOption().
+                withName(TABLE_TYPE_OPTION).
+                withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgument().
+                                withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(tableType);
+
+        OptionFormat optionFormat = getOptionFormat();
+        RegexOption tableFilter = new RegexOption();
+        tableFilter.setName(TABLE_FILTER_OPTION);
+        tableFilter.setDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
+        tableFilter.setPrefixes(optionFormat.getOptionPrefixes());
+        tableFilter.setArgumentSeparator(optionFormat.getArgumentSeparator());
+        tableFilter.addRegex(TABLE_FILTER_OPTION, 1, LOW);
+        tableFilter.setArgument(
+                newArgument().
+                        withName(getMessage(TABLE_FILTER_ARGUMENT_NAME)).
+                        withValuesSeparator(null).
+                        withMinimum(1).
+                        withRequired(true).build()
+        );
+        group.withOption(tableFilter);
+
+        return group.build();
+    }
+
+    protected void parseTableGroup(CommandLine commandLine, DumpSpec dumpSpec) {
+        Collection<String> tableTypes = newTreeSet(String.CASE_INSENSITIVE_ORDER);
+        tableTypes.addAll(commandLine.<String>getValues(TABLE_TYPE_OPTION));
+        if (tableTypes.isEmpty()) {
+            tableTypes.add(Table.TABLE);
+        }
+        dumpSpec.setTableTypes(tableTypes);
+
+        Map<String, SelectQuerySpec> tableQueryMapping = newHashMap();
+        for (String table : commandLine.<String>getValues(TABLE_OPTION)) {
+            tableQueryMapping.put(table, new SelectQuerySpec(table));
+        }
+        for (Iterator<String> iterator = commandLine.<String>getValues(
+                TABLE_FILTER_OPTION).iterator(); iterator.hasNext(); ) {
+            String name = iterator.next();
+            SelectQuerySpec selectQuerySpec = tableQueryMapping.get(name);
+            if (selectQuerySpec == null) {
+                tableQueryMapping.put(name, selectQuerySpec = new SelectQuerySpec(name));
+            }
+            selectQuerySpec.setFilter(iterator.next());
+        }
+        dumpSpec.setSelectQuerySpecs(tableQueryMapping.values());
+    }
+
+    protected Option createNativeQueryGroup() {
+        GroupBuilder group = newGroup().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(MAX_VALUE);
+
+        Option query = newOption().
+                withName(QUERY_OPTION).
+                withDescription(getMessage(QUERY_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgument().
+                                withName(getMessage(QUERY_ARGUMENT_NAME)).
+                                withMinimum(1).
+                                withValuesSeparator(null).
+                                withRequired(true).build()
+                ).build();
+        group.withOption(query);
+
+        return group.build();
+    }
+
+    protected Collection<NativeQuerySpec> parseNativeQueryGroup(CommandLine commandLine) {
+        List<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
+        for (String query : commandLine.<String>getValues(QUERY_OPTION)) {
+            NativeQuerySpec nativeQuerySpec = new NativeQuerySpec();
+            nativeQuerySpec.setQuery(query);
+            nativeQuerySpecs.add(nativeQuerySpec);
+        }
+        return nativeQuerySpecs;
+    }
+
+    /**
      * An implementation of {@link CliRunAdapter} which assembles withConnection spec from provided command line after
      * the validation is passed.
      */
@@ -77,7 +192,7 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
                     .withName(getResources().getMessage(DUMP_GROUP_NAME))
                     .withOption(createSourceGroup())
                     .withOption(createOutputGroup())
-                    .withOption(createSelectQueryGroup())
+                    .withOption(createTableGroup())
                     .withOption(createNativeQueryGroup())
                     .withOption(createTimeZoneOption())
                     .withRequired(true).build();
@@ -88,8 +203,8 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
             DumpSpec spec = new DumpSpec();
             spec.setSourceConnectionSpec(parseSourceGroup(commandLine, this));
             spec.setOutputSpec(parseOutputGroup(commandLine, this));
-            spec.setSelectQuerySpecs(parseSelectQueryGroup(commandLine, this));
-            spec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine, this));
+            parseTableGroup(commandLine, spec);
+            spec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine));
             spec.setTimeZone(parseTimeZone(commandLine, this));
 
             ((DumpJobFactory) getJobFactory()).setDumpSpec(spec);

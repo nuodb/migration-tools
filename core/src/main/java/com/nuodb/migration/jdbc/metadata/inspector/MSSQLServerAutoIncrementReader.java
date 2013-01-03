@@ -27,7 +27,6 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.*;
 import com.nuodb.migration.jdbc.query.StatementCallback;
 import com.nuodb.migration.jdbc.query.StatementCreator;
@@ -40,32 +39,24 @@ import static com.nuodb.migration.jdbc.JdbcUtils.close;
 /**
  * @author Sergey Bushik
  */
-public class MSSQLAutoIncrementReader extends MetaDataReaderBase {
+public class MSSQLServerAutoIncrementReader extends MetaDataReaderBase {
 
-    private static final String QUERY = "SELECT NAME AS COLUMN_NAME,\n" +
-            "IDENT_CURRENT(OBJECT_NAME(OBJECT_ID)) AS START_WITH,\n" +
-            "IDENT_SEED(OBJECT_NAME(OBJECT_ID))    AS LAST_VALUE,\n" +
-            "IDENT_INCR(OBJECT_NAME(OBJECT_ID))    AS INCREMENT_BY\n" +
-            "FROM   SYS.IDENTITY_COLUMNS\n" +
-            "WHERE  OBJECT_ID = OBJECT_ID(?) AND IS_IDENTITY = 1";
+    private static final String QUERY = "SELECT COLUMN_NAME,\n" +
+            "IDENT_SEED(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS START_WITH,\n" +
+            "IDENT_CURRENT(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS LAST_VALUE,\n" +
+            "IDENT_INCR(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS INCREMENT_BY\n" +
+            "FROM INFORMATION_SCHEMA.COLUMNS\n" +
+            "WHERE COLUMNPROPERTY(OBJECT_ID(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)), COLUMN_NAME, 'ISIDENTITY') = 1 AND\n" +
+            "TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?";
 
-    public MSSQLAutoIncrementReader() {
+
+    public MSSQLServerAutoIncrementReader() {
         super(MetaDataType.AUTO_INCREMENT);
     }
 
     @Override
-    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
-        Connection connection = metaData.getConnection();
-        String catalog = connection.getCatalog();
-        try {
-            readIdentityColumns(inspector, database, metaData);
-        } finally {
-            connection.setCatalog(catalog);
-        }
-    }
-
-    protected void readIdentityColumns(final DatabaseInspector inspector, final Database database,
-                                       DatabaseMetaData metaData) throws SQLException {
+    public void read(final DatabaseInspector inspector, final Database database,
+                     DatabaseMetaData metaData) throws SQLException {
         StatementTemplate template = new StatementTemplate(metaData.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -77,45 +68,28 @@ public class MSSQLAutoIncrementReader extends MetaDataReaderBase {
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        Connection connection = statement.getConnection();
-                        for (Catalog catalog : database.listCatalogs()) {
+                        for (Table table : database.listTables()) {
+                            statement.setString(1, table.getCatalog().getName());
+                            statement.setString(2, table.getSchema().getName());
+                            statement.setString(3, table.getName());
+                            ResultSet resultSet = statement.executeQuery();
                             try {
-                                connection.setCatalog(catalog.getName());
-                            } catch (SQLException exception) {
-                                if (logger.isWarnEnabled()) {
-                                    logger.warn("Can't switch catalog", exception);
-                                }
-                                continue;
+                                read(table, resultSet);
+                            } finally {
+                                close(resultSet);
                             }
-                            readIdentityColumns(inspector, statement, catalog);
                         }
                     }
-
-
                 }
         );
     }
 
-    protected void readIdentityColumns(DatabaseInspector inspector, PreparedStatement statement,
-                                       Catalog catalog) throws SQLException {
-        Dialect dialect = catalog.getDatabase().getDialect();
-        for (Table table : catalog.listTables()) {
-            statement.setString(1, table.getQualifiedName(dialect));
-            ResultSet resultSet = statement.executeQuery();
-            try {
-                readIdentityColumns(table, resultSet);
-            } finally {
-                close(resultSet);
-            }
-        }
-    }
-
-    protected void readIdentityColumns(Table table, ResultSet resultSet) throws SQLException {
-        while (resultSet.next()) {
+    protected void read(Table table, ResultSet resultSet) throws SQLException {
+        if (resultSet.next()) {
             Column column = table.createColumn(resultSet.getString("COLUMN_NAME"));
             column.setAutoIncrement(true);
+
             Sequence sequence = new Sequence();
-            // TODO: generate or read sequence name
             sequence.setStartWith(resultSet.getLong("START_WITH"));
             sequence.setLastValue(resultSet.getLong("LAST_VALUE"));
             sequence.setIncrementBy(resultSet.getLong("INCREMENT_BY"));

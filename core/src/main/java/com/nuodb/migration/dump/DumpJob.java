@@ -33,6 +33,7 @@ import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.dialect.DialectResolver;
 import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 import com.nuodb.migration.jdbc.query.*;
@@ -52,14 +53,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.util.Collection;
+import java.util.*;
 import java.util.Date;
-import java.util.Map;
-import java.util.TimeZone;
 
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
-import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migration.jdbc.metadata.Table.TABLE;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
@@ -79,6 +78,7 @@ public class DumpJob extends JobBase {
 
     private TimeZone timeZone;
     private Catalog catalog;
+    private Collection<String> tableTypes = Collections.singleton(TABLE);
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
@@ -114,8 +114,9 @@ public class DumpJob extends JobBase {
     protected void dump(DumpJobExecution execution) throws SQLException {
         ConnectionServices connectionServices = execution.getConnectionServices();
 
-        DatabaseInspector databaseInspector = connectionServices.createDatabaseInspector();
-        databaseInspector.withMetaDataTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+        DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();
+        databaseInspector.withMetaDataTypes(
+                MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE, MetaDataType.COLUMN);
         databaseInspector.withDialectResolver(getDialectResolver());
 
         Connection connection = connectionServices.getConnection();
@@ -154,7 +155,7 @@ public class DumpJob extends JobBase {
 
     protected CatalogEntry createCatalogEntry(SelectQuery selectQuery, String type) {
         Table table = selectQuery.getTables().get(0);
-        return new CatalogEntry(table.getName(), type);
+        return new CatalogEntry(table.getName().toLowerCase(), type);
     }
 
     protected CatalogEntry createCatalogEntry(NativeQuery nativeQuery, String type) {
@@ -214,9 +215,6 @@ public class DumpJob extends JobBase {
         if (logger.isDebugEnabled()) {
             logger.debug(query.toQuery());
         }
-        if (query.toQuery().startsWith("SELECT SEQUENCE_CATALOG, SEQUENCE_SCHEMA, SEQUENCE_NAME, DATA_TYPE, NUMERIC_PRECISION, NUMERIC_PRECISION_RADIX, NUMERIC_SCALE")) {
-            System.out.println("f");
-        }
         PreparedStatement preparedStatement = connection.prepareStatement(
                 query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
         database.getDialect().setStreamResults(preparedStatement, true);
@@ -239,8 +237,8 @@ public class DumpJob extends JobBase {
     protected Collection<SelectQuery> createSelectQueries(Database database) {
         Dialect dialect = database.getDialect();
         Collection<SelectQuery> selectQueries = Lists.newArrayList();
-        for (Table table : database.listTables()) {
-            if (Table.TABLE.equals(table.getType()) || true) {
+        for (final Table table : database.listTables()) {
+            if (getTableTypes().contains(table.getType())) {
                 SelectQueryBuilder builder = new SelectQueryBuilder();
                 builder.setDialect(dialect);
                 builder.setTable(table);
@@ -256,11 +254,10 @@ public class DumpJob extends JobBase {
     }
 
     protected SelectQuery createSelectQuery(Database database, SelectQuerySpec selectQuerySpec) {
-        Dialect dialect = database.getDialect();
-        String tableName = selectQuerySpec.getTable();
         SelectQueryBuilder builder = new SelectQueryBuilder();
+        String tableName = selectQuerySpec.getTable();
         builder.setQualifyNames(true);
-        builder.setDialect(dialect);
+        builder.setDialect(database.getDialect());
         builder.setTable(database.findTable(tableName));
         builder.setColumns(selectQuerySpec.getColumns());
         if (!isEmpty(selectQuerySpec.getFilter())) {
@@ -301,6 +298,14 @@ public class DumpJob extends JobBase {
 
     public void setCatalog(Catalog catalog) {
         this.catalog = catalog;
+    }
+
+    public Collection<String> getTableTypes() {
+        return tableTypes;
+    }
+
+    public void setTableTypes(Collection<String> tableTypes) {
+        this.tableTypes = tableTypes;
     }
 
     public Collection<SelectQuerySpec> getSelectQuerySpecs() {

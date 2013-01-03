@@ -34,6 +34,7 @@ import java.sql.Types;
 import java.util.TimeZone;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static java.lang.String.valueOf;
 
 /**
  * @author Sergey Bushik
@@ -60,13 +61,13 @@ public class MySQLDialect extends SQL2003Dialect {
     }
 
     @Override
-    public char openQuote() {
-        return '`';
+    public String openQuote() {
+        return valueOf('`');
     }
 
     @Override
-    public char closeQuote() {
-        return '`';
+    public String closeQuote() {
+        return valueOf('`');
     }
 
     @Override

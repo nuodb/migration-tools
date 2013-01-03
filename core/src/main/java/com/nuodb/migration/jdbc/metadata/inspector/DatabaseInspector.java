@@ -84,13 +84,14 @@ public class DatabaseInspector {
 
         MetaDataReaderResolver columnCheck = new MetaDataReaderResolver(COLUMN_CHECK);
         columnCheck.registerObject("NuoDB", NuoDBColumnCheckReader.class);
+        columnCheck.registerObject("Microsoft SQL Server", MSSQLServerColumnCheckReader.class);
         withMetaDataReader(columnCheck);
 
-        MetaDataReaderResolver sequence = new MetaDataReaderResolver(AUTO_INCREMENT);
-        sequence.registerObject("MySQL", MySQLAutoIncrementReader.class);
-        sequence.registerObject("PostgreSQL", PostgreSQLAutoIncrementReader.class);
-        sequence.registerObject("Microsoft SQL Server", MSSQLAutoIncrementReader.class);
-        withMetaDataReader(sequence);
+        MetaDataReaderResolver autoIncrement = new MetaDataReaderResolver(AUTO_INCREMENT);
+        autoIncrement.registerObject("MySQL", MySQLAutoIncrementReader.class);
+        autoIncrement.registerObject("PostgreSQL", PostgreSQLAutoIncrementReader.class);
+        autoIncrement.registerObject("Microsoft SQL Server", MSSQLServerAutoIncrementReader.class);
+        withMetaDataReader(autoIncrement);
     }
 
     public Database inspect() throws SQLException {
@@ -235,7 +236,7 @@ public class DatabaseInspector {
         ConnectionProvider connectionProvider = new DriverPoolingConnectionProvider(nuodb);
         ConnectionServices connectionServices = connectionProvider.getConnectionServices();
         try {
-            DatabaseInspector databaseInspector = connectionServices.createDatabaseInspector();
+            DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();
             Database database = databaseInspector.inspect();
             System.out.println(database);
         } finally {

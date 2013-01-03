@@ -78,7 +78,7 @@ public class SchemaJob extends JobBase {
 
     protected void generate(SchemaJobExecution execution) throws Exception {
         ConnectionServices connectionServices = execution.getConnectionServices();
-        Database database = connectionServices.createDatabaseInspector().inspect();
+        Database database = connectionServices.getDatabaseInspector().inspect();
         Collection<String> scripts = getScriptGeneratorContext().getScripts(database);
         if (isFailOnEmptyScripts() && scripts.isEmpty()) {
             throw new SchemaJobException("Schema scripts are empty");

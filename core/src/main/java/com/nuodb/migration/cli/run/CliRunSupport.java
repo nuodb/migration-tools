@@ -27,7 +27,6 @@
  */
 package com.nuodb.migration.cli.run;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migration.cli.CliOptions;
 import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.CommandLine;
@@ -37,11 +36,16 @@ import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.option.*;
 import com.nuodb.migration.context.support.ApplicationSupport;
 import com.nuodb.migration.jdbc.JdbcConstants;
-import com.nuodb.migration.spec.*;
+import com.nuodb.migration.spec.ConnectionSpec;
+import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.spec.ResourceSpec;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migration.utils.Priority.LOW;
@@ -180,60 +184,6 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return group.build();
     }
 
-    /**
-     * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
-     */
-    protected Group createSelectQueryGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(TABLE_GROUP_NAME)).withMaximum(MAX_VALUE);
-
-        Option table = newOption().
-                withName(TABLE_OPTION).
-                withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgument().
-                                withName(getMessage(TABLE_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withRequired(true).build()
-                ).build();
-        group.withOption(table);
-
-        OptionFormat optionFormat = optionToolkit.getOptionFormat();
-        RegexOption tableFilter = new RegexOption();
-        tableFilter.setName(TABLE_FILTER_OPTION);
-        tableFilter.setDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
-        tableFilter.setPrefixes(optionFormat.getOptionPrefixes());
-        tableFilter.setArgumentSeparator(optionFormat.getArgumentSeparator());
-        tableFilter.addRegex(TABLE_FILTER_OPTION, 1, LOW);
-        tableFilter.setArgument(
-                newArgument().
-                        withName(getMessage(TABLE_FILTER_ARGUMENT_NAME)).
-                        withValuesSeparator(null).
-                        withMinimum(1).
-                        withRequired(true).build()
-        );
-        group.withOption(tableFilter);
-
-        return group.build();
-    }
-
-    protected Option createNativeQueryGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(MAX_VALUE);
-
-        Option query = newOption().
-                withName(QUERY_OPTION).
-                withDescription(getMessage(QUERY_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgument().
-                                withName(getMessage(QUERY_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withValuesSeparator(null).
-                                withRequired(true).build()
-                ).build();
-        group.withOption(query);
-
-        return group.build();
-    }
-
     protected ConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
         DriverConnectionSpec connection = new DriverConnectionSpec();
         connection.setCatalog(commandLine.<String>getValue(SOURCE_CATALOG_OPTION));
@@ -261,33 +211,6 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
             attributes.put(iterator.next(), iterator.next());
         }
         return attributes;
-    }
-
-    protected Collection<SelectQuerySpec> parseSelectQueryGroup(CommandLine commandLine, Option option) {
-        Map<String, SelectQuerySpec> tableQueryMapping = newHashMap();
-        for (String table : commandLine.<String>getValues(TABLE_OPTION)) {
-            tableQueryMapping.put(table, new SelectQuerySpec(table));
-        }
-        for (Iterator<String> iterator = commandLine.<String>getValues(
-                TABLE_FILTER_OPTION).iterator(); iterator.hasNext(); ) {
-            String name = iterator.next();
-            SelectQuerySpec selectQuerySpec = tableQueryMapping.get(name);
-            if (selectQuerySpec == null) {
-                tableQueryMapping.put(name, selectQuerySpec = new SelectQuerySpec(name));
-            }
-            selectQuerySpec.setFilter(iterator.next());
-        }
-        return tableQueryMapping.values();
-    }
-
-    protected Collection<NativeQuerySpec> parseNativeQueryGroup(CommandLine commandLine, Option option) {
-        List<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
-        for (String query : commandLine.<String>getValues(QUERY_OPTION)) {
-            NativeQuerySpec nativeQuerySpec = new NativeQuerySpec();
-            nativeQuerySpec.setQuery(query);
-            nativeQuerySpecs.add(nativeQuerySpec);
-        }
-        return nativeQuerySpecs;
     }
 
     protected Option createTimeZoneOption() {

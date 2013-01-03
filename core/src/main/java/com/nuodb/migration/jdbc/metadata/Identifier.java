@@ -49,8 +49,8 @@ public class Identifier implements Comparable<Identifier> {
         if (isEmpty(value)) {
             return null;
         }
-        if ((value.startsWith("`") && value.endsWith("`")) ||
-                (value.startsWith("\"") && value.endsWith("\""))) {
+        if ((value.startsWith("`") && value.endsWith("`")) || (value.startsWith("\"") && value.endsWith("\"")) ||
+                (value.startsWith("[") && value.endsWith("]"))) {
             value = value.substring(1, value.length() - 1);
         }
         return new Identifier(value);

@@ -33,6 +33,7 @@ import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.dialect.DialectResolver;
 import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 import com.nuodb.migration.jdbc.model.ValueModel;
@@ -62,7 +63,6 @@ import java.util.TimeZone;
 
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
-import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
 /**
@@ -105,8 +105,9 @@ public class LoadJob extends JobBase {
     protected void load(LoadJobExecution execution) throws SQLException {
         ConnectionServices connectionServices = execution.getConnectionServices();
 
-        DatabaseInspector databaseInspector = connectionServices.createDatabaseInspector();
-        databaseInspector.withMetaDataTypes(CATALOG, SCHEMA, TABLE, COLUMN);
+        DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();
+        databaseInspector.withMetaDataTypes(
+                MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE, MetaDataType.COLUMN);
         databaseInspector.withDialectResolver(getDialectResolver());
 
         Database database = databaseInspector.inspect();

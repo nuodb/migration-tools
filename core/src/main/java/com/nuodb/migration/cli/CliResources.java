@@ -77,6 +77,8 @@ public interface CliResources {
 
     final String TABLE_GROUP_NAME = "com.nuodb.migration.table.group.name";
     final String TABLE_OPTION_DESCRIPTION = "com.nuodb.migration.table.option.description";
+    final String TABLE_TYPE_OPTION_DESCRIPTION = "com.nuodb.migration.table.type.option.description";
+    final String TABLE_TYPE_ARGUMENT_NAME = "com.nuodb.migration.table.type.argument.name";
     final String TABLE_ARGUMENT_NAME = "com.nuodb.migration.table.argument.name";
     final String TABLE_FILTER_OPTION_DESCRIPTION = "com.nuodb.migration.table.filter.option.description";
     final String TABLE_FILTER_ARGUMENT_NAME = "com.nuodb.migration.table.filter.argument.name";

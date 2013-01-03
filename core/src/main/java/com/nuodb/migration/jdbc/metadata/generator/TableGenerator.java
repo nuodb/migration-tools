@@ -76,11 +76,10 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(' ');
                 buffer.append("NOT NULL");
             }
-            // TODO: CDMT-43 handle default value
-            // String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue());
-            // if (defaultValue != null) {
-            //      buffer.append(" DEFAULT ").append(defaultValue);
-            // }
+            String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue());
+            if (defaultValue != null) {
+                  buffer.append(" DEFAULT ").append(defaultValue);
+            }
             if (metaDataTypes.contains(INDEX)) {
                 Optional<Index> index = Iterables.tryFind(indexes, new Predicate<Index>() {
                     @Override
@@ -103,7 +102,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 String check = column.getCheck();
                 if (check != null && dialect.supportsColumnCheck()) {
                     buffer.append(" CHECK ");
-                    buffer.append(dialect.getColumnCheck(check));
+                    buffer.append(dialect.getCheckClause(check));
                 }
             }
             String comment = column.getComment();
@@ -152,7 +151,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
             if (dialect.supportsTableCheck()) {
                 for (String check : table.getChecks()) {
                     buffer.append(", CHECK ");
-                    buffer.append(dialect.getTableCheck(check));
+                    buffer.append(dialect.getCheckClause(check));
                 }
             }
         }

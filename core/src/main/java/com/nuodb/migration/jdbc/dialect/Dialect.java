@@ -90,10 +90,6 @@ public interface Dialect {
 
     String getIdentityColumn(String sequence);
 
-    String getTableCheck(String check);
-
-    String getColumnCheck(String check);
-
     String getDefaultValue(int typeCode, String defaultValue);
 
     String getDeleteAction(ReferenceAction deleteAction);
@@ -113,6 +109,8 @@ public interface Dialect {
     String getSequenceCache(Integer cache);
 
     String getSequenceOrder(boolean order);
+
+    String getCheckClause(String checkClause);
 
     void setStreamResults(Statement statement, boolean streamResults) throws SQLException;
 

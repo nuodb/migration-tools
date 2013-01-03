@@ -39,7 +39,7 @@ public interface ConnectionServices {
 
     Connection getConnection() throws SQLException;
 
-    DatabaseInspector createDatabaseInspector() throws SQLException;
+    DatabaseInspector getDatabaseInspector() throws SQLException;
 
     void close() throws SQLException;
 }
