@@ -36,25 +36,26 @@ import com.nuodb.migration.jdbc.query.StatementCreator;
 import com.nuodb.migration.jdbc.query.StatementTemplate;
 
 import java.sql.*;
+import java.util.regex.Pattern;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
 
 /**
  * @author Sergey Bushik
  */
-public class MSSQLServerColumnCheckReader extends MetaDataReaderBase {
+public class NuoDBCheckConstraintReader extends MetaDataReaderBase {
 
-    public static final String QUERY =
-            "SELECT COLUMN_NAME, CHECK_CLAUSE\n" +
-            "FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS\n" +
-            "ON CONSTRAINT_COLUMN_USAGE.CONSTRAINT_NAME = CHECK_CONSTRAINTS.CONSTRAINT_NAME WHERE TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?";
+    private static final String QUERY =
+            "SELECT T.CONSTRAINTNAME, T.CONSTRAINTTEXT FROM SYSTEM.TABLECONSTRAINTS AS T\n" +
+            "INNER JOIN SYSTEM.FIELDS AS F ON T.SCHEMA = F.SCHEMA AND T.TABLENAME = F.TABLENAME\n" +
+            "WHERE T.SCHEMA=? AND T.TABLENAME=?";
 
-    public MSSQLServerColumnCheckReader() {
-        super(MetaDataType.COLUMN_CHECK);
+    public NuoDBCheckConstraintReader() {
+        super(MetaDataType.CHECK_CONSTRAINT);
     }
 
     @Override
-    public void read(final DatabaseInspector inspector, final Database database,
+    public void read(DatabaseInspector inspector, final Database database,
                      DatabaseMetaData metaData) throws SQLException {
         StatementTemplate template = new StatementTemplate(metaData.getConnection());
         template.execute(
@@ -65,12 +66,12 @@ public class MSSQLServerColumnCheckReader extends MetaDataReaderBase {
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
+
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
                         for (Table table : database.listTables()) {
-                            statement.setString(1, table.getCatalog().getName());
-                            statement.setString(2, table.getSchema().getName());
-                            statement.setString(3, table.getName());
+                            statement.setString(1, table.getSchema().getName());
+                            statement.setString(2, table.getName());
                             ResultSet resultSet = statement.executeQuery();
                             try {
                                 read(table, resultSet);
@@ -84,9 +85,16 @@ public class MSSQLServerColumnCheckReader extends MetaDataReaderBase {
     }
 
     protected void read(Table table, ResultSet resultSet) throws SQLException {
-        if (resultSet.next()) {
-            Column column = table.createColumn(resultSet.getString("COLUMN_NAME"));
-            column.setCheck(resultSet.getString("CHECK_CLAUSE"));
+        String regex = Pattern.quote(table.getName() + "$constraint");
+        Pattern pattern = Pattern.compile(regex + "\\d+");
+        while (resultSet.next()) {
+            String constraint = resultSet.getString("CONSTRAINTNAME");
+            if (pattern.matcher(constraint).matches()) {
+                table.getChecks().add(resultSet.getString("CONSTRAINTTEXT"));
+            } else {
+                Column column = table.createColumn(constraint);
+                column.setCheck(resultSet.getString("CONSTRAINTTEXT"));
+            }
         }
     }
 }

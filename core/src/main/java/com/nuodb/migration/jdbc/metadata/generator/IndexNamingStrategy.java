@@ -52,16 +52,19 @@ public class IndexNamingStrategy extends NamingStrategyBase<Index> {
     protected String getIndexName(Index index, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("IDX");
-        buffer.append('_');
+
+        StringBuilder qualifier = new StringBuilder();
         if (index.isUnique()) {
-            buffer.append("UNIQUE");
-            buffer.append("_");
+            qualifier.append("UNIQUE");
+            qualifier.append("_");
         }
-        buffer.append(scriptGeneratorContext.getName(index.getTable(), false));
+        qualifier.append(scriptGeneratorContext.getName(index.getTable(), false));
         for (Column column : index.getColumns()) {
-            buffer.append("_");
-            buffer.append(scriptGeneratorContext.getName(column, false));
+            qualifier.append("_");
+            qualifier.append(scriptGeneratorContext.getName(column, false));
         }
+        buffer.append(Integer.toHexString(qualifier.toString().hashCode()).toUpperCase());
+
         return identifier ? scriptGeneratorContext.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

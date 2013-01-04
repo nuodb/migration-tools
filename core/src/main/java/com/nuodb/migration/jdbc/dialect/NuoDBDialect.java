@@ -110,10 +110,10 @@ public class NuoDBDialect extends SQL2003Dialect {
         return true;
     }
 
-    // @Override
-    // protected String normalize(String identifier) {
-    //     return identifier.toUpperCase();
-    // }
+    @Override
+    protected String normalize(String identifier) {
+         return identifier.toUpperCase();
+    }
 
     @Override
     public String getSequenceStartWith(Long startWith) {
@@ -172,11 +172,6 @@ public class NuoDBDialect extends SQL2003Dialect {
 
     @Override
     public boolean supportsIndexInCreateTable() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsTableCheck() {
         return false;
     }
 

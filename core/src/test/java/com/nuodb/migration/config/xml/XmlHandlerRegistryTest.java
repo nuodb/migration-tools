@@ -63,7 +63,6 @@ public class XmlHandlerRegistryTest {
                 eq(XmlDriverConnectionHandler.class), any(XmlReadContext.class));
     }
 
-
     @Test
     public void testLookupWriter() throws Exception {
         final XmlDriverConnectionHandler mock = mock(XmlDriverConnectionHandler.class);

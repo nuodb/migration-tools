@@ -20,10 +20,10 @@ import java.util.Properties;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DriverManagerConnectionProviderTest {
+public class DriverConnectionProviderTest {
 
+    private static final String URL = "jdbc:com.nuodb://localhost/test";
     private static final int TRANSACTION_ISOLATION = Connection.TRANSACTION_READ_COMMITTED;
-    private static final String URL = "jdbc:test";
 
     @Mock
     private DriverConnectionSpec connectionSpec;

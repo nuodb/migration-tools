@@ -76,6 +76,8 @@ public interface Dialect {
 
     String getIdentifier(String identifier);
 
+    String getIdentifier(String identifier, boolean normalizeIdentifier);
+
     String getNullColumnString();
 
     String getNoColumnsInsert();

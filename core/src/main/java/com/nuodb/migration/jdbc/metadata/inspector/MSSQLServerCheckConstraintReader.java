@@ -27,34 +27,36 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.metadata.*;
+import com.google.common.collect.Sets;
+import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
+import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.query.StatementCallback;
 import com.nuodb.migration.jdbc.query.StatementCreator;
 import com.nuodb.migration.jdbc.query.StatementTemplate;
 
 import java.sql.*;
+import java.util.Set;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
 
 /**
  * @author Sergey Bushik
  */
-public class MSSQLServerAutoIncrementReader extends MetaDataReaderBase {
+public class MSSQLServerCheckConstraintReader extends MetaDataReaderBase {
 
-    private static final String QUERY =
-            "SELECT COLUMN_NAME,\n" +
-            "IDENT_SEED(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS START_WITH,\n" +
-            "IDENT_CURRENT(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS LAST_VALUE,\n" +
-            "IDENT_INCR(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS INCREMENT_BY\n" +
-            "FROM INFORMATION_SCHEMA.COLUMNS\n" +
-            "WHERE COLUMNPROPERTY(OBJECT_ID(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)), COLUMN_NAME, 'ISIDENTITY') = 1\n" +
-            "  AND TABLE_CATALOG = ?\n" +
-            "  AND TABLE_SCHEMA = ?\n" +
-            "  AND TABLE_NAME = ?";
+    public static final String QUERY =
+            "SELECT CC.CHECK_CLAUSE, CTU.CONSTRAINT_NAME\n" +
+            "FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE AS CTU\n" +
+            "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON CTU.TABLE_CATALOG=CC.CONSTRAINT_CATALOG\n" +
+            "AND CTU.TABLE_SCHEMA=CC.CONSTRAINT_SCHEMA\n" +
+            "AND CTU.CONSTRAINT_NAME=CC.CONSTRAINT_NAME\n" +
+            "WHERE CTU.TABLE_CATALOG=?\n" +
+            "  AND CTU.TABLE_SCHEMA=?\n" +
+            "  AND CTU.TABLE_NAME=?";
 
-
-    public MSSQLServerAutoIncrementReader() {
-        super(MetaDataType.AUTO_INCREMENT);
+    public MSSQLServerCheckConstraintReader() {
+        super(MetaDataType.CHECK_CONSTRAINT);
     }
 
     @Override
@@ -88,15 +90,10 @@ public class MSSQLServerAutoIncrementReader extends MetaDataReaderBase {
     }
 
     protected void read(Table table, ResultSet resultSet) throws SQLException {
-        if (resultSet.next()) {
-            Column column = table.createColumn(resultSet.getString("COLUMN_NAME"));
-            column.setAutoIncrement(true);
-
-            Sequence sequence = new Sequence();
-            sequence.setStartWith(resultSet.getLong("START_WITH"));
-            sequence.setLastValue(resultSet.getLong("LAST_VALUE"));
-            sequence.setIncrementBy(resultSet.getLong("INCREMENT_BY"));
-            column.setSequence(sequence);
+        Set<String> checks = Sets.newLinkedHashSet();
+        while (resultSet.next()) {
+            checks.add(resultSet.getString("CHECK_CLAUSE"));
         }
+        table.setChecks(checks);
     }
 }

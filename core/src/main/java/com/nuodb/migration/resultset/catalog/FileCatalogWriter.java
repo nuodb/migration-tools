@@ -62,7 +62,7 @@ public class FileCatalogWriter implements CatalogWriter {
     @Override
     public void write(CatalogEntry catalogEntry) {
         try {
-            initCatalogOutput();
+            initOutput();
             String entryName = valueOf(catalogEntry);
             if (logger.isTraceEnabled()) {
                 logger.trace(String.format("Adding entry %1$s", entryName));
@@ -77,13 +77,13 @@ public class FileCatalogWriter implements CatalogWriter {
         }
     }
 
-    protected void initCatalogOutput() {
+    protected void initOutput() {
         if (output == null) {
-            output = getCatalogOutput();
+            output = createOutput();
         }
     }
 
-    protected OutputStream getCatalogOutput() {
+    protected OutputStream createOutput() {
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("Opening entry catalog writer %s", catalogFile));
         }

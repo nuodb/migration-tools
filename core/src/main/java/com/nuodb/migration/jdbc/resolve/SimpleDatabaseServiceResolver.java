@@ -41,49 +41,49 @@ import static java.lang.String.format;
 /**
  * @author Sergey Bushik
  */
-public class SimpleDatabaseAwareObjectResolver<T> implements DatabaseAwareObjectResolver<T> {
+public class SimpleDatabaseServiceResolver<T> implements DatabaseServiceResolver<T> {
 
     private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     private Map<DatabaseMatcher, Class<? extends T>> databaseMatchers = Maps.newHashMap();
 
-    private Class<? extends T> targetObjectClass;
-    private Class<? extends T> defaultObjectClass;
+    private Class<? extends T> targetClass;
+    private Class<? extends T> defaultTargetClass;
 
-    public SimpleDatabaseAwareObjectResolver(Class<? extends T> targetObjectClass) {
-        this.targetObjectClass = targetObjectClass;
+    public SimpleDatabaseServiceResolver(Class<? extends T> targetClass) {
+        this.targetClass = targetClass;
     }
 
-    public SimpleDatabaseAwareObjectResolver(Class<? extends T> targetObjectClass,
-                                             Class<? extends T> defaultObjectClass) {
-        this.targetObjectClass = targetObjectClass;
-        this.defaultObjectClass = defaultObjectClass;
+    public SimpleDatabaseServiceResolver(Class<? extends T> targetClass,
+                                         Class<? extends T> defaultTargetClass) {
+        this.targetClass = targetClass;
+        this.defaultTargetClass = defaultTargetClass;
     }
 
-    public void registerObject(String productName, Class<? extends T> objectClass) {
-        registerObject(new SimpleDatabaseMatcher(productName), objectClass);
+    public void register(String productName, Class<? extends T> objectClass) {
+        register(new SimpleDatabaseMatcher(productName), objectClass);
     }
 
-    public void registerObject(String productName, String productVersion, Class<? extends T> objectClass) {
-        registerObject(new SimpleDatabaseMatcher(productName, productVersion), objectClass);
+    public void register(String productName, String productVersion, Class<? extends T> objectClass) {
+        register(new SimpleDatabaseMatcher(productName, productVersion), objectClass);
     }
 
-    public void registerObject(String productName, String productVersion, int majorVersion,
-                               Class<? extends T> objectClass) {
-        registerObject(new SimpleDatabaseMatcher(productName, productVersion, majorVersion), objectClass);
+    public void register(String productName, String productVersion, int majorVersion,
+                         Class<? extends T> objectClass) {
+        register(new SimpleDatabaseMatcher(productName, productVersion, majorVersion), objectClass);
     }
 
-    public void registerObject(String productName, String productVersion, int majorVersion, int minorVersion,
-                               Class<? extends T> objectClass) {
-        registerObject(new SimpleDatabaseMatcher(productName, productVersion, majorVersion, minorVersion), objectClass);
+    public void register(String productName, String productVersion, int majorVersion, int minorVersion,
+                         Class<? extends T> objectClass) {
+        register(new SimpleDatabaseMatcher(productName, productVersion, majorVersion, minorVersion), objectClass);
     }
 
-    public void registerObject(DatabaseMatcher databaseMatcher, Class<? extends T> objectClass) {
+    public void register(DatabaseMatcher databaseMatcher, Class<? extends T> objectClass) {
         databaseMatchers.put(databaseMatcher, objectClass);
     }
 
     @Override
-    public T resolveObject(DatabaseMetaData metaData) throws SQLException {
+    public T resolve(DatabaseMetaData metaData) throws SQLException {
         String productName = metaData.getDatabaseProductName();
         String productVersion = metaData.getDatabaseProductVersion();
         int minorVersion = metaData.getDatabaseMinorVersion();
@@ -98,13 +98,13 @@ public class SimpleDatabaseAwareObjectResolver<T> implements DatabaseAwareObject
         }
         if (serviceClass != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug(format("Resolved %s to %s", targetObjectClass.getName(), serviceClass.getName()));
+                logger.debug(format("Resolved %s to %s", targetClass.getName(), serviceClass.getName()));
             }
-        } else if (defaultObjectClass != null) {
+        } else if (defaultTargetClass != null) {
             if (logger.isWarnEnabled()) {
-                logger.warn(format("Defaulted %s to %s", targetObjectClass.getName(), defaultObjectClass.getName()));
+                logger.warn(format("Defaulted %s to %s", targetClass.getName(), defaultTargetClass.getName()));
             }
-            serviceClass = defaultObjectClass;
+            serviceClass = defaultTargetClass;
         }
         return serviceClass != null ? createObject(serviceClass, metaData) : null;
     }

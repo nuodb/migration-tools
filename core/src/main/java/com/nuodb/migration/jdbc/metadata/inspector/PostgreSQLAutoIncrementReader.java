@@ -79,6 +79,7 @@ public class PostgreSQLAutoIncrementReader extends MetaDataReaderBase {
                             }
                         }
                 );
+                column.setDefaultValue(null);
             }
         }
     }

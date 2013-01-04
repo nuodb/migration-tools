@@ -47,9 +47,9 @@ public class Table extends HasIdentifierBase {
     private final Map<Identifier, Column> columns = Maps.newLinkedHashMap();
     private final Map<Identifier, Index> indexes = Maps.newLinkedHashMap();
     private final Collection<ForeignKey> foreignKeys = Sets.newLinkedHashSet();
-    private final Collection<String> checks = Sets.newHashSet();
     private final Database database;
     private final Catalog catalog;
+    private Collection<String> checks = Sets.newHashSet();
     private Schema schema;
     private String type = TABLE;
     private String comment;
@@ -160,6 +160,10 @@ public class Table extends HasIdentifierBase {
 
     public Collection<String> getChecks() {
         return checks;
+    }
+
+    public void setChecks(Collection<String> checks) {
+        this.checks = checks;
     }
 
     @Override

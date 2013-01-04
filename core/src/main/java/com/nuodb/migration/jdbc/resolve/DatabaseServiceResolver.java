@@ -33,18 +33,17 @@ import java.sql.SQLException;
 /**
  * @author Sergey Bushik
  */
-public interface DatabaseAwareObjectResolver<T> {
+public interface DatabaseServiceResolver<T> {
 
-    void registerObject(String productName, Class<? extends T> serviceClass);
+    void register(String productName, Class<? extends T> serviceClass);
 
-    void registerObject(String productName, String productVersion, Class<? extends T> serviceClass);
+    void register(String productName, String productVersion, Class<? extends T> serviceClass);
 
-    void registerObject(String productName, String productVersion, int majorVersion, Class<? extends T> serviceClass);
+    void register(String productName, String productVersion, int majorVersion, Class<? extends T> serviceClass);
 
-    void registerObject(String productName, String productVersion, int majorVersion, int minorVersion,
-                        Class<? extends T> serviceClass);
+    void register(String productName, String productVersion, int majorVersion, int minorVersion, Class<? extends T> serviceClass);
 
-    void registerObject(DatabaseMatcher databaseMatcher, Class<? extends T> serviceClass);
+    void register(DatabaseMatcher databaseMatcher, Class<? extends T> serviceClass);
 
-    T resolveObject(DatabaseMetaData metaData) throws SQLException;
+    T resolve(DatabaseMetaData metaData) throws SQLException;
 }

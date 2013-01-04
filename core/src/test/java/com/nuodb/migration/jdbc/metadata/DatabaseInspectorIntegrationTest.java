@@ -9,24 +9,21 @@ import com.nuodb.migration.spec.DriverConnectionSpec;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.sql.Connection;
 
-public class DatabaseIntrospectorIntegrationTest {
+import static com.nuodb.migration.jdbc.JdbcUtils.close;
+
+public class DatabaseInspectorIntegrationTest {
 
     private Connection connection;
     private DatabaseInspector inspector;
 
     @Before
     public void setUp() throws Exception {
-        DriverConnectionSpec mysql = new DriverConnectionSpec();
-        mysql.setDriverClassName("com.mysql.jdbc.Driver");
-        mysql.setUrl("jdbc:mysql://localhost:3306/test");
-        mysql.setUsername("root");
-
-        DriverConnectionSpec nuodb = TestUtils.createTestNuoDBConnectionSpec();
-
-        final DriverConnectionProvider connectionProvider = new DriverPoolingConnectionProvider(nuodb);
+        DriverConnectionSpec nuodb = TestUtils.createConnectionSpec();
+        DriverConnectionProvider connectionProvider = new DriverPoolingConnectionProvider(nuodb);
         connection = connectionProvider.getConnection();
 
         Assert.assertNotNull(connection);
@@ -37,10 +34,26 @@ public class DatabaseIntrospectorIntegrationTest {
         inspector.withConnection(connection);
     }
 
+    @Test
+    public void testInspectCatalog() throws Exception {
+        inspector.withMetaDataTypes(MetaDataType.CATALOG);
+        inspector.inspect();
+    }
+
+    @Test
+    public void testInspectSchema() throws Exception {
+        inspector.withMetaDataTypes(MetaDataType.CATALOG, MetaDataType.SCHEMA);
+        inspector.inspect();
+    }
+
+    @Test
+    public void testInspectTable() throws Exception {
+        inspector.withMetaDataTypes(MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE);
+        inspector.inspect();
+    }
+
     @After
     public void tearDown() throws Exception {
-        if (connection != null) {
-            connection.close();
-        }
+        close(connection);
     }
 }

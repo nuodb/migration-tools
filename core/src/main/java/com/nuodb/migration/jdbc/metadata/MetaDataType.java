@@ -50,8 +50,7 @@ public class MetaDataType implements Comparable<MetaDataType> {
     public static final MetaDataType FOREIGN_KEY = new MetaDataType("foreign key");
     public static final MetaDataType INDEX = new MetaDataType("index");
     public static final MetaDataType AUTO_INCREMENT = new MetaDataType("auto increment");
-    public static final MetaDataType TABLE_CHECK = new MetaDataType("table check");
-    public static final MetaDataType COLUMN_CHECK = new MetaDataType("column check");
+    public static final MetaDataType CHECK_CONSTRAINT = new MetaDataType("check constraint");
 
     public static final MetaDataType[] ALL_TYPES = getAllTypes();
 

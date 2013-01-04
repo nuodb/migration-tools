@@ -27,8 +27,9 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.metadata.Column;
+import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.Identifier;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.query.StatementCallback;
@@ -36,18 +37,28 @@ import com.nuodb.migration.jdbc.query.StatementCreator;
 import com.nuodb.migration.jdbc.query.StatementTemplate;
 
 import java.sql.*;
+import java.util.Map;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static com.nuodb.migration.jdbc.metadata.Identifier.valueOf;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBColumnCheckReader extends MetaDataReaderBase {
+public class OracleCheckConstraintReader extends MetaDataReaderBase {
 
-    private static final String QUERY = "SELECT * FROM SYSTEM.TABLECONSTRAINTS WHERE SCHEMA=? AND TABLENAME=?";
+    public static final String CONSTRAINT_TYPE_CHECK = "C";
+    public static final String STATUS_ENABLED = "ENABLED";
 
-    public NuoDBColumnCheckReader() {
-        super(MetaDataType.COLUMN_CHECK);
+    public static final String QUERY =
+            "SELECT ALL_CONSTRAINTS.CONSTRAINT_NAME, ALL_CONS_COLUMNS.COLUMN_NAME, ALL_CONSTRAINTS.SEARCH_CONDITION\n" +
+            "FROM SYS.ALL_CONS_COLUMNS\n" +
+            "JOIN SYS.ALL_CONSTRAINTS ON ALL_CONS_COLUMNS.TABLE_NAME=ALL_CONSTRAINTS.TABLE_NAME\n" +
+            "AND ALL_CONS_COLUMNS.CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME\n" +
+            "WHERE ALL_CONSTRAINTS.CONSTRAINT_TYPE=? AND ALL_CONSTRAINTS.STATUS=? AND ALL_CONSTRAINTS.TABLE_NAME=?";
+
+    public OracleCheckConstraintReader() {
+        super(MetaDataType.CHECK_CONSTRAINT);
     }
 
     @Override
@@ -66,13 +77,14 @@ public class NuoDBColumnCheckReader extends MetaDataReaderBase {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
                         for (Table table : database.listTables()) {
-                            statement.setString(1, table.getSchema().getName());
-                            statement.setString(2, table.getName());
-                            ResultSet constraints = statement.executeQuery();
+                            statement.setString(1, CONSTRAINT_TYPE_CHECK);
+                            statement.setString(2, STATUS_ENABLED);
+                            statement.setString(3, table.getName());
+                            ResultSet resultSet = statement.executeQuery();
                             try {
-                                readConstraints(table, constraints);
+                                read(table, resultSet);
                             } finally {
-                                close(constraints);
+                                close(resultSet);
                             }
                         }
                     }
@@ -80,10 +92,15 @@ public class NuoDBColumnCheckReader extends MetaDataReaderBase {
         );
     }
 
-    protected void readConstraints(Table table, ResultSet constraints) throws SQLException {
-        while (constraints.next()) {
-            Column column = table.createColumn(constraints.getString("CONSTRAINTNAME"));
-            column.setCheck(constraints.getString("CONSTRAINTTEXT"));
+    protected void read(Table table, ResultSet resultSet) throws SQLException {
+        Map<Identifier, String> checks = Maps.newLinkedHashMap();
+        while (resultSet.next()) {
+            String check = resultSet.getString("SEARCH_CONDITION");
+            if (!check.endsWith("IS NOT NULL")) {
+                Identifier identifier = valueOf(resultSet.getString("CONSTRAINT_NAME"));
+                checks.put(identifier, check);
+            }
         }
+        table.setChecks(checks.values());
     }
 }

@@ -82,16 +82,18 @@ public class DatabaseInspector {
         withMetaDataReader(new ForeignKeyReader());
         withMetaDataReader(new PrimaryKeyReader());
 
-        MetaDataReaderResolver columnCheck = new MetaDataReaderResolver(COLUMN_CHECK);
-        columnCheck.registerObject("NuoDB", NuoDBColumnCheckReader.class);
-        columnCheck.registerObject("Microsoft SQL Server", MSSQLServerColumnCheckReader.class);
-        withMetaDataReader(columnCheck);
+        MetaDataReaderResolver checkReader = new MetaDataReaderResolver(CHECK_CONSTRAINT);
+        checkReader.register("NuoDB", NuoDBCheckConstraintReader.class);
+        checkReader.register("PostgreSQL", PostgreSQLCheckConstraintReader.class);
+        checkReader.register("Microsoft SQL Server", MSSQLServerCheckConstraintReader.class);
+        checkReader.register("Oracle", OracleCheckConstraintReader.class);
+        withMetaDataReader(checkReader);
 
-        MetaDataReaderResolver autoIncrement = new MetaDataReaderResolver(AUTO_INCREMENT);
-        autoIncrement.registerObject("MySQL", MySQLAutoIncrementReader.class);
-        autoIncrement.registerObject("PostgreSQL", PostgreSQLAutoIncrementReader.class);
-        autoIncrement.registerObject("Microsoft SQL Server", MSSQLServerAutoIncrementReader.class);
-        withMetaDataReader(autoIncrement);
+        MetaDataReaderResolver autoIncrementReader = new MetaDataReaderResolver(AUTO_INCREMENT);
+        autoIncrementReader.register("MySQL", MySQLAutoIncrementReader.class);
+        autoIncrementReader.register("PostgreSQL", PostgreSQLAutoIncrementReader.class);
+        autoIncrementReader.register("Microsoft SQL Server", MSSQLServerAutoIncrementReader.class);
+        withMetaDataReader(autoIncrementReader);
     }
 
     public Database inspect() throws SQLException {
@@ -129,7 +131,7 @@ public class DatabaseInspector {
             logger.debug(format("DatabaseInfo: %s", databaseInfo));
         }
         database.setDatabaseInfo(databaseInfo);
-        database.setDialect(getDialectResolver().resolveObject(metaData));
+        database.setDialect(getDialectResolver().resolve(metaData));
     }
 
     protected void readMetaData(Database database) throws SQLException {

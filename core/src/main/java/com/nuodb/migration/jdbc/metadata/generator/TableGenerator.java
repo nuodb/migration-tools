@@ -98,7 +98,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                     }
                 }
             }
-            if (metaDataTypes.contains(COLUMN_CHECK)) {
+            if (metaDataTypes.contains(CHECK_CONSTRAINT)) {
                 String check = column.getCheck();
                 if (check != null && dialect.supportsColumnCheck()) {
                     buffer.append(" CHECK ");
@@ -147,7 +147,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 }
             }
         }
-        if (metaDataTypes.contains(TABLE_CHECK)) {
+        if (metaDataTypes.contains(CHECK_CONSTRAINT)) {
             if (dialect.supportsTableCheck()) {
                 for (String check : table.getChecks()) {
                     buffer.append(", CHECK ");

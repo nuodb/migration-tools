@@ -44,17 +44,22 @@ public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
     }
 
     @Override
-    public String getQualifiedName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
+    public String getQualifiedName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext,
+                                   boolean identifier) {
         return getForeignKeyName(foreignKey, scriptGeneratorContext, identifier);
     }
 
-    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
+    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext,
+                                    boolean identifier) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("FK");
-        buffer.append('_');
-        buffer.append(scriptGeneratorContext.getName(foreignKey.getSourceTable(), false));
-        buffer.append('_');
-        buffer.append(scriptGeneratorContext.getName(foreignKey.getTargetTable(), false));
+
+        StringBuilder qualifier = new StringBuilder();
+        qualifier.append(scriptGeneratorContext.getName(foreignKey.getSourceTable(), false));
+        qualifier.append('_');
+        qualifier.append(scriptGeneratorContext.getName(foreignKey.getTargetTable(), false));
+        buffer.append(Integer.toHexString(qualifier.toString().hashCode()).toUpperCase());
+
         return identifier ? scriptGeneratorContext.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

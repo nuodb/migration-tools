@@ -31,6 +31,7 @@ import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -74,6 +75,18 @@ public class JdbcUtils {
         } catch (SQLException exception) {
             if (logger.isWarnEnabled()) {
                 logger.warn("Failed closing connection services", exception);
+            }
+        }
+    }
+
+    public static void close(Connection connection) {
+        try {
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException exception) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed closing connection", exception);
             }
         }
     }

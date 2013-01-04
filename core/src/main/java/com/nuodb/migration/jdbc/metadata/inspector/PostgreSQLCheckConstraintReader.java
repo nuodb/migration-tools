@@ -27,38 +27,40 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.metadata.*;
+import com.google.common.collect.Maps;
+import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.Identifier;
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
+import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.query.StatementCallback;
 import com.nuodb.migration.jdbc.query.StatementCreator;
 import com.nuodb.migration.jdbc.query.StatementTemplate;
 
 import java.sql.*;
+import java.util.Map;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
 
 /**
  * @author Sergey Bushik
  */
-public class MSSQLServerAutoIncrementReader extends MetaDataReaderBase {
+public class PostgreSQLCheckConstraintReader extends MetaDataReaderBase {
 
-    private static final String QUERY =
-            "SELECT COLUMN_NAME,\n" +
-            "IDENT_SEED(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS START_WITH,\n" +
-            "IDENT_CURRENT(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS LAST_VALUE,\n" +
-            "IDENT_INCR(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS INCREMENT_BY\n" +
-            "FROM INFORMATION_SCHEMA.COLUMNS\n" +
-            "WHERE COLUMNPROPERTY(OBJECT_ID(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)), COLUMN_NAME, 'ISIDENTITY') = 1\n" +
-            "  AND TABLE_CATALOG = ?\n" +
-            "  AND TABLE_SCHEMA = ?\n" +
-            "  AND TABLE_NAME = ?";
+    public static final String QUERY =
+            "SELECT *\n" +
+            "FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS CCU\n" +
+            "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON\n" +
+            "CCU.TABLE_CATALOG = CC.CONSTRAINT_CATALOG\n" +
+            "AND CCU.TABLE_SCHEMA = CC.CONSTRAINT_SCHEMA\n" +
+            "AND CCU.CONSTRAINT_NAME = CC.CONSTRAINT_NAME\n" +
+            "WHERE CCU.TABLE_SCHEMA = ? AND CCU.TABLE_NAME = ?";
 
-
-    public MSSQLServerAutoIncrementReader() {
-        super(MetaDataType.AUTO_INCREMENT);
+    public PostgreSQLCheckConstraintReader() {
+        super(MetaDataType.CHECK_CONSTRAINT);
     }
 
     @Override
-    public void read(final DatabaseInspector inspector, final Database database,
+    public void read(DatabaseInspector inspector, final Database database,
                      DatabaseMetaData metaData) throws SQLException {
         StatementTemplate template = new StatementTemplate(metaData.getConnection());
         template.execute(
@@ -69,12 +71,12 @@ public class MSSQLServerAutoIncrementReader extends MetaDataReaderBase {
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
+
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
                         for (Table table : database.listTables()) {
-                            statement.setString(1, table.getCatalog().getName());
-                            statement.setString(2, table.getSchema().getName());
-                            statement.setString(3, table.getName());
+                            statement.setString(1, table.getSchema().getName());
+                            statement.setString(2, table.getName());
                             ResultSet resultSet = statement.executeQuery();
                             try {
                                 read(table, resultSet);
@@ -88,15 +90,11 @@ public class MSSQLServerAutoIncrementReader extends MetaDataReaderBase {
     }
 
     protected void read(Table table, ResultSet resultSet) throws SQLException {
-        if (resultSet.next()) {
-            Column column = table.createColumn(resultSet.getString("COLUMN_NAME"));
-            column.setAutoIncrement(true);
-
-            Sequence sequence = new Sequence();
-            sequence.setStartWith(resultSet.getLong("START_WITH"));
-            sequence.setLastValue(resultSet.getLong("LAST_VALUE"));
-            sequence.setIncrementBy(resultSet.getLong("INCREMENT_BY"));
-            column.setSequence(sequence);
+        Map<Identifier, String> checks = Maps.newLinkedHashMap();
+        while (resultSet.next()) {
+            Identifier identifier = Identifier.valueOf(resultSet.getString("CONSTRAINT_NAME"));
+            checks.put(identifier, resultSet.getString("CHECK_CLAUSE"));
         }
+        table.setChecks(checks.values());
     }
 }

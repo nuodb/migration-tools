@@ -115,7 +115,7 @@ public class LoadJob extends JobBase {
 
         Connection connection = connectionServices.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolveObject(metaData));
+        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(metaData));
 
         CatalogReader catalogReader = getCatalog().getCatalogReader();
         execution.setCatalogReader(catalogReader);

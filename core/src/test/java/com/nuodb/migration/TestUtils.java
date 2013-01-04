@@ -4,7 +4,7 @@ import com.nuodb.migration.spec.DriverConnectionSpec;
 
 public class TestUtils {
 
-    public static DriverConnectionSpec createTestNuoDBConnectionSpec() {
+    public static DriverConnectionSpec createConnectionSpec() {
         final DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
         connectionSpec.setUsername("dba");

@@ -57,6 +57,7 @@ public class SQL2003Dialect implements Dialect {
     private static final Pattern IDENTIFIER = Pattern.compile("[a-zA-Z0-9_]*");
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private JdbcTypeRegistry jdbcTypeRegistry;
+    private boolean normalizeIdentifier;
 
     public SQL2003Dialect() {
         this(new Jdbc4TypeRegistry());
@@ -95,16 +96,31 @@ public class SQL2003Dialect implements Dialect {
         addJdbcTypeName(Types.NCLOB, "NCLOB");
     }
 
+
     @Override
     public String getIdentifier(String identifier) {
+        return getIdentifier(identifier, isNormalizeIdentifier());
+    }
+
+    @Override
+    public String getIdentifier(String identifier, boolean normalizeIdentifier) {
         if (identifier == null) {
             return null;
         }
+        identifier = normalizeIdentifier ? normalize(identifier) : identifier;
         if (isQuote(identifier)) {
-            return quote(normalize(identifier));
+            return quote(identifier);
         } else {
-            return normalize(identifier);
+            return identifier;
         }
+    }
+
+    public boolean isNormalizeIdentifier() {
+        return normalizeIdentifier;
+    }
+
+    public void setNormalizeIdentifier(boolean normalizeIdentifier) {
+        this.normalizeIdentifier = normalizeIdentifier;
     }
 
     protected boolean isQuote(String identifier) {
@@ -244,15 +260,20 @@ public class SQL2003Dialect implements Dialect {
 
     @Override
     public String getCheckClause(String checkClause) {
-        return normalizeQueryFragment(checkClause);
+        checkClause = getSQLFragment(checkClause);
+        if (!checkClause.startsWith("(") && !checkClause.endsWith(")")) {
+            return "(" + checkClause + ")";
+        } else {
+            return checkClause;
+        }
     }
 
     @Override
     public String getDefaultValue(int typeCode, String defaultValue) {
-        return normalizeQueryFragment(defaultValue);
+        return getSQLFragment(defaultValue);
     }
 
-    protected String normalizeQueryFragment(String fragment) {
+    protected String getSQLFragment(String fragment) {
         if (fragment == null) {
             return null;
         }
