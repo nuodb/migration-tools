@@ -1,6 +1,5 @@
 package com.nuodb.migration.jdbc;
 
-
 import com.nuodb.migration.jdbc.connection.DriverConnectionProvider;
 import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
 import com.nuodb.migration.spec.DriverConnectionSpec;

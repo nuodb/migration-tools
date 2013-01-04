@@ -8,46 +8,71 @@ The NuoDB Customer Migration Data tool is a command-line interface designed to a
 
         $ git clone https://github.com/nuodb/migration-tools
         $ cd migration-tools/
-    	$ mvn install
+        $ mvn install
         $ cd assembly/target/nuodb-migration/bin/
         $ ./nuodb-migration --help
         
 ## Synopsis ##
 
-    $ ./nuodb-migration 
-    	--help=<[dump] [load]> | 
-    	--list | 
-    	--config=<file> 
-    	<[dump] [load]>
+    $ ./nuodb-migration
+        --help=<[dump] | [load] | [schema]> |
+        --list |
+        --config=<file>
+        <[dump] | [load] | [schema]>
 
 --------
 
     $ ./nuodb-migration dump 
-    	--source.driver=<driver> | 
-    	--source.url=<url> | 
-    	--source.username=<username> | 
-    	--source.password=<password> | 
-    	--source.properties=<properties> | 
-    	--source.catalog=<catalog> | 
-    	--source.schema=<schema> | 
-    	--output.type=<output type> | 
-    	--output.path=<output path> | 
-    	--output.*=<attribute value> | 
-    	--table=<table> | 
-    	--table.*.filter=<query filter> | 
-    	--query=<query>
+        --source.driver<driver> |
+        --source.url=<url> |
+        --source.username=<username> |
+        --source.password=<password> |
+        --source.properties=<properties> |
+        --source.catalog=<catalog> |
+        --source.schema=<schema> |
+        --output.type=<output type> |
+        --output.path=<output path> |
+        --output.*=<attribute value> |
+        --table=<table> |
+        --table.type=<table type> |
+        --table.*.filter=<query filter> |
+        --query=<query> |
+        --time.zone=<time zone>
 
 --------
 
     $ ./nuodb-migration load 
-    	--target.url=<url> |
-    	--target.username=<username> | 
-    	--target.password=<password> | 
-    	--target.properties=<properties> | 
-    	--target.schema=<schema> | 
-    	--input.type=<input type> | 
-    	--input.path=<input path> | 
-    	--input.*=<attribute value>
+        --target.url=<url> |
+        --target.username=<username> |
+        --target.password=<password> |
+        --target.properties=<properties> |
+        --target.schema=<schema> |
+        --input.type=<input type> |
+        --input.path=<input path> |
+        --input.*=<attribute value> |
+        --time.zone=<time zone>
+
+--------
+
+    $ ./nuodb-migration schema 
+        --source.driver=<driver> |
+        --source.url=<url> |
+        --source.username=<username> |
+        --source.password=<password> |
+        --source.properties=<properties> |
+        --source.catalog=<catalog> |
+        --source.schema=<schema> |
+        --target.url=<url> |
+        --target.username=<username> |
+        --target.password=<password> |
+        --target.properties=<properties> |
+        --target.schema=<schema> |
+        --output.path=<output path> |
+        --meta.data.*=<[true] | [false]> |
+        --script.type=<[drop] , [create]> |
+        --group.scripts.by=<[table] | [meta.data]>
+
+--------
 
 ## Connect to Third-party Databases ##
 
@@ -96,10 +121,10 @@ Example 1: Dump all tables from MySQL "enron" catalog in CSV format
 Example 2: Dump records from hockey table where "id" does not equal 25 from NuoDB "test" catalog in BSON format
 
     $ ./nuodb-migration dump --source.driver=com.nuodb.jdbc.Driver \  
-        --source.url=jdbc:com.nuodb://localhost/test --source.username=dba \
-        --source.password=goalie \ 
+        --source.url=jdbc:com.nuodb://localhost/test
+        --source.username=dba --source.password=goalie \
         --source.schema=hockey --table=hockey --table.hockey.filter=id<>25 \  
-        --output.type=bson --output.path=/tmp/test/dump.cat
+        --output.path=/tmp/dump.cat --output.type=bson
 
 ----
 
@@ -107,8 +132,16 @@ Example 3:  Load CSV data to the corresponding tables in NuoDB from /tmp/test/du
 
     $ ./nuodb-migration load --target.url=jdbc:com.nuodb://localhost/test \
         --target.username=dba --target.password=goalie \
-        --input.path=/tmp/test/dump.cat
+        --input.path=/tmp/dump.cat
 
+----
+
+Example 4: Generate NuoDB schema from
+
+    $ ./nuodb-migration schema --source.driver=oracle.jdbc.driver.OracleDriver
+    --source.url=jdbc:oracle:thin:@//localhost:1521/test \
+    --source.username=dba --source.password=goalie --source.schema=test \
+    --output.path=/tmp/schema.sql
 
 ## Command Line Options ##
 

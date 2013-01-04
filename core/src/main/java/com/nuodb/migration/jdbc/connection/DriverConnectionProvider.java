@@ -41,12 +41,14 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import static java.lang.String.format;
+
 public class DriverConnectionProvider implements ConnectionProvider {
 
     public static final String USER_PROPERTY = "user";
     public static final String PASSWORD_PROPERTY = "password";
 
-    protected transient final Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     private DriverConnectionSpec driverConnectionSpec;
     private Boolean autoCommit;
@@ -103,7 +105,7 @@ public class DriverConnectionProvider implements ConnectionProvider {
         if (driver == null) {
             String driverClassName = driverConnectionSpec.getDriverClassName();
             if (logger.isDebugEnabled()) {
-                logger.debug(String.format("Loading driver %s", driverClassName));
+                logger.debug(format("Loading driver %s", driverClassName));
             }
             driver = ReflectionUtils.newInstance(driverClassName);
         }
