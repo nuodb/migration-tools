@@ -1,8 +1,15 @@
 # migration-tools #
 
-*A command line interface to help domain administrators migrate a legacy database to NuoDB.*
+*A command-line interface for helping domain administrators manage backup and migration of their databases.*
 
-The NuoDB Customer Migration Data tool is a command-line interface designed to assist you in migrating legacy data from any SQL database to a NuoDB database. Use nuodb-migration dump and nuodb-migration load to copy, normalize, and load data from an existing database to a NuoDB database.
+This tool is designed to assist you in migrating data from supported* SQL databases to a NuoDB database. Use nuodb-migration dump and nuodb-migration load to copy, normalize, and load data from an existing database (NuoDB or 3rd party) to a NuoDB database.  With the command-line interface, domain administrators will be able to perform the following database backup and migration tasks:
+
+1. Migrate (generate) a schema to a target NuoDB database
+2. Copy data from an existing database to a target NuoDB database
+3. Dump data from an existing database
+4. Load data to a target NuoDB database
+
+*These functions are initially supported with MySQL, SQL Server, Oracle and PostgreSQL.
 
 ## Building from Source
 
