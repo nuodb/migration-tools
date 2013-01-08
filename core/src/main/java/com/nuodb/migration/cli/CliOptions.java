@@ -88,4 +88,11 @@ public interface CliOptions {
     final String SCHEMA_META_DATA_OPTION = "meta.data.*";
     final String SCHEMA_SCRIPT_TYPE_OPTION = "script.type";
     final String SCHEMA_GROUP_SCRIPTS_BY_OPTION = "group.scripts.by";
+    final String SCHEMA_IDENTIFIER_NORMALIZER = "identifier.normalizer";
+
+    final String JDBC_TYPE_NAME_OPTION = "type.name";
+    final String JDBC_TYPE_CODE_OPTION = "type.code";
+    final String JDBC_TYPE_SIZE_OPTION = "type.size";
+    final String JDBC_TYPE_PRECISION_OPTION = "type.precision";
+    final String JDBC_TYPE_SCALE_OPTION = "type.scale";
 }

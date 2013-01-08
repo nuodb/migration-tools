@@ -25,37 +25,53 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.cli.parse.option;
-
-import com.nuodb.migration.cli.parse.Argument;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-
-import java.util.Collection;
+package com.nuodb.migration.jdbc.type;
 
 /**
  * @author Sergey Bushik
  */
-public interface ArgumentBuilder {
+public class JdbcTypeSpecifiers {
 
-    ArgumentBuilder withId(int id);
+    private Integer size;
+    private Integer precision;
+    private Integer scale;
 
-    ArgumentBuilder withName(String name);
+    public Integer getSize() {
+        return size;
+    }
 
-    ArgumentBuilder withDescription(String description);
+    public JdbcTypeSpecifiers withSize(Integer size) {
+        this.size = size;
+        return this;
+    }
 
-    ArgumentBuilder withRequired(boolean required);
+    public Integer getPrecision() {
+        return precision;
+    }
 
-    ArgumentBuilder withMinimum(int minimum);
+    public JdbcTypeSpecifiers withPrecision(Integer precision) {
+        this.precision = precision;
+        return this;
+    }
 
-    ArgumentBuilder withMaximum(int maximum);
+    public Integer getScale() {
+        return scale;
+    }
 
-    ArgumentBuilder withDefaultValue(Object defaultValue);
+    public JdbcTypeSpecifiers withScale(Integer scale) {
+        this.scale = scale;
+        return this;
+    }
 
-    ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor);
+    public static JdbcTypeSpecifiers newSize(Integer size) {
+        return new JdbcTypeSpecifiers().withSize(size);
+    }
 
-    ArgumentBuilder withValuesSeparator(String valuesSeparator);
+    public static JdbcTypeSpecifiers newScale(Integer scale) {
+        return new JdbcTypeSpecifiers().withScale(scale);
+    }
 
-    ArgumentBuilder withHelpValues(Collection<String> helpValues);
-
-    Argument build();
+    public static JdbcTypeSpecifiers newSizePrecisionScale(Integer size, Integer precision, Integer scale) {
+        return new JdbcTypeSpecifiers().withScale(size).withPrecision(precision).withScale(scale);
+    }
 }

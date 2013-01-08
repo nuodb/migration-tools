@@ -32,14 +32,12 @@ import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migration.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migration.jdbc.metadata.generator.*;
+import com.nuodb.migration.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migration.job.JobExecutor;
 import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
-import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverConnectionSpec;
-import com.nuodb.migration.spec.ResourceSpec;
-import com.nuodb.migration.spec.SchemaSpec;
+import com.nuodb.migration.spec.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +46,7 @@ import java.util.Collection;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migration.jdbc.metadata.generator.DatabaseGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migration.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER;
+import static com.nuodb.migration.jdbc.type.JdbcTypeSpecifiers.newSizePrecisionScale;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
 /**
@@ -78,38 +77,45 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
     }
 
     protected ScriptGeneratorContext createScriptGeneratorContext() {
-        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext();
+        ScriptGeneratorContext context = new ScriptGeneratorContext();
+        context.getAttributes().put(GROUP_SCRIPTS_BY, getSchemaSpec().getGroupScriptsBy());
+        context.setMetaDataTypes(getSchemaSpec().getMetaDataTypes());
+        context.setScriptTypes(getSchemaSpec().getScriptTypes());
 
         NuoDBDialect dialect = new NuoDBDialect();
-        // TODO: dialect.setNormalizeIdentifier(true);
-        scriptGeneratorContext.setDialect(dialect);
+        JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
+        for (JdbcTypeSpec jdbcTypeSpec : getSchemaSpec().getJdbcTypeSpecs()) {
+            jdbcTypeNameMap.addTypeName(
+                    jdbcTypeSpec.getTypeCode(), jdbcTypeSpec.getTypeName(),
+                    newSizePrecisionScale(
+                            jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()));
+        }
+        dialect.setIdentifierNormalizer(getSchemaSpec().getIdentifierNormalizer());
+        context.setDialect(dialect);
 
-        scriptGeneratorContext.setMetaDataTypes(getSchemaSpec().getMetaDataTypes());
         ConnectionSpec connectionSpec = getSchemaSpec().getTargetConnectionSpec();
         if (connectionSpec != null) {
-            scriptGeneratorContext.setCatalog(connectionSpec.getCatalog());
-            scriptGeneratorContext.setSchema(connectionSpec.getSchema());
+            context.setCatalog(connectionSpec.getCatalog());
+            context.setSchema(connectionSpec.getSchema());
         }
-        scriptGeneratorContext.setScriptTypes(getSchemaSpec().getScriptTypes());
-        scriptGeneratorContext.getAttributes().put(GROUP_SCRIPTS_BY, getSchemaSpec().getGroupScriptsBy());
-        return scriptGeneratorContext;
+        return context;
     }
 
     protected ScriptExporter createScriptExporter() {
-        Collection<ScriptExporter> scriptExporters = newArrayList();
+        Collection<ScriptExporter> exporters = newArrayList();
         ConnectionProvider connectionProvider = createConnectionProvider(schemaSpec.getTargetConnectionSpec());
         if (connectionProvider != null) {
-            scriptExporters.add(new ConnectionScriptExporter(connectionProvider.getConnectionServices()));
+            exporters.add(new ConnectionScriptExporter(connectionProvider.getConnectionServices()));
         }
         ResourceSpec outputSpec = schemaSpec.getOutputSpec();
         if (outputSpec != null) {
-            scriptExporters.add(new FileScriptExporter(outputSpec.getPath()));
+            exporters.add(new FileScriptExporter(outputSpec.getPath()));
         }
         // Fallback to the standard output if neither target connection nor target file were specified
-        if (scriptExporters.isEmpty()) {
-            scriptExporters.add(SYSTEM_OUT_SCRIPT_EXPORTER);
+        if (exporters.isEmpty()) {
+            exporters.add(SYSTEM_OUT_SCRIPT_EXPORTER);
         }
-        return new CompositeScriptExporter(scriptExporters);
+        return new CompositeScriptExporter(exporters);
     }
 
     public SchemaSpec getSchemaSpec() {

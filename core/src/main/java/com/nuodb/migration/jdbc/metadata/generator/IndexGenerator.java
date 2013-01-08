@@ -46,20 +46,20 @@ public class IndexGenerator extends ScriptGeneratorBase<Index> implements Constr
     }
 
     @Override
-    public Collection<String> getCreateScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(Index index, ScriptGeneratorContext context) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE");
         if (index.isUnique()) {
             buffer.append(" UNIQUE");
         }
         buffer.append(" INDEX ");
-        buffer.append(scriptGeneratorContext.getName(index));
+        buffer.append(context.getName(index));
         buffer.append(" ON ");
-        buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
+        buffer.append(context.getQualifiedName(index.getTable()));
         buffer.append(" (");
         for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            buffer.append(scriptGeneratorContext.getName(column));
+            buffer.append(context.getName(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }
@@ -69,15 +69,15 @@ public class IndexGenerator extends ScriptGeneratorBase<Index> implements Constr
     }
 
     @Override
-    public Collection<String> getDropScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getDropScripts(Index index, ScriptGeneratorContext context) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP INDEX ");
-        buffer.append(scriptGeneratorContext.getName(index));
+        buffer.append(context.getName(index));
 
-        Dialect dialect = scriptGeneratorContext.getDialect();
+        Dialect dialect = context.getDialect();
         if (dialect.supportsDropIndexOnTable()) {
             buffer.append(" ON ");
-            buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
+            buffer.append(context.getQualifiedName(index.getTable()));
             buffer.append(' ');
         }
 

@@ -46,7 +46,9 @@ public interface OptionBuilder {
 
     OptionBuilder withAlias(String alias);
 
-    OptionBuilder withGroup(Group children);
+    OptionBuilder withGroup(Group group);
+
+    OptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
 
     OptionBuilder withTrigger(Trigger trigger);
 

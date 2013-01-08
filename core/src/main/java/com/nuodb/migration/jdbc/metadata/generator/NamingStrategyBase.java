@@ -39,12 +39,12 @@ public abstract class NamingStrategyBase<T extends Relational> extends Generator
     }
 
     @Override
-    public String getName(T relational, ScriptGeneratorContext scriptGeneratorContext) {
-        return getName(relational, scriptGeneratorContext, true);
+    public String getName(T relational, ScriptGeneratorContext context) {
+        return getName(relational, context, true);
     }
 
     @Override
-    public String getQualifiedName(T object, ScriptGeneratorContext scriptGeneratorContext) {
-        return getQualifiedName(object, scriptGeneratorContext, true);
+    public String getQualifiedName(T object, ScriptGeneratorContext context) {
+        return getQualifiedName(object, context, true);
     }
 }

@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.google.common.io.Closeables.closeQuietly;
 import static java.lang.String.format;
@@ -51,10 +52,10 @@ public class SQLKeywords implements Set<String> {
 
     public static final SQLKeywords SQL_2003_KEYWORDS = new SQLKeywords("sql2003.keywords");
 
-    private Set<String> keywords = newCaseInsensitiveSet();
+    private Set<String> keywords = newTreeSet(String.CASE_INSENSITIVE_ORDER);
 
-    private static Set<String> load(String resource) {
-        Set<String> keywords = newCaseInsensitiveSet();
+    private static Collection<String> load(String resource) {
+        Collection<String> keywords = newHashSet();
         InputStream input = SQLKeywords.class.getResourceAsStream(resource);
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         String keyword;
@@ -74,16 +75,8 @@ public class SQLKeywords implements Set<String> {
         return keywords;
     }
 
-    private static Set<String> newCaseInsensitiveSet() {
-        return newTreeSet(String.CASE_INSENSITIVE_ORDER);
-    }
-
     private SQLKeywords(String resource) {
         this(load(resource), false);
-    }
-
-    public SQLKeywords(Collection<String> keywords) {
-        this(keywords, true);
     }
 
     public SQLKeywords(Collection<String> keywords, boolean modifiable) {

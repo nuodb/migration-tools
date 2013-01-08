@@ -54,12 +54,12 @@ public class RegexOption extends ContainerBase {
     private Map<RegexTrigger, Integer> triggersGroups = Maps.newHashMap();
 
     public RegexOption() {
-        setOptionProcessor(new ArgumentMaximumProcessor());
+        setOptionProcessor(new ArgumentMaximumUpdater());
     }
 
     public RegexOption(int id, String name, String description, boolean required) {
         super(id, name, description, required);
-        setOptionProcessor(new ArgumentMaximumProcessor());
+        setOptionProcessor(new ArgumentMaximumUpdater());
     }
 
     public void addRegex(String regex, int group, int priority) {
@@ -77,9 +77,9 @@ public class RegexOption extends ContainerBase {
      * @param arguments   to withConnection regular expression on.
      */
     @Override
-    public void processInternal(CommandLine commandLine, ListIterator<String> arguments) {
+    public void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
-        Trigger trigger = getTriggerFired(getTriggers(), argument);
+        Trigger trigger = getFireTrigger(getTriggers(), argument);
         if (canProcess(commandLine, argument)) {
             processTriggerFired(commandLine, trigger, argument);
         } else {
@@ -154,7 +154,7 @@ public class RegexOption extends ContainerBase {
      * Updates maximum value of container's argument option. Used with RegexOption when part of option name matching
      * regular expression is stored in the option items and option's argument.
      */
-    static class ArgumentMaximumProcessor implements OptionProcessor {
+    static class ArgumentMaximumUpdater implements OptionProcessor {
 
         private int count = 0;
 

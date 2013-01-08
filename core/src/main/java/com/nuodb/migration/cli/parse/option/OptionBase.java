@@ -145,38 +145,38 @@ public abstract class OptionBase implements Option {
 
     @Override
     public void preProcess(CommandLine commandLine, ListIterator<String> arguments) {
-        preProcessInternal(commandLine, arguments);
+        doPreProcess(commandLine, arguments);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.preProcess(commandLine, this, arguments);
         }
     }
 
-    protected void preProcessInternal(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void doPreProcess(CommandLine commandLine, ListIterator<String> arguments) {
     }
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        processInternal(commandLine, arguments);
+        doProcess(commandLine, arguments);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.process(commandLine, this, arguments);
         }
     }
 
-    protected void processInternal(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
     }
 
     @Override
     public void postProcess(CommandLine commandLine) {
-        postProcessInternal(commandLine);
+        doPostProcess(commandLine);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.postProcess(commandLine, this);
         }
     }
 
-    protected void postProcessInternal(CommandLine commandLine) {
+    protected void doPostProcess(CommandLine commandLine) {
         if (isRequired() && !commandLine.hasOption(this)) {
             throw new OptionException(this, format("Missing required option %1$s", getName()));
         }

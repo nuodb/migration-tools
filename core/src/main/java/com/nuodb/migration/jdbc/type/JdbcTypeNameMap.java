@@ -28,115 +28,112 @@
 package com.nuodb.migration.jdbc.type;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.sql.Types;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.String.format;
+import static com.nuodb.migration.jdbc.type.JdbcTypeSpecifiers.newSizePrecisionScale;
 
 /**
  * @author Sergey Bushik
  */
 public class JdbcTypeNameMap {
 
-    public static final JdbcTypeNameMap STANDARD = new StandardJdbcTypeNameMap();
-
-    public static final String LENGTH = "n";
-    public static final String PRECISION = "p";
-    public static final String SCALE = "s";
+    public static final String SIZE = "N";
+    public static final String PRECISION = "P";
+    public static final String SCALE = "S";
     public static final String VARIABLE_PREFIX = "{";
     public static final String VARIABLE_SUFFIX = "}";
 
-    private Map<Integer, String> typeCodeMap = Maps.newHashMap();
-    private Map<Integer, Map<Integer, String>> typeCodeLengthMap = Maps.newHashMap();
+    private Map<Integer, Map<JdbcTypeSpecifiers, String>> typeCodeTypeSpecifiersMap = Maps.newHashMap();
 
-    public void addJdbcTypeName(int typeCode, String typeName) {
-        typeCodeMap.put(typeCode, typeName);
+    public void addTypeName(int typeCode, String typeName) {
+        addTypeName(typeCode, typeName, null);
     }
 
-    public void addJdbcTypeName(int typeCode, String typeName, int length) {
-        Map<Integer, String> typeLengthMap = typeCodeLengthMap.get(typeCode);
-        if (typeLengthMap == null) {
-            typeLengthMap = Maps.newTreeMap();
-            typeCodeLengthMap.put(typeCode, typeLengthMap);
+    public void addTypeName(int typeCode, String typeName, JdbcTypeSpecifiers typeSpecifiers) {
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeCode);
+        if (typeSpecifiersMap == null) {
+            typeSpecifiersMap = Maps.newHashMap();
+            typeCodeTypeSpecifiersMap.put(typeCode, typeSpecifiersMap);
         }
-        typeLengthMap.put(length, typeName);
+        typeSpecifiersMap.put(typeSpecifiers, typeName.toUpperCase());
     }
 
-    public void removeJdbcTypeName(int typeCode) {
-        typeCodeMap.remove(typeCode);
+    public String getTypeName(int typeCode) {
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeCode);
+        return typeSpecifiersMap != null ? typeSpecifiersMap.get(null) : null;
     }
 
-    public String getJdbcTypeName(int typeCode) {
-        return typeCodeMap.get(typeCode);
-    }
-
-    public String getJdbcTypeName(int typeCode, int length, int precision, int scale) {
-        Map<Integer, String> map = typeCodeLengthMap.get(typeCode);
-        if (map != null) {
-            for (Map.Entry<Integer, String> entry : map.entrySet()) {
-                if (length <= entry.getKey()) {
-                    return expandVariables(entry.getValue(), length, precision, scale);
+    public String getTypeName(int typeCode, int size, int precision, int scale) {
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeCode);
+        String typeName = null;
+        if (typeSpecifiersMap != null) {
+            JdbcTypeSpecifiers targetTypeSpecifiers = newSizePrecisionScale(size, precision, scale);
+            for (Map.Entry<JdbcTypeSpecifiers, String> entry : typeSpecifiersMap.entrySet()) {
+                JdbcTypeSpecifiers typeSpecifiers = entry.getKey();
+                if (TYPE_SPECIFIERS_COMPARATOR.compare(typeSpecifiers, targetTypeSpecifiers) >= 0) {
+                    if (typeSpecifiers != null) {
+                        targetTypeSpecifiers = typeSpecifiers;
+                    }
+                    typeName = entry.getValue();
                 }
             }
         }
-        return expandVariables(getJdbcTypeName(typeCode), length, precision, scale);
-    }
-
-    protected String expandVariables(String typeName, int length, int precision, int scale) {
-        if (!StringUtils.isEmpty(typeName)) {
-            typeName = expandVariable(typeName, LENGTH, Integer.toString(length));
-            typeName = expandVariable(typeName, PRECISION, Integer.toString(precision));
-            typeName = expandVariable(typeName, SCALE, Integer.toString(scale));
+        if (typeName == null) {
+            typeName = getTypeName(typeCode);
         }
-        return typeName;
+        return expand(typeName, size, precision, scale);
     }
 
-    protected String expandVariable(String typeName, String variable, String value) {
+    public void removeTypeName(int typeCode) {
+        removeTypeName(typeCode, null);
+    }
+
+    public void removeTypeName(int typeCode, JdbcTypeSpecifiers typeSpecifiers) {
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeCode);
+        if (typeSpecifiersMap != null) {
+            typeSpecifiersMap.remove(typeSpecifiers);
+        }
+    }
+
+    private static String expand(String template, int size, int precision, int scale) {
+        if (!StringUtils.isEmpty(template)) {
+            template = expand(template, SIZE, Integer.toString(size));
+            template = expand(template, PRECISION, Integer.toString(precision));
+            template = expand(template, SCALE, Integer.toString(scale));
+        }
+        return template;
+    }
+
+    private static String expand(String template, String variable, String value) {
         Pattern compile = Pattern.compile(
                 Pattern.quote(VARIABLE_PREFIX + variable + VARIABLE_SUFFIX), Pattern.CASE_INSENSITIVE);
-        Matcher matcher = compile.matcher(typeName);
-        return matcher.find() ? matcher.replaceAll(value) : typeName;
+        Matcher matcher = compile.matcher(template);
+        return matcher.find() ? matcher.replaceAll(value) : template;
     }
 
-    static class StandardJdbcTypeNameMap extends JdbcTypeNameMap {
-
-        private static final Logger LOGGER = LoggerFactory.getLogger(JdbcTypeNameMap.class);
-
-        private static Map<Integer, String> createJdbcTypeNameMap() {
-            Map<Integer, String> typeNameMap = Maps.newLinkedHashMap();
-            Field[] fields = Types.class.getFields();
-            for (Field field : fields) {
-                if (Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
-                    try {
-                        typeNameMap.put((Integer) field.get(null), field.getName());
-                    } catch (IllegalAccessException exception) {
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug(format("Failed accessing %s field", Types.class), exception);
-                        }
-                    }
-                }
-            }
-            return typeNameMap;
-        }
-
-        private StandardJdbcTypeNameMap() {
-            for (Map.Entry<Integer, String> entry : createJdbcTypeNameMap().entrySet()) {
-                addJdbcTypeName(entry.getKey(), entry.getValue());
-            }
-        }
-
+    private static final Comparator<JdbcTypeSpecifiers> TYPE_SPECIFIERS_COMPARATOR = new Ordering<JdbcTypeSpecifiers>() {
         @Override
-        public String getJdbcTypeName(int typeCode, int length, int precision, int scale) {
-            String typeName = super.getJdbcTypeName(typeCode, length, precision, scale);
-            return typeName != null ? typeName : "type(" + typeCode + ")";
+        public int compare(JdbcTypeSpecifiers left, JdbcTypeSpecifiers right) {
+            int result = compare(left.getSize(), right.getSize());
+            if (result == 0) {
+                result = compare(left.getPrecision(), right.getPrecision());
+            }
+            if (result == 0) {
+                result = compare(left.getScale(), right.getScale());
+            }
+            return result;
         }
-    }
+
+        private int compare(Integer left, Integer right) {
+            return left != null && right != null ? left.compareTo(right) : 0;
+        }
+
+    }.nullsFirst();
+
 }

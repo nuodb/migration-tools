@@ -25,37 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.cli.parse.option;
-
-import com.nuodb.migration.cli.parse.Argument;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-
-import java.util.Collection;
+package com.nuodb.migration.jdbc.dialect;
 
 /**
  * @author Sergey Bushik
  */
-public interface ArgumentBuilder {
+public interface IdentifierNormalizer {
 
-    ArgumentBuilder withId(int id);
-
-    ArgumentBuilder withName(String name);
-
-    ArgumentBuilder withDescription(String description);
-
-    ArgumentBuilder withRequired(boolean required);
-
-    ArgumentBuilder withMinimum(int minimum);
-
-    ArgumentBuilder withMaximum(int maximum);
-
-    ArgumentBuilder withDefaultValue(Object defaultValue);
-
-    ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor);
-
-    ArgumentBuilder withValuesSeparator(String valuesSeparator);
-
-    ArgumentBuilder withHelpValues(Collection<String> helpValues);
-
-    Argument build();
+    String normalize(Dialect dialect, String identifier, boolean requiresQuoting);
 }

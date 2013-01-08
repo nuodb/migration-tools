@@ -28,6 +28,7 @@
 package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
+import com.nuodb.migration.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 
 import java.sql.Connection;
@@ -74,10 +75,6 @@ public interface Dialect {
 
     boolean supportsNegativeScale();
 
-    String getIdentifier(String identifier);
-
-    String getIdentifier(String identifier, boolean normalizeIdentifier);
-
     String getNullColumnString();
 
     String getNoColumnsInsert();
@@ -114,6 +111,10 @@ public interface Dialect {
 
     String getCheckClause(String checkClause);
 
+    String getIdentifier(String identifier);
+
+    String getIdentifier(String identifier, IdentifierNormalizer normalizeIdentifier);
+
     void setStreamResults(Statement statement, boolean streamResults) throws SQLException;
 
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
@@ -122,5 +123,11 @@ public interface Dialect {
 
     SQLKeywords getSQLKeywords();
 
+    JdbcTypeNameMap getJdbcTypeNameMap();
+
     JdbcTypeRegistry getJdbcTypeRegistry();
+
+    void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer);
+
+    IdentifierNormalizer getIdentifierNormalizer();
 }

@@ -25,37 +25,48 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.cli.parse.option;
+package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.cli.parse.Argument;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-
-import java.util.Collection;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Sergey Bushik
  */
-public interface ArgumentBuilder {
+public class IdentifierNormalizers {
 
-    ArgumentBuilder withId(int id);
+    public static IdentifierNormalizer lowerCase() {
+        return new IdentifierNormalizer() {
+            @Override
+            public String normalize(Dialect dialect, String identifier, boolean requiresQuoting) {
+                return StringUtils.lowerCase(identifier);
+            }
+        };
+    }
 
-    ArgumentBuilder withName(String name);
+    public static IdentifierNormalizer upperCase() {
+        return new IdentifierNormalizer() {
+            @Override
+            public String normalize(Dialect dialect, String identifier, boolean requiresQuoting) {
+                return StringUtils.upperCase(identifier);
+            }
+        };
+    }
 
-    ArgumentBuilder withDescription(String description);
+    public static IdentifierNormalizer standard() {
+        return new IdentifierNormalizer() {
+            @Override
+            public String normalize(Dialect dialect, String identifier, boolean requiresQuoting) {
+                return ((StandardDialect) dialect).normalize(identifier, requiresQuoting);
+            }
+        };
+    }
 
-    ArgumentBuilder withRequired(boolean required);
-
-    ArgumentBuilder withMinimum(int minimum);
-
-    ArgumentBuilder withMaximum(int maximum);
-
-    ArgumentBuilder withDefaultValue(Object defaultValue);
-
-    ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor);
-
-    ArgumentBuilder withValuesSeparator(String valuesSeparator);
-
-    ArgumentBuilder withHelpValues(Collection<String> helpValues);
-
-    Argument build();
+    public static IdentifierNormalizer noop() {
+        return new IdentifierNormalizer() {
+            @Override
+            public String normalize(Dialect dialect, String identifier, boolean requiresQuoting) {
+                return identifier;
+            }
+        };
+    }
 }

@@ -49,10 +49,10 @@ public class SchemaJob extends JobBase {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private boolean failOnEmptyScripts;
-    private ConnectionProvider connectionProvider;
     private ScriptGeneratorContext scriptGeneratorContext;
     private ScriptExporter scriptExporter;
+    private ConnectionProvider connectionProvider;
+    private boolean failOnEmptyScripts;
 
     @Override
     public void execute(JobExecution execution) throws Exception {

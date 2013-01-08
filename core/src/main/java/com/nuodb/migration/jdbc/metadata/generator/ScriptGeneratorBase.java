@@ -46,33 +46,33 @@ public abstract class ScriptGeneratorBase<R extends Relational> extends Generato
     }
 
     @Override
-    public Collection<String> getScripts(R relational, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getScripts(R relational, ScriptGeneratorContext context) {
         Collection<String> scripts;
-        if (isScriptType(DROP, scriptGeneratorContext) && isScriptType(CREATE, scriptGeneratorContext)) {
-            scripts = getDropCreateScripts(relational, scriptGeneratorContext);
-        } else if (isScriptType(DROP, scriptGeneratorContext)) {
-            scripts = getDropScripts(relational, scriptGeneratorContext);
-        } else if (isScriptType(CREATE, scriptGeneratorContext)) {
-            scripts = getCreateScripts(relational, scriptGeneratorContext);
+        if (hasScriptType(context, DROP) && hasScriptType(context, CREATE)) {
+            scripts = getDropCreateScripts(relational, context);
+        } else if (hasScriptType(context, DROP)) {
+            scripts = getDropScripts(relational, context);
+        } else if (hasScriptType(context, CREATE)) {
+            scripts = getCreateScripts(relational, context);
         } else {
             scripts = emptySet();
         }
         return scripts;
     }
 
-    protected Collection<String> getDropCreateScripts(R relational, ScriptGeneratorContext scriptGeneratorContext) {
+    protected Collection<String> getDropCreateScripts(R relational, ScriptGeneratorContext context) {
         Collection<String> scripts = newArrayList();
-        scripts.addAll(getDropScripts(relational, scriptGeneratorContext));
-        scripts.addAll(getCreateScripts(relational, scriptGeneratorContext));
+        scripts.addAll(getDropScripts(relational, context));
+        scripts.addAll(getCreateScripts(relational, context));
         return scripts;
     }
 
-    protected boolean isScriptType(ScriptType scriptType, ScriptGeneratorContext scriptGeneratorContext) {
-        Collection<ScriptType> scriptTypes = scriptGeneratorContext.getScriptTypes();
+    protected boolean hasScriptType(ScriptGeneratorContext context, ScriptType scriptType) {
+        Collection<ScriptType> scriptTypes = context.getScriptTypes();
         return scriptTypes != null && scriptTypes.contains(scriptType);
     }
 
-    protected abstract Collection<String> getDropScripts(R relational, ScriptGeneratorContext scriptGeneratorContext);
+    protected abstract Collection<String> getDropScripts(R relational, ScriptGeneratorContext context);
 
-    protected abstract Collection<String> getCreateScripts(R relational, ScriptGeneratorContext scriptGeneratorContext);
+    protected abstract Collection<String> getCreateScripts(R relational, ScriptGeneratorContext context);
 }

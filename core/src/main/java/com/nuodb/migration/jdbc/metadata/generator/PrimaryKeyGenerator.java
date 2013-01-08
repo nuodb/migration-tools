@@ -58,20 +58,20 @@ public class PrimaryKeyGenerator extends ScriptGeneratorBase<PrimaryKey> impleme
     }
 
     @Override
-    public Collection<String> getCreateScripts(PrimaryKey primaryKey, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(PrimaryKey primaryKey, ScriptGeneratorContext context) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        buffer.append(scriptGeneratorContext.getName(primaryKey.getTable()));
+        buffer.append(context.getName(primaryKey.getTable()));
         buffer.append(" ADD ");
-        buffer.append(getConstraintScript(primaryKey, scriptGeneratorContext));
+        buffer.append(getConstraintScript(primaryKey, context));
         return singleton(buffer.toString());
     }
 
     @Override
-    public Collection<String> getDropScripts(PrimaryKey primaryKey, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getDropScripts(PrimaryKey primaryKey, ScriptGeneratorContext context) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        buffer.append(scriptGeneratorContext.getName(primaryKey.getTable()));
+        buffer.append(context.getName(primaryKey.getTable()));
         buffer.append(" DROP PRIMARY KEY");
         return singleton(buffer.toString());
     }

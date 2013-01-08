@@ -40,7 +40,6 @@ public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
     private Map<JdbcTypeDesc, JdbcType> jdbcTypeMap = Maps.newHashMap();
     private Map<JdbcTypeDesc, JdbcTypeDesc> jdbcTypeDescAliasMap = Maps.newHashMap();
     private Map<Class, JdbcTypeAdapter> jdbcTypeAdapterMap = Maps.newHashMap();
-    private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
 
     public JdbcTypeRegistryBase() {
     }
@@ -49,11 +48,6 @@ public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
         addJdbcTypes(jdbcTypeRegistry.getJdbcTypeMap());
         addJdbcTypeAdapters(jdbcTypeRegistry.getJdbcTypeAdapterMap());
         addJdbcTypeDescAliases(jdbcTypeRegistry.getJdbcTypeDescAliases());
-    }
-
-    @Override
-    public JdbcTypeNameMap getJdbcTypeNameMap() {
-        return jdbcTypeNameMap;
     }
 
     @Override

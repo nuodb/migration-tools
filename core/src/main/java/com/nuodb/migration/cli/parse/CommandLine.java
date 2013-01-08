@@ -23,6 +23,8 @@ import java.util.List;
  */
 public interface CommandLine extends OptionSet {
 
+    List<String> getArguments();
+
     void addOption(Option option);
 
     void addValue(Option option, Object value);
@@ -37,11 +39,11 @@ public interface CommandLine extends OptionSet {
 
     void setDefaultSwitch(Option option, Boolean defaultSwitch);
 
-    List<Object> getOptionValues(Option option);
+    List<Object> getValues(Option option);
+
+    boolean isOption(String argument);
 
     Option getCurrent();
 
     void setCurrent(Option option);
-
-    boolean isOption(String argument);
 }

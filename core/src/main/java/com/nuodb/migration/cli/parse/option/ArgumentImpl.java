@@ -16,20 +16,13 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.nuodb.migration.cli.parse.Argument;
-import com.nuodb.migration.cli.parse.CommandLine;
-import com.nuodb.migration.cli.parse.Help;
-import com.nuodb.migration.cli.parse.HelpHint;
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionException;
-import com.nuodb.migration.cli.parse.OptionProcessor;
+import com.google.common.collect.Iterables;
+import com.nuodb.migration.cli.parse.*;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
+
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
 
 /**
  * An implementation of an argument
@@ -40,6 +33,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
 
     private int minimum = 0;
     private int maximum = 1;
+    private Collection<String> helpValues;
     private List<Object> defaultValues;
     private String valuesSeparator;
 
@@ -105,6 +99,16 @@ public class ArgumentImpl extends OptionBase implements Argument {
     }
 
     @Override
+    public Collection<String> getHelpValues() {
+        return helpValues;
+    }
+
+    @Override
+    public void setHelpValues(Collection<String> helpValues) {
+        this.helpValues = helpValues;
+    }
+
+    @Override
     public Set<String> getPrefixes() {
         return Collections.emptySet();
     }
@@ -139,7 +143,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
     }
 
     protected void processInternal(CommandLine commandLine, ListIterator<String> arguments, Option option) {
-        int count = commandLine.getOptionValues(option).size();
+        int count = commandLine.getValues(option).size();
         while (arguments.hasNext() && (count < maximum)) {
             String value = arguments.next();
             if (commandLine.isOption(value)) {
@@ -156,7 +160,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
                     arguments.add(value);
                 }
                 if (values.hasMoreTokens()) {
-                    throw new OptionException(this, String.format("Unexpected token %1$s", values.nextToken()));
+                    throw new OptionException(this, format("Unexpected token %1$s", values.nextToken()));
                 }
             } else {
                 count++;
@@ -180,19 +184,19 @@ public class ArgumentImpl extends OptionBase implements Argument {
     }
 
     @Override
-    protected void postProcessInternal(CommandLine commandLine) {
+    protected void doPostProcess(CommandLine commandLine) {
         postProcessInternal(commandLine, this);
     }
 
     protected void postProcessInternal(CommandLine commandLine, Option option) {
-        List values = commandLine.getValues(option);
+        List<Object> values = commandLine.getValues(option);
         int minimum = getMinimum();
         if (values.size() < minimum) {
-            throw new OptionException(option, String.format("Missing value for %1$s argument", getName()));
+            throw new OptionException(option, format("Missing value for %1$s argument", getName()));
         }
         int maximum = getMaximum();
         if (values.size() > maximum) {
-            throw new OptionException(option, String.format("Too many values for %1$s argument", getName()));
+            throw new OptionException(option, format("Too many values for %1$s argument", getName()));
         }
     }
 
@@ -204,11 +208,19 @@ public class ArgumentImpl extends OptionBase implements Argument {
         boolean numbered = (maximum > 1) && hints.contains(HelpHint.ARGUMENT_NUMBERED);
         boolean bracketed = hints.contains(HelpHint.ARGUMENT_BRACKETED);
         // if infinite args are allowed then crop the list
-        int max = (maximum == Integer.MAX_VALUE) ? 2 : maximum;
+        int count;
+        Collection<String> helpValues = getHelpValues();
+        boolean useHelpValues;
+        if (helpValues != null && helpValues.size() > 0) {
+            count = helpValues.size();
+            useHelpValues = true;
+        } else {
+            count = (maximum == Integer.MAX_VALUE) ? 2 : maximum;
+            useHelpValues = false;
+        }
         int i = 0;
-
         // for each argument
-        while (i < max) {
+        while (i < count) {
             // if we're past the first append a space
             if (i > 0) {
                 buffer.append(' ');
@@ -221,7 +233,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
                 buffer.append('<');
             }
             // append name
-            buffer.append(getName());
+            buffer.append(useHelpValues ? Iterables.get(helpValues, i) : getName());
             ++i;
             // if numbering
             if (numbered) {
@@ -232,7 +244,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
             }
         }
         // if infinite args are allowed
-        if (maximum == Integer.MAX_VALUE) {
+        if (!useHelpValues && maximum == Integer.MAX_VALUE) {
             buffer.append(" ...");
         }
         // for each argument
@@ -247,6 +259,6 @@ public class ArgumentImpl extends OptionBase implements Argument {
 
     @Override
     public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
-        return Collections.singletonList((Help) new HelpImpl(this, indent));
+        return singletonList((Help) new HelpImpl(this, indent));
     }
 }

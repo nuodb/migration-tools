@@ -81,6 +81,7 @@ public class CliCommand extends ArgumentImpl {
 
     @Override
     public void postProcess(CommandLine commandLine) {
+        super.postProcess(commandLine);
         CliRun cliRun = commandLine.getValue(this);
         try {
             if (cliRun != null) {

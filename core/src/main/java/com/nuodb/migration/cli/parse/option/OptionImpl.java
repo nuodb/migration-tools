@@ -82,9 +82,9 @@ public class OptionImpl extends ContainerBase {
     }
 
     @Override
-    protected void processInternal(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
-        Trigger trigger = getTriggerFired(getTriggers(), argument);
+        Trigger trigger = getFireTrigger(getTriggers(), argument);
         if (trigger != null) {
             commandLine.addOption(this);
         } else {

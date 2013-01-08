@@ -115,14 +115,14 @@ public abstract class ContainerBase extends OptionBase implements Container {
             if (this.argumentSeparator != null) {
                 int index = argument.indexOf(this.argumentSeparator);
                 if (index > 0) {
-                    return getTriggerFired(triggers, argument.substring(0, index)) != null;
+                    return getFireTrigger(triggers, argument.substring(0, index)) != null;
                 }
             }
         }
-        return getTriggerFired(triggers, argument) != null;
+        return getFireTrigger(triggers, argument) != null;
     }
 
-    protected Trigger getTriggerFired(PriorityList<Trigger> triggers, String argument) {
+    protected Trigger getFireTrigger(PriorityList<Trigger> triggers, String argument) {
         for (Trigger trigger : triggers) {
             if (trigger.fire(argument)) {
                 return trigger;
@@ -142,7 +142,7 @@ public abstract class ContainerBase extends OptionBase implements Container {
     }
 
     @Override
-    protected void preProcessInternal(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void doPreProcess(CommandLine commandLine, ListIterator<String> arguments) {
         if (this.argumentSeparator != null) {
             String value = arguments.next();
             int index = value.indexOf(this.argumentSeparator);
@@ -163,7 +163,7 @@ public abstract class ContainerBase extends OptionBase implements Container {
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        processInternal(commandLine, arguments);
+        doProcess(commandLine, arguments);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.process(commandLine, this, arguments);
@@ -181,6 +181,7 @@ public abstract class ContainerBase extends OptionBase implements Container {
                 arguments.add(unquoted);
             }
             arguments.previous();
+            argument.preProcess(commandLine, arguments);
             argument.process(commandLine, arguments, this);
         }
     }
@@ -204,7 +205,7 @@ public abstract class ContainerBase extends OptionBase implements Container {
         if (optionProcessor != null) {
             optionProcessor.postProcess(commandLine, this);
         }
-        postProcessInternal(commandLine);
+        doPostProcess(commandLine);
         if (commandLine.hasOption(this)) {
             postProcessArgument(commandLine);
             postProcessGroup(commandLine);

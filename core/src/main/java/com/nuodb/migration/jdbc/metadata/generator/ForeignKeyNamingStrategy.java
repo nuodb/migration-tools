@@ -39,27 +39,26 @@ public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
     }
 
     @Override
-    public String getName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
-        return getForeignKeyName(foreignKey, scriptGeneratorContext, identifier);
+    public String getName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
+        return getForeignKeyName(foreignKey, context, identifier);
     }
 
     @Override
-    public String getQualifiedName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext,
+    public String getQualifiedName(ForeignKey foreignKey, ScriptGeneratorContext context,
                                    boolean identifier) {
-        return getForeignKeyName(foreignKey, scriptGeneratorContext, identifier);
+        return getForeignKeyName(foreignKey, context, identifier);
     }
 
-    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext,
-                                    boolean identifier) {
+    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("FK");
 
         StringBuilder qualifier = new StringBuilder();
-        qualifier.append(scriptGeneratorContext.getName(foreignKey.getSourceTable(), false));
+        qualifier.append(context.getName(foreignKey.getSourceTable(), false));
         qualifier.append('_');
-        qualifier.append(scriptGeneratorContext.getName(foreignKey.getTargetTable(), false));
+        qualifier.append(context.getName(foreignKey.getTargetTable(), false));
         buffer.append(Integer.toHexString(qualifier.toString().hashCode()).toUpperCase());
 
-        return identifier ? scriptGeneratorContext.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
+        return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

@@ -5,7 +5,7 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *     * Redistributions of source code must retain the above copyright
+ *     * Redistributions of source typeCode must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
@@ -25,37 +25,56 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.cli.parse.option;
-
-import com.nuodb.migration.cli.parse.Argument;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-
-import java.util.Collection;
+package com.nuodb.migration.spec;
 
 /**
  * @author Sergey Bushik
  */
-public interface ArgumentBuilder {
+public class JdbcTypeSpec extends SpecBase {
 
-    ArgumentBuilder withId(int id);
+    private String typeName;
+    private int typeCode;
+    private Integer size;
+    private Integer precision;
+    private Integer scale;
 
-    ArgumentBuilder withName(String name);
+    public String getTypeName() {
+        return typeName;
+    }
 
-    ArgumentBuilder withDescription(String description);
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
 
-    ArgumentBuilder withRequired(boolean required);
+    public int getTypeCode() {
+        return typeCode;
+    }
 
-    ArgumentBuilder withMinimum(int minimum);
+    public void setTypeCode(int typeCode) {
+        this.typeCode = typeCode;
+    }
 
-    ArgumentBuilder withMaximum(int maximum);
+    public Integer getSize() {
+        return size;
+    }
 
-    ArgumentBuilder withDefaultValue(Object defaultValue);
+    public void setSize(Integer size) {
+        this.size = size;
+    }
 
-    ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor);
+    public Integer getPrecision() {
+        return precision;
+    }
 
-    ArgumentBuilder withValuesSeparator(String valuesSeparator);
+    public void setPrecision(Integer precision) {
+        this.precision = precision;
+    }
 
-    ArgumentBuilder withHelpValues(Collection<String> helpValues);
+    public Integer getScale() {
+        return scale;
+    }
 
-    Argument build();
+    public void setScale(Integer scale) {
+        this.scale = scale;
+    }
 }

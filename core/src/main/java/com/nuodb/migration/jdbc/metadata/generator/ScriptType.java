@@ -31,5 +31,5 @@ package com.nuodb.migration.jdbc.metadata.generator;
  * @author Sergey Bushik
  */
 public enum ScriptType {
-    CREATE, DROP
+    DROP, CREATE
 }

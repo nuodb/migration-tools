@@ -34,7 +34,7 @@ import static java.lang.String.valueOf;
 /**
  * @author Sergey Bushik
  */
-public class MSSQLServerDialect extends SQL2003Dialect {
+public class MSSQLServerDialect extends StandardDialect {
 
     public static final int DATETIMEOFFSET = -155;
 

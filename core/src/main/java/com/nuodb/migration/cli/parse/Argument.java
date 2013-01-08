@@ -16,6 +16,7 @@
  */
 package com.nuodb.migration.cli.parse;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -31,6 +32,10 @@ public interface Argument extends Option {
     int getMaximum();
 
     void setMaximum(int maximum);
+
+    Collection<String> getHelpValues();
+
+    void setHelpValues(Collection<String> helpValues);
 
     List<Object> getDefaultValues();
 

@@ -16,9 +16,9 @@
  */
 package com.nuodb.migration.cli.parse.parser;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Supplier;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.nuodb.migration.cli.parse.CommandLine;
 import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.Trigger;
@@ -27,31 +27,49 @@ import com.nuodb.migration.cli.parse.option.TriggerImpl;
 
 import java.util.*;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static com.google.common.collect.Multimaps.newListMultimap;
+import static com.google.common.collect.Sets.newLinkedHashSet;
+import static java.util.Collections.unmodifiableSet;
+
 /**
  * A executable line implementation allowing options to row their processed information to a CommandLine.
  */
 public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     private List<String> arguments;
-    private Set<Option> options = Sets.newHashSet();
-    private Map<Option, List<Object>> values = Maps.newHashMap();
-    private Map<Option, Boolean> switches = Maps.newHashMap();
-    private Map<Option, List<Object>> defaultValues = Maps.newHashMap();
-    private Map<Option, Boolean> defaultSwitches = Maps.newHashMap();
-    private Map<Option, Properties> properties = Maps.newHashMap();
+    private Set<Option> options = newLinkedHashSet();
+    private ListMultimap<Option, Object> values = newListMultimap(
+            Maps.<Option, Collection<Object>>newLinkedHashMap(),
+            new Supplier<List<Object>>() {
+                @Override
+                public List<Object> get() {
+                    return newArrayList();
+                }
+            });
+    private Map<Option, Boolean> switches = newLinkedHashMap();
+    private Map<Option, List<Object>> defaultValues = newLinkedHashMap();
+    private Map<Option, Boolean> defaultSwitches = newLinkedHashMap();
+    private Map<Option, Properties> properties = newLinkedHashMap();
     private Option root;
     private Option current;
 
     /**
-     * Creates a new WriteableCommandLineImpl rooted on the specified option, to hold the parsed withConnection.arguments.
+     * Creates a new CommandLineImpl to hold the parsed arguments.
      *
      * @param root      the executable line's root option
-     * @param arguments the withConnection.arguments this executable line represents
+     * @param arguments the arguments this executable line represents
      */
     public CommandLineImpl(Option root, List<String> arguments) {
         this.root = root;
         this.arguments = arguments;
         this.current = root;
+    }
+
+    @Override
+    public List<String> getArguments() {
+        return arguments;
     }
 
     @Override
@@ -67,18 +85,13 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     @Override
     public void addValue(Option option, Object value) {
         addOption(option);
-        List<Object> values = this.values.get(option);
-        if (values == null) {
-            values = Lists.newArrayList();
-            this.values.put(option, values);
-        }
-        values.add(value);
+        values.put(option, value);
     }
 
     @Override
     public void addSwitch(Option option, boolean value) {
         addOption(option);
-        this.switches.put(option, value ? Boolean.TRUE : Boolean.FALSE);
+        switches.put(option, value ? Boolean.TRUE : Boolean.FALSE);
     }
 
     @Override
@@ -140,7 +153,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     }
 
     @Override
-    public List<Object> getOptionValues(Option option) {
+    public List<Object> getValues(Option option) {
         List<Object> values = this.values.get(option);
         return values == null ? Collections.emptyList() : values;
     }
@@ -172,7 +185,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     public Set<String> getProperties(Option option) {
         Properties properties = this.properties.get(option);
         Set keys = properties != null ? properties.keySet() : null;
-        return keys != null ? Collections.unmodifiableSet(keys) : Collections.emptySet();
+        return (keys != null) ? unmodifiableSet(keys) : Collections.emptySet();
     }
 
     @Override
@@ -194,7 +207,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     @Override
     public Set<Option> getOptions() {
-        return Collections.unmodifiableSet(options);
+        return unmodifiableSet(options);
     }
 
     @Override

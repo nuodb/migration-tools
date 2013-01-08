@@ -40,7 +40,7 @@ import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 /**
  * @author Sergey Bushik
  */
-public class OracleDialect extends SQL2003Dialect {
+public class OracleDialect extends StandardDialect {
 
     public OracleDialect() {
         addJdbcTypeAdapter(new OracleBlobTypeAdapter());

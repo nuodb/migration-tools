@@ -45,119 +45,116 @@ public abstract class CliRunAdapter implements CliRun {
 
     protected CliRunAdapter(String command) {
         this.command = command;
-        this.option = createOption();
     }
-
-    protected abstract Option createOption();
 
     @Override
     public int getId() {
-        return option.getId();
+        return initOption().getId();
     }
 
     @Override
     public void setId(int id) {
-        option.setId(id);
+        initOption().setId(id);
     }
 
     @Override
     public String getName() {
-        return option.getName();
+        return initOption().getName();
     }
 
     @Override
     public void setName(String name) {
-        option.setName(name);
+        initOption().setName(name);
     }
 
     @Override
     public String getDescription() {
-        return option.getDescription();
+        return initOption().getDescription();
     }
 
     @Override
     public void setDescription(String description) {
-        option.setDescription(description);
+        initOption().setDescription(description);
     }
 
     @Override
     public boolean isRequired() {
-        return option.isRequired();
+        return initOption().isRequired();
     }
 
     @Override
     public void setRequired(boolean required) {
-        option.setRequired(required);
+        initOption().setRequired(required);
     }
 
     @Override
     public OptionProcessor getOptionProcessor() {
-        return option.getOptionProcessor();
+        return initOption().getOptionProcessor();
     }
 
     @Override
     public void setOptionProcessor(OptionProcessor optionProcessor) {
-        option.setOptionProcessor(optionProcessor);
+        initOption().setOptionProcessor(optionProcessor);
     }
 
     @Override
     public Set<String> getPrefixes() {
-        return option.getPrefixes();
+        return initOption().getPrefixes();
     }
 
     @Override
     public void addTrigger(Trigger trigger) {
-        option.addTrigger(trigger);
+        initOption().addTrigger(trigger);
     }
 
     @Override
     public void addTrigger(Trigger trigger, int priority) {
-        option.addTrigger(trigger, priority);
+        initOption().addTrigger(trigger, priority);
     }
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        return option.getTriggers();
+        return initOption().getTriggers();
     }
 
     @Override
     public Option findOption(String trigger) {
-        return option.findOption(trigger);
+        return initOption().findOption(trigger);
     }
 
     @Override
     public Option findOption(Trigger trigger) {
-        return option.findOption(trigger);
+        return initOption().findOption(trigger);
     }
 
     @Override
     public void defaults(CommandLine commandLine) {
-        option.defaults(commandLine);
+        initOption().defaults(commandLine);
     }
 
     @Override
     public boolean canProcess(CommandLine commandLine, String argument) {
-        return option.canProcess(commandLine, argument);
+        return initOption().canProcess(commandLine, argument);
     }
 
     @Override
     public boolean canProcess(CommandLine commandLine, ListIterator<String> arguments) {
-        return option.canProcess(commandLine, arguments);
+        return initOption().canProcess(commandLine, arguments);
     }
 
     @Override
     public void preProcess(CommandLine commandLine, ListIterator<String> arguments) {
-        option.preProcess(commandLine, arguments);
+        initOption().preProcess(commandLine, arguments);
     }
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        option.process(commandLine, arguments);
+        initOption().process(commandLine, arguments);
     }
 
     @Override
     public void postProcess(CommandLine commandLine) {
-        option.postProcess(commandLine);
+        initOption().postProcess(commandLine);
         bind(commandLine);
     }
 
@@ -166,21 +163,22 @@ public abstract class CliRunAdapter implements CliRun {
 
     @Override
     public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator) {
-        option.help(buffer, hints, comparator);
+        initOption().help(buffer, hints, comparator);
     }
 
     @Override
     public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
-        return option.help(indent, hints, comparator);
+        return initOption().help(indent, hints, comparator);
     }
 
-    public Option getOption() {
+    protected Option initOption() {
+        if (option == null) {
+            option = createOption();
+        }
         return option;
     }
 
-    public void setOption(Option option) {
-        this.option = option;
-    }
+    protected abstract Option createOption();
 
     @Override
     public String getCommand() {

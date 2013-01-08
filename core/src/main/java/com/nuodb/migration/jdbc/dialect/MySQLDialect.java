@@ -39,7 +39,7 @@ import static java.lang.String.valueOf;
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends SQL2003Dialect {
+public class MySQLDialect extends StandardDialect {
 
     public MySQLDialect() {
         addJdbcType(MySQLBigIntUnsignedType.INSTANCE);

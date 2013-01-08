@@ -40,16 +40,16 @@ public class IndexNamingStrategy extends NamingStrategyBase<Index> {
     }
 
     @Override
-    public String getName(Index index, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
-        return getIndexName(index, scriptGeneratorContext, identifier);
+    public String getName(Index index, ScriptGeneratorContext context, boolean identifier) {
+        return getIndexName(index, context, identifier);
     }
 
     @Override
-    public String getQualifiedName(Index index, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
-        return getIndexName(index, scriptGeneratorContext, identifier);
+    public String getQualifiedName(Index index, ScriptGeneratorContext context, boolean identifier) {
+        return getIndexName(index, context, identifier);
     }
 
-    protected String getIndexName(Index index, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
+    protected String getIndexName(Index index, ScriptGeneratorContext context, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("IDX");
 
@@ -58,13 +58,13 @@ public class IndexNamingStrategy extends NamingStrategyBase<Index> {
             qualifier.append("UNIQUE");
             qualifier.append("_");
         }
-        qualifier.append(scriptGeneratorContext.getName(index.getTable(), false));
+        qualifier.append(context.getName(index.getTable(), false));
         for (Column column : index.getColumns()) {
             qualifier.append("_");
-            qualifier.append(scriptGeneratorContext.getName(column, false));
+            qualifier.append(context.getName(column, false));
         }
         buffer.append(Integer.toHexString(qualifier.toString().hashCode()).toUpperCase());
 
-        return identifier ? scriptGeneratorContext.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
+        return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

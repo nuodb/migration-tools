@@ -40,28 +40,27 @@ public class SequenceNamingStrategy extends NamingStrategyBase<Sequence> {
     }
 
     @Override
-    public String getName(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext, boolean identifier) {
-        return getSequenceName(sequence, scriptGeneratorContext, identifier);
+    public String getName(Sequence sequence, ScriptGeneratorContext context, boolean identifier) {
+        return getSequenceName(sequence, context, identifier);
     }
 
     @Override
-    public String getQualifiedName(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext,
+    public String getQualifiedName(Sequence sequence, ScriptGeneratorContext context,
                                    boolean identifier) {
-        return getSequenceName(sequence, scriptGeneratorContext, identifier);
+        return getSequenceName(sequence, context, identifier);
     }
 
-    protected String getSequenceName(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext,
-                                     boolean identifier) {
+    protected String getSequenceName(Sequence sequence, ScriptGeneratorContext context, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("SEQ");
 
         StringBuilder qualifier = new StringBuilder();
         Column column = sequence.getColumn();
-        qualifier.append(scriptGeneratorContext.getName(column.getTable(), false));
+        qualifier.append(context.getName(column.getTable(), false));
         qualifier.append('_');
-        qualifier.append(scriptGeneratorContext.getName(column, false));
+        qualifier.append(context.getName(column, false));
         buffer.append(Integer.toHexString(qualifier.toString().hashCode()).toUpperCase());
 
-        return identifier ? scriptGeneratorContext.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
+        return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }
 }

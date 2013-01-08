@@ -58,69 +58,69 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
     }
 
     @Override
-    public Collection<String> getCreateScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
-        initScriptGeneratorContext(scriptGeneratorContext);
+    public Collection<String> getCreateScripts(Database database, ScriptGeneratorContext context) {
+        initScriptGeneratorContext(context);
         Collection<String> scripts = newArrayList();
-        GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorContext);
+        GroupScriptsBy groupScriptsBy = getGroupScriptsBy(context);
         switch (groupScriptsBy) {
             case TABLE:
                 for (Table table : database.listTables()) {
                     Collection<Table> tables = Collections.singleton(table);
-                    addCreateScripts(scriptGeneratorContext, scripts, tables);
+                    addCreateScripts(context, scripts, tables);
                 }
-                addForeignKeysScripts(scriptGeneratorContext, scripts, true);
+                addForeignKeysScripts(context, scripts, true);
                 break;
             case META_DATA:
                 Collection<Table> tables = database.listTables();
-                addCreateScripts(scriptGeneratorContext, scripts, tables);
+                addCreateScripts(context, scripts, tables);
                 break;
         }
-        releaseScriptGeneratorContext(scriptGeneratorContext);
+        releaseScriptGeneratorContext(context);
         return scripts;
     }
 
     @Override
-    public Collection<String> getDropScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
-        initScriptGeneratorContext(scriptGeneratorContext);
+    public Collection<String> getDropScripts(Database database, ScriptGeneratorContext context) {
+        initScriptGeneratorContext(context);
         Collection<String> scripts = newArrayList();
-        GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorContext);
+        GroupScriptsBy groupScriptsBy = getGroupScriptsBy(context);
         switch (groupScriptsBy) {
             case TABLE:
                 for (Table table : database.listTables()) {
                     Collection<Table> tables = Collections.singleton(table);
-                    addDropScripts(scriptGeneratorContext, scripts, tables);
+                    addDropScripts(context, scripts, tables);
                 }
                 break;
             case META_DATA:
                 Collection<Table> tables = database.listTables();
-                addCreateScripts(scriptGeneratorContext, scripts, tables);
+                addCreateScripts(context, scripts, tables);
                 break;
         }
-        releaseScriptGeneratorContext(scriptGeneratorContext);
+        releaseScriptGeneratorContext(context);
         return scripts;
     }
 
     @Override
-    public Collection<String> getDropCreateScripts(Database database, ScriptGeneratorContext scriptGeneratorContext) {
-        initScriptGeneratorContext(scriptGeneratorContext);
+    public Collection<String> getDropCreateScripts(Database database, ScriptGeneratorContext context) {
+        initScriptGeneratorContext(context);
         Collection<String> scripts = newArrayList();
-        GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorContext.getAttributes().get(GROUP_SCRIPTS_BY);
+        GroupScriptsBy groupScriptsBy = (GroupScriptsBy) context.getAttributes().get(GROUP_SCRIPTS_BY);
         switch (groupScriptsBy) {
             case TABLE:
                 for (Table table : database.listTables()) {
                     Collection<Table> tables = Collections.singleton(table);
-                    addDropScripts(scriptGeneratorContext, scripts, tables);
-                    addCreateScripts(scriptGeneratorContext, scripts, tables);
+                    addDropScripts(context, scripts, tables);
+                    addCreateScripts(context, scripts, tables);
                 }
-                addForeignKeysScripts(scriptGeneratorContext, scripts, true);
+                addForeignKeysScripts(context, scripts, true);
                 break;
             case META_DATA:
                 Collection<Table> tables = database.listTables();
-                addDropScripts(scriptGeneratorContext, scripts, tables);
-                addCreateScripts(scriptGeneratorContext, scripts, tables);
+                addDropScripts(context, scripts, tables);
+                addCreateScripts(context, scripts, tables);
                 break;
         }
-        releaseScriptGeneratorContext(scriptGeneratorContext);
+        releaseScriptGeneratorContext(context);
         return scripts;
     }
 

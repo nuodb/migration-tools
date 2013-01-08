@@ -44,7 +44,7 @@ public class SequenceGenerator extends ScriptGeneratorBase<Sequence> {
     }
 
     @Override
-    public Collection<String> getCreateScripts(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(Sequence sequence, ScriptGeneratorContext context) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE");
         buffer.append(' ');
@@ -54,8 +54,8 @@ public class SequenceGenerator extends ScriptGeneratorBase<Sequence> {
         }
         buffer.append("SEQUENCE");
         buffer.append(' ');
-        buffer.append(scriptGeneratorContext.getQualifiedName(sequence));
-        Dialect dialect = scriptGeneratorContext.getDialect();
+        buffer.append(context.getQualifiedName(sequence));
+        Dialect dialect = context.getDialect();
 
         String currentValue = dialect.getSequenceStartWith(sequence.getLastValue());
         if (currentValue != null) {
@@ -102,15 +102,15 @@ public class SequenceGenerator extends ScriptGeneratorBase<Sequence> {
     }
 
     @Override
-    public Collection<String> getDropScripts(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getDropScripts(Sequence sequence, ScriptGeneratorContext context) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP SEQUENCE");
-        if (scriptGeneratorContext.getDialect().supportsDropSequenceIfExists()) {
+        if (context.getDialect().supportsDropSequenceIfExists()) {
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }
         buffer.append(' ');
-        buffer.append(scriptGeneratorContext.getQualifiedName(sequence));
+        buffer.append(context.getQualifiedName(sequence));
         return singleton(buffer.toString());
     }
 }

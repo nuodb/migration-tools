@@ -33,7 +33,9 @@ package com.nuodb.migration.cli.parse.option;
 
 import com.google.common.collect.Lists;
 import com.nuodb.migration.cli.parse.Argument;
+import com.nuodb.migration.cli.parse.OptionProcessor;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -47,8 +49,10 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
     private boolean required;
     private int minimum = 0;
     private int maximum = 1;
+    private OptionProcessor optionProcessor;
     private List<Object> defaultValues = Lists.newArrayList();
     private String valuesSeparator;
+    private Collection<String> helpValues;
 
     public ArgumentBuilderImpl(OptionFormat optionFormat) {
         this.valuesSeparator = optionFormat.getArgumentValuesSeparator();
@@ -97,8 +101,21 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
     }
 
     @Override
+    public ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor) {
+        this.optionProcessor = optionProcessor;
+        return this;
+    }
+
+    @Override
     public ArgumentBuilder withValuesSeparator(String valuesSeparator) {
         this.valuesSeparator = valuesSeparator;
+        return this;
+    }
+
+
+    @Override
+    public ArgumentBuilder withHelpValues(Collection<String> helpValues) {
+        this.helpValues = helpValues;
         return this;
     }
 
@@ -112,7 +129,9 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
         argument.setMinimum(minimum);
         argument.setMaximum(maximum);
         argument.setDefaultValues(defaultValues);
+        argument.setOptionProcessor(optionProcessor);
         argument.setValuesSeparator(valuesSeparator);
+        argument.setHelpValues(helpValues);
         return argument;
     }
 }

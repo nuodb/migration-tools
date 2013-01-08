@@ -52,7 +52,6 @@ public class HelpFormatter extends HelpHint {
                         GROUP_OPTIONS,
                         GROUP_ARGUMENTS,
                         GROUP_OUTER,
-                        ARGUMENT_NUMBERED,
                         ARGUMENT_BRACKETED,
                         CONTAINER_ARGUMENT,
                         CONTAINER_GROUP
@@ -75,7 +74,6 @@ public class HelpFormatter extends HelpHint {
                         GROUP_OPTIONS,
                         GROUP_ARGUMENTS,
                         GROUP_OUTER,
-                        ARGUMENT_NUMBERED,
                         ARGUMENT_BRACKETED,
                         CONTAINER_GROUP
                 ));

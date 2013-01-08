@@ -28,10 +28,7 @@
 package com.nuodb.migration.cli.parse.option;
 
 import com.google.common.collect.Sets;
-import com.nuodb.migration.cli.parse.Argument;
-import com.nuodb.migration.cli.parse.Group;
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.Trigger;
+import com.nuodb.migration.cli.parse.*;
 
 import java.util.Set;
 
@@ -50,6 +47,7 @@ public class OptionBuilderImpl implements OptionBuilder {
     protected Set<Trigger> triggers = Sets.newHashSet();
     private Set<String> prefixes;
     private String argumentSeparator;
+    private OptionProcessor optionProcessor;
 
     public OptionBuilderImpl(OptionFormat optionFormat) {
         this.prefixes = optionFormat.getOptionPrefixes();
@@ -92,6 +90,12 @@ public class OptionBuilderImpl implements OptionBuilder {
     }
 
     @Override
+    public OptionBuilder withOptionProcessor(OptionProcessor optionProcessor) {
+        this.optionProcessor = optionProcessor;
+        return this;
+    }
+
+    @Override
     public OptionBuilder withArgument(Argument argument) {
         this.argument = argument;
         return this;
@@ -122,6 +126,7 @@ public class OptionBuilderImpl implements OptionBuilder {
         option.setName(name);
         option.setDescription(description);
         option.setRequired(required);
+        option.setOptionProcessor(optionProcessor);
         option.setArgument(argument);
         option.setArgumentSeparator(argumentSeparator);
         option.setPrefixes(prefixes);

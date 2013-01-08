@@ -70,6 +70,4 @@ public interface JdbcTypeRegistry {
     JdbcTypeDesc getJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc);
 
     Map<JdbcTypeDesc, JdbcTypeDesc> getJdbcTypeDescAliases();
-
-    JdbcTypeNameMap getJdbcTypeNameMap();
 }

@@ -35,7 +35,7 @@ import com.nuodb.migration.jdbc.resolve.SimpleDatabaseServiceResolver;
 public class SimpleDialectResolver extends SimpleDatabaseServiceResolver<Dialect> implements DialectResolver {
 
     public SimpleDialectResolver() {
-        super(Dialect.class, SQL2003Dialect.class);
+        super(Dialect.class, StandardDialect.class);
         register("MySQL", MySQLDialect.class);
         register("PostgreSQL", PostgreSQLDialect.class);
         register("Microsoft SQL Server", MSSQLServerDialect.class);

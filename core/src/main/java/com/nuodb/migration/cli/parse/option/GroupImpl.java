@@ -16,14 +16,14 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
 import com.nuodb.migration.utils.PriorityListImpl;
 
 import java.util.*;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migration.cli.parse.HelpHint.*;
 import static java.lang.String.format;
 
@@ -37,9 +37,9 @@ public class GroupImpl extends OptionBase implements Group {
     private int minimum;
     private int maximum;
 
-    private List<Option> options = Lists.newArrayList();
-    private Set<String> prefixes = Sets.newHashSet();
-    private List<Argument> arguments = Lists.newArrayList();
+    private List<Option> options = newArrayList();
+    private Set<String> prefixes = newHashSet();
+    private List<Argument> arguments = newArrayList();
     private PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
 
     public GroupImpl() {
@@ -226,7 +226,10 @@ public class GroupImpl extends OptionBase implements Group {
                     break;
                 }
             }
-            if (isRequired()) {
+
+        }
+        if (present > 0 || isRequired()) {
+            for (Option option : this.options) {
                 option.postProcess(commandLine);
             }
         }
@@ -238,7 +241,7 @@ public class GroupImpl extends OptionBase implements Group {
         if (present < this.minimum) {
             throw new OptionException(this, "Missing option");
         }
-        // post withConnection each withConnection.arguments argument
+        // post process each arguments
         for (Argument argument : arguments) {
             argument.postProcess(commandLine);
         }
@@ -251,7 +254,7 @@ public class GroupImpl extends OptionBase implements Group {
 
     @Override
     public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator, String optionSeparator) {
-        hints = Sets.newHashSet(hints);
+        hints = newHashSet(hints);
         boolean optional = !isRequired() && (hints.contains(OPTIONAL) || hints.contains(OPTIONAL_CHILD_GROUP));
         boolean expanded = (getName() == null) || hints.contains(GROUP_OPTIONS);
         boolean named = !expanded || ((getName() != null) && hints.contains(GROUP));
@@ -274,7 +277,7 @@ public class GroupImpl extends OptionBase implements Group {
             if (!hints.contains(GROUP_OPTIONS)) {
                 optionHints = Collections.emptySet();
             } else {
-                optionHints = Sets.newHashSet(hints);
+                optionHints = newHashSet(hints);
                 optionHints.remove(OPTIONAL);
             }
             // grab a list of the option's options.
@@ -284,7 +287,7 @@ public class GroupImpl extends OptionBase implements Group {
                 list = options;
             } else {
                 // sort options if comparator is supplied
-                list = Lists.newArrayList(options);
+                list = newArrayList(options);
                 Collections.sort(list, comparator);
             }
             // for each option.
@@ -319,7 +322,7 @@ public class GroupImpl extends OptionBase implements Group {
 
     @Override
     public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
-        List<Help> help = Lists.newArrayList();
+        List<Help> help = newArrayList();
         if (hints.contains(GROUP)) {
             help.add(new HelpImpl(this, indent));
         }
@@ -331,7 +334,7 @@ public class GroupImpl extends OptionBase implements Group {
                 options = this.options;
             } else {
                 // sort options if comparator is supplied
-                options = Lists.newArrayList(this.options);
+                options = newArrayList(this.options);
                 Collections.sort(options, comparator);
             }
             // for each option

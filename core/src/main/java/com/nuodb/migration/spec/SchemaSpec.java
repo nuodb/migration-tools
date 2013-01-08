@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.spec;
 
+import com.nuodb.migration.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migration.jdbc.metadata.generator.ScriptType;
@@ -47,6 +48,8 @@ public class SchemaSpec extends TaskSpecBase {
     private Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.ALL_TYPES);
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
+    private Collection<JdbcTypeSpec> jdbcTypeSpecs = newHashSet();
+    private IdentifierNormalizer identifierNormalizer;
 
     public ConnectionSpec getSourceConnectionSpec() {
         return sourceConnectionSpec;
@@ -94,5 +97,21 @@ public class SchemaSpec extends TaskSpecBase {
 
     public void setGroupScriptsBy(GroupScriptsBy groupScriptsBy) {
         this.groupScriptsBy = groupScriptsBy;
+    }
+
+    public Collection<JdbcTypeSpec> getJdbcTypeSpecs() {
+        return jdbcTypeSpecs;
+    }
+
+    public void setJdbcTypeSpecs(Collection<JdbcTypeSpec> jdbcTypeSpecs) {
+        this.jdbcTypeSpecs = jdbcTypeSpecs;
+    }
+
+    public IdentifierNormalizer getIdentifierNormalizer() {
+        return identifierNormalizer;
+    }
+
+    public void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer) {
+        this.identifierNormalizer = identifierNormalizer;
     }
 }

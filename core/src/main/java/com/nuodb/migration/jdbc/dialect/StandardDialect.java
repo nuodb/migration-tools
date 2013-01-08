@@ -28,10 +28,7 @@
 package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
-import com.nuodb.migration.jdbc.type.JdbcType;
-import com.nuodb.migration.jdbc.type.JdbcTypeAdapter;
-import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migration.jdbc.type.*;
 import com.nuodb.migration.jdbc.type.jdbc4.Jdbc4TypeRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +37,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Collection;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
@@ -52,78 +48,62 @@ import static java.sql.Connection.*;
 /**
  * @author Sergey Bushik
  */
-public class SQL2003Dialect implements Dialect {
+public class StandardDialect implements Dialect {
 
     private static final Pattern IDENTIFIER = Pattern.compile("[a-zA-Z0-9_]*");
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-    private JdbcTypeRegistry jdbcTypeRegistry;
-    private boolean normalizeIdentifier;
+    private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
+    private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
+    private IdentifierNormalizer identifierNormalizer = IdentifierNormalizers.standard();
 
-    public SQL2003Dialect() {
-        this(new Jdbc4TypeRegistry());
+    public StandardDialect() {
+        addTypeName(Types.BIT, "BIT");
+        addTypeName(Types.BOOLEAN, "BOOLEAN");
+        addTypeName(Types.TINYINT, "TINYINT");
+        addTypeName(Types.SMALLINT, "SMALLINT");
+        addTypeName(Types.INTEGER, "INTEGER");
+        addTypeName(Types.BIGINT, "BIGINT");
+        addTypeName(Types.FLOAT, "FLOAT({P})");
+        addTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
+        addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+        addTypeName(Types.REAL, "REAL");
+
+        addTypeName(Types.DATE, "DATE");
+        addTypeName(Types.TIME, "TIME");
+        addTypeName(Types.TIMESTAMP, "TIMESTAMP");
+
+        addTypeName(Types.BLOB, "BLOB");
+
+        addTypeName(Types.CHAR, "CHAR({N})");
+        addTypeName(Types.NCHAR, "NCHAR({N})");
+
+        addTypeName(Types.VARCHAR, "VARCHAR({N})");
+        addTypeName(Types.NVARCHAR, "NVARCHAR({N})");
+
+        addTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
+        addTypeName(Types.LONGNVARCHAR, "NVARCHAR({N})");
+
+        addTypeName(Types.CLOB, "CLOB");
+        addTypeName(Types.NCLOB, "NCLOB");
     }
-
-    public SQL2003Dialect(JdbcTypeRegistry jdbcTypeRegistry) {
-        this.jdbcTypeRegistry = jdbcTypeRegistry;
-
-        addJdbcTypeName(Types.BIT, "BIT");
-        addJdbcTypeName(Types.BOOLEAN, "BOOLEAN");
-        addJdbcTypeName(Types.TINYINT, "TINYINT");
-        addJdbcTypeName(Types.SMALLINT, "SMALLINT");
-        addJdbcTypeName(Types.INTEGER, "INTEGER");
-        addJdbcTypeName(Types.BIGINT, "BIGINT");
-        addJdbcTypeName(Types.FLOAT, "FLOAT({P})");
-        addJdbcTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
-        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
-        addJdbcTypeName(Types.REAL, "REAL");
-
-        addJdbcTypeName(Types.DATE, "DATE");
-        addJdbcTypeName(Types.TIME, "TIME");
-        addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP");
-
-        addJdbcTypeName(Types.BLOB, "BLOB");
-
-        addJdbcTypeName(Types.CHAR, "CHAR({N})");
-        addJdbcTypeName(Types.NCHAR, "NCHAR({N})");
-
-        addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
-        addJdbcTypeName(Types.NVARCHAR, "NVARCHAR({N})");
-
-        addJdbcTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
-        addJdbcTypeName(Types.LONGNVARCHAR, "NVARCHAR({N})");
-
-        addJdbcTypeName(Types.CLOB, "CLOB");
-        addJdbcTypeName(Types.NCLOB, "NCLOB");
-    }
-
 
     @Override
     public String getIdentifier(String identifier) {
-        return getIdentifier(identifier, isNormalizeIdentifier());
+        return getIdentifier(identifier, getIdentifierNormalizer());
     }
 
     @Override
-    public String getIdentifier(String identifier, boolean normalizeIdentifier) {
+    public String getIdentifier(String identifier, IdentifierNormalizer identifierNormalizer) {
         if (identifier == null) {
             return null;
         }
-        identifier = normalizeIdentifier ? normalize(identifier) : identifier;
-        if (isQuote(identifier)) {
-            return quote(identifier);
-        } else {
-            return identifier;
-        }
+        boolean requiresQuoting = isRequiresQuoting(identifier);
+        String normalizedIdentifier = identifierNormalizer != null ?
+                identifierNormalizer.normalize(this, identifier, requiresQuoting) : identifier;
+        return requiresQuoting ? quote(normalizedIdentifier) : normalizedIdentifier;
     }
 
-    public boolean isNormalizeIdentifier() {
-        return normalizeIdentifier;
-    }
-
-    public void setNormalizeIdentifier(boolean normalizeIdentifier) {
-        this.normalizeIdentifier = normalizeIdentifier;
-    }
-
-    protected boolean isQuote(String identifier) {
+    protected boolean isRequiresQuoting(String identifier) {
         return !isIdentifier(identifier) || isSQLKeyword(identifier);
     }
 
@@ -139,7 +119,7 @@ public class SQL2003Dialect implements Dialect {
         return openQuote() + identifier + closeQuote();
     }
 
-    protected String normalize(String identifier) {
+    protected String normalize(String identifier, boolean requiresQuoting) {
         return identifier;
     }
 
@@ -209,8 +189,28 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
+    public SQLKeywords getSQLKeywords() {
+        return SQLKeywords.SQL_2003_KEYWORDS;
+    }
+
+    @Override
+    public JdbcTypeNameMap getJdbcTypeNameMap() {
+        return jdbcTypeNameMap;
+    }
+
+    @Override
     public JdbcTypeRegistry getJdbcTypeRegistry() {
         return jdbcTypeRegistry;
+    }
+
+    @Override
+    public IdentifierNormalizer getIdentifierNormalizer() {
+        return identifierNormalizer;
+    }
+
+    @Override
+    public void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer) {
+        this.identifierNormalizer = identifierNormalizer;
     }
 
     @Override
@@ -348,11 +348,6 @@ public class SQL2003Dialect implements Dialect {
     }
 
     @Override
-    public SQLKeywords getSQLKeywords() {
-        return SQLKeywords.SQL_2003_KEYWORDS;
-    }
-
-    @Override
     public boolean supportsIfExistsBeforeDropTable() {
         return false;
     }
@@ -396,51 +391,27 @@ public class SQL2003Dialect implements Dialect {
         return true;
     }
 
-    protected JdbcType getJdbcType(int typeCode) {
-        return jdbcTypeRegistry.getJdbcType(typeCode);
+    protected void addTypeName(int typeCode, String typeName) {
+        jdbcTypeNameMap.addTypeName(typeCode, typeName);
     }
 
-    protected JdbcType getJdbcType(int typeCode, String typeName) {
-        return jdbcTypeRegistry.getJdbcType(typeCode, typeName);
+    protected void addTypeName(int typeCode, String typeName, JdbcTypeSpecifiers typeSpecifiers) {
+        jdbcTypeNameMap.addTypeName(typeCode, typeName, typeSpecifiers);
     }
 
-    protected JdbcType getJdbcType(JdbcTypeDesc typeDesc) {
-        return jdbcTypeRegistry.getJdbcType(typeDesc);
+    protected void removeTypeName(int typeCode) {
+        jdbcTypeNameMap.removeTypeName(typeCode);
     }
 
     protected void addJdbcType(JdbcType jdbcType) {
         jdbcTypeRegistry.addJdbcType(jdbcType);
     }
 
-    protected Collection<JdbcType> getJdbcTypes() {
-        return jdbcTypeRegistry.getJdbcTypeMap();
-    }
-
     protected void addJdbcTypeAdapter(JdbcTypeAdapter jdbcTypeAdapter) {
         jdbcTypeRegistry.addJdbcTypeAdapter(jdbcTypeAdapter);
     }
 
-    protected void addJdbcTypeName(int typeCode, String typeName) {
-        jdbcTypeRegistry.getJdbcTypeNameMap().addJdbcTypeName(typeCode, typeName);
-    }
-
-    protected void addJdbcTypeName(int typeCode, String typeName, int size) {
-        jdbcTypeRegistry.getJdbcTypeNameMap().addJdbcTypeName(typeCode, typeName, size);
-    }
-
-    protected void removeJdbcTypeName(int typeCode) {
-        jdbcTypeRegistry.getJdbcTypeNameMap().removeJdbcTypeName(typeCode);
-    }
-
-    public void addJdbcTypeDescAlias(int typeCode, int typeCodeAlias) {
-        getJdbcTypeRegistry().addJdbcTypeDescAlias(typeCode, typeCodeAlias);
-    }
-
     public void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias) {
-        getJdbcTypeRegistry().addJdbcTypeDescAlias(typeCode, typeName, typeCodeAlias);
-    }
-
-    public void addJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc, JdbcTypeDesc jdbcTypeDescAlias) {
-        getJdbcTypeRegistry().addJdbcTypeDescAlias(jdbcTypeDesc, jdbcTypeDescAlias);
+        jdbcTypeRegistry.addJdbcTypeDescAlias(typeCode, typeName, typeCodeAlias);
     }
 }
