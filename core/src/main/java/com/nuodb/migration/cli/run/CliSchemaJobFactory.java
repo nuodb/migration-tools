@@ -65,6 +65,11 @@ import static org.apache.commons.lang3.StringUtils.replace;
  */
 public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory, CliResources {
 
+    public static final String IDENTIFIER_NORMALIZER_NOOP = "noop";
+    public static final String IDENTIFIER_NORMALIZER_STANDARD = "standard";
+    public static final String IDENTIFIER_NORMALIZER_LOWERCASE = "lowercase";
+    public static final String IDENTIFIER_NORMALIZER_UPPERCASE = "uppercase";
+
     private static final String COMMAND = "schema";
 
     public CliSchemaJobFactory(OptionToolkit optionToolkit) {
@@ -319,9 +324,9 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             }
             schemaSpec.setGroupScriptsBy(groupScriptsBy);
 
-            Map<String, IdentifierNormalizer> identifierNormalizers = getIdentifierNormalizers();
             String identifierNormalizerValue = commandLine.getValue(SCHEMA_IDENTIFIER_NORMALIZER);
-            IdentifierNormalizer identifierNormalizer = identifierNormalizers.get(identifierNormalizerValue);
+            IdentifierNormalizer identifierNormalizer = identifierNormalizerValue != null ?
+                    getIdentifierNormalizers().get(identifierNormalizerValue) : null;
             schemaSpec.setIdentifierNormalizer(identifierNormalizer != null ? identifierNormalizer : IdentifierNormalizers.noop());
 
             ListMultimap<String, Object> values = jdbcTypeSpecValuesCollector.getValues();
@@ -350,10 +355,10 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
     protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {
         Map<String, IdentifierNormalizer> identifierNormalizers =
                 new TreeMap<String, IdentifierNormalizer>(String.CASE_INSENSITIVE_ORDER);
-        identifierNormalizers.put("noop", IdentifierNormalizers.noop());
-        identifierNormalizers.put("standard", IdentifierNormalizers.standard());
-        identifierNormalizers.put("lowercase", IdentifierNormalizers.lowerCase());
-        identifierNormalizers.put("uppercase", IdentifierNormalizers.upperCase());
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_NOOP, IdentifierNormalizers.noop());
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_STANDARD, IdentifierNormalizers.standard());
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_LOWERCASE, IdentifierNormalizers.lowerCase());
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_UPPERCASE, IdentifierNormalizers.upperCase());
         return identifierNormalizers;
     }
 
