@@ -83,6 +83,92 @@ public class ScriptGeneratorContext {
         this.scriptGeneratorMap.putAll(scriptGeneratorContext.getScriptGenerators());
     }
 
+    public String getName(Relational relational) {
+        return getNamingStrategy(relational).getName(relational, this);
+    }
+
+    public String getName(Relational relational, boolean identifier) {
+        return getNamingStrategy(relational).getName(relational, this, identifier);
+    }
+
+    public String getQualifiedName(Relational relational) {
+        return getNamingStrategy(relational).getQualifiedName(relational, this);
+    }
+
+    public String getQualifiedName(Relational relational, boolean identifier) {
+        return getNamingStrategy(relational).getQualifiedName(relational, this, identifier);
+    }
+
+    public ScriptGenerator getScriptGenerator(Relational relational) {
+        return (ScriptGenerator) getGeneratorService(scriptGeneratorMap, relational);
+    }
+
+    public ScriptGenerator getScriptGenerator(Class<? extends Relational> relationalType) {
+        return scriptGeneratorMap.get(relationalType);
+    }
+
+    public void addScriptGenerator(ScriptGenerator<? extends Relational> scriptGenerator) {
+        scriptGeneratorMap.put(scriptGenerator.getRelationalType(), scriptGenerator);
+    }
+
+    public void addNamingStrategy(NamingStrategy<? extends Relational> namingStrategy) {
+        namingStrategyMap.put(namingStrategy.getRelationalType(), namingStrategy);
+    }
+
+    public NamingStrategy getNamingStrategy(Relational relational) {
+        return (NamingStrategy) getGeneratorService(namingStrategyMap, relational);
+    }
+
+    protected GeneratorService getGeneratorService(Map generatorServiceMap, Relational relational) {
+        Class<? extends Relational> relationalType = relational.getClass();
+        Class<? extends Relational> type = relationalType;
+        GeneratorService generatorService = null;
+        while (generatorService == null && type != null) {
+            generatorService = (GeneratorService) generatorServiceMap.get(type);
+            if (generatorService == null) {
+                generatorService = getGeneratorService(generatorServiceMap, type.getInterfaces());
+            }
+            type = (Class<? extends Relational>) type.getSuperclass();
+        }
+        if (generatorService == null) {
+            throw new ScriptGeneratorException(format("Generator service not found for %s", relationalType));
+        }
+        if (!relationalType.equals(generatorService.getRelationalType())) {
+            generatorServiceMap.put(relationalType, generatorService);
+        }
+        return generatorService;
+    }
+
+    protected GeneratorService getGeneratorService(Map generatorServiceMap, Class<?>... types) {
+        GeneratorService generatorService = null;
+        for (int i = 0, length = types.length; generatorService == null && i < length; i++) {
+            generatorService = (GeneratorService) generatorServiceMap.get(types[i]);
+        }
+        return generatorService;
+    }
+
+    public Collection<String> getScripts(Relational relational) {
+        return getScriptGenerator(relational).getScripts(relational, this);
+    }
+
+    public Collection<String> getCreateScripts(Relational relational) {
+        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
+        scriptGeneratorContext.setScriptTypes(newHashSet(CREATE));
+        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
+    }
+
+    public Collection<String> getDropScripts(Relational relational) {
+        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
+        scriptGeneratorContext.setScriptTypes(newHashSet(DROP));
+        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
+    }
+
+    public Collection<String> getDropCreateScripts(Relational relational) {
+        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
+        scriptGeneratorContext.setScriptTypes(newHashSet(DROP, CREATE));
+        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
+    }
+
     public String getCatalog() {
         return catalog;
     }
@@ -123,28 +209,8 @@ public class ScriptGeneratorContext {
         this.metaDataTypes = metaDataTypes;
     }
 
-    public <R extends Relational> ScriptGenerator<R> getScriptGenerator(R relational) {
-        return getGeneratorService(scriptGeneratorMap, relational);
-    }
-
-    public <R extends Relational> ScriptGenerator<R> getScriptGenerator(Class<R> relationalType) {
-        return (ScriptGenerator<R>) scriptGeneratorMap.get(relationalType);
-    }
-
-    public <R extends Relational> void addScriptGenerator(ScriptGenerator<R> scriptGenerator) {
-        scriptGeneratorMap.put(scriptGenerator.getRelationalType(), scriptGenerator);
-    }
-
     public Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> getScriptGenerators() {
         return scriptGeneratorMap;
-    }
-
-    public <R extends Relational> void addNamingStrategy(NamingStrategy<R> namingStrategy) {
-        namingStrategyMap.put(namingStrategy.getRelationalType(), namingStrategy);
-    }
-
-    public <R extends Relational> NamingStrategy<R> getNamingStrategy(R relational) {
-        return getGeneratorService(namingStrategyMap, relational);
     }
 
     public Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> getNamingStrategies() {
@@ -157,73 +223,5 @@ public class ScriptGeneratorContext {
 
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
-    }
-
-    protected <R extends Relational, T extends GeneratorService<R>> T getGeneratorService(
-            Map generatorServiceMap, R relational) {
-        Class<? extends Relational> relationalType = relational.getClass();
-        Class<? extends Relational> type = relationalType;
-        GeneratorService<R> generatorService = null;
-        while (generatorService == null && type != null) {
-            generatorService = (GeneratorService<R>) generatorServiceMap.get(type);
-            if (generatorService == null) {
-                generatorService = getGeneratorService(generatorServiceMap, type.getInterfaces());
-            }
-            type = (Class<? extends Relational>) type.getSuperclass();
-        }
-        if (generatorService == null) {
-            throw new ScriptGeneratorException(format("Generator service not found for %s", relationalType));
-        }
-        if (!relationalType.equals(generatorService.getRelationalType())) {
-            generatorServiceMap.put(relationalType, generatorService);
-        }
-        return (T) generatorService;
-    }
-
-    protected <R extends Relational> GeneratorService<R> getGeneratorService(Map generatorServiceMap,
-                                                                             Class<?>... types) {
-        GeneratorService<R> generatorService = null;
-        for (int i = 0, length = types.length; generatorService == null && i < length; i++) {
-            generatorService = (GeneratorService<R>) generatorServiceMap.get(types[i]);
-        }
-        return generatorService;
-    }
-
-    public <R extends Relational> Collection<String> getScripts(R relational) {
-        return getScriptGenerator(relational).getScripts(relational, this);
-    }
-
-    public <R extends Relational> Collection<String> getCreateScripts(R relational) {
-        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
-        scriptGeneratorContext.setScriptTypes(newHashSet(CREATE));
-        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
-    }
-
-    public <R extends Relational> Collection<String> getDropScripts(R relational) {
-        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
-        scriptGeneratorContext.setScriptTypes(newHashSet(DROP));
-        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
-    }
-
-    public <R extends Relational> Collection<String> getDropCreateScripts(R relational) {
-        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
-        scriptGeneratorContext.setScriptTypes(newHashSet(DROP, CREATE));
-        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
-    }
-
-    public <R extends Relational> String getName(R relational) {
-        return getNamingStrategy(relational).getName(relational, this);
-    }
-
-    public <R extends Relational> String getName(R relational, boolean identifier) {
-        return getNamingStrategy(relational).getName(relational, this, identifier);
-    }
-
-    public <R extends Relational> String getQualifiedName(R relational) {
-        return getNamingStrategy(relational).getQualifiedName(relational, this);
-    }
-
-    public <R extends Relational> String getQualifiedName(R relational, boolean identifier) {
-        return getNamingStrategy(relational).getQualifiedName(relational, this, identifier);
     }
 }

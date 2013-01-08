@@ -50,6 +50,7 @@ import java.util.TimeZone;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migration.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -262,7 +263,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
             for (String param : params) {
                 String[] pair = param.split("=");
                 if (pair.length != 2) {
-                    throw new OptionException(option, String.format("Malformed name-value pair %1$s", pair));
+                    throw new OptionException(option, format("Malformed name-value pair %1$s", pair));
                 }
                 properties.put(pair[0], pair[1]);
             }
