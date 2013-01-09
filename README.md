@@ -1,7 +1,6 @@
 # migration-tools #
 
 [![Build Status](https://secure.travis-ci.org/nuodb/migration-tools.png)](http://travis-ci.org/nuodb/migration-tools)
-[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/nuodb/migration-tools)
 
 *A command-line interface for helping domain administrators manage backup and migration of their databases.*
 
