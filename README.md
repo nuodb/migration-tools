@@ -1,5 +1,8 @@
 # migration-tools #
 
+[![Build Status](https://secure.travis-ci.org/nuodb/migration-tools.png)](http://travis-ci.org/nuodb/migration-tools)
+[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/nuodb/migration-tools)
+
 *A command-line interface for helping domain administrators manage backup and migration of their databases.*
 
 This tool is designed to assist you in migrating data from supported SQL databases to a NuoDB database. Use nuodb-migration dump and nuodb-migration load to copy, normalize, and load data from an existing database (NuoDB or 3rd party) to a NuoDB database.  With the command-line interface, domain administrators will be able to perform the following database backup and migration tasks:
@@ -405,3 +408,4 @@ Time zone option enables date columns to be dumped and reloaded between servers 
 </td></tr>
 
 </table>
+
