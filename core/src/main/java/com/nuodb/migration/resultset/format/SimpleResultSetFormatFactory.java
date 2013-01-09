@@ -27,7 +27,6 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import com.google.common.collect.Maps;
 import com.nuodb.migration.resultset.format.bson.BsonAttributes;
 import com.nuodb.migration.resultset.format.bson.BsonResultSetInput;
 import com.nuodb.migration.resultset.format.bson.BsonResultSetOutput;
@@ -43,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newTreeMap;
+
 /**
  * @author Sergey Bushik
  */
@@ -51,9 +52,9 @@ public class SimpleResultSetFormatFactory implements ResultSetFormatFactory {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Map<String, Class<? extends ResultSetInput>> inputClasses = Maps.newHashMap();
+    private Map<String, Class<? extends ResultSetInput>> inputClasses = newTreeMap(String.CASE_INSENSITIVE_ORDER);
 
-    private Map<String, Class<? extends ResultSetOutput>> outputClasses = Maps.newHashMap();
+    private Map<String, Class<? extends ResultSetOutput>> outputClasses = newTreeMap(String.CASE_INSENSITIVE_ORDER);
 
     public SimpleResultSetFormatFactory() {
         registerFormat(CsvAttributes.FORMAT, CsvResultSetInput.class);

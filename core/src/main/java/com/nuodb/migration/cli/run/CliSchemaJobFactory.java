@@ -176,55 +176,6 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         }
 
         protected void createSchemaOptions(GroupBuilder group) {
-            RegexOption generate = new RegexOption();
-            generate.setName(SCHEMA_META_DATA_OPTION);
-            generate.setDescription(getMessage(SCHEMA_META_DATA_OPTION_DESCRIPTION));
-            generate.setPrefixes(getOptionFormat().getOptionPrefixes());
-            generate.setArgumentSeparator(getOptionFormat().getArgumentSeparator());
-            generate.addRegex(SCHEMA_META_DATA_OPTION, 1, Priority.LOW);
-            generate.setArgument(
-                    newArgument().
-                            withName(getMessage(SCHEMA_META_DATA_ARGUMENT_NAME)).
-                            withValuesSeparator(null).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
-            group.withOption(generate);
-
-            Collection<String> scriptTypeHelpValues = Lists.transform(asList(ScriptType.values()),
-                    new Function<ScriptType, String>() {
-                        @Override
-                        public String apply(ScriptType scriptType) {
-                            return scriptType.name().toLowerCase();
-                        }
-                    });
-            Option scriptType = newOption().
-                    withName(SCHEMA_SCRIPT_TYPE_OPTION).
-                    withDescription(getMessage(SCHEMA_SCRIPT_TYPE_OPTION_DESCRIPTION)).
-                    withArgument(
-                            newArgument().
-                                    withName(getMessage(SCHEMA_SCRIPT_TYPE_ARGUMENT_NAME)).
-                                    withMinimum(1).
-                                    withMaximum(ScriptType.values().length).
-                                    withHelpValues(scriptTypeHelpValues).build()
-                    ).build();
-            group.withOption(scriptType);
-
-            Option groupScriptsBy = newOption().
-                    withName(SCHEMA_GROUP_SCRIPTS_BY_OPTION).
-                    withDescription(getMessage(SCHEMA_GROUP_SCRIPTS_BY_OPTION_DESCRIPTION)).
-                    withArgument(
-                            newArgument().
-                                    withName(getMessage(SCHEMA_GROUP_SCRIPTS_BY_ARGUMENT_NAME)).build()
-                    ).build();
-            group.withOption(groupScriptsBy);
-
-            Option identifierNormalizer = newOption().
-                    withName(SCHEMA_IDENTIFIER_NORMALIZER).
-                    withDescription(getMessage(SCHEMA_IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION)).
-                    withArgument(
-                            newArgument().
-                                    withName(getMessage(SCHEMA_IDENTIFIER_NORMALIZER_ARGUMENT_NAME)).build()
-                    ).build();
-            group.withOption(identifierNormalizer);
-
             GroupBuilder typeGroup = newGroup().withName(getResources().getMessage(JDBC_TYPE_GROUP_NAME));
             Option typeName = newOption().
                     withName(JDBC_TYPE_NAME_OPTION).
@@ -279,6 +230,55 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             typeGroup.withOption(typeScale);
             typeGroup.withMaximum(Integer.MAX_VALUE);
             group.withOption(typeGroup.build());
+
+            RegexOption generate = new RegexOption();
+            generate.setName(SCHEMA_META_DATA_OPTION);
+            generate.setDescription(getMessage(SCHEMA_META_DATA_OPTION_DESCRIPTION));
+            generate.setPrefixes(getOptionFormat().getOptionPrefixes());
+            generate.setArgumentSeparator(getOptionFormat().getArgumentSeparator());
+            generate.addRegex(SCHEMA_META_DATA_OPTION, 1, Priority.LOW);
+            generate.setArgument(
+                    newArgument().
+                            withName(getMessage(SCHEMA_META_DATA_ARGUMENT_NAME)).
+                            withValuesSeparator(null).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
+            group.withOption(generate);
+
+            Collection<String> scriptTypeHelpValues = Lists.transform(asList(ScriptType.values()),
+                    new Function<ScriptType, String>() {
+                        @Override
+                        public String apply(ScriptType scriptType) {
+                            return scriptType.name().toLowerCase();
+                        }
+                    });
+            Option scriptType = newOption().
+                    withName(SCHEMA_SCRIPT_TYPE_OPTION).
+                    withDescription(getMessage(SCHEMA_SCRIPT_TYPE_OPTION_DESCRIPTION)).
+                    withArgument(
+                            newArgument().
+                                    withName(getMessage(SCHEMA_SCRIPT_TYPE_ARGUMENT_NAME)).
+                                    withMinimum(1).
+                                    withMaximum(ScriptType.values().length).
+                                    withHelpValues(scriptTypeHelpValues).build()
+                    ).build();
+            group.withOption(scriptType);
+
+            Option groupScriptsBy = newOption().
+                    withName(SCHEMA_GROUP_SCRIPTS_BY_OPTION).
+                    withDescription(getMessage(SCHEMA_GROUP_SCRIPTS_BY_OPTION_DESCRIPTION)).
+                    withArgument(
+                            newArgument().
+                                    withName(getMessage(SCHEMA_GROUP_SCRIPTS_BY_ARGUMENT_NAME)).build()
+                    ).build();
+            group.withOption(groupScriptsBy);
+
+            Option identifierNormalizer = newOption().
+                    withName(SCHEMA_IDENTIFIER_NORMALIZER).
+                    withDescription(getMessage(SCHEMA_IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION)).
+                    withArgument(
+                            newArgument().
+                                    withName(getMessage(SCHEMA_IDENTIFIER_NORMALIZER_ARGUMENT_NAME)).build()
+                    ).build();
+            group.withOption(identifierNormalizer);
         }
 
         protected void parserSchemaOptions(SchemaSpec schemaSpec, CommandLine commandLine, Option option) {

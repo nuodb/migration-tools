@@ -8,14 +8,40 @@
     <version>1.0</version>
     <packaging>pom</packaging>
     <url>https://github.com/nuodb/migration-tools</url>
+
     <modules>
         <module>bootstrap</module>
         <module>core</module>
         <module>assembly</module>
     </modules>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <!--<dependency>-->
+        <!--<groupId>mysql</groupId>-->
+        <!--<artifactId>mysql-connector-java</artifactId>-->
+        <!--<version>5.1.20</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+        <!--<groupId>net.sourceforge.jtds</groupId>-->
+        <!--<artifactId>jtds</artifactId>-->
+        <!--<version>1.2.4</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+        <!--<groupId>com.microsoft.sqlserver</groupId>-->
+        <!--<artifactId>sqljdbc4</artifactId>-->
+        <!--<version>4.0</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+        <!--<groupId>postgresql</groupId>-->
+        <!--<artifactId>postgresql</artifactId>-->
+        <!--<version>9.0-801.jdbc4</version>-->
+        <!--</dependency>-->
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>

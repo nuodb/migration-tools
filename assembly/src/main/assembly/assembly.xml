@@ -20,6 +20,7 @@
             <outputDirectory>jar</outputDirectory>
             <excludes>
                 <exclude>com.nuodb:nuodb-migration-bootstrap</exclude>
+                <exclude>com.nuodb:nuodb-migration-assembly</exclude>
             </excludes>
         </dependencySet>
     </dependencySets>

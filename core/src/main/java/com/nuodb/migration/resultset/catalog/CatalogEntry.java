@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.resultset.catalog;
 
+import static org.apache.commons.lang3.StringUtils.lowerCase;
+
 /**
  * @author Sergey Bushik
  */
@@ -37,7 +39,7 @@ public class CatalogEntry {
 
     public CatalogEntry(String name, String type) {
         this.name = name;
-        this.type = type;
+        this.type = lowerCase(type);
     }
 
     public String getName() {

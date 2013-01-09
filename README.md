@@ -2,24 +2,28 @@
 
 *A command-line interface for helping domain administrators manage backup and migration of their databases.*
 
-This tool is designed to assist you in migrating data from supported* SQL databases to a NuoDB database. Use nuodb-migration dump and nuodb-migration load to copy, normalize, and load data from an existing database (NuoDB or 3rd party) to a NuoDB database.  With the command-line interface, domain administrators will be able to perform the following database backup and migration tasks:
+This tool is designed to assist you in migrating data from supported SQL databases to a NuoDB database. Use nuodb-migration dump and nuodb-migration load to copy, normalize, and load data from an existing database (NuoDB or 3rd party) to a NuoDB database.  With the command-line interface, domain administrators will be able to perform the following database backup and migration tasks:
 
 1. Migrate (generate) a schema to a target NuoDB database
 2. Copy data from an existing database to a target NuoDB database
 3. Dump data from an existing database
 4. Load data to a target NuoDB database
 
-*These functions are initially supported with MySQL, SQL Server, Oracle and PostgreSQL.
+*These functions are initially tested on MySQL, SQL Server, Oracle and PostgreSQL and should work with any JDBC-compliant database.*
 
-## Building from Source
+## Building from Source ##
 
-        $ git clone https://github.com/nuodb/migration-tools
-        $ cd migration-tools/
-        $ mvn install
-        $ cd assembly/target/nuodb-migration/bin/
-        $ ./nuodb-migration --help
-        
+    $ git clone https://github.com/nuodb/migration-tools
+    $ cd migration-tools/
+    $ mvn install
+    $ cd assembly/target/nuodb-migration/bin/
+    $ ./nuodb-migration --help
+
+--------
+
 ## Synopsis ##
+
+### Root command line options ###
 
     $ ./nuodb-migration
         --help=<[dump] | [load] | [schema]> |
@@ -27,57 +31,73 @@ This tool is designed to assist you in migrating data from supported* SQL databa
         --config=<file>
         <[dump] | [load] | [schema]>
 
---------
+### Dump data from an existing database ###
 
-    $ ./nuodb-migration dump 
-        --source.driver<driver> |
-        --source.url=<url> |
-        --source.username=<username> |
-        --source.password=<password> |
-        --source.properties=<properties> |
-        --source.catalog=<catalog> |
-        --source.schema=<schema> |
-        --output.type=<output type> |
-        --output.path=<output path> |
-        --output.*=<attribute value> |
-        --table=<table> |
-        --table.type=<table type> |
-        --table.*.filter=<query filter> |
-        --query=<query> |
+    $ ./nuodb-migration dump
+        [source database connection, required]
+            --source.driver<driver> |
+            --source.url=<url> |
+            --source.username=<username> |
+            --source.password=<password> |
+            --source.properties=<properties> |
+            --source.catalog=<catalog> |
+            --source.schema=<schema> |
+        [output specification, required]
+            --output.type=<output type> |
+            --output.path=<output path> |
+            --output.*=<attribute value> |
+        [table names & query filters, optional]
+            --table=<table> |
+            --table.type=<table type> |
+            --table.*.filter=<query filter> |
+        [select statements, optional]
+            --query=<query> |
         --time.zone=<time zone>
 
---------
+### Load data to a target NuoDB database ###
 
-    $ ./nuodb-migration load 
-        --target.url=<url> |
-        --target.username=<username> |
-        --target.password=<password> |
-        --target.properties=<properties> |
-        --target.schema=<schema> |
-        --input.type=<input type> |
-        --input.path=<input path> |
-        --input.*=<attribute value> |
+    $ ./nuodb-migration load
+        [target database connection, required]
+            --target.url=<url> |
+            --target.username=<username> |
+            --target.password=<password> |
+            --target.properties=<properties> |
+            --target.schema=<schema> |
+        [input specification, required]
+            --input.type=<input type> |
+            --input.path=<input path> |
+            --input.*=<attribute value> |
         --time.zone=<time zone>
 
---------
+### Generate a schema for a target NuoDB database ###
 
-    $ ./nuodb-migration schema 
-        --source.driver=<driver> |
-        --source.url=<url> |
-        --source.username=<username> |
-        --source.password=<password> |
-        --source.properties=<properties> |
-        --source.catalog=<catalog> |
-        --source.schema=<schema> |
-        --target.url=<url> |
-        --target.username=<username> |
-        --target.password=<password> |
-        --target.properties=<properties> |
-        --target.schema=<schema> |
-        --output.path=<output path> |
-        --meta.data.*=<[true] | [false]> |
-        --script.type=<[drop] , [create]> |
-        --group.scripts.by=<[table] | [meta.data]>
+    $ ./nuodb-migration schema
+        [source database connection, required]
+            --source.driver=<driver> |
+            --source.url=<url> |
+            --source.username=<username> |
+            --source.password=<password> |
+            --source.properties=<properties> |
+            --source.catalog=<catalog> |
+            --source.schema=<schema> |
+        [target database connection, optional]
+            --target.url=<url> |
+            --target.username=<username> |
+            --target.password=<password> |
+            --target.properties=<properties> |
+            --target.schema=<schema> |
+            --output.path=<output path> |
+        [custom type declarations, optional]
+            --type.name=<type name> |
+            --type.code=<type code> |
+            --type.size=<type size> |
+            --type.precision=<type precision> |
+            --type.scale=<type scale>
+        [schema output options, optional]
+            --meta.data.*=<[true] | [false]> |
+            --script.type=<[drop] , [create]> |
+            --group.scripts.by=<[table] | [meta.data]>
+            --identifier.normalizer=<[noop], [standard], [lower.case], [upper.case]>
 
 --------
 
@@ -85,7 +105,19 @@ This tool is designed to assist you in migrating data from supported* SQL databa
 
 To interface with third-party databases through JDBC-compliant drivers you should download & install appropriate JAR files.
 
-Add required dependency to pom.xml, clean & package project. For example, to add MySQL JDBC connector:
+You can add required dependency to pom.xml, then clean & package project:
+
+    $ mvn clean install
+
+The required JDBC driver JAR file will be download automatically to the assembly/target/nuodb-migration/jar/ directory
+
+Alternatively, you can download & copy required JAR file to assembly/target/nuodb-migration/jar/ manually. For example, to install PostgreSQL JDBC4 Driver:
+
+    $ mvn clean install
+    $ curl http://jdbc.postgresql.org/download/postgresql-9.2-1001.jdbc4.jar > \
+        assembly/target/nuodb-migration/jar/postgresql-9.2-1001.jdbc4.jar
+
+To illustrate an inclusion of MySQL JDBC Driver into assembly using Maven add the following dependency to pom.xml, then clean & package project:
 
     <?xml version="1.0" encoding="UTF-8"?>
     <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -102,17 +134,25 @@ Add required dependency to pom.xml, clean & package project. For example, to add
         ...
     </project>
 
+For Microsoft SQL Server you might use jTDS Type 4 JDBC Driver:
+
+    <dependency>
+        <groupId>net.sourceforge.jtds</groupId>
+        <artifactId>jtds</artifactId>
+        <version>1.2.4</version>
+        </dependency>
+    <dependency>
+
+For PostgreSQL add PostgreSQL Native Driver of the required version to the pom.xml file:
+
+    <dependency>
+        <groupId>postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>9.0-801.jdbc4</version>
+    </dependency>
+
 --------
 
-    $ mvn clean install
-    
-Required JAR file will be download to assembly/target/nuodb-migration/jar/ directory
-
-Alternatively, you can download & copy required JAR file to assembly/target/nuodb-migration/jar/ manually. For example, to install PosgreSQL JDBC4 Driver:
-
-    $ mvn clean install
-    $ curl http://jdbc.postgresql.org/download/postgresql-9.2-1001.jdbc4.jar > assembly/target/nuodb-migration/jar/postgresql-9.2-1001.jdbc4.jar
-    
 ## Examples ##
 
 The following examples show how to dump MySQL to a file (in the first case), and an existing NuoDB database (in the second case).  The third case shows how to use the load command. 
@@ -120,35 +160,41 @@ The following examples show how to dump MySQL to a file (in the first case), and
 Example 1: Dump all tables from MySQL "enron" catalog in CSV format
 
     $ ./nuodb-migration dump --source.driver=com.mysql.jdbc.Driver \
-        --source.url=jdbc:mysql://localhost:3306/enron --source.catalog=enron \
-        --source.username=root --output.type=csv --output.path=/tmp/test/dump.cat
+        --source.url=jdbc:mysql://localhost:3306/test --source.catalog=test \
+        --source.username=<username> \
+        --output.type=csv --output.path=/tmp/dump.cat
 
-----
-
-Example 2: Dump records from hockey table where "id" does not equal 25 from NuoDB "test" catalog in BSON format
+Example 2: Dump records from "hockey" table where "id" is not equal to 25 from NuoDB "test" catalog in BSON format
 
     $ ./nuodb-migration dump --source.driver=com.nuodb.jdbc.Driver \  
-        --source.url=jdbc:com.nuodb://localhost/test
-        --source.username=dba --source.password=goalie \
+        --source.url=jdbc:com.nuodb://localhost/test \
+        --source.username=<username> \
         --source.schema=hockey --table=hockey --table.hockey.filter=id<>25 \  
         --output.path=/tmp/dump.cat --output.type=bson
 
-----
-
-Example 3:  Load CSV data to the corresponding tables in NuoDB from /tmp/test/dump.cat
+Example 3: Load CSV data to the corresponding tables in NuoDB from /tmp/dump.cat
 
     $ ./nuodb-migration load --target.url=jdbc:com.nuodb://localhost/test \
-        --target.username=dba --target.password=goalie \
+        --target.username=<username> --target.password=<password> \
         --input.path=/tmp/dump.cat
 
-----
+Example 4: Generate NuoDB schema from Oracle "test" database and output it to stdout stream. To save schema in a particular file on the file system add --output.path=<file> option, i.e. --output.path=/tmp/schema.sql
 
-Example 4: Generate NuoDB schema from
+    $ ./nuodb-migration schema --source.driver=oracle.jdbc.driver.OracleDriver \
+        --source.url=jdbc:oracle:thin:@//localhost:1521/test \
+        --source.username=<username> --source.password=<password> --source.schema=test
 
-    $ ./nuodb-migration schema --source.driver=oracle.jdbc.driver.OracleDriver
-    --source.url=jdbc:oracle:thin:@//localhost:1521/test \
-    --source.username=dba --source.password=goalie --source.schema=test \
-    --output.path=/tmp/schema.sql
+Example 5: Migrate schema from Microsoft SQL Server "test" database to a NuoDB database excluding generation of foreign keys and check constraints on table and column levels. Generated table names and column identifiers will be transformed using "standard" identifier normalizer (changed to upper case if unquoted).
+
+    $ ./nuodb-migration schema --source.driver=net.sourceforge.jtds.jdbc.Driver \
+        --source.url=jdbc:jtds:sqlserver://localhost:1433/test \
+        --source.username=<username> --source.password=<password> --source.schema=dbo \
+        --target.url=jdbc:com.nuodb://localhost/test \
+        --target.username=<username> --target.password=<password> --target.schema=hockey \
+        --meta.data.foreign.key=false --meta.data.check.constraint=false \
+        --identifier.normalizer=standard
+
+--------
 
 ## Command Line Options ##
 
@@ -159,7 +205,7 @@ Example 4: Generate NuoDB schema from
 <tr><td>
 [--help=[command]] 
 </td><td>
-Prints help contents on the requested command 
+Prints help contents on the requested command
 </td></tr>
 
 <tr><td>
@@ -169,26 +215,21 @@ Lists available migration commands
 </td></tr>
 
 <tr><td>
-[--config=file]
-</td><td>
-Reads definition of the migration process from the XML file and executes it
-</td></tr>
-
-<tr><td>
 [command]
 </td><td>
-Executes specified migration command (dump or load) 
+Executes specified migration command (dump, load or schema)
 </td></tr>
 
 </table>
 
 ### nuodb-migration dump
+
 <table>
 <tr><td colspan="2">
-Source database connection options
+<b>Source database connection</b>
 </td></tr>
 
-<tr><td>
+<tr><td width="30%">
 &nbsp;&nbsp;&nbsp;&nbsp;--source.driver=driver
 </td><td>
 JDBC driver class name
@@ -215,7 +256,7 @@ Source database password
 <tr><td>
 &nbsp;&nbsp;&nbsp;&nbsp;[--source.properties=[properties]]
 </td><td>
-Additional connection properties encoded as URL query string . For example: "property1=value1&property2=value2"
+Additional connection properties encoded as URL query string "property1=value1&property2=value2"
 </td></tr>
 
 <tr><td>
@@ -227,17 +268,17 @@ Default database catalog name to use
 <tr><td>
 &nbsp;&nbsp;&nbsp;&nbsp;[--source.schema=[schema]]
 </td><td>
-Default database schema name to use output specification  
+Default database schema name to use
 </td></tr>
 
 <tr><td colspan="2">
-Output specification options
+<b>Output specification</b>
 </td></tr>
 
 <tr><td>
 &nbsp;&nbsp;&nbsp;&nbsp;--output.type=output type
 </td><td>
-Output type (cvs, xml, bson)
+Output format type name (cvs, xml or bson)
 </td></tr>
 
 <tr><td>
@@ -249,11 +290,24 @@ Path on the file system
 <tr><td>
 &nbsp;&nbsp;&nbsp;&nbsp;[--output.*=[attribute value]]
 </td><td>
-Output format attributes, i.e. -output.csv.delimiter, -output.csv.quoting, -output.csv.quote, -output.csv.escape, -output.csv.line.separator overriding attributes from com.nuodb.migration.result.format.csv.CsvAttributes; -output.xml.encoding, -output.xml.version options for XML to override default values of com.nuodb.migration.result.format.xml.XmlAttributes
+CSV output format attributes
+<a href="https://github.com/nuodb/migration-tools/blob/master/core/src/main/java/com/nuodb/migration/resultset/format/csv/CsvAttributes.java">com.nuodb.migration.result.format.csv.CsvAttributes</a>
+<ul>
+<li>--output.csv.delimiter=,</li>
+<li>--output.csv.quoting=false</li>
+<li>--output.csv.quote="</li>
+<li>--output.csv.escape=|</li>
+<li>--output.csv.line.separator=\r\n</li>
+</ul>
+XML output format attributes
+<a href="https://github.com/nuodb/migration-tools/blob/master/core/src/main/java/com/nuodb/migration/resultset/format/xml/XmlAttributes.java">com.nuodb.migration.result.format.xml.XmlAttributes</a>
+<ul>
+<li>--output.xml.encoding=UTF-8</li>
+</ul>
 </td></tr>
 
 <tr><td colspan="2">
-Table names and select filters
+<b>Table names, types & query filters</b>
 </td></tr>
 
 <tr><td>
@@ -263,15 +317,30 @@ Table name
 </td></tr>
 
 <tr><td>
+&nbsp;&nbsp;&nbsp;&nbsp;[--table.type=[table type]]
+</td><td>
+Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE is included into dump
+</td></tr>
+
+<tr><td>
 &nbsp;&nbsp;&nbsp;&nbsp;[--table.*.filter=[query filter]]
 </td><td>
 Filters table records when appended to the query statement after the where clause
 </td></tr>
 
+<tr><td colspan="2">
+<b>Select statements</b>
+</td></tr>
 <tr><td>
 &nbsp;&nbsp;&nbsp;&nbsp;[--query=query]
 </td><td>
-Full select statement to dump
+Select statement
+</td></tr>
+
+<tr><td>
+[--time.zone=time zone]
+</td><td>
+Time zone option enables date columns to be dumped and reloaded between servers in different time zones, i.e. --time.zone=UTC
 </td></tr>
 
 </table>
@@ -280,10 +349,10 @@ Full select statement to dump
 <table>
 
 <tr><td colspan="2">
-NuoDB connection options
+<b>Target database connection<b>
 </td></tr>
 
-<tr><td>
+<tr><td width="30%">
 &nbsp;&nbsp;&nbsp;&nbsp;--target.url=url
 </td><td>
 Target database connection URL in format jdbc:com.nuodb://{BROKER}:{PORT}/{DATABASE}
@@ -304,7 +373,7 @@ Target database password
 <tr><td>
 &nbsp;&nbsp;&nbsp;&nbsp;[--target.properties=[properties]]
 </td><td>
-Additional connection properties encoded as URL query string such as  "property1=value1&property2=value2"
+Additional connection properties encoded as URL query string "property1=value1&property2=value2"
 </td></tr>
 
 <tr><td>
@@ -314,7 +383,7 @@ Default database schema name to use input specification
 </td></tr>
 
 <tr><td colspan="2">
-Input specification options
+<b>Input specification</b>
 </td></tr>
 
 <tr><td>
@@ -326,7 +395,13 @@ Path on the file system
 <tr><td>
 &nbsp;&nbsp;&nbsp;&nbsp;[--input.*=[attribute value]]
 </td><td>
-Input format attributes
+Input format attributes, same options as described under the <b>Output specification</b> of <a href="https://github.com/nuodb/migration-tools#nuodb-migration-dump">nuodb-migration dump</a>
+</td></tr>
+
+<tr><td>
+[--time.zone=time zone]
+</td><td>
+Time zone option enables date columns to be dumped and reloaded between servers in different time zones, i.e. --time.zone=UTC
 </td></tr>
 
 </table>

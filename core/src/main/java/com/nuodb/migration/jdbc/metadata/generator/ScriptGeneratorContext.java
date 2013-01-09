@@ -71,16 +71,15 @@ public class ScriptGeneratorContext {
     }
 
     public ScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
-        this.dialect = scriptGeneratorContext.getDialect();
-        this.catalog = scriptGeneratorContext.getCatalog();
-        this.schema = scriptGeneratorContext.getSchema();
+        setDialect(scriptGeneratorContext.getDialect());
+        setCatalog(scriptGeneratorContext.getCatalog());
+        setSchema(scriptGeneratorContext.getSchema());
+        setScriptTypes(scriptGeneratorContext.getScriptTypes());
+        setMetaDataTypes(scriptGeneratorContext.getMetaDataTypes());
 
-        this.scriptTypes.addAll(scriptGeneratorContext.getScriptTypes());
-        this.metaDataTypes.addAll(scriptGeneratorContext.getMetaDataTypes());
-
-        this.attributes.putAll(scriptGeneratorContext.getAttributes());
-        this.namingStrategyMap.putAll(scriptGeneratorContext.getNamingStrategies());
-        this.scriptGeneratorMap.putAll(scriptGeneratorContext.getScriptGenerators());
+        attributes.putAll(scriptGeneratorContext.getAttributes());
+        namingStrategyMap.putAll(scriptGeneratorContext.getNamingStrategies());
+        scriptGeneratorMap.putAll(scriptGeneratorContext.getScriptGenerators());
     }
 
     public String getName(Relational relational) {
