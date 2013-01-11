@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
+
 import java.sql.Types;
 
 import static java.lang.String.valueOf;
@@ -34,11 +36,12 @@ import static java.lang.String.valueOf;
 /**
  * @author Sergey Bushik
  */
-public class MSSQLServerDialect extends StandardDialect {
+public class MSSQLServerDialect extends SimpleDialect {
 
     public static final int DATETIMEOFFSET = -155;
 
-    public MSSQLServerDialect() {
+    public MSSQLServerDialect(DatabaseInfo databaseInfo) {
+        super(databaseInfo);
         addJdbcTypeDescAlias(Types.LONGVARBINARY, "IMAGE", Types.BLOB);
         addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
         addJdbcTypeDescAlias(Types.LONGNVARCHAR, "XML", Types.CLOB);

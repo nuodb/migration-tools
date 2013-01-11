@@ -52,12 +52,12 @@ public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
     public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("FK");
+        buffer.append('_');
 
         StringBuilder qualifier = new StringBuilder();
         qualifier.append(context.getName(foreignKey.getSourceTable(), false));
-        qualifier.append('_');
         qualifier.append(context.getName(foreignKey.getTargetTable(), false));
-        buffer.append(Integer.toHexString(qualifier.toString().hashCode()).toUpperCase());
+        buffer.append(buffer.append(md5Hex(qualifier.toString())));
 
         return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }

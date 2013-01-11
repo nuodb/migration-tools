@@ -51,7 +51,7 @@ public class MySQLAutoIncrementReader extends MetaDataReaderBase {
 
     @Override
     public void read(DatabaseInspector inspector, final Database database,
-                     DatabaseMetaData metaData) throws SQLException {
+                     DatabaseMetaData databaseMetaData) throws SQLException {
         final Collection<Column> columns = newArrayList();
         for (Table table : database.listTables()) {
             for (Column column : table.getColumns()) {
@@ -63,7 +63,7 @@ public class MySQLAutoIncrementReader extends MetaDataReaderBase {
         if (columns.isEmpty()) {
             return;
         }
-        StatementTemplate template = new StatementTemplate(metaData.getConnection());
+        StatementTemplate template = new StatementTemplate(databaseMetaData.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override

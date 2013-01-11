@@ -52,6 +52,7 @@ public class IndexNamingStrategy extends NamingStrategyBase<Index> {
     protected String getIndexName(Index index, ScriptGeneratorContext context, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("IDX");
+        buffer.append("_");
 
         StringBuilder qualifier = new StringBuilder();
         if (index.isUnique()) {
@@ -63,7 +64,7 @@ public class IndexNamingStrategy extends NamingStrategyBase<Index> {
             qualifier.append("_");
             qualifier.append(context.getName(column, false));
         }
-        buffer.append(Integer.toHexString(qualifier.toString().hashCode()).toUpperCase());
+        buffer.append(md5Hex(qualifier.toString()));
 
         return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
     }

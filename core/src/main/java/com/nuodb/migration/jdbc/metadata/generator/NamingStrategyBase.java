@@ -29,6 +29,9 @@ package com.nuodb.migration.jdbc.metadata.generator;
 
 import com.nuodb.migration.jdbc.metadata.Relational;
 
+import static org.apache.commons.codec.binary.Hex.encodeHex;
+import static org.apache.commons.codec.digest.DigestUtils.md5;
+
 /**
  * @author Sergey Bushik
  */
@@ -46,5 +49,9 @@ public abstract class NamingStrategyBase<T extends Relational> extends Generator
     @Override
     public String getQualifiedName(T object, ScriptGeneratorContext context) {
         return getQualifiedName(object, context, true);
+    }
+
+    protected static String md5Hex(String data) {
+        return new String(encodeHex(md5(data), false));
     }
 }

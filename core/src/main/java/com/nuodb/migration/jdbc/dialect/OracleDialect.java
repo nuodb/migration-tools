@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -40,9 +42,11 @@ import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 /**
  * @author Sergey Bushik
  */
-public class OracleDialect extends StandardDialect {
+public class OracleDialect extends SimpleDialect {
 
-    public OracleDialect() {
+    public OracleDialect(DatabaseInfo databaseInfo) {
+        super(databaseInfo);
+
         addJdbcTypeAdapter(new OracleBlobTypeAdapter());
         addJdbcTypeAdapter(new OracleClobTypeAdapter());
     }

@@ -53,9 +53,9 @@ public class ColumnReader extends MetaDataReaderBase {
     }
 
     @Override
-    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
+    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData databaseMetaData) throws SQLException {
         for (Table table : database.listTables()) {
-            readColumns(database, metaData, table);
+            readColumns(database, databaseMetaData, table);
         }
     }
 

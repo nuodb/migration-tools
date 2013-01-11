@@ -66,7 +66,7 @@ public class ConnectionScriptExporter extends CountingScriptExporter {
             throw new ScriptGeneratorException("Database connection is not opened");
         }
         statement.executeUpdate(script);
-        processWarning(statement.getWarnings());
+//        processWarning(statement.getWarnings());
     }
 
     protected void processWarning(SQLWarning warning) throws SQLException {

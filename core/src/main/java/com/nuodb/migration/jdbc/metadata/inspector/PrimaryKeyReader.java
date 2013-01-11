@@ -45,9 +45,9 @@ public class PrimaryKeyReader extends MetaDataReaderBase {
     }
 
     @Override
-    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
+    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData databaseMetaData) throws SQLException {
         for (Table table : database.listTables()) {
-            readPrimaryKeys(database, metaData, table);
+            readPrimaryKeys(database, databaseMetaData, table);
         }
     }
 

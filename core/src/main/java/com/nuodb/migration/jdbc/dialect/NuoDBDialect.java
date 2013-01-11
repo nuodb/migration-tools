@@ -28,8 +28,10 @@
 package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
+import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Types;
+import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migration.jdbc.type.JdbcTypeSpecifiers.newScale;
@@ -40,12 +42,20 @@ import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 /**
  * @author Sergey Bushik
  */
-public class NuoDBDialect extends StandardDialect {
+public class NuoDBDialect extends SimpleDialect {
+
+    private static final Pattern ALLOWED_IDENTIFIER_PATTERN = Pattern.compile("^[a-zA-Z_]+\\w*$");
 
     private static final int WRITE_COMMITTED = 5;
     private static final int CONSISTENT_READ = 7;
 
     public NuoDBDialect() {
+        this(new DatabaseInfo("NuoDB"));
+    }
+
+    public NuoDBDialect(DatabaseInfo databaseInfo) {
+        super(databaseInfo);
+
         removeTypeName(Types.BIT);
         addTypeName(Types.BIT, "BOOLEAN", newSize(1));
 
@@ -62,8 +72,6 @@ public class NuoDBDialect extends StandardDialect {
         addTypeName(Types.CHAR, "CHAR", newSize(1));
         addTypeName(Types.CHAR, "CHAR({N})");
 
-        // addJdbcTypeName(Types.VARCHAR, "CHARACTER VARYING({N})");
-        // addJdbcTypeName(Types.LONGVARCHAR, "CHARACTER VARYING({N})");
         addTypeName(Types.VARCHAR, "VARCHAR({N})");
         addTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
 
@@ -74,24 +82,14 @@ public class NuoDBDialect extends StandardDialect {
         addTypeName(Types.TIMESTAMP, "TIMESTAMP", newScale(0));
 
         addTypeName(Types.BINARY, "BINARY({N})");
-
-        // addJdbcTypeName(Types.VARBINARY, "BINARY VARYING({N})");
-        // addJdbcTypeName(Types.LONGVARBINARY, "BINARY VARYING({N})");
         addTypeName(Types.VARBINARY, "VARBINARY({N})");
         addTypeName(Types.LONGVARBINARY, "VARBINARY({N})");
 
         addTypeName(Types.NULL, "NULL");
-
-        // addJdbcTypeName(Types.BLOB, "BINARY LARGE OBJECT");
-        // addJdbcTypeName(Types.CLOB, "CHARACTER LARGE OBJECT");
-        // addJdbcTypeName(Types.BOOLEAN, "BOOLEAN");
         addTypeName(Types.BLOB, "BLOB");
         addTypeName(Types.CLOB, "CLOB");
         addTypeName(Types.BOOLEAN, "BOOLEAN");
 
-        // addJdbcTypeName(Types.NCHAR, "NATIONAL CHARACTER");
-        // addJdbcTypeName(Types.NVARCHAR, "NATIONAL CHARACTER VARYING({N})");
-        // addJdbcTypeName(Types.NCLOB, "NATIONAL CHARACTER LARGE OBJECT");
         addTypeName(Types.NCHAR, "NCHAR", newSize(1));
         addTypeName(Types.NCHAR, "NCHAR({N})");
         addTypeName(Types.NVARCHAR, "NVARCHAR({N})");
@@ -100,6 +98,9 @@ public class NuoDBDialect extends StandardDialect {
         addJdbcType(NuoDBIntegerType.INSTANCE);
         addJdbcType(NuoDBBigIntType.INSTANCE);
         addJdbcType(NuoDBTimeType.INSTANCE);
+
+        setAllowedIdentifierPattern(ALLOWED_IDENTIFIER_PATTERN);
+        // addScriptTranslation(new DatabaseInfo("MySQL"), "CURRENT_TIMESTAMP", "NOW");
     }
 
     @Override

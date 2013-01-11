@@ -32,5 +32,5 @@ package com.nuodb.migration.jdbc.resolve;
  */
 public interface DatabaseMatcher {
 
-    boolean matches(String productName, String productVersion, int majorVersion, int minorVersion);
+    boolean matches(DatabaseInfo databaseInfo);
 }

@@ -28,6 +28,8 @@
 package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
+import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migration.jdbc.resolve.SimpleDatabaseServiceResolverAware;
 import com.nuodb.migration.jdbc.type.*;
 import com.nuodb.migration.jdbc.type.jdbc4.Jdbc4TypeRegistry;
 import org.slf4j.Logger;
@@ -42,21 +44,29 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migration.jdbc.dialect.IdentifierNormalizers.standard;
 import static java.lang.String.valueOf;
 import static java.sql.Connection.*;
 
 /**
  * @author Sergey Bushik
  */
-public class StandardDialect implements Dialect {
+public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> implements Dialect {
 
-    private static final Pattern IDENTIFIER = Pattern.compile("[a-zA-Z0-9_]*");
+    private static final Pattern ALLOWED_IDENTIFIER_PATTERN = Pattern.compile("[a-zA-Z0-9_]*");
+
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private ScriptTranslatorManager scriptTranslatorManager = new ScriptTranslatorManager();
     private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
     private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
-    private IdentifierNormalizer identifierNormalizer = IdentifierNormalizers.standard();
+    private IdentifierNormalizer identifierNormalizer = standard();
+    private Pattern allowedIdentifierPattern = ALLOWED_IDENTIFIER_PATTERN;
+    private DatabaseInfo databaseInfo;
 
-    public StandardDialect() {
+    public SimpleDialect(DatabaseInfo databaseInfo) {
+        this.databaseInfo = databaseInfo;
+
         addTypeName(Types.BIT, "BIT");
         addTypeName(Types.BOOLEAN, "BOOLEAN");
         addTypeName(Types.TINYINT, "TINYINT");
@@ -89,26 +99,21 @@ public class StandardDialect implements Dialect {
 
     @Override
     public String getIdentifier(String identifier) {
-        return getIdentifier(identifier, getIdentifierNormalizer());
-    }
-
-    @Override
-    public String getIdentifier(String identifier, IdentifierNormalizer identifierNormalizer) {
         if (identifier == null) {
             return null;
         }
-        boolean requiresQuoting = isRequiresQuoting(identifier);
-        String normalizedIdentifier = identifierNormalizer != null ?
-                identifierNormalizer.normalize(this, identifier, requiresQuoting) : identifier;
-        return requiresQuoting ? quote(normalizedIdentifier) : normalizedIdentifier;
+        boolean quoting = isQuotingIdentifier(identifier);
+        identifier = getIdentifierNormalizer() != null ?
+                getIdentifierNormalizer().normalize(this, identifier, quoting) : identifier;
+        return quoting ? quote(identifier) : identifier;
     }
 
-    protected boolean isRequiresQuoting(String identifier) {
-        return !isIdentifier(identifier) || isSQLKeyword(identifier);
+    protected boolean isQuotingIdentifier(String identifier) {
+        return !isAllowedIdentifier(identifier) || isSQLKeyword(identifier);
     }
 
-    protected boolean isIdentifier(String identifier) {
-        return IDENTIFIER.matcher(identifier).matches();
+    protected boolean isAllowedIdentifier(String identifier) {
+        return getAllowedIdentifierPattern().matcher(identifier).matches();
     }
 
     protected boolean isSQLKeyword(String identifier) {
@@ -129,6 +134,14 @@ public class StandardDialect implements Dialect {
 
     protected String closeQuote() {
         return valueOf('"');
+    }
+
+    protected void addScriptTranslation(DatabaseInfo databaseInfo, String sourceScript, String targetScript) {
+        scriptTranslatorManager.addScriptTranslation(this.databaseInfo, databaseInfo, sourceScript, targetScript);
+    }
+
+    protected void addScriptTranslator(ScriptTranslator scriptTranslator) {
+        scriptTranslatorManager.addScriptTranslator(scriptTranslator);
     }
 
     @Override
@@ -213,6 +226,14 @@ public class StandardDialect implements Dialect {
         this.identifierNormalizer = identifierNormalizer;
     }
 
+    public Pattern getAllowedIdentifierPattern() {
+        return allowedIdentifierPattern;
+    }
+
+    public void setAllowedIdentifierPattern(Pattern allowedIdentifierPattern) {
+        this.allowedIdentifierPattern = allowedIdentifierPattern;
+    }
+
     @Override
     public boolean supportsDropIndexIfExists() {
         return false;
@@ -260,7 +281,7 @@ public class StandardDialect implements Dialect {
 
     @Override
     public String getCheckClause(String checkClause) {
-        checkClause = getSQLFragment(checkClause);
+        checkClause = getScriptFragment(checkClause);
         if (!checkClause.startsWith("(") && !checkClause.endsWith(")")) {
             return "(" + checkClause + ")";
         } else {
@@ -270,10 +291,18 @@ public class StandardDialect implements Dialect {
 
     @Override
     public String getDefaultValue(int typeCode, String defaultValue) {
-        return getSQLFragment(defaultValue);
+        String fragment = getScriptFragment(defaultValue);
+        if (fragment == null) {
+            return null;
+        }
+        if (!fragment.startsWith("'") && !fragment.endsWith("'")) {
+            return "'" + fragment + "'";
+        } else {
+            return fragment;
+        }
     }
 
-    protected String getSQLFragment(String fragment) {
+    protected String getScriptFragment(String fragment) {
         if (fragment == null) {
             return null;
         }
@@ -413,5 +442,34 @@ public class StandardDialect implements Dialect {
 
     public void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias) {
         jdbcTypeRegistry.addJdbcTypeDescAlias(typeCode, typeName, typeCodeAlias);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SimpleDialect that = (SimpleDialect) o;
+
+        if (identifierNormalizer != null ? !identifierNormalizer.equals(
+                that.identifierNormalizer) : that.identifierNormalizer != null) return false;
+        if (jdbcTypeNameMap != null ? !jdbcTypeNameMap.equals(that.jdbcTypeNameMap) : that.jdbcTypeNameMap != null)
+            return false;
+        if (jdbcTypeRegistry != null ? !jdbcTypeRegistry.equals(that.jdbcTypeRegistry) : that.jdbcTypeRegistry != null)
+            return false;
+        if (logger != null ? !logger.equals(that.logger) : that.logger != null) return false;
+        if (scriptTranslatorManager != null ? !scriptTranslatorManager.equals(
+                that.scriptTranslatorManager) : that.scriptTranslatorManager != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = jdbcTypeNameMap != null ? jdbcTypeNameMap.hashCode() : 0;
+        result = 31 * result + (jdbcTypeRegistry != null ? jdbcTypeRegistry.hashCode() : 0);
+        result = 31 * result + (identifierNormalizer != null ? identifierNormalizer.hashCode() : 0);
+        result = 31 * result + (scriptTranslatorManager != null ? scriptTranslatorManager.hashCode() : 0);
+        return result;
     }
 }

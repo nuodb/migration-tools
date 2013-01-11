@@ -26,6 +26,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
 ### Root command line options ###
 
     $ bin/nuodb-migration
+        --help |
         --help=<[dump] | [load] | [schema]> |
         --list |
         --config=<file>
@@ -193,12 +194,19 @@ Example 5: Migrate schema from Microsoft SQL Server "test" database to a NuoDB d
 
 ### $ bin/nuodb-migration ###
 
-<table>
+<table width="100%">
+
+<tr><td width="30%">
+[--help]
+</td><td>
+Prints command line options
+</td></tr>
+
 
 <tr><td>
 [--help=[command]]
 </td><td>
-Prints help contents on the requested command
+Prints help contents on the migration command
 </td></tr>
 
 <tr><td>
@@ -208,17 +216,16 @@ Lists available migration commands
 </td></tr>
 
 <tr><td>
-&lt; [dump] | [load] | [schema] &gt;
+[dump] | [load] | [schema]
 </td><td>
-Executes specified migration command (dump, load or schema)
+Executes specified migration command (dump, load or schema) with its arguments
 </td></tr>
 
 </table>
 
-
 ### $ bin/nuodb-migration dump ###
 
-<table>
+<table width="100%">
 <tr><td colspan="2">
 <b>Source database connection, required</b>
 </td></tr>
@@ -342,7 +349,7 @@ Time zone option enables date columns to be dumped and reloaded between servers 
 
 ### $ bin/nuodb-migration load ###
 
-<table>
+<table width="100%>
 
 <tr><td colspan="2">
 <b>Target database connection, required</b>
@@ -406,7 +413,7 @@ Time zone option enables date columns to be dumped and reloaded between servers 
 
 ### $ bin/nuodb-migration schema ###
 
-<table>
+<table width="100%>
 <tr><td colspan="2">
 <b>Source database connection, required</b>
 </td></tr>

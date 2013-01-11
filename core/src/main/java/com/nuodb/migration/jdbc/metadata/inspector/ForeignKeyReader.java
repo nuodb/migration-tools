@@ -53,9 +53,9 @@ public class ForeignKeyReader extends MetaDataReaderBase {
 
     @Override
     public void read(DatabaseInspector inspector, Database database,
-                     DatabaseMetaData metaData) throws SQLException {
+                     DatabaseMetaData databaseMetaData) throws SQLException {
         for (Table table : database.listTables()) {
-            readForeignKeys(database, metaData, table);
+            readForeignKeys(database, databaseMetaData, table);
         }
     }
 

@@ -48,9 +48,9 @@ public class IndexReader extends MetaDataReaderBase {
 
     @Override
     public void read(DatabaseInspector inspector, Database database,
-                     DatabaseMetaData metaData) throws SQLException {
+                     DatabaseMetaData databaseMetaData) throws SQLException {
         for (Table table : database.listTables()) {
-            readIndexes(database, metaData, table);
+            readIndexes(database, databaseMetaData, table);
         }
     }
 

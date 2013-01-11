@@ -27,8 +27,6 @@
  */
 package com.nuodb.migration.jdbc.resolve;
 
-import com.google.common.collect.Maps;
-import com.nuodb.migration.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +34,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
+import static com.nuodb.migration.utils.ReflectionUtils.newInstance;
 import static java.lang.String.format;
 
 /**
@@ -45,71 +45,91 @@ public class SimpleDatabaseServiceResolver<T> implements DatabaseServiceResolver
 
     private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Map<DatabaseMatcher, Class<? extends T>> databaseMatchers = Maps.newHashMap();
+    private Map<DatabaseMatcher, Class<? extends T>> serviceClassMap = newHashMap();
+    private Map<DatabaseInfo, T> serviceMap = newHashMap();
+    private Class<? extends T> serviceClass;
+    private Class<? extends T> defaultServiceClass;
 
-    private Class<? extends T> targetClass;
-    private Class<? extends T> defaultTargetClass;
-
-    public SimpleDatabaseServiceResolver(Class<? extends T> targetClass) {
-        this.targetClass = targetClass;
+    public SimpleDatabaseServiceResolver(Class<? extends T> serviceClass) {
+        this.serviceClass = serviceClass;
     }
 
-    public SimpleDatabaseServiceResolver(Class<? extends T> targetClass,
-                                         Class<? extends T> defaultTargetClass) {
-        this.targetClass = targetClass;
-        this.defaultTargetClass = defaultTargetClass;
-    }
-
-    public void register(String productName, Class<? extends T> objectClass) {
-        register(new SimpleDatabaseMatcher(productName), objectClass);
-    }
-
-    public void register(String productName, String productVersion, Class<? extends T> objectClass) {
-        register(new SimpleDatabaseMatcher(productName, productVersion), objectClass);
-    }
-
-    public void register(String productName, String productVersion, int majorVersion,
-                         Class<? extends T> objectClass) {
-        register(new SimpleDatabaseMatcher(productName, productVersion, majorVersion), objectClass);
-    }
-
-    public void register(String productName, String productVersion, int majorVersion, int minorVersion,
-                         Class<? extends T> objectClass) {
-        register(new SimpleDatabaseMatcher(productName, productVersion, majorVersion, minorVersion), objectClass);
-    }
-
-    public void register(DatabaseMatcher databaseMatcher, Class<? extends T> objectClass) {
-        databaseMatchers.put(databaseMatcher, objectClass);
+    public SimpleDatabaseServiceResolver(Class<? extends T> serviceClass,
+                                         Class<? extends T> defaultServiceClass) {
+        this.serviceClass = serviceClass;
+        this.defaultServiceClass = defaultServiceClass;
     }
 
     @Override
-    public T resolve(DatabaseMetaData metaData) throws SQLException {
-        String productName = metaData.getDatabaseProductName();
-        String productVersion = metaData.getDatabaseProductVersion();
-        int minorVersion = metaData.getDatabaseMinorVersion();
-        int majorVersion = metaData.getDatabaseMajorVersion();
+    public void register(DatabaseInfo databaseInfo, Class<? extends T> serviceClass) {
+        register(new SimpleDatabaseMatcher(databaseInfo), serviceClass);
+    }
+
+    @Override
+    public void register(DatabaseMatcher databaseMatcher, Class<? extends T> serviceClass) {
+        serviceClassMap.put(databaseMatcher, serviceClass);
+    }
+
+    @Override
+    public void register(String productName, String productVersion, Class<? extends T> serviceClass) {
+        register(new DatabaseInfo(productName, productVersion), serviceClass);
+    }
+
+    @Override
+    public void register(String productName, String productVersion, Integer majorVersion,
+                            Class<? extends T> serviceClass) {
+        register(new DatabaseInfo(productName, productVersion, majorVersion), serviceClass);
+    }
+
+    @Override
+    public void register(String productName, String productVersion, Integer majorVersion, Integer minorVersion,
+                            Class<? extends T> serviceClass) {
+        register(new DatabaseInfo(productName, productVersion, majorVersion, minorVersion), serviceClass);
+    }
+
+    @Override
+    public void register(String productName, Class<? extends T> serviceClass) {
+        register(new DatabaseInfo(productName), serviceClass);
+    }
+
+    @Override
+    public T resolve(DatabaseInfo databaseInfo) {
+        T service = serviceMap.get(databaseInfo);
+        if (service != null) {
+            return service;
+        }
         Class<? extends T> serviceClass = null;
-        for (Map.Entry<DatabaseMatcher, Class<? extends T>> databaseInfoMatcherEntry : databaseMatchers.entrySet()) {
+        for (Map.Entry<DatabaseMatcher, Class<? extends T>> databaseInfoMatcherEntry : serviceClassMap.entrySet()) {
             DatabaseMatcher databaseMatcher = databaseInfoMatcherEntry.getKey();
-            if (databaseMatcher.matches(productName, productVersion, minorVersion, majorVersion)) {
+            if (databaseMatcher.matches(databaseInfo)) {
                 serviceClass = databaseInfoMatcherEntry.getValue();
                 break;
             }
         }
         if (serviceClass != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug(format("Resolved %s to %s", targetClass.getName(), serviceClass.getName()));
+                logger.debug(format("Resolved %s to %s", this.serviceClass.getName(), serviceClass.getName()));
             }
-        } else if (defaultTargetClass != null) {
+        } else if (defaultServiceClass != null) {
             if (logger.isWarnEnabled()) {
-                logger.warn(format("Defaulted %s to %s", targetClass.getName(), defaultTargetClass.getName()));
+                logger.warn(format("Defaulted %s to %s", this.serviceClass.getName(), defaultServiceClass.getName()));
             }
-            serviceClass = defaultTargetClass;
+            serviceClass = defaultServiceClass;
         }
-        return serviceClass != null ? createObject(serviceClass, metaData) : null;
+        service = serviceClass != null ? createService(serviceClass, databaseInfo) : null;
+        if (service instanceof DatabaseServiceResolverAware) {
+            ((DatabaseServiceResolverAware) service).setDatabaseServiceResolver(this);
+        }
+        serviceMap.put(databaseInfo, service);
+        return service;
     }
 
-    protected T createObject(Class<? extends T> objectClass, DatabaseMetaData metaData) {
-        return ReflectionUtils.newInstance(objectClass);
+    @Override
+    public T resolve(DatabaseMetaData databaseMetaData) throws SQLException {
+        return resolve(new DatabaseInfo(databaseMetaData));
+    }
+
+    protected T createService(Class<? extends T> serviceClass, DatabaseInfo databaseInfo) {
+        return newInstance(serviceClass);
     }
 }

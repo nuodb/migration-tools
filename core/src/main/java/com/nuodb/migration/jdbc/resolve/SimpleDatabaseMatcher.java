@@ -27,83 +27,19 @@
  */
 package com.nuodb.migration.jdbc.resolve;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * @author Sergey Bushik
  */
 public class SimpleDatabaseMatcher implements DatabaseMatcher {
 
-    protected final String productName;
-    protected final String productVersion;
-    protected final Integer majorVersion;
-    protected final Integer minorVersion;
+    private DatabaseInfo databaseInfo;
 
-    public SimpleDatabaseMatcher(String productName) {
-        this(productName, null);
-    }
-
-    public SimpleDatabaseMatcher(String productName, String productVersion) {
-        this(productName, productVersion, null);
-    }
-
-    public SimpleDatabaseMatcher(String productName, String productVersion, Integer majorVersion) {
-        this(productName, productVersion, majorVersion, null);
-    }
-
-    public SimpleDatabaseMatcher(String productName, String productVersion, Integer majorVersion,
-                                 Integer minorVersion) {
-        this.productName = productName;
-        this.productVersion = productVersion;
-        this.majorVersion = majorVersion;
-        this.minorVersion = minorVersion;
+    public SimpleDatabaseMatcher(DatabaseInfo databaseInfo) {
+        this.databaseInfo = databaseInfo;
     }
 
     @Override
-    public boolean matches(String productName, String productVersion, int majorVersion, int minorVersion) {
-        if (matchesProductName(productName)) {
-            return false;
-        }
-        if (matchesProductVersion(productVersion)) {
-            return false;
-        }
-        if (matchesMajorVersion(majorVersion)) {
-            return false;
-        }
-        if (matchesMinorVersion(minorVersion)) {
-            return false;
-        }
-        return true;
-    }
-
-    protected boolean matchesProductName(String productName) {
-        return !StringUtils.startsWithIgnoreCase(this.productName, productName);
-    }
-
-    protected boolean matchesProductVersion(String productVersion) {
-        if (this.productVersion != null) {
-            if (!StringUtils.equals(this.productVersion, productVersion)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected boolean matchesMajorVersion(int majorVersion) {
-        if (this.majorVersion != null) {
-            if (!this.majorVersion.equals(majorVersion)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected boolean matchesMinorVersion(int minorVersion) {
-        if (this.minorVersion != null) {
-            if (!this.minorVersion.equals(minorVersion)) {
-                return true;
-            }
-        }
-        return false;
+    public boolean matches(DatabaseInfo databaseInfo) {
+        return this.databaseInfo.matches(databaseInfo);
     }
 }

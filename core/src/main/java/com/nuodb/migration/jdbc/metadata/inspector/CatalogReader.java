@@ -45,8 +45,8 @@ public class CatalogReader extends MetaDataReaderBase {
         super(MetaDataType.CATALOG);
     }
 
-    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
-        ResultSet catalogs = metaData.getCatalogs();
+    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData databaseMetaData) throws SQLException {
+        ResultSet catalogs = databaseMetaData.getCatalogs();
         try {
             while (catalogs.next()) {
                 database.createCatalog(catalogs.getString("TABLE_CAT"));

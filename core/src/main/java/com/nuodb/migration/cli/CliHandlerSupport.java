@@ -52,9 +52,9 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
 
     protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public static final String MIGRATION_EXECUTABLE = "nuodb-migration";
-    public static final String MIGRATION_EXECUTABLE_COMMAND = "nuodb-migration %1$s";
+    public static final String EXECUTABLE = "bin/nuodb-migration";
 
+    private String executable = EXECUTABLE;
     private OptionToolkit optionToolkit;
     private CliRunFactoryLookup cliRunFactoryLookup;
     private Parser parser = new ParserImpl();
@@ -100,9 +100,8 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
                                 withMaximum(1).build()
                 ).build();
 
-        Option command = new CliCommand(
-                COMMAND_OPTION_ID, COMMAND_OPTION, getMessage(COMMAND_OPTION_DESCRIPTION), false,
-                cliRunFactoryLookup);
+        Option command = new CliCommand(COMMAND_OPTION_ID, COMMAND_OPTION, getMessage(COMMAND_OPTION_DESCRIPTION),
+                false, cliRunFactoryLookup);
         return optionToolkit.newGroup().
                 withName(getMessage(ROOT_GROUP_NAME)).
                 withOption(help).
@@ -139,13 +138,13 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
             CliRunFactory cliRunFactory = cliRunFactoryLookup.lookup(command);
             if (cliRunFactory != null) {
                 formatter.setOption(cliRunFactory.createCliRun());
-                formatter.setExecutable(format(MIGRATION_EXECUTABLE_COMMAND, command));
+                formatter.setExecutable(getExecutable() + " " + command);
             } else {
                 throw new OptionException(options.getOption(HELP_OPTION), format("Unknown command %s", command));
             }
         } else {
             formatter.setOption(root);
-            formatter.setExecutable(MIGRATION_EXECUTABLE);
+            formatter.setExecutable(getExecutable());
         }
         formatter.format(System.out);
     }
@@ -192,11 +191,19 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
         String executable;
         if (option instanceof CliRun) {
             String command = ((CliRun) option).getCommand();
-            executable = format(MIGRATION_EXECUTABLE_COMMAND, command);
+            executable = format(getExecutable() + " " + command);
         } else {
-            executable = MIGRATION_EXECUTABLE;
+            executable = getExecutable();
         }
         formatter.setExecutable(executable);
         formatter.format(System.out);
+    }
+
+    public String getExecutable() {
+        return executable;
+    }
+
+    public void setExecutable(String executable) {
+        this.executable = executable;
     }
 }

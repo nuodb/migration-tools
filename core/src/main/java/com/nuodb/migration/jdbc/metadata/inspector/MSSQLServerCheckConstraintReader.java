@@ -61,8 +61,8 @@ public class MSSQLServerCheckConstraintReader extends MetaDataReaderBase {
 
     @Override
     public void read(final DatabaseInspector inspector, final Database database,
-                     DatabaseMetaData metaData) throws SQLException {
-        StatementTemplate template = new StatementTemplate(metaData.getConnection());
+                     DatabaseMetaData databaseMetaData) throws SQLException {
+        StatementTemplate template = new StatementTemplate(databaseMetaData.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override

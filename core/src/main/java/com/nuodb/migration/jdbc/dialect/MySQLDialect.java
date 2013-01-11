@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -39,9 +41,11 @@ import static java.lang.String.valueOf;
 /**
  * @author Sergey Bushik
  */
-public class MySQLDialect extends StandardDialect {
+public class MySQLDialect extends SimpleDialect {
 
-    public MySQLDialect() {
+    public MySQLDialect(DatabaseInfo databaseInfo) {
+        super(databaseInfo);
+
         addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
 
         addJdbcTypeDescAlias(Types.LONGVARCHAR, "TINYTEXT", Types.CLOB);

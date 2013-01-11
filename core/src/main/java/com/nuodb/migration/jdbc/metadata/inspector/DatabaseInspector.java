@@ -111,27 +111,27 @@ public class DatabaseInspector {
     }
 
     protected void readInfo(Database database) throws SQLException {
-        DatabaseMetaData metaData = getConnection().getMetaData();
+        DatabaseMetaData databaseMetaData = getConnection().getMetaData();
         DriverInfo driverInfo = new DriverInfo();
-        driverInfo.setName(metaData.getDriverName());
-        driverInfo.setVersion(metaData.getDriverVersion());
-        driverInfo.setMinorVersion(metaData.getDriverMinorVersion());
-        driverInfo.setMajorVersion(metaData.getDriverMajorVersion());
+        driverInfo.setName(databaseMetaData.getDriverName());
+        driverInfo.setVersion(databaseMetaData.getDriverVersion());
+        driverInfo.setMinorVersion(databaseMetaData.getDriverMinorVersion());
+        driverInfo.setMajorVersion(databaseMetaData.getDriverMajorVersion());
         if (logger.isDebugEnabled()) {
             logger.debug(format("DriverInfo: %s", driverInfo));
         }
         database.setDriverInfo(driverInfo);
 
         DatabaseInfo databaseInfo = new DatabaseInfo();
-        databaseInfo.setProductName(metaData.getDatabaseProductName());
-        databaseInfo.setProductVersion(metaData.getDatabaseProductVersion());
-        databaseInfo.setMinorVersion(metaData.getDatabaseMinorVersion());
-        databaseInfo.setMajorVersion(metaData.getDatabaseMajorVersion());
+        databaseInfo.setProductName(databaseMetaData.getDatabaseProductName());
+        databaseInfo.setProductVersion(databaseMetaData.getDatabaseProductVersion());
+        databaseInfo.setMinorVersion(databaseMetaData.getDatabaseMinorVersion());
+        databaseInfo.setMajorVersion(databaseMetaData.getDatabaseMajorVersion());
         if (logger.isDebugEnabled()) {
             logger.debug(format("DatabaseInfo: %s", databaseInfo));
         }
         database.setDatabaseInfo(databaseInfo);
-        database.setDialect(getDialectResolver().resolve(metaData));
+        database.setDialect(getDialectResolver().resolve(databaseMetaData));
     }
 
     protected void readMetaData(Database database) throws SQLException {

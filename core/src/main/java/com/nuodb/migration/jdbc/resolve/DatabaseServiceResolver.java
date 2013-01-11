@@ -39,11 +39,15 @@ public interface DatabaseServiceResolver<T> {
 
     void register(String productName, String productVersion, Class<? extends T> serviceClass);
 
-    void register(String productName, String productVersion, int majorVersion, Class<? extends T> serviceClass);
+    void register(String productName, String productVersion, Integer majorVersion, Class<? extends T> serviceClass);
 
-    void register(String productName, String productVersion, int majorVersion, int minorVersion, Class<? extends T> serviceClass);
+    void register(String productName, String productVersion, Integer majorVersion, Integer minorVersion, Class<? extends T> serviceClass);
+
+    void register(DatabaseInfo databaseInfo, Class<? extends T> serviceClass);
 
     void register(DatabaseMatcher databaseMatcher, Class<? extends T> serviceClass);
 
-    T resolve(DatabaseMetaData metaData) throws SQLException;
+    T resolve(DatabaseInfo databaseInfo);
+
+    T resolve(DatabaseMetaData databaseMetaData) throws SQLException;
 }

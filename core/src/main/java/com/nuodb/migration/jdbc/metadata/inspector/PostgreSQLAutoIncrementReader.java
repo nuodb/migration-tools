@@ -48,7 +48,7 @@ public class PostgreSQLAutoIncrementReader extends MetaDataReaderBase {
     }
 
     @Override
-    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
+    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData databaseMetaData) throws SQLException {
         Dialect dialect = database.getDialect();
         for (Table table : database.listTables()) {
             for (final Column column : table.getColumns()) {
@@ -64,7 +64,7 @@ public class PostgreSQLAutoIncrementReader extends MetaDataReaderBase {
                 final String query = format("SELECT * FROM %s.%s",
                         dialect.getIdentifier(table.getSchema().getName()),
                         dialect.getIdentifier(sequence));
-                StatementTemplate template = new StatementTemplate(metaData.getConnection());
+                StatementTemplate template = new StatementTemplate(databaseMetaData.getConnection());
                 template.execute(
                         new StatementCreator<PreparedStatement>() {
                             @Override

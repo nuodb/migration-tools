@@ -32,5 +32,5 @@ package com.nuodb.migration.jdbc.dialect;
  */
 public interface IdentifierNormalizer {
 
-    String normalize(Dialect dialect, String identifier, boolean requiresQuoting);
+    String normalize(Dialect dialect, String identifier, boolean quoting);
 }

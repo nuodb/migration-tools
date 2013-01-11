@@ -96,7 +96,7 @@ public class ReflectionUtils {
         } catch (IllegalAccessException exception) {
             throw new ReflectionException(exception);
         } catch (InvocationTargetException exception) {
-            throw new ReflectionException(exception);
+            throw new ReflectionException(exception.getTargetException());
         } catch (InstantiationException exception) {
             throw new ReflectionException(exception);
         }
@@ -112,7 +112,7 @@ public class ReflectionUtils {
         } catch (IllegalAccessException exception) {
             throw new ReflectionException(exception);
         } catch (InvocationTargetException exception) {
-            throw new ReflectionException(exception);
+            throw new ReflectionException(exception.getTargetException());
         }
     }
 }

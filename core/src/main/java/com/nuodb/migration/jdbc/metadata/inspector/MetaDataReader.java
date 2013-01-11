@@ -40,5 +40,5 @@ public interface MetaDataReader {
 
     MetaDataType getMetaDataType();
 
-    void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException;
+    void read(DatabaseInspector inspector, Database database, DatabaseMetaData databaseMetaData) throws SQLException;
 }

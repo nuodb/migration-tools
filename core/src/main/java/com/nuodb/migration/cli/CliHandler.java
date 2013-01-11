@@ -48,12 +48,19 @@ public class CliHandler extends CliHandlerSupport implements Bootable {
     @Override
     public void boot(Config config, String[] arguments) throws Exception {
         try {
+            boot(config);
+
             Option root = createOption();
-            OptionSet options = getParser().parse(arguments, root);
-            handleOptionSet(options, root);
+            OptionSet optionSet = getParser().parse(arguments, root);
+            handleOptionSet(optionSet, root);
         } catch (OptionException exception) {
             handleOptionException(exception);
             System.exit(CLI_ERROR);
         }
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    protected void boot(Config config) {
+        setExecutable(config.getProperty(Config.EXECUTABLE, CliHandlerSupport.EXECUTABLE));
     }
 }

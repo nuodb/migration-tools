@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -37,7 +39,11 @@ import static com.nuodb.migration.jdbc.JdbcUtils.close;
 /**
  * @author Sergey Bushik
  */
-public class PostgreSQLDialect extends StandardDialect {
+public class PostgreSQLDialect extends SimpleDialect {
+
+    public PostgreSQLDialect(DatabaseInfo databaseInfo) {
+        super(databaseInfo);
+    }
 
     /**
      * The standard says that unquoted identifiers should be normalized to upper case but PostgreSQL normalizes to lower
@@ -47,7 +53,7 @@ public class PostgreSQLDialect extends StandardDialect {
      * @return boolean indicating whether quoting is required.
      */
     @Override
-    protected boolean isRequiresQuoting(String identifier) {
+    protected boolean isQuotingIdentifier(String identifier) {
         boolean quote = false;
         for (int i = 0, length = identifier.length(); i < length; i++) {
             if (Character.isUpperCase(identifier.charAt(i))) {
@@ -55,7 +61,7 @@ public class PostgreSQLDialect extends StandardDialect {
                 break;
             }
         }
-        return quote || super.isRequiresQuoting(identifier);
+        return quote || super.isQuotingIdentifier(identifier);
     }
 
     @Override

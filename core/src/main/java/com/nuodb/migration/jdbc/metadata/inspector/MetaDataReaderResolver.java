@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.metadata.inspector;
 
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
+import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migration.jdbc.resolve.DatabaseMatcher;
 import com.nuodb.migration.jdbc.resolve.DatabaseServiceResolver;
 import com.nuodb.migration.jdbc.resolve.SimpleDatabaseServiceResolver;
@@ -40,9 +41,9 @@ import java.sql.SQLException;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class MetaDataReaderResolver extends MetaDataReaderBase implements DatabaseServiceResolver<MetaDataReader> {
+public class MetaDataReaderResolver extends MetaDataReaderBase {
 
-    private DatabaseServiceResolver<MetaDataReader> databaseServiceResolver;
+    private DatabaseServiceResolver<MetaDataReader> metaDataReaderResolver;
 
     public MetaDataReaderResolver(MetaDataType metaDataType) {
         this(metaDataType, MetaDataReader.class);
@@ -54,44 +55,51 @@ public class MetaDataReaderResolver extends MetaDataReaderBase implements Databa
     }
 
     public MetaDataReaderResolver(MetaDataType metaDataType,
-                                  DatabaseServiceResolver<MetaDataReader> databaseServiceResolver) {
+                                  DatabaseServiceResolver<MetaDataReader> metaDataReaderResolver) {
         super(metaDataType);
-        this.databaseServiceResolver = databaseServiceResolver;
+        this.metaDataReaderResolver = metaDataReaderResolver;
     }
 
     @Override
-    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
-        MetaDataReader metaDataReader = databaseServiceResolver.resolve(metaData);
+    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData databaseMetaData) throws SQLException {
+        MetaDataReader metaDataReader = metaDataReaderResolver.resolve(databaseMetaData);
         if (metaDataReader != null) {
-            metaDataReader.read(inspector, database, metaData);
+            metaDataReader.read(inspector, database, databaseMetaData);
         }
     }
 
-    public void register(String productName, Class<? extends MetaDataReader> readerClass) {
-        databaseServiceResolver.register(productName, readerClass);
+    public void register(String productName,
+                         Class<? extends MetaDataReader> serviceClass) {
+        metaDataReaderResolver.register(productName, serviceClass);
+    }
+
+    public void register(DatabaseInfo databaseInfo,
+                         Class<? extends MetaDataReader> serviceClass) {
+        metaDataReaderResolver.register(databaseInfo, serviceClass);
+    }
+
+    public MetaDataReader resolve(DatabaseInfo databaseInfo) {
+        return metaDataReaderResolver.resolve(databaseInfo);
     }
 
     public void register(String productName, String productVersion,
-                         Class<? extends MetaDataReader> readerClass) {
-        databaseServiceResolver.register(productName, productVersion, readerClass);
+                         Class<? extends MetaDataReader> serviceClass) {
+        metaDataReaderResolver.register(productName, productVersion, serviceClass);
     }
 
-    public void register(String productName, String productVersion, int majorVersion,
-                         Class<? extends MetaDataReader> readerClass) {
-        databaseServiceResolver.register(productName, productVersion, majorVersion, readerClass);
+    public void register(String productName, String productVersion, Integer majorVersion,
+                         Class<? extends MetaDataReader> serviceClass) {
+        metaDataReaderResolver.register(productName, productVersion, majorVersion, serviceClass);
     }
 
-    public void register(String productName, String productVersion, int majorVersion, int minorVersion,
-                         Class<? extends MetaDataReader> readerClass) {
-        databaseServiceResolver.register(productName, productVersion, majorVersion, minorVersion, readerClass);
+    public void register(DatabaseMatcher databaseMatcher,
+                         Class<? extends MetaDataReader> serviceClass) {
+        metaDataReaderResolver.register(databaseMatcher, serviceClass);
     }
 
-    public void register(DatabaseMatcher databaseMatcher, Class<? extends MetaDataReader> readerClass) {
-        databaseServiceResolver.register(databaseMatcher, readerClass);
-    }
-
-    @Override
-    public MetaDataReader resolve(DatabaseMetaData metaData) throws SQLException {
-        return databaseServiceResolver.resolve(metaData);
+    public void register(String productName, String productVersion, Integer majorVersion,
+                         Integer minorVersion,
+                         Class<? extends MetaDataReader> serviceClass) {
+        metaDataReaderResolver.register(productName, productVersion, majorVersion, minorVersion, serviceClass);
     }
 }

@@ -64,7 +64,7 @@ public class ScriptGeneratorContext {
         addScriptGenerator(new IndexGenerator());
         addScriptGenerator(new ForeignKeyGenerator());
 
-        // TODO: CDMT-41 fixed addNamingStrategy(new IndexNamingStrategy()); removed
+        addNamingStrategy(new IndexNamingStrategy());
         addNamingStrategy(new SequenceNamingStrategy());
         addNamingStrategy(new ForeignKeyNamingStrategy());
         addNamingStrategy(new HasIdentifierNamingStrategy());

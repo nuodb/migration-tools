@@ -25,43 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata.generator;
-
-import com.nuodb.migration.jdbc.metadata.Column;
-import com.nuodb.migration.jdbc.metadata.Sequence;
+package com.nuodb.migration.jdbc.resolve;
 
 /**
  * @author Sergey Bushik
  */
-public class SequenceNamingStrategy extends NamingStrategyBase<Sequence> {
+public interface DatabaseServiceResolverAware<T> {
 
-    public SequenceNamingStrategy() {
-        super(Sequence.class);
-    }
+    DatabaseServiceResolver<T> getDatabaseServiceResolver();
 
-    @Override
-    public String getName(Sequence sequence, ScriptGeneratorContext context, boolean identifier) {
-        return getSequenceName(sequence, context, identifier);
-    }
-
-    @Override
-    public String getQualifiedName(Sequence sequence, ScriptGeneratorContext context,
-                                   boolean identifier) {
-        return getSequenceName(sequence, context, identifier);
-    }
-
-    protected String getSequenceName(Sequence sequence, ScriptGeneratorContext context, boolean identifier) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("SEQ");
-        buffer.append('_');
-
-        StringBuilder qualifier = new StringBuilder();
-        Column column = sequence.getColumn();
-        qualifier.append(context.getName(column.getTable(), false));
-        qualifier.append(context.getName(column, false));
-        buffer.append(md5Hex(qualifier.toString()));
-
-        return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
-    }
-
+    void setDatabaseServiceResolver(DatabaseServiceResolver<T> databaseServiceResolver);
 }

@@ -36,6 +36,8 @@ public interface Config {
 
     final String HOME = "nuodb.migration.home";
 
+    final String EXECUTABLE = "com.nuodb.migration.executable";
+
     final String LOADER = "com.nuodb.migration.bootstrap.loader";
 
     final String BOOTABLE = "com.nuodb.migration.bootstrap.bootable";

@@ -48,8 +48,8 @@ public class TableReader extends MetaDataReaderBase {
     }
 
     @Override
-    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
-        ResultSet tables = metaData.getTables(inspector.getCatalog(), inspector.getSchema(), inspector.getTable(),
+    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData databaseMetaData) throws SQLException {
+        ResultSet tables = databaseMetaData.getTables(inspector.getCatalog(), inspector.getSchema(), inspector.getTable(),
                 inspector.getTableTypes());
         try {
             while (tables.next()) {

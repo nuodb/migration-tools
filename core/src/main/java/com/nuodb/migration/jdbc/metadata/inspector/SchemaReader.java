@@ -50,9 +50,9 @@ public class SchemaReader extends MetaDataReaderBase {
     }
 
     @Override
-    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData metaData) throws SQLException {
+    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData databaseMetaData) throws SQLException {
         ResultSet schemas = inspector.getCatalog() != null ?
-                metaData.getSchemas(inspector.getCatalog(), null) : metaData.getSchemas();
+                databaseMetaData.getSchemas(inspector.getCatalog(), null) : databaseMetaData.getSchemas();
         ValueModelList<ValueModel> columns = createValueModelList(schemas);
         try {
             while (schemas.next()) {

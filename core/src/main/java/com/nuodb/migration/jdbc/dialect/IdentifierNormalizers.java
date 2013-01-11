@@ -37,7 +37,7 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer lowerCase() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalize(Dialect dialect, String identifier, boolean requiresQuoting) {
+            public String normalize(Dialect dialect, String identifier, boolean quoting) {
                 return StringUtils.lowerCase(identifier);
             }
         };
@@ -46,7 +46,7 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer upperCase() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalize(Dialect dialect, String identifier, boolean requiresQuoting) {
+            public String normalize(Dialect dialect, String identifier, boolean quoting) {
                 return StringUtils.upperCase(identifier);
             }
         };
@@ -55,8 +55,8 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer standard() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalize(Dialect dialect, String identifier, boolean requiresQuoting) {
-                return ((StandardDialect) dialect).normalize(identifier, requiresQuoting);
+            public String normalize(Dialect dialect, String identifier, boolean quoting) {
+                return ((SimpleDialect) dialect).normalize(identifier, quoting);
             }
         };
     }
@@ -64,7 +64,7 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer noop() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalize(Dialect dialect, String identifier, boolean requiresQuoting) {
+            public String normalize(Dialect dialect, String identifier, boolean quoting) {
                 return identifier;
             }
         };

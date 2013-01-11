@@ -113,8 +113,6 @@ public interface Dialect {
 
     String getIdentifier(String identifier);
 
-    String getIdentifier(String identifier, IdentifierNormalizer normalizeIdentifier);
-
     void setStreamResults(Statement statement, boolean streamResults) throws SQLException;
 
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
@@ -127,7 +125,7 @@ public interface Dialect {
 
     JdbcTypeRegistry getJdbcTypeRegistry();
 
-    void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer);
-
     IdentifierNormalizer getIdentifierNormalizer();
+
+    void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer);
 }
