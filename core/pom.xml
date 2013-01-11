@@ -18,10 +18,6 @@
             <id>apache.org snapshots</id>
             <url>https://repository.apache.org/content/groups/snapshots</url>
         </repository>
-        <repository>
-            <id>typecode.lds.org</id>
-            <url>https://typecode.lds.org/nexus/content/groups/main-repo</url>
-        </repository>
     </repositories>
 
     <dependencies>
