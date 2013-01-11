@@ -38,8 +38,8 @@
                     </descriptors>
                     <appendAssemblyId>false</appendAssemblyId>
                     <finalName>nuodb-migration</finalName>
-                    <outputDirectory>targetDialect</outputDirectory>
-                    <workDirectory>targetDialect/assembly/work</workDirectory>
+                    <outputDirectory>target</outputDirectory>
+                    <workDirectory>target/assembly/work</workDirectory>
                 </configuration>
                 <executions>
                     <execution>
