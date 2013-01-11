@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -45,6 +46,8 @@ import static java.util.Collections.unmodifiableSet;
  * @author Sergey Bushik
  */
 public class SQLKeywords implements Set<String> {
+
+    public static final SQLKeywords NONE_KEYWORDS = new SQLKeywords(Collections.EMPTY_SET, false);
 
     public static final SQLKeywords SQL_92_KEYWORDS = new SQLKeywords("sql92.keywords");
 
@@ -77,6 +80,13 @@ public class SQLKeywords implements Set<String> {
 
     private SQLKeywords(String resource) {
         this(load(resource), false);
+    }
+
+    public SQLKeywords() {
+    }
+
+    public SQLKeywords(Collection<String> keywords) {
+        this(keywords, true);
     }
 
     public SQLKeywords(Collection<String> keywords, boolean modifiable) {

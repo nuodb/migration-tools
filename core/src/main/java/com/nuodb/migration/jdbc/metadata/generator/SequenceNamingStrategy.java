@@ -61,7 +61,7 @@ public class SequenceNamingStrategy extends NamingStrategyBase<Sequence> {
         qualifier.append(context.getName(column, false));
         buffer.append(md5Hex(qualifier.toString()));
 
-        return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
+        return identifier ? context.getDialect().getIdentifier(buffer.toString(), sequence) : buffer.toString();
     }
 
 }

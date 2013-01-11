@@ -27,7 +27,9 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.metadata.HasIdentifier;
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
+import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Types;
@@ -101,8 +103,17 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
-    protected boolean isAllowedIdentifier(String identifier) {
+    protected boolean isAllowedIdentifier(String identifier, HasIdentifier hasIdentifier) {
         return ALLOWED_IDENTIFIER_PATTERN.matcher(identifier).matches();
+    }
+
+    @Override
+    protected boolean isSQLKeyword(String identifier, HasIdentifier hasIdentifier) {
+        if (hasIdentifier != null && hasIdentifier instanceof Table) {
+            return false;
+        } else {
+            return getSQLKeywords().contains(identifier);
+        }
     }
 
     @Override
@@ -115,11 +126,6 @@ public class NuoDBDialect extends SimpleDialect {
     @Override
     public boolean supportsSequence() {
         return true;
-    }
-
-    @Override
-    protected String normalize(String identifier, boolean requiresQuoting) {
-        return requiresQuoting ? identifier : identifier.toUpperCase();
     }
 
     @Override

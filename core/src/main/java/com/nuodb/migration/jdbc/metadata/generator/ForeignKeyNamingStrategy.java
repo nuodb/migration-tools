@@ -59,6 +59,6 @@ public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
         qualifier.append(context.getName(foreignKey.getTargetTable(), false));
         buffer.append(buffer.append(md5Hex(qualifier.toString())));
 
-        return identifier ? context.getDialect().getIdentifier(buffer.toString()) : buffer.toString();
+        return identifier ? context.getDialect().getIdentifier(buffer.toString(), foreignKey) : buffer.toString();
     }
 }

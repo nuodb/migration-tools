@@ -31,8 +31,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.nuodb.migration.jdbc.dialect.Dialect;
-import com.nuodb.migration.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migration.jdbc.metadata.*;
+import com.nuodb.migration.jdbc.type.JdbcTypeNameMap;
 
 import java.util.Collection;
 import java.util.Iterator;

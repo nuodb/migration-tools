@@ -148,7 +148,7 @@ public class Table extends HasIdentifierBase {
                 column = new Column(this, identifier);
                 columns.put(identifier, column);
             } else {
-                throw new MetaDataException(format("Table %s doesn't contain %s column", getName(), identifier));
+                throw new MetaDataException(format("Table %s doesn't have %s column", getName(), identifier));
             }
         }
         return column;

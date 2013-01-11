@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.metadata.HasIdentifier;
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migration.jdbc.resolve.DatabaseServiceResolver;
@@ -45,7 +46,6 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migration.jdbc.dialect.IdentifierNormalizers.standard;
 import static java.lang.String.valueOf;
 import static java.sql.Connection.*;
 
@@ -61,7 +61,8 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     private ScriptTranslationManager scriptTranslationManager = new ScriptTranslationManager();
     private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
     private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
-    private IdentifierNormalizer identifierNormalizer = standard();
+    private IdentifierNormalizer identifierNormalizer = IdentifierNormalizers.noop();
+    private IdentifierQuotingPolicy identifierQuotingPolicy = IdentifierQuotingPolicies.standard();
     private DatabaseInfo databaseInfo;
 
     public SimpleDialect(DatabaseInfo databaseInfo) {
@@ -98,25 +99,24 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     @Override
-    public String getIdentifier(String identifier) {
+    public String getIdentifier(String identifier, HasIdentifier hasIdentifier) {
         if (identifier == null) {
             return null;
         }
-        boolean quoting = isQuotingIdentifier(identifier);
-        identifier = getIdentifierNormalizer() != null ?
-                getIdentifierNormalizer().normalize(this, identifier, quoting) : identifier;
+        identifier = getIdentifierNormalizer().normalizeIdentifier(identifier, hasIdentifier, this);
+        boolean quoting = getIdentifierQuotingPolicy().isQuotingIdentifier(identifier, hasIdentifier, this);
         return quoting ? quote(identifier) : identifier;
     }
 
-    protected boolean isQuotingIdentifier(String identifier) {
-        return !isAllowedIdentifier(identifier) || isSQLKeyword(identifier);
+    protected boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier) {
+        return !isAllowedIdentifier(identifier, hasIdentifier) || isSQLKeyword(identifier, hasIdentifier);
     }
 
-    protected boolean isAllowedIdentifier(String identifier) {
+    protected boolean isAllowedIdentifier(String identifier, HasIdentifier hasIdentifier) {
         return ALLOWED_IDENTIFIER_PATTERN.matcher(identifier).matches();
     }
 
-    protected boolean isSQLKeyword(String identifier) {
+    protected boolean isSQLKeyword(String identifier, HasIdentifier hasIdentifier) {
         return getSQLKeywords().contains(identifier);
     }
 
@@ -124,7 +124,7 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
         return openQuote() + identifier + closeQuote();
     }
 
-    protected String normalize(String identifier, boolean requiresQuoting) {
+    protected String normalizeIdentifier(String identifier) {
         return identifier;
     }
 
@@ -230,6 +230,16 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     @Override
     public void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer) {
         this.identifierNormalizer = identifierNormalizer;
+    }
+
+    @Override
+    public IdentifierQuotingPolicy getIdentifierQuotingPolicy() {
+        return identifierQuotingPolicy;
+    }
+
+    @Override
+    public void setIdentifierQuotingPolicy(IdentifierQuotingPolicy identifierQuotingPolicy) {
+        this.identifierQuotingPolicy = identifierQuotingPolicy;
     }
 
     @Override
@@ -343,7 +353,7 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
                     identifier = identifier == null ? next : identifier + next;
                 }
                 if (identifier != null) {
-                    token = getIdentifier(identifier);
+                    token = getIdentifier(identifier, null);
                 }
             }
             result.append(token);

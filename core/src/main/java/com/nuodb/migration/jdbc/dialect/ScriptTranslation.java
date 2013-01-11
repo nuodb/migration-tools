@@ -124,9 +124,7 @@ public class ScriptTranslation {
 
     @Override
     public int hashCode() {
-        int result = sourceDialect != null ? sourceDialect.hashCode() : 0;
-        result = 31 * result + (targetDialect != null ? targetDialect.hashCode() : 0);
-        result = 31 * result + (sourceDatabaseInfo != null ? sourceDatabaseInfo.hashCode() : 0);
+        int result = sourceDatabaseInfo != null ? sourceDatabaseInfo.hashCode() : 0;
         result = 31 * result + (targetDatabaseInfo != null ? targetDatabaseInfo.hashCode() : 0);
         result = 31 * result + (sourceScript != null ? sourceScript.hashCode() : 0);
         result = 31 * result + (targetScript != null ? targetScript.hashCode() : 0);

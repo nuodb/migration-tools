@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.metadata.HasIdentifier;
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migration.jdbc.type.JdbcTypeNameMap;
@@ -112,7 +113,7 @@ public interface Dialect {
 
     String getCheckClause(String checkClause);
 
-    String getIdentifier(String identifier);
+    String getIdentifier(String identifier, HasIdentifier hasIdentifier);
 
     SQLKeywords getSQLKeywords();
 
@@ -131,6 +132,10 @@ public interface Dialect {
     IdentifierNormalizer getIdentifierNormalizer();
 
     void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer);
+
+    IdentifierQuotingPolicy getIdentifierQuotingPolicy();
+
+    void setIdentifierQuotingPolicy(IdentifierQuotingPolicy identifierQuotingPolicy);
 
     ScriptTranslationManager getScriptTranslationManager();
 

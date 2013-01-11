@@ -81,35 +81,36 @@ public class HasIdentifierBase extends IndentedOutputBase implements HasIdentifi
 
     @Override
     public String getName(Dialect dialect) {
-        return dialect.getIdentifier(getName());
+        return dialect.getIdentifier(getName(), this);
     }
 
     @Override
     public String getQualifiedName(Dialect dialect) {
-        return isQualified() ? getQualifiedName(dialect, null, null, getName()) : getName(dialect);
+        return isQualified() ? getQualifiedName(dialect, null, null, this) : getName(dialect);
     }
 
     @Override
     public String getQualifiedName(String catalog, String schema) {
-        return isQualified() ? getQualifiedName(null, catalog, schema, getName()) : getName();
+        return isQualified() ? getQualifiedName(null, catalog, schema, this) : getName();
     }
 
     @Override
     public String getQualifiedName(Dialect dialect, String catalog, String schema) {
-        return isQualified() ? getQualifiedName(dialect, catalog, schema, getName()) : getName(dialect);
+        return isQualified() ? getQualifiedName(dialect, catalog, schema, this) : getName(dialect);
     }
 
-    private static String getQualifiedName(Dialect dialect, String catalog, String schema, String name) {
+    private static String getQualifiedName(Dialect dialect, String catalog, String schema, HasIdentifier hasIdentifier) {
         StringBuilder buffer = new StringBuilder();
         if (catalog != null) {
-            buffer.append(dialect != null ? dialect.getIdentifier(catalog) : catalog);
+            buffer.append(dialect != null ? dialect.getIdentifier(catalog, null) : catalog);
             buffer.append('.');
         }
         if (schema != null) {
-            buffer.append(dialect != null ? dialect.getIdentifier(schema) : schema);
+            buffer.append(dialect != null ? dialect.getIdentifier(schema, null) : schema);
             buffer.append('.');
         }
-        buffer.append(dialect != null ? dialect.getIdentifier(name) : name);
+        String name = hasIdentifier.getName();
+        buffer.append(dialect != null ? dialect.getIdentifier(name, hasIdentifier) : hasIdentifier.getName());
         return buffer.toString();
     }
 

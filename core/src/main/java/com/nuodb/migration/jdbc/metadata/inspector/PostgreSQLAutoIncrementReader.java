@@ -62,8 +62,8 @@ public class PostgreSQLAutoIncrementReader extends MetaDataReaderBase {
                 }
                 String sequence = split[1];
                 final String query = format("SELECT * FROM %s.%s",
-                        dialect.getIdentifier(table.getSchema().getName()),
-                        dialect.getIdentifier(sequence));
+                        dialect.getIdentifier(table.getSchema().getName(), null),
+                        dialect.getIdentifier(sequence, null));
                 StatementTemplate template = new StatementTemplate(databaseMetaData.getConnection());
                 template.execute(
                         new StatementCreator<PreparedStatement>() {

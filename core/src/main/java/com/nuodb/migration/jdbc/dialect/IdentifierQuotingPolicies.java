@@ -25,47 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata.generator;
+package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.Column;
-import com.nuodb.migration.jdbc.metadata.Index;
+import com.nuodb.migration.jdbc.metadata.HasIdentifier;
 
 /**
  * @author Sergey Bushik
  */
-public class IndexNamingStrategy extends NamingStrategyBase<Index> {
+public class IdentifierQuotingPolicies {
 
-    public IndexNamingStrategy() {
-        super(Index.class);
-    }
-
-    @Override
-    public String getName(Index index, ScriptGeneratorContext context, boolean identifier) {
-        return getIndexName(index, context, identifier);
-    }
-
-    @Override
-    public String getQualifiedName(Index index, ScriptGeneratorContext context, boolean identifier) {
-        return getIndexName(index, context, identifier);
-    }
-
-    protected String getIndexName(Index index, ScriptGeneratorContext context, boolean identifier) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("IDX");
-        buffer.append("_");
-
-        StringBuilder qualifier = new StringBuilder();
-        if (index.isUnique()) {
-            qualifier.append("UNIQUE");
-            qualifier.append("_");
-        }
-        qualifier.append(context.getName(index.getTable(), false));
-        for (Column column : index.getColumns()) {
-            qualifier.append("_");
-            qualifier.append(context.getName(column, false));
-        }
-        buffer.append(md5Hex(qualifier.toString()));
-
-        return identifier ? context.getDialect().getIdentifier(buffer.toString(), index) : buffer.toString();
+    public static IdentifierQuotingPolicy standard() {
+        return new IdentifierQuotingPolicy() {
+            @Override
+            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
+                return ((SimpleDialect) dialect).isQuotingIdentifier(identifier, hasIdentifier);
+            }
+        };
     }
 }

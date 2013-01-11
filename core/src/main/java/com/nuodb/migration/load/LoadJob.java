@@ -130,6 +130,7 @@ public class LoadJob extends JobBase {
             }
             connection.commit();
         } finally {
+            connection.rollback();
             if (dialect.supportsSessionTimeZone()) {
                 dialect.setSessionTimeZone(connection, null);
             }

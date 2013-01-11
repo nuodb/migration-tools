@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.nuodb.migration.jdbc.metadata.HasIdentifier;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -37,7 +38,7 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer lowerCase() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalize(Dialect dialect, String identifier, boolean quoting) {
+            public String normalizeIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
                 return StringUtils.lowerCase(identifier);
             }
         };
@@ -46,7 +47,7 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer upperCase() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalize(Dialect dialect, String identifier, boolean quoting) {
+            public String normalizeIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
                 return StringUtils.upperCase(identifier);
             }
         };
@@ -55,8 +56,8 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer standard() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalize(Dialect dialect, String identifier, boolean quoting) {
-                return ((SimpleDialect) dialect).normalize(identifier, quoting);
+            public String normalizeIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
+                return ((SimpleDialect) dialect).normalizeIdentifier(identifier);
             }
         };
     }
@@ -64,7 +65,7 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer noop() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalize(Dialect dialect, String identifier, boolean quoting) {
+            public String normalizeIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
                 return identifier;
             }
         };
