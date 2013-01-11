@@ -123,7 +123,7 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
 
     protected abstract void doReadBegin();
 
-    protected void setColumnValues(String[] values) {
+    protected void setValues(String[] values) {
         ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
         for (int index = 0; index < values.length; index++) {
             ValueFormatModel valueFormatModel = valueFormatModelList.get(index);

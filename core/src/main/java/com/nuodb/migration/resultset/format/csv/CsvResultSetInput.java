@@ -104,7 +104,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
             }
             values[column++] = value;
         }
-        setColumnValues(values);
+        setValues(values);
     }
 
     @Override

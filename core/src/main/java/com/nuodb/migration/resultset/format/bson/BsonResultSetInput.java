@@ -113,7 +113,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
 
     @Override
     public void readRow() {
-        setColumnValues(iterator.next());
+        setValues(iterator.next());
     }
 
     protected String[] doReadRow() {

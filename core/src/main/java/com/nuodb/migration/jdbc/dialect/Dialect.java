@@ -91,7 +91,7 @@ public interface Dialect {
 
     String getIdentityColumn(String sequence);
 
-    String getDefaultValue(int typeCode, String defaultValue, Dialect sourceDialect);
+    String getDefaultValue(int typeCode, String defaultValue, Dialect dialect);
 
     String getDeleteAction(ReferenceAction deleteAction);
 

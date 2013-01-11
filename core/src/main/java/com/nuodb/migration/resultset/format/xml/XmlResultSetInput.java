@@ -105,7 +105,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
 
     @Override
     public void readRow() {
-        setColumnValues(iterator.next());
+        setValues(iterator.next());
     }
 
     protected String[] doReadRow() {

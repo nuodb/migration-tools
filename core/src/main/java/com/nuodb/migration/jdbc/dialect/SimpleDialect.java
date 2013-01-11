@@ -136,13 +136,13 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
         return valueOf('"');
     }
 
-    protected void addScriptTranslation(DatabaseInfo databaseInfo, String sourceScript, String targetScript) {
-        getScriptTranslationManager().addScriptTranslation(
-                new ScriptTranslation(databaseInfo, this, sourceScript, targetScript));
+    protected String getScriptTranslation(String sourceScript, Dialect sourceDialect) {
+        return getScriptTranslationManager().getScriptTranslation(sourceDialect, this, sourceScript);
     }
 
-    protected String getScriptTranslation(Dialect dialect, String sourceScript) {
-        return getScriptTranslationManager().getScriptTranslation(dialect, this, sourceScript);
+    protected void addScriptTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript, String targetScript) {
+        getScriptTranslationManager().addScriptTranslation(
+                new ScriptTranslation(sourceDatabaseInfo, this, sourceScript, targetScript));
     }
 
     @Override
@@ -314,11 +314,11 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     @Override
-    public String getDefaultValue(int typeCode, String defaultValue, Dialect sourceDialect) {
+    public String getDefaultValue(int typeCode, String defaultValue, Dialect dialect) {
         if (defaultValue == null) {
             return null;
         }
-        defaultValue = getScriptTranslation(sourceDialect, defaultValue);
+        defaultValue = getScriptTranslation(defaultValue, dialect);
         defaultValue = getScriptQuoted(defaultValue);
         if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
             return "'" + defaultValue + "'";
