@@ -28,6 +28,7 @@
 package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
+import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migration.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 
@@ -89,7 +90,7 @@ public interface Dialect {
 
     String getIdentityColumn(String sequence);
 
-    String getDefaultValue(int typeCode, String defaultValue);
+    String getDefaultValue(int typeCode, String defaultValue, Dialect sourceDialect);
 
     String getDeleteAction(ReferenceAction deleteAction);
 
@@ -113,19 +114,25 @@ public interface Dialect {
 
     String getIdentifier(String identifier);
 
+    SQLKeywords getSQLKeywords();
+
+    DatabaseInfo getDatabaseInfo();
+
+    JdbcTypeNameMap getJdbcTypeNameMap();
+
+    JdbcTypeRegistry getJdbcTypeRegistry();
+
     void setStreamResults(Statement statement, boolean streamResults) throws SQLException;
 
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
 
     void setTransactionIsolationLevel(Connection connection, int[] transactionIsolationLevels) throws SQLException;
 
-    SQLKeywords getSQLKeywords();
-
-    JdbcTypeNameMap getJdbcTypeNameMap();
-
-    JdbcTypeRegistry getJdbcTypeRegistry();
-
     IdentifierNormalizer getIdentifierNormalizer();
 
     void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer);
+
+    ScriptTranslationManager getScriptTranslationManager();
+
+    void setScriptTranslationManager(ScriptTranslationManager scriptTranslationManager);
 }

@@ -61,7 +61,7 @@ public class SchemaJob extends JobBase {
     }
 
     protected void validate() {
-        isNotNull(getConnectionProvider(), "Source connection provider is required");
+        isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getScriptGeneratorContext(), "Script generator context is required");
         isNotNull(getScriptExporter(), "Script exporter is required");
     }

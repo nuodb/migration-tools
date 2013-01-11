@@ -69,7 +69,6 @@ public class NuoDBDialect extends SimpleDialect {
         addTypeName(Types.DOUBLE, "DOUBLE");
         addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
 
-        addTypeName(Types.CHAR, "CHAR", newSize(1));
         addTypeName(Types.CHAR, "CHAR({N})");
 
         addTypeName(Types.VARCHAR, "VARCHAR({N})");
@@ -90,7 +89,6 @@ public class NuoDBDialect extends SimpleDialect {
         addTypeName(Types.CLOB, "CLOB");
         addTypeName(Types.BOOLEAN, "BOOLEAN");
 
-        addTypeName(Types.NCHAR, "NCHAR", newSize(1));
         addTypeName(Types.NCHAR, "NCHAR({N})");
         addTypeName(Types.NVARCHAR, "NVARCHAR({N})");
         addTypeName(Types.NCLOB, "NCLOB");
@@ -99,8 +97,12 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcType(NuoDBBigIntType.INSTANCE);
         addJdbcType(NuoDBTimeType.INSTANCE);
 
-        setAllowedIdentifierPattern(ALLOWED_IDENTIFIER_PATTERN);
-        // addScriptTranslation(new DatabaseInfo("MySQL"), "CURRENT_TIMESTAMP", "NOW");
+        addScriptTranslation(new DatabaseInfo("MySQL"), "CURRENT_TIMESTAMP", "NOW");
+    }
+
+    @Override
+    protected boolean isAllowedIdentifier(String identifier) {
+        return ALLOWED_IDENTIFIER_PATTERN.matcher(identifier).matches();
     }
 
     @Override

@@ -27,9 +27,10 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
+import com.google.common.collect.Maps;
+
 import java.util.Map;
 
-import static com.google.common.collect.Maps.newTreeMap;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
@@ -37,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  */
 public class SimpleScriptTranslator implements ScriptTranslator {
 
-    private final Map<String, String> scriptTranslations = newTreeMap(String.CASE_INSENSITIVE_ORDER);
+    private final Map<String, String> scriptTranslations = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
 
     private final Dialect sourceDialect;
     private final Dialect targetDialect;

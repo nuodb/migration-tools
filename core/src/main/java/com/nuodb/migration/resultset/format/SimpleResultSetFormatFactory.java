@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.resultset.format;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migration.resultset.format.bson.BsonAttributes;
 import com.nuodb.migration.resultset.format.bson.BsonResultSetInput;
 import com.nuodb.migration.resultset.format.bson.BsonResultSetOutput;
@@ -42,8 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static com.google.common.collect.Maps.newTreeMap;
-
 /**
  * @author Sergey Bushik
  */
@@ -52,9 +51,10 @@ public class SimpleResultSetFormatFactory implements ResultSetFormatFactory {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Map<String, Class<? extends ResultSetInput>> inputClasses = newTreeMap(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, Class<? extends ResultSetInput>> inputClasses = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
 
-    private Map<String, Class<? extends ResultSetOutput>> outputClasses = newTreeMap(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, Class<? extends ResultSetOutput>> outputClasses = Maps.newTreeMap(
+            String.CASE_INSENSITIVE_ORDER);
 
     public SimpleResultSetFormatFactory() {
         registerFormat(CsvAttributes.FORMAT, CsvResultSetInput.class);
@@ -68,12 +68,12 @@ public class SimpleResultSetFormatFactory implements ResultSetFormatFactory {
 
     @Override
     public ResultSetInput createInput(String formatType) {
-        return createFormat(formatType, inputClasses.get(formatType));
+        return (ResultSetInput) createFormat(formatType, inputClasses.get(formatType));
     }
 
     @Override
     public ResultSetOutput createOutput(String formatType) {
-        return createFormat(formatType, outputClasses.get(formatType));
+        return (ResultSetOutput) createFormat(formatType, outputClasses.get(formatType));
     }
 
     @Override
@@ -86,14 +86,14 @@ public class SimpleResultSetFormatFactory implements ResultSetFormatFactory {
         }
     }
 
-    protected <T extends ResultSetFormat> T createFormat(String formatType, Class<T> formatClass) {
+    protected ResultSetFormat createFormat(String formatType, Class<? extends ResultSetFormat> formatClass) {
         if (formatClass == null) {
             if (logger.isTraceEnabled()) {
                 logger.trace(String.format("Can't resolve format type %1$s to a class", formatType));
             }
             ClassLoader classLoader = ReflectionUtils.getClassLoader();
             try {
-                formatClass = (Class<T>) classLoader.loadClass(formatType);
+                formatClass = (Class<? extends ResultSetFormat>) classLoader.loadClass(formatType);
             } catch (ClassNotFoundException e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn(String.format("Loading %1$s as class failed", formatType));

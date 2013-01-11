@@ -287,8 +287,8 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
                 Set<MetaDataType> metaDataTypes = newHashSet(MetaDataType.ALL_TYPES);
                 for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
                     MetaDataType metaDataType = new MetaDataType(replace(iterator.next(), ".", " "));
-                    String generate = iterator.next();
-                    if (generate == null || parseBoolean(generate)) {
+                    String booleanValue = iterator.next();
+                    if (booleanValue == null || parseBoolean(booleanValue)) {
                         metaDataTypes.add(metaDataType);
                     } else {
                         metaDataTypes.remove(metaDataType);

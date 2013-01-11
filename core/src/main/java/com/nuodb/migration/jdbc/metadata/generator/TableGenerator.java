@@ -59,6 +59,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
         Collection<Column> columns = table.getColumns();
         final Collection<Index> indexes = table.getIndexes();
         Collection<MetaDataType> metaDataTypes = context.getMetaDataTypes();
+        Dialect sourceDialect = table.getDatabase().getDialect();
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();
             buffer.append(context.getName(column));
@@ -76,7 +77,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(' ');
                 buffer.append("NOT NULL");
             }
-            String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue());
+            String defaultValue = dialect.getDefaultValue(column.getTypeCode(), column.getDefaultValue(), sourceDialect);
             if (defaultValue != null) {
                 buffer.append(" DEFAULT ").append(defaultValue);
             }

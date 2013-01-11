@@ -30,13 +30,13 @@ package com.nuodb.migration.jdbc.metadata.generator;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.Sets;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.*;
 
 import java.util.*;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
 
 /**
@@ -259,7 +259,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
 
     protected void initScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
         Map<String, Object> attributes = scriptGeneratorContext.getAttributes();
-        attributes.put(PROCESSED_TABLES, Sets.newLinkedHashSet());
+        attributes.put(PROCESSED_TABLES, newLinkedHashSet());
         attributes.put(PENDING_FOREIGN_KEYS,
                 Multimaps.<Table, ForeignKey>newSetMultimap(new HashMap<Table, Collection<ForeignKey>>(),
                         new Supplier<Set<ForeignKey>>() {

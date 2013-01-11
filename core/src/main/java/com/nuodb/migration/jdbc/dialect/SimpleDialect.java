@@ -29,6 +29,7 @@ package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migration.jdbc.resolve.DatabaseServiceResolver;
 import com.nuodb.migration.jdbc.resolve.SimpleDatabaseServiceResolverAware;
 import com.nuodb.migration.jdbc.type.*;
 import com.nuodb.migration.jdbc.type.jdbc4.Jdbc4TypeRegistry;
@@ -57,11 +58,10 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private ScriptTranslatorManager scriptTranslatorManager = new ScriptTranslatorManager();
+    private ScriptTranslationManager scriptTranslationManager = new ScriptTranslationManager();
     private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
     private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
     private IdentifierNormalizer identifierNormalizer = standard();
-    private Pattern allowedIdentifierPattern = ALLOWED_IDENTIFIER_PATTERN;
     private DatabaseInfo databaseInfo;
 
     public SimpleDialect(DatabaseInfo databaseInfo) {
@@ -113,7 +113,7 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     protected boolean isAllowedIdentifier(String identifier) {
-        return getAllowedIdentifierPattern().matcher(identifier).matches();
+        return ALLOWED_IDENTIFIER_PATTERN.matcher(identifier).matches();
     }
 
     protected boolean isSQLKeyword(String identifier) {
@@ -137,11 +137,12 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     protected void addScriptTranslation(DatabaseInfo databaseInfo, String sourceScript, String targetScript) {
-        scriptTranslatorManager.addScriptTranslation(this.databaseInfo, databaseInfo, sourceScript, targetScript);
+        getScriptTranslationManager().addScriptTranslation(
+                new ScriptTranslation(databaseInfo, this, sourceScript, targetScript));
     }
 
-    protected void addScriptTranslator(ScriptTranslator scriptTranslator) {
-        scriptTranslatorManager.addScriptTranslator(scriptTranslator);
+    protected String getScriptTranslation(Dialect dialect, String sourceScript) {
+        return getScriptTranslationManager().getScriptTranslation(dialect, this, sourceScript);
     }
 
     @Override
@@ -202,6 +203,11 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     @Override
+    public DatabaseInfo getDatabaseInfo() {
+        return databaseInfo;
+    }
+
+    @Override
     public SQLKeywords getSQLKeywords() {
         return SQLKeywords.SQL_2003_KEYWORDS;
     }
@@ -226,12 +232,20 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
         this.identifierNormalizer = identifierNormalizer;
     }
 
-    public Pattern getAllowedIdentifierPattern() {
-        return allowedIdentifierPattern;
+    @Override
+    public ScriptTranslationManager getScriptTranslationManager() {
+        return scriptTranslationManager;
     }
 
-    public void setAllowedIdentifierPattern(Pattern allowedIdentifierPattern) {
-        this.allowedIdentifierPattern = allowedIdentifierPattern;
+    @Override
+    public void setScriptTranslationManager(ScriptTranslationManager scriptTranslationManager) {
+        this.scriptTranslationManager = scriptTranslationManager;
+    }
+
+    @Override
+    public void setDatabaseServiceResolver(DatabaseServiceResolver<Dialect> databaseServiceResolver) {
+        super.setDatabaseServiceResolver(databaseServiceResolver);
+        scriptTranslationManager.setDatabaseServiceResolver(databaseServiceResolver);
     }
 
     @Override
@@ -281,7 +295,7 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
 
     @Override
     public String getCheckClause(String checkClause) {
-        checkClause = getScriptFragment(checkClause);
+        checkClause = getScriptQuoted(checkClause);
         if (!checkClause.startsWith("(") && !checkClause.endsWith(")")) {
             return "(" + checkClause + ")";
         } else {
@@ -290,23 +304,24 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     @Override
-    public String getDefaultValue(int typeCode, String defaultValue) {
-        String fragment = getScriptFragment(defaultValue);
-        if (fragment == null) {
+    public String getDefaultValue(int typeCode, String defaultValue, Dialect sourceDialect) {
+        if (defaultValue == null) {
             return null;
         }
-        if (!fragment.startsWith("'") && !fragment.endsWith("'")) {
-            return "'" + fragment + "'";
+        defaultValue = getScriptTranslation(sourceDialect, defaultValue);
+        defaultValue = getScriptQuoted(defaultValue);
+        if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+            return "'" + defaultValue + "'";
         } else {
-            return fragment;
+            return defaultValue;
         }
     }
 
-    protected String getScriptFragment(String fragment) {
-        if (fragment == null) {
+    protected String getScriptQuoted(String script) {
+        if (script == null) {
             return null;
         }
-        StringTokenizer tokens = new StringTokenizer(fragment, "+*/-=<>'`\"[](), \t\n\r\f", true);
+        StringTokenizer tokens = new StringTokenizer(script, "+*/-=<>'`\"[](), \t\n\r\f", true);
         StringBuilder result = new StringBuilder();
         while (tokens.hasMoreTokens()) {
             String token = tokens.nextToken();
@@ -458,8 +473,8 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
         if (jdbcTypeRegistry != null ? !jdbcTypeRegistry.equals(that.jdbcTypeRegistry) : that.jdbcTypeRegistry != null)
             return false;
         if (logger != null ? !logger.equals(that.logger) : that.logger != null) return false;
-        if (scriptTranslatorManager != null ? !scriptTranslatorManager.equals(
-                that.scriptTranslatorManager) : that.scriptTranslatorManager != null) return false;
+        if (scriptTranslationManager != null ? !scriptTranslationManager.equals(
+                that.scriptTranslationManager) : that.scriptTranslationManager != null) return false;
 
         return true;
     }
@@ -469,7 +484,7 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
         int result = jdbcTypeNameMap != null ? jdbcTypeNameMap.hashCode() : 0;
         result = 31 * result + (jdbcTypeRegistry != null ? jdbcTypeRegistry.hashCode() : 0);
         result = 31 * result + (identifierNormalizer != null ? identifierNormalizer.hashCode() : 0);
-        result = 31 * result + (scriptTranslatorManager != null ? scriptTranslatorManager.hashCode() : 0);
+        result = 31 * result + (scriptTranslationManager != null ? scriptTranslationManager.hashCode() : 0);
         return result;
     }
 }
