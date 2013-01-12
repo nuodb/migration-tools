@@ -62,7 +62,7 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
     private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
     private IdentifierNormalizer identifierNormalizer = IdentifierNormalizers.noop();
-    private IdentifierQuotingPolicy identifierQuotingPolicy = IdentifierQuotingPolicies.standard();
+    private IdentifierQuoting identifierQuoting = IdentifierQuotings.standard();
     private DatabaseInfo databaseInfo;
 
     public SimpleDialect(DatabaseInfo databaseInfo) {
@@ -104,7 +104,7 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
             return null;
         }
         identifier = getIdentifierNormalizer().normalizeIdentifier(identifier, hasIdentifier, this);
-        boolean quoting = getIdentifierQuotingPolicy().isQuotingIdentifier(identifier, hasIdentifier, this);
+        boolean quoting = getIdentifierQuoting().isQuotingIdentifier(identifier, hasIdentifier, this);
         return quoting ? quote(identifier) : identifier;
     }
 
@@ -233,13 +233,13 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     @Override
-    public IdentifierQuotingPolicy getIdentifierQuotingPolicy() {
-        return identifierQuotingPolicy;
+    public IdentifierQuoting getIdentifierQuoting() {
+        return identifierQuoting;
     }
 
     @Override
-    public void setIdentifierQuotingPolicy(IdentifierQuotingPolicy identifierQuotingPolicy) {
-        this.identifierQuotingPolicy = identifierQuotingPolicy;
+    public void setIdentifierQuoting(IdentifierQuoting identifierQuoting) {
+        this.identifierQuoting = identifierQuoting;
     }
 
     @Override

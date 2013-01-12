@@ -39,6 +39,8 @@ import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.cli.parse.option.RegexOption;
 import com.nuodb.migration.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migration.jdbc.dialect.IdentifierNormalizers;
+import com.nuodb.migration.jdbc.dialect.IdentifierQuoting;
+import com.nuodb.migration.jdbc.dialect.IdentifierQuotings;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migration.jdbc.metadata.generator.ScriptType;
@@ -47,6 +49,7 @@ import com.nuodb.migration.spec.JdbcTypeSpec;
 import com.nuodb.migration.spec.ResourceSpec;
 import com.nuodb.migration.spec.SchemaSpec;
 import com.nuodb.migration.utils.Priority;
+import com.nuodb.migration.utils.ReflectionUtils;
 
 import java.util.*;
 
@@ -64,6 +67,10 @@ import static org.apache.commons.lang3.StringUtils.replace;
  * @author Sergey Bushik
  */
 public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory, CliResources {
+
+    public static final String IDENTIFIER_QUOTING_MINIMAL = "minimal";
+    public static final String IDENTIFIER_QUOTING_STANDARD = "standard";
+    public static final String IDENTIFIER_QUOTING_ALWAYS = "always";
 
     public static final String IDENTIFIER_NORMALIZER_NOOP = "noop";
     public static final String IDENTIFIER_NORMALIZER_STANDARD = "standard";
@@ -271,6 +278,15 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
                     ).build();
             group.withOption(groupScriptsBy);
 
+            Option identifierQuoting = newOption().
+                    withName(SCHEMA_IDENTIFIER_QUOTING).
+                    withDescription(getMessage(SCHEMA_IDENTIFIER_QUOTING_OPTION_DESCRIPTION)).
+                    withArgument(
+                            newArgument().
+                                    withName(getMessage(SCHEMA_IDENTIFIER_QUOTING_ARGUMENT_NAME)).build()
+                    ).build();
+            group.withOption(identifierQuoting);
+
             Option identifierNormalizer = newOption().
                     withName(SCHEMA_IDENTIFIER_NORMALIZER).
                     withDescription(getMessage(SCHEMA_IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION)).
@@ -324,10 +340,31 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             }
             schemaSpec.setGroupScriptsBy(groupScriptsBy);
 
+            String identifierQuotingValue = commandLine.getValue(SCHEMA_IDENTIFIER_QUOTING);
+            IdentifierQuoting identifierQuoting = null;
+            if (identifierQuotingValue != null) {
+                identifierQuoting = getIdentifierQuotings().get(identifierQuotingValue);
+                if (identifierQuoting == null) {
+                    Class<IdentifierQuoting> identifierQuotingClass = ReflectionUtils.loadClass(identifierQuotingValue);
+                    identifierQuoting = ReflectionUtils.newInstance(identifierQuotingClass);
+                }
+            }
+            schemaSpec.setIdentifierQuoting(
+                    identifierQuoting != null ? identifierQuoting : IdentifierQuotings.standard());
+
             String identifierNormalizerValue = commandLine.getValue(SCHEMA_IDENTIFIER_NORMALIZER);
-            IdentifierNormalizer identifierNormalizer = identifierNormalizerValue != null ?
-                    getIdentifierNormalizers().get(identifierNormalizerValue) : null;
-            schemaSpec.setIdentifierNormalizer(identifierNormalizer != null ? identifierNormalizer : IdentifierNormalizers.noop());
+            IdentifierNormalizer identifierNormalizer = null;
+            if (identifierNormalizerValue != null) {
+                identifierNormalizer = getIdentifierNormalizers().get(identifierNormalizerValue);
+                if (identifierNormalizer == null) {
+                    Class<IdentifierNormalizer> identifierNormalizerClass =
+                            ReflectionUtils.loadClass(identifierNormalizerValue);
+                    identifierNormalizer =
+                            ReflectionUtils.newInstance(identifierNormalizerClass);
+                }
+            }
+            schemaSpec.setIdentifierNormalizer(
+                    identifierNormalizer != null ? identifierNormalizer : IdentifierNormalizers.noop());
 
             ListMultimap<String, Object> values = jdbcTypeSpecValuesCollector.getValues();
             int count = values.get(JDBC_TYPE_NAME_OPTION).size();
@@ -360,6 +397,15 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         identifierNormalizers.put(IDENTIFIER_NORMALIZER_LOWERCASE, IdentifierNormalizers.lowerCase());
         identifierNormalizers.put(IDENTIFIER_NORMALIZER_UPPERCASE, IdentifierNormalizers.upperCase());
         return identifierNormalizers;
+    }
+
+    protected Map<String, IdentifierQuoting> getIdentifierQuotings() {
+        Map<String, IdentifierQuoting> identifierQuotings =
+                new TreeMap<String, IdentifierQuoting>(String.CASE_INSENSITIVE_ORDER);
+        identifierQuotings.put(IDENTIFIER_QUOTING_MINIMAL, IdentifierQuotings.minimal());
+        identifierQuotings.put(IDENTIFIER_QUOTING_STANDARD, IdentifierQuotings.standard());
+        identifierQuotings.put(IDENTIFIER_QUOTING_ALWAYS, IdentifierQuotings.always());
+        return identifierQuotings;
     }
 
     @Override

@@ -40,6 +40,7 @@ import static com.nuodb.migration.jdbc.type.JdbcTypeSpecifiers.newScale;
 import static com.nuodb.migration.jdbc.type.JdbcTypeSpecifiers.newSize;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
+import static org.apache.commons.lang3.StringUtils.isAllUpperCase;
 
 /**
  * @author Sergey Bushik
@@ -100,6 +101,11 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcType(NuoDBTimeType.INSTANCE);
 
         addScriptTranslation(new DatabaseInfo("MySQL"), "CURRENT_TIMESTAMP", "NOW");
+    }
+
+    @Override
+    protected boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier) {
+        return super.isQuotingIdentifier(identifier, hasIdentifier) || !isAllUpperCase(identifier);
     }
 
     @Override

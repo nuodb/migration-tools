@@ -25,41 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata.generator;
+package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.ForeignKey;
+import com.nuodb.migration.jdbc.metadata.HasIdentifier;
 
 /**
  * @author Sergey Bushik
  */
-public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
+public interface IdentifierQuoting {
 
-    public ForeignKeyNamingStrategy() {
-        super(ForeignKey.class);
-    }
-
-    @Override
-    public String getName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
-        return getForeignKeyName(foreignKey, context, identifier);
-    }
-
-    @Override
-    public String getQualifiedName(ForeignKey foreignKey, ScriptGeneratorContext context,
-                                   boolean identifier) {
-        return getForeignKeyName(foreignKey, context, identifier);
-    }
-
-    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("FK");
-        buffer.append('_');
-
-        StringBuilder qualifier = new StringBuilder();
-        qualifier.append(context.getName(foreignKey.getPrimaryTable(), false));
-        qualifier.append(' ');
-        qualifier.append(context.getName(foreignKey.getForeignTable(), false));
-        buffer.append(md5Hex(qualifier.toString()));
-
-        return identifier ? context.getDialect().getIdentifier(buffer.toString(), foreignKey) : buffer.toString();
-    }
+    boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect);
 }

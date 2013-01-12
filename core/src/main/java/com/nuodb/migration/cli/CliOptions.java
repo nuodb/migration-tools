@@ -40,21 +40,10 @@ public interface CliOptions {
     final int LIST_OPTION_ID = 2;
     final int CONFIG_OPTION_ID = 3;
     final int COMMAND_OPTION_ID = 4;
-    /**
-     * Formats and shows help.
-     */
+
     final String HELP_OPTION = "help";
-    /**
-     * Lists available command line interface commands, such as withConnection, load, copy.
-     */
     final String LIST_OPTION = "list";
-    /**
-     * Points the where migration process is specified in the form of XML file.
-     */
     final String CONFIG_OPTION = "config";
-    /**
-     * Command line interface command to withConnection.
-     */
     final String COMMAND_OPTION = "command";
 
     final String SOURCE_DRIVER_OPTION = "source.driver";
@@ -88,6 +77,7 @@ public interface CliOptions {
     final String SCHEMA_META_DATA_OPTION = "meta.data.*";
     final String SCHEMA_SCRIPT_TYPE_OPTION = "script.type";
     final String SCHEMA_GROUP_SCRIPTS_BY_OPTION = "group.scripts.by";
+    final String SCHEMA_IDENTIFIER_QUOTING = "identifier.quoting";
     final String SCHEMA_IDENTIFIER_NORMALIZER = "identifier.normalizer";
 
     final String JDBC_TYPE_NAME_OPTION = "type.name";

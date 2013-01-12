@@ -72,7 +72,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  */
 public class DumpJob extends JobBase {
 
-    private static final String QUERY_ENTRY_NAME = "query-%1$tH-%1$tM-%1$tS";
+    private static final String QUERY_ENTRY_NAME = "query-%1$tH%1$tM%1$tS";
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

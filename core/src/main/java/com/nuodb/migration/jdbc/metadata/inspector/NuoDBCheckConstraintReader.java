@@ -39,6 +39,8 @@ import java.sql.*;
 import java.util.regex.Pattern;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static java.sql.ResultSet.CONCUR_READ_ONLY;
+import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
@@ -62,7 +64,7 @@ public class NuoDBCheckConstraintReader extends MetaDataReaderBase {
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY);
+                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
@@ -72,11 +74,11 @@ public class NuoDBCheckConstraintReader extends MetaDataReaderBase {
                         for (Table table : database.listTables()) {
                             statement.setString(1, table.getSchema().getName());
                             statement.setString(2, table.getName());
-                            ResultSet resultSet = statement.executeQuery();
+                            ResultSet checkConstraints = statement.executeQuery();
                             try {
-                                read(table, resultSet);
+                                readCheckConstraints(table, checkConstraints);
                             } finally {
-                                close(resultSet);
+                                close(checkConstraints);
                             }
                         }
                     }
@@ -84,16 +86,16 @@ public class NuoDBCheckConstraintReader extends MetaDataReaderBase {
         );
     }
 
-    protected void read(Table table, ResultSet resultSet) throws SQLException {
+    protected void readCheckConstraints(Table table, ResultSet checkConstraints) throws SQLException {
         String regex = Pattern.quote(table.getName() + "$constraint");
         Pattern pattern = Pattern.compile(regex + "\\d+");
-        while (resultSet.next()) {
-            String constraint = resultSet.getString("CONSTRAINTNAME");
+        while (checkConstraints.next()) {
+            String constraint = checkConstraints.getString("CONSTRAINTNAME");
             if (pattern.matcher(constraint).matches()) {
-                table.getChecks().add(resultSet.getString("CONSTRAINTTEXT"));
+                table.getChecks().add(checkConstraints.getString("CONSTRAINTTEXT"));
             } else {
                 Column column = table.createColumn(constraint);
-                column.setCheck(resultSet.getString("CONSTRAINTTEXT"));
+                column.setCheck(checkConstraints.getString("CONSTRAINTTEXT"));
             }
         }
     }

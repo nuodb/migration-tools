@@ -101,6 +101,8 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
             String value = iterator.next();
             if (doubleQuote.equals(value)) {
                 value = StringUtils.EMPTY;
+            } else if (value != null && value.length() == 0) {
+                value = null;
             }
             values[column++] = value;
         }

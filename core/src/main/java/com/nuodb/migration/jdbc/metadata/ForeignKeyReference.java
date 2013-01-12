@@ -32,28 +32,28 @@ package com.nuodb.migration.jdbc.metadata;
  */
 public class ForeignKeyReference extends IndentedOutputBase {
 
-    private Column sourceColumn;
-    private Column targetColumn;
+    private Column primaryColumn;
+    private Column foreignColumn;
 
-    public ForeignKeyReference(Column sourceColumn, Column targetColumn) {
-        this.sourceColumn = sourceColumn;
-        this.targetColumn = targetColumn;
+    public ForeignKeyReference(Column sourceColumn, Column foreignColumn) {
+        this.primaryColumn = sourceColumn;
+        this.foreignColumn = foreignColumn;
     }
 
-    public Column getSourceColumn() {
-        return sourceColumn;
+    public Column getPrimaryColumn() {
+        return primaryColumn;
     }
 
-    public Table getSourceTable() {
-        return sourceColumn.getTable();
+    public Table getPrimaryTable() {
+        return primaryColumn.getTable();
     }
 
-    public Column getTargetColumn() {
-        return targetColumn;
+    public Column getForeignColumn() {
+        return foreignColumn;
     }
 
-    public Table getTargetTable() {
-        return targetColumn.getTable();
+    public Table getForeignTable() {
+        return foreignColumn.getTable();
     }
 
     @Override
@@ -63,25 +63,25 @@ public class ForeignKeyReference extends IndentedOutputBase {
 
         ForeignKeyReference that = (ForeignKeyReference) o;
 
-        if (sourceColumn != null ? !sourceColumn.equals(that.sourceColumn) : that.sourceColumn != null) return false;
-        if (targetColumn != null ? !targetColumn.equals(that.targetColumn) : that.targetColumn != null) return false;
+        if (primaryColumn != null ? !primaryColumn.equals(that.primaryColumn) : that.primaryColumn != null) return false;
+        if (foreignColumn != null ? !foreignColumn.equals(that.foreignColumn) : that.foreignColumn != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = sourceColumn != null ? sourceColumn.hashCode() : 0;
-        result = 31 * result + (targetColumn != null ? targetColumn.hashCode() : 0);
+        int result = primaryColumn != null ? primaryColumn.hashCode() : 0;
+        result = 31 * result + (foreignColumn != null ? foreignColumn.hashCode() : 0);
         return result;
     }
 
     @Override
     public void output(int indent, StringBuilder buffer) {
         outputIndent(indent, buffer);
-        buffer.append(qualify(sourceColumn));
+        buffer.append(qualify(primaryColumn));
         buffer.append("->");
-        buffer.append(qualify(sourceColumn));
+        buffer.append(qualify(foreignColumn));
     }
 
     protected String qualify(Column column) {

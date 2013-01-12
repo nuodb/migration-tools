@@ -27,66 +27,61 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.google.common.collect.Maps;
+import com.nuodb.migration.jdbc.JdbcUtils;
+import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.Database;
-import com.nuodb.migration.jdbc.metadata.Identifier;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.query.StatementCallback;
 import com.nuodb.migration.jdbc.query.StatementCreator;
 import com.nuodb.migration.jdbc.query.StatementTemplate;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 
 import java.sql.*;
-import java.util.Map;
 
-import static com.nuodb.migration.jdbc.JdbcUtils.close;
-import static com.nuodb.migration.jdbc.metadata.Identifier.valueOf;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
  */
-public class OracleCheckConstraintReader extends MetaDataReaderBase {
-
-    private static final String CONSTRAINT_TYPE_CHECK = "C";
-    private static final String STATUS_ENABLED = "ENABLED";
+public class NuoDBColumnReader extends NuoDBMetaDataReaderBase {
 
     private static final String QUERY =
-            "SELECT ALL_CONSTRAINTS.CONSTRAINT_NAME, ALL_CONS_COLUMNS.COLUMN_NAME, ALL_CONSTRAINTS.SEARCH_CONDITION\n" +
-            "FROM SYS.ALL_CONS_COLUMNS\n" +
-            "JOIN SYS.ALL_CONSTRAINTS ON ALL_CONS_COLUMNS.TABLE_NAME=ALL_CONSTRAINTS.TABLE_NAME\n" +
-            "AND ALL_CONS_COLUMNS.CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME\n" +
-            "WHERE ALL_CONSTRAINTS.CONSTRAINT_TYPE=? AND ALL_CONSTRAINTS.STATUS=? AND ALL_CONSTRAINTS.TABLE_NAME=?";
+            "SELECT *\n" +
+            "FROM SYSTEM.FIELDS\n" +
+            "INNER JOIN SYSTEM.DATATYPES ON FIELDS.DATATYPE = DATATYPES.ID\n" +
+            "WHERE SCHEMA=?\n" +
+            "  AND TABLENAME=?\n";
 
-    public OracleCheckConstraintReader() {
-        super(MetaDataType.CHECK_CONSTRAINT);
+    public NuoDBColumnReader() {
+        super(MetaDataType.COLUMN);
     }
 
     @Override
-    public void read(DatabaseInspector inspector, final Database database,
-                     DatabaseMetaData databaseMetaData) throws SQLException {
-        StatementTemplate template = new StatementTemplate(databaseMetaData.getConnection());
+    protected void doRead(DatabaseInspector inspector, final Database database,
+                          DatabaseMetaData databaseMetaData) throws SQLException {
+        final StatementTemplate template = new StatementTemplate(databaseMetaData.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                        return connection.prepareStatement(QUERY,
+                                TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
-
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
                         for (Table table : database.listTables()) {
-                            statement.setString(1, CONSTRAINT_TYPE_CHECK);
-                            statement.setString(2, STATUS_ENABLED);
-                            statement.setString(3, table.getName());
-                            ResultSet checkConstraints = statement.executeQuery();
+                            statement.setString(1, table.getSchema().getName());
+                            statement.setString(2, table.getName());
+                            ResultSet columns = statement.executeQuery();
                             try {
-                                readCheckConstraints(table, checkConstraints);
+                                readTable(table, columns);
                             } finally {
-                                close(checkConstraints);
+                                JdbcUtils.close(columns);
                             }
                         }
                     }
@@ -94,15 +89,25 @@ public class OracleCheckConstraintReader extends MetaDataReaderBase {
         );
     }
 
-    protected void readCheckConstraints(Table table, ResultSet checkConstraints) throws SQLException {
-        Map<Identifier, String> checks = Maps.newLinkedHashMap();
-        while (checkConstraints.next()) {
-            String check = checkConstraints.getString("SEARCH_CONDITION");
-            if (!check.endsWith("IS NOT NULL")) {
-                Identifier identifier = valueOf(checkConstraints.getString("CONSTRAINT_NAME"));
-                checks.put(identifier, check);
-            }
+    protected void readTable(Table table, ResultSet columns) throws SQLException {
+        JdbcTypeRegistry typeRegistry = table.getDatabase().getDialect().getJdbcTypeRegistry();
+        while (columns.next()) {
+            Column column = table.createColumn(columns.getString("FIELD"));
+
+            JdbcTypeDesc typeDescAlias = typeRegistry.getJdbcTypeDescAlias(
+                    columns.getInt("JDBCTYPE"), columns.getString("NAME"));
+            column.setTypeCode(typeDescAlias.getTypeCode());
+            column.setTypeName(typeDescAlias.getTypeName());
+
+            int columnSize = columns.getInt("LENGTH");
+            column.setSize(columnSize);
+            column.setPrecision(columnSize);
+            column.setDefaultValue(columns.getString("DEFAULTVALUE"));
+            column.setScale(columns.getInt("SCALE"));
+            column.setComment(columns.getString("REMARKS"));
+            column.setPosition(columns.getInt("FIELDPOSITION"));
+            column.setNullable(columns.getInt("FLAGS") == 0);
+            column.setAutoIncrement(columns.getString("GENERATOR_SEQUENCE") != null);
         }
-        table.setChecks(checks.values());
     }
 }

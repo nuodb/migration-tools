@@ -50,8 +50,14 @@ public class MetaDataReaderResolver extends MetaDataReaderBase {
     }
 
     public MetaDataReaderResolver(MetaDataType metaDataType,
-                                  Class<? extends MetaDataReader> targetReaderClass) {
-        this(metaDataType, new SimpleDatabaseServiceResolver<MetaDataReader>(targetReaderClass));
+                                  Class<? extends MetaDataReader> readerClass) {
+        this(metaDataType, new SimpleDatabaseServiceResolver<MetaDataReader>(readerClass));
+    }
+
+    public MetaDataReaderResolver(MetaDataType metaDataType,
+                                  Class<? extends MetaDataReader> readerClass,
+                                  Class<? extends MetaDataReader> defaultReaderClass) {
+        this(metaDataType, new SimpleDatabaseServiceResolver<MetaDataReader>(readerClass, defaultReaderClass));
     }
 
     public MetaDataReaderResolver(MetaDataType metaDataType,
@@ -61,7 +67,8 @@ public class MetaDataReaderResolver extends MetaDataReaderBase {
     }
 
     @Override
-    public void read(DatabaseInspector inspector, Database database, DatabaseMetaData databaseMetaData) throws SQLException {
+    public void read(DatabaseInspector inspector, Database database,
+                     DatabaseMetaData databaseMetaData) throws SQLException {
         MetaDataReader metaDataReader = metaDataReaderResolver.resolve(databaseMetaData);
         if (metaDataReader != null) {
             metaDataReader.read(inspector, database, databaseMetaData);

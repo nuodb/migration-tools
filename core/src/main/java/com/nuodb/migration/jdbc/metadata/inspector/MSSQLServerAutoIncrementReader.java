@@ -35,6 +35,8 @@ import com.nuodb.migration.jdbc.query.StatementTemplate;
 import java.sql.*;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static java.sql.ResultSet.CONCUR_READ_ONLY;
+import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
@@ -65,7 +67,7 @@ public class MSSQLServerAutoIncrementReader extends MetaDataReaderBase {
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY);
+                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                     }
                 },
                 new StatementCallback<PreparedStatement>() {

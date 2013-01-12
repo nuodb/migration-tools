@@ -74,12 +74,12 @@ public class ScriptGeneratorContext {
         setDialect(scriptGeneratorContext.getDialect());
         setCatalog(scriptGeneratorContext.getCatalog());
         setSchema(scriptGeneratorContext.getSchema());
-        setScriptTypes(scriptGeneratorContext.getScriptTypes());
-        setMetaDataTypes(scriptGeneratorContext.getMetaDataTypes());
 
-        attributes.putAll(scriptGeneratorContext.getAttributes());
-        namingStrategyMap.putAll(scriptGeneratorContext.getNamingStrategies());
-        scriptGeneratorMap.putAll(scriptGeneratorContext.getScriptGenerators());
+        scriptTypes = newHashSet(scriptGeneratorContext.getScriptTypes());
+        metaDataTypes = newHashSet(scriptGeneratorContext.getMetaDataTypes());
+        attributes = newHashMap(scriptGeneratorContext.getAttributes());
+        namingStrategyMap = newHashMap(scriptGeneratorContext.getNamingStrategies());
+        scriptGeneratorMap = newHashMap(scriptGeneratorContext.getScriptGenerators());
     }
 
     public String getName(Relational relational) {

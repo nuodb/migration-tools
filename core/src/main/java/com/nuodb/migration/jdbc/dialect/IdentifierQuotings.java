@@ -32,7 +32,33 @@ import com.nuodb.migration.jdbc.metadata.HasIdentifier;
 /**
  * @author Sergey Bushik
  */
-public interface IdentifierQuotingPolicy {
+public class IdentifierQuotings {
 
-    boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect);
+    public static IdentifierQuoting minimal() {
+        return new IdentifierQuoting() {
+            @Override
+            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
+                return !((SimpleDialect) dialect).isAllowedIdentifier(identifier, hasIdentifier) ||
+                        ((SimpleDialect) dialect).isSQLKeyword(identifier, hasIdentifier);
+            }
+        };
+    }
+
+    public static IdentifierQuoting standard() {
+        return new IdentifierQuoting() {
+            @Override
+            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
+                return ((SimpleDialect) dialect).isQuotingIdentifier(identifier, hasIdentifier);
+            }
+        };
+    }
+
+    public static IdentifierQuoting always() {
+        return new IdentifierQuoting() {
+            @Override
+            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
+                return true;
+            }
+        };
+    }
 }

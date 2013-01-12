@@ -133,9 +133,9 @@ public interface Dialect {
 
     void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer);
 
-    IdentifierQuotingPolicy getIdentifierQuotingPolicy();
+    IdentifierQuoting getIdentifierQuoting();
 
-    void setIdentifierQuotingPolicy(IdentifierQuotingPolicy identifierQuotingPolicy);
+    void setIdentifierQuoting(IdentifierQuoting identifierQuoting);
 
     ScriptTranslationManager getScriptTranslationManager();
 

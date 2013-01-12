@@ -49,7 +49,7 @@ public class ForeignKeyGenerator extends ScriptGeneratorBase<ForeignKey> impleme
     public Collection<String> getCreateScripts(ForeignKey foreignKey, ScriptGeneratorContext context) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        buffer.append(context.getQualifiedName(foreignKey.getSourceTable()));
+        buffer.append(context.getQualifiedName(foreignKey.getPrimaryTable()));
         buffer.append(" ADD CONSTRAINT ");
         buffer.append(context.getName(foreignKey));
         buffer.append(' ');
@@ -62,7 +62,7 @@ public class ForeignKeyGenerator extends ScriptGeneratorBase<ForeignKey> impleme
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
         Dialect dialect = context.getDialect();
-        buffer.append(context.getQualifiedName(foreignKey.getSourceTable()));
+        buffer.append(context.getQualifiedName(foreignKey.getPrimaryTable()));
         buffer.append(' ');
         buffer.append(dialect.getDropForeignKey());
         buffer.append(' ');
@@ -84,7 +84,7 @@ public class ForeignKeyGenerator extends ScriptGeneratorBase<ForeignKey> impleme
         }
         buffer.append(")");
         buffer.append(" REFERENCES ");
-        buffer.append(context.getName(foreignKey.getTargetTable()));
+        buffer.append(context.getName(foreignKey.getForeignTable()));
         buffer.append(" (");
         for (Iterator<Column> iterator = foreignKey.getTargetColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();

@@ -44,8 +44,8 @@ import static com.nuodb.migration.jdbc.metadata.Identifier.valueOf;
  */
 public class ForeignKeyReader extends MetaDataReaderBase {
 
-    protected ReferentialActionMap referentialActionMap;
-    protected DeferrabilityMap deferrabilityMap;
+    private DeferrabilityMap deferrabilityMap;
+    private ReferentialActionMap referentialActionMap;
 
     public ForeignKeyReader() {
         super(MetaDataType.FOREIGN_KEY);
@@ -59,19 +59,21 @@ public class ForeignKeyReader extends MetaDataReaderBase {
         }
     }
 
-    protected void readForeignKeys(Database database, DatabaseMetaData metaData, Table table) throws SQLException {
-        ResultSet foreignKeys = metaData.getImportedKeys(
+
+    protected void readForeignKeys(Database database, DatabaseMetaData databaseMetaData,
+                                   Table table) throws SQLException {
+        ResultSet foreignKeys = databaseMetaData.getImportedKeys(
                 table.getCatalog().getName(), table.getSchema().getName(), table.getName());
         try {
             boolean fixPosition = false;
             while (foreignKeys.next()) {
-                Table sourceTable = database.createCatalog(foreignKeys.getString("FKTABLE_CAT")).createSchema(
+                Table primaryTable = database.createCatalog(foreignKeys.getString("FKTABLE_CAT")).createSchema(
                         foreignKeys.getString("FKTABLE_SCHEM")).createTable(foreignKeys.getString("FKTABLE_NAME"));
-                final Column sourceColumn = sourceTable.createColumn(foreignKeys.getString("FKCOLUMN_NAME"));
+                final Column primaryColumn = primaryTable.createColumn(foreignKeys.getString("FKCOLUMN_NAME"));
 
-                final Table targetTable = database.createCatalog(foreignKeys.getString("PKTABLE_CAT")).createSchema(
+                final Table foreignTable = database.createCatalog(foreignKeys.getString("PKTABLE_CAT")).createSchema(
                         foreignKeys.getString("PKTABLE_SCHEM")).createTable(foreignKeys.getString("PKTABLE_NAME"));
-                final Column targetColumn = targetTable.createColumn(foreignKeys.getString("PKCOLUMN_NAME"));
+                final Column foreignColumn = foreignTable.createColumn(foreignKeys.getString("PKCOLUMN_NAME"));
 
                 int position = foreignKeys.getInt("KEY_SEQ");
                 if (fixPosition || position == 0) {
@@ -81,15 +83,15 @@ public class ForeignKeyReader extends MetaDataReaderBase {
                     position += 1;
                 }
                 final Identifier identifier = valueOf(foreignKeys.getString("FK_NAME"));
-                Optional<ForeignKey> foreignKeyOptional = Iterables.tryFind(sourceTable.getForeignKeys(),
+                Optional<ForeignKey> foreignKeyOptional = Iterables.tryFind(primaryTable.getForeignKeys(),
                         new Predicate<ForeignKey>() {
                             @Override
-                            public boolean apply(ForeignKey input) {
+                            public boolean apply(ForeignKey foreignKey) {
                                 if (identifier != null) {
-                                    return identifier.equals(input.getIdentifier());
+                                    return identifier.equals(foreignKey.getIdentifier());
                                 }
-                                for (ForeignKeyReference reference : input.getReferences()) {
-                                    if (targetTable.equals(reference.getTargetTable())) {
+                                for (ForeignKeyReference foreignKeyReference : foreignKey.getReferences()) {
+                                    if (foreignTable.equals(foreignKeyReference.getForeignTable())) {
                                         return true;
                                     }
                                 }
@@ -100,30 +102,30 @@ public class ForeignKeyReader extends MetaDataReaderBase {
                 if (foreignKeyOptional.isPresent()) {
                     foreignKey = foreignKeyOptional.get();
                 } else {
-                    sourceTable.addForeignKey(foreignKey = new ForeignKey(identifier));
-                    foreignKey.setSourceTable(sourceTable);
-                    foreignKey.setTargetTable(targetTable);
+                    primaryTable.addForeignKey(foreignKey = new ForeignKey(identifier));
+                    foreignKey.setPrimaryTable(primaryTable);
+                    foreignKey.setForeignTable(foreignTable);
                     foreignKey.setUpdateAction(getReferentialAction(foreignKeys.getInt("UPDATE_RULE")));
                     foreignKey.setDeleteAction(getReferentialAction(foreignKeys.getInt("DELETE_RULE")));
                     foreignKey.setDeferrability(getDeferrability(foreignKeys.getInt("DEFERRABILITY")));
                 }
-                foreignKey.addReference(sourceColumn, targetColumn, position);
+                foreignKey.addReference(primaryColumn, foreignColumn, position);
             }
         } finally {
             close(foreignKeys);
         }
     }
 
-    protected ReferenceAction getReferentialAction(int value) {
-        ReferentialActionMap referentialActionMap = getReferentialActionMap() != null ?
-                getReferentialActionMap() : ReferentialActionMap.getInstance();
-        return referentialActionMap.get(value);
-    }
-
     protected Deferrability getDeferrability(int value) {
         DeferrabilityMap deferrabilityMap = getDeferrabilityMap() != null ?
                 getDeferrabilityMap() : DeferrabilityMap.getInstance();
         return deferrabilityMap.getDeferrability(value);
+    }
+
+    protected ReferenceAction getReferentialAction(int value) {
+        ReferentialActionMap referentialActionMap = getReferentialActionMap() != null ?
+                getReferentialActionMap() : ReferentialActionMap.getInstance();
+        return referentialActionMap.get(value);
     }
 
     public ReferentialActionMap getReferentialActionMap() {

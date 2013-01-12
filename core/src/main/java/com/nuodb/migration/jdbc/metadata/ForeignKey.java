@@ -43,8 +43,8 @@ public class ForeignKey extends ConstraintBase {
     private ReferenceAction updateAction = ReferenceAction.NO_ACTION;
     private ReferenceAction deleteAction = ReferenceAction.NO_ACTION;
     private Deferrability deferrability;
-    private Table sourceTable;
-    private Table targetTable;
+    private Table primaryTable;
+    private Table foreignTable;
 
     public ForeignKey(Identifier name) {
         super(name);
@@ -55,20 +55,20 @@ public class ForeignKey extends ConstraintBase {
         return getTargetColumns();
     }
 
-    public Table getSourceTable() {
-        return sourceTable;
+    public Table getPrimaryTable() {
+        return primaryTable;
     }
 
-    public void setSourceTable(Table sourceTable) {
-        this.sourceTable = sourceTable;
+    public void setPrimaryTable(Table primaryTable) {
+        this.primaryTable = primaryTable;
     }
 
-    public Table getTargetTable() {
-        return targetTable;
+    public Table getForeignTable() {
+        return foreignTable;
     }
 
-    public void setTargetTable(Table targetTable) {
-        this.targetTable = targetTable;
+    public void setForeignTable(Table foreignTable) {
+        this.foreignTable = foreignTable;
     }
 
     public void addReference(Column sourceColumn, Column targetColumn, int position) {
@@ -107,7 +107,7 @@ public class ForeignKey extends ConstraintBase {
         return Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
             @Override
             public Column apply(ForeignKeyReference input) {
-                return input.getSourceColumn();
+                return input.getPrimaryColumn();
             }
         });
     }
@@ -116,7 +116,7 @@ public class ForeignKey extends ConstraintBase {
         return Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
             @Override
             public Column apply(ForeignKeyReference input) {
-                return input.getTargetColumn();
+                return input.getForeignColumn();
             }
         });
     }

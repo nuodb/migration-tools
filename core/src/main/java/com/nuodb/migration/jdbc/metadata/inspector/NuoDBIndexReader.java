@@ -27,76 +27,66 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.metadata.Database;
-import com.nuodb.migration.jdbc.metadata.Identifier;
-import com.nuodb.migration.jdbc.metadata.MetaDataType;
-import com.nuodb.migration.jdbc.metadata.Table;
+import com.nuodb.migration.jdbc.metadata.*;
 import com.nuodb.migration.jdbc.query.StatementCallback;
 import com.nuodb.migration.jdbc.query.StatementCreator;
 import com.nuodb.migration.jdbc.query.StatementTemplate;
 
 import java.sql.*;
-import java.util.Map;
 
-import static com.nuodb.migration.jdbc.JdbcUtils.close;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
  */
-public class PostgreSQLCheckConstraintReader extends MetaDataReaderBase {
+public class NuoDBIndexReader extends NuoDBMetaDataReaderBase implements NuoDBIndex {
 
-    private static final String QUERY =
-            "SELECT *\n" +
-            "FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS CCU\n" +
-            "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON\n" +
-            "CCU.TABLE_CATALOG = CC.CONSTRAINT_CATALOG\n" +
-            "AND CCU.TABLE_SCHEMA = CC.CONSTRAINT_SCHEMA\n" +
-            "AND CCU.CONSTRAINT_NAME = CC.CONSTRAINT_NAME\n" +
-            "WHERE CCU.TABLE_SCHEMA = ? AND CCU.TABLE_NAME = ?";
-
-    public PostgreSQLCheckConstraintReader() {
-        super(MetaDataType.CHECK_CONSTRAINT);
+    public NuoDBIndexReader() {
+        super(MetaDataType.INDEX);
     }
 
     @Override
-    public void read(DatabaseInspector inspector, final Database database,
-                     DatabaseMetaData databaseMetaData) throws SQLException {
-        StatementTemplate template = new StatementTemplate(databaseMetaData.getConnection());
+    protected void doRead(DatabaseInspector inspector, final Database database,
+                          DatabaseMetaData databaseMetaData) throws SQLException {
+        final StatementTemplate template = new StatementTemplate(databaseMetaData.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                        StringBuilder query = new StringBuilder(QUERY);
+                        query.append(' ');
+                        query.append("AND");
+                        query.append(' ');
+                        query.append("INDEXTYPE IN (");
+                        query.append(UNIQUE).append(',').append(KEY);
+                        query.append(')');
+                        return connection.prepareStatement(query.toString(),
+                                TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
-
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
                         for (Table table : database.listTables()) {
                             statement.setString(1, table.getSchema().getName());
                             statement.setString(2, table.getName());
-                            ResultSet checkConstraints = statement.executeQuery();
-                            try {
-                                readCheckConstraints(table, checkConstraints);
-                            } finally {
-                                close(checkConstraints);
-                            }
+                            readIndexes(table, statement.executeQuery());
                         }
                     }
                 }
         );
     }
 
-    protected void readCheckConstraints(Table table, ResultSet checkConstraints) throws SQLException {
-        Map<Identifier, String> checks = Maps.newLinkedHashMap();
-        while (checkConstraints.next()) {
-            Identifier identifier = Identifier.valueOf(checkConstraints.getString("CONSTRAINT_NAME"));
-            checks.put(identifier, checkConstraints.getString("CHECK_CLAUSE"));
+    protected void readIndexes(Table table, ResultSet indexes) throws SQLException {
+        while (indexes.next()) {
+            Identifier identifier = Identifier.valueOf(indexes.getString("INDEXNAME"));
+            Index index = table.getIndex(identifier);
+            if (index == null) {
+                table.addIndex(index = new Index(identifier));
+                index.setUnique(indexes.getInt("INDEXTYPE") == UNIQUE);
+            }
+            index.addColumn(table.createColumn(indexes.getString("FIELD")), indexes.getInt("POSITION"));
         }
-        table.setChecks(checks.values());
     }
 }

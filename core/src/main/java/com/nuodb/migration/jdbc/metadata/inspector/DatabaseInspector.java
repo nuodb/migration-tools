@@ -53,9 +53,8 @@ import static com.nuodb.migration.utils.ReflectionUtils.newInstance;
 import static java.lang.String.format;
 
 /**
- * Reads database meta data and creates its meta model. Root meta model object is {@link
- * com.nuodb.migration.jdbc.metadata.Database} containing set of catalogs, each catalog has a collection of schemas and
- * schema is a wrapper of collection of a tables.
+ * Reads database meta data and creates meta model from it. Root meta model object is {@link Database} containing set of
+ * catalogs, each catalog has a collection of schemas and schema is a wrapper of collection of a tables.
  *
  * @author Sergey Bushik
  */
@@ -76,11 +75,31 @@ public class DatabaseInspector {
     public DatabaseInspector() {
         withMetaDataReader(new CatalogReader());
         withMetaDataReader(new SchemaReader());
-        withMetaDataReader(new TableReader());
-        withMetaDataReader(new ColumnReader());
-        withMetaDataReader(new IndexReader());
-        withMetaDataReader(new ForeignKeyReader());
-        withMetaDataReader(new PrimaryKeyReader());
+
+        MetaDataReaderResolver tableReader = new MetaDataReaderResolver(TABLE,
+                MetaDataReader.class, TableReader.class);
+        tableReader.register("NuoDB", NuoDBTableReader.class);
+        withMetaDataReader(tableReader);
+
+        MetaDataReaderResolver columnReader = new MetaDataReaderResolver(COLUMN,
+                MetaDataReader.class, ColumnReader.class);
+        columnReader.register("NuoDB", NuoDBColumnReader.class);
+        withMetaDataReader(columnReader);
+
+        MetaDataReaderResolver indexReader = new MetaDataReaderResolver(INDEX,
+                MetaDataReader.class, IndexReader.class);
+        indexReader.register("NuoDB", NuoDBIndexReader.class);
+        withMetaDataReader(indexReader);
+
+        MetaDataReaderResolver primaryKeyReader = new MetaDataReaderResolver(PRIMARY_KEY,
+                MetaDataReader.class, PrimaryKeyReader.class);
+        primaryKeyReader.register("NuoDB", NuoDBPrimaryKeyReader.class);
+        withMetaDataReader(primaryKeyReader);
+
+        MetaDataReaderResolver foreignKeyReader = new MetaDataReaderResolver(FOREIGN_KEY,
+                MetaDataReader.class, ForeignKeyReader.class);
+        foreignKeyReader.register("NuoDB", NuoDBForeignKeyReader.class);
+        withMetaDataReader(foreignKeyReader);
 
         MetaDataReaderResolver checkReader = new MetaDataReaderResolver(CHECK_CONSTRAINT);
         checkReader.register("NuoDB", NuoDBCheckConstraintReader.class);

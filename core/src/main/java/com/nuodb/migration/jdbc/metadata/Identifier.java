@@ -29,6 +29,8 @@ package com.nuodb.migration.jdbc.metadata;
 
 public class Identifier implements Comparable<Identifier> {
 
+    public static final Identifier EMPTY_IDENTIFIER = Identifier.valueOf(null);
+
     private static final String EMPTY = "";
 
     private String value;

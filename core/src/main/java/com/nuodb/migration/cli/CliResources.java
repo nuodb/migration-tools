@@ -116,6 +116,8 @@ public interface CliResources {
 
     final String SCHEMA_GROUP_SCRIPTS_BY_OPTION_DESCRIPTION = "com.nuodb.migration.schema.group.scripts.by.option.description";
     final String SCHEMA_GROUP_SCRIPTS_BY_ARGUMENT_NAME = "com.nuodb.migration.schema.group.scripts.by.argument.name";
+    final String SCHEMA_IDENTIFIER_QUOTING_OPTION_DESCRIPTION = "com.nuodb.migration.schema.identifier.quoting.option.description";
+    final String SCHEMA_IDENTIFIER_QUOTING_ARGUMENT_NAME = "com.nuodb.migration.schema.identifier.quoting.argument.name";
     final String SCHEMA_IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION = "com.nuodb.migration.schema.identifier.normalize.option.description";
     final String SCHEMA_IDENTIFIER_NORMALIZER_ARGUMENT_NAME = "com.nuodb.migration.schema.identifier.normalizer.argument.name";
 

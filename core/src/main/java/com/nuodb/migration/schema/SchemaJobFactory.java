@@ -90,6 +90,7 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
                     newSizePrecisionScale(
                             jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()));
         }
+        dialect.setIdentifierQuoting(getSchemaSpec().getIdentifierQuoting());
         dialect.setIdentifierNormalizer(getSchemaSpec().getIdentifierNormalizer());
         context.setDialect(dialect);
 

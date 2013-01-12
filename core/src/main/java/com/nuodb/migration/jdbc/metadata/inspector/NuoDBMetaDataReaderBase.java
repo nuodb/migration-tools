@@ -25,21 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.MetaDataException;
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
+
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * @author Sergey Bushik
  */
-public class IdentifierQuotingPolicies {
+public abstract class NuoDBMetaDataReaderBase extends MetaDataReaderBase {
 
-    public static IdentifierQuotingPolicy standard() {
-        return new IdentifierQuotingPolicy() {
-            @Override
-            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
-                return ((SimpleDialect) dialect).isQuotingIdentifier(identifier, hasIdentifier);
-            }
-        };
+    protected NuoDBMetaDataReaderBase(MetaDataType metaDataType) {
+        super(metaDataType);
     }
+
+    @Override
+    public void read(DatabaseInspector inspector, Database database,
+                     DatabaseMetaData databaseMetaData) throws SQLException {
+        if (inspector.getCatalog() == null || EMPTY.equals(inspector.getCatalog())) {
+            doRead(inspector, database, databaseMetaData);
+        } else {
+            throw new MetaDataException("NuoDB does not support catalogs");
+        }
+    }
+
+    protected abstract void doRead(DatabaseInspector inspector, Database database,
+                                   DatabaseMetaData databaseMetaData) throws SQLException;
 }

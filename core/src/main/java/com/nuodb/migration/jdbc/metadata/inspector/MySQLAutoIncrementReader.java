@@ -37,13 +37,17 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static java.sql.ResultSet.CONCUR_READ_ONLY;
+import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
  */
 public class MySQLAutoIncrementReader extends MetaDataReaderBase {
 
-    private static final String QUERY = "SELECT AUTO_INCREMENT AS LAST_VALUE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=? && TABLE_NAME=?";
+    private static final String QUERY =
+            "SELECT AUTO_INCREMENT AS LAST_VALUE FROM INFORMATION_SCHEMA.TABLES\n" +
+            "WHERE TABLE_SCHEMA=? && TABLE_NAME=?";
 
     public MySQLAutoIncrementReader() {
         super(MetaDataType.AUTO_INCREMENT);
@@ -68,7 +72,7 @@ public class MySQLAutoIncrementReader extends MetaDataReaderBase {
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY);
+                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                     }
                 },
                 new StatementCallback<PreparedStatement>() {

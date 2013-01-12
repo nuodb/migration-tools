@@ -175,7 +175,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
                     (Multimap<Table, ForeignKey>) scriptGeneratorContext.getAttributes().get(PENDING_FOREIGN_KEYS);
             for (Table table : tables) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
-                    Table targetTable = foreignKey.getTargetTable();
+                    Table targetTable = foreignKey.getForeignTable();
                     if (!isTableSupported(targetTable, scriptGeneratorContext)) {
                         continue;
                     }
@@ -199,7 +199,7 @@ public class DatabaseGenerator extends ScriptGeneratorBase<Database> {
             Multimap<Table, ForeignKey> pendingForeignKeys =
                     (Multimap<Table, ForeignKey>) scriptGeneratorContext.getAttributes().get(PENDING_FOREIGN_KEYS);
             for (ForeignKey foreignKey : newArrayList(pendingForeignKeys.values())) {
-                Table table = foreignKey.getTargetTable();
+                Table table = foreignKey.getForeignTable();
                 if (!isTableSupported(table, scriptGeneratorContext)) {
                     continue;
                 }

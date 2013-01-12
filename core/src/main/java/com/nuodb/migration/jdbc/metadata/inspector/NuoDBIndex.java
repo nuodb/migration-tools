@@ -25,41 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata.generator;
-
-import com.nuodb.migration.jdbc.metadata.ForeignKey;
+package com.nuodb.migration.jdbc.metadata.inspector;
 
 /**
  * @author Sergey Bushik
  */
-public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
+public interface NuoDBIndex {
 
-    public ForeignKeyNamingStrategy() {
-        super(ForeignKey.class);
-    }
+    public static final String QUERY =
+            "SELECT * FROM SYSTEM.INDEXES INNER JOIN SYSTEM.INDEXFIELDS ON\n" +
+            "INDEXES.SCHEMA=INDEXFIELDS.SCHEMA AND\n" +
+            "INDEXES.TABLENAME=INDEXFIELDS.TABLENAME AND\n" +
+            "INDEXES.INDEXNAME = INDEXFIELDS.INDEXNAME\n" +
+            "WHERE SCHEMA=? AND TABLENAME=?";
 
-    @Override
-    public String getName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
-        return getForeignKeyName(foreignKey, context, identifier);
-    }
-
-    @Override
-    public String getQualifiedName(ForeignKey foreignKey, ScriptGeneratorContext context,
-                                   boolean identifier) {
-        return getForeignKeyName(foreignKey, context, identifier);
-    }
-
-    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("FK");
-        buffer.append('_');
-
-        StringBuilder qualifier = new StringBuilder();
-        qualifier.append(context.getName(foreignKey.getPrimaryTable(), false));
-        qualifier.append(' ');
-        qualifier.append(context.getName(foreignKey.getForeignTable(), false));
-        buffer.append(md5Hex(qualifier.toString()));
-
-        return identifier ? context.getDialect().getIdentifier(buffer.toString(), foreignKey) : buffer.toString();
-    }
+    public static final int PRIMARY_KEY = 0;
+    public static final int UNIQUE = 1;
+    public static final int KEY = 2;
 }

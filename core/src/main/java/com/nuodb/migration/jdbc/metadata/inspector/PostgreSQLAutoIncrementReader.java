@@ -37,11 +37,15 @@ import org.apache.commons.lang3.StringUtils;
 import java.sql.*;
 
 import static java.lang.String.format;
+import static java.sql.ResultSet.CONCUR_READ_ONLY;
+import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
  */
 public class PostgreSQLAutoIncrementReader extends MetaDataReaderBase {
+
+    private static final String QUERY = "SELECT * FROM %s.%s";
 
     public PostgreSQLAutoIncrementReader() {
         super(MetaDataType.AUTO_INCREMENT);
@@ -61,7 +65,7 @@ public class PostgreSQLAutoIncrementReader extends MetaDataReaderBase {
                     continue;
                 }
                 String sequence = split[1];
-                final String query = format("SELECT * FROM %s.%s",
+                final String query = format(QUERY,
                         dialect.getIdentifier(table.getSchema().getName(), null),
                         dialect.getIdentifier(sequence, null));
                 StatementTemplate template = new StatementTemplate(databaseMetaData.getConnection());
@@ -69,7 +73,7 @@ public class PostgreSQLAutoIncrementReader extends MetaDataReaderBase {
                         new StatementCreator<PreparedStatement>() {
                             @Override
                             public PreparedStatement create(Connection connection) throws SQLException {
-                                return connection.prepareStatement(query);
+                                return connection.prepareStatement(query, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                             }
                         },
                         new StatementCallback<PreparedStatement>() {

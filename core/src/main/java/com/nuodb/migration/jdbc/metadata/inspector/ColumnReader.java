@@ -62,7 +62,7 @@ public class ColumnReader extends MetaDataReaderBase {
     public void readColumns(Database database, DatabaseMetaData metaData, Table table) throws SQLException {
         ResultSet columns = metaData.getColumns(table.getCatalog().getName(), table.getSchema().getName(),
                 table.getName(), null);
-        JdbcTypeRegistry jdbcTypeRegistry = database.getDialect().getJdbcTypeRegistry();
+        JdbcTypeRegistry typeRegistry = database.getDialect().getJdbcTypeRegistry();
         try {
             ValueModelList<ValueModel> valueModelList = createValueModelList(columns.getMetaData());
             while (columns.next()) {
@@ -70,10 +70,10 @@ public class ColumnReader extends MetaDataReaderBase {
                         columns.getString("TABLE_SCHEM")).createTable(columns.getString("TABLE_NAME"));
 
                 Column column = table.createColumn(columns.getString("COLUMN_NAME"));
-                JdbcTypeDesc jdbcTypeDescAlias = jdbcTypeRegistry.getJdbcTypeDescAlias(
+                JdbcTypeDesc typeDescAlias = typeRegistry.getJdbcTypeDescAlias(
                         columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
-                column.setTypeCode(jdbcTypeDescAlias.getTypeCode());
-                column.setTypeName(jdbcTypeDescAlias.getTypeName());
+                column.setTypeCode(typeDescAlias.getTypeCode());
+                column.setTypeName(typeDescAlias.getTypeName());
 
                 int columnSize = columns.getInt("COLUMN_SIZE");
                 column.setSize(columnSize);

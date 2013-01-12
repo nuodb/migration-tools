@@ -39,13 +39,15 @@ import java.sql.*;
 import java.util.Set;
 
 import static com.nuodb.migration.jdbc.JdbcUtils.close;
+import static java.sql.ResultSet.CONCUR_READ_ONLY;
+import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
  */
 public class MSSQLServerCheckConstraintReader extends MetaDataReaderBase {
 
-    public static final String QUERY =
+    private static final String QUERY =
             "SELECT CC.CHECK_CLAUSE, CTU.CONSTRAINT_NAME\n" +
             "FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE AS CTU\n" +
             "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON CTU.TABLE_CATALOG=CC.CONSTRAINT_CATALOG\n" +
@@ -67,7 +69,7 @@ public class MSSQLServerCheckConstraintReader extends MetaDataReaderBase {
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY);
+                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
