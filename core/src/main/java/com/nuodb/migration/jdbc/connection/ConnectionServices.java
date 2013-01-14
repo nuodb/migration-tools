@@ -37,6 +37,10 @@ import java.sql.SQLException;
  */
 public interface ConnectionServices {
 
+    String getCatalog();
+
+    String getSchema();
+
     Connection getConnection() throws SQLException;
 
     DatabaseInspector getDatabaseInspector() throws SQLException;

@@ -29,31 +29,22 @@ package com.nuodb.migration.jdbc.connection;
 
 import com.nuodb.migration.spec.DriverConnectionSpec;
 import com.nuodb.migration.utils.ReflectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.dbcp.BasicDataSource;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
+import java.util.Map;
 
 import static java.lang.String.format;
 
-public class DriverConnectionProvider implements ConnectionProvider {
-
-    public static final String USER_PROPERTY = "user";
-    public static final String PASSWORD_PROPERTY = "password";
-
-    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
+public class DriverConnectionProvider extends DataSourceConnectionProvider {
 
     private DriverConnectionSpec driverConnectionSpec;
     private Boolean autoCommit;
     private Integer transactionIsolation;
-    private boolean initDriver;
 
     public DriverConnectionProvider(DriverConnectionSpec driverConnectionSpec) {
         this(driverConnectionSpec, false);
@@ -75,31 +66,32 @@ public class DriverConnectionProvider implements ConnectionProvider {
         return driverConnectionSpec;
     }
 
-    protected String getCatalog() {
+    @Override
+    public String getCatalog() {
         return driverConnectionSpec != null ? driverConnectionSpec.getCatalog() : null;
     }
 
-    protected String getSchema() {
+    @Override
+    public String getSchema() {
         return driverConnectionSpec != null ? driverConnectionSpec.getSchema() : null;
     }
 
-    @Override
-    public ConnectionServices getConnectionServices() {
-        return new DriverConnectionServices(this);
-    }
-
-    protected void initDriver() throws SQLException {
-        if (!initDriver) {
-            synchronized (this) {
-                if (!initDriver) {
-                    loadDriver();
-                    initDriver = true;
-                }
+    protected DataSource createDataSource() throws SQLException {
+        registerDriver();
+        BasicDataSource dataSource = new BasicDataSource();
+        dataSource.setUrl(driverConnectionSpec.getUrl());
+        dataSource.setUsername(driverConnectionSpec.getUsername());
+        dataSource.setPassword(driverConnectionSpec.getPassword());
+        Map<String, String> properties = driverConnectionSpec.getProperties();
+        if (properties != null) {
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
+                dataSource.addConnectionProperty(entry.getKey(), entry.getValue());
             }
         }
+        return dataSource;
     }
 
-    protected void loadDriver() throws SQLException {
+    protected void registerDriver() throws SQLException {
         DriverConnectionSpec driverConnectionSpec = getDriverConnectionSpec();
         Driver driver = driverConnectionSpec.getDriver();
         if (driver == null) {
@@ -112,14 +104,6 @@ public class DriverConnectionProvider implements ConnectionProvider {
         DriverManager.registerDriver(driver);
     }
 
-    @Override
-    public Connection getConnection() throws SQLException {
-        initDriver();
-        Connection connection = createConnection();
-        initConnection(connection);
-        return createConnectionProxy(connection);
-    }
-
     protected void initConnection(Connection connection) throws SQLException {
         if (autoCommit != null) {
             connection.setAutoCommit(autoCommit);
@@ -127,11 +111,6 @@ public class DriverConnectionProvider implements ConnectionProvider {
         if (transactionIsolation != null) {
             connection.setTransactionIsolation(transactionIsolation);
         }
-    }
-
-    protected ConnectionProxy createConnectionProxy(Connection connection) {
-        return (ConnectionProxy) Proxy.newProxyInstance(ReflectionUtils.getClassLoader(),
-                new Class<?>[]{ConnectionProxy.class}, new ConnectionProxyHandler(connection));
     }
 
     @Override
@@ -142,6 +121,11 @@ public class DriverConnectionProvider implements ConnectionProvider {
             }
             connection.close();
         }
+    }
+
+    @Override
+    public String toString() {
+        return driverConnectionSpec.getUrl();
     }
 
     public boolean isAutoCommit() {
@@ -158,45 +142,5 @@ public class DriverConnectionProvider implements ConnectionProvider {
 
     public void setTransactionIsolation(int transactionIsolation) {
         this.transactionIsolation = transactionIsolation;
-    }
-
-    class ConnectionProxyHandler implements InvocationHandler {
-
-        private static final String GET_CONNECTION = "getConnection";
-        private Connection connection;
-
-        public ConnectionProxyHandler(Connection connection) {
-            this.connection = connection;
-        }
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            String methodName = method.getName();
-            if (GET_CONNECTION.equals(methodName)) {
-                return getConnection(connection);
-            }
-            return ReflectionUtils.invokeMethod(connection, method, args);
-        }
-    }
-
-    protected Connection createConnection() throws SQLException {
-        String url = driverConnectionSpec.getUrl();
-        Properties properties = new Properties();
-        if (driverConnectionSpec.getProperties() != null) {
-            properties.putAll(driverConnectionSpec.getProperties());
-        }
-        String username = driverConnectionSpec.getUsername();
-        String password = driverConnectionSpec.getPassword();
-        if (username != null) {
-            properties.setProperty(USER_PROPERTY, username);
-        }
-        if (password != null) {
-            properties.setProperty(PASSWORD_PROPERTY, password);
-        }
-        return DriverManager.getConnection(url, properties);
-    }
-
-    protected Connection getConnection(Connection connection) {
-        return connection;
     }
 }

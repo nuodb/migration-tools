@@ -39,23 +39,27 @@ import static java.lang.String.format;
 public class ConnectionProviderFactory {
 
     private boolean pooling;
+    private boolean logging;
 
     public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec, boolean autoCommit) {
         if (connectionSpec == null) {
             return null;
         }
+        ConnectionProvider connectionProvider;
         if (connectionSpec instanceof DriverConnectionSpec) {
-            return createConnectionProvider((DriverConnectionSpec) connectionSpec, autoCommit);
+            connectionProvider = createConnectionProvider((DriverConnectionSpec) connectionSpec, autoCommit);
         } else {
             throw new MigrationException(format("Connection specification is not supported %s", connectionSpec));
         }
+        return logging ? new StatementLoggingConnectionProvider(connectionProvider) : connectionProvider;
     }
 
-    protected ConnectionProvider createConnectionProvider(DriverConnectionSpec connectionSpec, boolean autoCommit) {
+    protected ConnectionProvider createConnectionProvider(DriverConnectionSpec driverConnectionSpec,
+                                                          boolean autoCommit) {
         if (isPooling()) {
-            return new DriverPoolingConnectionProvider(connectionSpec, autoCommit);
+            return new DriverPoolingConnectionProvider(driverConnectionSpec, autoCommit);
         } else {
-            return new DriverConnectionProvider(connectionSpec, autoCommit);
+            return new DriverConnectionProvider(driverConnectionSpec, autoCommit);
         }
     }
 
@@ -65,5 +69,13 @@ public class ConnectionProviderFactory {
 
     public void setPooling(boolean pooling) {
         this.pooling = pooling;
+    }
+
+    public boolean isLogging() {
+        return logging;
+    }
+
+    public void setLogging(boolean logging) {
+        this.logging = logging;
     }
 }

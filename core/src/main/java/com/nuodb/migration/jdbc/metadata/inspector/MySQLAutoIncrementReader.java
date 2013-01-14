@@ -83,11 +83,11 @@ public class MySQLAutoIncrementReader extends MetaDataReaderBase {
                             Table table = column.getTable();
                             statement.setString(1, table.getCatalog().getName());
                             statement.setString(2, table.getName());
-                            ResultSet resultSet = statement.executeQuery();
+                            ResultSet autoIncrement = statement.executeQuery();
                             try {
-                                read(column, resultSet);
+                                read(column, autoIncrement);
                             } finally {
-                                close(resultSet);
+                                close(autoIncrement);
                             }
                         }
                     }
@@ -95,10 +95,10 @@ public class MySQLAutoIncrementReader extends MetaDataReaderBase {
         );
     }
 
-    protected void read(Column column, ResultSet resultSet) throws SQLException {
-        if (resultSet.next()) {
+    protected void read(Column column, ResultSet autoIncrement) throws SQLException {
+        if (autoIncrement.next()) {
             Sequence sequence = new Sequence();
-            sequence.setLastValue(resultSet.getLong("LAST_VALUE"));
+            sequence.setLastValue(autoIncrement.getLong("LAST_VALUE"));
             column.setSequence(sequence);
         }
     }

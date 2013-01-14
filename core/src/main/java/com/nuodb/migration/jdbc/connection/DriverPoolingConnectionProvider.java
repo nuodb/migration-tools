@@ -48,8 +48,8 @@ import java.util.Properties;
 public class DriverPoolingConnectionProvider extends DriverConnectionProvider {
 
     private static final String GET_INNERMOST_DELEGATE = "getInnermostDelegate";
-
-    private PoolingDataSource dataSource;
+    public static final String USER_PROPERTY = "user";
+    public static final String PASSWORD_PROPERTY = "password";
 
     public DriverPoolingConnectionProvider(DriverConnectionSpec driverConnectionSpec) {
         super(driverConnectionSpec);
@@ -65,31 +65,17 @@ public class DriverPoolingConnectionProvider extends DriverConnectionProvider {
     }
 
     @Override
-    protected Connection createConnection() throws SQLException {
-        initDataSource();
-        return dataSource.getConnection();
-    }
-
-    protected void initDataSource() throws SQLException {
-        if (dataSource == null) {
-            synchronized (this) {
-                if (dataSource == null) {
-                    dataSource = createDataSource();
-                }
-            }
-            dataSource.setAccessToUnderlyingConnectionAllowed(true);
-        }
-    }
-
     protected PoolingDataSource createDataSource() throws SQLException {
-        DriverConnectionSpec driverConnectionSpec = getDriverConnectionSpec();
-        String url = driverConnectionSpec.getUrl();
+        registerDriver();
+
+        DriverConnectionSpec connectionSpec = getDriverConnectionSpec();
+        String url = connectionSpec.getUrl();
         Properties properties = new Properties();
-        if (driverConnectionSpec.getProperties() != null) {
-            properties.putAll(driverConnectionSpec.getProperties());
+        if (connectionSpec.getProperties() != null) {
+            properties.putAll(connectionSpec.getProperties());
         }
-        String username = driverConnectionSpec.getUsername();
-        String password = driverConnectionSpec.getPassword();
+        String username = connectionSpec.getUsername();
+        String password = connectionSpec.getPassword();
         if (username != null) {
             properties.setProperty(USER_PROPERTY, username);
         }
@@ -102,27 +88,29 @@ public class DriverPoolingConnectionProvider extends DriverConnectionProvider {
         PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(
                 new DriverManagerConnectionFactory(url, properties),
                 new GenericObjectPool(null), null, null, false, true);
-        return new PoolingDataSource(poolableConnectionFactory.getPool());
+        PoolingDataSource dataSource = new PoolingDataSource(poolableConnectionFactory.getPool());
+        dataSource.setAccessToUnderlyingConnectionAllowed(true);
+        return dataSource;
     }
 
     @Override
-    protected Connection getConnection(Connection connection) {
-        if (connection == null) {
+    protected Connection invokeGetConnection(Connection proxy) {
+        if (proxy == null) {
             return null;
         }
         try {
-            Class connectionClass = connection.getClass();
+            Class connectionClass = proxy.getClass();
             while (!Modifier.isPublic(connectionClass.getModifiers())) {
                 connectionClass = connectionClass.getSuperclass();
                 if (connectionClass == null) {
-                    return connection;
+                    return proxy;
                 }
             }
             Method method = connectionClass.getMethod(GET_INNERMOST_DELEGATE, (Class[]) null);
-            Connection delegate = ReflectionUtils.invokeMethod(connection, method);
-            return (delegate != null ? delegate : connection);
+            Connection delegate = ReflectionUtils.invokeMethod(proxy, method);
+            return (delegate != null ? delegate : proxy);
         } catch (NoSuchMethodException exception) {
-            return connection;
+            return proxy;
         }
     }
 }

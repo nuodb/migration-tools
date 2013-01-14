@@ -25,43 +25,66 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.query;
+package com.nuodb.migration.jdbc.connection;
 
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
-
-import static com.nuodb.migration.jdbc.JdbcUtils.close;
 
 /**
  * @author Sergey Bushik
  */
-public class StatementTemplate {
+public class ConnectionServicesBase implements ConnectionServices {
 
-    private transient final Logger logger = LoggerFactory.getLogger(getClass());
+    private ConnectionProvider connectionProvider;
+    private Connection connection;
 
-    private final Connection connection;
-
-    public StatementTemplate(Connection connection) {
-        this.connection = connection;
+    public ConnectionServicesBase(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
     }
 
-    public <X extends Statement> void execute(StatementCreator<X> statementCreator,
-                                              StatementCallback<X> statementCallback) throws SQLException {
-        X statement = statementCreator.create(connection);
-        try {
-            statementCallback.execute(statement);
-        } catch (Exception exception) {
-            if (logger.isErrorEnabled()) {
-                logger.error("Failed executing statement callback", exception);
+    @Override
+    public String getCatalog() {
+        return connectionProvider.getCatalog();
+    }
+
+    @Override
+    public String getSchema() {
+        return connectionProvider.getSchema();
+    }
+
+    @Override
+    public Connection getConnection() throws SQLException {
+        Connection connection = this.connection;
+        if (connection == null) {
+            synchronized (this) {
+                connection = this.connection;
+                if (connection == null) {
+                    connection = this.connection = connectionProvider.getConnection();
+                }
             }
-        } finally {
-            close(statement.getResultSet());
-            close(statement);
         }
+        return connection;
+    }
+
+    @Override
+    public DatabaseInspector getDatabaseInspector() throws SQLException {
+        DatabaseInspector databaseInspector = new DatabaseInspector();
+        databaseInspector.withCatalog(getCatalog());
+        databaseInspector.withSchema(getSchema());
+        databaseInspector.withConnection(getConnection());
+        return databaseInspector;
+    }
+
+    @Override
+    public void close() throws SQLException {
+        connectionProvider.closeConnection(connection);
+        connection = null;
+    }
+
+    @Override
+    public String toString() {
+        return connectionProvider.toString();
     }
 }

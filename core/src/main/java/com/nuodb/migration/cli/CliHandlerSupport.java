@@ -36,6 +36,7 @@ import com.nuodb.migration.cli.run.CliRunFactory;
 import com.nuodb.migration.cli.run.CliRunFactoryLookup;
 import com.nuodb.migration.cli.run.CliRunJob;
 import com.nuodb.migration.context.support.ApplicationSupport;
+import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migration.job.JobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,6 +182,11 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
     protected void configure(JobFactory jobFactory) {
         if (logger.isTraceEnabled()) {
             logger.trace(format("Configuring %1$s job factory", jobFactory.getClass()));
+        }
+        if (jobFactory instanceof ConnectionProviderFactory) {
+            ConnectionProviderFactory connectionProviderFactory = (ConnectionProviderFactory) jobFactory;
+            connectionProviderFactory.setLogging(true);
+            connectionProviderFactory.setPooling(true);
         }
     }
 

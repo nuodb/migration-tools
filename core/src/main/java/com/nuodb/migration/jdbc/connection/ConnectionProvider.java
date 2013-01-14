@@ -32,9 +32,13 @@ import java.sql.SQLException;
 
 public interface ConnectionProvider {
 
+    String getCatalog();
+
+    String getSchema();
+
     Connection getConnection() throws SQLException;
 
-    ConnectionServices getConnectionServices();
-
     void closeConnection(Connection connection) throws SQLException;
+
+    ConnectionServices getConnectionServices();
 }

@@ -111,8 +111,8 @@ public class SimpleDatabaseServiceResolver<T> implements DatabaseServiceResolver
                 logger.debug(format("Resolved %s to %s", this.serviceClass.getName(), serviceClass.getName()));
             }
         } else if (defaultServiceClass != null) {
-            if (logger.isWarnEnabled()) {
-                logger.warn(format("Defaulted %s to %s", this.serviceClass.getName(), defaultServiceClass.getName()));
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Defaulted %s to %s", this.serviceClass.getName(), defaultServiceClass.getName()));
             }
             serviceClass = defaultServiceClass;
         }

@@ -33,11 +33,13 @@ package com.nuodb.migration.jdbc.metadata.inspector;
 public interface NuoDBIndex {
 
     public static final String QUERY =
-            "SELECT * FROM SYSTEM.INDEXES INNER JOIN SYSTEM.INDEXFIELDS ON\n" +
-            "INDEXES.SCHEMA=INDEXFIELDS.SCHEMA AND\n" +
-            "INDEXES.TABLENAME=INDEXFIELDS.TABLENAME AND\n" +
-            "INDEXES.INDEXNAME = INDEXFIELDS.INDEXNAME\n" +
-            "WHERE SCHEMA=? AND TABLENAME=?";
+            "SELECT *\n" +
+            "FROM SYSTEM.INDEXES\n" +
+            "INNER JOIN SYSTEM.INDEXFIELDS ON INDEXES.SCHEMA=INDEXFIELDS.SCHEMA\n" +
+            "AND INDEXES.TABLENAME=INDEXFIELDS.TABLENAME\n" +
+            "AND INDEXES.INDEXNAME = INDEXFIELDS.INDEXNAME\n" +
+            "WHERE SCHEMA=?\n" +
+            "  AND TABLENAME=?";
 
     public static final int PRIMARY_KEY = 0;
     public static final int UNIQUE = 1;

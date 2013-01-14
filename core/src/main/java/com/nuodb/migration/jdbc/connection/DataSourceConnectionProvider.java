@@ -27,54 +27,27 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
-import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
-
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public class DriverConnectionServices implements ConnectionServices {
+public abstract class DataSourceConnectionProvider extends ConnectionProviderBase {
 
-    private final DriverConnectionProvider driverConnectionProvider;
-    private Connection connection;
+    private DataSource dataSource;
 
-    public DriverConnectionServices(DriverConnectionProvider driverConnectionProvider) {
-        this.driverConnectionProvider = driverConnectionProvider;
-    }
-
-    @Override
-    public Connection getConnection() throws SQLException {
-        Connection connection = this.connection;
-        if (connection == null) {
+    protected Connection createConnection() throws SQLException {
+        if (dataSource == null) {
             synchronized (this) {
-                connection = this.connection;
-                if (connection == null) {
-                    connection = this.connection = driverConnectionProvider.getConnection();
+                if (dataSource == null) {
+                    dataSource = createDataSource();
                 }
             }
         }
-        return connection;
+        return dataSource.getConnection();
     }
 
-    @Override
-    public DatabaseInspector getDatabaseInspector() throws SQLException {
-        DatabaseInspector databaseInspector = new DatabaseInspector();
-        databaseInspector.withCatalog(driverConnectionProvider.getCatalog());
-        databaseInspector.withSchema(driverConnectionProvider.getSchema());
-        databaseInspector.withConnection(getConnection());
-        return databaseInspector;
-    }
-
-    @Override
-    public void close() throws SQLException {
-        driverConnectionProvider.closeConnection(connection);
-        connection = null;
-    }
-
-    @Override
-    public String toString() {
-        return driverConnectionProvider.getDriverConnectionSpec().getUrl();
-    }
+    protected abstract DataSource createDataSource() throws SQLException;
 }
