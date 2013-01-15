@@ -27,8 +27,10 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
+import com.nuodb.migration.jdbc.query.SimpleStatementFormatterFactory;
+import com.nuodb.migration.jdbc.query.StatementFormatter;
+import com.nuodb.migration.jdbc.query.StatementFormatterFactory;
 import com.nuodb.migration.utils.ReflectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +38,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.*;
 import java.util.Collection;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
 /**
@@ -48,11 +46,12 @@ import static com.google.common.collect.Sets.newHashSet;
  */
 public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
 
+    private Logger logger = LoggerFactory.getLogger(getClass());
+    private StatementFormatterFactory statementFormatterFactory = new SimpleStatementFormatterFactory();
     private ConnectionProvider connectionProvider;
-    private Logger logger;
 
     public StatementLoggingConnectionProvider(ConnectionProvider connectionProvider) {
-        this(connectionProvider, LoggerFactory.getLogger(StatementLoggingConnectionProvider.class));
+        this.connectionProvider = connectionProvider;
     }
 
     public StatementLoggingConnectionProvider(ConnectionProvider connectionProvider, Logger logger) {
@@ -87,10 +86,17 @@ public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
                 new ConnectionInvocationHandler(connection));
     }
 
-    protected void logStatement(String statement) {
+    protected void logStatement(String query) {
         if (logger.isTraceEnabled()) {
-            logger.trace(statement);
+            logger.trace(query);
         }
+    }
+
+    protected Object invokeConnectionGetMetaData(ConnectionInvocationHandler connectionInvocationHandler,
+                                                 Object proxy, Method method, Object[] args) {
+        DatabaseMetaData databaseMetaData = connectionInvocationHandler.invokeTarget(method, args);
+        return Proxy.newProxyInstance(ReflectionUtils.getClassLoader(), new Class<?>[]{DatabaseMetaData.class},
+                new ConnectionAwareInvocationHandler((Connection) proxy, databaseMetaData));
     }
 
     protected Object invokeConnectionCreateStatement(ConnectionInvocationHandler connectionInvocationHandler,
@@ -108,13 +114,6 @@ public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
                         (String) args[0]));
     }
 
-    protected Object invokeConnectionGetMetaData(ConnectionInvocationHandler connectionInvocationHandler,
-                                                 Object proxy, Method method, Object[] args) {
-        DatabaseMetaData databaseMetaData = connectionInvocationHandler.invokeTarget(method, args);
-        return Proxy.newProxyInstance(ReflectionUtils.getClassLoader(), new Class<?>[]{DatabaseMetaData.class},
-                new ConnectionAwareInvocationHandler((Connection) proxy, databaseMetaData));
-    }
-
     protected Object invokeStatementExecute(StatementInvocationHandler statementInvocationHandler,
                                             Object proxy, Method method, Object[] args) {
         return statementInvocationHandler.invokeExecute(method, args);
@@ -123,6 +122,14 @@ public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
     protected Object invokePreparedStatementSet(PreparedStatementInvocationHandler preparedStatementInvocationHandler,
                                                 Object proxy, Method method, Object[] args) {
         return preparedStatementInvocationHandler.invokeSet(method, args);
+    }
+
+    public StatementFormatterFactory getStatementFormatterFactory() {
+        return statementFormatterFactory;
+    }
+
+    public void setStatementFormatterFactory(StatementFormatterFactory statementFormatterFactory) {
+        this.statementFormatterFactory = statementFormatterFactory;
     }
 
     public class ConnectionInvocationHandler extends ConnectionProviderBase.ConnectionInvocationHandler {
@@ -191,14 +198,14 @@ public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
         }
 
         public Object invokeExecute(Method method, Object[] args) {
-            logStatement((String) args[0]);
+            logStatement(statementFormatterFactory.createStatementFormatter(getTarget(), (String) args[0]).format());
             return invokeTarget(method, args);
         }
     }
 
     public class PreparedStatementInvocationHandler extends StatementInvocationHandler<PreparedStatement> {
 
-        public static final String SET_NULL = "setNull";
+        private static final String SET_NULL = "setNull";
 
         private final Collection<String> SET_METHODS = newHashSet(
                 "setNull", "setBoolean", "setByte", "setShort", "setInt", "setLong", "setFloat", "setDouble",
@@ -209,15 +216,11 @@ public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
         );
         private final StatementFormatter statementFormatter;
 
+
         public PreparedStatementInvocationHandler(Connection connection,
                                                   PreparedStatement preparedStatement, String query) {
-            this(connection, preparedStatement, new StatementFormatter(query));
-        }
-
-        public PreparedStatementInvocationHandler(Connection connection, PreparedStatement preparedStatement,
-                                                  StatementFormatter statementFormatter) {
             super(connection, preparedStatement);
-            this.statementFormatter = statementFormatter;
+            this.statementFormatter = statementFormatterFactory.createStatementFormatter(getTarget(), query);
         }
 
         @Override
@@ -247,32 +250,5 @@ public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
         }
     }
 
-    public static class StatementFormatter {
 
-        private static final String PARAMETER = "?";
-
-        private final String query;
-        private final List<Object> parameters;
-
-        public StatementFormatter(String query) {
-            this.query = query;
-            this.parameters = newArrayList(new Object[StringUtils.countMatches(query, PARAMETER)]);
-        }
-
-        public void setParameter(int index, Object value) {
-            parameters.set(index, value);
-        }
-
-        public String format() {
-            Pattern pattern = Pattern.compile(Pattern.quote(PARAMETER));
-            Matcher matcher = pattern.matcher(query);
-            StringBuffer result = new StringBuffer(query.length());
-            int index = 0;
-            while (matcher.find()) {
-                matcher.appendReplacement(result, String.valueOf(parameters.get(index++)));
-            }
-            matcher.appendTail(result);
-            return result.toString();
-        }
-    }
 }

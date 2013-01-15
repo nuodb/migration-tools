@@ -69,7 +69,6 @@ import static org.apache.commons.lang3.StringUtils.replace;
 public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory, CliResources {
 
     public static final String IDENTIFIER_QUOTING_MINIMAL = "minimal";
-    public static final String IDENTIFIER_QUOTING_STANDARD = "standard";
     public static final String IDENTIFIER_QUOTING_ALWAYS = "always";
 
     public static final String IDENTIFIER_NORMALIZER_NOOP = "noop";
@@ -350,7 +349,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
                 }
             }
             schemaSpec.setIdentifierQuoting(
-                    identifierQuoting != null ? identifierQuoting : IdentifierQuotings.standard());
+                    identifierQuoting != null ? identifierQuoting : IdentifierQuotings.always());
 
             String identifierNormalizerValue = commandLine.getValue(SCHEMA_IDENTIFIER_NORMALIZER);
             IdentifierNormalizer identifierNormalizer = null;
@@ -403,7 +402,6 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         Map<String, IdentifierQuoting> identifierQuotings =
                 new TreeMap<String, IdentifierQuoting>(String.CASE_INSENSITIVE_ORDER);
         identifierQuotings.put(IDENTIFIER_QUOTING_MINIMAL, IdentifierQuotings.minimal());
-        identifierQuotings.put(IDENTIFIER_QUOTING_STANDARD, IdentifierQuotings.standard());
         identifierQuotings.put(IDENTIFIER_QUOTING_ALWAYS, IdentifierQuotings.always());
         return identifierQuotings;
     }

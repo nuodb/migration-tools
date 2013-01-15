@@ -72,6 +72,6 @@ public class JdbcTypeSpecifiers {
     }
 
     public static JdbcTypeSpecifiers newSizePrecisionScale(Integer size, Integer precision, Integer scale) {
-        return new JdbcTypeSpecifiers().withScale(size).withPrecision(precision).withScale(scale);
+        return new JdbcTypeSpecifiers().withSize(size).withPrecision(precision).withScale(scale);
     }
 }

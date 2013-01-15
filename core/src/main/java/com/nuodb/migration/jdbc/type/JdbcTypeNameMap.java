@@ -49,72 +49,90 @@ public class JdbcTypeNameMap {
     public static final String VARIABLE_PREFIX = "{";
     public static final String VARIABLE_SUFFIX = "}";
 
-    private Map<Integer, Map<JdbcTypeSpecifiers, String>> typeCodeTypeSpecifiersMap = Maps.newHashMap();
+    private Map<JdbcTypeDesc, Map<JdbcTypeSpecifiers, String>> typeCodeTypeSpecifiersMap = Maps.newHashMap();
 
     public void addTypeName(int typeCode, String typeName) {
-        addTypeName(typeCode, typeName, null);
+        addTypeName(new JdbcTypeDesc(typeCode), typeName);
+    }
+
+    public void addTypeName(JdbcTypeDesc typeDesc, String typeName) {
+        addTypeName(typeDesc, typeName, null);
     }
 
     public void addTypeName(int typeCode, String typeName, JdbcTypeSpecifiers typeSpecifiers) {
-        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeCode);
+        addTypeName(new JdbcTypeDesc(typeCode), typeName, typeSpecifiers);
+    }
+
+    public void addTypeName(JdbcTypeDesc typeDesc, String typeName, JdbcTypeSpecifiers typeSpecifiers) {
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeDesc);
         if (typeSpecifiersMap == null) {
             typeSpecifiersMap = Maps.newHashMap();
-            typeCodeTypeSpecifiersMap.put(typeCode, typeSpecifiersMap);
+            typeCodeTypeSpecifiersMap.put(typeDesc, typeSpecifiersMap);
         }
         typeSpecifiersMap.put(typeSpecifiers, typeName.toUpperCase());
     }
 
-    public String getTypeName(int typeCode) {
-        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeCode);
+    public String getTypeName(JdbcTypeDesc typeDesc) {
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeDesc);
         return typeSpecifiersMap != null ? typeSpecifiersMap.get(null) : null;
     }
 
-    public String getTypeName(int typeCode, int size, int precision, int scale) {
-        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeCode);
+    public String getTypeName(JdbcTypeDesc typeDesc, int size, int precision, int scale) {
+        return getTypeName(typeDesc, newSizePrecisionScale(size, precision, scale));
+    }
+
+    public String getTypeName(JdbcTypeDesc typeDesc, JdbcTypeSpecifiers typeSpecifiers) {
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeDesc);
         String typeName = null;
         if (typeSpecifiersMap != null) {
-            JdbcTypeSpecifiers targetTypeSpecifiers = newSizePrecisionScale(size, precision, scale);
             for (Map.Entry<JdbcTypeSpecifiers, String> entry : typeSpecifiersMap.entrySet()) {
-                JdbcTypeSpecifiers typeSpecifiers = entry.getKey();
-                if (TYPE_SPECIFIERS_COMPARATOR.compare(typeSpecifiers, targetTypeSpecifiers) >= 0) {
+                JdbcTypeSpecifiers entryTypeSpecifiers = entry.getKey();
+                if (TYPE_SPECIFIERS_COMPARATOR.compare(entryTypeSpecifiers, typeSpecifiers) >= 0) {
                     if (typeSpecifiers != null) {
-                        targetTypeSpecifiers = typeSpecifiers;
+                        typeSpecifiers = entryTypeSpecifiers;
                     }
                     typeName = entry.getValue();
                 }
             }
         }
         if (typeName == null) {
-            typeName = getTypeName(typeCode);
+            typeName = getTypeName(typeDesc);
         }
-        return expand(typeName, size, precision, scale);
+        return expand(typeName, typeSpecifiers);
     }
 
     public void removeTypeName(int typeCode) {
-        removeTypeName(typeCode, null);
+        removeTypeName(new JdbcTypeDesc(typeCode));
     }
 
-    public void removeTypeName(int typeCode, JdbcTypeSpecifiers typeSpecifiers) {
-        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeCode);
+    public void removeTypeName(JdbcTypeDesc typeDesc) {
+        removeTypeName(typeDesc, null);
+    }
+
+    public void removeTypeName(JdbcTypeDesc typeDesc, JdbcTypeSpecifiers typeSpecifiers) {
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeDesc);
         if (typeSpecifiersMap != null) {
             typeSpecifiersMap.remove(typeSpecifiers);
         }
     }
 
-    private static String expand(String template, int size, int precision, int scale) {
-        if (!StringUtils.isEmpty(template)) {
-            template = expand(template, SIZE, Integer.toString(size));
-            template = expand(template, PRECISION, Integer.toString(precision));
-            template = expand(template, SCALE, Integer.toString(scale));
+    private static String expand(String typeName, JdbcTypeSpecifiers typeSpecifiers) {
+        if (!StringUtils.isEmpty(typeName)) {
+            Integer size = typeSpecifiers.getSize();
+            Integer precision = typeSpecifiers.getPrecision();
+            Integer scale = typeSpecifiers.getScale();
+            typeName = expand(typeName, SIZE, size != null ? Integer.toString(size) : null);
+            typeName = expand(typeName, PRECISION, precision != null ? Integer.toString(precision) : null);
+            typeName = expand(typeName, SCALE, scale != null ? Integer.toString(scale) : null);
         }
-        return template;
+        return typeName;
     }
 
-    private static String expand(String template, String variable, String value) {
+    private static String expand(String typeName, String variable, String value) {
         Pattern compile = Pattern.compile(
                 Pattern.quote(VARIABLE_PREFIX + variable + VARIABLE_SUFFIX), Pattern.CASE_INSENSITIVE);
-        Matcher matcher = compile.matcher(template);
-        return matcher.find() ? matcher.replaceAll(value) : template;
+        Matcher matcher = compile.matcher(typeName);
+        return value != null && matcher.find() ? matcher.replaceAll(value) : typeName;
     }
 
     private static final Comparator<JdbcTypeSpecifiers> TYPE_SPECIFIERS_COMPARATOR = new Ordering<JdbcTypeSpecifiers>() {
@@ -135,5 +153,4 @@ public class JdbcTypeNameMap {
         }
 
     }.nullsFirst();
-
 }

@@ -62,7 +62,7 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
     private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
     private IdentifierNormalizer identifierNormalizer = IdentifierNormalizers.noop();
-    private IdentifierQuoting identifierQuoting = IdentifierQuotings.standard();
+    private IdentifierQuoting identifierQuoting = IdentifierQuotings.always();
     private DatabaseInfo databaseInfo;
 
     public SimpleDialect(DatabaseInfo databaseInfo) {
@@ -445,24 +445,32 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
         return true;
     }
 
-    protected void addTypeName(int typeCode, String typeName) {
+    public void addTypeName(int typeCode, String typeName) {
         jdbcTypeNameMap.addTypeName(typeCode, typeName);
     }
 
-    protected void addTypeName(int typeCode, String typeName, JdbcTypeSpecifiers typeSpecifiers) {
+    public void addTypeName(int typeCode, String typeName, JdbcTypeSpecifiers typeSpecifiers) {
         jdbcTypeNameMap.addTypeName(typeCode, typeName, typeSpecifiers);
     }
 
-    protected void removeTypeName(int typeCode) {
+    public void addTypeName(JdbcTypeDesc typeDesc, String typeName) {
+        jdbcTypeNameMap.addTypeName(typeDesc, typeName);
+    }
+
+    public void removeTypeName(int typeCode) {
         jdbcTypeNameMap.removeTypeName(typeCode);
     }
 
-    protected void addJdbcType(JdbcType jdbcType) {
-        jdbcTypeRegistry.addJdbcType(jdbcType);
+    public void removeTypeName(JdbcTypeDesc typeDesc) {
+        jdbcTypeNameMap.removeTypeName(typeDesc);
     }
 
-    protected void addJdbcTypeAdapter(JdbcTypeAdapter jdbcTypeAdapter) {
-        jdbcTypeRegistry.addJdbcTypeAdapter(jdbcTypeAdapter);
+    public void addJdbcType(JdbcType type) {
+        jdbcTypeRegistry.addJdbcType(type);
+    }
+
+    public void addJdbcTypeAdapter(JdbcTypeAdapter typeAdapter) {
+        jdbcTypeRegistry.addJdbcTypeAdapter(typeAdapter);
     }
 
     public void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias) {

@@ -25,31 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.jdbc.query;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
-public class IdentifierQuotings {
+public interface StatementFormatterFactory {
 
-    public static IdentifierQuoting minimal() {
-        return new IdentifierQuoting() {
-            @Override
-            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
-                return !((SimpleDialect) dialect).isAllowedIdentifier(identifier, hasIdentifier) ||
-                        ((SimpleDialect) dialect).isSQLKeyword(identifier, hasIdentifier);
-            }
-        };
-    }
-
-    public static IdentifierQuoting always() {
-        return new IdentifierQuoting() {
-            @Override
-            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
-                return true;
-            }
-        };
-    }
+    StatementFormatter createStatementFormatter(Statement statement, String query);
 }

@@ -32,12 +32,14 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.*;
-import com.nuodb.migration.jdbc.type.JdbcTypeNameMap;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migration.jdbc.type.JdbcTypeSpecifiers;
 
 import java.util.Collection;
 import java.util.Iterator;
 
 import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migration.jdbc.type.JdbcTypeSpecifiers.newSizePrecisionScale;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -193,9 +195,13 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
         if (scale < 0 && !dialect.supportsNegativeScale()) {
             scale = 0;
         }
-        JdbcTypeNameMap typeNameMap = dialect.getJdbcTypeNameMap();
-        String typeName = typeNameMap.getTypeName(
-                column.getTypeCode(), column.getSize(), column.getPrecision(), scale);
+        JdbcTypeSpecifiers typeSpecifiers = newSizePrecisionScale(column.getSize(), column.getPrecision(), scale);
+        String typeName = dialect.getJdbcTypeNameMap().getTypeName(
+                new JdbcTypeDesc(column.getTypeCode(), column.getTypeName()), typeSpecifiers);
+        if (typeName == null) {
+            typeName = dialect.getJdbcTypeNameMap().getTypeName(
+                    new JdbcTypeDesc(column.getTypeCode()), typeSpecifiers);
+        }
         if (typeName == null) {
             throw new ScriptGeneratorException(
                     format("Unsupported type %s, type code %d, length %d on table %s column %s",

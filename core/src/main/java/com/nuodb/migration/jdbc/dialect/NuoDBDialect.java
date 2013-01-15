@@ -31,6 +31,7 @@ import com.nuodb.migration.jdbc.metadata.HasIdentifier;
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 
 import java.sql.Types;
 import java.util.regex.Pattern;
@@ -95,6 +96,7 @@ public class NuoDBDialect extends SimpleDialect {
         addTypeName(Types.NCHAR, "NCHAR({N})");
         addTypeName(Types.NVARCHAR, "NVARCHAR({N})");
         addTypeName(Types.NCLOB, "NCLOB");
+        addTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
 
         addJdbcType(NuoDBIntegerType.INSTANCE);
         addJdbcType(NuoDBBigIntType.INSTANCE);

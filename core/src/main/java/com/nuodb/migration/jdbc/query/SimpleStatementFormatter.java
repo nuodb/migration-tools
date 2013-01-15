@@ -25,31 +25,43 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.dialect;
+package com.nuodb.migration.jdbc.query;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static org.apache.commons.lang3.StringUtils.countMatches;
 
 /**
  * @author Sergey Bushik
  */
-public class IdentifierQuotings {
+public class SimpleStatementFormatter implements StatementFormatter {
 
-    public static IdentifierQuoting minimal() {
-        return new IdentifierQuoting() {
-            @Override
-            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
-                return !((SimpleDialect) dialect).isAllowedIdentifier(identifier, hasIdentifier) ||
-                        ((SimpleDialect) dialect).isSQLKeyword(identifier, hasIdentifier);
-            }
-        };
+    private static final String PARAMETER = "?";
+
+    private final String query;
+    private final List<Object> parameters;
+
+    public SimpleStatementFormatter(String query) {
+        this.query = query;
+        this.parameters = newArrayList(new Object[countMatches(query, PARAMETER)]);
     }
 
-    public static IdentifierQuoting always() {
-        return new IdentifierQuoting() {
-            @Override
-            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
-                return true;
-            }
-        };
+    public String format() {
+        Pattern pattern = Pattern.compile(Pattern.quote(PARAMETER));
+        Matcher matcher = pattern.matcher(query);
+        StringBuffer result = new StringBuffer(query.length());
+        int index = 0;
+        while (matcher.find()) {
+            matcher.appendReplacement(result, String.valueOf(parameters.get(index++)));
+        }
+        matcher.appendTail(result);
+        return result.toString();
+    }
+
+    public void setParameter(int index, Object value) {
+        parameters.set(index, value);
     }
 }
