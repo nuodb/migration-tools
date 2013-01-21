@@ -49,23 +49,23 @@ public abstract class OptionSetImpl implements OptionSet {
     }
 
     @Override
-    public <T> T getValue(String trigger) {
+    public Object getValue(String trigger) {
         return getValue(getOption(trigger), null);
     }
 
     @Override
-    public <T> T getValue(String trigger, Object defaultValue) {
+    public Object getValue(String trigger, Object defaultValue) {
         return getValue(getOption(trigger), defaultValue);
     }
 
     @Override
-    public <T> T getValue(Option option) {
+    public Object getValue(Option option) {
         return getValue(option, null);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T getValue(Option option, Object defaultValue) {
+    public Object getValue(Option option, Object defaultValue) {
         List<Object> values;
         if (defaultValue == null) {
             values = getValues(option);
@@ -73,9 +73,9 @@ public abstract class OptionSetImpl implements OptionSet {
             values = getValues(option, Collections.singletonList(defaultValue));
         }
         if (values.isEmpty()) {
-            return (T) defaultValue;
+            return defaultValue;
         }
-        return (T) values.get(0);
+        return values.get(0);
     }
 
     @Override

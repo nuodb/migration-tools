@@ -27,7 +27,6 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.JdbcUtils;
 import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
@@ -40,6 +39,7 @@ import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 
 import java.sql.*;
 
+import static com.nuodb.migration.jdbc.JdbcUtils.close;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
@@ -53,7 +53,7 @@ public class NuoDBColumnReader extends NuoDBMetaDataReaderBase {
             "FROM SYSTEM.FIELDS\n" +
             "INNER JOIN SYSTEM.DATATYPES ON FIELDS.DATATYPE = DATATYPES.ID\n" +
             "WHERE SCHEMA=?\n" +
-            "  AND TABLENAME=?\n";
+            "  AND TABLENAME=?";
 
     public NuoDBColumnReader() {
         super(MetaDataType.COLUMN);
@@ -81,7 +81,7 @@ public class NuoDBColumnReader extends NuoDBMetaDataReaderBase {
                             try {
                                 readTable(table, columns);
                             } finally {
-                                JdbcUtils.close(columns);
+                                close(columns);
                             }
                         }
                     }

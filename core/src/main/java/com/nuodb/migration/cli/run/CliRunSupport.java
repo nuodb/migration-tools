@@ -187,20 +187,20 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected ConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
         DriverConnectionSpec connection = new DriverConnectionSpec();
-        connection.setCatalog(commandLine.<String>getValue(SOURCE_CATALOG_OPTION));
-        connection.setSchema(commandLine.<String>getValue(SOURCE_SCHEMA_OPTION));
-        connection.setDriverClassName(commandLine.<String>getValue(SOURCE_DRIVER_OPTION));
-        connection.setUrl(commandLine.<String>getValue(SOURCE_URL_OPTION));
-        connection.setUsername(commandLine.<String>getValue(SOURCE_USERNAME_OPTION));
-        connection.setPassword(commandLine.<String>getValue(SOURCE_PASSWORD_OPTION));
+        connection.setCatalog((String) commandLine.getValue(SOURCE_CATALOG_OPTION));
+        connection.setSchema((String) commandLine.getValue(SOURCE_SCHEMA_OPTION));
+        connection.setDriverClassName((String) commandLine.getValue(SOURCE_DRIVER_OPTION));
+        connection.setUrl((String) commandLine.getValue(SOURCE_URL_OPTION));
+        connection.setUsername((String) commandLine.getValue(SOURCE_USERNAME_OPTION));
+        connection.setPassword((String) commandLine.getValue(SOURCE_PASSWORD_OPTION));
         parseProperties(connection, commandLine, SOURCE_PROPERTIES_OPTION, option);
         return connection;
     }
 
     protected ResourceSpec parseOutputGroup(CommandLine commandLine, Option option) {
         ResourceSpec resource = new ResourceSpec();
-        resource.setType(commandLine.<String>getValue(OUTPUT_TYPE_OPTION));
-        resource.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
+        resource.setType((String) commandLine.getValue(OUTPUT_TYPE_OPTION));
+        resource.setPath((String) commandLine.getValue(OUTPUT_PATH_OPTION));
         resource.setAttributes(parseFormatAttributes(
                 commandLine.<String>getValues(OUTPUT_OPTION), commandLine.getOption(OUTPUT_OPTION)));
         return resource;
@@ -227,7 +227,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected TimeZone parseTimeZone(CommandLine commandLine, Option option) {
-        String timeZone = commandLine.getValue(TIME_ZONE_OPTION);
+        String timeZone = (String) commandLine.getValue(TIME_ZONE_OPTION);
         if (timeZone != null) {
             TimeZone systemTimeZone = TimeZone.getDefault();
             try {
@@ -251,7 +251,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
      */
     protected void parseProperties(DriverConnectionSpec connection, CommandLine commandLine, String trigger,
                                    Option option) {
-        String url = commandLine.getValue(trigger);
+        String url = (String) commandLine.getValue(trigger);
         if (url != null) {
             try {
                 url = URLDecoder.decode(url, "UTF-8");
@@ -361,10 +361,10 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         if (commandLine.hasOption(TARGET_URL_OPTION)) {
             connection = new DriverConnectionSpec();
             connection.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
-            connection.setUrl(commandLine.<String>getValue(TARGET_URL_OPTION));
-            connection.setUsername(commandLine.<String>getValue(TARGET_USERNAME_OPTION));
-            connection.setPassword(commandLine.<String>getValue(TARGET_PASSWORD_OPTION));
-            connection.setSchema(commandLine.<String>getValue(TARGET_SCHEMA_OPTION));
+            connection.setUrl((String) commandLine.getValue(TARGET_URL_OPTION));
+            connection.setUsername((String) commandLine.getValue(TARGET_USERNAME_OPTION));
+            connection.setPassword((String) commandLine.getValue(TARGET_PASSWORD_OPTION));
+            connection.setSchema((String) commandLine.getValue(TARGET_SCHEMA_OPTION));
             parseProperties(connection, commandLine, TARGET_PROPERTIES_OPTION, option);
         }
         return connection;
@@ -372,7 +372,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
 
     protected ResourceSpec parseInputGroup(CommandLine commandLine, Option option) {
         ResourceSpec resource = new ResourceSpec();
-        resource.setPath(commandLine.<String>getValue(INPUT_PATH_OPTION));
+        resource.setPath((String) commandLine.getValue(INPUT_PATH_OPTION));
         resource.setAttributes(parseFormatAttributes(
                 commandLine.<String>getValues(INPUT_OPTION), commandLine.getOption(INPUT_OPTION)));
         return resource;

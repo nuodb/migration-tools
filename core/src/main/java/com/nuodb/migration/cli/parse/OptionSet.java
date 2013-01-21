@@ -31,13 +31,13 @@ public interface OptionSet {
 
     <T> List<T> getValues(Option option, List<T> defaultValues);
 
-    <T> T getValue(String trigger);
+    Object getValue(String trigger);
 
-    <T> T getValue(String trigger, Object defaultValue);
+    Object getValue(String trigger, Object defaultValue);
 
-    <T> T getValue(Option option);
+    Object getValue(Option option);
 
-    <T> T getValue(Option option, Object defaultValue);
+    Object getValue(Option option, Object defaultValue);
 
     Boolean getSwitch(String trigger);
 

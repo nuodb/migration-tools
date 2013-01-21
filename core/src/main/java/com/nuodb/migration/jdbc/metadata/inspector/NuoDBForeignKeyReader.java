@@ -71,7 +71,7 @@ public class NuoDBForeignKeyReader extends NuoDBMetaDataReaderBase {
             "  AND PRIMARYTABLE.TABLENAME=?\n" +
             "ORDER BY PKTABLE_SCHEM,\n" +
             "         PKTABLE_NAME,\n" +
-            "         KEY_SEQ ASC;";
+            "         KEY_SEQ ASC";
 
     public NuoDBForeignKeyReader() {
         super(MetaDataType.FOREIGN_KEY);

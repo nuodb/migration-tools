@@ -133,7 +133,7 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
     }
 
     protected void handleHelp(OptionSet options, Option root) {
-        String command = options.getValue(HELP_OPTION);
+        String command = (String) options.getValue(HELP_OPTION);
         HelpFormatter formatter = new HelpFormatter();
         if (command != null) {
             CliRunFactory cliRunFactory = cliRunFactoryLookup.lookup(command);
@@ -169,7 +169,7 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
     }
 
     protected void handleRun(OptionSet options) {
-        CliRun cliRun = options.getValue(COMMAND_OPTION);
+        CliRun cliRun = (CliRun) options.getValue(COMMAND_OPTION);
         if (logger.isTraceEnabled()) {
             logger.trace(format("Running %1$s command", cliRun.getCommand()));
         }

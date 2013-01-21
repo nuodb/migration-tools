@@ -325,7 +325,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             for (GroupScriptsBy groupScriptsBy : GroupScriptsBy.values()) {
                 groupScriptsByConditionMap.put(groupScriptsBy.getCondition(), groupScriptsBy);
             }
-            String groupScriptsByCondition = commandLine.getValue(SCHEMA_GROUP_SCRIPTS_BY_OPTION);
+            String groupScriptsByCondition = (String) commandLine.getValue(SCHEMA_GROUP_SCRIPTS_BY_OPTION);
             GroupScriptsBy groupScriptsBy;
             if (groupScriptsByCondition != null) {
                 groupScriptsBy = groupScriptsByConditionMap.get(groupScriptsByCondition);
@@ -339,7 +339,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             }
             schemaSpec.setGroupScriptsBy(groupScriptsBy);
 
-            String identifierQuotingValue = commandLine.getValue(SCHEMA_IDENTIFIER_QUOTING);
+            String identifierQuotingValue = (String) commandLine.getValue(SCHEMA_IDENTIFIER_QUOTING);
             IdentifierQuoting identifierQuoting = null;
             if (identifierQuotingValue != null) {
                 identifierQuoting = getIdentifierQuotings().get(identifierQuotingValue);
@@ -351,7 +351,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             schemaSpec.setIdentifierQuoting(
                     identifierQuoting != null ? identifierQuoting : IdentifierQuotings.always());
 
-            String identifierNormalizerValue = commandLine.getValue(SCHEMA_IDENTIFIER_NORMALIZER);
+            String identifierNormalizerValue = (String) commandLine.getValue(SCHEMA_IDENTIFIER_NORMALIZER);
             IdentifierNormalizer identifierNormalizer = null;
             if (identifierNormalizerValue != null) {
                 identifierNormalizer = getIdentifierNormalizers().get(identifierNormalizerValue);
@@ -428,7 +428,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         ResourceSpec resource = null;
         if (commandLine.hasOption(OUTPUT_PATH_OPTION)) {
             resource = new ResourceSpec();
-            resource.setPath(commandLine.<String>getValue(OUTPUT_PATH_OPTION));
+            resource.setPath((String) commandLine.getValue(OUTPUT_PATH_OPTION));
         }
         return resource;
     }
