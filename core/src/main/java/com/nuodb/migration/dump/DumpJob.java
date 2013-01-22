@@ -212,9 +212,6 @@ public class DumpJob extends JobBase {
 
     protected PreparedStatement prepareStatement(Connection connection, Database database,
                                                  Query query) throws SQLException {
-        if (logger.isDebugEnabled()) {
-            logger.debug(query.toQuery());
-        }
         PreparedStatement preparedStatement = connection.prepareStatement(
                 query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
         database.getDialect().setStreamResults(preparedStatement, true);

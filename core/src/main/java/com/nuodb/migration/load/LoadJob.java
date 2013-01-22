@@ -28,6 +28,7 @@
 package com.nuodb.migration.load;
 
 import com.google.common.collect.Lists;
+import com.nuodb.migration.MigrationException;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.dialect.Dialect;
@@ -72,6 +73,7 @@ public class LoadJob extends JobBase {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private ConnectionProvider connectionProvider;
+    private InsertType insertType;
     private TimeZone timeZone;
     private Map<String, String> attributes;
     private Catalog catalog;
@@ -129,8 +131,10 @@ public class LoadJob extends JobBase {
                 load(execution, catalogEntry);
             }
             connection.commit();
-        } finally {
+        } catch (Exception exception) {
             connection.rollback();
+            throw new MigrationException(exception);
+        } finally {
             if (dialect.supportsSessionTimeZone()) {
                 dialect.setSessionTimeZone(connection, null);
             }
@@ -192,9 +196,6 @@ public class LoadJob extends JobBase {
     }
 
     protected PreparedStatement createStatement(Connection connection, Query query) throws SQLException {
-        if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Prepare SQL: %s", query.toQuery()));
-        }
         return connection.prepareStatement(query.toQuery());
     }
 
@@ -210,6 +211,7 @@ public class LoadJob extends JobBase {
 
     protected InsertQuery createInsertQuery(Table table, ValueModelList valueModelList) {
         InsertQueryBuilder builder = new InsertQueryBuilder();
+        builder.setInsertType(getInsertType());
         builder.setQualifyNames(true);
         builder.setTable(table);
         if (valueModelList != null) {
@@ -228,6 +230,14 @@ public class LoadJob extends JobBase {
 
     public void setConnectionProvider(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
+    }
+
+    public InsertType getInsertType() {
+        return insertType;
+    }
+
+    public void setInsertType(InsertType insertType) {
+        this.insertType = insertType;
     }
 
     public TimeZone getTimeZone() {

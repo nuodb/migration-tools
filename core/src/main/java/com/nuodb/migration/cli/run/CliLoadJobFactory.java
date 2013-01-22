@@ -31,6 +31,7 @@ import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.CommandLine;
 import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
+import com.nuodb.migration.jdbc.query.InsertType;
 import com.nuodb.migration.load.LoadJobFactory;
 import com.nuodb.migration.spec.LoadSpec;
 
@@ -67,6 +68,7 @@ public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, C
                     .withName(getResources().getMessage(LOAD_GROUP_NAME))
                     .withOption(createTargetGroup())
                     .withOption(createInputGroup())
+                    .withOption(createReplaceOption())
                     .withOption(createTimeZoneOption())
                     .withRequired(true).build();
         }
@@ -76,9 +78,19 @@ public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, C
             LoadSpec loadSpec = new LoadSpec();
             loadSpec.setTargetConnectionSpec(parseTargetGroup(commandLine, this));
             loadSpec.setInputSpec(parseInputGroup(commandLine, this));
-            loadSpec.setTimeZone(parseTimeZone(commandLine, this));
-
+            loadSpec.setTimeZone(parseTimeZoneOption(commandLine, this));
+            loadSpec.setInsertType(parseReplaceOption(commandLine, this));
             ((LoadJobFactory) getJobFactory()).setLoadSpec(loadSpec);
         }
+    }
+
+    protected Option createReplaceOption() {
+        return newOption().
+                withName(REPLACE_OPTION).
+                withDescription(getMessage(REPLACE_OPTION_DESCRIPTION)).build();
+    }
+
+    protected InsertType parseReplaceOption(CommandLine commandLine, Option option) {
+        return commandLine.hasOption(REPLACE_OPTION) ? InsertType.REPLACE : InsertType.INSERT;
     }
 }

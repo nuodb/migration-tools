@@ -25,51 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.spec;
+package com.nuodb.migration.load;
 
-import com.nuodb.migration.jdbc.query.InsertType;
-
-import java.util.TimeZone;
+import com.nuodb.migration.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadSpec extends TaskSpecBase {
+public class LoadJobException extends MigrationException {
 
-    private ConnectionSpec targetConnectionSpec;
-    private TimeZone timeZone;
-    private InsertType insertType;
-    private ResourceSpec inputSpec;
-
-    public ConnectionSpec getTargetConnectionSpec() {
-        return targetConnectionSpec;
+    public LoadJobException(String message) {
+        super(message);
     }
 
-    public void setTargetConnectionSpec(ConnectionSpec targetConnectionSpec) {
-        this.targetConnectionSpec = targetConnectionSpec;
+    public LoadJobException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public TimeZone getTimeZone() {
-        return timeZone;
-    }
-
-    public void setTimeZone(TimeZone timeZone) {
-        this.timeZone = timeZone;
-    }
-
-    public InsertType getInsertType() {
-        return insertType;
-    }
-
-    public void setInsertType(InsertType insertType) {
-        this.insertType = insertType;
-    }
-
-    public ResourceSpec getInputSpec() {
-        return inputSpec;
-    }
-
-    public void setInputSpec(ResourceSpec inputSpec) {
-        this.inputSpec = inputSpec;
+    public LoadJobException(Throwable cause) {
+        super(cause);
     }
 }

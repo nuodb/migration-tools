@@ -226,7 +226,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 ).build();
     }
 
-    protected TimeZone parseTimeZone(CommandLine commandLine, Option option) {
+    protected TimeZone parseTimeZoneOption(CommandLine commandLine, Option option) {
         String timeZone = (String) commandLine.getValue(TIME_ZONE_OPTION);
         if (timeZone != null) {
             TimeZone systemTimeZone = TimeZone.getDefault();

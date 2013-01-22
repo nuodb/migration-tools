@@ -71,6 +71,8 @@ public interface CliOptions {
     final String TARGET_PROPERTIES_OPTION = "target.properties";
     final String TARGET_SCHEMA_OPTION = "target.schema";
 
+    final String REPLACE_OPTION = "replace";
+
     final String INPUT_OPTION = "input.*";
     final String INPUT_PATH_OPTION = "input.path";
 

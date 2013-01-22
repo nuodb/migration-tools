@@ -41,6 +41,7 @@ import java.util.Collection;
 public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
 
     private Dialect dialect;
+    private InsertType insertType;
     private Table table;
     private boolean qualifyNames;
     private Collection<String> columns = Lists.newArrayList();
@@ -48,6 +49,7 @@ public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
     @Override
     public InsertQuery build() {
         InsertQuery insertQuery = new InsertQuery();
+        insertQuery.setInsertType(insertType);
         insertQuery.setQualifyNames(qualifyNames);
         insertQuery.setTable(table);
         Database database = table.getDatabase();
@@ -74,6 +76,14 @@ public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
 
     public void setDialect(Dialect dialect) {
         this.dialect = dialect;
+    }
+
+    public InsertType getInsertType() {
+        return insertType;
+    }
+
+    public void setInsertType(InsertType insertType) {
+        this.insertType = insertType;
     }
 
     public Table getTable() {

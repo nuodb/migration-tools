@@ -205,7 +205,7 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
             spec.setOutputSpec(parseOutputGroup(commandLine, this));
             parseTableGroup(commandLine, spec);
             spec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine));
-            spec.setTimeZone(parseTimeZone(commandLine, this));
+            spec.setTimeZone(parseTimeZoneOption(commandLine, this));
 
             ((DumpJobFactory) getJobFactory()).setDumpSpec(spec);
         }

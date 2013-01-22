@@ -40,10 +40,19 @@ import java.util.Map;
  */
 public class InsertQuery implements Query {
 
+    private InsertType insertType = InsertType.INSERT;
     private Dialect dialect;
     private Table table;
     private boolean qualifyNames;
     private Map<Column, String> columns = Maps.newLinkedHashMap();
+
+    public InsertType getInsertType() {
+        return insertType;
+    }
+
+    public void setInsertType(InsertType insertType) {
+        this.insertType = insertType;
+    }
 
     public Dialect getDialect() {
         return dialect;
@@ -88,7 +97,8 @@ public class InsertQuery implements Query {
     @Override
     public String toQuery() {
         StringBuilder query = new StringBuilder();
-        query.append("INSERT INTO ")
+        query.append(insertType == null ? InsertType.INSERT : insertType.getCommand());
+        query.append(" INTO ")
                 .append(qualifyNames ? table.getQualifiedName(dialect) : table.getName(dialect));
         if (columns.size() == 0) {
             query.append(' ').append(dialect.getNoColumnsInsert());

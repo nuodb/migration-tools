@@ -25,51 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.spec;
-
-import com.nuodb.migration.jdbc.query.InsertType;
-
-import java.util.TimeZone;
+package com.nuodb.migration.jdbc.query;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadSpec extends TaskSpecBase {
+public enum InsertType {
 
-    private ConnectionSpec targetConnectionSpec;
-    private TimeZone timeZone;
-    private InsertType insertType;
-    private ResourceSpec inputSpec;
+    INSERT("INSERT"), REPLACE("REPLACE");
 
-    public ConnectionSpec getTargetConnectionSpec() {
-        return targetConnectionSpec;
+    private final String command;
+
+    InsertType(String command) {
+        this.command = command;
     }
 
-    public void setTargetConnectionSpec(ConnectionSpec targetConnectionSpec) {
-        this.targetConnectionSpec = targetConnectionSpec;
-    }
-
-    public TimeZone getTimeZone() {
-        return timeZone;
-    }
-
-    public void setTimeZone(TimeZone timeZone) {
-        this.timeZone = timeZone;
-    }
-
-    public InsertType getInsertType() {
-        return insertType;
-    }
-
-    public void setInsertType(InsertType insertType) {
-        this.insertType = insertType;
-    }
-
-    public ResourceSpec getInputSpec() {
-        return inputSpec;
-    }
-
-    public void setInputSpec(ResourceSpec inputSpec) {
-        this.inputSpec = inputSpec;
+    public String getCommand() {
+        return command;
     }
 }
