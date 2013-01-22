@@ -32,24 +32,14 @@ import com.nuodb.migration.jdbc.metadata.ForeignKey;
 /**
  * @author Sergey Bushik
  */
-public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
+public class ForeignKeyNamingStrategy extends HasIdentifierNamingStrategy<ForeignKey> {
 
     public ForeignKeyNamingStrategy() {
         super(ForeignKey.class);
     }
 
     @Override
-    public String getName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
-        return getForeignKeyName(foreignKey, context, identifier);
-    }
-
-    @Override
-    public String getQualifiedName(ForeignKey foreignKey, ScriptGeneratorContext context,
-                                   boolean identifier) {
-        return getForeignKeyName(foreignKey, context, identifier);
-    }
-
-    public String getForeignKeyName(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
+    protected String getNameOfHasIdentifier(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("FK");
         buffer.append('_');
@@ -58,8 +48,8 @@ public class ForeignKeyNamingStrategy extends NamingStrategyBase<ForeignKey> {
         qualifier.append(context.getName(foreignKey.getPrimaryTable(), false));
         qualifier.append(' ');
         qualifier.append(context.getName(foreignKey.getForeignTable(), false));
-        buffer.append(md5Hex(qualifier.toString()));
 
-        return identifier ? context.getDialect().getIdentifier(buffer.toString(), foreignKey) : buffer.toString();
+        buffer.append(md5Hex(qualifier.toString()));
+        return buffer.toString();
     }
 }

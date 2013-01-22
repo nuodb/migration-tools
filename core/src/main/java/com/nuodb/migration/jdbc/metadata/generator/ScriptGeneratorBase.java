@@ -48,11 +48,11 @@ public abstract class ScriptGeneratorBase<R extends Relational> extends Generato
     @Override
     public Collection<String> getScripts(R relational, ScriptGeneratorContext context) {
         Collection<String> scripts;
-        if (hasScriptType(context, DROP) && hasScriptType(context, CREATE)) {
+        if (isScriptType(context, DROP) && isScriptType(context, CREATE)) {
             scripts = getDropCreateScripts(relational, context);
-        } else if (hasScriptType(context, DROP)) {
+        } else if (isScriptType(context, DROP)) {
             scripts = getDropScripts(relational, context);
-        } else if (hasScriptType(context, CREATE)) {
+        } else if (isScriptType(context, CREATE)) {
             scripts = getCreateScripts(relational, context);
         } else {
             scripts = emptySet();
@@ -67,12 +67,12 @@ public abstract class ScriptGeneratorBase<R extends Relational> extends Generato
         return scripts;
     }
 
-    protected boolean hasScriptType(ScriptGeneratorContext context, ScriptType scriptType) {
-        Collection<ScriptType> scriptTypes = context.getScriptTypes();
-        return scriptTypes != null && scriptTypes.contains(scriptType);
-    }
-
     protected abstract Collection<String> getDropScripts(R relational, ScriptGeneratorContext context);
 
     protected abstract Collection<String> getCreateScripts(R relational, ScriptGeneratorContext context);
+
+    protected boolean isScriptType(ScriptGeneratorContext context, ScriptType scriptType) {
+        Collection<ScriptType> scriptTypes = context.getScriptTypes();
+        return scriptTypes != null && scriptTypes.contains(scriptType);
+    }
 }

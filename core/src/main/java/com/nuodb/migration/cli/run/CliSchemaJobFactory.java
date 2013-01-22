@@ -37,6 +37,7 @@ import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.cli.parse.option.GroupBuilder;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.cli.parse.option.RegexOption;
+import com.nuodb.migration.jdbc.JdbcConstants;
 import com.nuodb.migration.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migration.jdbc.dialect.IdentifierNormalizers;
 import com.nuodb.migration.jdbc.dialect.IdentifierQuoting;
@@ -45,9 +46,7 @@ import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migration.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migration.schema.SchemaJobFactory;
-import com.nuodb.migration.spec.JdbcTypeSpec;
-import com.nuodb.migration.spec.ResourceSpec;
-import com.nuodb.migration.spec.SchemaSpec;
+import com.nuodb.migration.spec.*;
 import com.nuodb.migration.utils.Priority;
 import com.nuodb.migration.utils.ReflectionUtils;
 
@@ -177,7 +176,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             schemaSpec.setSourceConnectionSpec(parseSourceGroup(commandLine, this));
             schemaSpec.setTargetConnectionSpec(parseTargetGroup(commandLine, this));
             schemaSpec.setOutputSpec(parseOutputGroup(commandLine, this));
-            parserSchemaOptions(schemaSpec, commandLine, this);
+            parseSchemaOptions(schemaSpec, commandLine, this);
             ((SchemaJobFactory) getJobFactory()).setSchemaSpec(schemaSpec);
         }
 
@@ -296,7 +295,18 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             group.withOption(identifierNormalizer);
         }
 
-        protected void parserSchemaOptions(SchemaSpec schemaSpec, CommandLine commandLine, Option option) {
+        protected ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
+            DriverConnectionSpec connection = new DriverConnectionSpec();
+            connection.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
+            connection.setUrl((String) commandLine.getValue(TARGET_URL_OPTION));
+            connection.setUsername((String) commandLine.getValue(TARGET_USERNAME_OPTION));
+            connection.setPassword((String) commandLine.getValue(TARGET_PASSWORD_OPTION));
+            connection.setSchema((String) commandLine.getValue(TARGET_SCHEMA_OPTION));
+            parseProperties(connection, commandLine, TARGET_PROPERTIES_OPTION, option);
+            return connection;
+        }
+
+        protected void parseSchemaOptions(SchemaSpec schemaSpec, CommandLine commandLine, Option option) {
             if (commandLine.hasOption(SCHEMA_META_DATA_OPTION)) {
                 Collection<String> values = commandLine.getValues(SCHEMA_META_DATA_OPTION);
                 Set<MetaDataType> metaDataTypes = newHashSet(MetaDataType.ALL_TYPES);
@@ -387,7 +397,6 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         }
     }
 
-
     protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {
         Map<String, IdentifierNormalizer> identifierNormalizers =
                 new TreeMap<String, IdentifierNormalizer>(String.CASE_INSENSITIVE_ORDER);
@@ -440,12 +449,10 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         Option url = newOption().
                 withName(TARGET_URL_OPTION).
                 withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
-                withRequired(true).
                 withArgument(
                         newArgument().
                                 withName(getMessage(TARGET_URL_ARGUMENT_NAME)).
-                                withRequired(true).
-                                withMinimum(1).build()
+                                withMinimum(1).withRequired(true).build()
                 ).build();
         group.withOption(url);
 

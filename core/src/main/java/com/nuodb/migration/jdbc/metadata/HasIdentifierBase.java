@@ -99,7 +99,12 @@ public class HasIdentifierBase extends IndentedOutputBase implements HasIdentifi
         return isQualified() ? getQualifiedName(dialect, catalog, schema, this) : getName(dialect);
     }
 
-    private static String getQualifiedName(Dialect dialect, String catalog, String schema, HasIdentifier hasIdentifier) {
+    public static String getQualifiedName(Dialect dialect, String catalog, String schema, HasIdentifier hasIdentifier) {
+        return getQualifiedName(dialect, catalog, schema, hasIdentifier.getName(), hasIdentifier);
+    }
+
+    public static String getQualifiedName(Dialect dialect, String catalog, String schema, String name,
+                                          HasIdentifier hasIdentifier) {
         StringBuilder buffer = new StringBuilder();
         if (catalog != null) {
             buffer.append(dialect != null ? dialect.getIdentifier(catalog, null) : catalog);
@@ -109,7 +114,6 @@ public class HasIdentifierBase extends IndentedOutputBase implements HasIdentifi
             buffer.append(dialect != null ? dialect.getIdentifier(schema, null) : schema);
             buffer.append('.');
         }
-        String name = hasIdentifier.getName();
         buffer.append(dialect != null ? dialect.getIdentifier(name, hasIdentifier) : hasIdentifier.getName());
         return buffer.toString();
     }

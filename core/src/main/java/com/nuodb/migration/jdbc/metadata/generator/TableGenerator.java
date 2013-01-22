@@ -71,7 +71,7 @@ public class TableGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
                         column.getSequence() != null ?
-                                context.getQualifiedName(column.getSequence()) : null));
+                                context.getName(column.getSequence()) : null));
             }
             if (column.isNullable()) {
                 buffer.append(dialect.getNullColumnString());

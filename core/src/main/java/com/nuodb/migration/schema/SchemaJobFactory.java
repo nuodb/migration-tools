@@ -95,6 +95,8 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         context.setDialect(dialect);
 
         ConnectionSpec connectionSpec = getSchemaSpec().getTargetConnectionSpec();
+
+        context.setSchema("HOCKEY");
         if (connectionSpec != null) {
             context.setCatalog(connectionSpec.getCatalog());
             context.setSchema(connectionSpec.getSchema());
@@ -104,7 +106,8 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
 
     protected ScriptExporter createScriptExporter() {
         Collection<ScriptExporter> exporters = newArrayList();
-        ConnectionProvider connectionProvider = createConnectionProvider(schemaSpec.getTargetConnectionSpec());
+        ConnectionSpec targetConnectionSpec = schemaSpec.getTargetConnectionSpec();
+        ConnectionProvider connectionProvider = createConnectionProvider(targetConnectionSpec);
         if (connectionProvider != null) {
             exporters.add(new ConnectionScriptExporter(connectionProvider.getConnectionServices()));
         }

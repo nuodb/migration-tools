@@ -36,7 +36,7 @@ public interface NamingStrategy<R extends Relational> extends GeneratorService<R
 
     String getName(R relational, ScriptGeneratorContext context);
 
-    String getName(R relational, ScriptGeneratorContext context, boolean identifier);
+    String getName(R relational, ScriptGeneratorContext context, boolean normalize);
 
     String getQualifiedName(R relational, ScriptGeneratorContext context);
 

@@ -51,15 +51,20 @@ public class ConnectionProviderFactory {
         } else {
             throw new MigrationException(format("Connection specification is not supported %s", connectionSpec));
         }
-        return logging ? new StatementLoggingConnectionProvider(connectionProvider) : connectionProvider;
+        if (connectionProvider != null && logging) {
+            connectionProvider = new StatementLoggingConnectionProvider(connectionProvider);
+        }
+        return connectionProvider;
     }
 
-    protected ConnectionProvider createConnectionProvider(DriverConnectionSpec driverConnectionSpec,
-                                                          boolean autoCommit) {
+    protected ConnectionProvider createConnectionProvider(DriverConnectionSpec connectionSpec, boolean autoCommit) {
+        if (connectionSpec.getUrl() == null) {
+            return null;
+        }
         if (isPooling()) {
-            return new DriverPoolingConnectionProvider(driverConnectionSpec, autoCommit);
+            return new DriverPoolingConnectionProvider(connectionSpec, autoCommit);
         } else {
-            return new DriverConnectionProvider(driverConnectionSpec, autoCommit);
+            return new DriverConnectionProvider(connectionSpec, autoCommit);
         }
     }
 

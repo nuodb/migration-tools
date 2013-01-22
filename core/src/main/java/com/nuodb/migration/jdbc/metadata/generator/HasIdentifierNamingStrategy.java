@@ -27,25 +27,55 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
+import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import com.nuodb.migration.jdbc.metadata.HasIdentifierBase;
+
+import static org.apache.commons.codec.binary.Hex.encodeHex;
+import static org.apache.commons.codec.digest.DigestUtils.md5;
 
 /**
  * @author Sergey Bushik
  */
-public class HasIdentifierNamingStrategy extends NamingStrategyBase<HasIdentifier> {
+public class HasIdentifierNamingStrategy<R extends HasIdentifier> extends GeneratorServiceBase<R> implements NamingStrategy<R> {
 
     public HasIdentifierNamingStrategy() {
-        super(HasIdentifier.class);
+        this((Class<R>) HasIdentifier.class);
+    }
+
+    public HasIdentifierNamingStrategy(Class<R> objectType) {
+        super(objectType);
     }
 
     @Override
-    public String getName(HasIdentifier object, ScriptGeneratorContext context, boolean identifier) {
-        return identifier ? object.getName(context.getDialect()) : object.getName();
+    public String getName(R hasIdentifier, ScriptGeneratorContext context) {
+        return getName(hasIdentifier, context, true);
     }
 
     @Override
-    public String getQualifiedName(HasIdentifier object, ScriptGeneratorContext context, boolean identifier) {
-        return identifier ? object.getQualifiedName(context.getDialect(), context.getCatalog(), context.getSchema()) :
-                object.getQualifiedName(context.getCatalog(), context.getSchema());
+    public String getName(R hasIdentifier, ScriptGeneratorContext context, boolean identifier) {
+        String name = getNameOfHasIdentifier(hasIdentifier, context, identifier);
+        return identifier ? context.getDialect().getIdentifier(name, hasIdentifier) : name;
+    }
+
+    @Override
+    public String getQualifiedName(R hasIdentifier, ScriptGeneratorContext context, boolean identifier) {
+        Dialect dialect = identifier ? context.getDialect() : null;
+        String name = getNameOfHasIdentifier(hasIdentifier, context, identifier);
+        return HasIdentifierBase.getQualifiedName(dialect, context.getCatalog(),
+                context.getSchema(), name, hasIdentifier);
+    }
+
+    @Override
+    public String getQualifiedName(R hasIdentifier, ScriptGeneratorContext context) {
+        return getQualifiedName(hasIdentifier, context, true);
+    }
+
+    protected String getNameOfHasIdentifier(R hasIdentifier, ScriptGeneratorContext context, boolean identifier) {
+        return hasIdentifier.getName();
+    }
+
+    public static String md5Hex(String data) {
+        return new String(encodeHex(md5(data), false));
     }
 }
