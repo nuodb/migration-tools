@@ -3,7 +3,6 @@ package com.nuodb.migration.jdbc;
 import com.nuodb.migration.jdbc.connection.DriverConnectionProvider;
 import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
 import com.nuodb.migration.spec.DriverConnectionSpec;
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,12 +15,14 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Properties;
 
+import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DriverConnectionProviderTest {
 
     private static final String URL = "jdbc:com.nuodb://localhost/test";
+
     private static final int TRANSACTION_ISOLATION = Connection.TRANSACTION_READ_COMMITTED;
 
     @Mock
@@ -50,10 +51,10 @@ public class DriverConnectionProviderTest {
                 new DriverPoolingConnectionProvider(connectionSpec);
         connectionProvider.setTransactionIsolation(TRANSACTION_ISOLATION);
         connectionProvider.setAutoCommit(false);
-        Assert.assertNotNull(connectionProvider.getConnection());
+
+        assertNotNull(connectionProvider.getConnection());
         verify(connectionSpec).getDriver();
         verify(connectionSpec).getUsername();
-        verify(connectionSpec).getUrl();
         verify(connectionSpec).getPassword();
         verify(connection).setTransactionIsolation(anyInt());
         verify(connection).setAutoCommit(false);
