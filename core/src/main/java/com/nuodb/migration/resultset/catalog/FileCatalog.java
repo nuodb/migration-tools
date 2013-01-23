@@ -44,27 +44,28 @@ public class FileCatalog implements Catalog {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private String path;
+    private File pathFile;
     private File catalogDir;
     private File catalogFile;
 
     public FileCatalog(String path) {
         this.path = path;
+        this.pathFile = getPathFile();
         this.catalogDir = getCatalogDir();
         this.catalogFile = getCatalogFile();
     }
 
+    protected File getPathFile() {
+        return new File(path == null ? new File(EMPTY).getAbsolutePath() : path);
+    }
+
     protected File getCatalogDir() {
-        File catalogDir = new File(path == null ? getCurrentDirectory() : path);
-        return catalogDir.exists() && catalogDir.isFile() ? catalogDir.getParentFile() : catalogDir;
+        return pathFile.exists() && pathFile.isFile() ? pathFile.getParentFile() : catalogDir;
     }
 
     protected File getCatalogFile() {
-        String catalogFile = catalogDir.isFile() ? catalogDir.getName() : CATALOG_FILE_NAME;
+        String catalogFile = pathFile.exists() && pathFile.isFile() ? pathFile.getName() : CATALOG_FILE_NAME;
         return new File(catalogDir, catalogFile);
-    }
-
-    private static String getCurrentDirectory() {
-        return new File(EMPTY).getAbsolutePath();
     }
 
     public String getPath() {

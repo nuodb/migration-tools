@@ -34,5 +34,7 @@ public interface StatementFormatter {
 
     String format();
 
+    Object getParameter(int index);
+
     void setParameter(int index, Object value);
 }

@@ -27,11 +27,15 @@
  */
 package com.nuodb.migration.jdbc.query;
 
+import java.sql.Blob;
+import java.sql.Clob;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.String.valueOf;
+import static java.util.regex.Matcher.quoteReplacement;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 
 /**
@@ -40,6 +44,7 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 public class SimpleStatementFormatter implements StatementFormatter {
 
     private static final String PARAMETER = "?";
+    public static final Pattern PARAMETER_PATTERN = Pattern.compile(Pattern.quote(PARAMETER));
 
     private final String query;
     private final List<Object> parameters;
@@ -50,15 +55,33 @@ public class SimpleStatementFormatter implements StatementFormatter {
     }
 
     public String format() {
-        Pattern pattern = Pattern.compile(Pattern.quote(PARAMETER));
-        Matcher matcher = pattern.matcher(query);
+        Matcher matcher = PARAMETER_PATTERN.matcher(query);
         StringBuffer result = new StringBuffer(query.length());
         int index = 0;
         while (matcher.find()) {
-            matcher.appendReplacement(result, String.valueOf(parameters.get(index++)));
+            matcher.appendReplacement(result, quoteReplacement(format(getParameter(index++))));
         }
         matcher.appendTail(result);
         return result.toString();
+    }
+
+    protected String format(Object parameter) {
+        if (parameter == null) {
+            return "NULL";
+        } else if (parameter instanceof Number) {
+            return valueOf(parameter);
+        } else if (parameter instanceof Clob) {
+            return "[CLOB]";
+        } else if (parameter instanceof Blob) {
+            return "[BLOB]";
+        } else {
+            String value = valueOf(parameter);
+            return new StringBuilder(value.length() + 2).append("'").append(value).append("'").toString();
+        }
+    }
+
+    public Object getParameter(int index) {
+        return parameters.get(index);
     }
 
     public void setParameter(int index, Object value) {
