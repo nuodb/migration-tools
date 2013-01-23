@@ -1,58 +1,67 @@
 <!DOCTYPE html>
 <html>
 
-  <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="migration-tools : Migration Tools for NuoDB" />
+<head>
+  <meta charset='utf-8'/>
+  <meta http-equiv="X-UA-Compatible" content="chrome=1"/>
+  <meta name="description" content="migration-tools : Migration Tools for NuoDB"/>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+  <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>migration-tools</title>
-  </head>
+  <title>migration-tools</title>
+</head>
 
-  <body>
+<body>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/nuodb/migration-tools">View on GitHub</a>
+<!-- HEADER -->
+<div id="header_wrap" class="outer">
+  <header class="inner">
+    <a id="forkme_banner" href="https://github.com/nuodb/migration-tools">View on GitHub</a>
 
-          <h1 id="project_title">migration-tools</h1>
-          <h2 id="project_tagline">Migration Tools for NuoDB</h2>
+    <h1 id="project_title">migration-tools</h1>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/nuodb/migration-tools/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/nuodb/migration-tools/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
+    <h2 id="project_tagline">Migration Tools for NuoDB</h2>
 
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h3>Welcome to the NuoDB Migration Tools Project</h3>
+    <section id="downloads">
+      <a class="zip_download_link" href="https://github.com/nuodb/migration-tools/zipball/master">Download this project
+        as a .zip file</a>
+      <a class="tar_download_link" href="https://github.com/nuodb/migration-tools/tarball/master">Download this project
+        as a tar.gz file</a>
+    </section>
+  </header>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main_content_wrap" class="outer">
+<section id="main_content" class="inner">
+<h3>Welcome to the NuoDB Migration Tools Project</h3>
 
 <p>This site contains details on how to install and use the NuoDB Ruby Native Driver.</p>
 
-<p><em>A command-line interface for helping domain administrators manage backup and migration of their databases.</em></p>
+<p><em>A command-line interface for helping domain administrators manage backup and migration of their databases.</em>
+</p>
 
-<p>This tool is designed to assist you in migrating data from supported SQL databases to a NuoDB database. Use nuodb-migration dump and nuodb-migration load to copy, normalize, and load data from an existing database (NuoDB or 3rd party) to a NuoDB database.  With the command-line interface, domain administrators will be able to perform the following database backup and migration tasks:</p>
+<p>This tool is designed to assist you in migrating data from supported SQL databases to a NuoDB database. Use
+  nuodb-migration dump and nuodb-migration load to copy, normalize, and load data from an existing database (NuoDB or
+  3rd party) to a NuoDB database. With the command-line interface, domain administrators will be able to perform the
+  following database backup and migration tasks:</p>
 
 <ol>
-<li>Migrate (generate) a schema to a target NuoDB database</li>
-<li>Copy data from an existing database to a target NuoDB database</li>
-<li>Dump data from an existing database</li>
-<li>Load data to a target NuoDB database</li>
-</ol><p><em>These functions are initially tested on MySQL, SQL Server, Oracle and PostgreSQL and should work with any JDBC-compliant database.</em></p>
+  <li>Migrate (generate) a schema to a target NuoDB database</li>
+  <li>Copy data from an existing database to a target NuoDB database</li>
+  <li>Dump data from an existing database</li>
+  <li>Load data to a target NuoDB database</li>
+</ol>
+<p><em>These functions are initially tested on MySQL, SQL Server, Oracle and PostgreSQL and should work with any
+  JDBC-compliant database.</em></p>
 
 <h2>Building from Source</h2>
 
 <pre><code>$ git clone https://github.com/nuodb/migration-tools
-$ cd migration-tools/
-$ mvn install
-$ cd assembly/target/nuodb-migration/
-$ bin/nuodb-migration --help
+  $ cd migration-tools/
+  $ mvn install
+  $ cd assembly/target/nuodb-migration/
+  $ bin/nuodb-migration --help
 </code></pre>
 
 <h2>Synopsis</h2>
@@ -60,203 +69,211 @@ $ bin/nuodb-migration --help
 <h3>Root command line options</h3>
 
 <pre><code>$ bin/nuodb-migration
-    --help |
-    --help=&lt;[dump] | [load] | [schema]&gt; |
-    --list |
-    --config=&lt;file&gt;
-    &lt;[dump] | [load] | [schema]&gt;
+  --help |
+  --help=&lt;[dump] | [load] | [schema]&gt; |
+  --list |
+  --config=&lt;file&gt;
+  &lt;[dump] | [load] | [schema]&gt;
 </code></pre>
 
 <h3>Dump data from an existing database</h3>
 
 <pre><code>$ bin/nuodb-migration dump
-    [source database connection, required]
-        --source.driver&lt;driver&gt; |
-        --source.url=&lt;url&gt; |
-        --source.username=&lt;username&gt; |
-        --source.password=&lt;password&gt; |
-        --source.properties=&lt;properties&gt; |
-        --source.catalog=&lt;catalog&gt; |
-        --source.schema=&lt;schema&gt; |
-    [output specification, required]
-        --output.type=&lt;output type&gt; |
-        --output.path=&lt;output path&gt; |
-        --output.*=&lt;attribute value&gt; |
-    [table names &amp; query filters, optional]
-        --table=&lt;table&gt; |
-        --table.type=&lt;table type&gt; |
-        --table.*.filter=&lt;query filter&gt; |
-    [select statements, optional]
-        --query=&lt;query&gt; |
-    --time.zone=&lt;time zone&gt;
+  [source database connection, required]
+  --source.driver&lt;driver&gt; |
+  --source.url=&lt;url&gt; |
+  --source.username=&lt;username&gt; |
+  --source.password=&lt;password&gt; |
+  --source.properties=&lt;properties&gt; |
+  --source.catalog=&lt;catalog&gt; |
+  --source.schema=&lt;schema&gt; |
+  [output specification, required]
+  --output.type=&lt;output type&gt; |
+  --output.path=&lt;output path&gt; |
+  --output.*=&lt;attribute value&gt; |
+  [table names &amp; query filters, optional]
+  --table=&lt;table&gt; |
+  --table.type=&lt;table type&gt; |
+  --table.*.filter=&lt;query filter&gt; |
+  [select statements, optional]
+  --query=&lt;query&gt; |
+  --time.zone=&lt;time zone&gt;
 </code></pre>
 
 <h3>Load data to a target NuoDB database</h3>
 
 <pre><code>$ bin/nuodb-migration load
-    [target database connection, required]
-        --target.url=&lt;url&gt; |
-        --target.username=&lt;username&gt; |
-        --target.password=&lt;password&gt; |
-        --target.properties=&lt;properties&gt; |
-        --target.schema=&lt;schema&gt; |
-    [input specification, required]
-        --input.type=&lt;input type&gt; |
-        --input.path=&lt;input path&gt; |
-        --input.*=&lt;attribute value&gt; |
-    --time.zone=&lt;time zone&gt;
+  [target database connection, required]
+  --target.url=&lt;url&gt; |
+  --target.username=&lt;username&gt; |
+  --target.password=&lt;password&gt; |
+  --target.properties=&lt;properties&gt; |
+  --target.schema=&lt;schema&gt; |
+  [input specification, required]
+  --input.type=&lt;input type&gt; |
+  --input.path=&lt;input path&gt; |
+  --input.*=&lt;attribute value&gt; |
+  --time.zone=&lt;time zone&gt;
 </code></pre>
 
 <h3>Generate a schema for a target NuoDB database</h3>
 
 <pre><code>$ bin/nuodb-migration schema
-    [source database connection, required]
-        --source.driver=&lt;driver&gt; |
-        --source.url=&lt;url&gt; |
-        --source.username=&lt;username&gt; |
-        --source.password=&lt;password&gt; |
-        --source.properties=&lt;properties&gt; |
-        --source.catalog=&lt;catalog&gt; |
-        --source.schema=&lt;schema&gt; |
-    [target database connection, optional]
-        --target.url=&lt;url&gt; |
-        --target.username=&lt;username&gt; |
-        --target.password=&lt;password&gt; |
-        --target.properties=&lt;properties&gt; |
-        --target.schema=&lt;schema&gt; |
-        --output.path=&lt;output path&gt; |
-    [custom type declarations, optional]
-        --type.name=&lt;type name&gt; |
-        --type.code=&lt;type code&gt; |
-        --type.size=&lt;type size&gt; |
-        --type.precision=&lt;type precision&gt; |
-        --type.scale=&lt;type scale&gt;
-    [schema output options, optional]
-        --meta.data.*=&lt;[true] | [false]&gt; |
-        --script.type=&lt;[drop] , [create]&gt; |
-        --group.scripts.by=&lt;[table] | [meta.data]&gt; |
-        --identifier.normalizer=&lt;[noop] | [standard] | [lower.case] | [upper.case]&gt;
+  [source database connection, required]
+  --source.driver=&lt;driver&gt; |
+  --source.url=&lt;url&gt; |
+  --source.username=&lt;username&gt; |
+  --source.password=&lt;password&gt; |
+  --source.properties=&lt;properties&gt; |
+  --source.catalog=&lt;catalog&gt; |
+  --source.schema=&lt;schema&gt; |
+  [target database connection, optional]
+  --target.url=&lt;url&gt; |
+  --target.username=&lt;username&gt; |
+  --target.password=&lt;password&gt; |
+  --target.properties=&lt;properties&gt; |
+  --target.schema=&lt;schema&gt; |
+  --output.path=&lt;output path&gt; |
+  [custom type declarations, optional]
+  --type.name=&lt;type name&gt; |
+  --type.code=&lt;type code&gt; |
+  --type.size=&lt;type size&gt; |
+  --type.precision=&lt;type precision&gt; |
+  --type.scale=&lt;type scale&gt;
+  [schema output options, optional]
+  --meta.data.*=&lt;[true] | [false]&gt; |
+  --script.type=&lt;[drop] , [create]&gt; |
+  --group.scripts.by=&lt;[table] | [meta.data]&gt; |
+  --identifier.normalizer=&lt;[noop] | [standard] | [lower.case] | [upper.case]&gt;
 </code></pre>
 
 <h2>Connect to Third-party Databases</h2>
 
-<p>To interface with third-party databases through JDBC-compliant drivers you should download &amp; install appropriate JAR files.</p>
+<p>To interface with third-party databases through JDBC-compliant drivers you should download &amp; install appropriate
+  JAR files.</p>
 
 <p>You can add required dependency to pom.xml, then clean &amp; package project:</p>
 
 <pre><code>$ mvn clean install
 </code></pre>
 
-<p>The required JDBC driver JAR file will be download automatically to the assembly/target/nuodb-migration/jar/ directory</p>
+<p>The required JDBC driver JAR file will be download automatically to the assembly/target/nuodb-migration/jar/
+  directory</p>
 
-<p>Alternatively, you can download &amp; copy required JAR file to assembly/target/nuodb-migration/jar/ manually. For example, to install PostgreSQL JDBC4 Driver:</p>
+<p>Alternatively, you can download &amp; copy required JAR file to assembly/target/nuodb-migration/jar/ manually. For
+  example, to install PostgreSQL JDBC4 Driver:</p>
 
 <pre><code>$ mvn clean install
-$ curl http://jdbc.postgresql.org/download/postgresql-9.2-1001.jdbc4.jar &gt; \
-    assembly/target/nuodb-migration/jar/postgresql-9.2-1001.jdbc4.jar
+  $ curl http://jdbc.postgresql.org/download/postgresql-9.2-1001.jdbc4.jar &gt; \
+  assembly/target/nuodb-migration/jar/postgresql-9.2-1001.jdbc4.jar
 </code></pre>
 
-<p>To include MySQL JDBC Driver into assembly using Maven add the following dependency to pom.xml, then clean &amp; package project:</p>
+<p>To include MySQL JDBC Driver into assembly using Maven add the following dependency to pom.xml, then clean &amp;
+  package project:</p>
 
 <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
-    ...
-    &lt;dependencies&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;mysql&lt;/groupId&gt;
-            &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
-            &lt;version&gt;5.1.20&lt;/version&gt;
-        &lt;/dependency&gt;
-    &lt;/dependencies&gt;
-    ...
-&lt;/project&gt;
+  &lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+  ...
+  &lt;dependencies&gt;
+  &lt;dependency&gt;
+  &lt;groupId&gt;mysql&lt;/groupId&gt;
+  &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+  &lt;version&gt;5.1.20&lt;/version&gt;
+  &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+  ...
+  &lt;/project&gt;
 </code></pre>
 
 <p>For Microsoft SQL Server you might use jTDS Type 4 JDBC Driver:</p>
 
 <pre><code>&lt;dependency&gt;
-    &lt;groupId&gt;net.sourceforge.jtds&lt;/groupId&gt;
-    &lt;artifactId&gt;jtds&lt;/artifactId&gt;
-    &lt;version&gt;1.2.4&lt;/version&gt;
-&lt;dependency&gt;
+  &lt;groupId&gt;net.sourceforge.jtds&lt;/groupId&gt;
+  &lt;artifactId&gt;jtds&lt;/artifactId&gt;
+  &lt;version&gt;1.2.4&lt;/version&gt;
+  &lt;dependency&gt;
 </code></pre>
 
 <p>For PostgreSQL add PostgreSQL Native Driver of the required version to the pom.xml file:</p>
 
 <pre><code>&lt;dependency&gt;
-    &lt;groupId&gt;postgresql&lt;/groupId&gt;
-    &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
-    &lt;version&gt;9.0-801.jdbc4&lt;/version&gt;
-&lt;/dependency&gt;
+  &lt;groupId&gt;postgresql&lt;/groupId&gt;
+  &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
+  &lt;version&gt;9.0-801.jdbc4&lt;/version&gt;
+  &lt;/dependency&gt;
 </code></pre>
 
 <h2>Examples</h2>
 
-<p>The following examples show how to dump MySQL to a file (in the first case), and an existing NuoDB database (in the second case).  The third case shows how to use the load command.</p>
+<p>The following examples show how to dump MySQL to a file (in the first case), and an existing NuoDB database (in the
+  second case). The third case shows how to use the load command.</p>
 
 <p>Example 1: Dump all tables from MySQL "enron" catalog in CSV format</p>
 
 <pre><code>$ bin/nuodb-migration dump --source.driver=com.mysql.jdbc.Driver \
-    --source.url=jdbc:mysql://localhost:3306/test --source.catalog=test \
-    --source.username=&lt;username&gt; \
-    --output.type=csv --output.path=/tmp/dump.cat
+  --source.url=jdbc:mysql://localhost:3306/test --source.catalog=test \
+  --source.username=&lt;username&gt; \
+  --output.type=csv --output.path=/tmp/dump.cat
 </code></pre>
 
-<p>Example 2: Dump records from "hockey" table where "id" is not equal to 25 from NuoDB "test" catalog in BSON format</p>
+<p>Example 2: Dump records from "hockey" table where "id" is not equal to 25 from NuoDB "test" catalog in BSON
+  format</p>
 
 <pre><code>$ bin/nuodb-migration dump --source.driver=com.nuodb.jdbc.Driver \
-    --source.url=jdbc:com.nuodb://localhost/test \
-    --source.username=&lt;username&gt; \
-    --source.schema=hockey --table=hockey --table.hockey.filter=id&lt;&gt;25 \
-    --output.path=/tmp/dump.cat --output.type=bson
+  --source.url=jdbc:com.nuodb://localhost/test \
+  --source.username=&lt;username&gt; \
+  --source.schema=hockey --table=hockey --table.hockey.filter=id&lt;&gt;25 \
+  --output.path=/tmp/dump.cat --output.type=bson
 </code></pre>
 
 <p>Example 3: Load CSV data to the corresponding tables in NuoDB from /tmp/dump.cat</p>
 
 <pre><code>$ bin/nuodb-migration load --target.url=jdbc:com.nuodb://localhost/test \
-    --target.username=&lt;username&gt; --target.password=&lt;password&gt; \
-    --input.path=/tmp/dump.cat
+  --target.username=&lt;username&gt; --target.password=&lt;password&gt; \
+  --input.path=/tmp/dump.cat
 </code></pre>
 
-<p>Example 4: Generate NuoDB schema from Oracle "test" database and output it to stdout stream. To save schema in a particular file on the file system add --output.path= option, i.e. --output.path=/tmp/schema.sql</p>
+<p>Example 4: Generate NuoDB schema from Oracle "test" database and output it to stdout stream. To save schema in a
+  particular file on the file system add --output.path= option, i.e. --output.path=/tmp/schema.sql</p>
 
 <pre><code>$ bin/nuodb-migration schema --source.driver=oracle.jdbc.driver.OracleDriver \
-    --source.url=jdbc:oracle:thin:@//localhost:1521/test \
-    --source.username=&lt;username&gt; --source.password=&lt;password&gt; --source.schema=test
+  --source.url=jdbc:oracle:thin:@//localhost:1521/test \
+  --source.username=&lt;username&gt; --source.password=&lt;password&gt; --source.schema=test
 </code></pre>
 
-<p>Example 5: Migrate schema from Microsoft SQL Server "test" database to a NuoDB database excluding generation of foreign keys and check constraints on table and column levels. Generated table names and column identifiers will be transformed using "standard" identifier normalizer (changed to upper case if unquoted).</p>
+<p>Example 5: Migrate schema from Microsoft SQL Server "test" database to a NuoDB database excluding generation of
+  foreign keys and check constraints on table and column levels. Generated table names and column identifiers will be
+  transformed using "standard" identifier normalizer (changed to upper case if unquoted).</p>
 
 <pre><code>$ bin/nuodb-migration schema --source.driver=net.sourceforge.jtds.jdbc.Driver \
-    --source.url=jdbc:jtds:sqlserver://localhost:1433/test \
-    --source.username=&lt;username&gt; --source.password=&lt;password&gt; --source.schema=dbo \
-    --target.url=jdbc:com.nuodb://localhost/test \
-    --target.username=&lt;username&gt; --target.password=&lt;password&gt; --target.schema=hockey \
-    --meta.data.foreign.key=false --meta.data.check.constraint=false \
-    --identifier.normalizer=standard
+  --source.url=jdbc:jtds:sqlserver://localhost:1433/test \
+  --source.username=&lt;username&gt; --source.password=&lt;password&gt; --source.schema=dbo \
+  --target.url=jdbc:com.nuodb://localhost/test \
+  --target.username=&lt;username&gt; --target.password=&lt;password&gt; --target.schema=hockey \
+  --meta.data.foreign.key=false --meta.data.check.constraint=false \
+  --identifier.normalizer=standard
 </code></pre>
-
-<h3>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
 
 <h3>Support or Contact</h3>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-      </section>
-    </div>
+<p>Having trouble with migration-tools? Contact <a href="mailto:support@nuodb.com">support@nuodb.com</a>
+  and we’ll help you sort it out. GitHub hosts the
+  <a href="https://github.com/nuodb/migration-tools/issues">issue tracker</a> for
+  this open-source project.</p>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">migration-tools maintained by <a href="https://github.com/nuodb">nuodb</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
+</section>
+</div>
 
-    
+<!-- FOOTER  -->
+<div id="footer_wrap" class="outer">
+  <footer class="inner">
+    <p class="copyright">Copyright (c) 2012-2013, NuoDB, Inc. ruby-nuodb maintained by <a
+        href="https://github.com/nuodb">nuodb</a>
+    </p>
+  </footer>
+</div>
 
-  </body>
+</body>
 </html>
