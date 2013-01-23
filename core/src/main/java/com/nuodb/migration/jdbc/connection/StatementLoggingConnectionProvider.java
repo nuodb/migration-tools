@@ -86,7 +86,7 @@ public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
                 new ConnectionInvocationHandler(connection));
     }
 
-    protected void logStatement(String query) {
+    protected void log(String query) {
         if (logger.isTraceEnabled()) {
             logger.trace(query);
         }
@@ -158,7 +158,7 @@ public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
         }
     }
 
-    public class ConnectionAwareInvocationHandler<T> extends TargetInvocationHandler<T> {
+    public class ConnectionAwareInvocationHandler<T> extends TargetAwareInvocationHandler<T> {
 
         private static final String GET_CONNECTION_METHOD = "getConnection";
 
@@ -198,7 +198,7 @@ public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
         }
 
         public Object invokeExecute(Method method, Object[] args) {
-            logStatement(statementFormatterFactory.createStatementFormatter(getTarget(), (String) args[0]).format());
+            log(statementFormatterFactory.createStatementFormatter(getTarget(), (String) args[0]).format());
             return invokeTarget(method, args);
         }
     }
@@ -245,7 +245,7 @@ public class StatementLoggingConnectionProvider extends ConnectionProviderBase {
 
         @Override
         public Object invokeExecute(Method method, Object[] args) {
-            logStatement(statementFormatter.format());
+            log(statementFormatter.format());
             return invokeTarget(method, args);
         }
     }

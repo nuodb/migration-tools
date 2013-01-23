@@ -46,13 +46,13 @@ public interface ResultSetFormat {
 
     void setTimeZone(TimeZone timeZone);
 
-    String getAttribute(String attribute);
+    Object getAttribute(String attribute);
 
-    String getAttribute(String attribute, String defaultValue);
+    Object getAttribute(String attribute, Object defaultValue);
 
-    Map<String, String> getAttributes();
+    Map<String, Object> getAttributes();
 
-    void setAttributes(Map<String, String> attributes);
+    void setAttributes(Map<String, Object> attributes);
 
     ValueModelList<ValueModel> getValueModelList();
 

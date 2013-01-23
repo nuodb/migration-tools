@@ -35,7 +35,7 @@ public class SpecBase implements Spec {
 
     private String id;
     private String type;
-    private Map<String, String> attributes;
+    private Map<String, Object> attributes;
 
     public String getId() {
         return id;
@@ -53,11 +53,11 @@ public class SpecBase implements Spec {
         this.type = type;
     }
 
-    public Map<String, String> getAttributes() {
+    public Map<String, Object> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 

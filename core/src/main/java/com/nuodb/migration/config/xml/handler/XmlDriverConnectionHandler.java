@@ -53,10 +53,10 @@ public class XmlDriverConnectionHandler extends XmlReadWriteHandlerBase<DriverCo
         output.getChild("url").setValue(connection.getUrl());
         output.getChild("username").setValue(connection.getUsername());
         output.getChild("password").setValue(connection.getPassword());
-        for (Map.Entry<String, String> entry : connection.getProperties().entrySet()) {
+        for (Map.Entry<String, Object> entry : connection.getProperties().entrySet()) {
             OutputNode property = output.getChild("property");
             property.getChild("name").setValue(entry.getKey());
-            property.getChild("value").setValue(entry.getValue());
+            property.getChild("value").setValue((String) entry.getValue());
         }
         return true;
     }

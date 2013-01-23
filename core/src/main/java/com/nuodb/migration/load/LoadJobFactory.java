@@ -41,6 +41,7 @@ import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
+import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DriverConnectionSpec;
 import com.nuodb.migration.spec.LoadSpec;
 import com.nuodb.migration.spec.ResourceSpec;
@@ -66,7 +67,8 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
 
         ResourceSpec inputSpec = loadSpec.getInputSpec();
         LoadJob job = new LoadJob();
-        job.setConnectionProvider(createConnectionProvider(loadSpec.getTargetConnectionSpec(), false));
+        ConnectionSpec connectionSpec = loadSpec.getTargetConnectionSpec();
+        job.setConnectionProvider(createConnectionProvider(connectionSpec, false));
 
         job.setAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));

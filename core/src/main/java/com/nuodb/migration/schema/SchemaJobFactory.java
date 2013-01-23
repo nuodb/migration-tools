@@ -95,8 +95,6 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         context.setDialect(dialect);
 
         ConnectionSpec connectionSpec = getSchemaSpec().getTargetConnectionSpec();
-
-        context.setSchema("HOCKEY");
         if (connectionSpec != null) {
             context.setCatalog(connectionSpec.getCatalog());
             context.setSchema(connectionSpec.getSchema());

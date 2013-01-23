@@ -75,7 +75,7 @@ public class LoadJob extends JobBase {
     private ConnectionProvider connectionProvider;
     private InsertType insertType;
     private TimeZone timeZone;
-    private Map<String, String> attributes;
+    private Map<String, Object> attributes;
     private Catalog catalog;
     private DialectResolver dialectResolver;
     private ResultSetFormatFactory resultSetFormatFactory;
@@ -248,11 +248,11 @@ public class LoadJob extends JobBase {
         this.timeZone = timeZone;
     }
 
-    public Map<String, String> getAttributes() {
+    public Map<String, Object> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 

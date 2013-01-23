@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
+import com.nuodb.migration.jdbc.url.JdbcUrl;
+import com.nuodb.migration.jdbc.url.JdbcUrlParserUtils;
 import com.nuodb.migration.spec.DriverConnectionSpec;
 import com.nuodb.migration.utils.ReflectionUtils;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -43,6 +45,7 @@ import static java.lang.String.format;
 public class DriverConnectionProvider extends DataSourceConnectionProvider {
 
     private DriverConnectionSpec driverConnectionSpec;
+    private JdbcUrl jdbcUrl;
     private Boolean autoCommit;
     private Integer transactionIsolation;
 
@@ -50,30 +53,35 @@ public class DriverConnectionProvider extends DataSourceConnectionProvider {
         this(driverConnectionSpec, false);
     }
 
-    public DriverConnectionProvider(DriverConnectionSpec driverConnectionSpec, boolean autoCommit) {
-        this.driverConnectionSpec = driverConnectionSpec;
-        this.autoCommit = autoCommit;
+    public DriverConnectionProvider(DriverConnectionSpec driverConnectionSpec, Boolean autoCommit) {
+        this(driverConnectionSpec, autoCommit, null);
     }
 
-    public DriverConnectionProvider(DriverConnectionSpec driverConnectionSpec, boolean autoCommit,
-                                    int transactionIsolation) {
+    public DriverConnectionProvider(DriverConnectionSpec driverConnectionSpec, Boolean autoCommit,
+                                    Integer transactionIsolation) {
         this.driverConnectionSpec = driverConnectionSpec;
+        this.jdbcUrl = JdbcUrlParserUtils.getInstance().parse(
+                driverConnectionSpec.getUrl(), driverConnectionSpec.getProperties());
         this.autoCommit = autoCommit;
         this.transactionIsolation = transactionIsolation;
     }
 
-    protected DriverConnectionSpec getDriverConnectionSpec() {
-        return driverConnectionSpec;
-    }
-
     @Override
     public String getCatalog() {
-        return driverConnectionSpec != null ? driverConnectionSpec.getCatalog() : null;
+        String catalog = jdbcUrl.getCatalog();
+        if (jdbcUrl.getCatalog() != null) {
+            catalog = jdbcUrl.getCatalog();
+        }
+        return catalog;
     }
 
     @Override
     public String getSchema() {
-        return driverConnectionSpec != null ? driverConnectionSpec.getSchema() : null;
+        String schema = jdbcUrl.getSchema();
+        if (jdbcUrl.getSchema() != null) {
+            schema = jdbcUrl.getSchema();
+        }
+        return schema;
     }
 
     protected DataSource createDataSource() throws SQLException {
@@ -82,17 +90,16 @@ public class DriverConnectionProvider extends DataSourceConnectionProvider {
         dataSource.setUrl(driverConnectionSpec.getUrl());
         dataSource.setUsername(driverConnectionSpec.getUsername());
         dataSource.setPassword(driverConnectionSpec.getPassword());
-        Map<String, String> properties = driverConnectionSpec.getProperties();
+        Map<String, Object> properties = driverConnectionSpec.getProperties();
         if (properties != null) {
-            for (Map.Entry<String, String> entry : properties.entrySet()) {
-                dataSource.addConnectionProperty(entry.getKey(), entry.getValue());
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                dataSource.addConnectionProperty(entry.getKey(), (String) entry.getValue());
             }
         }
         return dataSource;
     }
 
     protected void registerDriver() throws SQLException {
-        DriverConnectionSpec driverConnectionSpec = getDriverConnectionSpec();
         Driver driver = driverConnectionSpec.getDriver();
         if (driver == null) {
             String driverClassName = driverConnectionSpec.getDriverClassName();
@@ -104,6 +111,10 @@ public class DriverConnectionProvider extends DataSourceConnectionProvider {
         DriverManager.registerDriver(driver);
     }
 
+    protected DriverConnectionSpec getDriverConnectionSpec() {
+        return driverConnectionSpec;
+    }
+
     protected void initConnection(Connection connection) throws SQLException {
         if (autoCommit != null) {
             connection.setAutoCommit(autoCommit);
@@ -111,6 +122,22 @@ public class DriverConnectionProvider extends DataSourceConnectionProvider {
         if (transactionIsolation != null) {
             connection.setTransactionIsolation(transactionIsolation);
         }
+    }
+
+    public Boolean getAutoCommit() {
+        return autoCommit;
+    }
+
+    public void setAutoCommit(Boolean autoCommit) {
+        this.autoCommit = autoCommit;
+    }
+
+    public Integer getTransactionIsolation() {
+        return transactionIsolation;
+    }
+
+    public void setTransactionIsolation(Integer transactionIsolation) {
+        this.transactionIsolation = transactionIsolation;
     }
 
     @Override
@@ -126,21 +153,5 @@ public class DriverConnectionProvider extends DataSourceConnectionProvider {
     @Override
     public String toString() {
         return driverConnectionSpec.getUrl();
-    }
-
-    public boolean isAutoCommit() {
-        return autoCommit;
-    }
-
-    public void setAutoCommit(boolean autoCommit) {
-        this.autoCommit = autoCommit;
-    }
-
-    public int getTransactionIsolation() {
-        return transactionIsolation;
-    }
-
-    public void setTransactionIsolation(int transactionIsolation) {
-        this.transactionIsolation = transactionIsolation;
     }
 }

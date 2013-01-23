@@ -183,11 +183,6 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
         if (logger.isTraceEnabled()) {
             logger.trace(format("Configuring %1$s job factory", jobFactory.getClass()));
         }
-        if (jobFactory instanceof ConnectionProviderFactory) {
-            ConnectionProviderFactory connectionProviderFactory = (ConnectionProviderFactory) jobFactory;
-            connectionProviderFactory.setLogging(true);
-            connectionProviderFactory.setPooling(true);
-        }
     }
 
     protected void handleOptionException(OptionException exception) {

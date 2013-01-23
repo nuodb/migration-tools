@@ -25,39 +25,66 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.connection;
+package com.nuodb.migration.jdbc.url;
 
-import com.nuodb.migration.MigrationException;
-import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverConnectionSpec;
+import java.util.HashMap;
+import java.util.Map;
 
-import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionProviderFactory {
+public class NuoDBJdbcUrlParser implements JdbcUrlParser {
 
-    public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec, boolean autoCommit) {
-        if (connectionSpec == null) {
-            return null;
-        }
-        ConnectionProvider connectionProvider;
-        if (connectionSpec instanceof DriverConnectionSpec) {
-            connectionProvider = createConnectionProvider((DriverConnectionSpec) connectionSpec, autoCommit);
-        } else {
-            throw new MigrationException(format("Connection specification is not supported %s", connectionSpec));
-        }
-        if (connectionProvider != null) {
-            connectionProvider = new StatementLoggingConnectionProvider(connectionProvider);
-        }
-        return connectionProvider;
+    @Override
+    public boolean canParse(String url) {
+        return startsWith(url, "jdbc:com.nuodb");
     }
 
-    public ConnectionProvider createConnectionProvider(DriverConnectionSpec driverConnectionSpec, boolean autoCommit) {
-        if (driverConnectionSpec.getUrl() == null) {
+    @Override
+    public JdbcUrl parse(String url, Map<String, Object> overrides) {
+        return new NuoDBJdbcUrl(url, overrides);
+    }
+
+    class NuoDBJdbcUrl implements JdbcUrl {
+
+        private Map<String, Object> properties = new HashMap<String, Object>();
+
+        public NuoDBJdbcUrl(String url, Map<String, Object> overrides) {
+            int start = url.indexOf("://") + 3;
+            if (start > 0) {
+                int params = url.indexOf('?', start);
+                if (params > 0) {
+                    String pairs[] = url.substring(params + 1).split("&");
+                    int length = pairs.length;
+                    for (int i = 0; i < length; i++) {
+                        String pair[] = pairs[i].split("=");
+                        if (pair.length == 2) {
+                            properties.put(pair[0], pair[1]);
+                        }
+                    }
+
+                }
+            }
+            if (overrides != null) {
+                properties.putAll(overrides);
+            }
+        }
+
+        @Override
+        public String getCatalog() {
             return null;
         }
-        return new DriverPoolingConnectionProvider(driverConnectionSpec, autoCommit);
+
+        @Override
+        public String getSchema() {
+            return (String) properties.get("schema");
+        }
+
+        @Override
+        public Map<String, Object> getProperties() {
+            return properties;
+        }
     }
 }

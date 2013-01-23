@@ -72,11 +72,11 @@ public abstract class ConnectionProviderBase implements ConnectionProvider {
         return connection;
     }
 
-    public abstract class TargetInvocationHandler<T> implements InvocationHandler {
+    public abstract class TargetAwareInvocationHandler<T> implements InvocationHandler {
 
         private final T target;
 
-        public TargetInvocationHandler(T target) {
+        public TargetAwareInvocationHandler(T target) {
             this.target = target;
         }
 
@@ -94,7 +94,7 @@ public abstract class ConnectionProviderBase implements ConnectionProvider {
         }
     }
 
-    public class ConnectionInvocationHandler extends TargetInvocationHandler<Connection> {
+    public class ConnectionInvocationHandler extends TargetAwareInvocationHandler<Connection> {
 
         private static final String GET_CONNECTION_METHOD = "getConnection";
 

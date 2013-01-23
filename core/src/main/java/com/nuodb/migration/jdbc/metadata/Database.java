@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.metadata;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -105,7 +106,14 @@ public class Database extends IndentedOutputBase implements Relational {
         if (tables.isEmpty()) {
             throw new MetaDataException(format("Can't find table %s", table));
         } else if (tables.size() > 1) {
-            throw new MetaDataException(format("Multiple tables %s correspond to %s", tables, table));
+            throw new MetaDataException(format("Multiple tables %s match %s",
+                    Iterables.transform(tables,
+                            new Function<Table, String>() {
+                                @Override
+                                public String apply(Table table) {
+                                    return table.getQualifiedName(getDialect());
+                                }
+                            }), table));
         }
         return tables.iterator().next();
     }

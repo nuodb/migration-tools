@@ -51,17 +51,17 @@ public class DriverPoolingConnectionProvider extends DriverConnectionProvider {
     public static final String USER_PROPERTY = "user";
     public static final String PASSWORD_PROPERTY = "password";
 
-    public DriverPoolingConnectionProvider(DriverConnectionSpec driverConnectionSpec) {
-        super(driverConnectionSpec);
+    public DriverPoolingConnectionProvider(DriverConnectionSpec connectionSpec) {
+        super(connectionSpec);
     }
 
-    public DriverPoolingConnectionProvider(DriverConnectionSpec driverConnectionSpec, boolean autoCommit) {
-        super(driverConnectionSpec, autoCommit);
+    public DriverPoolingConnectionProvider(DriverConnectionSpec connectionSpec, boolean autoCommit) {
+        super(connectionSpec, autoCommit);
     }
 
-    public DriverPoolingConnectionProvider(DriverConnectionSpec driverConnectionSpec, boolean autoCommit,
+    public DriverPoolingConnectionProvider(DriverConnectionSpec connectionSpec, boolean autoCommit,
                                            int transactionIsolation) {
-        super(driverConnectionSpec, autoCommit, transactionIsolation);
+        super(connectionSpec, autoCommit, transactionIsolation);
     }
 
     @Override
@@ -85,10 +85,10 @@ public class DriverPoolingConnectionProvider extends DriverConnectionProvider {
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("Creating connection pool at %s", url));
         }
-        PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(
+        PoolableConnectionFactory connectionFactory = new PoolableConnectionFactory(
                 new DriverManagerConnectionFactory(url, properties),
                 new GenericObjectPool(null), null, null, false, true);
-        PoolingDataSource dataSource = new PoolingDataSource(poolableConnectionFactory.getPool());
+        PoolingDataSource dataSource = new PoolingDataSource(connectionFactory.getPool());
         dataSource.setAccessToUnderlyingConnectionAllowed(true);
         return dataSource;
     }

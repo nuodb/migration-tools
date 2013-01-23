@@ -63,7 +63,7 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
         if (getWriter() != null) {
             printer = new CSVPrinter(getWriter(), format);
         } else if (getOutputStream() != null) {
-            String encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
+            String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
             printer = new CSVPrinter(new OutputStreamWriter(getOutputStream(), Charset.forName(encoding)), format);
 
         }

@@ -25,39 +25,54 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.connection;
+package com.nuodb.migration.jdbc.url;
 
-import com.nuodb.migration.MigrationException;
-import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.google.common.collect.Sets;
 
-import static java.lang.String.format;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionProviderFactory {
+public class JdbcUrlParserUtils {
 
-    public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec, boolean autoCommit) {
-        if (connectionSpec == null) {
-            return null;
+    private static JdbcUrlParserUtils INSTANCE;
+
+    public static JdbcUrlParserUtils getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new JdbcUrlParserUtils();
         }
-        ConnectionProvider connectionProvider;
-        if (connectionSpec instanceof DriverConnectionSpec) {
-            connectionProvider = createConnectionProvider((DriverConnectionSpec) connectionSpec, autoCommit);
-        } else {
-            throw new MigrationException(format("Connection specification is not supported %s", connectionSpec));
-        }
-        if (connectionProvider != null) {
-            connectionProvider = new StatementLoggingConnectionProvider(connectionProvider);
-        }
-        return connectionProvider;
+        return INSTANCE;
     }
 
-    public ConnectionProvider createConnectionProvider(DriverConnectionSpec driverConnectionSpec, boolean autoCommit) {
-        if (driverConnectionSpec.getUrl() == null) {
-            return null;
+    private Collection<JdbcUrlParser> parsers = Sets.newLinkedHashSet();
+
+    private JdbcUrlParserUtils() {
+        parsers.add(new NuoDBJdbcUrlParser());
+    }
+
+    public JdbcUrl parse(String url, Map<String, Object> overrides) {
+        for (JdbcUrlParser parser : parsers) {
+            if (parser.canParse(url)) {
+                return parser.parse(url, overrides);
+            }
         }
-        return new DriverPoolingConnectionProvider(driverConnectionSpec, autoCommit);
+        return null;
+    }
+
+    public void addParser(JdbcUrlParser jdbcUrlParser) {
+        parsers.add(jdbcUrlParser);
+    }
+
+    public Collection<JdbcUrlParser> getParsers() {
+        return parsers;
+    }
+
+    public static void main(String[] args) {
+        JdbcUrl jdbcUrl = new JdbcUrlParserUtils().parse("jdbc:com.nuodb://localhost/test?schema=foo", null);
+        if (jdbcUrl != null) {
+            System.out.println("catalog: " + jdbcUrl.getCatalog() + " , schema: " + jdbcUrl.getSchema());
+        }
     }
 }

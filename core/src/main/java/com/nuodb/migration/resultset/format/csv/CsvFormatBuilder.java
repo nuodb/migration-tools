@@ -53,7 +53,7 @@ class CsvFormatBuilder implements CsvAttributes {
     }
 
     public CSVFormat build() {
-        String delimiterValue = format.getAttribute(ATTRIBUTE_DELIMITER);
+        String delimiterValue = (String) format.getAttribute(ATTRIBUTE_DELIMITER);
 
         if (isEmpty(delimiterValue)) {
             delimiter = DELIMITER;
@@ -61,27 +61,27 @@ class CsvFormatBuilder implements CsvAttributes {
             delimiter = delimiterValue.charAt(0);
         }
 
-        String quotingValue = format.getAttribute(ATTRIBUTE_QUOTING);
+        String quotingValue = (String) format.getAttribute(ATTRIBUTE_QUOTING);
         if (isEmpty(quotingValue)) {
             quoting = QUOTING;
         } else {
             quoting = parseBoolean(quotingValue);
         }
 
-        String quoteValue = format.getAttribute(ATTRIBUTE_QUOTE);
+        String quoteValue = (String) format.getAttribute(ATTRIBUTE_QUOTE);
         if (isEmpty(quoteValue)) {
             quote = QUOTE;
         } else {
             quote = quoteValue.charAt(0);
         }
 
-        String escapeValue = format.getAttribute(ATTRIBUTE_ESCAPE);
+        String escapeValue = (String) format.getAttribute(ATTRIBUTE_ESCAPE);
         if (isEmpty(escapeValue)) {
             escape = ESCAPE;
         } else {
             escape = escapeValue.charAt(0);
         }
-        lineSeparator = format.getAttribute(ATTRIBUTE_LINE_SEPARATOR, LINE_SEPARATOR);
+        lineSeparator = (String) format.getAttribute(ATTRIBUTE_LINE_SEPARATOR, LINE_SEPARATOR);
 
         CSVFormatBuilder builder = CSVFormat.newBuilder(delimiter);
         if (quoting && quote != null) {

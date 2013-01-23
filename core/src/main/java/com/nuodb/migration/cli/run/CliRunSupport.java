@@ -36,7 +36,6 @@ import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.option.*;
 import com.nuodb.migration.context.support.ApplicationSupport;
 import com.nuodb.migration.jdbc.JdbcConstants;
-import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DriverConnectionSpec;
 import com.nuodb.migration.spec.ResourceSpec;
 
@@ -185,15 +184,13 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return group.build();
     }
 
-    protected ConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
+    protected DriverConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
         DriverConnectionSpec connection = new DriverConnectionSpec();
-        connection.setCatalog((String) commandLine.getValue(SOURCE_CATALOG_OPTION));
-        connection.setSchema((String) commandLine.getValue(SOURCE_SCHEMA_OPTION));
         connection.setDriverClassName((String) commandLine.getValue(SOURCE_DRIVER_OPTION));
         connection.setUrl((String) commandLine.getValue(SOURCE_URL_OPTION));
         connection.setUsername((String) commandLine.getValue(SOURCE_USERNAME_OPTION));
         connection.setPassword((String) commandLine.getValue(SOURCE_PASSWORD_OPTION));
-        parseProperties(connection, commandLine, SOURCE_PROPERTIES_OPTION, option);
+        connection.setProperties(parseProperties(commandLine, SOURCE_PROPERTIES_OPTION, option));
         return connection;
     }
 
@@ -201,13 +198,13 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         ResourceSpec resource = new ResourceSpec();
         resource.setType((String) commandLine.getValue(OUTPUT_TYPE_OPTION));
         resource.setPath((String) commandLine.getValue(OUTPUT_PATH_OPTION));
-        resource.setAttributes(parseFormatAttributes(
+        resource.setAttributes(parseAttributes(
                 commandLine.<String>getValues(OUTPUT_OPTION), commandLine.getOption(OUTPUT_OPTION)));
         return resource;
     }
 
-    protected Map<String, String> parseFormatAttributes(List<String> values, Option option) {
-        Map<String, String> attributes = newHashMap();
+    protected Map<String, Object> parseAttributes(List<String> values, Option option) {
+        Map<String, Object> attributes = newHashMap();
         for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
             attributes.put(iterator.next(), iterator.next());
         }
@@ -244,13 +241,12 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     /**
      * Parses URL encoded properties name1=value1&name2=value2
      *
-     * @param connection  driver connection spec to store URL encoded properties in
      * @param commandLine holding command line options
      * @param trigger     key to key value pairs
      * @param option      the option which contains parsed url
      */
-    protected void parseProperties(DriverConnectionSpec connection, CommandLine commandLine, String trigger,
-                                   Option option) {
+    protected Map<String, Object> parseProperties(CommandLine commandLine, String trigger, Option option) {
+        Map<String, Object> properties = null;
         String url = (String) commandLine.getValue(trigger);
         if (url != null) {
             try {
@@ -259,7 +255,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 throw new OptionException(option, exception.getMessage());
             }
             String[] params = url.split("&");
-            Map<String, String> properties = newHashMap();
+            properties = newHashMap();
             for (String param : params) {
                 String[] pair = param.split("=");
                 if (pair.length != 2) {
@@ -267,8 +263,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 }
                 properties.put(pair[0], pair[1]);
             }
-            connection.setProperties(properties);
         }
+        return properties;
     }
 
     protected Group createTargetGroup() {
@@ -356,7 +352,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withOption(attributes).build();
     }
 
-    protected ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
+    protected DriverConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
         DriverConnectionSpec connection = null;
         if (commandLine.hasOption(TARGET_URL_OPTION)) {
             connection = new DriverConnectionSpec();
@@ -365,7 +361,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
             connection.setUsername((String) commandLine.getValue(TARGET_USERNAME_OPTION));
             connection.setPassword((String) commandLine.getValue(TARGET_PASSWORD_OPTION));
             connection.setSchema((String) commandLine.getValue(TARGET_SCHEMA_OPTION));
-            parseProperties(connection, commandLine, TARGET_PROPERTIES_OPTION, option);
+            connection.setProperties(parseProperties(commandLine, TARGET_PROPERTIES_OPTION, option));
         }
         return connection;
     }
@@ -373,7 +369,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     protected ResourceSpec parseInputGroup(CommandLine commandLine, Option option) {
         ResourceSpec resource = new ResourceSpec();
         resource.setPath((String) commandLine.getValue(INPUT_PATH_OPTION));
-        resource.setAttributes(parseFormatAttributes(
+        resource.setAttributes(parseAttributes(
                 commandLine.<String>getValues(INPUT_OPTION), commandLine.getOption(INPUT_OPTION)));
         return resource;
     }

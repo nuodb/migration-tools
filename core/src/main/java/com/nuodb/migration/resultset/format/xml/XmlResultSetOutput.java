@@ -54,8 +54,8 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
 
     @Override
     protected void initOutput() {
-        version = getAttribute(ATTRIBUTE_VERSION, VERSION);
-        encoding = getAttribute(ATTRIBUTE_ENCODING, ENCODING);
+        version = (String) getAttribute(ATTRIBUTE_VERSION, VERSION);
+        encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
 
         XMLOutputFactory factory = XMLOutputFactory.newInstance();
         try {

@@ -46,7 +46,7 @@ import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelL
  */
 public abstract class ResultSetFormatBase implements ResultSetFormat {
 
-    private Map<String, String> attributes;
+    private Map<String, Object> attributes;
     private TimeZone timeZone;
     private ValueModelList<ValueModel> valueModelList = createValueModelList();
     private ValueModelList<ValueFormatModel> valueFormatModelList;
@@ -54,13 +54,13 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
     private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;
 
     @Override
-    public String getAttribute(String attribute) {
+    public Object getAttribute(String attribute) {
         return attributes != null ? attributes.get(attribute) : null;
     }
 
     @Override
-    public String getAttribute(String attribute, String defaultValue) {
-        String value = null;
+    public Object getAttribute(String attribute, Object defaultValue) {
+        Object value = null;
         if (attributes != null) {
             value = attributes.get(attribute);
         }
@@ -68,7 +68,7 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
     }
 
     @Override
-    public final void setAttributes(Map<String, String> attributes) {
+    public final void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 
@@ -87,7 +87,7 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
     }
 
     @Override
-    public Map<String, String> getAttributes() {
+    public Map<String, Object> getAttributes() {
         return attributes;
     }
 

@@ -82,7 +82,7 @@ public class DumpJob extends JobBase {
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
-    private Map<String, String> attributes;
+    private Map<String, Object> attributes;
     private ConnectionProvider connectionProvider;
     private DialectResolver dialectResolver;
     private ResultSetFormatFactory resultSetFormatFactory;
@@ -329,11 +329,11 @@ public class DumpJob extends JobBase {
         this.outputType = outputType;
     }
 
-    public Map<String, String> getAttributes() {
+    public Map<String, Object> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 

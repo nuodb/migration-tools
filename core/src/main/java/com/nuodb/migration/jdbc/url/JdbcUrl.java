@@ -25,39 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.connection;
+package com.nuodb.migration.jdbc.url;
 
-import com.nuodb.migration.MigrationException;
-import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverConnectionSpec;
-
-import static java.lang.String.format;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionProviderFactory {
+public interface JdbcUrl {
 
-    public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec, boolean autoCommit) {
-        if (connectionSpec == null) {
-            return null;
-        }
-        ConnectionProvider connectionProvider;
-        if (connectionSpec instanceof DriverConnectionSpec) {
-            connectionProvider = createConnectionProvider((DriverConnectionSpec) connectionSpec, autoCommit);
-        } else {
-            throw new MigrationException(format("Connection specification is not supported %s", connectionSpec));
-        }
-        if (connectionProvider != null) {
-            connectionProvider = new StatementLoggingConnectionProvider(connectionProvider);
-        }
-        return connectionProvider;
-    }
+    String getCatalog();
 
-    public ConnectionProvider createConnectionProvider(DriverConnectionSpec driverConnectionSpec, boolean autoCommit) {
-        if (driverConnectionSpec.getUrl() == null) {
-            return null;
-        }
-        return new DriverPoolingConnectionProvider(driverConnectionSpec, autoCommit);
-    }
+    String getSchema();
+
+    Map<String, Object> getProperties();
 }

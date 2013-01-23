@@ -33,12 +33,13 @@ import java.sql.Driver;
 import java.util.Map;
 
 public class DriverConnectionSpec extends ConnectionSpecBase {
+
     private String driverClassName;
     private Driver driver;
     private String url;
     private String username;
     private String password;
-    private Map<String, String> properties = Maps.newHashMap();
+    private Map<String, Object> properties = Maps.newHashMap();
 
     public Driver getDriver() {
         return driver;
@@ -84,11 +85,11 @@ public class DriverConnectionSpec extends ConnectionSpecBase {
         properties.put(property, value);
     }
 
-    public Map<String, String> getProperties() {
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, String> properties) {
+    public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
 }

@@ -39,7 +39,7 @@ public interface Spec {
 
     void setType(String type);
 
-    Map<String, String> getAttributes();
+    Map<String, Object> getAttributes();
 
-    void setAttributes(Map<String, String> attributes);
+    void setAttributes(Map<String, Object> attributes);
 }

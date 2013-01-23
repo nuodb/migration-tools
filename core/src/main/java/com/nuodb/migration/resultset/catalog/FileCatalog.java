@@ -60,7 +60,7 @@ public class FileCatalog implements Catalog {
     }
 
     protected File getCatalogDir() {
-        return pathFile.exists() && pathFile.isFile() ? pathFile.getParentFile() : catalogDir;
+        return pathFile.exists() && pathFile.isFile() ? pathFile.getParentFile() : pathFile;
     }
 
     protected File getCatalogFile() {
