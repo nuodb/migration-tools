@@ -32,9 +32,9 @@ package com.nuodb.migration.jdbc.dialect;
  */
 public interface ScriptTranslator {
 
-    String translateScript(String sourceScript);
+    Script translateScript(Script sourceScript);
 
-    void addScriptTranslation(String sourceScript, String targetScript);
+    void addScriptTranslation(Script sourceScript, Script targetScript);
 
     Dialect getSourceDialect();
 

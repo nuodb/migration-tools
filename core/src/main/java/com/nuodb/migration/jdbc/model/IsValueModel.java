@@ -30,25 +30,7 @@ package com.nuodb.migration.jdbc.model;
 /**
  * @author Sergey Bushik
  */
-public interface ValueModel extends IsValueModel {
+public interface IsValueModel {
 
-    String getName();
-
-    void setName(String name);
-
-    int getTypeCode();
-
-    void setTypeCode(int typeCode);
-
-    String getTypeName();
-
-    void setTypeName(String typeName);
-
-    int getPrecision();
-
-    void setPrecision(int precision);
-
-    int getScale();
-
-    void setScale(int scale);
+    ValueModel asValueModel();
 }

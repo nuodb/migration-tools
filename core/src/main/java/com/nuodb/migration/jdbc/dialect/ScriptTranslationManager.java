@@ -33,7 +33,7 @@ import com.google.common.collect.Multimap;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migration.jdbc.resolve.DatabaseServiceResolver;
 import com.nuodb.migration.jdbc.resolve.SimpleDatabaseServiceResolverAware;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
 import java.util.Set;
@@ -58,10 +58,10 @@ public class ScriptTranslationManager extends SimpleDatabaseServiceResolverAware
                 }
             });
 
-    public String getScriptTranslation(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                       String sourceScript) {
+    public Script getScriptTranslation(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
+                                       Script sourceScript) {
         DialectResolver dialectResolver = getDialectResolver();
-        String scriptTranslation = null;
+        Script scriptTranslation = null;
         if (dialectResolver != null) {
             Dialect sourceDialect = dialectResolver.resolve(sourceDatabaseInfo);
             Dialect targetDialect = dialectResolver.resolve(targetDatabaseInfo);
@@ -79,10 +79,10 @@ public class ScriptTranslationManager extends SimpleDatabaseServiceResolverAware
         return scriptTranslation;
     }
 
-    public String getScriptTranslation(Dialect sourceDialect, Dialect targetDialect, String sourceScript) {
+    public Script getScriptTranslation(Dialect sourceDialect, Dialect targetDialect, Script sourceScript) {
         ScriptTranslator targetScriptTranslator = null;
         Collection<ScriptTranslator> scriptTranslators = scriptTranslatorsMap.get(sourceDialect);
-        String targetScript = null;
+        Script targetScript = null;
         for (ScriptTranslator scriptTranslator : scriptTranslators) {
             if (scriptTranslator.getTargetDialect().equals(targetDialect)) {
                 targetScript = targetScriptTranslator.translateScript(sourceScript);
@@ -97,7 +97,7 @@ public class ScriptTranslationManager extends SimpleDatabaseServiceResolverAware
                 boolean targetDialectInfoMatches = scriptTranslation.getTargetDialect() != null ?
                         scriptTranslation.getTargetDialect().equals(targetDialect) :
                         scriptTranslation.getTargetDatabaseInfo().matches(sourceDialect.getDatabaseInfo());
-                boolean sourceScriptEquals = StringUtils.equals(scriptTranslation.getSourceScript(), sourceScript);
+                boolean sourceScriptEquals = ObjectUtils.equals(scriptTranslation.getSourceScript(), sourceScript);
                 if (sourceDialectInfoMatches && targetDialectInfoMatches && sourceScriptEquals) {
                     targetScript = scriptTranslation.getTargetScript();
                     break;

@@ -141,9 +141,8 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
                     value = access.getValue(String.class, options);
                     break;
                 default:
-                    throw new JdbcTypeValueException(
-                            format("Unsupported JDBC type %s, code %d", valueModel.getTypeName(),
-                                    valueModel.getTypeCode()));
+                    throw new JdbcTypeValueException(format("Unsupported data type %s, type code %d on %s column",
+                            valueModel.getTypeName(), valueModel.getTypeCode(), getValueModelName(valueModel)));
             }
             return value;
         }
@@ -215,17 +214,19 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
                     access.setValue(!isEmpty(value) ? value : null, options);
                     break;
                 default:
-                    throw new JdbcTypeValueException(
-                            format("Unsupported JDBC type %s, code %d", valueModel.getTypeName(),
-                                    valueModel.getTypeCode()));
+                    throw new JdbcTypeValueException(format("Unsupported data type %s, type code %d on %s column",
+                            valueModel.getTypeName(), valueModel.getTypeCode(), getValueModelName(valueModel)));
             }
         }
 
         protected String encode(byte[] value) {
-            return new String(Hex.encodeHex(value, false));
+            return value != null ? new String(Hex.encodeHex(value, false)) : null;
         }
 
         protected byte[] write(Object object) throws IOException {
+            if (object == null) {
+                return null;
+            }
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             ObjectOutputStream output = null;
             try {
@@ -240,13 +241,16 @@ public class SimpleJdbcTypeValueFormatRegistry extends JdbcTypeValueFormatRegist
 
         protected byte[] decode(String value) {
             try {
-                return Hex.decodeHex(value.toCharArray());
+                return value != null ? Hex.decodeHex(value.toCharArray()) : null;
             } catch (DecoderException exception) {
                 throw new JdbcTypeValueException(exception);
             }
         }
 
         protected Object read(byte[] value) throws ClassNotFoundException, IOException {
+            if (value == null) {
+                return null;
+            }
             ByteArrayInputStream bytes = new ByteArrayInputStream(value);
             ObjectInputStream input = null;
             try {

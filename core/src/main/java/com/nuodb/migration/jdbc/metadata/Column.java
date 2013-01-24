@@ -142,15 +142,6 @@ public class Column extends HasIdentifierBase implements ValueModel {
         this.scale = scale;
     }
 
-    @Override
-    public void copy(ValueModel valueModel) {
-        setName(valueModel.getName());
-        setTypeCode(valueModel.getTypeCode());
-        setTypeName(valueModel.getTypeName());
-        setPrecision(valueModel.getPrecision());
-        setScale(valueModel.getScale());
-    }
-
     public Table getTable() {
         return table;
     }
@@ -232,6 +223,11 @@ public class Column extends HasIdentifierBase implements ValueModel {
 
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
+    }
+
+    @Override
+    public ValueModel asValueModel() {
+        return this;
     }
 
     @Override

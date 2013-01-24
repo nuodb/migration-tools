@@ -256,7 +256,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
 
         @Override
         public ValueModel getValueModel() {
-            return valueModel;
+            return valueModel.asValueModel();
         }
 
         @Override

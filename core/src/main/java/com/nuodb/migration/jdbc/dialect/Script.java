@@ -25,30 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.model;
+package com.nuodb.migration.jdbc.dialect;
 
 /**
  * @author Sergey Bushik
  */
-public interface ValueModel extends IsValueModel {
+public interface Script extends Comparable<Script> {
 
-    String getName();
-
-    void setName(String name);
-
-    int getTypeCode();
-
-    void setTypeCode(int typeCode);
-
-    String getTypeName();
-
-    void setTypeName(String typeName);
-
-    int getPrecision();
-
-    void setPrecision(int precision);
-
-    int getScale();
-
-    void setScale(int scale);
+    String getScript();
 }

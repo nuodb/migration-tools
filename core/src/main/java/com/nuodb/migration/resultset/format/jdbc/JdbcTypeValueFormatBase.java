@@ -27,10 +27,15 @@
  */
 package com.nuodb.migration.resultset.format.jdbc;
 
+import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.metadata.Column;
+import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 import java.util.Map;
+
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -48,14 +53,13 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
         }
     }
 
-    protected abstract String doGetValue(JdbcTypeValueAccess<T> access, Map<String, Object> options) throws Exception;
-
     protected JdbcTypeValueException newGetValueFailure(JdbcTypeValueAccess access, Exception exception) {
-        ValueModel value = access.getValueModel();
-        return new JdbcTypeValueException(
-                String.format("Can't get column %s type %s value",
-                        value.getName(), value.getTypeName()), exception);
+        ValueModel valueModel = access.getValueModel();
+        return new JdbcTypeValueException(format("Can't get value %s %s of column",
+                getValueModelName(valueModel), valueModel.getTypeName()), exception);
     }
+
+    protected abstract String doGetValue(JdbcTypeValueAccess<T> access, Map<String, Object> options) throws Exception;
 
     @Override
     public void setValue(JdbcTypeValueAccess<T> access, String value, Map<String, Object> options) {
@@ -72,10 +76,20 @@ public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<
                                        Map<String, Object> options) throws Exception;
 
     protected JdbcTypeValueException newSetValueFailure(JdbcTypeValueAccess access, Exception exception) {
-        ValueModel value = access.getValueModel();
-        return new JdbcTypeValueException(
-                String.format("Can't set column %s type %s value",
-                        value.getName(), value.getTypeName()), exception);
+        ValueModel valueModel = access.getValueModel();
+        return new JdbcTypeValueException(format("Can't set value on %s %s column",
+                getValueModelName(valueModel), valueModel.getTypeName()), exception);
+    }
+
+    protected String getValueModelName(ValueModel valueModel) {
+        if (valueModel instanceof Column) {
+            Column column = (Column) valueModel;
+            Table table = column.getTable();
+            Dialect dialect = table.getDatabase().getDialect();
+            return format("table %s %s", table.getQualifiedName(dialect), column.getName(dialect));
+        } else {
+            return valueModel.getName();
+        }
     }
 }
 

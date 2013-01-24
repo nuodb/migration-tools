@@ -37,6 +37,7 @@ public class SimpleValueModel implements ValueModel {
     private String typeName;
     private int precision;
     private int scale;
+    private ValueModel valueModel;
 
     public SimpleValueModel() {
     }
@@ -72,7 +73,17 @@ public class SimpleValueModel implements ValueModel {
     }
 
     public SimpleValueModel(ValueModel valueModel) {
-        copy(valueModel);
+        this.name = valueModel.getName();
+        this.typeCode = valueModel.getTypeCode();
+        this.typeName = valueModel.getTypeName();
+        this.precision = valueModel.getPrecision();
+        this.scale = valueModel.getScale();
+        this.valueModel = valueModel;
+    }
+
+    @Override
+    public ValueModel asValueModel() {
+        return valueModel != null ? valueModel : this;
     }
 
     @Override
@@ -121,15 +132,6 @@ public class SimpleValueModel implements ValueModel {
     @Override
     public void setScale(int scale) {
         this.scale = scale;
-    }
-
-    @Override
-    public void copy(ValueModel valueModel) {
-        setName(valueModel.getName());
-        setTypeCode(valueModel.getTypeCode());
-        setTypeName(valueModel.getTypeName());
-        setPrecision(valueModel.getPrecision());
-        setScale(valueModel.getScale());
     }
 
     @Override

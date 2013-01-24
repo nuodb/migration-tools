@@ -137,12 +137,15 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     protected String getScriptTranslation(String sourceScript, Dialect sourceDialect) {
-        return getScriptTranslationManager().getScriptTranslation(sourceDialect, this, sourceScript);
+        Script targetScript = getScriptTranslationManager().getScriptTranslation(
+                sourceDialect, this, new SimpleScript(sourceScript));
+        return targetScript != null ? targetScript.getScript() : null;
     }
 
     protected void addScriptTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript, String targetScript) {
         getScriptTranslationManager().addScriptTranslation(
-                new ScriptTranslation(sourceDatabaseInfo, this, sourceScript, targetScript));
+                new ScriptTranslation(sourceDatabaseInfo, this,
+                        new SimpleScript(sourceScript), new SimpleScript(targetScript)));
     }
 
     @Override

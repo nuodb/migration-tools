@@ -2,10 +2,10 @@
  * Copyright (c) 2012, NuoDB, Inc.
  * All rights reserved.
  *
- * Redistribution and use in sourceDialect and binary forms, with or without
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *     * Redistributions of sourceDialect code must retain the above copyright
+ *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
@@ -27,42 +27,20 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 /**
  * @author Sergey Bushik
  */
-public class SimpleScriptTranslator implements ScriptTranslator {
+public class SimpleScript implements Script, Comparable<Script> {
 
-    private final Map<Script, Script> scriptTranslations = new TreeMap<Script, Script>();
+    private String script;
 
-    private final Dialect sourceDialect;
-    private final Dialect targetDialect;
-
-    public SimpleScriptTranslator(Dialect sourceDialect, Dialect targetDialect) {
-        this.sourceDialect = sourceDialect;
-        this.targetDialect = targetDialect;
+    public SimpleScript(String script) {
+        this.script = script;
     }
 
     @Override
-    public Script translateScript(Script sourceScript) {
-        return scriptTranslations.get(sourceScript);
-    }
-
-    @Override
-    public void addScriptTranslation(Script sourceScript, Script targetScript) {
-        scriptTranslations.put(sourceScript, targetScript);
-    }
-
-    @Override
-    public Dialect getSourceDialect() {
-        return sourceDialect;
-    }
-
-    @Override
-    public Dialect getTargetDialect() {
-        return targetDialect;
+    public String getScript() {
+        return script;
     }
 
     @Override
@@ -70,21 +48,20 @@ public class SimpleScriptTranslator implements ScriptTranslator {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        SimpleScriptTranslator that = (SimpleScriptTranslator) o;
+        SimpleScript that = (SimpleScript) o;
 
-        if (sourceDialect != null ? !sourceDialect.equals(that.sourceDialect) : that.sourceDialect != null) {
-            return false;
-        }
-        if (targetDialect != null ? !targetDialect.equals(that.targetDialect) : that.targetDialect != null) {
-            return false;
-        }
+        if (script != null ? !script.equals(that.script) : that.script != null) return false;
+
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = sourceDialect != null ? sourceDialect.hashCode() : 0;
-        result = 31 * result + (targetDialect != null ? targetDialect.hashCode() : 0);
-        return result;
+        return script != null ? script.hashCode() : 0;
+    }
+
+    @Override
+    public int compareTo(Script o) {
+        return String.CASE_INSENSITIVE_ORDER.compare(o.getScript(), getScript());
     }
 }

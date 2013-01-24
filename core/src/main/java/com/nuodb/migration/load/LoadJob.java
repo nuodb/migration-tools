@@ -173,8 +173,9 @@ public class LoadJob extends JobBase {
         }
         Database database = execution.getDatabase();
         Table table = database.findTable(tableName);
+        int index = 0;
         for (ValueModel valueModel : valueModelList) {
-            valueModel.copy(table.getColumn(valueModel.getName()));
+            valueModelList.set(index++, table.getColumn(valueModel.getName()));
         }
         final InsertQuery query = createInsertQuery(table, valueModelList);
 

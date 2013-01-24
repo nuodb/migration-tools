@@ -81,7 +81,7 @@ public class HasIdentifierBase extends IndentedOutputBase implements HasIdentifi
 
     @Override
     public String getName(Dialect dialect) {
-        return dialect.getIdentifier(getName(), this);
+        return dialect != null ? dialect.getIdentifier(getName(), this) : getName();
     }
 
     @Override

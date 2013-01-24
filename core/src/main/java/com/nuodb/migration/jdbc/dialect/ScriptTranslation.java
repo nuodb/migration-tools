@@ -38,11 +38,11 @@ public class ScriptTranslation {
     private Dialect targetDialect;
     private DatabaseInfo sourceDatabaseInfo;
     private DatabaseInfo targetDatabaseInfo;
-    private String sourceScript;
-    private String targetScript;
+    private Script sourceScript;
+    private Script targetScript;
 
-    public ScriptTranslation(Dialect sourceDialect, DatabaseInfo targetDatabaseInfo, String sourceScript,
-                             String targetScript) {
+    public ScriptTranslation(Dialect sourceDialect, DatabaseInfo targetDatabaseInfo, Script sourceScript,
+                             Script targetScript) {
         this.sourceDialect = sourceDialect;
         this.targetDatabaseInfo = targetDatabaseInfo;
         this.sourceScript = sourceScript;
@@ -50,8 +50,8 @@ public class ScriptTranslation {
         this.sourceDatabaseInfo = sourceDialect.getDatabaseInfo();
     }
 
-    public ScriptTranslation(DatabaseInfo sourceDatabaseInfo, Dialect targetDialect, String sourceScript,
-                             String targetScript) {
+    public ScriptTranslation(DatabaseInfo sourceDatabaseInfo, Dialect targetDialect, Script sourceScript,
+                             Script targetScript) {
         this.sourceDatabaseInfo = sourceDatabaseInfo;
         this.targetDialect = targetDialect;
         this.sourceScript = sourceScript;
@@ -60,7 +60,7 @@ public class ScriptTranslation {
     }
 
     public ScriptTranslation(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                             String sourceScript, String targetScript) {
+                             Script sourceScript, Script targetScript) {
         this.sourceDatabaseInfo = sourceDatabaseInfo;
         this.targetDatabaseInfo = targetDatabaseInfo;
         this.sourceScript = sourceScript;
@@ -68,7 +68,7 @@ public class ScriptTranslation {
     }
 
     public ScriptTranslation(Dialect sourceDialect, Dialect targetDialect,
-                             String sourceScript, String targetScript) {
+                             Script sourceScript, Script targetScript) {
         this.sourceDialect = sourceDialect;
         this.targetDialect = targetDialect;
         this.sourceScript = sourceScript;
@@ -93,11 +93,11 @@ public class ScriptTranslation {
         return targetDatabaseInfo;
     }
 
-    public String getSourceScript() {
+    public Script getSourceScript() {
         return sourceScript;
     }
 
-    public String getTargetScript() {
+    public Script getTargetScript() {
         return targetScript;
     }
 
