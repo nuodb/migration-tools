@@ -29,7 +29,7 @@ package com.nuodb.migration.jdbc.connection;
 
 import com.nuodb.migration.jdbc.url.JdbcUrl;
 import com.nuodb.migration.jdbc.url.JdbcUrlParserUtils;
-import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.utils.ReflectionUtils;
 import org.apache.commons.dbcp.BasicDataSource;
 
@@ -42,26 +42,26 @@ import java.util.Map;
 
 import static java.lang.String.format;
 
-public class DriverConnectionProvider extends DataSourceConnectionProvider {
+public class JdbcConnectionProvider extends DataSourceConnectionProvider {
 
-    private DriverConnectionSpec driverConnectionSpec;
+    private JdbcConnectionSpec jdbcConnectionSpec;
     private JdbcUrl jdbcUrl;
     private Boolean autoCommit;
     private Integer transactionIsolation;
 
-    public DriverConnectionProvider(DriverConnectionSpec driverConnectionSpec) {
-        this(driverConnectionSpec, false);
+    public JdbcConnectionProvider(JdbcConnectionSpec jdbcConnectionSpec) {
+        this(jdbcConnectionSpec, false);
     }
 
-    public DriverConnectionProvider(DriverConnectionSpec driverConnectionSpec, Boolean autoCommit) {
-        this(driverConnectionSpec, autoCommit, null);
+    public JdbcConnectionProvider(JdbcConnectionSpec jdbcConnectionSpec, Boolean autoCommit) {
+        this(jdbcConnectionSpec, autoCommit, null);
     }
 
-    public DriverConnectionProvider(DriverConnectionSpec driverConnectionSpec, Boolean autoCommit,
-                                    Integer transactionIsolation) {
-        this.driverConnectionSpec = driverConnectionSpec;
+    public JdbcConnectionProvider(JdbcConnectionSpec jdbcConnectionSpec, Boolean autoCommit,
+                                  Integer transactionIsolation) {
+        this.jdbcConnectionSpec = jdbcConnectionSpec;
         this.jdbcUrl = JdbcUrlParserUtils.getInstance().parse(
-                driverConnectionSpec.getUrl(), driverConnectionSpec.getProperties());
+                jdbcConnectionSpec.getUrl(), jdbcConnectionSpec.getProperties());
         this.autoCommit = autoCommit;
         this.transactionIsolation = transactionIsolation;
     }
@@ -87,10 +87,10 @@ public class DriverConnectionProvider extends DataSourceConnectionProvider {
     protected DataSource createDataSource() throws SQLException {
         registerDriver();
         BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setUrl(driverConnectionSpec.getUrl());
-        dataSource.setUsername(driverConnectionSpec.getUsername());
-        dataSource.setPassword(driverConnectionSpec.getPassword());
-        Map<String, Object> properties = driverConnectionSpec.getProperties();
+        dataSource.setUrl(jdbcConnectionSpec.getUrl());
+        dataSource.setUsername(jdbcConnectionSpec.getUsername());
+        dataSource.setPassword(jdbcConnectionSpec.getPassword());
+        Map<String, Object> properties = jdbcConnectionSpec.getProperties();
         if (properties != null) {
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 dataSource.addConnectionProperty(entry.getKey(), (String) entry.getValue());
@@ -100,9 +100,9 @@ public class DriverConnectionProvider extends DataSourceConnectionProvider {
     }
 
     protected void registerDriver() throws SQLException {
-        Driver driver = driverConnectionSpec.getDriver();
+        Driver driver = jdbcConnectionSpec.getDriver();
         if (driver == null) {
-            String driverClassName = driverConnectionSpec.getDriverClassName();
+            String driverClassName = jdbcConnectionSpec.getDriverClassName();
             if (logger.isDebugEnabled()) {
                 logger.debug(format("Loading driver %s", driverClassName));
             }
@@ -111,8 +111,8 @@ public class DriverConnectionProvider extends DataSourceConnectionProvider {
         DriverManager.registerDriver(driver);
     }
 
-    protected DriverConnectionSpec getDriverConnectionSpec() {
-        return driverConnectionSpec;
+    protected JdbcConnectionSpec getJdbcConnectionSpec() {
+        return jdbcConnectionSpec;
     }
 
     protected void initConnection(Connection connection) throws SQLException {
@@ -152,6 +152,6 @@ public class DriverConnectionProvider extends DataSourceConnectionProvider {
 
     @Override
     public String toString() {
-        return driverConnectionSpec.getUrl();
+        return jdbcConnectionSpec.getUrl();
     }
 }

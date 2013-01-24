@@ -35,12 +35,12 @@ import java.sql.SQLException;
 /**
  * @author Sergey Bushik
  */
-public class ConnectionServicesBase implements ConnectionServices {
+public class SimpleConnectionServices implements ConnectionServices {
 
     private ConnectionProvider connectionProvider;
     private Connection connection;
 
-    public ConnectionServicesBase(ConnectionProvider connectionProvider) {
+    public SimpleConnectionServices(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
     }
 

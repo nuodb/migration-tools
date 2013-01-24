@@ -29,7 +29,7 @@ package com.nuodb.migration.jdbc.connection;
 
 import com.nuodb.migration.MigrationException;
 import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 
 import static java.lang.String.format;
 
@@ -43,21 +43,21 @@ public class ConnectionProviderFactory {
             return null;
         }
         ConnectionProvider connectionProvider;
-        if (connectionSpec instanceof DriverConnectionSpec) {
-            connectionProvider = createConnectionProvider((DriverConnectionSpec) connectionSpec, autoCommit);
+        if (connectionSpec instanceof JdbcConnectionSpec) {
+            connectionProvider = createConnectionProvider((JdbcConnectionSpec) connectionSpec, autoCommit);
         } else {
             throw new MigrationException(format("Connection specification is not supported %s", connectionSpec));
         }
         if (connectionProvider != null) {
-            connectionProvider = new StatementLoggingConnectionProvider(connectionProvider);
+            connectionProvider = new JdbcLoggingConnectionProvider(connectionProvider);
         }
         return connectionProvider;
     }
 
-    public ConnectionProvider createConnectionProvider(DriverConnectionSpec driverConnectionSpec, boolean autoCommit) {
-        if (driverConnectionSpec.getUrl() == null) {
+    public ConnectionProvider createConnectionProvider(JdbcConnectionSpec jdbcConnectionSpec, boolean autoCommit) {
+        if (jdbcConnectionSpec.getUrl() == null) {
             return null;
         }
-        return new DriverPoolingConnectionProvider(driverConnectionSpec, autoCommit);
+        return new JdbcPoolingConnectionProvider(jdbcConnectionSpec, autoCommit);
     }
 }

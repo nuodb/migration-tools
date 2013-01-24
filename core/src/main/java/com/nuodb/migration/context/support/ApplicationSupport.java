@@ -37,7 +37,7 @@ import com.nuodb.migration.i18n.Resources;
 public class ApplicationSupport {
 
     public ApplicationContext getApplicationContext() {
-        return ApplicationContextHolder.getContext();
+        return ApplicationContextHolder.getApplicationContext();
     }
 
     public Resources getResources() {

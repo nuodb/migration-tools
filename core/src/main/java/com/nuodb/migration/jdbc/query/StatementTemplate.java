@@ -27,10 +27,6 @@
  */
 package com.nuodb.migration.jdbc.query;
 
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -41,8 +37,6 @@ import static com.nuodb.migration.jdbc.JdbcUtils.close;
  * @author Sergey Bushik
  */
 public class StatementTemplate {
-
-    private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final Connection connection;
 
@@ -55,10 +49,6 @@ public class StatementTemplate {
         X statement = statementCreator.create(connection);
         try {
             statementCallback.execute(statement);
-        } catch (Exception exception) {
-            if (logger.isErrorEnabled()) {
-                logger.error("Failed executing statement callback", exception);
-            }
         } finally {
             close(statement.getResultSet());
             close(statement);

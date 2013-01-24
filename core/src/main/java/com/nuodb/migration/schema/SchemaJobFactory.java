@@ -140,12 +140,12 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         SchemaJobFactory jobFactory = new SchemaJobFactory();
         jobFactory.setSchemaSpec(new SchemaSpec() {
             {
-                DriverConnectionSpec sourceConnectionSpec = new DriverConnectionSpec();
+                JdbcConnectionSpec sourceConnectionSpec = new JdbcConnectionSpec();
                 sourceConnectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
                 sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/mysql");
                 sourceConnectionSpec.setUsername("root");
 
-                DriverConnectionSpec targetConnectionSpec = new DriverConnectionSpec();
+                JdbcConnectionSpec targetConnectionSpec = new JdbcConnectionSpec();
                 targetConnectionSpec.setDriverClassName("com.nuodb.jdbc.Driver");
                 targetConnectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
                 targetConnectionSpec.setUsername("dba");

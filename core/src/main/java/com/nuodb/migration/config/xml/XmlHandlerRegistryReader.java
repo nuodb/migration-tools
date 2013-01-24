@@ -41,7 +41,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
 
-public class XmlHandlerRegistryParser {
+public class XmlHandlerRegistryReader {
 
     protected transient final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -56,22 +56,22 @@ public class XmlHandlerRegistryParser {
         resources.add(resource);
     }
 
-    public void parse(XmlHandlerRegistry registry) {
+    public void read(XmlHandlerRegistry registry) {
         for (URL resource : resources) {
             try {
-                parse(registry, resource.openStream());
+                read(registry, resource.openStream());
             } catch (IOException e) {
                 throw new XmlPersisterException(String.format("Failed reading handler registry %1$s", resource));
             }
         }
     }
 
-    protected void parse(XmlHandlerRegistry registry, InputStream input) {
+    protected void read(XmlHandlerRegistry registry, InputStream input) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         String value;
         try {
             while ((value = reader.readLine()) != null) {
-                parse(registry, value);
+                read(registry, value);
             }
         } catch (IOException e) {
             throw new XmlPersisterException("Failed loading registry", e);
@@ -86,7 +86,7 @@ public class XmlHandlerRegistryParser {
         }
     }
 
-    protected void parse(XmlHandlerRegistry registry, String value) {
+    protected void read(XmlHandlerRegistry registry, String value) {
         value = value.trim();
         int comma = value.lastIndexOf(",");
         String handlerClassAsText;

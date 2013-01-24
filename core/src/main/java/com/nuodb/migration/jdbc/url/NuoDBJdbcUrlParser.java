@@ -56,10 +56,10 @@ public class NuoDBJdbcUrlParser implements JdbcUrlParser {
             if (start > 0) {
                 int params = url.indexOf('?', start);
                 if (params > 0) {
-                    String pairs[] = url.substring(params + 1).split("&");
+                    String[] pairs = url.substring(params + 1).split("&");
                     int length = pairs.length;
                     for (int i = 0; i < length; i++) {
-                        String pair[] = pairs[i].split("=");
+                        String[] pair = pairs[i].split("=");
                         if (pair.length == 2) {
                             properties.put(pair[0], pair[1]);
                         }

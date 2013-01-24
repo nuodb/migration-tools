@@ -1,8 +1,8 @@
 package com.nuodb.migration.jdbc;
 
-import com.nuodb.migration.jdbc.connection.DriverConnectionProvider;
-import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
-import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
+import com.nuodb.migration.jdbc.connection.JdbcPoolingConnectionProvider;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class DriverConnectionProviderTest {
     private static final int TRANSACTION_ISOLATION = Connection.TRANSACTION_READ_COMMITTED;
 
     @Mock
-    private DriverConnectionSpec connectionSpec;
+    private JdbcConnectionSpec connectionSpec;
     @Mock
     private Driver driver;
     @Mock
@@ -38,7 +38,7 @@ public class DriverConnectionProviderTest {
         when(driver.acceptsURL(URL)).thenReturn(true);
         DriverManager.registerDriver(driver);
 
-        connectionSpec = mock(DriverConnectionSpec.class);
+        connectionSpec = mock(JdbcConnectionSpec.class);
         when(connectionSpec.getDriver()).thenReturn(driver);
         when(connectionSpec.getUrl()).thenReturn(URL);
         when(connectionSpec.getUsername()).thenReturn("user");
@@ -47,8 +47,8 @@ public class DriverConnectionProviderTest {
 
     @Test
     public void testGetConnection() throws Exception {
-        DriverConnectionProvider connectionProvider =
-                new DriverPoolingConnectionProvider(connectionSpec);
+        JdbcConnectionProvider connectionProvider =
+                new JdbcPoolingConnectionProvider(connectionSpec);
         connectionProvider.setTransactionIsolation(TRANSACTION_ISOLATION);
         connectionProvider.setAutoCommit(false);
 

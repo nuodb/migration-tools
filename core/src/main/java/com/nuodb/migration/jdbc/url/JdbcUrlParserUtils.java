@@ -61,18 +61,11 @@ public class JdbcUrlParserUtils {
         return null;
     }
 
-    public void addParser(JdbcUrlParser jdbcUrlParser) {
-        parsers.add(jdbcUrlParser);
+    public void addParser(JdbcUrlParser parser) {
+        parsers.add(parser);
     }
 
     public Collection<JdbcUrlParser> getParsers() {
         return parsers;
-    }
-
-    public static void main(String[] args) {
-        JdbcUrl jdbcUrl = new JdbcUrlParserUtils().parse("jdbc:com.nuodb://localhost/test?schema=foo", null);
-        if (jdbcUrl != null) {
-            System.out.println("catalog: " + jdbcUrl.getCatalog() + " , schema: " + jdbcUrl.getSchema());
-        }
     }
 }

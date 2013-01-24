@@ -28,8 +28,8 @@
 package com.nuodb.migration.config.xml;
 
 import com.nuodb.migration.config.xml.handler.XmlAliasTypeMapper;
-import com.nuodb.migration.spec.DriverConnectionSpec;
 import com.nuodb.migration.spec.DumpSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.spec.MigrationSpec;
 import com.nuodb.migration.spec.Spec;
 import com.nuodb.migration.utils.Priority;
@@ -40,34 +40,34 @@ import java.util.Arrays;
 
 public class XmlPersisterBuilder implements XmlConstants {
 
-    public static final String HANDLERS_REGISTRY = "com/nuodb/tools/migration/spec/xml/xml.handler.registry";
+    public static final String XML_HANDLER_REGISTRY = "com/nuodb/migration/config/xml/xml.handler.registry";
 
-    private XmlHandlerRegistryParser parser = new XmlHandlerRegistryParser();
+    private XmlHandlerRegistryReader handlerRegistryReader = new XmlHandlerRegistryReader();
 
     public XmlPersisterBuilder addRegistry(String registry) {
-        parser.addRegistry(registry);
+        handlerRegistryReader.addRegistry(registry);
         return this;
     }
 
     public XmlPersister build() {
-        XmlHandlerRegistry registry = new XmlHandlerRegistry();
-        parser.parse(registry);
+        XmlHandlerRegistry handlerRegistry = new XmlHandlerRegistry();
+        handlerRegistryReader.read(handlerRegistry);
 
-        XmlAliasTypeMapper<Spec> handler = new XmlAliasTypeMapper<Spec>();
-        handler.bind(MIGRATION_NAMESPACE, CONNECTION_ELEMENT, JDBC, DriverConnectionSpec.class);
-        handler.bind(MIGRATION_NAMESPACE, TASK_ELEMENT, DUMP, DumpSpec.class);
-        registry.registerHandler(handler, Priority.LOW);
+        XmlAliasTypeMapper<Spec> aliasTypeMapper = new XmlAliasTypeMapper<Spec>();
+        aliasTypeMapper.bind(MIGRATION_NAMESPACE, CONNECTION_ELEMENT, JDBC, JdbcConnectionSpec.class);
+        aliasTypeMapper.bind(MIGRATION_NAMESPACE, TASK_ELEMENT, DUMP, DumpSpec.class);
+        handlerRegistry.registerHandler(aliasTypeMapper, Priority.LOW);
 
-        return new XmlPersister(registry);
+        return new XmlPersister(handlerRegistry);
     }
 
     public static void main(String[] args) throws IOException {
         XmlPersisterBuilder builder = new XmlPersisterBuilder();
-        builder.addRegistry(HANDLERS_REGISTRY);
+        builder.addRegistry(XML_HANDLER_REGISTRY);
         XmlPersister persister = builder.build();
 
         MigrationSpec migrationSpec = new MigrationSpec();
-        DriverConnectionSpec connection = new DriverConnectionSpec();
+        JdbcConnectionSpec connection = new JdbcConnectionSpec();
         connection.setId("mysql");
         connection.setDriverClassName("com.mysql.jdbc.Driver");
         connection.setUrl("jdbc:mysql://localhost:3306/test");
@@ -83,11 +83,11 @@ public class XmlPersisterBuilder implements XmlConstants {
         migrationSpec = persister.read(MigrationSpec.class,
                 new ByteArrayInputStream((
                         "<?xml version=\"1.0\"?>\n" +
-                                "<migration xmlns=\"http://nuodb.com/schema/migration\">\n" +
-                                "   <task type=\"dump\"/>\n" +
-                                "   <connection id=\"mysql\" type=\"jdbc\"/>\n" +
-                                "   <connection id=\"\" type=\"jdbc\"/>\n" +
-                                "</migration>").getBytes()));
+                        "<migration xmlns=\"http://nuodb.com/schema/migration\">\n" +
+                        "   <task type=\"dump\"/>\n" +
+                        "   <connection id=\"mysql\" type=\"jdbc\"/>\n" +
+                        "   <connection id=\"\" type=\"jdbc\"/>\n" +
+                        "</migration>").getBytes()));
         System.out.println(migrationSpec);
     }
 }

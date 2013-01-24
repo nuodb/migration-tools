@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
-import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.utils.ReflectionUtils;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
@@ -45,22 +45,22 @@ import java.util.Properties;
  *
  * @author Sergey Bushik
  */
-public class DriverPoolingConnectionProvider extends DriverConnectionProvider {
+public class JdbcPoolingConnectionProvider extends JdbcConnectionProvider {
 
     private static final String GET_INNERMOST_DELEGATE = "getInnermostDelegate";
     public static final String USER_PROPERTY = "user";
     public static final String PASSWORD_PROPERTY = "password";
 
-    public DriverPoolingConnectionProvider(DriverConnectionSpec connectionSpec) {
+    public JdbcPoolingConnectionProvider(JdbcConnectionSpec connectionSpec) {
         super(connectionSpec);
     }
 
-    public DriverPoolingConnectionProvider(DriverConnectionSpec connectionSpec, boolean autoCommit) {
+    public JdbcPoolingConnectionProvider(JdbcConnectionSpec connectionSpec, boolean autoCommit) {
         super(connectionSpec, autoCommit);
     }
 
-    public DriverPoolingConnectionProvider(DriverConnectionSpec connectionSpec, boolean autoCommit,
-                                           int transactionIsolation) {
+    public JdbcPoolingConnectionProvider(JdbcConnectionSpec connectionSpec, boolean autoCommit,
+                                         int transactionIsolation) {
         super(connectionSpec, autoCommit, transactionIsolation);
     }
 
@@ -68,7 +68,7 @@ public class DriverPoolingConnectionProvider extends DriverConnectionProvider {
     protected PoolingDataSource createDataSource() throws SQLException {
         registerDriver();
 
-        DriverConnectionSpec connectionSpec = getDriverConnectionSpec();
+        JdbcConnectionSpec connectionSpec = getJdbcConnectionSpec();
         String url = connectionSpec.getUrl();
         Properties properties = new Properties();
         if (connectionSpec.getProperties() != null) {

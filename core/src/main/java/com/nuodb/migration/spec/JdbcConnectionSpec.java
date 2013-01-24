@@ -32,7 +32,7 @@ import com.google.common.collect.Maps;
 import java.sql.Driver;
 import java.util.Map;
 
-public class DriverConnectionSpec extends ConnectionSpecBase {
+public class JdbcConnectionSpec extends ConnectionSpecBase {
 
     private String driverClassName;
     private Driver driver;
@@ -81,7 +81,7 @@ public class DriverConnectionSpec extends ConnectionSpecBase {
         this.password = password;
     }
 
-    public void addProperty(String property, String value) {
+    public void addProperty(String property, Object value) {
         properties.put(property, value);
     }
 

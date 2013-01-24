@@ -36,7 +36,7 @@ import com.nuodb.migration.cli.parse.OptionException;
 import com.nuodb.migration.cli.parse.option.*;
 import com.nuodb.migration.context.support.ApplicationSupport;
 import com.nuodb.migration.jdbc.JdbcConstants;
-import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.spec.ResourceSpec;
 
 import java.io.UnsupportedEncodingException;
@@ -184,14 +184,14 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return group.build();
     }
 
-    protected DriverConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
-        DriverConnectionSpec connection = new DriverConnectionSpec();
-        connection.setDriverClassName((String) commandLine.getValue(SOURCE_DRIVER_OPTION));
-        connection.setUrl((String) commandLine.getValue(SOURCE_URL_OPTION));
-        connection.setUsername((String) commandLine.getValue(SOURCE_USERNAME_OPTION));
-        connection.setPassword((String) commandLine.getValue(SOURCE_PASSWORD_OPTION));
-        connection.setProperties(parseProperties(commandLine, SOURCE_PROPERTIES_OPTION, option));
-        return connection;
+    protected JdbcConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
+        JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
+        connectionSpec.setDriverClassName((String) commandLine.getValue(SOURCE_DRIVER_OPTION));
+        connectionSpec.setUrl((String) commandLine.getValue(SOURCE_URL_OPTION));
+        connectionSpec.setUsername((String) commandLine.getValue(SOURCE_USERNAME_OPTION));
+        connectionSpec.setPassword((String) commandLine.getValue(SOURCE_PASSWORD_OPTION));
+        connectionSpec.setProperties(parseProperties(commandLine, SOURCE_PROPERTIES_OPTION, option));
+        return connectionSpec;
     }
 
     protected ResourceSpec parseOutputGroup(CommandLine commandLine, Option option) {
@@ -352,18 +352,18 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withOption(attributes).build();
     }
 
-    protected DriverConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
-        DriverConnectionSpec connection = null;
+    protected JdbcConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
+        JdbcConnectionSpec connectionSpec = null;
         if (commandLine.hasOption(TARGET_URL_OPTION)) {
-            connection = new DriverConnectionSpec();
-            connection.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
-            connection.setUrl((String) commandLine.getValue(TARGET_URL_OPTION));
-            connection.setUsername((String) commandLine.getValue(TARGET_USERNAME_OPTION));
-            connection.setPassword((String) commandLine.getValue(TARGET_PASSWORD_OPTION));
-            connection.setSchema((String) commandLine.getValue(TARGET_SCHEMA_OPTION));
-            connection.setProperties(parseProperties(commandLine, TARGET_PROPERTIES_OPTION, option));
+            connectionSpec = new JdbcConnectionSpec();
+            connectionSpec.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
+            connectionSpec.setUrl((String) commandLine.getValue(TARGET_URL_OPTION));
+            connectionSpec.setUsername((String) commandLine.getValue(TARGET_USERNAME_OPTION));
+            connectionSpec.setPassword((String) commandLine.getValue(TARGET_PASSWORD_OPTION));
+            connectionSpec.setSchema((String) commandLine.getValue(TARGET_SCHEMA_OPTION));
+            connectionSpec.setProperties(parseProperties(commandLine, TARGET_PROPERTIES_OPTION, option));
         }
-        return connection;
+        return connectionSpec;
     }
 
     protected ResourceSpec parseInputGroup(CommandLine commandLine, Option option) {

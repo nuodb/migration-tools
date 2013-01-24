@@ -30,14 +30,14 @@ package com.nuodb.migration.jdbc.metadata.inspector;
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
-import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
+import com.nuodb.migration.jdbc.connection.JdbcPoolingConnectionProvider;
 import com.nuodb.migration.jdbc.dialect.DialectResolver;
 import com.nuodb.migration.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migration.jdbc.metadata.DriverInfo;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
-import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,19 +242,19 @@ public class DatabaseInspector {
     }
 
     public static void main(String[] args) throws Exception {
-        DriverConnectionSpec mysql = new DriverConnectionSpec();
+        JdbcConnectionSpec mysql = new JdbcConnectionSpec();
         mysql.setDriverClassName("com.mysql.jdbc.Driver");
         mysql.setUrl("jdbc:mysql://localhost:3306/generate-schema");
         mysql.setUsername("root");
 
-        DriverConnectionSpec nuodb = new DriverConnectionSpec();
+        JdbcConnectionSpec nuodb = new JdbcConnectionSpec();
         nuodb.setDriverClassName("com.nuodb.jdbc.Driver");
         nuodb.setUrl("jdbc:com.nuodb://localhost/test");
         nuodb.setSchema("hockey");
         nuodb.setUsername("dba");
         nuodb.setPassword("goalie");
 
-        ConnectionProvider connectionProvider = new DriverPoolingConnectionProvider(nuodb);
+        ConnectionProvider connectionProvider = new JdbcPoolingConnectionProvider(nuodb);
         ConnectionServices connectionServices = connectionProvider.getConnectionServices();
         try {
             DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();

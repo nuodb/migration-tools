@@ -48,7 +48,7 @@ public abstract class ConnectionProviderBase implements ConnectionProvider {
 
     @Override
     public ConnectionServices getConnectionServices() {
-        return new ConnectionServicesBase(this);
+        return new SimpleConnectionServices(this);
     }
 
     @Override
@@ -72,11 +72,11 @@ public abstract class ConnectionProviderBase implements ConnectionProvider {
         return connection;
     }
 
-    public abstract class TargetAwareInvocationHandler<T> implements InvocationHandler {
+    public abstract class TargetInvocationHandler<T> implements InvocationHandler {
 
         private final T target;
 
-        public TargetAwareInvocationHandler(T target) {
+        public TargetInvocationHandler(T target) {
             this.target = target;
         }
 
@@ -94,7 +94,7 @@ public abstract class ConnectionProviderBase implements ConnectionProvider {
         }
     }
 
-    public class ConnectionInvocationHandler extends TargetAwareInvocationHandler<Connection> {
+    public class ConnectionInvocationHandler extends TargetInvocationHandler<Connection> {
 
         private static final String GET_CONNECTION_METHOD = "getConnection";
 

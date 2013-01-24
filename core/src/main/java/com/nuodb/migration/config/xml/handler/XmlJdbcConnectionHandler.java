@@ -27,28 +27,44 @@
  */
 package com.nuodb.migration.config.xml.handler;
 
+import com.nuodb.migration.config.xml.XmlConstants;
 import com.nuodb.migration.config.xml.XmlReadContext;
 import com.nuodb.migration.config.xml.XmlWriteContext;
-import com.nuodb.migration.spec.DumpSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
-public class XmlDumpTaskHandler extends XmlReadWriteHandlerBase<DumpSpec> {
+import java.util.Map;
 
-    public XmlDumpTaskHandler() {
-        super(DumpSpec.class);
+public class XmlJdbcConnectionHandler extends XmlReadWriteHandlerBase<JdbcConnectionSpec> implements XmlConstants {
+
+    public XmlJdbcConnectionHandler() {
+        super(JdbcConnectionSpec.class);
     }
 
     @Override
-    protected boolean write(DumpSpec task, OutputNode output, XmlWriteContext context) throws Exception {
-        super.write(task, output, context);
-        // TODO: implement
+    protected boolean write(JdbcConnectionSpec connection, OutputNode output, XmlWriteContext context) throws Exception {
+        output.getNamespaces().setReference(MIGRATION_NAMESPACE);
+        set(output, ID_ATTRIBUTE, connection.getId());
+        set(output, TYPE_ATTRIBUTE, connection.getType());
+        output.getChild("catalog").setValue(connection.getCatalog());
+        output.getChild("schema").setValue(connection.getSchema());
+        output.getChild("driver").setValue(connection.getDriverClassName());
+        output.getChild("url").setValue(connection.getUrl());
+        output.getChild("username").setValue(connection.getUsername());
+        output.getChild("password").setValue(connection.getPassword());
+        for (Map.Entry<String, Object> entry : connection.getProperties().entrySet()) {
+            OutputNode property = output.getChild("property");
+            property.getChild("name").setValue(entry.getKey());
+            property.getChild("value").setValue((String) entry.getValue());
+        }
         return true;
     }
 
     @Override
-    protected void read(InputNode input, DumpSpec task, XmlReadContext context) throws Exception {
-        super.read(input, task, context);
+    protected void read(InputNode input, JdbcConnectionSpec connection, XmlReadContext context) throws Exception {
+        connection.setId(get(input, ID_ATTRIBUTE));
+        connection.setType(get(input, TYPE_ATTRIBUTE));
         // TODO: implement
     }
 }

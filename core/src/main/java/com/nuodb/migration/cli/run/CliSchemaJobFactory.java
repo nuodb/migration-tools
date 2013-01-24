@@ -296,7 +296,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         }
 
         protected ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
-            DriverConnectionSpec connection = new DriverConnectionSpec();
+            JdbcConnectionSpec connection = new JdbcConnectionSpec();
             connection.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
             connection.setUrl((String) commandLine.getValue(TARGET_URL_OPTION));
             connection.setUsername((String) commandLine.getValue(TARGET_USERNAME_OPTION));

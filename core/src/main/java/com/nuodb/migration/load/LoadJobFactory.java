@@ -42,7 +42,7 @@ import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
 import com.nuodb.migration.spec.ConnectionSpec;
-import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.spec.LoadSpec;
 import com.nuodb.migration.spec.ResourceSpec;
 
@@ -121,7 +121,7 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
         LoadJobFactory jobFactory = new LoadJobFactory();
         jobFactory.setLoadSpec(new LoadSpec() {
             {
-                DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
+                JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
                 connectionSpec.setDriverClassName("com.nuodb.jdbc.Driver");
                 connectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
                 connectionSpec.setUsername("dba");

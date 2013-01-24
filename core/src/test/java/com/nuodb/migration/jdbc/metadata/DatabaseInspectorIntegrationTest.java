@@ -2,10 +2,10 @@ package com.nuodb.migration.jdbc.metadata;
 
 
 import com.nuodb.migration.TestUtils;
-import com.nuodb.migration.jdbc.connection.DriverConnectionProvider;
-import com.nuodb.migration.jdbc.connection.DriverPoolingConnectionProvider;
+import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
+import com.nuodb.migration.jdbc.connection.JdbcPoolingConnectionProvider;
 import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
-import com.nuodb.migration.spec.DriverConnectionSpec;
+import com.nuodb.migration.spec.JdbcConnectionSpec;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -22,8 +22,8 @@ public class DatabaseInspectorIntegrationTest {
 
     @Before
     public void setUp() throws Exception {
-        DriverConnectionSpec nuodb = TestUtils.createConnectionSpec();
-        DriverConnectionProvider connectionProvider = new DriverPoolingConnectionProvider(nuodb);
+        JdbcConnectionSpec nuodb = TestUtils.createConnectionSpec();
+        JdbcConnectionProvider connectionProvider = new JdbcPoolingConnectionProvider(nuodb);
         connection = connectionProvider.getConnection();
 
         Assert.assertNotNull(connection);

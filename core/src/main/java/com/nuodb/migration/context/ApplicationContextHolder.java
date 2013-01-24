@@ -32,17 +32,22 @@ package com.nuodb.migration.context;
  */
 public class ApplicationContextHolder {
 
-    private static ApplicationContextHolderStrategy applicationContextHolderStrategy = new StaticApplicationContextHolderStrategy();
+    private static ApplicationContextHolderStrategy applicationContextHolderStrategy;
 
-    public static void setStrategy(ApplicationContextHolderStrategy strategy) {
-        applicationContextHolderStrategy = strategy;
+    static {
+        setApplicationContextHolderStrategy(new StaticApplicationContextHolderStrategy());
     }
 
-    public static ApplicationContext getContext() {
-        return applicationContextHolderStrategy.getContext();
+    public static void setApplicationContextHolderStrategy(
+            ApplicationContextHolderStrategy applicationContextHolderStrategy) {
+        ApplicationContextHolder.applicationContextHolderStrategy = applicationContextHolderStrategy;
     }
 
-    public static void setContext(ApplicationContext context) {
-        applicationContextHolderStrategy.setContext(context);
+    public static ApplicationContext getApplicationContext() {
+        return applicationContextHolderStrategy.getApplicationContext();
+    }
+
+    public static void setApplicationContext(ApplicationContext applicationContext) {
+        applicationContextHolderStrategy.setApplicationContext(applicationContext);
     }
 }
