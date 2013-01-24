@@ -19,7 +19,7 @@ import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DriverConnectionProviderTest {
+public class JdbcConnectionProviderTest {
 
     private static final String URL = "jdbc:com.nuodb://localhost/test";
 
