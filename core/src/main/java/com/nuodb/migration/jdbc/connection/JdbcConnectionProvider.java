@@ -68,8 +68,8 @@ public class JdbcConnectionProvider extends DataSourceConnectionProvider {
 
     @Override
     public String getCatalog() {
-        String catalog = null;
-        if (jdbcUrl != null) {
+        String catalog = jdbcConnectionSpec.getCatalog();
+        if (catalog == null && jdbcUrl != null) {
             catalog = jdbcUrl.getCatalog();
         }
         return catalog;
@@ -77,8 +77,8 @@ public class JdbcConnectionProvider extends DataSourceConnectionProvider {
 
     @Override
     public String getSchema() {
-        String schema = null;
-        if (jdbcUrl != null) {
+        String schema = jdbcConnectionSpec.getSchema();
+        if (schema == null && jdbcUrl != null) {
             schema = jdbcUrl.getSchema();
         }
         return schema;

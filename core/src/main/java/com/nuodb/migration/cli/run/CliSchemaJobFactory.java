@@ -303,7 +303,6 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             connection.setPassword((String) commandLine.getValue(TARGET_PASSWORD_OPTION));
             connection.setSchema((String) commandLine.getValue(TARGET_SCHEMA_OPTION));
             connection.setProperties(parseProperties(commandLine, TARGET_PROPERTIES_OPTION, option));
-
             return connection;
         }
 

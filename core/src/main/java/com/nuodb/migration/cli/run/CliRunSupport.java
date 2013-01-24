@@ -191,6 +191,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         connectionSpec.setUsername((String) commandLine.getValue(SOURCE_USERNAME_OPTION));
         connectionSpec.setPassword((String) commandLine.getValue(SOURCE_PASSWORD_OPTION));
         connectionSpec.setProperties(parseProperties(commandLine, SOURCE_PROPERTIES_OPTION, option));
+        connectionSpec.setCatalog((String) commandLine.getValue(SOURCE_CATALOG_OPTION));
+        connectionSpec.setSchema((String) commandLine.getValue(SOURCE_SCHEMA_OPTION));
         return connectionSpec;
     }
 
@@ -360,8 +362,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
             connectionSpec.setUrl((String) commandLine.getValue(TARGET_URL_OPTION));
             connectionSpec.setUsername((String) commandLine.getValue(TARGET_USERNAME_OPTION));
             connectionSpec.setPassword((String) commandLine.getValue(TARGET_PASSWORD_OPTION));
-            connectionSpec.setSchema((String) commandLine.getValue(TARGET_SCHEMA_OPTION));
             connectionSpec.setProperties(parseProperties(commandLine, TARGET_PROPERTIES_OPTION, option));
+            connectionSpec.setSchema((String) commandLine.getValue(TARGET_SCHEMA_OPTION));
         }
         return connectionSpec;
     }
