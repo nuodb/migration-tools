@@ -38,15 +38,19 @@ public interface ResultSetInput extends ResultSetFormat {
 
     void readBegin();
 
-    boolean hasNextRow();
-
     void readRow();
 
     void readEnd();
+
+    boolean hasNextRow();
 
     void setReader(Reader reader);
 
     void setInputStream(InputStream inputStream);
 
+    void initInput();
+
     void setPreparedStatement(PreparedStatement preparedStatement);
+
+    void initInputModel();
 }

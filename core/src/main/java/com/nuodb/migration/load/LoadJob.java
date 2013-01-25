@@ -40,7 +40,6 @@ import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.query.*;
-import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
@@ -149,14 +148,14 @@ public class LoadJob extends JobBase {
             Dialect dialect = execution.getDatabase().getDialect();
             ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(catalogEntry.getType());
             resultSetInput.setAttributes(getAttributes());
+            resultSetInput.setJdbcTypeValueFormatRegistry(execution.getJdbcTypeValueFormatRegistry());
+            resultSetInput.setJdbcTypeValueAccessProvider(
+                    new JdbcTypeValueAccessProvider(dialect.getJdbcTypeRegistry()));
             if (!dialect.supportsSessionTimeZone() && dialect.supportsStatementWithTimezone()) {
                 resultSetInput.setTimeZone(getTimeZone());
             }
             resultSetInput.setInputStream(entryInput);
-            resultSetInput.setJdbcTypeValueFormatRegistry(execution.getJdbcTypeValueFormatRegistry());
-
-            JdbcTypeRegistry jdbcTypeRegistry = dialect.getJdbcTypeRegistry();
-            resultSetInput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
+            resultSetInput.initInput();
 
             load(execution, resultSetInput, catalogEntry.getName());
         } finally {
@@ -203,6 +202,7 @@ public class LoadJob extends JobBase {
     protected void load(LoadJobExecution execution, ResultSetInput resultSetInput,
                         PreparedStatement preparedStatement) throws SQLException {
         resultSetInput.setPreparedStatement(preparedStatement);
+        resultSetInput.initInputModel();
         while (execution.isRunning() && resultSetInput.hasNextRow()) {
             resultSetInput.readRow();
             preparedStatement.executeUpdate();

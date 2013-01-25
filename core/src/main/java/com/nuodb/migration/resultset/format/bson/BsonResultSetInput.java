@@ -57,7 +57,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
     }
 
     @Override
-    protected void initInput() {
+    public void initInput() {
         BsonFactory factory = new BsonFactory();
         factory.enable(ENABLE_STREAMING);
         try {

@@ -42,9 +42,13 @@ public interface ResultSetOutput extends ResultSetFormat {
 
     void writeEnd();
 
+    void setResultSet(ResultSet resultSet);
+
+    void initOutputModel();
+
     void setWriter(Writer writer);
 
     void setOutputStream(OutputStream outputStream);
 
-    void setResultSet(ResultSet resultSet);
+    void initOutput();
 }

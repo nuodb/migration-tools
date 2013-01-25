@@ -54,11 +54,13 @@ public class ValueModelFactory {
                 metaData.getPrecision(column), metaData.getScale(column));
     }
 
-    public static ValueModelList<ValueModel> createValueModelList(ResultSet resultSet) throws SQLException {
+    public static ValueModelList<ValueModel> createValueModelList(
+            ResultSet resultSet) throws SQLException {
         return createValueModelList(resultSet.getMetaData());
     }
 
-    public static ValueModelList<ValueModel> createValueModelList(ResultSetMetaData metaData) throws SQLException {
+    public static ValueModelList<ValueModel> createValueModelList(
+            ResultSetMetaData metaData) throws SQLException {
         final int size = metaData.getColumnCount();
         final ValueModel[] values = new ValueModel[size];
         for (int i = 0; i < size; i++) {

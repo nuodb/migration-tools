@@ -59,7 +59,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
     }
 
     @Override
-    protected void initInput() {
+    public void initInput() {
         CsvFormatBuilder builder = new CsvFormatBuilder(this);
         CSVFormat format = builder.build();
         Character quote = builder.getQuote();

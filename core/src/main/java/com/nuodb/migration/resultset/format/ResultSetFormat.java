@@ -58,9 +58,9 @@ public interface ResultSetFormat {
 
     void setValueModelList(ValueModelList<ValueModel> valueModelList);
 
-    ValueModelList<ValueFormatModel> getValueFormatModelList();
+    ValueModelList<ResultSetValueModel> getResultSetValueModelList();
 
-    void setValueFormatModelList(ValueModelList<ValueFormatModel> valueFormatModelList);
+    void setResultSetValueModelList(ValueModelList<ResultSetValueModel> resultSetValueModelList);
 
     JdbcTypeValueAccessProvider getJdbcTypeValueAccessProvider();
 

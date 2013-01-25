@@ -57,7 +57,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
     }
 
     @Override
-    protected void initInput() {
+    public void initInput() {
         String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
 
         XMLInputFactory factory = XMLInputFactory.newInstance();

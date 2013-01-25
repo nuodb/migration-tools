@@ -54,7 +54,7 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
     }
 
     @Override
-    protected void initOutput() {
+    public void initOutput() {
         CsvFormatBuilder builder = new CsvFormatBuilder(this);
         CSVFormat format = builder.build();
         Character quote = builder.getQuote();

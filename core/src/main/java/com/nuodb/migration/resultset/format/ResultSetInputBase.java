@@ -27,7 +27,10 @@
  */
 package com.nuodb.migration.resultset.format;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelFactory;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
@@ -38,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 
@@ -69,10 +73,7 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     @Override
     public void setInputStream(InputStream inputStream) {
         this.inputStream = inputStream;
-        initInput();
     }
-
-    protected abstract void initInput();
 
     public PreparedStatement getPreparedStatement() {
         return preparedStatement;
@@ -81,25 +82,36 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     @Override
     public void setPreparedStatement(PreparedStatement preparedStatement) {
         this.preparedStatement = preparedStatement;
-        initValueFormatModelList();
     }
 
-    protected void initValueFormatModelList() {
-        setValueFormatModelList(createValueFormatModelList());
-    }
-
-    protected ValueModelList<ValueFormatModel> createValueFormatModelList() {
-        int index = 0;
-        ValueFormatModel valueFormatModel;
-        final ValueModelList<ValueFormatModel> valueFormatModelList = createValueModelList();
-        for (ValueModel valueModel : getValueModelList()) {
-            visitValueFormatModel(valueFormatModel = createValueFormatModel(valueModel, index++));
-            valueFormatModelList.add(valueFormatModel);
+    @Override
+    public void initInputModel() {
+        ValueModelList<ValueModel> valueModelList = getValueModelList();
+        if (valueModelList == null) {
+            try {
+                setValueModelList(
+                        valueModelList = ValueModelFactory.createValueModelList(preparedStatement.getMetaData()));
+            } catch (SQLException exception) {
+                throw new ResultSetInputException(exception);
+            }
         }
-        return valueFormatModelList;
+        ValueModelList<ResultSetValueModel> resultSetValueModelList = getResultSetValueModelList();
+        if (resultSetValueModelList == null) {
+            resultSetValueModelList = createValueModelList(Iterables.transform(valueModelList,
+                    new Function<ValueModel, ResultSetValueModel>() {
+
+                        private int index = 0;
+
+                        @Override
+                        public ResultSetValueModel apply(ValueModel valueModel) {
+                            return visitValueFormatModel(createValueFormatModel(valueModel, index++));
+                        }
+                    }));
+            setResultSetValueModelList(resultSetValueModelList);
+        }
     }
 
-    protected ValueFormatModel createValueFormatModel(ValueModel valueModel, int index) {
+    protected ResultSetValueModel createValueFormatModel(ValueModel valueModel, int index) {
         JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(valueModel.getTypeCode(), valueModel.getTypeName());
         JdbcTypeDesc jdbcTypeDescAlias = getJdbcTypeValueAccessProvider().getJdbcTypeDescAlias(jdbcTypeDesc);
 
@@ -110,7 +122,7 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
         JdbcTypeValueAccess<Object> jdbcTypeValueAccess =
                 getJdbcTypeValueAccessProvider().getPreparedStatementAccess(getPreparedStatement(), valueModel,
                         index + 1);
-        return new SimpleValueFormatModel(valueModel, valueFormat, jdbcTypeValueAccess, null);
+        return new SimpleResultSetValueModel(valueModel, valueFormat, jdbcTypeValueAccess, null);
     }
 
     @Override
@@ -124,12 +136,12 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     protected abstract void doReadBegin();
 
     protected void setValues(String[] values) {
-        ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
+        ValueModelList<ResultSetValueModel> resultSetValueModelList = getResultSetValueModelList();
         for (int index = 0; index < values.length; index++) {
-            ValueFormatModel valueFormatModel = valueFormatModelList.get(index);
-            valueFormatModel.getJdbcTypeValueFormat().setValue(
-                    valueFormatModel.getJdbcTypeValueAccess(), values[index],
-                    valueFormatModel.getJdbcTypeValueAccessOptions());
+            ResultSetValueModel resultSetValueModel = resultSetValueModelList.get(index);
+            resultSetValueModel.getJdbcTypeValueFormat().setValue(
+                    resultSetValueModel.getJdbcTypeValueAccess(), values[index],
+                    resultSetValueModel.getJdbcTypeValueAccessOptions());
         }
     }
 

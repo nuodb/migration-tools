@@ -27,15 +27,21 @@
  */
 package com.nuodb.migration.dump;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.dialect.DialectResolver;
+import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.model.ValueModelFactory;
+import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.query.*;
 import com.nuodb.migration.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
@@ -139,10 +145,10 @@ public class DumpJob extends JobBase {
             }
 
             for (SelectQuery selectQuery : createSelectQueries(database, getSelectQuerySpecs())) {
-                dump(execution, selectQuery, createCatalogEntry(selectQuery, getOutputType()));
+                dump(execution, selectQuery);
             }
             for (NativeQuery nativeQuery : createNativeQueries(getNativeQuerySpecs())) {
-                dump(execution, nativeQuery, createCatalogEntry(nativeQuery, getOutputType()));
+                dump(execution, nativeQuery);
             }
             connection.commit();
         } finally {
@@ -153,37 +159,30 @@ public class DumpJob extends JobBase {
         }
     }
 
-    protected CatalogEntry createCatalogEntry(SelectQuery selectQuery, String type) {
-        Table table = selectQuery.getTables().get(0);
-        return new CatalogEntry(table.getName().toLowerCase(), type);
-    }
-
-    protected CatalogEntry createCatalogEntry(NativeQuery nativeQuery, String type) {
-        return new CatalogEntry(format(QUERY_ENTRY_NAME, new Date()), type);
-    }
-
-    protected void dump(final DumpJobExecution execution, final Query query,
-                        final CatalogEntry catalogEntry) throws SQLException {
+    protected void dump(final DumpJobExecution execution, final Query query) throws SQLException {
         final Database database = execution.getDatabase();
         StatementTemplate template = new StatementTemplate(execution.getConnectionServices().getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
-                        return prepareStatement(connection, database, query);
+                        PreparedStatement statement = connection.prepareStatement(
+                                query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                        database.getDialect().setStreamResults(statement, true);
+                        return statement;
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement preparedStatement) throws SQLException {
-                        dump(execution, preparedStatement, catalogEntry);
+                        dump(execution, query, preparedStatement);
                     }
                 }
         );
     }
 
-    protected void dump(DumpJobExecution execution, PreparedStatement preparedStatement,
-                        CatalogEntry catalogEntry) throws SQLException {
+    protected void dump(DumpJobExecution execution, Query query,
+                        PreparedStatement preparedStatement) throws SQLException {
         final ResultSetOutput resultSetOutput = getResultSetFormatFactory().createOutput(getOutputType());
         resultSetOutput.setAttributes(getAttributes());
         resultSetOutput.setJdbcTypeValueFormatRegistry(execution.getJdbcTypeValueFormatRegistry());
@@ -196,12 +195,15 @@ public class DumpJob extends JobBase {
         resultSetOutput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
 
         ResultSet resultSet = preparedStatement.executeQuery();
+        resultSetOutput.setResultSet(resultSet);
+        resultSetOutput.setValueModelList(createValueModelList(resultSet, query));
+        resultSetOutput.initOutputModel();
 
         CatalogWriter catalogWriter = execution.getCatalogWriter();
+        CatalogEntry catalogEntry = createCatalogEntry(query);
         catalogWriter.write(catalogEntry);
-
         resultSetOutput.setOutputStream(catalogWriter.getOutputStream(catalogEntry));
-        resultSetOutput.setResultSet(resultSet);
+        resultSetOutput.initOutput();
 
         resultSetOutput.writeBegin();
         while (execution.isRunning() && resultSet.next()) {
@@ -210,12 +212,28 @@ public class DumpJob extends JobBase {
         resultSetOutput.writeEnd();
     }
 
-    protected PreparedStatement prepareStatement(Connection connection, Database database,
-                                                 Query query) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-        database.getDialect().setStreamResults(preparedStatement, true);
-        return preparedStatement;
+    protected CatalogEntry createCatalogEntry(Query query) {
+        if (query instanceof SelectQuery) {
+            Table table = ((SelectQuery) query).getTables().get(0);
+            return new CatalogEntry(table.getName().toLowerCase(), getOutputType());
+        } else {
+            return new CatalogEntry(format(QUERY_ENTRY_NAME, new Date()), getOutputType());
+        }
+    }
+
+    protected ValueModelList<ValueModel> createValueModelList(ResultSet resultSet, Query query) throws SQLException {
+        if (query instanceof SelectQuery) {
+            return ValueModelFactory.createValueModelList(
+                    Iterables.transform(((SelectQuery) query).getColumns(),
+                    new Function<Column, ValueModel>() {
+                        @Override
+                        public ValueModel apply(Column column) {
+                            return column;
+                        }
+                    }));
+        } else {
+            return ValueModelFactory.createValueModelList(resultSet);
+        }
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database,

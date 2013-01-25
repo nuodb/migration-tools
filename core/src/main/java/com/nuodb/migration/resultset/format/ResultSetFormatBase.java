@@ -39,17 +39,15 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
-
 /**
  * @author Sergey Bushik
  */
 public abstract class ResultSetFormatBase implements ResultSetFormat {
 
-    private Map<String, Object> attributes;
     private TimeZone timeZone;
-    private ValueModelList<ValueModel> valueModelList = createValueModelList();
-    private ValueModelList<ValueFormatModel> valueFormatModelList;
+    private Map<String, Object> attributes;
+    private ValueModelList<ValueModel> valueModelList;
+    private ValueModelList<ResultSetValueModel> resultSetValueModelList;
     private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider;
     private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;
 
@@ -72,8 +70,8 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
         this.attributes = attributes;
     }
 
-    protected void visitValueFormatModel(ValueFormatModel valueFormatModel) {
-        int typeCode = valueFormatModel.getTypeCode();
+    protected ResultSetValueModel visitValueFormatModel(ResultSetValueModel resultSetValueModel) {
+        int typeCode = resultSetValueModel.getTypeCode();
         if (typeCode == Types.TIME || typeCode == Types.TIMESTAMP || typeCode == Types.DATE) {
             TimeZone timeZone = getTimeZone();
             if (timeZone != null) {
@@ -81,9 +79,10 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
                 calendar.setTimeZone(timeZone);
                 Map<String, Object> options = Maps.newHashMap();
                 options.put(JdbcDateTypeBase.CALENDAR, calendar);
-                valueFormatModel.setJdbcTypeValueAccessOptions(options);
+                resultSetValueModel.setJdbcTypeValueAccessOptions(options);
             }
         }
+        return resultSetValueModel;
     }
 
     @Override
@@ -99,6 +98,26 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
     @Override
     public void setTimeZone(TimeZone timeZone) {
         this.timeZone = timeZone;
+    }
+
+    @Override
+    public ValueModelList<ValueModel> getValueModelList() {
+        return valueModelList;
+    }
+
+    @Override
+    public void setValueModelList(ValueModelList<ValueModel> valueModelList) {
+        this.valueModelList = valueModelList;
+    }
+
+    @Override
+    public ValueModelList<ResultSetValueModel> getResultSetValueModelList() {
+        return resultSetValueModelList;
+    }
+
+    @Override
+    public void setResultSetValueModelList(ValueModelList<ResultSetValueModel> resultSetValueModelList) {
+        this.resultSetValueModelList = resultSetValueModelList;
     }
 
     @Override
@@ -119,25 +138,5 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
     @Override
     public void setJdbcTypeValueFormatRegistry(JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry) {
         this.jdbcTypeValueFormatRegistry = jdbcTypeValueFormatRegistry;
-    }
-
-    @Override
-    public ValueModelList<ValueModel> getValueModelList() {
-        return valueModelList;
-    }
-
-    @Override
-    public void setValueModelList(ValueModelList<ValueModel> valueModelList) {
-        this.valueModelList = valueModelList;
-    }
-
-    @Override
-    public ValueModelList<ValueFormatModel> getValueFormatModelList() {
-        return valueFormatModelList;
-    }
-
-    @Override
-    public void setValueFormatModelList(ValueModelList<ValueFormatModel> valueFormatModelList) {
-        this.valueFormatModelList = valueFormatModelList;
     }
 }

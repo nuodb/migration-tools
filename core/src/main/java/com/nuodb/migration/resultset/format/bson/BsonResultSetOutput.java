@@ -50,7 +50,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
     }
 
     @Override
-    protected void initOutput() {
+    public void initOutput() {
         BsonFactory factory = new BsonFactory();
         factory.enable(ENABLE_STREAMING);
         try {
