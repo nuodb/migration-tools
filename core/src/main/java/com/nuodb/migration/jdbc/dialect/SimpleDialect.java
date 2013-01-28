@@ -63,6 +63,7 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
     private IdentifierNormalizer identifierNormalizer = IdentifierNormalizers.noop();
     private IdentifierQuoting identifierQuoting = IdentifierQuotings.always();
+    private ScriptEscapeUtils scriptEscapeUtils = new ScriptEscapeUtils();
     private DatabaseInfo databaseInfo;
 
     public SimpleDialect(DatabaseInfo databaseInfo) {
@@ -262,6 +263,16 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     @Override
+    public ScriptEscapeUtils getScriptEscapeUtils() {
+        return scriptEscapeUtils;
+    }
+
+    @Override
+    public void setScriptEscapeUtils(ScriptEscapeUtils scriptEscapeUtils) {
+        this.scriptEscapeUtils = scriptEscapeUtils;
+    }
+
+    @Override
     public boolean supportsDropIndexIfExists() {
         return false;
     }
@@ -308,7 +319,7 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
 
     @Override
     public String getCheckClause(String checkClause) {
-        checkClause = getScriptQuoted(checkClause);
+        checkClause = getScriptQuotation(checkClause);
         if (!checkClause.startsWith("(") && !checkClause.endsWith(")")) {
             return "(" + checkClause + ")";
         } else {
@@ -322,15 +333,31 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
             return null;
         }
         defaultValue = getScriptTranslation(defaultValue, dialect);
-        defaultValue = getScriptQuoted(defaultValue);
-        if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
-            return "'" + defaultValue + "'";
-        } else {
-            return defaultValue;
+        defaultValue = getScriptEscapeUtils().escapeDefaultValue(defaultValue);
+        String defaultValueUnquoted = defaultValue;
+        boolean opening = false;
+        if (defaultValue.startsWith("'")) {
+            defaultValueUnquoted = defaultValue.substring(1);
+            opening = true;
         }
+        boolean closing = false;
+        if (opening && defaultValueUnquoted.endsWith("'")) {
+            defaultValueUnquoted = defaultValueUnquoted.substring(defaultValueUnquoted.length() - 1);
+            closing = true;
+        }
+        if (opening && closing) {
+            int escapeCharCount = 0;
+            for (int i = defaultValueUnquoted.length() - 1; i >= 0; i--, escapeCharCount++) {
+                if (!getScriptEscapeUtils().isEscapeChar(defaultValueUnquoted.charAt(i))) {
+                    break;
+                }
+            }
+            return escapeCharCount % 2 == 0 ? "'" + defaultValue + "'" : defaultValue;
+        }
+        return "'" + defaultValue + "'";
     }
 
-    protected String getScriptQuoted(String script) {
+    protected String getScriptQuotation(String script) {
         if (script == null) {
             return null;
         }

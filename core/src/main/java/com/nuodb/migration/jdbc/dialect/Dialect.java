@@ -137,6 +137,10 @@ public interface Dialect {
 
     void setIdentifierQuoting(IdentifierQuoting identifierQuoting);
 
+    ScriptEscapeUtils getScriptEscapeUtils();
+
+    void setScriptEscapeUtils(ScriptEscapeUtils scriptEscapeUtils);
+
     ScriptTranslationManager getScriptTranslationManager();
 
     void setScriptTranslationManager(ScriptTranslationManager scriptTranslationManager);

@@ -122,7 +122,7 @@ public class DatabaseInspector {
         if (catalog != null) {
             database.getCatalog(catalog);
         }
-        if (schema != null) {
+        if (catalog != null && schema != null) {
             database.getCatalog(catalog).getSchema(schema);
         }
         connection.commit();
