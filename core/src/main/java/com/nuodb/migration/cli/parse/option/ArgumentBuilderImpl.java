@@ -51,11 +51,11 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
     private int maximum = 1;
     private OptionProcessor optionProcessor;
     private List<Object> defaultValues = Lists.newArrayList();
-    private String valuesSeparator;
+    private OptionFormat optionFormat;
     private Collection<String> helpValues;
 
     public ArgumentBuilderImpl(OptionFormat optionFormat) {
-        this.valuesSeparator = optionFormat.getArgumentValuesSeparator();
+        this.optionFormat = optionFormat;
     }
 
     @Override
@@ -107,11 +107,10 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
     }
 
     @Override
-    public ArgumentBuilder withValuesSeparator(String valuesSeparator) {
-        this.valuesSeparator = valuesSeparator;
+    public ArgumentBuilder withOptionFormat(OptionFormat optionFormat) {
+        this.optionFormat = optionFormat;
         return this;
     }
-
 
     @Override
     public ArgumentBuilder withHelpValues(Collection<String> helpValues) {
@@ -130,7 +129,7 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
         argument.setMaximum(maximum);
         argument.setDefaultValues(defaultValues);
         argument.setOptionProcessor(optionProcessor);
-        argument.setValuesSeparator(valuesSeparator);
+        argument.setOptionFormat(optionFormat);
         argument.setHelpValues(helpValues);
         return argument;
     }

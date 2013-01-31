@@ -30,6 +30,7 @@ package com.nuodb.migration.cli.run;
 import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.CommandLine;
 import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.jdbc.query.InsertType;
 import com.nuodb.migration.load.LoadJobFactory;
@@ -53,13 +54,13 @@ public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, C
 
     @Override
     public CliRun createCliRun() {
-        return new CliLoad();
+        return new CliLoadJob();
     }
 
-    class CliLoad extends CliRunJob {
+    class CliLoadJob extends CliRunJob {
 
-        public CliLoad() {
-            super(COMMAND, new LoadJobFactory());
+        public CliLoadJob() {
+            super(CliLoadJobFactory.this.getOptionFormat(), COMMAND, new LoadJobFactory());
         }
 
         @Override
@@ -87,6 +88,7 @@ public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, C
     protected Option createReplaceOption() {
         return newOption().
                 withName(REPLACE_OPTION).
+                withAlias(REPLACE_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(REPLACE_OPTION_DESCRIPTION)).build();
     }
 

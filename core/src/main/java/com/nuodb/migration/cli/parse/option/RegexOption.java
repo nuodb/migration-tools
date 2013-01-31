@@ -33,7 +33,7 @@ import com.nuodb.migration.match.AntRegexCompiler;
 import com.nuodb.migration.match.Match;
 import com.nuodb.migration.match.RegexCompiler;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.util.*;
 
@@ -62,6 +62,10 @@ public class RegexOption extends ContainerBase {
         setOptionProcessor(new ArgumentMaximumUpdater());
     }
 
+    public RegexOption(OptionFormat optionFormat) {
+        super(optionFormat);
+    }
+
     public void addRegex(String regex, int group, int priority) {
         for (String prefix : getPrefixes()) {
             RegexTrigger trigger = new RegexTrigger(regexCompiler.compile(prefix + regex));
@@ -79,7 +83,7 @@ public class RegexOption extends ContainerBase {
     @Override
     public void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
-        Trigger trigger = getFireTrigger(getTriggers(), argument);
+        Trigger trigger = findTrigger(getTriggers(), argument);
         if (canProcess(commandLine, argument)) {
             processTriggerFired(commandLine, trigger, argument);
         } else {
@@ -113,7 +117,7 @@ public class RegexOption extends ContainerBase {
         if (optional) {
             help.append('[');
         }
-        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
         createTriggers(triggers, getPrefixes(), getName());
         join(help, triggers);
 

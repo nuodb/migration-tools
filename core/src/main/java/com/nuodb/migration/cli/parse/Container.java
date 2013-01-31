@@ -39,8 +39,4 @@ public interface Container extends Option {
     Argument getArgument();
 
     void setArgument(Argument argument);
-
-    String getArgumentSeparator();
-
-    void setArgumentSeparator(String argumentSeparator);
 }

@@ -46,6 +46,7 @@ public class HelpFormatter extends HelpHint {
     static {
         USAGE_OUTPUT_HINTS = Collections.unmodifiableSet(
                 Sets.newHashSet(
+                        ALIASES,
                         OPTIONAL,
                         PROPERTY,
                         SWITCH,

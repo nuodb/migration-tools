@@ -36,7 +36,7 @@ import com.nuodb.migration.cli.run.CliRun;
 import com.nuodb.migration.cli.run.CliRunFactory;
 import com.nuodb.migration.cli.run.CliRunFactoryLookup;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.util.ListIterator;
 
@@ -59,7 +59,7 @@ public class CliCommand extends ArgumentImpl {
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
         for (String cliCommand : cliRunFactoryLookup.getCommands()) {
             triggers.add(new TriggerImpl(cliCommand));
         }

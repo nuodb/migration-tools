@@ -42,8 +42,13 @@ public interface CliOptions {
     final int COMMAND_OPTION_ID = 4;
 
     final String HELP_OPTION = "help";
+    final String HELP_SHORT_OPTION = "h";
     final String LIST_OPTION = "list";
+    final String LIST_SHORT_OPTION = "l";
     final String CONFIG_OPTION = "config";
+    final String CONFIG_SHORT_OPTION = "c";
+    final String PROPERTIES_OPTION = "properties";
+    final String PROPERTIES_SHORT_OPTION = "p";
     final String COMMAND_OPTION = "command";
 
     final String SOURCE_DRIVER_OPTION = "source.driver";
@@ -55,6 +60,7 @@ public interface CliOptions {
     final String SOURCE_SCHEMA_OPTION = "source.schema";
 
     final String TIME_ZONE_OPTION = "time.zone";
+    final String TIME_ZONE_SHORT_OPTION = "tz";
     final String OUTPUT_OPTION = "output.*";
     final String OUTPUT_TYPE_OPTION = "output.type";
     final String OUTPUT_PATH_OPTION = "output.path";
@@ -72,6 +78,7 @@ public interface CliOptions {
     final String TARGET_SCHEMA_OPTION = "target.schema";
 
     final String REPLACE_OPTION = "replace";
+    final String REPLACE_SHORT_OPTION = "replace";
 
     final String INPUT_OPTION = "input.*";
     final String INPUT_PATH_OPTION = "input.path";

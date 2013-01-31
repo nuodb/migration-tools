@@ -41,10 +41,6 @@ public interface Argument extends Option {
 
     void setDefaultValues(List<Object> defaultValues);
 
-    String getValuesSeparator();
-
-    void setValuesSeparator(String valuesSeparator);
-
     /**
      * Adds defaults to a executable line.
      *

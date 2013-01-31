@@ -35,7 +35,7 @@ public class OptionToolkit {
     private OptionFormat optionFormat;
 
     public OptionToolkit() {
-        this(OptionFormat.DEFAULT_FORMAT);
+        this(OptionFormat.LONG);
     }
 
     public OptionToolkit(OptionFormat optionFormat) {

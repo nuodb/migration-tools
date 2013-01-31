@@ -28,6 +28,7 @@
 package com.nuodb.migration.cli.run;
 
 import com.nuodb.migration.cli.parse.*;
+import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.utils.PriorityList;
 
 import java.util.Comparator;
@@ -40,10 +41,12 @@ import java.util.Set;
  */
 public abstract class CliRunAdapter implements CliRun {
 
+    private final OptionFormat optionFormat;
+    private final String command;
     private Option option;
-    private String command;
 
-    protected CliRunAdapter(String command) {
+    protected CliRunAdapter(OptionFormat optionFormat, String command) {
+        this.optionFormat = optionFormat;
         this.command = command;
     }
 
@@ -158,6 +161,11 @@ public abstract class CliRunAdapter implements CliRun {
         bind(commandLine);
     }
 
+    @Override
+    public void setOptionFormat(OptionFormat optionFormat) {
+        initOption().setOptionFormat(optionFormat);
+    }
+
     protected void bind(CommandLine commandLine) {
     }
 
@@ -185,7 +193,8 @@ public abstract class CliRunAdapter implements CliRun {
         return command;
     }
 
-    public void setCommand(String command) {
-        this.command = command;
+    @Override
+    public OptionFormat getOptionFormat() {
+        return optionFormat;
     }
 }

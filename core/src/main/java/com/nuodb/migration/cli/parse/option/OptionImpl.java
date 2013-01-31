@@ -27,10 +27,9 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.util.*;
 
@@ -41,8 +40,8 @@ import static com.nuodb.migration.cli.parse.HelpHint.*;
  */
 public class OptionImpl extends ContainerBase {
 
-    private Set<String> prefixes;
-    private Set<String> aliases;
+    private OptionFormat optionFormat;
+    private Map<String, OptionFormat> aliasOptionFormats;
 
     public OptionImpl() {
     }
@@ -52,39 +51,45 @@ public class OptionImpl extends ContainerBase {
     }
 
     public OptionImpl(int id, String name, String description, boolean required,
-                      Set<String> prefixes, Set<String> aliases) {
+                      OptionFormat optionFormat, Map<String, OptionFormat> aliasOptionFormats) {
         super(id, name, description, required);
-        this.prefixes = prefixes;
-        this.aliases = aliases;
+        this.optionFormat = optionFormat;
+        this.aliasOptionFormats = aliasOptionFormats;
     }
 
-    public Set<String> getAliases() {
-        return aliases;
+    public Map<String, OptionFormat> getAliasOptionFormats() {
+        return aliasOptionFormats;
     }
 
-    public void setAliases(Set<String> aliases) {
-        this.aliases = aliases;
+    public void setAliasOptionFormats(Map<String, OptionFormat> aliasOptionFormats) {
+        this.aliasOptionFormats = aliasOptionFormats;
     }
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new PriorityListImpl();
-        triggers.addAll(super.getTriggers());
+        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>(super.getTriggers());
         Set<String> prefixes = getPrefixes();
         createTriggers(triggers, prefixes, getName());
-        Set<String> aliases = getAliases();
-        if (aliases != null) {
-            for (String alias : aliases) {
-                createTriggers(triggers, prefixes, alias);
+        if (getAliasOptionFormats() != null) {
+            Set<Map.Entry<String, OptionFormat>> aliasOptionFormats = getAliasOptionFormats().entrySet();
+            for (Map.Entry<String, OptionFormat> aliasOptionFormat : aliasOptionFormats) {
+                createTriggers(triggers, aliasOptionFormat.getValue().getOptionPrefixes(), aliasOptionFormat.getKey());
             }
         }
         return triggers;
     }
 
     @Override
+    public Set<String> getPrefixes() {
+        Set<String> prefixes = new HashSet<String>(super.getPrefixes());
+        prefixes.addAll(getOptionPrefixes());
+        return prefixes;
+    }
+
+    @Override
     protected void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
-        Trigger trigger = getFireTrigger(getTriggers(), argument);
+        Trigger trigger = findTrigger(getTriggers(), argument);
         if (trigger != null) {
             commandLine.addOption(this);
         } else {
@@ -100,23 +105,17 @@ public class OptionImpl extends ContainerBase {
             help.append('[');
         }
         Set<String> prefixes = getPrefixes();
-        PriorityList<Trigger> triggers = new PriorityListImpl();
+        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
         createTriggers(triggers, prefixes, getName());
         join(help, triggers);
-        Set<String> aliases = getAliases();
-        if (displayAliases && (aliases != null && !aliases.isEmpty())) {
+        Map<String, OptionFormat> aliasOptionFormats = getAliasOptionFormats();
+        if (displayAliases && (aliasOptionFormats != null && !aliasOptionFormats.isEmpty())) {
             help.append(" (");
-            List<String> list = Lists.newArrayList(aliases);
-            Collections.sort(list);
-            for (Iterator<String> i = list.iterator(); i.hasNext(); ) {
-                String alias = i.next();
-                triggers = new PriorityListImpl<Trigger>();
-                createTriggers(triggers, prefixes, alias);
-                join(help, triggers);
-                if (i.hasNext()) {
-                    help.append(',');
-                }
+            triggers.clear();
+            for (Map.Entry<String, OptionFormat> aliasOptionFormat : aliasOptionFormats.entrySet()) {
+                createTriggers(triggers, aliasOptionFormat.getValue().getOptionPrefixes(), aliasOptionFormat.getKey());
             }
+            join(help, triggers);
             help.append(')');
         }
         Argument argument = getArgument();

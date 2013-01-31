@@ -53,7 +53,7 @@ public interface ArgumentBuilder {
 
     ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor);
 
-    ArgumentBuilder withValuesSeparator(String valuesSeparator);
+    ArgumentBuilder withOptionFormat(OptionFormat optionFormat);
 
     ArgumentBuilder withHelpValues(Collection<String> helpValues);
 

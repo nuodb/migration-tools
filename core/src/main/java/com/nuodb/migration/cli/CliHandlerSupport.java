@@ -29,6 +29,7 @@ package com.nuodb.migration.cli;
 
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.cli.parse.help.HelpFormatter;
+import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.cli.parse.parser.ParserImpl;
 import com.nuodb.migration.cli.run.CliRun;
@@ -36,7 +37,6 @@ import com.nuodb.migration.cli.run.CliRunFactory;
 import com.nuodb.migration.cli.run.CliRunFactoryLookup;
 import com.nuodb.migration.cli.run.CliRunJob;
 import com.nuodb.migration.context.support.ApplicationSupport;
-import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migration.job.JobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +81,7 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
         Option help = optionToolkit.newOption().
                 withId(HELP_OPTION_ID).
                 withName(HELP_OPTION).
+                withAlias(HELP_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(HELP_OPTION_DESCRIPTION)).
                 withArgument(
                         optionToolkit.newArgument().
@@ -89,10 +90,12 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
         Option list = optionToolkit.newOption().
                 withId(LIST_OPTION_ID).
                 withName(LIST_OPTION).
+                withAlias(LIST_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(LIST_OPTION_DESCRIPTION)).build();
         Option config = optionToolkit.newOption().
                 withId(CONFIG_OPTION_ID).
                 withName(CONFIG_OPTION).
+                withAlias(CONFIG_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
                 withArgument(
                         optionToolkit.newArgument().
@@ -100,7 +103,6 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
                                 withMinimum(1).
                                 withMaximum(1).build()
                 ).build();
-
         Option command = new CliCommand(COMMAND_OPTION_ID, COMMAND_OPTION, getMessage(COMMAND_OPTION_DESCRIPTION),
                 false, cliRunFactoryLookup);
         return optionToolkit.newGroup().

@@ -130,6 +130,9 @@ public class LoadJob extends JobBase {
                 load(execution, catalogEntry);
             }
             connection.commit();
+        } catch (MigrationException exception) {
+            connection.rollback();
+            throw exception;
         } catch (Exception exception) {
             connection.rollback();
             throw new MigrationException(exception);

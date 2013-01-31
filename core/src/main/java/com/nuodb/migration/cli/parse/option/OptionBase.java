@@ -16,20 +16,12 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.nuodb.migration.cli.parse.CommandLine;
-import com.nuodb.migration.cli.parse.HelpHint;
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionException;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-import com.nuodb.migration.cli.parse.Trigger;
+import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.Priority;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.String.format;
 
@@ -42,10 +34,15 @@ public abstract class OptionBase implements Option {
     private String name;
     private String description;
     private boolean required;
+    private OptionFormat optionFormat;
     private OptionProcessor optionProcessor;
-    private PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+    private PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
 
     protected OptionBase() {
+    }
+
+    protected OptionBase(OptionFormat optionFormat) {
+        this.optionFormat = optionFormat;
     }
 
     protected OptionBase(int id, String name, String description, boolean required) {
@@ -53,6 +50,15 @@ public abstract class OptionBase implements Option {
         this.name = name;
         this.description = description;
         this.required = required;
+    }
+
+    protected OptionBase(int id, String name, String description, boolean required,
+                         OptionFormat optionFormat) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.required = required;
+        this.optionFormat = optionFormat;
     }
 
     @Override
@@ -96,6 +102,16 @@ public abstract class OptionBase implements Option {
     }
 
     @Override
+    public OptionFormat getOptionFormat() {
+        return optionFormat;
+    }
+
+    @Override
+    public void setOptionFormat(OptionFormat optionFormat) {
+        this.optionFormat = optionFormat;
+    }
+
+    @Override
     public OptionProcessor getOptionProcessor() {
         return optionProcessor;
     }
@@ -125,8 +141,21 @@ public abstract class OptionBase implements Option {
         return findOption(new TriggerImpl(trigger));
     }
 
+    @Override
     public Option findOption(Trigger trigger) {
         return getTriggers().contains(trigger) ? this : null;
+    }
+
+    public Set<String> getOptionPrefixes() {
+        return optionFormat != null ? optionFormat.getOptionPrefixes() : Collections.<String>emptySet();
+    }
+
+    public String getArgumentSeparator() {
+        return optionFormat != null ? optionFormat.getArgumentSeparator() : null;
+    }
+
+    public String getArgumentValuesSeparator() {
+        return optionFormat != null ? optionFormat.getArgumentValuesSeparator() : null;
     }
 
     @Override

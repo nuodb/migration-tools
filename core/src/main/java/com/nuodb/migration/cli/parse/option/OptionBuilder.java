@@ -29,8 +29,6 @@ package com.nuodb.migration.cli.parse.option;
 
 import com.nuodb.migration.cli.parse.*;
 
-import java.util.Set;
-
 /**
  * @author Sergey Bushik
  */
@@ -46,6 +44,8 @@ public interface OptionBuilder {
 
     OptionBuilder withAlias(String alias);
 
+    OptionBuilder withAlias(String alias, OptionFormat optionFormat);
+
     OptionBuilder withGroup(Group group);
 
     OptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
@@ -54,9 +54,7 @@ public interface OptionBuilder {
 
     OptionBuilder withArgument(Argument argument);
 
-    OptionBuilder withArgumentSeparator(String argumentSeparator);
-
-    OptionBuilder withPrefixes(Set<String> prefixes);
+    OptionBuilder withOptionFormat(OptionFormat optionFormat);
 
     Option build();
 }

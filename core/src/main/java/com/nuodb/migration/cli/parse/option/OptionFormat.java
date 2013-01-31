@@ -27,8 +27,7 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.google.common.collect.Sets;
-
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -36,14 +35,20 @@ import java.util.Set;
  */
 public class OptionFormat {
 
-    public static final OptionFormat DEFAULT_FORMAT = new OptionFormat("--", "=", ",");
+    public static final OptionFormat LONG = new OptionFormat("--", "=", ",");
+    public static final OptionFormat SHORT = new OptionFormat("-", "=", ",");
 
-    private final Set<String> optionPrefixes;
-    private final String argumentSeparator;
-    private final String argumentValuesSeparator;
+    private Set<String> optionPrefixes;
+    private String argumentSeparator;
+    private String argumentValuesSeparator;
+
+    public OptionFormat(OptionFormat optionFormat) {
+        this(optionFormat.getOptionPrefixes(), optionFormat.getArgumentSeparator(),
+                optionFormat.getArgumentValuesSeparator());
+    }
 
     public OptionFormat(String optionPrefix, String argumentSeparator, String argumentValuesSeparator) {
-        this(Sets.newHashSet(optionPrefix), argumentSeparator, argumentValuesSeparator);
+        this(Collections.singleton(optionPrefix), argumentSeparator, argumentValuesSeparator);
     }
 
     public OptionFormat(Set<String> optionPrefixes, String argumentSeparator, String argumentValuesSeparator) {
@@ -56,11 +61,23 @@ public class OptionFormat {
         return optionPrefixes;
     }
 
+    public void setOptionPrefixes(Set<String> optionPrefixes) {
+        this.optionPrefixes = optionPrefixes;
+    }
+
     public String getArgumentSeparator() {
         return argumentSeparator;
     }
 
+    public void setArgumentSeparator(String argumentSeparator) {
+        this.argumentSeparator = argumentSeparator;
+    }
+
     public String getArgumentValuesSeparator() {
         return argumentValuesSeparator;
+    }
+
+    public void setArgumentValuesSeparator(String argumentValuesSeparator) {
+        this.argumentValuesSeparator = argumentValuesSeparator;
     }
 }

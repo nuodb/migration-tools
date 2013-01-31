@@ -35,6 +35,7 @@ import com.google.common.collect.Maps;
 import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.cli.parse.option.GroupBuilder;
+import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
 import com.nuodb.migration.cli.parse.option.RegexOption;
 import com.nuodb.migration.jdbc.JdbcConstants;
@@ -88,7 +89,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
 
     @Override
     public CliRun createCliRun() {
-        return new CliGenerateSchema();
+        return new CliSchemaJob();
     }
 
     class JdbcTypeSpecValuesCollector implements OptionProcessor {
@@ -151,12 +152,12 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         }
     }
 
-    class CliGenerateSchema extends CliRunJob {
+    class CliSchemaJob extends CliRunJob {
 
         private JdbcTypeSpecValuesCollector jdbcTypeSpecValuesCollector = new JdbcTypeSpecValuesCollector();
 
-        public CliGenerateSchema() {
-            super(COMMAND, new SchemaJobFactory());
+        public CliSchemaJob() {
+            super(CliSchemaJobFactory.this.getOptionFormat(), COMMAND, new SchemaJobFactory());
         }
 
         @Override
@@ -236,16 +237,18 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             typeGroup.withMaximum(Integer.MAX_VALUE);
             group.withOption(typeGroup.build());
 
+            OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+            optionFormat.setArgumentValuesSeparator(null);
+
             RegexOption generate = new RegexOption();
             generate.setName(SCHEMA_META_DATA_OPTION);
             generate.setDescription(getMessage(SCHEMA_META_DATA_OPTION_DESCRIPTION));
-            generate.setPrefixes(getOptionFormat().getOptionPrefixes());
-            generate.setArgumentSeparator(getOptionFormat().getArgumentSeparator());
+            generate.setOptionFormat(getOptionFormat());
             generate.addRegex(SCHEMA_META_DATA_OPTION, 1, Priority.LOW);
             generate.setArgument(
                     newArgument().
                             withName(getMessage(SCHEMA_META_DATA_ARGUMENT_NAME)).
-                            withValuesSeparator(null).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
+                            withOptionFormat(optionFormat).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
             group.withOption(generate);
 
             Collection<String> scriptTypeHelpValues = Lists.transform(asList(ScriptType.values()),

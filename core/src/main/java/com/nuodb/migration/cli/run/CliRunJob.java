@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.cli.run;
 
+import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.job.*;
 
 import java.util.Collections;
@@ -39,8 +40,8 @@ public abstract class CliRunJob extends CliRunAdapter {
 
     private JobFactory jobFactory;
 
-    public CliRunJob(String command, JobFactory jobFactory) {
-        super(command);
+    public CliRunJob(OptionFormat optionFormat, String command, JobFactory jobFactory) {
+        super(optionFormat, command);
         this.jobFactory = jobFactory;
     }
 
@@ -56,7 +57,7 @@ public abstract class CliRunJob extends CliRunAdapter {
         executor.execute(context);
         Throwable failure = executor.getJobStatus().getFailure();
         if (failure != null) {
-            throw new CliRunException(failure.getMessage(), failure);
+            throw new CliRunException(failure);
         }
     }
 

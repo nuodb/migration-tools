@@ -27,9 +27,11 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.nuodb.migration.cli.parse.*;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,21 +39,19 @@ import java.util.Set;
  */
 public class OptionBuilderImpl implements OptionBuilder {
 
-    protected int id;
-    protected String name;
-    protected String description;
-    protected boolean required;
-    protected Argument argument;
-    protected Group group;
-    protected Set<String> aliases = Sets.newHashSet();
-    protected Set<Trigger> triggers = Sets.newHashSet();
-    private Set<String> prefixes;
-    private String argumentSeparator;
+    private int id;
+    private String name;
+    private String description;
+    private boolean required;
+    private Argument argument;
+    private Group group;
+    private Map<String, OptionFormat> aliases = Maps.newHashMap();
+    private Set<Trigger> triggers = Sets.newHashSet();
+    private OptionFormat optionFormat;
     private OptionProcessor optionProcessor;
 
     public OptionBuilderImpl(OptionFormat optionFormat) {
-        this.prefixes = optionFormat.getOptionPrefixes();
-        this.argumentSeparator = optionFormat.getArgumentSeparator();
+        this.optionFormat = optionFormat;
     }
 
     @Override
@@ -68,7 +68,12 @@ public class OptionBuilderImpl implements OptionBuilder {
 
     @Override
     public OptionBuilder withAlias(String alias) {
-        this.aliases.add(alias);
+        return withAlias(alias, optionFormat);
+    }
+
+    @Override
+    public OptionBuilder withAlias(String alias, OptionFormat optionFormat) {
+        this.aliases.put(alias, optionFormat);
         return this;
     }
 
@@ -102,14 +107,8 @@ public class OptionBuilderImpl implements OptionBuilder {
     }
 
     @Override
-    public OptionBuilder withPrefixes(Set<String> prefixes) {
-        this.prefixes = prefixes;
-        return this;
-    }
-
-    @Override
-    public OptionBuilder withArgumentSeparator(String argumentSeparator) {
-        this.argumentSeparator = argumentSeparator;
+    public OptionBuilder withOptionFormat(OptionFormat optionFormat) {
+        this.optionFormat = optionFormat;
         return this;
     }
 
@@ -128,9 +127,8 @@ public class OptionBuilderImpl implements OptionBuilder {
         option.setRequired(required);
         option.setOptionProcessor(optionProcessor);
         option.setArgument(argument);
-        option.setArgumentSeparator(argumentSeparator);
-        option.setPrefixes(prefixes);
-        option.setAliases(aliases);
+        option.setOptionFormat(optionFormat);
+        option.setAliasOptionFormats(aliases);
         option.setGroup(group);
         for (Trigger trigger : triggers) {
             option.addTrigger(trigger);

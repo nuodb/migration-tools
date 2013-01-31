@@ -18,7 +18,7 @@ package com.nuodb.migration.cli.parse.option;
 
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.util.*;
 
@@ -61,7 +61,7 @@ public class Property extends OptionBase {
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
         triggers.add(new TriggerImpl(prefix));
         return triggers;
     }

@@ -31,9 +31,16 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PriorityListImpl<T> extends AbstractCollection<T> implements PriorityList<T>, Serializable {
+public class SimplePriorityList<T> extends AbstractCollection<T> implements PriorityList<T>, Serializable {
 
-    public static final PriorityList EMPTY_LIST = new PriorityListImpl();
+    public static final PriorityList EMPTY_LIST = new SimplePriorityList();
+
+    public SimplePriorityList() {
+    }
+
+    public SimplePriorityList(PriorityList<T> priorityList) {
+        addAll(priorityList);
+    }
 
     @SuppressWarnings("unchecked")
     public static <T> PriorityList<T> emptyList() {

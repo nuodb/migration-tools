@@ -98,6 +98,9 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
     }
 
     protected void log(String query) {
+        if (query.startsWith("INSERT INTO \"HOCKEY\".\"SiteTree_Live\" (\"ID\", \"ClassName\", \"Created\", \"LastEdited\", \"URLSegment\", \"Title\", \"MenuTitle\", \"Content\", \"MetaTitle\", \"MetaDescription\", \"MetaKeywords\", \"ExtraMeta\", \"ShowInMenus\", \"ShowInSearch\", \"Sort\", \"HasBrokenFile\", \"HasBrokenLink\", \"ReportClass\", \"CanViewType\", \"CanEditType\", \"Version\", \"ParentID\", \"Priority\") VALUES ('10'")) {
+            System.out.println();
+        }
         if (logger.isTraceEnabled()) {
             logger.trace(query);
         }

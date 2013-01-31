@@ -18,7 +18,7 @@ package com.nuodb.migration.cli.parse.option;
 
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.util.*;
 
@@ -40,7 +40,7 @@ public class GroupImpl extends OptionBase implements Group {
     private List<Option> options = newArrayList();
     private Set<String> prefixes = newHashSet();
     private List<Argument> arguments = newArrayList();
-    private PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
+    private PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
 
     public GroupImpl() {
     }

@@ -16,6 +16,7 @@
  */
 package com.nuodb.migration.cli.parse;
 
+import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.utils.PriorityList;
 
 import java.util.Comparator;
@@ -89,6 +90,20 @@ public interface Option {
     void setRequired(boolean required);
 
     /**
+     * Returns option format.
+     *
+     * @return current option format.
+     */
+    OptionFormat getOptionFormat();
+
+    /**
+     * Changes option format to the desired.
+     *
+     * @param optionFormat to be used.
+     */
+    void setOptionFormat(OptionFormat optionFormat);
+
+    /**
      * Returns option processor associated with this option.
      *
      * @return option processor associated with the option.
@@ -104,7 +119,7 @@ public interface Option {
 
     /**
      * Identifies the argument prefixes that should be considered options. This is used to identify whether a given
-     * string looks like an option or an argument value. Typically an option would return the setValue [--,-] while switches
+     * string looks like an option or an argument value. Typically an option would return the value [--,-] while switches
      * might offer [-,+].
      * <p/>
      * The returned Set must not be null.

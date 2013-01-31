@@ -35,22 +35,12 @@ public class ArgumentImpl extends OptionBase implements Argument {
     private int maximum = 1;
     private Collection<String> helpValues;
     private List<Object> defaultValues;
-    private String valuesSeparator;
 
     public ArgumentImpl() {
     }
 
     public ArgumentImpl(int id, String name, String description, boolean required) {
         super(id, name != null ? name : NAME, description, required);
-    }
-
-    public ArgumentImpl(int id, String name, String description, boolean required,
-                        int minimum, int maximum, List<Object> defaultValues, String valuesSeparator) {
-        super(id, name != null ? name : NAME, description, required);
-        this.minimum = minimum;
-        this.maximum = maximum;
-        this.defaultValues = defaultValues;
-        this.valuesSeparator = valuesSeparator;
     }
 
     @Override
@@ -86,16 +76,6 @@ public class ArgumentImpl extends OptionBase implements Argument {
     @Override
     public void setDefaultValues(List<Object> defaultValues) {
         this.defaultValues = defaultValues;
-    }
-
-    @Override
-    public String getValuesSeparator() {
-        return valuesSeparator;
-    }
-
-    @Override
-    public void setValuesSeparator(String valuesSeparator) {
-        this.valuesSeparator = valuesSeparator;
     }
 
     @Override
@@ -150,8 +130,9 @@ public class ArgumentImpl extends OptionBase implements Argument {
                 arguments.previous();
                 break;
             }
-            if (valuesSeparator != null) {
-                StringTokenizer values = new StringTokenizer(value, valuesSeparator);
+            String argumentValuesSeparator = getArgumentValuesSeparator();
+            if (argumentValuesSeparator != null) {
+                StringTokenizer values = new StringTokenizer(value, argumentValuesSeparator);
                 arguments.remove();
                 while (values.hasMoreTokens() && (count < maximum)) {
                     count++;

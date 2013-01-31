@@ -31,9 +31,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
-import com.nuodb.migration.utils.PriorityListImpl;
+import com.nuodb.migration.utils.SimplePriorityList;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * @author Sergey Bushik
@@ -42,14 +45,21 @@ public abstract class ContainerBase extends OptionBase implements Container {
 
     private Group group;
     private Argument argument;
-    private String argumentSeparator;
-    private Set<String> prefixes;
 
     protected ContainerBase() {
     }
 
+    protected ContainerBase(OptionFormat optionFormat) {
+        super(optionFormat);
+    }
+
     protected ContainerBase(int id, String name, String description, boolean required) {
         super(id, name, description, required);
+    }
+
+    protected ContainerBase(int id, String name, String description, boolean required,
+                            OptionFormat optionFormat) {
+        super(id, name, description, required, optionFormat);
     }
 
     @Override
@@ -73,35 +83,17 @@ public abstract class ContainerBase extends OptionBase implements Container {
     }
 
     @Override
-    public String getArgumentSeparator() {
-        return argumentSeparator;
-    }
-
-    @Override
-    public void setArgumentSeparator(String argumentSeparator) {
-        this.argumentSeparator = argumentSeparator;
-    }
-
-    @Override
     public Set<String> getPrefixes() {
-        Set<String> prefixesOfContainer = Sets.newHashSet();
+        Set<String> prefixes = Sets.newHashSet();
         if (group != null) {
-            prefixesOfContainer.addAll(group.getPrefixes());
+            prefixes.addAll(group.getPrefixes());
         }
-        if (prefixes != null) {
-            prefixesOfContainer.addAll(prefixes);
-        }
-        return prefixesOfContainer;
-    }
-
-    public void setPrefixes(Set<String> prefixes) {
-        this.prefixes = prefixes;
+        return prefixes;
     }
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new PriorityListImpl<Trigger>();
-        triggers.addAll(super.getTriggers());
+        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>(super.getTriggers());
         if (group != null) {
             triggers.addAll(group.getTriggers());
         }
@@ -112,17 +104,18 @@ public abstract class ContainerBase extends OptionBase implements Container {
     public boolean canProcess(CommandLine commandLine, String argument) {
         PriorityList<Trigger> triggers = getTriggers();
         if (this.argument != null) {
-            if (this.argumentSeparator != null) {
-                int index = argument.indexOf(this.argumentSeparator);
+            String argumentSeparator = getArgumentSeparator();
+            if (argumentSeparator != null) {
+                int index = argument.indexOf(argumentSeparator);
                 if (index > 0) {
-                    return getFireTrigger(triggers, argument.substring(0, index)) != null;
+                    return findTrigger(triggers, argument.substring(0, index)) != null;
                 }
             }
         }
-        return getFireTrigger(triggers, argument) != null;
+        return findTrigger(triggers, argument) != null;
     }
 
-    protected Trigger getFireTrigger(PriorityList<Trigger> triggers, String argument) {
+    protected Trigger findTrigger(PriorityList<Trigger> triggers, String argument) {
         for (Trigger trigger : triggers) {
             if (trigger.fire(argument)) {
                 return trigger;
@@ -143,9 +136,10 @@ public abstract class ContainerBase extends OptionBase implements Container {
 
     @Override
     protected void doPreProcess(CommandLine commandLine, ListIterator<String> arguments) {
-        if (this.argumentSeparator != null) {
+        String argumentSeparator = getArgumentSeparator();
+        if (argumentSeparator != null) {
             String value = arguments.next();
-            int index = value.indexOf(this.argumentSeparator);
+            int index = value.indexOf(argumentSeparator);
             if (index > 0) {
                 arguments.remove();
                 arguments.add(value.substring(0, index));

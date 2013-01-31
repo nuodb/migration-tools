@@ -333,28 +333,17 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
             return null;
         }
         defaultValue = getScriptTranslation(defaultValue, dialect);
-        defaultValue = getScriptEscapeUtils().escapeDefaultValue(defaultValue);
         String defaultValueUnquoted = defaultValue;
         boolean opening = false;
         if (defaultValue.startsWith("'")) {
             defaultValueUnquoted = defaultValue.substring(1);
             opening = true;
         }
-        boolean closing = false;
         if (opening && defaultValueUnquoted.endsWith("'")) {
-            defaultValueUnquoted = defaultValueUnquoted.substring(defaultValueUnquoted.length() - 1);
-            closing = true;
+            defaultValueUnquoted = defaultValueUnquoted.substring(0, defaultValueUnquoted.length() - 1);
         }
-        if (opening && closing) {
-            int escapeCharCount = 0;
-            for (int i = defaultValueUnquoted.length() - 1; i >= 0; i--, escapeCharCount++) {
-                if (!getScriptEscapeUtils().isEscapeChar(defaultValueUnquoted.charAt(i))) {
-                    break;
-                }
-            }
-            return escapeCharCount % 2 == 0 ? "'" + defaultValue + "'" : defaultValue;
-        }
-        return "'" + defaultValue + "'";
+        defaultValueUnquoted = getScriptEscapeUtils().escapeDefaultValue(defaultValueUnquoted);
+        return "'" + defaultValueUnquoted + "'";
     }
 
     protected String getScriptQuotation(String script) {
@@ -529,10 +518,6 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
 
     @Override
     public int hashCode() {
-        int result = jdbcTypeNameMap != null ? jdbcTypeNameMap.hashCode() : 0;
-        result = 31 * result + (jdbcTypeRegistry != null ? jdbcTypeRegistry.hashCode() : 0);
-        result = 31 * result + (identifierNormalizer != null ? identifierNormalizer.hashCode() : 0);
-        result = 31 * result + (scriptTranslationManager != null ? scriptTranslationManager.hashCode() : 0);
-        return result;
+        return databaseInfo != null ? databaseInfo.hashCode() : 0;
     }
 }

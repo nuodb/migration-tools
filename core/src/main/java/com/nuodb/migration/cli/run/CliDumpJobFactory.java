@@ -105,17 +105,18 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
                 ).build();
         group.withOption(tableType);
 
-        OptionFormat optionFormat = getOptionFormat();
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setArgumentValuesSeparator(null);
+
         RegexOption tableFilter = new RegexOption();
         tableFilter.setName(TABLE_FILTER_OPTION);
         tableFilter.setDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
-        tableFilter.setPrefixes(optionFormat.getOptionPrefixes());
-        tableFilter.setArgumentSeparator(optionFormat.getArgumentSeparator());
+        tableFilter.setOptionFormat(optionFormat);
         tableFilter.addRegex(TABLE_FILTER_OPTION, 1, LOW);
         tableFilter.setArgument(
                 newArgument().
                         withName(getMessage(TABLE_FILTER_ARGUMENT_NAME)).
-                        withValuesSeparator(null).
+                        withOptionFormat(optionFormat).
                         withMinimum(1).
                         withRequired(true).build()
         );
@@ -151,6 +152,9 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
     protected Option createNativeQueryGroup() {
         GroupBuilder group = newGroup().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(MAX_VALUE);
 
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setArgumentValuesSeparator(null);
+
         Option query = newOption().
                 withName(QUERY_OPTION).
                 withDescription(getMessage(QUERY_OPTION_DESCRIPTION)).
@@ -158,7 +162,7 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
                         newArgument().
                                 withName(getMessage(QUERY_ARGUMENT_NAME)).
                                 withMinimum(1).
-                                withValuesSeparator(null).
+                                withOptionFormat(optionFormat).
                                 withRequired(true).build()
                 ).build();
         group.withOption(query);
@@ -183,7 +187,7 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
     class CliDumpJob extends CliRunJob {
 
         public CliDumpJob() {
-            super(COMMAND, new DumpJobFactory());
+            super(CliDumpJobFactory.this.getOptionFormat(), COMMAND, new DumpJobFactory());
         }
 
         @Override

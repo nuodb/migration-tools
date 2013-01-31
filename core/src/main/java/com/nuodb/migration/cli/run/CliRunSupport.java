@@ -148,7 +148,6 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     protected Group createOutputGroup() {
         GroupBuilder group = newGroup().withName(getMessage(OUTPUT_GROUP_NAME)).withRequired(true).withMinimum(1);
 
-        OptionFormat optionFormat = optionToolkit.getOptionFormat();
         Option type = newOption().
                 withName(OUTPUT_TYPE_OPTION).
                 withDescription(getMessage(OUTPUT_TYPE_OPTION_DESCRIPTION)).
@@ -169,16 +168,17 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 ).build();
         group.withOption(path);
 
-        RegexOption attributes = new RegexOption();
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setArgumentValuesSeparator(null);
+
+        RegexOption attributes = new RegexOption(optionFormat);
         attributes.setName(OUTPUT_OPTION);
         attributes.setDescription(getMessage(OUTPUT_OPTION_DESCRIPTION));
-        attributes.setPrefixes(optionFormat.getOptionPrefixes());
-        attributes.setArgumentSeparator(optionFormat.getArgumentSeparator());
         attributes.addRegex(OUTPUT_OPTION, 1, LOW);
         attributes.setArgument(
                 newArgument().
                         withName(getMessage(OUTPUT_OPTION_ARGUMENT_NAME)).
-                        withValuesSeparator(null).withMinimum(1).withMaximum(MAX_VALUE).build());
+                        withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build());
         group.withOption(attributes);
 
         return group.build();
@@ -216,6 +216,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     protected Option createTimeZoneOption() {
         return newOption().
                 withName(TIME_ZONE_OPTION).
+                withAlias(TIME_ZONE_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(TIME_ZONE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgument().
@@ -325,8 +326,6 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected Group createInputGroup() {
-        OptionFormat optionFormat = optionToolkit.getOptionFormat();
-
         Option path = newOption().
                 withName(INPUT_PATH_OPTION).
                 withDescription(getMessage(INPUT_PATH_OPTION_DESCRIPTION)).
@@ -336,16 +335,18 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                                 withName(getMessage(INPUT_PATH_ARGUMENT_NAME)).build()
                 ).build();
 
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setArgumentValuesSeparator(null);
+
         RegexOption attributes = new RegexOption();
         attributes.setName(INPUT_OPTION);
         attributes.setDescription(getMessage(INPUT_OPTION_DESCRIPTION));
-        attributes.setPrefixes(optionFormat.getOptionPrefixes());
-        attributes.setArgumentSeparator(optionFormat.getArgumentSeparator());
+        attributes.setOptionFormat(optionFormat);
         attributes.addRegex(INPUT_OPTION, 1, LOW);
         attributes.setArgument(
                 newArgument().
                         withName(getMessage(INPUT_OPTION_ARGUMENT_NAME)).
-                        withValuesSeparator(null).withMinimum(1).withMaximum(MAX_VALUE).build());
+                        withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build());
         return newGroup().
                 withName(getMessage(INPUT_GROUP_NAME)).
                 withRequired(true).
