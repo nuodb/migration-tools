@@ -27,7 +27,6 @@
  */
 package com.nuodb.migration.match;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,11 +72,5 @@ public class AntRegexCompiler extends PatternCompilerBase {
     protected String quote(String pattern, int start, int end) {
         return start == end ? EMPTY :
                 Pattern.quote(pattern.substring(start, end));
-    }
-
-    public static void main(String[] args) {
-        RegexCompiler compiler = new AntRegexCompiler();
-        Regex regex = compiler.compile("-table.*.filter");
-        System.out.println(Arrays.asList(regex.matches("-table.\\wusers.filter")));
     }
 }

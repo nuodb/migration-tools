@@ -117,11 +117,7 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     protected boolean isSQLKeyword(String identifier, Identifiable identifiable) {
-        if (identifiable != null && identifiable instanceof Table) {
-            return false;
-        } else {
-            return getSQLKeywords().contains(identifier);
-        }
+        return !(identifiable != null && identifiable instanceof Table) && getSQLKeywords().contains(identifier);
     }
 
     @Override

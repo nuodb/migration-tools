@@ -107,4 +107,9 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
             primaryKey.addColumn(table.createColumn(primaryKeys.getString("FIELD")), primaryKeys.getInt("POSITION"));
         }
     }
+
+    @Override
+    protected boolean supports(TableInspectionScope inspectionScope) {
+        return inspectionScope.getSchema() != null && inspectionScope.getTable() != null;
+    }
 }

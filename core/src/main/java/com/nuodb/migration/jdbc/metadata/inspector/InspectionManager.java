@@ -27,15 +27,11 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.connection.ConnectionProvider;
-import com.nuodb.migration.jdbc.connection.ConnectionServices;
-import com.nuodb.migration.jdbc.connection.JdbcPoolingConnectionProvider;
 import com.nuodb.migration.jdbc.dialect.DialectResolver;
 import com.nuodb.migration.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.MetaData;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
-import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.sql.Connection;
@@ -126,7 +122,7 @@ public class InspectionManager {
 
     public void inspect(InspectionResults inspectionResults, InspectionScope inspectionScope,
                         MetaDataType... objectTypes) throws SQLException {
-        InspectionContext inspectionContext = createInspectionContext(objectTypes, inspectionResults);
+        InspectionContext inspectionContext = createInspectionContext(inspectionResults, objectTypes);
         try {
             inspectionContext.inspect(inspectionScope, objectTypes);
         } finally {
@@ -136,7 +132,7 @@ public class InspectionManager {
 
     public void inspect(InspectionResults inspectionResults, MetaData object,
                         MetaDataType... objectTypes) throws SQLException {
-        InspectionContext inspectionContext = createInspectionContext(objectTypes, inspectionResults);
+        InspectionContext inspectionContext = createInspectionContext(inspectionResults, objectTypes);
         try {
             inspectionContext.inspect(object, objectTypes);
         } finally {
@@ -146,7 +142,7 @@ public class InspectionManager {
 
     public void inspect(InspectionResults inspectionResults, Collection<MetaData> objects,
                         MetaDataType... objectTypes) throws SQLException {
-        InspectionContext inspectionContext = createInspectionContext(objectTypes, inspectionResults);
+        InspectionContext inspectionContext = createInspectionContext(inspectionResults, objectTypes);
         try {
             inspectionContext.inspect(objects, objectTypes);
         } finally {
@@ -158,9 +154,9 @@ public class InspectionManager {
         return new SimpleInspectionResults();
     }
 
-    protected InspectionContext createInspectionContext(MetaDataType[] objectTypes,
-                                                        InspectionResults inspectionResults) {
-        return new SimpleInspectionContext(this, objectTypes, inspectionResults);
+    protected InspectionContext createInspectionContext(InspectionResults inspectionResults,
+                                                        MetaDataType... objectTypes) {
+        return new SimpleInspectionContext(this, inspectionResults, objectTypes);
     }
 
     protected void releaseInspectionContext(InspectionContext inspectionContext) throws SQLException {
@@ -193,32 +189,5 @@ public class InspectionManager {
 
     public void setInspectors(Collection<Inspector> inspectors) {
         this.inspectors = inspectors;
-    }
-
-    public static void main(String[] args) throws Exception {
-        JdbcConnectionSpec mysql = new JdbcConnectionSpec();
-        mysql.setDriverClassName("com.mysql.jdbc.Driver");
-        mysql.setUrl("jdbc:mysql://localhost:3306/generate-schema");
-        mysql.setUsername("root");
-
-        JdbcConnectionSpec nuodb = new JdbcConnectionSpec();
-        nuodb.setDriverClassName("com.nuodb.jdbc.Driver");
-        nuodb.setUrl("jdbc:com.nuodb://localhost/test");
-        nuodb.setSchema("hockey");
-        nuodb.setUsername("dba");
-        nuodb.setPassword("goalie");
-
-        ConnectionProvider connectionProvider = new JdbcPoolingConnectionProvider(nuodb);
-        ConnectionServices connectionServices = connectionProvider.getConnectionServices();
-        try {
-            InspectionManager inspectionManager = new InspectionManager();
-            inspectionManager.setConnection(connectionServices.getConnection());
-            Database database = inspectionManager.inspect(
-                    new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema())
-            ).getObject(MetaDataType.DATABASE);
-            System.out.println(database);
-        } finally {
-            connectionServices.close();
-        }
     }
 }

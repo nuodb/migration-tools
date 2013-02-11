@@ -30,6 +30,8 @@ package com.nuodb.migration.jdbc.metadata.generator;
 import com.nuodb.migration.jdbc.metadata.*;
 import org.apache.commons.lang3.ObjectUtils;
 
+import static com.nuodb.migration.jdbc.metadata.Identifier.valueOf;
+
 /**
  * @author Sergey Bushik
  */
@@ -51,11 +53,11 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
 
     protected boolean isGenerateSchema(ScriptGeneratorContext scriptGeneratorContext, Schema schema) {
         boolean generate = true;
-        Identifier catalogId = Identifier.valueOf(scriptGeneratorContext.getSourceCatalog());
+        Identifier catalogId = valueOf(scriptGeneratorContext.getSourceCatalog());
         if (catalogId != null) {
             generate = ObjectUtils.equals(catalogId, schema.getCatalog().getIdentifier());
         }
-        Identifier schemaId = Identifier.valueOf(scriptGeneratorContext.getSourceSchema());
+        Identifier schemaId = valueOf(scriptGeneratorContext.getSourceSchema());
         if (generate && schemaId != null) {
             generate = ObjectUtils.equals(schemaId, schema.getIdentifier());
         }

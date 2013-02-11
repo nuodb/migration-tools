@@ -49,11 +49,12 @@ import static com.nuodb.migration.jdbc.metadata.generator.ScriptType.DROP;
 @SuppressWarnings("unchecked")
 public class ScriptGeneratorContext {
 
-    private Dialect dialect;
     private String sourceCatalog;
     private String sourceSchema;
     private String targetCatalog;
     private String targetSchema;
+
+    private Dialect dialect;
 
     private Map<String, Object> attributes = newHashMap();
     private PriorityList<NamingStrategy<? extends MetaData>> namingStrategies =
@@ -80,11 +81,12 @@ public class ScriptGeneratorContext {
     }
 
     public ScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
-        dialect = scriptGeneratorContext.getDialect();
         sourceCatalog = scriptGeneratorContext.getSourceCatalog();
         sourceSchema = scriptGeneratorContext.getSourceSchema();
         targetCatalog = scriptGeneratorContext.getTargetCatalog();
         targetSchema = scriptGeneratorContext.getTargetSchema();
+
+        dialect = scriptGeneratorContext.getDialect();
 
         attributes = newHashMap(scriptGeneratorContext.getAttributes());
         scriptTypes = newHashSet(scriptGeneratorContext.getScriptTypes());

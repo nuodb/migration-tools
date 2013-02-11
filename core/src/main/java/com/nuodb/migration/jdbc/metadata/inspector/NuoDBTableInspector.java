@@ -100,7 +100,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(query.toString(),
+                        return connection.prepareStatement(query,
                                 TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                     }
                 },
@@ -126,7 +126,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
                 new StatementCreator<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(query.toString(),
+                        return connection.prepareStatement(query,
                                 TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                     }
                 },

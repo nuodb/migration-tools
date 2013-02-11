@@ -89,7 +89,7 @@ public class ScriptTranslationManager extends SimpleServiceResolverAware<Dialect
                 break;
             }
         }
-        if (targetScriptTranslator == null) {
+        if (targetScript == null) {
             for (ScriptTranslation scriptTranslation : scriptTranslations) {
                 boolean sourceDialectInfoMatches = scriptTranslation.getSourceDialect() != null ?
                         scriptTranslation.getSourceDialect().equals(sourceDialect) :

@@ -53,11 +53,11 @@ public class SimpleInspectionContext implements InspectionContext {
     private InspectionResults inspectionResults;
     private MetaDataType[] objectTypes;
 
-    public SimpleInspectionContext(InspectionManager inspectionManager, MetaDataType[] objectTypes,
-                                   InspectionResults inspectionResults) {
+    public SimpleInspectionContext(InspectionManager inspectionManager, InspectionResults inspectionResults,
+                                   MetaDataType... objectTypes) {
         this.inspectionManager = inspectionManager;
-        this.objectTypes = objectTypes;
         this.inspectionResults = inspectionResults;
+        this.objectTypes = objectTypes;
     }
 
     @Override
@@ -87,12 +87,25 @@ public class SimpleInspectionContext implements InspectionContext {
     }
 
     @Override
+    public void inspect(MetaData object, MetaDataType... objectTypes) throws SQLException {
+        for (MetaDataType objectType : objectTypes) {
+            Inspector inspector = findInspector(objectType);
+            inspector.inspectObject(this, object);
+        }
+    }
+
+    @Override
+    public void inspect(Collection<MetaData> objects, MetaDataType... objectTypes) throws SQLException {
+        for (MetaDataType objectType : objectTypes) {
+            Inspector inspector = findInspector(objectType);
+            inspector.inspectObjects(this, objects);
+        }
+    }
+
+    @Override
     public void inspect(InspectionScope scope, MetaDataType... objectTypes) throws SQLException {
         for (MetaDataType objectType : objectTypes) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(format("Inspecting %s", objectType));
-            }
-            Inspector inspector = findMetaDataHandler(inspectionManager.getInspectors(), objectType);
+            Inspector inspector = findInspector(objectType);
             if (inspector.supports(this, scope)) {
                 inspector.inspectScope(this, scope);
             } else {
@@ -101,19 +114,10 @@ public class SimpleInspectionContext implements InspectionContext {
         }
     }
 
-    @Override
-    public void inspect(MetaData object, MetaDataType... objectTypes) throws SQLException {
-        for (MetaDataType objectType : objectTypes) {
-            Inspector inspector = findMetaDataHandler(inspectionManager.getInspectors(), objectType);
-            inspector.inspectObject(this, object);
+    protected Inspector findInspector(MetaDataType objectType) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Inspecting %s", objectType));
         }
-    }
-
-    @Override
-    public void inspect(Collection<MetaData> objects, MetaDataType... objectTypes) throws SQLException {
-        for (MetaDataType objectType : objectTypes) {
-            Inspector inspector = findMetaDataHandler(inspectionManager.getInspectors(), objectType);
-            inspector.inspectObjects(this, objects);
-        }
+        return findMetaDataHandler(inspectionManager.getInspectors(), objectType);
     }
 }
