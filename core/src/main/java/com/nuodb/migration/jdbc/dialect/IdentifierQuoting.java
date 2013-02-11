@@ -27,12 +27,12 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import com.nuodb.migration.jdbc.metadata.Identifiable;
 
 /**
  * @author Sergey Bushik
  */
 public interface IdentifierQuoting {
 
-    boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect);
+    boolean isQuotingIdentifier(String identifier, Identifiable identifiable, Dialect dialect);
 }

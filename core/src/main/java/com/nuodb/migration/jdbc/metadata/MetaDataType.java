@@ -27,40 +27,45 @@
  */
 package com.nuodb.migration.jdbc.metadata;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.List;
+import java.util.Map;
 
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 
 public class MetaDataType implements Comparable<MetaDataType> {
 
-    private static final Logger logger = LoggerFactory.getLogger(MetaDataType.class);
+    private static final transient Logger logger = LoggerFactory.getLogger(MetaDataType.class);
 
-    public static final MetaDataType CATALOG = new MetaDataType("catalog");
-    public static final MetaDataType SCHEMA = new MetaDataType("schema");
-    public static final MetaDataType TABLE = new MetaDataType("table");
-    public static final MetaDataType COLUMN = new MetaDataType("column");
-    public static final MetaDataType PRIMARY_KEY = new MetaDataType("primary key");
-    public static final MetaDataType FOREIGN_KEY = new MetaDataType("foreign key");
-    public static final MetaDataType INDEX = new MetaDataType("index");
-    public static final MetaDataType AUTO_INCREMENT = new MetaDataType("auto increment");
-    public static final MetaDataType CHECK_CONSTRAINT = new MetaDataType("check constraint");
+    public static final MetaDataType DATABASE = new MetaDataType(Database.class);
+    public static final MetaDataType CATALOG = new MetaDataType(Catalog.class);
+    public static final MetaDataType SCHEMA = new MetaDataType(Schema.class);
+    public static final MetaDataType TABLE = new MetaDataType(Table.class);
+    public static final MetaDataType COLUMN = new MetaDataType(Column.class);
+    public static final MetaDataType PRIMARY_KEY = new MetaDataType(PrimaryKey.class);
+    public static final MetaDataType FOREIGN_KEY = new MetaDataType(ForeignKey.class);
+    public static final MetaDataType INDEX = new MetaDataType(Index.class);
+    public static final MetaDataType AUTO_INCREMENT = new MetaDataType(AutoIncrement.class);
+    public static final MetaDataType CHECK = new MetaDataType(Check.class);
 
-    public static final MetaDataType[] ALL_TYPES = getAllTypes();
+    private Class<? extends MetaData> typeClass;
 
-    private static MetaDataType[] getAllTypes() {
-        List<MetaDataType> types = Lists.newArrayList();
+    public static final Map<String, MetaDataType> TYPE_NAME_MAP = getTypeNameMap();
+
+    public static final MetaDataType[] TYPES = TYPE_NAME_MAP.values().toArray(new MetaDataType[]{});
+
+    private static Map<String, MetaDataType> getTypeNameMap() {
+        Map<String, MetaDataType> typeNameMap = Maps.newLinkedHashMap();
         Field[] fields = MetaDataType.class.getFields();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getType() == MetaDataType.class) {
                 try {
-                    types.add((MetaDataType) field.get(null));
+                    typeNameMap.put(field.getName(), (MetaDataType) field.get(null));
                 } catch (IllegalAccessException exception) {
                     if (logger.isDebugEnabled()) {
                         logger.debug(format("Failed accessing %s field", MetaDataType.class), exception);
@@ -68,37 +73,46 @@ public class MetaDataType implements Comparable<MetaDataType> {
                 }
             }
         }
-        return types.toArray(new MetaDataType[types.size()]);
+        return typeNameMap;
     }
 
-    private final String type;
+    public MetaDataType(Class<? extends MetaData> typeClass) {
+        isNotNull(typeClass, "Type class is required");
+        this.typeClass = typeClass;
+    }
 
-    public MetaDataType(String type) {
-        isNotNull(type, "Meta data type is required");
-        this.type = type;
+    public Class<? extends MetaData> getTypeClass() {
+        return typeClass;
+    }
+
+    public boolean isAssignableFrom(MetaDataType metaDataType) {
+        return typeClass.isAssignableFrom(metaDataType.getTypeClass());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MetaDataType)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         MetaDataType that = (MetaDataType) o;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        if (!typeClass.equals(that.typeClass)) return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        return type != null ? type.hashCode() : 0;
+        return typeClass.hashCode();
+    }
+
+    public int compareTo(MetaDataType that) {
+        if (typeClass.equals(that.getTypeClass())) {
+            return 0;
+        } else {
+            return typeClass.isAssignableFrom(that.getTypeClass()) ? 1 : -1;
+        }
     }
 
     @Override
     public String toString() {
-        return type;
-    }
-
-    @Override
-    public int compareTo(MetaDataType metaDataType) {
-        return type.compareTo(metaDataType.type);
+        return getTypeClass().getName();
     }
 }

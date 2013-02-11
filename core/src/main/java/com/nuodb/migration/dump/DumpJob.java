@@ -38,7 +38,9 @@ import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
-import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
+import com.nuodb.migration.jdbc.metadata.inspector.InspectionManager;
+import com.nuodb.migration.jdbc.metadata.inspector.InspectionResults;
+import com.nuodb.migration.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelFactory;
 import com.nuodb.migration.jdbc.model.ValueModelList;
@@ -120,17 +122,20 @@ public class DumpJob extends JobBase {
     protected void dump(DumpJobExecution execution) throws SQLException {
         ConnectionServices connectionServices = execution.getConnectionServices();
 
-        DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();
-        databaseInspector.withMetaDataTypes(
-                MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE, MetaDataType.COLUMN);
-        databaseInspector.withDialectResolver(getDialectResolver());
+        InspectionManager inspectionManager = new InspectionManager();
+        inspectionManager.setInspectionScope
+                (new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()));
+        inspectionManager.setDialectResolver(getDialectResolver());
+        inspectionManager.setConnection(connectionServices.getConnection());
+        InspectionResults inspectionResults = inspectionManager.inspect(
+                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE, MetaDataType.COLUMN);
 
-        Connection connection = connectionServices.getConnection();
-        Database database = databaseInspector.inspect();
+        Database database = inspectionResults.getObject(MetaDataType.DATABASE);
         execution.setDatabase(database);
 
-        DatabaseMetaData metaData = connection.getMetaData();
-        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(metaData));
+        Connection connection = connectionServices.getConnection();
+        DatabaseMetaData databaseMetaData = connection.getMetaData();
+        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(databaseMetaData));
 
         CatalogWriter catalogWriter = getCatalog().getCatalogWriter();
         execution.setCatalogWriter(catalogWriter);
@@ -252,7 +257,7 @@ public class DumpJob extends JobBase {
     protected Collection<SelectQuery> createSelectQueries(Database database) {
         Dialect dialect = database.getDialect();
         Collection<SelectQuery> selectQueries = Lists.newArrayList();
-        for (final Table table : database.listTables()) {
+        for (final Table table : database.getTables()) {
             if (getTableTypes().contains(table.getType())) {
                 SelectQueryBuilder builder = new SelectQueryBuilder();
                 builder.setDialect(dialect);

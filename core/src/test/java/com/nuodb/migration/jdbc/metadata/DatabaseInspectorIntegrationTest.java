@@ -4,7 +4,7 @@ package com.nuodb.migration.jdbc.metadata;
 import com.nuodb.migration.TestUtils;
 import com.nuodb.migration.jdbc.connection.JdbcConnectionProvider;
 import com.nuodb.migration.jdbc.connection.JdbcPoolingConnectionProvider;
-import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
+import com.nuodb.migration.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migration.spec.JdbcConnectionSpec;
 import junit.framework.Assert;
 import org.junit.After;
@@ -18,7 +18,7 @@ import static com.nuodb.migration.jdbc.JdbcUtils.close;
 public class DatabaseInspectorIntegrationTest {
 
     private Connection connection;
-    private DatabaseInspector inspector;
+    private InspectionManager inspector;
 
     @Before
     public void setUp() throws Exception {
@@ -30,26 +30,23 @@ public class DatabaseInspectorIntegrationTest {
         Assert.assertNotNull(connection.getMetaData());
         Assert.assertFalse(connection.isClosed());
 
-        inspector = new DatabaseInspector();
-        inspector.withConnection(connection);
+        inspector = new InspectionManager();
+        inspector.setConnection(connection);
     }
 
     @Test
     public void testInspectCatalog() throws Exception {
-        inspector.withMetaDataTypes(MetaDataType.CATALOG);
-        inspector.inspect();
+        inspector.inspect(MetaDataType.CATALOG);
     }
 
     @Test
     public void testInspectSchema() throws Exception {
-        inspector.withMetaDataTypes(MetaDataType.CATALOG, MetaDataType.SCHEMA);
-        inspector.inspect();
+        inspector.inspect(MetaDataType.CATALOG, MetaDataType.SCHEMA);
     }
 
     @Test
     public void testInspectTable() throws Exception {
-        inspector.withMetaDataTypes(MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE);
-        inspector.inspect();
+        inspector.inspect(MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE);
     }
 
     @After

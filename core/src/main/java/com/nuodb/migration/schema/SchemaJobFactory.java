@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migration.jdbc.metadata.generator.DatabaseGenerator.GROUP_SCRIPTS_BY;
+import static com.nuodb.migration.jdbc.metadata.generator.DatabaseScriptGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migration.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER;
 import static com.nuodb.migration.jdbc.type.JdbcTypeSpecifiers.newSizePrecisionScale;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
@@ -66,7 +66,7 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         isNotNull(schemaSpec, "Generate schema spec is required");
         SchemaJob schemaJob = new SchemaJob();
         schemaJob.setConnectionProvider(createConnectionProvider(schemaSpec.getSourceConnectionSpec()));
-        schemaJob.setScriptGeneratorContext(createScriptGeneratorContext());
+        schemaJob.setContext(createScriptGeneratorContext());
         schemaJob.setFailOnEmptyScripts(isFailOnEmptyScripts());
         schemaJob.setScriptExporter(createScriptExporter());
         return schemaJob;

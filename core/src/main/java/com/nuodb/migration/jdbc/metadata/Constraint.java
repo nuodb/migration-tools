@@ -29,7 +29,7 @@ package com.nuodb.migration.jdbc.metadata;
 
 import java.util.Collection;
 
-public interface Constraint extends HasIdentifier {
+public interface Constraint extends Identifiable {
 
     Table getTable();
 

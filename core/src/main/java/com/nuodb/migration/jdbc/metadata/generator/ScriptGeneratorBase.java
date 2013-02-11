@@ -27,7 +27,8 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.metadata.Relational;
+import com.nuodb.migration.jdbc.metadata.MetaDataHandlerBase;
+import com.nuodb.migration.jdbc.metadata.MetaData;
 
 import java.util.Collection;
 
@@ -39,40 +40,40 @@ import static java.util.Collections.emptySet;
 /**
  * @author Sergey Bushik
  */
-public abstract class ScriptGeneratorBase<R extends Relational> extends GeneratorServiceBase<R> implements ScriptGenerator<R> {
+public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHandlerBase implements ScriptGenerator<T> {
 
-    protected ScriptGeneratorBase(Class<R> relationalType) {
-        super(relationalType);
+    protected ScriptGeneratorBase(Class<T> metaDataType) {
+        super(metaDataType);
     }
 
     @Override
-    public Collection<String> getScripts(R relational, ScriptGeneratorContext context) {
+    public Collection<String> getScripts(T object, ScriptGeneratorContext scriptGeneratorContext) {
         Collection<String> scripts;
-        if (isScriptType(context, DROP) && isScriptType(context, CREATE)) {
-            scripts = getDropCreateScripts(relational, context);
-        } else if (isScriptType(context, DROP)) {
-            scripts = getDropScripts(relational, context);
-        } else if (isScriptType(context, CREATE)) {
-            scripts = getCreateScripts(relational, context);
+        if (isGenerateScript(DROP, scriptGeneratorContext) && isGenerateScript(CREATE, scriptGeneratorContext)) {
+            scripts = getDropCreateScripts(object, scriptGeneratorContext);
+        } else if (isGenerateScript(DROP, scriptGeneratorContext)) {
+            scripts = getDropScripts(object, scriptGeneratorContext);
+        } else if (isGenerateScript(CREATE, scriptGeneratorContext)) {
+            scripts = getCreateScripts(object, scriptGeneratorContext);
         } else {
             scripts = emptySet();
         }
         return scripts;
     }
 
-    protected Collection<String> getDropCreateScripts(R relational, ScriptGeneratorContext context) {
+    protected abstract Collection<String> getDropScripts(T metaData, ScriptGeneratorContext scriptGeneratorContext);
+
+    protected abstract Collection<String> getCreateScripts(T metaData, ScriptGeneratorContext scriptGeneratorContext);
+
+    protected Collection<String> getDropCreateScripts(T metaData, ScriptGeneratorContext scriptGeneratorContext) {
         Collection<String> scripts = newArrayList();
-        scripts.addAll(getDropScripts(relational, context));
-        scripts.addAll(getCreateScripts(relational, context));
+        scripts.addAll(getDropScripts(metaData, scriptGeneratorContext));
+        scripts.addAll(getCreateScripts(metaData, scriptGeneratorContext));
         return scripts;
     }
 
-    protected abstract Collection<String> getDropScripts(R relational, ScriptGeneratorContext context);
-
-    protected abstract Collection<String> getCreateScripts(R relational, ScriptGeneratorContext context);
-
-    protected boolean isScriptType(ScriptGeneratorContext context, ScriptType scriptType) {
-        Collection<ScriptType> scriptTypes = context.getScriptTypes();
+    protected boolean isGenerateScript(ScriptType scriptType, ScriptGeneratorContext scriptGeneratorContext) {
+        Collection<ScriptType> scriptTypes = scriptGeneratorContext.getScriptTypes();
         return scriptTypes != null && scriptTypes.contains(scriptType);
     }
 }

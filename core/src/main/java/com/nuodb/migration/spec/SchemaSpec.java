@@ -46,7 +46,7 @@ public class SchemaSpec extends TaskSpecBase {
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;
     private ResourceSpec outputSpec;
-    private Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.ALL_TYPES);
+    private Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.TYPES);
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
     private Collection<JdbcTypeSpec> jdbcTypeSpecs = newHashSet();

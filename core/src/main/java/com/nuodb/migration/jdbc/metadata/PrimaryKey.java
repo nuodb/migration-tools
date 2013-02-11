@@ -43,7 +43,7 @@ public class PrimaryKey extends ConstraintBase {
     private Map<Integer, Column> columns = Maps.newTreeMap();
 
     public PrimaryKey(Identifier identifier) {
-        super(identifier);
+        super(MetaDataType.PRIMARY_KEY, identifier);
     }
 
     @Override

@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import com.nuodb.migration.jdbc.metadata.Identifiable;
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
@@ -106,18 +106,18 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
-    protected boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier) {
-        return super.isQuotingIdentifier(identifier, hasIdentifier) || !isAllUpperCase(identifier);
+    protected boolean isQuotingIdentifier(String identifier, Identifiable identifiable) {
+        return super.isQuotingIdentifier(identifier, identifiable) || !isAllUpperCase(identifier);
     }
 
     @Override
-    protected boolean isAllowedIdentifier(String identifier, HasIdentifier hasIdentifier) {
+    protected boolean isAllowedIdentifier(String identifier, Identifiable identifiable) {
         return ALLOWED_IDENTIFIER_PATTERN.matcher(identifier).matches();
     }
 
     @Override
-    protected boolean isSQLKeyword(String identifier, HasIdentifier hasIdentifier) {
-        if (hasIdentifier != null && hasIdentifier instanceof Table) {
+    protected boolean isSQLKeyword(String identifier, Identifiable identifiable) {
+        if (identifiable != null && identifiable instanceof Table) {
             return false;
         } else {
             return getSQLKeywords().contains(identifier);

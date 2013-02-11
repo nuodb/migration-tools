@@ -45,7 +45,7 @@ public class Index extends ConstraintBase {
     private Map<Integer, Column> columns = Maps.newTreeMap();
 
     public Index(Identifier identifier) {
-        super(identifier);
+        super(MetaDataType.INDEX, identifier);
     }
 
     public boolean isUnique() {

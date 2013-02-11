@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import com.nuodb.migration.jdbc.metadata.Identifiable;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -38,7 +38,7 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer noop() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalizeIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
+            public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
                 return identifier;
             }
         };
@@ -47,7 +47,7 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer standard() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalizeIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
+            public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
                 return ((SimpleDialect) dialect).normalizeIdentifier(identifier);
             }
         };
@@ -56,7 +56,7 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer lowerCase() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalizeIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
+            public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
                 return StringUtils.lowerCase(identifier);
             }
         };
@@ -65,7 +65,7 @@ public class IdentifierNormalizers {
     public static IdentifierNormalizer upperCase() {
         return new IdentifierNormalizer() {
             @Override
-            public String normalizeIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
+            public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
                 return StringUtils.upperCase(identifier);
             }
         };

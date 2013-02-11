@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import com.nuodb.migration.jdbc.metadata.Identifiable;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Connection;
@@ -52,11 +52,11 @@ public class PostgreSQLDialect extends SimpleDialect {
      *
      *
      * @param identifier to be normalized.
-     * @param hasIdentifier
+     * @param identifiable
      * @return boolean indicating whether quoting is required.
      */
     @Override
-    protected boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier) {
+    protected boolean isQuotingIdentifier(String identifier, Identifiable identifiable) {
         boolean quote = false;
         for (int i = 0, length = identifier.length(); i < length; i++) {
             if (Character.isUpperCase(identifier.charAt(i))) {
@@ -64,7 +64,7 @@ public class PostgreSQLDialect extends SimpleDialect {
                 break;
             }
         }
-        return quote || super.isQuotingIdentifier(identifier, hasIdentifier);
+        return quote || super.isQuotingIdentifier(identifier, identifiable);
     }
 
     @Override

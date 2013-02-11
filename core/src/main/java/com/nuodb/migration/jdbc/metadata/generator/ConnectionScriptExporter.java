@@ -63,7 +63,7 @@ public class ConnectionScriptExporter extends CountingScriptExporter {
     @Override
     public void exportScript(String script) throws Exception {
         if (connection == null) {
-            throw new ScriptGeneratorException("Database connection is not opened");
+            throw new GeneratorException("Database connection is not opened");
         }
         statement.executeUpdate(script);
         processWarning(statement.getWarnings());

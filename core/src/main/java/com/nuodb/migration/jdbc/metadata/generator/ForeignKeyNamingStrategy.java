@@ -32,22 +32,22 @@ import com.nuodb.migration.jdbc.metadata.ForeignKey;
 /**
  * @author Sergey Bushik
  */
-public class ForeignKeyNamingStrategy extends HasIdentifierNamingStrategy<ForeignKey> {
+public class ForeignKeyNamingStrategy extends IdentifiableNamingStrategy<ForeignKey> {
 
     public ForeignKeyNamingStrategy() {
         super(ForeignKey.class);
     }
 
     @Override
-    protected String getNameOfHasIdentifier(ForeignKey foreignKey, ScriptGeneratorContext context, boolean identifier) {
+    protected String getIdentifiableName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("FK");
         buffer.append('_');
 
         StringBuilder qualifier = new StringBuilder();
-        qualifier.append(context.getName(foreignKey.getPrimaryTable(), false));
+        qualifier.append(scriptGeneratorContext.getName(foreignKey.getPrimaryTable(), false));
         qualifier.append(' ');
-        qualifier.append(context.getName(foreignKey.getForeignTable(), false));
+        qualifier.append(scriptGeneratorContext.getName(foreignKey.getForeignTable(), false));
 
         buffer.append(md5Hex(qualifier.toString()));
         return buffer.toString();

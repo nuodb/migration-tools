@@ -27,8 +27,6 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
-import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -66,15 +64,6 @@ public class SimpleConnectionServices implements ConnectionServices {
             }
         }
         return connection;
-    }
-
-    @Override
-    public DatabaseInspector getDatabaseInspector() throws SQLException {
-        DatabaseInspector databaseInspector = new DatabaseInspector();
-        databaseInspector.withCatalog(getCatalog());
-        databaseInspector.withSchema(getSchema());
-        databaseInspector.withConnection(getConnection());
-        return databaseInspector;
     }
 
     @Override

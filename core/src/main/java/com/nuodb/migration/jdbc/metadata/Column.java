@@ -27,12 +27,16 @@
  */
 package com.nuodb.migration.jdbc.metadata;
 
+import com.google.common.collect.Sets;
 import com.nuodb.migration.jdbc.model.ValueModel;
+
+import java.util.Set;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.upperCase;
 
-public class Column extends HasIdentifierBase implements ValueModel {
+public class Column extends IdentifiableBase implements ValueModel {
+
     /**
      * Default precision is maximum value
      */
@@ -83,13 +87,13 @@ public class Column extends HasIdentifierBase implements ValueModel {
      */
     private boolean autoIncrement;
     /**
-     * Associated auto increment offset
+     * Associated auto increment sequence
      */
     private Sequence sequence;
     /**
      * Check constraint.
      */
-    private String check;
+    private Set<Check> checks = Sets.newLinkedHashSet();
 
     private String defaultValue;
 
@@ -98,7 +102,7 @@ public class Column extends HasIdentifierBase implements ValueModel {
     }
 
     public Column(Table table, Identifier identifier) {
-        super(identifier);
+        super(MetaDataType.COLUMN, identifier);
         this.table = table;
     }
 
@@ -209,20 +213,26 @@ public class Column extends HasIdentifierBase implements ValueModel {
         return isAutoIncrement();
     }
 
-    public String getCheck() {
-        return check;
-    }
-
-    public void setCheck(String check) {
-        this.check = check;
-    }
-
     public String getDefaultValue() {
         return defaultValue;
     }
 
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
+    }
+
+    public void addCheck(Check check) {
+        check.setTable(table);
+        check.getColumns().add(this);
+        checks.add(check);
+    }
+
+    public Set<Check> getChecks() {
+        return checks;
+    }
+
+    public void setChecks(Set<Check> checks) {
+        this.checks = checks;
     }
 
     @Override
@@ -235,25 +245,8 @@ public class Column extends HasIdentifierBase implements ValueModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-
         Column column = (Column) o;
-
-        if (autoIncrement != column.autoIncrement) return false;
-        if (sequence != null ? !sequence.equals(column.sequence) : column.sequence != null) return false;
-        if (nullable != column.nullable) return false;
-        if (position != column.position) return false;
-        if (precision != column.precision) return false;
-        if (radix != column.radix) return false;
-        if (scale != column.scale) return false;
-        if (size != column.size) return false;
-        if (typeCode != column.typeCode) return false;
-        if (check != null ? !check.equals(column.check) : column.check != null) return false;
-        if (comment != null ? !comment.equals(column.comment) : column.comment != null) return false;
-        if (defaultValue != null ? !defaultValue.equals(column.defaultValue) : column.defaultValue != null)
-            return false;
         if (table != null ? !table.equals(column.table) : column.table != null) return false;
-        if (typeName != null ? !typeName.equals(column.typeName) : column.typeName != null) return false;
-
         return true;
     }
 
@@ -261,18 +254,6 @@ public class Column extends HasIdentifierBase implements ValueModel {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (table != null ? table.hashCode() : 0);
-        result = 31 * result + typeCode;
-        result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
-        result = 31 * result + size;
-        result = 31 * result + precision;
-        result = 31 * result + scale;
-        result = 31 * result + (comment != null ? comment.hashCode() : 0);
-        result = 31 * result + radix;
-        result = 31 * result + position;
-        result = 31 * result + (nullable ? 1 : 0);
-        result = 31 * result + (autoIncrement ? 1 : 0);
-        result = 31 * result + (check != null ? check.hashCode() : 0);
-        result = 31 * result + (defaultValue != null ? defaultValue.hashCode() : 0);
         return result;
     }
 

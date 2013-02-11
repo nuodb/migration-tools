@@ -31,8 +31,6 @@ public class Identifier implements Comparable<Identifier> {
 
     public static final Identifier EMPTY_IDENTIFIER = Identifier.valueOf(null);
 
-    private static final String EMPTY = "";
-
     private String value;
 
     protected Identifier(String value) {
@@ -79,10 +77,6 @@ public class Identifier implements Comparable<Identifier> {
 
     @Override
     public int compareTo(Identifier identifier) {
-        if (identifier != null) {
-            return value.compareTo(identifier.value());
-        } else {
-            return value.compareTo(EMPTY);
-        }
+        return identifier != null ? value.compareTo(identifier.value()) : 1;
     }
 }

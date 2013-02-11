@@ -27,11 +27,11 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import com.nuodb.migration.jdbc.metadata.Identifiable;
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migration.jdbc.resolve.DatabaseServiceResolver;
-import com.nuodb.migration.jdbc.resolve.SimpleDatabaseServiceResolverAware;
+import com.nuodb.migration.jdbc.resolve.ServiceResolver;
+import com.nuodb.migration.jdbc.resolve.SimpleServiceResolverAware;
 import com.nuodb.migration.jdbc.type.*;
 import com.nuodb.migration.jdbc.type.jdbc4.Jdbc4TypeRegistry;
 import org.slf4j.Logger;
@@ -52,7 +52,7 @@ import static java.sql.Connection.*;
 /**
  * @author Sergey Bushik
  */
-public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> implements Dialect {
+public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implements Dialect {
 
     private static final Pattern ALLOWED_IDENTIFIER_PATTERN = Pattern.compile("[a-zA-Z0-9_]*");
 
@@ -100,24 +100,24 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     @Override
-    public String getIdentifier(String identifier, HasIdentifier hasIdentifier) {
+    public String getIdentifier(String identifier, Identifiable identifiable) {
         if (identifier == null) {
             return null;
         }
-        identifier = getIdentifierNormalizer().normalizeIdentifier(identifier, hasIdentifier, this);
-        boolean quoting = getIdentifierQuoting().isQuotingIdentifier(identifier, hasIdentifier, this);
+        identifier = getIdentifierNormalizer().normalizeIdentifier(identifier, identifiable, this);
+        boolean quoting = getIdentifierQuoting().isQuotingIdentifier(identifier, identifiable, this);
         return quoting ? quote(identifier) : identifier;
     }
 
-    protected boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier) {
-        return !isAllowedIdentifier(identifier, hasIdentifier) || isSQLKeyword(identifier, hasIdentifier);
+    protected boolean isQuotingIdentifier(String identifier, Identifiable identifiable) {
+        return !isAllowedIdentifier(identifier, identifiable) || isSQLKeyword(identifier, identifiable);
     }
 
-    protected boolean isAllowedIdentifier(String identifier, HasIdentifier hasIdentifier) {
+    protected boolean isAllowedIdentifier(String identifier, Identifiable identifiable) {
         return ALLOWED_IDENTIFIER_PATTERN.matcher(identifier).matches();
     }
 
-    protected boolean isSQLKeyword(String identifier, HasIdentifier hasIdentifier) {
+    protected boolean isSQLKeyword(String identifier, Identifiable identifiable) {
         return getSQLKeywords().contains(identifier);
     }
 
@@ -257,9 +257,9 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     @Override
-    public void setDatabaseServiceResolver(DatabaseServiceResolver<Dialect> databaseServiceResolver) {
-        super.setDatabaseServiceResolver(databaseServiceResolver);
-        scriptTranslationManager.setDatabaseServiceResolver(databaseServiceResolver);
+    public void setServiceResolver(ServiceResolver<Dialect> serviceResolver) {
+        super.setServiceResolver(serviceResolver);
+        scriptTranslationManager.setServiceResolver(serviceResolver);
     }
 
     @Override
@@ -318,12 +318,12 @@ public class SimpleDialect extends SimpleDatabaseServiceResolverAware<Dialect> i
     }
 
     @Override
-    public String getCheckClause(String checkClause) {
-        checkClause = getScriptQuotation(checkClause);
-        if (!checkClause.startsWith("(") && !checkClause.endsWith(")")) {
-            return "(" + checkClause + ")";
+    public String getCheckClause(String clause) {
+        clause = getScriptQuotation(clause);
+        if (!clause.startsWith("(") && !clause.endsWith(")")) {
+            return "(" + clause + ")";
         } else {
-            return checkClause;
+            return clause;
         }
     }
 

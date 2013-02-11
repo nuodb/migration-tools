@@ -30,7 +30,7 @@ package com.nuodb.migration.jdbc.metadata;
 /**
  * @author Sergey Bushik
  */
-public class ForeignKeyReference extends IndentedOutputBase {
+public class ForeignKeyReference extends IndentedBase {
 
     private Column primaryColumn;
     private Column foreignColumn;

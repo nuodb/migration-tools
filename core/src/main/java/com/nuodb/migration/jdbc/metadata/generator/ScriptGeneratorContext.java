@@ -28,18 +28,20 @@
 package com.nuodb.migration.jdbc.metadata.generator;
 
 import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.metadata.MetaData;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
-import com.nuodb.migration.jdbc.metadata.Relational;
+import com.nuodb.migration.utils.Priority;
+import com.nuodb.migration.utils.PriorityList;
+import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.nuodb.migration.jdbc.metadata.MetaDataType.ALL_TYPES;
+import static com.nuodb.migration.jdbc.metadata.MetaDataHandlerUtils.findMetaDataHandler;
 import static com.nuodb.migration.jdbc.metadata.generator.ScriptType.CREATE;
 import static com.nuodb.migration.jdbc.metadata.generator.ScriptType.DROP;
-import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -50,122 +52,97 @@ public class ScriptGeneratorContext {
     private Dialect dialect;
     private String catalog;
     private String schema;
-    private Collection<ScriptType> scriptTypes = newHashSet();
-    private Collection<MetaDataType> metaDataTypes = newHashSet(ALL_TYPES);
     private Map<String, Object> attributes = newHashMap();
-    private Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> namingStrategyMap = newHashMap();
-    private Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> scriptGeneratorMap = newHashMap();
+    private PriorityList<NamingStrategy<? extends MetaData>> namingStrategies =
+            new SimplePriorityList<NamingStrategy<? extends MetaData>>();
+    private PriorityList<ScriptGenerator<? extends MetaData>> scriptGenerators =
+            new SimplePriorityList<ScriptGenerator<? extends MetaData>>();
+
+    private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
+    private Collection<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
 
     public ScriptGeneratorContext() {
-        addScriptGenerator(new DatabaseGenerator());
-        addScriptGenerator(new TableGenerator());
-        addScriptGenerator(new SequenceGenerator());
-        addScriptGenerator(new PrimaryKeyGenerator());
-        addScriptGenerator(new IndexGenerator());
-        addScriptGenerator(new ForeignKeyGenerator());
+        addScriptGenerator(new DatabaseScriptGenerator());
+        addScriptGenerator(new TableScriptGenerator());
+        addScriptGenerator(new SequenceScriptGenerator());
+        addScriptGenerator(new PrimaryScriptGenerator());
+        addScriptGenerator(new IndexScriptGenerator());
+        addScriptGenerator(new ForeignKeyScriptGenerator());
 
         addNamingStrategy(new IndexNamingStrategy());
         addNamingStrategy(new SequenceNamingStrategy());
         addNamingStrategy(new ForeignKeyNamingStrategy());
-        addNamingStrategy(new HasIdentifierNamingStrategy());
+        addNamingStrategy(new IdentifiableNamingStrategy(), Priority.LOW);
     }
 
     public ScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
-        setDialect(scriptGeneratorContext.getDialect());
-        setCatalog(scriptGeneratorContext.getCatalog());
-        setSchema(scriptGeneratorContext.getSchema());
+        dialect = scriptGeneratorContext.getDialect();
+        catalog = scriptGeneratorContext.getCatalog();
+        schema = scriptGeneratorContext.getSchema();
 
-        scriptTypes = newHashSet(scriptGeneratorContext.getScriptTypes());
-        metaDataTypes = newHashSet(scriptGeneratorContext.getMetaDataTypes());
-        attributes = newHashMap(scriptGeneratorContext.getAttributes());
-        namingStrategyMap = newHashMap(scriptGeneratorContext.getNamingStrategies());
-        scriptGeneratorMap = newHashMap(scriptGeneratorContext.getScriptGenerators());
+        attributes.putAll(scriptGeneratorContext.getAttributes());
+        scriptTypes.addAll(scriptGeneratorContext.getScriptTypes());
+        metaDataTypes.addAll(scriptGeneratorContext.getMetaDataTypes());
+
+        namingStrategies.addAll(scriptGeneratorContext.getNamingStrategies());
+        scriptGenerators.addAll(scriptGeneratorContext.getScriptGenerators());
     }
 
-    public String getName(Relational relational) {
-        return getNamingStrategy(relational).getName(relational, this);
+    public String getName(MetaData metaData) {
+        return getNamingStrategy(metaData).getName(metaData, this, true);
     }
 
-    public String getName(Relational relational, boolean identifier) {
-        return getNamingStrategy(relational).getName(relational, this, identifier);
+    public String getName(MetaData metaData, boolean normalize) {
+        return getNamingStrategy(metaData).getName(metaData, this, normalize);
     }
 
-    public String getQualifiedName(Relational relational) {
-        return getNamingStrategy(relational).getQualifiedName(relational, this);
+    public String getQualifiedName(MetaData metaData) {
+        return getNamingStrategy(metaData).getQualifiedName(metaData, this, true);
     }
 
-    public String getQualifiedName(Relational relational, boolean identifier) {
-        return getNamingStrategy(relational).getQualifiedName(relational, this, identifier);
+    public String getQualifiedName(MetaData metaData, boolean normalize) {
+        return getNamingStrategy(metaData).getQualifiedName(metaData, this, normalize);
     }
 
-    public ScriptGenerator getScriptGenerator(Relational relational) {
-        return (ScriptGenerator) getGeneratorService(scriptGeneratorMap, relational);
+    public void addNamingStrategy(NamingStrategy<? extends MetaData> namingStrategy) {
+        namingStrategies.add(namingStrategy);
     }
 
-    public ScriptGenerator getScriptGenerator(Class<? extends Relational> relationalType) {
-        return scriptGeneratorMap.get(relationalType);
+    public void addNamingStrategy(NamingStrategy<? extends MetaData> namingStrategy, int priority) {
+        namingStrategies.add(namingStrategy, priority);
     }
 
-    public void addScriptGenerator(ScriptGenerator<? extends Relational> scriptGenerator) {
-        scriptGeneratorMap.put(scriptGenerator.getRelationalType(), scriptGenerator);
+    public NamingStrategy getNamingStrategy(MetaData metaData) {
+        return (NamingStrategy) findMetaDataHandler(namingStrategies,
+                metaData.getObjectType());
     }
 
-    public void addNamingStrategy(NamingStrategy<? extends Relational> namingStrategy) {
-        namingStrategyMap.put(namingStrategy.getRelationalType(), namingStrategy);
+    public void addScriptGenerator(ScriptGenerator<? extends MetaData> scriptGenerator) {
+        scriptGenerators.add(scriptGenerator);
     }
 
-    public NamingStrategy getNamingStrategy(Relational relational) {
-        return (NamingStrategy) getGeneratorService(namingStrategyMap, relational);
+    public void addScriptGenerator(ScriptGenerator<? extends MetaData> scriptGenerator, int priority) {
+        scriptGenerators.add(scriptGenerator, priority);
     }
 
-    protected GeneratorService getGeneratorService(Map generatorServiceMap, Relational relational) {
-        Class<? extends Relational> relationalType = relational.getClass();
-        Class<? extends Relational> type = relationalType;
-        GeneratorService generatorService = null;
-        while (generatorService == null && type != null) {
-            generatorService = (GeneratorService) generatorServiceMap.get(type);
-            if (generatorService == null) {
-                generatorService = getGeneratorService(generatorServiceMap, type.getInterfaces());
-            }
-            type = (Class<? extends Relational>) type.getSuperclass();
-        }
-        if (generatorService == null) {
-            throw new ScriptGeneratorException(format("Generator service not found for %s", relationalType));
-        }
-        if (!relationalType.equals(generatorService.getRelationalType())) {
-            generatorServiceMap.put(relationalType, generatorService);
-        }
-        return generatorService;
+    public ScriptGenerator getScriptGenerator(MetaData object) {
+        return (ScriptGenerator) findMetaDataHandler(scriptGenerators, object.getObjectType());
     }
 
-    protected GeneratorService getGeneratorService(Map generatorServiceMap, Class<?>... types) {
-        GeneratorService generatorService = null;
-        for (int i = 0, length = types.length; generatorService == null && i < length; i++) {
-            generatorService = (GeneratorService) generatorServiceMap.get(types[i]);
-        }
-        return generatorService;
+    public Collection<String> getScripts(MetaData object) {
+        return getScriptGenerator(object).getScripts(object, this);
     }
 
-    public Collection<String> getScripts(Relational relational) {
-        return getScriptGenerator(relational).getScripts(relational, this);
+    public Collection<String> getCreateScripts(MetaData object) {
+        ScriptGeneratorContext context = new ScriptGeneratorContext(this);
+        context.setScriptTypes(newHashSet(CREATE));
+        return getScriptGenerator(object).getScripts(object, context);
     }
 
-    public Collection<String> getCreateScripts(Relational relational) {
-        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
-        scriptGeneratorContext.setScriptTypes(newHashSet(CREATE));
-        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
-    }
-
-    public Collection<String> getDropScripts(Relational relational) {
-        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
-        scriptGeneratorContext.setScriptTypes(newHashSet(DROP));
-        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
-    }
-
-    public Collection<String> getDropCreateScripts(Relational relational) {
-        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext(this);
-        scriptGeneratorContext.setScriptTypes(newHashSet(DROP, CREATE));
-        return getScriptGenerator(relational).getScripts(relational, scriptGeneratorContext);
+    public Collection<String> getDropScripts(MetaData object) {
+        ScriptGeneratorContext context = new ScriptGeneratorContext(this);
+        context.setScriptTypes(newHashSet(DROP));
+        return getScriptGenerator(object).getScripts(object, context);
     }
 
     public String getCatalog() {
@@ -200,6 +177,14 @@ public class ScriptGeneratorContext {
         this.scriptTypes = scriptTypes;
     }
 
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
+
     public Collection<MetaDataType> getMetaDataTypes() {
         return this.metaDataTypes;
     }
@@ -208,19 +193,11 @@ public class ScriptGeneratorContext {
         this.metaDataTypes = metaDataTypes;
     }
 
-    public Map<Class<? extends Relational>, ScriptGenerator<? extends Relational>> getScriptGenerators() {
-        return scriptGeneratorMap;
+    public PriorityList<NamingStrategy<? extends MetaData>> getNamingStrategies() {
+        return namingStrategies;
     }
 
-    public Map<Class<? extends Relational>, NamingStrategy<? extends Relational>> getNamingStrategies() {
-        return namingStrategyMap;
-    }
-
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(Map<String, Object> attributes) {
-        this.attributes = attributes;
+    public PriorityList<ScriptGenerator<? extends MetaData>> getScriptGenerators() {
+        return scriptGenerators;
     }
 }

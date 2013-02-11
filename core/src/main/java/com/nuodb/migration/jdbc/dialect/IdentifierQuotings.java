@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import com.nuodb.migration.jdbc.metadata.Identifiable;
 
 /**
  * @author Sergey Bushik
@@ -37,9 +37,9 @@ public class IdentifierQuotings {
     public static IdentifierQuoting minimal() {
         return new IdentifierQuoting() {
             @Override
-            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
-                return !((SimpleDialect) dialect).isAllowedIdentifier(identifier, hasIdentifier) ||
-                        ((SimpleDialect) dialect).isSQLKeyword(identifier, hasIdentifier);
+            public boolean isQuotingIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
+                return !((SimpleDialect) dialect).isAllowedIdentifier(identifier, identifiable) ||
+                        ((SimpleDialect) dialect).isSQLKeyword(identifier, identifiable);
             }
         };
     }
@@ -47,7 +47,7 @@ public class IdentifierQuotings {
     public static IdentifierQuoting always() {
         return new IdentifierQuoting() {
             @Override
-            public boolean isQuotingIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect) {
+            public boolean isQuotingIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
                 return true;
             }
         };

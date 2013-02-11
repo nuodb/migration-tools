@@ -30,16 +30,16 @@ package com.nuodb.migration.jdbc.metadata;
 /**
  * @author Sergey Bushik
  */
-public abstract class ConstraintBase extends HasIdentifierBase implements Constraint {
+public abstract class ConstraintBase extends IdentifiableBase implements Constraint {
 
     private Table table;
 
-    public ConstraintBase(String name) {
-        super(name);
+    protected ConstraintBase(MetaDataType metaDataType, String name) {
+        super(metaDataType, name);
     }
 
-    public ConstraintBase(Identifier identifier) {
-        super(identifier);
+    protected ConstraintBase(MetaDataType metaDataType, Identifier identifier) {
+        super(metaDataType, identifier);
     }
 
     @Override

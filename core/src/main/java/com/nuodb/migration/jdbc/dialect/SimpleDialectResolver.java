@@ -28,17 +28,17 @@
 package com.nuodb.migration.jdbc.dialect;
 
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migration.jdbc.resolve.SimpleDatabaseServiceResolver;
+import com.nuodb.migration.jdbc.resolve.SimpleServiceResolver;
 
 import static com.nuodb.migration.utils.ReflectionUtils.newInstance;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleDialectResolver extends SimpleDatabaseServiceResolver<Dialect> implements DialectResolver {
+public class SimpleDialectResolver extends SimpleServiceResolver<Dialect> implements DialectResolver {
 
     public SimpleDialectResolver() {
-        super(Dialect.class, SimpleDialect.class);
+        super(SimpleDialect.class);
         register("MySQL", MySQLDialect.class);
         register("PostgreSQL", PostgreSQLDialect.class);
         register("Microsoft SQL Server", MSSQLServerDialect.class);

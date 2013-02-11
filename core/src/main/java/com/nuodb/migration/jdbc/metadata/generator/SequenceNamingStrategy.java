@@ -33,22 +33,22 @@ import com.nuodb.migration.jdbc.metadata.Sequence;
 /**
  * @author Sergey Bushik
  */
-public class SequenceNamingStrategy extends HasIdentifierNamingStrategy<Sequence> {
+public class SequenceNamingStrategy extends IdentifiableNamingStrategy<Sequence> {
 
     public SequenceNamingStrategy() {
         super(Sequence.class);
     }
 
     @Override
-    protected String getNameOfHasIdentifier(Sequence sequence, ScriptGeneratorContext context, boolean identifier) {
+    protected String getIdentifiableName(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("SEQ");
         buffer.append('_');
 
         StringBuilder qualifier = new StringBuilder();
         Column column = sequence.getColumn();
-        qualifier.append(context.getName(column.getTable(), false));
-        qualifier.append(context.getName(column, false));
+        qualifier.append(scriptGeneratorContext.getName(column.getTable(), false));
+        qualifier.append(scriptGeneratorContext.getName(column, false));
         buffer.append(md5Hex(qualifier.toString()));
 
         return buffer.toString();

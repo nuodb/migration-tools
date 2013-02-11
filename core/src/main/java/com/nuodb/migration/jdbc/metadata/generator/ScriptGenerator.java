@@ -27,14 +27,15 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.metadata.Relational;
+import com.nuodb.migration.jdbc.metadata.MetaDataHandler;
+import com.nuodb.migration.jdbc.metadata.MetaData;
 
 import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public interface ScriptGenerator<R extends Relational> extends GeneratorService<R> {
+public interface ScriptGenerator<T extends MetaData> extends MetaDataHandler {
 
-    Collection<String> getScripts(R relational, ScriptGeneratorContext context);
+    Collection<String> getScripts(T object, ScriptGeneratorContext scriptGeneratorContext);
 }

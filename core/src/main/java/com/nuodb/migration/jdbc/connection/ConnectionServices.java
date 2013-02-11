@@ -27,8 +27,6 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
-import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -42,8 +40,6 @@ public interface ConnectionServices {
     String getSchema();
 
     Connection getConnection() throws SQLException;
-
-    DatabaseInspector getDatabaseInspector() throws SQLException;
 
     void close() throws SQLException;
 }

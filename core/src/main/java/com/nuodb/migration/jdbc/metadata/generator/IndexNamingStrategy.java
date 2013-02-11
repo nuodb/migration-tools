@@ -33,14 +33,14 @@ import com.nuodb.migration.jdbc.metadata.Index;
 /**
  * @author Sergey Bushik
  */
-public class IndexNamingStrategy extends HasIdentifierNamingStrategy<Index> {
+public class IndexNamingStrategy extends IdentifiableNamingStrategy<Index> {
 
     public IndexNamingStrategy() {
         super(Index.class);
     }
 
     @Override
-    protected String getNameOfHasIdentifier(Index index, ScriptGeneratorContext context, boolean identifier) {
+    protected String getIdentifiableName(Index index, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("IDX");
         buffer.append("_");
@@ -50,10 +50,10 @@ public class IndexNamingStrategy extends HasIdentifierNamingStrategy<Index> {
             qualifier.append("UNIQUE");
             qualifier.append("_");
         }
-        qualifier.append(context.getName(index.getTable(), false));
+        qualifier.append(scriptGeneratorContext.getName(index.getTable(), false));
         for (Column column : index.getColumns()) {
             qualifier.append("_");
-            qualifier.append(context.getName(column, false));
+            qualifier.append(scriptGeneratorContext.getName(column, false));
         }
         buffer.append(md5Hex(qualifier.toString()));
 

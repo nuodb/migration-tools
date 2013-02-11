@@ -27,18 +27,15 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.metadata.Relational;
+import com.nuodb.migration.jdbc.metadata.MetaDataHandler;
+import com.nuodb.migration.jdbc.metadata.MetaData;
 
 /**
  * @author Sergey Bushik
  */
-public interface NamingStrategy<R extends Relational> extends GeneratorService<R> {
+public interface NamingStrategy<M extends MetaData> extends MetaDataHandler {
 
-    String getName(R relational, ScriptGeneratorContext context);
+    String getName(M metaDataObject, ScriptGeneratorContext scriptGeneratorContext, boolean normalize);
 
-    String getName(R relational, ScriptGeneratorContext context, boolean normalize);
-
-    String getQualifiedName(R relational, ScriptGeneratorContext context);
-
-    String getQualifiedName(R relational, ScriptGeneratorContext context, boolean identifier);
+    String getQualifiedName(M metaDataObject, ScriptGeneratorContext scriptGeneratorContext, boolean normalize);
 }

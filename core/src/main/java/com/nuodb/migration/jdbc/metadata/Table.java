@@ -38,31 +38,31 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 
-public class Table extends HasIdentifierBase {
+public class Table extends IdentifiableBase {
 
     public static final String TABLE = "TABLE";
     public static final String VIEW = "VIEW";
 
-    private PrimaryKey primaryKey;
-    private final Map<Identifier, Column> columns = Maps.newLinkedHashMap();
-    private final Map<Identifier, Index> indexes = Maps.newLinkedHashMap();
-    private final Collection<ForeignKey> foreignKeys = Sets.newLinkedHashSet();
-    private final Database database;
-    private final Catalog catalog;
-    private Collection<String> checks = Sets.newHashSet();
+    private Database database;
+    private Catalog catalog;
     private Schema schema;
+
+    private Map<Identifier, Column> columns = Maps.newLinkedHashMap();
+    private Map<Identifier, Index> indexes = Maps.newLinkedHashMap();
+    private Collection<ForeignKey> foreignKeys = Sets.newLinkedHashSet();
+
+    private PrimaryKey primaryKey;
+    private Collection<Check> checks = Sets.newHashSet();
+
     private String type = TABLE;
     private String comment;
 
-    public Table(Database database, Catalog catalog, Schema schema, String name) {
-        this(database, catalog, schema, Identifier.valueOf(name));
+    public Table(String name) {
+        this(Identifier.valueOf(name));
     }
 
-    public Table(Database database, Catalog catalog, Schema schema, Identifier identifier) {
-        super(identifier, true);
-        this.database = database;
-        this.catalog = catalog;
-        this.schema = schema;
+    public Table(Identifier identifier) {
+        super(MetaDataType.TABLE, identifier, true);
     }
 
     @Override
@@ -97,6 +97,11 @@ public class Table extends HasIdentifierBase {
         return indexes.get(identifier);
     }
 
+    public void addCheck(Check check) {
+        check.setTable(this);
+        checks.add(check);
+    }
+
     public Collection<Index> getIndexes() {
         return indexes.values();
     }
@@ -105,12 +110,24 @@ public class Table extends HasIdentifierBase {
         return database;
     }
 
+    public void setDatabase(Database database) {
+        this.database = database;
+    }
+
     public Catalog getCatalog() {
         return catalog;
     }
 
+    public void setCatalog(Catalog catalog) {
+        this.catalog = catalog;
+    }
+
     public Schema getSchema() {
         return schema;
+    }
+
+    public void setSchema(Schema schema) {
+        this.schema = schema;
     }
 
     public String getComment() {
@@ -158,11 +175,11 @@ public class Table extends HasIdentifierBase {
         return newArrayList(columns.values());
     }
 
-    public Collection<String> getChecks() {
+    public Collection<Check> getChecks() {
         return checks;
     }
 
-    public void setChecks(Collection<String> checks) {
+    public void setChecks(Collection<Check> checks) {
         this.checks = checks;
     }
 
@@ -205,5 +222,29 @@ public class Table extends HasIdentifierBase {
             buffer.append(' ');
             output(indent, buffer, getForeignKeys());
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Table table = (Table) o;
+
+        if (database != null ? !database.equals(table.database) : table.database != null) return false;
+        if (catalog != null ? !catalog.equals(table.catalog) : table.catalog != null) return false;
+        if (schema != null ? !schema.equals(table.schema) : table.schema != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (database != null ? database.hashCode() : 0);
+        result = 31 * result + (catalog != null ? catalog.hashCode() : 0);
+        result = 31 * result + (schema != null ? schema.hashCode() : 0);
+        return result;
     }
 }

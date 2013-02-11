@@ -30,8 +30,11 @@ package com.nuodb.migration.schema;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migration.jdbc.metadata.generator.ScriptGeneratorContext;
+import com.nuodb.migration.jdbc.metadata.inspector.InspectionManager;
+import com.nuodb.migration.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
 import org.slf4j.Logger;
@@ -49,7 +52,7 @@ public class SchemaJob extends JobBase {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private ScriptGeneratorContext scriptGeneratorContext;
+    private ScriptGeneratorContext context;
     private ScriptExporter scriptExporter;
     private ConnectionProvider connectionProvider;
     private boolean failOnEmptyScripts;
@@ -62,7 +65,7 @@ public class SchemaJob extends JobBase {
 
     protected void validate() {
         isNotNull(getConnectionProvider(), "Connection provider is required");
-        isNotNull(getScriptGeneratorContext(), "Script generator context is required");
+        isNotNull(getContext(), "Script generator context is required");
         isNotNull(getScriptExporter(), "Script exporter is required");
     }
 
@@ -78,8 +81,13 @@ public class SchemaJob extends JobBase {
 
     protected void generate(SchemaJobExecution execution) throws Exception {
         ConnectionServices connectionServices = execution.getConnectionServices();
-        Database database = connectionServices.getDatabaseInspector().inspect();
-        Collection<String> scripts = getScriptGeneratorContext().getScripts(database);
+
+        InspectionManager inspectionManager = new InspectionManager();
+        inspectionManager.setInspectionScope(
+                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()));
+        inspectionManager.setConnection(connectionServices.getConnection());
+        Database database = inspectionManager.inspect().getObject(MetaDataType.DATABASE);
+        Collection<String> scripts = getContext().getScripts(database);
         if (isFailOnEmptyScripts() && scripts.isEmpty()) {
             throw new SchemaJobException("Schema scripts are empty");
         }
@@ -108,12 +116,12 @@ public class SchemaJob extends JobBase {
         this.connectionProvider = connectionProvider;
     }
 
-    public ScriptGeneratorContext getScriptGeneratorContext() {
-        return scriptGeneratorContext;
+    public ScriptGeneratorContext getContext() {
+        return context;
     }
 
-    public void setScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
-        this.scriptGeneratorContext = scriptGeneratorContext;
+    public void setContext(ScriptGeneratorContext context) {
+        this.context = context;
     }
 
     public ScriptExporter getScriptExporter() {

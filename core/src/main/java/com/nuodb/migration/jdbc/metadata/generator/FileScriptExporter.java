@@ -72,7 +72,7 @@ public class FileScriptExporter extends CountingScriptExporter {
     @Override
     protected void exportScript(String script) throws Exception {
         if (writer == null) {
-            throw new ScriptGeneratorException("File is not opened");
+            throw new GeneratorException("File is not opened");
         }
         if (getCount() > 0) {
             writer.newLine();

@@ -27,12 +27,12 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import com.nuodb.migration.jdbc.metadata.Identifiable;
 
 /**
  * @author Sergey Bushik
  */
 public interface IdentifierNormalizer {
 
-    String normalizeIdentifier(String identifier, HasIdentifier hasIdentifier, Dialect dialect);
+    String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect);
 }

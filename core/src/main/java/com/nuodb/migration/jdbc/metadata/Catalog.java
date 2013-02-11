@@ -36,61 +36,87 @@ import java.util.Map;
 import static com.nuodb.migration.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 
-public class Catalog extends HasIdentifierBase {
+public class Catalog extends IdentifiableBase implements HasTables {
 
     private Map<Identifier, Schema> schemas = Maps.newLinkedHashMap();
     private Database database;
 
-    public Catalog(Database database, String name) {
-        this(database, valueOf(name));
+    public Catalog(String name) {
+        this(valueOf(name));
     }
 
-    public Catalog(Database database, Identifier identifier) {
-        super(identifier);
-        this.database = database;
+    public Catalog(Identifier identifier) {
+        super(MetaDataType.CATALOG, identifier);
     }
 
     public Database getDatabase() {
         return database;
     }
 
-    public Schema getSchema(String name) {
-        return createSchema(valueOf(name), false);
+    public void setDatabase(Database database) {
+        for (Schema schema : getSchemas()) {
+            schema.setDatabase(database);
+        }
+        this.database = database;
     }
 
-    public Schema getSchema(Identifier identifier) {
-        return createSchema(identifier, false);
+    public Collection<Schema> getSchemas() {
+        return schemas.values();
     }
 
-    public Schema createSchema(String name) {
-        return createSchema(valueOf(name), true);
+    public Schema getSchema(String schemaName) {
+        return addSchema(valueOf(schemaName), false);
     }
 
-    public Schema createSchema(Identifier identifier) {
-        return createSchema(identifier, true);
+    public Schema getSchema(Identifier schemaId) {
+        return addSchema(schemaId, false);
     }
 
-    protected Schema createSchema(Identifier identifier, boolean create) {
-        Schema schema = schemas.get(identifier);
+    public Schema addSchema(String schemaName) {
+        return addSchema(valueOf(schemaName), true);
+    }
+
+    public Schema addSchema(Identifier schemaId) {
+        return addSchema(schemaId, true);
+    }
+
+    public Schema addSchema(Schema schema) {
+        schema.setDatabase(database);
+        schema.setCatalog(this);
+        schemas.put(schema.getIdentifier(), schema);
+        return schema;
+    }
+
+    public boolean hasSchema(String schemaName) {
+        return hasSchema(valueOf(schemaName));
+    }
+
+    public boolean hasSchema(Identifier schemaId) {
+        return schemas.containsKey(schemaId);
+    }
+
+    public void removeSchema(Schema schema) {
+        schemas.remove(schema.getIdentifier());
+    }
+
+    protected Schema addSchema(Identifier schemaId, boolean create) {
+        Schema schema = schemas.get(schemaId);
         if (schema == null) {
             if (create) {
-                schemas.put(identifier, schema = new Schema(database, this, identifier));
+                addSchema(schema = new Schema(schemaId));
             } else {
-                throw new MetaDataException(format("Schema %s doesn't exist", identifier));
+                throw new MetaDataException(format("Schema %s doesn't exist", schemaId));
             }
         }
         return schema;
     }
 
-    public Collection<Schema> listSchemas() {
-        return schemas.values();
-    }
-
-    public Collection<Table> listTables() {
-        Collection<Schema> schemas = listSchemas();
+    @Override
+    public Collection<Table> getTables() {
+        Collection<Schema> schemas = getSchemas();
         Collection<Table> tables = Lists.newArrayList();
         for (Schema schema : schemas) {
-            tables.addAll(schema.listTables());
+            tables.addAll(schema.getTables());
         }
         return tables;
     }
@@ -103,6 +129,26 @@ public class Catalog extends HasIdentifierBase {
         buffer.append("schemas");
         buffer.append(' ');
 
-        output(indent, buffer, listSchemas());
+        output(indent, buffer, getSchemas());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Catalog catalog = (Catalog) o;
+
+        if (database != null ? !database.equals(catalog.database) : catalog.database != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (database != null ? database.hashCode() : 0);
+        return result;
     }
 }

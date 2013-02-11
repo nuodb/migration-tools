@@ -35,57 +35,87 @@ import java.util.Map;
 import static com.nuodb.migration.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 
-public class Schema extends HasIdentifierBase {
-
-    private Map<Identifier, Table> tables = Maps.newLinkedHashMap();
+public class Schema extends IdentifiableBase implements HasTables {
 
     private Database database;
     private Catalog catalog;
+    private final Map<Identifier, Table> tables = Maps.newLinkedHashMap();
 
-    public Schema(Database database, Catalog catalog, String name) {
-        this(database, catalog, valueOf(name));
+    public Schema(String name) {
+        this(valueOf(name));
     }
 
-    public Schema(Database database, Catalog catalog, Identifier identifier) {
-        super(identifier);
-        this.database = database;
-        this.catalog = catalog;
+    public Schema(Identifier identifier) {
+        super(MetaDataType.SCHEMA, identifier);
     }
 
     public Database getDatabase() {
         return database;
     }
 
+    public void setDatabase(Database database) {
+        for (Table table : getTables()) {
+            table.setDatabase(database);
+        }
+        this.database = database;
+    }
+
     public Catalog getCatalog() {
         return catalog;
     }
 
-    public Table getTable(String name) {
-        return createTable(valueOf(name), false);
+    public void setCatalog(Catalog catalog) {
+        for (Table table : getTables()) {
+            table.setDatabase(catalog.getDatabase());
+            table.setCatalog(catalog);
+        }
+        this.catalog = catalog;
     }
 
-    public Table getTable(Identifier identifier) {
-        return createTable(identifier, false);
+    public Table getTable(String tableName) {
+        return addTable(valueOf(tableName), false);
     }
 
-    public Table createTable(String name) {
-        return createTable(valueOf(name), true);
+    public Table getTable(Identifier tableId) {
+        return addTable(tableId, false);
     }
 
-    protected Table createTable(Identifier identifier, boolean create) {
-        Table table = tables.get(identifier);
+    public Table addTable(String tableName) {
+        return addTable(valueOf(tableName), true);
+    }
+
+    public Table addTable(Identifier tableId) {
+        return addTable(tableId, true);
+    }
+
+    public void addTable(Table table) {
+        table.setDatabase(catalog != null ? catalog.getDatabase() : null);
+        table.setCatalog(catalog);
+        table.setSchema(this);
+        tables.put(table.getIdentifier(), table);
+    }
+
+    public boolean hasTable(String tableName) {
+        return hasTable(valueOf(tableName));
+    }
+
+    public boolean hasTable(Identifier tableId) {
+        return tables.containsKey(tableId);
+    }
+
+    protected Table addTable(Identifier tableId, boolean create) {
+        Table table = tables.get(tableId);
         if (table == null) {
             if (create) {
-                table = new Table(database, catalog, this, identifier);
-                tables.put(identifier, table);
+                addTable(table = new Table(tableId));
             } else {
-                throw new MetaDataException(format("Table %s doesn't exist", identifier));
+                throw new MetaDataException(format("Table %s doesn't exist", tableId));
             }
         }
         return table;
     }
 
-    public Collection<Table> listTables() {
+    public Collection<Table> getTables() {
         return tables.values();
     }
 
@@ -97,6 +127,28 @@ public class Schema extends HasIdentifierBase {
         buffer.append("tables");
         buffer.append(' ');
 
-        output(indent, buffer, listTables());
+        output(indent, buffer, getTables());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Schema schema = (Schema) o;
+
+        if (database != null ? !database.equals(schema.database) : schema.database != null) return false;
+        if (catalog != null ? !catalog.equals(schema.catalog) : schema.catalog != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (database != null ? database.hashCode() : 0);
+        result = 31 * result + (catalog != null ? catalog.hashCode() : 0);
+        return result;
     }
 }

@@ -47,7 +47,7 @@ public class ForeignKey extends ConstraintBase {
     private Table foreignTable;
 
     public ForeignKey(Identifier name) {
-        super(name);
+        super(MetaDataType.FOREIGN_KEY, name);
     }
 
     @Override

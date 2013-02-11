@@ -27,21 +27,47 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
+import com.nuodb.migration.jdbc.query.QueryUtils;
+
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
+
 /**
  * @author Sergey Bushik
  */
-public interface NuoDBIndex {
+public class NuoDBIndex {
 
     public static final String QUERY =
-            "SELECT *\n" +
-            "FROM SYSTEM.INDEXES\n" +
+            "SELECT * FROM SYSTEM.INDEXES\n" +
             "INNER JOIN SYSTEM.INDEXFIELDS ON INDEXES.SCHEMA=INDEXFIELDS.SCHEMA\n" +
             "AND INDEXES.TABLENAME=INDEXFIELDS.TABLENAME\n" +
-            "AND INDEXES.INDEXNAME = INDEXFIELDS.INDEXNAME\n" +
-            "WHERE SCHEMA=?\n" +
-            "  AND TABLENAME=?";
+            "AND INDEXES.INDEXNAME=INDEXFIELDS.INDEXNAME";
 
     public static final int PRIMARY_KEY = 0;
     public static final int UNIQUE = 1;
     public static final int KEY = 2;
+
+    public static String createQuery(int... indexTypes) {
+        final Collection<String> filters = newArrayList();
+        filters.add("SCHEMA=?");
+        filters.add("TABLENAME=?");
+        if (indexTypes != null && indexTypes.length > 0) {
+            if (indexTypes.length == 1) {
+                filters.add("INDEXTYPE=" + indexTypes[0]);
+            } else {
+                StringBuilder filter = new StringBuilder();
+                filter.append("INDEXTYPE IN (");
+                for (int i = 0; i < indexTypes.length; i++) {
+                    filter.append(indexTypes[i]);
+                    if (i + 1 < indexTypes.length) {
+                        filter.append(", ");
+                    }
+                }
+                filter.append(")");
+                filters.add(filter.toString());
+            }
+        }
+        return QueryUtils.where(QUERY, filters, "AND");
+    }
 }

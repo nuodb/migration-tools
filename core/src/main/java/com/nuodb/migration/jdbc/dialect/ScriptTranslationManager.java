@@ -31,8 +31,8 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migration.jdbc.resolve.DatabaseServiceResolver;
-import com.nuodb.migration.jdbc.resolve.SimpleDatabaseServiceResolverAware;
+import com.nuodb.migration.jdbc.resolve.ServiceResolver;
+import com.nuodb.migration.jdbc.resolve.SimpleServiceResolverAware;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
@@ -45,7 +45,7 @@ import static com.google.common.collect.Sets.newLinkedHashSet;
 /**
  * @author Sergey Bushik
  */
-public class ScriptTranslationManager extends SimpleDatabaseServiceResolverAware<Dialect> {
+public class ScriptTranslationManager extends SimpleServiceResolverAware<Dialect> {
 
     private Set<ScriptTranslation> scriptTranslations = newLinkedHashSet();
 
@@ -136,13 +136,13 @@ public class ScriptTranslationManager extends SimpleDatabaseServiceResolverAware
     }
 
     @Override
-    public DatabaseServiceResolver<Dialect> getDatabaseServiceResolver() {
-        return super.getDatabaseServiceResolver();
+    public ServiceResolver<Dialect> getServiceResolver() {
+        return super.getServiceResolver();
     }
 
     @Override
-    public void setDatabaseServiceResolver(DatabaseServiceResolver<Dialect> databaseServiceResolver) {
-        super.setDatabaseServiceResolver(databaseServiceResolver);
+    public void setServiceResolver(ServiceResolver<Dialect> serviceResolver) {
+        super.setServiceResolver(serviceResolver);
 
         DialectResolver dialectResolver = getDialectResolver();
         if (dialectResolver != null) {
@@ -154,7 +154,7 @@ public class ScriptTranslationManager extends SimpleDatabaseServiceResolverAware
     }
 
     protected DialectResolver getDialectResolver() {
-        return (DialectResolver) getDatabaseServiceResolver();
+        return (DialectResolver) getServiceResolver();
     }
 
     @Override

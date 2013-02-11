@@ -37,7 +37,7 @@ import static java.lang.String.format;
 /**
  * @author Sergey Bushik
  */
-public class Sequence extends HasIdentifierBase {
+public class Sequence extends IdentifiableBase {
 
     private Column column;
     private Long startWith;
@@ -49,6 +49,10 @@ public class Sequence extends HasIdentifierBase {
     private boolean order;
     private boolean temporary;
     private Integer cache;
+
+    protected Sequence(MetaDataType objectType) {
+        super(objectType);
+    }
 
     public Column getColumn() {
         return column;

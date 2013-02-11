@@ -312,9 +312,9 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         protected void parseSchemaOptions(SchemaSpec schemaSpec, CommandLine commandLine, Option option) {
             if (commandLine.hasOption(SCHEMA_META_DATA_OPTION)) {
                 Collection<String> values = commandLine.getValues(SCHEMA_META_DATA_OPTION);
-                Set<MetaDataType> metaDataTypes = newHashSet(MetaDataType.ALL_TYPES);
+                Set<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
                 for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
-                    MetaDataType metaDataType = new MetaDataType(replace(iterator.next(), ".", " "));
+                    MetaDataType metaDataType = MetaDataType.TYPE_NAME_MAP.get(replace(iterator.next(), ".", "_"));
                     String booleanValue = iterator.next();
                     if (booleanValue == null || parseBoolean(booleanValue)) {
                         metaDataTypes.add(metaDataType);

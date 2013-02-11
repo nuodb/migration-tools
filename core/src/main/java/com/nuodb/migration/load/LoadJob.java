@@ -36,7 +36,9 @@ import com.nuodb.migration.jdbc.dialect.DialectResolver;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
-import com.nuodb.migration.jdbc.metadata.inspector.DatabaseInspector;
+import com.nuodb.migration.jdbc.metadata.inspector.InspectionManager;
+import com.nuodb.migration.jdbc.metadata.inspector.InspectionResults;
+import com.nuodb.migration.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.query.*;
@@ -106,12 +108,15 @@ public class LoadJob extends JobBase {
     protected void load(LoadJobExecution execution) throws SQLException {
         ConnectionServices connectionServices = execution.getConnectionServices();
 
-        DatabaseInspector databaseInspector = connectionServices.getDatabaseInspector();
-        databaseInspector.withMetaDataTypes(
-                MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE, MetaDataType.COLUMN);
-        databaseInspector.withDialectResolver(getDialectResolver());
+        InspectionManager inspectionManager = new InspectionManager();
+        inspectionManager.setInspectionScope
+                (new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()));
+        inspectionManager.setDialectResolver(getDialectResolver());
+        inspectionManager.setConnection(connectionServices.getConnection());
 
-        Database database = databaseInspector.inspect();
+        InspectionResults inspectionResults = inspectionManager.inspect(
+                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE, MetaDataType.COLUMN);
+        Database database = inspectionResults.getObject(MetaDataType.DATABASE);
         execution.setDatabase(database);
 
         Connection connection = connectionServices.getConnection();

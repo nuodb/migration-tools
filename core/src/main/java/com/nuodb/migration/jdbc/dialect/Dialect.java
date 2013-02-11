@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.HasIdentifier;
+import com.nuodb.migration.jdbc.metadata.Identifiable;
 import com.nuodb.migration.jdbc.metadata.ReferenceAction;
 import com.nuodb.migration.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migration.jdbc.type.JdbcTypeNameMap;
@@ -111,9 +111,9 @@ public interface Dialect {
 
     String getSequenceOrder(boolean order);
 
-    String getCheckClause(String checkClause);
+    String getCheckClause(String clause);
 
-    String getIdentifier(String identifier, HasIdentifier hasIdentifier);
+    String getIdentifier(String identifier, Identifiable identifiable);
 
     SQLKeywords getSQLKeywords();
 
