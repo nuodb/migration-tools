@@ -55,17 +55,17 @@ public class MetaDataType implements Comparable<MetaDataType> {
 
     private Class<? extends MetaData> typeClass;
 
-    public static final Map<String, MetaDataType> TYPE_NAME_MAP = getTypeNameMap();
+    public static final Map<String, MetaDataType> NAME_TYPE_MAP = getNameTypeMap();
 
-    public static final MetaDataType[] TYPES = TYPE_NAME_MAP.values().toArray(new MetaDataType[]{});
+    public static final MetaDataType[] TYPES = NAME_TYPE_MAP.values().toArray(new MetaDataType[]{});
 
-    private static Map<String, MetaDataType> getTypeNameMap() {
-        Map<String, MetaDataType> typeNameMap = Maps.newLinkedHashMap();
+    private static Map<String, MetaDataType> getNameTypeMap() {
+        Map<String, MetaDataType> nameTypeMap = Maps.newLinkedHashMap();
         Field[] fields = MetaDataType.class.getFields();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getType() == MetaDataType.class) {
                 try {
-                    typeNameMap.put(field.getName(), (MetaDataType) field.get(null));
+                    nameTypeMap.put(field.getName(), (MetaDataType) field.get(null));
                 } catch (IllegalAccessException exception) {
                     if (logger.isDebugEnabled()) {
                         logger.debug(format("Failed accessing %s field", MetaDataType.class), exception);
@@ -73,7 +73,7 @@ public class MetaDataType implements Comparable<MetaDataType> {
                 }
             }
         }
-        return typeNameMap;
+        return nameTypeMap;
     }
 
     public MetaDataType(Class<? extends MetaData> typeClass) {

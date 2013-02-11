@@ -314,7 +314,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
                 Collection<String> values = commandLine.getValues(SCHEMA_META_DATA_OPTION);
                 Set<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
                 for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
-                    MetaDataType metaDataType = MetaDataType.TYPE_NAME_MAP.get(replace(iterator.next(), ".", "_"));
+                    MetaDataType metaDataType = MetaDataType.NAME_TYPE_MAP.get(replace(iterator.next(), ".", "_"));
                     String booleanValue = iterator.next();
                     if (booleanValue == null || parseBoolean(booleanValue)) {
                         metaDataTypes.add(metaDataType);
