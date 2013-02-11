@@ -50,6 +50,7 @@ public class JdbcUrlParserUtils {
 
     private JdbcUrlParserUtils() {
         parsers.add(new NuoDBJdbcUrlParser());
+        parsers.add(new MySQLJdbcUrlParser());
     }
 
     public JdbcUrl parse(String url, Map<String, Object> overrides) {

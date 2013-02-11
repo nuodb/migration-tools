@@ -83,13 +83,15 @@ public class SchemaJob extends JobBase {
         ConnectionServices connectionServices = execution.getConnectionServices();
 
         InspectionManager inspectionManager = new InspectionManager();
-        inspectionManager.setInspectionScope(
-                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()));
         inspectionManager.setConnection(connectionServices.getConnection());
-        Database database = inspectionManager.inspect().getObject(MetaDataType.DATABASE);
+        Database database = inspectionManager.inspect(
+                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
+                MetaDataType.TYPES
+        ).getObject(MetaDataType.DATABASE);
+
         Collection<String> scripts = getContext().getScripts(database);
         if (isFailOnEmptyScripts() && scripts.isEmpty()) {
-            throw new SchemaJobException("Schema scripts are empty");
+            throw new SchemaJobException("Scripts are empty");
         }
         ScriptExporter scriptExporter = getScriptExporter();
         try {

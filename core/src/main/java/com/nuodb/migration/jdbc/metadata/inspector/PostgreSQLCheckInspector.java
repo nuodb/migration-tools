@@ -104,7 +104,7 @@ public class PostgreSQLCheckInspector extends InspectorBase<Table, TableInspecti
     @Override
     public void inspectScope(InspectionContext inspectionContext,
                              TableInspectionScope inspectionScope) throws SQLException {
-        throw new InspectorException("Not yet implemented");
+        throw new InspectorException("Not implemented yet");
     }
 
     @Override

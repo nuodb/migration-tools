@@ -121,11 +121,11 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         }
         if (service != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug(format("Resolved %s", getServiceName(service)));
+                logger.debug(format("Service instance resolved %s", getServiceName(service)));
             }
         } else if (defaultService != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug(format("Defaulted to %s", getServiceName(defaultService)));
+                logger.debug(format("Service instance defaulted to %s", getServiceName(defaultService)));
             }
             service = defaultService;
         }
@@ -147,11 +147,11 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         }
         if (serviceClass != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug(format("Resolved %s", getServiceClassName(serviceClass)));
+                logger.debug(format("Service class resolved %s", getServiceClassName(serviceClass)));
             }
         } else if (defaultServiceClass != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug(format("Defaulted to %s", getServiceClassName(defaultServiceClass)));
+                logger.debug(format("Service class defaulted to %s", getServiceClassName(defaultServiceClass)));
             }
             serviceClass = defaultServiceClass;
         }

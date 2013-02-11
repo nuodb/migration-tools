@@ -33,6 +33,7 @@ import com.nuodb.migration.jdbc.connection.JdbcPoolingConnectionProvider;
 import com.nuodb.migration.jdbc.dialect.DialectResolver;
 import com.nuodb.migration.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migration.jdbc.metadata.Database;
+import com.nuodb.migration.jdbc.metadata.MetaData;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.utils.SimplePriorityList;
@@ -52,10 +53,8 @@ import static com.nuodb.migration.jdbc.metadata.MetaDataType.*;
 public class InspectionManager {
 
     private Connection connection;
-    private InspectionScope inspectionScope;
     private DialectResolver dialectResolver = new SimpleDialectResolver();
     private Collection<Inspector> inspectors = new SimplePriorityList<Inspector>();
-    private MetaDataType[] objectTypes = MetaDataType.TYPES;
 
     public InspectionManager() {
         addInspector(new SimpleDatabaseInspector());
@@ -104,21 +103,64 @@ public class InspectionManager {
     }
 
     public InspectionResults inspect(MetaDataType... objectTypes) throws SQLException {
-        return inspect(getInspectionScope(), objectTypes);
+        return inspect(new TableInspectionScope(), objectTypes);
     }
 
     public InspectionResults inspect(InspectionScope inspectionScope, MetaDataType... objectTypes) throws SQLException {
-        InspectionContext inspectionContext = createInspectionContext(objectTypes);
+        InspectionResults inspectionResults = createInspectionResults();
+        inspect(inspectionResults, inspectionScope, objectTypes);
+        return inspectionResults;
+    }
+
+    public InspectionResults inspect(MetaData object, MetaDataType... objectTypes) throws SQLException {
+        InspectionResults inspectionResults = createInspectionResults();
+        inspect(inspectionResults, object, objectTypes);
+        return inspectionResults;
+    }
+
+    public InspectionResults inspect(Collection<MetaData> objects, MetaDataType... objectTypes) throws SQLException {
+        InspectionResults inspectionResults = createInspectionResults();
+        inspect(inspectionResults, objects, objectTypes);
+        return inspectionResults;
+    }
+
+    public void inspect(InspectionResults inspectionResults, InspectionScope inspectionScope,
+                        MetaDataType... objectTypes) throws SQLException {
+        InspectionContext inspectionContext = createInspectionContext(objectTypes, inspectionResults);
         try {
             inspectionContext.inspect(inspectionScope, objectTypes);
         } finally {
             releaseInspectionContext(inspectionContext);
         }
-        return inspectionContext.getInspectionResults();
     }
 
-    protected InspectionContext createInspectionContext(MetaDataType[] objectTypes) {
-        return new SimpleInspectionContext(this, objectTypes);
+    public void inspect(InspectionResults inspectionResults, MetaData object,
+                        MetaDataType... objectTypes) throws SQLException {
+        InspectionContext inspectionContext = createInspectionContext(objectTypes, inspectionResults);
+        try {
+            inspectionContext.inspect(object, objectTypes);
+        } finally {
+            releaseInspectionContext(inspectionContext);
+        }
+    }
+
+    public void inspect(InspectionResults inspectionResults, Collection<MetaData> objects,
+                        MetaDataType... objectTypes) throws SQLException {
+        InspectionContext inspectionContext = createInspectionContext(objectTypes, inspectionResults);
+        try {
+            inspectionContext.inspect(objects, objectTypes);
+        } finally {
+            releaseInspectionContext(inspectionContext);
+        }
+    }
+
+    protected InspectionResults createInspectionResults() {
+        return new SimpleInspectionResults();
+    }
+
+    protected InspectionContext createInspectionContext(MetaDataType[] objectTypes,
+                                                        InspectionResults inspectionResults) {
+        return new SimpleInspectionContext(this, objectTypes, inspectionResults);
     }
 
     protected void releaseInspectionContext(InspectionContext inspectionContext) throws SQLException {
@@ -139,22 +181,6 @@ public class InspectionManager {
 
     public void setDialectResolver(DialectResolver dialectResolver) {
         this.dialectResolver = dialectResolver;
-    }
-
-    public InspectionScope getInspectionScope() {
-        return inspectionScope;
-    }
-
-    public void setInspectionScope(InspectionScope inspectionScope) {
-        this.inspectionScope = inspectionScope;
-    }
-
-    public MetaDataType[] getObjectTypes() {
-        return objectTypes;
-    }
-
-    public void setObjectTypes(MetaDataType[] objectTypes) {
-        this.objectTypes = objectTypes;
     }
 
     public void addInspector(Inspector inspector) {
@@ -186,10 +212,10 @@ public class InspectionManager {
         ConnectionServices connectionServices = connectionProvider.getConnectionServices();
         try {
             InspectionManager inspectionManager = new InspectionManager();
-            inspectionManager.setInspectionScope(
-                    new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()));
             inspectionManager.setConnection(connectionServices.getConnection());
-            Database database = inspectionManager.inspect().getObject(MetaDataType.DATABASE);
+            Database database = inspectionManager.inspect(
+                    new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema())
+            ).getObject(MetaDataType.DATABASE);
             System.out.println(database);
         } finally {
             connectionServices.close();

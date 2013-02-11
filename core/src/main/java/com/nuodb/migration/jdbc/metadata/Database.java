@@ -42,7 +42,7 @@ import static com.nuodb.migration.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.split;
 
-public class Database extends IndentedBase implements HasTables {
+public class Database extends IndentedBase implements HasSchemas {
 
     private final Map<Identifier, Catalog> catalogs = Maps.newLinkedHashMap();
     private DriverInfo driverInfo;
@@ -221,5 +221,26 @@ public class Database extends IndentedBase implements HasTables {
         buffer.append(' ');
 
         output(indent, buffer, getCatalogs());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Database database = (Database) o;
+
+        if (databaseInfo != null ? !databaseInfo.equals(database.databaseInfo) : database.databaseInfo != null)
+            return false;
+        if (driverInfo != null ? !driverInfo.equals(database.driverInfo) : database.driverInfo != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = driverInfo != null ? driverInfo.hashCode() : 0;
+        result = 31 * result + (databaseInfo != null ? databaseInfo.hashCode() : 0);
+        return result;
     }
 }

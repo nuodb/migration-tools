@@ -37,7 +37,6 @@ import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.metadata.inspector.InspectionManager;
-import com.nuodb.migration.jdbc.metadata.inspector.InspectionResults;
 import com.nuodb.migration.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
@@ -109,14 +108,14 @@ public class LoadJob extends JobBase {
         ConnectionServices connectionServices = execution.getConnectionServices();
 
         InspectionManager inspectionManager = new InspectionManager();
-        inspectionManager.setInspectionScope
-                (new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()));
         inspectionManager.setDialectResolver(getDialectResolver());
         inspectionManager.setConnection(connectionServices.getConnection());
+        Database database = inspectionManager.inspect(
+                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
+                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA,
+                MetaDataType.TABLE, MetaDataType.COLUMN
+        ).getObject(MetaDataType.DATABASE);
 
-        InspectionResults inspectionResults = inspectionManager.inspect(
-                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE, MetaDataType.COLUMN);
-        Database database = inspectionResults.getObject(MetaDataType.DATABASE);
         execution.setDatabase(database);
 
         Connection connection = connectionServices.getConnection();

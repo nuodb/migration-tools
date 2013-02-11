@@ -51,21 +51,21 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     private Class<? extends InspectionScope> inspectionScopeClass;
     private MetaDataType parentObjectType;
 
-    protected InspectorBase(Class<? extends MetaData> metaDataTypeClass,
+    protected InspectorBase(Class<? extends MetaData> objectClass,
                             Class<? extends InspectionScope> inspectionScopeClass) {
-        super(metaDataTypeClass);
+        super(objectClass);
         this.inspectionScopeClass = inspectionScopeClass;
     }
 
-    protected InspectorBase(MetaDataType metaDataType,
+    protected InspectorBase(MetaDataType objectType,
                             Class<? extends InspectionScope> inspectionScopeClass) {
-        super(metaDataType);
+        super(objectType);
         this.inspectionScopeClass = inspectionScopeClass;
     }
 
-    protected InspectorBase(MetaDataType metaDataType, MetaDataType parentObjectType,
+    protected InspectorBase(MetaDataType objectType, MetaDataType parentObjectType,
                             Class<? extends InspectionScope> inspectionScopeClass) {
-        super(metaDataType);
+        super(objectType);
         this.inspectionScopeClass = inspectionScopeClass;
         this.parentObjectType = parentObjectType;
     }
@@ -82,9 +82,9 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
         }
     }
 
-    protected Collection<M> getParentObjects(InspectionContext inspectionContext) throws SQLException {
+    protected Collection<M> getParentObjects(InspectionContext inspectionScope) throws SQLException {
         return getParentObjectType() != null ?
-                (Collection<M>) inspectionContext.getInspectionResults().getObjects(getParentObjectType()) : null;
+                (Collection<M>) inspectionScope.getInspectionResults().getObjects(getParentObjectType()) : null;
     }
 
     @Override

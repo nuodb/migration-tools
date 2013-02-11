@@ -105,7 +105,6 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
             sequence.setCache(autoIncrement.getInt("CACHE_VALUE"));
             sequence.setCycle("T".equalsIgnoreCase(autoIncrement.getString("IS_CYCLED")));
             column.setSequence(sequence);
-
             inspectionContext.getInspectionResults().addObject(sequence);
         }
     }
@@ -114,7 +113,7 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
     @Override
     public void inspectScope(InspectionContext inspectionContext,
                              TableInspectionScope inspectionScope) throws SQLException {
-        throw new InspectorException("Not yet implemented");
+        throw new InspectorException("Not implemented yet");
     }
 
     @Override

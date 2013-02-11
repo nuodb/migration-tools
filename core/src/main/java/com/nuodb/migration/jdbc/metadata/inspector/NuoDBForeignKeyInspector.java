@@ -82,7 +82,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -94,7 +94,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
+                        for (TableInspectionScope inspectionScope : scopes) {
                             statement.setString(1, inspectionScope.getSchema());
                             statement.setString(2, inspectionScope.getTable());
                             inspect(inspectionContext, statement.executeQuery());
@@ -105,15 +105,15 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
     }
 
     private void inspect(InspectionContext inspectionContext, ResultSet foreignKeys) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        InspectionResults results = inspectionContext.getInspectionResults();
         ForeignKey foreignKey = null;
         while (foreignKeys.next()) {
-            Table primaryTable = addTable(inspectionResults, null, foreignKeys.getString("FKTABLE_SCHEM"),
+            Table primaryTable = addTable(results, null, foreignKeys.getString("FKTABLE_SCHEM"),
                     foreignKeys.getString("FKTABLE_NAME"));
 
             final Column primaryColumn = primaryTable.createColumn(foreignKeys.getString("FKCOLUMN_NAME"));
 
-            Table foreignTable = addTable(inspectionResults, null, foreignKeys.getString("PKTABLE_SCHEM"),
+            Table foreignTable = addTable(results, null, foreignKeys.getString("PKTABLE_SCHEM"),
                     foreignKeys.getString("PKTABLE_NAME"));
 
             final Column foreignColumn = foreignTable.createColumn(foreignKeys.getString("PKCOLUMN_NAME"));
@@ -126,7 +126,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
                 foreignKey.setUpdateAction(getReferentialAction(foreignKeys.getInt("UPDATE_RULE")));
                 foreignKey.setDeleteAction(getReferentialAction(foreignKeys.getInt("DELETE_RULE")));
                 foreignKey.setDeferrability(getDeferrability(foreignKeys.getInt("DEFERRABILITY")));
-                inspectionResults.addObject(foreignKey);
+                results.addObject(foreignKey);
             }
             foreignKey.addReference(primaryColumn, foreignColumn, position);
         }

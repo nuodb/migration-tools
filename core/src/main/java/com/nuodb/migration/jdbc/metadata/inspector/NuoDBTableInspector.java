@@ -61,8 +61,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
     }
 
     @Override
-    public void inspectScope(final InspectionContext inspectionContext,
-                             final TableInspectionScope inspectionScope) throws SQLException {
+    public void inspectScope(final InspectionContext inspectionContext, final TableInspectionScope inspectionScope) throws SQLException {
         validateInspectionScope(inspectionScope);
         final Collection<String> filters = newArrayList();
         final Collection<String> parameters = newArrayList();

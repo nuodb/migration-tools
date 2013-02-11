@@ -68,7 +68,7 @@ public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table,
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -80,7 +80,7 @@ public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table,
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
+                        for (TableInspectionScope inspectionScope : scopes) {
                             statement.setString(1, inspectionScope.getCatalog());
                             statement.setString(2, inspectionScope.getSchema());
                             statement.setString(3, inspectionScope.getTable());
@@ -91,16 +91,15 @@ public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table,
                                 close(checks);
                             }
                         }
-
                     }
                 }
         );
     }
 
-    private void inspect(InspectionContext inspectionContext, ResultSet autoIncrement) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+    private void inspect(InspectionContext context, ResultSet autoIncrement) throws SQLException {
+        InspectionResults results = context.getInspectionResults();
         if (autoIncrement.next()) {
-            Table table = addTable(inspectionResults,
+            Table table = addTable(results,
                     autoIncrement.getString("TABLE_CATALOG"), autoIncrement.getString("TABLE_SCHEMA"),
                     autoIncrement.getString("TABLE_NAME"));
             Sequence sequence = new AutoIncrement();
@@ -112,7 +111,7 @@ public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table,
             column.setAutoIncrement(true);
             column.setSequence(sequence);
 
-            inspectionResults.addObject(sequence);
+            results.addObject(sequence);
         }
     }
 

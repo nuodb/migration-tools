@@ -34,8 +34,8 @@ public class MetaDataHandlerBase implements MetaDataHandler {
 
     private final MetaDataType objectType;
 
-    public MetaDataHandlerBase(Class<? extends MetaData> typeClass) {
-        this.objectType = new MetaDataType(typeClass);
+    public MetaDataHandlerBase(Class<? extends MetaData> objectClass) {
+        this.objectType = new MetaDataType(objectClass);
     }
 
     public MetaDataHandlerBase(MetaDataType objectType) {

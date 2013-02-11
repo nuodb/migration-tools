@@ -63,8 +63,8 @@ public class SimpleTableInspector extends TableInspectorBase<Schema, TableInspec
 
     @Override
     protected void inspectScopes(InspectionContext inspectionContext,
-                                 Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
+                                 Collection<? extends TableInspectionScope> scopes) throws SQLException {
+        for (TableInspectionScope inspectionScope : scopes) {
             InspectionResults inspectionResults = inspectionContext.getInspectionResults();
             DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
             ResultSet tables = databaseMetaData.getTables(

@@ -74,7 +74,7 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -86,7 +86,7 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
+                        for (TableInspectionScope inspectionScope : scopes) {
                             statement.setString(1, inspectionScope.getSchema());
                             statement.setString(2, inspectionScope.getTable());
                             ResultSet columns = statement.executeQuery();
@@ -102,14 +102,14 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
     }
 
     private void inspect(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        JdbcTypeRegistry jdbcTypeRegistry = inspectionContext.getDialect().getJdbcTypeRegistry();
+        InspectionResults results = inspectionContext.getInspectionResults();
+        JdbcTypeRegistry typeRegistry = inspectionContext.getDialect().getJdbcTypeRegistry();
         while (columns.next()) {
-            Table table = InspectionResultsUtils.addTable(inspectionResults, null, columns.getString("SCHEMA"),
+            Table table = InspectionResultsUtils.addTable(results, null, columns.getString("SCHEMA"),
                     columns.getString("TABLENAME"));
 
             Column column = table.createColumn(columns.getString("FIELD"));
-            JdbcTypeDesc typeDescAlias = jdbcTypeRegistry.getJdbcTypeDescAlias(
+            JdbcTypeDesc typeDescAlias = typeRegistry.getJdbcTypeDescAlias(
                     columns.getInt("JDBCTYPE"), columns.getString("NAME"));
             column.setTypeCode(typeDescAlias.getTypeCode());
             column.setTypeName(typeDescAlias.getTypeName());
@@ -124,7 +124,7 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
             column.setNullable(columns.getInt("FLAGS") == 0);
             column.setAutoIncrement(columns.getString("GENERATOR_SEQUENCE") != null);
 
-            inspectionResults.addObject(column);
+            results.addObject(column);
         }
     }
 

@@ -59,8 +59,8 @@ public class IdentifiableNamingStrategy<T extends Identifiable> extends MetaData
     public String getQualifiedName(T identifiable, ScriptGeneratorContext scriptGeneratorContext, boolean normalize) {
         Dialect dialect = normalize ? scriptGeneratorContext.getDialect() : null;
         String name = getIdentifiableName(identifiable, scriptGeneratorContext);
-        return IdentifiableBase.getQualifiedName(dialect, scriptGeneratorContext.getCatalog(),
-                scriptGeneratorContext.getSchema(), name, identifiable);
+        return IdentifiableBase.getQualifiedName(dialect, scriptGeneratorContext.getTargetCatalog(),
+                scriptGeneratorContext.getTargetSchema(), name, identifiable);
     }
 
     protected String getIdentifiableName(T identifiable, ScriptGeneratorContext scriptGeneratorContext) {

@@ -33,6 +33,7 @@ import com.nuodb.migration.jdbc.metadata.MetaDataType;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
@@ -45,11 +46,13 @@ public interface InspectionContext {
 
     InspectionResults getInspectionResults();
 
-    void inspect(InspectionScope inspectionScope) throws SQLException;
+    void inspect(InspectionScope scope) throws SQLException;
 
-    void inspect(InspectionScope inspectionScope, MetaDataType[] metaDataTypes) throws SQLException;
+    void inspect(InspectionScope scope, MetaDataType... objectTypes) throws SQLException;
 
-    void inspect(MetaData metaData) throws SQLException;
+    void inspect(MetaData object) throws SQLException;
 
-    void inspect(MetaData metaData, MetaDataType[] metaDataTypes) throws SQLException;
+    void inspect(MetaData object, MetaDataType... objectTypes) throws SQLException;
+
+    void inspect(Collection<MetaData> objects, MetaDataType... objectTypes) throws SQLException;
 }

@@ -69,7 +69,7 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -81,7 +81,7 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
+                        for (TableInspectionScope inspectionScope : scopes) {
                             statement.setString(1, inspectionScope.getCatalog());
                             statement.setString(2, inspectionScope.getSchema());
                             statement.setString(3, inspectionScope.getTable());
@@ -102,8 +102,7 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (checks.next()) {
             Table table = addTable(inspectionResults,
-                    checks.getString("TABLE_CATALOG"), checks.getString("TABLE_SCHEMA"),
-                    checks.getString("TABLE_NAME"));
+                    checks.getString("TABLE_CATALOG"), checks.getString("TABLE_SCHEMA"), checks.getString("TABLE_NAME"));
             Check check = new Check(checks.getString("CONSTRAINT_NAME"));
             check.setClause(checks.getString("CHECK_CLAUSE"));
             table.addCheck(check);

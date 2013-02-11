@@ -41,6 +41,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.nuodb.migration.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migration.jdbc.metadata.inspector.NuoDBIndex.*;
 import static com.nuodb.migration.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
@@ -69,7 +70,7 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -82,7 +83,7 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
+                        for (TableInspectionScope inspectionScope : scopes) {
                             statement.setString(1, inspectionScope.getSchema());
                             statement.setString(2, inspectionScope.getTable());
                             inspect(inspectionContext, statement.executeQuery());
@@ -93,11 +94,9 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
     }
 
     protected void inspect(InspectionContext inspectionContext, ResultSet indexes) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        InspectionResults results = inspectionContext.getInspectionResults();
         while (indexes.next()) {
-            Table table = InspectionResultsUtils.addTable(inspectionResults, null, indexes.getString("SCHEMA"),
-                    indexes.getString("TABLENAME"));
-
+            Table table = addTable(results, null, indexes.getString("SCHEMA"), indexes.getString("TABLENAME"));
             Identifier identifier = Identifier.valueOf(indexes.getString("INDEXNAME"));
             Index index = table.getIndex(identifier);
             if (index == null) {
@@ -106,7 +105,7 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
             }
             index.addColumn(table.createColumn(indexes.getString("FIELD")), indexes.getInt("POSITION"));
 
-            inspectionResults.addObject(index);
+            results.addObject(index);
         }
     }
 

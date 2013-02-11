@@ -108,9 +108,8 @@ public class OracleCheckInspector extends InspectorBase<Table, TableInspectionSc
     }
 
     @Override
-    public void inspectScope(InspectionContext inspectionContext,
-                             TableInspectionScope inspectionScope) throws SQLException {
-        throw new InspectorException("Not yet implemented");
+    public void inspectScope(InspectionContext inspectionContext, TableInspectionScope inspectionScope) throws SQLException {
+        throw new InspectorException("Not implemented yet");
     }
 
     @Override

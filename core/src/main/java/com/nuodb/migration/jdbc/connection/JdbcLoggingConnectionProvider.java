@@ -252,4 +252,9 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
             return invokeTarget(method, args);
         }
     }
+
+    @Override
+    public String toString() {
+        return connectionProvider.toString();
+    }
 }

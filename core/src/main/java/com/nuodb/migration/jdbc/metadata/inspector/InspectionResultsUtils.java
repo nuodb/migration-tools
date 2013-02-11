@@ -34,50 +34,49 @@ import com.nuodb.migration.jdbc.metadata.*;
  */
 public class InspectionResultsUtils {
 
-    public static Database addDatabase(InspectionResults inspectionResults) {
-        Database database = inspectionResults.getObject(MetaDataType.DATABASE);
+    public static Database addDatabase(InspectionResults results) {
+        Database database = results.getObject(MetaDataType.DATABASE);
         if (database == null) {
-            inspectionResults.addObject(database = new Database());
+            results.addObject(database = new Database());
         }
         return database;
     }
 
-    public static Catalog addCatalog(InspectionResults inspectionResults, String catalogName) {
-        Database database = addDatabase(inspectionResults);
+    public static Catalog addCatalog(InspectionResults results, String catalogName) {
+        Database database = addDatabase(results);
         Catalog catalog;
         Identifier catalogId = Identifier.valueOf(catalogName);
         if (database.hasCatalog(catalogId)) {
             catalog = database.getCatalog(catalogId);
         } else {
             catalog = database.addCatalog(catalogId);
-            inspectionResults.addObject(catalog);
+            results.addObject(catalog);
         }
         return catalog;
     }
 
-    public static Schema addSchema(InspectionResults inspectionResults, String catalogName, String schemaName) {
-        Catalog catalog = addCatalog(inspectionResults, catalogName);
+    public static Schema addSchema(InspectionResults results, String catalogName, String schemaName) {
+        Catalog catalog = addCatalog(results, catalogName);
         Schema schema;
         Identifier schemaId = Identifier.valueOf(schemaName);
         if (catalog.hasSchema(schemaId)) {
             schema = catalog.getSchema(schemaId);
         } else {
             schema = catalog.addSchema(schemaId);
-            inspectionResults.addObject(schema);
+            results.addObject(schema);
         }
         return schema;
     }
 
-    public static Table addTable(InspectionResults inspectionResults, String catalogName, String schemaName,
-                                 String tableName) {
-        Schema schema = addSchema(inspectionResults, catalogName, schemaName);
+    public static Table addTable(InspectionResults results, String catalogName, String schemaName, String tableName) {
+        Schema schema = addSchema(results, catalogName, schemaName);
         Table table;
         Identifier tableId = Identifier.valueOf(tableName);
         if (schema.hasTable(tableId)) {
             table = schema.getTable(tableId);
         } else {
             table = schema.addTable(tableId);
-            inspectionResults.addObject(table);
+            results.addObject(table);
         }
         return table;
     }

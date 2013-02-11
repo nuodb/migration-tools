@@ -36,7 +36,7 @@ import java.util.Map;
 import static com.nuodb.migration.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 
-public class Catalog extends IdentifiableBase implements HasTables {
+public class Catalog extends IdentifiableBase implements HasSchemas {
 
     private Map<Identifier, Schema> schemas = Maps.newLinkedHashMap();
     private Database database;

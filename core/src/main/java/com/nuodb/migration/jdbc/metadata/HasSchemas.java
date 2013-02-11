@@ -25,26 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.spec;
+package com.nuodb.migration.jdbc.metadata;
 
-public class ConnectionSpecBase extends SpecBase implements ConnectionSpec {
+import java.util.Collection;
 
-    private String catalog;
-    private String schema;
+/**
+ * @author Sergey Bushik
+ */
+public interface HasSchemas extends HasTables {
 
-    public String getCatalog() {
-        return catalog;
-    }
-
-    public void setCatalog(String catalog) {
-        this.catalog = catalog;
-    }
-
-    public String getSchema() {
-        return schema;
-    }
-
-    public void setSchema(String schema) {
-        this.schema = schema;
-    }
+    Collection<Schema> getSchemas();
 }

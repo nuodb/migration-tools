@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.jdbc.metadata.generator;
 
-import com.nuodb.migration.jdbc.metadata.MetaDataHandlerBase;
 import com.nuodb.migration.jdbc.metadata.MetaData;
+import com.nuodb.migration.jdbc.metadata.MetaDataHandlerBase;
 
 import java.util.Collection;
 
@@ -42,18 +42,18 @@ import static java.util.Collections.emptySet;
  */
 public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHandlerBase implements ScriptGenerator<T> {
 
-    protected ScriptGeneratorBase(Class<T> metaDataType) {
-        super(metaDataType);
+    protected ScriptGeneratorBase(Class<T> objectClass) {
+        super(objectClass);
     }
 
     @Override
     public Collection<String> getScripts(T object, ScriptGeneratorContext scriptGeneratorContext) {
         Collection<String> scripts;
-        if (isGenerateScript(DROP, scriptGeneratorContext) && isGenerateScript(CREATE, scriptGeneratorContext)) {
+        if (isGenerateScript(scriptGeneratorContext, DROP) && isGenerateScript(scriptGeneratorContext, CREATE)) {
             scripts = getDropCreateScripts(object, scriptGeneratorContext);
-        } else if (isGenerateScript(DROP, scriptGeneratorContext)) {
+        } else if (isGenerateScript(scriptGeneratorContext, DROP)) {
             scripts = getDropScripts(object, scriptGeneratorContext);
-        } else if (isGenerateScript(CREATE, scriptGeneratorContext)) {
+        } else if (isGenerateScript(scriptGeneratorContext, CREATE)) {
             scripts = getCreateScripts(object, scriptGeneratorContext);
         } else {
             scripts = emptySet();
@@ -61,18 +61,18 @@ public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHa
         return scripts;
     }
 
-    protected abstract Collection<String> getDropScripts(T metaData, ScriptGeneratorContext scriptGeneratorContext);
+    protected abstract Collection<String> getDropScripts(T object, ScriptGeneratorContext scriptGeneratorContext);
 
-    protected abstract Collection<String> getCreateScripts(T metaData, ScriptGeneratorContext scriptGeneratorContext);
+    protected abstract Collection<String> getCreateScripts(T object, ScriptGeneratorContext scriptGeneratorContext);
 
-    protected Collection<String> getDropCreateScripts(T metaData, ScriptGeneratorContext scriptGeneratorContext) {
+    protected Collection<String> getDropCreateScripts(T object, ScriptGeneratorContext scriptGeneratorContext) {
         Collection<String> scripts = newArrayList();
-        scripts.addAll(getDropScripts(metaData, scriptGeneratorContext));
-        scripts.addAll(getCreateScripts(metaData, scriptGeneratorContext));
+        scripts.addAll(getDropScripts(object, scriptGeneratorContext));
+        scripts.addAll(getCreateScripts(object, scriptGeneratorContext));
         return scripts;
     }
 
-    protected boolean isGenerateScript(ScriptType scriptType, ScriptGeneratorContext scriptGeneratorContext) {
+    protected boolean isGenerateScript(ScriptGeneratorContext scriptGeneratorContext, ScriptType scriptType) {
         Collection<ScriptType> scriptTypes = scriptGeneratorContext.getScriptTypes();
         return scriptTypes != null && scriptTypes.contains(scriptType);
     }

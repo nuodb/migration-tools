@@ -27,8 +27,6 @@
  */
 package com.nuodb.migration.jdbc.connection;
 
-import com.nuodb.migration.jdbc.url.JdbcUrl;
-import com.nuodb.migration.jdbc.url.JdbcUrlParserUtils;
 import com.nuodb.migration.spec.JdbcConnectionSpec;
 import com.nuodb.migration.utils.ReflectionUtils;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -45,7 +43,6 @@ import static java.lang.String.format;
 public class JdbcConnectionProvider extends DataSourceConnectionProvider {
 
     private JdbcConnectionSpec jdbcConnectionSpec;
-    private JdbcUrl jdbcUrl;
     private Boolean autoCommit;
     private Integer transactionIsolation;
 
@@ -60,28 +57,18 @@ public class JdbcConnectionProvider extends DataSourceConnectionProvider {
     public JdbcConnectionProvider(JdbcConnectionSpec jdbcConnectionSpec, Boolean autoCommit,
                                   Integer transactionIsolation) {
         this.jdbcConnectionSpec = jdbcConnectionSpec;
-        this.jdbcUrl = JdbcUrlParserUtils.getInstance().parse(
-                jdbcConnectionSpec.getUrl(), jdbcConnectionSpec.getProperties());
         this.autoCommit = autoCommit;
         this.transactionIsolation = transactionIsolation;
     }
 
     @Override
     public String getCatalog() {
-        String catalog = jdbcConnectionSpec.getCatalog();
-        if (catalog == null && jdbcUrl != null) {
-            catalog = jdbcUrl.getCatalog();
-        }
-        return catalog;
+        return jdbcConnectionSpec.getCatalog();
     }
 
     @Override
     public String getSchema() {
-        String schema = jdbcConnectionSpec.getSchema();
-        if (schema == null && jdbcUrl != null) {
-            schema = jdbcUrl.getSchema();
-        }
-        return schema;
+        return jdbcConnectionSpec.getSchema();
     }
 
     protected DataSource createDataSource() throws SQLException {

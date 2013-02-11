@@ -25,26 +25,53 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.spec;
+package com.nuodb.migration.jdbc.url;
 
-public class ConnectionSpecBase extends SpecBase implements ConnectionSpec {
+import java.util.Map;
 
-    private String catalog;
-    private String schema;
+import static org.apache.commons.lang3.StringUtils.*;
 
-    public String getCatalog() {
-        return catalog;
+/**
+ * @author Sergey Bushik
+ */
+public class MySQLJdbcUrlParser implements JdbcUrlParser {
+
+    @Override
+    public boolean canParse(String url) {
+        return startsWith(url, "jdbc:mysql");
     }
 
-    public void setCatalog(String catalog) {
-        this.catalog = catalog;
+    @Override
+    public JdbcUrl parse(String url, Map<String, Object> overrides) {
+        return new MySQLJdbcUrl(url, overrides);
     }
 
-    public String getSchema() {
-        return schema;
-    }
+    class MySQLJdbcUrl extends JdbcUrlBase {
 
-    public void setSchema(String schema) {
-        this.schema = schema;
+        private final String catalog;
+
+        public MySQLJdbcUrl(String url, Map<String, Object> overrides) {
+            super(url);
+            int prefix = url.indexOf("://");
+            int parameters = 0;
+            if (prefix > 0 && (parameters = url.indexOf('?', prefix + 3)) > 0) {
+                parseParameters(getProperties(), url, parameters);
+            }
+            String base = parameters > 0 ? url.substring(0, parameters) : url;
+            catalog = substringAfterLast(base, "/");
+            if (overrides != null) {
+                getProperties().putAll(overrides);
+            }
+        }
+
+        @Override
+        public String getCatalog() {
+            return catalog;
+        }
+
+        @Override
+        public String getSchema() {
+            return null;
+        }
     }
 }

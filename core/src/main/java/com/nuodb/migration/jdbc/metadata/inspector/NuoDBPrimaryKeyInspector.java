@@ -41,6 +41,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.nuodb.migration.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migration.jdbc.metadata.inspector.NuoDBIndex.PRIMARY_KEY;
 import static com.nuodb.migration.jdbc.metadata.inspector.NuoDBIndex.createQuery;
 import static com.nuodb.migration.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
@@ -70,7 +71,7 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -83,7 +84,7 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
+                        for (TableInspectionScope inspectionScope : scopes) {
                             statement.setString(1, inspectionScope.getSchema());
                             statement.setString(2, inspectionScope.getTable());
                             inspect(inspectionContext, statement.executeQuery());
@@ -93,11 +94,10 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
         );
     }
 
-    private void inspect(InspectionContext inspectionContext, ResultSet primaryKeys) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+    private void inspect(InspectionContext context, ResultSet primaryKeys) throws SQLException {
+        InspectionResults results = context.getInspectionResults();
         while (primaryKeys.next()) {
-            Table table = InspectionResultsUtils.addTable(inspectionResults, null, primaryKeys.getString("SCHEMA"),
-                    primaryKeys.getString("TABLENAME"));
+            Table table = addTable(results, null, primaryKeys.getString("SCHEMA"), primaryKeys.getString("TABLENAME"));
 
             final Identifier identifier = Identifier.valueOf(primaryKeys.getString("INDEXNAME"));
             PrimaryKey primaryKey = table.getPrimaryKey();

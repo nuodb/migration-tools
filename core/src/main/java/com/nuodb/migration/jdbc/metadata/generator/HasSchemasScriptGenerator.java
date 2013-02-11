@@ -25,26 +25,40 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.spec;
+package com.nuodb.migration.jdbc.metadata.generator;
 
-public class ConnectionSpecBase extends SpecBase implements ConnectionSpec {
+import com.nuodb.migration.jdbc.metadata.*;
+import org.apache.commons.lang3.ObjectUtils;
 
-    private String catalog;
-    private String schema;
+/**
+ * @author Sergey Bushik
+ */
+public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchemas> {
 
-    public String getCatalog() {
-        return catalog;
+    public HasSchemasScriptGenerator() {
+        super(HasSchemas.class);
     }
 
-    public void setCatalog(String catalog) {
-        this.catalog = catalog;
+    protected HasTables getTables(ScriptGeneratorContext scriptGeneratorContext, HasSchemas schemas) {
+        HasTablesAdapter tables = new HasTablesAdapter(getObjectType());
+        for (Schema schema : schemas.getSchemas()) {
+            if (isGenerateSchema(scriptGeneratorContext, schema)) {
+                tables.addTables(schema);
+            }
+        }
+        return tables;
     }
 
-    public String getSchema() {
-        return schema;
-    }
-
-    public void setSchema(String schema) {
-        this.schema = schema;
+    protected boolean isGenerateSchema(ScriptGeneratorContext scriptGeneratorContext, Schema schema) {
+        boolean generate = true;
+        Identifier catalogId = Identifier.valueOf(scriptGeneratorContext.getSourceCatalog());
+        if (catalogId != null) {
+            generate = ObjectUtils.equals(catalogId, schema.getCatalog().getIdentifier());
+        }
+        Identifier schemaId = Identifier.valueOf(scriptGeneratorContext.getSourceSchema());
+        if (generate && schemaId != null) {
+            generate = ObjectUtils.equals(schemaId, schema.getIdentifier());
+        }
+        return generate;
     }
 }

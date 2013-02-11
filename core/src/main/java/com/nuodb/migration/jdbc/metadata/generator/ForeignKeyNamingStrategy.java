@@ -45,9 +45,9 @@ public class ForeignKeyNamingStrategy extends IdentifiableNamingStrategy<Foreign
         buffer.append('_');
 
         StringBuilder qualifier = new StringBuilder();
-        qualifier.append(scriptGeneratorContext.getName(foreignKey.getPrimaryTable(), false));
+        qualifier.append(scriptGeneratorContext.getQualifiedName(foreignKey.getPrimaryTable(), false));
         qualifier.append(' ');
-        qualifier.append(scriptGeneratorContext.getName(foreignKey.getForeignTable(), false));
+        qualifier.append(scriptGeneratorContext.getQualifiedName(foreignKey.getForeignTable(), false));
 
         buffer.append(md5Hex(qualifier.toString()));
         return buffer.toString();

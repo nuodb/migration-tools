@@ -30,6 +30,8 @@ package com.nuodb.migration.jdbc.metadata.generator;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.ForeignKey;
+import com.nuodb.migration.jdbc.metadata.Schema;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -85,7 +87,8 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
         }
         buffer.append(")");
         buffer.append(" REFERENCES ");
-        buffer.append(scriptGeneratorContext.getName(foreignKey.getForeignTable()));
+        buffer.append(getForeignScriptGeneratorContext(foreignKey, scriptGeneratorContext).getQualifiedName(
+                foreignKey.getForeignTable()));
         buffer.append(" (");
         for (Iterator<Column> iterator = foreignKey.getTargetColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
@@ -106,5 +109,27 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
             buffer.append(deleteAction);
         }
         return buffer.toString();
+    }
+
+    /**
+     * Fixes cross database foreign keys generation https://github.com/nuodb/migration-tools/issues/3
+     *
+     * @param foreignKey             to create foreign script generator context
+     * @param scriptGeneratorContext current script generator context used for the session
+     * @return source context if primary and foreign schemas are equals or changes target schema & catalog name to
+     *         foreign table schema & catalog.
+     */
+    protected ScriptGeneratorContext getForeignScriptGeneratorContext(ForeignKey foreignKey,
+                                                                      ScriptGeneratorContext scriptGeneratorContext) {
+        Schema primarySchema = foreignKey.getPrimaryTable().getSchema();
+        Schema foreignSchema = foreignKey.getForeignTable().getSchema();
+        if (ObjectUtils.equals(primarySchema, foreignSchema)) {
+            return scriptGeneratorContext;
+        } else {
+            ScriptGeneratorContext foreignScriptGeneratorContext = new ScriptGeneratorContext(scriptGeneratorContext);
+            foreignScriptGeneratorContext.setTargetCatalog(foreignSchema.getCatalog().getName());
+            foreignScriptGeneratorContext.setTargetSchema(foreignSchema.getName());
+            return foreignScriptGeneratorContext;
+        }
     }
 }

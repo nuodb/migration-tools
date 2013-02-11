@@ -54,7 +54,7 @@ public class ConnectionScriptExporter extends CountingScriptExporter {
     @Override
     protected void doOpen() throws Exception {
         if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Exporting scripts to the database %s", connectionServices));
+            logger.debug(String.format("Exporting scripts to %s", connectionServices));
         }
         connection = connectionServices.getConnection();
         statement = connection.createStatement();

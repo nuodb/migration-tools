@@ -72,8 +72,8 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
+                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
+        for (TableInspectionScope inspectionScope : scopes) {
             final StringBuilder query = new StringBuilder(QUERY_TABLE);
             Collection<String> filters = Lists.newArrayList();
             final Collection<String> parameters = Lists.newArrayList();
@@ -117,8 +117,7 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         Map<Table, AutoIncrement> autoIncrement = Maps.newHashMap();
         while (tables.next()) {
-            Table table = addTable(inspectionResults,
-                    tables.getString("TABLE_SCHEMA"), null, tables.getString("TABLE_NAME"));
+            Table table = addTable(inspectionResults, tables.getString("TABLE_SCHEMA"), null, tables.getString("TABLE_NAME"));
             AutoIncrement sequence = new AutoIncrement();
             sequence.setLastValue(tables.getLong("AUTO_INCREMENT"));
             autoIncrement.put(table, sequence);

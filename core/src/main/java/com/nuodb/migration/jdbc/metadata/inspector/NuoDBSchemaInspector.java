@@ -61,14 +61,12 @@ public class NuoDBSchemaInspector extends InspectorBase<Catalog, SchemaInspectio
     }
 
     @Override
-    public void inspectObjects(InspectionContext inspectionContext,
-                               Collection<? extends Catalog> catalogs) throws SQLException {
+    public void inspectObjects(InspectionContext inspectionContext, Collection<? extends Catalog> catalogs) throws SQLException {
         inspectScope(inspectionContext, new SchemaInspectionScope());
     }
 
     @Override
-    public void inspectScope(final InspectionContext inspectionContext,
-                             final SchemaInspectionScope inspectionScope) throws SQLException {
+    public void inspectScope(final InspectionContext inspectionContext, final SchemaInspectionScope inspectionScope) throws SQLException {
         validateInspectionScope(inspectionScope);
 
         final Collection<String> filters = newArrayList();

@@ -53,7 +53,7 @@ public class MetaDataType implements Comparable<MetaDataType> {
     public static final MetaDataType AUTO_INCREMENT = new MetaDataType(AutoIncrement.class);
     public static final MetaDataType CHECK = new MetaDataType(Check.class);
 
-    private Class<? extends MetaData> typeClass;
+    private Class<? extends MetaData> objectType;
 
     public static final Map<String, MetaDataType> NAME_TYPE_MAP = getNameTypeMap();
 
@@ -76,17 +76,17 @@ public class MetaDataType implements Comparable<MetaDataType> {
         return nameTypeMap;
     }
 
-    public MetaDataType(Class<? extends MetaData> typeClass) {
-        isNotNull(typeClass, "Type class is required");
-        this.typeClass = typeClass;
+    public MetaDataType(Class<? extends MetaData> objectType) {
+        isNotNull(objectType, "Type class is required");
+        this.objectType = objectType;
     }
 
-    public Class<? extends MetaData> getTypeClass() {
-        return typeClass;
+    public Class<? extends MetaData> getObjectType() {
+        return objectType;
     }
 
     public boolean isAssignableFrom(MetaDataType metaDataType) {
-        return typeClass.isAssignableFrom(metaDataType.getTypeClass());
+        return objectType.isAssignableFrom(metaDataType.getObjectType());
     }
 
     @Override
@@ -94,25 +94,25 @@ public class MetaDataType implements Comparable<MetaDataType> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MetaDataType that = (MetaDataType) o;
-        if (!typeClass.equals(that.typeClass)) return false;
+        if (!objectType.equals(that.objectType)) return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        return typeClass.hashCode();
+        return objectType.hashCode();
     }
 
     public int compareTo(MetaDataType that) {
-        if (typeClass.equals(that.getTypeClass())) {
+        if (objectType.equals(that.getObjectType())) {
             return 0;
         } else {
-            return typeClass.isAssignableFrom(that.getTypeClass()) ? 1 : -1;
+            return objectType.isAssignableFrom(that.getObjectType()) ? 1 : -1;
         }
     }
 
     @Override
     public String toString() {
-        return getTypeClass().getName();
+        return getObjectType().getName();
     }
 }

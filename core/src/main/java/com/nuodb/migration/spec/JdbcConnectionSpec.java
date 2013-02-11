@@ -28,9 +28,12 @@
 package com.nuodb.migration.spec;
 
 import com.google.common.collect.Maps;
+import com.nuodb.migration.jdbc.url.JdbcUrl;
 
 import java.sql.Driver;
 import java.util.Map;
+
+import static com.nuodb.migration.jdbc.url.JdbcUrlParserUtils.getInstance;
 
 public class JdbcConnectionSpec extends ConnectionSpecBase {
 
@@ -40,6 +43,31 @@ public class JdbcConnectionSpec extends ConnectionSpecBase {
     private String username;
     private String password;
     private Map<String, Object> properties = Maps.newHashMap();
+
+    @Override
+    public String getCatalog() {
+        String schema;
+        JdbcUrl jdbcUrl;
+        if ((schema = super.getCatalog()) == null && (jdbcUrl = getJdbcUrl()) != null) {
+            schema = jdbcUrl.getCatalog();
+        }
+        return schema;
+    }
+
+    @Override
+    public String getSchema() {
+        String schema;
+        JdbcUrl jdbcUrl;
+        if ((schema = super.getSchema()) == null && (jdbcUrl = getJdbcUrl()) != null) {
+            schema = jdbcUrl.getSchema();
+        }
+        return schema;
+    }
+
+    public JdbcUrl getJdbcUrl() {
+        return getInstance().parse(url, properties);
+    }
+
 
     public Driver getDriver() {
         return driver;

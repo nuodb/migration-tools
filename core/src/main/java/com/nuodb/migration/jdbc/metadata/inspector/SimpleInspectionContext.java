@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import static com.nuodb.migration.jdbc.metadata.MetaDataHandlerUtils.findMetaDataHandler;
 import static java.lang.String.format;
@@ -43,6 +44,7 @@ import static java.lang.String.format;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public class SimpleInspectionContext implements InspectionContext {
 
     protected final transient Logger logger = LoggerFactory.getLogger(getClass());
@@ -50,10 +52,6 @@ public class SimpleInspectionContext implements InspectionContext {
     private InspectionManager inspectionManager;
     private InspectionResults inspectionResults;
     private MetaDataType[] objectTypes;
-
-    public SimpleInspectionContext(InspectionManager inspectionManager, MetaDataType[] objectTypes) {
-        this(inspectionManager, objectTypes, new SimpleInspectionResults());
-    }
 
     public SimpleInspectionContext(InspectionManager inspectionManager, MetaDataType[] objectTypes,
                                    InspectionResults inspectionResults) {
@@ -84,19 +82,19 @@ public class SimpleInspectionContext implements InspectionContext {
     }
 
     @Override
-    public void inspect(InspectionScope inspectionScope) throws SQLException {
-        inspect(inspectionScope, objectTypes);
+    public void inspect(InspectionScope scope) throws SQLException {
+        inspect(scope, objectTypes);
     }
 
     @Override
-    public void inspect(InspectionScope inspectionScope, MetaDataType[] objectTypes) throws SQLException {
+    public void inspect(InspectionScope scope, MetaDataType... objectTypes) throws SQLException {
         for (MetaDataType objectType : objectTypes) {
             if (logger.isDebugEnabled()) {
-                logger.debug(format("Inspecting meta data %s", objectType));
+                logger.debug(format("Inspecting %s", objectType));
             }
             Inspector inspector = findMetaDataHandler(inspectionManager.getInspectors(), objectType);
-            if (inspector.supports(this, inspectionScope)) {
-                inspector.inspectScope(this, inspectionScope);
+            if (inspector.supports(this, scope)) {
+                inspector.inspectScope(this, scope);
             } else {
                 inspector.inspect(this);
             }
@@ -104,14 +102,18 @@ public class SimpleInspectionContext implements InspectionContext {
     }
 
     @Override
-    public void inspect(MetaData object, MetaDataType[] objectTypes) throws SQLException {
+    public void inspect(MetaData object, MetaDataType... objectTypes) throws SQLException {
         for (MetaDataType objectType : objectTypes) {
             Inspector inspector = findMetaDataHandler(inspectionManager.getInspectors(), objectType);
-            if (inspector.supports(object)) {
-                inspector.inspectObject(this, object);
-            } else {
-                inspector.inspect(this);
-            }
+            inspector.inspectObject(this, object);
+        }
+    }
+
+    @Override
+    public void inspect(Collection<MetaData> objects, MetaDataType... objectTypes) throws SQLException {
+        for (MetaDataType objectType : objectTypes) {
+            Inspector inspector = findMetaDataHandler(inspectionManager.getInspectors(), objectType);
+            inspector.inspectObjects(this, objects);
         }
     }
 }

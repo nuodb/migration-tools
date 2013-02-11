@@ -50,8 +50,11 @@ import static com.nuodb.migration.jdbc.metadata.generator.ScriptType.DROP;
 public class ScriptGeneratorContext {
 
     private Dialect dialect;
-    private String catalog;
-    private String schema;
+    private String sourceCatalog;
+    private String sourceSchema;
+    private String targetCatalog;
+    private String targetSchema;
+
     private Map<String, Object> attributes = newHashMap();
     private PriorityList<NamingStrategy<? extends MetaData>> namingStrategies =
             new SimplePriorityList<NamingStrategy<? extends MetaData>>();
@@ -62,7 +65,8 @@ public class ScriptGeneratorContext {
     private Collection<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
 
     public ScriptGeneratorContext() {
-        addScriptGenerator(new DatabaseScriptGenerator());
+        addScriptGenerator(new HasTablesScriptGenerator(), Priority.LOW);
+        addScriptGenerator(new HasSchemasScriptGenerator());
         addScriptGenerator(new TableScriptGenerator());
         addScriptGenerator(new SequenceScriptGenerator());
         addScriptGenerator(new PrimaryScriptGenerator());
@@ -77,12 +81,14 @@ public class ScriptGeneratorContext {
 
     public ScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
         dialect = scriptGeneratorContext.getDialect();
-        catalog = scriptGeneratorContext.getCatalog();
-        schema = scriptGeneratorContext.getSchema();
+        sourceCatalog = scriptGeneratorContext.getSourceCatalog();
+        sourceSchema = scriptGeneratorContext.getSourceSchema();
+        targetCatalog = scriptGeneratorContext.getTargetCatalog();
+        targetSchema = scriptGeneratorContext.getTargetSchema();
 
-        attributes.putAll(scriptGeneratorContext.getAttributes());
-        scriptTypes.addAll(scriptGeneratorContext.getScriptTypes());
-        metaDataTypes.addAll(scriptGeneratorContext.getMetaDataTypes());
+        attributes = newHashMap(scriptGeneratorContext.getAttributes());
+        scriptTypes = newHashSet(scriptGeneratorContext.getScriptTypes());
+        metaDataTypes = newHashSet(scriptGeneratorContext.getMetaDataTypes());
 
         namingStrategies.addAll(scriptGeneratorContext.getNamingStrategies());
         scriptGenerators.addAll(scriptGeneratorContext.getScriptGenerators());
@@ -145,20 +151,36 @@ public class ScriptGeneratorContext {
         return getScriptGenerator(object).getScripts(object, context);
     }
 
-    public String getCatalog() {
-        return catalog;
+    public String getSourceCatalog() {
+        return sourceCatalog;
     }
 
-    public void setCatalog(String catalog) {
-        this.catalog = catalog;
+    public void setSourceCatalog(String sourceCatalog) {
+        this.sourceCatalog = sourceCatalog;
     }
 
-    public String getSchema() {
-        return schema;
+    public String getSourceSchema() {
+        return sourceSchema;
     }
 
-    public void setSchema(String schema) {
-        this.schema = schema;
+    public void setSourceSchema(String sourceSchema) {
+        this.sourceSchema = sourceSchema;
+    }
+
+    public String getTargetCatalog() {
+        return targetCatalog;
+    }
+
+    public void setTargetCatalog(String targetCatalog) {
+        this.targetCatalog = targetCatalog;
+    }
+
+    public String getTargetSchema() {
+        return targetSchema;
+    }
+
+    public void setTargetSchema(String targetSchema) {
+        this.targetSchema = targetSchema;
     }
 
     public Dialect getDialect() {

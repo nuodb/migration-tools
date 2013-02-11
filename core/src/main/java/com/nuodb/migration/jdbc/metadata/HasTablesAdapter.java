@@ -25,26 +25,43 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.spec;
+package com.nuodb.migration.jdbc.metadata;
 
-public class ConnectionSpecBase extends SpecBase implements ConnectionSpec {
+import java.util.Collection;
 
-    private String catalog;
-    private String schema;
+import static com.google.common.collect.Lists.newArrayList;
 
-    public String getCatalog() {
-        return catalog;
+/**
+ * @author Sergey Bushik
+ */
+public class HasTablesAdapter implements HasTables {
+
+    private final MetaDataType objectType;
+    private final Collection<Table> tables = newArrayList();
+
+    public HasTablesAdapter(MetaDataType objectType) {
+        this.objectType = objectType;
     }
 
-    public void setCatalog(String catalog) {
-        this.catalog = catalog;
+    public void addTables(Table... tables)  {
+        addTables(newArrayList(tables));
     }
 
-    public String getSchema() {
-        return schema;
+    public void addTables(Collection<Table> tables)  {
+        this.tables.addAll(tables);
     }
 
-    public void setSchema(String schema) {
-        this.schema = schema;
+    public void addTables(HasTables tables)  {
+        this.tables.addAll(tables.getTables());
+    }
+
+    @Override
+    public Collection<Table> getTables() {
+        return tables;
+    }
+
+    @Override
+    public MetaDataType getObjectType() {
+        return objectType;
     }
 }

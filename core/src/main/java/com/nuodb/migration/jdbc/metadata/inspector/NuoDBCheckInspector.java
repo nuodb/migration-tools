@@ -78,7 +78,7 @@ public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspecti
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -90,7 +90,7 @@ public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspecti
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
+                        for (TableInspectionScope inspectionScope : scopes) {
                             statement.setString(1, inspectionScope.getSchema());
                             statement.setString(2, inspectionScope.getTable());
                             ResultSet checks = statement.executeQuery();
@@ -106,9 +106,9 @@ public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspecti
     }
 
     private void inspect(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        InspectionResults results = inspectionContext.getInspectionResults();
         while (checks.next()) {
-            Table table = addTable(inspectionResults, null, checks.getString("SCHEMA"), checks.getString("TABLENAME"));
+            Table table = addTable(results, null, checks.getString("SCHEMA"), checks.getString("TABLENAME"));
             String regex = Pattern.quote(table.getName() + "$constraint");
             Pattern pattern = Pattern.compile(regex + "\\d+");
 

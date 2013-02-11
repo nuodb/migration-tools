@@ -25,26 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.spec;
+package com.nuodb.migration.jdbc.url;
 
-public class ConnectionSpecBase extends SpecBase implements ConnectionSpec {
+import java.util.HashMap;
+import java.util.Map;
 
-    private String catalog;
-    private String schema;
+/**
+ * @author Sergey Bushik
+ */
+public abstract class JdbcUrlBase implements JdbcUrl {
 
-    public String getCatalog() {
-        return catalog;
+    private final String url;
+    private Map<String, Object> properties = new HashMap<String, Object>();
+
+    protected JdbcUrlBase(String url) {
+        this.url = url;
     }
 
-    public void setCatalog(String catalog) {
-        this.catalog = catalog;
+    @Override
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
-    public String getSchema() {
-        return schema;
+    public static void parseParameters(Map<String, Object> parameters, String url, int offset) {
+        String[] pairs = url.substring(offset + 1).split("&");
+        int length = pairs.length;
+        for (int i = 0; i < length; i++) {
+            String[] pair = pairs[i].split("=");
+            parameters.put(pair[0], pair.length > 1 ? pair[1] : null);
+        }
     }
 
-    public void setSchema(String schema) {
-        this.schema = schema;
+    @Override
+    public String toString() {
+        return url;
     }
 }

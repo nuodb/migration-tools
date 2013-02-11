@@ -69,7 +69,7 @@ public abstract class TableInspectorBase<M extends MetaData, T extends TableInsp
 
     protected abstract Collection<? extends T> createInspectionScopes(Collection<? extends M> objects);
 
-    protected abstract void inspectScopes(InspectionContext inspectionContext, Collection<? extends T> inspectionScopes) throws SQLException;
+    protected abstract void inspectScopes(InspectionContext inspectionContext, Collection<? extends T> scopes) throws SQLException;
 
     @Override
     public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) {

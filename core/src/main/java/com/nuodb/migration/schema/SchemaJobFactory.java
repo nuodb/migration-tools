@@ -27,24 +27,23 @@
  */
 package com.nuodb.migration.schema;
 
-import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migration.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migration.jdbc.metadata.generator.*;
 import com.nuodb.migration.jdbc.type.JdbcTypeNameMap;
-import com.nuodb.migration.job.JobExecutor;
-import com.nuodb.migration.job.JobExecutors;
 import com.nuodb.migration.job.JobFactory;
-import com.nuodb.migration.job.TraceJobExecutionListener;
-import com.nuodb.migration.spec.*;
+import com.nuodb.migration.spec.ConnectionSpec;
+import com.nuodb.migration.spec.JdbcTypeSpec;
+import com.nuodb.migration.spec.ResourceSpec;
+import com.nuodb.migration.spec.SchemaSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migration.jdbc.metadata.generator.DatabaseScriptGenerator.GROUP_SCRIPTS_BY;
+import static com.nuodb.migration.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migration.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER;
 import static com.nuodb.migration.jdbc.type.JdbcTypeSpecifiers.newSizePrecisionScale;
 import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
@@ -63,7 +62,7 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
 
     @Override
     public SchemaJob createJob() {
-        isNotNull(schemaSpec, "Generate schema spec is required");
+        isNotNull(schemaSpec, "Schema spec is required");
         SchemaJob schemaJob = new SchemaJob();
         schemaJob.setConnectionProvider(createConnectionProvider(schemaSpec.getSourceConnectionSpec()));
         schemaJob.setContext(createScriptGeneratorContext());
@@ -77,10 +76,10 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
     }
 
     protected ScriptGeneratorContext createScriptGeneratorContext() {
-        ScriptGeneratorContext context = new ScriptGeneratorContext();
-        context.getAttributes().put(GROUP_SCRIPTS_BY, getSchemaSpec().getGroupScriptsBy());
-        context.setMetaDataTypes(getSchemaSpec().getMetaDataTypes());
-        context.setScriptTypes(getSchemaSpec().getScriptTypes());
+        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext();
+        scriptGeneratorContext.getAttributes().put(GROUP_SCRIPTS_BY, getSchemaSpec().getGroupScriptsBy());
+        scriptGeneratorContext.setMetaDataTypes(getSchemaSpec().getMetaDataTypes());
+        scriptGeneratorContext.setScriptTypes(getSchemaSpec().getScriptTypes());
 
         NuoDBDialect dialect = new NuoDBDialect();
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
@@ -92,14 +91,18 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         }
         dialect.setIdentifierQuoting(getSchemaSpec().getIdentifierQuoting());
         dialect.setIdentifierNormalizer(getSchemaSpec().getIdentifierNormalizer());
-        context.setDialect(dialect);
+        scriptGeneratorContext.setDialect(dialect);
 
-        ConnectionSpec connectionSpec = getSchemaSpec().getTargetConnectionSpec();
-        if (connectionSpec != null) {
-            context.setCatalog(connectionSpec.getCatalog());
-            context.setSchema(connectionSpec.getSchema());
+        ConnectionSpec sourceConnectionSpec = getSchemaSpec().getSourceConnectionSpec();
+        scriptGeneratorContext.setSourceCatalog(sourceConnectionSpec.getCatalog());
+        scriptGeneratorContext.setSourceSchema(sourceConnectionSpec.getSchema());
+
+        ConnectionSpec targetConnectionSpec = getSchemaSpec().getTargetConnectionSpec();
+        if (targetConnectionSpec != null) {
+            scriptGeneratorContext.setTargetCatalog(targetConnectionSpec.getCatalog());
+            scriptGeneratorContext.setTargetSchema(targetConnectionSpec.getSchema());
         }
-        return context;
+        return scriptGeneratorContext;
     }
 
     protected ScriptExporter createScriptExporter() {
@@ -134,34 +137,5 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
 
     public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
         this.failOnEmptyScripts = failOnEmptyScripts;
-    }
-
-    public static void main(String[] args) {
-        SchemaJobFactory jobFactory = new SchemaJobFactory();
-        jobFactory.setSchemaSpec(new SchemaSpec() {
-            {
-                JdbcConnectionSpec sourceConnectionSpec = new JdbcConnectionSpec();
-                sourceConnectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
-                sourceConnectionSpec.setUrl("jdbc:mysql://localhost:3306/mysql");
-                sourceConnectionSpec.setUsername("root");
-
-                JdbcConnectionSpec targetConnectionSpec = new JdbcConnectionSpec();
-                targetConnectionSpec.setDriverClassName("com.nuodb.jdbc.Driver");
-                targetConnectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
-                targetConnectionSpec.setUsername("dba");
-                targetConnectionSpec.setPassword("goalie");
-                targetConnectionSpec.setSchema("hockey");
-
-                ResourceSpec outputSpec = new ResourceSpec();
-                outputSpec.setPath("/tmp/test/schema.sql");
-
-                setOutputSpec(outputSpec);
-                setSourceConnectionSpec(sourceConnectionSpec);
-                //setTargetConnectionSpec(targetConnectionSpec);
-            }
-        });
-        JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());
-        executor.addJobExecutionListener(new TraceJobExecutionListener());
-        executor.execute(Maps.<String, Object>newHashMap());
     }
 }
