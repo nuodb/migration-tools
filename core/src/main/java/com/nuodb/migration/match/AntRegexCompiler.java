@@ -45,6 +45,9 @@ public class AntRegexCompiler extends PatternCompilerBase {
 
     private static final String EMPTY = "";
 
+    private AntRegexCompiler() {
+    }
+
     @Override
     protected Pattern pattern(String regex) {
         if (regex == null) {

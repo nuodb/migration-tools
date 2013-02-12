@@ -111,7 +111,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
 
     protected <T> JdbcTypeAdapter<T> getJdbcTypeAdapter(Class valueClass, Class typeClass) {
         JdbcTypeAdapter jdbcTypeAdapter = null;
-        if (valueClass != null && !valueClass.isAssignableFrom(typeClass)) {
+        if (valueClass != null && !typeClass.isAssignableFrom(valueClass)) {
             jdbcTypeAdapter = getJdbcTypeAdapter(typeClass);
             if (jdbcTypeAdapter == null) {
                 throw new JdbcTypeException(

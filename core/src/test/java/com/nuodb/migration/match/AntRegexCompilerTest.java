@@ -9,15 +9,16 @@ public class AntRegexCompilerTest {
 
     @Test
     public void testMatcherCreation() throws Exception {
-        final Regex matcher = (new AntRegexCompiler()).compile(PATTERN);
+        RegexCompiler compiler = AntRegexCompiler.INSTANCE;
+        final Regex matcher = compiler.compile(PATTERN);
         Assert.assertNotNull(matcher);
-        Assert.assertNotNull((new AntRegexCompiler()).compile("*TEST*"));
+        Assert.assertNotNull(compiler.compile("*TEST*"));
         Assert.assertEquals(matcher.regex(), PATTERN);
     }
 
     @Test
     public void testMatch() throws Exception {
-        AntRegexCompiler compiler = new AntRegexCompiler();
+        RegexCompiler compiler = AntRegexCompiler.INSTANCE;
         Regex regex = compiler.compile(PATTERN);
         Assert.assertTrue(regex.test("TEST3"));
         Assert.assertTrue(regex.test("TEST"));
