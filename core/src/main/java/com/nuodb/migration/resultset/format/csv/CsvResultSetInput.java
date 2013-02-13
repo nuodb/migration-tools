@@ -78,7 +78,8 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
             if (getReader() != null) {
                 parser = new CSVParser(getReader(), format);
             } else if (getInputStream() != null) {
-                parser = new CSVParser(new InputStreamReader(getInputStream()), format);
+                String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, System.getProperty("file.encoding"));
+                parser = new CSVParser(new InputStreamReader(getInputStream(), encoding), format);
             }
         } catch (IOException exception) {
             throw new ResultSetInputException(exception);

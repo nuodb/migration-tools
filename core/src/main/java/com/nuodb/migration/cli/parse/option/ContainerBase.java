@@ -85,6 +85,7 @@ public abstract class ContainerBase extends OptionBase implements Container {
     @Override
     public Set<String> getPrefixes() {
         Set<String> prefixes = Sets.newHashSet();
+        prefixes.addAll(getOptionPrefixes());
         if (group != null) {
             prefixes.addAll(group.getPrefixes());
         }

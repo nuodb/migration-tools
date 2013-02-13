@@ -241,6 +241,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             optionFormat.setArgumentValuesSeparator(null);
 
             RegexOption generate = new RegexOption();
+            generate.setOptionFormat(getOptionFormat());
             generate.setName(SCHEMA_META_DATA_OPTION);
             generate.setDescription(getMessage(SCHEMA_META_DATA_OPTION_DESCRIPTION));
             generate.setOptionFormat(getOptionFormat());

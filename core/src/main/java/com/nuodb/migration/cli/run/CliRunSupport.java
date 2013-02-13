@@ -339,6 +339,7 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         optionFormat.setArgumentValuesSeparator(null);
 
         RegexOption attributes = new RegexOption();
+        attributes.setOptionFormat(getOptionFormat());
         attributes.setName(INPUT_OPTION);
         attributes.setDescription(getMessage(INPUT_OPTION_DESCRIPTION));
         attributes.setOptionFormat(optionFormat);

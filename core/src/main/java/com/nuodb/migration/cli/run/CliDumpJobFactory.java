@@ -109,6 +109,7 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
         optionFormat.setArgumentValuesSeparator(null);
 
         RegexOption tableFilter = new RegexOption();
+        tableFilter.setOptionFormat(getOptionFormat());
         tableFilter.setName(TABLE_FILTER_OPTION);
         tableFilter.setDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
         tableFilter.setOptionFormat(optionFormat);
