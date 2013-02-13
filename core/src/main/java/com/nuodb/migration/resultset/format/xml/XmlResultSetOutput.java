@@ -27,14 +27,17 @@
  */
 package com.nuodb.migration.resultset.format.xml;
 
-import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
 import com.nuodb.migration.resultset.format.ResultSetOutputException;
+import com.nuodb.migration.resultset.format.utils.BinaryEncoder;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueVariant;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import static com.nuodb.migration.resultset.format.value.ValueVariantType.toAlias;
 import static javax.xml.XMLConstants.*;
 
 /**
@@ -76,10 +79,11 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             writer.writeStartElement(RESULT_SET_ELEMENT);
             writer.writeNamespace("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
             writer.writeStartElement(COLUMNS_ELEMENT);
-            for (ValueModel valueModel : getValueModelList()) {
+            for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
                 writer.writeEmptyElement(COLUMN_ELEMENT);
                 writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
-                writer.writeAttribute(ATTRIBUTE_NAME, valueModel.getName());
+                writer.writeAttribute(ATTRIBUTE_NAME, valueFormatModel.getName());
+                writer.writeAttribute(ATTRIBUTE_VARIANT, toAlias(valueFormatModel.getValueVariantType()));
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
@@ -88,26 +92,33 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
     }
 
     @Override
-    protected void writeRow(String[] columnValues) {
+    protected void writeValues(ValueVariant[] variants) {
         try {
             writer.writeStartElement(ROW_ELEMENT);
-            for (String columnValue : columnValues) {
-                writeColumnValue(columnValue);
+            int i = 0;
+            for (ValueVariant variant : variants) {
+                if (variant.isNull()) {
+                    writer.writeEmptyElement(COLUMN_ELEMENT);
+                    writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE, "true");
+                } else {
+                    writer.writeStartElement(COLUMN_ELEMENT);
+                    String value = null;
+                    switch (getValueFormatModelList().get(i).getValueVariantType()) {
+                        case BINARY:
+                            value = BinaryEncoder.HEX.encode(variant.asBytes());
+                            break;
+                        case STRING:
+                            value = XmlEscape.INSTANCE.escape(variant.asString());
+                            break;
+                    }
+                    writer.writeCharacters(value);
+                    writer.writeEndElement();
+                }
+                i++;
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
             throw new ResultSetOutputException(e);
-        }
-    }
-
-    protected void writeColumnValue(String value) throws XMLStreamException {
-        if (value == null) {
-            writer.writeEmptyElement(COLUMN_ELEMENT);
-            writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE, "true");
-        } else {
-            writer.writeStartElement(COLUMN_ELEMENT);
-            writer.writeCharacters(XmlEscape.INSTANCE.escape(value));
-            writer.writeEndElement();
         }
     }
 

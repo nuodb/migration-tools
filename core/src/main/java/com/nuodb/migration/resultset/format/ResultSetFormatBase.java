@@ -28,11 +28,11 @@
 package com.nuodb.migration.resultset.format;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migration.jdbc.type.jdbc2.JdbcDateTypeBase;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueFormatRegistry;
 
 import java.sql.Types;
 import java.util.Calendar;
@@ -46,10 +46,9 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
 
     private TimeZone timeZone;
     private Map<String, Object> attributes;
-    private ValueModelList<ValueModel> valueModelList;
-    private ValueModelList<ResultSetValueModel> resultSetValueModelList;
-    private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider;
-    private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;
+    private ValueModelList<ValueFormatModel> valueFormatModelList;
+    private ValueFormatRegistry valueFormatRegistry;
+    private JdbcTypeValueAccessProvider valueAccessProvider;
 
     @Override
     public Object getAttribute(String attribute) {
@@ -70,19 +69,19 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
         this.attributes = attributes;
     }
 
-    protected ResultSetValueModel visitValueFormatModel(ResultSetValueModel resultSetValueModel) {
-        int typeCode = resultSetValueModel.getTypeCode();
+    protected ValueFormatModel visitValueFormatModel(ValueFormatModel valueFormatModel) {
+        int typeCode = valueFormatModel.getTypeCode();
         if (typeCode == Types.TIME || typeCode == Types.TIMESTAMP || typeCode == Types.DATE) {
             TimeZone timeZone = getTimeZone();
             if (timeZone != null) {
+                Map<String, Object> valueAccessOptions = Maps.newHashMap();
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeZone(timeZone);
-                Map<String, Object> options = Maps.newHashMap();
-                options.put(JdbcDateTypeBase.CALENDAR, calendar);
-                resultSetValueModel.setJdbcTypeValueAccessOptions(options);
+                valueAccessOptions.put(JdbcDateTypeBase.CALENDAR, calendar);
+                valueFormatModel.setValueAccessOptions(valueAccessOptions);
             }
         }
-        return resultSetValueModel;
+        return valueFormatModel;
     }
 
     @Override
@@ -101,42 +100,32 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
     }
 
     @Override
-    public ValueModelList<ValueModel> getValueModelList() {
-        return valueModelList;
+    public ValueModelList<ValueFormatModel> getValueFormatModelList() {
+        return valueFormatModelList;
     }
 
     @Override
-    public void setValueModelList(ValueModelList<ValueModel> valueModelList) {
-        this.valueModelList = valueModelList;
+    public void setValueFormatModelList(ValueModelList<ValueFormatModel> valueFormatModelList) {
+        this.valueFormatModelList = valueFormatModelList;
     }
 
     @Override
-    public ValueModelList<ResultSetValueModel> getResultSetValueModelList() {
-        return resultSetValueModelList;
+    public JdbcTypeValueAccessProvider getValueAccessProvider() {
+        return valueAccessProvider;
     }
 
     @Override
-    public void setResultSetValueModelList(ValueModelList<ResultSetValueModel> resultSetValueModelList) {
-        this.resultSetValueModelList = resultSetValueModelList;
+    public void setValueAccessProvider(JdbcTypeValueAccessProvider valueAccessProvider) {
+        this.valueAccessProvider = valueAccessProvider;
     }
 
     @Override
-    public JdbcTypeValueAccessProvider getJdbcTypeValueAccessProvider() {
-        return jdbcTypeValueAccessProvider;
+    public ValueFormatRegistry getValueFormatRegistry() {
+        return valueFormatRegistry;
     }
 
     @Override
-    public void setJdbcTypeValueAccessProvider(JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider) {
-        this.jdbcTypeValueAccessProvider = jdbcTypeValueAccessProvider;
-    }
-
-    @Override
-    public JdbcTypeValueFormatRegistry getJdbcTypeValueFormatRegistry() {
-        return jdbcTypeValueFormatRegistry;
-    }
-
-    @Override
-    public void setJdbcTypeValueFormatRegistry(JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry) {
-        this.jdbcTypeValueFormatRegistry = jdbcTypeValueFormatRegistry;
+    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
+        this.valueFormatRegistry = valueFormatRegistry;
     }
 }

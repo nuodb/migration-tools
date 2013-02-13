@@ -38,7 +38,6 @@ import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migration.jdbc.metadata.inspector.TableInspectionScope;
-import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.query.*;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
@@ -49,7 +48,8 @@ import com.nuodb.migration.resultset.catalog.CatalogEntry;
 import com.nuodb.migration.resultset.catalog.CatalogReader;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetInput;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueFormatRegistryResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,7 @@ public class LoadJob extends JobBase {
     private Catalog catalog;
     private DialectResolver dialectResolver;
     private ResultSetFormatFactory resultSetFormatFactory;
-    private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver;
+    private ValueFormatRegistryResolver valueFormatRegistryResolver;
 
     @Override
     public void execute(JobExecution execution) throws Exception {
@@ -91,7 +91,7 @@ public class LoadJob extends JobBase {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Database dialect resolver is required");
-        isNotNull(getJdbcTypeValueFormatRegistryResolver(), "JDBC type value format registry resolver is required");
+        isNotNull(getValueFormatRegistryResolver(), "JDBC type value format registry resolver is required");
     }
 
     protected void execute(LoadJobExecution execution) throws SQLException {
@@ -120,7 +120,7 @@ public class LoadJob extends JobBase {
 
         Connection connection = connectionServices.getConnection();
         DatabaseMetaData metaData = connection.getMetaData();
-        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(metaData));
+        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(metaData));
 
         CatalogReader catalogReader = getCatalog().getCatalogReader();
         execution.setCatalogReader(catalogReader);
@@ -155,8 +155,8 @@ public class LoadJob extends JobBase {
             Dialect dialect = execution.getDatabase().getDialect();
             ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(catalogEntry.getType());
             resultSetInput.setAttributes(getAttributes());
-            resultSetInput.setJdbcTypeValueFormatRegistry(execution.getJdbcTypeValueFormatRegistry());
-            resultSetInput.setJdbcTypeValueAccessProvider(
+            resultSetInput.setValueFormatRegistry(execution.getValueFormatRegistry());
+            resultSetInput.setValueAccessProvider(
                     new JdbcTypeValueAccessProvider(dialect.getJdbcTypeRegistry()));
             if (!dialect.supportsSessionTimeZone() && dialect.supportsStatementWithTimezone()) {
                 resultSetInput.setTimeZone(getTimeZone());
@@ -173,17 +173,17 @@ public class LoadJob extends JobBase {
     protected void load(final LoadJobExecution execution, final ResultSetInput resultSetInput,
                         String tableName) throws SQLException {
         resultSetInput.readBegin();
-        ValueModelList<ValueModel> valueModelList = resultSetInput.getValueModelList();
-        if (valueModelList.isEmpty()) {
+        ValueModelList<ValueFormatModel> valueFormatModelList = resultSetInput.getValueFormatModelList();
+        if (valueFormatModelList.isEmpty()) {
             return;
         }
         Database database = execution.getDatabase();
         Table table = database.findTable(tableName);
         int index = 0;
-        for (ValueModel valueModel : valueModelList) {
-            valueModelList.set(index++, table.getColumn(valueModel.getName()));
+        for (ValueFormatModel valueFormatModel : valueFormatModelList) {
+            valueFormatModelList.get(index++).fromValueModel(table.getColumn(valueFormatModel.getName()));
         }
-        final InsertQuery query = createInsertQuery(table, valueModelList);
+        final InsertQuery query = createInsertQuery(table, valueFormatModelList);
 
         StatementTemplate template = new StatementTemplate(execution.getConnectionServices().getConnection());
         template.execute(
@@ -288,12 +288,12 @@ public class LoadJob extends JobBase {
         this.resultSetFormatFactory = resultSetFormatFactory;
     }
 
-    public JdbcTypeValueFormatRegistryResolver getJdbcTypeValueFormatRegistryResolver() {
-        return jdbcTypeValueFormatRegistryResolver;
+    public ValueFormatRegistryResolver getValueFormatRegistryResolver() {
+        return valueFormatRegistryResolver;
     }
 
-    public void setJdbcTypeValueFormatRegistryResolver(
-            JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver) {
-        this.jdbcTypeValueFormatRegistryResolver = jdbcTypeValueFormatRegistryResolver;
+    public void setValueFormatRegistryResolver(
+            ValueFormatRegistryResolver valueFormatRegistryResolver) {
+        this.valueFormatRegistryResolver = valueFormatRegistryResolver;
     }
 }

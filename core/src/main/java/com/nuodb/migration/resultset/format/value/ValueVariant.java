@@ -25,28 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.access;
-
-import com.nuodb.migration.jdbc.model.ValueModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
-
-import java.sql.SQLException;
-import java.util.Map;
+package com.nuodb.migration.resultset.format.value;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess<T> {
+public interface ValueVariant {
 
-    JdbcType<T> getJdbcType();
+    boolean isNull();
 
-    int getColumn();
+    String asString();
 
-    ValueModel getValueModel();
+    byte[] asBytes();
 
-    T getValue(Map<String, Object> options) throws SQLException;
-
-    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
-
-    <X> void setValue(X value, Map<String, Object> options) throws SQLException;
+    ValueVariantType getValueVariantType();
 }

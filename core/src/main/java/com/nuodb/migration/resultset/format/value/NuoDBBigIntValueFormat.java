@@ -25,24 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.value;
 
-import com.nuodb.migration.MigrationException;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+
+import java.util.Map;
+
+import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
+ * Temporary fix which screens program from incorrect decimal<->(bigint or integer) type mapping for DB-2288 "column
+ * metadata type does not match DDL type"
+ *
  * @author Sergey Bushik
  */
-public class JdbcTypeValueException extends MigrationException {
+public class NuoDBBigIntValueFormat extends ValueFormatBase<String> {
 
-    public JdbcTypeValueException(String message) {
-        super(message);
+    @Override
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<String> valueAccess, Map<String, Object> valueAccessOptions) throws Exception {
+        return string(valueAccess.getValue(valueAccessOptions));
     }
 
-    public JdbcTypeValueException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<String> valueAccess,
+                              Map<String, Object> valueAccessOptions) throws Exception {
+        String value = variant.asString();
+        valueAccess.setValue(!isEmpty(value) ? value : null, valueAccessOptions);
     }
 
-    public JdbcTypeValueException(Throwable cause) {
-        super(cause);
+    @Override
+    public ValueVariantType getVariantType(ValueModel ValueModel) {
+        return ValueVariantType.STRING;
     }
 }

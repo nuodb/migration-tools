@@ -87,6 +87,16 @@ public class SimpleValueModel implements ValueModel {
     }
 
     @Override
+    public void fromValueModel(ValueModel valueModel) {
+        setName(valueModel.getName());
+        setTypeName(valueModel.getTypeName());
+        setTypeCode(valueModel.getTypeCode());
+        setPrecision(valueModel.getPrecision());
+        setScale(valueModel.getScale());
+        this.valueModel = valueModel;
+    }
+
+    @Override
     public String getName() {
         return name;
     }

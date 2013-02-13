@@ -29,18 +29,24 @@ package com.nuodb.migration.resultset.format.bson;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
+import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueVariant;
+import com.nuodb.migration.resultset.format.value.ValueVariantType;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
 
 import static com.fasterxml.jackson.core.JsonToken.*;
-import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModel;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
+import static com.nuodb.migration.resultset.format.value.ValueVariantType.STRING;
+import static com.nuodb.migration.resultset.format.value.ValueVariantType.fromAlias;
+import static com.nuodb.migration.resultset.format.value.ValueVariants.binary;
+import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 
 /**
@@ -49,7 +55,7 @@ import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 public class BsonResultSetInput extends ResultSetInputBase implements BsonAttributes {
 
     private JsonParser reader;
-    private Iterator<String[]> iterator;
+    private Iterator<ValueVariant[]> iterator;
 
     @Override
     public String getFormat() {
@@ -72,17 +78,20 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
         iterator = createInputIterator();
     }
 
-    protected Iterator<String[]> createInputIterator() {
+    protected Iterator<ValueVariant[]> createInputIterator() {
         return new BsonInputIterator();
     }
 
     @Override
     protected void doReadBegin() {
-        ValueModelList<ValueModel> valueModelList = createValueModelList();
+        ValueModelList<ValueFormatModel> valueFormatModelList = createValueModelList();
         try {
             if (isNextToken(START_OBJECT) && isNextField(COLUMNS_FIELD) && isNextToken(START_OBJECT)) {
-                while (isNextField(COLUMN_FIELD) && isNextToken(VALUE_STRING)) {
-                    valueModelList.add(createValueModel(reader.getText()));
+                while (isNextToken(VALUE_STRING)) {
+                    ValueFormatModel valueFormatModel = new SimpleValueFormatModel();
+                    valueFormatModel.setName(isNextField(COLUMN_FIELD) ? reader.getText() : null);
+                    valueFormatModel.setValueVariantType(isNextField(VARIANT_FIELD) ? fromAlias(reader.getText()) : null);
+                    valueFormatModelList.add(valueFormatModel);
                 }
                 reader.nextToken();
             }
@@ -91,7 +100,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
         } catch (IOException exception) {
             throw new ResultSetInputException(exception);
         }
-        setValueModelList(valueModelList);
+        setValueFormatModelList(valueFormatModelList);
     }
 
     protected boolean isCurrentToken(JsonToken token) {
@@ -116,15 +125,24 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
         setValues(iterator.next());
     }
 
-    protected String[] doReadRow() {
-        String[] values = null;
+    protected ValueVariant[] doReadRow() {
+        ValueVariant[] values = null;
         try {
             if (isCurrentToken(START_ARRAY)) {
-                values = new String[getValueModelList().size()];
-                int column = 0;
+                ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
+                values = new ValueVariant[valueFormatModelList.size()];
                 reader.nextToken();
+                int i = 0;
                 while (isCurrentToken(VALUE_NULL) || isCurrentToken(VALUE_STRING)) {
-                    values[column++] = reader.getText();
+                    switch (valueFormatModelList.get(i).getValueVariantType()) {
+                        case BINARY:
+                            values[i] = binary(reader.getBinaryValue());
+                            break;
+                        case STRING:
+                            values[i] = string(reader.getText());
+                            break;
+                    }
+                    i++;
                     reader.nextToken();
                 }
                 reader.nextToken();
@@ -144,10 +162,9 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
         }
     }
 
+    class BsonInputIterator implements Iterator<ValueVariant[]> {
 
-    class BsonInputIterator implements Iterator<String[]> {
-
-        private String[] current;
+        private ValueVariant[] current;
 
         @Override
         public boolean hasNext() {
@@ -158,8 +175,8 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
         }
 
         @Override
-        public String[] next() {
-            String[] next = current;
+        public ValueVariant[] next() {
+            ValueVariant[] next = current;
             current = null;
             if (next == null) {
                 // hasNext() wasn't called before

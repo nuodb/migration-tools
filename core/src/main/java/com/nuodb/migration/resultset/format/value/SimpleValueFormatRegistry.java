@@ -25,20 +25,23 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.value;
 
-import com.nuodb.migration.jdbc.dialect.NuoDBBigIntType;
-import com.nuodb.migration.jdbc.dialect.NuoDBIntegerType;
-import com.nuodb.migration.jdbc.dialect.NuoDBTimeType;
+import com.nuodb.migration.jdbc.type.jdbc2.JdbcDateType;
+import com.nuodb.migration.jdbc.type.jdbc2.JdbcTimeType;
+import com.nuodb.migration.jdbc.type.jdbc2.JdbcTimestampType;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBJdbcTypeValueFormatRegistry extends SimpleJdbcTypeValueFormatRegistry {
+public class SimpleValueFormatRegistry extends ValueFormatRegistryBase {
 
-    public NuoDBJdbcTypeValueFormatRegistry() {
-        addJdbcTypeValueFormat(NuoDBTimeType.INSTANCE, new NuoDBTimeTypeValueFormat());
-        addJdbcTypeValueFormat(NuoDBBigIntType.INSTANCE, new NuoDBBigIntTypeValueFormat());
-        addJdbcTypeValueFormat(NuoDBIntegerType.INSTANCE, new NuoDBIntegerTypeValueFormat());
+    public SimpleValueFormatRegistry() {
+        super(new SimpleValueFormat());
+        addValueFormat(JdbcTimestampType.INSTANCE, new JdbcTimestampValueFormat());
+        addValueFormat(JdbcTimeType.INSTANCE, new JdbcTimeValueFormat());
+        addValueFormat(JdbcDateType.INSTANCE, new JdbcDateValueFormat());
     }
 }
+
+

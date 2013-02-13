@@ -25,27 +25,76 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
-
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
-
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+package com.nuodb.migration.resultset.format.value;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBIntegerTypeValueFormat extends JdbcTypeValueFormatBase<String> {
+public class ValueVariants {
 
-    @Override
-    protected String doGetValue(JdbcTypeValueAccess<String> access, Map<String, Object> options) throws Exception {
-        return access.getValue(options);
+    public static ValueVariant binary(byte[] value) {
+        return new BinaryVariant(value);
     }
 
-    @Override
-    protected void doSetValue(JdbcTypeValueAccess<String> access, String value,
-                              Map<String, Object> options) throws Exception {
-        access.setValue(!isEmpty(value) ? value : null, options);
+    public static ValueVariant string(String value) {
+        return new StringVariant(value);
+    }
+
+    static class BinaryVariant implements ValueVariant {
+
+        private final byte[] value;
+
+        public BinaryVariant(byte[] value) {
+            this.value = value;
+        }
+
+        @Override
+        public String asString() {
+            return new String(value);
+        }
+
+        @Override
+        public byte[] asBytes() {
+            return value;
+        }
+
+        @Override
+        public boolean isNull() {
+            return value == null;
+        }
+
+        @Override
+        public ValueVariantType getValueVariantType() {
+            return ValueVariantType.BINARY;
+        }
+    }
+
+    static class StringVariant implements ValueVariant {
+
+        public String value;
+
+        public StringVariant(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String asString() {
+            return value;
+        }
+
+        @Override
+        public byte[] asBytes() {
+            return value.getBytes();
+        }
+
+        @Override
+        public boolean isNull() {
+            return value == null;
+        }
+
+        @Override
+        public ValueVariantType getValueVariantType() {
+            return ValueVariantType.STRING;
+        }
     }
 }

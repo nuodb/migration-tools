@@ -32,7 +32,7 @@ import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.job.JobExecutionDelegate;
 import com.nuodb.migration.job.JobExecution;
 import com.nuodb.migration.resultset.catalog.CatalogWriter;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
+import com.nuodb.migration.resultset.format.value.ValueFormatRegistry;
 
 /**
  * @author Sergey Bushik
@@ -41,7 +41,7 @@ public class DumpJobExecution extends JobExecutionDelegate {
 
     private ConnectionServices connectionServices;
     private Database database;
-    private JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry;
+    private ValueFormatRegistry valueFormatRegistry;
     private CatalogWriter catalogWriter;
 
     public DumpJobExecution(JobExecution execution) {
@@ -64,12 +64,12 @@ public class DumpJobExecution extends JobExecutionDelegate {
         this.database = database;
     }
 
-    public JdbcTypeValueFormatRegistry getJdbcTypeValueFormatRegistry() {
-        return jdbcTypeValueFormatRegistry;
+    public ValueFormatRegistry getValueFormatRegistry() {
+        return valueFormatRegistry;
     }
 
-    public void setJdbcTypeValueFormatRegistry(JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry) {
-        this.jdbcTypeValueFormatRegistry = jdbcTypeValueFormatRegistry;
+    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
+        this.valueFormatRegistry = valueFormatRegistry;
     }
 
     public CatalogWriter getCatalogWriter() {

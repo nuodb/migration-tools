@@ -25,18 +25,23 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.value;
 
-import com.nuodb.migration.jdbc.resolve.SimpleServiceResolver;
+import com.nuodb.migration.jdbc.model.ValueModel;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
+
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleJdbcTypeValueFormatRegistryResolver extends SimpleServiceResolver<JdbcTypeValueFormatRegistry>
-        implements JdbcTypeValueFormatRegistryResolver {
+public interface ValueFormat<T> {
 
-    public SimpleJdbcTypeValueFormatRegistryResolver() {
-        super(SimpleJdbcTypeValueFormatRegistry.class);
-        register("NuoDB", NuoDBJdbcTypeValueFormatRegistry.class);
-    }
+    ValueVariantType getVariantType(ValueModel ValueModel);
+
+    ValueVariant getValue(JdbcTypeValueAccess<T> valueAccess,
+                     Map<String, Object> valueAccessOptions) throws ValueFormatException;
+
+    void setValue(ValueVariant variant, JdbcTypeValueAccess<T> valueAccess,
+                  Map<String, Object> valueAccessOptions) throws ValueFormatException;
 }

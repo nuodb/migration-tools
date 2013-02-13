@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.value;
 
 import com.nuodb.migration.jdbc.type.JdbcType;
 import com.nuodb.migration.jdbc.type.JdbcTypeDesc;
@@ -35,13 +35,13 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueFormatRegistry {
+public interface ValueFormatRegistry {
 
-    void addJdbcTypeValueFormat(JdbcType jdbcType, JdbcTypeValueFormat jdbcTypeValueFormat);
+    void addValueFormat(JdbcType jdbcType, ValueFormat valueFormat);
 
-    void addJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc, JdbcTypeValueFormat jdbcTypeValueFormat);
+    void addValueFormat(JdbcTypeDesc jdbcTypeDesc, ValueFormat valueFormat);
 
-    JdbcTypeValueFormat getJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc);
+    ValueFormat getValueFormat(JdbcTypeDesc jdbcTypeDesc);
 
-    Map<JdbcTypeDesc, JdbcTypeValueFormat> getJdbcTypeValueFormats();
+    Map<JdbcTypeDesc, ValueFormat> getValueFormats();
 }

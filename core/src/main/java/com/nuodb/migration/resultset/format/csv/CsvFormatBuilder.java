@@ -88,6 +88,7 @@ class CsvFormatBuilder implements CsvAttributes {
             builder.withQuotePolicy(Quote.MINIMAL);
             builder.withQuoteChar(quote);
         }
+        builder.withCommentStart(COMMENT_START);
         builder.withRecordSeparator(lineSeparator);
         builder.withEscape(escape);
         return builder.build();

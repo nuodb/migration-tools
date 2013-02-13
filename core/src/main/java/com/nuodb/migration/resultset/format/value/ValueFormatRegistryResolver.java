@@ -25,24 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.value;
 
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
-
-import java.util.Map;
+import com.nuodb.migration.jdbc.resolve.ServiceResolver;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBTimeTypeValueFormat extends JdbcTypeValueFormatBase<String> {
-    @Override
-    protected String doGetValue(JdbcTypeValueAccess<String> access, Map<String, Object> options) throws Exception {
-        return access.getValue(String.class, options);
-    }
-
-    @Override
-    protected void doSetValue(JdbcTypeValueAccess<String> access, String value,
-                              Map<String, Object> options) throws Exception {
-        access.setValue(value, options);
-    }
+public interface ValueFormatRegistryResolver extends ServiceResolver<ValueFormatRegistry> {
 }

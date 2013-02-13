@@ -25,28 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.access;
+package com.nuodb.migration.resultset.format.value;
 
 import com.nuodb.migration.jdbc.model.ValueModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
-import java.sql.SQLException;
 import java.util.Map;
+
+import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess<T> {
+public class NuoDBIntegerValueFormat extends ValueFormatBase<String> {
 
-    JdbcType<T> getJdbcType();
+    @Override
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<String> valueAccess,
+                                      Map<String, Object> valueAccessOptions) throws Exception {
+        return string(valueAccess.getValue(valueAccessOptions));
+    }
 
-    int getColumn();
+    @Override
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<String> valueAccess,
+                              Map<String, Object> valueAccessOptions) throws Exception {
+        String value = variant.asString();
+        valueAccess.setValue(!isEmpty(value) ? value : null, valueAccessOptions);
+    }
 
-    ValueModel getValueModel();
-
-    T getValue(Map<String, Object> options) throws SQLException;
-
-    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
-
-    <X> void setValue(X value, Map<String, Object> options) throws SQLException;
+    @Override
+    public ValueVariantType getVariantType(ValueModel ValueModel) {
+        return ValueVariantType.STRING;
+    }
 }

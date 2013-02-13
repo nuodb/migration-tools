@@ -27,10 +27,10 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistry;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueFormatRegistry;
 
 import java.util.Map;
 import java.util.TimeZone;
@@ -54,19 +54,15 @@ public interface ResultSetFormat {
 
     void setAttributes(Map<String, Object> attributes);
 
-    ValueModelList<ValueModel> getValueModelList();
+    ValueModelList<ValueFormatModel> getValueFormatModelList();
 
-    void setValueModelList(ValueModelList<ValueModel> valueModelList);
+    void setValueFormatModelList(ValueModelList<ValueFormatModel> valueFormatModelList);
 
-    ValueModelList<ResultSetValueModel> getResultSetValueModelList();
+    JdbcTypeValueAccessProvider getValueAccessProvider();
 
-    void setResultSetValueModelList(ValueModelList<ResultSetValueModel> resultSetValueModelList);
+    void setValueAccessProvider(JdbcTypeValueAccessProvider valueAccessProvider);
 
-    JdbcTypeValueAccessProvider getJdbcTypeValueAccessProvider();
+    ValueFormatRegistry getValueFormatRegistry();
 
-    void setJdbcTypeValueAccessProvider(JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider);
-
-    JdbcTypeValueFormatRegistry getJdbcTypeValueFormatRegistry();
-
-    void setJdbcTypeValueFormatRegistry(JdbcTypeValueFormatRegistry jdbcTypeValueFormatRegistry);
+    void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
 }

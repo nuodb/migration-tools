@@ -35,6 +35,8 @@ public interface CsvAttributes {
     final String ENCODING = "utf-8";
 
     final String FORMAT = "csv";
+
+    final char COMMENT_START = '#';
     /**
      * The symbol used for value separation, must not be a line break character.
      */

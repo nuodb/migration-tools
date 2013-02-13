@@ -34,7 +34,6 @@ import com.nuodb.migration.jdbc.connection.ConnectionProvider;
 import com.nuodb.migration.jdbc.connection.ConnectionServices;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.dialect.DialectResolver;
-import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.Database;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
@@ -53,7 +52,9 @@ import com.nuodb.migration.resultset.catalog.CatalogEntry;
 import com.nuodb.migration.resultset.catalog.CatalogWriter;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.ResultSetOutput;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
+import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migration.spec.NativeQuerySpec;
 import com.nuodb.migration.spec.SelectQuerySpec;
 import org.slf4j.Logger;
@@ -93,7 +94,7 @@ public class DumpJob extends JobBase {
     private ConnectionProvider connectionProvider;
     private DialectResolver dialectResolver;
     private ResultSetFormatFactory resultSetFormatFactory;
-    private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver;
+    private ValueFormatRegistryResolver valueFormatRegistryResolver;
 
     @Override
     public void execute(JobExecution execution) throws Exception {
@@ -105,7 +106,7 @@ public class DumpJob extends JobBase {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Database dialect resolver is required");
-        isNotNull(getJdbcTypeValueFormatRegistryResolver(), "JDBC type value format registry resolver is required");
+        isNotNull(getValueFormatRegistryResolver(), "JDBC type value format registry resolver is required");
     }
 
     protected void execute(DumpJobExecution execution) throws SQLException {
@@ -133,7 +134,7 @@ public class DumpJob extends JobBase {
 
         Connection connection = connectionServices.getConnection();
         DatabaseMetaData databaseMetaData = connection.getMetaData();
-        execution.setJdbcTypeValueFormatRegistry(getJdbcTypeValueFormatRegistryResolver().resolve(databaseMetaData));
+        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(databaseMetaData));
 
         CatalogWriter catalogWriter = getCatalog().getCatalogWriter();
         execution.setCatalogWriter(catalogWriter);
@@ -188,18 +189,18 @@ public class DumpJob extends JobBase {
                         PreparedStatement preparedStatement) throws SQLException {
         final ResultSetOutput resultSetOutput = getResultSetFormatFactory().createOutput(getOutputType());
         resultSetOutput.setAttributes(getAttributes());
-        resultSetOutput.setJdbcTypeValueFormatRegistry(execution.getJdbcTypeValueFormatRegistry());
+        resultSetOutput.setValueFormatRegistry(execution.getValueFormatRegistry());
 
         Dialect dialect = execution.getDatabase().getDialect();
         if (!dialect.supportsSessionTimeZone() && dialect.supportsStatementWithTimezone()) {
             resultSetOutput.setTimeZone(getTimeZone());
         }
         JdbcTypeRegistry jdbcTypeRegistry = dialect.getJdbcTypeRegistry();
-        resultSetOutput.setJdbcTypeValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
+        resultSetOutput.setValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
 
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSetOutput.setResultSet(resultSet);
-        resultSetOutput.setValueModelList(createValueModelList(resultSet, query));
+        resultSetOutput.setValueFormatModelList(createValueModelList(resultSet, query));
         resultSetOutput.initOutputModel();
 
         CatalogWriter catalogWriter = execution.getCatalogWriter();
@@ -224,19 +225,17 @@ public class DumpJob extends JobBase {
         }
     }
 
-    protected ValueModelList<ValueModel> createValueModelList(ResultSet resultSet, Query query) throws SQLException {
-        if (query instanceof SelectQuery) {
-            return ValueModelFactory.createValueModelList(
-                    Iterables.transform(((SelectQuery) query).getColumns(),
-                    new Function<Column, ValueModel>() {
+    protected ValueModelList<ValueFormatModel> createValueModelList(ResultSet resultSet, Query query) throws SQLException {
+        Collection<? extends ValueModel> valueModelList = query instanceof SelectQuery ?
+                ((SelectQuery) query).getColumns() : ValueModelFactory.createValueModelList(resultSet);
+        return ValueModelFactory.createValueModelList(
+                Iterables.transform(valueModelList,
+                    new Function<ValueModel, ValueFormatModel>() {
                         @Override
-                        public ValueModel apply(Column column) {
-                            return column;
+                        public ValueFormatModel apply(ValueModel valueModel) {
+                            return new SimpleValueFormatModel(valueModel);
                         }
                     }));
-        } else {
-            return ValueModelFactory.createValueModelList(resultSet);
-        }
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database,
@@ -374,12 +373,12 @@ public class DumpJob extends JobBase {
         this.resultSetFormatFactory = resultSetFormatFactory;
     }
 
-    public JdbcTypeValueFormatRegistryResolver getJdbcTypeValueFormatRegistryResolver() {
-        return jdbcTypeValueFormatRegistryResolver;
+    public ValueFormatRegistryResolver getValueFormatRegistryResolver() {
+        return valueFormatRegistryResolver;
     }
 
-    public void setJdbcTypeValueFormatRegistryResolver(
-            JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver) {
-        this.jdbcTypeValueFormatRegistryResolver = jdbcTypeValueFormatRegistryResolver;
+    public void setValueFormatRegistryResolver(
+            ValueFormatRegistryResolver valueFormatRegistryResolver) {
+        this.valueFormatRegistryResolver = valueFormatRegistryResolver;
     }
 }

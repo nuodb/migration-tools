@@ -25,35 +25,31 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.value;
 
+import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
-import java.sql.SQLException;
-import java.sql.Time;
 import java.util.Map;
-
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTimeTypeValueFormat extends JdbcTypeValueFormatBase<Time> {
+public interface ValueFormatModel extends ValueModel {
 
-    @Override
-    protected String doGetValue(JdbcTypeValueAccess<Time> access, Map<String, Object> options) throws SQLException {
-        Time time = access.getValue(options);
-        return time != null ? time.toString() : null;
-    }
+    ValueFormat getValueFormat();
 
-    @Override
-    protected void doSetValue(JdbcTypeValueAccess<Time> access, String value,
-                              Map<String, Object> options) throws SQLException {
-        try {
-            access.setValue(!isEmpty(value) ? value : null, options);
-        } catch (IllegalArgumentException exception) {
-            throw new JdbcTypeValueException(format("Value %s is not in the hh:mm:ss format", value));
-        }
-    }
+    void setValueFormat(ValueFormat valueFormat);
+
+    ValueVariantType getValueVariantType();
+
+    void setValueVariantType(ValueVariantType valueVariantType);
+
+    JdbcTypeValueAccess getValueAccess();
+
+    void setValueAccess(JdbcTypeValueAccess valueAccess);
+
+    Map<String, Object> getValueAccessOptions();
+
+    void setValueAccessOptions(Map<String, Object> valueAccessOptions);
 }

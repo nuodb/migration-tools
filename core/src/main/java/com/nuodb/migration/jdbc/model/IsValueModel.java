@@ -33,4 +33,6 @@ package com.nuodb.migration.jdbc.model;
 public interface IsValueModel {
 
     ValueModel asValueModel();
+
+    void fromValueModel(ValueModel valueModel);
 }

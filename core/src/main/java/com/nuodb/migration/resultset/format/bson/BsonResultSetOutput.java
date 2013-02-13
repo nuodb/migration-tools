@@ -28,13 +28,15 @@
 package com.nuodb.migration.resultset.format.bson;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
 import com.nuodb.migration.resultset.format.ResultSetOutputException;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueVariant;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
 
+import static com.nuodb.migration.resultset.format.value.ValueVariantType.toAlias;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 
 /**
@@ -71,8 +73,9 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
             writer.writeStartObject();
             writer.writeFieldName(COLUMNS_FIELD);
             writer.writeStartObject();
-            for (ValueModel valueModel : getValueModelList()) {
-                writer.writeStringField(COLUMN_FIELD, valueModel.getName());
+            for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
+                writer.writeStringField(COLUMN_FIELD, valueFormatModel.getName());
+                writer.writeStringField(VARIANT_FIELD, toAlias(valueFormatModel.getValueVariantType()));
             }
             writer.writeEndObject();
             writer.writeFieldName(ROWS_FIELD);
@@ -83,15 +86,24 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
     }
 
     @Override
-    protected void writeRow(String[] columnValues) {
+    protected void writeValues(ValueVariant[] variants) {
         try {
             writer.writeStartArray();
-            for (String columnValue : columnValues) {
-                if (columnValue == null) {
+            int i = 0;
+            for (ValueVariant variant : variants) {
+                if (variant.isNull()) {
                     writer.writeNull();
                 } else {
-                    writer.writeString(columnValue);
+                    switch (getValueFormatModelList().get(i).getValueVariantType()) {
+                        case BINARY:
+                            writer.writeBinary(variant.asBytes());
+                            break;
+                        case STRING:
+                            writer.writeString(variant.asString());
+                            break;
+                    }
                 }
+                i++;
             }
             writer.writeEndArray();
         } catch (IOException exception) {

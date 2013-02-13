@@ -30,6 +30,7 @@ package com.nuodb.migration.resultset.format;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
@@ -44,7 +45,7 @@ public interface ResultSetOutput extends ResultSetFormat {
 
     void setResultSet(ResultSet resultSet);
 
-    void initOutputModel();
+    void initOutputModel() throws SQLException;
 
     void setWriter(Writer writer);
 

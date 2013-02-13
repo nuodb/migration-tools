@@ -25,60 +25,33 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format;
+package com.nuodb.migration.resultset.format.value;
 
-import com.nuodb.migration.jdbc.model.SimpleValueModel;
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
 
 import java.util.Map;
+
+import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleResultSetValueModel extends SimpleValueModel implements ResultSetValueModel {
-
-    private JdbcTypeValueFormat jdbcTypeValueFormat;
-    private JdbcTypeValueAccess jdbcTypeValueAccess;
-    private Map<String, Object> jdbcTypeValueAccessOptions;
-
-    public SimpleResultSetValueModel(ValueModel valueModel, JdbcTypeValueFormat jdbcTypeValueFormat,
-                                     JdbcTypeValueAccess jdbcTypeValueAccess,
-                                     Map<String, Object> jdbcTypeValueAccessOptions) {
-        super(valueModel);
-        this.jdbcTypeValueFormat = jdbcTypeValueFormat;
-        this.jdbcTypeValueAccess = jdbcTypeValueAccess;
-        this.jdbcTypeValueAccessOptions = jdbcTypeValueAccessOptions;
+public class NuoDBTimeValueFormat extends ValueFormatBase<String> {
+    @Override
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<String> valueAccess, Map<String, Object> valueAccessOptions) throws Exception {
+        return string(valueAccess.getValue(String.class, valueAccessOptions));
     }
 
     @Override
-    public JdbcTypeValueFormat getJdbcTypeValueFormat() {
-        return jdbcTypeValueFormat;
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<String> valueAccess,
+                              Map<String, Object> valueAccessOptions) throws Exception {
+        String value = variant.asString();
+        valueAccess.setValue(value, valueAccessOptions);
     }
 
     @Override
-    public void setJdbcTypeValueFormat(JdbcTypeValueFormat jdbcTypeValueFormat) {
-        this.jdbcTypeValueFormat = jdbcTypeValueFormat;
-    }
-
-    @Override
-    public JdbcTypeValueAccess getJdbcTypeValueAccess() {
-        return jdbcTypeValueAccess;
-    }
-
-    @Override
-    public void setJdbcTypeValueAccess(JdbcTypeValueAccess jdbcTypeValueAccess) {
-        this.jdbcTypeValueAccess = jdbcTypeValueAccess;
-    }
-
-    @Override
-    public Map<String, Object> getJdbcTypeValueAccessOptions() {
-        return jdbcTypeValueAccessOptions;
-    }
-
-    @Override
-    public void setJdbcTypeValueAccessOptions(Map<String, Object> jdbcTypeValueAccessOptions) {
-        this.jdbcTypeValueAccessOptions = jdbcTypeValueAccessOptions;
+    public ValueVariantType getVariantType(ValueModel ValueModel) {
+        return ValueVariantType.STRING;
     }
 }

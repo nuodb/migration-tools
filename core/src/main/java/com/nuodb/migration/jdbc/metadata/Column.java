@@ -241,6 +241,15 @@ public class Column extends IdentifiableBase implements ValueModel {
     }
 
     @Override
+    public void fromValueModel(ValueModel valueModel) {
+        setName(valueModel.getName());
+        setTypeName(valueModel.getTypeName());
+        setTypeCode(valueModel.getTypeCode());
+        setPrecision(valueModel.getPrecision());
+        setScale(valueModel.getScale());
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

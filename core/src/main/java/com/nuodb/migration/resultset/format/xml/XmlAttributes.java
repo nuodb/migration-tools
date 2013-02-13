@@ -44,5 +44,6 @@ public interface XmlAttributes {
     final String COLUMNS_ELEMENT = "columns";
     final String COLUMN_ELEMENT = "column";
     final String ATTRIBUTE_NAME = "name";
+    final String ATTRIBUTE_VARIANT = "variant";
     final String ROW_ELEMENT = "row";
 }

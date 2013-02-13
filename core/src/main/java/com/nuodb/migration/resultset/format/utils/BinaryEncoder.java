@@ -25,30 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.utils;
 
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
-
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import com.nuodb.migration.resultset.format.value.ValueFormatException;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 
 /**
- * Temporary fix which screens program from incorrect decimal<->(bigint or integer) type mapping for DB-2288 "column
- * metadata type does not match DDL type"
- *
  * @author Sergey Bushik
  */
-public class NuoDBBigIntTypeValueFormat extends JdbcTypeValueFormatBase<String> {
+public abstract class BinaryEncoder {
 
-    @Override
-    protected String doGetValue(JdbcTypeValueAccess<String> access, Map<String, Object> options) throws Exception {
-        return access.getValue(options);
-    }
+    public static final BinaryEncoder HEX = new BinaryEncoder() {
+        @Override
+        public String encode(byte[] value) {
+            return value != null ? new String(Hex.encodeHex(value, false)) : null;
+        }
 
-    @Override
-    protected void doSetValue(JdbcTypeValueAccess<String> access, String value,
-                              Map<String, Object> options) throws Exception {
-        access.setValue(!isEmpty(value) ? value : null, options);
-    }
+        @Override
+        public byte[] decode(String value) {
+            try {
+                return value != null ? Hex.decodeHex(value.toCharArray()) : null;
+            } catch (DecoderException exception) {
+                throw new ValueFormatException(exception);
+            }
+        }
+    };
+
+    public abstract String encode(byte[] value);
+
+    public abstract byte[] decode(String value);
 }

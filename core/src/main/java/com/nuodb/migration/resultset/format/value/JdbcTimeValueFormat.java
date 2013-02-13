@@ -25,28 +25,44 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format;
+package com.nuodb.migration.resultset.format.value;
 
 import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormat;
 
+import java.sql.SQLException;
+import java.sql.Time;
 import java.util.Map;
+
+import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public interface ResultSetValueModel extends ValueModel {
+public class JdbcTimeValueFormat extends ValueFormatBase<Time> {
 
-    JdbcTypeValueAccess getJdbcTypeValueAccess();
+    @Override
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<Time> valueAccess,
+                                      Map<String, Object> valueAccessOptions) throws SQLException {
+        Time time = valueAccess.getValue(valueAccessOptions);
+        return string(time != null ? time.toString() : null);
+    }
 
-    void setJdbcTypeValueAccess(JdbcTypeValueAccess jdbcTypeValueAccess);
+    @Override
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Time> valueAccess,
+                              Map<String, Object> valueAccessOptions) throws SQLException {
+        final String value = variant.asString();
+        try {
+            valueAccess.setValue(!isEmpty(value) ? value : null, valueAccessOptions);
+        } catch (IllegalArgumentException exception) {
+            throw new ValueFormatException(format("Value %s is not in the hh:mm:ss format", value));
+        }
+    }
 
-    JdbcTypeValueFormat getJdbcTypeValueFormat();
-
-    void setJdbcTypeValueFormat(JdbcTypeValueFormat jdbcTypeValueFormat);
-
-    Map<String, Object> getJdbcTypeValueAccessOptions();
-
-    void setJdbcTypeValueAccessOptions(Map<String, Object> jdbcTypeValueAccessOptions);
+    @Override
+    public ValueVariantType getVariantType(ValueModel ValueModel) {
+        return ValueVariantType.STRING;
+    }
 }

@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.value;
 
 import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.type.JdbcType;
@@ -36,50 +36,50 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeValueFormatRegistryBase implements JdbcTypeValueFormatRegistry {
+public class ValueFormatRegistryBase implements ValueFormatRegistry {
 
-    private Map<JdbcTypeDesc, JdbcTypeValueFormat> jdbcTypeValueFormats = Maps.newHashMap();
-    private JdbcTypeValueFormat defaultJdbcTypeValueFormat;
+    private Map<JdbcTypeDesc, ValueFormat> valueFormats = Maps.newHashMap();
+    private ValueFormat defaultValueFormat;
 
-    public JdbcTypeValueFormatRegistryBase() {
+    public ValueFormatRegistryBase() {
     }
 
-    public JdbcTypeValueFormatRegistryBase(JdbcTypeValueFormat defaultJdbcTypeValueFormat) {
-        this.defaultJdbcTypeValueFormat = defaultJdbcTypeValueFormat;
-    }
-
-    @Override
-    public void addJdbcTypeValueFormat(JdbcType jdbcType, JdbcTypeValueFormat jdbcTypeValueFormat) {
-        addJdbcTypeValueFormat(jdbcType.getTypeDesc(), jdbcTypeValueFormat);
+    public ValueFormatRegistryBase(ValueFormat defaultValueFormat) {
+        this.defaultValueFormat = defaultValueFormat;
     }
 
     @Override
-    public void addJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc, JdbcTypeValueFormat jdbcTypeValueFormat) {
-        jdbcTypeValueFormats.put(jdbcTypeDesc, jdbcTypeValueFormat);
+    public void addValueFormat(JdbcType jdbcType, ValueFormat valueFormat) {
+        addValueFormat(jdbcType.getTypeDesc(), valueFormat);
     }
 
     @Override
-    public JdbcTypeValueFormat getJdbcTypeValueFormat(JdbcTypeDesc jdbcTypeDesc) {
-        JdbcTypeValueFormat jdbcTypeValueFormat = jdbcTypeValueFormats.get(jdbcTypeDesc);
-        if (jdbcTypeValueFormat == null) {
-            jdbcTypeValueFormat = jdbcTypeValueFormats.get(new JdbcTypeDesc(jdbcTypeDesc.getTypeCode()));
+    public void addValueFormat(JdbcTypeDesc jdbcTypeDesc, ValueFormat valueFormat) {
+        valueFormats.put(jdbcTypeDesc, valueFormat);
+    }
+
+    @Override
+    public ValueFormat getValueFormat(JdbcTypeDesc jdbcTypeDesc) {
+        ValueFormat valueFormat = valueFormats.get(jdbcTypeDesc);
+        if (valueFormat == null) {
+            valueFormat = valueFormats.get(new JdbcTypeDesc(jdbcTypeDesc.getTypeCode()));
         }
-        if (jdbcTypeValueFormat == null) {
-            jdbcTypeValueFormat = getDefaultJdbcTypeValueFormat();
+        if (valueFormat == null) {
+            valueFormat = getDefaultValueFormat();
         }
-        return jdbcTypeValueFormat;
+        return valueFormat;
     }
 
     @Override
-    public Map<JdbcTypeDesc, JdbcTypeValueFormat> getJdbcTypeValueFormats() {
-        return jdbcTypeValueFormats;
+    public Map<JdbcTypeDesc, ValueFormat> getValueFormats() {
+        return valueFormats;
     }
 
-    public JdbcTypeValueFormat getDefaultJdbcTypeValueFormat() {
-        return defaultJdbcTypeValueFormat;
+    public ValueFormat getDefaultValueFormat() {
+        return defaultValueFormat;
     }
 
-    public void setDefaultJdbcTypeValueFormat(JdbcTypeValueFormat defaultJdbcTypeValueFormat) {
-        this.defaultJdbcTypeValueFormat = defaultJdbcTypeValueFormat;
+    public void setDefaultValueFormat(ValueFormat defaultValueFormat) {
+        this.defaultValueFormat = defaultValueFormat;
     }
 }

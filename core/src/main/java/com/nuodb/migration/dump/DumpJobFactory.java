@@ -35,8 +35,8 @@ import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.FileCatalog;
 import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
 import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.jdbc.JdbcTypeValueFormatRegistryResolver;
-import com.nuodb.migration.resultset.format.jdbc.SimpleJdbcTypeValueFormatRegistryResolver;
+import com.nuodb.migration.resultset.format.value.SimpleValueFormatRegistryResolver;
+import com.nuodb.migration.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migration.spec.ConnectionSpec;
 import com.nuodb.migration.spec.DumpSpec;
 import com.nuodb.migration.spec.ResourceSpec;
@@ -59,8 +59,8 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
             new SimpleDialectResolver();
     private ResultSetFormatFactory resultSetFormatFactory =
             new SimpleResultSetFormatFactory();
-    private JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver =
-            new SimpleJdbcTypeValueFormatRegistryResolver();
+    private ValueFormatRegistryResolver valueFormatRegistryResolver =
+            new SimpleValueFormatRegistryResolver();
 
     public DumpJob createJob() {
         isNotNull(dumpSpec, "Dump spec is required");
@@ -78,7 +78,7 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
         dumpJob.setTableTypes(dumpSpec.getTableTypes());
         dumpJob.setDialectResolver(getDialectResolver());
         dumpJob.setResultSetFormatFactory(getResultSetFormatFactory());
-        dumpJob.setJdbcTypeValueFormatRegistryResolver(getJdbcTypeValueFormatRegistryResolver());
+        dumpJob.setValueFormatRegistryResolver(getValueFormatRegistryResolver());
         return dumpJob;
     }
 
@@ -110,12 +110,12 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
         this.resultSetFormatFactory = resultSetFormatFactory;
     }
 
-    public JdbcTypeValueFormatRegistryResolver getJdbcTypeValueFormatRegistryResolver() {
-        return jdbcTypeValueFormatRegistryResolver;
+    public ValueFormatRegistryResolver getValueFormatRegistryResolver() {
+        return valueFormatRegistryResolver;
     }
 
-    public void setJdbcTypeValueFormatRegistryResolver(
-            JdbcTypeValueFormatRegistryResolver jdbcTypeValueFormatRegistryResolver) {
-        this.jdbcTypeValueFormatRegistryResolver = jdbcTypeValueFormatRegistryResolver;
+    public void setValueFormatRegistryResolver(
+            ValueFormatRegistryResolver valueFormatRegistryResolver) {
+        this.valueFormatRegistryResolver = valueFormatRegistryResolver;
     }
 }

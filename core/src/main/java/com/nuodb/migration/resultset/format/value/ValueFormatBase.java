@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.value;
 
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.Column;
@@ -40,48 +40,50 @@ import static java.lang.String.format;
 /**
  * @author Sergey Bushik
  */
-public abstract class JdbcTypeValueFormatBase<T> implements JdbcTypeValueFormat<T> {
+public abstract class ValueFormatBase<T> implements ValueFormat<T> {
 
     @Override
-    public String getValue(JdbcTypeValueAccess<T> access, Map<String, Object> options) {
+    public ValueVariant getValue(JdbcTypeValueAccess<T> valueAccess, Map<String, Object> valueAccessOptions) {
         try {
-            return doGetValue(access, options);
-        } catch (JdbcTypeValueException exception) {
+            return doGetValue(valueAccess, valueAccessOptions);
+        } catch (ValueFormatException exception) {
             throw exception;
         } catch (Exception exception) {
-            throw newGetValueFailure(access, exception);
+            throw newGetValueFailure(valueAccess, exception);
         }
     }
 
-    protected JdbcTypeValueException newGetValueFailure(JdbcTypeValueAccess access, Exception exception) {
-        ValueModel valueModel = access.getValueModel();
-        return new JdbcTypeValueException(format("Can't get value %s %s of column",
-                getValueModelName(valueModel), valueModel.getTypeName()), exception);
+    protected abstract ValueVariant doGetValue(JdbcTypeValueAccess<T> valueAccess,
+                                               Map<String, Object> valueAccessOptions) throws Exception;
+
+    protected ValueFormatException newGetValueFailure(JdbcTypeValueAccess valueAccess, Exception exception) {
+        ValueModel valueModel = valueAccess.getValueModel();
+        return new ValueFormatException(format("Can't get value %s %s of column",
+                getValueName(valueModel), valueModel.getTypeName()), exception);
     }
 
-    protected abstract String doGetValue(JdbcTypeValueAccess<T> access, Map<String, Object> options) throws Exception;
-
     @Override
-    public void setValue(JdbcTypeValueAccess<T> access, String value, Map<String, Object> options) {
+    public void setValue(ValueVariant variant, JdbcTypeValueAccess<T> valueAccess,
+                         Map<String, Object> valueAccessOptions) {
         try {
-            doSetValue(access, value, options);
-        } catch (JdbcTypeValueException exception) {
+            doSetValue(variant, valueAccess, valueAccessOptions);
+        } catch (ValueFormatException exception) {
             throw exception;
         } catch (Exception exception) {
-            throw newSetValueFailure(access, exception);
+            throw newSetValueFailure(valueAccess, exception);
         }
     }
 
-    protected abstract void doSetValue(JdbcTypeValueAccess<T> access, String value,
-                                       Map<String, Object> options) throws Exception;
+    protected abstract void doSetValue(ValueVariant variant, JdbcTypeValueAccess<T> valueAccess,
+                                       Map<String, Object> valueAccessOptions) throws Exception;
 
-    protected JdbcTypeValueException newSetValueFailure(JdbcTypeValueAccess access, Exception exception) {
-        ValueModel valueModel = access.getValueModel();
-        return new JdbcTypeValueException(format("Can't set value on %s %s column",
-                getValueModelName(valueModel), valueModel.getTypeName()), exception);
+    protected ValueFormatException newSetValueFailure(JdbcTypeValueAccess valueAccess, Exception exception) {
+        ValueModel valueModel = valueAccess.getValueModel();
+        return new ValueFormatException(format("Can't set value on %s %s column",
+                getValueName(valueModel), valueModel.getTypeName()), exception);
     }
 
-    protected String getValueModelName(ValueModel valueModel) {
+    protected String getValueName(ValueModel valueModel) {
         if (valueModel instanceof Column) {
             Column column = (Column) valueModel;
             Table table = column.getTable();

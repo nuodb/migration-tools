@@ -25,28 +25,20 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.type.access;
+package com.nuodb.migration.resultset.format.value;
 
-import com.nuodb.migration.jdbc.model.ValueModel;
-import com.nuodb.migration.jdbc.type.JdbcType;
-
-import java.sql.SQLException;
-import java.util.Map;
+import com.nuodb.migration.jdbc.dialect.NuoDBBigIntType;
+import com.nuodb.migration.jdbc.dialect.NuoDBIntegerType;
+import com.nuodb.migration.jdbc.dialect.NuoDBTimeType;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueAccess<T> {
+public class NuoDBValueFormatRegistry extends SimpleValueFormatRegistry {
 
-    JdbcType<T> getJdbcType();
-
-    int getColumn();
-
-    ValueModel getValueModel();
-
-    T getValue(Map<String, Object> options) throws SQLException;
-
-    <X> X getValue(Class<X> valueClass, Map<String, Object> options) throws SQLException;
-
-    <X> void setValue(X value, Map<String, Object> options) throws SQLException;
+    public NuoDBValueFormatRegistry() {
+        addValueFormat(NuoDBTimeType.INSTANCE, new NuoDBTimeValueFormat());
+        addValueFormat(NuoDBBigIntType.INSTANCE, new NuoDBBigIntValueFormat());
+        addValueFormat(NuoDBIntegerType.INSTANCE, new NuoDBIntegerValueFormat());
+    }
 }

@@ -25,53 +25,62 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.value;
 
+import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccess;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
-import static com.nuodb.migration.jdbc.type.JdbcTypeDesc.isTypeNameEquals;
+import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcDateTypeValueFormat extends JdbcTypeValueFormatBase<Date> {
-
-    private static final String YEAR_TYPE = "YEAR";
+public class JdbcTimestampValueFormat extends ValueFormatBase<Timestamp> {
 
     private static final DateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
 
     @Override
-    protected String doGetValue(JdbcTypeValueAccess<Date> access, Map<String, Object> options) throws SQLException {
-        Date date = access.getValue(options);
-        if (date == null) {
-            return null;
-        } else if (isTypeNameEquals(access.getValueModel().getTypeName(), YEAR_TYPE)) {
-            return YEAR_FORMAT.format(date);
-        } else {
-            return date.toString();
-        }
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<Timestamp> valueAccess,
+                                 Map<String, Object> valueAccessOptions) throws SQLException {
+        Timestamp timestamp = valueAccess.getValue(valueAccessOptions);
+        return string(timestamp != null ? timestamp.toString() : null);
     }
 
     @Override
-    protected void doSetValue(JdbcTypeValueAccess<Date> access, String value,
-                              Map<String, Object> options) throws SQLException {
-        if (!(doSetValueAsDate(access, value, options) || doSetValueAsYear(access, value, options))) {
-            throw new JdbcTypeValueException(format("Value %s is not a date nor year", value));
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Timestamp> valueAccess,
+                              Map<String, Object> valueAccessOptions) throws SQLException {
+        if (!(doSetValueAsTimestamp(variant, valueAccess, valueAccessOptions) || doSetValueAsDate(variant,
+                valueAccess, valueAccessOptions) ||
+                doSetValueAsYear(variant, valueAccess, valueAccessOptions))) {
+            throw new ValueFormatException(format("Value %s is not a timestamp, date nor year", variant));
         }
     }
 
-    protected boolean doSetValueAsDate(JdbcTypeValueAccess<Date> access, String value,
+    protected boolean doSetValueAsTimestamp(ValueVariant variant, JdbcTypeValueAccess<Timestamp> access,
+                                            Map<String, Object> options) throws SQLException {
+        try {
+            String value = variant.asString();
+            access.setValue(!isEmpty(value) ? Timestamp.valueOf(value) : null, options);
+            return true;
+        } catch (IllegalArgumentException exception) {
+            return false;
+        }
+    }
+
+    protected boolean doSetValueAsDate(ValueVariant variant, JdbcTypeValueAccess<Timestamp> access,
                                        Map<String, Object> options) throws SQLException {
         try {
+            String value = variant.asString();
             access.setValue(!isEmpty(value) ? Date.valueOf(value) : null, options);
             return true;
         } catch (IllegalArgumentException exception) {
@@ -79,13 +88,19 @@ public class JdbcDateTypeValueFormat extends JdbcTypeValueFormatBase<Date> {
         }
     }
 
-    protected boolean doSetValueAsYear(JdbcTypeValueAccess<Date> access, String value,
+    protected boolean doSetValueAsYear(ValueVariant variant, JdbcTypeValueAccess<Timestamp> access,
                                        Map<String, Object> options) throws SQLException {
         try {
+            String value = variant.asString();
             access.setValue(YEAR_FORMAT.parse(value), options);
             return true;
         } catch (ParseException e) {
             return false;
         }
+    }
+
+    @Override
+    public ValueVariantType getVariantType(ValueModel ValueModel) {
+        return ValueVariantType.STRING;
     }
 }

@@ -27,18 +27,25 @@
  */
 package com.nuodb.migration.resultset.format.xml;
 
-import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
+import com.nuodb.migration.resultset.format.utils.BinaryEncoder;
+import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueVariant;
+import com.nuodb.migration.resultset.format.value.ValueVariantType;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.*;
 import java.util.Iterator;
 
-import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModel;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
+import static com.nuodb.migration.resultset.format.value.ValueVariantType.STRING;
+import static com.nuodb.migration.resultset.format.value.ValueVariantType.fromAlias;
+import static com.nuodb.migration.resultset.format.value.ValueVariants.binary;
+import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
 import static java.lang.String.format;
 import static javax.xml.XMLConstants.NULL_NS_URI;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
@@ -49,7 +56,7 @@ import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
 public class XmlResultSetInput extends ResultSetInputBase implements XmlAttributes {
 
     private XMLStreamReader reader;
-    private Iterator<String[]> iterator;
+    private Iterator<ValueVariant[]> iterator;
 
     @Override
     public String getFormat() {
@@ -74,28 +81,30 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
 
     }
 
-    protected Iterator<String[]> createInputIterator() {
+    protected Iterator<ValueVariant[]> createInputIterator() {
         return new XmlInputIterator();
     }
 
     @Override
     protected void doReadBegin() {
-        ValueModelList<ValueModel> valueModelList = createValueModelList();
+        ValueModelList<ValueFormatModel> valueFormatModelList = createValueModelList();
         if (isNextElement(RESULT_SET_ELEMENT) && isNextElement(COLUMNS_ELEMENT)) {
             while (isNextElement(COLUMN_ELEMENT)) {
                 String column = getAttributeValue(NULL_NS_URI, ATTRIBUTE_NAME);
-                if (column != null) {
-                    valueModelList.add(createValueModel(column));
-                } else {
+                ValueFormatModel valueFormatModel = new SimpleValueFormatModel();
+                valueFormatModel.setName(column);
+                valueFormatModel.setValueVariantType(fromAlias(getAttributeValue(NULL_NS_URI, ATTRIBUTE_VARIANT)));
+                if (column == null) {
                     Location location = reader.getLocation();
                     throw new ResultSetInputException(
                             format("Element %s doesn't have %s attribute [location at %d:%d]",
                                     COLUMN_ELEMENT, ATTRIBUTE_NAME,
                                     location.getLineNumber(), location.getColumnNumber()));
                 }
+                valueFormatModelList.add(valueFormatModel);
             }
         }
-        setValueModelList(valueModelList);
+        setValueFormatModelList(valueFormatModelList);
     }
 
     @Override
@@ -108,21 +117,33 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
         setValues(iterator.next());
     }
 
-    protected String[] doReadRow() {
-        String[] values = null;
+    protected ValueVariant[] doReadRow() {
+        ValueVariant[] values = null;
         if (isCurrentElement(ROW_ELEMENT) || isNextElement(ROW_ELEMENT)) {
-            values = new String[getValueModelList().size()];
-            int column = 0;
+            int i = 0;
+            ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
+            values = new ValueVariant[valueFormatModelList.size()];
             while (isNextElement(COLUMN_ELEMENT)) {
                 String nil = getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE);
                 if (!StringUtils.equals(nil, "true")) {
+                    String value;
                     try {
-                        values[column] = XmlEscape.INSTANCE.unescape(reader.getElementText());
+                         value = reader.getElementText();
                     } catch (XMLStreamException exception) {
                         throw new ResultSetInputException(exception);
                     }
+                    ValueVariantType valueVariantType = valueFormatModelList.get(i).getValueVariantType();
+                    valueVariantType = valueVariantType != null ? valueVariantType : STRING;
+                    switch (valueVariantType) {
+                        case BINARY:
+                            values[i] = binary(BinaryEncoder.HEX.decode(value));
+                        break;
+                        case STRING:
+                            values[i] = string(XmlEscape.INSTANCE.unescape(value));
+                        break;
+                    }
                 }
-                column++;
+                i++;
             }
         }
         return values;
@@ -166,9 +187,9 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
         }
     }
 
-    class XmlInputIterator implements Iterator<String[]> {
+    class XmlInputIterator implements Iterator<ValueVariant[]> {
 
-        private String[] current;
+        private ValueVariant[] current;
 
         @Override
         public boolean hasNext() {
@@ -179,8 +200,8 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
         }
 
         @Override
-        public String[] next() {
-            String[] next = current;
+        public ValueVariant[] next() {
+            ValueVariant[] next = current;
             current = null;
             if (next == null) {
                 next = doReadRow();

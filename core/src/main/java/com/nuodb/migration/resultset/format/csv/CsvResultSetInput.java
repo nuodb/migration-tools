@@ -27,10 +27,14 @@
  */
 package com.nuodb.migration.resultset.format.csv;
 
-import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.resultset.format.ResultSetInputBase;
 import com.nuodb.migration.resultset.format.ResultSetInputException;
+import com.nuodb.migration.resultset.format.utils.BinaryEncoder;
+import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueVariant;
+import com.nuodb.migration.resultset.format.value.ValueVariantType;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -40,9 +44,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 
-import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModel;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
+import static com.nuodb.migration.resultset.format.value.ValueVariantType.STRING;
+import static com.nuodb.migration.resultset.format.value.ValueVariantType.fromAlias;
+import static com.nuodb.migration.resultset.format.value.ValueVariants.binary;
+import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
 import static java.lang.String.valueOf;
+import static org.apache.commons.lang3.StringUtils.split;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * @author Sergey Bushik
@@ -78,13 +88,22 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
 
     @Override
     protected void doReadBegin() {
-        ValueModelList<ValueModel> valueModelList = createValueModelList();
+        ValueModelList<ValueFormatModel> valueFormatModelList = createValueModelList();
         if (iterator.hasNext()) {
-            for (String column : iterator.next()) {
-                valueModelList.add(createValueModel(column));
+            final CSVRecord record = iterator.next();
+            String[] aliases = split(record.getComment(), ",");
+            int i = 0;
+            for (String column : record) {
+                ValueFormatModel valueFormatModel = new SimpleValueFormatModel();
+                valueFormatModel.setName(column);
+                if (aliases != null && i < aliases.length) {
+                    valueFormatModel.setValueVariantType(fromAlias(trim(aliases[i])));
+                }
+                valueFormatModelList.add(valueFormatModel);
+                i++;
             }
         }
-        setValueModelList(valueModelList);
+        setValueFormatModelList(valueFormatModelList);
     }
 
     @Override
@@ -94,17 +113,27 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
 
     @Override
     public void readRow() {
-        String[] values = new String[getValueModelList().size()];
-        Iterator<String> iterator = this.iterator.next().iterator();
-        int column = 0;
-        while (iterator.hasNext()) {
-            String value = iterator.next();
+        final CSVRecord record = iterator.next();
+        ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
+        ValueVariant[] values = new ValueVariant[valueFormatModelList.size()];
+        int i = 0;
+        for (String value : newArrayList(record.iterator())) {
             if (doubleQuote.equals(value)) {
                 value = StringUtils.EMPTY;
             } else if (value != null && value.length() == 0) {
                 value = null;
             }
-            values[column++] = value;
+            ValueVariantType valueVariantType = valueFormatModelList.get(i).getValueVariantType();
+            valueVariantType = valueVariantType != null ? valueVariantType : STRING;
+            switch (valueVariantType) {
+                case BINARY:
+                    values[i] = binary(BinaryEncoder.HEX.decode(value));
+                    break;
+                case STRING:
+                    values[i] = string(value);
+                    break;
+            }
+            i++;
         }
         setValues(values);
     }

@@ -27,9 +27,11 @@
  */
 package com.nuodb.migration.resultset.format.csv;
 
-import com.nuodb.migration.jdbc.model.ValueModel;
 import com.nuodb.migration.resultset.format.ResultSetOutputBase;
 import com.nuodb.migration.resultset.format.ResultSetOutputException;
+import com.nuodb.migration.resultset.format.utils.BinaryEncoder;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueVariant;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -37,6 +39,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 
+import static com.nuodb.migration.resultset.format.value.ValueVariantType.toAlias;
 import static java.lang.String.valueOf;
 
 /**
@@ -65,15 +68,24 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
         } else if (getOutputStream() != null) {
             String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
             printer = new CSVPrinter(new OutputStreamWriter(getOutputStream(), Charset.forName(encoding)), format);
-
         }
     }
 
     @Override
     protected void doWriteBegin() {
         try {
-            for (ValueModel valueModel : getValueModelList()) {
-                printer.print(valueModel.getName());
+            final StringBuilder variant = new StringBuilder();
+            int i = 0;
+            for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
+                if (i++ > 0) {
+                    variant.append(",");
+                }
+                variant.append(toAlias(valueFormatModel.getValueVariantType()));
+            }
+            printer.printComment(variant.toString());
+            for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
+                printer.print(valueFormatModel.getName());
+
             }
             printer.println();
         } catch (IOException e) {
@@ -82,15 +94,26 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
     }
 
     @Override
-    protected void writeRow(String[] columnValues) {
+    protected void writeValues(ValueVariant[] variants) {
         try {
-            for (int i = 0; i < columnValues.length; i++) {
-                String columnValue = columnValues[i];
-                if (columnValue != null && columnValue.length() == 0) {
-                    columnValues[i] = doubleQuote;
+            String[] values = new String[variants.length];
+            for (int i = 0; i < variants.length; i++) {
+                ValueVariant variant = variants[i];
+                String value = null;
+                switch (getValueFormatModelList().get(i).getValueVariantType()) {
+                    case BINARY:
+                        value = BinaryEncoder.HEX.encode(variant.asBytes());
+                        break;
+                    case STRING:
+                        value = variant.asString();
+                        break;
                 }
+                if (value != null && value.length() == 0) {
+                    value = doubleQuote;
+                }
+                values[i] = value;
             }
-            printer.printRecord(columnValues);
+            printer.printRecord(values);
         } catch (IOException e) {
             throw new ResultSetOutputException(e);
         }

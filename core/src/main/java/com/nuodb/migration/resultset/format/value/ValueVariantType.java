@@ -25,12 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.resultset.format.jdbc;
+package com.nuodb.migration.resultset.format.value;
 
-import com.nuodb.migration.jdbc.resolve.ServiceResolver;
+import java.util.Collections;
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newTreeMap;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcTypeValueFormatRegistryResolver extends ServiceResolver<JdbcTypeValueFormatRegistry> {
+public enum ValueVariantType {
+
+    STRING, BINARY;
+
+    private static final Map<String, ValueVariantType> ALIASES;
+
+    public static String toAlias(ValueVariantType valueVariantType) {
+        return valueVariantType.name().toLowerCase();
+    }
+
+    public static ValueVariantType fromAlias(String alias) {
+        return ALIASES.get(alias);
+    }
+
+    static {
+        Map<String, ValueVariantType> aliases = newTreeMap(CASE_INSENSITIVE_ORDER);
+        for (ValueVariantType valueVariantType : values()) {
+            aliases.put(valueVariantType.name(), valueVariantType);
+        }
+        ALIASES = Collections.unmodifiableMap(aliases);
+    }
 }
