@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
@@ -118,24 +119,24 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
         final CSVRecord record = iterator.next();
         ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
         ValueVariant[] values = new ValueVariant[valueFormatModelList.size()];
-        int i = 0;
-        for (String value : newArrayList(record.iterator())) {
+        List<String> columns = newArrayList(record.iterator());
+        for (int j = 0; j < values.length; j++) {
+            String value = j < columns.size() ? columns.get(j) : null;
             if (doubleQuote.equals(value)) {
                 value = StringUtils.EMPTY;
             } else if (value != null && value.length() == 0) {
                 value = null;
             }
-            ValueVariantType valueVariantType = valueFormatModelList.get(i).getValueVariantType();
+            ValueVariantType valueVariantType = valueFormatModelList.get(j).getValueVariantType();
             valueVariantType = valueVariantType != null ? valueVariantType : STRING;
             switch (valueVariantType) {
                 case BINARY:
-                    values[i] = binary(BinaryEncoder.HEX.decode(value));
+                    values[j] = binary(BinaryEncoder.HEX.decode(value));
                     break;
                 case STRING:
-                    values[i] = string(value);
+                    values[j] = string(value);
                     break;
             }
-            i++;
         }
         setValues(values);
     }

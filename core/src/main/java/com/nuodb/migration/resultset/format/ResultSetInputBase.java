@@ -114,6 +114,9 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
     protected void setValues(ValueVariant[] variants) {
         ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
         for (int index = 0; index < variants.length; index++) {
+            if (variants[index] == null) {
+                System.out.println("ResultSetInputBase.setValues");
+            }
             ValueFormatModel valueFormatModel = valueFormatModelList.get(index);
             valueFormatModel.getValueFormat().setValue(
                     variants[index], valueFormatModel.getValueAccess(),

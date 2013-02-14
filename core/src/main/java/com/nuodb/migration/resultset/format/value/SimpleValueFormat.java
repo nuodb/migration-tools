@@ -125,6 +125,9 @@ public class SimpleValueFormat extends ValueFormatBase<Object> {
     protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Object> valueAccess,
                               Map<String, Object> valueAccessOptions) throws Exception {
         ValueModel valueModel = valueAccess.getValueModel();
+        if (variant == null) {
+            System.out.println("SimpleValueFormat.doSetValue");
+        }
         final String value = variant.asString();
         switch (valueModel.getTypeCode()) {
             case Types.BIT:

@@ -40,6 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  */
 class CsvFormatBuilder implements CsvAttributes {
 
+
     private ResultSetFormat format;
 
     private Character delimiter;
@@ -54,13 +55,15 @@ class CsvFormatBuilder implements CsvAttributes {
 
     public CSVFormat build() {
         String delimiterValue = (String) format.getAttribute(ATTRIBUTE_DELIMITER);
-
         if (isEmpty(delimiterValue)) {
             delimiter = DELIMITER;
         } else {
-            delimiter = delimiterValue.charAt(0);
+            if (delimiterValue.equalsIgnoreCase(ATTRIBUTE_DELIMITER_TAB)) {
+                delimiter = TAB;
+            } else {
+                delimiter = delimiterValue.charAt(0);
+            }
         }
-
         String quotingValue = (String) format.getAttribute(ATTRIBUTE_QUOTING);
         if (isEmpty(quotingValue)) {
             quoting = QUOTING;

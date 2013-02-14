@@ -33,12 +33,10 @@ import static java.lang.System.getProperty;
  * @author Sergey Bushik
  */
 public interface CsvAttributes {
-
     /**
      * Input & output stream encoding
      */
     final String ATTRIBUTE_ENCODING = "csv.encoding";
-
     /**
      * The symbol used for value separation, must not be a line break character.
      */
@@ -60,10 +58,13 @@ public interface CsvAttributes {
      */
     final String ATTRIBUTE_LINE_SEPARATOR = "csv.line.separator";
 
+    final String ATTRIBUTE_DELIMITER_TAB = "tab";
     final String FORMAT = "csv";
     final char COMMENT_START = '#';
     final String ENCODING = getProperty("file.encoding");
-    final Character DELIMITER = ',';
+    final Character TAB = '\t';
+    final Character COMMA = ',';
+    final Character DELIMITER = COMMA;
     final String LINE_SEPARATOR = "\r\n";
     final boolean QUOTING = false;
     final Character QUOTE = '"';

@@ -29,7 +29,7 @@
 # JAVA_HOME can optionally be set here
 
 # NUODB_HOME is set here
-NUODB_HOME=/opt/nuodb
+: ${NUODB_HOME:="/opt/nuodb"}
 
 # Maximum heap size
 MAX_HEAP_SIZE="256M"
