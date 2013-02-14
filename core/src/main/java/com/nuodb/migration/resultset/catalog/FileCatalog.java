@@ -41,7 +41,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  */
 public class FileCatalog implements Catalog {
 
-    private static Regex CATALOG_FILE_NAME_REGEX = AntRegexCompiler.INSTANCE.compile("*.cat");
+    private static Regex CATALOG_FILE_REGEX = AntRegexCompiler.INSTANCE.compile("*.cat");
     private static final String CATALOG_FILE_NAME = "dump.cat";
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -59,7 +59,7 @@ public class FileCatalog implements Catalog {
     }
 
     protected File getPathFile() {
-        return new File(path == null ? new File(EMPTY).getAbsolutePath() : path);
+        return new File(path == null ? EMPTY : path).getAbsoluteFile();
     }
 
     protected File getCatalogDir() {
@@ -67,11 +67,11 @@ public class FileCatalog implements Catalog {
     }
 
     protected boolean isPathCatalogFile(File pathFile) {
-        return ((pathFile.exists() && pathFile.isFile()) || isPathLikeCatalogFile(pathFile));
+        return ((pathFile.exists() && pathFile.isFile()) || isCatalogFileLike(pathFile));
     }
 
-    protected boolean isPathLikeCatalogFile(File pathFile) {
-        return CATALOG_FILE_NAME_REGEX.test(pathFile.getName());
+    protected boolean isCatalogFileLike(File pathFile) {
+        return CATALOG_FILE_REGEX.test(pathFile.getName());
     }
 
     protected File getCatalogFile() {

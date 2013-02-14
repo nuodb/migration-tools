@@ -27,16 +27,18 @@
  */
 package com.nuodb.migration.resultset.format.csv;
 
+import static java.lang.System.getProperty;
+
 /**
  * @author Sergey Bushik
  */
 public interface CsvAttributes {
 
-    final String ENCODING = "utf-8";
+    /**
+     * Input & output stream encoding
+     */
+    final String ATTRIBUTE_ENCODING = "csv.encoding";
 
-    final String FORMAT = "csv";
-
-    final char COMMENT_START = '#';
     /**
      * The symbol used for value separation, must not be a line break character.
      */
@@ -45,10 +47,6 @@ public interface CsvAttributes {
      * Indicates whether quotation should be used.
      */
     final String ATTRIBUTE_QUOTING = "csv.quoting";
-    /**
-     * Output stream encoding
-     */
-    final String ATTRIBUTE_ENCODING = "csv.encoding";
     /**
      * The symbol used as value encapsulation marker.
      */
@@ -62,6 +60,9 @@ public interface CsvAttributes {
      */
     final String ATTRIBUTE_LINE_SEPARATOR = "csv.line.separator";
 
+    final String FORMAT = "csv";
+    final char COMMENT_START = '#';
+    final String ENCODING = getProperty("file.encoding");
     final Character DELIMITER = ',';
     final String LINE_SEPARATOR = "\r\n";
     final boolean QUOTING = false;

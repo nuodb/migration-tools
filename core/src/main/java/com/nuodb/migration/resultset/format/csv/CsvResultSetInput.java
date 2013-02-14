@@ -42,6 +42,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -78,8 +79,8 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
             if (getReader() != null) {
                 parser = new CSVParser(getReader(), format);
             } else if (getInputStream() != null) {
-                String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, System.getProperty("file.encoding"));
-                parser = new CSVParser(new InputStreamReader(getInputStream(), encoding), format);
+                String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
+                parser = new CSVParser(new InputStreamReader(getInputStream(), Charset.forName(encoding)), format);
             }
         } catch (IOException exception) {
             throw new ResultSetInputException(exception);
