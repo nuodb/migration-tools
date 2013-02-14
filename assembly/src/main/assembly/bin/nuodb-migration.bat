@@ -1,3 +1,4 @@
+@echo off
 @REM Copyright (c) 2012, NuoDB, Inc.
 @REM All rights reserved.
 @REM
@@ -24,20 +25,28 @@
 @REM OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 @REM ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# JAVA_HOME can optionally be set here
+@REM  JAVA_HOME can optionally be set here
 
-# NUODB_HOME is set here
-NUODB_HOME=C:\Program Files\NuoDB
+@REM  NUODB_HOME is set here
+if exist %NUODB_HOME% goto okNuoDBHome
+set NUODB_HOME="C:\Program Files\NuoDB"
+if exist %NUODB_HOME% goto okNuoDBHome
+set NUODB_HOME="C:\Program Files (x86)\NuoDB"
 
-# Maximum heap size
-MAX_HEAP_SIZE="256M"
+:okNuoDBHome
 
-if not defined JAVA_HOME goto :error
-if not defined NUODB_MIGRATION_HOME set NUODB_MIGRATION_HOME=%~dp0..
+@REM  Maximum heap size
+set MAX_HEAP_SIZE="256M"
 
-JAVA_OPTS=-Xmx$%MAX_HEAP_SIZE% -Dnuodb.home=%NUODB_HOME% -Dnuodb.migration.home=%NUODB_MIGRATION_HOME%
+if "%JAVA_HOME%" == "" goto error
+if not "%NUODB_MIGRATION_HOME%" == "" goto okHome
+set CURRENT_DIR=%cd%
+set NUODB_MIGRATION_HOME="%CURRENT_DIR%\.."
 
-"%JAVA_HOME%\bin\java" $JAVA_OPTS -cp %NUODB_MIGRATION_HOME%\bin\bootstrap.jar com.nuodb.migration.bootstrap.Bootstrap %*
+:okHome
+set JAVA_OPTS=-Xmx%MAX_HEAP_SIZE% -Dnuodb.home=%NUODB_HOME% -Dnuodb.migration.home=%NUODB_MIGRATION_HOME%
+
+"%JAVA_HOME%\bin\java" %JAVA_OPTS% -cp %NUODB_MIGRATION_HOME%\bin\bootstrap.jar com.nuodb.migration.bootstrap.Bootstrap %*
 
 GOTO :finally
 
