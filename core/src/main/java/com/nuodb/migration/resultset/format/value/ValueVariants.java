@@ -34,12 +34,16 @@ import java.util.Arrays;
  */
 public class ValueVariants {
 
+    public static final ValueVariant BINARY_NULL = new BinaryVariant(null);
+
+    public static final ValueVariant STRING_NULL = new StringVariant(null);
+
     public static ValueVariant binary(byte[] value) {
-        return new BinaryVariant(value);
+        return value == null ? BINARY_NULL : new BinaryVariant(value);
     }
 
     public static ValueVariant string(String value) {
-        return new StringVariant(value);
+        return value == null ? STRING_NULL : new StringVariant(value);
     }
 
     static class BinaryVariant implements ValueVariant {
@@ -52,7 +56,7 @@ public class ValueVariants {
 
         @Override
         public String asString() {
-            return new String(value);
+            return value != null ? new String(value) : null;
         }
 
         @Override
@@ -108,7 +112,7 @@ public class ValueVariants {
 
         @Override
         public byte[] asBytes() {
-            return value.getBytes();
+            return value != null ? value.getBytes() : null;
         }
 
         @Override

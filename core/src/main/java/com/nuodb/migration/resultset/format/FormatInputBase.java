@@ -128,12 +128,10 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
     protected abstract ValueVariant[] readValues();
 
     protected void setValues(ValueVariant[] values) {
-        ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
+        ValueModelList<ValueFormatModel> list = getValueFormatModelList();
         for (int index = 0; index < values.length; index++) {
-            ValueFormatModel valueFormatModel = valueFormatModelList.get(index);
-            valueFormatModel.getValueFormat().setValue(
-                    values[index], valueFormatModel.getValueAccess(),
-                    valueFormatModel.getValueAccessOptions());
+            ValueFormatModel model = list.get(index);
+            model.getValueFormat().setValue(values[index], model.getValueAccess(), model.getValueAccessOptions());
         }
     }
 

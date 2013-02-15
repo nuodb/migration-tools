@@ -32,9 +32,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.resultset.format.FormatInputBase;
 import com.nuodb.migration.resultset.format.FormatInputException;
-import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
-import com.nuodb.migration.resultset.format.value.ValueFormatModel;
-import com.nuodb.migration.resultset.format.value.ValueVariant;
+import com.nuodb.migration.resultset.format.value.*;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
@@ -42,7 +40,9 @@ import java.util.Iterator;
 
 import static com.fasterxml.jackson.core.JsonToken.*;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
+import static com.nuodb.migration.resultset.format.value.ValueVariantType.STRING;
 import static com.nuodb.migration.resultset.format.value.ValueVariantType.fromAlias;
+import static com.nuodb.migration.resultset.format.value.ValueVariantUtils.fill;
 import static com.nuodb.migration.resultset.format.value.ValueVariants.binary;
 import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
@@ -134,23 +134,26 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
         ValueVariant[] values = null;
         try {
             if (isCurrentToken(START_ARRAY)) {
-                ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
-                values = new ValueVariant[valueFormatModelList.size()];
+                ValueModelList<ValueFormatModel> list = getValueFormatModelList();
+                values = new ValueVariant[list.size()];
                 reader.nextToken();
-                int i = 0;
+                int index = 0;
                 while (isCurrentToken(VALUE_NULL) || isCurrentToken(VALUE_STRING)) {
-                    switch (valueFormatModelList.get(i).getValueVariantType()) {
+                    ValueVariantType valueVariantType = list.get(index).getValueVariantType();
+                    valueVariantType = valueVariantType != null ? valueVariantType : STRING;
+                    switch (valueVariantType) {
                         case BINARY:
-                            values[i] = binary(reader.getBinaryValue());
+                            values[index] = binary(reader.getBinaryValue());
                             break;
                         case STRING:
-                            values[i] = string(reader.getText());
+                            values[index] = string(reader.getText());
                             break;
                     }
-                    i++;
+                    index++;
                     reader.nextToken();
                 }
                 reader.nextToken();
+                fill(values, list, index);
             }
         } catch (IOException exception) {
             throw new FormatInputException(exception);

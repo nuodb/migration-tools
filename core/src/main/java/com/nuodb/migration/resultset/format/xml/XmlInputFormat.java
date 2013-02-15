@@ -44,6 +44,7 @@ import java.util.Iterator;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 import static com.nuodb.migration.resultset.format.value.ValueVariantType.STRING;
 import static com.nuodb.migration.resultset.format.value.ValueVariantType.fromAlias;
+import static com.nuodb.migration.resultset.format.value.ValueVariantUtils.fill;
 import static com.nuodb.migration.resultset.format.value.ValueVariants.binary;
 import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
 import static java.lang.String.format;
@@ -120,31 +121,31 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
     protected ValueVariant[] doReadValues() {
         ValueVariant[] values = null;
         if (isCurrentElement(ROW_ELEMENT) || isNextElement(ROW_ELEMENT)) {
-            int i = 0;
-            ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
-            values = new ValueVariant[valueFormatModelList.size()];
+            int index = 0;
+            ValueModelList<ValueFormatModel> model = getValueFormatModelList();
+            values = new ValueVariant[model.size()];
             while (isNextElement(COLUMN_ELEMENT)) {
-                String nil = getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE);
-                if (!StringUtils.equals(nil, "true")) {
-                    String value;
-                    try {
-                         value = reader.getElementText();
-                    } catch (XMLStreamException exception) {
-                        throw new FormatInputException(exception);
-                    }
-                    ValueVariantType valueVariantType = valueFormatModelList.get(i).getValueVariantType();
-                    valueVariantType = valueVariantType != null ? valueVariantType : STRING;
-                    switch (valueVariantType) {
-                        case BINARY:
-                            values[i] = binary(BinaryEncoder.HEX.decode(value));
-                        break;
-                        case STRING:
-                            values[i] = string(XmlEscape.INSTANCE.unescape(value));
-                        break;
-                    }
+                boolean nil = StringUtils.equals(
+                        getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE), "true");
+                String value;
+                try {
+                     value = nil ? null : reader.getElementText();
+                } catch (XMLStreamException exception) {
+                    throw new FormatInputException(exception);
                 }
-                i++;
+                ValueVariantType type = model.get(index).getValueVariantType();
+                type = type != null ? type : STRING;
+                switch (type) {
+                    case BINARY:
+                        values[index] = binary(BinaryEncoder.HEX.decode(value));
+                    break;
+                    case STRING:
+                        values[index] = string(XmlEscape.INSTANCE.unescape(value));
+                    break;
+                }
+                index++;
             }
+            fill(values, model, index);
         }
         return values;
     }

@@ -31,10 +31,7 @@ import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.resultset.format.FormatInputBase;
 import com.nuodb.migration.resultset.format.FormatInputException;
 import com.nuodb.migration.resultset.format.utils.BinaryEncoder;
-import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
-import com.nuodb.migration.resultset.format.value.ValueFormatModel;
-import com.nuodb.migration.resultset.format.value.ValueVariant;
-import com.nuodb.migration.resultset.format.value.ValueVariantType;
+import com.nuodb.migration.resultset.format.value.*;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -44,12 +41,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Iterator;
-import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
 import static com.nuodb.migration.resultset.format.value.ValueVariantType.STRING;
 import static com.nuodb.migration.resultset.format.value.ValueVariantType.fromAlias;
+import static com.nuodb.migration.resultset.format.value.ValueVariantUtils.fill;
 import static com.nuodb.migration.resultset.format.value.ValueVariants.binary;
 import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
 import static java.lang.String.valueOf;
@@ -91,22 +88,22 @@ public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
 
     @Override
     protected void doReadBegin() {
-        ValueModelList<ValueFormatModel> valueFormatModelList = createValueModelList();
+        ValueModelList<ValueFormatModel> list = createValueModelList();
         if (iterator.hasNext()) {
             final CSVRecord record = iterator.next();
             String[] aliases = split(record.getComment(), ",");
             int i = 0;
             for (String column : record) {
-                ValueFormatModel valueFormatModel = new SimpleValueFormatModel();
-                valueFormatModel.setName(column);
+                ValueFormatModel model = new SimpleValueFormatModel();
+                model.setName(column);
                 if (aliases != null && i < aliases.length) {
-                    valueFormatModel.setValueVariantType(fromAlias(trim(aliases[i])));
+                    model.setValueVariantType(fromAlias(trim(aliases[i])));
                 }
-                valueFormatModelList.add(valueFormatModel);
+                list.add(model);
                 i++;
             }
         }
-        setValueFormatModelList(valueFormatModelList);
+        setValueFormatModelList(list);
     }
 
     @Override
@@ -116,28 +113,28 @@ public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
 
     @Override
     protected ValueVariant[] readValues() {
-        final CSVRecord record = iterator.next();
-        ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
-        ValueVariant[] values = new ValueVariant[valueFormatModelList.size()];
-        List<String> columns = newArrayList(record.iterator());
-        for (int j = 0; j < values.length; j++) {
-            String value = j < columns.size() ? columns.get(j) : null;
+        CSVRecord record = iterator.next();
+        ValueModelList<ValueFormatModel> list = getValueFormatModelList();
+        ValueVariant[] values = new ValueVariant[list.size()];
+        int index = 0;
+        for (String value : newArrayList(record.iterator())) {
             if (doubleQuote.equals(value)) {
                 value = StringUtils.EMPTY;
             } else if (value != null && value.length() == 0) {
                 value = null;
             }
-            ValueVariantType valueVariantType = valueFormatModelList.get(j).getValueVariantType();
-            valueVariantType = valueVariantType != null ? valueVariantType : STRING;
-            switch (valueVariantType) {
+            ValueVariantType type = list.get(index).getValueVariantType();
+            type = type != null ? type : STRING;
+            switch (type) {
                 case BINARY:
-                    values[j] = binary(BinaryEncoder.HEX.decode(value));
+                    values[index] = binary(BinaryEncoder.HEX.decode(value));
                     break;
                 case STRING:
-                    values[j] = string(value);
+                    values[index] = string(value);
                     break;
             }
         }
+        fill(values, list, index);
         return values;
     }
 
