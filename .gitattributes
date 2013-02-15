@@ -1,0 +1,43 @@
+# Default
+*           text=auto
+ 
+# POSIX files
+*.sh        eol=lf
+*.initd     eol=lf
+ 
+# Windows files
+*.bat       eol=crlf
+*.cmd       eol=crlf
+*.sln       eol=crlf
+*.reg       eol=crlf
+*.hm        eol=crlf
+
+# Image/media files
+*.bmp       binary
+*.jpg       binary
+*.png       binary
+*.gif       binary
+*.pdf       binary
+*.ico       binary
+*.docx      binary
+*.dotx      binary
+*.gem       binary
+ 
+# Security files
+*.pem       binary
+*.pk12      binary
+*.pub       binary
+*.crt       binary
+*.signed    binary
+ 
+# Package files
+*.iso       binary
+*.rpm       binary
+*.deb       binary
+*.cpio      binary
+*.tar       binary
+*.z         binary
+*.gz        binary
+*.bz2       binary
+*.xz        binary
+*.zip       binary
