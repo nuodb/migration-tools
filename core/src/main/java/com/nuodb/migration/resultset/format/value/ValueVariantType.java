@@ -29,8 +29,8 @@ package com.nuodb.migration.resultset.format.value;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.TreeMap;
 
-import static com.google.common.collect.Maps.newTreeMap;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 /**
@@ -51,7 +51,7 @@ public enum ValueVariantType {
     }
 
     static {
-        Map<String, ValueVariantType> aliases = newTreeMap(CASE_INSENSITIVE_ORDER);
+        Map<String, ValueVariantType> aliases = new TreeMap<String, ValueVariantType>(CASE_INSENSITIVE_ORDER);
         for (ValueVariantType valueVariantType : values()) {
             aliases.put(valueVariantType.name(), valueVariantType);
         }

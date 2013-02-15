@@ -43,6 +43,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static java.lang.String.*;
+
 /**
  * @author Sergey Bushik
  */
@@ -52,10 +54,10 @@ public class SimpleFormatFactory implements FormatFactory {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private Map<String, Class<? extends FormatInput>> inputClasses =
-            new TreeMap<String, Class<? extends FormatInput>>(String.CASE_INSENSITIVE_ORDER);
+            new TreeMap<String, Class<? extends FormatInput>>(CASE_INSENSITIVE_ORDER);
 
     private Map<String, Class<? extends FormatOutput>> outputClasses =
-            new TreeMap<String, Class<? extends FormatOutput>>(String.CASE_INSENSITIVE_ORDER);
+            new TreeMap<String, Class<? extends FormatOutput>>(CASE_INSENSITIVE_ORDER);
 
     public SimpleFormatFactory() {
         registerFormat(CsvAttributes.FORMAT_TYPE, CsvInputFormat.class);
@@ -90,18 +92,18 @@ public class SimpleFormatFactory implements FormatFactory {
     protected Format createFormat(String formatType, Class<? extends Format> formatClass) {
         if (formatClass == null) {
             if (logger.isTraceEnabled()) {
-                logger.trace(String.format("Can't resolve format type %1$s to a class", formatType));
+                logger.trace(format("Can't resolve format type %1$s to a class", formatType));
             }
             ClassLoader classLoader = ReflectionUtils.getClassLoader();
             try {
                 formatClass = (Class<? extends Format>) classLoader.loadClass(formatType);
             } catch (ClassNotFoundException e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn(String.format("Loading %1$s as class failed", formatType));
+                    logger.warn(format("Loading %1$s as class failed", formatType));
                 }
             }
             if (formatClass == null) {
-                throw new FormatInputException(String.format("Format %1$s is not recognized", formatType));
+                throw new FormatInputException(format("Format %1$s is not recognized", formatType));
             }
         }
         return ReflectionUtils.newInstance(formatClass);

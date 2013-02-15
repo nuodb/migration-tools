@@ -58,6 +58,7 @@ import static com.google.common.collect.Multimaps.newListMultimap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migration.jdbc.metadata.generator.ScriptType.valueOf;
 import static java.lang.Boolean.parseBoolean;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -403,7 +404,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
 
     protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {
         Map<String, IdentifierNormalizer> identifierNormalizers =
-                new TreeMap<String, IdentifierNormalizer>(String.CASE_INSENSITIVE_ORDER);
+                new TreeMap<String, IdentifierNormalizer>(CASE_INSENSITIVE_ORDER);
         identifierNormalizers.put(IDENTIFIER_NORMALIZER_NOOP, IdentifierNormalizers.noop());
         identifierNormalizers.put(IDENTIFIER_NORMALIZER_STANDARD, IdentifierNormalizers.standard());
         identifierNormalizers.put(IDENTIFIER_NORMALIZER_LOWERCASE, IdentifierNormalizers.lowerCase());
@@ -413,7 +414,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
 
     protected Map<String, IdentifierQuoting> getIdentifierQuotings() {
         Map<String, IdentifierQuoting> identifierQuotings =
-                new TreeMap<String, IdentifierQuoting>(String.CASE_INSENSITIVE_ORDER);
+                new TreeMap<String, IdentifierQuoting>(CASE_INSENSITIVE_ORDER);
         identifierQuotings.put(IDENTIFIER_QUOTING_MINIMAL, IdentifierQuotings.minimal());
         identifierQuotings.put(IDENTIFIER_QUOTING_ALWAYS, IdentifierQuotings.always());
         return identifierQuotings;
