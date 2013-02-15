@@ -32,7 +32,7 @@ package com.nuodb.migration.resultset.format.bson;
  */
 public interface BsonAttributes {
 
-    final String FORMAT = "bson";
+    final String FORMAT_TYPE = "bson";
 
     final String COLUMNS_FIELD = "columns";
     final String VARIANT_FIELD = "variant";

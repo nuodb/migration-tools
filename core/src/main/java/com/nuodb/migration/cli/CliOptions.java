@@ -68,6 +68,8 @@ public interface CliOptions {
     final String TABLE_OPTION = "table";
     final String TABLE_TYPE_OPTION = "table.type";
     final String TABLE_FILTER_OPTION = "table.*.filter";
+    final String TABLE_INSERT_OPTION = "table.*.insert";
+    final String TABLE_REPLACE_OPTION = "table.*.replace";
 
     final String QUERY_OPTION = "query";
 
@@ -78,7 +80,7 @@ public interface CliOptions {
     final String TARGET_SCHEMA_OPTION = "target.schema";
 
     final String REPLACE_OPTION = "replace";
-    final String REPLACE_SHORT_OPTION = "replace";
+    final String REPLACE_SHORT_OPTION = "r";
 
     final String INPUT_OPTION = "input.*";
     final String INPUT_PATH_OPTION = "input.path";

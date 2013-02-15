@@ -58,8 +58,8 @@ public interface CsvAttributes {
      */
     final String ATTRIBUTE_LINE_SEPARATOR = "csv.line.separator";
 
+    final String FORMAT_TYPE = "csv";
     final String ATTRIBUTE_DELIMITER_TAB = "tab";
-    final String FORMAT = "csv";
     final char COMMENT_START = '#';
     final String ENCODING = getProperty("file.encoding");
     final Character TAB = '\t';

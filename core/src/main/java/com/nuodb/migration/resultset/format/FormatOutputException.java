@@ -27,42 +27,22 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.jdbc.model.ValueModelList;
-import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
-import com.nuodb.migration.resultset.format.value.ValueFormatModel;
-import com.nuodb.migration.resultset.format.value.ValueFormatRegistry;
-
-import java.util.Map;
-import java.util.TimeZone;
+import com.nuodb.migration.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public interface ResultSetFormat {
+public class FormatOutputException extends MigrationException {
 
-    String getFormat();
+    public FormatOutputException(String message) {
+        super(message);
+    }
 
-    TimeZone getTimeZone();
+    public FormatOutputException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    void setTimeZone(TimeZone timeZone);
-
-    Object getAttribute(String attribute);
-
-    Object getAttribute(String attribute, Object defaultValue);
-
-    Map<String, Object> getAttributes();
-
-    void setAttributes(Map<String, Object> attributes);
-
-    ValueModelList<ValueFormatModel> getValueFormatModelList();
-
-    void setValueFormatModelList(ValueModelList<ValueFormatModel> valueFormatModelList);
-
-    JdbcTypeValueAccessProvider getValueAccessProvider();
-
-    void setValueAccessProvider(JdbcTypeValueAccessProvider valueAccessProvider);
-
-    ValueFormatRegistry getValueFormatRegistry();
-
-    void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
+    public FormatOutputException(Throwable cause) {
+        super(cause);
+    }
 }

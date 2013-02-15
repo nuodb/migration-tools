@@ -27,14 +27,21 @@
  */
 package com.nuodb.migration.cli.run;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migration.cli.CliResources;
 import com.nuodb.migration.cli.parse.CommandLine;
 import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.option.GroupBuilder;
 import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
+import com.nuodb.migration.cli.parse.option.RegexOption;
 import com.nuodb.migration.jdbc.query.InsertType;
 import com.nuodb.migration.load.LoadJobFactory;
 import com.nuodb.migration.spec.LoadSpec;
+
+import java.util.Map;
+
+import static com.nuodb.migration.utils.Priority.LOW;
 
 /**
  * @author Sergey Bushik
@@ -69,7 +76,7 @@ public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, C
                     .withName(getResources().getMessage(LOAD_GROUP_NAME))
                     .withOption(createTargetGroup())
                     .withOption(createInputGroup())
-                    .withOption(createReplaceOption())
+                    .withOption(createInsertTypeGroup())
                     .withOption(createTimeZoneOption())
                     .withRequired(true).build();
         }
@@ -77,22 +84,49 @@ public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, C
         @Override
         protected void bind(CommandLine commandLine) {
             LoadSpec loadSpec = new LoadSpec();
-            loadSpec.setTargetConnectionSpec(parseTargetGroup(commandLine, this));
+            loadSpec.setConnectionSpec(parseTargetGroup(commandLine, this));
             loadSpec.setInputSpec(parseInputGroup(commandLine, this));
             loadSpec.setTimeZone(parseTimeZoneOption(commandLine, this));
-            loadSpec.setInsertType(parseReplaceOption(commandLine, this));
+            parseInsertTypeGroup(commandLine, loadSpec);
             ((LoadJobFactory) getJobFactory()).setLoadSpec(loadSpec);
         }
     }
 
-    protected Option createReplaceOption() {
-        return newOption().
+    protected Option createInsertTypeGroup() {
+        GroupBuilder group = newGroup().withName(getMessage(INSERT_TYPE_GROUP_NAME));
+
+        Option replace = newOption().
                 withName(REPLACE_OPTION).
                 withAlias(REPLACE_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(REPLACE_OPTION_DESCRIPTION)).build();
+        group.withOption(replace);
+
+        RegexOption replaceType = new RegexOption();
+        replaceType.setOptionFormat(getOptionFormat());
+        replaceType.setName(TABLE_REPLACE_OPTION);
+        replaceType.setDescription(getMessage(TABLE_REPLACE_OPTION_DESCRIPTION));
+        replaceType.addRegex(TABLE_REPLACE_OPTION, 1, LOW);
+        group.withOption(replaceType);
+
+        RegexOption insertType = new RegexOption();
+        insertType.setOptionFormat(getOptionFormat());
+        insertType.setName(TABLE_INSERT_OPTION);
+        insertType.setDescription(getMessage(TABLE_INSERT_OPTION_DESCRIPTION));
+        insertType.addRegex(TABLE_INSERT_OPTION, 1, LOW);
+        group.withOption(insertType);
+
+        return group.build();
     }
 
-    protected InsertType parseReplaceOption(CommandLine commandLine, Option option) {
-        return commandLine.hasOption(REPLACE_OPTION) ? InsertType.REPLACE : InsertType.INSERT;
+    protected void parseInsertTypeGroup(CommandLine commandLine, LoadSpec loadSpec) {
+        loadSpec.setInsertType(commandLine.hasOption(REPLACE_OPTION) ? InsertType.REPLACE : InsertType.INSERT);
+        Map<String, InsertType> tableInsertTypes = Maps.newHashMap();
+        for (String table : commandLine.<String>getValues(TABLE_INSERT_OPTION)) {
+            tableInsertTypes.put(table, InsertType.INSERT);
+        }
+        for (String table : commandLine.<String>getValues(TABLE_REPLACE_OPTION)) {
+            tableInsertTypes.put(table, InsertType.REPLACE);
+        }
+        loadSpec.setTableInsertTypes(tableInsertTypes);
     }
 }

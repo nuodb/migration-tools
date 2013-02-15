@@ -32,17 +32,17 @@ import com.nuodb.migration.MigrationException;
 /**
  * @author Sergey Bushik
  */
-public class ResultSetOutputException extends MigrationException {
+public class FormatInputException extends MigrationException {
 
-    public ResultSetOutputException(String message) {
+    public FormatInputException(String message) {
         super(message);
     }
 
-    public ResultSetOutputException(String message, Throwable cause) {
+    public FormatInputException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public ResultSetOutputException(Throwable cause) {
+    public FormatInputException(Throwable cause) {
         super(cause);
     }
 }

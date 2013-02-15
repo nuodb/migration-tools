@@ -50,8 +50,8 @@ import com.nuodb.migration.job.JobExecution;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.CatalogEntry;
 import com.nuodb.migration.resultset.catalog.CatalogWriter;
-import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.ResultSetOutput;
+import com.nuodb.migration.resultset.format.FormatOutput;
+import com.nuodb.migration.resultset.format.FormatFactory;
 import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
 import com.nuodb.migration.resultset.format.value.ValueFormatModel;
 import com.nuodb.migration.resultset.format.value.ValueFormatRegistryResolver;
@@ -93,7 +93,7 @@ public class DumpJob extends JobBase {
     private Map<String, Object> attributes;
     private ConnectionProvider connectionProvider;
     private DialectResolver dialectResolver;
-    private ResultSetFormatFactory resultSetFormatFactory;
+    private FormatFactory formatFactory;
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
 
     @Override
@@ -187,33 +187,33 @@ public class DumpJob extends JobBase {
 
     protected void dump(DumpJobExecution execution, Query query,
                         PreparedStatement preparedStatement) throws SQLException {
-        final ResultSetOutput resultSetOutput = getResultSetFormatFactory().createOutput(getOutputType());
-        resultSetOutput.setAttributes(getAttributes());
-        resultSetOutput.setValueFormatRegistry(execution.getValueFormatRegistry());
+        final FormatOutput formatOutput = getFormatFactory().createOutput(getOutputType());
+        formatOutput.setAttributes(getAttributes());
+        formatOutput.setValueFormatRegistry(execution.getValueFormatRegistry());
 
         Dialect dialect = execution.getDatabase().getDialect();
         if (!dialect.supportsSessionTimeZone() && dialect.supportsStatementWithTimezone()) {
-            resultSetOutput.setTimeZone(getTimeZone());
+            formatOutput.setTimeZone(getTimeZone());
         }
         JdbcTypeRegistry jdbcTypeRegistry = dialect.getJdbcTypeRegistry();
-        resultSetOutput.setValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
+        formatOutput.setValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
 
         ResultSet resultSet = preparedStatement.executeQuery();
-        resultSetOutput.setResultSet(resultSet);
-        resultSetOutput.setValueFormatModelList(createValueModelList(resultSet, query));
-        resultSetOutput.initOutputModel();
+        formatOutput.setResultSet(resultSet);
+        formatOutput.setValueFormatModelList(createValueModelList(resultSet, query));
+        formatOutput.initOutputModel();
 
         CatalogWriter catalogWriter = execution.getCatalogWriter();
         CatalogEntry catalogEntry = createCatalogEntry(query);
         catalogWriter.write(catalogEntry);
-        resultSetOutput.setOutputStream(catalogWriter.getOutputStream(catalogEntry));
-        resultSetOutput.initOutput();
+        formatOutput.setOutputStream(catalogWriter.getOutputStream(catalogEntry));
+        formatOutput.initOutput();
 
-        resultSetOutput.writeBegin();
+        formatOutput.writeBegin();
         while (execution.isRunning() && resultSet.next()) {
-            resultSetOutput.writeRow();
+            formatOutput.writeRow();
         }
-        resultSetOutput.writeEnd();
+        formatOutput.writeEnd();
     }
 
     protected CatalogEntry createCatalogEntry(Query query) {
@@ -365,12 +365,12 @@ public class DumpJob extends JobBase {
         this.dialectResolver = dialectResolver;
     }
 
-    public ResultSetFormatFactory getResultSetFormatFactory() {
-        return resultSetFormatFactory;
+    public FormatFactory getFormatFactory() {
+        return formatFactory;
     }
 
-    public void setResultSetFormatFactory(ResultSetFormatFactory resultSetFormatFactory) {
-        this.resultSetFormatFactory = resultSetFormatFactory;
+    public void setFormatFactory(FormatFactory formatFactory) {
+        this.formatFactory = formatFactory;
     }
 
     public ValueFormatRegistryResolver getValueFormatRegistryResolver() {

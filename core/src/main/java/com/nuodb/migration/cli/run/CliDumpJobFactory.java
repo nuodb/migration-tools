@@ -109,7 +109,6 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
         optionFormat.setArgumentValuesSeparator(null);
 
         RegexOption tableFilter = new RegexOption();
-        tableFilter.setOptionFormat(getOptionFormat());
         tableFilter.setName(TABLE_FILTER_OPTION);
         tableFilter.setDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
         tableFilter.setOptionFormat(optionFormat);
@@ -206,7 +205,7 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
         @Override
         protected void bind(CommandLine commandLine) {
             DumpSpec spec = new DumpSpec();
-            spec.setSourceConnectionSpec(parseSourceGroup(commandLine, this));
+            spec.setConnectionSpec(parseSourceGroup(commandLine, this));
             spec.setOutputSpec(parseOutputGroup(commandLine, this));
             parseTableGroup(commandLine, spec);
             spec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine));

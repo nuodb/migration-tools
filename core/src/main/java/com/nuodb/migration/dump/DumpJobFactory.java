@@ -33,8 +33,8 @@ import com.nuodb.migration.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.FileCatalog;
-import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.FormatFactory;
+import com.nuodb.migration.resultset.format.SimpleFormatFactory;
 import com.nuodb.migration.resultset.format.value.SimpleValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migration.spec.ConnectionSpec;
@@ -57,8 +57,8 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
 
     private DialectResolver dialectResolver =
             new SimpleDialectResolver();
-    private ResultSetFormatFactory resultSetFormatFactory =
-            new SimpleResultSetFormatFactory();
+    private FormatFactory formatFactory =
+            new SimpleFormatFactory();
     private ValueFormatRegistryResolver valueFormatRegistryResolver =
             new SimpleValueFormatRegistryResolver();
 
@@ -66,7 +66,7 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
         isNotNull(dumpSpec, "Dump spec is required");
 
         DumpJob dumpJob = new DumpJob();
-        ConnectionSpec connectionSpec = dumpSpec.getSourceConnectionSpec();
+        ConnectionSpec connectionSpec = dumpSpec.getConnectionSpec();
         dumpJob.setConnectionProvider(createConnectionProvider(connectionSpec, false));
         ResourceSpec outputSpec = dumpSpec.getOutputSpec();
         dumpJob.setOutputType(outputSpec.getType());
@@ -77,7 +77,7 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
         dumpJob.setNativeQuerySpecs(dumpSpec.getNativeQuerySpecs());
         dumpJob.setTableTypes(dumpSpec.getTableTypes());
         dumpJob.setDialectResolver(getDialectResolver());
-        dumpJob.setResultSetFormatFactory(getResultSetFormatFactory());
+        dumpJob.setFormatFactory(getFormatFactory());
         dumpJob.setValueFormatRegistryResolver(getValueFormatRegistryResolver());
         return dumpJob;
     }
@@ -102,12 +102,12 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
         this.dialectResolver = dialectResolver;
     }
 
-    public ResultSetFormatFactory getResultSetFormatFactory() {
-        return resultSetFormatFactory;
+    public FormatFactory getFormatFactory() {
+        return formatFactory;
     }
 
-    public void setResultSetFormatFactory(ResultSetFormatFactory resultSetFormatFactory) {
-        this.resultSetFormatFactory = resultSetFormatFactory;
+    public void setFormatFactory(FormatFactory formatFactory) {
+        this.formatFactory = formatFactory;
     }
 
     public ValueFormatRegistryResolver getValueFormatRegistryResolver() {

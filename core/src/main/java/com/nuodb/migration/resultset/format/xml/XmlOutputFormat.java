@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.resultset.format.xml;
 
-import com.nuodb.migration.resultset.format.ResultSetOutputBase;
-import com.nuodb.migration.resultset.format.ResultSetOutputException;
+import com.nuodb.migration.resultset.format.FormatOutputBase;
+import com.nuodb.migration.resultset.format.FormatOutputException;
 import com.nuodb.migration.resultset.format.utils.BinaryEncoder;
 import com.nuodb.migration.resultset.format.value.ValueFormatModel;
 import com.nuodb.migration.resultset.format.value.ValueVariant;
@@ -43,7 +43,7 @@ import static javax.xml.XMLConstants.*;
 /**
  * @author Sergey Bushik
  */
-public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttributes {
+public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
 
     private String encoding;
     private String version;
@@ -51,8 +51,8 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
     private XMLStreamWriter writer;
 
     @Override
-    public String getFormat() {
-        return FORMAT;
+    public String getType() {
+        return FORMAT_TYPE;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
                 writer = factory.createXMLStreamWriter(getOutputStream(), getEncoding());
             }
         } catch (XMLStreamException e) {
-            throw new ResultSetOutputException(e);
+            throw new FormatOutputException(e);
         }
     }
 
@@ -87,7 +87,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
-            throw new ResultSetOutputException(e);
+            throw new FormatOutputException(e);
         }
     }
 
@@ -118,7 +118,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             }
             writer.writeEndElement();
         } catch (XMLStreamException e) {
-            throw new ResultSetOutputException(e);
+            throw new FormatOutputException(e);
         }
     }
 
@@ -130,7 +130,7 @@ public class XmlResultSetOutput extends ResultSetOutputBase implements XmlAttrib
             writer.flush();
             writer.close();
         } catch (XMLStreamException e) {
-            throw new ResultSetOutputException(e);
+            throw new FormatOutputException(e);
         }
     }
 

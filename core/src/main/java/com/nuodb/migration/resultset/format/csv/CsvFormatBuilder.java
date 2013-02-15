@@ -27,7 +27,7 @@
  */
 package com.nuodb.migration.resultset.format.csv;
 
-import com.nuodb.migration.resultset.format.ResultSetFormat;
+import com.nuodb.migration.resultset.format.Format;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.Quote;
 
@@ -40,8 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  */
 class CsvFormatBuilder implements CsvAttributes {
 
-
-    private ResultSetFormat format;
+    private Format format;
 
     private Character delimiter;
     private boolean quoting;
@@ -49,7 +48,7 @@ class CsvFormatBuilder implements CsvAttributes {
     private Character escape;
     private String lineSeparator;
 
-    public CsvFormatBuilder(ResultSetFormat format) {
+    public CsvFormatBuilder(Format format) {
         this.format = format;
     }
 

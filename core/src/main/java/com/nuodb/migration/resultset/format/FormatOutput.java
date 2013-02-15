@@ -27,22 +27,29 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import com.nuodb.migration.MigrationException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public class ResultSetInputException extends MigrationException {
+public interface FormatOutput extends Format {
 
-    public ResultSetInputException(String message) {
-        super(message);
-    }
+    void writeBegin();
 
-    public ResultSetInputException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    void writeRow();
 
-    public ResultSetInputException(Throwable cause) {
-        super(cause);
-    }
+    void writeEnd();
+
+    void setResultSet(ResultSet resultSet);
+
+    void initOutputModel() throws SQLException;
+
+    void setWriter(Writer writer);
+
+    void setOutputStream(OutputStream outputStream);
+
+    void initOutput();
 }

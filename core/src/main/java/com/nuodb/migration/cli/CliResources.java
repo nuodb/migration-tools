@@ -134,4 +134,8 @@ public interface CliResources {
     final String JDBC_TYPE_PRECISION_ARGUMENT_NAME = "com.nuodb.migration.jdbc.type.precision.argument.name";
     final String JDBC_TYPE_SCALE_OPTION_DESCRIPTION = "com.nuodb.migration.jdbc.type.scale.option.description";
     final String JDBC_TYPE_SCALE_ARGUMENT_NAME = "com.nuodb.migration.jdbc.type.scale.argument.name";
+
+    final String INSERT_TYPE_GROUP_NAME = "com.nuodb.migration.insert.type.group.name";
+    final String TABLE_REPLACE_OPTION_DESCRIPTION = "com.nuodb.migration.table.replace.option.description";
+    final String TABLE_INSERT_OPTION_DESCRIPTION = "com.nuodb.migration.table.insert.option.description";
 }

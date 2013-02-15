@@ -27,8 +27,8 @@
  */
 package com.nuodb.migration.resultset.format.csv;
 
-import com.nuodb.migration.resultset.format.ResultSetOutputBase;
-import com.nuodb.migration.resultset.format.ResultSetOutputException;
+import com.nuodb.migration.resultset.format.FormatOutputBase;
+import com.nuodb.migration.resultset.format.FormatOutputException;
 import com.nuodb.migration.resultset.format.utils.BinaryEncoder;
 import com.nuodb.migration.resultset.format.value.ValueFormatModel;
 import com.nuodb.migration.resultset.format.value.ValueVariant;
@@ -46,14 +46,14 @@ import static java.lang.String.valueOf;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttributes {
+public class CsvOutputFormat extends FormatOutputBase implements CsvAttributes {
 
     private CSVPrinter printer;
     private String doubleQuote;
 
     @Override
-    public String getFormat() {
-        return FORMAT;
+    public String getType() {
+        return FORMAT_TYPE;
     }
 
     @Override
@@ -89,7 +89,7 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
             }
             printer.println();
         } catch (IOException e) {
-            throw new ResultSetOutputException(e);
+            throw new FormatOutputException(e);
         }
     }
 
@@ -115,7 +115,7 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
             }
             printer.printRecord(values);
         } catch (IOException e) {
-            throw new ResultSetOutputException(e);
+            throw new FormatOutputException(e);
         }
     }
 
@@ -124,7 +124,7 @@ public class CsvResultSetOutput extends ResultSetOutputBase implements CsvAttrib
         try {
             printer.close();
         } catch (IOException e) {
-            throw new ResultSetOutputException(e);
+            throw new FormatOutputException(e);
         }
     }
 }

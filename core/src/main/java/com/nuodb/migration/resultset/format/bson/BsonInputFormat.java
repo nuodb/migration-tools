@@ -30,12 +30,11 @@ package com.nuodb.migration.resultset.format.bson;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.nuodb.migration.jdbc.model.ValueModelList;
-import com.nuodb.migration.resultset.format.ResultSetInputBase;
-import com.nuodb.migration.resultset.format.ResultSetInputException;
+import com.nuodb.migration.resultset.format.FormatInputBase;
+import com.nuodb.migration.resultset.format.FormatInputException;
 import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
 import com.nuodb.migration.resultset.format.value.ValueFormatModel;
 import com.nuodb.migration.resultset.format.value.ValueVariant;
-import com.nuodb.migration.resultset.format.value.ValueVariantType;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
@@ -43,7 +42,6 @@ import java.util.Iterator;
 
 import static com.fasterxml.jackson.core.JsonToken.*;
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
-import static com.nuodb.migration.resultset.format.value.ValueVariantType.STRING;
 import static com.nuodb.migration.resultset.format.value.ValueVariantType.fromAlias;
 import static com.nuodb.migration.resultset.format.value.ValueVariants.binary;
 import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
@@ -52,14 +50,14 @@ import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 /**
  * @author Sergey Bushik
  */
-public class BsonResultSetInput extends ResultSetInputBase implements BsonAttributes {
+public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
 
     private JsonParser reader;
     private Iterator<ValueVariant[]> iterator;
 
     @Override
-    public String getFormat() {
-        return FORMAT;
+    public String getType() {
+        return FORMAT_TYPE;
     }
 
     @Override
@@ -73,7 +71,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
                 reader = factory.createJsonParser(getInputStream());
             }
         } catch (IOException exception) {
-            throw new ResultSetInputException(exception);
+            throw new FormatInputException(exception);
         }
         iterator = createInputIterator();
     }
@@ -98,7 +96,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
             reader.nextToken();
             reader.nextToken();
         } catch (IOException exception) {
-            throw new ResultSetInputException(exception);
+            throw new FormatInputException(exception);
         }
         setValueFormatModelList(valueFormatModelList);
     }
@@ -120,12 +118,11 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
         return iterator != null && iterator.hasNext();
     }
 
-    @Override
-    public void readRow() {
-        setValues(iterator.next());
+    protected ValueVariant[] readValues() {
+        return iterator.next();
     }
 
-    protected ValueVariant[] doReadRow() {
+    protected ValueVariant[] doReadValues() {
         ValueVariant[] values = null;
         try {
             if (isCurrentToken(START_ARRAY)) {
@@ -148,7 +145,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
                 reader.nextToken();
             }
         } catch (IOException exception) {
-            throw new ResultSetInputException(exception);
+            throw new FormatInputException(exception);
         }
         return values;
     }
@@ -158,7 +155,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
         try {
             reader.close();
         } catch (IOException exception) {
-            throw new ResultSetInputException(exception);
+            throw new FormatInputException(exception);
         }
     }
 
@@ -169,7 +166,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
         @Override
         public boolean hasNext() {
             if (current == null) {
-                current = doReadRow();
+                current = doReadValues();
             }
             return current != null;
         }
@@ -180,9 +177,9 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
             current = null;
             if (next == null) {
                 // hasNext() wasn't called before
-                next = doReadRow();
+                next = readValues();
                 if (next == null) {
-                    throw new ResultSetInputException("No more rows available");
+                    throw new FormatInputException("No more rows available");
                 }
             }
             return next;
@@ -190,7 +187,7 @@ public class BsonResultSetInput extends ResultSetInputBase implements BsonAttrib
 
         @Override
         public void remove() {
-            throw new ResultSetInputException("Removal is unsupported operation");
+            throw new FormatInputException("Removal is unsupported operation");
         }
     }
 }

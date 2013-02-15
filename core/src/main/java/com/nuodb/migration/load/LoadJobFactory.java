@@ -37,8 +37,8 @@ import com.nuodb.migration.job.JobFactory;
 import com.nuodb.migration.job.TraceJobExecutionListener;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.FileCatalog;
-import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.SimpleResultSetFormatFactory;
+import com.nuodb.migration.resultset.format.FormatFactory;
+import com.nuodb.migration.resultset.format.SimpleFormatFactory;
 import com.nuodb.migration.resultset.format.value.SimpleValueFormatRegistryResolver;
 import com.nuodb.migration.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migration.spec.ConnectionSpec;
@@ -56,8 +56,8 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
     private LoadSpec loadSpec;
     private DialectResolver dialectResolver =
             new SimpleDialectResolver();
-    private ResultSetFormatFactory resultSetFormatFactory =
-            new SimpleResultSetFormatFactory();
+    private FormatFactory formatFactory =
+            new SimpleFormatFactory();
     private ValueFormatRegistryResolver valueFormatRegistryResolver =
             new SimpleValueFormatRegistryResolver();
 
@@ -67,20 +67,21 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
 
         ResourceSpec inputSpec = loadSpec.getInputSpec();
         LoadJob job = new LoadJob();
-        ConnectionSpec connectionSpec = loadSpec.getTargetConnectionSpec();
+        ConnectionSpec connectionSpec = loadSpec.getConnectionSpec();
         job.setConnectionProvider(createConnectionProvider(connectionSpec, false));
 
         job.setAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));
         job.setTimeZone(loadSpec.getTimeZone());
         job.setInsertType(loadSpec.getInsertType());
+        job.setTableInsertTypes(loadSpec.getTableInsertTypes());
         job.setDialectResolver(getDialectResolver());
-        job.setResultSetFormatFactory(getResultSetFormatFactory());
+        job.setFormatFactory(getFormatFactory());
         job.setValueFormatRegistryResolver(getValueFormatRegistryResolver());
         return job;
     }
 
-    protected Catalog createCatalog(String path) {
+    public Catalog createCatalog(String path) {
         return new FileCatalog(path);
     }
 
@@ -100,12 +101,12 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
         this.dialectResolver = dialectResolver;
     }
 
-    public ResultSetFormatFactory getResultSetFormatFactory() {
-        return resultSetFormatFactory;
+    public FormatFactory getFormatFactory() {
+        return formatFactory;
     }
 
-    public void setResultSetFormatFactory(ResultSetFormatFactory resultSetFormatFactory) {
-        this.resultSetFormatFactory = resultSetFormatFactory;
+    public void setFormatFactory(FormatFactory formatFactory) {
+        this.formatFactory = formatFactory;
     }
 
     public ValueFormatRegistryResolver getValueFormatRegistryResolver() {
@@ -127,7 +128,7 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
                 connectionSpec.setUsername("dba");
                 connectionSpec.setPassword("goalie");
                 connectionSpec.setSchema("hockey");
-                setTargetConnectionSpec(connectionSpec);
+                setConnectionSpec(connectionSpec);
 
                 ResourceSpec inputSpec = new ResourceSpec();
                 inputSpec.setPath("/tmp/test/dump.cat");

@@ -43,18 +43,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static com.nuodb.migration.jdbc.model.ValueModelFactory.createValueModelList;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public abstract class ResultSetOutputBase extends ResultSetFormatBase implements ResultSetOutput {
+public abstract class FormatOutputBase extends FormatBase implements FormatOutput {
 
     private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     private Writer writer;
     private OutputStream outputStream;
     private ResultSet resultSet;
+    private int row;
 
     public Writer getWriter() {
         return writer;
@@ -109,21 +111,38 @@ public abstract class ResultSetOutputBase extends ResultSetFormatBase implements
 
     @Override
     public final void writeRow() {
-        writeValues(getValues());
+        ValueVariant []values = null;
+        try {
+            writeValues(values = getValues());
+            row++;
+        } catch (Exception exception) {
+            onWriteRowFailure(exception, row, values);
+        }
     }
 
     protected ValueVariant[] getValues() {
         int index = 0;
-        final ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
-        final ValueVariant[] variants = new ValueVariant[valueFormatModelList.size()];
+        ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
+        ValueVariant[] values = new ValueVariant[valueFormatModelList.size()];
         for (ValueFormatModel valueFormatModel : valueFormatModelList) {
-            variants[index++] = valueFormatModel.getValueFormat().getValue(
+            values[index++] = valueFormatModel.getValueFormat().getValue(
                     valueFormatModel.getValueAccess(), valueFormatModel.getValueAccessOptions());
         }
-        return variants;
+        return values;
     }
 
     protected abstract void writeValues(ValueVariant[] variants);
+
+    protected void onWriteRowFailure(Exception exception, int row, ValueVariant[] values) {
+        String message = format("Failed to dump row #%d", row);
+        if (isLenient()) {
+            if (logger.isErrorEnabled()) {
+                logger.error(message);
+            }
+        } else {
+            throw new FormatInputException(message, exception);
+        }
+    }
 
     @Override
     public void writeEnd() {

@@ -42,13 +42,14 @@ import java.util.TimeZone;
 /**
  * @author Sergey Bushik
  */
-public abstract class ResultSetFormatBase implements ResultSetFormat {
+public abstract class FormatBase implements Format {
 
     private TimeZone timeZone;
     private Map<String, Object> attributes;
     private ValueModelList<ValueFormatModel> valueFormatModelList;
     private ValueFormatRegistry valueFormatRegistry;
     private JdbcTypeValueAccessProvider valueAccessProvider;
+    private boolean lenient;
 
     @Override
     public Object getAttribute(String attribute) {
@@ -92,6 +93,16 @@ public abstract class ResultSetFormatBase implements ResultSetFormat {
     @Override
     public TimeZone getTimeZone() {
         return timeZone;
+    }
+
+    @Override
+    public boolean isLenient() {
+        return lenient;
+    }
+
+    @Override
+    public void setLenient(boolean lenient) {
+        this.lenient = lenient;
     }
 
     @Override

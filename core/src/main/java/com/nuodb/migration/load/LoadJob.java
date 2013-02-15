@@ -46,8 +46,8 @@ import com.nuodb.migration.job.JobExecution;
 import com.nuodb.migration.resultset.catalog.Catalog;
 import com.nuodb.migration.resultset.catalog.CatalogEntry;
 import com.nuodb.migration.resultset.catalog.CatalogReader;
-import com.nuodb.migration.resultset.format.ResultSetFormatFactory;
-import com.nuodb.migration.resultset.format.ResultSetInput;
+import com.nuodb.migration.resultset.format.FormatFactory;
+import com.nuodb.migration.resultset.format.FormatInput;
 import com.nuodb.migration.resultset.format.value.ValueFormatModel;
 import com.nuodb.migration.resultset.format.value.ValueFormatRegistryResolver;
 import org.slf4j.Logger;
@@ -58,6 +58,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -73,13 +74,14 @@ public class LoadJob extends JobBase {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private ConnectionProvider connectionProvider;
-    private InsertType insertType;
     private TimeZone timeZone;
     private Map<String, Object> attributes;
     private Catalog catalog;
     private DialectResolver dialectResolver;
-    private ResultSetFormatFactory resultSetFormatFactory;
+    private FormatFactory formatFactory;
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
+    private InsertType insertType;
+    private Map<String, InsertType> tableInsertTypes;
 
     @Override
     public void execute(JobExecution execution) throws Exception {
@@ -153,27 +155,27 @@ public class LoadJob extends JobBase {
         InputStream entryInput = catalogReader.getInputStream(catalogEntry);
         try {
             Dialect dialect = execution.getDatabase().getDialect();
-            ResultSetInput resultSetInput = getResultSetFormatFactory().createInput(catalogEntry.getType());
-            resultSetInput.setAttributes(getAttributes());
-            resultSetInput.setValueFormatRegistry(execution.getValueFormatRegistry());
-            resultSetInput.setValueAccessProvider(
+            FormatInput formatInput = getFormatFactory().createInput(catalogEntry.getType());
+            formatInput.setAttributes(getAttributes());
+            formatInput.setValueFormatRegistry(execution.getValueFormatRegistry());
+            formatInput.setValueAccessProvider(
                     new JdbcTypeValueAccessProvider(dialect.getJdbcTypeRegistry()));
             if (!dialect.supportsSessionTimeZone() && dialect.supportsStatementWithTimezone()) {
-                resultSetInput.setTimeZone(getTimeZone());
+                formatInput.setTimeZone(getTimeZone());
             }
-            resultSetInput.setInputStream(entryInput);
-            resultSetInput.initInput();
+            formatInput.setInputStream(entryInput);
+            formatInput.initInput();
 
-            load(execution, resultSetInput, catalogEntry.getName());
+            load(execution, formatInput, catalogEntry.getName());
         } finally {
             closeQuietly(entryInput);
         }
     }
 
-    protected void load(final LoadJobExecution execution, final ResultSetInput resultSetInput,
+    protected void load(final LoadJobExecution execution, final FormatInput formatInput,
                         String tableName) throws SQLException {
-        resultSetInput.readBegin();
-        ValueModelList<ValueFormatModel> valueFormatModelList = resultSetInput.getValueFormatModelList();
+        formatInput.readBegin();
+        ValueModelList<ValueFormatModel> valueFormatModelList = formatInput.getValueFormatModelList();
         if (valueFormatModelList.isEmpty()) {
             return;
         }
@@ -196,7 +198,7 @@ public class LoadJob extends JobBase {
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement preparedStatement) throws SQLException {
-                        load(execution, resultSetInput, preparedStatement);
+                        load(execution, formatInput, preparedStatement);
                     }
                 }
         );
@@ -206,20 +208,20 @@ public class LoadJob extends JobBase {
         return connection.prepareStatement(query.toQuery());
     }
 
-    protected void load(LoadJobExecution execution, ResultSetInput resultSetInput,
+    protected void load(LoadJobExecution execution, FormatInput formatInput,
                         PreparedStatement preparedStatement) throws SQLException {
-        resultSetInput.setPreparedStatement(preparedStatement);
-        resultSetInput.initInputModel();
-        while (execution.isRunning() && resultSetInput.hasNextRow()) {
-            resultSetInput.readRow();
+        formatInput.setPreparedStatement(preparedStatement);
+        formatInput.initInputModel();
+        while (execution.isRunning() && formatInput.hasNextRow()) {
+            formatInput.readRow();
             preparedStatement.executeUpdate();
         }
-        resultSetInput.readEnd();
+        formatInput.readEnd();
     }
 
     protected InsertQuery createInsertQuery(Table table, ValueModelList valueModelList) {
         InsertQueryBuilder builder = new InsertQueryBuilder();
-        builder.setInsertType(getInsertType());
+        builder.setInsertType(getInsertType(table));
         builder.setQualifyNames(true);
         builder.setTable(table);
         if (valueModelList != null) {
@@ -230,6 +232,22 @@ public class LoadJob extends JobBase {
             builder.setColumns(columns);
         }
         return builder.build();
+    }
+
+    private InsertType getInsertType(Table table) {
+        Database database = table.getDatabase();
+        Map<String, InsertType> tableInsertTypes = getTableInsertTypes();
+        InsertType insertType = getInsertType();
+        if (tableInsertTypes != null) {
+            for (Map.Entry<String, InsertType> entry : tableInsertTypes.entrySet()) {
+                final Collection<Table> tables = database.findTables(entry.getKey());
+                if (tables.contains(table)) {
+                    insertType = entry.getValue();
+                    break;
+                }
+            }
+        }
+        return insertType;
     }
 
     public ConnectionProvider getConnectionProvider() {
@@ -246,6 +264,14 @@ public class LoadJob extends JobBase {
 
     public void setInsertType(InsertType insertType) {
         this.insertType = insertType;
+    }
+
+    public void setTableInsertTypes(Map<String, InsertType> tableInsertTypes) {
+        this.tableInsertTypes = tableInsertTypes;
+    }
+
+    public Map<String, InsertType> getTableInsertTypes() {
+        return tableInsertTypes;
     }
 
     public TimeZone getTimeZone() {
@@ -280,12 +306,12 @@ public class LoadJob extends JobBase {
         this.dialectResolver = dialectResolver;
     }
 
-    public ResultSetFormatFactory getResultSetFormatFactory() {
-        return resultSetFormatFactory;
+    public FormatFactory getFormatFactory() {
+        return formatFactory;
     }
 
-    public void setResultSetFormatFactory(ResultSetFormatFactory resultSetFormatFactory) {
-        this.resultSetFormatFactory = resultSetFormatFactory;
+    public void setFormatFactory(FormatFactory formatFactory) {
+        this.formatFactory = formatFactory;
     }
 
     public ValueFormatRegistryResolver getValueFormatRegistryResolver() {

@@ -28,8 +28,8 @@
 package com.nuodb.migration.resultset.format.xml;
 
 import com.nuodb.migration.jdbc.model.ValueModelList;
-import com.nuodb.migration.resultset.format.ResultSetInputBase;
-import com.nuodb.migration.resultset.format.ResultSetInputException;
+import com.nuodb.migration.resultset.format.FormatInputBase;
+import com.nuodb.migration.resultset.format.FormatInputException;
 import com.nuodb.migration.resultset.format.utils.BinaryEncoder;
 import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
 import com.nuodb.migration.resultset.format.value.ValueFormatModel;
@@ -53,14 +53,14 @@ import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
 /**
  * @author Sergey Bushik
  */
-public class XmlResultSetInput extends ResultSetInputBase implements XmlAttributes {
+public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
 
     private XMLStreamReader reader;
     private Iterator<ValueVariant[]> iterator;
 
     @Override
-    public String getFormat() {
-        return FORMAT;
+    public String getType() {
+        return FORMAT_TYPE;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
                 reader = factory.createXMLStreamReader(getInputStream(), encoding);
             }
         } catch (XMLStreamException e) {
-            throw new ResultSetInputException(e);
+            throw new FormatInputException(e);
         }
         iterator = createInputIterator();
 
@@ -96,7 +96,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
                 valueFormatModel.setValueVariantType(fromAlias(getAttributeValue(NULL_NS_URI, ATTRIBUTE_VARIANT)));
                 if (column == null) {
                     Location location = reader.getLocation();
-                    throw new ResultSetInputException(
+                    throw new FormatInputException(
                             format("Element %s doesn't have %s attribute [location at %d:%d]",
                                     COLUMN_ELEMENT, ATTRIBUTE_NAME,
                                     location.getLineNumber(), location.getColumnNumber()));
@@ -113,11 +113,11 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
     }
 
     @Override
-    public void readRow() {
-        setValues(iterator.next());
+    protected ValueVariant[] readValues() {
+        return iterator.next();
     }
 
-    protected ValueVariant[] doReadRow() {
+    protected ValueVariant[] doReadValues() {
         ValueVariant[] values = null;
         if (isCurrentElement(ROW_ELEMENT) || isNextElement(ROW_ELEMENT)) {
             int i = 0;
@@ -130,7 +130,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
                     try {
                          value = reader.getElementText();
                     } catch (XMLStreamException exception) {
-                        throw new ResultSetInputException(exception);
+                        throw new FormatInputException(exception);
                     }
                     ValueVariantType valueVariantType = valueFormatModelList.get(i).getValueVariantType();
                     valueVariantType = valueVariantType != null ? valueVariantType : STRING;
@@ -157,7 +157,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
                         return reader.getLocalName().equals(name);
                 }
             } catch (XMLStreamException exception) {
-                throw new ResultSetInputException(exception);
+                throw new FormatInputException(exception);
             }
         }
         return false;
@@ -183,7 +183,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
         try {
             reader.close();
         } catch (XMLStreamException exception) {
-            throw new ResultSetInputException(exception);
+            throw new FormatInputException(exception);
         }
     }
 
@@ -194,7 +194,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
         @Override
         public boolean hasNext() {
             if (current == null) {
-                current = doReadRow();
+                current = doReadValues();
             }
             return current != null;
         }
@@ -204,9 +204,9 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
             ValueVariant[] next = current;
             current = null;
             if (next == null) {
-                next = doReadRow();
+                next = readValues();
                 if (next == null) {
-                    throw new ResultSetInputException("No more rows available");
+                    throw new FormatInputException("No more rows available");
                 }
             }
             return next;
@@ -214,7 +214,7 @@ public class XmlResultSetInput extends ResultSetInputBase implements XmlAttribut
 
         @Override
         public void remove() {
-            throw new ResultSetInputException("Removal is unsupported operation");
+            throw new FormatInputException("Removal is unsupported operation");
         }
     }
 }

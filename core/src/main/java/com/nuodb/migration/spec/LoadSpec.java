@@ -27,8 +27,10 @@
  */
 package com.nuodb.migration.spec;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migration.jdbc.query.InsertType;
 
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -36,17 +38,18 @@ import java.util.TimeZone;
  */
 public class LoadSpec extends TaskSpecBase {
 
-    private ConnectionSpec targetConnectionSpec;
+    private ConnectionSpec connectionSpec;
     private TimeZone timeZone;
-    private InsertType insertType;
     private ResourceSpec inputSpec;
+    private InsertType insertType;
+    private Map<String, InsertType> tableInsertTypes = Maps.newHashMap();
 
-    public ConnectionSpec getTargetConnectionSpec() {
-        return targetConnectionSpec;
+    public ConnectionSpec getConnectionSpec() {
+        return connectionSpec;
     }
 
-    public void setTargetConnectionSpec(ConnectionSpec targetConnectionSpec) {
-        this.targetConnectionSpec = targetConnectionSpec;
+    public void setConnectionSpec(ConnectionSpec connectionSpec) {
+        this.connectionSpec = connectionSpec;
     }
 
     public TimeZone getTimeZone() {
@@ -71,5 +74,13 @@ public class LoadSpec extends TaskSpecBase {
 
     public void setInputSpec(ResourceSpec inputSpec) {
         this.inputSpec = inputSpec;
+    }
+
+    public Map<String, InsertType> getTableInsertTypes() {
+        return tableInsertTypes;
+    }
+
+    public void setTableInsertTypes(Map<String, InsertType> tableInsertTypes) {
+        this.tableInsertTypes = tableInsertTypes;
     }
 }

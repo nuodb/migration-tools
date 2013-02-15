@@ -41,17 +41,20 @@ import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public abstract class ResultSetInputBase extends ResultSetFormatBase implements ResultSetInput {
+public abstract class FormatInputBase extends FormatBase implements FormatInput {
 
     private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     private Reader reader;
     private InputStream inputStream;
     private PreparedStatement preparedStatement;
+    private int row;
 
     public Reader getReader() {
         return reader;
@@ -100,27 +103,48 @@ public abstract class ResultSetInputBase extends ResultSetFormatBase implements 
         }
     }
 
-
     @Override
     public final void readBegin() {
         if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Read input %s", getClass().getName()));
+            logger.debug(format("Read input %s", getClass().getName()));
         }
+        row = 0;
         doReadBegin();
     }
 
     protected abstract void doReadBegin();
 
-    protected void setValues(ValueVariant[] variants) {
+    @Override
+    public void readRow() {
+        ValueVariant []values = null;
+        try {
+            setValues(values = readValues());
+            row++;
+        } catch (Exception exception) {
+            onReadRowFailure(exception, row, values);
+        }
+    }
+
+    protected abstract ValueVariant[] readValues();
+
+    protected void setValues(ValueVariant[] values) {
         ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
-        for (int index = 0; index < variants.length; index++) {
-            if (variants[index] == null) {
-                System.out.println("ResultSetInputBase.setValues");
-            }
+        for (int index = 0; index < values.length; index++) {
             ValueFormatModel valueFormatModel = valueFormatModelList.get(index);
             valueFormatModel.getValueFormat().setValue(
-                    variants[index], valueFormatModel.getValueAccess(),
+                    values[index], valueFormatModel.getValueAccess(),
                     valueFormatModel.getValueAccessOptions());
+        }
+    }
+
+    protected void onReadRowFailure(Exception exception, int row, ValueVariant[] values) {
+        String message = format("Failed to load row #%d", row);
+        if (isLenient()) {
+            if (logger.isErrorEnabled()) {
+                logger.error(message);
+            }
+        } else {
+            throw new FormatInputException(message, exception);
         }
     }
 

@@ -27,29 +27,46 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import java.io.OutputStream;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.nuodb.migration.jdbc.model.ValueModelList;
+import com.nuodb.migration.jdbc.type.access.JdbcTypeValueAccessProvider;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueFormatRegistry;
+
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author Sergey Bushik
  */
-public interface ResultSetOutput extends ResultSetFormat {
+public interface Format {
 
-    void writeBegin();
+    String getType();
 
-    void writeRow();
+    void setLenient(boolean lenient);
 
-    void writeEnd();
+    boolean isLenient();
 
-    void setResultSet(ResultSet resultSet);
+    TimeZone getTimeZone();
 
-    void initOutputModel() throws SQLException;
+    void setTimeZone(TimeZone timeZone);
 
-    void setWriter(Writer writer);
+    Object getAttribute(String attribute);
 
-    void setOutputStream(OutputStream outputStream);
+    Object getAttribute(String attribute, Object defaultValue);
 
-    void initOutput();
+    Map<String, Object> getAttributes();
+
+    void setAttributes(Map<String, Object> attributes);
+
+    ValueModelList<ValueFormatModel> getValueFormatModelList();
+
+    void setValueFormatModelList(ValueModelList<ValueFormatModel> valueFormatModelList);
+
+    JdbcTypeValueAccessProvider getValueAccessProvider();
+
+    void setValueAccessProvider(JdbcTypeValueAccessProvider valueAccessProvider);
+
+    ValueFormatRegistry getValueFormatRegistry();
+
+    void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
 }

@@ -23,7 +23,7 @@ public class FileCatalogIntegrationTest extends TestUtils {
     public void setUp() throws Exception {
         ResourceSpec outputSpec = new ResourceSpec();
         outputSpec.setPath(DIR);
-        outputSpec.setType(CsvAttributes.FORMAT);
+        outputSpec.setType(CsvAttributes.FORMAT_TYPE);
 
         FileCatalog catalogFile = new FileCatalog(outputSpec.getPath());
         Assert.assertEquals(DIR, catalogFile.getPath());

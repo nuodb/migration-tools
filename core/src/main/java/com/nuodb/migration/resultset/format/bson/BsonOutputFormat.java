@@ -28,8 +28,8 @@
 package com.nuodb.migration.resultset.format.bson;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.nuodb.migration.resultset.format.ResultSetOutputBase;
-import com.nuodb.migration.resultset.format.ResultSetOutputException;
+import com.nuodb.migration.resultset.format.FormatOutputBase;
+import com.nuodb.migration.resultset.format.FormatOutputException;
 import com.nuodb.migration.resultset.format.value.ValueFormatModel;
 import com.nuodb.migration.resultset.format.value.ValueVariant;
 import de.undercouch.bson4jackson.BsonFactory;
@@ -42,13 +42,13 @@ import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 /**
  * @author Sergey Bushik
  */
-public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttributes {
+public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes {
 
     private JsonGenerator writer;
 
     @Override
-    public String getFormat() {
-        return FORMAT;
+    public String getType() {
+        return FORMAT_TYPE;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
                 writer = factory.createJsonGenerator(getOutputStream());
             }
         } catch (IOException exception) {
-            throw new ResultSetOutputException(exception);
+            throw new FormatOutputException(exception);
         }
 
     }
@@ -81,7 +81,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
             writer.writeFieldName(ROWS_FIELD);
             writer.writeStartArray();
         } catch (IOException exception) {
-            throw new ResultSetOutputException(exception);
+            throw new FormatOutputException(exception);
         }
     }
 
@@ -107,7 +107,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
             }
             writer.writeEndArray();
         } catch (IOException exception) {
-            throw new ResultSetOutputException(exception);
+            throw new FormatOutputException(exception);
         }
     }
 
@@ -119,7 +119,7 @@ public class BsonResultSetOutput extends ResultSetOutputBase implements BsonAttr
             writer.flush();
             writer.close();
         } catch (IOException exception) {
-            throw new ResultSetOutputException(exception);
+            throw new FormatOutputException(exception);
         }
     }
 }

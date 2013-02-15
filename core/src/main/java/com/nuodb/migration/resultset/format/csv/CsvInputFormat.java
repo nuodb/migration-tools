@@ -28,8 +28,8 @@
 package com.nuodb.migration.resultset.format.csv;
 
 import com.nuodb.migration.jdbc.model.ValueModelList;
-import com.nuodb.migration.resultset.format.ResultSetInputBase;
-import com.nuodb.migration.resultset.format.ResultSetInputException;
+import com.nuodb.migration.resultset.format.FormatInputBase;
+import com.nuodb.migration.resultset.format.FormatInputException;
 import com.nuodb.migration.resultset.format.utils.BinaryEncoder;
 import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
 import com.nuodb.migration.resultset.format.value.ValueFormatModel;
@@ -59,15 +59,15 @@ import static org.apache.commons.lang3.StringUtils.trim;
 /**
  * @author Sergey Bushik
  */
-public class CsvResultSetInput extends ResultSetInputBase implements CsvAttributes {
+public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
 
     private CSVParser parser;
     private String doubleQuote;
     private Iterator<CSVRecord> iterator;
 
     @Override
-    public String getFormat() {
-        return FORMAT;
+    public String getType() {
+        return FORMAT_TYPE;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
                 parser = new CSVParser(new InputStreamReader(getInputStream(), Charset.forName(encoding)), format);
             }
         } catch (IOException exception) {
-            throw new ResultSetInputException(exception);
+            throw new FormatInputException(exception);
         }
         iterator = parser.iterator();
     }
@@ -115,7 +115,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
     }
 
     @Override
-    public void readRow() {
+    protected ValueVariant[] readValues() {
         final CSVRecord record = iterator.next();
         ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
         ValueVariant[] values = new ValueVariant[valueFormatModelList.size()];
@@ -138,7 +138,7 @@ public class CsvResultSetInput extends ResultSetInputBase implements CsvAttribut
                     break;
             }
         }
-        setValues(values);
+        return values;
     }
 
     @Override

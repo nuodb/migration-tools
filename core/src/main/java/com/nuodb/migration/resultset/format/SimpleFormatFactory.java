@@ -28,14 +28,14 @@
 package com.nuodb.migration.resultset.format;
 
 import com.nuodb.migration.resultset.format.bson.BsonAttributes;
-import com.nuodb.migration.resultset.format.bson.BsonResultSetInput;
-import com.nuodb.migration.resultset.format.bson.BsonResultSetOutput;
+import com.nuodb.migration.resultset.format.bson.BsonInputFormat;
+import com.nuodb.migration.resultset.format.bson.BsonOutputFormat;
 import com.nuodb.migration.resultset.format.csv.CsvAttributes;
-import com.nuodb.migration.resultset.format.csv.CsvResultSetInput;
-import com.nuodb.migration.resultset.format.csv.CsvResultSetOutput;
+import com.nuodb.migration.resultset.format.csv.CsvInputFormat;
+import com.nuodb.migration.resultset.format.csv.CsvOutputFormat;
 import com.nuodb.migration.resultset.format.xml.XmlAttributes;
-import com.nuodb.migration.resultset.format.xml.XmlResultSetInput;
-import com.nuodb.migration.resultset.format.xml.XmlResultSetOutput;
+import com.nuodb.migration.resultset.format.xml.XmlInputFormat;
+import com.nuodb.migration.resultset.format.xml.XmlOutputFormat;
 import com.nuodb.migration.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,61 +47,61 @@ import java.util.TreeMap;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class SimpleResultSetFormatFactory implements ResultSetFormatFactory {
+public class SimpleFormatFactory implements FormatFactory {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Map<String, Class<? extends ResultSetInput>> inputClasses =
-            new TreeMap<String, Class<? extends ResultSetInput>>(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, Class<? extends FormatInput>> inputClasses =
+            new TreeMap<String, Class<? extends FormatInput>>(String.CASE_INSENSITIVE_ORDER);
 
-    private Map<String, Class<? extends ResultSetOutput>> outputClasses =
-            new TreeMap<String, Class<? extends ResultSetOutput>>(String.CASE_INSENSITIVE_ORDER);
+    private Map<String, Class<? extends FormatOutput>> outputClasses =
+            new TreeMap<String, Class<? extends FormatOutput>>(String.CASE_INSENSITIVE_ORDER);
 
-    public SimpleResultSetFormatFactory() {
-        registerFormat(CsvAttributes.FORMAT, CsvResultSetInput.class);
-        registerFormat(XmlAttributes.FORMAT, XmlResultSetInput.class);
-        registerFormat(BsonAttributes.FORMAT, BsonResultSetInput.class);
+    public SimpleFormatFactory() {
+        registerFormat(CsvAttributes.FORMAT_TYPE, CsvInputFormat.class);
+        registerFormat(XmlAttributes.FORMAT_TYPE, XmlInputFormat.class);
+        registerFormat(BsonAttributes.FORMAT_TYPE, BsonInputFormat.class);
 
-        registerFormat(CsvAttributes.FORMAT, CsvResultSetOutput.class);
-        registerFormat(XmlAttributes.FORMAT, XmlResultSetOutput.class);
-        registerFormat(BsonAttributes.FORMAT, BsonResultSetOutput.class);
+        registerFormat(CsvAttributes.FORMAT_TYPE, CsvOutputFormat.class);
+        registerFormat(XmlAttributes.FORMAT_TYPE, XmlOutputFormat.class);
+        registerFormat(BsonAttributes.FORMAT_TYPE, BsonOutputFormat.class);
     }
 
     @Override
-    public ResultSetInput createInput(String formatType) {
-        return (ResultSetInput) createFormat(formatType, inputClasses.get(formatType));
+    public FormatInput createInput(String formatType) {
+        return (FormatInput) createFormat(formatType, inputClasses.get(formatType));
     }
 
     @Override
-    public ResultSetOutput createOutput(String formatType) {
-        return (ResultSetOutput) createFormat(formatType, outputClasses.get(formatType));
+    public FormatOutput createOutput(String formatType) {
+        return (FormatOutput) createFormat(formatType, outputClasses.get(formatType));
     }
 
     @Override
-    public void registerFormat(String formatType, Class<? extends ResultSetFormat> formatClass) {
-        if (ResultSetOutput.class.isAssignableFrom(formatClass)) {
-            outputClasses.put(formatType, (Class<? extends ResultSetOutput>) formatClass);
+    public void registerFormat(String formatType, Class<? extends Format> formatClass) {
+        if (FormatOutput.class.isAssignableFrom(formatClass)) {
+            outputClasses.put(formatType, (Class<? extends FormatOutput>) formatClass);
         }
-        if (ResultSetInput.class.isAssignableFrom(formatClass)) {
-            inputClasses.put(formatType, (Class<? extends ResultSetInput>) formatClass);
+        if (FormatInput.class.isAssignableFrom(formatClass)) {
+            inputClasses.put(formatType, (Class<? extends FormatInput>) formatClass);
         }
     }
 
-    protected ResultSetFormat createFormat(String formatType, Class<? extends ResultSetFormat> formatClass) {
+    protected Format createFormat(String formatType, Class<? extends Format> formatClass) {
         if (formatClass == null) {
             if (logger.isTraceEnabled()) {
                 logger.trace(String.format("Can't resolve format type %1$s to a class", formatType));
             }
             ClassLoader classLoader = ReflectionUtils.getClassLoader();
             try {
-                formatClass = (Class<? extends ResultSetFormat>) classLoader.loadClass(formatType);
+                formatClass = (Class<? extends Format>) classLoader.loadClass(formatType);
             } catch (ClassNotFoundException e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn(String.format("Loading %1$s as class failed", formatType));
                 }
             }
             if (formatClass == null) {
-                throw new ResultSetInputException(String.format("Format %1$s is not recognized", formatType));
+                throw new FormatInputException(String.format("Format %1$s is not recognized", formatType));
             }
         }
         return ReflectionUtils.newInstance(formatClass);

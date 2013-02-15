@@ -27,31 +27,14 @@
  */
 package com.nuodb.migration.resultset.format;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 /**
  * @author Sergey Bushik
  */
-public interface ResultSetInput extends ResultSetFormat {
+public interface FormatFactory {
 
-    void readBegin();
+    FormatInput createInput(String formatType);
 
-    void readRow();
+    FormatOutput createOutput(String formatType);
 
-    void readEnd();
-
-    boolean hasNextRow();
-
-    void setReader(Reader reader);
-
-    void setInputStream(InputStream inputStream);
-
-    void initInput();
-
-    void setPreparedStatement(PreparedStatement preparedStatement);
-
-    void initInputModel() throws SQLException;
+    void registerFormat(String formatType, Class<? extends Format> formatClass);
 }

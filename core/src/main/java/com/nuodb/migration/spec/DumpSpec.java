@@ -40,19 +40,19 @@ import static com.nuodb.migration.jdbc.metadata.Table.TABLE;
  */
 public class DumpSpec extends TaskSpecBase {
 
-    private ConnectionSpec sourceConnectionSpec;
+    private ConnectionSpec connectionSpec;
     private TimeZone timeZone;
     private Collection<String> tableTypes = Collections.singleton(TABLE);
     private Collection<SelectQuerySpec> selectQuerySpecs = Lists.newArrayList();
     private Collection<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
     private ResourceSpec outputSpec;
 
-    public ConnectionSpec getSourceConnectionSpec() {
-        return sourceConnectionSpec;
+    public ConnectionSpec getConnectionSpec() {
+        return connectionSpec;
     }
 
-    public void setSourceConnectionSpec(ConnectionSpec sourceConnectionSpec) {
-        this.sourceConnectionSpec = sourceConnectionSpec;
+    public void setConnectionSpec(ConnectionSpec connectionSpec) {
+        this.connectionSpec = connectionSpec;
     }
 
     public TimeZone getTimeZone() {
