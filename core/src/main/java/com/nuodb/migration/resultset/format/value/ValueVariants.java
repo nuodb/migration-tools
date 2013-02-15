@@ -27,6 +27,8 @@
  */
 package com.nuodb.migration.resultset.format.value;
 
+import java.util.Arrays;
+
 /**
  * @author Sergey Bushik
  */
@@ -67,6 +69,28 @@ public class ValueVariants {
         public ValueVariantType getValueVariantType() {
             return ValueVariantType.BINARY;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            BinaryVariant that = (BinaryVariant) o;
+
+            if (!Arrays.equals(value, that.value)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return value != null ? Arrays.hashCode(value) : 0;
+        }
+
+        @Override
+        public String toString() {
+            return "BinaryVariant{" + value + '}';
+        }
     }
 
     static class StringVariant implements ValueVariant {
@@ -95,6 +119,28 @@ public class ValueVariants {
         @Override
         public ValueVariantType getValueVariantType() {
             return ValueVariantType.STRING;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            StringVariant that = (StringVariant) o;
+
+            if (value != null ? !value.equals(that.value) : that.value != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return value != null ? value.hashCode() : 0;
+        }
+
+        @Override
+        public String toString() {
+            return "StringVariant{'" + value + "'}";
         }
     }
 }
