@@ -63,7 +63,7 @@ public class SimpleInspectionContext implements InspectionContext {
     @Override
     public Dialect getDialect() throws SQLException {
         DialectResolver dialectResolver = inspectionManager.getDialectResolver();
-        return dialectResolver.resolve(getConnection().getMetaData());
+        return dialectResolver.resolve(getConnection());
     }
 
     @Override

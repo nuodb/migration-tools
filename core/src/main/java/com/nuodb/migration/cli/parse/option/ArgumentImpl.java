@@ -191,13 +191,13 @@ public class ArgumentImpl extends OptionBase implements Argument {
         // if infinite args are allowed then crop the list
         int count;
         Collection<String> helpValues = getHelpValues();
-        boolean useHelpValues;
+        boolean hasHelpValues;
         if (helpValues != null && helpValues.size() > 0) {
             count = helpValues.size();
-            useHelpValues = true;
+            hasHelpValues = true;
         } else {
             count = (maximum == Integer.MAX_VALUE) ? 2 : maximum;
-            useHelpValues = false;
+            hasHelpValues = false;
         }
         int i = 0;
         // for each argument
@@ -214,7 +214,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
                 buffer.append('<');
             }
             // append name
-            buffer.append(useHelpValues ? Iterables.get(helpValues, i) : getName());
+            buffer.append(hasHelpValues ? Iterables.get(helpValues, i) : getName());
             ++i;
             // if numbering
             if (numbered) {
@@ -225,7 +225,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
             }
         }
         // if infinite args are allowed
-        if (!useHelpValues && maximum == Integer.MAX_VALUE) {
+        if (!hasHelpValues && maximum == Integer.MAX_VALUE) {
             buffer.append(" ...");
         }
         // for each argument

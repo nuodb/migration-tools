@@ -38,27 +38,14 @@ public abstract class OptionBase implements Option {
     private OptionProcessor optionProcessor;
     private PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
 
-    protected OptionBase() {
+    public OptionBase() {
     }
 
-    protected OptionBase(OptionFormat optionFormat) {
-        this.optionFormat = optionFormat;
-    }
-
-    protected OptionBase(int id, String name, String description, boolean required) {
+    public OptionBase(int id, String name, String description, boolean required) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.required = required;
-    }
-
-    protected OptionBase(int id, String name, String description, boolean required,
-                         OptionFormat optionFormat) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.required = required;
-        this.optionFormat = optionFormat;
     }
 
     @Override
@@ -147,7 +134,7 @@ public abstract class OptionBase implements Option {
     }
 
     public Set<String> getOptionPrefixes() {
-        return optionFormat != null ? optionFormat.getOptionPrefixes() : Collections.<String>emptySet();
+        return optionFormat != null ? optionFormat.getPrefixes() : Collections.<String>emptySet();
     }
 
     public String getArgumentSeparator() {
@@ -155,7 +142,7 @@ public abstract class OptionBase implements Option {
     }
 
     public String getArgumentValuesSeparator() {
-        return optionFormat != null ? optionFormat.getArgumentValuesSeparator() : null;
+        return optionFormat != null ? optionFormat.getValuesSeparator() : null;
     }
 
     @Override
@@ -186,14 +173,14 @@ public abstract class OptionBase implements Option {
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        doProcess(commandLine, arguments);
+        processArguments(commandLine, arguments);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.process(commandLine, this, arguments);
         }
     }
 
-    protected void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void processArguments(CommandLine commandLine, ListIterator<String> arguments) {
     }
 
     @Override

@@ -30,6 +30,7 @@ package com.nuodb.migration.jdbc.resolve;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Map;
@@ -91,6 +92,11 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
     @Override
     public void register(DatabaseMatcher databaseMatcher, Class<? extends T> serviceClass) {
         serviceClassMap.put(databaseMatcher, serviceClass);
+    }
+
+    @Override
+    public T resolve(Connection connection) throws SQLException {
+        return resolve(connection.getMetaData());
     }
 
     @Override

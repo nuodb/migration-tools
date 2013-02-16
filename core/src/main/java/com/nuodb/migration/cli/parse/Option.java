@@ -32,7 +32,7 @@ public interface Option {
     /**
      * Returns the id of the option.  This can be used in a loop and switch construct:
      * <p/>
-     * <code> for(Option o : cmd.getOptions()){ switch(o.getId()){ case POTENTIAL_OPTION: ... } } </code>
+     * <code> for(Option option : commandLine.getOptions()){ switch(option.getId()){ case OPTION: ... } } </code>
      * <p/>
      * The returned value is not guaranteed to be unique.
      *

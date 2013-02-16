@@ -27,86 +27,87 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.nuodb.migration.cli.parse.Argument;
+import com.nuodb.migration.cli.parse.BasicOption;
 import com.nuodb.migration.cli.parse.Group;
-import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.OptionProcessor;
 import com.nuodb.migration.cli.parse.Trigger;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class GroupBuilderImpl<O extends Group> extends OptionBuilderBase<O> implements GroupBuilder<O> {
+public class BasicOptionBuilderImpl<O extends BasicOption>
+        extends AugmentOptionBuilderBase<O> implements BasicOptionBuilder<O> {
 
-    private int minimum = 0;
-    private int maximum = 0;
-    private List<Option> options = Lists.newArrayList();
+    private Map<String, OptionFormat> aliases = Maps.newHashMap();
 
-    public GroupBuilderImpl(OptionFormat optionFormat) {
-        super((Class<? extends O>) GroupImpl.class, optionFormat);
+    public BasicOptionBuilderImpl(OptionFormat optionFormat) {
+        super((Class<? extends O>) BasicOptionImpl.class, optionFormat);
     }
 
     @Override
-    public GroupBuilder withId(int id) {
-        return (GroupBuilder) super.withId(id);
+    public BasicOptionBuilder withId(int id) {
+        return (BasicOptionBuilder) super.withId(id);
     }
 
     @Override
-    public GroupBuilder withName(String name) {
-        return (GroupBuilder) super.withName(name);
+    public BasicOptionBuilder withName(String name) {
+        return (BasicOptionBuilder) super.withName(name);
     }
 
     @Override
-    public GroupBuilder withDescription(String description) {
-        return (GroupBuilder) super.withDescription(description);
+    public BasicOptionBuilder withDescription(String description) {
+        return (BasicOptionBuilder) super.withDescription(description);
     }
 
     @Override
-    public GroupBuilder withRequired(boolean required) {
-        return (GroupBuilder) super.withRequired(required);
+    public BasicOptionBuilder withRequired(boolean required) {
+        return (BasicOptionBuilder) super.withRequired(required);
     }
 
     @Override
-    public GroupBuilder withTrigger(Trigger trigger) {
-        return (GroupBuilder) super.withTrigger(trigger);
+    public BasicOptionBuilder withTrigger(Trigger trigger) {
+        return (BasicOptionBuilder) super.withTrigger(trigger);
     }
 
     @Override
-    public GroupBuilder withOptionFormat(OptionFormat optionFormat) {
-        return (GroupBuilder) super.withOptionFormat(optionFormat);
+    public BasicOptionBuilder withOptionFormat(OptionFormat optionFormat) {
+        return (BasicOptionBuilder) super.withOptionFormat(optionFormat);
     }
 
     @Override
-    public GroupBuilder withOptionProcessor(OptionProcessor optionProcessor) {
-        return (GroupBuilder) super.withOptionProcessor(optionProcessor);
+    public BasicOptionBuilder withOptionProcessor(OptionProcessor optionProcessor) {
+        return (BasicOptionBuilder) super.withOptionProcessor(optionProcessor);
     }
 
     @Override
-    public GroupBuilder withMinimum(int minimum) {
-        this.minimum = minimum;
-        return this;
+    public BasicOptionBuilder withGroup(Group group) {
+        return (BasicOptionBuilder) super.withGroup(group);
     }
 
     @Override
-    public GroupBuilder withMaximum(int maximum) {
-        this.maximum = maximum;
-        return this;
+    public BasicOptionBuilder withArgument(Argument argument) {
+        return (BasicOptionBuilder) super.withArgument(argument);
     }
 
     @Override
-    public GroupBuilder withOption(Option option) {
-        this.options.add(option);
+    public BasicOptionBuilder withAlias(String alias) {
+        return withAlias(alias, optionFormat);
+    }
+
+    @Override
+    public BasicOptionBuilder withAlias(String alias, OptionFormat optionFormat) {
+        this.aliases.put(alias, optionFormat);
         return this;
     }
 
     @Override
     public O build() {
         O option = super.build();
-        option.setMinimum(minimum);
-        option.setMaximum(maximum);
-        option.addOptions(options);
+        option.setAliases(aliases);
         return option;
     }
 }

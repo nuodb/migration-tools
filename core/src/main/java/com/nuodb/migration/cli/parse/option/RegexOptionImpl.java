@@ -28,23 +28,34 @@
 package com.nuodb.migration.cli.parse.option;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.cli.parse.*;
+import com.nuodb.migration.cli.parse.Argument;
+import com.nuodb.migration.cli.parse.AugmentOption;
+import com.nuodb.migration.cli.parse.CommandLine;
+import com.nuodb.migration.cli.parse.Group;
+import com.nuodb.migration.cli.parse.HelpHint;
+import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.OptionException;
+import com.nuodb.migration.cli.parse.OptionProcessor;
+import com.nuodb.migration.cli.parse.RegexOption;
+import com.nuodb.migration.cli.parse.Trigger;
 import com.nuodb.migration.match.AntRegexCompiler;
 import com.nuodb.migration.match.Match;
+import com.nuodb.migration.match.Regex;
 import com.nuodb.migration.match.RegexCompiler;
 import com.nuodb.migration.utils.PriorityList;
 import com.nuodb.migration.utils.SimplePriorityList;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
-import static com.nuodb.migration.cli.parse.HelpHint.CONTAINER_ARGUMENT;
-import static com.nuodb.migration.cli.parse.HelpHint.CONTAINER_GROUP;
-import static com.nuodb.migration.cli.parse.HelpHint.OPTIONAL;
+import static com.nuodb.migration.cli.parse.HelpHint.*;
 
 /**
  * @author Sergey Bushik
  */
-public class RegexOption extends ContainerBase {
+public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
 
     /**
      * Regular expression compiler used to compile wild char triggers into a pattern to match & process --table.*,
@@ -53,25 +64,21 @@ public class RegexOption extends ContainerBase {
     private RegexCompiler regexCompiler = AntRegexCompiler.INSTANCE;
     private Map<RegexTrigger, Integer> triggersGroups = Maps.newHashMap();
 
-    public RegexOption() {
+    public RegexOptionImpl() {
         setOptionProcessor(new ArgumentMaximumUpdater());
     }
 
-    public RegexOption(int id, String name, String description, boolean required) {
-        super(id, name, description, required);
-        setOptionProcessor(new ArgumentMaximumUpdater());
-    }
-
-    public RegexOption(OptionFormat optionFormat) {
-        super(optionFormat);
-    }
-
+    @Override
     public void addRegex(String regex, int group, int priority) {
         for (String prefix : getPrefixes()) {
-            RegexTrigger trigger = new RegexTrigger(regexCompiler.compile(prefix + regex));
-            getTriggersGroups().put(trigger, group);
-            addTrigger(trigger, priority);
+            addRegex(regexCompiler.compile(prefix + regex), group, priority);
         }
+    }
+
+    protected void addRegex(Regex regex, int group, int priority) {
+        RegexTrigger trigger = new RegexTrigger(regex);
+        getTriggersGroups().put(trigger, group);
+        addTrigger(trigger, priority);
     }
 
     /**
@@ -81,24 +88,24 @@ public class RegexOption extends ContainerBase {
      * @param arguments   to withConnection regular expression on.
      */
     @Override
-    public void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    public void processArguments(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
         Trigger trigger = findTrigger(getTriggers(), argument);
         if (canProcess(commandLine, argument)) {
-            processTriggerFired(commandLine, trigger, argument);
+            processTrigger(commandLine, trigger, argument);
         } else {
             throw new OptionException(this, String.format("Unexpected token %1$s", argument));
         }
     }
 
-    protected void processTriggerFired(CommandLine commandLine, Trigger trigger, String argument) {
+    protected void processTrigger(CommandLine commandLine, Trigger trigger, String argument) {
         commandLine.addOption(this);
         if (trigger instanceof RegexTrigger) {
-            processRegexTriggerFired(commandLine, (RegexTrigger) trigger, argument);
+            processRegexTrigger(commandLine, (RegexTrigger) trigger, argument);
         }
     }
 
-    protected void processRegexTriggerFired(CommandLine commandLine, RegexTrigger trigger, String argument) {
+    protected void processRegexTrigger(CommandLine commandLine, RegexTrigger trigger, String argument) {
         Match match = trigger.getRegex().exec(argument);
         Integer group = getTriggersGroups().get(trigger);
         String[] matches = match.matches();
@@ -107,7 +114,7 @@ public class RegexOption extends ContainerBase {
         }
     }
 
-    public Map<RegexTrigger, Integer> getTriggersGroups() {
+    protected Map<RegexTrigger, Integer> getTriggersGroups() {
         return triggersGroups;
     }
 
@@ -168,8 +175,8 @@ public class RegexOption extends ContainerBase {
 
         @Override
         public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-            Container container = (Container) option;
-            Argument argument = container.getArgument();
+            AugmentOption augemented = (AugmentOption) option;
+            Argument argument = augemented.getArgument();
             if (argument != null) {
                 argument.setMaximum(++count * 2);
             }

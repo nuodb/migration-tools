@@ -27,13 +27,10 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-/**
- * @author Sergey Bushik
- */
-
 import com.google.common.collect.Lists;
 import com.nuodb.migration.cli.parse.Argument;
 import com.nuodb.migration.cli.parse.OptionProcessor;
+import com.nuodb.migration.cli.parse.Trigger;
 
 import java.util.Collection;
 import java.util.List;
@@ -41,45 +38,51 @@ import java.util.List;
 /**
  * @author Sergey Bushik
  */
-public class ArgumentBuilderImpl implements ArgumentBuilder {
+public class ArgumentBuilderImpl<O extends Argument>
+        extends OptionBuilderBase<O> implements ArgumentBuilder<O> {
 
-    private int id;
-    private String name;
-    private String description;
-    private boolean required;
     private int minimum = 0;
     private int maximum = 1;
-    private OptionProcessor optionProcessor;
     private List<Object> defaultValues = Lists.newArrayList();
-    private OptionFormat optionFormat;
     private Collection<String> helpValues;
 
     public ArgumentBuilderImpl(OptionFormat optionFormat) {
-        this.optionFormat = optionFormat;
+        super((Class<? extends O>) ArgumentImpl.class, optionFormat);
     }
 
     @Override
     public ArgumentBuilder withId(int id) {
-        this.id = id;
-        return this;
+        return (ArgumentBuilder) super.withId(id);
     }
 
     @Override
     public ArgumentBuilder withName(String name) {
-        this.name = name;
-        return this;
+        return (ArgumentBuilder) super.withName(name);
     }
 
     @Override
     public ArgumentBuilder withDescription(String description) {
-        this.description = description;
-        return this;
+        return (ArgumentBuilder) super.withDescription(description);
     }
 
     @Override
     public ArgumentBuilder withRequired(boolean required) {
-        this.required = required;
-        return this;
+        return (ArgumentBuilder) super.withRequired(required);
+    }
+
+    @Override
+    public ArgumentBuilder withTrigger(Trigger trigger) {
+        return (ArgumentBuilder) super.withTrigger(trigger);
+    }
+
+    @Override
+    public ArgumentBuilder withOptionFormat(OptionFormat optionFormat) {
+        return (ArgumentBuilder) super.withOptionFormat(optionFormat);
+    }
+
+    @Override
+    public ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor) {
+        return (ArgumentBuilder) super.withOptionProcessor(optionProcessor);
     }
 
     @Override
@@ -101,37 +104,19 @@ public class ArgumentBuilderImpl implements ArgumentBuilder {
     }
 
     @Override
-    public ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor) {
-        this.optionProcessor = optionProcessor;
-        return this;
-    }
-
-    @Override
-    public ArgumentBuilder withOptionFormat(OptionFormat optionFormat) {
-        this.optionFormat = optionFormat;
-        return this;
-    }
-
-    @Override
     public ArgumentBuilder withHelpValues(Collection<String> helpValues) {
         this.helpValues = helpValues;
         return this;
     }
 
     @Override
-    public Argument build() {
-        ArgumentImpl argument = new ArgumentImpl();
-        argument.setId(id);
-        argument.setName(name);
-        argument.setDescription(description);
-        argument.setRequired(required);
-        argument.setMinimum(minimum);
-        argument.setMaximum(maximum);
-        argument.setDefaultValues(defaultValues);
-        argument.setOptionProcessor(optionProcessor);
-        argument.setOptionFormat(optionFormat);
-        argument.setHelpValues(helpValues);
-        return argument;
+    public O build() {
+        O option = super.build();
+        option.setMinimum(minimum);
+        option.setMaximum(maximum);
+        option.setDefaultValues(defaultValues);
+        option.setHelpValues(helpValues);
+        return option;
     }
 }
 

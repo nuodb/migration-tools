@@ -105,8 +105,8 @@ public class DumpJob extends JobBase {
     protected void validate() {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
-        isNotNull(getDialectResolver(), "Database dialect resolver is required");
-        isNotNull(getValueFormatRegistryResolver(), "JDBC type value format registry resolver is required");
+        isNotNull(getDialectResolver(), "Dialect resolver is required");
+        isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
     }
 
     protected void execute(DumpJobExecution execution) throws SQLException {
@@ -133,8 +133,7 @@ public class DumpJob extends JobBase {
         execution.setDatabase(database);
 
         Connection connection = connectionServices.getConnection();
-        DatabaseMetaData databaseMetaData = connection.getMetaData();
-        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(databaseMetaData));
+        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
 
         CatalogWriter catalogWriter = getCatalog().getCatalogWriter();
         execution.setCatalogWriter(catalogWriter);

@@ -29,10 +29,7 @@ package com.nuodb.migration.cli.run;
 
 import com.nuodb.migration.cli.CliOptions;
 import com.nuodb.migration.cli.CliResources;
-import com.nuodb.migration.cli.parse.CommandLine;
-import com.nuodb.migration.cli.parse.Group;
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionException;
+import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.cli.parse.option.*;
 import com.nuodb.migration.context.support.ApplicationSupport;
 import com.nuodb.migration.jdbc.JdbcConstants;
@@ -71,73 +68,73 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
      * @return group of options for the source database.
      */
     protected Group createSourceGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(SOURCE_GROUP_NAME)).withRequired(true).withMinimum(1);
+        GroupBuilder group = newGroupBuilder().withName(getMessage(SOURCE_GROUP_NAME)).withRequired(true).withMinimum(1);
 
-        Option driver = newOption().
+        Option driver = newBasicOptionBuilder().
                 withName(SOURCE_DRIVER_OPTION).
                 withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
         group.withOption(driver);
 
-        Option url = newOption().
+        Option url = newBasicOptionBuilder().
                 withName(SOURCE_URL_OPTION).
                 withDescription(getMessage(SOURCE_URL_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(SOURCE_URL_ARGUMENT_NAME)).
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
         group.withOption(url);
 
-        Option username = newOption().
+        Option username = newBasicOptionBuilder().
                 withName(SOURCE_USERNAME_OPTION).
                 withDescription(getMessage(SOURCE_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(SOURCE_USERNAME_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(username);
 
-        Option password = newOption().
+        Option password = newBasicOptionBuilder().
                 withName(SOURCE_PASSWORD_OPTION).
                 withDescription(getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(password);
 
-        Option properties = newOption().
+        Option properties = newBasicOptionBuilder().
                 withName(SOURCE_PROPERTIES_OPTION).
                 withDescription(getMessage(SOURCE_PROPERTIES_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(SOURCE_PROPERTIES_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(properties);
 
-        Option catalog = newOption().
+        Option catalog = newBasicOptionBuilder().
                 withName(SOURCE_CATALOG_OPTION).
                 withDescription(getMessage(SOURCE_CATALOG_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(SOURCE_CATALOG_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(catalog);
 
-        Option schema = newOption().
+        Option schema = newBasicOptionBuilder().
                 withName(SOURCE_SCHEMA_OPTION).
                 withDescription(getMessage(SOURCE_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(schema);
@@ -146,39 +143,41 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected Group createOutputGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(OUTPUT_GROUP_NAME)).withRequired(true).withMinimum(1);
+        GroupBuilder group = newGroupBuilder().withName(getMessage(OUTPUT_GROUP_NAME)).withRequired(true).withMinimum(1);
 
-        Option type = newOption().
+        Option type = newBasicOptionBuilder().
                 withName(OUTPUT_TYPE_OPTION).
                 withDescription(getMessage(OUTPUT_TYPE_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(OUTPUT_TYPE_ARGUMENT_NAME)).
                                 withRequired(true).withMinimum(1).build()
                 ).build();
         group.withOption(type);
 
-        Option path = newOption().
+        Option path = newBasicOptionBuilder().
                 withName(OUTPUT_PATH_OPTION).
                 withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(path);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
-        optionFormat.setArgumentValuesSeparator(null);
+        optionFormat.setValuesSeparator(null);
 
-        RegexOption attributes = new RegexOption(optionFormat);
-        attributes.setName(OUTPUT_OPTION);
-        attributes.setDescription(getMessage(OUTPUT_OPTION_DESCRIPTION));
-        attributes.addRegex(OUTPUT_OPTION, 1, LOW);
-        attributes.setArgument(
-                newArgument().
-                        withName(getMessage(OUTPUT_OPTION_ARGUMENT_NAME)).
-                        withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build());
+        Option attributes = newRegexOptionBuilder().
+                withName(OUTPUT_OPTION).
+                withDescription(getMessage(OUTPUT_OPTION_DESCRIPTION)).
+                withRegex(OUTPUT_OPTION, 1, LOW).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(OUTPUT_OPTION_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build()
+                )
+                .build();
         group.withOption(attributes);
 
         return group.build();
@@ -214,12 +213,12 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected Option createTimeZoneOption() {
-        return newOption().
+        return newBasicOptionBuilder().
                 withName(TIME_ZONE_OPTION).
                 withAlias(TIME_ZONE_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(TIME_ZONE_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TIME_ZONE_ARGUMENT_NAME)).
                                 withMinimum(1).
                                 withRequired(true).build()
@@ -271,52 +270,52 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected Group createTargetGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(TARGET_GROUP_NAME));
+        GroupBuilder group = newGroupBuilder().withName(getMessage(TARGET_GROUP_NAME));
 
-        Option url = newOption().
+        Option url = newBasicOptionBuilder().
                 withName(TARGET_URL_OPTION).
                 withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TARGET_URL_ARGUMENT_NAME)).
                                 withRequired(true).
                                 withMinimum(1).build()
                 ).build();
         group.withOption(url);
 
-        Option username = newOption().
+        Option username = newBasicOptionBuilder().
                 withName(TARGET_USERNAME_OPTION).
                 withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(username);
 
-        Option password = newOption().
+        Option password = newBasicOptionBuilder().
                 withName(TARGET_PASSWORD_OPTION).
                 withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(password);
 
-        Option properties = newOption().
+        Option properties = newBasicOptionBuilder().
                 withName(TARGET_PROPERTIES_OPTION).
                 withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(properties);
 
-        Option schema = newOption().
+        Option schema = newBasicOptionBuilder().
                 withName(TARGET_SCHEMA_OPTION).
                 withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(schema);
@@ -326,29 +325,29 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     }
 
     protected Group createInputGroup() {
-        Option path = newOption().
+        Option path = newBasicOptionBuilder().
                 withName(INPUT_PATH_OPTION).
                 withDescription(getMessage(INPUT_PATH_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(INPUT_PATH_ARGUMENT_NAME)).build()
                 ).build();
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
-        optionFormat.setArgumentValuesSeparator(null);
+        optionFormat.setValuesSeparator(null);
 
-        RegexOption attributes = new RegexOption();
-        attributes.setOptionFormat(getOptionFormat());
-        attributes.setName(INPUT_OPTION);
-        attributes.setDescription(getMessage(INPUT_OPTION_DESCRIPTION));
-        attributes.setOptionFormat(optionFormat);
-        attributes.addRegex(INPUT_OPTION, 1, LOW);
-        attributes.setArgument(
-                newArgument().
-                        withName(getMessage(INPUT_OPTION_ARGUMENT_NAME)).
-                        withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build());
-        return newGroup().
+        Option attributes = newRegexOptionBuilder().
+                withName(INPUT_OPTION).
+                withDescription(getMessage(INPUT_OPTION_DESCRIPTION)).
+                withRegex(INPUT_OPTION, 1, LOW).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(INPUT_OPTION_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build()
+                )
+                .build();
+        return newGroupBuilder().
                 withName(getMessage(INPUT_GROUP_NAME)).
                 withRequired(true).
                 withMinimum(1).
@@ -378,16 +377,20 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return resource;
     }
 
-    protected OptionBuilder newOption() {
-        return optionToolkit.newOption();
+    protected ArgumentBuilder newArgumentBuilder() {
+        return optionToolkit.newArgumentBuilder();
     }
 
-    protected GroupBuilder newGroup() {
-        return optionToolkit.newGroup();
+    protected BasicOptionBuilder newBasicOptionBuilder() {
+        return optionToolkit.newBasicOptionBuilder();
     }
 
-    protected ArgumentBuilder newArgument() {
-        return optionToolkit.newArgument();
+    protected GroupBuilder newGroupBuilder() {
+        return optionToolkit.newGroupBuilder();
+    }
+
+    protected RegexOptionBuilder newRegexOptionBuilder() {
+        return optionToolkit.newRegexOptionBuilder();
     }
 
     protected OptionFormat getOptionFormat() {

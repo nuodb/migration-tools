@@ -37,8 +37,6 @@ import com.nuodb.migration.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migration.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migration.job.JobBase;
 import com.nuodb.migration.job.JobExecution;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -49,8 +47,6 @@ import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
  * @author Sergey Bushik
  */
 public class SchemaJob extends JobBase {
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private ScriptGeneratorContext context;
     private ScriptExporter scriptExporter;

@@ -55,7 +55,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -92,8 +91,8 @@ public class LoadJob extends JobBase {
     protected void validate() {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
-        isNotNull(getDialectResolver(), "Database dialect resolver is required");
-        isNotNull(getValueFormatRegistryResolver(), "JDBC type value format registry resolver is required");
+        isNotNull(getDialectResolver(), "Dialect resolver is required");
+        isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
     }
 
     protected void execute(LoadJobExecution execution) throws SQLException {
@@ -109,20 +108,17 @@ public class LoadJob extends JobBase {
     protected void load(LoadJobExecution execution) throws SQLException {
         ConnectionServices connectionServices = execution.getConnectionServices();
 
+        Connection connection = connectionServices.getConnection();
         InspectionManager inspectionManager = new InspectionManager();
         inspectionManager.setDialectResolver(getDialectResolver());
-        inspectionManager.setConnection(connectionServices.getConnection());
+        inspectionManager.setConnection(connection);
         Database database = inspectionManager.inspect(
                 new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
-                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA,
-                MetaDataType.TABLE, MetaDataType.COLUMN
+                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE, MetaDataType.COLUMN
         ).getObject(MetaDataType.DATABASE);
 
         execution.setDatabase(database);
-
-        Connection connection = connectionServices.getConnection();
-        DatabaseMetaData metaData = connection.getMetaData();
-        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(metaData));
+        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
 
         CatalogReader catalogReader = getCatalog().getCatalogReader();
         execution.setCatalogReader(catalogReader);

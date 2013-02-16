@@ -27,30 +27,33 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.nuodb.migration.cli.parse.*;
+import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.OptionProcessor;
+import com.nuodb.migration.cli.parse.Trigger;
 
-import java.util.Map;
 import java.util.Set;
+
+import static com.nuodb.migration.utils.ReflectionUtils.newInstance;
 
 /**
  * @author Sergey Bushik
  */
-public class OptionBuilderImpl implements OptionBuilder {
+public abstract class OptionBuilderBase<O extends Option> implements OptionBuilder<O> {
 
-    private int id;
-    private String name;
-    private String description;
-    private boolean required;
-    private Argument argument;
-    private Group group;
-    private Map<String, OptionFormat> aliases = Maps.newHashMap();
-    private Set<Trigger> triggers = Sets.newHashSet();
-    private OptionFormat optionFormat;
-    private OptionProcessor optionProcessor;
+    private Class<? extends O> optionClass;
 
-    public OptionBuilderImpl(OptionFormat optionFormat) {
+    protected int id;
+    protected String name;
+    protected String description;
+    protected boolean required;
+
+    protected OptionFormat optionFormat;
+    protected OptionProcessor optionProcessor;
+    protected Set<Trigger> triggers = Sets.newHashSet();
+
+    public OptionBuilderBase(Class<? extends O> optionClass, OptionFormat optionFormat) {
+        this.optionClass = optionClass;
         this.optionFormat = optionFormat;
     }
 
@@ -67,17 +70,6 @@ public class OptionBuilderImpl implements OptionBuilder {
     }
 
     @Override
-    public OptionBuilder withAlias(String alias) {
-        return withAlias(alias, optionFormat);
-    }
-
-    @Override
-    public OptionBuilder withAlias(String alias, OptionFormat optionFormat) {
-        this.aliases.put(alias, optionFormat);
-        return this;
-    }
-
-    @Override
     public OptionBuilder withDescription(String description) {
         this.description = description;
         return this;
@@ -89,20 +81,9 @@ public class OptionBuilderImpl implements OptionBuilder {
         return this;
     }
 
-    public OptionBuilder withGroup(Group group) {
-        this.group = group;
-        return this;
-    }
-
     @Override
     public OptionBuilder withOptionProcessor(OptionProcessor optionProcessor) {
         this.optionProcessor = optionProcessor;
-        return this;
-    }
-
-    @Override
-    public OptionBuilder withArgument(Argument argument) {
-        this.argument = argument;
         return this;
     }
 
@@ -114,25 +95,26 @@ public class OptionBuilderImpl implements OptionBuilder {
 
     @Override
     public OptionBuilder withTrigger(Trigger trigger) {
-        triggers.add(trigger);
+        this.triggers.add(trigger);
         return this;
     }
 
     @Override
-    public Option build() {
-        OptionImpl option = new OptionImpl();
+    public O build() {
+        O option = create();
         option.setId(id);
         option.setName(name);
         option.setDescription(description);
         option.setRequired(required);
         option.setOptionProcessor(optionProcessor);
-        option.setArgument(argument);
         option.setOptionFormat(optionFormat);
-        option.setAliasOptionFormats(aliases);
-        option.setGroup(group);
         for (Trigger trigger : triggers) {
             option.addTrigger(trigger);
         }
         return option;
+    }
+
+    protected O create() {
+        return newInstance(optionClass);
     }
 }

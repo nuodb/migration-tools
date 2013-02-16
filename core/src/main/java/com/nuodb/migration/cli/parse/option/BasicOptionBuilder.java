@@ -27,28 +27,34 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-import com.nuodb.migration.cli.parse.Trigger;
+import com.nuodb.migration.cli.parse.*;
 
 /**
  * @author Sergey Bushik
  */
-public interface OptionBuilder<O extends Option> {
+public interface BasicOptionBuilder<O extends BasicOption> extends AugmentOptionBuilder<O> {
 
-    OptionBuilder withId(int id);
+    BasicOptionBuilder withId(int id);
 
-    OptionBuilder withName(String name);
+    BasicOptionBuilder withName(String name);
 
-    OptionBuilder withDescription(String description);
+    BasicOptionBuilder withDescription(String description);
 
-    OptionBuilder withRequired(boolean required);
+    BasicOptionBuilder withRequired(boolean required);
 
-    OptionBuilder withTrigger(Trigger trigger);
+    BasicOptionBuilder withTrigger(Trigger trigger);
 
-    OptionBuilder withOptionFormat(OptionFormat optionFormat);
+    BasicOptionBuilder withOptionFormat(OptionFormat optionFormat);
 
-    OptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
+    BasicOptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
+
+    BasicOptionBuilder withArgument(Argument argument);
+
+    BasicOptionBuilder withGroup(Group group);
+
+    BasicOptionBuilder withAlias(String alias);
+
+    BasicOptionBuilder withAlias(String alias, OptionFormat optionFormat);
 
     O build();
 }

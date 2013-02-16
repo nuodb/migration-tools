@@ -29,7 +29,16 @@ package com.nuodb.migration.cli.parse.option;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.nuodb.migration.cli.parse.*;
+import com.nuodb.migration.cli.parse.Argument;
+import com.nuodb.migration.cli.parse.AugmentOption;
+import com.nuodb.migration.cli.parse.CommandLine;
+import com.nuodb.migration.cli.parse.Group;
+import com.nuodb.migration.cli.parse.Help;
+import com.nuodb.migration.cli.parse.HelpHint;
+import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.OptionException;
+import com.nuodb.migration.cli.parse.OptionProcessor;
+import com.nuodb.migration.cli.parse.Trigger;
 import com.nuodb.migration.utils.PriorityList;
 import com.nuodb.migration.utils.SimplePriorityList;
 
@@ -41,25 +50,19 @@ import java.util.Set;
 /**
  * @author Sergey Bushik
  */
-public abstract class ContainerBase extends OptionBase implements Container {
+public abstract class AugmentOptionBase extends OptionBase implements AugmentOption {
 
-    private Group group;
     private Argument argument;
+    private Group group;
 
-    protected ContainerBase() {
+    @Override
+    public Argument getArgument() {
+        return argument;
     }
 
-    protected ContainerBase(OptionFormat optionFormat) {
-        super(optionFormat);
-    }
-
-    protected ContainerBase(int id, String name, String description, boolean required) {
-        super(id, name, description, required);
-    }
-
-    protected ContainerBase(int id, String name, String description, boolean required,
-                            OptionFormat optionFormat) {
-        super(id, name, description, required, optionFormat);
+    @Override
+    public void setArgument(Argument argument) {
+        this.argument = argument;
     }
 
     @Override
@@ -73,21 +76,11 @@ public abstract class ContainerBase extends OptionBase implements Container {
     }
 
     @Override
-    public Argument getArgument() {
-        return argument;
-    }
-
-    @Override
-    public void setArgument(Argument argument) {
-        this.argument = argument;
-    }
-
-    @Override
     public Set<String> getPrefixes() {
         Set<String> prefixes = Sets.newHashSet();
         prefixes.addAll(getOptionPrefixes());
-        if (group != null) {
-            prefixes.addAll(group.getPrefixes());
+        if (getGroup() != null) {
+            prefixes.addAll(getGroup().getPrefixes());
         }
         return prefixes;
     }
@@ -95,8 +88,8 @@ public abstract class ContainerBase extends OptionBase implements Container {
     @Override
     public PriorityList<Trigger> getTriggers() {
         PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>(super.getTriggers());
-        if (group != null) {
-            triggers.addAll(group.getTriggers());
+        if (getGroup() != null) {
+            triggers.addAll(getGroup().getTriggers());
         }
         return triggers;
     }
@@ -104,7 +97,7 @@ public abstract class ContainerBase extends OptionBase implements Container {
     @Override
     public boolean canProcess(CommandLine commandLine, String argument) {
         PriorityList<Trigger> triggers = getTriggers();
-        if (this.argument != null) {
+        if (getArgument() != null) {
             String argumentSeparator = getArgumentSeparator();
             if (argumentSeparator != null) {
                 int index = argument.indexOf(argumentSeparator);
@@ -127,11 +120,11 @@ public abstract class ContainerBase extends OptionBase implements Container {
 
     @Override
     public void defaults(CommandLine commandLine) {
-        if (this.argument != null) {
-            this.argument.defaults(commandLine, this);
+        if (getArgument() != null) {
+            getArgument().defaults(commandLine, this);
         }
-        if (this.group != null) {
-            this.group.defaults(commandLine);
+        if (getGroup() != null) {
+            getGroup().defaults(commandLine);
         }
     }
 
@@ -158,17 +151,17 @@ public abstract class ContainerBase extends OptionBase implements Container {
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        doProcess(commandLine, arguments);
+        processArguments(commandLine, arguments);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.process(commandLine, this, arguments);
         }
-        processArgument(commandLine, arguments);
+        doProcess(commandLine, arguments);
         processGroup(commandLine, arguments);
     }
 
-    protected void processArgument(CommandLine commandLine, ListIterator<String> arguments) {
-        if (argument != null && arguments.hasNext()) {
+    protected void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
+        if (getArgument() != null && arguments.hasNext()) {
             String value = arguments.next();
             String unquoted = unquote(value);
             if (!value.equals(unquoted)) {
@@ -176,14 +169,14 @@ public abstract class ContainerBase extends OptionBase implements Container {
                 arguments.add(unquoted);
             }
             arguments.previous();
-            argument.preProcess(commandLine, arguments);
-            argument.process(commandLine, arguments, this);
+            getArgument().preProcess(commandLine, arguments);
+            getArgument().process(commandLine, arguments, this);
         }
     }
 
     protected void processGroup(CommandLine commandLine, ListIterator<String> arguments) {
-        if ((group != null) && group.canProcess(commandLine, arguments)) {
-            group.process(commandLine, arguments);
+        if ((getGroup() != null) && getGroup().canProcess(commandLine, arguments)) {
+            getGroup().process(commandLine, arguments);
         }
     }
 
@@ -208,28 +201,28 @@ public abstract class ContainerBase extends OptionBase implements Container {
     }
 
     protected void postProcessArgument(CommandLine commandLine) {
-        if (argument != null) {
-            argument.postProcess(commandLine, this);
+        if (getArgument() != null) {
+            getArgument().postProcess(commandLine, this);
         }
     }
 
     protected void postProcessGroup(CommandLine commandLine) {
-        if (group != null) {
-            group.postProcess(commandLine);
+        if (getGroup() != null) {
+            getGroup().postProcess(commandLine);
         }
     }
 
     @Override
     public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator) {
-        boolean displayArgument = (this.argument != null) && hints.contains(HelpHint.CONTAINER_ARGUMENT);
-        boolean displayGroup = (this.group != null) && hints.contains(HelpHint.CONTAINER_GROUP);
+        boolean displayArgument = (getArgument() != null) && hints.contains(HelpHint.CONTAINER_ARGUMENT);
+        boolean displayGroup = (getGroup() != null) && hints.contains(HelpHint.CONTAINER_GROUP);
         if (displayArgument) {
             buffer.append(' ');
-            this.argument.help(buffer, hints, comparator);
+            getArgument().help(buffer, hints, comparator);
         }
         if (displayGroup) {
             buffer.append(' ');
-            this.group.help(buffer, hints, comparator);
+            getGroup().help(buffer, hints, comparator);
         }
     }
 

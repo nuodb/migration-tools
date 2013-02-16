@@ -37,7 +37,6 @@ import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.cli.parse.option.GroupBuilder;
 import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.migration.cli.parse.option.RegexOption;
 import com.nuodb.migration.jdbc.JdbcConstants;
 import com.nuodb.migration.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migration.jdbc.dialect.IdentifierNormalizers;
@@ -48,7 +47,6 @@ import com.nuodb.migration.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migration.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migration.schema.SchemaJobFactory;
 import com.nuodb.migration.spec.*;
-import com.nuodb.migration.utils.Priority;
 import com.nuodb.migration.utils.ReflectionUtils;
 
 import java.util.*;
@@ -57,6 +55,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.newListMultimap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migration.jdbc.metadata.generator.ScriptType.valueOf;
+import static com.nuodb.migration.utils.Priority.LOW;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
@@ -163,7 +162,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
 
         @Override
         protected Option createOption() {
-            GroupBuilder group = newGroup().withName(getResources().getMessage(SCHEMA_GROUP_NAME));
+            GroupBuilder group = newGroupBuilder().withName(getResources().getMessage(SCHEMA_GROUP_NAME));
             group.withRequired(true);
             group.withOption(createSourceGroup());
             group.withOption(createTargetGroup());
@@ -183,53 +182,53 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         }
 
         protected void createSchemaOptions(GroupBuilder group) {
-            GroupBuilder typeGroup = newGroup().withName(getResources().getMessage(JDBC_TYPE_GROUP_NAME));
-            Option typeName = newOption().
+            GroupBuilder typeGroup = newGroupBuilder().withName(getResources().getMessage(JDBC_TYPE_GROUP_NAME));
+            Option typeName = newBasicOptionBuilder().
                     withName(JDBC_TYPE_NAME_OPTION).
                     withDescription(getMessage(JDBC_TYPE_NAME_OPTION_DESCRIPTION)).
                     withArgument(
-                            newArgument().
+                            newArgumentBuilder().
                                     withName(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME)).
                                     withHelpValues(singleton(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME))).
                                     withOptionProcessor(jdbcTypeSpecValuesCollector).
                                     withMinimum(1).withMaximum(Integer.MAX_VALUE).withRequired(true).build()
                     ).build();
             typeGroup.withOption(typeName);
-            Option typeCode = newOption().
+            Option typeCode = newBasicOptionBuilder().
                     withName(JDBC_TYPE_CODE_OPTION).
                     withDescription(getMessage(JDBC_TYPE_CODE_OPTION_DESCRIPTION)).
                     withArgument(
-                            newArgument().
+                            newArgumentBuilder().
                                     withName(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME)).
                                     withHelpValues(singleton(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME))).
                                     withMinimum(1).withMaximum(Integer.MAX_VALUE).withRequired(true).build()
                     ).build();
             typeGroup.withOption(typeCode);
-            Option typeSize = newOption().
+            Option typeSize = newBasicOptionBuilder().
                     withName(JDBC_TYPE_SIZE_OPTION).
                     withDescription(getMessage(JDBC_TYPE_SIZE_OPTION_DESCRIPTION)).
                     withArgument(
-                            newArgument().
+                            newArgumentBuilder().
                                     withName(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME)).
                                     withHelpValues(singleton(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME))).
                                     withMaximum(Integer.MAX_VALUE).build()
                     ).build();
             typeGroup.withOption(typeSize);
-            Option typePrecision = newOption().
+            Option typePrecision = newBasicOptionBuilder().
                     withName(JDBC_TYPE_PRECISION_OPTION).
                     withDescription(getMessage(JDBC_TYPE_PRECISION_OPTION_DESCRIPTION)).
                     withArgument(
-                            newArgument().
+                            newArgumentBuilder().
                                     withName(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME)).
                                     withHelpValues(singleton(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME))).
                                     withMaximum(Integer.MAX_VALUE).build()
                     ).build();
             typeGroup.withOption(typePrecision);
-            Option typeScale = newOption().
+            Option typeScale = newBasicOptionBuilder().
                     withName(JDBC_TYPE_SCALE_OPTION).
                     withDescription(getMessage(JDBC_TYPE_SCALE_OPTION_DESCRIPTION)).
                     withArgument(
-                            newArgument().
+                            newArgumentBuilder().
                                     withName(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME)).
                                     withHelpValues(singleton(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME))).
                                     withMaximum(Integer.MAX_VALUE).build()
@@ -239,18 +238,18 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             group.withOption(typeGroup.build());
 
             OptionFormat optionFormat = new OptionFormat(getOptionFormat());
-            optionFormat.setArgumentValuesSeparator(null);
+            optionFormat.setValuesSeparator(null);
 
-            RegexOption generate = new RegexOption();
-            generate.setOptionFormat(getOptionFormat());
-            generate.setName(SCHEMA_META_DATA_OPTION);
-            generate.setDescription(getMessage(SCHEMA_META_DATA_OPTION_DESCRIPTION));
-            generate.setOptionFormat(getOptionFormat());
-            generate.addRegex(SCHEMA_META_DATA_OPTION, 1, Priority.LOW);
-            generate.setArgument(
-                    newArgument().
-                            withName(getMessage(SCHEMA_META_DATA_ARGUMENT_NAME)).
-                            withOptionFormat(optionFormat).withMinimum(1).withMaximum(Integer.MAX_VALUE).build());
+            Option generate = newRegexOptionBuilder().
+                    withName(SCHEMA_META_DATA_OPTION).
+                    withDescription(getMessage(SCHEMA_META_DATA_OPTION_DESCRIPTION)).
+                    withRegex(SCHEMA_META_DATA_OPTION, 1, LOW).
+                    withArgument(
+                            newArgumentBuilder().
+                                    withName(getMessage(SCHEMA_META_DATA_ARGUMENT_NAME)).
+                                    withOptionFormat(optionFormat).withMinimum(1).withMaximum(Integer.MAX_VALUE).build()
+                    )
+                    .build();
             group.withOption(generate);
 
             Collection<String> scriptTypeHelpValues = Lists.transform(asList(ScriptType.values()),
@@ -260,11 +259,11 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
                             return scriptType.name().toLowerCase();
                         }
                     });
-            Option scriptType = newOption().
+            Option scriptType = newBasicOptionBuilder().
                     withName(SCHEMA_SCRIPT_TYPE_OPTION).
                     withDescription(getMessage(SCHEMA_SCRIPT_TYPE_OPTION_DESCRIPTION)).
                     withArgument(
-                            newArgument().
+                            newArgumentBuilder().
                                     withName(getMessage(SCHEMA_SCRIPT_TYPE_ARGUMENT_NAME)).
                                     withMinimum(1).
                                     withMaximum(ScriptType.values().length).
@@ -272,29 +271,29 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
                     ).build();
             group.withOption(scriptType);
 
-            Option groupScriptsBy = newOption().
+            Option groupScriptsBy = newBasicOptionBuilder().
                     withName(SCHEMA_GROUP_SCRIPTS_BY_OPTION).
                     withDescription(getMessage(SCHEMA_GROUP_SCRIPTS_BY_OPTION_DESCRIPTION)).
                     withArgument(
-                            newArgument().
+                            newArgumentBuilder().
                                     withName(getMessage(SCHEMA_GROUP_SCRIPTS_BY_ARGUMENT_NAME)).build()
                     ).build();
             group.withOption(groupScriptsBy);
 
-            Option identifierQuoting = newOption().
+            Option identifierQuoting = newBasicOptionBuilder().
                     withName(SCHEMA_IDENTIFIER_QUOTING).
                     withDescription(getMessage(SCHEMA_IDENTIFIER_QUOTING_OPTION_DESCRIPTION)).
                     withArgument(
-                            newArgument().
+                            newArgumentBuilder().
                                     withName(getMessage(SCHEMA_IDENTIFIER_QUOTING_ARGUMENT_NAME)).build()
                     ).build();
             group.withOption(identifierQuoting);
 
-            Option identifierNormalizer = newOption().
+            Option identifierNormalizer = newBasicOptionBuilder().
                     withName(SCHEMA_IDENTIFIER_NORMALIZER).
                     withDescription(getMessage(SCHEMA_IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION)).
                     withArgument(
-                            newArgument().
+                            newArgumentBuilder().
                                     withName(getMessage(SCHEMA_IDENTIFIER_NORMALIZER_ARGUMENT_NAME)).build()
                     ).build();
             group.withOption(identifierNormalizer);
@@ -422,13 +421,13 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
 
     @Override
     protected Group createOutputGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(SCHEMA_OUTPUT_GROUP_NAME));
-        Option path = newOption().
+        GroupBuilder group = newGroupBuilder().withName(getMessage(SCHEMA_OUTPUT_GROUP_NAME));
+        Option path = newBasicOptionBuilder().
                 withName(OUTPUT_PATH_OPTION).
                 withRequired(true).
                 withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(OUTPUT_PATH_ARGUMENT_NAME)).
                                 withMinimum(1).
                                 withRequired(true).build()
@@ -449,50 +448,50 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
 
     @Override
     protected Group createTargetGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(TARGET_GROUP_NAME));
+        GroupBuilder group = newGroupBuilder().withName(getMessage(TARGET_GROUP_NAME));
 
-        Option url = newOption().
+        Option url = newBasicOptionBuilder().
                 withName(TARGET_URL_OPTION).
                 withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TARGET_URL_ARGUMENT_NAME)).
                                 withMinimum(1).withRequired(true).build()
                 ).build();
         group.withOption(url);
 
-        Option username = newOption().
+        Option username = newBasicOptionBuilder().
                 withName(TARGET_USERNAME_OPTION).
                 withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(username);
 
-        Option password = newOption().
+        Option password = newBasicOptionBuilder().
                 withName(TARGET_PASSWORD_OPTION).
                 withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(password);
 
-        Option properties = newOption().
+        Option properties = newBasicOptionBuilder().
                 withName(TARGET_PROPERTIES_OPTION).
                 withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TARGET_PROPERTIES_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(properties);
 
-        Option schema = newOption().
+        Option schema = newBasicOptionBuilder().
                 withName(TARGET_SCHEMA_OPTION).
                 withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(schema);

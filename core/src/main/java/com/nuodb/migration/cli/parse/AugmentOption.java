@@ -25,30 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.cli.parse.option;
-
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-import com.nuodb.migration.cli.parse.Trigger;
+package com.nuodb.migration.cli.parse;
 
 /**
  * @author Sergey Bushik
  */
-public interface OptionBuilder<O extends Option> {
+public interface AugmentOption extends Option {
 
-    OptionBuilder withId(int id);
+    Argument getArgument();
 
-    OptionBuilder withName(String name);
+    void setArgument(Argument argument);
 
-    OptionBuilder withDescription(String description);
+    Group getGroup();
 
-    OptionBuilder withRequired(boolean required);
-
-    OptionBuilder withTrigger(Trigger trigger);
-
-    OptionBuilder withOptionFormat(OptionFormat optionFormat);
-
-    OptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
-
-    O build();
+    void setGroup(Group children);
 }

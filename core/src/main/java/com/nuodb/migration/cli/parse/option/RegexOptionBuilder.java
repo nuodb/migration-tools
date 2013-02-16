@@ -27,28 +27,32 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-import com.nuodb.migration.cli.parse.Trigger;
+import com.nuodb.migration.cli.parse.*;
 
 /**
  * @author Sergey Bushik
  */
-public interface OptionBuilder<O extends Option> {
+public interface RegexOptionBuilder<O extends RegexOption> extends AugmentOptionBuilder<O> {
 
-    OptionBuilder withId(int id);
+    RegexOptionBuilder withId(int id);
 
-    OptionBuilder withName(String name);
+    RegexOptionBuilder withName(String name);
 
-    OptionBuilder withDescription(String description);
+    RegexOptionBuilder withDescription(String description);
 
-    OptionBuilder withRequired(boolean required);
+    RegexOptionBuilder withRequired(boolean required);
 
-    OptionBuilder withTrigger(Trigger trigger);
+    RegexOptionBuilder withTrigger(Trigger trigger);
 
-    OptionBuilder withOptionFormat(OptionFormat optionFormat);
+    RegexOptionBuilder withOptionFormat(OptionFormat optionFormat);
 
-    OptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
+    RegexOptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
+
+    RegexOptionBuilder withArgument(Argument argument);
+
+    RegexOptionBuilder withGroup(Group group);
+
+    RegexOptionBuilder withRegex(String regex, int group, int priority);
 
     O build();
 }

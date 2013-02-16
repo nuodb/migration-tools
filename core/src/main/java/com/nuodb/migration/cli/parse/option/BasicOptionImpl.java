@@ -34,35 +34,23 @@ import com.nuodb.migration.utils.SimplePriorityList;
 import java.util.*;
 
 import static com.nuodb.migration.cli.parse.HelpHint.*;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
-public class OptionImpl extends ContainerBase {
+public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
 
-    private OptionFormat optionFormat;
-    private Map<String, OptionFormat> aliasOptionFormats;
+    private Map<String, OptionFormat> aliases;
 
-    public OptionImpl() {
+    @Override
+    public Map<String, OptionFormat> getAliases() {
+        return aliases;
     }
 
-    public OptionImpl(int id, String name, String description, boolean required) {
-        super(id, name, description, required);
-    }
-
-    public OptionImpl(int id, String name, String description, boolean required,
-                      OptionFormat optionFormat, Map<String, OptionFormat> aliasOptionFormats) {
-        super(id, name, description, required);
-        this.optionFormat = optionFormat;
-        this.aliasOptionFormats = aliasOptionFormats;
-    }
-
-    public Map<String, OptionFormat> getAliasOptionFormats() {
-        return aliasOptionFormats;
-    }
-
-    public void setAliasOptionFormats(Map<String, OptionFormat> aliasOptionFormats) {
-        this.aliasOptionFormats = aliasOptionFormats;
+    @Override
+    public void setAliases(Map<String, OptionFormat> aliases) {
+        this.aliases = aliases;
     }
 
     @Override
@@ -70,10 +58,10 @@ public class OptionImpl extends ContainerBase {
         PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>(super.getTriggers());
         Set<String> prefixes = getPrefixes();
         createTriggers(triggers, prefixes, getName());
-        if (getAliasOptionFormats() != null) {
-            Set<Map.Entry<String, OptionFormat>> aliasOptionFormats = getAliasOptionFormats().entrySet();
-            for (Map.Entry<String, OptionFormat> aliasOptionFormat : aliasOptionFormats) {
-                createTriggers(triggers, aliasOptionFormat.getValue().getOptionPrefixes(), aliasOptionFormat.getKey());
+        if (getAliases() != null) {
+            Set<Map.Entry<String, OptionFormat>> aliases = getAliases().entrySet();
+            for (Map.Entry<String, OptionFormat> alias : aliases) {
+                createTriggers(triggers, alias.getValue().getPrefixes(), alias.getKey());
             }
         }
         return triggers;
@@ -87,13 +75,13 @@ public class OptionImpl extends ContainerBase {
     }
 
     @Override
-    protected void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void processArguments(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
         Trigger trigger = findTrigger(getTriggers(), argument);
         if (trigger != null) {
             commandLine.addOption(this);
         } else {
-            throw new OptionException(this, String.format("Unexpected token %1$s", argument));
+            throw new OptionException(this, format("Unexpected token %1$s", argument));
         }
     }
 
@@ -108,12 +96,12 @@ public class OptionImpl extends ContainerBase {
         PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
         createTriggers(triggers, prefixes, getName());
         join(help, triggers);
-        Map<String, OptionFormat> aliasOptionFormats = getAliasOptionFormats();
-        if (displayAliases && (aliasOptionFormats != null && !aliasOptionFormats.isEmpty())) {
+        Map<String, OptionFormat> aliases = getAliases();
+        if (displayAliases && (aliases != null && !aliases.isEmpty())) {
             help.append(" (");
             triggers.clear();
-            for (Map.Entry<String, OptionFormat> aliasOptionFormat : aliasOptionFormats.entrySet()) {
-                createTriggers(triggers, aliasOptionFormat.getValue().getOptionPrefixes(), aliasOptionFormat.getKey());
+            for (Map.Entry<String, OptionFormat> alias : aliases.entrySet()) {
+                createTriggers(triggers, alias.getValue().getPrefixes(), alias.getKey());
             }
             join(help, triggers);
             help.append(')');

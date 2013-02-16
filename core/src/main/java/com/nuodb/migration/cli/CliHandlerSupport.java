@@ -78,34 +78,34 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
     }
 
     protected Group createOption() {
-        Option help = optionToolkit.newOption().
+        Option help = optionToolkit.newBasicOptionBuilder().
                 withId(HELP_OPTION_ID).
                 withName(HELP_OPTION).
                 withAlias(HELP_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(HELP_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
+                        optionToolkit.newArgumentBuilder().
                                 withName(getMessage(HELP_ARGUMENT_NAME)).build()
                 ).build();
-        Option list = optionToolkit.newOption().
+        Option list = optionToolkit.newBasicOptionBuilder().
                 withId(LIST_OPTION_ID).
                 withName(LIST_OPTION).
                 withAlias(LIST_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(LIST_OPTION_DESCRIPTION)).build();
-        Option config = optionToolkit.newOption().
+        Option config = optionToolkit.newBasicOptionBuilder().
                 withId(CONFIG_OPTION_ID).
                 withName(CONFIG_OPTION).
                 withAlias(CONFIG_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
                 withArgument(
-                        optionToolkit.newArgument().
+                        optionToolkit.newArgumentBuilder().
                                 withName(getMessage(CONFIG_ARGUMENT_NAME)).
                                 withMinimum(1).
                                 withMaximum(1).build()
                 ).build();
         Option command = new CliCommand(COMMAND_OPTION_ID, COMMAND_OPTION, getMessage(COMMAND_OPTION_DESCRIPTION),
                 false, cliRunFactoryLookup);
-        return optionToolkit.newGroup().
+        return optionToolkit.newGroupBuilder().
                 withName(getMessage(ROOT_GROUP_NAME)).
                 withOption(help).
                 withOption(list).

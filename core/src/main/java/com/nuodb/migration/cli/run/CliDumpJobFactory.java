@@ -35,7 +35,6 @@ import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.option.GroupBuilder;
 import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.migration.cli.parse.option.RegexOption;
 import com.nuodb.migration.dump.DumpJobFactory;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.spec.DumpSpec;
@@ -83,45 +82,44 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
      * Table option handles -table=users, -table=roles and stores it items the option in the  command line.
      */
     protected Group createTableGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(TABLE_GROUP_NAME)).withMaximum(MAX_VALUE);
+        GroupBuilder group = newGroupBuilder().withName(getMessage(TABLE_GROUP_NAME)).withMaximum(MAX_VALUE);
 
-        Option table = newOption().
+        Option table = newBasicOptionBuilder().
                 withName(TABLE_OPTION).
                 withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TABLE_ARGUMENT_NAME)).
                                 withMinimum(1).
                                 withRequired(true).build()
                 ).build();
         group.withOption(table);
 
-        Option tableType = newOption().
+        Option tableType = newBasicOptionBuilder().
                 withName(TABLE_TYPE_OPTION).
                 withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(tableType);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
-        optionFormat.setArgumentValuesSeparator(null);
+        optionFormat.setValuesSeparator(null);
 
-        RegexOption tableFilter = new RegexOption();
-        tableFilter.setName(TABLE_FILTER_OPTION);
-        tableFilter.setDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION));
-        tableFilter.setOptionFormat(optionFormat);
-        tableFilter.addRegex(TABLE_FILTER_OPTION, 1, LOW);
-        tableFilter.setArgument(
-                newArgument().
-                        withName(getMessage(TABLE_FILTER_ARGUMENT_NAME)).
-                        withOptionFormat(optionFormat).
-                        withMinimum(1).
-                        withRequired(true).build()
-        );
+        Option tableFilter = newRegexOptionBuilder().
+                withName(TABLE_FILTER_OPTION).
+                withDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION)).
+                withRegex(TABLE_FILTER_OPTION, 1, LOW).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(TABLE_FILTER_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withMinimum(1).
+                                withRequired(true).build()
+                ).build();
+
         group.withOption(tableFilter);
-
         return group.build();
     }
 
@@ -150,16 +148,16 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
     }
 
     protected Option createNativeQueryGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(MAX_VALUE);
+        GroupBuilder group = newGroupBuilder().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(MAX_VALUE);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
-        optionFormat.setArgumentValuesSeparator(null);
+        optionFormat.setValuesSeparator(null);
 
-        Option query = newOption().
+        Option query = newBasicOptionBuilder().
                 withName(QUERY_OPTION).
                 withDescription(getMessage(QUERY_OPTION_DESCRIPTION)).
                 withArgument(
-                        newArgument().
+                        newArgumentBuilder().
                                 withName(getMessage(QUERY_ARGUMENT_NAME)).
                                 withMinimum(1).
                                 withOptionFormat(optionFormat).
@@ -192,7 +190,7 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
 
         @Override
         protected Option createOption() {
-            return newGroup()
+            return newGroupBuilder()
                     .withName(getResources().getMessage(DUMP_GROUP_NAME))
                     .withOption(createSourceGroup())
                     .withOption(createOutputGroup())

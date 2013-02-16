@@ -27,86 +27,77 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.google.common.collect.Lists;
+import com.nuodb.migration.cli.parse.Argument;
+import com.nuodb.migration.cli.parse.AugmentOption;
 import com.nuodb.migration.cli.parse.Group;
-import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.OptionProcessor;
 import com.nuodb.migration.cli.parse.Trigger;
-
-import java.util.List;
 
 /**
  * @author Sergey Bushik
  */
-public class GroupBuilderImpl<O extends Group> extends OptionBuilderBase<O> implements GroupBuilder<O> {
+public abstract class AugmentOptionBuilderBase<O extends AugmentOption>
+        extends OptionBuilderBase<O> implements AugmentOptionBuilder<O> {
 
-    private int minimum = 0;
-    private int maximum = 0;
-    private List<Option> options = Lists.newArrayList();
+    private Argument argument;
+    private Group group;
 
-    public GroupBuilderImpl(OptionFormat optionFormat) {
-        super((Class<? extends O>) GroupImpl.class, optionFormat);
+    public AugmentOptionBuilderBase(Class<? extends O> optionClass, OptionFormat optionFormat) {
+        super(optionClass, optionFormat);
     }
 
     @Override
-    public GroupBuilder withId(int id) {
-        return (GroupBuilder) super.withId(id);
+    public AugmentOptionBuilder withId(int id) {
+        return (AugmentOptionBuilder) super.withId(id);
     }
 
     @Override
-    public GroupBuilder withName(String name) {
-        return (GroupBuilder) super.withName(name);
+    public AugmentOptionBuilder withName(String name) {
+        return (AugmentOptionBuilder) super.withName(name);
     }
 
     @Override
-    public GroupBuilder withDescription(String description) {
-        return (GroupBuilder) super.withDescription(description);
+    public AugmentOptionBuilder withDescription(String description) {
+        return (AugmentOptionBuilder) super.withDescription(description);
     }
 
     @Override
-    public GroupBuilder withRequired(boolean required) {
-        return (GroupBuilder) super.withRequired(required);
+    public AugmentOptionBuilder withRequired(boolean required) {
+        return (AugmentOptionBuilder) super.withRequired(required);
     }
 
     @Override
-    public GroupBuilder withTrigger(Trigger trigger) {
-        return (GroupBuilder) super.withTrigger(trigger);
+    public AugmentOptionBuilder withTrigger(Trigger trigger) {
+        return (AugmentOptionBuilder) super.withTrigger(trigger);
     }
 
     @Override
-    public GroupBuilder withOptionFormat(OptionFormat optionFormat) {
-        return (GroupBuilder) super.withOptionFormat(optionFormat);
+    public AugmentOptionBuilder withOptionFormat(OptionFormat optionFormat) {
+        return (AugmentOptionBuilder) super.withOptionFormat(optionFormat);
     }
 
     @Override
-    public GroupBuilder withOptionProcessor(OptionProcessor optionProcessor) {
-        return (GroupBuilder) super.withOptionProcessor(optionProcessor);
+    public AugmentOptionBuilder withOptionProcessor(OptionProcessor optionProcessor) {
+        return (AugmentOptionBuilder) super.withOptionProcessor(optionProcessor);
     }
 
     @Override
-    public GroupBuilder withMinimum(int minimum) {
-        this.minimum = minimum;
+    public AugmentOptionBuilder withGroup(Group group) {
+        this.group = group;
         return this;
     }
 
     @Override
-    public GroupBuilder withMaximum(int maximum) {
-        this.maximum = maximum;
-        return this;
-    }
-
-    @Override
-    public GroupBuilder withOption(Option option) {
-        this.options.add(option);
+    public AugmentOptionBuilder withArgument(Argument argument) {
+        this.argument = argument;
         return this;
     }
 
     @Override
     public O build() {
         O option = super.build();
-        option.setMinimum(minimum);
-        option.setMaximum(maximum);
-        option.addOptions(options);
+        option.setArgument(argument);
+        option.setGroup(group);
         return option;
     }
 }

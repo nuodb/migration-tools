@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.jdbc.resolve;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
@@ -46,6 +47,8 @@ public interface ServiceResolver<T> {
     void register(DatabaseInfo databaseInfo, Class<? extends T> serviceClass);
 
     void register(DatabaseMatcher databaseMatcher, Class<? extends T> serviceClass);
+
+    T resolve(Connection connection) throws SQLException;
 
     T resolve(DatabaseInfo databaseInfo);
 

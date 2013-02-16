@@ -38,31 +38,31 @@ public class OptionFormat {
     public static final OptionFormat LONG = new OptionFormat("--", "=", ",");
     public static final OptionFormat SHORT = new OptionFormat("-", "=", ",");
 
-    private Set<String> optionPrefixes;
+    private Set<String> prefixes;
     private String argumentSeparator;
-    private String argumentValuesSeparator;
+    private String valuesSeparator;
 
     public OptionFormat(OptionFormat optionFormat) {
-        this(optionFormat.getOptionPrefixes(), optionFormat.getArgumentSeparator(),
-                optionFormat.getArgumentValuesSeparator());
+        this(optionFormat.getPrefixes(), optionFormat.getArgumentSeparator(),
+                optionFormat.getValuesSeparator());
     }
 
-    public OptionFormat(String optionPrefix, String argumentSeparator, String argumentValuesSeparator) {
-        this(Collections.singleton(optionPrefix), argumentSeparator, argumentValuesSeparator);
+    public OptionFormat(String optionPrefix, String argumentSeparator, String valuesSeparator) {
+        this(Collections.singleton(optionPrefix), argumentSeparator, valuesSeparator);
     }
 
-    public OptionFormat(Set<String> optionPrefixes, String argumentSeparator, String argumentValuesSeparator) {
-        this.optionPrefixes = optionPrefixes;
+    public OptionFormat(Set<String> optionPrefixes, String argumentSeparator, String valuesSeparator) {
+        this.prefixes = optionPrefixes;
         this.argumentSeparator = argumentSeparator;
-        this.argumentValuesSeparator = argumentValuesSeparator;
+        this.valuesSeparator = valuesSeparator;
     }
 
-    public Set<String> getOptionPrefixes() {
-        return optionPrefixes;
+    public Set<String> getPrefixes() {
+        return prefixes;
     }
 
-    public void setOptionPrefixes(Set<String> optionPrefixes) {
-        this.optionPrefixes = optionPrefixes;
+    public void setPrefixes(Set<String> prefixes) {
+        this.prefixes = prefixes;
     }
 
     public String getArgumentSeparator() {
@@ -73,11 +73,11 @@ public class OptionFormat {
         this.argumentSeparator = argumentSeparator;
     }
 
-    public String getArgumentValuesSeparator() {
-        return argumentValuesSeparator;
+    public String getValuesSeparator() {
+        return valuesSeparator;
     }
 
-    public void setArgumentValuesSeparator(String argumentValuesSeparator) {
-        this.argumentValuesSeparator = argumentValuesSeparator;
+    public void setValuesSeparator(String valuesSeparator) {
+        this.valuesSeparator = valuesSeparator;
     }
 }

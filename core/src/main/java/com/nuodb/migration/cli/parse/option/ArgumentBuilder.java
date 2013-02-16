@@ -29,13 +29,14 @@ package com.nuodb.migration.cli.parse.option;
 
 import com.nuodb.migration.cli.parse.Argument;
 import com.nuodb.migration.cli.parse.OptionProcessor;
+import com.nuodb.migration.cli.parse.Trigger;
 
 import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public interface ArgumentBuilder {
+public interface ArgumentBuilder<O extends Argument> extends OptionBuilder<O> {
 
     ArgumentBuilder withId(int id);
 
@@ -45,17 +46,19 @@ public interface ArgumentBuilder {
 
     ArgumentBuilder withRequired(boolean required);
 
+    ArgumentBuilder withTrigger(Trigger trigger);
+
+    ArgumentBuilder withOptionFormat(OptionFormat optionFormat);
+
+    ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor);
+
     ArgumentBuilder withMinimum(int minimum);
 
     ArgumentBuilder withMaximum(int maximum);
 
     ArgumentBuilder withDefaultValue(Object defaultValue);
 
-    ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor);
-
-    ArgumentBuilder withOptionFormat(OptionFormat optionFormat);
-
     ArgumentBuilder withHelpValues(Collection<String> helpValues);
 
-    Argument build();
+    O build();
 }

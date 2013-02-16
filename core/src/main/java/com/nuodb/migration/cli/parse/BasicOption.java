@@ -25,30 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.cli.parse.option;
+package com.nuodb.migration.cli.parse;
 
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-import com.nuodb.migration.cli.parse.Trigger;
+import com.nuodb.migration.cli.parse.option.OptionFormat;
+
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface OptionBuilder<O extends Option> {
+public interface BasicOption extends AugmentOption {
 
-    OptionBuilder withId(int id);
+    Map<String, OptionFormat> getAliases();
 
-    OptionBuilder withName(String name);
-
-    OptionBuilder withDescription(String description);
-
-    OptionBuilder withRequired(boolean required);
-
-    OptionBuilder withTrigger(Trigger trigger);
-
-    OptionBuilder withOptionFormat(OptionFormat optionFormat);
-
-    OptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
-
-    O build();
+    void setAliases(Map<String, OptionFormat> aliases);
 }

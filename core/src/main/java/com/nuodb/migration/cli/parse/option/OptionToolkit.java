@@ -46,15 +46,19 @@ public class OptionToolkit {
         return optionFormat;
     }
 
-    public OptionBuilder newOption() {
-        return new OptionBuilderImpl(optionFormat);
-    }
-
-    public ArgumentBuilder newArgument() {
+    public ArgumentBuilder newArgumentBuilder() {
         return new ArgumentBuilderImpl(optionFormat);
     }
 
-    public GroupBuilder newGroup() {
-        return new GroupBuilderImpl();
+    public BasicOptionBuilder newBasicOptionBuilder() {
+        return new BasicOptionBuilderImpl(optionFormat);
+    }
+
+    public GroupBuilder newGroupBuilder() {
+        return new GroupBuilderImpl(optionFormat);
+    }
+
+    public RegexOptionBuilder newRegexOptionBuilder() {
+        return new RegexOptionBuilderImpl(optionFormat);
     }
 }

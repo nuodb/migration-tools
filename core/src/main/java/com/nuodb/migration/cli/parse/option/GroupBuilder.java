@@ -29,11 +29,13 @@ package com.nuodb.migration.cli.parse.option;
 
 import com.nuodb.migration.cli.parse.Group;
 import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.OptionProcessor;
+import com.nuodb.migration.cli.parse.Trigger;
 
 /**
  * @author Sergey Bushik
  */
-public interface GroupBuilder {
+public interface GroupBuilder<O extends Group> extends OptionBuilder<O> {
 
     GroupBuilder withId(int id);
 
@@ -41,13 +43,19 @@ public interface GroupBuilder {
 
     GroupBuilder withDescription(String description);
 
+    GroupBuilder withRequired(boolean required);
+
+    GroupBuilder withTrigger(Trigger trigger);
+
+    GroupBuilder withOptionFormat(OptionFormat optionFormat);
+
+    GroupBuilder withOptionProcessor(OptionProcessor optionProcessor);
+
     GroupBuilder withMinimum(int minimum);
 
     GroupBuilder withMaximum(int maximum);
 
     GroupBuilder withOption(Option option);
 
-    GroupBuilder withRequired(boolean required);
-
-    Group build();
+    O build();
 }

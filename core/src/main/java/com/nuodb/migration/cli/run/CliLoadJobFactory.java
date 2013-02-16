@@ -34,7 +34,6 @@ import com.nuodb.migration.cli.parse.Option;
 import com.nuodb.migration.cli.parse.option.GroupBuilder;
 import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
-import com.nuodb.migration.cli.parse.option.RegexOption;
 import com.nuodb.migration.jdbc.query.InsertType;
 import com.nuodb.migration.load.LoadJobFactory;
 import com.nuodb.migration.spec.LoadSpec;
@@ -72,7 +71,7 @@ public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, C
 
         @Override
         protected Option createOption() {
-            return newGroup()
+            return newGroupBuilder()
                     .withName(getResources().getMessage(LOAD_GROUP_NAME))
                     .withOption(createTargetGroup())
                     .withOption(createInputGroup())
@@ -93,26 +92,24 @@ public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, C
     }
 
     protected Option createInsertTypeGroup() {
-        GroupBuilder group = newGroup().withName(getMessage(INSERT_TYPE_GROUP_NAME));
+        GroupBuilder group = newGroupBuilder().withName(getMessage(INSERT_TYPE_GROUP_NAME));
 
-        Option replace = newOption().
+        Option replace = newBasicOptionBuilder().
                 withName(REPLACE_OPTION).
                 withAlias(REPLACE_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(REPLACE_OPTION_DESCRIPTION)).build();
         group.withOption(replace);
 
-        RegexOption replaceType = new RegexOption();
-        replaceType.setOptionFormat(getOptionFormat());
-        replaceType.setName(TABLE_REPLACE_OPTION);
-        replaceType.setDescription(getMessage(TABLE_REPLACE_OPTION_DESCRIPTION));
-        replaceType.addRegex(TABLE_REPLACE_OPTION, 1, LOW);
+        Option replaceType = newRegexOptionBuilder().
+                withName(TABLE_REPLACE_OPTION).
+                withDescription(getMessage(TABLE_REPLACE_OPTION_DESCRIPTION)).
+                withRegex(TABLE_REPLACE_OPTION, 1, LOW).build();
         group.withOption(replaceType);
 
-        RegexOption insertType = new RegexOption();
-        insertType.setOptionFormat(getOptionFormat());
-        insertType.setName(TABLE_INSERT_OPTION);
-        insertType.setDescription(getMessage(TABLE_INSERT_OPTION_DESCRIPTION));
-        insertType.addRegex(TABLE_INSERT_OPTION, 1, LOW);
+        Option insertType = newRegexOptionBuilder().
+                withName(TABLE_INSERT_OPTION).
+                withDescription(getMessage(TABLE_INSERT_OPTION_DESCRIPTION)).
+                withRegex(TABLE_INSERT_OPTION, 1, LOW).build();
         group.withOption(insertType);
 
         return group.build();

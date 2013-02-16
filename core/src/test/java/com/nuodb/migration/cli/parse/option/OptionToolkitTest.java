@@ -26,18 +26,18 @@ public class OptionToolkitTest {
 
     @Test
     public void testNewBuilders() throws Exception {
-        toolkit.newOption();
-        toolkit.newArgument();
-        toolkit.newGroup();
+        toolkit.newBasicOptionBuilder();
+        toolkit.newArgumentBuilder();
+        toolkit.newGroupBuilder();
     }
 
     @Test
     public void testArgumentBuilder() throws Exception {
-        final ArgumentBuilder builder = toolkit.newArgument();
+        final ArgumentBuilder builder = toolkit.newArgumentBuilder();
         builder.withMaximum(OPTION_MAXIMUM).withMinimum(OPTION_MINIMUM).withId(OPTION_ID);
         final Argument argument = builder.build();
 
-        verify(optionFormat, times(1)).getArgumentValuesSeparator();
+        verify(optionFormat, times(1)).getValuesSeparator();
         Assert.assertEquals(argument.getId(), OPTION_ID);
         Assert.assertEquals(argument.getMinimum(), OPTION_MINIMUM);
         Assert.assertEquals(argument.getMaximum(), OPTION_MAXIMUM);
@@ -45,18 +45,18 @@ public class OptionToolkitTest {
 
     @Test
     public void testOptionBuilder() throws Exception {
-        final OptionBuilder builder = toolkit.newOption();
+        final OptionBuilder builder = toolkit.newBasicOptionBuilder();
         builder.withId(OPTION_ID);
         final Option option = builder.build();
 
         verify(optionFormat, times(1)).getArgumentSeparator();
-        verify(optionFormat, times(1)).getOptionPrefixes();
+        verify(optionFormat, times(1)).getPrefixes();
         Assert.assertEquals(option.getId(), OPTION_ID);
     }
 
     @Test
     public void testGroupBuilder() throws Exception {
-        final GroupBuilder builder = toolkit.newGroup();
+        final GroupBuilder builder = toolkit.newGroupBuilder();
         builder.withId(OPTION_ID).withMaximum(OPTION_MAXIMUM).withMinimum(OPTION_MINIMUM);
 
         final Group group = builder.build();

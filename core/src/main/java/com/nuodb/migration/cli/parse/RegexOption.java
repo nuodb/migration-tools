@@ -25,30 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.cli.parse.option;
-
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-import com.nuodb.migration.cli.parse.Trigger;
+package com.nuodb.migration.cli.parse;
 
 /**
  * @author Sergey Bushik
  */
-public interface OptionBuilder<O extends Option> {
+public interface RegexOption extends AugmentOption {
 
-    OptionBuilder withId(int id);
-
-    OptionBuilder withName(String name);
-
-    OptionBuilder withDescription(String description);
-
-    OptionBuilder withRequired(boolean required);
-
-    OptionBuilder withTrigger(Trigger trigger);
-
-    OptionBuilder withOptionFormat(OptionFormat optionFormat);
-
-    OptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
-
-    O build();
+    void addRegex(String regex, int group, int priority);
 }
