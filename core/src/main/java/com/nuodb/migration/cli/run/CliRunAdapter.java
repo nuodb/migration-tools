@@ -31,10 +31,7 @@ import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.utils.PriorityList;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Sergey Bushik
@@ -170,12 +167,12 @@ public abstract class CliRunAdapter implements CliRun {
     }
 
     @Override
-    public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator) {
         initOption().help(buffer, hints, comparator);
     }
 
     @Override
-    public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public List<Help> help(int indent, Collection<HelpHint> hints, Comparator<Option> comparator) {
         return initOption().help(indent, hints, comparator);
     }
 

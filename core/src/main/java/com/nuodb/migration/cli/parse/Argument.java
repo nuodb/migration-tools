@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * An option that can withConnection items passed on the executable line in the form "--file readme.txt".
+ * An option that can process items passed on the executable line in the form "--file readme.txt"
  */
 public interface Argument extends Option {
 

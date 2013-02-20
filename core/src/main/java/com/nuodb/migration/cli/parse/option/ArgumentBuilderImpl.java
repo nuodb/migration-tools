@@ -36,6 +36,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * Default argument builder implementation.
+ *
  * @author Sergey Bushik
  */
 public class ArgumentBuilderImpl<O extends Argument>

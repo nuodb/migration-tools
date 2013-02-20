@@ -34,11 +34,15 @@ public class OptionToolkit {
 
     private OptionFormat optionFormat;
 
-    public OptionToolkit() {
-        this(OptionFormat.LONG);
+    public static OptionToolkit getInstance() {
+        return getInstance(OptionFormat.LONG);
     }
 
-    public OptionToolkit(OptionFormat optionFormat) {
+    public static OptionToolkit getInstance(OptionFormat optionFormat) {
+        return new OptionToolkit(optionFormat);
+    }
+
+    protected OptionToolkit(OptionFormat optionFormat) {
         this.optionFormat = optionFormat;
     }
 

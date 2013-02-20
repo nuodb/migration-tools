@@ -19,10 +19,7 @@ package com.nuodb.migration.cli.parse;
 import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.utils.PriorityList;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The super type of all options representing a particular element of the executable line interface.
@@ -227,7 +224,7 @@ public interface Option {
      * @param hints      a setValue of withConnection hints
      * @param comparator a comparator used to sort the options
      */
-    void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator);
+    void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator);
 
     /**
      * Builds up a list of help lines instances to be presented by HelpFormatter.
@@ -237,5 +234,5 @@ public interface Option {
      * @param comparator a comparator used to sort options when applicable
      * @return a list of help lines objects
      */
-    List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator);
+    List<Help> help(int indent, Collection<HelpHint> hints, Comparator<Option> comparator);
 }

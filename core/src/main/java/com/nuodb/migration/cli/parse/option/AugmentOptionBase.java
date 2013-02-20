@@ -29,25 +29,15 @@ package com.nuodb.migration.cli.parse.option;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.nuodb.migration.cli.parse.Argument;
-import com.nuodb.migration.cli.parse.AugmentOption;
-import com.nuodb.migration.cli.parse.CommandLine;
-import com.nuodb.migration.cli.parse.Group;
-import com.nuodb.migration.cli.parse.Help;
-import com.nuodb.migration.cli.parse.HelpHint;
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionException;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-import com.nuodb.migration.cli.parse.Trigger;
+import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
 import com.nuodb.migration.utils.SimplePriorityList;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 
 /**
+ * Base subclass for the options augmented with an argument {@link Argument} and a child group {@link Group}.
+ *
  * @author Sergey Bushik
  */
 public abstract class AugmentOptionBase extends OptionBase implements AugmentOption {
@@ -129,7 +119,7 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
     }
 
     @Override
-    protected void doPreProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void preProcessOption(CommandLine commandLine, ListIterator<String> arguments) {
         String argumentSeparator = getArgumentSeparator();
         if (argumentSeparator != null) {
             String value = arguments.next();
@@ -156,11 +146,11 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
         if (optionProcessor != null) {
             optionProcessor.process(commandLine, this, arguments);
         }
-        doProcess(commandLine, arguments);
+        processAugment(commandLine, arguments);
         processGroup(commandLine, arguments);
     }
 
-    protected void doProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void processAugment(CommandLine commandLine, ListIterator<String> arguments) {
         if (getArgument() != null && arguments.hasNext()) {
             String value = arguments.next();
             String unquoted = unquote(value);
@@ -193,7 +183,7 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
         if (optionProcessor != null) {
             optionProcessor.postProcess(commandLine, this);
         }
-        doPostProcess(commandLine);
+        postProcessOption(commandLine);
         if (commandLine.hasOption(this)) {
             postProcessArgument(commandLine);
             postProcessGroup(commandLine);
@@ -213,9 +203,9 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
     }
 
     @Override
-    public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator) {
-        boolean displayArgument = (getArgument() != null) && hints.contains(HelpHint.CONTAINER_ARGUMENT);
-        boolean displayGroup = (getGroup() != null) && hints.contains(HelpHint.CONTAINER_GROUP);
+    public void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator) {
+        boolean displayArgument = (getArgument() != null) && hints.contains(HelpHint.AUGMENT_ARGUMENT);
+        boolean displayGroup = (getGroup() != null) && hints.contains(HelpHint.AUGMENT_GROUP);
         if (displayArgument) {
             buffer.append(' ');
             getArgument().help(buffer, hints, comparator);
@@ -227,15 +217,15 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
     }
 
     @Override
-    public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public List<Help> help(int indent, Collection<HelpHint> hints, Comparator<Option> comparator) {
         List<Help> help = Lists.newArrayList();
         help.add(new HelpImpl(this, indent));
         Argument argument = getArgument();
-        if (hints.contains(HelpHint.CONTAINER_ARGUMENT) && (argument != null)) {
+        if (hints.contains(HelpHint.AUGMENT_ARGUMENT) && (argument != null)) {
             help.addAll(argument.help(indent + 1, hints, comparator));
         }
         Group children = getGroup();
-        if (hints.contains(HelpHint.CONTAINER_GROUP) && (children != null)) {
+        if (hints.contains(HelpHint.AUGMENT_GROUP) && (children != null)) {
             help.addAll(children.help(indent + 1, hints, comparator));
         }
         return help;

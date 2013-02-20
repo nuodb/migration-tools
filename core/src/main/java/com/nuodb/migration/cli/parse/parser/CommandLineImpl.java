@@ -154,8 +154,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     @Override
     public List<Object> getValues(Option option) {
-        List<Object> values = this.values.get(option);
-        return values == null ? Collections.emptyList() : values;
+        return getValues(option, null);
     }
 
     @Override
@@ -170,7 +169,7 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
     public <T> List<T> getValues(Option option, List<T> defaultValues) {
         List<T> values = (List<T>) this.values.get(option);
         if (values == null || values.isEmpty()) {
-            values = (List<T>) this.defaultValues.get(option);
+            values = defaultValues != null ? defaultValues : (List<T>) this.defaultValues.get(option);
         }
         return values == null ? Collections.<T>emptyList() : values;
     }

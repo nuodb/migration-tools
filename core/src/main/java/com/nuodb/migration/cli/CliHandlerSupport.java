@@ -61,7 +61,7 @@ public class CliHandlerSupport extends ApplicationSupport implements CliResource
     private Parser parser = new ParserImpl();
 
     protected CliHandlerSupport() {
-        this(new OptionToolkit());
+        this(OptionToolkit.getInstance());
     }
 
     protected CliHandlerSupport(OptionToolkit optionToolkit) {

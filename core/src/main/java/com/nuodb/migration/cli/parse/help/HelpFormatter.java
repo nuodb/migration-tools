@@ -28,20 +28,26 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
+import static com.nuodb.migration.cli.parse.HelpHint.*;
+import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 
 @SuppressWarnings("unchecked")
-public class HelpFormatter extends HelpHint {
+public class HelpFormatter {
 
     public final static String GUTTER = "    ";
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-    private static Set<HelpHint> USAGE_OUTPUT_HINTS;
+    public static Set<HelpHint> USAGE_OUTPUT_HINTS;
 
-    private static Set<HelpHint> HELP_OUTPUT_HINTS;
+    public static Set<HelpHint> HELP_OUTPUT_HINTS;
 
-    private static Set<HelpHint> OPTION_OUTPUT_HINTS;
+    public static Set<HelpHint> OPTION_OUTPUT_HINTS;
 
     static {
         USAGE_OUTPUT_HINTS = Collections.unmodifiableSet(
@@ -54,15 +60,15 @@ public class HelpFormatter extends HelpHint {
                         GROUP_ARGUMENTS,
                         GROUP_OUTER,
                         ARGUMENT_BRACKETED,
-                        CONTAINER_ARGUMENT,
-                        CONTAINER_GROUP
+                        AUGMENT_ARGUMENT,
+                        AUGMENT_GROUP
                 ));
         HELP_OUTPUT_HINTS = Collections.unmodifiableSet(
                 Sets.newHashSet(
                         ALIASES,
                         OPTIONAL,
                         GROUP,
-                        CONTAINER_ARGUMENT
+                        AUGMENT_ARGUMENT
                 ));
         OPTION_OUTPUT_HINTS = Collections.unmodifiableSet(
                 Sets.newHashSet(
@@ -76,7 +82,7 @@ public class HelpFormatter extends HelpHint {
                         GROUP_ARGUMENTS,
                         GROUP_OUTER,
                         ARGUMENT_BRACKETED,
-                        CONTAINER_GROUP
+                        AUGMENT_GROUP
                 ));
     }
 
@@ -106,74 +112,77 @@ public class HelpFormatter extends HelpHint {
             help(writer);
             footer(writer);
             writer.flush();
-        } catch (IOException e) {
+        } catch (IOException exception) {
             if (logger.isWarnEnabled()) {
-                logger.warn("Failed formatting help", e);
+                logger.warn("Failed formatting help", exception);
             }
         }
     }
 
     protected void header(Writer writer) throws IOException {
-        if (header != null) {
+        if (getHeader() != null) {
             divider(writer);
-            line(writer, header);
+            line(writer, getHeader());
         }
     }
 
     protected void exception(Writer writer) throws IOException {
-        if (exception != null) {
+        if (getException() != null) {
             divider(writer);
-            line(writer, exception.getMessage());
+            line(writer, getException().getMessage());
         }
     }
 
     protected void divider(Writer writer) throws IOException {
-        if (divider != null) {
-            line(writer, divider);
+        if (getDivider() != null) {
+            line(writer, getDivider());
         }
     }
 
     protected void usage(Writer writer) throws IOException {
         divider(writer);
         StringBuilder usage = new StringBuilder("Usage:\n");
-        usage.append(executable).append(" ");
+        usage.append(getExecutable()).append(" ");
         Option option;
-        if ((exception != null) && (exception.getOption() != null)) {
+        OptionException exception = getException();
+        if (exception != null && exception.getOption() != null) {
             option = exception.getOption();
         } else {
-            option = this.option;
+            option = getOption();
         }
-        option.help(usage, usageOutputHints, comparator);
+        isNotNull(option, "Option is required");
+        option.help(usage, getUsageOutputHints(), getComparator());
         line(writer, usage.toString());
     }
 
     protected void help(Writer writer) throws IOException {
-        line(writer, divider);
+        line(writer, getDivider());
         Option option;
-        if ((exception != null) && (exception.getOption() != null)) {
+        OptionException exception = getException();
+        if (exception != null && exception.getOption() != null) {
             option = exception.getOption();
         } else {
-            option = this.option;
+            option = getOption();
         }
-        assert option != null;
-        List<Help> helps = option.help(0, optionOutputHints, comparator);
+        isNotNull(option, "Option is required");
+        List<Help> helps = option.help(0, getOptionOutputHints(), getComparator());
         int usageWidth = 0;
         for (Help help : helps) {
-            String content = help.help(helpOutputHints, comparator);
+            String content = help.help(getHelpOutputHints(), getComparator());
             usageWidth = Math.max(usageWidth, content.length());
         }
         for (Help help : helps) {
             line(writer,
-                    pad(help.help(helpOutputHints, comparator), usageWidth),
-                    gutter, help.getOption().getDescription());
+                    pad(help.help(getHelpOutputHints(), getComparator()), usageWidth),
+                    getGutter(), help.getOption().getDescription());
         }
-        line(writer, divider);
+        line(writer, getDivider());
     }
 
     protected void footer(Writer writer) throws IOException {
-        if (footer != null) {
-            line(writer, footer);
-            line(writer, divider);
+        if (getFooter() != null) {
+            line(writer, getFooter());
+            line(writer, getDivider());
         }
     }
 
@@ -198,47 +207,92 @@ public class HelpFormatter extends HelpHint {
         return padded.toString();
     }
 
+
+    public Set<HelpHint> getUsageOutputHints() {
+        return usageOutputHints;
+    }
+
     public void setUsageOutputHints(Set<HelpHint> usageOutputHints) {
         this.usageOutputHints = usageOutputHints;
+    }
+
+    public Set<HelpHint> getHelpOutputHints() {
+        return helpOutputHints;
     }
 
     public void setHelpOutputHints(Set<HelpHint> helpOutputHints) {
         this.helpOutputHints = helpOutputHints;
     }
 
+    public Set<HelpHint> getOptionOutputHints() {
+        return optionOutputHints;
+    }
+
     public void setOptionOutputHints(Set<HelpHint> optionOutputHints) {
         this.optionOutputHints = optionOutputHints;
     }
 
-    public void setHeader(String header) {
-        this.header = header;
-    }
-
-    public void setException(OptionException exception) {
-        this.exception = exception;
-    }
-
-    public void setComparator(Comparator comparator) {
-        this.comparator = comparator;
-    }
-
-    public void setDivider(String divider) {
-        this.divider = divider;
-    }
-
-    public void setOption(Option option) {
-        this.option = option;
-    }
-
-    public void setFooter(String footer) {
-        this.footer = footer;
+    public String getExecutable() {
+        return executable;
     }
 
     public void setExecutable(String executable) {
         this.executable = executable;
     }
 
+    public String getHeader() {
+        return header;
+    }
+
+    public void setHeader(String header) {
+        this.header = header;
+    }
+
+    public String getDivider() {
+        return divider;
+    }
+
+    public void setDivider(String divider) {
+        this.divider = divider;
+    }
+
+    public String getGutter() {
+        return gutter;
+    }
+
     public void setGutter(String gutter) {
         this.gutter = gutter;
+    }
+
+    public String getFooter() {
+        return footer;
+    }
+
+    public void setFooter(String footer) {
+        this.footer = footer;
+    }
+
+    public Option getOption() {
+        return option;
+    }
+
+    public void setOption(Option option) {
+        this.option = option;
+    }
+
+    public Comparator getComparator() {
+        return comparator;
+    }
+
+    public void setComparator(Comparator comparator) {
+        this.comparator = comparator;
+    }
+
+    public OptionException getException() {
+        return exception;
+    }
+
+    public void setException(OptionException exception) {
+        this.exception = exception;
     }
 }

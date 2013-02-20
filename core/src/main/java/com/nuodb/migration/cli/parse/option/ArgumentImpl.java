@@ -115,14 +115,14 @@ public class ArgumentImpl extends OptionBase implements Argument {
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments, Option option) {
-        processInternal(commandLine, arguments, option);
+        processArgument(commandLine, arguments, option);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.process(commandLine, this, arguments);
         }
     }
 
-    protected void processInternal(CommandLine commandLine, ListIterator<String> arguments, Option option) {
+    protected void processArgument(CommandLine commandLine, ListIterator<String> arguments, Option option) {
         int count = commandLine.getValues(option).size();
         while (arguments.hasNext() && (count < maximum)) {
             String value = arguments.next();
@@ -130,9 +130,9 @@ public class ArgumentImpl extends OptionBase implements Argument {
                 arguments.previous();
                 break;
             }
-            String argumentValuesSeparator = getArgumentValuesSeparator();
-            if (argumentValuesSeparator != null) {
-                StringTokenizer values = new StringTokenizer(value, argumentValuesSeparator);
+            String separator = getArgumentValuesSeparator();
+            if (separator != null) {
+                StringTokenizer values = new StringTokenizer(value, separator);
                 arguments.remove();
                 while (values.hasMoreTokens() && (count < maximum)) {
                     count++;
@@ -141,13 +141,17 @@ public class ArgumentImpl extends OptionBase implements Argument {
                     arguments.add(value);
                 }
                 if (values.hasMoreTokens()) {
-                    throw new OptionException(this, format("Unexpected token %1$s", values.nextToken()));
+                    postProcessUnexpected(values.nextToken());
                 }
             } else {
                 count++;
                 commandLine.addValue(option, value);
             }
         }
+    }
+
+    protected void postProcessUnexpected(String argument) {
+        throw new OptionException(this, format("Unexpected token %1$s", argument));
     }
 
     @Override
@@ -165,7 +169,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
     }
 
     @Override
-    protected void doPostProcess(CommandLine commandLine) {
+    protected void postProcessOption(CommandLine commandLine) {
         postProcessInternal(commandLine, this);
     }
 
@@ -182,7 +186,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
     }
 
     @Override
-    public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator) {
         int minimum = getMinimum();
         int maximum = getMaximum();
         boolean optional = hints.contains(HelpHint.OPTIONAL);
@@ -239,7 +243,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
     }
 
     @Override
-    public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public List<Help> help(int indent, Collection<HelpHint> hints, Comparator<Option> comparator) {
         return singletonList((Help) new HelpImpl(this, indent));
     }
 }

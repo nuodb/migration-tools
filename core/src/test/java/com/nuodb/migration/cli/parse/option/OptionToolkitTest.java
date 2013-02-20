@@ -1,67 +1,64 @@
 package com.nuodb.migration.cli.parse.option;
 
 import com.nuodb.migration.cli.parse.Argument;
+import com.nuodb.migration.cli.parse.BasicOption;
 import com.nuodb.migration.cli.parse.Group;
-import com.nuodb.migration.cli.parse.Option;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.spy;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class OptionToolkitTest {
 
-    private OptionToolkit toolkit;
-    private OptionFormat optionFormat;
+    private OptionToolkit optionToolkit;
 
     private static final int OPTION_ID = 1;
     private static final int OPTION_MINIMUM = 0;
     private static final int OPTION_MAXIMUM = 1;
 
-    @Before
-    public void setUp() throws Exception {
-        optionFormat = mock(OptionFormat.class);
-        toolkit = new OptionToolkit(optionFormat);
+    @BeforeMethod
+    public void init() throws Exception {
+        optionToolkit = spy(OptionToolkit.getInstance());
     }
 
     @Test
-    public void testNewBuilders() throws Exception {
-        toolkit.newBasicOptionBuilder();
-        toolkit.newArgumentBuilder();
-        toolkit.newGroupBuilder();
+    public void testNewBuilder() throws Exception {
+        assertNotNull(optionToolkit.newArgumentBuilder());
+        assertNotNull(optionToolkit.newBasicOptionBuilder());
+        assertNotNull(optionToolkit.newGroupBuilder());
+        assertNotNull(optionToolkit.newRegexOptionBuilder());
     }
 
     @Test
-    public void testArgumentBuilder() throws Exception {
-        final ArgumentBuilder builder = toolkit.newArgumentBuilder();
-        builder.withMaximum(OPTION_MAXIMUM).withMinimum(OPTION_MINIMUM).withId(OPTION_ID);
-        final Argument argument = builder.build();
+    public void testBuildArgument() throws Exception {
+        Argument argument = optionToolkit.newArgumentBuilder().
+                withId(OPTION_ID).withMinimum(OPTION_MINIMUM).withMaximum(OPTION_MAXIMUM).build();
 
-        verify(optionFormat, times(1)).getValuesSeparator();
-        Assert.assertEquals(argument.getId(), OPTION_ID);
-        Assert.assertEquals(argument.getMinimum(), OPTION_MINIMUM);
-        Assert.assertEquals(argument.getMaximum(), OPTION_MAXIMUM);
+        assertNotNull(argument);
+        assertEquals(argument.getId(), OPTION_ID);
+        assertEquals(argument.getMinimum(), OPTION_MINIMUM);
+        assertEquals(argument.getMaximum(), OPTION_MAXIMUM);
     }
 
     @Test
-    public void testOptionBuilder() throws Exception {
-        final OptionBuilder builder = toolkit.newBasicOptionBuilder();
-        builder.withId(OPTION_ID);
-        final Option option = builder.build();
+    public void testBuildOption() throws Exception {
+        BasicOption option = optionToolkit.newBasicOptionBuilder().
+                withId(OPTION_ID).build();
 
-        verify(optionFormat, times(1)).getArgumentSeparator();
-        verify(optionFormat, times(1)).getPrefixes();
-        Assert.assertEquals(option.getId(), OPTION_ID);
+        assertNotNull(option);
+        assertEquals(option.getId(), OPTION_ID);
     }
 
     @Test
-    public void testGroupBuilder() throws Exception {
-        final GroupBuilder builder = toolkit.newGroupBuilder();
-        builder.withId(OPTION_ID).withMaximum(OPTION_MAXIMUM).withMinimum(OPTION_MINIMUM);
+    public void testBuildGroup() throws Exception {
+        Group group = optionToolkit.newGroupBuilder().
+                withId(OPTION_ID).withMaximum(OPTION_MAXIMUM).withMinimum(OPTION_MINIMUM).build();
 
-        final Group group = builder.build();
-        Assert.assertEquals(group.getId(), OPTION_ID);
-        Assert.assertEquals(group.getMinimum(), OPTION_MINIMUM);
-        Assert.assertEquals(group.getMaximum(), OPTION_MAXIMUM);
+        assertNotNull(group);
+        assertEquals(group.getId(), OPTION_ID);
+        assertEquals(group.getMinimum(), OPTION_MINIMUM);
+        assertEquals(group.getMaximum(), OPTION_MAXIMUM);
     }
 }

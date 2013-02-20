@@ -24,6 +24,9 @@ import java.util.*;
 
 import static com.nuodb.migration.cli.parse.HelpHint.ARGUMENT_BRACKETED;
 import static com.nuodb.migration.cli.parse.HelpHint.PROPERTY;
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 /**
  * Handles the java style options prefixed with -D
@@ -79,7 +82,7 @@ public class Property extends OptionBase {
     public void process(CommandLine line, ListIterator<String> arguments) {
         String argument = arguments.next();
         if (!canProcess(line, argument)) {
-            throw new OptionException(this, String.format("Unexpected token %1$s", argument));
+            processUnexpected(argument);
         }
         int startIndex = prefix.length();
         int equalsIndex = argument.indexOf('=', startIndex);
@@ -95,8 +98,12 @@ public class Property extends OptionBase {
         line.addProperty(this, property, value);
     }
 
+    protected void processUnexpected(String argument) {
+        throw new OptionException(this, format("Unexpected token %1$s", argument));
+    }
+
     @Override
-    public void help(StringBuilder buffer, Set<HelpHint> helpSettings, Comparator<Option> comparator) {
+    public void help(StringBuilder buffer, Collection<HelpHint> helpSettings, Comparator<Option> comparator) {
         if (helpSettings.contains(PROPERTY)) {
             boolean bracketed = helpSettings.contains(ARGUMENT_BRACKETED);
             buffer.append(prefix);
@@ -119,12 +126,12 @@ public class Property extends OptionBase {
     }
 
     @Override
-    public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public List<Help> help(int indent, Collection<HelpHint> hints, Comparator<Option> comparator) {
         if (hints.contains(PROPERTY)) {
             Help help = new HelpImpl(this, indent);
-            return Collections.singletonList(help);
+            return singletonList(help);
         } else {
-            return Collections.emptyList();
+            return emptyList();
         }
     }
 }

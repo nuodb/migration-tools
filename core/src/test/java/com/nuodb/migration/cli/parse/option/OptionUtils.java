@@ -27,40 +27,16 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.nuodb.migration.cli.parse.Argument;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-import com.nuodb.migration.cli.parse.Trigger;
+import java.util.ListIterator;
 
-import java.util.Collection;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
- * Facilitates building command line arguments {@link Argument}.
- *
  * @author Sergey Bushik
  */
-public interface ArgumentBuilder<O extends Argument> extends OptionBuilder<O> {
+public class OptionUtils {
 
-    ArgumentBuilder withId(int id);
-
-    ArgumentBuilder withName(String name);
-
-    ArgumentBuilder withDescription(String description);
-
-    ArgumentBuilder withRequired(boolean required);
-
-    ArgumentBuilder withTrigger(Trigger trigger);
-
-    ArgumentBuilder withOptionFormat(OptionFormat optionFormat);
-
-    ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor);
-
-    ArgumentBuilder withMinimum(int minimum);
-
-    ArgumentBuilder withMaximum(int maximum);
-
-    ArgumentBuilder withDefaultValue(Object defaultValue);
-
-    ArgumentBuilder withHelpValues(Collection<String> helpValues);
-
-    O build();
+    public static ListIterator<String> createArguments(String... arguments) {
+        return newArrayList(arguments).listIterator();
+    }
 }

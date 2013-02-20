@@ -32,9 +32,32 @@ import com.nuodb.migration.cli.parse.option.OptionFormat;
 import java.util.Map;
 
 /**
+ * Basic option which may be aliased with additional names. Aliases triggers option processing in a line with its name.
+ * Having option --opt it can be aliased to -o using short form (single hyphen notation) as:
+ *
+ * <pre>
+ * BasicOption option;
+ * option.setName("opt");
+ * option.addAlias("o", OptionFormat.SHORT);
+ * </pre>
+ *
  * @author Sergey Bushik
  */
 public interface BasicOption extends AugmentOption {
+
+    /**
+     * Adds alias to the option in the default option format
+     *
+     * @param alias to add to this option
+     */
+    void addAlias(String alias);
+
+    /**
+     *
+     * @param alias
+     * @param optionFormat
+     */
+    void addAlias(String alias, OptionFormat optionFormat);
 
     Map<String, OptionFormat> getAliases();
 

@@ -29,12 +29,12 @@ import java.util.Set;
 public class HelpImpl implements Help {
 
     /**
-     * The option that this HelpLineImpl describes
+     * The option that this help describes
      */
     private final Option option;
 
     /**
-     * The level of indenting for this item
+     * The level of indentation for this item
      */
     private final int indent;
 

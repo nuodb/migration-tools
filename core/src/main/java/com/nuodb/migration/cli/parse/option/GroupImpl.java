@@ -28,7 +28,7 @@ import static com.nuodb.migration.cli.parse.HelpHint.*;
 import static java.lang.String.format;
 
 /**
- * An implementation of option of options.
+ * An implementation of the group of options.
  */
 public class GroupImpl extends OptionBase implements Group {
 
@@ -235,11 +235,11 @@ public class GroupImpl extends OptionBase implements Group {
         }
         // too many options
         if (unexpected != null) {
-            throw new OptionException(this, format("Unexpected option %1$s", unexpected.getName()));
+            postProcessUnexpected(unexpected);
         }
         // too few options
         if (present < this.minimum) {
-            throw new OptionException(this, "Missing option");
+            postProcessMissing(present);
         }
         // post process each arguments
         for (Argument argument : arguments) {
@@ -247,13 +247,21 @@ public class GroupImpl extends OptionBase implements Group {
         }
     }
 
+    protected void postProcessMissing(int present) {
+        throw new OptionException(this, "Missing option");
+    }
+
+    protected void postProcessUnexpected(Option option) {
+        throw new OptionException(this, format("Unexpected option %1$s", option.getName()));
+    }
+
     @Override
-    public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator) {
         help(buffer, hints, comparator, OPTION_SEPARATOR);
     }
 
     @Override
-    public void help(StringBuilder buffer, Set<HelpHint> hints, Comparator<Option> comparator, String optionSeparator) {
+    public void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator, String separator) {
         hints = newHashSet(hints);
         boolean optional = !isRequired() && (hints.contains(OPTIONAL) || hints.contains(OPTIONAL_CHILD_GROUP));
         boolean expanded = (getName() == null) || hints.contains(GROUP_OPTIONS);
@@ -299,7 +307,7 @@ public class GroupImpl extends OptionBase implements Group {
 
                 // registerCommandExecutor separators as needed
                 if (i.hasNext()) {
-                    buffer.append(optionSeparator);
+                    buffer.append(separator);
                 }
             }
         }
@@ -321,7 +329,7 @@ public class GroupImpl extends OptionBase implements Group {
     }
 
     @Override
-    public List<Help> help(int indent, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public List<Help> help(int indent, Collection<HelpHint> hints, Comparator<Option> comparator) {
         List<Help> help = newArrayList();
         if (hints.contains(GROUP)) {
             help.add(new HelpImpl(this, indent));

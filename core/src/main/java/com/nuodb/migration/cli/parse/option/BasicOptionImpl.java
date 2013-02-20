@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.utils.PriorityList;
 import com.nuodb.migration.utils.SimplePriorityList;
@@ -34,14 +35,27 @@ import com.nuodb.migration.utils.SimplePriorityList;
 import java.util.*;
 
 import static com.nuodb.migration.cli.parse.HelpHint.*;
+import static com.nuodb.migration.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 
 /**
+ * Basic command line option which accepts arguments and may have name aliases.
+ *
  * @author Sergey Bushik
  */
 public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
 
-    private Map<String, OptionFormat> aliases;
+    private Map<String, OptionFormat> aliases = Maps.newHashMap();
+
+    @Override
+    public void addAlias(String alias) {
+        addAlias(alias, getOptionFormat());
+    }
+
+    @Override
+    public void addAlias(String alias, OptionFormat optionFormat) {
+        aliases.put(alias, optionFormat);
+    }
 
     @Override
     public Map<String, OptionFormat> getAliases() {
@@ -50,6 +64,7 @@ public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
 
     @Override
     public void setAliases(Map<String, OptionFormat> aliases) {
+        isNotNull(aliases, "Aliases should not be null");
         this.aliases = aliases;
     }
 
@@ -57,7 +72,10 @@ public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
     public PriorityList<Trigger> getTriggers() {
         PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>(super.getTriggers());
         Set<String> prefixes = getPrefixes();
-        createTriggers(triggers, prefixes, getName());
+        String name = getName();
+        if (name != null) {
+            createTriggers(triggers, prefixes, name);
+        }
         if (getAliases() != null) {
             Set<Map.Entry<String, OptionFormat>> aliases = getAliases().entrySet();
             for (Map.Entry<String, OptionFormat> alias : aliases) {
@@ -81,12 +99,16 @@ public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
         if (trigger != null) {
             commandLine.addOption(this);
         } else {
-            throw new OptionException(this, format("Unexpected token %1$s", argument));
+            processUnexpected(argument);
         }
     }
 
+    protected void processUnexpected(String argument) {
+        throw new OptionException(this, format("Unexpected token %1$s", argument));
+    }
+
     @Override
-    public void help(StringBuilder help, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public void help(StringBuilder help, Collection<HelpHint> hints, Comparator<Option> comparator) {
         boolean optional = !isRequired() && hints.contains(OPTIONAL);
         boolean displayAliases = hints.contains(ALIASES);
         if (optional) {
@@ -107,9 +129,9 @@ public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
             help.append(')');
         }
         Argument argument = getArgument();
-        boolean displayArgument = argument != null && hints.contains(CONTAINER_ARGUMENT);
+        boolean displayArgument = argument != null && hints.contains(AUGMENT_ARGUMENT);
         Group children = getGroup();
-        boolean displayGroup = children != null && hints.contains(CONTAINER_GROUP);
+        boolean displayGroup = children != null && hints.contains(AUGMENT_GROUP);
         if (displayArgument) {
             help.append(getArgumentSeparator());
             argument.help(help, hints, comparator);

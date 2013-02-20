@@ -23,10 +23,11 @@ import com.nuodb.migration.utils.SimplePriorityList;
 
 import java.util.*;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
 
 /**
- * A base implementation of option providing limited ground work for further implementations.
+ * A base implementation of the option providing limited ground work for further implementations.
  */
 public abstract class OptionBase implements Option {
 
@@ -34,7 +35,7 @@ public abstract class OptionBase implements Option {
     private String name;
     private String description;
     private boolean required;
-    private OptionFormat optionFormat;
+    private OptionFormat optionFormat = OptionFormat.LONG;
     private OptionProcessor optionProcessor;
     private PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
 
@@ -161,14 +162,14 @@ public abstract class OptionBase implements Option {
 
     @Override
     public void preProcess(CommandLine commandLine, ListIterator<String> arguments) {
-        doPreProcess(commandLine, arguments);
+        preProcessOption(commandLine, arguments);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.preProcess(commandLine, this, arguments);
         }
     }
 
-    protected void doPreProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void preProcessOption(CommandLine commandLine, ListIterator<String> arguments) {
     }
 
     @Override
@@ -185,17 +186,21 @@ public abstract class OptionBase implements Option {
 
     @Override
     public void postProcess(CommandLine commandLine) {
-        doPostProcess(commandLine);
+        postProcessOption(commandLine);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.postProcess(commandLine, this);
         }
     }
 
-    protected void doPostProcess(CommandLine commandLine) {
+    protected void postProcessOption(CommandLine commandLine) {
         if (isRequired() && !commandLine.hasOption(this)) {
-            throw new OptionException(this, format("Missing required option %1$s", getName()));
+            postProcessRequired();
         }
+    }
+
+    protected void postProcessRequired() {
+        throw new OptionException(this, format("Missing required option %1$s", getName()));
     }
 
     public static void createTriggers(PriorityList<Trigger> triggers, Set<String> prefixes, String trigger) {
@@ -237,7 +242,7 @@ public abstract class OptionBase implements Option {
     @Override
     public String toString() {
         StringBuilder help = new StringBuilder();
-        help(help, HelpHint.ALL_HINTS, null);
+        help(help, newHashSet(HelpHint.values()), null);
         return help.toString();
     }
 }

@@ -28,16 +28,7 @@
 package com.nuodb.migration.cli.parse.option;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migration.cli.parse.Argument;
-import com.nuodb.migration.cli.parse.AugmentOption;
-import com.nuodb.migration.cli.parse.CommandLine;
-import com.nuodb.migration.cli.parse.Group;
-import com.nuodb.migration.cli.parse.HelpHint;
-import com.nuodb.migration.cli.parse.Option;
-import com.nuodb.migration.cli.parse.OptionException;
-import com.nuodb.migration.cli.parse.OptionProcessor;
-import com.nuodb.migration.cli.parse.RegexOption;
-import com.nuodb.migration.cli.parse.Trigger;
+import com.nuodb.migration.cli.parse.*;
 import com.nuodb.migration.match.AntRegexCompiler;
 import com.nuodb.migration.match.Match;
 import com.nuodb.migration.match.Regex;
@@ -45,12 +36,13 @@ import com.nuodb.migration.match.RegexCompiler;
 import com.nuodb.migration.utils.PriorityList;
 import com.nuodb.migration.utils.SimplePriorityList;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 
 import static com.nuodb.migration.cli.parse.HelpHint.*;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -94,8 +86,12 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
         if (canProcess(commandLine, argument)) {
             processTrigger(commandLine, trigger, argument);
         } else {
-            throw new OptionException(this, String.format("Unexpected token %1$s", argument));
+            processUnexpected(argument);
         }
+    }
+
+    protected void processUnexpected(String argument) {
+        throw new OptionException(this, format("Unexpected token %1$s", argument));
     }
 
     protected void processTrigger(CommandLine commandLine, Trigger trigger, String argument) {
@@ -119,7 +115,7 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
     }
 
     @Override
-    public void help(StringBuilder help, Set<HelpHint> hints, Comparator<Option> comparator) {
+    public void help(StringBuilder help, Collection<HelpHint> hints, Comparator<Option> comparator) {
         boolean optional = !isRequired() && hints.contains(OPTIONAL);
         if (optional) {
             help.append('[');
@@ -129,9 +125,9 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
         join(help, triggers);
 
         Argument argument = getArgument();
-        boolean displayArgument = argument != null && hints.contains(CONTAINER_ARGUMENT);
+        boolean displayArgument = argument != null && hints.contains(AUGMENT_ARGUMENT);
         Group group = getGroup();
-        boolean displayGroup = group != null && hints.contains(CONTAINER_GROUP);
+        boolean displayGroup = group != null && hints.contains(AUGMENT_GROUP);
         if (displayArgument) {
             help.append(getArgumentSeparator());
             boolean bracketed = hints.contains(HelpHint.ARGUMENT_BRACKETED);
@@ -175,8 +171,8 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
 
         @Override
         public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-            AugmentOption augemented = (AugmentOption) option;
-            Argument argument = augemented.getArgument();
+            AugmentOption augment = (AugmentOption) option;
+            Argument argument = augment.getArgument();
             if (argument != null) {
                 argument.setMaximum(++count * 2);
             }
