@@ -38,4 +38,24 @@ public class ResourceSpec extends SpecBase implements Spec {
     public void setPath(String path) {
         this.path = path;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        ResourceSpec that = (ResourceSpec) o;
+
+        if (path != null ? !path.equals(that.path) : that.path != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (path != null ? path.hashCode() : 0);
+        return result;
+    }
 }

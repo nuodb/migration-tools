@@ -172,12 +172,12 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
         }
 
         @Override
-        protected void bind(CommandLine commandLine) {
+        protected void bind(OptionSet optionSet) {
             SchemaSpec schemaSpec = new SchemaSpec();
-            schemaSpec.setSourceConnectionSpec(parseSourceGroup(commandLine, this));
-            schemaSpec.setTargetConnectionSpec(parseTargetGroup(commandLine, this));
-            schemaSpec.setOutputSpec(parseOutputGroup(commandLine, this));
-            parseSchemaOptions(schemaSpec, commandLine, this);
+            schemaSpec.setSourceConnectionSpec(parseSourceGroup(optionSet, this));
+            schemaSpec.setTargetConnectionSpec(parseTargetGroup(optionSet, this));
+            schemaSpec.setOutputSpec(parseOutputGroup(optionSet, this));
+            parseSchemaOptions(schemaSpec, optionSet, this);
             ((SchemaJobFactory) getJobFactory()).setSchemaSpec(schemaSpec);
         }
 
@@ -299,20 +299,20 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             group.withOption(identifierNormalizer);
         }
 
-        protected ConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
+        protected ConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
             JdbcConnectionSpec connection = new JdbcConnectionSpec();
             connection.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
-            connection.setUrl((String) commandLine.getValue(TARGET_URL_OPTION));
-            connection.setUsername((String) commandLine.getValue(TARGET_USERNAME_OPTION));
-            connection.setPassword((String) commandLine.getValue(TARGET_PASSWORD_OPTION));
-            connection.setSchema((String) commandLine.getValue(TARGET_SCHEMA_OPTION));
-            connection.setProperties(parseProperties(commandLine, TARGET_PROPERTIES_OPTION, option));
+            connection.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
+            connection.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
+            connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
+            connection.setSchema((String) optionSet.getValue(TARGET_SCHEMA_OPTION));
+            connection.setProperties(parseProperties(optionSet, TARGET_PROPERTIES_OPTION, option));
             return connection;
         }
 
-        protected void parseSchemaOptions(SchemaSpec schemaSpec, CommandLine commandLine, Option option) {
-            if (commandLine.hasOption(SCHEMA_META_DATA_OPTION)) {
-                Collection<String> values = commandLine.getValues(SCHEMA_META_DATA_OPTION);
+        protected void parseSchemaOptions(SchemaSpec schemaSpec, OptionSet optionSet, Option option) {
+            if (optionSet.hasOption(SCHEMA_META_DATA_OPTION)) {
+                Collection<String> values = optionSet.getValues(SCHEMA_META_DATA_OPTION);
                 Set<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
                 for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
                     MetaDataType metaDataType = MetaDataType.NAME_TYPE_MAP.get(replace(iterator.next(), ".", "_"));
@@ -325,7 +325,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
                 }
                 schemaSpec.setMetaDataTypes(metaDataTypes);
             }
-            List<String> scriptTypeValues = commandLine.getValues(SCHEMA_SCRIPT_TYPE_OPTION);
+            List<String> scriptTypeValues = optionSet.getValues(SCHEMA_SCRIPT_TYPE_OPTION);
             Collection<ScriptType> scriptTypes = newHashSet();
             for (String scriptTypeValue : scriptTypeValues) {
                 scriptTypes.add(valueOf(scriptTypeValue.toUpperCase()));
@@ -339,7 +339,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             for (GroupScriptsBy groupScriptsBy : GroupScriptsBy.values()) {
                 groupScriptsByConditionMap.put(groupScriptsBy.getCondition(), groupScriptsBy);
             }
-            String groupScriptsByCondition = (String) commandLine.getValue(SCHEMA_GROUP_SCRIPTS_BY_OPTION);
+            String groupScriptsByCondition = (String) optionSet.getValue(SCHEMA_GROUP_SCRIPTS_BY_OPTION);
             GroupScriptsBy groupScriptsBy;
             if (groupScriptsByCondition != null) {
                 groupScriptsBy = groupScriptsByConditionMap.get(groupScriptsByCondition);
@@ -353,7 +353,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             }
             schemaSpec.setGroupScriptsBy(groupScriptsBy);
 
-            String identifierQuotingValue = (String) commandLine.getValue(SCHEMA_IDENTIFIER_QUOTING);
+            String identifierQuotingValue = (String) optionSet.getValue(SCHEMA_IDENTIFIER_QUOTING);
             IdentifierQuoting identifierQuoting = null;
             if (identifierQuotingValue != null) {
                 identifierQuoting = getIdentifierQuotings().get(identifierQuotingValue);
@@ -365,7 +365,7 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
             schemaSpec.setIdentifierQuoting(
                     identifierQuoting != null ? identifierQuoting : IdentifierQuotings.always());
 
-            String identifierNormalizerValue = (String) commandLine.getValue(SCHEMA_IDENTIFIER_NORMALIZER);
+            String identifierNormalizerValue = (String) optionSet.getValue(SCHEMA_IDENTIFIER_NORMALIZER);
             IdentifierNormalizer identifierNormalizer = null;
             if (identifierNormalizerValue != null) {
                 identifierNormalizer = getIdentifierNormalizers().get(identifierNormalizerValue);
@@ -437,11 +437,11 @@ public class CliSchemaJobFactory extends CliRunSupport implements CliRunFactory,
     }
 
     @Override
-    protected ResourceSpec parseOutputGroup(CommandLine commandLine, Option option) {
+    protected ResourceSpec parseOutputGroup(OptionSet optionSet, Option option) {
         ResourceSpec resource = null;
-        if (commandLine.hasOption(OUTPUT_PATH_OPTION)) {
+        if (optionSet.hasOption(OUTPUT_PATH_OPTION)) {
             resource = new ResourceSpec();
-            resource.setPath((String) commandLine.getValue(OUTPUT_PATH_OPTION));
+            resource.setPath((String) optionSet.getValue(OUTPUT_PATH_OPTION));
         }
         return resource;
     }

@@ -163,7 +163,7 @@ public abstract class CliRunAdapter implements CliRun {
         initOption().setOptionFormat(optionFormat);
     }
 
-    protected void bind(CommandLine commandLine) {
+    protected void bind(OptionSet optionSet) {
     }
 
     @Override

@@ -29,8 +29,8 @@ package com.nuodb.migration.cli.run;
 
 import com.google.common.collect.Maps;
 import com.nuodb.migration.cli.CliResources;
-import com.nuodb.migration.cli.parse.CommandLine;
 import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.OptionSet;
 import com.nuodb.migration.cli.parse.option.GroupBuilder;
 import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
@@ -81,12 +81,12 @@ public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, C
         }
 
         @Override
-        protected void bind(CommandLine commandLine) {
+        protected void bind(OptionSet optionSet) {
             LoadSpec loadSpec = new LoadSpec();
-            loadSpec.setConnectionSpec(parseTargetGroup(commandLine, this));
-            loadSpec.setInputSpec(parseInputGroup(commandLine, this));
-            loadSpec.setTimeZone(parseTimeZoneOption(commandLine, this));
-            parseInsertTypeGroup(commandLine, loadSpec);
+            loadSpec.setConnectionSpec(parseTargetGroup(optionSet, this));
+            loadSpec.setInputSpec(parseInputGroup(optionSet, this));
+            loadSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
+            parseInsertTypeGroup(optionSet, loadSpec);
             ((LoadJobFactory) getJobFactory()).setLoadSpec(loadSpec);
         }
     }
@@ -115,13 +115,13 @@ public class CliLoadJobFactory extends CliRunSupport implements CliRunFactory, C
         return group.build();
     }
 
-    protected void parseInsertTypeGroup(CommandLine commandLine, LoadSpec loadSpec) {
-        loadSpec.setInsertType(commandLine.hasOption(REPLACE_OPTION) ? InsertType.REPLACE : InsertType.INSERT);
+    protected void parseInsertTypeGroup(OptionSet optionSet, LoadSpec loadSpec) {
+        loadSpec.setInsertType(optionSet.hasOption(REPLACE_OPTION) ? InsertType.REPLACE : InsertType.INSERT);
         Map<String, InsertType> tableInsertTypes = Maps.newHashMap();
-        for (String table : commandLine.<String>getValues(TABLE_INSERT_OPTION)) {
+        for (String table : optionSet.<String>getValues(TABLE_INSERT_OPTION)) {
             tableInsertTypes.put(table, InsertType.INSERT);
         }
-        for (String table : commandLine.<String>getValues(TABLE_REPLACE_OPTION)) {
+        for (String table : optionSet.<String>getValues(TABLE_REPLACE_OPTION)) {
             tableInsertTypes.put(table, InsertType.REPLACE);
         }
         loadSpec.setTableInsertTypes(tableInsertTypes);

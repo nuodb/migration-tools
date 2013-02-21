@@ -27,6 +27,7 @@
  */
 package com.nuodb.migration.spec;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import java.util.Map;
@@ -35,7 +36,7 @@ public class SpecBase implements Spec {
 
     private String id;
     private String type;
-    private Map<String, Object> attributes;
+    private Map<String, Object> attributes = Maps.newHashMap();
 
     public String getId() {
         return id;
@@ -59,6 +60,28 @@ public class SpecBase implements Spec {
 
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SpecBase specBase = (SpecBase) o;
+
+        if (attributes != null ? !attributes.equals(specBase.attributes) : specBase.attributes != null) return false;
+        if (id != null ? !id.equals(specBase.id) : specBase.id != null) return false;
+        if (type != null ? !type.equals(specBase.type) : specBase.type != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (attributes != null ? attributes.hashCode() : 0);
+        return result;
     }
 
     @Override

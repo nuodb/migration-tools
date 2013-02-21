@@ -60,8 +60,8 @@ public class RegexOptionTest {
         regexOption.setName("regex");
     }
 
-    @DataProvider(name = "addRegexArguments")
-    public Object[][] createAddRegexArguments() {
+    @DataProvider(name = "addRegexData")
+    public Object[][] createAddRegexData() {
         RegexCompiler regexCompiler = AntRegexCompiler.INSTANCE;
         return new Object[][]{
                 {"option.*", new RegexTrigger(regexCompiler.compile("--option.*"))},
@@ -69,15 +69,15 @@ public class RegexOptionTest {
         };
     }
 
-    @Test(dataProvider = "addRegexArguments")
+    @Test(dataProvider = "addRegexData")
     public void testAddRegex(String regex, Trigger trigger) {
         regexOption.addRegex(regex, 1, NORMAL);
 
         assertTrue(regexOption.getTriggers().contains(trigger));
     }
 
-    @DataProvider(name = "canProcessArguments")
-    public Object[][] createCanProcessArguments() {
+    @DataProvider(name = "canProcessData")
+    public Object[][] createCanProcessData() {
         return new Object[][]{
                 {"option.*", "--option.name"},
                 {"option.*", "--option.comma.name"},
@@ -86,7 +86,7 @@ public class RegexOptionTest {
         };
     }
 
-    @Test(groups = "regexOption.canProcess", dataProvider = "canProcessArguments")
+    @Test(groups = "regexOption.canProcess", dataProvider = "canProcessData")
     public void testCanProcess(String regex, String argument) {
         regexOption.addRegex(regex, 1, NORMAL);
 
@@ -95,8 +95,8 @@ public class RegexOptionTest {
                 "Regex option is expected to be able to process the argument");
     }
 
-    @DataProvider(name = "processArguments")
-    public Object[][] createProcessArguments() {
+    @DataProvider(name = "processData")
+    public Object[][] createProcessData() {
         return new Object[][]{
                 {"option.*",
                         newArrayList("--option.name1=value1", "--option.name2=value2"),
@@ -104,7 +104,7 @@ public class RegexOptionTest {
         };
     }
 
-    @Test(dependsOnGroups = "regexOption.canProcess", dataProvider = "processArguments")
+    @Test(dependsOnGroups = "regexOption.canProcess", dataProvider = "processData")
     public void testProcess(String regex, List<String> arguments, List<String> values) {
         regexOption.setArgument(new ArgumentImpl());
         regexOption.addRegex(regex, 1, NORMAL);

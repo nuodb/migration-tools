@@ -29,9 +29,9 @@ package com.nuodb.migration.cli.run;
 
 import com.google.common.collect.Lists;
 import com.nuodb.migration.cli.CliResources;
-import com.nuodb.migration.cli.parse.CommandLine;
 import com.nuodb.migration.cli.parse.Group;
 import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.OptionSet;
 import com.nuodb.migration.cli.parse.option.GroupBuilder;
 import com.nuodb.migration.cli.parse.option.OptionFormat;
 import com.nuodb.migration.cli.parse.option.OptionToolkit;
@@ -123,19 +123,19 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
         return group.build();
     }
 
-    protected void parseTableGroup(CommandLine commandLine, DumpSpec dumpSpec) {
+    protected void parseTableGroup(OptionSet optionSet, DumpSpec dumpSpec) {
         Collection<String> tableTypes = newTreeSet(String.CASE_INSENSITIVE_ORDER);
-        tableTypes.addAll(commandLine.<String>getValues(TABLE_TYPE_OPTION));
+        tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
         if (tableTypes.isEmpty()) {
             tableTypes.add(Table.TABLE);
         }
         dumpSpec.setTableTypes(tableTypes);
 
         Map<String, SelectQuerySpec> tableQueryMapping = newHashMap();
-        for (String table : commandLine.<String>getValues(TABLE_OPTION)) {
+        for (String table : optionSet.<String>getValues(TABLE_OPTION)) {
             tableQueryMapping.put(table, new SelectQuerySpec(table));
         }
-        for (Iterator<String> iterator = commandLine.<String>getValues(
+        for (Iterator<String> iterator = optionSet.<String>getValues(
                 TABLE_FILTER_OPTION).iterator(); iterator.hasNext(); ) {
             String name = iterator.next();
             SelectQuerySpec selectQuerySpec = tableQueryMapping.get(name);
@@ -168,9 +168,9 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
         return group.build();
     }
 
-    protected Collection<NativeQuerySpec> parseNativeQueryGroup(CommandLine commandLine) {
+    protected Collection<NativeQuerySpec> parseNativeQueryGroup(OptionSet optionSet) {
         List<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
-        for (String query : commandLine.<String>getValues(QUERY_OPTION)) {
+        for (String query : optionSet.<String>getValues(QUERY_OPTION)) {
             NativeQuerySpec nativeQuerySpec = new NativeQuerySpec();
             nativeQuerySpec.setQuery(query);
             nativeQuerySpecs.add(nativeQuerySpec);
@@ -201,13 +201,13 @@ public class CliDumpJobFactory extends CliRunSupport implements CliRunFactory, C
         }
 
         @Override
-        protected void bind(CommandLine commandLine) {
+        protected void bind(OptionSet optionSet) {
             DumpSpec spec = new DumpSpec();
-            spec.setConnectionSpec(parseSourceGroup(commandLine, this));
-            spec.setOutputSpec(parseOutputGroup(commandLine, this));
-            parseTableGroup(commandLine, spec);
-            spec.setNativeQuerySpecs(parseNativeQueryGroup(commandLine));
-            spec.setTimeZone(parseTimeZoneOption(commandLine, this));
+            spec.setConnectionSpec(parseSourceGroup(optionSet, this));
+            spec.setOutputSpec(parseOutputGroup(optionSet, this));
+            parseTableGroup(optionSet, spec);
+            spec.setNativeQuerySpecs(parseNativeQueryGroup(optionSet));
+            spec.setTimeZone(parseTimeZoneOption(optionSet, this));
 
             ((DumpJobFactory) getJobFactory()).setDumpSpec(spec);
         }

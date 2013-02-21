@@ -183,24 +183,24 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
         return group.build();
     }
 
-    protected JdbcConnectionSpec parseSourceGroup(CommandLine commandLine, Option option) {
+    protected JdbcConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
         JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
-        connectionSpec.setDriverClassName((String) commandLine.getValue(SOURCE_DRIVER_OPTION));
-        connectionSpec.setUrl((String) commandLine.getValue(SOURCE_URL_OPTION));
-        connectionSpec.setUsername((String) commandLine.getValue(SOURCE_USERNAME_OPTION));
-        connectionSpec.setPassword((String) commandLine.getValue(SOURCE_PASSWORD_OPTION));
-        connectionSpec.setProperties(parseProperties(commandLine, SOURCE_PROPERTIES_OPTION, option));
-        connectionSpec.setCatalog((String) commandLine.getValue(SOURCE_CATALOG_OPTION));
-        connectionSpec.setSchema((String) commandLine.getValue(SOURCE_SCHEMA_OPTION));
+        connectionSpec.setDriverClassName((String) optionSet.getValue(SOURCE_DRIVER_OPTION));
+        connectionSpec.setUrl((String) optionSet.getValue(SOURCE_URL_OPTION));
+        connectionSpec.setUsername((String) optionSet.getValue(SOURCE_USERNAME_OPTION));
+        connectionSpec.setPassword((String) optionSet.getValue(SOURCE_PASSWORD_OPTION));
+        connectionSpec.setProperties(parseProperties(optionSet, SOURCE_PROPERTIES_OPTION, option));
+        connectionSpec.setCatalog((String) optionSet.getValue(SOURCE_CATALOG_OPTION));
+        connectionSpec.setSchema((String) optionSet.getValue(SOURCE_SCHEMA_OPTION));
         return connectionSpec;
     }
 
-    protected ResourceSpec parseOutputGroup(CommandLine commandLine, Option option) {
+    protected ResourceSpec parseOutputGroup(OptionSet optionSet, Option option) {
         ResourceSpec resource = new ResourceSpec();
-        resource.setType((String) commandLine.getValue(OUTPUT_TYPE_OPTION));
-        resource.setPath((String) commandLine.getValue(OUTPUT_PATH_OPTION));
+        resource.setType((String) optionSet.getValue(OUTPUT_TYPE_OPTION));
+        resource.setPath((String) optionSet.getValue(OUTPUT_PATH_OPTION));
         resource.setAttributes(parseAttributes(
-                commandLine.<String>getValues(OUTPUT_OPTION), commandLine.getOption(OUTPUT_OPTION)));
+                optionSet.<String>getValues(OUTPUT_OPTION), optionSet.getOption(OUTPUT_OPTION)));
         return resource;
     }
 
@@ -225,8 +225,8 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 ).build();
     }
 
-    protected TimeZone parseTimeZoneOption(CommandLine commandLine, Option option) {
-        String timeZone = (String) commandLine.getValue(TIME_ZONE_OPTION);
+    protected TimeZone parseTimeZoneOption(OptionSet optionSet, Option option) {
+        String timeZone = (String) optionSet.getValue(TIME_ZONE_OPTION);
         if (timeZone != null) {
             TimeZone systemTimeZone = TimeZone.getDefault();
             try {
@@ -243,13 +243,13 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
     /**
      * Parses URL encoded properties name1=value1&name2=value2
      *
-     * @param commandLine holding command line options
+     * @param optionSet holding command line options
      * @param trigger     key to key value pairs
      * @param option      the option which contains parsed url
      */
-    protected Map<String, Object> parseProperties(CommandLine commandLine, String trigger, Option option) {
+    protected Map<String, Object> parseProperties(OptionSet optionSet, String trigger, Option option) {
         Map<String, Object> properties = null;
-        String url = (String) commandLine.getValue(trigger);
+        String url = (String) optionSet.getValue(trigger);
         if (url != null) {
             try {
                 url = URLDecoder.decode(url, "UTF-8");
@@ -355,25 +355,25 @@ public class CliRunSupport extends ApplicationSupport implements CliResources, C
                 withOption(attributes).build();
     }
 
-    protected JdbcConnectionSpec parseTargetGroup(CommandLine commandLine, Option option) {
+    protected JdbcConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
         JdbcConnectionSpec connectionSpec = null;
-        if (commandLine.hasOption(TARGET_URL_OPTION)) {
+        if (optionSet.hasOption(TARGET_URL_OPTION)) {
             connectionSpec = new JdbcConnectionSpec();
             connectionSpec.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
-            connectionSpec.setUrl((String) commandLine.getValue(TARGET_URL_OPTION));
-            connectionSpec.setUsername((String) commandLine.getValue(TARGET_USERNAME_OPTION));
-            connectionSpec.setPassword((String) commandLine.getValue(TARGET_PASSWORD_OPTION));
-            connectionSpec.setProperties(parseProperties(commandLine, TARGET_PROPERTIES_OPTION, option));
-            connectionSpec.setSchema((String) commandLine.getValue(TARGET_SCHEMA_OPTION));
+            connectionSpec.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
+            connectionSpec.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
+            connectionSpec.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
+            connectionSpec.setProperties(parseProperties(optionSet, TARGET_PROPERTIES_OPTION, option));
+            connectionSpec.setSchema((String) optionSet.getValue(TARGET_SCHEMA_OPTION));
         }
         return connectionSpec;
     }
 
-    protected ResourceSpec parseInputGroup(CommandLine commandLine, Option option) {
+    protected ResourceSpec parseInputGroup(OptionSet optionSet, Option option) {
         ResourceSpec resource = new ResourceSpec();
-        resource.setPath((String) commandLine.getValue(INPUT_PATH_OPTION));
+        resource.setPath((String) optionSet.getValue(INPUT_PATH_OPTION));
         resource.setAttributes(parseAttributes(
-                commandLine.<String>getValues(INPUT_OPTION), commandLine.getOption(INPUT_OPTION)));
+                optionSet.<String>getValues(INPUT_OPTION), optionSet.getOption(INPUT_OPTION)));
         return resource;
     }
 
