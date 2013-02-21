@@ -43,6 +43,8 @@ import static org.mockito.Mockito.verify;
 import static org.testng.Assert.*;
 
 /**
+ * Validates that option objects added to the group of process provided arguments as expected.
+ *
  * @author Sergey Bushik
  */
 public class GroupTest {

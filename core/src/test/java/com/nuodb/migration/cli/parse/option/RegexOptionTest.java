@@ -105,7 +105,7 @@ public class RegexOptionTest {
     }
 
     @Test(dependsOnGroups = "regexOption.canProcess", dataProvider = "processData")
-    public void testProcess(String regex, List<String> arguments, List<String> values) {
+    public void testProcess(String regex, List<String> arguments, List<String> expected) {
         regexOption.setArgument(new ArgumentImpl());
         regexOption.addRegex(regex, 1, NORMAL);
 
@@ -118,7 +118,7 @@ public class RegexOptionTest {
         }
         verify(commandLine, atLeastOnce()).addOption(regexOption);
 
-        for (String value : values) {
+        for (String value : expected) {
             verify(commandLine).addValue(regexOption, value);
         }
     }

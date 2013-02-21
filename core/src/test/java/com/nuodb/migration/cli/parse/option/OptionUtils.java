@@ -43,10 +43,6 @@ import static org.mockito.Mockito.*;
  */
 public class OptionUtils {
 
-    public static ListIterator<String> createArguments(String... arguments) {
-        return newArrayList(arguments).listIterator();
-    }
-
     public static BasicOption createBasicOptionSpy() {
         return spy(new BasicOptionImpl());
     }
@@ -71,6 +67,10 @@ public class OptionUtils {
         CommandLine commandLine = mock(CommandLine.class);
         when(commandLine.isOption(anyString())).thenAnswer(new IsOptionAnswer(optionFormat));
         return commandLine;
+    }
+
+    public static ListIterator<String> createArguments(String... arguments) {
+        return newArrayList(arguments).listIterator();
     }
 
     static class IsOptionAnswer implements Answer<Boolean> {

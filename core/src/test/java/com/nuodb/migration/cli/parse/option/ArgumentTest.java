@@ -54,7 +54,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
- * Tests methods of the {@link Argument} option implementation.
+ * Tests methods of the {@link Argument} option type.
  *
  * @author Sergey Bushik
  */

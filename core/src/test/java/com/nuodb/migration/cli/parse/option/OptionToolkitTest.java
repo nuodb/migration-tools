@@ -10,6 +10,11 @@ import static org.mockito.Mockito.spy;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+/**
+ * Performs functional testing of the CLI option toolkit.
+ *
+ * @author Sergey Bushik
+ */
 public class OptionToolkitTest {
 
     private OptionToolkit optionToolkit;

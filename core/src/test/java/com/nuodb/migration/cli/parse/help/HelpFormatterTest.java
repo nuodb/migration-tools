@@ -40,6 +40,8 @@ import static com.nuodb.migration.cli.parse.help.HelpFormatter.*;
 import static org.mockito.Mockito.*;
 
 /**
+ * Verifies proper help formatting for showing on the command line.
+ *
  * @author Sergey Bushik
  */
 public class HelpFormatterTest {

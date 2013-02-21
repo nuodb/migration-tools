@@ -50,6 +50,16 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 /**
+ * Verifies functionality of the create & parse pairs of methods in {@link CliRunSupport} for creating option & parsing
+ * that option to the required spec classes. Correspondingly tested pairs are:
+ * <ul>
+ *     <li>{@link CliRunSupport#createSourceGroup()} & {@link CliRunSupport#parseSourceGroup(OptionSet, Option)}</li>
+ *     <li>{@link CliRunSupport#createTargetGroup()} & {@link CliRunSupport#parseTargetGroup(OptionSet, Option)}</li>
+ *     <li>{@link CliRunSupport#createInputGroup()} & {@link CliRunSupport#parseInputGroup(OptionSet, Option)}</li>
+ *     <li>{@link CliRunSupport#createOutputGroup()} & {@link CliRunSupport#parseOutputGroup(OptionSet, Option)}</li>
+ *     <li>{@link CliRunSupport#createTimeZoneOption()} & {@link CliRunSupport#parseTimeZoneOption(OptionSet, Option)}</li>
+ * </ul>
+ *
  * @author Sergey Bushik
  */
 public class CliRunSupportTest {
