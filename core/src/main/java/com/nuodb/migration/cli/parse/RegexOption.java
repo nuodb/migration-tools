@@ -27,10 +27,19 @@
  */
 package com.nuodb.migration.cli.parse;
 
+import com.nuodb.migration.match.Regex;
+import com.nuodb.migration.match.RegexCompiler;
+
 /**
  * @author Sergey Bushik
  */
 public interface RegexOption extends AugmentOption {
 
     void addRegex(String regex, int group, int priority);
+
+    void addRegex(Regex regex, int group, int priority);
+
+    RegexCompiler getRegexCompiler();
+
+    void setRegexCompiler(RegexCompiler regexCompiler);
 }

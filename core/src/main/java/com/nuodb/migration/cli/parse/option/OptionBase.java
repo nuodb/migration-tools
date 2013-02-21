@@ -174,14 +174,14 @@ public abstract class OptionBase implements Option {
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        processArguments(commandLine, arguments);
+        processOption(commandLine, arguments);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.process(commandLine, this, arguments);
         }
     }
 
-    protected void processArguments(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void processOption(CommandLine commandLine, ListIterator<String> arguments) {
     }
 
     @Override

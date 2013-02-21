@@ -38,9 +38,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.ListIterator;
 
-import static com.nuodb.migration.cli.parse.option.OptionUtils.createArguments;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static com.nuodb.migration.cli.parse.option.OptionUtils.*;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.*;
 
@@ -53,25 +51,24 @@ public class GroupTest {
 
     @BeforeMethod
     public void init() {
-        group = spy(new GroupImpl());
+        group = createGroupSpy();
     }
 
     @Test
     public void testTriggers() {
-        BasicOption option = spy(new BasicOptionImpl());
-        option.setName("option");
-        group.addOption(option);
+        BasicOption basicOption = createBasicOptionSpy();
+        basicOption.setName("option");
+        group.addOption(basicOption);
 
         assertNotNull(group.findOption("--option"));
 
-        assertEquals(group.getPrefixes(), option.getPrefixes());
-        assertEquals(group.getTriggers(), option.getTriggers());
+        assertEquals(group.getPrefixes(), basicOption.getPrefixes());
+        assertEquals(group.getTriggers(), basicOption.getTriggers());
     }
 
     @Test
     public void testRequired() {
-        BasicOption option = spy(new BasicOptionImpl());
-        group.addOption(option);
+        group.addOption(createBasicOptionSpy());
         group.setMinimum(1);
 
         assertTrue(group.isRequired(), "Minimum value is specified and group is required");
@@ -79,12 +76,12 @@ public class GroupTest {
 
     @Test
     public void testDefaults() {
-        Argument argument = spy(new ArgumentImpl());
+        Argument argument = createArgumentSpy();
         List<Object> defaultValues = Lists.<Object>newArrayList("default1", "default2");
         argument.setDefaultValues(defaultValues);
         group.addOption(argument);
 
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
         group.defaults(commandLine);
 
         verify(argument).defaults(commandLine);
@@ -93,15 +90,13 @@ public class GroupTest {
 
     @Test
     public void testCanProcess() {
-        BasicOption option = spy(new BasicOptionImpl());
-        option.setName("option");
-        group.addOption(option);
+        BasicOption basicOption = createBasicOptionSpy();
+        basicOption.setName("option");
+        group.addOption(basicOption);
 
-        Argument argument = spy(new ArgumentImpl());
-        group.addOption(argument);
+        group.addOption(createArgumentSpy());
 
-        CommandLine commandLine = mock(CommandLine.class);
-
+        CommandLine commandLine = createCommandLineMock();
         ListIterator<String> arguments = createArguments("--option", "argument");
         assertTrue(group.canProcess(commandLine, arguments),
                 "Group should be able to process the argument by triggering underlying option");

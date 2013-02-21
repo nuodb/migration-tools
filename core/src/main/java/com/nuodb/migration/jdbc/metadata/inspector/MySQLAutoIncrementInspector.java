@@ -72,8 +72,8 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
-        for (TableInspectionScope inspectionScope : scopes) {
+                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+        for (TableInspectionScope inspectionScope : inspectionScopes) {
             final StringBuilder query = new StringBuilder(QUERY_TABLE);
             Collection<String> filters = Lists.newArrayList();
             final Collection<String> parameters = Lists.newArrayList();

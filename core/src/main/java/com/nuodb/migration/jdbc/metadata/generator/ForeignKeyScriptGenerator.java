@@ -47,19 +47,35 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
         super(ForeignKey.class);
     }
 
+    /**
+     * Fix for DB-953 generates:
+     * <pre>ALTER TABLE "table1" ADD FOREIGN KEY ("column1") REFERENCES "table2" ("column2");</pre>
+     * instead of
+     * <pre>ALTER TABLE "table1" ADD CONSTRAINT "fk1" FOREIGN KEY ("column1") REFERENCES "table2" ("column2");</pre>
+     *
+     * @param foreignKey
+     * @param scriptGeneratorContext
+     * @return
+     */
     @Override
     public Collection<String> getCreateScripts(ForeignKey foreignKey,
                                                ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
         buffer.append(scriptGeneratorContext.getQualifiedName(foreignKey.getPrimaryTable()));
-        buffer.append(" ADD CONSTRAINT ");
-        buffer.append(scriptGeneratorContext.getName(foreignKey));
-        buffer.append(' ');
+        buffer.append(" ADD ");
         buffer.append(getConstraintScript(foreignKey, scriptGeneratorContext));
         return singleton(buffer.toString());
     }
 
+    /**
+     * Fix for DB-953 generates
+     * <pre>ALTER TABLE "table1" DROP FOREIGN KEY ("column1") REFERENCES "table2";</pre>
+     *
+     * @param foreignKey
+     * @param scriptGeneratorContext
+     * @return
+     */
     @Override
     public Collection<String> getDropScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
@@ -69,7 +85,17 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
         buffer.append(' ');
         buffer.append(dialect.getDropForeignKey());
         buffer.append(' ');
-        buffer.append(scriptGeneratorContext.getName(foreignKey));
+        for (Iterator<Column> iterator = foreignKey.getSourceColumns().iterator(); iterator.hasNext(); ) {
+            Column column = iterator.next();
+            buffer.append(scriptGeneratorContext.getName(column));
+            if (iterator.hasNext()) {
+                buffer.append(", ");
+            }
+        }
+        buffer.append(")");
+        buffer.append(" REFERENCES ");
+        buffer.append(getForeignScriptGeneratorContext(foreignKey, scriptGeneratorContext).getQualifiedName(
+                foreignKey.getForeignTable()));
         return singleton(buffer.toString());
     }
 

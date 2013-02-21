@@ -55,10 +55,10 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
-        for (TableInspectionScope inspectionScope : scopes) {
+        for (TableInspectionScope inspectionScope : inspectionScopes) {
             ResultSet indexes = databaseMetaData.getIndexInfo(
                     inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable(), false, true);
             try {

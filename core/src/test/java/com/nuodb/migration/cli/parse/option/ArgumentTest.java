@@ -28,7 +28,12 @@
 package com.nuodb.migration.cli.parse.option;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migration.cli.parse.*;
+import com.nuodb.migration.cli.parse.Argument;
+import com.nuodb.migration.cli.parse.CommandLine;
+import com.nuodb.migration.cli.parse.Help;
+import com.nuodb.migration.cli.parse.HelpHint;
+import com.nuodb.migration.cli.parse.Option;
+import com.nuodb.migration.cli.parse.OptionException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -39,7 +44,9 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migration.cli.parse.HelpHint.*;
+import static com.nuodb.migration.cli.parse.option.OptionUtils.createArgumentSpy;
 import static com.nuodb.migration.cli.parse.option.OptionUtils.createArguments;
+import static com.nuodb.migration.cli.parse.option.OptionUtils.createCommandLineMock;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.*;
@@ -57,7 +64,7 @@ public class ArgumentTest {
 
     @BeforeMethod
     public void init() {
-        argument = spy(new ArgumentImpl());
+        argument = createArgumentSpy();
     }
 
     /**
@@ -65,7 +72,7 @@ public class ArgumentTest {
      */
     @Test
     public void testCanProcess() {
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
 
         assertTrue(argument.canProcess(commandLine, "--option"));
         assertTrue(argument.canProcess(commandLine, "value1"));
@@ -82,12 +89,10 @@ public class ArgumentTest {
     public void testProcessArgument() {
         argument.setMaximum(Integer.MAX_VALUE);
 
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
         when(commandLine.getValues(argument)).thenReturn(newArrayList());
-        when(commandLine.isOption(anyString())).thenReturn(false);
 
-        ListIterator<String> arguments = createArguments("--option", "value1", "value2", "argument2");
-        arguments.next();
+        ListIterator<String> arguments = createArguments("value1", "value2", "argument2");
         argument.process(commandLine, arguments);
 
         verify(commandLine).addValue(argument, "value1");
@@ -100,14 +105,13 @@ public class ArgumentTest {
      */
     @Test
     public void testProcessOption() {
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
         when(commandLine.getValues(argument)).thenReturn(newArrayList());
-        when(commandLine.isOption(anyString())).thenReturn(true);
 
         ListIterator<String> arguments = createArguments("--option", "value1,value2", "argument2");
         argument.process(commandLine, arguments);
 
-        verify(commandLine, times(0)).addValue(any(Option.class), anyString());
+        verify(commandLine, never()).addValue(any(Option.class), anyString());
     }
 
     /**
@@ -117,11 +121,11 @@ public class ArgumentTest {
     public void testProcessSeparatedValues() {
         argument.setMaximum(Integer.MAX_VALUE);
 
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
         when(commandLine.getValues(argument)).thenReturn(newArrayList());
-        when(commandLine.isOption(anyString())).thenReturn(false);
 
-        ListIterator<String> arguments = createArguments("--option", "value1,value2", "argument2");
+        ListIterator<String> arguments = createArguments("value1,value2", "argument2");
+        argument.process(commandLine, arguments);
         argument.process(commandLine, arguments);
 
         verify(commandLine).addValue(argument, "value1");
@@ -137,7 +141,7 @@ public class ArgumentTest {
     public void testPostProcessMinimum() {
         argument.setMinimum(1);
 
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
         when(commandLine.getValues(argument)).thenReturn(EMPTY_LIST);
 
         argument.postProcess(commandLine);
@@ -150,7 +154,7 @@ public class ArgumentTest {
     public void testPostProcessMaximum() {
         argument.setMaximum(1);
 
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
         when(commandLine.getValues(argument)).thenReturn(Lists.<Object>newArrayList("value1", "value2"));
 
         argument.postProcess(commandLine);

@@ -224,7 +224,7 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     public String getDropForeignKey() {
-        return "DROP CONSTRAINT FOREIGN";
+        return "DROP FOREIGN KEY";
     }
 
     @Override

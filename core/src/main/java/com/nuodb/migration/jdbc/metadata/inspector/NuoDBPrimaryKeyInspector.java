@@ -71,7 +71,7 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -84,7 +84,7 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : scopes) {
+                        for (TableInspectionScope inspectionScope : inspectionScopes) {
                             statement.setString(1, inspectionScope.getSchema());
                             statement.setString(2, inspectionScope.getTable());
                             inspect(inspectionContext, statement.executeQuery());

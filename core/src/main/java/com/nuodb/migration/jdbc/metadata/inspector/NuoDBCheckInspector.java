@@ -78,7 +78,7 @@ public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspecti
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -90,7 +90,7 @@ public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspecti
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : scopes) {
+                        for (TableInspectionScope inspectionScope : inspectionScopes) {
                             statement.setString(1, inspectionScope.getSchema());
                             statement.setString(2, inspectionScope.getTable());
                             ResultSet checks = statement.executeQuery();

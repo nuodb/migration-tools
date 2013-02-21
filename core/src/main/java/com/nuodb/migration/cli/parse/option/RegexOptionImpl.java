@@ -57,7 +57,7 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
     private Map<RegexTrigger, Integer> triggersGroups = Maps.newHashMap();
 
     public RegexOptionImpl() {
-        setOptionProcessor(new ArgumentMaximumUpdater());
+        setOptionProcessor(new RegexOptionArgumentProcessor());
     }
 
     @Override
@@ -67,10 +67,21 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
         }
     }
 
-    protected void addRegex(Regex regex, int group, int priority) {
+    @Override
+    public void addRegex(Regex regex, int group, int priority) {
         RegexTrigger trigger = new RegexTrigger(regex);
         getTriggersGroups().put(trigger, group);
         addTrigger(trigger, priority);
+    }
+
+    @Override
+    public RegexCompiler getRegexCompiler() {
+        return regexCompiler;
+    }
+
+    @Override
+    public void setRegexCompiler(RegexCompiler regexCompiler) {
+        this.regexCompiler = regexCompiler;
     }
 
     /**
@@ -80,7 +91,7 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
      * @param arguments   to withConnection regular expression on.
      */
     @Override
-    public void processArguments(CommandLine commandLine, ListIterator<String> arguments) {
+    public void processOption(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
         Trigger trigger = findTrigger(getTriggers(), argument);
         if (canProcess(commandLine, argument)) {
@@ -97,11 +108,11 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
     protected void processTrigger(CommandLine commandLine, Trigger trigger, String argument) {
         commandLine.addOption(this);
         if (trigger instanceof RegexTrigger) {
-            processRegexTrigger(commandLine, (RegexTrigger) trigger, argument);
+            processTrigger(commandLine, (RegexTrigger) trigger, argument);
         }
     }
 
-    protected void processRegexTrigger(CommandLine commandLine, RegexTrigger trigger, String argument) {
+    protected void processTrigger(CommandLine commandLine, RegexTrigger trigger, String argument) {
         Match match = trigger.getRegex().exec(argument);
         Integer group = getTriggersGroups().get(trigger);
         String[] matches = match.matches();
@@ -161,7 +172,7 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
      * Updates maximum value of container's argument option. Used with RegexOption when part of option name matching
      * regular expression is stored in the option items and option's argument.
      */
-    static class ArgumentMaximumUpdater implements OptionProcessor {
+    static class RegexOptionArgumentProcessor implements OptionProcessor {
 
         private int count = 0;
 

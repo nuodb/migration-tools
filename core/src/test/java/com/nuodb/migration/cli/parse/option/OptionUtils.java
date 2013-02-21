@@ -27,9 +27,16 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
+import com.nuodb.migration.cli.parse.*;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
 import java.util.ListIterator;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sergey Bushik
@@ -38,5 +45,51 @@ public class OptionUtils {
 
     public static ListIterator<String> createArguments(String... arguments) {
         return newArrayList(arguments).listIterator();
+    }
+
+    public static BasicOption createBasicOptionSpy() {
+        return spy(new BasicOptionImpl());
+    }
+
+    public static Argument createArgumentSpy() {
+        return spy(new ArgumentImpl());
+    }
+
+    public static Group createGroupSpy() {
+        return spy(new GroupImpl());
+    }
+
+    public static RegexOption createRegexOptionSpy() {
+        return spy(new RegexOptionImpl());
+    }
+
+    public static CommandLine createCommandLineMock() {
+        return createCommandLineMock(OptionFormat.LONG);
+    }
+
+    public static CommandLine createCommandLineMock(OptionFormat optionFormat) {
+        CommandLine commandLine = mock(CommandLine.class);
+        when(commandLine.isOption(anyString())).thenAnswer(new IsOptionAnswer(optionFormat));
+        return commandLine;
+    }
+
+    static class IsOptionAnswer implements Answer<Boolean> {
+
+        private OptionFormat optionFormat;
+
+        public IsOptionAnswer(OptionFormat optionFormat) {
+            this.optionFormat = optionFormat;
+        }
+
+        @Override
+        public Boolean answer(InvocationOnMock invocation) throws Throwable {
+            boolean isOption = false;
+            for (String prefix : optionFormat.getPrefixes()) {
+                if ((isOption = startsWith((CharSequence) invocation.getArguments()[0], prefix))) {
+                    break;
+                }
+            }
+            return isOption;
+        }
     }
 }

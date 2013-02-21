@@ -93,7 +93,7 @@ public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
     }
 
     @Override
-    protected void processArguments(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void processOption(CommandLine commandLine, ListIterator<String> arguments) {
         String argument = arguments.next();
         Trigger trigger = findTrigger(getTriggers(), argument);
         if (trigger != null) {

@@ -27,7 +27,11 @@
  */
 package com.nuodb.migration.cli.parse.option;
 
-import com.nuodb.migration.cli.parse.*;
+import com.nuodb.migration.cli.parse.BasicOption;
+import com.nuodb.migration.cli.parse.CommandLine;
+import com.nuodb.migration.cli.parse.Help;
+import com.nuodb.migration.cli.parse.HelpHint;
+import com.nuodb.migration.cli.parse.OptionException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -38,7 +42,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migration.cli.parse.HelpHint.*;
 import static com.nuodb.migration.cli.parse.option.OptionFormat.SHORT;
-import static com.nuodb.migration.cli.parse.option.OptionUtils.createArguments;
+import static com.nuodb.migration.cli.parse.option.OptionUtils.*;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
@@ -56,14 +60,14 @@ public class BasicOptionTest {
 
     @BeforeMethod
     public void init() {
-        basicOption = spy(new BasicOptionImpl());
+        basicOption = createBasicOptionSpy();
         basicOption.setName(NAME);
         basicOption.setOptionFormat(OptionFormat.LONG);
     }
 
-    @Test(groups = "canProcess")
+    @Test(groups = "basicOption.canProcess")
     public void testCanProcessByName() {
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
 
         assertTrue(basicOption.canProcess(commandLine,
                 createArguments("--option")), "Option should be processable by name");
@@ -71,36 +75,37 @@ public class BasicOptionTest {
                 createArguments("--non-option")), "Unexpected option can't be processed by name");
     }
 
-    @Test(groups = "canProcess")
+    @Test(groups = "basicOption.canProcess")
     public void testCanProcessByAlias() {
         basicOption.addAlias(ALIAS, SHORT);
 
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
         assertTrue(basicOption.canProcess(commandLine,
                 createArguments("-o")), "Option should be processable by alias");
         assertFalse(basicOption.canProcess(commandLine,
                 createArguments("-non-o")), "Unexpected argument can't be processed by alias");
     }
 
-    @Test(dependsOnGroups = "canProcess")
+    @Test(dependsOnGroups = "basicOption.canProcess")
     public void testProcessByName() {
         basicOption.addAlias(ALIAS, SHORT);
 
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
         basicOption.process(commandLine, createArguments("--option"));
         verify(commandLine).addOption(basicOption);
     }
 
-    @Test(dependsOnGroups = "canProcess", expectedExceptions = OptionException.class)
+    @Test(dependsOnGroups = "basicOption.canProcess", expectedExceptions = OptionException.class)
     public void testProcessByNameUnexpected() {
-        CommandLine commandLine = mock(CommandLine.class);
+        CommandLine commandLine = createCommandLineMock();
         basicOption.process(commandLine, createArguments("--non-option"));
     }
 
-    @Test(dependsOnGroups = "canProcess")
+    @Test(dependsOnGroups = "basicOption.canProcess")
     public void testProcessArgument() {
-        basicOption.setArgument(new ArgumentImpl());
-        CommandLine commandLine = mock(CommandLine.class);
+        basicOption.setArgument(createArgumentSpy());
+
+        CommandLine commandLine = createCommandLineMock();
 
         ListIterator<String> arguments = createArguments("--option=argument");
         assertTrue(basicOption.canProcess(commandLine, arguments));

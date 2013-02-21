@@ -141,7 +141,7 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
 
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        processArguments(commandLine, arguments);
+        processOption(commandLine, arguments);
         OptionProcessor optionProcessor = getOptionProcessor();
         if (optionProcessor != null) {
             optionProcessor.process(commandLine, this, arguments);

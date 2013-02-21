@@ -68,6 +68,9 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
             "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID\n" +
             "WHERE SCHEMA=? AND TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
 
+    public static void main(String[] args) {
+        System.out.println(QUERY);
+    }
     @Override
     public void inspectScope(InspectionContext inspectionContext,
                              TableInspectionScope inspectionScope) throws SQLException {
@@ -82,7 +85,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
@@ -94,7 +97,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
                 new StatementCallback<PreparedStatement>() {
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : scopes) {
+                        for (TableInspectionScope inspectionScope : inspectionScopes) {
                             statement.setString(1, inspectionScope.getSchema());
                             statement.setString(2, inspectionScope.getTable());
                             inspect(inspectionContext, statement.executeQuery());
@@ -105,15 +108,15 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
     }
 
     private void inspect(InspectionContext inspectionContext, ResultSet foreignKeys) throws SQLException {
-        InspectionResults results = inspectionContext.getInspectionResults();
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         ForeignKey foreignKey = null;
         while (foreignKeys.next()) {
-            Table primaryTable = addTable(results, null, foreignKeys.getString("FKTABLE_SCHEM"),
+            Table primaryTable = addTable(inspectionResults, null, foreignKeys.getString("FKTABLE_SCHEM"),
                     foreignKeys.getString("FKTABLE_NAME"));
 
             final Column primaryColumn = primaryTable.createColumn(foreignKeys.getString("FKCOLUMN_NAME"));
 
-            Table foreignTable = addTable(results, null, foreignKeys.getString("PKTABLE_SCHEM"),
+            Table foreignTable = addTable(inspectionResults, null, foreignKeys.getString("PKTABLE_SCHEM"),
                     foreignKeys.getString("PKTABLE_NAME"));
 
             final Column foreignColumn = foreignTable.createColumn(foreignKeys.getString("PKCOLUMN_NAME"));
@@ -126,7 +129,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
                 foreignKey.setUpdateAction(getReferentialAction(foreignKeys.getInt("UPDATE_RULE")));
                 foreignKey.setDeleteAction(getReferentialAction(foreignKeys.getInt("DELETE_RULE")));
                 foreignKey.setDeferrability(getDeferrability(foreignKeys.getInt("DEFERRABILITY")));
-                results.addObject(foreignKey);
+                inspectionResults.addObject(foreignKey);
             }
             foreignKey.addReference(primaryColumn, foreignColumn, position);
         }

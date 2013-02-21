@@ -60,11 +60,11 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> scopes) throws SQLException {
+                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
         JdbcTypeRegistry jdbcTypeRegistry = inspectionContext.getDialect().getJdbcTypeRegistry();
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
-        for (TableInspectionScope inspectionScope : scopes) {
+        for (TableInspectionScope inspectionScope : inspectionScopes) {
             ResultSet columns = databaseMetaData.getColumns(
                     inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable(), null);
             try {

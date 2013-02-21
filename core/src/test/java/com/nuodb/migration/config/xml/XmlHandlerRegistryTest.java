@@ -1,25 +1,24 @@
 package com.nuodb.migration.config.xml;
 
-
 import com.nuodb.migration.config.xml.handler.XmlDumpHandler;
 import com.nuodb.migration.config.xml.handler.XmlJdbcConnectionHandler;
 import com.nuodb.migration.config.xml.handler.XmlMigrationHandler;
-import junit.framework.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 public class XmlHandlerRegistryTest {
 
     private XmlHandlerRegistry xmlHandlerRegistry;
 
-    @Before
+    @BeforeMethod
     public void setUp() throws Exception {
         xmlHandlerRegistry = new XmlHandlerRegistry();
     }
@@ -41,7 +40,7 @@ public class XmlHandlerRegistryTest {
                 XmlJdbcConnectionHandler.class,
                 mock(XmlReadContext.class)
         );
-        Assert.assertNull(xmlReadHandler);
+        assertNull(xmlReadHandler);
 
         final XmlJdbcConnectionHandler mock = mock(XmlJdbcConnectionHandler.class);
 
@@ -57,8 +56,8 @@ public class XmlHandlerRegistryTest {
                 mock(XmlReadContext.class)
         );
 
-        Assert.assertNotNull(xmlReadHandler);
-        Assert.assertTrue(xmlReadHandler == mock);
+        assertNotNull(xmlReadHandler);
+        assertTrue(xmlReadHandler == mock);
         verify(xmlReadHandler).canRead(any(InputNode.class),
                 eq(XmlJdbcConnectionHandler.class), any(XmlReadContext.class));
     }
@@ -73,7 +72,7 @@ public class XmlHandlerRegistryTest {
                 mock(OutputNode.class),
                 mock(XmlWriteContext.class)
         );
-        Assert.assertNull(xmlWriteHandler);
+        assertNull(xmlWriteHandler);
 
         when(mock.canWrite(anyObject(),
                 eq(XmlJdbcConnectionHandler.class),
@@ -88,14 +87,14 @@ public class XmlHandlerRegistryTest {
                 mock(XmlWriteContext.class)
         );
 
-        Assert.assertNotNull(xmlWriteHandler);
-        Assert.assertTrue(xmlWriteHandler == mock);
+        assertNotNull(xmlWriteHandler);
+        assertTrue(xmlWriteHandler == mock);
         verify(xmlWriteHandler).canWrite(anyObject(),
                 eq(XmlJdbcConnectionHandler.class),
                 any(OutputNode.class), any(XmlWriteContext.class));
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expectedExceptions = AssertionError.class)
     public void testRegisterWrongType() throws Exception {
         xmlHandlerRegistry.registerHandler(mock(XmlHandler.class));
     }
