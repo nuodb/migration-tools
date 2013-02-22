@@ -133,6 +133,7 @@ public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
                     values[index] = string(value);
                     break;
             }
+            index++;
         }
         fill(values, list, index);
         return values;

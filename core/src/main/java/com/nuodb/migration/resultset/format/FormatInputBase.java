@@ -106,7 +106,7 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
     @Override
     public final void readBegin() {
         if (logger.isDebugEnabled()) {
-            logger.debug(format("Read input %s", getClass().getName()));
+            logger.debug(format("Read begin %s", getClass().getName()));
         }
         row = 0;
         doReadBegin();
