@@ -119,10 +119,15 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
         ValueVariant []values = null;
         try {
             setValues(values = readValues());
+            executeUpdate();
             row++;
         } catch (Exception exception) {
             onReadRowFailure(exception, row, values);
         }
+    }
+
+    protected void executeUpdate() throws SQLException {
+        preparedStatement.executeUpdate();
     }
 
     protected abstract ValueVariant[] readValues();

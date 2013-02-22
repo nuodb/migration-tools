@@ -37,6 +37,8 @@ import java.sql.SQLException;
  */
 public interface FormatOutput extends Format {
 
+    boolean hasNextRow() throws SQLException;
+
     void writeBegin();
 
     void writeRow();

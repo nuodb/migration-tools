@@ -210,7 +210,6 @@ public class LoadJob extends JobBase {
         formatInput.initInputModel();
         while (execution.isRunning() && formatInput.hasNextRow()) {
             formatInput.readRow();
-            preparedStatement.executeUpdate();
         }
         formatInput.readEnd();
     }

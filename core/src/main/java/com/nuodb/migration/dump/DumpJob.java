@@ -209,7 +209,7 @@ public class DumpJob extends JobBase {
         formatOutput.initOutput();
 
         formatOutput.writeBegin();
-        while (execution.isRunning() && resultSet.next()) {
+        while (execution.isRunning() && formatOutput.hasNextRow()) {
             formatOutput.writeRow();
         }
         formatOutput.writeEnd();

@@ -38,7 +38,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
+import static java.lang.String.format;
 import static java.lang.String.valueOf;
+import static java.lang.System.getProperty;
 import static org.apache.commons.io.FileUtils.*;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -65,10 +67,10 @@ public class FileCatalogWriter implements CatalogWriter {
             initOutput();
             String entryName = valueOf(catalogEntry);
             if (logger.isTraceEnabled()) {
-                logger.trace(String.format("Adding entry %1$s", entryName));
+                logger.trace(format("Adding entry %1$s", entryName));
             }
             if (!entries.isEmpty()) {
-                IOUtils.write(System.getProperty("line.separator"), output);
+                IOUtils.write(getProperty("line.separator"), output);
             }
             entries.add(catalogEntry);
             IOUtils.write(entryName, output);
@@ -85,7 +87,7 @@ public class FileCatalogWriter implements CatalogWriter {
 
     protected OutputStream createOutput() {
         if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Opening entry catalog writer %s", catalogFile));
+            logger.debug(format("Opening entry catalog writer %s", catalogFile));
         }
         try {
             forceMkdir(catalogDir);
@@ -110,7 +112,7 @@ public class FileCatalogWriter implements CatalogWriter {
         try {
             File file = getFile(catalogDir, valueOf(catalogEntry));
             if (logger.isDebugEnabled()) {
-                logger.debug(String.format("Opening file %s", file.getPath()));
+                logger.debug(format("Opening file %s", file.getPath()));
             }
             entryOutput = new BufferedOutputStream(openOutputStream(file));
         } catch (IOException e) {

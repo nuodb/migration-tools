@@ -78,12 +78,11 @@ public class FileCatalogReader implements CatalogReader {
         }
     }
 
-    protected CatalogEntry[] readEntries(InputStream entriesInput) {
+    protected CatalogEntry[] readEntries(InputStream input) {
         List<CatalogEntry> entries = Lists.newArrayList();
-        Scanner scanner = new Scanner(entriesInput);
-        scanner.useDelimiter(System.getProperty("line.separator"));
-        while (scanner.hasNext()) {
-            entries.add(getEntry(scanner.next()));
+        Scanner scanner = new Scanner(input);
+        while (scanner.hasNextLine()) {
+            entries.add(getEntry(scanner.nextLine()));
         }
         scanner.close();
         return entries.toArray(new CatalogEntry[entries.size()]);

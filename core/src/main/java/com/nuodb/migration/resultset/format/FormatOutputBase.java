@@ -100,6 +100,11 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
     }
 
     @Override
+    public boolean hasNextRow() throws SQLException {
+        return resultSet != null && resultSet.next();
+    }
+
+    @Override
     public final void writeBegin() {
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("Write begin %s", getClass().getName()));
