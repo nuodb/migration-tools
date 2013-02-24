@@ -27,31 +27,32 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.metadata.Identifiable;
-import com.nuodb.migration.jdbc.metadata.Identifier;
-import com.nuodb.migration.jdbc.metadata.MetaData;
+import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 
+import java.sql.SQLException;
 import java.util.Collection;
+
 
 /**
  * @author Sergey Bushik
  */
-public interface InspectionResults {
+public class PostgreSQLColumnInspector extends SimpleColumnInspector {
 
-    void addObject(MetaData object);
-
-    void addObjects(Collection<? extends MetaData> objects);
-
-    <M extends MetaData> M getObject(MetaDataType objectType);
-
-    <M extends Identifiable> M getObject(MetaDataType objectType, String name);
-
-    <M extends Identifiable> M getObject(MetaDataType objectType, Identifier identifier);
-
-    <M extends MetaData> Collection<M> getObjects(MetaDataType objectType);
-
-    Collection<? extends MetaData> getObjects();
-
-    void removeObject(MetaData object);
+    @Override
+    protected void inspectScopes(InspectionContext inspectionContext,
+                                 Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+        RootInspectionResultsDelta rootInspectionResultsDelta = new RootInspectionResultsDelta(
+                inspectionContext.getInspectionResults());
+        inspectionContext.setInspectionResults(rootInspectionResultsDelta);
+        try {
+            super.inspectScopes(inspectionContext, inspectionScopes);
+            InspectionResults deltaInspectionResults = rootInspectionResultsDelta.getDeltaInspectionResults();
+            for (Column column : deltaInspectionResults.<Column>getObjects(MetaDataType.COLUMN)) {
+                PostgreSQLColumn.process(inspectionContext, column);
+            }
+        } finally {
+            inspectionContext.setInspectionResults(rootInspectionResultsDelta.getRootInspectionResults());
+        }
+    }
 }

@@ -41,11 +41,16 @@ public class AntRegexCompiler extends PatternCompilerBase {
 
     public static final AntRegexCompiler INSTANCE = new AntRegexCompiler();
 
-    private static final Pattern ANT_PATTERN = Pattern.compile("\\?|\\*|\\{([^/]+?)\\}");
-
     private static final String EMPTY = "";
 
+    private final Pattern pattern;
+
     private AntRegexCompiler() {
+        this(0);
+    }
+
+    public AntRegexCompiler(int flags) {
+        pattern = Pattern.compile("\\?|\\*|\\{([^/]+?)\\}", flags);
     }
 
     @Override
@@ -54,7 +59,7 @@ public class AntRegexCompiler extends PatternCompilerBase {
             return null;
         }
         StringBuilder builder = new StringBuilder();
-        Matcher matcher = ANT_PATTERN.matcher(regex);
+        Matcher matcher = pattern.matcher(regex);
         int end = 0;
         while (matcher.find()) {
             builder.append(quote(regex, end, matcher.start()));

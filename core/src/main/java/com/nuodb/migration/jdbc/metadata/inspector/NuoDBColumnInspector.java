@@ -28,6 +28,7 @@
 package com.nuodb.migration.jdbc.metadata.inspector;
 
 import com.nuodb.migration.jdbc.metadata.Column;
+import com.nuodb.migration.jdbc.metadata.DefaultValue;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.query.StatementCallback;
@@ -117,7 +118,8 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
             int columnSize = columns.getInt("LENGTH");
             column.setSize(columnSize);
             column.setPrecision(columnSize);
-            column.setDefaultValue(columns.getString("DEFAULTVALUE"));
+            String defaultValue = columns.getString("DEFAULTVALUE");
+            column.setDefaultValue(defaultValue != null ? new DefaultValue(defaultValue) : null);
             column.setScale(columns.getInt("SCALE"));
             column.setComment(columns.getString("REMARKS"));
             column.setPosition(columns.getInt("FIELDPOSITION"));

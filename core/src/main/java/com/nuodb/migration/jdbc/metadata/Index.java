@@ -43,6 +43,7 @@ public class Index extends ConstraintBase {
     private String filterCondition;
     private SortOrder sortOrder;
     private Map<Integer, Column> columns = Maps.newTreeMap();
+    private String expression;
 
     public Index(Identifier identifier) {
         super(MetaDataType.INDEX, identifier);
@@ -68,6 +69,14 @@ public class Index extends ConstraintBase {
     @Override
     public Collection<Column> getColumns() {
         return newArrayList(columns.values());
+    }
+
+    public String getExpression() {
+        return expression;
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
     }
 
     public String getFilterCondition() {
@@ -96,8 +105,8 @@ public class Index extends ConstraintBase {
 
         if (unique != index.unique) return false;
         if (columns != null ? !columns.equals(index.columns) : index.columns != null) return false;
-        if (filterCondition != null ? !filterCondition.equals(index.filterCondition) : index.filterCondition != null)
-            return false;
+        if (filterCondition != null ? !filterCondition.equals(index.filterCondition) : index.filterCondition != null) return false;
+        if (expression != null ? !expression.equals(index.expression) : index.expression != null) return false;
         if (sortOrder != index.sortOrder) return false;
 
         return true;
@@ -108,6 +117,7 @@ public class Index extends ConstraintBase {
         int result = super.hashCode();
         result = 31 * result + (unique ? 1 : 0);
         result = 31 * result + (filterCondition != null ? filterCondition.hashCode() : 0);
+        result = 31 * result + (expression != null ? expression.hashCode() : 0);
         result = 31 * result + (sortOrder != null ? sortOrder.hashCode() : 0);
         result = 31 * result + (columns != null ? columns.hashCode() : 0);
         return result;
@@ -125,16 +135,21 @@ public class Index extends ConstraintBase {
             buffer.append(format("filter %s", filterCondition));
         }
 
-        Collection<Column> columns = getColumns();
         buffer.append(' ');
-        buffer.append('(');
-        for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
-            Column column = iterator.next();
-            buffer.append(column.getName());
-            if (iterator.hasNext()) {
-                buffer.append(", ");
+        String expression = getExpression();
+        if (expression != null) {
+            buffer.append(expression);
+        } else {
+            Collection<Column> columns = getColumns();
+            buffer.append('(');
+            for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
+                Column column = iterator.next();
+                buffer.append(column.getName());
+                if (iterator.hasNext()) {
+                    buffer.append(", ");
+                }
             }
+            buffer.append(')');
         }
-        buffer.append(')');
     }
 }

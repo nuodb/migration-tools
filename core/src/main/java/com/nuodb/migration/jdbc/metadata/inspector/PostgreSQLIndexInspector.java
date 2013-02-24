@@ -27,31 +27,31 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.metadata.Identifiable;
-import com.nuodb.migration.jdbc.metadata.Identifier;
-import com.nuodb.migration.jdbc.metadata.MetaData;
-import com.nuodb.migration.jdbc.metadata.MetaDataType;
+import com.nuodb.migration.jdbc.dialect.Dialect;
+import com.nuodb.migration.jdbc.metadata.Index;
 
-import java.util.Collection;
+import java.sql.SQLException;
+
+import static com.nuodb.migration.jdbc.dialect.DialectUtils.stripQuotes;
 
 /**
  * @author Sergey Bushik
  */
-public interface InspectionResults {
+public class PostgreSQLIndexInspector extends SimpleIndexInspector {
 
-    void addObject(MetaData object);
-
-    void addObjects(Collection<? extends MetaData> objects);
-
-    <M extends MetaData> M getObject(MetaDataType objectType);
-
-    <M extends Identifiable> M getObject(MetaDataType objectType, String name);
-
-    <M extends Identifiable> M getObject(MetaDataType objectType, Identifier identifier);
-
-    <M extends MetaData> Collection<M> getObjects(MetaDataType objectType);
-
-    Collection<? extends MetaData> getObjects();
-
-    void removeObject(MetaData object);
+    /**
+     * http://www.postgresql.org/docs/9.0/static/sql-createindex.html
+     *
+     * @param inspectionContext current inspection context
+     * @param index             for which expression is inspected
+     * @param expression        based on one or more columns of the table
+     * @return
+     */
+    @Override
+    protected boolean isExpression(InspectionContext inspectionContext, Index index,
+                                   String expression) throws SQLException {
+        Dialect dialect = inspectionContext.getDialect();
+        expression = stripQuotes(dialect, expression);
+        return !dialect.isAllowedIdentifier(expression, null);
+    }
 }

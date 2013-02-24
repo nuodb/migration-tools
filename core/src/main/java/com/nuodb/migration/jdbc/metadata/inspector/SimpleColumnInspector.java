@@ -28,6 +28,7 @@
 package com.nuodb.migration.jdbc.metadata.inspector;
 
 import com.nuodb.migration.jdbc.metadata.Column;
+import com.nuodb.migration.jdbc.metadata.DefaultValue;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
 import com.nuodb.migration.jdbc.metadata.Table;
 import com.nuodb.migration.jdbc.model.ValueModel;
@@ -61,14 +62,14 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+        DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
         JdbcTypeRegistry jdbcTypeRegistry = inspectionContext.getDialect().getJdbcTypeRegistry();
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
         for (TableInspectionScope inspectionScope : inspectionScopes) {
             ResultSet columns = databaseMetaData.getColumns(
                     inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable(), null);
+            ValueModelList<ValueModel> columnsModel = createValueModelList(columns.getMetaData());
             try {
-                ValueModelList<ValueModel> columnsModel = createValueModelList(columns.getMetaData());
                 while (columns.next()) {
                     Table table = addTable(inspectionResults, columns.getString("TABLE_CAT"),
                             columns.getString("TABLE_SCHEM"), columns.getString("TABLE_NAME"));
@@ -82,7 +83,8 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
                     int columnSize = columns.getInt("COLUMN_SIZE");
                     column.setSize(columnSize);
                     column.setPrecision(columnSize);
-                    column.setDefaultValue(columns.getString("COLUMN_DEF"));
+                    String defaultValue = columns.getString("COLUMN_DEF");
+                    column.setDefaultValue(defaultValue != null ? new DefaultValue(defaultValue) : null);
                     column.setScale(columns.getInt("DECIMAL_DIGITS"));
                     column.setComment(columns.getString("REMARKS"));
                     column.setPosition(columns.getInt("ORDINAL_POSITION"));

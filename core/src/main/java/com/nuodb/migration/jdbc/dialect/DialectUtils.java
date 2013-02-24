@@ -25,33 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata.inspector;
+package com.nuodb.migration.jdbc.dialect;
 
-import com.nuodb.migration.jdbc.metadata.Identifiable;
-import com.nuodb.migration.jdbc.metadata.Identifier;
-import com.nuodb.migration.jdbc.metadata.MetaData;
-import com.nuodb.migration.jdbc.metadata.MetaDataType;
-
-import java.util.Collection;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * @author Sergey Bushik
  */
-public interface InspectionResults {
+public class DialectUtils {
 
-    void addObject(MetaData object);
-
-    void addObjects(Collection<? extends MetaData> objects);
-
-    <M extends MetaData> M getObject(MetaDataType objectType);
-
-    <M extends Identifiable> M getObject(MetaDataType objectType, String name);
-
-    <M extends Identifiable> M getObject(MetaDataType objectType, Identifier identifier);
-
-    <M extends MetaData> Collection<M> getObjects(MetaDataType objectType);
-
-    Collection<? extends MetaData> getObjects();
-
-    void removeObject(MetaData object);
+    public static String stripQuotes(Dialect dialect, String name) {
+        String openQuote = dialect.openQuote();
+        String closeQuote = dialect.closeQuote();
+        if (startsWith(name, openQuote) && endsWith(name, closeQuote)) {
+            name = substring(name, dialect.openQuote().length());
+            name = substring(name, 0, name.length() - closeQuote.length());
+        }
+        return name;
+    }
 }

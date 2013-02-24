@@ -106,17 +106,17 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
-    protected boolean isQuotingIdentifier(String identifier, Identifiable identifiable) {
+    public boolean isQuotingIdentifier(String identifier, Identifiable identifiable) {
         return super.isQuotingIdentifier(identifier, identifiable) || !isAllUpperCase(identifier);
     }
 
     @Override
-    protected boolean isAllowedIdentifier(String identifier, Identifiable identifiable) {
+    public boolean isAllowedIdentifier(String identifier, Identifiable identifiable) {
         return ALLOWED_IDENTIFIER_PATTERN.matcher(identifier).matches();
     }
 
     @Override
-    protected boolean isSQLKeyword(String identifier, Identifiable identifiable) {
+    public boolean isSQLKeyword(String identifier, Identifiable identifiable) {
         return !(identifiable != null && identifiable instanceof Table) && getSQLKeywords().contains(identifier);
     }
 

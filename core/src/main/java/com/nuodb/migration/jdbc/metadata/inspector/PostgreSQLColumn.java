@@ -27,34 +27,43 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.nuodb.migration.jdbc.dialect.Dialect;
-import com.nuodb.migration.jdbc.metadata.MetaData;
-import com.nuodb.migration.jdbc.metadata.MetaDataType;
+import com.nuodb.migration.jdbc.metadata.AutoIncrement;
+import com.nuodb.migration.jdbc.metadata.Column;
+import com.nuodb.migration.jdbc.metadata.DefaultValue;
+import com.nuodb.migration.jdbc.metadata.Sequence;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.nuodb.migration.jdbc.dialect.DialectUtils.stripQuotes;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static java.util.regex.Pattern.compile;
 
 /**
  * @author Sergey Bushik
  */
-public interface InspectionContext {
+public class PostgreSQLColumn {
 
-    Dialect getDialect() throws SQLException;
+    private static final String VALUE_CLASS_REGEX = "'(.*)'::.*";
+    private static final String AUTO_INCREMENT_REGEX = "nextval\\(" + VALUE_CLASS_REGEX + "\\)";
+    private static final Pattern VALUE_CLASS = compile(VALUE_CLASS_REGEX, CASE_INSENSITIVE);
+    private static final Pattern AUTO_INCREMENT = compile(AUTO_INCREMENT_REGEX, CASE_INSENSITIVE);
 
-    Connection getConnection() throws SQLException;
-
-    InspectionResults getInspectionResults();
-
-    void setInspectionResults(InspectionResults inspectionResults);
-
-    void inspect(InspectionScope scope) throws SQLException;
-
-    void inspect(InspectionScope scope, MetaDataType... objectTypes) throws SQLException;
-
-    void inspect(MetaData object) throws SQLException;
-
-    void inspect(MetaData object, MetaDataType... objectTypes) throws SQLException;
-
-    void inspect(Collection<MetaData> objects, MetaDataType... objectTypes) throws SQLException;
+    public static Column process(InspectionContext inspectionContext, Column column) throws SQLException {
+        DefaultValue defaultValue = column.getDefaultValue();
+        if (defaultValue != null) {
+            Matcher matcher;
+            if ((matcher = AUTO_INCREMENT.matcher(defaultValue.getValue())).matches()) {
+                Sequence sequence = new AutoIncrement();
+                sequence.setName(stripQuotes(inspectionContext.getDialect(), matcher.group(1)));
+                column.setAutoIncrement(true);
+                column.setDefaultValue(null);
+                column.setSequence(sequence);
+            } else if ((matcher = VALUE_CLASS.matcher(defaultValue.getValue())).matches()) {
+                column.setDefaultValue(new DefaultValue(matcher.group(1)));
+            }
+        }
+        return column;
+    }
 }

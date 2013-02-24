@@ -32,7 +32,6 @@ import com.nuodb.migration.jdbc.metadata.*;
 import com.nuodb.migration.jdbc.query.StatementCallback;
 import com.nuodb.migration.jdbc.query.StatementCreator;
 import com.nuodb.migration.jdbc.query.StatementTemplate;
-import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -40,6 +39,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.nuodb.migration.jdbc.metadata.inspector.PostgreSQLColumn.process;
 import static java.lang.String.format;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -61,18 +61,13 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
         Dialect dialect = inspectionContext.getDialect();
         for (Table table : tables) {
             for (final Column column : table.getColumns()) {
-                if (!column.isAutoIncrement()) {
+                Sequence sequence = process(inspectionContext, column).getSequence();
+                if (sequence != null) {
                     continue;
                 }
-                String defaultValue = column.getDefaultValue();
-                String[] split = StringUtils.split(defaultValue, '\'');
-                if (split.length < 2) {
-                    continue;
-                }
-                String sequence = split[1];
                 final String query = format(QUERY,
                         dialect.getIdentifier(table.getSchema().getName(), null),
-                        dialect.getIdentifier(sequence, null));
+                        dialect.getIdentifier(sequence.getName(), null));
                 StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
                 template.execute(
                         new StatementCreator<PreparedStatement>() {

@@ -109,15 +109,18 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return quoting ? quote(identifier) : identifier;
     }
 
-    protected boolean isQuotingIdentifier(String identifier, Identifiable identifiable) {
+    @Override
+    public boolean isQuotingIdentifier(String identifier, Identifiable identifiable) {
         return !isAllowedIdentifier(identifier, identifiable) || isSQLKeyword(identifier, identifiable);
     }
 
-    protected boolean isAllowedIdentifier(String identifier, Identifiable identifiable) {
+    @Override
+    public boolean isAllowedIdentifier(String identifier, Identifiable identifiable) {
         return ALLOWED_IDENTIFIER_PATTERN.matcher(identifier).matches();
     }
 
-    protected boolean isSQLKeyword(String identifier, Identifiable identifiable) {
+
+    public boolean isSQLKeyword(String identifier, Identifiable identifiable) {
         return getSQLKeywords().contains(identifier);
     }
 
@@ -129,11 +132,13 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return identifier;
     }
 
-    protected String openQuote() {
+    @Override
+    public String openQuote() {
         return valueOf('"');
     }
 
-    protected String closeQuote() {
+    @Override
+    public String closeQuote() {
         return valueOf('"');
     }
 

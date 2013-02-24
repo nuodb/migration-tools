@@ -66,10 +66,12 @@ public class InspectionManager {
 
         InspectorResolver columnInspector = new InspectorResolver(COLUMN, new SimpleColumnInspector());
         columnInspector.register("NuoDB", new NuoDBColumnInspector());
+        columnInspector.register("PostgreSQL", new PostgreSQLColumnInspector());
         addInspector(columnInspector);
 
         InspectorResolver indexInspector = new InspectorResolver(INDEX, new SimpleIndexInspector());
         indexInspector.register("NuoDB", new NuoDBIndexInspector());
+        indexInspector.register("PostgreSQL", new PostgreSQLIndexInspector());
         addInspector(indexInspector);
 
         InspectorResolver primaryKeyInspector = new InspectorResolver(PRIMARY_KEY, new SimplePrimaryKeyInspector());

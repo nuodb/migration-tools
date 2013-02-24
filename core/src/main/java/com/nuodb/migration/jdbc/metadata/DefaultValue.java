@@ -25,33 +25,46 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migration.jdbc.metadata.inspector;
-
-import com.nuodb.migration.jdbc.metadata.Identifiable;
-import com.nuodb.migration.jdbc.metadata.Identifier;
-import com.nuodb.migration.jdbc.metadata.MetaData;
-import com.nuodb.migration.jdbc.metadata.MetaDataType;
-
-import java.util.Collection;
+package com.nuodb.migration.jdbc.metadata;
 
 /**
  * @author Sergey Bushik
  */
-public interface InspectionResults {
+public class DefaultValue {
 
-    void addObject(MetaData object);
+    private String value;
 
-    void addObjects(Collection<? extends MetaData> objects);
+    public DefaultValue(String value) {
+        this.value = value;
+    }
 
-    <M extends MetaData> M getObject(MetaDataType objectType);
+    public String getValue() {
+        return value;
+    }
 
-    <M extends Identifiable> M getObject(MetaDataType objectType, String name);
+    public void setValue(String value) {
+        this.value = value;
+    }
 
-    <M extends Identifiable> M getObject(MetaDataType objectType, Identifier identifier);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-    <M extends MetaData> Collection<M> getObjects(MetaDataType objectType);
+        DefaultValue that = (DefaultValue) o;
 
-    Collection<? extends MetaData> getObjects();
+        if (value != null ? !value.equals(that.value) : that.value != null) return false;
 
-    void removeObject(MetaData object);
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return value != null ? value.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }

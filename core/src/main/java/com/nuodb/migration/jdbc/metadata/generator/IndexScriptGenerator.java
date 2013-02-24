@@ -30,10 +30,14 @@ package com.nuodb.migration.jdbc.metadata.generator;
 import com.nuodb.migration.jdbc.dialect.Dialect;
 import com.nuodb.migration.jdbc.metadata.Column;
 import com.nuodb.migration.jdbc.metadata.Index;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Iterator;
 
+import static java.lang.String.format;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
 /**
@@ -41,51 +45,67 @@ import static java.util.Collections.singleton;
  */
 public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements ConstraintScriptGenerator<Index> {
 
+    private final transient Logger logger = LoggerFactory.getLogger(getClass());
+
     public IndexScriptGenerator() {
         super(Index.class);
     }
 
     @Override
     public Collection<String> getCreateScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("CREATE");
-        if (index.isUnique()) {
-            buffer.append(" UNIQUE");
-        }
-        buffer.append(" INDEX ");
-        buffer.append(scriptGeneratorContext.getName(index));
-        buffer.append(" ON ");
-        buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
-        buffer.append(" (");
-        for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext(); ) {
-            Column column = iterator.next();
-            buffer.append(scriptGeneratorContext.getName(column));
-            if (iterator.hasNext()) {
-                buffer.append(", ");
+        if (index.getExpression() != null) {
+            if (logger.isWarnEnabled()) {
+                logger.warn(format("Index expressions are not supported %s", index));
             }
+            return emptySet();
+        } else {
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("CREATE");
+            if (index.isUnique()) {
+                buffer.append(" UNIQUE");
+            }
+            buffer.append(" INDEX ");
+            buffer.append(scriptGeneratorContext.getName(index));
+            buffer.append(" ON ");
+            buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
+            buffer.append(" (");
+            for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext(); ) {
+                Column column = iterator.next();
+                buffer.append(scriptGeneratorContext.getName(column));
+                if (iterator.hasNext()) {
+                    buffer.append(", ");
+                }
+            }
+            buffer.append(')');
+            return singleton(buffer.toString());
         }
-        buffer.append(')');
-        return singleton(buffer.toString());
     }
 
     @Override
     public Collection<String> getDropScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("DROP INDEX ");
-        buffer.append(scriptGeneratorContext.getName(index));
+        if (index.getExpression() != null) {
+            if (logger.isWarnEnabled()) {
+                logger.warn(format("Index expressions are not supported %s", index));
+            }
+            return emptySet();
+        } else {
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("DROP INDEX ");
+            buffer.append(scriptGeneratorContext.getName(index));
 
-        Dialect dialect = scriptGeneratorContext.getDialect();
-        if (dialect.supportsDropIndexOnTable()) {
-            buffer.append(" ON ");
-            buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
-            buffer.append(' ');
-        }
+            Dialect dialect = scriptGeneratorContext.getDialect();
+            if (dialect.supportsDropIndexOnTable()) {
+                buffer.append(" ON ");
+                buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
+                buffer.append(' ');
+            }
 
-        if (dialect.supportsDropIndexIfExists()) {
-            buffer.append(' ');
-            buffer.append("IF EXISTS");
+            if (dialect.supportsDropIndexIfExists()) {
+                buffer.append(' ');
+                buffer.append("IF EXISTS");
+            }
+            return singleton(buffer.toString());
         }
-        return singleton(buffer.toString());
     }
 
     public String getConstraintScript(Index index, ScriptGeneratorContext scriptGeneratorContext) {

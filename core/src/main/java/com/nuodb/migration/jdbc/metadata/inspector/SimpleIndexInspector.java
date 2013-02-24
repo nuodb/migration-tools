@@ -56,31 +56,13 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
         for (TableInspectionScope inspectionScope : inspectionScopes) {
             ResultSet indexes = databaseMetaData.getIndexInfo(
                     inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable(), false, true);
             try {
                 while (indexes.next()) {
-                    if (indexes.getShort("TYPE") == tableIndexStatistic) {
-                        continue;
-                    }
-                    Table table = addTable(inspectionResults, indexes.getString("TABLE_CAT"),
-                            indexes.getString("TABLE_SCHEM"), indexes.getString("TABLE_NAME"));
-
-                    Identifier identifier = valueOf(indexes.getString("INDEX_NAME"));
-                    Index index = table.getIndex(identifier);
-                    if (index == null) {
-                        index = new Index(identifier);
-                        table.addIndex(index);
-                        index.setUnique(!indexes.getBoolean("NON_UNIQUE"));
-                        index.setFilterCondition(indexes.getString("FILTER_CONDITION"));
-                        index.setSortOrder(getSortOrder(indexes.getString("ASC_OR_DESC")));
-                        inspectionResults.addObject(index);
-                    }
-                    index.addColumn(table.createColumn(indexes.getString("COLUMN_NAME")),
-                            indexes.getInt("ORDINAL_POSITION"));
+                    inspect(inspectionContext, indexes);
                 }
             } finally {
                 close(indexes);
@@ -88,7 +70,37 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
         }
     }
 
-    private static SortOrder getSortOrder(String ascOrDesc) {
+    protected void inspect(InspectionContext inspectionContext, ResultSet indexes) throws SQLException {
+        if (indexes.getShort("TYPE") == tableIndexStatistic) {
+            return;
+        }
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        Table table = addTable(inspectionResults, indexes.getString("TABLE_CAT"),
+                indexes.getString("TABLE_SCHEM"), indexes.getString("TABLE_NAME"));
+
+        Identifier identifier = valueOf(indexes.getString("INDEX_NAME"));
+        Index index = table.getIndex(identifier);
+        if (index == null) {
+            index = new Index(identifier);
+            table.addIndex(index);
+            index.setUnique(!indexes.getBoolean("NON_UNIQUE"));
+            index.setFilterCondition(indexes.getString("FILTER_CONDITION"));
+            index.setSortOrder(getSortOrder(indexes.getString("ASC_OR_DESC")));
+            inspectionResults.addObject(index);
+        }
+        String expression = indexes.getString("COLUMN_NAME");
+        if (isExpression(inspectionContext, index, expression)) {
+            index.setExpression(expression);
+        } else {
+            index.addColumn(table.createColumn(expression), indexes.getInt("ORDINAL_POSITION"));
+        }
+    }
+
+    protected boolean isExpression(InspectionContext inspectionContext, Index index, String expression) throws SQLException {
+        return false;
+    }
+
+    public static SortOrder getSortOrder(String ascOrDesc) {
         if (ascOrDesc != null) {
             return ascOrDesc.equals("A") ? SortOrder.ASC : SortOrder.DESC;
         } else {

@@ -77,6 +77,11 @@ public class SimpleInspectionContext implements InspectionContext {
     }
 
     @Override
+    public void setInspectionResults(InspectionResults inspectionResults) {
+        this.inspectionResults = inspectionResults;
+    }
+
+    @Override
     public void inspect(MetaData object) throws SQLException {
         inspect(object, objectTypes);
     }

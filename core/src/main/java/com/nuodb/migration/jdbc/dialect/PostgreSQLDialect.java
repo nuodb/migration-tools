@@ -56,7 +56,7 @@ public class PostgreSQLDialect extends SimpleDialect {
      * @return boolean indicating whether quoting is required.
      */
     @Override
-    protected boolean isQuotingIdentifier(String identifier, Identifiable identifiable) {
+    public boolean isQuotingIdentifier(String identifier, Identifiable identifiable) {
         boolean quote = false;
         for (int i = 0, length = identifier.length(); i < length; i++) {
             if (Character.isUpperCase(identifier.charAt(i))) {

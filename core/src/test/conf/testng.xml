@@ -1,8 +1,8 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="com.nuodb.migration" verbose="1">
-    <test name="cli.parse.help">
+    <test name="cli">
         <packages>
-            <package name="com.nuodb.migration.cli.parse.help"/>
+            <package name="com.nuodb.migration.cli"/>
         </packages>
     </test>
 </suite>

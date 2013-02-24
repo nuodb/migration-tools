@@ -82,14 +82,14 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
         }
     }
 
-    protected Collection<M> getParentObjects(InspectionContext inspectionScope) throws SQLException {
-        return getParentObjectType() != null ?
-                (Collection<M>) inspectionScope.getInspectionResults().getObjects(getParentObjectType()) : null;
-    }
-
     @Override
     public void inspectObject(InspectionContext inspectionContext, M object) throws SQLException {
         inspectObjects(inspectionContext, singleton(object));
+    }
+
+    protected Collection<M> getParentObjects(InspectionContext inspectionScope) throws SQLException {
+        return getParentObjectType() != null ?
+                (Collection<M>) inspectionScope.getInspectionResults().getObjects(getParentObjectType()) : null;
     }
 
     public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) {

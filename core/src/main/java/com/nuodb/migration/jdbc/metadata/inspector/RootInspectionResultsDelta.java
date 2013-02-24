@@ -27,81 +27,79 @@
  */
 package com.nuodb.migration.jdbc.metadata.inspector;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Supplier;
-import com.google.common.collect.*;
 import com.nuodb.migration.jdbc.metadata.Identifiable;
 import com.nuodb.migration.jdbc.metadata.Identifier;
 import com.nuodb.migration.jdbc.metadata.MetaData;
 import com.nuodb.migration.jdbc.metadata.MetaDataType;
-import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
-import java.util.Set;
-
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
-public class SimpleInspectionResults implements InspectionResults {
+public class RootInspectionResultsDelta implements InspectionResults {
 
-    private SetMultimap<MetaDataType, MetaData> objects = Multimaps.newSetMultimap(
-            Maps.<MetaDataType, Collection<MetaData>>newHashMap(),
-            new Supplier<Set<MetaData>>() {
-                public Set<MetaData> get() {
-                    return Sets.newLinkedHashSet();
-                }
-            });
+    private InspectionResults rootInspectionResults;
+    private InspectionResults deltaInspectionResults;
+
+    public RootInspectionResultsDelta(InspectionResults rootInspectionResults) {
+        this(rootInspectionResults, new SimpleInspectionResults());
+    }
+
+    public RootInspectionResultsDelta(InspectionResults rootInspectionResults,
+                                      InspectionResults deltaInspectionResults) {
+        this.rootInspectionResults = rootInspectionResults;
+        this.deltaInspectionResults = deltaInspectionResults;
+    }
 
     @Override
     public void addObject(MetaData object) {
-        objects.put(object.getObjectType(), object);
+        rootInspectionResults.addObject(object);
+        deltaInspectionResults.addObject(object);
     }
 
     @Override
     public void addObjects(Collection<? extends MetaData> objects) {
-        for (MetaData object : objects) {
-            addObject(object);
-        }
+        rootInspectionResults.addObjects(objects);
+        deltaInspectionResults.addObjects(objects);
     }
 
     @Override
     public <M extends MetaData> M getObject(MetaDataType objectType) {
-        Set<MetaData> objectsByType = objects.get(objectType);
-        return !objectsByType.isEmpty() ? (M) objectsByType.iterator().next() : null;
+        return rootInspectionResults.getObject(objectType);
     }
 
     @Override
     public <M extends Identifiable> M getObject(MetaDataType objectType, String name) {
-        return getObject(objectType, Identifier.valueOf(name));
+        return rootInspectionResults.getObject(objectType, name);
     }
 
     @Override
-    public <M extends Identifiable> M getObject(MetaDataType objectType, final Identifier identifier) {
-        Optional<MetaData> identifiable = Iterables.tryFind(objects.get(objectType), new Predicate<MetaData>() {
-            @Override
-            public boolean apply(MetaData object) {
-                return object instanceof Identifiable && ObjectUtils.equals(((Identifiable) object).getIdentifier(),
-                        identifier);
-            }
-        });
-        return identifiable.isPresent() ? (M) identifiable.get() : null;
+    public <M extends Identifiable> M getObject(MetaDataType objectType, Identifier identifier) {
+        return rootInspectionResults.getObject(objectType, identifier);
     }
 
     @Override
     public <M extends MetaData> Collection<M> getObjects(MetaDataType objectType) {
-        return (Collection<M>) objects.get(objectType);
-    }
-
-    @Override
-    public Collection<? extends MetaData> getObjects() {
-        return objects.values();
+        return rootInspectionResults.getObjects(objectType);
     }
 
     @Override
     public void removeObject(MetaData object) {
-        objects.remove(object.getObjectType(), object);
+        rootInspectionResults.removeObject(object);
+        deltaInspectionResults.removeObject(object);
+    }
+
+    @Override
+    public Collection<? extends MetaData> getObjects() {
+        return rootInspectionResults.getObjects();
+    }
+
+    public InspectionResults getRootInspectionResults() {
+        return rootInspectionResults;
+    }
+
+    public InspectionResults getDeltaInspectionResults() {
+        return deltaInspectionResults;
     }
 }

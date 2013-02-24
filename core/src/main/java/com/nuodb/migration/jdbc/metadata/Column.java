@@ -95,7 +95,7 @@ public class Column extends IdentifiableBase implements ValueModel {
      */
     private Set<Check> checks = Sets.newLinkedHashSet();
 
-    private String defaultValue;
+    private DefaultValue defaultValue;
 
     public Column(Table table, String name) {
         this(table, Identifier.valueOf(name));
@@ -213,11 +213,11 @@ public class Column extends IdentifiableBase implements ValueModel {
         return isAutoIncrement();
     }
 
-    public String getDefaultValue() {
+    public DefaultValue getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(String defaultValue) {
+    public void setDefaultValue(DefaultValue defaultValue) {
         this.defaultValue = defaultValue;
     }
 

@@ -129,6 +129,16 @@ public interface Dialect {
 
     void setTransactionIsolationLevel(Connection connection, int[] transactionIsolationLevels) throws SQLException;
 
+    String openQuote();
+
+    String closeQuote();
+
+    boolean isAllowedIdentifier(String identifier, Identifiable identifiable);
+
+    boolean isQuotingIdentifier(String identifier, Identifiable identifiable);
+
+    boolean isSQLKeyword(String identifier, Identifiable identifiable);
+
     IdentifierNormalizer getIdentifierNormalizer();
 
     void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer);
