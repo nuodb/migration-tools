@@ -84,7 +84,7 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
     }
 
     @Override
-    public void initInputModel() throws SQLException {
+    public void initValueFormatModel() throws SQLException {
         int index = 0;
         for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
             JdbcTypeDesc typeDesc = getValueAccessProvider().getJdbcTypeDescAlias(

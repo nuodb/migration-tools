@@ -47,7 +47,7 @@ public interface FormatOutput extends Format {
 
     void setResultSet(ResultSet resultSet);
 
-    void initOutputModel() throws SQLException;
+    void initValueFormatModel() throws SQLException;
 
     void setWriter(Writer writer);
 

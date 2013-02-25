@@ -207,7 +207,7 @@ public class LoadJob extends JobBase {
     protected void load(LoadJobExecution execution, FormatInput formatInput,
                         PreparedStatement preparedStatement) throws SQLException {
         formatInput.setPreparedStatement(preparedStatement);
-        formatInput.initInputModel();
+        formatInput.initValueFormatModel();
         while (execution.isRunning() && formatInput.hasNextRow()) {
             formatInput.readRow();
         }

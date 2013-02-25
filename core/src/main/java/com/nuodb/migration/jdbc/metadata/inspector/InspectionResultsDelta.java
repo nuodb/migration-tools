@@ -37,17 +37,17 @@ import java.util.Collection;
 /**
  * @author Sergey Bushik
  */
-public class RootInspectionResultsDelta implements InspectionResults {
+public class InspectionResultsDelta implements InspectionResults {
 
     private InspectionResults rootInspectionResults;
     private InspectionResults deltaInspectionResults;
 
-    public RootInspectionResultsDelta(InspectionResults rootInspectionResults) {
+    public InspectionResultsDelta(InspectionResults rootInspectionResults) {
         this(rootInspectionResults, new SimpleInspectionResults());
     }
 
-    public RootInspectionResultsDelta(InspectionResults rootInspectionResults,
-                                      InspectionResults deltaInspectionResults) {
+    public InspectionResultsDelta(InspectionResults rootInspectionResults,
+                                  InspectionResults deltaInspectionResults) {
         this.rootInspectionResults = rootInspectionResults;
         this.deltaInspectionResults = deltaInspectionResults;
     }

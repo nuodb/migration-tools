@@ -53,5 +53,5 @@ public interface FormatInput extends Format {
 
     void setPreparedStatement(PreparedStatement preparedStatement);
 
-    void initInputModel() throws SQLException;
+    void initValueFormatModel() throws SQLException;
 }

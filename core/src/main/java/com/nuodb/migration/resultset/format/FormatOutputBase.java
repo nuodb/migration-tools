@@ -77,7 +77,7 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
     }
 
     @Override
-    public void initOutputModel() throws SQLException {
+    public void initValueFormatModel() throws SQLException {
         ValueModelList<ValueModel> valueModelList = createValueModelList(resultSet.getMetaData());
         int index = 0;
         for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {

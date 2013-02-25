@@ -42,17 +42,17 @@ public class PostgreSQLColumnInspector extends SimpleColumnInspector {
     @Override
     protected void inspectScopes(InspectionContext inspectionContext,
                                  Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        RootInspectionResultsDelta rootInspectionResultsDelta = new RootInspectionResultsDelta(
+        InspectionResultsDelta inspectionResultsDelta = new InspectionResultsDelta(
                 inspectionContext.getInspectionResults());
-        inspectionContext.setInspectionResults(rootInspectionResultsDelta);
+        inspectionContext.setInspectionResults(inspectionResultsDelta);
         try {
             super.inspectScopes(inspectionContext, inspectionScopes);
-            InspectionResults deltaInspectionResults = rootInspectionResultsDelta.getDeltaInspectionResults();
+            InspectionResults deltaInspectionResults = inspectionResultsDelta.getDeltaInspectionResults();
             for (Column column : deltaInspectionResults.<Column>getObjects(MetaDataType.COLUMN)) {
                 PostgreSQLColumn.process(inspectionContext, column);
             }
         } finally {
-            inspectionContext.setInspectionResults(rootInspectionResultsDelta.getRootInspectionResults());
+            inspectionContext.setInspectionResults(inspectionResultsDelta.getRootInspectionResults());
         }
     }
 }

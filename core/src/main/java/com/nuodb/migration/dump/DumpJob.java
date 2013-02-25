@@ -200,7 +200,7 @@ public class DumpJob extends JobBase {
         ResultSet resultSet = preparedStatement.executeQuery();
         formatOutput.setResultSet(resultSet);
         formatOutput.setValueFormatModelList(createValueModelList(resultSet, query));
-        formatOutput.initOutputModel();
+        formatOutput.initValueFormatModel();
 
         CatalogWriter catalogWriter = execution.getCatalogWriter();
         CatalogEntry catalogEntry = createCatalogEntry(query);

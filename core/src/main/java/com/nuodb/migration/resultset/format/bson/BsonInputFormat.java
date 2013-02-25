@@ -32,7 +32,10 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.nuodb.migration.jdbc.model.ValueModelList;
 import com.nuodb.migration.resultset.format.FormatInputBase;
 import com.nuodb.migration.resultset.format.FormatInputException;
-import com.nuodb.migration.resultset.format.value.*;
+import com.nuodb.migration.resultset.format.value.SimpleValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueFormatModel;
+import com.nuodb.migration.resultset.format.value.ValueVariant;
+import com.nuodb.migration.resultset.format.value.ValueVariantType;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
@@ -46,6 +49,8 @@ import static com.nuodb.migration.resultset.format.value.ValueVariantUtils.fill;
 import static com.nuodb.migration.resultset.format.value.ValueVariants.binary;
 import static com.nuodb.migration.resultset.format.value.ValueVariants.string;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
+import static java.lang.String.valueOf;
+import static java.util.Arrays.asList;
 
 /**
  * @author Sergey Bushik
@@ -109,12 +114,12 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
         setValueFormatModelList(valueFormatModelList);
     }
 
-    protected boolean isCurrentToken(JsonToken token) {
-        return token.equals(reader.getCurrentToken());
+    protected boolean isCurrentToken(JsonToken... tokens) {
+        return asList(tokens).contains(reader.getCurrentToken());
     }
 
-    protected boolean isNextToken(JsonToken token) throws IOException {
-        return token.equals(reader.nextToken());
+    protected boolean isNextToken(JsonToken... tokens) throws IOException {
+        return asList(tokens).contains(reader.nextToken());
     }
 
     protected boolean isNextField(String field) throws IOException {
@@ -134,26 +139,26 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
         ValueVariant[] values = null;
         try {
             if (isCurrentToken(START_ARRAY)) {
-                ValueModelList<ValueFormatModel> list = getValueFormatModelList();
-                values = new ValueVariant[list.size()];
+                ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
+                values = new ValueVariant[valueFormatModelList.size()];
                 reader.nextToken();
                 int index = 0;
-                while (isCurrentToken(VALUE_NULL) || isCurrentToken(VALUE_STRING)) {
-                    ValueVariantType valueVariantType = list.get(index).getValueVariantType();
+                while (isCurrentToken(VALUE_NULL, VALUE_STRING, VALUE_EMBEDDED_OBJECT)) {
+                    ValueVariantType valueVariantType = valueFormatModelList.get(index).getValueVariantType();
                     valueVariantType = valueVariantType != null ? valueVariantType : STRING;
                     switch (valueVariantType) {
                         case BINARY:
-                            values[index] = binary(reader.getBinaryValue());
+                            values[index] = binary((byte[]) reader.getEmbeddedObject());
                             break;
                         case STRING:
-                            values[index] = string(reader.getText());
+                            values[index] = string(valueOf(reader.getEmbeddedObject()));
                             break;
                     }
                     index++;
                     reader.nextToken();
                 }
                 reader.nextToken();
-                fill(values, list, index);
+                fill(values, valueFormatModelList, index);
             }
         } catch (IOException exception) {
             throw new FormatInputException(exception);
