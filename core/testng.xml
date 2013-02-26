@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Suite" parallel="none">
+  <test name="Migration" >
+    <groups>
+	  <run>
+	    <exclude name="integrationtest"/>
+        <exclude name="disabled"/>
+	  </run>
+	</groups>
+    <packages>
+      <package name="com.nuodb.migration.*" />
+   </packages>
+  </test>
+</suite>
