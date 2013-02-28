@@ -9,7 +9,7 @@
 	  </run>
 	</groups>
     <packages>
-      <package name="com.nuodb.migration.*" />
+      <package name="com.nuodb.migrator.*" />
    </packages>
   </test>
 </suite>

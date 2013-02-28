@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>com.nuodb</groupId>
-        <artifactId>nuodb-migration-parent</artifactId>
+        <artifactId>nuodb-migrator-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.nuodb</groupId>
-    <artifactId>nuodb-migration-bootstrap</artifactId>
+    <artifactId>nuodb-migrator-bootstrap</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <build>
@@ -22,7 +22,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.nuodb.migration.bootstrap.Bootstrap</mainClass>
+                            <mainClass>com.nuodb.migrator.bootstrap.Bootstrap</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

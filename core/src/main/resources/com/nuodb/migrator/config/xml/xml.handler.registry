@@ -1,0 +1,4 @@
+com.nuodb.migrator.config.xml.handler.XmlMigrationHandler
+com.nuodb.migrator.config.xml.handler.XmlDriverConnectionHandler
+com.nuodb.migrator.config.xml.handler.XmlDumpTaskHandler
+com.nuodb.migrator.config.xml.handler.XmlTransformerHandler

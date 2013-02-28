@@ -4,7 +4,7 @@
 
 *A command-line interface for helping domain administrators manage backup and migration of their databases.*
 
-This tool is designed to assist you in migrating data from supported SQL databases to a NuoDB database. Use nuodb-migration dump and nuodb-migration load to copy, normalize, and load data from an existing database (NuoDB or 3rd party) to a NuoDB database.  With the command-line interface, domain administrators will be able to perform the following database backup and migration tasks:
+This tool is designed to assist you in migrating data from supported SQL databases to a NuoDB database. Use nuodb-migrator dump and nuodb-migrator load to copy, normalize, and load data from an existing database (NuoDB or 3rd party) to a NuoDB database.  With the command-line interface, domain administrators will be able to perform the following database backup and migration tasks:
 
 1. Migrate (generate) a schema to a target NuoDB database
 2. Copy data from an existing database to a target NuoDB database
@@ -18,14 +18,14 @@ This tool is designed to assist you in migrating data from supported SQL databas
     $ git clone https://github.com/nuodb/migration-tools
     $ cd migration-tools/
     $ mvn install
-    $ cd assembly/target/nuodb-migration/
-    $ bin/nuodb-migration --help
+    $ cd assembly/target/nuodb-migrator/
+    $ bin/nuodb-migrator --help
 
 ## Synopsis ##
 
 ### Root command line options ###
 
-    $ bin/nuodb-migration
+    $ bin/nuodb-migrator
         --help |
         --help=<[dump] | [load] | [schema]> |
         --list |
@@ -34,7 +34,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
 
 ### Dump data from an existing database ###
 
-    $ bin/nuodb-migration dump
+    $ bin/nuodb-migrator dump
         [source database connection, required]
             --source.driver<driver> |
             --source.url=<url> |
@@ -57,7 +57,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
 
 ### Load data to a target NuoDB database ###
 
-    $ bin/nuodb-migration load
+    $ bin/nuodb-migrator load
         [target database connection, required]
             --target.url=<url> |
             --target.username=<username> |
@@ -72,7 +72,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
 
 ### Generate a schema for a target NuoDB database ###
 
-    $ bin/nuodb-migration schema
+    $ bin/nuodb-migrator schema
         [source database connection, required]
             --source.driver=<driver> |
             --source.url=<url> |
@@ -108,13 +108,13 @@ You can add required dependency to pom.xml, then clean & package project:
 
     $ mvn clean install
 
-The required JDBC driver JAR file will be download automatically to the assembly/target/nuodb-migration/jar/ directory
+The required JDBC driver JAR file will be download automatically to the assembly/target/nuodb-migrator/jar/ directory
 
-Alternatively, you can download & copy required JAR file to assembly/target/nuodb-migration/jar/ manually. For example, to install PostgreSQL JDBC4 Driver:
+Alternatively, you can download & copy required JAR file to assembly/target/nuodb-migrator/jar/ manually. For example, to install PostgreSQL JDBC4 Driver:
 
     $ mvn clean install
     $ curl http://jdbc.postgresql.org/download/postgresql-9.2-1001.jdbc4.jar > \
-        assembly/target/nuodb-migration/jar/postgresql-9.2-1001.jdbc4.jar
+        assembly/target/nuodb-migrator/jar/postgresql-9.2-1001.jdbc4.jar
 
 To include MySQL JDBC Driver into assembly using Maven add the following dependency to pom.xml, then clean & package project:
 
@@ -155,14 +155,14 @@ The following examples show how to dump MySQL to a file (in the first case), and
 
 Example 1: Dump all tables from MySQL "enron" catalog in CSV format
 
-    $ bin/nuodb-migration dump --source.driver=com.mysql.jdbc.Driver \
+    $ bin/nuodb-migrator dump --source.driver=com.mysql.jdbc.Driver \
         --source.url=jdbc:mysql://localhost:3306/test --source.catalog=test \
         --source.username=<username> \
         --output.type=csv --output.path=/tmp/dump.cat
 
 Example 2: Dump records from "hockey" table where "id" is not equal to 25 from NuoDB "test" catalog in BSON format
 
-    $ bin/nuodb-migration dump --source.driver=com.nuodb.jdbc.Driver \
+    $ bin/nuodb-migrator dump --source.driver=com.nuodb.jdbc.Driver \
         --source.url=jdbc:com.nuodb://localhost/test \
         --source.username=<username> \
         --source.schema=hockey --table=hockey --table.hockey.filter=id<>25 \
@@ -170,19 +170,19 @@ Example 2: Dump records from "hockey" table where "id" is not equal to 25 from N
 
 Example 3: Load CSV data to the corresponding tables in NuoDB from /tmp/dump.cat
 
-    $ bin/nuodb-migration load --target.url=jdbc:com.nuodb://localhost/test \
+    $ bin/nuodb-migrator load --target.url=jdbc:com.nuodb://localhost/test \
         --target.username=<username> --target.password=<password> \
         --input.path=/tmp/dump.cat
 
 Example 4: Generate NuoDB schema from Oracle "test" database and output it to stdout stream. To save schema in a particular file on the file system add --output.path=<file> option, i.e. --output.path=/tmp/schema.sql
 
-    $ bin/nuodb-migration schema --source.driver=oracle.jdbc.driver.OracleDriver \
+    $ bin/nuodb-migrator schema --source.driver=oracle.jdbc.driver.OracleDriver \
         --source.url=jdbc:oracle:thin:@//localhost:1521/test \
         --source.username=<username> --source.password=<password> --source.schema=test
 
 Example 5: Migrate schema from Microsoft SQL Server "test" database to a NuoDB database excluding generation of foreign keys and check constraints on table and column levels. Generated table names and column identifiers will be transformed using "standard" identifier normalizer (changed to upper case if unquoted).
 
-    $ bin/nuodb-migration schema --source.driver=net.sourceforge.jtds.jdbc.Driver \
+    $ bin/nuodb-migrator schema --source.driver=net.sourceforge.jtds.jdbc.Driver \
         --source.url=jdbc:jtds:sqlserver://localhost:1433/test \
         --source.username=<username> --source.password=<password> --source.schema=dbo \
         --target.url=jdbc:com.nuodb://localhost/test \
