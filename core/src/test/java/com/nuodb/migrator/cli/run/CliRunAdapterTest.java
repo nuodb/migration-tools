@@ -85,20 +85,6 @@ public class CliRunAdapterTest {
             }
         }).when(option).process(any(CommandLine.class), any(ListIterator.class));
 
-        option.addOptionProcessor(new OptionProcessor() {
-            @Override
-            public void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-            }
-
-            @Override
-            public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-                System.out.println("CliRunAdapterTest.process");
-            }
-
-            @Override
-            public void postProcess(CommandLine commandLine, Option option) {
-            }
-        });
         OptionSet optionSet = parser.parse(new String[]{"--option"}, cliRunAdapter);
         verify(cliRunAdapter).bind(optionSet);
     }

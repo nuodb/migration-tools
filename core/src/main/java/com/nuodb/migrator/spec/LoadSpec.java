@@ -83,4 +83,34 @@ public class LoadSpec extends TaskSpecBase {
     public void setTableInsertTypes(Map<String, InsertType> tableInsertTypes) {
         this.tableInsertTypes = tableInsertTypes;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        LoadSpec loadSpec = (LoadSpec) o;
+
+        if (connectionSpec != null ? !connectionSpec.equals(loadSpec.connectionSpec) : loadSpec.connectionSpec != null)
+            return false;
+        if (inputSpec != null ? !inputSpec.equals(loadSpec.inputSpec) : loadSpec.inputSpec != null) return false;
+        if (insertType != loadSpec.insertType) return false;
+        if (tableInsertTypes != null ? !tableInsertTypes.equals(
+                loadSpec.tableInsertTypes) : loadSpec.tableInsertTypes != null) return false;
+        if (timeZone != null ? !timeZone.equals(loadSpec.timeZone) : loadSpec.timeZone != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (connectionSpec != null ? connectionSpec.hashCode() : 0);
+        result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
+        result = 31 * result + (inputSpec != null ? inputSpec.hashCode() : 0);
+        result = 31 * result + (insertType != null ? insertType.hashCode() : 0);
+        result = 31 * result + (tableInsertTypes != null ? tableInsertTypes.hashCode() : 0);
+        return result;
+    }
 }

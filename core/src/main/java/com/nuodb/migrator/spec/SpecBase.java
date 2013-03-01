@@ -32,6 +32,8 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import java.util.Map;
 
+import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
+
 public class SpecBase implements Spec {
 
     private String id;
@@ -86,6 +88,6 @@ public class SpecBase implements Spec {
 
     @Override
     public String toString() {
-        return ReflectionToStringBuilder.toString(this);
+        return ReflectionToStringBuilder.toString(this, MULTI_LINE_STYLE);
     }
 }

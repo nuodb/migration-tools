@@ -84,7 +84,8 @@ public class CliSchemaJob extends CliRunJob {
 
     @Override
     protected Option createOption() {
-        GroupBuilder group = newGroupBuilder().withName(getResources().getMessage(SCHEMA_GROUP_NAME));
+        GroupBuilder group = newGroupBuilder().
+                withName(getResources().getMessage(SCHEMA_GROUP_NAME));
         group.withRequired(true);
         group.withOption(createSourceGroup());
         group.withOption(createTargetGroup());

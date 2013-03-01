@@ -27,6 +27,10 @@
  */
 package com.nuodb.migrator.spec;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
+import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
+
 /**
  * @author Sergey Bushik
  */
@@ -44,5 +48,27 @@ public class NativeQuerySpec {
 
     public void setQuery(String query) {
         this.query = query;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        NativeQuerySpec that = (NativeQuerySpec) o;
+
+        if (query != null ? !query.equals(that.query) : that.query != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return query != null ? query.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return ReflectionToStringBuilder.toString(this, MULTI_LINE_STYLE);
     }
 }

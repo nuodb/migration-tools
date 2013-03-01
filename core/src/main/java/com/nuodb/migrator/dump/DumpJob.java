@@ -253,7 +253,7 @@ public class DumpJob extends JobBase {
     protected Collection<SelectQuery> createSelectQueries(Database database) {
         Dialect dialect = database.getDialect();
         Collection<SelectQuery> selectQueries = Lists.newArrayList();
-        for (final Table table : database.getTables()) {
+        for (Table table : database.getTables()) {
             if (getTableTypes().contains(table.getType())) {
                 SelectQueryBuilder builder = new SelectQueryBuilder();
                 builder.setDialect(dialect);
@@ -262,7 +262,7 @@ public class DumpJob extends JobBase {
                 selectQueries.add(builder.build());
             } else {
                 if (logger.isTraceEnabled()) {
-                    logger.trace(format("Skip %s %s", table.getQualifiedName(dialect), table.getType()));
+                    logger.trace(format("Skip table %s type %s", table.getQualifiedName(dialect), table.getType()));
                 }
             }
         }

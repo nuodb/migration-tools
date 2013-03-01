@@ -77,8 +77,9 @@ public class CliDumpJobTest {
 
                 "--table.type=TABLE",
                 "--table.type=SYSTEM TABLE",
-                "--table.users",
-                "--table.users_roles.filter=role_id IN (1,2,3,4,5)",
+                "--table=users",
+                "--table=users_roles",
+                "--table.users_roles.filter=role_id in (1,2,3,4,5)",
 
                 "--query=SELECT id, name, definition FROM definitions",
                 "--time.zone=GMT"
@@ -109,20 +110,18 @@ public class CliDumpJobTest {
         outputSpec.setPath("/tmp/dump.cat");
 
         Map<String, Object> attributes = new HashMap<String, Object>();
-        properties.put(CsvAttributes.ATTRIBUTE_ENCODING, "cp1251");
-        properties.put(CsvAttributes.ATTRIBUTE_DELIMITER, ",");
-        properties.put(CsvAttributes.ATTRIBUTE_QUOTING, "true");
-        properties.put(CsvAttributes.ATTRIBUTE_ESCAPE, "escape");
+        attributes.put(CsvAttributes.ATTRIBUTE_ENCODING, "cp1251");
+        attributes.put(CsvAttributes.ATTRIBUTE_DELIMITER, ",");
+        attributes.put(CsvAttributes.ATTRIBUTE_QUOTING, "true");
+        attributes.put(CsvAttributes.ATTRIBUTE_ESCAPE, "|");
         outputSpec.setAttributes(attributes);
 
         dumpSpec.setOutputSpec(outputSpec);
         dumpSpec.setSelectQuerySpecs(asList(
                 new SelectQuerySpec("users"),
-                new SelectQuerySpec("users_roles", "role_id IN (1,2,3,4,5)")
+                new SelectQuerySpec("users_roles", "role_id in (1,2,3,4,5)")
         ));
-        dumpSpec.setNativeQuerySpecs(
-                asList(new NativeQuerySpec("SELECT id, name, definition FROM definitions")
-                ));
+        dumpSpec.setNativeQuerySpecs(asList(new NativeQuerySpec("SELECT id, name, definition FROM definitions")));
         dumpSpec.setTableTypes(asList("TABLE", "SYSTEM TABLE"));
         dumpSpec.setTimeZone(TimeZone.getTimeZone("GMT"));
         return dumpSpec;

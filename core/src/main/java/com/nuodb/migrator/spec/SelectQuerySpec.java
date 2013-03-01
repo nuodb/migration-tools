@@ -27,7 +27,11 @@
  */
 package com.nuodb.migrator.spec;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 import java.util.Collection;
+
+import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 public class SelectQuerySpec {
 
@@ -66,5 +70,32 @@ public class SelectQuerySpec {
 
     public void setFilter(String filter) {
         this.filter = filter;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SelectQuerySpec that = (SelectQuerySpec) o;
+
+        if (columns != null ? !columns.equals(that.columns) : that.columns != null) return false;
+        if (filter != null ? !filter.equals(that.filter) : that.filter != null) return false;
+        if (table != null ? !table.equals(that.table) : that.table != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = table != null ? table.hashCode() : 0;
+        result = 31 * result + (columns != null ? columns.hashCode() : 0);
+        result = 31 * result + (filter != null ? filter.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return ReflectionToStringBuilder.toString(this, MULTI_LINE_STYLE);
     }
 }

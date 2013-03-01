@@ -27,12 +27,25 @@
  */
 package com.nuodb.migrator.cli.run;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
+import com.nuodb.migrator.jdbc.query.InsertType;
+import com.nuodb.migrator.load.LoadJobFactory;
+import com.nuodb.migrator.resultset.format.csv.CsvAttributes;
+import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.LoadSpec;
+import com.nuodb.migrator.spec.ResourceSpec;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+
+import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER_CLASS_NAME;
 import static org.mockito.Mockito.spy;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Sergey Bushik
@@ -49,6 +62,56 @@ public class CliLoadJobTest {
     }
 
     @Test
-    public void test() {
+    public void testParse() {
+        String[] arguments = {
+                "--target.url=jdbc:com.nuodb://localhost/test?schema=hockey",
+                "--target.username=dba",
+                "--target.password=goalie",
+
+                "--input.path=/tmp/dump.cat",
+
+                "--input.csv.encoding=cp1251",
+                "--input.csv.delimiter= ",
+                "--input.csv.quoting=true",
+                "--input.csv.escape=|",
+
+                "--table.deployments.insert",
+                "--table.deployments_nodes.replace",
+                "--time.zone=GMT+2"
+        };
+        parser.parse(arguments, cliLoadJob);
+
+        LoadJobFactory loadJobFactory = (LoadJobFactory) cliLoadJob.getJobFactory();
+        assertEquals(loadJobFactory.getLoadSpec(), createLoadSpec());
+    }
+
+    private LoadSpec createLoadSpec() {
+        LoadSpec loadSpec = new LoadSpec();
+
+        JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
+        connectionSpec.setDriverClassName(NUODB_DRIVER_CLASS_NAME);
+        connectionSpec.setUrl("jdbc:com.nuodb://localhost/test?schema=hockey");
+        connectionSpec.setUsername("dba");
+        connectionSpec.setPassword("goalie");
+        loadSpec.setConnectionSpec(connectionSpec);
+
+        ResourceSpec inputSpec = new ResourceSpec();
+        inputSpec.setPath("/tmp/dump.cat");
+
+        Map<String, Object> attributes = new HashMap<String, Object>();
+        attributes.put(CsvAttributes.ATTRIBUTE_ENCODING, "cp1251");
+        attributes.put(CsvAttributes.ATTRIBUTE_DELIMITER, " ");
+        attributes.put(CsvAttributes.ATTRIBUTE_QUOTING, "true");
+        attributes.put(CsvAttributes.ATTRIBUTE_ESCAPE, "|");
+        inputSpec.setAttributes(attributes);
+        loadSpec.setInputSpec(inputSpec);
+        loadSpec.setInsertType(InsertType.INSERT);
+
+        Map<String, InsertType> tableInsertTypes = Maps.newHashMap();
+        tableInsertTypes.put("deployments", InsertType.INSERT);
+        tableInsertTypes.put("deployments_nodes", InsertType.REPLACE);
+        loadSpec.setTableInsertTypes(tableInsertTypes);
+        loadSpec.setTimeZone(TimeZone.getTimeZone("GMT+2"));
+        return loadSpec;
     }
 }

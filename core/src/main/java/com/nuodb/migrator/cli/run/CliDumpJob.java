@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.cli.run;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
@@ -44,14 +43,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
 
 /**
- * An implementation of {@link CliRunAdapter} which assembles withConnection spec from provided command line after the
- * validation is passed.
+ * An implementation of {@link CliRunAdapter} which assembles dump spec from provided command line after the validation
+ * is passed.
  *
  * @author Sergey Bushik
  */
@@ -103,6 +103,7 @@ public class CliDumpJob extends CliRunJob {
                         newArgumentBuilder().
                                 withName(getMessage(TABLE_ARGUMENT_NAME)).
                                 withMinimum(1).
+                                withMaximum(Integer.MAX_VALUE).
                                 withRequired(true).build()
                 ).build();
         group.withOption(table);
@@ -182,7 +183,7 @@ public class CliDumpJob extends CliRunJob {
     }
 
     protected Collection<NativeQuerySpec> parseNativeQueryGroup(OptionSet optionSet) {
-        List<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
+        List<NativeQuerySpec> nativeQuerySpecs = newArrayList();
         for (String query : optionSet.<String>getValues(QUERY_OPTION)) {
             nativeQuerySpecs.add(new NativeQuerySpec(query));
         }
