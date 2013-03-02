@@ -43,7 +43,7 @@ public class BasicMigrationTest extends MigrationTestBase {
 	/*
 	 * Assert Load is run and database is not empty
 	 */
-	@Test(groups = { "integrationtest" })
+	@Test(groups = { "integrationtest", "dataloadperformed" })
 	public void testDataLoaded() throws Exception {
 		String sqlStr = "select count(*) from datatypes1";
 		Statement stmt1 = null, stmt2 = null;
@@ -61,7 +61,8 @@ public class BasicMigrationTest extends MigrationTestBase {
 
 			Assert.assertTrue(rs1.next());
 			Assert.assertTrue(rs2.next());
-			Assert.assertEquals(rs2.getInt(1), rs1.getInt(1));
+			Assert.assertEquals(rs2.getInt(1), rs1.getInt(1),
+					"Please check if data is loaded.");
 
 		} finally {
 			closeAll(rs1, stmt1, rs2, stmt2);
@@ -76,7 +77,7 @@ public class BasicMigrationTest extends MigrationTestBase {
 	 * The test executes the same select all statement against the source
 	 * database and the target database and compares the result values.
 	 */
-	@Test(groups = { "integrationtest" }, dependsOnMethods = { "testDataLoaded" })
+	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
 	public void testDataTypes1() throws Exception {
 		String sqlStr = "select * from datatypes1";
 		Statement stmt1 = null, stmt2 = null;
@@ -102,7 +103,7 @@ public class BasicMigrationTest extends MigrationTestBase {
 	/*
 	 * See documentation for testDataTypes1
 	 */
-	@Test(groups = { "integrationtest" }, dependsOnMethods = { "testDataLoaded" })
+	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
 	public void testDataTypes2() throws Exception {
 		String sqlStr = "select * from datatypes2";
 		Statement stmt1 = null, stmt2 = null;
@@ -128,7 +129,7 @@ public class BasicMigrationTest extends MigrationTestBase {
 	/*
 	 * See documentation for testDataTypes1
 	 */
-	@Test(groups = { "integrationtest" }, dependsOnMethods = { "testDataLoaded" })
+	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
 	public void testDataTypes3() throws Exception {
 		String sqlStr = "select * from datatypes3";
 		Statement stmt1 = null, stmt2 = null;

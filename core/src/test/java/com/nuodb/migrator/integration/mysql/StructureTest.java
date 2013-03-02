@@ -49,9 +49,9 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the Tables are migrated with the right columns
 	 */
-	@Test(groups = { "integrationtest" })
+	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
 	public void testTables() throws Exception {
-		String sqlStr1 = "select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = ?";
+		String sqlStr1 = "select TABLE_NAME from information_schema.TABLES where TABLE_TYPE='BASE TABLE' AND TABLE_SCHEMA = ?";
 		String sqlStr2 = "select tablename from system.TABLES where TYPE = 'TABLE' and schema = ?";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
@@ -170,9 +170,17 @@ public class StructureTest extends MigrationTestBase {
 	}
 
 	/*
+	 * test if all the Views are migrated
+	 */
+	@Test(groups = { "integrationtest", "disabled" }, dependsOnGroups = { "dataloadperformed" })
+	public void testViews() throws Exception {
+		// MYSQL Views are not migrated yet.
+	}
+
+	/*
 	 * test if all the Primary and Unique Key Constraints are migrated
 	 */
-	@Test(groups = { "integrationtest" })
+	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
 	public void testPrimaryAndUniqueKeyConstraints() throws Exception {
 		String sqlStr1 = "select TC.TABLE_NAME, C.COLUMN_NAME, C.COLUMN_KEY from information_schema.TABLE_CONSTRAINTS TC "
 				+ "inner join information_schema.COLUMNS C on TC.CONSTRAINT_SCHEMA=? "
@@ -219,7 +227,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the Check Constraints are migrated
 	 */
-	@Test(groups = { "integrationtest", "disabled" })
+	@Test(groups = { "integrationtest", "disabled" }, dependsOnGroups = { "dataloadperformed" })
 	public void testCheckConstraints() throws Exception {
 		// MYSQL Does not have any implementations for CHECK constraints
 	}
@@ -227,7 +235,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the Foreign Key Constraints are migrated
 	 */
-	@Test(groups = { "integrationtest" })
+	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
 	public void testForeignKeyConstraints() throws Exception {
 		String sqlStr1 = "select TC.TABLE_NAME, CU.COLUMN_NAME, CU.REFERENCED_TABLE_NAME, CU.REFERENCED_COLUMN_NAME "
 				+ "from information_schema.TABLE_CONSTRAINTS TC INNER JOIN information_schema.KEY_COLUMN_USAGE CU "
@@ -289,7 +297,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the auto increment settings are migrated
 	 */
-	@Test(groups = { "integrationtest" })
+	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
 	public void testAutoIncrement() throws Exception {
 		String sqlStr1 = "select T.TABLE_NAME, T.AUTO_INCREMENT, C.COLUMN_NAME "
 				+ "from information_schema.TABLES T INNER JOIN information_schema.COLUMNS C "
@@ -320,10 +328,60 @@ public class StructureTest extends MigrationTestBase {
 				boolean found = false;
 				while (rs2.next()) {
 					found = true;
-					Assert.assertNotNull(rs2.getString("SEQUENCENAME"));
-					Assert.assertEquals(rs2.getString("SEQUENCENAME")
-							.substring(0, 4), "SEQ_");
+					String seqName = rs2.getString("SEQUENCENAME");
+					Assert.assertNotNull(seqName);
+					if (seqName.equals(nuodbSchemaUsed + "$"
+							+ "IDENTITY_SEQUENCE")) {
+						continue;
+					}
+					Assert.assertEquals(seqName.substring(0, 4), "SEQ_");
 					// TODO: Need to check start value - Don't know how yet
+				}
+				Assert.assertTrue(found);
+				rs2.close();
+				stmt2.close();
+
+			}
+		} finally {
+			closeAll(rs1, stmt1, rs2, stmt2);
+		}
+	}
+
+	/*
+	 * test if all the Indexes are migrated
+	 */
+	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
+	public void testIndexes() throws Exception {
+		String sqlStr1 = "select C.TABLE_NAME, C.COLUMN_NAME "
+				+ "from information_schema.COLUMNS C "
+				+ "where C.TABLE_SCHEMA=? AND C.COLUMN_KEY = 'MUL'";
+		String sqlStr2 = "SELECT I.INDEXNAME FROM SYSTEM.INDEXES I "
+				+ "INNER JOIN SYSTEM.INDEXFIELDS F ON I.SCHEMA=F.SCHEMA AND I.TABLENAME=F.TABLENAME AND I.INDEXNAME=F.INDEXNAME "
+				+ "WHERE I.INDEXTYPE=2 AND F.SCHEMA=? AND F.TABLENAME=? AND F.FIELD=?";
+		PreparedStatement stmt1 = null, stmt2 = null;
+		ResultSet rs1 = null, rs2 = null;
+		try {
+			stmt1 = sourceConnection.prepareStatement(sqlStr1);
+			stmt1.setString(1, sourceConnection.getCatalog());
+			rs1 = stmt1.executeQuery();
+
+			Assert.assertNotNull(rs1);
+
+			while (rs1.next()) {
+				String tName = rs1.getString("TABLE_NAME");
+				String cName = rs1.getString("COLUMN_NAME");
+
+				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
+				stmt2.setString(1, nuodbSchemaUsed);
+				stmt2.setString(2, tName);
+				stmt2.setString(3, cName);
+				rs2 = stmt2.executeQuery();
+				boolean found = false;
+				while (rs2.next()) {
+					found = true;
+					String idxName = rs2.getString("INDEXNAME");
+					Assert.assertNotNull(idxName);
+					Assert.assertEquals(idxName.substring(0, 4), "IDX_");
 				}
 				Assert.assertTrue(found);
 				rs2.close();
