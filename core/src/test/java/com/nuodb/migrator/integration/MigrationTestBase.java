@@ -59,7 +59,7 @@ public class MigrationTestBase {
 	@Parameters({ "source.driver", "source.url", "source.username",
 			"source.password", "source.schema", "source.jdbcjar", "nuodb.home",
 			"nuodb.driver", "nuodb.url", "nuodb.username", "nuodb.password",
-			"nuodb.schema", "nuodb.jdbcjar"})
+			"nuodb.schema", "nuodb.jdbcjar" })
 	@BeforeMethod(alwaysRun = true)
 	public void beforeTest(String sourceDriver, String sourceUrl,
 			String sourceUsername, @Optional("") String sourcePassword,
@@ -109,6 +109,7 @@ public class MigrationTestBase {
 		sourceProp.put("password", sourcePassword);
 		sourceProp.put("schema", sourceSchema);
 		sourceConnection = DriverManager.getConnection(sourceUrl, sourceProp);
+		sourceConnection.setAutoCommit(false);
 
 		Driver d2 = (Driver) Class.forName(nuodbDriver, true, ucl)
 				.newInstance();
@@ -118,6 +119,8 @@ public class MigrationTestBase {
 		nuodbProp.put("password", nuodbPassword);
 		nuodbProp.put("schema", nuodbSchema);
 		nuodbConnection = DriverManager.getConnection(nuodbUrl, nuodbProp);
+		nuodbConnection.setAutoCommit(false);
+
 		// Save this to support java 1.6 where connection.getSchema method is
 		// not there.
 		nuodbSchemaUsed = nuodbSchema;

@@ -392,4 +392,12 @@ public class StructureTest extends MigrationTestBase {
 			closeAll(rs1, stmt1, rs2, stmt2);
 		}
 	}
+
+	/*
+	 * test if all the Triggers are migrated
+	 */
+	@Test(groups = { "integrationtest", "disabled" }, dependsOnGroups = { "dataloadperformed" })
+	public void testTriggers() throws Exception {
+		// MYSQL Triggers are not migrated yet.
+	}
 }
