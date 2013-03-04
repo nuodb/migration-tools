@@ -132,6 +132,7 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
         for (ValueFormatModel valueFormatModel : valueFormatModelList) {
             values[index++] = valueFormatModel.getValueFormat().getValue(
                     valueFormatModel.getValueAccess(), valueFormatModel.getValueAccessOptions());
+
         }
         return values;
     }

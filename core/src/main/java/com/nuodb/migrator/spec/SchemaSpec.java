@@ -35,7 +35,6 @@ import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 
 import java.util.Collection;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
 /**
@@ -46,7 +45,7 @@ public class SchemaSpec extends TaskSpecBase {
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;
     private ResourceSpec outputSpec;
-    private Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.TYPES);
+    private Collection<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
     private Collection<JdbcTypeSpec> jdbcTypeSpecs = newHashSet();
@@ -82,7 +81,7 @@ public class SchemaSpec extends TaskSpecBase {
     }
 
     public void setMetaDataTypes(Collection<MetaDataType> metaDataTypes) {
-        this.metaDataTypes = metaDataTypes;
+        this.metaDataTypes = newHashSet(metaDataTypes);
     }
 
     public Collection<ScriptType> getScriptTypes() {
@@ -90,7 +89,7 @@ public class SchemaSpec extends TaskSpecBase {
     }
 
     public void setScriptTypes(Collection<ScriptType> scriptTypes) {
-        this.scriptTypes = scriptTypes;
+        this.scriptTypes = newHashSet(scriptTypes);
     }
 
     public GroupScriptsBy getGroupScriptsBy() {
@@ -106,7 +105,7 @@ public class SchemaSpec extends TaskSpecBase {
     }
 
     public void setJdbcTypeSpecs(Collection<JdbcTypeSpec> jdbcTypeSpecs) {
-        this.jdbcTypeSpecs = jdbcTypeSpecs;
+        this.jdbcTypeSpecs = newHashSet(jdbcTypeSpecs);
     }
 
     public IdentifierQuoting getIdentifierQuoting() {
@@ -123,5 +122,48 @@ public class SchemaSpec extends TaskSpecBase {
 
     public void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer) {
         this.identifierNormalizer = identifierNormalizer;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        SchemaSpec that = (SchemaSpec) o;
+
+        if (groupScriptsBy != that.groupScriptsBy) return false;
+        if (identifierNormalizer != null ? !identifierNormalizer.equals(
+                that.identifierNormalizer) : that.identifierNormalizer != null) return false;
+        if (identifierQuoting != null ? !identifierQuoting.equals(
+                that.identifierQuoting) : that.identifierQuoting != null)
+            return false;
+        if (jdbcTypeSpecs != null ? !jdbcTypeSpecs.equals(that.jdbcTypeSpecs) : that.jdbcTypeSpecs != null)
+            return false;
+        if (metaDataTypes != null ? !metaDataTypes.equals(that.metaDataTypes) : that.metaDataTypes != null)
+            return false;
+        if (outputSpec != null ? !outputSpec.equals(that.outputSpec) : that.outputSpec != null) return false;
+        if (scriptTypes != null ? !scriptTypes.equals(that.scriptTypes) : that.scriptTypes != null) return false;
+        if (sourceConnectionSpec != null ? !sourceConnectionSpec.equals(
+                that.sourceConnectionSpec) : that.sourceConnectionSpec != null) return false;
+        if (targetConnectionSpec != null ? !targetConnectionSpec.equals(
+                that.targetConnectionSpec) : that.targetConnectionSpec != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (sourceConnectionSpec != null ? sourceConnectionSpec.hashCode() : 0);
+        result = 31 * result + (targetConnectionSpec != null ? targetConnectionSpec.hashCode() : 0);
+        result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);
+        result = 31 * result + (metaDataTypes != null ? metaDataTypes.hashCode() : 0);
+        result = 31 * result + (scriptTypes != null ? scriptTypes.hashCode() : 0);
+        result = 31 * result + (groupScriptsBy != null ? groupScriptsBy.hashCode() : 0);
+        result = 31 * result + (jdbcTypeSpecs != null ? jdbcTypeSpecs.hashCode() : 0);
+        result = 31 * result + (identifierQuoting != null ? identifierQuoting.hashCode() : 0);
+        result = 31 * result + (identifierNormalizer != null ? identifierNormalizer.hashCode() : 0);
+        return result;
     }
 }

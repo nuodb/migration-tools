@@ -247,11 +247,11 @@ public class CliRunSupport extends CliSupport {
      * Parses URL encoded properties name1=value1&name2=value2
      *
      * @param optionSet holding command line options
-     * @param trigger     key to key value pairs
-     * @param option      the option which contains parsed url
+     * @param trigger   key to key value pairs
+     * @param option    the option which contains parsed url
      */
     protected Map<String, Object> parseProperties(OptionSet optionSet, String trigger, Option option) {
-        Map<String, Object> properties = null;
+        Map<String, Object> properties = newHashMap();
         String url = (String) optionSet.getValue(trigger);
         if (url != null) {
             try {
@@ -260,7 +260,6 @@ public class CliRunSupport extends CliSupport {
                 throw new OptionException(option, exception.getMessage());
             }
             String[] params = url.split("&");
-            properties = newHashMap();
             for (String param : params) {
                 String[] pair = param.split("=");
                 if (pair.length != 2) {

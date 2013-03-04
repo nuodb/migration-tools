@@ -37,14 +37,15 @@ import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.jdbc.JdbcConstants;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
-import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
-import com.nuodb.migrator.jdbc.dialect.IdentifierQuotings;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.schema.SchemaJobFactory;
-import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.JdbcTypeSpec;
+import com.nuodb.migrator.spec.ResourceSpec;
+import com.nuodb.migrator.spec.SchemaSpec;
 import com.nuodb.migrator.utils.ReflectionUtils;
 
 import java.util.*;
@@ -52,6 +53,9 @@ import java.util.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.newListMultimap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
+import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
+import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Boolean.parseBoolean;
@@ -84,7 +88,8 @@ public class CliSchemaJob extends CliRunJob {
 
     @Override
     protected Option createOption() {
-        GroupBuilder group = newGroupBuilder().withName(getResources().getMessage(SCHEMA_GROUP_NAME));
+        GroupBuilder group = newGroupBuilder().
+                withName(getResources().getMessage(SCHEMA_GROUP_NAME));
         group.withRequired(true);
         group.withOption(createSourceGroup());
         group.withOption(createTargetGroup());
@@ -285,8 +290,7 @@ public class CliSchemaJob extends CliRunJob {
                 identifierQuoting = ReflectionUtils.newInstance(identifierQuotingClass);
             }
         }
-        schemaSpec.setIdentifierQuoting(
-                identifierQuoting != null ? identifierQuoting : IdentifierQuotings.always());
+        schemaSpec.setIdentifierQuoting(identifierQuoting != null ? identifierQuoting : ALWAYS);
 
         String identifierNormalizerValue = (String) optionSet.getValue(SCHEMA_IDENTIFIER_NORMALIZER);
         IdentifierNormalizer identifierNormalizer = null;
@@ -300,7 +304,7 @@ public class CliSchemaJob extends CliRunJob {
             }
         }
         schemaSpec.setIdentifierNormalizer(
-                identifierNormalizer != null ? identifierNormalizer : IdentifierNormalizers.noop());
+                identifierNormalizer != null ? identifierNormalizer : NOOP);
 
         ListMultimap<String, Object> values = jdbcTypeSpecValuesCollector.getValues();
         int count = values.get(JDBC_TYPE_NAME_OPTION).size();
@@ -326,18 +330,18 @@ public class CliSchemaJob extends CliRunJob {
     protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {
         Map<String, IdentifierNormalizer> identifierNormalizers =
                 new TreeMap<String, IdentifierNormalizer>(CASE_INSENSITIVE_ORDER);
-        identifierNormalizers.put(IDENTIFIER_NORMALIZER_NOOP, IdentifierNormalizers.noop());
-        identifierNormalizers.put(IDENTIFIER_NORMALIZER_STANDARD, IdentifierNormalizers.standard());
-        identifierNormalizers.put(IDENTIFIER_NORMALIZER_LOWERCASE, IdentifierNormalizers.lowerCase());
-        identifierNormalizers.put(IDENTIFIER_NORMALIZER_UPPERCASE, IdentifierNormalizers.upperCase());
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_NOOP, NOOP);
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_STANDARD, STANDARD);
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_LOWERCASE, LOWER_CASE);
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_UPPERCASE, UPPER_CASE);
         return identifierNormalizers;
     }
 
     protected Map<String, IdentifierQuoting> getIdentifierQuotings() {
         Map<String, IdentifierQuoting> identifierQuotings =
                 new TreeMap<String, IdentifierQuoting>(CASE_INSENSITIVE_ORDER);
-        identifierQuotings.put(IDENTIFIER_QUOTING_MINIMAL, IdentifierQuotings.minimal());
-        identifierQuotings.put(IDENTIFIER_QUOTING_ALWAYS, IdentifierQuotings.always());
+        identifierQuotings.put(IDENTIFIER_QUOTING_MINIMAL, MINIMAL);
+        identifierQuotings.put(IDENTIFIER_QUOTING_ALWAYS, ALWAYS);
         return identifierQuotings;
     }
 

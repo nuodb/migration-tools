@@ -46,6 +46,8 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.NOOP;
+import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static java.lang.String.valueOf;
 import static java.sql.Connection.*;
 
@@ -61,8 +63,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     private ScriptTranslationManager scriptTranslationManager = new ScriptTranslationManager();
     private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
     private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
-    private IdentifierNormalizer identifierNormalizer = IdentifierNormalizers.noop();
-    private IdentifierQuoting identifierQuoting = IdentifierQuotings.always();
+    private IdentifierNormalizer identifierNormalizer = NOOP;
+    private IdentifierQuoting identifierQuoting = ALWAYS;
     private ScriptEscapeUtils scriptEscapeUtils = new ScriptEscapeUtils();
     private DatabaseInfo databaseInfo;
 

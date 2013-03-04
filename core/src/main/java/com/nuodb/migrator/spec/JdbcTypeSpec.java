@@ -77,4 +77,32 @@ public class JdbcTypeSpec extends SpecBase {
     public void setScale(Integer scale) {
         this.scale = scale;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        JdbcTypeSpec that = (JdbcTypeSpec) o;
+
+        if (typeCode != that.typeCode) return false;
+        if (precision != null ? !precision.equals(that.precision) : that.precision != null) return false;
+        if (scale != null ? !scale.equals(that.scale) : that.scale != null) return false;
+        if (size != null ? !size.equals(that.size) : that.size != null) return false;
+        if (typeName != null ? !typeName.equals(that.typeName) : that.typeName != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
+        result = 31 * result + typeCode;
+        result = 31 * result + (size != null ? size.hashCode() : 0);
+        result = 31 * result + (precision != null ? precision.hashCode() : 0);
+        result = 31 * result + (scale != null ? scale.hashCode() : 0);
+        return result;
+    }
 }

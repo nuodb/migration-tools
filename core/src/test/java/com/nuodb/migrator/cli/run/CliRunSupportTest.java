@@ -125,7 +125,6 @@ public class CliRunSupportTest {
         expected.setUrl("jdbc:com.nuodb://localhost/test");
         expected.setUsername("dba");
         expected.setPassword("goalie");
-        expected.setProperties(null);
         expected.setSchema("hockey");
         return new Object[][]{{arguments, expected}};
     }

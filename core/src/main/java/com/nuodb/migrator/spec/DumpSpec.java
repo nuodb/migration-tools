@@ -28,6 +28,7 @@
 package com.nuodb.migrator.spec;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -68,7 +69,7 @@ public class DumpSpec extends TaskSpecBase {
     }
 
     public void setTableTypes(Collection<String> tableTypes) {
-        this.tableTypes = tableTypes;
+        this.tableTypes = Sets.newLinkedHashSet(tableTypes);
     }
 
     public Collection<SelectQuerySpec> getSelectQuerySpecs() {
@@ -76,7 +77,7 @@ public class DumpSpec extends TaskSpecBase {
     }
 
     public void setSelectQuerySpecs(Collection<SelectQuerySpec> selectQuerySpecs) {
-        this.selectQuerySpecs = selectQuerySpecs;
+        this.selectQuerySpecs = Lists.newArrayList(selectQuerySpecs);
     }
 
     public Collection<NativeQuerySpec> getNativeQuerySpecs() {
@@ -84,7 +85,7 @@ public class DumpSpec extends TaskSpecBase {
     }
 
     public void setNativeQuerySpecs(Collection<NativeQuerySpec> nativeQuerySpecs) {
-        this.nativeQuerySpecs = nativeQuerySpecs;
+        this.nativeQuerySpecs = Lists.newArrayList(nativeQuerySpecs);
     }
 
     public ResourceSpec getOutputSpec() {
@@ -93,5 +94,38 @@ public class DumpSpec extends TaskSpecBase {
 
     public void setOutputSpec(ResourceSpec outputSpec) {
         this.outputSpec = outputSpec;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        DumpSpec dumpSpec = (DumpSpec) o;
+
+        if (connectionSpec != null ? !connectionSpec.equals(dumpSpec.connectionSpec) : dumpSpec.connectionSpec != null)
+            return false;
+        if (nativeQuerySpecs != null ? !nativeQuerySpecs.equals(
+                dumpSpec.nativeQuerySpecs) : dumpSpec.nativeQuerySpecs != null) return false;
+        if (outputSpec != null ? !outputSpec.equals(dumpSpec.outputSpec) : dumpSpec.outputSpec != null) return false;
+        if (selectQuerySpecs != null ? !selectQuerySpecs.equals(
+                dumpSpec.selectQuerySpecs) : dumpSpec.selectQuerySpecs != null) return false;
+        if (tableTypes != null ? !tableTypes.equals(dumpSpec.tableTypes) : dumpSpec.tableTypes != null) return false;
+        if (timeZone != null ? !timeZone.equals(dumpSpec.timeZone) : dumpSpec.timeZone != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (connectionSpec != null ? connectionSpec.hashCode() : 0);
+        result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
+        result = 31 * result + (tableTypes != null ? tableTypes.hashCode() : 0);
+        result = 31 * result + (selectQuerySpecs != null ? selectQuerySpecs.hashCode() : 0);
+        result = 31 * result + (nativeQuerySpecs != null ? nativeQuerySpecs.hashCode() : 0);
+        result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);
+        return result;
     }
 }
