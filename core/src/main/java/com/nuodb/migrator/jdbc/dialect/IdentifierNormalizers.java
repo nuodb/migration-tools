@@ -28,46 +28,40 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
-import org.apache.commons.lang3.StringUtils;
+
+import static org.apache.commons.lang3.StringUtils.lowerCase;
+import static org.apache.commons.lang3.StringUtils.upperCase;
 
 /**
  * @author Sergey Bushik
  */
 public class IdentifierNormalizers {
 
-    public static IdentifierNormalizer noop() {
-        return new IdentifierNormalizer() {
-            @Override
-            public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-                return identifier;
-            }
-        };
-    }
+    public static final IdentifierNormalizer NOOP = new IdentifierNormalizer() {
+        @Override
+        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
+            return identifier;
+        }
+    };
 
-    public static IdentifierNormalizer standard() {
-        return new IdentifierNormalizer() {
-            @Override
-            public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-                return ((SimpleDialect) dialect).normalizeIdentifier(identifier);
-            }
-        };
-    }
+    public static final IdentifierNormalizer STANDARD = new IdentifierNormalizer() {
+        @Override
+        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
+            return ((SimpleDialect) dialect).normalizeIdentifier(identifier);
+        }
+    };
 
-    public static IdentifierNormalizer lowerCase() {
-        return new IdentifierNormalizer() {
-            @Override
-            public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-                return StringUtils.lowerCase(identifier);
-            }
-        };
-    }
+    public static final IdentifierNormalizer LOWER_CASE = new IdentifierNormalizer() {
+        @Override
+        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
+            return lowerCase(identifier);
+        }
+    };
 
-    public static IdentifierNormalizer upperCase() {
-        return new IdentifierNormalizer() {
-            @Override
-            public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-                return StringUtils.upperCase(identifier);
-            }
-        };
-    }
+    public static final IdentifierNormalizer UPPER_CASE = new IdentifierNormalizer() {
+        @Override
+        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
+            return upperCase(identifier);
+        }
+    };
 }

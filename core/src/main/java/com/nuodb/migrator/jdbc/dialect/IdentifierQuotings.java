@@ -34,22 +34,18 @@ import com.nuodb.migrator.jdbc.metadata.Identifiable;
  */
 public class IdentifierQuotings {
 
-    public static IdentifierQuoting minimal() {
-        return new IdentifierQuoting() {
-            @Override
-            public boolean isQuotingIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-                return !((SimpleDialect) dialect).isAllowedIdentifier(identifier, identifiable) ||
-                        ((SimpleDialect) dialect).isSQLKeyword(identifier, identifiable);
-            }
-        };
-    }
+    public static final IdentifierQuoting MINIMAL = new IdentifierQuoting() {
+        @Override
+        public boolean isQuotingIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
+            return !dialect.isAllowedIdentifier(identifier, identifiable) ||
+                    dialect.isSQLKeyword(identifier, identifiable);
+        }
+    };
 
-    public static IdentifierQuoting always() {
-        return new IdentifierQuoting() {
-            @Override
-            public boolean isQuotingIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-                return true;
-            }
-        };
-    }
+    public static final IdentifierQuoting ALWAYS = new IdentifierQuoting() {
+        @Override
+        public boolean isQuotingIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
+            return true;
+        }
+    };
 }

@@ -27,12 +27,26 @@
  */
 package com.nuodb.migrator.cli.run;
 
+import com.google.common.collect.Lists;
 import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
+import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers;
+import com.nuodb.migrator.jdbc.dialect.IdentifierQuotings;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
+import com.nuodb.migrator.schema.SchemaJobFactory;
+import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.ResourceSpec;
+import com.nuodb.migrator.spec.SchemaSpec;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Collection;
+
+import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER_CLASS_NAME;
 import static org.mockito.Mockito.spy;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Sergey Bushik
@@ -49,6 +63,66 @@ public class CliSchemaJobTest {
     }
 
     @Test
-    public void test() {
+    public void testParse() {
+        String[] arguments = {
+                "--source.driver=oracle.jdbc.driver.OracleDriver",
+                "--source.url=jdbc:oracle:thin:@//localhost:1521/test",
+                "--source.username=test",
+                "--source.password=12345",
+                "--source.schema=test",
+
+                "--target.url=jdbc:com.nuodb://localhost/test",
+                "--target.username=dba",
+                "--target.password=goalie",
+                "--target.schema=test",
+
+                "--output.path=/tmp/schema.sql",
+
+                "--meta.data.check=false",
+                "--meta.data.auto.increment=false",
+                "--script.type=drop,create",
+                "--group.scripts.by=meta.data",
+                "--identifier.quoting=always",
+                "--identifier.normalizer=standard",
+        };
+        parser.parse(arguments, cliSchemaJob);
+
+        SchemaJobFactory schemaJobFactory = (SchemaJobFactory) cliSchemaJob.getJobFactory();
+        assertEquals(schemaJobFactory.getSchemaSpec(), createSchemaSpec());
+    }
+
+    private SchemaSpec createSchemaSpec() {
+        SchemaSpec schemaSpec = new SchemaSpec();
+
+        JdbcConnectionSpec sourceConnectionSpec = new JdbcConnectionSpec();
+        sourceConnectionSpec.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+        sourceConnectionSpec.setUrl("jdbc:oracle:thin:@//localhost:1521/test");
+        sourceConnectionSpec.setUsername("test");
+        sourceConnectionSpec.setPassword("12345");
+        sourceConnectionSpec.setSchema("test");
+        schemaSpec.setSourceConnectionSpec(sourceConnectionSpec);
+
+        JdbcConnectionSpec targetConnectionSpec = new JdbcConnectionSpec();
+        targetConnectionSpec.setDriverClassName(NUODB_DRIVER_CLASS_NAME);
+        targetConnectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
+        targetConnectionSpec.setUsername("dba");
+        targetConnectionSpec.setPassword("goalie");
+        targetConnectionSpec.setSchema("test");
+        schemaSpec.setTargetConnectionSpec(targetConnectionSpec);
+
+        ResourceSpec outputSpec = new ResourceSpec();
+        outputSpec.setPath("/tmp/schema.sql");
+        schemaSpec.setOutputSpec(outputSpec);
+
+        Collection<MetaDataType> metaDataTypes = Lists.newArrayList(MetaDataType.TYPES);
+        metaDataTypes.remove(MetaDataType.CHECK);
+        metaDataTypes.remove(MetaDataType.AUTO_INCREMENT);
+        schemaSpec.setMetaDataTypes(metaDataTypes);
+
+        schemaSpec.setScriptTypes(Lists.newArrayList(ScriptType.DROP, ScriptType.CREATE));
+        schemaSpec.setGroupScriptsBy(GroupScriptsBy.META_DATA);
+        schemaSpec.setIdentifierQuoting(IdentifierQuotings.ALWAYS);
+        schemaSpec.setIdentifierNormalizer(IdentifierNormalizers.STANDARD);
+        return schemaSpec;
     }
 }

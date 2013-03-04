@@ -69,7 +69,6 @@ public class CliLoadJobTest {
                 "--target.password=goalie",
 
                 "--input.path=/tmp/dump.cat",
-
                 "--input.csv.encoding=cp1251",
                 "--input.csv.delimiter= ",
                 "--input.csv.quoting=true",

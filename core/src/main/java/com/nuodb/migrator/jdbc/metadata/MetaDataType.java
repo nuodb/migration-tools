@@ -60,7 +60,7 @@ public class MetaDataType implements Comparable<MetaDataType> {
     public static final MetaDataType[] TYPES = NAME_TYPE_MAP.values().toArray(new MetaDataType[]{});
 
     private static Map<String, MetaDataType> getNameTypeMap() {
-        Map<String, MetaDataType> nameTypeMap = Maps.newLinkedHashMap();
+        Map<String, MetaDataType> nameTypeMap = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
         Field[] fields = MetaDataType.class.getFields();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getType() == MetaDataType.class) {

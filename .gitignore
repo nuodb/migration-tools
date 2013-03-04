@@ -1,2 +1,7 @@
-target/
-.idea/
+target
+out
+.idea
+.gitignore
+*.iml
+*.ipr
+*.iws
