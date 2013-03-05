@@ -12,6 +12,7 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.*;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static org.testng.Assert.assertNotNull;
 
+@Test(groups = {"integration"})
 public class InspectionManagerIntegrationTest {
 
     private InspectionManager inspector;

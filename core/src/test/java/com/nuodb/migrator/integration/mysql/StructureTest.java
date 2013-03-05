@@ -49,7 +49,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the Tables are migrated with the right columns
 	 */
-	@Test(groups = { "integrationtest" })
+	@Test(groups = { "integration" })
 	public void testTables() throws Exception {
 		String sqlStr1 = "select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = ?";
 		String sqlStr2 = "select tablename from system.TABLES where TYPE = 'TABLE' and schema = ?";
@@ -172,7 +172,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the Primary and Unique Key Constraints are migrated
 	 */
-	@Test(groups = { "integrationtest" })
+	@Test(groups = { "integration" })
 	public void testPrimaryAndUniqueKeyConstraints() throws Exception {
 		String sqlStr1 = "select TC.TABLE_NAME, C.COLUMN_NAME, C.COLUMN_KEY from information_schema.TABLE_CONSTRAINTS TC "
 				+ "inner join information_schema.COLUMNS C on TC.CONSTRAINT_SCHEMA=? "
@@ -219,7 +219,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the Check Constraints are migrated
 	 */
-	@Test(groups = { "integrationtest", "disabled" })
+	@Test(groups = { "integration", "disabled" })
 	public void testCheckConstraints() throws Exception {
 		// MYSQL Does not have any implementations for CHECK constraints
 	}
@@ -227,7 +227,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the Foreign Key Constraints are migrated
 	 */
-	@Test(groups = { "integrationtest" })
+	@Test(groups = { "integration" })
 	public void testForeignKeyConstraints() throws Exception {
 		String sqlStr1 = "select TC.TABLE_NAME, CU.COLUMN_NAME, CU.REFERENCED_TABLE_NAME, CU.REFERENCED_COLUMN_NAME "
 				+ "from information_schema.TABLE_CONSTRAINTS TC INNER JOIN information_schema.KEY_COLUMN_USAGE CU "
@@ -289,7 +289,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the auto increment settings are migrated
 	 */
-	@Test(groups = { "integrationtest" })
+	@Test(groups = { "integration" })
 	public void testAutoIncrement() throws Exception {
 		String sqlStr1 = "select T.TABLE_NAME, T.AUTO_INCREMENT, C.COLUMN_NAME "
 				+ "from information_schema.TABLES T INNER JOIN information_schema.COLUMNS C "
