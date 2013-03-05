@@ -55,7 +55,7 @@ public class RegexOptionTest {
     private RegexOption regexOption;
 
     @BeforeMethod
-    public void init() {
+    public void setUp() {
         regexOption = createRegexOptionSpy();
         regexOption.setName("regex");
     }

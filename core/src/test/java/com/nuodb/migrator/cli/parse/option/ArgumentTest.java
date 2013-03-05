@@ -63,7 +63,7 @@ public class ArgumentTest {
     private Argument argument;
 
     @BeforeMethod
-    public void init() {
+    public void setUp() {
         argument = createArgumentSpy();
     }
 

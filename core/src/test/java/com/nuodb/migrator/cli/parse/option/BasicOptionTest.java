@@ -59,7 +59,7 @@ public class BasicOptionTest {
     private BasicOption basicOption;
 
     @BeforeMethod
-    public void init() {
+    public void setUp() {
         basicOption = createBasicOptionSpy();
         basicOption.setName(NAME);
         basicOption.setOptionFormat(OptionFormat.LONG);

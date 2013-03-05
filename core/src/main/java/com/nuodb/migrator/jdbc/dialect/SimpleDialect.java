@@ -130,7 +130,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return openQuote() + identifier + closeQuote();
     }
 
-    protected String normalizeIdentifier(String identifier) {
+    @Override
+    public String normalizeIdentifier(String identifier) {
         return identifier;
     }
 

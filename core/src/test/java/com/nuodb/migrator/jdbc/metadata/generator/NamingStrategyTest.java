@@ -27,61 +27,34 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newLinkedHashSet;
+import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * @author Sergey Bushik
  */
-public class CompositeScriptExporter implements ScriptExporter {
+public class NamingStrategyTest {
 
-    private final transient Logger logger = LoggerFactory.getLogger(getClass());
-    private Collection<ScriptExporter> scriptExporters = newLinkedHashSet();
+    private ScriptGeneratorContext scriptGeneratorContext;
 
-    public CompositeScriptExporter() {
+    @BeforeMethod
+    public void setUp() {
+        NuoDBDialect dialect = new NuoDBDialect();
+
+        Database database = new Database();
+        database.setDialect(dialect);
+
+        scriptGeneratorContext = new ScriptGeneratorContext();
+        scriptGeneratorContext.setDialect(dialect);
     }
 
-    public CompositeScriptExporter(ScriptExporter... scriptExporters) {
-        this(newArrayList(scriptExporters));
+    @Test
+    public void testGetName() {
     }
 
-    public CompositeScriptExporter(Collection<ScriptExporter> scriptExporters) {
-        this.scriptExporters.addAll(scriptExporters);
-    }
-
-    public void addScriptExporter(ScriptExporter scriptExporter) {
-        this.scriptExporters.add(scriptExporter);
-    }
-
-    @Override
-    public void open() throws Exception {
-        for (ScriptExporter scriptExporter : scriptExporters) {
-            scriptExporter.open();
-        }
-    }
-
-    @Override
-    public void exportScripts(Collection<String> scripts) throws Exception {
-        for (ScriptExporter scriptExporter : scriptExporters) {
-            scriptExporter.exportScripts(scripts);
-        }
-    }
-
-    @Override
-    public void close() throws Exception {
-        for (ScriptExporter scriptExporter : scriptExporters) {
-            try {
-                scriptExporter.close();
-            } catch (Exception exception) {
-                if (logger.isErrorEnabled()) {
-                    logger.error("Error closing script exporter", exception);
-                }
-            }
-        }
+    @Test
+    public void testGetQualifiedName() {
     }
 }

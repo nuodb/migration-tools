@@ -27,41 +27,33 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.apache.commons.lang3.StringUtils.lowerCase;
-import static org.apache.commons.lang3.StringUtils.upperCase;
+import static com.nuodb.migrator.jdbc.dialect.DialectUtils.stripQuotes;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Sergey Bushik
  */
-public class IdentifierNormalizers {
+public class DialectUtilsTest {
 
-    public static final IdentifierNormalizer NOOP = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return identifier;
-        }
-    };
+    private Dialect dialect;
 
-    public static final IdentifierNormalizer STANDARD = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return dialect.normalizeIdentifier(identifier);
-        }
-    };
+    @BeforeMethod
+    public void setUp() {
+        dialect = mock(Dialect.class);
+        when(dialect.openQuote()).thenReturn("'");
+        when(dialect.closeQuote()).thenReturn("'");
+    }
 
-    public static final IdentifierNormalizer LOWER_CASE = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return lowerCase(identifier);
-        }
-    };
-
-    public static final IdentifierNormalizer UPPER_CASE = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return upperCase(identifier);
-        }
-    };
+    @Test
+    public void testStripQuotes() {
+        assertEquals(stripQuotes(dialect, "'users'"), "users");
+        assertEquals(stripQuotes(dialect, "'users"), "'users");
+        assertEquals(stripQuotes(dialect, "users'"), "users'");
+        assertEquals(stripQuotes(dialect, "users"), "users");
+    }
 }

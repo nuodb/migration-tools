@@ -24,7 +24,7 @@ public class OptionToolkitTest {
     private static final int OPTION_MAXIMUM = 1;
 
     @BeforeMethod
-    public void init() throws Exception {
+    public void setUp() throws Exception {
         optionToolkit = spy(OptionToolkit.getInstance());
     }
 

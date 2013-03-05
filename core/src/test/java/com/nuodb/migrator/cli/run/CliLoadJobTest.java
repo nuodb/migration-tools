@@ -56,7 +56,7 @@ public class CliLoadJobTest {
     private CliLoadJob cliLoadJob;
 
     @BeforeMethod
-    public void init() {
+    public void setUp() {
         parser = spy(new ParserImpl());
         cliLoadJob = spy(new CliLoadJob());
     }

@@ -49,7 +49,7 @@ public class HelpFormatterTest {
     private HelpFormatter helpFormatter;
 
     @BeforeMethod
-    public void init() {
+    public void setUp() {
         helpFormatter = spy(new HelpFormatter());
         helpFormatter.setUsageOutputHints(USAGE_OUTPUT_HINTS);
         helpFormatter.setHelpOutputHints(HELP_OUTPUT_HINTS);

@@ -242,8 +242,10 @@ public class CliSchemaJob extends CliRunJob {
         if (optionSet.hasOption(SCHEMA_META_DATA_OPTION)) {
             Collection<String> values = optionSet.getValues(SCHEMA_META_DATA_OPTION);
             Set<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
+            Map<String, MetaDataType> nameTypeMap = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+            nameTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
             for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
-                MetaDataType metaDataType = MetaDataType.NAME_TYPE_MAP.get(replace(iterator.next(), ".", "_"));
+                MetaDataType metaDataType = nameTypeMap.get(replace(iterator.next(), ".", "_"));
                 String booleanValue = iterator.next();
                 if (booleanValue == null || parseBoolean(booleanValue)) {
                     metaDataTypes.add(metaDataType);
