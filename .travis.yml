@@ -18,8 +18,6 @@ env:
 
 notifications:
   recipients:
-    - sergey.bushik@altoros.com
-    - pstoev@nuodb.com
     - moorthy@asthra.com
 
 before_install:
