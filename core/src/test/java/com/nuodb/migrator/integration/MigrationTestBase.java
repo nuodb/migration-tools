@@ -129,7 +129,7 @@ public class MigrationTestBase {
 	}
 
 	@AfterMethod
-	public void afterTest() throws SQLException {
+	public void tearDown() throws SQLException {
 		if (sourceConnection != null) {
 			sourceConnection.close();
 		}

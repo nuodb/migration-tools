@@ -61,31 +61,30 @@ public class ScriptTranslationManager extends SimpleServiceResolverAware<Dialect
     public Script getScriptTranslation(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
                                        Script sourceScript) {
         DialectResolver dialectResolver = getDialectResolver();
-        Script scriptTranslation = null;
+        Script script = null;
         if (dialectResolver != null) {
             Dialect sourceDialect = dialectResolver.resolve(sourceDatabaseInfo);
             Dialect targetDialect = dialectResolver.resolve(targetDatabaseInfo);
-            scriptTranslation = getScriptTranslation(sourceDialect, targetDialect, sourceScript);
+            script = getScriptTranslation(sourceDialect, targetDialect, sourceScript);
         } else {
-            for (ScriptTranslation scriptTranslationEntry : scriptTranslations) {
-                if (scriptTranslationEntry.getSourceDatabaseInfo().equals(sourceDatabaseInfo) &&
-                        scriptTranslationEntry.getTargetDatabaseInfo().equals(targetDatabaseInfo) &&
+            for (ScriptTranslation scriptTranslation : scriptTranslations) {
+                if (scriptTranslation.getSourceDatabaseInfo().equals(sourceDatabaseInfo) &&
+                        scriptTranslation.getTargetDatabaseInfo().equals(targetDatabaseInfo) &&
                         sourceScript.equals(sourceScript)) {
-                    scriptTranslation = scriptTranslationEntry.getTargetScript();
+                    script = scriptTranslation.getTargetScript();
                     break;
                 }
             }
         }
-        return scriptTranslation;
+        return script;
     }
 
     public Script getScriptTranslation(Dialect sourceDialect, Dialect targetDialect, Script sourceScript) {
-        ScriptTranslator targetScriptTranslator = null;
         Collection<ScriptTranslator> scriptTranslators = scriptTranslatorsMap.get(sourceDialect);
         Script targetScript = null;
         for (ScriptTranslator scriptTranslator : scriptTranslators) {
             if (scriptTranslator.getTargetDialect().equals(targetDialect)) {
-                targetScript = targetScriptTranslator.translateScript(sourceScript);
+                targetScript = scriptTranslator.translateScript(sourceScript);
                 break;
             }
         }

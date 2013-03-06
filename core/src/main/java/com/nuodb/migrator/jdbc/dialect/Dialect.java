@@ -133,6 +133,8 @@ public interface Dialect {
 
     String closeQuote();
 
+    String normalizeIdentifier(String identifier);
+
     boolean isAllowedIdentifier(String identifier, Identifiable identifiable);
 
     boolean isQuotingIdentifier(String identifier, Identifiable identifiable);

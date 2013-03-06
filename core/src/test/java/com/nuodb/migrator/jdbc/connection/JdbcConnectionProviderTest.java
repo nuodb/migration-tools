@@ -1,14 +1,9 @@
-package com.nuodb.migrator.jdbc;
+package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.jdbc.connection.JdbcConnectionProvider;
-import com.nuodb.migrator.jdbc.connection.JdbcPoolingConnectionProvider;
 import com.nuodb.migrator.spec.JdbcConnectionSpec;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -18,22 +13,20 @@ import java.util.Properties;
 import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
 public class JdbcConnectionProviderTest {
 
     private static final String URL = "jdbc:com.nuodb://localhost/test";
 
     private static final int TRANSACTION_ISOLATION = Connection.TRANSACTION_READ_COMMITTED;
 
-    @Mock
     private JdbcConnectionSpec connectionSpec;
-    @Mock
     private Driver driver;
-    @Mock
     private Connection connection;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeMethod
+    public void init() throws Exception {
+        connection = mock(Connection.class);
+        driver = mock(Driver.class);
         when(driver.connect(anyString(), any(Properties.class))).thenReturn(connection);
         when(driver.acceptsURL(URL)).thenReturn(true);
         DriverManager.registerDriver(driver);
@@ -60,7 +53,7 @@ public class JdbcConnectionProviderTest {
         verify(connection).setAutoCommit(false);
     }
 
-    @After
+    @AfterMethod
     public void tearDown() throws Exception {
         DriverManager.deregisterDriver(driver);
     }

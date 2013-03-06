@@ -52,7 +52,7 @@ public class CliDumpJobTest {
     private CliDumpJob cliDumpJob;
 
     @BeforeMethod
-    public void init() {
+    public void setUp() {
         parser = spy(new ParserImpl());
         cliDumpJob = spy(new CliDumpJob());
     }

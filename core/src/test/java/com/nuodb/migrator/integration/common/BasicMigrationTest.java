@@ -28,12 +28,9 @@
 package com.nuodb.migrator.integration.common;
 
 import java.sql.ResultSet;
-import java.sql.Statement;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.nuodb.migrator.integration.MigrationTestBase;
 
 /**
  * @author Krishnamoorthy Dhandapani

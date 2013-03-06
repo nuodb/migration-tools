@@ -52,7 +52,7 @@ public class GroupTest {
     private Group group;
 
     @BeforeMethod
-    public void init() {
+    public void setUp() {
         group = createGroupSpy();
     }
 

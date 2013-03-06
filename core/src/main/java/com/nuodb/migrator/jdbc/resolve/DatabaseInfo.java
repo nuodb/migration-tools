@@ -62,8 +62,8 @@ public class DatabaseInfo {
     public DatabaseInfo(String productName, String productVersion, Integer majorVersion, Integer minorVersion) {
         this.productName = productName;
         this.productVersion = productVersion;
-        this.majorVersion = majorVersion;
         this.minorVersion = minorVersion;
+        this.majorVersion = majorVersion;
     }
 
     public String getProductName() {

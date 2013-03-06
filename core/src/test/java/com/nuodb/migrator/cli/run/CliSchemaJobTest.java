@@ -57,7 +57,7 @@ public class CliSchemaJobTest {
     private CliSchemaJob cliSchemaJob;
 
     @BeforeMethod
-    public void init() {
+    public void setUp() {
         parser = spy(new ParserImpl());
         cliSchemaJob = spy(new CliSchemaJob());
     }

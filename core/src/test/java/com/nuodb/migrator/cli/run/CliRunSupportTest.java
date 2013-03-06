@@ -68,7 +68,7 @@ public class CliRunSupportTest {
     private CliRunSupport cliRunSupport;
 
     @BeforeMethod
-    public void init() {
+    public void setUp() {
         parser = spy(new ParserImpl());
         cliRunSupport = spy(new CliRunSupport());
     }

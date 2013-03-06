@@ -4,7 +4,7 @@
   <test name="MYSQL Integration Tests" >
     <groups>
 	  <run>
-	    <include name="integrationtest"/>
+	    <include name="integration"/>
         <exclude name="disabled"/>
 	  </run>
 	</groups>

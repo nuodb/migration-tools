@@ -25,43 +25,50 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.jdbc;
 
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.connection.ConnectionServices;
+import org.testng.annotations.Test;
 
-import static org.apache.commons.lang3.StringUtils.lowerCase;
-import static org.apache.commons.lang3.StringUtils.upperCase;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Sergey Bushik
  */
-public class IdentifierNormalizers {
+public class JdbcUtilsTest {
 
-    public static final IdentifierNormalizer NOOP = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return identifier;
-        }
-    };
+    @Test
+    public void testCloseResultSet() throws SQLException {
+        ResultSet resultSet = mock(ResultSet.class);
+        close(resultSet);
+        verify(resultSet).close();
+    }
 
-    public static final IdentifierNormalizer STANDARD = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return dialect.normalizeIdentifier(identifier);
-        }
-    };
+    @Test
+    public void testCloseStatement() throws SQLException {
+        Statement statement = mock(Statement.class);
+        close(statement);
+        verify(statement).close();
+    }
 
-    public static final IdentifierNormalizer LOWER_CASE = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return lowerCase(identifier);
-        }
-    };
+    @Test
+    public void testCloseConnection() throws SQLException {
+        Connection connection = mock(Connection.class);
+        close(connection);
+        verify(connection).close();
+    }
 
-    public static final IdentifierNormalizer UPPER_CASE = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return upperCase(identifier);
-        }
-    };
+    @Test
+    public void testCloseConnectionServices() throws SQLException {
+        ConnectionServices connectionServices = mock(ConnectionServices.class);
+        close(connectionServices);
+        verify(connectionServices).close();
+    }
 }

@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.spec;
 
-import com.google.common.collect.Maps;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 
 import java.sql.Driver;
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.jdbc.url.JdbcUrlParserUtils.getInstance;
 
 public class JdbcConnectionSpec extends ConnectionSpecBase {
@@ -42,7 +42,7 @@ public class JdbcConnectionSpec extends ConnectionSpecBase {
     private String url;
     private String username;
     private String password;
-    private Map<String, Object> properties = Maps.newHashMap();
+    private Map<String, Object> properties = newHashMap();
 
     @Override
     public String getCatalog() {

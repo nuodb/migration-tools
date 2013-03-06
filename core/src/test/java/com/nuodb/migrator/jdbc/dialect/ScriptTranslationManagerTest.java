@@ -27,41 +27,34 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.apache.commons.lang3.StringUtils.lowerCase;
-import static org.apache.commons.lang3.StringUtils.upperCase;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Sergey Bushik
  */
-public class IdentifierNormalizers {
+public class ScriptTranslationManagerTest {
 
-    public static final IdentifierNormalizer NOOP = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return identifier;
-        }
-    };
+    private ScriptTranslationManager scriptTranslationManager;
 
-    public static final IdentifierNormalizer STANDARD = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return dialect.normalizeIdentifier(identifier);
-        }
-    };
+    @BeforeMethod
+    public void setUp() {
+        scriptTranslationManager = new ScriptTranslationManager();
+        scriptTranslationManager.setServiceResolver(new SimpleDialectResolver());
+    }
 
-    public static final IdentifierNormalizer LOWER_CASE = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return lowerCase(identifier);
-        }
-    };
-
-    public static final IdentifierNormalizer UPPER_CASE = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return upperCase(identifier);
-        }
-    };
+    @Test
+    public void testGetScriptTranslation() {
+        scriptTranslationManager.addScriptTranslation(
+                new ScriptTranslation(new DatabaseInfo("MySQL"), new DatabaseInfo("NuoDB"),
+                        new SimpleScript("CURRENT_TIMESTAMP"), new SimpleScript("NOW")));
+        Script script = scriptTranslationManager.getScriptTranslation(new DatabaseInfo("MySQL"),
+                new DatabaseInfo("NuoDB"), new SimpleScript("CURRENT_TIMESTAMP"));
+        assertNotNull(script, "Script translation is required");
+        assertEquals(script.getScript(), "NOW");
+    }
 }

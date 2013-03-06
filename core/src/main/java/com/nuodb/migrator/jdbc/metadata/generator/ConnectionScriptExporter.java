@@ -46,7 +46,6 @@ public class ConnectionScriptExporter extends CountingScriptExporter {
     private Connection connection;
     private Statement statement;
 
-
     public ConnectionScriptExporter(ConnectionServices connectionServices) {
         this.connectionServices = connectionServices;
     }

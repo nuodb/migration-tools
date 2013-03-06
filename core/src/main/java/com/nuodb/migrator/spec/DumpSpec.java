@@ -27,14 +27,14 @@
  */
 package com.nuodb.migrator.spec;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.TimeZone;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
+import static java.util.Collections.singleton;
 
 /**
  * @author Sergey Bushik
@@ -43,9 +43,9 @@ public class DumpSpec extends TaskSpecBase {
 
     private ConnectionSpec connectionSpec;
     private TimeZone timeZone;
-    private Collection<String> tableTypes = Collections.singleton(TABLE);
-    private Collection<SelectQuerySpec> selectQuerySpecs = Lists.newArrayList();
-    private Collection<NativeQuerySpec> nativeQuerySpecs = Lists.newArrayList();
+    private Collection<String> tableTypes = singleton(TABLE);
+    private Collection<SelectQuerySpec> selectQuerySpecs = newArrayList();
+    private Collection<NativeQuerySpec> nativeQuerySpecs = newArrayList();
     private ResourceSpec outputSpec;
 
     public ConnectionSpec getConnectionSpec() {
@@ -77,7 +77,7 @@ public class DumpSpec extends TaskSpecBase {
     }
 
     public void setSelectQuerySpecs(Collection<SelectQuerySpec> selectQuerySpecs) {
-        this.selectQuerySpecs = Lists.newArrayList(selectQuerySpecs);
+        this.selectQuerySpecs = newArrayList(selectQuerySpecs);
     }
 
     public Collection<NativeQuerySpec> getNativeQuerySpecs() {
@@ -85,7 +85,7 @@ public class DumpSpec extends TaskSpecBase {
     }
 
     public void setNativeQuerySpecs(Collection<NativeQuerySpec> nativeQuerySpecs) {
-        this.nativeQuerySpecs = Lists.newArrayList(nativeQuerySpecs);
+        this.nativeQuerySpecs = newArrayList(nativeQuerySpecs);
     }
 
     public ResourceSpec getOutputSpec() {

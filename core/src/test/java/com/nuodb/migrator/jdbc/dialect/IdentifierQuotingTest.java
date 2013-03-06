@@ -25,67 +25,59 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.run;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.cli.parse.*;
-import com.nuodb.migrator.cli.parse.parser.ParserImpl;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.ListIterator;
-import java.util.Map;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Sergey Bushik
  */
-public class CliRunAdapterTest {
+public class IdentifierQuotingTest {
 
-    private Parser parser;
-    private CliRunAdapter cliRunAdapter;
+    private Dialect dialect;
 
     @BeforeMethod
-    public void setUp() {
-        parser = spy(new ParserImpl());
-        cliRunAdapter = spy(new CliRunAdapter() {
-            @Override
-            protected Option createOption() {
-                return mock(Option.class);
-            }
-
-            @Override
-            public void run() {
-            }
-
-            @Override
-            public void run(Map<String, Object> context) {
-            }
-        });
+    public void init() {
+        dialect = mock(Dialect.class);
     }
 
     @Test
-    public void testBind() {
-        Option option = cliRunAdapter.getOption();
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                ListIterator<String> arguments = (ListIterator<String>) invocation.getArguments()[1];
-                return arguments.hasNext();
-            }
-        }).when(option).canProcess(any(CommandLine.class), any(ListIterator.class));
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                ListIterator<String> arguments = (ListIterator<String>) invocation.getArguments()[1];
-                arguments.remove();
-                return null;
-            }
-        }).when(option).process(any(CommandLine.class), any(ListIterator.class));
+    public void testIdentifierQuotingMinimalAllowed() {
+        final IdentifierQuoting identifierQuoting = IdentifierQuotings.MINIMAL;
 
-        OptionSet optionSet = parser.parse(new String[]{"--option"}, cliRunAdapter);
-        verify(cliRunAdapter).bind(optionSet);
+        Dialect dialect = mock(Dialect.class);
+        when(dialect.isAllowedIdentifier(anyString(), any(Identifiable.class))).then(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                return false;
+            }
+        });
+        assertEquals(identifierQuoting.isQuotingIdentifier("id", null, dialect), true);
+    }
+
+    @Test
+    public void testIdentifierQuotingMinimalSQLKeyword() {
+        final IdentifierQuoting identifierQuoting = IdentifierQuotings.MINIMAL;
+
+        Dialect dialect = mock(Dialect.class);
+        when(dialect.isAllowedIdentifier(anyString(), any(Identifiable.class))).thenReturn(false);
+        when(dialect.isSQLKeyword(anyString(), any(Identifiable.class))).thenReturn(false);
+        assertEquals(identifierQuoting.isQuotingIdentifier("table", null, dialect), true);
+    }
+
+    @Test
+    public void testIdentifierQuotingAlways() {
+        final IdentifierQuoting identifierQuoting = IdentifierQuotings.ALWAYS;
+        assertEquals(identifierQuoting.isQuotingIdentifier("id", null, dialect), true);
     }
 }

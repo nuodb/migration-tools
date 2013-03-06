@@ -28,40 +28,41 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
-import static org.apache.commons.lang3.StringUtils.lowerCase;
-import static org.apache.commons.lang3.StringUtils.upperCase;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Sergey Bushik
  */
-public class IdentifierNormalizers {
+public class IdentifierNormalizerTest {
 
-    public static final IdentifierNormalizer NOOP = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return identifier;
-        }
-    };
+    @DataProvider(name = "normalizeIdentifierData")
+    public Object[][] createNormalizeIdentifierData() {
+        Dialect dialect = mock(Dialect.class);
+        when(dialect.normalizeIdentifier(anyString())).then(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                return invocation.getArguments()[0];
+            }
+        });
+        return new Object[][]{
+                {IdentifierNormalizers.NOOP, dialect, null, "Id", "Id"},
+                {IdentifierNormalizers.STANDARD, dialect, null, "Id", "Id"},
+                {IdentifierNormalizers.UPPER_CASE, dialect, null, "Id", "ID"},
+                {IdentifierNormalizers.LOWER_CASE, dialect, null, "Id", "id"},
+        };
+    }
 
-    public static final IdentifierNormalizer STANDARD = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return dialect.normalizeIdentifier(identifier);
-        }
-    };
-
-    public static final IdentifierNormalizer LOWER_CASE = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return lowerCase(identifier);
-        }
-    };
-
-    public static final IdentifierNormalizer UPPER_CASE = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return upperCase(identifier);
-        }
-    };
+    @Test(dataProvider = "normalizeIdentifierData")
+    public void testNormalizeIdentifier(IdentifierNormalizer identifierNormalizer, Dialect dialect,
+                                        Identifiable identifiable, String identifier, String expected) {
+        assertEquals(identifierNormalizer.normalizeIdentifier(identifier, identifiable, dialect), expected);
+    }
 }

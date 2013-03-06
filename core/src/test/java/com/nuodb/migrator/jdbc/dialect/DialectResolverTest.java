@@ -27,41 +27,42 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.apache.commons.lang3.StringUtils.lowerCase;
-import static org.apache.commons.lang3.StringUtils.upperCase;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Sergey Bushik
  */
-public class IdentifierNormalizers {
+public class DialectResolverTest {
 
-    public static final IdentifierNormalizer NOOP = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return identifier;
-        }
-    };
+    private DialectResolver dialectResolver;
 
-    public static final IdentifierNormalizer STANDARD = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return dialect.normalizeIdentifier(identifier);
-        }
-    };
+    @BeforeMethod
+    public void init() {
+        dialectResolver = new SimpleDialectResolver();
+    }
 
-    public static final IdentifierNormalizer LOWER_CASE = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return lowerCase(identifier);
-        }
-    };
+    @Test
+    public void testResolve() {
+        assertTrue(dialectResolver.resolve(
+                new DatabaseInfo("MySQL", "5.5.5.28", 5, 5)) instanceof MySQLDialect);
+        assertTrue(dialectResolver.resolve(
+                new DatabaseInfo("PostgreSQL", "9.2.3", 2, 9)) instanceof PostgreSQLDialect);
+        assertTrue(dialectResolver.resolve(
+                new DatabaseInfo("NuoDB", "1.0.0-118", 15, 1)) instanceof NuoDBDialect);
+        assertTrue(dialectResolver.resolve(
+                new DatabaseInfo("Oracle",
+                        "Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production\n" +
+                        "With the Partitioning, OLAP, Data Mining and Real Application Testing options", 2, 11))
+                instanceof OracleDialect);
+        assertTrue(dialectResolver.resolve(
+                new DatabaseInfo("Microsoft SQL Server", "11.00.3339", 0, 11)) instanceof MSSQLServerDialect);
 
-    public static final IdentifierNormalizer UPPER_CASE = new IdentifierNormalizer() {
-        @Override
-        public String normalizeIdentifier(String identifier, Identifiable identifiable, Dialect dialect) {
-            return upperCase(identifier);
-        }
-    };
+        assertNotNull(dialectResolver.resolve(
+                new DatabaseInfo("DB2", "DSN10015", 10, 1)));
+    }
 }
