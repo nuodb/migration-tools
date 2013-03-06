@@ -121,13 +121,15 @@ public class StructureTest extends MigrationTestBase {
 					tabColDetailsMap.put(colName, rs1.getString(colName));
 				}
 
-				Assert.assertFalse(tabColDetailsMap.isEmpty());
+				Assert.assertFalse(tabColDetailsMap.isEmpty(), tableName
+						+ " column details empty at source");
 
 				tabColMap.put(tabColDetailsMap.get(colNames[0]),
 						tabColDetailsMap);
 			}
 
-			Assert.assertFalse(tabColMap.isEmpty());
+			Assert.assertFalse(tabColMap.isEmpty(), tableName
+					+ " column details map empty at source");
 
 			stmt2 = nuodbConnection.prepareStatement(sqlStr2);
 			stmt2.setString(1, nuodbSchemaUsed);
