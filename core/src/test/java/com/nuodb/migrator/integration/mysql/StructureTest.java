@@ -110,7 +110,7 @@ public class StructureTest extends MigrationTestBase {
 		try {
 			stmt1 = sourceConnection.prepareStatement(sqlStr1);
 			stmt1.setString(1, sourceConnection.getCatalog());
-			stmt1.setString(2, tableName);
+			stmt1.setString(2, tableName.toLowerCase());
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
