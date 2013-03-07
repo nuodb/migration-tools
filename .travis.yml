@@ -2,6 +2,8 @@ language: java
 
 jdk:
   - openjdk7
+  - openjdk6
+  - oraclejdk7
 
 env:
   - NUODB_HOME=/opt/nuodb NUODB_MIGRATION_HOME=assembly/target/nuodb-migrator SOURCE_JDBCJAR=/var/tmp/mysql-connector-java-5.1.23.jar SOURCE_DRIVER=com.mysql.jdbc.Driver SOURCE_URL=jdbc:mysql://localhost:3306/nuodbtest SOURCE_USERNAME=root SOURCE_PASSWORD= NUODB_DRIVER=com.nuodb.jdbc.Driver NUODB_URL=jdbc:com.nuodb://localhost/test NUODB_USERNAME=dba NUODB_PASSWORD=goalie NUODB_SCHEMA=HOCKEY
@@ -9,6 +11,7 @@ env:
 notifications:
   recipients:
     - moorthy@asthra.com
+    - sergey.bushik@altoros.com
 
 before_install:
   - mysql -u$SOURCE_USERNAME -e 'create database nuodbtest;'
