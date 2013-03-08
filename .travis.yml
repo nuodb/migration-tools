@@ -12,6 +12,7 @@ notifications:
   recipients:
     - moorthy@asthra.com
     - sergey.bushik@altoros.com
+    - plothridge@nuodb.com
 
 before_install:
   - mysql -u$SOURCE_USERNAME -e 'create database nuodbtest;'
