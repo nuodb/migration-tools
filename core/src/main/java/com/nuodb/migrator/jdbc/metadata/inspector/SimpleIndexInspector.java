@@ -92,7 +92,7 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
         if (isExpression(inspectionContext, index, expression)) {
             index.setExpression(expression);
         } else {
-            index.addColumn(table.createColumn(expression), indexes.getInt("ORDINAL_POSITION"));
+            index.addColumn(table.addColumn(expression), indexes.getInt("ORDINAL_POSITION"));
         }
     }
 

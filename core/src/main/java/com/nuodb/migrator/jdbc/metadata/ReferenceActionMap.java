@@ -27,44 +27,44 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import com.google.common.collect.Maps;
+
+import java.util.Map;
+
+import static com.nuodb.migrator.jdbc.metadata.ReferenceAction.*;
+import static java.sql.DatabaseMetaData.*;
+
 /**
  * @author Sergey Bushik
  */
-public class DefaultValue {
+public class ReferenceActionMap {
 
-    private String value;
+    private Map<Integer, ReferenceAction> referenceActionMap = Maps.newHashMap();
 
-    private DefaultValue(String value) {
-        this.value = value;
+    private static ReferenceActionMap INSTANCE;
+
+    public static ReferenceActionMap getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = createInstance();
+        }
+        return INSTANCE;
     }
 
-    public static DefaultValue valueOf(String value) {
-        return value != null ? new DefaultValue(value) : null;
+    private static ReferenceActionMap createInstance() {
+        ReferenceActionMap referenceActionMap = new ReferenceActionMap();
+        referenceActionMap.add(importedKeyNoAction, NO_ACTION);
+        referenceActionMap.add(importedKeyCascade, CASCADE);
+        referenceActionMap.add(importedKeySetNull, SET_NULL);
+        referenceActionMap.add(importedKeyRestrict, RESTRICT);
+        referenceActionMap.add(importedKeySetDefault, SET_DEFAULT);
+        return referenceActionMap;
     }
 
-    public String getValue() {
-        return value;
+    public ReferenceAction get(int value) {
+        return referenceActionMap.get(value);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DefaultValue that = (DefaultValue) o;
-
-        if (value != null ? !value.equals(that.value) : that.value != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return value != null ? value.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return value;
+    public void add(int value, ReferenceAction action) {
+        referenceActionMap.put(value, action);
     }
 }

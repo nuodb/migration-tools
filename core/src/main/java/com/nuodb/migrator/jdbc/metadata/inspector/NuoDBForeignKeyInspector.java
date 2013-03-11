@@ -86,7 +86,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
+        StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementCreator<PreparedStatement>() {
                     @Override
@@ -107,6 +107,9 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
         );
     }
 
+//    ALTER TABLE "asset" ADD FOREIGN KEY ("modified_by") REFERENCES "user" ("id");
+//    ALTER TABLE "asset" ADD FOREIGN KEY ("created_by") REFERENCES "user" ("id");
+
     private void inspect(InspectionContext inspectionContext, ResultSet foreignKeys) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         ForeignKey foreignKey = null;
@@ -114,12 +117,12 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
             Table primaryTable = addTable(inspectionResults, null, foreignKeys.getString("FKTABLE_SCHEM"),
                     foreignKeys.getString("FKTABLE_NAME"));
 
-            final Column primaryColumn = primaryTable.createColumn(foreignKeys.getString("FKCOLUMN_NAME"));
+            final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
 
             Table foreignTable = addTable(inspectionResults, null, foreignKeys.getString("PKTABLE_SCHEM"),
                     foreignKeys.getString("PKTABLE_NAME"));
 
-            final Column foreignColumn = foreignTable.createColumn(foreignKeys.getString("PKCOLUMN_NAME"));
+            final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
             int position = foreignKeys.getInt("KEY_SEQ");
 
             if (position == 1) {
@@ -131,7 +134,9 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
                 foreignKey.setDeferrability(getDeferrability(foreignKeys.getInt("DEFERRABILITY")));
                 inspectionResults.addObject(foreignKey);
             }
-            foreignKey.addReference(primaryColumn, foreignColumn, position);
+            if (foreignKey != null) {
+                foreignKey.addReference(primaryColumn, foreignColumn, position);
+            }
         }
     }
 

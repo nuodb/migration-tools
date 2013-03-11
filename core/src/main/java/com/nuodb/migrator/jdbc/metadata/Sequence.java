@@ -27,12 +27,11 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * @author Sergey Bushik
@@ -161,7 +160,6 @@ public class Sequence extends IdentifiableBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (column != null ? column.hashCode() : 0);
         result = 31 * result + (startWith != null ? startWith.hashCode() : 0);
         result = 31 * result + (lastValue != null ? lastValue.hashCode() : 0);
         result = 31 * result + (incrementBy != null ? incrementBy.hashCode() : 0);
@@ -201,6 +199,6 @@ public class Sequence extends IdentifiableBase {
         if (cache != null) {
             attributes.add(format("cache=%d", cache));
         }
-        buffer.append(StringUtils.join(attributes, ", "));
+        buffer.append(join(attributes, ", "));
     }
 }

@@ -38,10 +38,7 @@ import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementCreator;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -49,8 +46,6 @@ import java.util.Map;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.lang.String.format;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 
 /**
@@ -59,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.containsAny;
 public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public static final String QUERY_TABLE = "SELECT TABLE_SCHEMA, TABLE_NAME, AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES";
-    public static final String QUERY_COLUMN = "SHOW COLUMNS FROM `%s`.`%s` WHERE EXTRA='AUTO_INCREMENT'";
+    public static final String QUERY_COLUMN = "SHOW COLUMNS FROM `%1$s`.`%2$s` WHERE EXTRA='AUTO_INCREMENT'";
 
     public MySQLAutoIncrementInspector() {
         super(MetaDataType.AUTO_INCREMENT, TableInspectionScope.class);
@@ -96,7 +91,7 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
                     new StatementCreator<PreparedStatement>() {
                         @Override
                         public PreparedStatement create(Connection connection) throws SQLException {
-                            return connection.prepareStatement(query.toString(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                            return connection.prepareStatement(query.toString());
                         }
                     },
                     new StatementCallback<PreparedStatement>() {
@@ -113,37 +108,47 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
         }
     }
 
-    private void inspect(InspectionContext inspectionContext, ResultSet tables) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        Map<Table, AutoIncrement> autoIncrement = Maps.newHashMap();
+    private void inspect(final InspectionContext inspectionContext, ResultSet tables) throws SQLException {
+        final InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        final Map<Table, AutoIncrement> autoIncrementMap = Maps.newHashMap();
         while (tables.next()) {
             Table table = addTable(inspectionResults, tables.getString("TABLE_SCHEMA"), null, tables.getString("TABLE_NAME"));
-            AutoIncrement sequence = new AutoIncrement();
-            sequence.setLastValue(tables.getLong("AUTO_INCREMENT"));
-            autoIncrement.put(table, sequence);
+            AutoIncrement autoIncrement = new AutoIncrement();
+            autoIncrement.setLastValue(tables.getLong("AUTO_INCREMENT"));
+            autoIncrementMap.put(table, autoIncrement);
         }
-        for (Map.Entry<Table, AutoIncrement> tableSequence : autoIncrement.entrySet()) {
-            Table table = tableSequence.getKey();
-            AutoIncrement sequence = tableSequence.getValue();
-            ResultSet columns = tables.getStatement().executeQuery(
-                    format(QUERY_COLUMN, table.getCatalog().getName(), table.getName()));
-            Column column;
-            try {
-                column = columns.next() ? table.createColumn(columns.getString("FIELD")) : null;
-            } finally {
-                close(columns);
-            }
-            if (column == null) {
-                continue;
-            }
-            column.setSequence(sequence);
-            column.setAutoIncrement(true);
-            inspectionResults.addObject(sequence);
-        }
-    }
+        StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
+        template.execute(
+                new StatementCreator<Statement>() {
+                    @Override
+                    public Statement create(Connection connection) throws SQLException {
+                        return connection.createStatement();
+                    }
+                },
+                new StatementCallback<Statement>() {
 
-    @Override
-    protected boolean supports(TableInspectionScope inspectionScope) {
-        return false;
+                    @Override
+                    public void execute(Statement statement) throws SQLException {
+                        for (Map.Entry<Table, AutoIncrement> autoIncrementEntry : autoIncrementMap.entrySet()) {
+                            Table table = autoIncrementEntry.getKey();
+                            AutoIncrement autoIncrement = autoIncrementEntry.getValue();
+                            ResultSet columns = statement.executeQuery(
+                                    format(QUERY_COLUMN, table.getCatalog().getName(), table.getName()));
+                            Column column;
+                            try {
+                                column = columns.next() ? table.addColumn(columns.getString("FIELD")) : null;
+                            } finally {
+                                close(columns);
+                            }
+                            if (column == null) {
+                                continue;
+                            }
+                            column.setSequence(autoIncrement);
+                            column.setAutoIncrement(true);
+                            inspectionResults.addObject(autoIncrement);
+                        }
+                    }
+                }
+        );
     }
 }

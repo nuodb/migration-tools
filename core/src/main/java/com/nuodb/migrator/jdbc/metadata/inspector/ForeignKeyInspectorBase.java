@@ -36,7 +36,7 @@ public abstract class ForeignKeyInspectorBase
         extends TableInspectorBase<Table, TableInspectionScope> implements ForeignKeyInspector {
 
     private DeferrabilityMap deferrabilityMap;
-    private ReferentialActionMap referentialActionMap;
+    private ReferenceActionMap referenceActionMap;
 
     public ForeignKeyInspectorBase() {
         super(MetaDataType.FOREIGN_KEY);
@@ -45,23 +45,23 @@ public abstract class ForeignKeyInspectorBase
     protected Deferrability getDeferrability(int value) {
         DeferrabilityMap deferrabilityMap = getDeferrabilityMap() != null ?
                 getDeferrabilityMap() : DeferrabilityMap.getInstance();
-        return deferrabilityMap.getDeferrability(value);
+        return deferrabilityMap.get(value);
     }
 
     protected ReferenceAction getReferentialAction(int value) {
-        ReferentialActionMap referentialActionMap = getReferentialActionMap() != null ?
-                getReferentialActionMap() : ReferentialActionMap.getInstance();
-        return referentialActionMap.get(value);
+        ReferenceActionMap referenceActionMap = getReferenceActionMap() != null ?
+                getReferenceActionMap() : ReferenceActionMap.getInstance();
+        return referenceActionMap.get(value);
     }
 
     @Override
-    public ReferentialActionMap getReferentialActionMap() {
-        return referentialActionMap;
+    public ReferenceActionMap getReferenceActionMap() {
+        return referenceActionMap;
     }
 
     @Override
-    public void setReferentialActionMap(ReferentialActionMap referentialActionMap) {
-        this.referentialActionMap = referentialActionMap;
+    public void setReferenceActionMap(ReferenceActionMap referenceActionMap) {
+        this.referenceActionMap = referenceActionMap;
     }
 
     @Override

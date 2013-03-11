@@ -57,4 +57,6 @@ public interface InspectionContext {
     void inspect(MetaData object, MetaDataType... objectTypes) throws SQLException;
 
     void inspect(Collection<MetaData> objects, MetaDataType... objectTypes) throws SQLException;
+
+    void commit() throws SQLException;
 }

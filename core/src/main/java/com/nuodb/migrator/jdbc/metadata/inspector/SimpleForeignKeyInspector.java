@@ -65,12 +65,12 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
                     Table primaryTable = addTable(inspectionResults, foreignKeys.getString("FKTABLE_CAT"),
                             foreignKeys.getString("FKTABLE_SCHEM"), foreignKeys.getString("FKTABLE_NAME"));
 
-                    final Column primaryColumn = primaryTable.createColumn(foreignKeys.getString("FKCOLUMN_NAME"));
+                    final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
 
                     final Table foreignTable = addTable(inspectionResults, foreignKeys.getString("PKTABLE_CAT"),
                             foreignKeys.getString("PKTABLE_SCHEM"), foreignKeys.getString("PKTABLE_NAME"));
 
-                    final Column foreignColumn = foreignTable.createColumn(foreignKeys.getString("PKCOLUMN_NAME"));
+                    final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
 
                     int position = foreignKeys.getInt("KEY_SEQ");
                     if (fixPosition || position == 0) {

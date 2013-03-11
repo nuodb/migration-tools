@@ -34,8 +34,8 @@ public class JdbcConnectionProviderTest {
         connectionSpec = mock(JdbcConnectionSpec.class);
         when(connectionSpec.getDriver()).thenReturn(driver);
         when(connectionSpec.getUrl()).thenReturn(URL);
-        when(connectionSpec.getUsername()).thenReturn("user");
-        when(connectionSpec.getPassword()).thenReturn("pass");
+        when(connectionSpec.getUsername()).thenReturn("username");
+        when(connectionSpec.getPassword()).thenReturn("password");
     }
 
     @Test

@@ -50,7 +50,7 @@ public class StatementTemplate {
         try {
             statementCallback.execute(statement);
         } finally {
-            close(statement.getResultSet());
+            close(statement != null ? statement.getResultSet() : null);
             close(statement);
         }
     }

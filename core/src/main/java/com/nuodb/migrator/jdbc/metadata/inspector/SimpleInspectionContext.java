@@ -119,6 +119,11 @@ public class SimpleInspectionContext implements InspectionContext {
         }
     }
 
+    @Override
+    public void commit() throws SQLException {
+        getConnection().commit();
+    }
+
     protected Inspector findInspector(MetaDataType objectType) {
         if (logger.isDebugEnabled()) {
             logger.debug(format("Inspecting %s", objectType));

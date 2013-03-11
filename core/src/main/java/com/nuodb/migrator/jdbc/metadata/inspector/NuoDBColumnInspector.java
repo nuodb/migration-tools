@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.DefaultValue;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
@@ -44,6 +43,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -103,13 +104,12 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
     }
 
     private void inspect(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
-        InspectionResults results = inspectionContext.getInspectionResults();
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         JdbcTypeRegistry typeRegistry = inspectionContext.getDialect().getJdbcTypeRegistry();
         while (columns.next()) {
-            Table table = InspectionResultsUtils.addTable(results, null, columns.getString("SCHEMA"),
-                    columns.getString("TABLENAME"));
+            Table table = addTable(inspectionResults, null, columns.getString("SCHEMA"), columns.getString("TABLENAME"));
 
-            Column column = table.createColumn(columns.getString("FIELD"));
+            Column column = table.addColumn(columns.getString("FIELD"));
             JdbcTypeDesc typeDescAlias = typeRegistry.getJdbcTypeDescAlias(
                     columns.getInt("JDBCTYPE"), columns.getString("NAME"));
             column.setTypeCode(typeDescAlias.getTypeCode());
@@ -118,15 +118,14 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
             int columnSize = columns.getInt("LENGTH");
             column.setSize(columnSize);
             column.setPrecision(columnSize);
-            String defaultValue = columns.getString("DEFAULTVALUE");
-            column.setDefaultValue(defaultValue != null ? new DefaultValue(defaultValue) : null);
+            column.setDefaultValue(valueOf(columns.getString("DEFAULTVALUE")));
             column.setScale(columns.getInt("SCALE"));
             column.setComment(columns.getString("REMARKS"));
             column.setPosition(columns.getInt("FIELDPOSITION"));
             column.setNullable(columns.getInt("FLAGS") == 0);
             column.setAutoIncrement(columns.getString("GENERATOR_SEQUENCE") != null);
 
-            results.addObject(column);
+            inspectionResults.addObject(column);
         }
     }
 

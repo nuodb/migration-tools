@@ -79,7 +79,6 @@ public class CliSchemaJob extends CliRunJob {
     public static final String IDENTIFIER_NORMALIZER_LOWERCASE = "lowercase";
 
     public static final String IDENTIFIER_NORMALIZER_UPPERCASE = "uppercase";
-
     private JdbcTypeSpecValuesCollector jdbcTypeSpecValuesCollector = new JdbcTypeSpecValuesCollector();
 
     public CliSchemaJob() {
@@ -242,7 +241,7 @@ public class CliSchemaJob extends CliRunJob {
         if (optionSet.hasOption(SCHEMA_META_DATA_OPTION)) {
             Collection<String> values = optionSet.getValues(SCHEMA_META_DATA_OPTION);
             Set<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
-            Map<String, MetaDataType> nameTypeMap = Maps.newTreeMap(String.CASE_INSENSITIVE_ORDER);
+            Map<String, MetaDataType> nameTypeMap = new TreeMap(String.CASE_INSENSITIVE_ORDER);
             nameTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
             for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
                 MetaDataType metaDataType = nameTypeMap.get(replace(iterator.next(), ".", "_"));

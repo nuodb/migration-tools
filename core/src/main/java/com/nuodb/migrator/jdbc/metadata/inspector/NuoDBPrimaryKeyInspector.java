@@ -104,7 +104,7 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
             if (primaryKey == null) {
                 table.setPrimaryKey(primaryKey = new PrimaryKey(identifier));
             }
-            primaryKey.addColumn(table.createColumn(primaryKeys.getString("FIELD")), primaryKeys.getInt("POSITION"));
+            primaryKey.addColumn(table.addColumn(primaryKeys.getString("FIELD")), primaryKeys.getInt("POSITION"));
         }
     }
 

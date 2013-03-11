@@ -50,7 +50,7 @@ import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
  */
 public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    private static final String QUERY =
+    public static final String QUERY =
             "SELECT CTU.TABLE_CATALOG, CTU.TABLE_SCHEMA, CTU.TABLE_NAME, CC.CHECK_CLAUSE, CTU.CONSTRAINT_NAME\n" +
             "FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE AS CTU\n" +
             "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON CTU.TABLE_CATALOG=CC.CONSTRAINT_CATALOG\n" +

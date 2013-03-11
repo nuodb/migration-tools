@@ -36,31 +36,30 @@ import static java.lang.String.format;
  */
 public class MetaDataHandlerUtils {
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> metaDataHandlers,
-                                                                    MetaData metaData) {
-        return findMetaDataHandler(metaDataHandlers, metaData.getObjectType(), true);
+    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,
+                                                                    MetaData object) {
+        return findMetaDataHandler(objectHandlers, object.getObjectType(), true);
     }
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> metaDataHandlers,
-                                                                    MetaData metaData, boolean required) {
-        return findMetaDataHandler(metaDataHandlers, metaData.getObjectType(), required);
+    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,
+                                                                    MetaData object, boolean required) {
+        return findMetaDataHandler(objectHandlers, object.getObjectType(), required);
     }
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> metaDataHandlers,
-                                                                    MetaDataType metaDataType) {
-        return findMetaDataHandler(metaDataHandlers, metaDataType, true);
+    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,
+                                                                    MetaDataType objectType) {
+        return findMetaDataHandler(objectHandlers, objectType, true);
     }
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> metaDataHandlers,
-                                                                    MetaDataType metaDataType, boolean required) {
-        for (T metaDataHandler : metaDataHandlers) {
-            if (metaDataHandler.supports(metaDataType)) {
-                return metaDataHandler;
+    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,
+                                                                    MetaDataType objectType, boolean required) {
+        for (T objectHandler : objectHandlers) {
+            if (objectHandler.supports(objectType)) {
+                return objectHandler;
             }
         }
         if (required) {
-            throw new MetaDataException(
-                    format("Required %s handler not found", metaDataType));
+            throw new MetaDataException(format("Required %s handler not found", objectType));
         } else {
             return null;
         }

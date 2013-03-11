@@ -65,7 +65,7 @@ public class ScriptGeneratorTest {
     public Object[][] createGetScriptsData() {
         Table table = new Table("users");
 
-        Column id = table.createColumn("id");
+        Column id = table.addColumn("id");
         id.setTypeCode(Types.INTEGER);
         id.setTypeName("integer");
         id.setNullable(false);
@@ -75,7 +75,7 @@ public class ScriptGeneratorTest {
         primaryKey.addColumn(id, 1);
         table.setPrimaryKey(primaryKey);
 
-        Column login = table.createColumn("login");
+        Column login = table.addColumn("login");
         login.setTypeCode(Types.VARCHAR);
         login.setTypeName("varchar");
         login.setSize(32);

@@ -40,7 +40,8 @@ import static java.sql.DatabaseMetaData.*;
 public class DeferrabilityMap {
 
     private static DeferrabilityMap INSTANCE;
-    private Map<Integer, Deferrability> foreignKeyDeferrabilityMap = Maps.newHashMap();
+
+    private Map<Integer, Deferrability> deferrabilityMap = Maps.newHashMap();
 
     public static DeferrabilityMap getInstance() {
         if (INSTANCE == null) {
@@ -50,18 +51,18 @@ public class DeferrabilityMap {
     }
 
     private static DeferrabilityMap createInstance() {
-        DeferrabilityMap instance = new DeferrabilityMap();
-        instance.addDeferrability(importedKeyInitiallyDeferred, INITIALLY_DEFERRED);
-        instance.addDeferrability(importedKeyInitiallyImmediate, INITIALLY_IMMEDIATE);
-        instance.addDeferrability(importedKeyNotDeferrable, NOT_DEFERRABLE);
-        return instance;
+        DeferrabilityMap deferrabilityMap = new DeferrabilityMap();
+        deferrabilityMap.add(importedKeyInitiallyDeferred, INITIALLY_DEFERRED);
+        deferrabilityMap.add(importedKeyInitiallyImmediate, INITIALLY_IMMEDIATE);
+        deferrabilityMap.add(importedKeyNotDeferrable, NOT_DEFERRABLE);
+        return deferrabilityMap;
     }
 
-    public void addDeferrability(int value, Deferrability deferrability) {
-        foreignKeyDeferrabilityMap.put(value, deferrability);
+    public Deferrability get(int value) {
+        return deferrabilityMap.get(value);
     }
 
-    public Deferrability getDeferrability(int value) {
-        return foreignKeyDeferrabilityMap.get(value);
+    public void add(int value, Deferrability deferrability) {
+        deferrabilityMap.put(value, deferrability);
     }
 }

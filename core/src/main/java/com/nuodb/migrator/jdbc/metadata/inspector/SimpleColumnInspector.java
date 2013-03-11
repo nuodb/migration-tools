@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.DefaultValue;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.model.ValueModel;
@@ -42,6 +41,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModelList;
 
@@ -74,7 +74,7 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
                     Table table = addTable(inspectionResults, columns.getString("TABLE_CAT"),
                             columns.getString("TABLE_SCHEM"), columns.getString("TABLE_NAME"));
 
-                    Column column = table.createColumn(columns.getString("COLUMN_NAME"));
+                    Column column = table.addColumn(columns.getString("COLUMN_NAME"));
                     JdbcTypeDesc typeDescAlias = jdbcTypeRegistry.getJdbcTypeDescAlias(
                             columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
                     column.setTypeCode(typeDescAlias.getTypeCode());
@@ -83,8 +83,7 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
                     int columnSize = columns.getInt("COLUMN_SIZE");
                     column.setSize(columnSize);
                     column.setPrecision(columnSize);
-                    String defaultValue = columns.getString("COLUMN_DEF");
-                    column.setDefaultValue(defaultValue != null ? new DefaultValue(defaultValue) : null);
+                    column.setDefaultValue(valueOf(columns.getString("COLUMN_DEF")));
                     column.setScale(columns.getInt("DECIMAL_DIGITS"));
                     column.setComment(columns.getString("REMARKS"));
                     column.setPosition(columns.getInt("ORDINAL_POSITION"));

@@ -73,7 +73,7 @@ public class SimplePrimaryKeyInspector extends TableInspectorBase<Table, TableIn
                         table.setPrimaryKey(primaryKey = new PrimaryKey(identifier));
                         inspectionResults.addObject(primaryKey);
                     }
-                    primaryKey.addColumn(table.createColumn(primaryKeys.getString("COLUMN_NAME")),
+                    primaryKey.addColumn(table.addColumn(primaryKeys.getString("COLUMN_NAME")),
                             primaryKeys.getInt("KEY_SEQ"));
                 }
             } finally {

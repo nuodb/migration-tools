@@ -28,7 +28,7 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.DeferrabilityMap;
-import com.nuodb.migrator.jdbc.metadata.ReferentialActionMap;
+import com.nuodb.migrator.jdbc.metadata.ReferenceActionMap;
 import com.nuodb.migrator.jdbc.metadata.Table;
 
 
@@ -37,9 +37,9 @@ import com.nuodb.migrator.jdbc.metadata.Table;
  */
 public interface ForeignKeyInspector extends Inspector<Table, TableInspectionScope> {
 
-    ReferentialActionMap getReferentialActionMap();
+    ReferenceActionMap getReferenceActionMap();
 
-    void setReferentialActionMap(ReferentialActionMap referentialActionMap);
+    void setReferenceActionMap(ReferenceActionMap referenceActionMap);
 
     DeferrabilityMap getDeferrabilityMap();
 

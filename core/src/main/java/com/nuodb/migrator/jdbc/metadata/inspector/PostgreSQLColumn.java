@@ -37,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.nuodb.migrator.jdbc.dialect.DialectUtils.stripQuotes;
+import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.compile;
 
@@ -61,7 +62,7 @@ public class PostgreSQLColumn {
                 column.setDefaultValue(null);
                 column.setSequence(sequence);
             } else if ((matcher = VALUE_CLASS.matcher(defaultValue.getValue())).matches()) {
-                column.setDefaultValue(new DefaultValue(matcher.group(1)));
+                column.setDefaultValue(valueOf(matcher.group(1)));
             }
         }
         return column;

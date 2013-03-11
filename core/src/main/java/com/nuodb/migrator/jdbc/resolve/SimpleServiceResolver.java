@@ -101,6 +101,9 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     @Override
     public T resolve(DatabaseInfo databaseInfo) {
+        if (databaseInfo == null) {
+            return null;
+        }
         T service = serviceCacheMap.get(databaseInfo);
         if (service != null) {
             return service;

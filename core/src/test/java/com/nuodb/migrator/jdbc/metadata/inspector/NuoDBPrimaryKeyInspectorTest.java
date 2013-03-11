@@ -25,46 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata;
+package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.collect.Maps;
+import org.testng.annotations.Test;
 
-import java.util.Map;
-
-import static com.nuodb.migrator.jdbc.metadata.ReferenceAction.*;
-import static java.sql.DatabaseMetaData.*;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public class ReferentialActionMap {
+public class NuoDBPrimaryKeyInspectorTest extends InspectorTestBase {
 
-    private Map<Integer, ReferenceAction> foreignKeyRuleMap = Maps.newHashMap();
-
-    private static ReferentialActionMap INSTANCE;
-
-    public static ReferentialActionMap getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = createInstance();
-        }
-        return INSTANCE;
+    public NuoDBPrimaryKeyInspectorTest() {
+        super(NuoDBPrimaryKeyInspector.class);
     }
 
-    private static ReferentialActionMap createInstance() {
-        ReferentialActionMap instance = new ReferentialActionMap();
-        instance.put(importedKeyNoAction, NO_ACTION);
-        instance.put(importedKeyCascade, CASCADE);
-        instance.put(importedKeySetNull, SET_NULL);
-        instance.put(importedKeyRestrict, RESTRICT);
-        instance.put(importedKeySetDefault, SET_DEFAULT);
-        return instance;
-    }
-
-    public void put(int value, ReferenceAction action) {
-        foreignKeyRuleMap.put(value, action);
-    }
-
-    public ReferenceAction get(int value) {
-        return foreignKeyRuleMap.get(value);
+    @Test
+    public void testInspect() throws SQLException {
     }
 }

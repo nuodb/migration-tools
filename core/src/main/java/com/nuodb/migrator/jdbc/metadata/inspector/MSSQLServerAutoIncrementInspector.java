@@ -48,7 +48,7 @@ import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
  */
 public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    private static final String QUERY =
+    public static final String QUERY =
             "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME,\n" +
             "IDENT_SEED(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS START_WITH,\n" +
             "IDENT_CURRENT(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS LAST_VALUE,\n" +
@@ -97,21 +97,22 @@ public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table,
     }
 
     private void inspect(InspectionContext context, ResultSet autoIncrement) throws SQLException {
-        InspectionResults results = context.getInspectionResults();
+        InspectionResults inspectionResults = context.getInspectionResults();
         if (autoIncrement.next()) {
-            Table table = addTable(results,
-                    autoIncrement.getString("TABLE_CATALOG"), autoIncrement.getString("TABLE_SCHEMA"),
+            Table table = addTable(inspectionResults,
+                    autoIncrement.getString("TABLE_CATALOG"),
+                    autoIncrement.getString("TABLE_SCHEMA"),
                     autoIncrement.getString("TABLE_NAME"));
             Sequence sequence = new AutoIncrement();
             sequence.setStartWith(autoIncrement.getLong("START_WITH"));
             sequence.setLastValue(autoIncrement.getLong("LAST_VALUE"));
             sequence.setIncrementBy(autoIncrement.getLong("INCREMENT_BY"));
 
-            Column column = table.createColumn(autoIncrement.getString("COLUMN_NAME"));
+            Column column = table.addColumn(autoIncrement.getString("COLUMN_NAME"));
             column.setAutoIncrement(true);
             column.setSequence(sequence);
 
-            results.addObject(sequence);
+            inspectionResults.addObject(sequence);
         }
     }
 

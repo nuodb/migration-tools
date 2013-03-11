@@ -53,7 +53,7 @@ import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
  */
 public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    private static final String QUERY =
+    public static final String QUERY =
             "SELECT T.SCHEMA, T.TABLENAME, T.CONSTRAINTNAME, T.CONSTRAINTTEXT\n" +
             "FROM SYSTEM.TABLECONSTRAINTS AS T\n" +
             "INNER JOIN SYSTEM.FIELDS AS F ON T.SCHEMA = F.SCHEMA\n" +
@@ -106,9 +106,9 @@ public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspecti
     }
 
     private void inspect(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
-        InspectionResults results = inspectionContext.getInspectionResults();
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (checks.next()) {
-            Table table = addTable(results, null, checks.getString("SCHEMA"), checks.getString("TABLENAME"));
+            Table table = addTable(inspectionResults, null, checks.getString("SCHEMA"), checks.getString("TABLENAME"));
             String regex = Pattern.quote(table.getName() + "$constraint");
             Pattern pattern = Pattern.compile(regex + "\\d+");
 
@@ -119,9 +119,10 @@ public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspecti
             if (pattern.matcher(constraint).matches()) {
                 table.addCheck(check);
             } else {
-                Column column = table.createColumn(constraint);
+                Column column = table.addColumn(constraint);
                 column.addCheck(check);
             }
+            inspectionResults.addObject(check);
         }
     }
 

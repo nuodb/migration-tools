@@ -128,7 +128,7 @@ public class InspectionManager {
         try {
             inspectionContext.inspect(inspectionScope, objectTypes);
         } finally {
-            releaseInspectionContext(inspectionContext);
+            commitInspectionContext(inspectionContext);
         }
     }
 
@@ -138,7 +138,7 @@ public class InspectionManager {
         try {
             inspectionContext.inspect(object, objectTypes);
         } finally {
-            releaseInspectionContext(inspectionContext);
+            commitInspectionContext(inspectionContext);
         }
     }
 
@@ -148,7 +148,7 @@ public class InspectionManager {
         try {
             inspectionContext.inspect(objects, objectTypes);
         } finally {
-            releaseInspectionContext(inspectionContext);
+            commitInspectionContext(inspectionContext);
         }
     }
 
@@ -161,8 +161,8 @@ public class InspectionManager {
         return new SimpleInspectionContext(this, inspectionResults, objectTypes);
     }
 
-    protected void releaseInspectionContext(InspectionContext inspectionContext) throws SQLException {
-        inspectionContext.getConnection().commit();
+    protected void commitInspectionContext(InspectionContext inspectionContext) throws SQLException {
+        inspectionContext.commit();
     }
 
     public Connection getConnection() {

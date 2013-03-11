@@ -25,46 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata;
+package com.nuodb.migrator.jdbc.metadata.inspector;
+
+import com.nuodb.migrator.jdbc.metadata.Table;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Sergey Bushik
  */
-public class DefaultValue {
+public class AssertUtils {
 
-    private String value;
-
-    private DefaultValue(String value) {
-        this.value = value;
-    }
-
-    public static DefaultValue valueOf(String value) {
-        return value != null ? new DefaultValue(value) : null;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DefaultValue that = (DefaultValue) o;
-
-        if (value != null ? !value.equals(that.value) : that.value != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return value != null ? value.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return value;
+    public static void assertTable(String catalogName, String schemaName, String tableName, Table table) {
+        assertNotNull(table);
+        assertEquals(table.getName(), tableName);
+        assertEquals(table.getSchema().getName(), schemaName);
+        assertEquals(table.getCatalog().getName(), catalogName);
     }
 }

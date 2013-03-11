@@ -41,6 +41,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.*;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
@@ -94,18 +95,18 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
     }
 
     protected void inspect(InspectionContext inspectionContext, ResultSet indexes) throws SQLException {
-        InspectionResults results = inspectionContext.getInspectionResults();
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (indexes.next()) {
-            Table table = addTable(results, null, indexes.getString("SCHEMA"), indexes.getString("TABLENAME"));
-            Identifier identifier = Identifier.valueOf(indexes.getString("INDEXNAME"));
+            Table table = addTable(inspectionResults, null, indexes.getString("SCHEMA"), indexes.getString("TABLENAME"));
+            Identifier identifier = valueOf(indexes.getString("INDEXNAME"));
             Index index = table.getIndex(identifier);
             if (index == null) {
                 table.addIndex(index = new Index(identifier));
                 index.setUnique(indexes.getInt("INDEXTYPE") == UNIQUE);
             }
-            index.addColumn(table.createColumn(indexes.getString("FIELD")), indexes.getInt("POSITION"));
+            index.addColumn(table.addColumn(indexes.getString("FIELD")), indexes.getInt("POSITION"));
 
-            results.addObject(index);
+            inspectionResults.addObject(index);
         }
     }
 

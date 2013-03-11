@@ -25,46 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata;
+package com.nuodb.migrator.jdbc.metadata.inspector;
+
+import org.testng.annotations.Test;
+
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public class DefaultValue {
+public class NuoDBTableInspectorTest extends InspectorTestBase {
 
-    private String value;
-
-    private DefaultValue(String value) {
-        this.value = value;
+    public NuoDBTableInspectorTest() {
+        super(NuoDBTableInspector.class);
     }
 
-    public static DefaultValue valueOf(String value) {
-        return value != null ? new DefaultValue(value) : null;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DefaultValue that = (DefaultValue) o;
-
-        if (value != null ? !value.equals(that.value) : that.value != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return value != null ? value.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return value;
+    @Test
+    public void testInspect() throws SQLException {
     }
 }

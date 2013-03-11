@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 
 public class Table extends IdentifiableBase {
@@ -58,7 +59,7 @@ public class Table extends IdentifiableBase {
     private String comment;
 
     public Table(String name) {
-        this(Identifier.valueOf(name));
+        this(valueOf(name));
     }
 
     public Table(Identifier identifier) {
@@ -150,12 +151,16 @@ public class Table extends IdentifiableBase {
         return getColumn(name, false);
     }
 
-    public Column createColumn(String name) {
-        return getColumn(name, true);
+    public Column addColumn(String name) {
+        return getColumn(valueOf(name), true);
+    }
+
+    public Column addColumn(Identifier identifier) {
+        return getColumn(identifier, true);
     }
 
     public Column getColumn(String name, boolean create) {
-        return getColumn(Identifier.valueOf(name), create);
+        return getColumn(valueOf(name), create);
     }
 
     public Column getColumn(Identifier identifier, boolean create) {

@@ -42,7 +42,6 @@ public class Column extends IdentifiableBase implements ValueModel {
      */
     public static final int DEFAULT_PRECISION = 38;
     public static final int DEFAULT_SCALE = 0;
-    public static final int DEFAULT_RADIX = 10;
 
     private Table table;
     /**
@@ -70,10 +69,6 @@ public class Column extends IdentifiableBase implements ValueModel {
      * Contains column remarks, may be null.
      */
     private String comment;
-    /**
-     * Radix for numbers, typically 2 or 10.
-     */
-    private int radix = DEFAULT_RADIX;
     /**
      * Ordinal position of column in table, starting at 1.
      */
@@ -166,14 +161,6 @@ public class Column extends IdentifiableBase implements ValueModel {
         this.comment = comment;
     }
 
-    public int getRadix() {
-        return radix;
-    }
-
-    public void setRadix(int radix) {
-        this.radix = radix;
-    }
-
     public int getPosition() {
         return position;
     }
@@ -254,8 +241,24 @@ public class Column extends IdentifiableBase implements ValueModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
+
         Column column = (Column) o;
+
+        if (autoIncrement != column.autoIncrement) return false;
+        if (nullable != column.nullable) return false;
+        if (position != column.position) return false;
+        if (precision != column.precision) return false;
+        if (scale != column.scale) return false;
+        if (size != column.size) return false;
+        if (typeCode != column.typeCode) return false;
+        if (checks != null ? !checks.equals(column.checks) : column.checks != null) return false;
+        if (comment != null ? !comment.equals(column.comment) : column.comment != null) return false;
+        if (defaultValue != null ? !defaultValue.equals(column.defaultValue) : column.defaultValue != null)
+            return false;
+        if (sequence != null ? !sequence.equals(column.sequence) : column.sequence != null) return false;
         if (table != null ? !table.equals(column.table) : column.table != null) return false;
+        if (typeName != null ? !typeName.equals(column.typeName) : column.typeName != null) return false;
+
         return true;
     }
 
@@ -263,6 +266,18 @@ public class Column extends IdentifiableBase implements ValueModel {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (table != null ? table.hashCode() : 0);
+        result = 31 * result + typeCode;
+        result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
+        result = 31 * result + size;
+        result = 31 * result + precision;
+        result = 31 * result + scale;
+        result = 31 * result + (comment != null ? comment.hashCode() : 0);
+        result = 31 * result + position;
+        result = 31 * result + (nullable ? 1 : 0);
+        result = 31 * result + (autoIncrement ? 1 : 0);
+        result = 31 * result + (sequence != null ? sequence.hashCode() : 0);
+        result = 31 * result + (checks != null ? checks.hashCode() : 0);
+        result = 31 * result + (defaultValue != null ? defaultValue.hashCode() : 0);
         return result;
     }
 
