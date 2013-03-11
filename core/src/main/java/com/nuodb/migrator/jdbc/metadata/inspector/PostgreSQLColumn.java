@@ -30,7 +30,6 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.metadata.AutoIncrement;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DefaultValue;
-import com.nuodb.migrator.jdbc.metadata.Sequence;
 
 import java.sql.SQLException;
 import java.util.regex.Matcher;
@@ -51,16 +50,15 @@ public class PostgreSQLColumn {
     private static final Pattern VALUE_CLASS = compile(VALUE_CLASS_REGEX, CASE_INSENSITIVE);
     private static final Pattern AUTO_INCREMENT = compile(AUTO_INCREMENT_REGEX, CASE_INSENSITIVE);
 
-    public static Column process(InspectionContext inspectionContext, Column column) throws SQLException {
+    public static Column adopt(InspectionContext inspectionContext, Column column) throws SQLException {
         DefaultValue defaultValue = column.getDefaultValue();
         if (defaultValue != null) {
             Matcher matcher;
             if ((matcher = AUTO_INCREMENT.matcher(defaultValue.getValue())).matches()) {
-                Sequence sequence = new AutoIncrement();
-                sequence.setName(stripQuotes(inspectionContext.getDialect(), matcher.group(1)));
-                column.setAutoIncrement(true);
+                AutoIncrement autoIncrement = new AutoIncrement();
+                autoIncrement.setName(stripQuotes(inspectionContext.getDialect(), matcher.group(1)));
                 column.setDefaultValue(null);
-                column.setSequence(sequence);
+                column.setSequence(autoIncrement);
             } else if ((matcher = VALUE_CLASS.matcher(defaultValue.getValue())).matches()) {
                 column.setDefaultValue(valueOf(matcher.group(1)));
             }

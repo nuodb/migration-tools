@@ -30,7 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.DataProvider;
 
 /**
  * @author Sergey Bushik
@@ -50,11 +50,23 @@ public class NamingStrategyTest {
         scriptGeneratorContext.setDialect(dialect);
     }
 
-    @Test
-    public void testGetName() {
+    @DataProvider(name = "getName")
+    public Object[][] createGetNameData() {
+        return new Object[][] {
+
+        };
     }
 
-    @Test
-    public void testGetQualifiedName() {
-    }
+//    @Test
+//    public void testGetName(MetaData object, String expected) {
+//        String name = scriptGeneratorContext.getName(object);
+//        // TODO: assertNotNull(name);
+//        // TODO: assertEquals(name, expected);
+//    }
+//
+//    @Test
+//    public void testGetQualifiedName(MetaData object, String expected) {
+//        String qualifiedName = scriptGeneratorContext.getQualifiedName(object);
+//        // TODO: assertNotNull(qualifiedName);
+//    }
 }

@@ -27,17 +27,17 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.metadata.Check;
+import com.nuodb.migrator.jdbc.metadata.MetaDataUtils;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import org.testng.annotations.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
-import static com.nuodb.migrator.jdbc.metadata.inspector.AssertUtils.assertTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.MSSQLServerCheckInspector.QUERY;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
@@ -57,7 +57,7 @@ public class MSSQLServerCheckInspectorTest extends InspectorTestBase {
     }
 
     @Test
-    public void testInspect() throws SQLException {
+    public void testInspect() throws Exception {
         PreparedStatement query = mock(PreparedStatement.class);
         given(getConnection().prepareStatement(eq(QUERY), anyInt(), anyInt())).willReturn(query);
 
@@ -68,7 +68,7 @@ public class MSSQLServerCheckInspectorTest extends InspectorTestBase {
         String schemaName = "schema";
         String tableName = "table";
         String checkName = "check";
-        String checkClause = "check clause";
+        String checkClause = "clause";
 
         given(resultSet.next()).willReturn(true, false);
         given(resultSet.getString("TABLE_CATALOG")).willReturn(catalogName);
@@ -79,16 +79,14 @@ public class MSSQLServerCheckInspectorTest extends InspectorTestBase {
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
         InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, CHECK);
+        verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Check> checks = inspectionResults.getObjects(CHECK);
         assertNotNull(checks);
         assertEquals(checks.size(), 1);
 
-        Check check = Iterables.get(checks, 0);
-        assertNotNull(check);
-        assertEquals(check.getName(), checkName);
-        assertEquals(check.getClause(), checkClause);
-
-        assertTable(catalogName, schemaName, tableName, check.getTable());
+        Table table = MetaDataUtils.createTable(catalogName, schemaName, tableName);
+        Check check = table.addCheck(new Check(checkName, checkClause));
+        assertEquals(get(checks, 0), check);
     }
 }

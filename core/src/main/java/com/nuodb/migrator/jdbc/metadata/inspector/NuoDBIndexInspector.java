@@ -105,7 +105,6 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
                 index.setUnique(indexes.getInt("INDEXTYPE") == UNIQUE);
             }
             index.addColumn(table.addColumn(indexes.getString("FIELD")), indexes.getInt("POSITION"));
-
             inspectionResults.addObject(index);
         }
     }

@@ -27,20 +27,22 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.dialect.DialectResolver;
+import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Sergey Bushik
  */
-public class AssertUtils {
+@SuppressWarnings("unchecked")
+public class InspectorTestUtils {
 
-    public static void assertTable(String catalogName, String schemaName, String tableName, Table table) {
-        assertNotNull(table);
-        assertEquals(table.getName(), tableName);
-        assertEquals(table.getSchema().getName(), schemaName);
-        assertEquals(table.getCatalog().getName(), catalogName);
-    }
+
 }

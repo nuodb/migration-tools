@@ -27,20 +27,20 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.DefaultValue;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
+import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
-import static com.nuodb.migrator.jdbc.metadata.inspector.AssertUtils.assertTable;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createColumn;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -55,16 +55,20 @@ import static org.testng.Assert.assertNotNull;
 public class NuoDBColumnInspectorTest extends InspectorTestBase {
 
     public NuoDBColumnInspectorTest() {
-        super(NuoDBColumnInspector.class, new NuoDBDialect());
+        super(NuoDBColumnInspector.class);
+    }
+
+    @Override
+    @BeforeMethod
+    public void setUp() throws Exception {
+        super.setUp();
+        willResolveDialect(getInspectionManager(), new NuoDBDialect());
     }
 
     @Test
-    public void testInspect() throws SQLException {
+    public void testInspect() throws Exception {
         PreparedStatement query = mock(PreparedStatement.class);
         given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(query);
-
-        ResultSet resultSet = mock(ResultSet.class);
-        given(query.executeQuery()).willReturn(resultSet);
 
         String catalogName = null;
         String schemaName = "schema";
@@ -79,6 +83,8 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         Boolean nullable = false;
         Boolean autoIncrement = true;
 
+        ResultSet resultSet = mock(ResultSet.class);
+        given(query.executeQuery()).willReturn(resultSet);
         given(resultSet.next()).willReturn(true, false);
         given(resultSet.getString("SCHEMA")).willReturn(schemaName);
         given(resultSet.getString("TABLENAME")).willReturn(tableName);
@@ -94,24 +100,23 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
         InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, COLUMN);
+        verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Column> columns = inspectionResults.getObjects(COLUMN);
         assertNotNull(columns);
         assertEquals(columns.size(), 1);
 
-        Column column = Iterables.get(columns, 0);
-        assertNotNull(column);
-        assertEquals(column.getName(), columnName);
-        assertEquals((Integer) column.getTypeCode(), typeCode);
-        assertEquals(column.getTypeName(), typeName);
-        assertEquals((Integer) column.getSize(), columnSize);
-        assertEquals((Integer) column.getPrecision(), columnSize);
-        assertEquals(column.getDefaultValue(), DefaultValue.valueOf(defaultValue));
-        assertEquals((Integer) column.getScale(), scale);
-        assertEquals(column.getComment(), comment);
-        assertEquals(column.isNullable(), false);
-        assertEquals((Boolean) column.isAutoIncrement(), autoIncrement);
+        Column column = createColumn(catalogName, schemaName, tableName, columnName);
+        column.setTypeName(typeName);
+        column.setTypeCode(typeCode);
+        column.setSize(columnSize);
+        column.setPrecision(columnSize);
+        column.setDefaultValue(valueOf(defaultValue));
+        column.setScale(scale);
+        column.setComment(comment);
+        column.setNullable(nullable);
+        column.setAutoIncrement(autoIncrement);
 
-        assertTable(catalogName, schemaName, tableName, column.getTable());
+        assertEquals(get(columns, 0), column);
     }
 }

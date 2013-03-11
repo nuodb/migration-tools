@@ -82,7 +82,7 @@ public class Column extends IdentifiableBase implements ValueModel {
      */
     private boolean autoIncrement;
     /**
-     * Associated auto increment sequence
+     * Associated auto incremented sequence
      */
     private Sequence sequence;
     /**
@@ -177,6 +177,10 @@ public class Column extends IdentifiableBase implements ValueModel {
         this.nullable = nullable;
     }
 
+    public boolean isIdentity() {
+        return isAutoIncrement();
+    }
+
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
@@ -194,10 +198,7 @@ public class Column extends IdentifiableBase implements ValueModel {
             sequence.setColumn(this);
         }
         this.sequence = sequence;
-    }
-
-    public boolean isIdentity() {
-        return isAutoIncrement();
+        this.autoIncrement = sequence != null;
     }
 
     public DefaultValue getDefaultValue() {
@@ -208,10 +209,11 @@ public class Column extends IdentifiableBase implements ValueModel {
         this.defaultValue = defaultValue;
     }
 
-    public void addCheck(Check check) {
+    public Check addCheck(Check check) {
         check.setTable(table);
         check.getColumns().add(this);
         checks.add(check);
+        return check;
     }
 
     public Set<Check> getChecks() {
@@ -251,11 +253,9 @@ public class Column extends IdentifiableBase implements ValueModel {
         if (scale != column.scale) return false;
         if (size != column.size) return false;
         if (typeCode != column.typeCode) return false;
-        if (checks != null ? !checks.equals(column.checks) : column.checks != null) return false;
         if (comment != null ? !comment.equals(column.comment) : column.comment != null) return false;
         if (defaultValue != null ? !defaultValue.equals(column.defaultValue) : column.defaultValue != null)
             return false;
-        if (sequence != null ? !sequence.equals(column.sequence) : column.sequence != null) return false;
         if (table != null ? !table.equals(column.table) : column.table != null) return false;
         if (typeName != null ? !typeName.equals(column.typeName) : column.typeName != null) return false;
 
@@ -275,8 +275,6 @@ public class Column extends IdentifiableBase implements ValueModel {
         result = 31 * result + position;
         result = 31 * result + (nullable ? 1 : 0);
         result = 31 * result + (autoIncrement ? 1 : 0);
-        result = 31 * result + (sequence != null ? sequence.hashCode() : 0);
-        result = 31 * result + (checks != null ? checks.hashCode() : 0);
         result = 31 * result + (defaultValue != null ? defaultValue.hashCode() : 0);
         return result;
     }

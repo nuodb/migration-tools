@@ -95,9 +95,9 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
     }
 
     private void inspect(InspectionContext context, ResultSet primaryKeys) throws SQLException {
-        InspectionResults results = context.getInspectionResults();
+        InspectionResults inspectionResults = context.getInspectionResults();
         while (primaryKeys.next()) {
-            Table table = addTable(results, null, primaryKeys.getString("SCHEMA"), primaryKeys.getString("TABLENAME"));
+            Table table = addTable(inspectionResults, null, primaryKeys.getString("SCHEMA"), primaryKeys.getString("TABLENAME"));
 
             final Identifier identifier = Identifier.valueOf(primaryKeys.getString("INDEXNAME"));
             PrimaryKey primaryKey = table.getPrimaryKey();
@@ -105,6 +105,7 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
                 table.setPrimaryKey(primaryKey = new PrimaryKey(identifier));
             }
             primaryKey.addColumn(table.addColumn(primaryKeys.getString("FIELD")), primaryKeys.getInt("POSITION"));
+            inspectionResults.addObject(primaryKey);
         }
     }
 

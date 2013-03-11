@@ -89,18 +89,20 @@ public class Table extends IdentifiableBase {
         return primaryKey;
     }
 
-    public void addIndex(Index index) {
+    public Index addIndex(Index index) {
         index.setTable(this);
         indexes.put(index.getIdentifier(), index);
+        return index;
     }
 
     public Index getIndex(Identifier identifier) {
         return indexes.get(identifier);
     }
 
-    public void addCheck(Check check) {
+    public Check addCheck(Check check) {
         check.setTable(this);
         checks.add(check);
+        return check;
     }
 
     public Collection<Index> getIndexes() {

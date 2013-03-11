@@ -27,13 +27,28 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import org.testng.annotations.Test;
 
-import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Collection;
+
+import static com.google.common.collect.Iterables.get;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.PRIMARY_KEY;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createTable;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public class NuoDBPrimaryKeyInspectorTest extends InspectorTestBase {
 
     public NuoDBPrimaryKeyInspectorTest() {
@@ -41,6 +56,39 @@ public class NuoDBPrimaryKeyInspectorTest extends InspectorTestBase {
     }
 
     @Test
-    public void testInspect() throws SQLException {
+    public void testInspect() throws Exception {
+        PreparedStatement query = mock(PreparedStatement.class);
+        given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(query);
+
+        String catalogName = null;
+        String schemaName = "schema";
+        String tableName = "table";
+        String columnName = "column";
+        String indexName = "pk";
+        int position = 0;
+
+        ResultSet resultSet = mock(ResultSet.class);
+        given(query.executeQuery()).willReturn(resultSet);
+        given(resultSet.next()).willReturn(true, false);
+        given(resultSet.getString("SCHEMA")).willReturn(schemaName);
+        given(resultSet.getString("TABLENAME")).willReturn(tableName);
+        given(resultSet.getString("FIELD")).willReturn(columnName);
+        given(resultSet.getString("INDEXNAME")).willReturn(indexName);
+        given(resultSet.getInt("INDEXTYPE")).willReturn(NuoDBIndex.PRIMARY_KEY);
+        given(resultSet.getInt("POSITION")).willReturn(position);
+
+        TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
+        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, PRIMARY_KEY);
+        verifyInspectScope(getInspector(), inspectionScope);
+
+        Collection<PrimaryKey> primaryKeys = inspectionResults.getObjects(PRIMARY_KEY);
+        assertEquals(primaryKeys.size(), 1);
+
+        Table table = createTable(catalogName, schemaName, tableName);
+        PrimaryKey primaryKey = new PrimaryKey(valueOf(indexName));
+        table.setPrimaryKey(primaryKey);
+        primaryKey.addColumn(table.addColumn(columnName), position);
+
+        assertEquals(get(primaryKeys, 0), primaryKey);
     }
 }

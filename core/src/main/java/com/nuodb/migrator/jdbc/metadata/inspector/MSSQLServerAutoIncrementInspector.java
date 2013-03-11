@@ -96,20 +96,19 @@ public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table,
         );
     }
 
-    private void inspect(InspectionContext context, ResultSet autoIncrement) throws SQLException {
+    private void inspect(InspectionContext context, ResultSet autoIncrements) throws SQLException {
         InspectionResults inspectionResults = context.getInspectionResults();
-        if (autoIncrement.next()) {
+        if (autoIncrements.next()) {
             Table table = addTable(inspectionResults,
-                    autoIncrement.getString("TABLE_CATALOG"),
-                    autoIncrement.getString("TABLE_SCHEMA"),
-                    autoIncrement.getString("TABLE_NAME"));
+                    autoIncrements.getString("TABLE_CATALOG"),
+                    autoIncrements.getString("TABLE_SCHEMA"),
+                    autoIncrements.getString("TABLE_NAME"));
             Sequence sequence = new AutoIncrement();
-            sequence.setStartWith(autoIncrement.getLong("START_WITH"));
-            sequence.setLastValue(autoIncrement.getLong("LAST_VALUE"));
-            sequence.setIncrementBy(autoIncrement.getLong("INCREMENT_BY"));
+            sequence.setStartWith(autoIncrements.getLong("START_WITH"));
+            sequence.setLastValue(autoIncrements.getLong("LAST_VALUE"));
+            sequence.setIncrementBy(autoIncrements.getLong("INCREMENT_BY"));
 
-            Column column = table.addColumn(autoIncrement.getString("COLUMN_NAME"));
-            column.setAutoIncrement(true);
+            Column column = table.addColumn(autoIncrements.getString("COLUMN_NAME"));
             column.setSequence(sequence);
 
             inspectionResults.addObject(sequence);

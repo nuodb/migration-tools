@@ -39,7 +39,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.metadata.inspector.PostgreSQLColumn.process;
+import static com.nuodb.migrator.jdbc.metadata.inspector.PostgreSQLColumn.adopt;
 import static java.lang.String.format;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -61,7 +61,7 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
         Dialect dialect = inspectionContext.getDialect();
         for (Table table : tables) {
             for (final Column column : table.getColumns()) {
-                Sequence sequence = process(inspectionContext, column).getSequence();
+                Sequence sequence = adopt(inspectionContext, column).getSequence();
                 if (sequence != null) {
                     continue;
                 }
@@ -88,18 +88,19 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
         }
     }
 
-    protected void inspect(InspectionContext inspectionContext, Column column, ResultSet autoIncrement) throws SQLException {
-        if (autoIncrement.next()) {
+    protected void inspect(InspectionContext inspectionContext, Column column, ResultSet autoIncrements) throws SQLException {
+        if (autoIncrements.next()) {
             Sequence sequence = new AutoIncrement();
-            sequence.setName(autoIncrement.getString("SEQUENCE_NAME"));
-            sequence.setLastValue(autoIncrement.getLong("LAST_VALUE"));
-            sequence.setStartWith(autoIncrement.getLong("START_VALUE"));
-            sequence.setMinValue(autoIncrement.getLong("MIN_VALUE"));
-            sequence.setMaxValue(autoIncrement.getLong("MAX_VALUE"));
-            sequence.setIncrementBy(autoIncrement.getLong("INCREMENT_BY"));
-            sequence.setCache(autoIncrement.getInt("CACHE_VALUE"));
-            sequence.setCycle("T".equalsIgnoreCase(autoIncrement.getString("IS_CYCLED")));
+            sequence.setName(autoIncrements.getString("SEQUENCE_NAME"));
+            sequence.setLastValue(autoIncrements.getLong("LAST_VALUE"));
+            sequence.setStartWith(autoIncrements.getLong("START_VALUE"));
+            sequence.setMinValue(autoIncrements.getLong("MIN_VALUE"));
+            sequence.setMaxValue(autoIncrements.getLong("MAX_VALUE"));
+            sequence.setIncrementBy(autoIncrements.getLong("INCREMENT_BY"));
+            sequence.setCache(autoIncrements.getInt("CACHE_VALUE"));
+            sequence.setCycle("T".equalsIgnoreCase(autoIncrements.getString("IS_CYCLED")));
             column.setSequence(sequence);
+
             inspectionContext.getInspectionResults().addObject(sequence);
         }
     }

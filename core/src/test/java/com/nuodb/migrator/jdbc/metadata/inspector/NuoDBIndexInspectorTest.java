@@ -27,24 +27,23 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import org.testng.annotations.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
-import static com.nuodb.migrator.jdbc.metadata.inspector.AssertUtils.assertTable;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createTable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author Sergey Bushik
@@ -57,7 +56,7 @@ public class NuoDBIndexInspectorTest extends InspectorTestBase {
     }
 
     @Test
-    public void testInspect() throws SQLException {
+    public void testInspect() throws Exception {
         PreparedStatement query = mock(PreparedStatement.class);
         given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(query);
 
@@ -65,8 +64,7 @@ public class NuoDBIndexInspectorTest extends InspectorTestBase {
         String schemaName = "schema";
         String tableName = "table";
         String columnName = "column";
-        String indexName = "index";
-        int indexType = NuoDBIndex.UNIQUE;
+        String indexName = "unique";
         int position = 0;
 
         ResultSet resultSet = mock(ResultSet.class);
@@ -76,18 +74,21 @@ public class NuoDBIndexInspectorTest extends InspectorTestBase {
         given(resultSet.getString("TABLENAME")).willReturn(tableName);
         given(resultSet.getString("FIELD")).willReturn(columnName);
         given(resultSet.getString("INDEXNAME")).willReturn(indexName);
-        given(resultSet.getInt("INDEXTYPE")).willReturn(indexType);
+        given(resultSet.getInt("INDEXTYPE")).willReturn(NuoDBIndex.UNIQUE);
         given(resultSet.getInt("POSITION")).willReturn(position);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
         InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, INDEX);
+        verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Index> indexes = inspectionResults.getObjects(INDEX);
         assertEquals(indexes.size(), 1);
 
-        Index index = Iterables.get(indexes, 0);
-        assertNotNull(index);
-        assertTrue(index.isUnique());
-        assertTable(catalogName, schemaName, tableName, index.getTable());
+        Table table = createTable(catalogName, schemaName, tableName);
+        Index index = table.addIndex(new Index(valueOf(indexName)));
+        index.addColumn(table.addColumn(columnName), position);
+        index.setUnique(true);
+
+        assertEquals(get(indexes, 0), index);
     }
 }

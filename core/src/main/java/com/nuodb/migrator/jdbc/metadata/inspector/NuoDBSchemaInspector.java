@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Catalog;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.query.QueryUtils;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementCreator;
@@ -104,7 +105,8 @@ public class NuoDBSchemaInspector extends InspectorBase<Catalog, SchemaInspectio
     private void inspect(InspectionContext inspectionContext, ResultSet schemas) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (schemas.next()) {
-            addSchema(inspectionResults, null, schemas.getString("SCHEMA"));
+            Schema schema = addSchema(inspectionResults, null, schemas.getString("SCHEMA"));
+            inspectionResults.addObject(schema);
         }
     }
 }

@@ -27,13 +27,26 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.metadata.Schema;
 import org.testng.annotations.Test;
 
-import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Collection;
+
+import static com.google.common.collect.Iterables.get;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createSchema;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public class NuoDBSchemaInspectorTest extends InspectorTestBase {
 
     public NuoDBSchemaInspectorTest() {
@@ -41,6 +54,26 @@ public class NuoDBSchemaInspectorTest extends InspectorTestBase {
     }
 
     @Test
-    public void testInspect() throws SQLException {
+    public void testInspect() throws Exception {
+        PreparedStatement query = mock(PreparedStatement.class);
+        given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(query);
+
+        String catalogName = null;
+        String schemaName = "schema";
+
+        ResultSet resultSet = mock(ResultSet.class);
+        given(query.executeQuery()).willReturn(resultSet);
+        given(resultSet.next()).willReturn(true, false);
+        given(resultSet.getString("SCHEMA")).willReturn(schemaName);
+
+        SchemaInspectionScope inspectionScope = new SchemaInspectionScope(catalogName, schemaName);
+        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, SCHEMA);
+
+        verifyInspectScope(getInspector(), inspectionScope);
+
+        Collection<Schema> schemas = inspectionResults.getObjects(SCHEMA);
+        assertEquals(schemas.size(), 1);
+
+        assertEquals(get(schemas, 0), createSchema(catalogName, schemaName));
     }
 }

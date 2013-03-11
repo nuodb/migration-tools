@@ -107,9 +107,6 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
         );
     }
 
-//    ALTER TABLE "asset" ADD FOREIGN KEY ("modified_by") REFERENCES "user" ("id");
-//    ALTER TABLE "asset" ADD FOREIGN KEY ("created_by") REFERENCES "user" ("id");
-
     private void inspect(InspectionContext inspectionContext, ResultSet foreignKeys) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         ForeignKey foreignKey = null;

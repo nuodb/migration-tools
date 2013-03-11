@@ -27,19 +27,17 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.collect.Iterables;
-import com.nuodb.migrator.jdbc.metadata.DeferrabilityMap;
-import com.nuodb.migrator.jdbc.metadata.ForeignKey;
-import com.nuodb.migrator.jdbc.metadata.ReferenceActionMap;
+import com.nuodb.migrator.jdbc.metadata.*;
 import org.testng.annotations.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY_IDENTIFIER;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.FOREIGN_KEY;
-import static com.nuodb.migrator.jdbc.metadata.inspector.AssertUtils.assertTable;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createTable;
 import static java.sql.DatabaseMetaData.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
@@ -54,24 +52,26 @@ import static org.testng.Assert.assertNotNull;
 @SuppressWarnings("unchecked")
 public class NuoDBForeignKeyInspectorTest extends InspectorTestBase {
 
+    private static DeferrabilityMap DEFERRABILITY_MAP = DeferrabilityMap.getInstance();
+    private static ReferenceActionMap REFERENCE_ACTION_MAP = ReferenceActionMap.getInstance();
+
     public NuoDBForeignKeyInspectorTest() {
         super(NuoDBForeignKeyInspector.class);
     }
 
     @Test
-    public void testInspect() throws SQLException {
+    public void testInspect() throws Exception {
         PreparedStatement query = mock(PreparedStatement.class);
         given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(query);
 
         ResultSet resultSet = mock(ResultSet.class);
         given(query.executeQuery()).willReturn(resultSet);
 
-        String pkCatalogName = null;
-        String pkSchemaName = "schema";
+        String catalogName = null;
+        String pkSchemaName = "pk schema";
         String pkTableName = "pk table";
         String pkColumnName = "pk column";
-        String fkCatalogName = null;
-        String fkSchemaName = "schema";
+        String fkSchemaName = "fk schema";
         String fkTableName = "fk table";
         String fkColumnName = "fk column";
 
@@ -92,21 +92,28 @@ public class NuoDBForeignKeyInspectorTest extends InspectorTestBase {
         given(resultSet.getInt("DELETE_RULE")).willReturn(deleteRule);
         given(resultSet.getInt("DEFERRABILITY")).willReturn(deferrability);
 
-        TableInspectionScope inspectionScope = new TableInspectionScope(pkCatalogName, pkSchemaName, pkTableName);
+        TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, pkSchemaName, pkTableName);
         InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, FOREIGN_KEY);
+        verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<ForeignKey> foreignKeys = inspectionResults.getObjects(FOREIGN_KEY);
         assertEquals(foreignKeys.size(), 1);
 
-        ForeignKey foreignKey = Iterables.get(foreignKeys, 0);
-        assertNotNull(foreignKey);
-        ReferenceActionMap referenceActionMap = ReferenceActionMap.getInstance();
-        assertEquals(foreignKey.getUpdateAction(), referenceActionMap.get(updateRule));
-        assertEquals(foreignKey.getDeleteAction(), referenceActionMap.get(deleteRule));
+        Table pkTable = createTable(catalogName, pkSchemaName, pkTableName);
+        Column pkColumn = pkTable.addColumn(pkColumnName);
+        Table fkTable = createTable(catalogName, fkSchemaName, fkTableName);
+        Column fkColumn = fkTable.addColumn(fkColumnName);
 
-        DeferrabilityMap deferrabilityMap = DeferrabilityMap.getInstance();
-        assertEquals(foreignKey.getDeferrability(), deferrabilityMap.get(deferrability));
-        assertTable(pkCatalogName, pkSchemaName, pkTableName, foreignKey.getPrimaryTable());
-        assertTable(fkCatalogName, fkSchemaName, fkTableName, foreignKey.getForeignTable());
+        ForeignKey foreignKey = new ForeignKey(EMPTY_IDENTIFIER);
+        foreignKey.setPrimaryTable(pkTable);
+        foreignKey.setForeignTable(fkTable);
+        foreignKey.addReference(pkColumn, fkColumn, position);
+        foreignKey.setDeferrability(DEFERRABILITY_MAP.get(deferrability));
+        foreignKey.setUpdateAction(REFERENCE_ACTION_MAP.get(updateRule));
+        foreignKey.setDeleteAction(REFERENCE_ACTION_MAP.get(deleteRule));
+        pkTable.addForeignKey(foreignKey);
+
+        assertNotNull(foreignKey);
+        assertEquals(get(foreignKeys, 0), foreignKey);
     }
 }

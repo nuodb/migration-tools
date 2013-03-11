@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.utils.ReflectionUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -38,10 +39,11 @@ import org.testng.annotations.BeforeMethod;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 
-import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
@@ -50,44 +52,24 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class InspectorTestBase {
 
     @Spy
-    private Dialect dialect;
-    @Spy
     private Inspector inspector;
     @Mock
     private Connection connection;
-    @Mock
-    private DialectResolver dialectResolver;
     @InjectMocks
     private InspectionManager inspectionManager = new InspectionManager();
 
-    protected InspectorTestBase(Class<? extends Inspector> inspectorClass) {
-        this(inspectorClass, mock(Dialect.class));
-    }
-
-    protected InspectorTestBase(Class<? extends Inspector> inspectorClass, Dialect dialect) {
-        this(newInstance(inspectorClass), dialect);
-    }
-
-    protected InspectorTestBase(Inspector inspector, Dialect dialect) {
+    public InspectorTestBase(Inspector inspector) {
         this.inspector = inspector;
-        this.dialect = dialect;
+    }
+
+    public InspectorTestBase(Class<? extends Inspector> inspectorClass) {
+        this(ReflectionUtils.newInstance(inspectorClass));
     }
 
     @BeforeMethod
     public void setUp() throws Exception {
         initMocks(this);
-
-        Dialect dialect = getDialect();
-        DialectResolver dialectResolver = getDialectResolver();
-        given(dialectResolver.resolve(any(Connection.class))).willReturn(dialect);
-        given(dialectResolver.resolve(any(DatabaseInfo.class))).willReturn(dialect);
-        given(dialectResolver.resolve(any(DatabaseMetaData.class))).willReturn(dialect);
-
-        getInspectionManager().addInspector(getInspector());
-    }
-
-    public Dialect getDialect() {
-        return dialect;
+        inspectionManager.addInspector(inspector);
     }
 
     public Inspector getInspector() {
@@ -98,11 +80,19 @@ public class InspectorTestBase {
         return connection;
     }
 
-    public DialectResolver getDialectResolver() {
-        return dialectResolver;
-    }
-
     public InspectionManager getInspectionManager() {
         return inspectionManager;
+    }
+
+    public static void verifyInspectScope(Inspector inspector, InspectionScope inspectionScope) throws Exception {
+        verify(inspector).inspectScope(any(InspectionContext.class), eq(inspectionScope));
+    }
+
+    public static void willResolveDialect(InspectionManager inspectionManager, Dialect dialect) throws Exception {
+        DialectResolver dialectResolver = mock(DialectResolver.class);
+        given(dialectResolver.resolve(any(Connection.class))).willReturn(dialect);
+        given(dialectResolver.resolve(any(DatabaseInfo.class))).willReturn(dialect);
+        given(dialectResolver.resolve(any(DatabaseMetaData.class))).willReturn(dialect);
+        inspectionManager.setDialectResolver(dialectResolver);
     }
 }

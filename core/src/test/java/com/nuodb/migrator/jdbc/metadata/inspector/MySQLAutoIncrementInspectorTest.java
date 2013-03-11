@@ -27,19 +27,17 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.collect.Iterables;
-import com.nuodb.migrator.jdbc.metadata.AutoIncrement;
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 import org.testng.annotations.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createSequence;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -56,14 +54,15 @@ public class MySQLAutoIncrementInspectorTest extends InspectorTestBase {
     }
 
     @Test
-    public void testInspect() throws SQLException {
+    public void testInspect() throws Exception {
         PreparedStatement queryTable = mock(PreparedStatement.class);
         given(getConnection().prepareStatement(anyString())).willReturn(queryTable);
 
         String catalogName = "catalog";
+        String schemaName = null;
         String tableName = "table";
         String columnName = "column";
-        Long lastValue = 5L;
+        long lastValue = 5L;
 
         ResultSet tables = mock(ResultSet.class);
         given(tables.next()).willReturn(true, false);
@@ -82,20 +81,14 @@ public class MySQLAutoIncrementInspectorTest extends InspectorTestBase {
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, null, tableName);
         InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, AUTO_INCREMENT);
-        Collection<AutoIncrement> autoIncrements = inspectionResults.getObjects(AUTO_INCREMENT);
+        verifyInspectScope(getInspector(), inspectionScope);
 
-        assertNotNull(autoIncrements);
-        assertEquals(autoIncrements.size(), 1);
+        Collection<Sequence> sequences = inspectionResults.getObjects(AUTO_INCREMENT);
+        assertNotNull(sequences);
+        assertEquals(sequences.size(), 1);
 
-        AutoIncrement autoIncrement = Iterables.get(autoIncrements, 0);
-        assertEquals(autoIncrement.getLastValue(), lastValue);
-
-        Column column = autoIncrement.getColumn();
-        assertEquals(column.getName(), columnName);
-
-        Table table = column.getTable();
-        assertNotNull(table);
-        assertEquals(table.getName(), tableName);
-        assertEquals(table.getCatalog().getName(), catalogName);
+        Sequence sequence = createSequence(catalogName, schemaName, tableName, columnName);
+        sequence.setLastValue(lastValue);
+        assertEquals(get(sequences, 0), sequence);
     }
 }

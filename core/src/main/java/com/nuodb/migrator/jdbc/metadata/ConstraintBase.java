@@ -34,12 +34,16 @@ public abstract class ConstraintBase extends IdentifiableBase implements Constra
 
     private Table table;
 
-    protected ConstraintBase(MetaDataType metaDataType, String name) {
-        super(metaDataType, name);
+    protected ConstraintBase(MetaDataType objectType) {
+        super(objectType);
     }
 
-    protected ConstraintBase(MetaDataType metaDataType, Identifier identifier) {
-        super(metaDataType, identifier);
+    protected ConstraintBase(MetaDataType objectType, String name) {
+        super(objectType, name);
+    }
+
+    protected ConstraintBase(MetaDataType objectType, Identifier identifier) {
+        super(objectType, identifier);
     }
 
     @Override

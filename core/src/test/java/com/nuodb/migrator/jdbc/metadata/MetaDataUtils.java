@@ -27,73 +27,31 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.google.common.collect.Sets;
-
-import java.util.Collection;
-
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
-
 /**
  * @author Sergey Bushik
  */
-public class Check extends ConstraintBase {
+public class MetaDataUtils {
 
-    private String clause;
-    private Collection columns = Sets.newHashSet();
-
-    public Check() {
-        super(CHECK);
+    public static Catalog createCatalog(String catalogName) {
+        return new Database().addCatalog(catalogName);
     }
 
-    public Check(String name) {
-        super(CHECK, name);
+    public static Schema createSchema(String catalogName, String schemaName) {
+        return createCatalog(catalogName).addSchema(schemaName);
     }
 
-    public Check(Identifier identifier) {
-        super(CHECK, identifier);
+    public static Table createTable(String catalogName, String schemaName, String tableName) {
+        return createSchema(catalogName, schemaName).addTable(tableName);
     }
 
-    public Check(String name, String clause) {
-        super(CHECK, name);
-        setClause(clause);
+    public static Column createColumn(String catalogName, String schemaName, String tableName, String columnName) {
+        return createTable(catalogName, schemaName, tableName).addColumn(columnName);
     }
 
-    public Check(Identifier identifier, String clause) {
-        super(CHECK, identifier);
-        setClause(clause);
-    }
-
-    public String getClause() {
-        return clause;
-    }
-
-    public void setClause(String clause) {
-        this.clause = clause;
-    }
-
-    @Override
-    public Collection getColumns() {
-        return columns;
-    }
-
-    public void setColumns(Collection columns) {
-        this.columns = columns;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Check check = (Check) o;
-        if (clause != null ? !clause.equals(check.clause) : check.clause != null) return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (clause != null ? clause.hashCode() : 0);
-        return result;
+    public static Sequence createSequence(String catalogName, String schemaName, String tableName, String columnName) {
+        Column column = createColumn(catalogName, schemaName, tableName, columnName);
+        Sequence sequence = new AutoIncrement();
+        column.setSequence(sequence);
+        return sequence;
     }
 }

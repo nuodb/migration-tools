@@ -49,7 +49,7 @@ public class PostgreSQLColumnInspector extends SimpleColumnInspector {
             super.inspectScopes(inspectionContext, inspectionScopes);
             InspectionResults deltaInspectionResults = inspectionResultsDelta.getDeltaInspectionResults();
             for (Column column : deltaInspectionResults.<Column>getObjects(MetaDataType.COLUMN)) {
-                PostgreSQLColumn.process(inspectionContext, column);
+                PostgreSQLColumn.adopt(inspectionContext, column);
             }
         } finally {
             inspectionContext.setInspectionResults(inspectionResultsDelta.getRootInspectionResults());

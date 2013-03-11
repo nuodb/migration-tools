@@ -27,18 +27,19 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.collect.Iterables;
-import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.metadata.Check;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import org.testng.annotations.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
-import static com.nuodb.migrator.jdbc.metadata.inspector.AssertUtils.assertTable;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createColumn;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createTable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -52,11 +53,11 @@ import static org.testng.Assert.*;
 public class NuoDBCheckInspectorTest extends InspectorTestBase {
 
     public NuoDBCheckInspectorTest() {
-        super(NuoDBCheckInspector.class, new NuoDBDialect());
+        super(NuoDBCheckInspector.class);
     }
 
     @Test
-    public void testInspect() throws SQLException {
+    public void testInspect() throws Exception {
         PreparedStatement query = mock(PreparedStatement.class);
         given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(query);
 
@@ -79,24 +80,18 @@ public class NuoDBCheckInspectorTest extends InspectorTestBase {
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
         InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, CHECK);
+        verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Check> checks = inspectionResults.getObjects(CHECK);
         assertNotNull(checks);
         assertEquals(checks.size(), 2);
 
-        Check check = Iterables.get(checks, 0);
-        assertTable(null, schemaName, tableName, check.getTable());
-        assertEquals(check.getName(), checkName1);
-        assertEquals(check.getClause(), checkClause1);
-        Collection columns = check.getColumns();
-        assertTrue(columns.isEmpty());
+        Table table = createTable(catalogName, schemaName, tableName);
+        Check check = table.addCheck(new Check(checkName1, checkClause1));
+        assertEquals(get(checks, 0), check);
 
-        check = Iterables.get(checks, 1);
-        assertTable(null, schemaName, tableName, check.getTable());
-        assertEquals(check.getName(), checkName2);
-        assertEquals(check.getClause(), checkClause2);
-
-        columns = check.getColumns();
-        assertEquals(columns.size(), 1);
+        Column column = createColumn(catalogName, schemaName, tableName, checkName2);
+        check = column.addCheck(new Check(checkName2, checkClause2));
+        assertEquals(get(checks, 1), check);
     }
 }

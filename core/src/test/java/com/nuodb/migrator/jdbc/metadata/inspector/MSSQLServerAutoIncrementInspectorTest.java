@@ -27,17 +27,16 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.collect.Iterables;
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 import org.testng.annotations.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
-import static com.nuodb.migrator.jdbc.metadata.inspector.AssertUtils.assertTable;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createSequence;
 import static com.nuodb.migrator.jdbc.metadata.inspector.MSSQLServerAutoIncrementInspector.QUERY;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
@@ -57,7 +56,7 @@ public class MSSQLServerAutoIncrementInspectorTest extends InspectorTestBase {
     }
 
     @Test
-    public void testInspect() throws SQLException {
+    public void testInspect() throws Exception {
         PreparedStatement query = mock(PreparedStatement.class);
         given(getConnection().prepareStatement(eq(QUERY), anyInt(), anyInt())).willReturn(query);
 
@@ -67,10 +66,10 @@ public class MSSQLServerAutoIncrementInspectorTest extends InspectorTestBase {
         String catalogName = "catalog";
         String schemaName = "schema";
         String tableName = "table";
-        Long startWith = 1L;
-        Long lastValue = 100L;
-        Long incrementBy = 1L;
         String columnName = "column";
+        long startWith = 1L;
+        long lastValue = 100L;
+        long incrementBy = 1L;
 
         given(resultSet.next()).willReturn(true, false);
         given(resultSet.getString("TABLE_CATALOG")).willReturn(catalogName);
@@ -84,19 +83,16 @@ public class MSSQLServerAutoIncrementInspectorTest extends InspectorTestBase {
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
         InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, AUTO_INCREMENT);
 
-        Collection<AutoIncrement> autoIncrements = inspectionResults.getObjects(AUTO_INCREMENT);
-        assertNotNull(autoIncrements);
-        assertEquals(autoIncrements.size(), 1);
+        verifyInspectScope(getInspector(), inspectionScope);
+        Collection<Sequence> sequences = inspectionResults.getObjects(AUTO_INCREMENT);
 
-        AutoIncrement autoIncrement = Iterables.get(autoIncrements, 0);
-        assertEquals(autoIncrement.getStartWith(), startWith);
-        assertEquals(autoIncrement.getLastValue(), lastValue);
-        assertEquals(autoIncrement.getIncrementBy(), incrementBy);
+        assertNotNull(sequences);
+        assertEquals(sequences.size(), 1);
 
-        Column column = autoIncrement.getColumn();
-        assertNotNull(column);
-        assertEquals(column.getName(), columnName);
-
-        assertTable(catalogName, schemaName, tableName, column.getTable());
+        Sequence sequence = createSequence(catalogName, schemaName, tableName, columnName);
+        sequence.setStartWith(startWith);
+        sequence.setLastValue(lastValue);
+        sequence.setIncrementBy(incrementBy);
+        assertEquals(get(sequences, 0), sequence);
     }
 }

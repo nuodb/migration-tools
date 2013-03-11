@@ -27,13 +27,26 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.metadata.Table;
 import org.testng.annotations.Test;
 
-import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Collection;
+
+import static com.google.common.collect.Iterables.get;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createTable;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public class NuoDBTableInspectorTest extends InspectorTestBase {
 
     public NuoDBTableInspectorTest() {
@@ -41,6 +54,34 @@ public class NuoDBTableInspectorTest extends InspectorTestBase {
     }
 
     @Test
-    public void testInspect() throws SQLException {
+    public void testInspect() throws Exception {
+        PreparedStatement query = mock(PreparedStatement.class);
+        given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(query);
+
+        String catalogName = null;
+        String schemaName = "schema";
+        String tableName = "table";
+        String comments = "comments";
+        String type = "TABLE";
+
+        ResultSet resultSet = mock(ResultSet.class);
+        given(query.executeQuery()).willReturn(resultSet);
+        given(resultSet.next()).willReturn(true, false);
+        given(resultSet.getString("SCHEMA")).willReturn(schemaName);
+        given(resultSet.getString("TABLENAME")).willReturn(tableName);
+        given(resultSet.getString("REMARKS")).willReturn(comments);
+        given(resultSet.getString("TYPE")).willReturn(type);
+
+        TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
+        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, TABLE);
+        verifyInspectScope(getInspector(), inspectionScope);
+
+        Collection<Table> tables = inspectionResults.getObjects(TABLE);
+        assertEquals(tables.size(), 1);
+
+        Table table = createTable(catalogName, schemaName, tableName);
+        table.setComment(comments);
+        table.setType(type);
+        assertEquals(get(tables, 0), table);
     }
 }

@@ -40,6 +40,7 @@ import java.sql.Types;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -63,17 +64,17 @@ public class ScriptGeneratorTest {
 
     @DataProvider(name = "getScriptsData")
     public Object[][] createGetScriptsData() {
+        Database database = new Database();
+        database.setDialect(new MySQLDialect(new DatabaseInfo("MySQL")));
+
         Table table = new Table("users");
+        table.setDatabase(database);
 
         Column id = table.addColumn("id");
         id.setTypeCode(Types.INTEGER);
         id.setTypeName("integer");
         id.setNullable(false);
         id.setPosition(1);
-
-        PrimaryKey primaryKey = new PrimaryKey(Identifier.valueOf("users_id"));
-        primaryKey.addColumn(id, 1);
-        table.setPrimaryKey(primaryKey);
 
         Column login = table.addColumn("login");
         login.setTypeCode(Types.VARCHAR);
@@ -82,15 +83,17 @@ public class ScriptGeneratorTest {
         login.setNullable(false);
         login.setPosition(2);
 
-        Database database = new Database();
-        database.setDialect(new MySQLDialect(new DatabaseInfo("MySQL")));
-        table.setDatabase(database);
+        PrimaryKey primaryKey = new PrimaryKey(valueOf("users_id"));
+        primaryKey.addColumn(id, 1);
+        table.setPrimaryKey(primaryKey);
 
         Collection<Object[]> data = Lists.newArrayList();
-        data.add(new Object[]{table, newArrayList(ScriptType.DROP), newArrayList(
-                "DROP TABLE IF EXISTS \"users\" CASCADE")});
-        data.add(new Object[]{table, newArrayList(ScriptType.CREATE), newArrayList(
-                "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, \"login\" VARCHAR(32) NOT NULL, PRIMARY KEY (\"id\"))")});
+        data.add(new Object[]{table, newArrayList(ScriptType.DROP),
+                newArrayList("DROP TABLE IF EXISTS \"users\" CASCADE")});
+        data.add(new Object[]{table, newArrayList(ScriptType.CREATE),
+                newArrayList(
+                "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, " +
+                        "\"login\" VARCHAR(32) NOT NULL, PRIMARY KEY (\"id\"))")});
 
         return data.toArray(new Object[][]{});
     }

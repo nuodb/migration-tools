@@ -29,10 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.jdbc.metadata.AutoIncrement;
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.query.QueryUtils;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementCreator;
@@ -110,12 +107,12 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
 
     private void inspect(final InspectionContext inspectionContext, ResultSet tables) throws SQLException {
         final InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        final Map<Table, AutoIncrement> autoIncrementMap = Maps.newHashMap();
+        final Map<Table, Sequence> autoIncrementMap = Maps.newHashMap();
         while (tables.next()) {
             Table table = addTable(inspectionResults, tables.getString("TABLE_SCHEMA"), null, tables.getString("TABLE_NAME"));
-            AutoIncrement autoIncrement = new AutoIncrement();
-            autoIncrement.setLastValue(tables.getLong("AUTO_INCREMENT"));
-            autoIncrementMap.put(table, autoIncrement);
+            Sequence sequence = new AutoIncrement();
+            sequence.setLastValue(tables.getLong("AUTO_INCREMENT"));
+            autoIncrementMap.put(table, sequence);
         }
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
@@ -129,9 +126,9 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
 
                     @Override
                     public void execute(Statement statement) throws SQLException {
-                        for (Map.Entry<Table, AutoIncrement> autoIncrementEntry : autoIncrementMap.entrySet()) {
+                        for (Map.Entry<Table, Sequence> autoIncrementEntry : autoIncrementMap.entrySet()) {
                             Table table = autoIncrementEntry.getKey();
-                            AutoIncrement autoIncrement = autoIncrementEntry.getValue();
+                            Sequence sequence = autoIncrementEntry.getValue();
                             ResultSet columns = statement.executeQuery(
                                     format(QUERY_COLUMN, table.getCatalog().getName(), table.getName()));
                             Column column;
@@ -143,9 +140,8 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
                             if (column == null) {
                                 continue;
                             }
-                            column.setSequence(autoIncrement);
-                            column.setAutoIncrement(true);
-                            inspectionResults.addObject(autoIncrement);
+                            column.setSequence(sequence);
+                            inspectionResults.addObject(sequence);
                         }
                     }
                 }
