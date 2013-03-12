@@ -25,39 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
-
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+package com.nuodb.migrator.jdbc.resolve;
 
 /**
  * @author Sergey Bushik
  */
-public class DialectResolverTest {
+public class ServiceInstance implements Service {
 
-    private DialectResolver dialectResolver;
+    private final String name;
 
-    @BeforeMethod
-    public void init() {
-        dialectResolver = new SimpleDialectResolver();
+    public ServiceInstance(String name) {
+        this.name = name;
     }
 
-    @Test
-    public void testResolve() {
-        assertTrue(dialectResolver.resolve(new DatabaseInfo("NuoDB", "1.0.0-118", 15, 1)) instanceof NuoDBDialect);
-        assertTrue(dialectResolver.resolve(new DatabaseInfo("MySQL", "5.5.5.28", 5, 5)) instanceof MySQLDialect);
-        assertTrue(dialectResolver.resolve(new DatabaseInfo("PostgreSQL", "9.2.3", 2, 9)) instanceof PostgreSQLDialect);
-        assertTrue(dialectResolver.resolve(new DatabaseInfo("Oracle",
-                        "Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production\n" +
-                        "With the Partitioning, OLAP, Data Mining and Real Application Testing options", 2, 11))
-                instanceof OracleDialect);
-        assertTrue(dialectResolver.resolve(
-                new DatabaseInfo("Microsoft SQL Server", "11.00.3339", 0, 11)) instanceof MSSQLServerDialect);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        assertNotNull(dialectResolver.resolve(new DatabaseInfo("DB2", "DSN10015", 10, 1)));
+        ServiceInstance that = (ServiceInstance) o;
+
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceInstance{name='" + name + "'}";
     }
 }

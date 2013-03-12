@@ -27,11 +27,9 @@
  */
 package com.nuodb.migrator.spec;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Collection;
-
-import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 public class SelectQuerySpec {
 
@@ -96,6 +94,6 @@ public class SelectQuerySpec {
 
     @Override
     public String toString() {
-        return ReflectionToStringBuilder.toString(this, MULTI_LINE_STYLE);
+        return ObjectUtils.toString(this);
     }
 }

@@ -29,11 +29,14 @@ package com.nuodb.migrator.jdbc.resolve;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
+import com.nuodb.migrator.utils.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Comparator;
 
+import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
 /**
@@ -60,10 +63,11 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
 
     public DatabaseInfo(DatabaseMetaData databaseMetaData) throws SQLException {
         this(databaseMetaData.getDatabaseProductName(), databaseMetaData.getDatabaseProductVersion(),
-                databaseMetaData.getDatabaseMinorVersion(), databaseMetaData.getDatabaseMajorVersion());
+                databaseMetaData.getDatabaseMajorVersion(), databaseMetaData.getDatabaseMinorVersion());
     }
 
     public DatabaseInfo(String productName, String productVersion, Integer majorVersion, Integer minorVersion) {
+        isNotNull(productName, "Product name is required");
         this.productName = productName;
         this.productVersion = productVersion;
         this.minorVersion = minorVersion;
@@ -105,7 +109,12 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
     public boolean matches(DatabaseInfo databaseInfo) {
         Ordering<Comparable> comparator = Ordering.natural().nullsLast();
         return ComparisonChain.start().
-                compare(productName, databaseInfo.productName).
+                compare(productName, databaseInfo.productName, new Comparator<String>() {
+                    @Override
+                    public int compare(String productName1, String productName2) {
+                        return StringUtils.equals(productName1, productName2) ? 0 : -1;
+                    }
+                }).
                 compare(productVersion, databaseInfo.productVersion, comparator).
                 compare(majorVersion, databaseInfo.majorVersion, comparator).
                 compare(minorVersion, databaseInfo.minorVersion, comparator).result() >= 0;
@@ -146,14 +155,8 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
         return result;
     }
 
-    public static void main(String[] args) {
-        analyze(new DatabaseInfo("MySQL"), new DatabaseInfo("MySQL"));
-        analyze(new DatabaseInfo("MySQL", "5.5.28"), new DatabaseInfo("MySQL", "5.5.29", 4, 4));
-        analyze(new DatabaseInfo("MySQL", "5.5.28"), new DatabaseInfo("MySQL", "5.5.28", 5, 1));
-    }
-
-    public static void analyze(DatabaseInfo databaseInfo1, DatabaseInfo databaseInfo2) {
-        System.out.println("comparing: " + databaseInfo1.compareTo(databaseInfo2) +
-                ", matching: " + databaseInfo1.matches(databaseInfo2));
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

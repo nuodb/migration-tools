@@ -38,6 +38,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Sergey Bushik
@@ -47,40 +48,40 @@ public class ServiceResolverTest {
 
     private SimpleServiceResolver<Service> serviceResolver;
 
-    @BeforeMethod(groups = "resolveService")
+    @BeforeMethod
     public void setUp() {
         serviceResolver = spy(new SimpleServiceResolver<Service>());
 
-        serviceResolver.register(new DatabaseInfo("NuoDB"), new Service("instance-1"));
-        serviceResolver.register(new DatabaseInfo("NuoDB", "1.0.1-128"), new Service("instance-2"));
-        serviceResolver.register(new DatabaseInfo("NuoDB", "1.0.1-128", 17), new Service("instance-3"));
-        serviceResolver.register(new DatabaseInfo("NuoDB", "1.0.1-128", 17, 1), new Service("instance-4"));
+        serviceResolver.register(new DatabaseInfo("NuoDB"), new ServiceInstance("service-1"));
+        serviceResolver.register(new DatabaseInfo("NuoDB", "1.0.1-128"), new ServiceInstance("service-2"));
+        serviceResolver.register(new DatabaseInfo("NuoDB", "1.0.1-128", 17), new ServiceInstance("service-3"));
+        serviceResolver.register(new DatabaseInfo("NuoDB", "1.0.1-128", 17, 1), new ServiceInstance("service-4"));
 
-        serviceResolver.register(new DatabaseInfo("MySQL"), new Service("instance-4"));
-        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28"), new Service("instance-5"));
-        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28", 5), new Service("instance-6"));
-        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28", 5, 5), new Service("instance-7"));
+        serviceResolver.register(new DatabaseInfo("MySQL"), new ServiceInstance("service-4"));
+        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28"), new ServiceInstance("service-5"));
+        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28", 5), new ServiceInstance("service-6"));
+        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28", 5, 5), new ServiceInstance("service-7"));
+
+        serviceResolver.register(new DatabaseInfo("PostgreSQL"), Service1.class);
+        serviceResolver.register(new DatabaseInfo("PostgreSQL", "9.2.3"), Service2.class);
+        serviceResolver.register(new DatabaseInfo("PostgreSQL", "9.2.3", 2), Service3.class);
+        serviceResolver.register(new DatabaseInfo("PostgreSQL", "9.2.3", 2, 9), Service4.class);
     }
 
     @DataProvider(name = "resolveService")
     public Object[][] createResolveServiceData() {
         return new Object[][]{
-                {"NuoDB", "1.0.1-129", 18, 5, new Service("instance-1")},
-                {"NuoDB", "1.0.1-128", 18, 5, new Service("instance-2")},
-                {"NuoDB", "1.0.1-128", 17, 5, new Service("instance-3")},
-                {"NuoDB", "1.0.1-128", 17, 1, new Service("instance-4")},
+                {"NuoDB", "1.0.1-129", 18, 2, new ServiceInstance("service-1")},
+                {"NuoDB", "1.0.1-128", 18, 2, new ServiceInstance("service-2")},
+                {"NuoDB", "1.0.1-128", 17, 2, new ServiceInstance("service-3")},
+                {"NuoDB", "1.0.1-128", 17, 1, new ServiceInstance("service-4")},
         };
     }
 
-    @Test(dataProvider = "resolveService", groups = "resolveService")
-    public void testResolveService(String productName, String productVersion,
-                                   int minorVersion, int majorVersion, Service service) throws Exception {
-        DatabaseMetaData metaData = mock(DatabaseMetaData.class);
-        given(metaData.getDatabaseProductName()).willReturn(productName);
-        given(metaData.getDatabaseProductVersion()).willReturn(productVersion);
-        given(metaData.getDatabaseMinorVersion()).willReturn(minorVersion);
-        given(metaData.getDatabaseMajorVersion()).willReturn(majorVersion);
-
+    @Test(dataProvider = "resolveService")
+    public void testResolveService(String productName, String productVersion, int majorVersion, int minorVersion,
+                                   Service service) throws Exception {
+        DatabaseMetaData metaData = createDatabaseMetaData(productName, productVersion, majorVersion, minorVersion);
         Connection connection = mock(Connection.class);
         given(connection.getMetaData()).willReturn(metaData);
 
@@ -89,6 +90,41 @@ public class ServiceResolverTest {
         verify(serviceResolver).resolve(eq(metaData));
         verify(serviceResolver).resolve(any(DatabaseInfo.class));
         verify(serviceResolver).resolveService(any(DatabaseInfo.class));
-        verify(serviceResolver, never()).resolveServiceClass(any(DatabaseInfo.class));
+    }
+
+    @DataProvider(name = "resolveServiceClass")
+    public Object[][] createResolveServiceClassData() {
+        return new Object[][]{
+                {"PostgreSQL", "9.2.4", 3, 10, Service1.class},
+                {"PostgreSQL", "9.2.3", 3, 10, Service2.class},
+                {"PostgreSQL", "9.2.3", 2, 10, Service3.class},
+                {"PostgreSQL", "9.2.3", 2, 9, Service4.class},
+        };
+    }
+
+    @Test(dataProvider = "resolveServiceClass")
+    public void testResolveServiceClass(String productName, String productVersion, int majorVersion, int minorVersion,
+                                        Class<? extends Service> serviceClass) throws Exception {
+        DatabaseMetaData metaData = createDatabaseMetaData(productName, productVersion, majorVersion, minorVersion);
+        Connection connection = mock(Connection.class);
+        given(connection.getMetaData()).willReturn(metaData);
+
+        Service service = serviceResolver.resolve(connection);
+        assertNotNull(service);
+        assertEquals(service.getClass(), serviceClass);
+
+        verify(serviceResolver).resolve(eq(metaData));
+        verify(serviceResolver).resolve(any(DatabaseInfo.class));
+        verify(serviceResolver).resolveServiceClass(any(DatabaseInfo.class));
+    }
+
+    public static DatabaseMetaData createDatabaseMetaData(String productName, String productVersion,
+                                                          int majorVersion, int minorVersion) throws Exception {
+        DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+        given(metaData.getDatabaseProductName()).willReturn(productName);
+        given(metaData.getDatabaseProductVersion()).willReturn(productVersion);
+        given(metaData.getDatabaseMajorVersion()).willReturn(majorVersion);
+        given(metaData.getDatabaseMinorVersion()).willReturn(minorVersion);
+        return metaData;
     }
 }

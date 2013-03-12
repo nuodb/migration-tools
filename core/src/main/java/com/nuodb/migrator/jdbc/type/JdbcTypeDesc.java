@@ -27,8 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import com.nuodb.migrator.utils.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
  * @author Sergey Bushik
@@ -81,6 +81,6 @@ public class JdbcTypeDesc {
 
     @Override
     public String toString() {
-        return ReflectionToStringBuilder.toString(this);
+        return ObjectUtils.toString(this);
     }
 }

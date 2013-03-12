@@ -28,11 +28,9 @@
 package com.nuodb.migrator.spec;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Map;
-
-import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 public class SpecBase implements Spec {
 
@@ -88,6 +86,6 @@ public class SpecBase implements Spec {
 
     @Override
     public String toString() {
-        return ReflectionToStringBuilder.toString(this, MULTI_LINE_STYLE);
+        return ObjectUtils.toString(this);
     }
 }
