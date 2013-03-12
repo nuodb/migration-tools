@@ -40,13 +40,9 @@ public interface ServiceResolver<T> {
 
     void register(DatabaseInfo databaseInfo, T service);
 
-    void register(DatabaseMatcher databaseMatcher, T service);
-
     void register(String productName, Class<? extends T> serviceClass);
 
     void register(DatabaseInfo databaseInfo, Class<? extends T> serviceClass);
-
-    void register(DatabaseMatcher databaseMatcher, Class<? extends T> serviceClass);
 
     T resolve(Connection connection) throws SQLException;
 

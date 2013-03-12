@@ -47,11 +47,11 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Map<DatabaseInfo, T> serviceCacheMap = new WeakHashMap<DatabaseInfo, T>();
     private T defaultService;
-    private Map<DatabaseMatcher, T> serviceMap = newHashMap();
     private Class<? extends T> defaultServiceClass;
-    private Map<DatabaseMatcher, Class<? extends T>> serviceClassMap = newHashMap();
+    private Map<DatabaseInfo, T> databaseInfoServiceMap = newHashMap();
+    private Map<DatabaseInfo, T> databaseInfoServiceCacheMap = new WeakHashMap<DatabaseInfo, T>();
+    private Map<DatabaseInfo, Class<? extends T>> databaseInfoServiceClassMap = newHashMap();
 
     public SimpleServiceResolver() {
     }
@@ -71,12 +71,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     @Override
     public void register(DatabaseInfo databaseInfo, T service) {
-        register(new SimpleDatabaseMatcher(databaseInfo), service);
-    }
-
-    @Override
-    public void register(DatabaseMatcher databaseMatcher, T service) {
-        serviceMap.put(databaseMatcher, service);
+        databaseInfoServiceMap.put(databaseInfo, service);
     }
 
     @Override
@@ -86,12 +81,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     @Override
     public void register(DatabaseInfo databaseInfo, Class<? extends T> serviceClass) {
-        register(new SimpleDatabaseMatcher(databaseInfo), serviceClass);
-    }
-
-    @Override
-    public void register(DatabaseMatcher databaseMatcher, Class<? extends T> serviceClass) {
-        serviceClassMap.put(databaseMatcher, serviceClass);
+        databaseInfoServiceClassMap.put(databaseInfo, serviceClass);
     }
 
     @Override
@@ -104,7 +94,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         if (databaseInfo == null) {
             return null;
         }
-        T service = serviceCacheMap.get(databaseInfo);
+        T service = databaseInfoServiceCacheMap.get(databaseInfo);
         if (service != null) {
             return service;
         }
@@ -115,17 +105,20 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         if (service instanceof ServiceResolverAware) {
             ((ServiceResolverAware) service).setServiceResolver(this);
         }
-        serviceCacheMap.put(databaseInfo, service);
+        databaseInfoServiceCacheMap.put(databaseInfo, service);
         return service;
     }
 
     protected T resolveService(DatabaseInfo databaseInfo) {
         T service = null;
-        for (Map.Entry<DatabaseMatcher, T> databaseInfoMatcherEntry : serviceMap.entrySet()) {
-            DatabaseMatcher databaseMatcher = databaseInfoMatcherEntry.getKey();
-            if (databaseMatcher.matches(databaseInfo)) {
-                service = databaseInfoMatcherEntry.getValue();
-                break;
+        DatabaseInfo serviceDatabaseInfo = null;
+        for (Map.Entry<DatabaseInfo, T> databaseInfoServiceEntry : databaseInfoServiceMap.entrySet()) {
+            DatabaseInfo currentServiceDatabaseInfo = databaseInfoServiceEntry.getKey();
+            if (currentServiceDatabaseInfo.matches(databaseInfo) &&
+                    (serviceDatabaseInfo == null ||
+                            currentServiceDatabaseInfo.compareTo(serviceDatabaseInfo) >= 0)) {
+                service = databaseInfoServiceEntry.getValue();
+                serviceDatabaseInfo = currentServiceDatabaseInfo;
             }
         }
         if (service != null) {
@@ -141,17 +134,16 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         return service;
     }
 
-    protected String getServiceName(T service) {
-        return service.getClass().getName();
-    }
-
     protected Class<? extends T> resolveServiceClass(DatabaseInfo databaseInfo) {
         Class<? extends T> serviceClass = null;
-        for (Map.Entry<DatabaseMatcher, Class<? extends T>> databaseInfoMatcherEntry : serviceClassMap.entrySet()) {
-            DatabaseMatcher databaseMatcher = databaseInfoMatcherEntry.getKey();
-            if (databaseMatcher.matches(databaseInfo)) {
-                serviceClass = databaseInfoMatcherEntry.getValue();
-                break;
+        DatabaseInfo serviceClassDatabaseInfo = null;
+        for (Map.Entry<DatabaseInfo, Class<? extends T>> databaseInfoServiceClassEntry : databaseInfoServiceClassMap.entrySet()) {
+            DatabaseInfo currentServiceClassDatabaseInfo = databaseInfoServiceClassEntry.getKey();
+            if (currentServiceClassDatabaseInfo.matches(databaseInfo) &&
+                    (serviceClassDatabaseInfo == null ||
+                            currentServiceClassDatabaseInfo.compareTo(serviceClassDatabaseInfo) >= 0)) {
+                serviceClass = databaseInfoServiceClassEntry.getValue();
+                serviceClassDatabaseInfo = currentServiceClassDatabaseInfo;
             }
         }
         if (serviceClass != null) {
@@ -165,6 +157,10 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
             serviceClass = defaultServiceClass;
         }
         return serviceClass;
+    }
+
+    protected String getServiceName(T service) {
+        return service.getClass().getName();
     }
 
     protected String getServiceClassName(Class<? extends T> serviceClass) {

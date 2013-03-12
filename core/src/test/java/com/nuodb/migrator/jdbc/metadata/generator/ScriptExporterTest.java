@@ -54,12 +54,12 @@ public class ScriptExporterTest {
     @BeforeMethod
     public void setUp() {
         scripts = newArrayList(
-                "CREATE TABLE \"users\" (\"used_id\" integer);",
-                "CREATE TABLE \"links\" (\"link_id\" integer);"
+                "CREATE TABLE \"users\" (\"used_id\" INTEGER);",
+                "CREATE TABLE \"links\" (\"link_id\" INTEGER);"
         );
     }
 
-    @DataProvider(name = "exportScriptsData")
+    @DataProvider(name = "exportScripts")
     public Object[][] createExportScriptsData() throws Exception {
         File dir = Files.createTempDir();
         dir.deleteOnExit();
@@ -80,7 +80,7 @@ public class ScriptExporterTest {
         };
     }
 
-    @Test(dataProvider = "exportScriptsData")
+    @Test(dataProvider = "exportScripts")
     public void testExportScripts(ScriptExporter scriptExporter) throws Exception {
         scriptExporter.open();
         scriptExporter.exportScripts(scripts);

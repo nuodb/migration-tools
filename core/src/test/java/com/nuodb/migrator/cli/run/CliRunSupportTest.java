@@ -73,7 +73,7 @@ public class CliRunSupportTest {
         cliRunSupport = spy(new CliRunSupport());
     }
 
-    @DataProvider(name = "sourceGroupData")
+    @DataProvider(name = "sourceGroup")
     public Object[][] createSourceGroupData() {
         String[] arguments = {
                 "--source.driver=com.mysql.jdbc.Driver",
@@ -97,7 +97,7 @@ public class CliRunSupportTest {
         return new Object[][]{{arguments, expected}};
     }
 
-    @Test(dataProvider = "sourceGroupData")
+    @Test(dataProvider = "sourceGroup")
     public void testSourceGroup(String[] arguments, JdbcConnectionSpec expected) {
         Group group = cliRunSupport.createSourceGroup();
         assertNotNull(group, "Source group of options is required");
@@ -111,7 +111,7 @@ public class CliRunSupportTest {
         assertEquals(actual, expected);
     }
 
-    @DataProvider(name = "targetGroupData")
+    @DataProvider(name = "targetGroup")
     public Object[][] createTargetGroupData() {
         String[] arguments = {
                 "--target.url=jdbc:com.nuodb://localhost/test",
@@ -129,7 +129,7 @@ public class CliRunSupportTest {
         return new Object[][]{{arguments, expected}};
     }
 
-    @Test(dataProvider = "targetGroupData")
+    @Test(dataProvider = "targetGroup")
     public void testTargetGroup(String[] arguments, JdbcConnectionSpec expected) {
         Group group = cliRunSupport.createTargetGroup();
         assertNotNull(group, "Target group of options is required");
@@ -141,7 +141,7 @@ public class CliRunSupportTest {
         assertEquals(actual, expected);
     }
 
-    @DataProvider(name = "inputGroupData")
+    @DataProvider(name = "inputGroup")
     public Object[][] createInputGroupData() {
         String[] arguments = {
                 "--input.path=/tmp/dump.cat",
@@ -159,7 +159,7 @@ public class CliRunSupportTest {
         return new Object[][]{{arguments, expected}};
     }
 
-    @Test(dataProvider = "inputGroupData")
+    @Test(dataProvider = "inputGroup")
     public void testInputGroup(String[] arguments, ResourceSpec expected) {
         Group group = cliRunSupport.createInputGroup();
         assertNotNull(group, "Input group of options is required");
@@ -171,7 +171,7 @@ public class CliRunSupportTest {
         assertEquals(actual, expected);
     }
 
-    @DataProvider(name = "outputGroupData")
+    @DataProvider(name = "outputGroup")
     public Object[][] createOutputGroupData() {
         String[] arguments = {
                 "--output.path=/tmp/dump.cat",
@@ -184,7 +184,7 @@ public class CliRunSupportTest {
         return new Object[][]{{arguments, expected}};
     }
 
-    @Test(dataProvider = "outputGroupData")
+    @Test(dataProvider = "outputGroup")
     public void testOutputGroup(String[] arguments, ResourceSpec expected) {
         Group group = cliRunSupport.createOutputGroup();
         assertNotNull(group, "Output group of options is required");
@@ -196,7 +196,7 @@ public class CliRunSupportTest {
         assertEquals(actual, expected);
     }
 
-    @DataProvider(name = "timeZoneData")
+    @DataProvider(name = "timeZone")
     public Object[][] createTimeZoneData() {
         return new Object[][]{
                 {new String[]{"-tz=UTC"}, getTimeZone("UTC")},
@@ -205,7 +205,7 @@ public class CliRunSupportTest {
         };
     }
 
-    @Test(dataProvider = "timeZoneData")
+    @Test(dataProvider = "timeZone")
     public void testTimeZone(String[] arguments, TimeZone expected) {
         Option option = cliRunSupport.createTimeZoneOption();
         assertNotNull(option, "Time zone option is required");

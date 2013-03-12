@@ -25,61 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.url;
-
-import com.google.common.collect.Sets;
-
-import java.util.Collection;
-import java.util.Map;
+package com.nuodb.migrator.jdbc.resolve;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcUrlParserUtils {
+class Service {
 
-    private static JdbcUrlParserUtils INSTANCE;
+    private final String name;
 
-    public static JdbcUrlParserUtils getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new JdbcUrlParserUtils();
-        }
-        return INSTANCE;
+    public Service(String name) {
+        this.name = name;
     }
 
-    private Collection<JdbcUrlParser> parsers = Sets.newLinkedHashSet();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-    private JdbcUrlParserUtils() {
-        parsers.add(new NuoDBJdbcUrlParser());
-        parsers.add(new MySQLJdbcUrlParser());
+        Service service = (Service) o;
+
+        if (name != null ? !name.equals(service.name) : service.name != null) return false;
+
+        return true;
     }
 
-    public JdbcUrlParser getParser(String url) {
-        for (JdbcUrlParser parser : parsers) {
-            if (parser.canParse(url)) {
-                return parser;
-            }
-        }
-        return null;
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
     }
 
-    public boolean canParse(String url) {
-        return getParser(url) != null;
-    }
-
-    public JdbcUrl parse(String url, Map<String, Object> overrides) {
-        for (JdbcUrlParser parser : parsers) {
-            if (parser.canParse(url)) {
-                return parser.parse(url, overrides);
-            }
-        }
-        return null;
-    }
-
-    public void addParser(JdbcUrlParser parser) {
-        parsers.add(parser);
-    }
-
-    public Collection<JdbcUrlParser> getParsers() {
-        return parsers;
+    @Override
+    public String toString() {
+        return "Service{name='" + name + "'}";
     }
 }

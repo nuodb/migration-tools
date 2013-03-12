@@ -62,7 +62,7 @@ public class ScriptGeneratorTest {
         scriptGeneratorContext.setDialect(dialect);
     }
 
-    @DataProvider(name = "getScriptsData")
+    @DataProvider(name = "getScripts")
     public Object[][] createGetScriptsData() {
         Database database = new Database();
         database.setDialect(new MySQLDialect(new DatabaseInfo("MySQL")));
@@ -72,13 +72,13 @@ public class ScriptGeneratorTest {
 
         Column id = table.addColumn("id");
         id.setTypeCode(Types.INTEGER);
-        id.setTypeName("integer");
+        id.setTypeName("INTEGER");
         id.setNullable(false);
         id.setPosition(1);
 
         Column login = table.addColumn("login");
         login.setTypeCode(Types.VARCHAR);
-        login.setTypeName("varchar");
+        login.setTypeName("VARCHAR");
         login.setSize(32);
         login.setNullable(false);
         login.setPosition(2);
@@ -98,7 +98,7 @@ public class ScriptGeneratorTest {
         return data.toArray(new Object[][]{});
     }
 
-    @Test(dataProvider = "getScriptsData")
+    @Test(dataProvider = "getScripts")
     public void testGetScripts(MetaData object, Collection<ScriptType> scriptTypes,
                                Collection<String> expected) throws Exception {
         scriptGeneratorContext.setScriptTypes(scriptTypes);

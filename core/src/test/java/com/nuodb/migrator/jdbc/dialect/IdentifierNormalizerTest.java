@@ -43,7 +43,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class IdentifierNormalizerTest {
 
-    @DataProvider(name = "normalizeIdentifierData")
+    @DataProvider(name = "normalizeIdentifier")
     public Object[][] createNormalizeIdentifierData() {
         Dialect dialect = mock(Dialect.class);
         when(dialect.normalizeIdentifier(anyString())).then(new Answer<Object>() {
@@ -60,7 +60,7 @@ public class IdentifierNormalizerTest {
         };
     }
 
-    @Test(dataProvider = "normalizeIdentifierData")
+    @Test(dataProvider = "normalizeIdentifier")
     public void testNormalizeIdentifier(IdentifierNormalizer identifierNormalizer, Dialect dialect,
                                         Identifiable identifiable, String identifier, String expected) {
         assertEquals(identifierNormalizer.normalizeIdentifier(identifier, identifiable, dialect), expected);

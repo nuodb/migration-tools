@@ -31,7 +31,6 @@ import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.jdbc.resolve.DatabaseMatcher;
 import com.nuodb.migrator.jdbc.resolve.ServiceResolver;
 import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
 
@@ -106,20 +105,12 @@ public class InspectorResolver extends MetaDataHandlerBase implements Inspector 
         inspectorResolver.register(databaseInfo, inspector);
     }
 
-    public void register(DatabaseMatcher databaseMatcher, Inspector inspector) {
-        inspectorResolver.register(databaseMatcher, inspector);
-    }
-
     public void register(String productName, Class<? extends Inspector> serviceClass) {
         inspectorResolver.register(productName, serviceClass);
     }
 
     public void register(DatabaseInfo databaseInfo, Class<? extends Inspector> serviceClass) {
         inspectorResolver.register(databaseInfo, serviceClass);
-    }
-
-    public void register(DatabaseMatcher databaseMatcher, Class<? extends Inspector> serviceClass) {
-        inspectorResolver.register(databaseMatcher, serviceClass);
     }
 
     public Inspector resolve(DatabaseInfo databaseInfo) {

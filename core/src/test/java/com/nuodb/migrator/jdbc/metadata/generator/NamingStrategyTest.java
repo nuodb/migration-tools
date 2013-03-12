@@ -29,8 +29,13 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.*;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Sergey Bushik
@@ -48,25 +53,41 @@ public class NamingStrategyTest {
 
         scriptGeneratorContext = new ScriptGeneratorContext();
         scriptGeneratorContext.setDialect(dialect);
+        scriptGeneratorContext.setTargetCatalog(null);
+        scriptGeneratorContext.setTargetSchema("target");
     }
 
     @DataProvider(name = "getName")
     public Object[][] createGetNameData() {
-        return new Object[][] {
-
+        return new Object[][]{
+                {createSchema(null, "schema"), false, "schema"},
+                {createSchema(null, "schema"), true, "\"schema\""},
+                {createTable(null, "schema", "table"), false, "table"},
+                {createTable(null, "schema", "table"), true, "\"table\""},
+                {createColumn(null, "schema", "table", "column"), false, "column"},
+                {createColumn(null, "schema", "table", "column"), true, "\"column\""}
         };
     }
 
-//    @Test
-//    public void testGetName(MetaData object, String expected) {
-//        String name = scriptGeneratorContext.getName(object);
-//        // TODO: assertNotNull(name);
-//        // TODO: assertEquals(name, expected);
-//    }
-//
-//    @Test
-//    public void testGetQualifiedName(MetaData object, String expected) {
-//        String qualifiedName = scriptGeneratorContext.getQualifiedName(object);
-//        // TODO: assertNotNull(qualifiedName);
-//    }
+    @DataProvider(name = "getQualifiedName")
+    public Object[][] createGetQualifiedNameData() {
+        return new Object[][]{
+                {createSchema(null, "schema"), false, "schema"},
+                {createSchema(null, "schema"), true, "\"schema\""},
+                {createTable(null, "schema", "table"), false, "target.table"},
+                {createTable(null, "schema", "table"), true, "\"target\".\"table\""},
+                {createColumn(null, "schema", "table", "column"), false, "column"},
+                {createColumn(null, "schema", "table", "column"), true, "\"column\""}
+        };
+    }
+
+    @Test(dataProvider = "getName")
+    public void testGetName(MetaData object, boolean normalize, String name) {
+        assertEquals(scriptGeneratorContext.getName(object, normalize), name);
+    }
+
+    @Test(dataProvider = "getQualifiedName")
+    public void testGetQualifiedName(MetaData object, boolean normalize, String qualifiedName) {
+        assertEquals(scriptGeneratorContext.getQualifiedName(object, normalize), qualifiedName);
+    }
 }

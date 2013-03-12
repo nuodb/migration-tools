@@ -27,15 +27,19 @@
  */
 package com.nuodb.migrator.jdbc.resolve;
 
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
+import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
+
 /**
  * @author Sergey Bushik
  */
-public class DatabaseInfo {
+public class DatabaseInfo implements Comparable<DatabaseInfo> {
 
     private String productName;
     private String productVersion;
@@ -99,25 +103,24 @@ public class DatabaseInfo {
     }
 
     public boolean matches(DatabaseInfo databaseInfo) {
-        if (productName != null ? !StringUtils.startsWithIgnoreCase(productName,
-                databaseInfo.productName) : databaseInfo.productName != null) {
-            return false;
-        }
-        if (productVersion != null && databaseInfo.productVersion != null &&
-                !StringUtils.equals(productVersion, databaseInfo.productVersion)) {
-            return false;
-        }
-        if (majorVersion != null && databaseInfo.majorVersion != null &&
-                majorVersion.equals(databaseInfo.majorVersion)) {
-            return false;
-        }
-        if (minorVersion != null && databaseInfo.minorVersion != null &&
-                minorVersion.equals(databaseInfo.minorVersion)) {
-            return false;
-        }
-        return true;
-
+        Ordering<Comparable> comparator = Ordering.natural().nullsLast();
+        return ComparisonChain.start().
+                compare(productName, databaseInfo.productName).
+                compare(productVersion, databaseInfo.productVersion, comparator).
+                compare(majorVersion, databaseInfo.majorVersion, comparator).
+                compare(minorVersion, databaseInfo.minorVersion, comparator).result() >= 0;
     }
+
+    @Override
+    public int compareTo(DatabaseInfo databaseInfo) {
+        Ordering<Comparable> ordering = Ordering.natural().nullsFirst();
+        return ComparisonChain.start().
+                compare(productName, databaseInfo.productName, ordering).
+                compare(productVersion, databaseInfo.productVersion, ordering).
+                compare(majorVersion, databaseInfo.majorVersion, ordering).
+                compare(minorVersion, databaseInfo.minorVersion, ordering).result();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -125,7 +128,7 @@ public class DatabaseInfo {
 
         DatabaseInfo that = (DatabaseInfo) o;
 
-        if (productName != null ? !StringUtils.startsWithIgnoreCase(productName,
+        if (productName != null ? !startsWithIgnoreCase(productName,
                 that.productName) : that.productName != null) return false;
         if (productVersion != null ? !StringUtils.equals(productVersion,
                 that.productVersion) : that.productVersion != null) return false;
@@ -141,5 +144,16 @@ public class DatabaseInfo {
         result = 31 * result + (majorVersion != null ? majorVersion.hashCode() : 0);
         result = 31 * result + (minorVersion != null ? minorVersion.hashCode() : 0);
         return result;
+    }
+
+    public static void main(String[] args) {
+        analyze(new DatabaseInfo("MySQL"), new DatabaseInfo("MySQL"));
+        analyze(new DatabaseInfo("MySQL", "5.5.28"), new DatabaseInfo("MySQL", "5.5.29", 4, 4));
+        analyze(new DatabaseInfo("MySQL", "5.5.28"), new DatabaseInfo("MySQL", "5.5.28", 5, 1));
+    }
+
+    public static void analyze(DatabaseInfo databaseInfo1, DatabaseInfo databaseInfo2) {
+        System.out.println("comparing: " + databaseInfo1.compareTo(databaseInfo2) +
+                ", matching: " + databaseInfo1.matches(databaseInfo2));
     }
 }

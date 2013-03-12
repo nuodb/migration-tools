@@ -38,7 +38,7 @@ public class InspectionManagerTest {
                 });
     }
 
-    @DataProvider(name = "inspectData")
+    @DataProvider(name = "inspect")
     public Object[][] createInspectData() {
         MetaDataType[] objectTypes = MetaDataType.TYPES;
         Object[][] inspectData = new Object[objectTypes.length][];
@@ -55,7 +55,7 @@ public class InspectionManagerTest {
      * @param objectType to be inspected
      * @throws Exception
      */
-    @Test(dataProvider = "inspectData")
+    @Test(dataProvider = "inspect")
     public void testInspect(MetaDataType objectType) throws Exception {
         Inspector inspector = mock(Inspector.class);
         when(inspector.supports(objectType)).thenReturn(true);

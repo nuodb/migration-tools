@@ -60,7 +60,7 @@ public class RegexOptionTest {
         regexOption.setName("regex");
     }
 
-    @DataProvider(name = "addRegexData")
+    @DataProvider(name = "addRegex")
     public Object[][] createAddRegexData() {
         RegexCompiler regexCompiler = AntRegexCompiler.INSTANCE;
         return new Object[][]{
@@ -69,14 +69,14 @@ public class RegexOptionTest {
         };
     }
 
-    @Test(dataProvider = "addRegexData")
+    @Test(dataProvider = "addRegex")
     public void testAddRegex(String regex, Trigger trigger) {
         regexOption.addRegex(regex, 1, NORMAL);
 
         assertTrue(regexOption.getTriggers().contains(trigger));
     }
 
-    @DataProvider(name = "canProcessData")
+    @DataProvider(name = "canProcess")
     public Object[][] createCanProcessData() {
         return new Object[][]{
                 {"option.*", "--option.name"},
@@ -86,7 +86,7 @@ public class RegexOptionTest {
         };
     }
 
-    @Test(groups = "cli.parse.option.regexOption.canProcess", dataProvider = "canProcessData")
+    @Test(groups = "cli.parse.option.regexOption.canProcess", dataProvider = "canProcess")
     public void testCanProcess(String regex, String argument) {
         regexOption.addRegex(regex, 1, NORMAL);
 
@@ -95,7 +95,7 @@ public class RegexOptionTest {
                 "Regex option is expected to be able to process the argument");
     }
 
-    @DataProvider(name = "processData")
+    @DataProvider(name = "process")
     public Object[][] createProcessData() {
         return new Object[][]{
                 {"option.*",
@@ -104,7 +104,7 @@ public class RegexOptionTest {
         };
     }
 
-    @Test(dependsOnGroups = "cli.parse.option.regexOption.canProcess", dataProvider = "processData")
+    @Test(dependsOnGroups = "cli.parse.option.regexOption.canProcess", dataProvider = "process")
     public void testProcess(String regex, List<String> arguments, List<String> expected) {
         regexOption.setArgument(new ArgumentImpl());
         regexOption.addRegex(regex, 1, NORMAL);
