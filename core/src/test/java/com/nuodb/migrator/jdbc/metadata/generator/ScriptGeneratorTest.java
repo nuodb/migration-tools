@@ -94,7 +94,6 @@ public class ScriptGeneratorTest {
                 newArrayList(
                 "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, " +
                         "\"login\" VARCHAR(32) NOT NULL, PRIMARY KEY (\"id\"))")});
-
         return data.toArray(new Object[][]{});
     }
 

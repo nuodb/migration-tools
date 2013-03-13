@@ -35,6 +35,11 @@ import java.util.Iterator;
  */
 public class QueryUtils {
 
+    public static final String OR = "OR";
+    public static final String AND = "AND";
+    public static final String ASC = "ASC";
+    public static final String DESC = "DESC";
+
     public static String where(String query, Collection<String> filters, String operator) {
         return where(new StringBuilder(query), filters, operator).toString();
     }
@@ -49,7 +54,7 @@ public class QueryUtils {
                 query.append(filter);
                 if (iterator.hasNext()) {
                     query.append(' ');
-                    query.append(operator);
+                    query.append(operator != null ? operator : AND);
                 }
             }
         }
@@ -69,8 +74,7 @@ public class QueryUtils {
                 query.append(' ');
                 query.append(column);
                 if (iterator.hasNext()) {
-                    query.append(' ');
-                    query.append(column);
+                    query.append(',');
                 }
             }
             if (order != null) {

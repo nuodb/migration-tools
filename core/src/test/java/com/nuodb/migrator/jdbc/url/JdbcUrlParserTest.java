@@ -48,8 +48,8 @@ public class JdbcUrlParserTest {
                 {"jdbc:com.nuodb://localhost/database", null, null, EMPTY_PROPERTIES},
                 {"jdbc:com.nuodb://localhost/database?user=admin&schema=test", null, "test",
                         new PropertiesBuilder().put("user", "admin").put("schema", "test").build()},
-                {"jdbc:mysql://localhost:3306/catalog", "catalog", null, EMPTY_PROPERTIES},
-                {"jdbc:mysql://localhost:3306/catalog?connectTimeout=1000", "catalog", null,
+                {"jdbc:mysql://localhost:3306/database", "database", null, EMPTY_PROPERTIES},
+                {"jdbc:mysql://localhost:3306/database?connectTimeout=1000", "database", null,
                         new PropertiesBuilder().put("connectTimeout", "1000").build()}
         };
     }

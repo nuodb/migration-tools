@@ -42,6 +42,7 @@ import static java.lang.String.format;
 public class FileScriptExporter extends CountingScriptExporter {
 
     public static final String OUTPUT_ENCODING = "UTF-8";
+
     private static final String SEMICOLON = ";";
     private File file;
     private String encoding;

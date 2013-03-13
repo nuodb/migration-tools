@@ -46,7 +46,7 @@ import static org.testng.Assert.assertNotNull;
 @SuppressWarnings("unchecked")
 public class ServiceResolverTest {
 
-    private SimpleServiceResolver<Service> serviceResolver;
+    private ServiceResolver<Service> serviceResolver;
 
     @BeforeMethod
     public void setUp() {
@@ -57,10 +57,10 @@ public class ServiceResolverTest {
         serviceResolver.register(new DatabaseInfo("NuoDB", "1.0.1-128", 17), new ServiceInstance("service-3"));
         serviceResolver.register(new DatabaseInfo("NuoDB", "1.0.1-128", 17, 1), new ServiceInstance("service-4"));
 
-        serviceResolver.register(new DatabaseInfo("MySQL"), new ServiceInstance("service-4"));
-        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28"), new ServiceInstance("service-5"));
-        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28", 5), new ServiceInstance("service-6"));
-        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28", 5, 5), new ServiceInstance("service-7"));
+        serviceResolver.register(new DatabaseInfo("MySQL"), new ServiceInstance("service-5"));
+        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28"), new ServiceInstance("service-6"));
+        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28", 5), new ServiceInstance("service-7"));
+        serviceResolver.register(new DatabaseInfo("MySQL", "5.5.28", 5, 5), new ServiceInstance("service-8"));
 
         serviceResolver.register(new DatabaseInfo("PostgreSQL"), Service1.class);
         serviceResolver.register(new DatabaseInfo("PostgreSQL", "9.2.3"), Service2.class);
@@ -89,7 +89,6 @@ public class ServiceResolverTest {
 
         verify(serviceResolver).resolve(eq(metaData));
         verify(serviceResolver).resolve(any(DatabaseInfo.class));
-        verify(serviceResolver).resolveService(any(DatabaseInfo.class));
     }
 
     @DataProvider(name = "resolveServiceClass")
@@ -115,7 +114,6 @@ public class ServiceResolverTest {
 
         verify(serviceResolver).resolve(eq(metaData));
         verify(serviceResolver).resolve(any(DatabaseInfo.class));
-        verify(serviceResolver).resolveServiceClass(any(DatabaseInfo.class));
     }
 
     public static DatabaseMetaData createDatabaseMetaData(String productName, String productVersion,

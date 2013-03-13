@@ -32,8 +32,10 @@ import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
+
+import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 
 /**
  * @author Sergey Bushik
@@ -42,9 +44,9 @@ public class SelectQuery implements Query {
 
     private Dialect dialect;
     private boolean qualifyNames;
-    private List<Table> tables = Lists.newArrayList();
-    private List<Column> columns = Lists.newArrayList();
-    private List<String> conditions = Lists.newArrayList();
+    private Collection<Table> tables = Lists.newArrayList();
+    private Collection<Column> columns = Lists.newArrayList();
+    private Collection<String> filters = Lists.newArrayList();
 
     public void addColumn(Column column) {
         columns.add(column);
@@ -54,8 +56,8 @@ public class SelectQuery implements Query {
         tables.add(table);
     }
 
-    public void addCondition(String condition) {
-        conditions.add(condition);
+    public void addFilter(String filter) {
+        filters.add(filter);
     }
 
     @Override
@@ -77,15 +79,7 @@ public class SelectQuery implements Query {
                 query.append(", ");
             }
         }
-        if (conditions.size() > 0) {
-            query.append(" WHERE ");
-            for (Iterator<String> iterator = conditions.iterator(); iterator.hasNext(); ) {
-                query.append(iterator.next());
-                if (iterator.hasNext()) {
-                    query.append(" AND ");
-                }
-            }
-        }
+        where(query, filters, "AND");
         return query.toString();
     }
 
@@ -105,16 +99,16 @@ public class SelectQuery implements Query {
         this.qualifyNames = qualifyNames;
     }
 
-    public List<Table> getTables() {
+    public Collection<Table> getTables() {
         return tables;
     }
 
-    public List<Column> getColumns() {
+    public Collection<Column> getColumns() {
         return columns;
     }
 
-    public List<String> getConditions() {
-        return conditions;
+    public Collection<String> getFilters() {
+        return filters;
     }
 
     @Override

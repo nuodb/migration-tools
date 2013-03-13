@@ -1,8 +1,9 @@
 package com.nuodb.migrator.i18n;
 
+import org.testng.annotations.Test;
 
-import junit.framework.Assert;
-import org.junit.Test;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 
 public class ResourcesTest {
 
@@ -11,19 +12,19 @@ public class ResourcesTest {
 
     @Test
     public void testCustomLocale() throws Exception {
-        final Resources resources = new Resources(BUNDLE_NAME);
-        Assert.assertNotNull(resources);
-        final String message = resources.getMessage(RESOURCE_NAME);
-        Assert.assertNotNull(message);
-        Assert.assertFalse(message.length() == 0);
+        Resources resources = new Resources(BUNDLE_NAME);
+        assertNotNull(resources);
+        String message = resources.getMessage(RESOURCE_NAME);
+        assertNotNull(message);
+        assertFalse(message.length() == 0);
     }
 
     @Test
     public void testDefaultLocale() throws Exception {
-        final Resources resources = Resources.getResources();
-        Assert.assertNotNull(resources);
-        final String message = resources.getMessage(RESOURCE_NAME);
-        Assert.assertNotNull(message);
-        Assert.assertFalse(message.length() == 0);
+        Resources resources = Resources.getResources();
+        assertNotNull(resources);
+        String message = resources.getMessage(RESOURCE_NAME);
+        assertNotNull(message);
+        assertFalse(message.length() == 0);
     }
 }

@@ -46,7 +46,6 @@ public class ServiceInstance implements Service {
         ServiceInstance that = (ServiceInstance) o;
 
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
-
         return true;
     }
 

@@ -64,6 +64,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
+import static com.google.common.collect.Iterables.get;
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
@@ -217,7 +218,7 @@ public class DumpJob extends JobBase {
 
     protected CatalogEntry createCatalogEntry(Query query) {
         if (query instanceof SelectQuery) {
-            Table table = ((SelectQuery) query).getTables().get(0);
+            Table table = get(((SelectQuery) query).getTables(), 0);
             return new CatalogEntry(table.getName().toLowerCase(), getOutputType());
         } else {
             return new CatalogEntry(format(QUERY_ENTRY_NAME, new Date()), getOutputType());

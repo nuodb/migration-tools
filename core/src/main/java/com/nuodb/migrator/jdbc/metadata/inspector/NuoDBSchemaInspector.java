@@ -45,6 +45,7 @@ import java.util.Iterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.ASC;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 import static java.util.Collections.singleton;
@@ -79,7 +80,7 @@ public class NuoDBSchemaInspector extends InspectorBase<Catalog, SchemaInspectio
         }
         final StringBuilder query = new StringBuilder(QUERY);
         QueryUtils.where(query, filters, "AND");
-        QueryUtils.orderBy(query, singleton("SCHEMA"), "ASC");
+        QueryUtils.orderBy(query, singleton("SCHEMA"), ASC);
 
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(

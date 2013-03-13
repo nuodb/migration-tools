@@ -34,7 +34,6 @@ import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Sergey Bushik
@@ -77,7 +76,7 @@ public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
         selectQuery.addTable(table);
         if (filters != null) {
             for (String filter : filters) {
-                selectQuery.addCondition(filter);
+                selectQuery.addFilter(filter);
             }
         }
         return selectQuery;
@@ -127,7 +126,7 @@ public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
         return filters;
     }
 
-    public void setFilters(List<String> filters) {
+    public void setFilters(Collection<String> filters) {
         this.filters = filters;
     }
 }
