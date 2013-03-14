@@ -136,7 +136,7 @@ public class JdbcTypeAdapterTest {
                 }
         ));
 
-        java.sql.Date date = java.sql.Date.valueOf("2000-01-01");
+        java.sql.Date date = new java.sql.Date(946677600000L);
         data.addAll(newArrayList(
                 new Object[][]{
                         {JdbcDateTypeAdapter.INSTANCE, null, null},
@@ -147,7 +147,7 @@ public class JdbcTypeAdapterTest {
                 }
         ));
 
-        Timestamp timestamp = Timestamp.valueOf("2000-01-01 10:45:00.123");
+        Timestamp timestamp = new Timestamp(946716300123L);
         data.addAll(newArrayList(
                 new Object[][]{
                         {JdbcTimestampTypeAdapter.INSTANCE, null, null},
@@ -158,7 +158,7 @@ public class JdbcTypeAdapterTest {
                 }
         ));
 
-        Time time = Time.valueOf("10:45:00");
+        Time time = new Time(27900000L);
         data.addAll(newArrayList(
                 new Object[][]{
                         {JdbcTimeTypeAdapter.INSTANCE, null, null},
@@ -239,7 +239,7 @@ public class JdbcTypeAdapterTest {
                 }
         ));
 
-        java.sql.Date date = java.sql.Date.valueOf("2000-01-01");
+        java.sql.Date date = new java.sql.Date(946677600000L);
         data.addAll(newArrayList(
                 new Object[][]{
                         {JdbcDateTypeAdapter.INSTANCE, null, java.sql.Date.class, null},
@@ -253,7 +253,7 @@ public class JdbcTypeAdapterTest {
                 }
         ));
 
-        Timestamp timestamp = Timestamp.valueOf("2000-01-01 10:45:00.123");
+        Timestamp timestamp = new Timestamp(946716300123L);
         data.addAll(newArrayList(
                 new Object[][]{
                         {JdbcTimestampTypeAdapter.INSTANCE, null, Timestamp.class, null},
@@ -268,7 +268,7 @@ public class JdbcTypeAdapterTest {
                 }
         ));
 
-        Time time = Time.valueOf("09:30:45");
+        Time time = new Time(23445000L);
         data.addAll(newArrayList(
                 new Object[][]{
                         {JdbcTimeTypeAdapter.INSTANCE, null, Time.class, null},
