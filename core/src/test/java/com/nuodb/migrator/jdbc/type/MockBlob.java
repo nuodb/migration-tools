@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.google.common.collect.Lists;
 import com.google.common.primitives.Bytes;
 
 import java.io.ByteArrayInputStream;
@@ -38,6 +37,7 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.apache.commons.codec.binary.Hex.encodeHex;
 
 /**
@@ -45,7 +45,7 @@ import static org.apache.commons.codec.binary.Hex.encodeHex;
  */
 public class MockBlob implements Blob {
 
-    private List<Byte> buffer = Lists.newArrayList();
+    private List<Byte> buffer = newArrayList();
     private boolean released;
 
     public MockBlob() {
@@ -157,13 +157,13 @@ public class MockBlob implements Blob {
 
     private byte[] getBytes(long position, long length) throws SQLException {
         validate();
-        length = fixLength(position, (int) length);
+        length = validateLength(position, (int) length);
         long fromIndex = position - 1;
         long toIndex = fromIndex + length;
         return Bytes.toArray(buffer.subList((int) fromIndex, (int) toIndex));
     }
 
-    private int fixLength(long position, int length) {
+    private int validateLength(long position, int length) {
         if (length < 0) {
             throw new IllegalArgumentException("Length must be greater or equals to 0");
         }

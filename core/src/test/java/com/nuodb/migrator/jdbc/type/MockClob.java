@@ -76,7 +76,7 @@ public class MockClob implements Clob {
 
     public Reader getCharacterStream(long pos, long length) throws SQLException {
         validate();
-        length = fixLength(pos, (int) length);
+        length = validateLength(pos, (int) length);
         return new StringReader(getSubString(pos, (int) length));
     }
 
@@ -87,7 +87,7 @@ public class MockClob implements Clob {
 
     public String getSubString(long position, int length) throws SQLException {
         validate();
-        length = fixLength(position, length);
+        length = validateLength(position, length);
         return buffer.substring((int) (position - 1), (int) (position - 1) + length);
     }
 
@@ -145,7 +145,7 @@ public class MockClob implements Clob {
         return buffer.toString();
     }
 
-    private int fixLength(long position, int length) {
+    private int validateLength(long position, int length) {
         if (length < 0) {
             throw new IllegalArgumentException("Length must be greater or equals to 0");
         }

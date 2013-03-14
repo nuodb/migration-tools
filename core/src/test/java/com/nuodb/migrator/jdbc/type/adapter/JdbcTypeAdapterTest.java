@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.type.adapter;
 
-import com.nuodb.migrator.jdbc.type.*;
+import com.nuodb.migrator.jdbc.type.JdbcTypeAdapter;
+import com.nuodb.migrator.jdbc.type.MockBlob;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeMethod;
@@ -42,21 +42,17 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.NClob;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.Calendar;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.type.MockStreams.newEqualsInputStream;
 import static com.nuodb.migrator.jdbc.type.MockStreams.newEqualsReader;
+import static com.nuodb.migrator.jdbc.type.MockTypes.*;
 import static org.apache.commons.lang3.time.DateUtils.toCalendar;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -70,23 +66,23 @@ public class JdbcTypeAdapterTest {
 
     @BeforeMethod
     public void setUp() throws SQLException {
-        MockitoAnnotations.initMocks(this);
+        initMocks(this);
         given(connection.createBlob()).will(new Answer<Blob>() {
             @Override
             public Blob answer(InvocationOnMock invocation) throws Throwable {
-                return new MockBlob();
+                return newBlob();
             }
         });
         given(connection.createClob()).will(new Answer<Clob>() {
             @Override
             public Clob answer(InvocationOnMock invocation) throws Throwable {
-                return new MockClob();
+                return newClob();
             }
         });
         given(connection.createNClob()).will(new Answer<NClob>() {
             @Override
             public NClob answer(InvocationOnMock invocation) throws Throwable {
-                return new MockNClob();
+                return newNClob();
             }
         });
     }
@@ -117,26 +113,26 @@ public class JdbcTypeAdapterTest {
                 }
         ));
 
-        MockClob mockClob = new MockClob("text");
-        data.addAll(newArrayList(
-                new Object[][]{
-                        {JdbcClobTypeAdapter.INSTANCE, null, null},
-                        {JdbcClobTypeAdapter.INSTANCE, "text", mockClob},
-                        {JdbcClobTypeAdapter.INSTANCE, "text".toCharArray(), mockClob},
-                        {JdbcClobTypeAdapter.INSTANCE, new StringReader("text"), mockClob},
-                        {JdbcClobTypeAdapter.INSTANCE, new ByteArrayInputStream("text".getBytes()), mockClob},
-                }
-        ));
-
-        MockBlob mockBlob = new MockBlob(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE});
+        Blob blob = newBlob(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE});
         data.addAll(newArrayList(
                 new Object[][]{
                         {JdbcBlobTypeAdapter.INSTANCE, null, null},
                         {JdbcBlobTypeAdapter.INSTANCE,
-                                new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE}, mockBlob},
+                                new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE}, blob},
                         {JdbcBlobTypeAdapter.INSTANCE,
                                 new ByteArrayInputStream(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE}
-                        ), mockBlob}
+                        ), blob}
+                }
+        ));
+
+        Clob clob = newClob("text");
+        data.addAll(newArrayList(
+                new Object[][]{
+                        {JdbcClobTypeAdapter.INSTANCE, null, null},
+                        {JdbcClobTypeAdapter.INSTANCE, "text", clob},
+                        {JdbcClobTypeAdapter.INSTANCE, "text".toCharArray(), clob},
+                        {JdbcClobTypeAdapter.INSTANCE, new StringReader("text"), clob},
+                        {JdbcClobTypeAdapter.INSTANCE, new ByteArrayInputStream("text".getBytes()), clob},
                 }
         ));
 
@@ -216,30 +212,30 @@ public class JdbcTypeAdapterTest {
                 }
         ));
 
-        MockClob mockClob = new MockClob("text");
-        data.addAll(newArrayList(
-                new Object[][]{
-                        {JdbcClobTypeAdapter.INSTANCE, null, Clob.class, null},
-                        {JdbcClobTypeAdapter.INSTANCE, mockClob, char[].class, "text".toCharArray()},
-                        {JdbcClobTypeAdapter.INSTANCE, mockClob, String.class, "text"},
-                        {JdbcClobTypeAdapter.INSTANCE, mockClob, Reader.class,
-                                newEqualsReader(new StringReader("text"))},
-                        {JdbcClobTypeAdapter.INSTANCE, mockClob, InputStream.class,
-                                newEqualsInputStream(new ByteArrayInputStream("text".getBytes()))}
-                }
-        ));
-
-        MockBlob mockBlob = new MockBlob(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE});
+        Blob blob = newBlob(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE});
         data.addAll(newArrayList(
                 new Object[][]{
                         {JdbcBlobTypeAdapter.INSTANCE, null, Blob.class, null},
-                        {JdbcBlobTypeAdapter.INSTANCE, mockBlob, Blob.class,
+                        {JdbcBlobTypeAdapter.INSTANCE, blob, Blob.class,
                                 new MockBlob(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE})},
-                        {JdbcBlobTypeAdapter.INSTANCE, mockBlob, byte[].class,
+                        {JdbcBlobTypeAdapter.INSTANCE, blob, byte[].class,
                                 new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE}},
-                        {JdbcBlobTypeAdapter.INSTANCE, mockBlob, InputStream.class,
+                        {JdbcBlobTypeAdapter.INSTANCE, blob, InputStream.class,
                                 newEqualsInputStream(new ByteArrayInputStream(
                                         new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE}))}
+                }
+        ));
+
+        Clob clob = newClob("text");
+        data.addAll(newArrayList(
+                new Object[][]{
+                        {JdbcClobTypeAdapter.INSTANCE, null, Clob.class, null},
+                        {JdbcClobTypeAdapter.INSTANCE, clob, char[].class, "text".toCharArray()},
+                        {JdbcClobTypeAdapter.INSTANCE, clob, String.class, "text"},
+                        {JdbcClobTypeAdapter.INSTANCE, clob, Reader.class,
+                                newEqualsReader(new StringReader("text"))},
+                        {JdbcClobTypeAdapter.INSTANCE, clob, InputStream.class,
+                                newEqualsInputStream(new ByteArrayInputStream("text".getBytes()))}
                 }
         ));
 
@@ -263,10 +259,10 @@ public class JdbcTypeAdapterTest {
                         {JdbcTimestampTypeAdapter.INSTANCE, null, Timestamp.class, null},
                         {JdbcTimestampTypeAdapter.INSTANCE, timestamp, Long.class, 946716300123L},
                         {JdbcTimestampTypeAdapter.INSTANCE, timestamp, Timestamp.class, new Timestamp(946716300123L)},
-                        {JdbcTimestampTypeAdapter.INSTANCE, timestamp, java.util.Date.class, new java.util.Date(
-                                946716300123L)},
-                        {JdbcTimestampTypeAdapter.INSTANCE, timestamp, java.sql.Date.class, new java.sql.Date(
-                                946716300123L)},
+                        {JdbcTimestampTypeAdapter.INSTANCE, timestamp, java.util.Date.class,
+                                new java.util.Date(946716300123L)},
+                        {JdbcTimestampTypeAdapter.INSTANCE, timestamp, java.sql.Date.class,
+                                new java.sql.Date(946716300123L)},
                         {JdbcTimestampTypeAdapter.INSTANCE, timestamp, Calendar.class,
                                 toCalendar(new java.util.Date(946716300123L))},
                 }
