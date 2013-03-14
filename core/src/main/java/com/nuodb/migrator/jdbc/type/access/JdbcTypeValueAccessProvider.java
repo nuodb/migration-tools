@@ -29,7 +29,6 @@ package com.nuodb.migrator.jdbc.type.access;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.model.ValueModel;
-import com.nuodb.migrator.jdbc.model.ValueModelFactory;
 import com.nuodb.migrator.jdbc.type.*;
 
 import java.sql.*;
@@ -43,6 +42,9 @@ import static java.lang.String.format;
  */
 @SuppressWarnings("unchecked")
 public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
+
+    public JdbcTypeValueAccessProvider() {
+    }
 
     public JdbcTypeValueAccessProvider(JdbcTypeRegistry jdbcTypeRegistry) {
         super(jdbcTypeRegistry);
@@ -82,7 +84,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
 
     public <T> JdbcTypeValueAccess<T> getResultSetAccess(ResultSet resultSet, int column) {
         try {
-            return getResultSetAccess(resultSet, ValueModelFactory.createValueModel(resultSet, column), column);
+            return getResultSetAccess(resultSet, createValueModel(resultSet, column), column);
         } catch (SQLException exception) {
             throw new JdbcTypeException(exception);
         }

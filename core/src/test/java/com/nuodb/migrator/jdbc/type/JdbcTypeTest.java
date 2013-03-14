@@ -27,51 +27,52 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
+
+import static org.mockito.Mockito.*;
+
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeSpecifiers {
+public class JdbcTypeTest {
 
-    private Integer size;
-    private Integer precision;
-    private Integer scale;
+    private static final int COLUMN = 1;
+    private JdbcTypeBase<Object> jdbcTypeBase;
 
-    public Integer getSize() {
-        return size;
+    @BeforeMethod
+    public void setUp() {
+        jdbcTypeBase = spy(new JdbcTypeBase<Object>(Types.OTHER, Object.class) {
+            @Override
+            public Object getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+                return null;
+            }
+
+            @Override
+            protected void setNullSafeValue(PreparedStatement statement, Object value, int column,
+                                            Map<String, Object> options) throws SQLException {
+            }
+        });
     }
 
-    public Integer getPrecision() {
-        return precision;
+    @Test
+    public void testSetNullValue() throws Exception {
+        PreparedStatement statement = mock(PreparedStatement.class);
+        jdbcTypeBase.setValue(statement, COLUMN, null, null);
+        verify(jdbcTypeBase).setNullValue(statement, COLUMN);
     }
 
-    public Integer getScale() {
-        return scale;
-    }
-
-    public JdbcTypeSpecifiers withSize(Integer size) {
-        this.size = size;
-        return this;
-    }
-
-    public JdbcTypeSpecifiers withPrecision(Integer precision) {
-        this.precision = precision;
-        return this;
-    }
-
-    public JdbcTypeSpecifiers withScale(Integer scale) {
-        this.scale = scale;
-        return this;
-    }
-
-    public static JdbcTypeSpecifiers newSize(Integer size) {
-        return new JdbcTypeSpecifiers().withSize(size);
-    }
-
-    public static JdbcTypeSpecifiers newScale(Integer scale) {
-        return new JdbcTypeSpecifiers().withScale(scale);
-    }
-
-    public static JdbcTypeSpecifiers newSizePrecisionScale(Integer size, Integer precision, Integer scale) {
-        return new JdbcTypeSpecifiers().withSize(size).withPrecision(precision).withScale(scale);
+    @Test
+    public void testSetNullSafeValue() throws Exception {
+        PreparedStatement statement = mock(PreparedStatement.class);
+        Object value = new Object();
+        jdbcTypeBase.setValue(statement, COLUMN, value, null);
+        verify(jdbcTypeBase).setNullSafeValue(statement, value, COLUMN, null);
     }
 }

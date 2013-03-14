@@ -42,6 +42,5 @@ public interface JdbcTypeValueGetter<T> {
 
     T getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException;
 
-    <X> X getValue(ResultSet resultSet, int column, Class<X> valueClass,
-                   Map<String, Object> options) throws SQLException;
+    <X> X getValue(ResultSet resultSet, int column, Class<X> valueClass, Map<String, Object> options) throws SQLException;
 }

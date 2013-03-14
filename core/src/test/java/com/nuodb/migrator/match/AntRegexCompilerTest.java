@@ -11,7 +11,7 @@ public class AntRegexCompilerTest {
     @Test
     public void testMatcherCreation() throws Exception {
         RegexCompiler compiler = AntRegexCompiler.INSTANCE;
-        final Regex matcher = compiler.compile(PATTERN);
+        Regex matcher = compiler.compile(PATTERN);
         assertNotNull(matcher);
         assertNotNull(compiler.compile("*TEST*"));
         assertEquals(matcher.regex(), PATTERN);

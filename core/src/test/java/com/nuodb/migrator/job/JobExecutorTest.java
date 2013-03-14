@@ -25,53 +25,10 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.type;
+package com.nuodb.migrator.job;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeSpecifiers {
-
-    private Integer size;
-    private Integer precision;
-    private Integer scale;
-
-    public Integer getSize() {
-        return size;
-    }
-
-    public Integer getPrecision() {
-        return precision;
-    }
-
-    public Integer getScale() {
-        return scale;
-    }
-
-    public JdbcTypeSpecifiers withSize(Integer size) {
-        this.size = size;
-        return this;
-    }
-
-    public JdbcTypeSpecifiers withPrecision(Integer precision) {
-        this.precision = precision;
-        return this;
-    }
-
-    public JdbcTypeSpecifiers withScale(Integer scale) {
-        this.scale = scale;
-        return this;
-    }
-
-    public static JdbcTypeSpecifiers newSize(Integer size) {
-        return new JdbcTypeSpecifiers().withSize(size);
-    }
-
-    public static JdbcTypeSpecifiers newScale(Integer scale) {
-        return new JdbcTypeSpecifiers().withScale(scale);
-    }
-
-    public static JdbcTypeSpecifiers newSizePrecisionScale(Integer size, Integer precision, Integer scale) {
-        return new JdbcTypeSpecifiers().withSize(size).withPrecision(precision).withScale(scale);
-    }
+public class JobExecutorTest {
 }

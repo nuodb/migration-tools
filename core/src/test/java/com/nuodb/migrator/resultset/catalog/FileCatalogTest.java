@@ -1,33 +1,32 @@
 package com.nuodb.migrator.resultset.catalog;
 
-
-import com.nuodb.migrator.TestUtils;
 import com.nuodb.migrator.resultset.format.csv.CsvAttributes;
 import com.nuodb.migrator.spec.ResourceSpec;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 
-public class FileCatalogIntegrationTest extends TestUtils {
+import static org.apache.commons.io.FileUtils.forceDelete;
+import static org.apache.commons.io.FileUtils.getTempDirectoryPath;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-    private static final String DIR = "/tmp/nuodb-migrator";
+public class FileCatalogTest {
 
-    private CatalogWriter writer;
     private FileCatalog fileCatalog;
+    private CatalogWriter writer;
 
     @Before
     public void setUp() throws Exception {
+        String fileCatalogPath = getTempDirectoryPath();
         ResourceSpec outputSpec = new ResourceSpec();
-        outputSpec.setPath(DIR);
+        outputSpec.setPath(fileCatalogPath);
         outputSpec.setType(CsvAttributes.FORMAT_TYPE);
 
-        FileCatalog catalogFile = new FileCatalog(outputSpec.getPath());
-        Assert.assertEquals(DIR, catalogFile.getPath());
-        this.fileCatalog = catalogFile;
+        fileCatalog = new FileCatalog(outputSpec.getPath());
+        assertEquals(fileCatalog.getPath(), fileCatalogPath);
     }
 
     @Test
@@ -35,7 +34,7 @@ public class FileCatalogIntegrationTest extends TestUtils {
         try {
             writer = fileCatalog.getCatalogWriter();
         } catch (CatalogException exception) {
-            Assert.fail(exception.getMessage());
+            fail(exception.getMessage());
         }
     }
 
@@ -46,7 +45,7 @@ public class FileCatalogIntegrationTest extends TestUtils {
         }
         File file = fileCatalog.getCatalogDir();
         if (file != null && file.exists()) {
-            FileUtils.forceDelete(file);
+            forceDelete(file);
         }
     }
 }

@@ -27,13 +27,13 @@
  */
 package com.nuodb.migrator.resultset.catalog;
 
-import com.nuodb.migrator.match.AntRegexCompiler;
 import com.nuodb.migrator.match.Regex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
+import static com.nuodb.migrator.match.AntRegexCompiler.INSTANCE;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
@@ -41,7 +41,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  */
 public class FileCatalog implements Catalog {
 
-    private static Regex CATALOG_FILE_REGEX = AntRegexCompiler.INSTANCE.compile("*.cat");
+    private static Regex CATALOG_FILE_REGEX = INSTANCE.compile("*.cat");
     private static final String CATALOG_FILE_NAME = "dump.cat";
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -58,6 +58,10 @@ public class FileCatalog implements Catalog {
         this.catalogFile = getCatalogFile();
     }
 
+    public String getPath() {
+        return path;
+    }
+
     protected File getPathFile() {
         return new File(path == null ? EMPTY : path).getAbsoluteFile();
     }
@@ -67,20 +71,16 @@ public class FileCatalog implements Catalog {
     }
 
     protected boolean isPathCatalogFile(File pathFile) {
-        return ((pathFile.exists() && pathFile.isFile()) || isCatalogFileLike(pathFile));
+        return ((pathFile.exists() && pathFile.isFile()) || isLikeCatalogFile(pathFile));
     }
 
-    protected boolean isCatalogFileLike(File pathFile) {
+    protected boolean isLikeCatalogFile(File pathFile) {
         return CATALOG_FILE_REGEX.test(pathFile.getName());
     }
 
     protected File getCatalogFile() {
         String catalogFile = isPathCatalogFile(pathFile) ? pathFile.getName() : CATALOG_FILE_NAME;
         return new File(catalogDir, catalogFile);
-    }
-
-    public String getPath() {
-        return path;
     }
 
     @Override

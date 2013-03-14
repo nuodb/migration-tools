@@ -79,7 +79,7 @@ public class JdbcBigIntegerTypeAdapter extends JdbcTypeAdapterBase<BigInteger> {
         } else if (valueClass.isAssignableFrom(Long.class)) {
             return (X) Long.valueOf(value.longValue());
         } else if (valueClass.isAssignableFrom(Integer.class)) {
-            return (X) Integer.valueOf(value.shortValue());
+            return (X) Integer.valueOf(value.intValue());
         } else if (valueClass.isAssignableFrom(Short.class)) {
             return (X) Short.valueOf(value.shortValue());
         } else if (valueClass.isAssignableFrom(Byte.class)) {

@@ -72,7 +72,7 @@ public class JdbcDateTypeAdapter extends JdbcTypeAdapterBase<Date> {
         } else if (valueClass.isAssignableFrom(Long.class)) {
             return (X) Long.valueOf(value.getTime());
         } else if (valueClass.isAssignableFrom(Date.class)) {
-            return (X) new Date(value.getTime());
+            return (X) value;
         } else if (valueClass.isAssignableFrom(Time.class)) {
             return (X) new Time(value.getTime());
         } else if (valueClass.isAssignableFrom(Timestamp.class)) {

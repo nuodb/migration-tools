@@ -35,7 +35,6 @@ import com.nuodb.migrator.jdbc.type.JdbcTypeException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -127,7 +126,7 @@ public class JdbcClobTypeAdapter extends JdbcTypeAdapterBase<Clob> {
             X x = (X) value.getCharacterStream();
             releaseClobAfterAccess(connection, value);
             return x;
-        } else if (valueClass.isAssignableFrom(OutputStream.class)) {
+        } else if (valueClass.isAssignableFrom(InputStream.class)) {
             initClobBeforeAccess(connection, value);
             X x = (X) value.getAsciiStream();
             releaseClobAfterAccess(connection, value);

@@ -57,7 +57,6 @@ public class DialectResolverTest {
                 instanceof OracleDialect);
         assertTrue(dialectResolver.resolve(
                 new DatabaseInfo("Microsoft SQL Server", "11.00.3339", 0, 11)) instanceof MSSQLServerDialect);
-
         assertNotNull(dialectResolver.resolve(new DatabaseInfo("DB2", "DSN10015", 10, 1)));
     }
 }

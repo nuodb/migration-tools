@@ -27,51 +27,17 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import java.sql.NClob;
+
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeSpecifiers {
+public class MockNClob extends MockClob implements NClob {
 
-    private Integer size;
-    private Integer precision;
-    private Integer scale;
-
-    public Integer getSize() {
-        return size;
+    public MockNClob() {
     }
 
-    public Integer getPrecision() {
-        return precision;
-    }
-
-    public Integer getScale() {
-        return scale;
-    }
-
-    public JdbcTypeSpecifiers withSize(Integer size) {
-        this.size = size;
-        return this;
-    }
-
-    public JdbcTypeSpecifiers withPrecision(Integer precision) {
-        this.precision = precision;
-        return this;
-    }
-
-    public JdbcTypeSpecifiers withScale(Integer scale) {
-        this.scale = scale;
-        return this;
-    }
-
-    public static JdbcTypeSpecifiers newSize(Integer size) {
-        return new JdbcTypeSpecifiers().withSize(size);
-    }
-
-    public static JdbcTypeSpecifiers newScale(Integer scale) {
-        return new JdbcTypeSpecifiers().withScale(scale);
-    }
-
-    public static JdbcTypeSpecifiers newSizePrecisionScale(Integer size, Integer precision, Integer scale) {
-        return new JdbcTypeSpecifiers().withSize(size).withPrecision(precision).withScale(scale);
+    public MockNClob(String buffer) {
+        super(buffer);
     }
 }
