@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.google.common.primitives.Bytes;
+import com.nuodb.migrator.utils.StreamUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,12 +38,14 @@ import java.sql.SQLException;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.primitives.Bytes.asList;
+import static com.google.common.primitives.Bytes.toArray;
 import static org.apache.commons.codec.binary.Hex.encodeHex;
 
 /**
  * @author Sergey Bushik
  */
-public class MockBlob implements Blob {
+class MockBlob implements Blob {
 
     private List<Byte> buffer = newArrayList();
     private boolean released;
@@ -52,7 +54,7 @@ public class MockBlob implements Blob {
     }
 
     public MockBlob(byte[] data) {
-        buffer = Bytes.asList(data);
+        buffer = asList(data);
     }
 
     public long length() throws SQLException {
@@ -74,7 +76,7 @@ public class MockBlob implements Blob {
 
     public long position(byte[] pattern, long start) throws SQLException {
         validate();
-        int index = indexOf(Bytes.toArray(buffer), pattern, (int) (start - 1));
+        int index = indexOf(toArray(buffer), pattern, (int) (start - 1));
         if (index != -1) {
             index += 1;
         }
@@ -91,15 +93,13 @@ public class MockBlob implements Blob {
 
     public int setBytes(long position, byte[] bytes, int offset, int length) throws SQLException {
         validate();
-        int fromIndex = offset;
-        int toIndex = fromIndex + length;
-        buffer.addAll((int) (position - 1), Bytes.asList(bytes).subList(fromIndex, toIndex));
+        buffer.addAll((int) (position - 1), asList(bytes).subList(offset, offset + length));
         return length;
     }
 
     public OutputStream setBinaryStream(long position) throws SQLException {
         validate();
-        return new MemoryBlobOutputStream((int) (position - 1));
+        return new BlobOutputStream((int) (position - 1));
     }
 
     public void truncate(long length) throws SQLException {
@@ -121,7 +121,7 @@ public class MockBlob implements Blob {
         if (!(o instanceof Blob)) return false;
         Blob blob = (Blob) o;
         try {
-            return MockStreams.equals(getBinaryStream(), blob.getBinaryStream());
+            return StreamUtils.equals(getBinaryStream(), blob.getBinaryStream());
         } catch (IOException exception) {
             throw new JdbcTypeException(exception);
         } catch (SQLException exception) {
@@ -130,7 +130,7 @@ public class MockBlob implements Blob {
     }
 
     public String toString() {
-        return new String(encodeHex(Bytes.toArray(buffer), false));
+        return new String(encodeHex(toArray(buffer), false));
     }
 
     private static int indexOf(byte[] buffer, byte[] pattern, int start) {
@@ -160,7 +160,7 @@ public class MockBlob implements Blob {
         length = validateLength(position, (int) length);
         long fromIndex = position - 1;
         long toIndex = fromIndex + length;
-        return Bytes.toArray(buffer.subList((int) fromIndex, (int) toIndex));
+        return toArray(buffer.subList((int) fromIndex, (int) toIndex));
     }
 
     private int validateLength(long position, int length) {
@@ -173,10 +173,10 @@ public class MockBlob implements Blob {
         return length;
     }
 
-    private class MemoryBlobOutputStream extends OutputStream {
+    private class BlobOutputStream extends OutputStream {
         private int index;
 
-        public MemoryBlobOutputStream(int index) {
+        public BlobOutputStream(int index) {
             this.index = index;
         }
 

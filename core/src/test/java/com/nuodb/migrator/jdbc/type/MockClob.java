@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import com.nuodb.migrator.utils.StreamUtils;
 import org.apache.commons.io.Charsets;
 
 import java.io.*;
@@ -37,7 +38,7 @@ import java.sql.SQLException;
 /**
  * @author Sergey Bushik
  */
-public class MockClob implements Clob {
+class MockClob implements Clob {
 
     private static final transient Charset BINARY_CHARSET = Charsets.toCharset("ISO-8859-1");
     private StringBuffer buffer = new StringBuffer();
@@ -66,7 +67,7 @@ public class MockClob implements Clob {
 
     public OutputStream setAsciiStream(long pos) throws SQLException {
         validate();
-        return new MemoryClobOutputStream((int) (pos - 1));
+        return new ClobOutputStream((int) (pos - 1));
     }
 
     public Reader getCharacterStream() throws SQLException {
@@ -129,7 +130,7 @@ public class MockClob implements Clob {
         if (!(o instanceof Clob)) return false;
         Clob clob = (Clob) o;
         try {
-            return MockStreams.equals(getAsciiStream(), clob.getAsciiStream());
+            return StreamUtils.equals(getAsciiStream(), clob.getAsciiStream());
         } catch (IOException exception) {
             throw new JdbcTypeException(exception);
         } catch (SQLException exception) {
@@ -179,11 +180,11 @@ public class MockClob implements Clob {
         }
     }
 
-    private class MemoryClobOutputStream extends OutputStream {
+    private class ClobOutputStream extends OutputStream {
 
         private int index;
 
-        public MemoryClobOutputStream(int index) {
+        public ClobOutputStream(int index) {
             this.index = index;
         }
 

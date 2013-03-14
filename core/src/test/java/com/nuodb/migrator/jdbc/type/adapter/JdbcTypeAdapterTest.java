@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.type.adapter;
 
 import com.nuodb.migrator.jdbc.type.JdbcTypeAdapter;
-import com.nuodb.migrator.jdbc.type.MockBlob;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -47,9 +46,9 @@ import java.util.Calendar;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.type.MockStreams.newEqualsInputStream;
-import static com.nuodb.migrator.jdbc.type.MockStreams.newEqualsReader;
 import static com.nuodb.migrator.jdbc.type.MockTypes.*;
+import static com.nuodb.migrator.utils.StreamUtils.newEqualsInputStream;
+import static com.nuodb.migrator.utils.StreamUtils.newEqualsReader;
 import static org.apache.commons.lang3.time.DateUtils.toCalendar;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -58,7 +57,7 @@ import static org.testng.Assert.assertEquals;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("SuspiciousToArrayCall")
+@SuppressWarnings({"unchecked", "SuspiciousToArrayCall"})
 public class JdbcTypeAdapterTest {
 
     @Mock
@@ -217,7 +216,7 @@ public class JdbcTypeAdapterTest {
                 new Object[][]{
                         {JdbcBlobTypeAdapter.INSTANCE, null, Blob.class, null},
                         {JdbcBlobTypeAdapter.INSTANCE, blob, Blob.class,
-                                new MockBlob(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE})},
+                                newBlob(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE})},
                         {JdbcBlobTypeAdapter.INSTANCE, blob, byte[].class,
                                 new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE}},
                         {JdbcBlobTypeAdapter.INSTANCE, blob, InputStream.class,

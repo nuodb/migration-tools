@@ -32,7 +32,7 @@ import java.sql.NClob;
 /**
  * @author Sergey Bushik
  */
-public class MockNClob extends MockClob implements NClob {
+class MockNClob extends MockClob implements NClob {
 
     public MockNClob() {
     }
