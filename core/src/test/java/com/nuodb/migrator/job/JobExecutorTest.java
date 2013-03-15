@@ -27,8 +27,62 @@
  */
 package com.nuodb.migrator.job;
 
+import com.nuodb.migrator.MigrationException;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
+import static junit.framework.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 /**
  * @author Sergey Bushik
  */
 public class JobExecutorTest {
+
+    private Job job;
+    private JobExecutor jobExecutor;
+    private Map<String, Object> context;
+
+    @BeforeMethod
+    public void setUp() {
+        job = mock(Job.class);
+        given(job.getName()).willReturn("mock");
+        jobExecutor = createJobExecutor(job);
+
+        context = new HashMap<String, Object>();
+    }
+
+    @Test
+    public void testExecute() throws Exception {
+        JobStatus jobStatus = jobExecutor.getJobStatus();
+        assertFalse(jobStatus.isRunning());
+
+        assertTrue(jobExecutor.execute(context));
+
+        verify(job).execute(any(JobExecution.class));
+        assertEquals(jobStatus.getJobStatusType(), JobStatusType.FINISHED);
+    }
+
+    @Test
+    public void testExecuteFailure() throws Exception {
+        MigrationException failure = new MigrationException("Failure");
+        willThrow(failure).given(job).execute(any(JobExecution.class));
+
+        JobStatus jobStatus = jobExecutor.getJobStatus();
+        assertFalse(jobStatus.isRunning());
+
+        assertTrue(jobExecutor.execute(context));
+
+        verify(job).execute(any(JobExecution.class));
+        assertEquals(failure, jobStatus.getFailure());
+        assertEquals(jobStatus.getJobStatusType(), JobStatusType.FINISHED);
+    }
 }

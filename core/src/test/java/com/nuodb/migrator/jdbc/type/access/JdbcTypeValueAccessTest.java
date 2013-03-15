@@ -57,7 +57,7 @@ public class JdbcTypeValueAccessTest {
     private static final int COLUMN = 1;
 
     @Spy
-    private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider;
+    private JdbcTypeValueAccessProvider jdbcTypeValueAccessProvider = new JdbcTypeValueAccessProvider();
     @Mock
     private Connection connection;
     @Mock

@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.type.adapter;
 
 import com.nuodb.migrator.jdbc.type.JdbcTypeAdapter;
+import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;

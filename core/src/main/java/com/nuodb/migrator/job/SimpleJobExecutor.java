@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
@@ -89,13 +91,13 @@ public class SimpleJobExecutor implements JobExecutor {
                 jobStatus.setExecutionStartDate(new Date());
             } else {
                 if (logger.isDebugEnabled()) {
-                    logger.info(String.format("Job %1$s is already running or it has been stop", job.getName()));
+                    logger.info(format("Job %1$s is already running or it has been stop", job.getName()));
                 }
                 return false;
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Starting execution of job %1$s", job.getName()));
+            logger.debug(format("Starting execution of job %1$s", job.getName()));
         }
         JobExecution execution = createJobExecution(context);
         try {
@@ -107,8 +109,8 @@ public class SimpleJobExecutor implements JobExecutor {
             }
             fireJobExecutionEvent(new JobExecutionEvent(execution));
         } catch (Throwable error) {
-            if (logger.isErrorEnabled()) {
-                logger.error(String.format("Job %1$s execution failed", job.getName()), error);
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Job %1$s execution failed", job.getName()));
             }
             synchronized (jobStatus) {
                 jobStatus.setExecutionEndDate(new Date());
