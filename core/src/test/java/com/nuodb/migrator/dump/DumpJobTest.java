@@ -27,8 +27,91 @@
  */
 package com.nuodb.migrator.dump;
 
+import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
+import com.nuodb.migrator.jdbc.dialect.DialectResolver;
+import com.nuodb.migrator.job.JobExecutor;
+import com.nuodb.migrator.resultset.catalog.Catalog;
+import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.utils.ValidationException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.assertTrue;
+
 /**
  * @author Sergey Bushik
  */
 public class DumpJobTest {
+
+    @Spy
+    @InjectMocks
+    private DumpJob dumpJob;
+    @Mock
+    private Catalog catalog;
+    @Mock
+    private ConnectionProvider connectionProvider;
+    @Mock
+    private DialectResolver dialectResolver;
+    @Mock
+    private ValueFormatRegistryResolver valueFormatRegistryResolver;
+
+    private JobExecutor jobExecutor;
+    private Map<String, Object> jobContext;
+
+    @BeforeMethod
+    public void setUp() {
+        initMocks(this);
+
+        dumpJob = spy(new DumpJob());
+        jobContext = new HashMap<String, Object>();
+        jobExecutor = createJobExecutor(dumpJob);
+    }
+
+    @Test
+    public void testValidateCatalog() throws Exception {
+        dumpJob.setCatalog(null);
+        jobExecutor.execute(jobContext);
+
+        verifyValidation();
+    }
+
+    @Test
+    public void testValidateConnectionProvider() throws Exception {
+        dumpJob.setConnectionProvider(null);
+        jobExecutor.execute(jobContext);
+
+        verifyValidation();
+    }
+
+    @Test
+    public void testValidateDialectResolver() throws Exception {
+        dumpJob.setDialectResolver(null);
+        jobExecutor.execute(jobContext);
+
+        verifyValidation();
+    }
+
+    @Test
+    public void testValidateValueFormatRegistryResolver() throws Exception {
+        dumpJob.setValueFormatRegistryResolver(null);
+        jobExecutor.execute(jobContext);
+
+        verifyValidation();
+    }
+
+    private void verifyValidation() throws Exception {
+        assertTrue(jobExecutor.getJobStatus().getFailure() instanceof ValidationException);
+        verify(dumpJob).validate();
+        verify(dumpJob, never()).execute(any(DumpJobExecution.class));
+    }
 }
