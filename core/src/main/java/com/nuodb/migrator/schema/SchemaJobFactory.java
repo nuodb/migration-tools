@@ -65,7 +65,7 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         isNotNull(schemaSpec, "Schema spec is required");
         SchemaJob schemaJob = new SchemaJob();
         schemaJob.setConnectionProvider(createConnectionProvider(schemaSpec.getSourceConnectionSpec()));
-        schemaJob.setContext(createScriptGeneratorContext());
+        schemaJob.setScriptGeneratorContext(createScriptGeneratorContext());
         schemaJob.setFailOnEmptyScripts(isFailOnEmptyScripts());
         schemaJob.setScriptExporter(createScriptExporter());
         return schemaJob;

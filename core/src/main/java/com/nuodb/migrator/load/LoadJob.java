@@ -39,7 +39,13 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.model.ValueModelList;
-import com.nuodb.migrator.jdbc.query.*;
+import com.nuodb.migrator.jdbc.query.InsertQuery;
+import com.nuodb.migrator.jdbc.query.InsertQueryBuilder;
+import com.nuodb.migrator.jdbc.query.InsertType;
+import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.query.StatementCallback;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migrator.job.decorate.DecoratingJobBase;
 import com.nuodb.migrator.resultset.catalog.Catalog;
@@ -186,7 +192,7 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
         }
         final InsertQuery query = createInsertQuery(table, valueFormatModelList);
 
-        StatementTemplate template = new StatementTemplate(execution.getConnectionServices().getConnection());
+        StatementTemplate template = new StatementTemplate(execution.getConnection());
         template.execute(
                 new StatementFactory<PreparedStatement>() {
                     @Override
@@ -196,8 +202,8 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void execute(PreparedStatement preparedStatement) throws SQLException {
-                        load(execution, formatInput, preparedStatement);
+                    public void execute(PreparedStatement statement) throws SQLException {
+                        load(execution, formatInput, statement);
                     }
                 }
         );
@@ -208,8 +214,8 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
     }
 
     protected void load(LoadJobExecution execution, FormatInput formatInput,
-                        PreparedStatement preparedStatement) throws SQLException {
-        formatInput.setPreparedStatement(preparedStatement);
+                        PreparedStatement statement) throws SQLException {
+        formatInput.setPreparedStatement(statement);
         formatInput.initValueFormatModel();
         while (execution.isRunning() && formatInput.hasNextRow()) {
             formatInput.readRow();
@@ -256,22 +262,6 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
         this.connectionProvider = connectionProvider;
     }
 
-    public InsertType getInsertType() {
-        return insertType;
-    }
-
-    public void setInsertType(InsertType insertType) {
-        this.insertType = insertType;
-    }
-
-    public void setTableInsertTypes(Map<String, InsertType> tableInsertTypes) {
-        this.tableInsertTypes = tableInsertTypes;
-    }
-
-    public Map<String, InsertType> getTableInsertTypes() {
-        return tableInsertTypes;
-    }
-
     public TimeZone getTimeZone() {
         return timeZone;
     }
@@ -316,8 +306,23 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
         return valueFormatRegistryResolver;
     }
 
-    public void setValueFormatRegistryResolver(
-            ValueFormatRegistryResolver valueFormatRegistryResolver) {
+    public void setValueFormatRegistryResolver(ValueFormatRegistryResolver valueFormatRegistryResolver) {
         this.valueFormatRegistryResolver = valueFormatRegistryResolver;
+    }
+
+    public InsertType getInsertType() {
+        return insertType;
+    }
+
+    public void setInsertType(InsertType insertType) {
+        this.insertType = insertType;
+    }
+
+    public Map<String, InsertType> getTableInsertTypes() {
+        return tableInsertTypes;
+    }
+
+    public void setTableInsertTypes(Map<String, InsertType> tableInsertTypes) {
+        this.tableInsertTypes = tableInsertTypes;
     }
 }

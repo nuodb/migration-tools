@@ -29,6 +29,7 @@ package com.nuodb.migrator.schema;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.connection.ConnectionServices;
+import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
@@ -49,9 +50,10 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
  */
 public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
 
-    private ScriptGeneratorContext context;
-    private ScriptExporter scriptExporter;
     private ConnectionProvider connectionProvider;
+    private DialectResolver dialectResolver;
+    private ScriptExporter scriptExporter;
+    private ScriptGeneratorContext scriptGeneratorContext;
     private boolean failOnEmptyScripts;
 
     public SchemaJob() {
@@ -61,8 +63,9 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
     @Override
     protected void initExecution(SchemaJobExecution execution) throws Exception {
         isNotNull(getConnectionProvider(), "Connection provider is required");
-        isNotNull(getContext(), "Script generator context is required");
+        isNotNull(getDialectResolver(), "Dialect resolver is required");
         isNotNull(getScriptExporter(), "Script exporter is required");
+        isNotNull(getScriptGeneratorContext(), "Script generator context is required");
 
         ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
         execution.setConnectionServices(connectionServices);
@@ -73,9 +76,9 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
     @Override
     protected void executeWith(SchemaJobExecution execution) throws Exception {
         Database database = inspect(execution);
-        Collection<String> scripts = getContext().getScripts(database);
+        Collection<String> scripts = getScriptGeneratorContext().getScripts(database);
         if (isFailOnEmptyScripts() && scripts.isEmpty()) {
-            throw new SchemaJobException("Scripts are empty");
+            throw new SchemaJobException("Scripts are empty: nothing to export");
         }
         ScriptExporter scriptExporter = getScriptExporter();
         try {
@@ -86,9 +89,10 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
         }
     }
 
-    private Database inspect(SchemaJobExecution execution) throws SQLException {
+    protected Database inspect(SchemaJobExecution execution) throws SQLException {
         InspectionManager inspectionManager = new InspectionManager();
         inspectionManager.setConnection(execution.getConnection());
+        inspectionManager.setDialectResolver(getDialectResolver());
         ConnectionServices connectionServices = execution.getConnectionServices();
         return inspectionManager.inspect(new TableInspectionScope(
                 connectionServices.getCatalog(), connectionServices.getSchema()), MetaDataType.TYPES
@@ -100,14 +104,6 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
         close(execution.getConnectionServices());
     }
 
-    public boolean isFailOnEmptyScripts() {
-        return failOnEmptyScripts;
-    }
-
-    public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
-        this.failOnEmptyScripts = failOnEmptyScripts;
-    }
-
     public ConnectionProvider getConnectionProvider() {
         return connectionProvider;
     }
@@ -116,12 +112,12 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
         this.connectionProvider = connectionProvider;
     }
 
-    public ScriptGeneratorContext getContext() {
-        return context;
+    public DialectResolver getDialectResolver() {
+        return dialectResolver;
     }
 
-    public void setContext(ScriptGeneratorContext context) {
-        this.context = context;
+    public void setDialectResolver(DialectResolver dialectResolver) {
+        this.dialectResolver = dialectResolver;
     }
 
     public ScriptExporter getScriptExporter() {
@@ -130,5 +126,21 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
 
     public void setScriptExporter(ScriptExporter scriptExporter) {
         this.scriptExporter = scriptExporter;
+    }
+
+    public ScriptGeneratorContext getScriptGeneratorContext() {
+        return scriptGeneratorContext;
+    }
+
+    public void setScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
+        this.scriptGeneratorContext = scriptGeneratorContext;
+    }
+
+    public boolean isFailOnEmptyScripts() {
+        return failOnEmptyScripts;
+    }
+
+    public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
+        this.failOnEmptyScripts = failOnEmptyScripts;
     }
 }
