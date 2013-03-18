@@ -150,32 +150,36 @@ public class Table extends IdentifiableBase {
     }
 
     public Column getColumn(String name) {
-        return getColumn(name, false);
+        return getColumn(valueOf(name));
+    }
+
+    private Column getColumn(Identifier identifier) {
+        return addColumn(identifier, false);
     }
 
     public Column addColumn(String name) {
-        return getColumn(valueOf(name), true);
+        return addColumn(valueOf(name), true);
     }
 
     public Column addColumn(Identifier identifier) {
-        return getColumn(identifier, true);
+        return addColumn(identifier, true);
     }
 
-    public Column getColumn(String name, boolean create) {
-        return getColumn(valueOf(name), create);
-    }
-
-    public Column getColumn(Identifier identifier, boolean create) {
+    public Column addColumn(Identifier identifier, boolean create) {
         Column column = columns.get(identifier);
         if (column == null) {
             if (create) {
-                column = new Column(this, identifier);
-                columns.put(identifier, column);
+                addColumn(column = new Column(identifier));
             } else {
                 throw new MetaDataException(format("Table %s doesn't have %s column", getName(), identifier));
             }
         }
         return column;
+    }
+
+    public void addColumn(Column column) {
+        column.setTable(this);
+        columns.put(column.getIdentifier(), column);
     }
 
     public Collection<Column> getColumns() {

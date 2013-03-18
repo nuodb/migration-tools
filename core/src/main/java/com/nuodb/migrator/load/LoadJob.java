@@ -185,7 +185,7 @@ public class LoadJob extends JobBase {
 
         StatementTemplate template = new StatementTemplate(execution.getConnectionServices().getConnection());
         template.execute(
-                new StatementCreator<PreparedStatement>() {
+                new StatementFactory<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
                         return createStatement(connection, query);

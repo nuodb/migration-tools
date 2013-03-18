@@ -36,9 +36,9 @@ public class SimpleJobExecution implements JobExecution {
 
     private Job job;
     private JobStatus jobStatus;
-    private Map<String, Object> context;
+    private Map<Object, Object> context;
 
-    public SimpleJobExecution(Job job, JobStatus jobStatus, Map<String, Object> context) {
+    public SimpleJobExecution(Job job, JobStatus jobStatus, Map<Object, Object> context) {
         this.job = job;
         this.jobStatus = jobStatus;
         this.context = context;
@@ -70,7 +70,7 @@ public class SimpleJobExecution implements JobExecution {
     }
 
     @Override
-    public Map<String, Object> getContext() {
+    public Map<Object, Object> getContext() {
         return context;
     }
 }

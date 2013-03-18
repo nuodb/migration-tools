@@ -40,7 +40,7 @@ public interface JobExecutor {
 
     void stop();
 
-    boolean execute(Map<String, Object> context);
+    boolean execute(Map<Object, Object> context);
 
     Job getJob();
 

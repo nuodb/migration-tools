@@ -28,90 +28,162 @@
 package com.nuodb.migrator.dump;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
+import com.nuodb.migrator.jdbc.connection.ConnectionServices;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
+import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
+import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.job.JobExecution;
 import com.nuodb.migrator.job.JobExecutor;
 import com.nuodb.migrator.resultset.catalog.Catalog;
+import com.nuodb.migrator.resultset.format.FormatFactory;
+import com.nuodb.migrator.resultset.format.SimpleFormatFactory;
+import com.nuodb.migrator.resultset.format.csv.CsvAttributes;
+import com.nuodb.migrator.resultset.format.value.SimpleValueFormatRegistryResolver;
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
-import com.nuodb.migrator.utils.ValidationException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY_IDENTIFIER;
 import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Sergey Bushik
  */
 public class DumpJobTest {
 
-    @Spy
-    @InjectMocks
-    private DumpJob dumpJob;
     @Mock
     private Catalog catalog;
     @Mock
     private ConnectionProvider connectionProvider;
+    @Spy
+    private DialectResolver dialectResolver = new SimpleDialectResolver();
+    @Spy
+    private FormatFactory formatFactory = new SimpleFormatFactory();
+    @Spy
+    private ValueFormatRegistryResolver valueFormatRegistryResolver = new SimpleValueFormatRegistryResolver();
     @Mock
-    private DialectResolver dialectResolver;
+    private Connection connection;
     @Mock
-    private ValueFormatRegistryResolver valueFormatRegistryResolver;
+    private ConnectionServices connectionServices;
+    @Spy
+    @InjectMocks
+    private DumpJob dumpJob = new DumpJob();
 
     private JobExecutor jobExecutor;
-    private Map<String, Object> jobContext;
+    private Map jobContext;
 
     @BeforeMethod
-    public void setUp() {
+    public void setUp() throws Exception {
         initMocks(this);
+        dumpJob.setOutputType(CsvAttributes.FORMAT_TYPE);
 
-        dumpJob = spy(new DumpJob());
-        jobContext = new HashMap<String, Object>();
+        DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+        given(databaseMetaData.getDatabaseProductName()).willReturn("NuoDB");
+        given(connection.getMetaData()).willReturn(databaseMetaData);
+
+        given(connectionServices.getConnection()).willReturn(connection);
+        given(connectionProvider.getConnection()).willReturn(connection);
+        given(connectionProvider.getConnectionServices()).willReturn(connectionServices);
+
+        jobContext = new HashMap();
         jobExecutor = createJobExecutor(dumpJob);
     }
 
     @Test
-    public void testValidateCatalog() throws Exception {
+    public void validateCatalog() throws Exception {
         dumpJob.setCatalog(null);
         jobExecutor.execute(jobContext);
-
-        verifyValidation();
+        verifyValidate();
     }
 
     @Test
-    public void testValidateConnectionProvider() throws Exception {
+    public void validateConnectionProvider() throws Exception {
         dumpJob.setConnectionProvider(null);
         jobExecutor.execute(jobContext);
-
-        verifyValidation();
+        verifyValidate();
     }
 
     @Test
-    public void testValidateDialectResolver() throws Exception {
+    public void validateDialectResolver() throws Exception {
         dumpJob.setDialectResolver(null);
         jobExecutor.execute(jobContext);
 
-        verifyValidation();
+        verifyValidate();
     }
 
     @Test
-    public void testValidateValueFormatRegistryResolver() throws Exception {
+    public void validateValueFormatRegistryResolver() throws Exception {
         dumpJob.setValueFormatRegistryResolver(null);
         jobExecutor.execute(jobContext);
 
-        verifyValidation();
+        verifyValidate();
     }
 
-    private void verifyValidation() throws Exception {
-        assertTrue(jobExecutor.getJobStatus().getFailure() instanceof ValidationException);
-        verify(dumpJob).validate();
-        verify(dumpJob, never()).execute(any(DumpJobExecution.class));
+    @Test
+    public void validateFormatFactory() throws Exception {
+        dumpJob.setFormatFactory(null);
+        jobExecutor.execute(jobContext);
+
+        verifyValidate();
     }
+
+    @Test
+    public void validateOutputType() throws Exception {
+        dumpJob.setOutputType(null);
+        jobExecutor.execute(jobContext);
+        verifyValidate();
+    }
+
+    private void verifyValidate() throws Exception {
+        assertNotNull(jobExecutor.getJobStatus().getFailure());
+        verify(dumpJob).initSessionContext(any(JobExecution.class));
+        verify(dumpJob, never()).executeSessionContext(any(JobExecution.class));
+    }
+
+    @Test
+    public void testExecuteInSession() throws Throwable {
+        Database database = new Database();
+        database.setDialect(new NuoDBDialect(new DatabaseInfo("NuoDB")));
+
+        Table table = database.addCatalog(EMPTY_IDENTIFIER).addSchema("schema").addTable("table");
+        Column column1 = table.addColumn("column1");
+        column1.setTypeCode(Types.BIGINT);
+        Column column2 = table.addColumn("column2");
+        column2.setTypeCode(Types.LONGVARCHAR);
+
+        willReturn(database).given(dumpJob).inspect(any(JobExecution.class));
+        willDoNothing().given(dumpJob).dump(any(JobExecution.class), any(Query.class));
+
+        jobExecutor.execute(jobContext);
+
+        Throwable failure = jobExecutor.getJobStatus().getFailure();
+        if (failure != null) {
+            throw failure;
+        }
+    }
+
+    public void test() throws SQLException {
+        // dump prepared statement
+        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+        given(connection.prepareStatement(anyString(), anyInt(), anyInt())).willReturn(preparedStatement);
+    }
+
 }

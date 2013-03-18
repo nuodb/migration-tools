@@ -49,7 +49,6 @@ import static com.nuodb.migrator.resultset.format.value.ValueVariantUtils.fill;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.binary;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.string;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
-import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 
 /**
@@ -151,7 +150,7 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
                             values[index] = binary((byte[]) reader.getEmbeddedObject());
                             break;
                         case STRING:
-                            values[index] = string(valueOf(reader.getEmbeddedObject()));
+                            values[index] = string((String) reader.getEmbeddedObject());
                             break;
                     }
                     index++;

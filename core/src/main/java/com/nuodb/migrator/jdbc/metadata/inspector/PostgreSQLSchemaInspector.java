@@ -25,58 +25,33 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
+package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionServices;
-import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.job.JobExecutionDelegate;
-import com.nuodb.migrator.job.JobExecution;
-import com.nuodb.migrator.resultset.catalog.CatalogWriter;
-import com.nuodb.migrator.resultset.format.value.ValueFormatRegistry;
+import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.MetaDataException;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+
+import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public class DumpJobExecution extends JobExecutionDelegate {
+public class PostgreSQLSchemaInspector extends InspectorBase<Catalog, SchemaInspectionScope> {
 
-    private ConnectionServices connectionServices;
-    private Database database;
-    private ValueFormatRegistry valueFormatRegistry;
-    private CatalogWriter catalogWriter;
-
-    public DumpJobExecution(JobExecution execution) {
-        super(execution);
+    public PostgreSQLSchemaInspector() {
+        super(MetaDataType.SCHEMA, SchemaInspectionScope.class);
     }
 
-    public ConnectionServices getConnectionServices() {
-        return connectionServices;
+    @Override
+    public void inspectScope(InspectionContext inspectionContext,
+                             SchemaInspectionScope inspectionScope) throws SQLException {
+        throw new MetaDataException("Method is not implemented yet");
     }
 
-    public void setConnectionServices(ConnectionServices connectionServices) {
-        this.connectionServices = connectionServices;
-    }
-
-    public Database getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
-
-    public ValueFormatRegistry getValueFormatRegistry() {
-        return valueFormatRegistry;
-    }
-
-    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
-        this.valueFormatRegistry = valueFormatRegistry;
-    }
-
-    public CatalogWriter getCatalogWriter() {
-        return catalogWriter;
-    }
-
-    public void setCatalogWriter(CatalogWriter catalogWriter) {
-        this.catalogWriter = catalogWriter;
+    @Override
+    public void inspectObjects(InspectionContext inspectionContext,
+                               Collection<? extends Catalog> objects) throws SQLException {
+        throw new MetaDataException("Method is not implemented yet");
     }
 }

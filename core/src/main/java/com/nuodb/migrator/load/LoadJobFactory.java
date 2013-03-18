@@ -137,6 +137,6 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
         });
         JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());
         executor.addJobExecutionListener(new TraceJobExecutionListener());
-        executor.execute(Maps.<String, Object>newHashMap());
+        executor.execute(Maps.<Object, Object>newHashMap());
     }
 }

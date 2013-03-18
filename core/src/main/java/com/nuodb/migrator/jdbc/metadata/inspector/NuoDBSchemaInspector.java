@@ -32,7 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.query.QueryUtils;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementCreator;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
 import java.sql.Connection;
@@ -84,7 +84,7 @@ public class NuoDBSchemaInspector extends InspectorBase<Catalog, SchemaInspectio
 
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
-                new StatementCreator<PreparedStatement>() {
+                new StatementFactory<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
                         return connection.prepareStatement(query.toString(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);

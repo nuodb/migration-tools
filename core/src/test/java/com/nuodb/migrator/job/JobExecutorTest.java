@@ -49,7 +49,7 @@ public class JobExecutorTest {
 
     private Job job;
     private JobExecutor jobExecutor;
-    private Map<String, Object> context;
+    private Map<Object, Object> context;
 
     @BeforeMethod
     public void setUp() {
@@ -57,7 +57,7 @@ public class JobExecutorTest {
         given(job.getName()).willReturn("mock");
         jobExecutor = createJobExecutor(job);
 
-        context = new HashMap<String, Object>();
+        context = new HashMap<Object, Object>();
     }
 
     @Test

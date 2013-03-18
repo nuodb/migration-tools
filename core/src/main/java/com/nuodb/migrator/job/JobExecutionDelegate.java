@@ -66,7 +66,7 @@ public class JobExecutionDelegate implements JobExecution {
     }
 
     @Override
-    public Map<String, Object> getContext() {
+    public Map<Object, Object> getContext() {
         return execution.getContext();
     }
 }

@@ -27,22 +27,31 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.MetaDataException;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
+import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
-public class InspectorTestUtils {
+public class MSSQLServerSchemaInspector extends InspectorBase<Catalog, SchemaInspectionScope> {
 
+    public MSSQLServerSchemaInspector() {
+        super(MetaDataType.SCHEMA, SchemaInspectionScope.class);
+    }
 
+    @Override
+    public void inspectScope(InspectionContext inspectionContext,
+                             SchemaInspectionScope inspectionScope) throws SQLException {
+        throw new MetaDataException("Method is not implemented yet");
+    }
+
+    @Override
+    public void inspectObjects(InspectionContext inspectionContext,
+                               Collection<? extends Catalog> objects) throws SQLException {
+        throw new MetaDataException("Method is not implemented yet");
+    }
 }

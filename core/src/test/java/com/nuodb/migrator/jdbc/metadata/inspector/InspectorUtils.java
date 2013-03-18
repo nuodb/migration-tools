@@ -25,67 +25,56 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.run;
+package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.cli.parse.*;
-import com.nuodb.migrator.cli.parse.parser.ParserImpl;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.Collection;
 
-import static org.mockito.Mockito.*;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.mockito.BDDMockito.willAnswer;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Sergey Bushik
  */
-public class CliRunAdapterTest {
+@SuppressWarnings("unchecked")
+public class InspectorUtils {
 
-    private Parser parser;
-    private CliRunAdapter cliRunAdapter;
-
-    @BeforeMethod
-    public void setUp() {
-        parser = spy(new ParserImpl());
-        cliRunAdapter = spy(new CliRunAdapter() {
-            @Override
-            protected Option createOption() {
-                return mock(Option.class);
-            }
-
-            @Override
-            public void run() {
-            }
-
-            @Override
-            public void run(Map<Object, Object> context) {
-            }
-        });
+    public static Inspector createInspector(final MetaDataType objectType, MetaData... objects) throws Exception {
+        return createInspector(objectType, newArrayList(objects));
     }
 
-    @Test
-    public void testBind() {
-        Option option = cliRunAdapter.getOption();
-        doAnswer(new Answer() {
+    public static Inspector createInspector(final MetaDataType objectType,
+                                            final Collection<? extends MetaData> objects) throws Exception {
+        final Inspector inspector = mock(Inspector.class);
+        willAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                ListIterator<String> arguments = (ListIterator<String>) invocation.getArguments()[1];
-                return arguments.hasNext();
+                MetaData otherObject = (MetaData) invocation.getArguments()[0];
+                return objectType.equals(otherObject.getObjectType());
             }
-        }).when(option).canProcess(any(CommandLine.class), any(ListIterator.class));
-        doAnswer(new Answer() {
+        }).given(inspector).supports(any(MetaData.class));
+        willAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                ListIterator<String> arguments = (ListIterator<String>) invocation.getArguments()[1];
-                arguments.remove();
+                MetaDataType otherObjectType = (MetaDataType) invocation.getArguments()[0];
+                return objectType.equals(otherObjectType);
+            }
+        }).given(inspector).supports(any(MetaDataType.class));
+
+        willAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                InspectionContext inspectionContext = (InspectionContext) invocation.getArguments()[0];
+                inspectionContext.getInspectionResults().addObjects(objects);
                 return null;
             }
-        }).when(option).process(any(CommandLine.class), any(ListIterator.class));
-
-        OptionSet optionSet = parser.parse(new String[]{"--option"}, cliRunAdapter);
-        verify(cliRunAdapter).bind(optionSet);
+        }).given(inspector).inspect(any(InspectionContext.class));
+        return inspector;
     }
 }

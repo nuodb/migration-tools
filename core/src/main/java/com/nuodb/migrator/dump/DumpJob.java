@@ -38,6 +38,7 @@ import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
+import com.nuodb.migrator.jdbc.metadata.inspector.InspectionResults;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.model.ValueModel;
 import com.nuodb.migrator.jdbc.model.ValueModelFactory;
@@ -50,19 +51,22 @@ import com.nuodb.migrator.job.JobExecution;
 import com.nuodb.migrator.resultset.catalog.Catalog;
 import com.nuodb.migrator.resultset.catalog.CatalogEntry;
 import com.nuodb.migrator.resultset.catalog.CatalogWriter;
-import com.nuodb.migrator.resultset.format.FormatOutput;
 import com.nuodb.migrator.resultset.format.FormatFactory;
+import com.nuodb.migrator.resultset.format.FormatOutput;
 import com.nuodb.migrator.resultset.format.value.SimpleValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
+import com.nuodb.migrator.resultset.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.spec.NativeQuerySpec;
 import com.nuodb.migrator.spec.SelectQuerySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
-import java.util.Date;
 
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.io.Closeables.closeQuietly;
@@ -74,6 +78,7 @@ import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -81,13 +86,20 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  */
 public class DumpJob extends JobBase {
 
+    public static final String DATABASE = "database";
+    public static final String CONNECTION_SERVICES = "connection.services";
+    public static final String VALUE_FORMAT_REGISTRY = "value.format.registry";
+    public static final String CATALOG_WRITER = "catalog.writer";
+    public static final String CONNECTION = "connection";
+    public static final String DIALECT = "dialect";
+
     private static final String QUERY_ENTRY_NAME = "query-%1$tH%1$tM%1$tS";
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private TimeZone timeZone;
     private Catalog catalog;
-    private Collection<String> tableTypes = Collections.singleton(TABLE);
+    private Collection<String> tableTypes = singleton(TABLE);
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
@@ -99,80 +111,111 @@ public class DumpJob extends JobBase {
 
     @Override
     public void execute(JobExecution execution) throws Exception {
-        validate();
-        execute(new DumpJobExecution(execution));
+        try {
+            initSessionContext(execution);
+            executeSessionContext(execution);
+        } finally {
+            releaseSessionContext(execution);
+        }
     }
 
-    protected void validate() {
+    protected void initSessionContext(JobExecution execution) throws SQLException {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
+        isNotNull(getFormatFactory(), "Format factory is required");
+        isNotNull(getOutputType(), "Output type is required");
         isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
+
+        Map<Object, Object> context = execution.getContext();
+        ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
+        context.put(CONNECTION_SERVICES, connectionServices);
+
+        Connection connection = connectionServices.getConnection();
+        context.put(CONNECTION, connection);
+
+        Dialect dialect = getDialectResolver().resolve(connection);
+        context.put(DIALECT, dialect);
+
+        ValueFormatRegistry valueFormatRegistry = getValueFormatRegistryResolver().resolve(connection);
+        context.put(VALUE_FORMAT_REGISTRY, valueFormatRegistry);
+
+        CatalogWriter catalogWriter = getCatalog().getCatalogWriter();
+        context.put(CATALOG_WRITER, catalogWriter);
     }
 
-    protected void execute(DumpJobExecution execution) throws SQLException {
-        ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
+    protected void releaseSessionContext(JobExecution execution) {
+        Map<Object, Object> context = execution.getContext();
+        ConnectionServices connectionServices = (ConnectionServices) context.get(CONNECTION_SERVICES);
+        close(connectionServices);
+
+        CatalogWriter catalogWriter = (CatalogWriter) context.get(CATALOG_WRITER);
+        closeQuietly(catalogWriter);
+    }
+
+    protected void executeSessionContext(JobExecution execution) throws SQLException {
         try {
-            execution.setConnectionServices(connectionServices);
-            dump(execution);
+            initSession(execution);
+            executeInSession(execution);
         } finally {
-            close(connectionServices);
+            releaseSession(execution);
         }
     }
 
-    protected void dump(DumpJobExecution execution) throws SQLException {
-        ConnectionServices connectionServices = execution.getConnectionServices();
+    protected void initSession(JobExecution execution) throws SQLException {
+        Dialect dialect = getDialect(execution);
+        Connection connection = getConnection(execution);
+        dialect.setTransactionIsolationLevel(connection,
+                new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
+        if (dialect.supportsSessionTimeZone()) {
+            dialect.setSessionTimeZone(connection, timeZone);
+        }
+    }
 
+    protected void executeInSession(JobExecution execution) throws SQLException {
+        Database database = inspect(execution);
+        for (SelectQuery selectQuery : createSelectQueries(database, getSelectQuerySpecs())) {
+            dump(execution, selectQuery);
+        }
+        for (NativeQuery nativeQuery : createNativeQueries(getNativeQuerySpecs())) {
+            dump(execution, nativeQuery);
+        }
+        Connection connection = getConnection(execution);
+        connection.commit();
+    }
+
+    protected void releaseSession(JobExecution execution) throws SQLException {
+        Connection connection = getConnection(execution);
+        Dialect dialect = getDialect(execution);
+        if (dialect.supportsSessionTimeZone()) {
+            dialect.setSessionTimeZone(connection, null);
+        }
+    }
+
+    protected Database inspect(JobExecution execution) throws SQLException {
+        ConnectionServices connectionServices = getConnectionServices(execution);
         InspectionManager inspectionManager = new InspectionManager();
         inspectionManager.setDialectResolver(getDialectResolver());
         inspectionManager.setConnection(connectionServices.getConnection());
-        Database database = inspectionManager.inspect(
+        InspectionResults inspectionResults = inspectionManager.inspect(
                 new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
                 MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA,
-                MetaDataType.TABLE, MetaDataType.COLUMN
-        ).getObject(MetaDataType.DATABASE);
-        execution.setDatabase(database);
-
-        Connection connection = connectionServices.getConnection();
-        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
-
-        CatalogWriter catalogWriter = getCatalog().getCatalogWriter();
-        execution.setCatalogWriter(catalogWriter);
-
-        Dialect dialect = database.getDialect();
-        try {
-            dialect.setTransactionIsolationLevel(connection,
-                    new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
-
-            if (dialect.supportsSessionTimeZone()) {
-                dialect.setSessionTimeZone(connection, timeZone);
-            }
-
-            for (SelectQuery selectQuery : createSelectQueries(database, getSelectQuerySpecs())) {
-                dump(execution, selectQuery);
-            }
-            for (NativeQuery nativeQuery : createNativeQueries(getNativeQuerySpecs())) {
-                dump(execution, nativeQuery);
-            }
-            connection.commit();
-        } finally {
-            if (dialect.supportsSessionTimeZone()) {
-                dialect.setSessionTimeZone(connection, null);
-            }
-            closeQuietly(catalogWriter);
-        }
+                MetaDataType.TABLE, MetaDataType.COLUMN);
+        Database database = inspectionResults.getObject(MetaDataType.DATABASE);
+        Map<Object, Object> context = execution.getContext();
+        context.put(DATABASE, database);
+        return database;
     }
 
-    protected void dump(final DumpJobExecution execution, final Query query) throws SQLException {
-        final Database database = execution.getDatabase();
-        StatementTemplate template = new StatementTemplate(execution.getConnectionServices().getConnection());
+    protected void dump(final JobExecution execution, final Query query) throws SQLException {
+        StatementTemplate template = new StatementTemplate(getConnection(execution));
         template.execute(
-                new StatementCreator<PreparedStatement>() {
+                new StatementFactory<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
                         PreparedStatement statement = connection.prepareStatement(
                                 query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                        database.getDialect().setStreamResults(statement, true);
+                        getDialect(execution).setStreamResults(statement, true);
                         return statement;
                     }
                 },
@@ -185,13 +228,13 @@ public class DumpJob extends JobBase {
         );
     }
 
-    protected void dump(DumpJobExecution execution, Query query,
+    protected void dump(JobExecution execution, Query query,
                         PreparedStatement preparedStatement) throws SQLException {
         final FormatOutput formatOutput = getFormatFactory().createOutput(getOutputType());
         formatOutput.setAttributes(getAttributes());
-        formatOutput.setValueFormatRegistry(execution.getValueFormatRegistry());
+        formatOutput.setValueFormatRegistry(getValueFormatRegistry(execution));
 
-        Dialect dialect = execution.getDatabase().getDialect();
+        Dialect dialect = getDialect(execution);
         if (!dialect.supportsSessionTimeZone() && dialect.supportsStatementWithTimezone()) {
             formatOutput.setTimeZone(getTimeZone());
         }
@@ -203,7 +246,7 @@ public class DumpJob extends JobBase {
         formatOutput.setValueFormatModelList(createValueModelList(resultSet, query));
         formatOutput.initValueFormatModel();
 
-        CatalogWriter catalogWriter = execution.getCatalogWriter();
+        CatalogWriter catalogWriter = getCatalogWriter(execution);
         CatalogEntry catalogEntry = createCatalogEntry(query);
         catalogWriter.write(catalogEntry);
         formatOutput.setOutputStream(catalogWriter.getOutputStream(catalogEntry));
@@ -225,23 +268,24 @@ public class DumpJob extends JobBase {
         }
     }
 
-    protected ValueModelList<ValueFormatModel> createValueModelList(ResultSet resultSet, Query query) throws SQLException {
+    protected ValueModelList<ValueFormatModel> createValueModelList(ResultSet resultSet,
+                                                                    Query query) throws SQLException {
         Collection<? extends ValueModel> valueModelList = query instanceof SelectQuery ?
                 ((SelectQuery) query).getColumns() : ValueModelFactory.createValueModelList(resultSet);
         return ValueModelFactory.createValueModelList(
                 Iterables.transform(valueModelList,
-                    new Function<ValueModel, ValueFormatModel>() {
-                        @Override
-                        public ValueFormatModel apply(ValueModel valueModel) {
-                            return new SimpleValueFormatModel(valueModel);
-                        }
-                    }));
+                        new Function<ValueModel, ValueFormatModel>() {
+                            @Override
+                            public ValueFormatModel apply(ValueModel valueModel) {
+                                return new SimpleValueFormatModel(valueModel);
+                            }
+                        }));
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database,
                                                           Collection<SelectQuerySpec> selectQuerySpecs) {
         Collection<SelectQuery> selectQueries = Lists.newArrayList();
-        if (selectQuerySpecs.isEmpty()) {
+        if (selectQuerySpecs == null || selectQuerySpecs.isEmpty()) {
             selectQueries.addAll(createSelectQueries(database));
         } else {
             for (SelectQuerySpec selectQuerySpec : selectQuerySpecs) {
@@ -272,10 +316,10 @@ public class DumpJob extends JobBase {
 
     protected SelectQuery createSelectQuery(Database database, SelectQuerySpec selectQuerySpec) {
         SelectQueryBuilder builder = new SelectQueryBuilder();
-        String tableName = selectQuerySpec.getTable();
+        String table = selectQuerySpec.getTable();
         builder.setQualifyNames(true);
         builder.setDialect(database.getDialect());
-        builder.setTable(database.findTable(tableName));
+        builder.setTable(database.findTable(table));
         builder.setColumns(selectQuerySpec.getColumns());
         if (!isEmpty(selectQuerySpec.getFilter())) {
             builder.addFilter(selectQuerySpec.getFilter());
@@ -285,12 +329,34 @@ public class DumpJob extends JobBase {
 
     protected Collection<NativeQuery> createNativeQueries(Collection<NativeQuerySpec> nativeQuerySpecs) {
         Collection<NativeQuery> queries = Lists.newArrayList();
-        for (NativeQuerySpec nativeQuerySpec : nativeQuerySpecs) {
-            NativeQueryBuilder builder = new NativeQueryBuilder();
-            builder.setQuery(nativeQuerySpec.getQuery());
-            queries.add(builder.build());
+        if (nativeQuerySpecs != null) {
+            for (NativeQuerySpec nativeQuerySpec : nativeQuerySpecs) {
+                NativeQueryBuilder builder = new NativeQueryBuilder();
+                builder.setQuery(nativeQuerySpec.getQuery());
+                queries.add(builder.build());
+            }
         }
         return queries;
+    }
+
+    protected ValueFormatRegistry getValueFormatRegistry(JobExecution execution) {
+        return (ValueFormatRegistry) execution.getContext().get(VALUE_FORMAT_REGISTRY);
+    }
+
+    protected CatalogWriter getCatalogWriter(JobExecution execution) {
+        return (CatalogWriter) execution.getContext().get(CATALOG_WRITER);
+    }
+
+    protected ConnectionServices getConnectionServices(JobExecution execution) throws SQLException {
+        return (ConnectionServices) execution.getContext().get(CONNECTION_SERVICES);
+    }
+
+    protected Connection getConnection(JobExecution execution) {
+        return (Connection) execution.getContext().get(CONNECTION);
+    }
+
+    protected Dialect getDialect(JobExecution execution) throws SQLException {
+        return (Dialect) execution.getContext().get(DIALECT);
     }
 
     public ConnectionProvider getConnectionProvider() {

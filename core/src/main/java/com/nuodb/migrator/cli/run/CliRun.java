@@ -38,7 +38,7 @@ public interface CliRun extends Option {
 
     void run();
 
-    void run(Map<String, Object> context);
+    void run(Map<Object, Object> context);
 
     String getCommand();
 }
