@@ -37,7 +37,7 @@ import static com.google.common.collect.Maps.newHashMap;
 /**
  * @author Sergey Bushik
  */
-public class LoadSpec extends TaskSpecBase {
+public class LoadSpec extends JobSpecBase {
 
     private ConnectionSpec connectionSpec;
     private TimeZone timeZone;

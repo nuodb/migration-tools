@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.dump;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.connection.ConnectionServices;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
@@ -37,7 +38,6 @@ import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.job.JobExecution;
 import com.nuodb.migrator.job.JobExecutor;
 import com.nuodb.migrator.resultset.catalog.Catalog;
 import com.nuodb.migrator.resultset.format.FormatFactory;
@@ -52,7 +52,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.sql.*;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY_IDENTIFIER;
@@ -88,7 +87,7 @@ public class DumpJobTest {
     private DumpJob dumpJob = new DumpJob();
 
     private JobExecutor jobExecutor;
-    private Map jobContext;
+    private Map<Object, Object> jobContext;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -103,7 +102,7 @@ public class DumpJobTest {
         given(connectionProvider.getConnection()).willReturn(connection);
         given(connectionProvider.getConnectionServices()).willReturn(connectionServices);
 
-        jobContext = new HashMap();
+        jobContext = Maps.newHashMap();
         jobExecutor = createJobExecutor(dumpJob);
     }
 
@@ -154,8 +153,8 @@ public class DumpJobTest {
 
     private void verifyValidate() throws Exception {
         assertNotNull(jobExecutor.getJobStatus().getFailure());
-        verify(dumpJob).initSessionContext(any(JobExecution.class));
-        verify(dumpJob, never()).executeSessionContext(any(JobExecution.class));
+        verify(dumpJob).initExecution(any(DumpJobExecution.class));
+        verify(dumpJob, never()).executeWith(any(DumpJobExecution.class));
     }
 
     @Test
@@ -169,8 +168,8 @@ public class DumpJobTest {
         Column column2 = table.addColumn("column2");
         column2.setTypeCode(Types.LONGVARCHAR);
 
-        willReturn(database).given(dumpJob).inspect(any(JobExecution.class));
-        willDoNothing().given(dumpJob).dump(any(JobExecution.class), any(Query.class));
+        willReturn(database).given(dumpJob).inspect(any(DumpJobExecution.class));
+        willDoNothing().given(dumpJob).dump(any(DumpJobExecution.class), any(Query.class));
 
         jobExecutor.execute(jobContext);
 

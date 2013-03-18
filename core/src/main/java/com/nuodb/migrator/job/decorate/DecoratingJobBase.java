@@ -25,48 +25,44 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.job;
+package com.nuodb.migrator.job.decorate;
 
-import java.util.Map;
+import com.nuodb.migrator.job.JobBase;
+import com.nuodb.migrator.job.JobExecution;
+
+import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 
 /**
  * @author Sergey Bushik
  */
-public class JobExecutionDelegate implements JobExecution {
+public class DecoratingJobBase<E extends JobExecution> extends JobBase {
 
-    private JobExecution execution;
+    private Class<E> executionClass;
 
-    public JobExecutionDelegate(JobExecution execution) {
-        this.execution = execution;
+    protected DecoratingJobBase(Class<E> executionClass) {
+        this.executionClass = executionClass;
     }
 
-    @Override
-    public boolean isRunning() {
-        return execution.isRunning();
+    public final void execute(JobExecution execution) throws Exception {
+        E decorated = createExecution(execution);
+        try {
+            initExecution(decorated);
+            executeWith(decorated);
+        } finally {
+            releaseExecution(decorated);
+        }
     }
 
-    @Override
-    public boolean isPaused() {
-        return execution.isPaused();
+    protected E createExecution(JobExecution execution) {
+        return newInstance(executionClass, execution);
     }
 
-    @Override
-    public boolean isStopped() {
-        return execution.isStopped();
+    protected void initExecution(E execution) throws Exception {
     }
 
-    @Override
-    public Job getJob() {
-        return execution.getJob();
+    protected void executeWith(E execution) throws Exception {
     }
 
-    @Override
-    public JobStatus getJobStatus() {
-        return execution.getJobStatus();
-    }
-
-    @Override
-    public Map<Object, Object> getContext() {
-        return execution.getContext();
+    protected void releaseExecution(E execution) throws Exception {
     }
 }

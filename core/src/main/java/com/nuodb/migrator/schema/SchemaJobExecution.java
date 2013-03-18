@@ -28,25 +28,36 @@
 package com.nuodb.migrator.schema;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionServices;
+import com.nuodb.migrator.job.decorate.DecoratingJobExecution;
 import com.nuodb.migrator.job.JobExecution;
-import com.nuodb.migrator.job.JobExecutionDelegate;
+
+import java.sql.Connection;
 
 /**
  * @author Sergey Bushik
  */
-public class SchemaJobExecution extends JobExecutionDelegate {
+public class SchemaJobExecution extends DecoratingJobExecution {
 
-    private ConnectionServices connectionServices;
+    private static final Object CONNECTION = "connection";
+    private static final String CONNECTION_SERVICES = "connection.services";
 
     public SchemaJobExecution(JobExecution execution) {
         super(execution);
     }
 
+    public Connection getConnection() {
+        return (Connection) getContext().get(CONNECTION);
+    }
+
+    public void setConnection(Connection connection) {
+        getContext().put(CONNECTION, connection);
+    }
+
     public ConnectionServices getConnectionServices() {
-        return connectionServices;
+        return (ConnectionServices) getContext().get(CONNECTION_SERVICES);
     }
 
     public void setConnectionServices(ConnectionServices connectionServices) {
-        this.connectionServices = connectionServices;
+        getContext().put(CONNECTION_SERVICES, connectionServices);
     }
 }

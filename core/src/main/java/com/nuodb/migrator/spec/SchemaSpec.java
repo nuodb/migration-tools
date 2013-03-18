@@ -40,7 +40,7 @@ import static com.google.common.collect.Sets.newHashSet;
 /**
  * @author Sergey Bushik
  */
-public class SchemaSpec extends TaskSpecBase {
+public class SchemaSpec extends JobSpecBase {
 
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;

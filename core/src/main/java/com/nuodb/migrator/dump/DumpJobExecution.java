@@ -25,14 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.load;
+package com.nuodb.migrator.dump;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionServices;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.job.JobExecution;
 import com.nuodb.migrator.job.decorate.DecoratingJobExecution;
-import com.nuodb.migrator.resultset.catalog.CatalogReader;
+import com.nuodb.migrator.resultset.catalog.CatalogWriter;
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistry;
 
 import java.sql.Connection;
@@ -40,25 +40,17 @@ import java.sql.Connection;
 /**
  * @author Sergey Bushik
  */
-public class LoadJobExecution extends DecoratingJobExecution {
+public class DumpJobExecution extends DecoratingJobExecution {
 
-    private static final String CATALOG_READER = "catalog.reader";
-    private static final String CONNECTION = "connection";
-    private static final String CONNECTION_SERVICES = "connection.services";
     private static final String DATABASE = "database";
     private static final String DIALECT = "dialect";
+    private static final String CATALOG_WRITER = "catalog.writer";
+    private static final String CONNECTION = "connection";
+    private static final String CONNECTION_SERVICES = "connection.services";
     private static final String VALUE_FORMAT_REGISTRY = "value.format.registry";
 
-    public LoadJobExecution(JobExecution execution) {
+    public DumpJobExecution(JobExecution execution) {
         super(execution);
-    }
-
-    public CatalogReader getCatalogReader() {
-        return (CatalogReader) getContext().get(CATALOG_READER);
-    }
-
-    public void setCatalogReader(CatalogReader catalogReader) {
-        getContext().put(CATALOG_READER, catalogReader);
     }
 
     public Connection getConnection() {
@@ -91,6 +83,14 @@ public class LoadJobExecution extends DecoratingJobExecution {
 
     public void setDialect(Dialect dialect) {
         getContext().put(DIALECT, dialect);
+    }
+
+    public CatalogWriter getCatalogWriter() {
+        return (CatalogWriter) getContext().get(CATALOG_WRITER);
+    }
+
+    public void setCatalogWriter(CatalogWriter catalogWriter) {
+        getContext().put(CATALOG_WRITER, catalogWriter);
     }
 
     public ValueFormatRegistry getValueFormatRegistry() {

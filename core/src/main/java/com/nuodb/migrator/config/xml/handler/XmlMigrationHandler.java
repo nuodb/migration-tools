@@ -32,8 +32,8 @@ import com.nuodb.migrator.config.xml.XmlConstants;
 import com.nuodb.migrator.config.xml.XmlReadContext;
 import com.nuodb.migrator.config.xml.XmlWriteContext;
 import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.JobSpec;
 import com.nuodb.migrator.spec.MigrationSpec;
-import com.nuodb.migrator.spec.TaskSpec;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
@@ -51,8 +51,8 @@ public class XmlMigrationHandler extends XmlReadWriteHandlerBase<MigrationSpec> 
         for (ConnectionSpec connection : migrationSpec.getConnectionSpecs()) {
             context.write(connection, ConnectionSpec.class, output.getChild(CONNECTION_ELEMENT));
         }
-        for (TaskSpec task : migrationSpec.getTaskSpecs()) {
-            context.write(task, TaskSpec.class, output.getChild(TASK_ELEMENT));
+        for (JobSpec task : migrationSpec.getTaskSpecs()) {
+            context.write(task, JobSpec.class, output.getChild(TASK_ELEMENT));
         }
         return true;
     }
@@ -60,7 +60,7 @@ public class XmlMigrationHandler extends XmlReadWriteHandlerBase<MigrationSpec> 
     @Override
     protected void read(InputNode input, MigrationSpec migrationSpec, XmlReadContext context) throws Exception {
         List<ConnectionSpec> connections = Lists.newArrayList();
-        List<TaskSpec> tasks = Lists.newArrayList();
+        List<JobSpec> tasks = Lists.newArrayList();
         InputNode node;
 
         while ((node = input.getNext()) != null) {
@@ -69,7 +69,7 @@ public class XmlMigrationHandler extends XmlReadWriteHandlerBase<MigrationSpec> 
                 connections.add(context.read(node, ConnectionSpec.class));
             }
             if (TASK_ELEMENT.equals(name)) {
-                tasks.add(context.read(node, TaskSpec.class));
+                tasks.add(context.read(node, JobSpec.class));
             }
         }
         migrationSpec.setConnectionSpecs(connections);

@@ -25,30 +25,52 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.spec;
+package com.nuodb.migrator.job.decorate;
 
-import com.google.common.collect.Lists;
+import com.nuodb.migrator.job.Job;
+import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.JobStatus;
 
-import java.util.List;
+import java.util.Map;
 
-public class MigrationSpec {
+/**
+ * @author Sergey Bushik
+ */
+public class DecoratingJobExecution implements JobExecution {
 
-    private List<? extends ConnectionSpec> connectionSpecs = Lists.newArrayList();
-    private List<? extends JobSpec> taskSpecs = Lists.newArrayList();
+    private JobExecution execution;
 
-    public List<? extends ConnectionSpec> getConnectionSpecs() {
-        return connectionSpecs;
+    public DecoratingJobExecution(JobExecution execution) {
+        this.execution = execution;
     }
 
-    public void setConnectionSpecs(List<? extends ConnectionSpec> connectionSpecs) {
-        this.connectionSpecs = connectionSpecs;
+    @Override
+    public boolean isRunning() {
+        return execution.isRunning();
     }
 
-    public List<? extends JobSpec> getTaskSpecs() {
-        return taskSpecs;
+    @Override
+    public boolean isPaused() {
+        return execution.isPaused();
     }
 
-    public void setTaskSpecs(List<? extends JobSpec> taskSpecs) {
-        this.taskSpecs = taskSpecs;
+    @Override
+    public boolean isStopped() {
+        return execution.isStopped();
+    }
+
+    @Override
+    public Job getJob() {
+        return execution.getJob();
+    }
+
+    @Override
+    public JobStatus getJobStatus() {
+        return execution.getJobStatus();
+    }
+
+    @Override
+    public Map<Object, Object> getContext() {
+        return execution.getContext();
     }
 }

@@ -35,9 +35,10 @@ import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorContext;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
-import com.nuodb.migrator.job.JobBase;
-import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.decorate.DecoratingJobBase;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
@@ -46,45 +47,32 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 /**
  * @author Sergey Bushik
  */
-public class SchemaJob extends JobBase {
+public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
 
     private ScriptGeneratorContext context;
     private ScriptExporter scriptExporter;
     private ConnectionProvider connectionProvider;
     private boolean failOnEmptyScripts;
 
-    @Override
-    public void execute(JobExecution execution) throws Exception {
-        validate();
-        execution(new SchemaJobExecution(execution));
+    public SchemaJob() {
+        super(SchemaJobExecution.class);
     }
 
-    protected void validate() {
+    @Override
+    protected void initExecution(SchemaJobExecution execution) throws Exception {
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getContext(), "Script generator context is required");
         isNotNull(getScriptExporter(), "Script exporter is required");
-    }
 
-    protected void execution(SchemaJobExecution execution) throws Exception {
         ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
-        try {
-            execution.setConnectionServices(connectionServices);
-            generate(execution);
-        } finally {
-            close(connectionServices);
-        }
+        execution.setConnectionServices(connectionServices);
+        Connection connection = connectionServices.getConnection();
+        execution.setConnection(connection);
     }
 
-    protected void generate(SchemaJobExecution execution) throws Exception {
-        ConnectionServices connectionServices = execution.getConnectionServices();
-
-        InspectionManager inspectionManager = new InspectionManager();
-        inspectionManager.setConnection(connectionServices.getConnection());
-        Database database = inspectionManager.inspect(
-                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
-                MetaDataType.TYPES
-        ).getObject(MetaDataType.DATABASE);
-
+    @Override
+    protected void executeWith(SchemaJobExecution execution) throws Exception {
+        Database database = inspect(execution);
         Collection<String> scripts = getContext().getScripts(database);
         if (isFailOnEmptyScripts() && scripts.isEmpty()) {
             throw new SchemaJobException("Scripts are empty");
@@ -96,6 +84,20 @@ public class SchemaJob extends JobBase {
         } finally {
             scriptExporter.close();
         }
+    }
+
+    private Database inspect(SchemaJobExecution execution) throws SQLException {
+        InspectionManager inspectionManager = new InspectionManager();
+        inspectionManager.setConnection(execution.getConnection());
+        ConnectionServices connectionServices = execution.getConnectionServices();
+        return inspectionManager.inspect(new TableInspectionScope(
+                connectionServices.getCatalog(), connectionServices.getSchema()), MetaDataType.TYPES
+        ).getObject(MetaDataType.DATABASE);
+    }
+
+    @Override
+    protected void releaseExecution(SchemaJobExecution execution) throws Exception {
+        close(execution.getConnectionServices());
     }
 
     public boolean isFailOnEmptyScripts() {

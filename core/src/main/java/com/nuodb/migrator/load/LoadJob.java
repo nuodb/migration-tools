@@ -41,8 +41,7 @@ import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.model.ValueModelList;
 import com.nuodb.migrator.jdbc.query.*;
 import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccessProvider;
-import com.nuodb.migrator.job.JobBase;
-import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.decorate.DecoratingJobBase;
 import com.nuodb.migrator.resultset.catalog.Catalog;
 import com.nuodb.migrator.resultset.catalog.CatalogEntry;
 import com.nuodb.migrator.resultset.catalog.CatalogReader;
@@ -69,7 +68,7 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 /**
  * @author Sergey Bushik
  */
-public class LoadJob extends JobBase {
+public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private ConnectionProvider connectionProvider;
@@ -82,52 +81,39 @@ public class LoadJob extends JobBase {
     private InsertType insertType;
     private Map<String, InsertType> tableInsertTypes;
 
-    @Override
-    public void execute(JobExecution execution) throws Exception {
-        validate();
-        execute(new LoadJobExecution(execution));
+    public LoadJob() {
+        super(LoadJobExecution.class);
     }
 
-    protected void validate() {
+    @Override
+    protected void initExecution(LoadJobExecution execution) throws SQLException {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
         isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
-    }
 
-    protected void execute(LoadJobExecution execution) throws SQLException {
         ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
-        try {
-            execution.setConnectionServices(connectionServices);
-            load(execution);
-        } finally {
-            close(connectionServices);
-        }
+        execution.setConnectionServices(connectionServices);
+        Connection connection = connectionServices.getConnection();
+        execution.setConnection(connection);
+
+        execution.setCatalogReader(getCatalog().getCatalogReader());
+        execution.setDialect(getDialectResolver().resolve(connection));
+        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
     }
 
-    protected void load(LoadJobExecution execution) throws SQLException {
-        ConnectionServices connectionServices = execution.getConnectionServices();
-
-        Connection connection = connectionServices.getConnection();
-        InspectionManager inspectionManager = new InspectionManager();
-        inspectionManager.setDialectResolver(getDialectResolver());
-        inspectionManager.setConnection(connection);
-        Database database = inspectionManager.inspect(
-                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
-                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE, MetaDataType.COLUMN
-        ).getObject(MetaDataType.DATABASE);
-
-        execution.setDatabase(database);
-        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
-
-        CatalogReader catalogReader = getCatalog().getCatalogReader();
-        execution.setCatalogReader(catalogReader);
-
-        Dialect dialect = database.getDialect();
+    @Override
+    protected void executeWith(LoadJobExecution execution) throws Exception {
+        Connection connection = execution.getConnection();
+        Dialect dialect = execution.getDialect();
         try {
             if (dialect.supportsSessionTimeZone()) {
-                dialect.setSessionTimeZone(connection, timeZone);
+                dialect.setSessionTimeZone(connection, getTimeZone());
             }
+            Database database = inspect(execution);
+            execution.setDatabase(database);
+
+            CatalogReader catalogReader = execution.getCatalogReader();
             for (CatalogEntry catalogEntry : catalogReader.readAll()) {
                 load(execution, catalogEntry);
             }
@@ -142,8 +128,25 @@ public class LoadJob extends JobBase {
             if (dialect.supportsSessionTimeZone()) {
                 dialect.setSessionTimeZone(connection, null);
             }
-            closeQuietly(catalogReader);
         }
+    }
+
+    protected Database inspect(LoadJobExecution execution) throws SQLException {
+        InspectionManager inspectionManager = new InspectionManager();
+        inspectionManager.setDialectResolver(getDialectResolver());
+        inspectionManager.setConnection(execution.getConnection());
+        ConnectionServices connectionServices = execution.getConnectionServices();
+        return inspectionManager.inspect(
+                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
+                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE,
+                MetaDataType.COLUMN
+        ).getObject(MetaDataType.DATABASE);
+    }
+
+    @Override
+    protected void releaseExecution(LoadJobExecution execution) throws Exception {
+        close(execution.getConnectionServices());
+        closeQuietly(execution.getCatalogReader());
     }
 
     protected void load(LoadJobExecution execution, CatalogEntry catalogEntry) throws SQLException {
