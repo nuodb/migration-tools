@@ -35,16 +35,16 @@ import org.testng.annotations.Test;
 
 import com.nuodb.migrator.integration.MigrationTestBase;
 
-
 /**
  * @author Krishnamoorthy Dhandapani
  */
+@Test(groups = { "integrationtest" })
 public class BasicMigrationTest extends MigrationTestBase {
 
 	/*
 	 * Assert Load is run and database is not empty
 	 */
-	@Test(groups = { "integrationtest", "dataloadperformed" })
+	@Test(groups = { "dataloadperformed" })
 	public void testDataLoaded() throws Exception {
 		String sqlStr = "select count(*) from datatypes1";
 		Statement stmt1 = null, stmt2 = null;
@@ -78,7 +78,7 @@ public class BasicMigrationTest extends MigrationTestBase {
 	 * The test executes the same select all statement against the source
 	 * database and the target database and compares the result values.
 	 */
-	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
+	@Test(dependsOnGroups = { "dataloadperformed" })
 	public void testDataTypes1() throws Exception {
 		String sqlStr = "select * from datatypes1";
 		Statement stmt1 = null, stmt2 = null;
@@ -104,7 +104,7 @@ public class BasicMigrationTest extends MigrationTestBase {
 	/*
 	 * See documentation for testDataTypes1
 	 */
-	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
+	@Test(dependsOnGroups = { "dataloadperformed" })
 	public void testDataTypes2() throws Exception {
 		String sqlStr = "select * from datatypes2";
 		Statement stmt1 = null, stmt2 = null;
@@ -130,7 +130,7 @@ public class BasicMigrationTest extends MigrationTestBase {
 	/*
 	 * See documentation for testDataTypes1
 	 */
-	@Test(groups = { "integrationtest" }, dependsOnGroups = { "dataloadperformed" })
+	@Test(dependsOnGroups = { "dataloadperformed" })
 	public void testDataTypes3() throws Exception {
 		String sqlStr = "select * from datatypes3";
 		Statement stmt1 = null, stmt2 = null;

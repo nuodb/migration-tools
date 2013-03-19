@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="MYSQL to NUODB Integration Test Suite" parallel="none">
-  <test name="MYSQL to NUODB Integration Tests" >
+<suite name="NUODB to NUODB Integration Test Suite" parallel="none">
+  <test name="NUODB to NUODB Integration Tests" >
     <groups>
 	  <run>
 	    <include name="integrationtest"/>
-	    <include name="mysqlintegrationtest"/>
+	    <include name="nuodbintegrationtest"/>
         <exclude name="disabled"/>
 	  </run>
 	</groups>

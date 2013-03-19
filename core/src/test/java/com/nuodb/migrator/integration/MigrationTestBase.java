@@ -45,8 +45,8 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
@@ -67,7 +67,7 @@ public class MigrationTestBase {
 			"source.password", "source.schema", "source.jdbcjar", "nuodb.home",
 			"nuodb.driver", "nuodb.url", "nuodb.username", "nuodb.password",
 			"nuodb.schema", "nuodb.jdbcjar" })
-	@BeforeMethod(alwaysRun = true)
+	@BeforeClass(alwaysRun = true)
 	public void beforeTest(String sourceDriver, String sourceUrl,
 			String sourceUsername, @Optional("") String sourcePassword,
 			@Optional("") String sourceSchema,
@@ -133,9 +133,10 @@ public class MigrationTestBase {
 		nuodbSchemaUsed = nuodbSchema;
 
 		rsUtil = new ResultSetUtil(sourceDriver);
+		
 	}
 
-	@AfterMethod
+	@AfterClass
 	public void tearDown() throws SQLException {
 		if (sourceConnection != null) {
 			sourceConnection.close();

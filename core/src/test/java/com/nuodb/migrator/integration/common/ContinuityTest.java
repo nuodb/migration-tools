@@ -40,12 +40,12 @@ import com.nuodb.migrator.integration.MigrationTestBase;
 /**
  * @author Krishnamoorthy Dhandapani
  */
+@Test(groups = { "integrationtest", "dataloadperformed" })
 public class ContinuityTest extends MigrationTestBase {
 
 	/*
 	 * Verify Primary Key constraints are working
 	 */
-	@Test(groups = { "integrationtest", "dataloadperformed" })
 	public void testPrimaryKeyViolation() throws Exception {
 		String sqlStr = "insert into datatypes1 (\"c6\") values ('1')";
 		Statement stmt1 = null;
@@ -68,7 +68,6 @@ public class ContinuityTest extends MigrationTestBase {
 	/*
 	 * Verify Unique Key constraints are working
 	 */
-	@Test(groups = { "integrationtest", "dataloadperformed" })
 	public void testUniqueKeyViolation() throws Exception {
 		String sqlStr = "insert into datatypes1 (\"c2\") values ('1')";
 		Statement stmt1 = null;
@@ -91,7 +90,7 @@ public class ContinuityTest extends MigrationTestBase {
 	/*
 	 * Verify Foreign Key constraints are working - NOT WORKING YET
 	 */
-	@Test(groups = { "integrationtest", "dataloadperformed", "disabled" })
+	@Test(groups = { "disabled" })
 	public void testForeignKeyViolation() throws Exception {
 	}
 
@@ -101,7 +100,6 @@ public class ContinuityTest extends MigrationTestBase {
 	 * run. So we are going to execute it twice and make sure the id is
 	 * incremented by 1 between those runs.
 	 */
-	@Test(groups = { "integrationtest", "dataloadperformed" })
 	public void testAutoIncrement() throws Exception {
 		String sqlStr = "insert into datatypes2 (\"c5\") values (?)";
 		String sqlStr2 = "select \"k1\" from datatypes2 where \"c5\"=?";
