@@ -25,32 +25,52 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.job.decorate;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.nuodb.migrator.job.Job;
+import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.JobStatus;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class StatementTemplate {
+public class DecoratingJobExecution implements JobExecution {
 
-    private final Connection connection;
+    private JobExecution execution;
 
-    public StatementTemplate(Connection connection) {
-        this.connection = connection;
+    public DecoratingJobExecution(JobExecution execution) {
+        this.execution = execution;
     }
 
-    public <X extends Statement> void execute(StatementFactory<X> factory, StatementCallback<X> callback) throws SQLException {
-        X statement = factory.create(connection);
-        try {
-            callback.execute(statement);
-        } finally {
-            close(statement != null ? statement.getResultSet() : null);
-            close(statement);
-        }
+    @Override
+    public boolean isRunning() {
+        return execution.isRunning();
+    }
+
+    @Override
+    public boolean isPaused() {
+        return execution.isPaused();
+    }
+
+    @Override
+    public boolean isStopped() {
+        return execution.isStopped();
+    }
+
+    @Override
+    public Job getJob() {
+        return execution.getJob();
+    }
+
+    @Override
+    public JobStatus getJobStatus() {
+        return execution.getJobStatus();
+    }
+
+    @Override
+    public Map<Object, Object> getContext() {
+        return execution.getContext();
     }
 }

@@ -38,6 +38,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addDatabase;
 import static java.lang.String.format;
 
 /**
@@ -53,7 +54,7 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
 
     @Override
     public void inspect(InspectionContext inspectionContext) throws SQLException {
-        Database database = InspectionResultsUtils.addDatabase(inspectionContext.getInspectionResults());
+        Database database = addDatabase(inspectionContext.getInspectionResults());
         DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
 
         DriverInfo driverInfo = new DriverInfo();

@@ -28,55 +28,76 @@
 package com.nuodb.migrator.load;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionServices;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.job.JobExecutionDelegate;
 import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.decorate.DecoratingJobExecution;
 import com.nuodb.migrator.resultset.catalog.CatalogReader;
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistry;
+
+import java.sql.Connection;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadJobExecution extends JobExecutionDelegate {
+public class LoadJobExecution extends DecoratingJobExecution {
 
-    private ConnectionServices connectionServices;
-    private Database database;
-    private ValueFormatRegistry valueFormatRegistry;
-    private CatalogReader catalogReader;
+    private static final String CATALOG_READER = "catalog.reader";
+    private static final String CONNECTION = "connection";
+    private static final String CONNECTION_SERVICES = "connection.services";
+    private static final String DATABASE = "database";
+    private static final String DIALECT = "dialect";
+    private static final String VALUE_FORMAT_REGISTRY = "value.format.registry";
 
     public LoadJobExecution(JobExecution execution) {
         super(execution);
     }
 
-    public ConnectionServices getConnectionServices() {
-        return connectionServices;
-    }
-
-    public void setConnectionServices(ConnectionServices connectionServices) {
-        this.connectionServices = connectionServices;
-    }
-
-    public Database getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
-
-    public ValueFormatRegistry getValueFormatRegistry() {
-        return valueFormatRegistry;
-    }
-
-    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
-        this.valueFormatRegistry = valueFormatRegistry;
-    }
-
     public CatalogReader getCatalogReader() {
-        return catalogReader;
+        return (CatalogReader) getContext().get(CATALOG_READER);
     }
 
     public void setCatalogReader(CatalogReader catalogReader) {
-        this.catalogReader = catalogReader;
+        getContext().put(CATALOG_READER, catalogReader);
+    }
+
+    public Connection getConnection() {
+        return (Connection) getContext().get(CONNECTION);
+    }
+
+    public void setConnection(Connection connection) {
+        getContext().put(CONNECTION, connection);
+    }
+
+    public ConnectionServices getConnectionServices() {
+        return (ConnectionServices) getContext().get(CONNECTION_SERVICES);
+    }
+
+    public void setConnectionServices(ConnectionServices connectionServices) {
+        getContext().put(CONNECTION_SERVICES, connectionServices);
+    }
+
+    public Database getDatabase() {
+        return (Database) getContext().get(DATABASE);
+    }
+
+    public void setDatabase(Database database) {
+        getContext().put(DATABASE, database);
+    }
+
+    public Dialect getDialect() {
+        return (Dialect) getContext().get(DIALECT);
+    }
+
+    public void setDialect(Dialect dialect) {
+        getContext().put(DIALECT, dialect);
+    }
+
+    public ValueFormatRegistry getValueFormatRegistry() {
+        return (ValueFormatRegistry) getContext().get(VALUE_FORMAT_REGISTRY);
+    }
+
+    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
+        getContext().put(VALUE_FORMAT_REGISTRY, valueFormatRegistry);
     }
 }

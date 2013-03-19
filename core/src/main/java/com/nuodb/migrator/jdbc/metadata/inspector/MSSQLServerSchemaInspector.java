@@ -25,16 +25,33 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import java.sql.Connection;
+import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.MetaDataException;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public interface StatementCreator<X extends Statement> {
+public class MSSQLServerSchemaInspector extends InspectorBase<Catalog, SchemaInspectionScope> {
 
-    X create(Connection connection) throws SQLException;
+    public MSSQLServerSchemaInspector() {
+        super(MetaDataType.SCHEMA, SchemaInspectionScope.class);
+    }
+
+    @Override
+    public void inspectScope(InspectionContext inspectionContext,
+                             SchemaInspectionScope inspectionScope) throws SQLException {
+        throw new MetaDataException("Method is not implemented yet");
+    }
+
+    @Override
+    public void inspectObjects(InspectionContext inspectionContext,
+                               Collection<? extends Catalog> objects) throws SQLException {
+        throw new MetaDataException("Method is not implemented yet");
+    }
 }

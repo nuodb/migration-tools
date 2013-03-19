@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.cli.run;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migrator.job.*;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -46,11 +46,11 @@ public abstract class CliRunJob extends CliRunAdapter {
 
     @Override
     public void run() {
-        run(Collections.<String, Object>emptyMap());
+        run(Maps.<Object, Object>newHashMap());
     }
 
     @Override
-    public void run(Map<String, Object> context) {
+    public void run(Map<Object, Object> context) {
         JobExecutor executor = JobExecutors.createJobExecutor(createJob());
         executor.addJobExecutionListener(new TraceJobExecutionListener());
         executor.execute(context);

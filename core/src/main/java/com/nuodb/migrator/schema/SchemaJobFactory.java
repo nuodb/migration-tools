@@ -29,7 +29,9 @@ package com.nuodb.migrator.schema;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
+import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
+import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migrator.jdbc.metadata.generator.*;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migrator.job.JobFactory;
@@ -59,14 +61,16 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
 
     private SchemaSpec schemaSpec;
     private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
+    private DialectResolver dialectResolver = new SimpleDialectResolver();
 
     @Override
     public SchemaJob createJob() {
         isNotNull(schemaSpec, "Schema spec is required");
         SchemaJob schemaJob = new SchemaJob();
         schemaJob.setConnectionProvider(createConnectionProvider(schemaSpec.getSourceConnectionSpec()));
-        schemaJob.setContext(createScriptGeneratorContext());
+        schemaJob.setDialectResolver(getDialectResolver());
         schemaJob.setFailOnEmptyScripts(isFailOnEmptyScripts());
+        schemaJob.setScriptGeneratorContext(createScriptGeneratorContext());
         schemaJob.setScriptExporter(createScriptExporter());
         return schemaJob;
     }
@@ -137,5 +141,13 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
 
     public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
         this.failOnEmptyScripts = failOnEmptyScripts;
+    }
+
+    public DialectResolver getDialectResolver() {
+        return dialectResolver;
+    }
+
+    public void setDialectResolver(DialectResolver dialectResolver) {
+        this.dialectResolver = dialectResolver;
     }
 }

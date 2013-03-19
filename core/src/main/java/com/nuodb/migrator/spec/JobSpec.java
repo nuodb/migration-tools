@@ -27,8 +27,5 @@
  */
 package com.nuodb.migrator.spec;
 
-/**
- * @author Sergey Bushik
- */
-public class TaskSpecBase extends SpecBase implements TaskSpec {
+public interface JobSpec extends Spec {
 }

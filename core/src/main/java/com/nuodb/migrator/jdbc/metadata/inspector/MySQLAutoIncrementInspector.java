@@ -32,7 +32,7 @@ import com.google.common.collect.Maps;
 import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.query.QueryUtils;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementCreator;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
 import java.sql.*;
@@ -85,7 +85,7 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
             QueryUtils.where(query, filters, "AND");
             StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
             template.execute(
-                    new StatementCreator<PreparedStatement>() {
+                    new StatementFactory<PreparedStatement>() {
                         @Override
                         public PreparedStatement create(Connection connection) throws SQLException {
                             return connection.prepareStatement(query.toString());
@@ -116,7 +116,7 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
         }
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
-                new StatementCreator<Statement>() {
+                new StatementFactory<Statement>() {
                     @Override
                     public Statement create(Connection connection) throws SQLException {
                         return connection.createStatement();

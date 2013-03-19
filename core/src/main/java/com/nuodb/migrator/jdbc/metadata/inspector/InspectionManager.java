@@ -58,6 +58,9 @@ public class InspectionManager {
 
         InspectorResolver schemaInspector = new InspectorResolver(SCHEMA, new SimpleSchemaInspector());
         schemaInspector.register("NuoDB", new NuoDBSchemaInspector());
+        // TODO: uncomment when CDMT-88 and CDMT-89 issues will be resolved
+        // schemaInspector.register("PostgreSQL", new PostgreSQLSchemaInspector());
+        // schemaInspector.register("Microsoft SQL Server", new MSSQLServerSchemaInspector());
         addInspector(schemaInspector);
 
         InspectorResolver tableInspector = new InspectorResolver(TABLE, new SimpleTableInspector());

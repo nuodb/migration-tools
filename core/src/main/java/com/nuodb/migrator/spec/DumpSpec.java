@@ -39,7 +39,7 @@ import static java.util.Collections.singleton;
 /**
  * @author Sergey Bushik
  */
-public class DumpSpec extends TaskSpecBase {
+public class DumpSpec extends JobSpecBase {
 
     private ConnectionSpec connectionSpec;
     private TimeZone timeZone;

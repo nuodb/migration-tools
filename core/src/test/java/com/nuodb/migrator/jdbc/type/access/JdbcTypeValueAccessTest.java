@@ -125,13 +125,14 @@ public class JdbcTypeValueAccessTest {
     @Test
     public void testResultSetAccess() throws Exception {
         Calendar calendar = Calendar.getInstance();
-        given(resultSet.getTimestamp(COLUMN)).willReturn(new Timestamp(calendar.getTimeInMillis()));
+        Timestamp timestamp = new Timestamp(calendar.getTimeInMillis());
+        given(resultSet.getTimestamp(COLUMN)).willReturn(timestamp);
 
         JdbcTypeValueAccess<Timestamp> resultSetAccess = jdbcTypeValueAccessProvider.getResultSetAccess(resultSet,
                 COLUMN);
 
         Map<String, Object> options = new HashMap<String, Object>();
-        assertEquals(resultSetAccess.getValue(options), new Timestamp(calendar.getTimeInMillis()));
+        assertEquals(resultSetAccess.getValue(options), timestamp);
         assertEquals(resultSetAccess.getValue(Calendar.class, options), calendar);
         verify(resultSet, times(2)).getTimestamp(COLUMN);
     }
@@ -139,7 +140,8 @@ public class JdbcTypeValueAccessTest {
     @Test
     public void testPreparedStatementAccess() throws Exception {
         Calendar calendar = Calendar.getInstance();
-        given(resultSet.getTimestamp(COLUMN)).willReturn(new Timestamp(calendar.getTimeInMillis()));
+        Timestamp timestamp = new Timestamp(calendar.getTimeInMillis());
+        given(resultSet.getTimestamp(COLUMN)).willReturn(timestamp);
 
         JdbcTypeValueAccess<Object> preparedStatementAccess =
                 jdbcTypeValueAccessProvider.getPreparedStatementAccess(preparedStatement, COLUMN);
@@ -147,6 +149,6 @@ public class JdbcTypeValueAccessTest {
         Map<String, Object> options = new HashMap<String, Object>();
         preparedStatementAccess.setValue(calendar.getTimeInMillis(), options);
         preparedStatementAccess.setValue(calendar, options);
-        verify(preparedStatement, times(2)).setTimestamp(eq(COLUMN), eq(new Timestamp(calendar.getTimeInMillis())));
+        verify(preparedStatement, times(2)).setTimestamp(eq(COLUMN), eq(timestamp));
     }
 }

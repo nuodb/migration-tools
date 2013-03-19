@@ -30,7 +30,9 @@ package com.nuodb.migrator.job;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public abstract class JobBase implements Job {
+
     @Override
     public String getName() {
         return getClass().getName();

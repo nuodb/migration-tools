@@ -55,12 +55,9 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
 
     private DumpSpec dumpSpec;
 
-    private DialectResolver dialectResolver =
-            new SimpleDialectResolver();
-    private FormatFactory formatFactory =
-            new SimpleFormatFactory();
-    private ValueFormatRegistryResolver valueFormatRegistryResolver =
-            new SimpleValueFormatRegistryResolver();
+    private DialectResolver dialectResolver = new SimpleDialectResolver();
+    private FormatFactory formatFactory = new SimpleFormatFactory();
+    private ValueFormatRegistryResolver valueFormatRegistryResolver = new SimpleValueFormatRegistryResolver();
 
     public DumpJob createJob() {
         isNotNull(dumpSpec, "Dump spec is required");

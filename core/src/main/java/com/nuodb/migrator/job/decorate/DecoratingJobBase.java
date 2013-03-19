@@ -25,24 +25,44 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata.inspector;
+package com.nuodb.migrator.job.decorate;
 
-import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.job.JobBase;
+import com.nuodb.migrator.job.JobExecution;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
+import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
-public class InspectorTestUtils {
+public class DecoratingJobBase<E extends JobExecution> extends JobBase {
 
+    private Class<E> executionClass;
 
+    protected DecoratingJobBase(Class<E> executionClass) {
+        this.executionClass = executionClass;
+    }
+
+    public final void execute(JobExecution execution) throws Exception {
+        E decorated = createExecution(execution);
+        try {
+            initExecution(decorated);
+            executeWith(decorated);
+        } finally {
+            releaseExecution(decorated);
+        }
+    }
+
+    protected E createExecution(JobExecution execution) {
+        return newInstance(executionClass, execution);
+    }
+
+    protected void initExecution(E execution) throws Exception {
+    }
+
+    protected void executeWith(E execution) throws Exception {
+    }
+
+    protected void releaseExecution(E execution) throws Exception {
+    }
 }

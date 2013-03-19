@@ -34,7 +34,7 @@ import java.util.List;
 public class MigrationSpec {
 
     private List<? extends ConnectionSpec> connectionSpecs = Lists.newArrayList();
-    private List<? extends TaskSpec> taskSpecs = Lists.newArrayList();
+    private List<? extends JobSpec> taskSpecs = Lists.newArrayList();
 
     public List<? extends ConnectionSpec> getConnectionSpecs() {
         return connectionSpecs;
@@ -44,11 +44,11 @@ public class MigrationSpec {
         this.connectionSpecs = connectionSpecs;
     }
 
-    public List<? extends TaskSpec> getTaskSpecs() {
+    public List<? extends JobSpec> getTaskSpecs() {
         return taskSpecs;
     }
 
-    public void setTaskSpecs(List<? extends TaskSpec> taskSpecs) {
+    public void setTaskSpecs(List<? extends JobSpec> taskSpecs) {
         this.taskSpecs = taskSpecs;
     }
 }

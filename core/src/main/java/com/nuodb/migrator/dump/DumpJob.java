@@ -29,7 +29,6 @@ package com.nuodb.migrator.dump;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.connection.ConnectionServices;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
@@ -38,20 +37,27 @@ import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
+import com.nuodb.migrator.jdbc.metadata.inspector.InspectionResults;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.model.ValueModel;
 import com.nuodb.migrator.jdbc.model.ValueModelFactory;
 import com.nuodb.migrator.jdbc.model.ValueModelList;
-import com.nuodb.migrator.jdbc.query.*;
+import com.nuodb.migrator.jdbc.query.NativeQuery;
+import com.nuodb.migrator.jdbc.query.NativeQueryBuilder;
+import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.query.SelectQuery;
+import com.nuodb.migrator.jdbc.query.SelectQueryBuilder;
+import com.nuodb.migrator.jdbc.query.StatementCallback;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccessProvider;
-import com.nuodb.migrator.job.JobBase;
-import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.decorate.DecoratingJobBase;
 import com.nuodb.migrator.resultset.catalog.Catalog;
 import com.nuodb.migrator.resultset.catalog.CatalogEntry;
 import com.nuodb.migrator.resultset.catalog.CatalogWriter;
-import com.nuodb.migrator.resultset.format.FormatOutput;
 import com.nuodb.migrator.resultset.format.FormatFactory;
+import com.nuodb.migrator.resultset.format.FormatOutput;
 import com.nuodb.migrator.resultset.format.value.SimpleValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
@@ -60,11 +66,17 @@ import com.nuodb.migrator.spec.SelectQuerySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
 
 import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
@@ -74,12 +86,13 @@ import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class DumpJob extends JobBase {
+public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
 
     private static final String QUERY_ENTRY_NAME = "query-%1$tH%1$tM%1$tS";
 
@@ -87,7 +100,7 @@ public class DumpJob extends JobBase {
 
     private TimeZone timeZone;
     private Catalog catalog;
-    private Collection<String> tableTypes = Collections.singleton(TABLE);
+    private Collection<String> tableTypes = singleton(TABLE);
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
@@ -97,57 +110,50 @@ public class DumpJob extends JobBase {
     private FormatFactory formatFactory;
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
 
-    @Override
-    public void execute(JobExecution execution) throws Exception {
-        validate();
-        execute(new DumpJobExecution(execution));
+    public DumpJob() {
+        super(DumpJobExecution.class);
     }
 
-    protected void validate() {
+    @Override
+    protected void initExecution(DumpJobExecution execution) throws SQLException {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
+        isNotNull(getFormatFactory(), "Format factory is required");
+        isNotNull(getOutputType(), "Output type is required");
         isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
-    }
 
-    protected void execute(DumpJobExecution execution) throws SQLException {
         ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
-        try {
-            execution.setConnectionServices(connectionServices);
-            dump(execution);
-        } finally {
-            close(connectionServices);
-        }
+        execution.setConnectionServices(connectionServices);
+        Connection connection = connectionServices.getConnection();
+        execution.setConnection(connection);
+
+        execution.setCatalogWriter(getCatalog().getCatalogWriter());
+        execution.setDialect(getDialectResolver().resolve(connection));
+        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
     }
 
-    protected void dump(DumpJobExecution execution) throws SQLException {
-        ConnectionServices connectionServices = execution.getConnectionServices();
-
-        InspectionManager inspectionManager = new InspectionManager();
-        inspectionManager.setDialectResolver(getDialectResolver());
-        inspectionManager.setConnection(connectionServices.getConnection());
-        Database database = inspectionManager.inspect(
-                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
-                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA,
-                MetaDataType.TABLE, MetaDataType.COLUMN
-        ).getObject(MetaDataType.DATABASE);
-        execution.setDatabase(database);
-
-        Connection connection = connectionServices.getConnection();
-        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
-
-        CatalogWriter catalogWriter = getCatalog().getCatalogWriter();
-        execution.setCatalogWriter(catalogWriter);
-
-        Dialect dialect = database.getDialect();
+    /**
+     * Executes dump in the provided context. First off, it inspects source database meta data and creates SELECT
+     * queries for discovered tables or use complete user-provided SELECT statements ("native queries") to retrieve
+     * data.
+     *
+     * @param execution
+     * @throws SQLException
+     */
+    @Override
+    protected void executeWith(DumpJobExecution execution) throws SQLException {
+        Dialect dialect = execution.getDialect();
+        Connection connection = execution.getConnection();
         try {
             dialect.setTransactionIsolationLevel(connection,
                     new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
-
             if (dialect.supportsSessionTimeZone()) {
-                dialect.setSessionTimeZone(connection, timeZone);
+                dialect.setSessionTimeZone(connection, getTimeZone());
             }
 
+            Database database = inspect(execution);
+            execution.setDatabase(database);
             for (SelectQuery selectQuery : createSelectQueries(database, getSelectQuerySpecs())) {
                 dump(execution, selectQuery);
             }
@@ -159,20 +165,36 @@ public class DumpJob extends JobBase {
             if (dialect.supportsSessionTimeZone()) {
                 dialect.setSessionTimeZone(connection, null);
             }
-            closeQuietly(catalogWriter);
         }
     }
 
+    @Override
+    protected void releaseExecution(DumpJobExecution execution) throws SQLException {
+        close(execution.getConnectionServices());
+        closeQuietly(execution.getCatalogWriter());
+    }
+
+    protected Database inspect(DumpJobExecution execution) throws SQLException {
+        InspectionManager inspectionManager = new InspectionManager();
+        inspectionManager.setDialectResolver(getDialectResolver());
+        inspectionManager.setConnection(execution.getConnection());
+        ConnectionServices connectionServices = execution.getConnectionServices();
+        InspectionResults inspectionResults = inspectionManager.inspect(
+                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
+                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA,
+                MetaDataType.TABLE, MetaDataType.COLUMN);
+        return inspectionResults.getObject(MetaDataType.DATABASE);
+    }
+
     protected void dump(final DumpJobExecution execution, final Query query) throws SQLException {
-        final Database database = execution.getDatabase();
-        StatementTemplate template = new StatementTemplate(execution.getConnectionServices().getConnection());
+        StatementTemplate template = new StatementTemplate(execution.getConnection());
         template.execute(
-                new StatementCreator<PreparedStatement>() {
+                new StatementFactory<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
                         PreparedStatement statement = connection.prepareStatement(
                                 query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                        database.getDialect().setStreamResults(statement, true);
+                        execution.getDialect().setStreamResults(statement, true);
                         return statement;
                     }
                 },
@@ -185,20 +207,19 @@ public class DumpJob extends JobBase {
         );
     }
 
-    protected void dump(DumpJobExecution execution, Query query,
-                        PreparedStatement preparedStatement) throws SQLException {
+    protected void dump(DumpJobExecution execution, Query query, PreparedStatement statement) throws SQLException {
         final FormatOutput formatOutput = getFormatFactory().createOutput(getOutputType());
         formatOutput.setAttributes(getAttributes());
         formatOutput.setValueFormatRegistry(execution.getValueFormatRegistry());
 
-        Dialect dialect = execution.getDatabase().getDialect();
+        Dialect dialect = execution.getDialect();
         if (!dialect.supportsSessionTimeZone() && dialect.supportsStatementWithTimezone()) {
             formatOutput.setTimeZone(getTimeZone());
         }
         JdbcTypeRegistry jdbcTypeRegistry = dialect.getJdbcTypeRegistry();
         formatOutput.setValueAccessProvider(new JdbcTypeValueAccessProvider(jdbcTypeRegistry));
 
-        ResultSet resultSet = preparedStatement.executeQuery();
+        ResultSet resultSet = statement.executeQuery();
         formatOutput.setResultSet(resultSet);
         formatOutput.setValueFormatModelList(createValueModelList(resultSet, query));
         formatOutput.initValueFormatModel();
@@ -225,23 +246,24 @@ public class DumpJob extends JobBase {
         }
     }
 
-    protected ValueModelList<ValueFormatModel> createValueModelList(ResultSet resultSet, Query query) throws SQLException {
+    protected ValueModelList<ValueFormatModel> createValueModelList(ResultSet resultSet,
+                                                                    Query query) throws SQLException {
         Collection<? extends ValueModel> valueModelList = query instanceof SelectQuery ?
                 ((SelectQuery) query).getColumns() : ValueModelFactory.createValueModelList(resultSet);
         return ValueModelFactory.createValueModelList(
                 Iterables.transform(valueModelList,
-                    new Function<ValueModel, ValueFormatModel>() {
-                        @Override
-                        public ValueFormatModel apply(ValueModel valueModel) {
-                            return new SimpleValueFormatModel(valueModel);
-                        }
-                    }));
+                        new Function<ValueModel, ValueFormatModel>() {
+                            @Override
+                            public ValueFormatModel apply(ValueModel valueModel) {
+                                return new SimpleValueFormatModel(valueModel);
+                            }
+                        }));
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database,
                                                           Collection<SelectQuerySpec> selectQuerySpecs) {
-        Collection<SelectQuery> selectQueries = Lists.newArrayList();
-        if (selectQuerySpecs.isEmpty()) {
+        Collection<SelectQuery> selectQueries = newArrayList();
+        if (selectQuerySpecs == null || selectQuerySpecs.isEmpty()) {
             selectQueries.addAll(createSelectQueries(database));
         } else {
             for (SelectQuerySpec selectQuerySpec : selectQuerySpecs) {
@@ -253,7 +275,7 @@ public class DumpJob extends JobBase {
 
     protected Collection<SelectQuery> createSelectQueries(Database database) {
         Dialect dialect = database.getDialect();
-        Collection<SelectQuery> selectQueries = Lists.newArrayList();
+        Collection<SelectQuery> selectQueries = newArrayList();
         for (Table table : database.getTables()) {
             if (getTableTypes().contains(table.getType())) {
                 SelectQueryBuilder builder = new SelectQueryBuilder();
@@ -272,10 +294,10 @@ public class DumpJob extends JobBase {
 
     protected SelectQuery createSelectQuery(Database database, SelectQuerySpec selectQuerySpec) {
         SelectQueryBuilder builder = new SelectQueryBuilder();
-        String tableName = selectQuerySpec.getTable();
+        String table = selectQuerySpec.getTable();
         builder.setQualifyNames(true);
         builder.setDialect(database.getDialect());
-        builder.setTable(database.findTable(tableName));
+        builder.setTable(database.findTable(table));
         builder.setColumns(selectQuerySpec.getColumns());
         if (!isEmpty(selectQuerySpec.getFilter())) {
             builder.addFilter(selectQuerySpec.getFilter());
@@ -284,11 +306,13 @@ public class DumpJob extends JobBase {
     }
 
     protected Collection<NativeQuery> createNativeQueries(Collection<NativeQuerySpec> nativeQuerySpecs) {
-        Collection<NativeQuery> queries = Lists.newArrayList();
-        for (NativeQuerySpec nativeQuerySpec : nativeQuerySpecs) {
-            NativeQueryBuilder builder = new NativeQueryBuilder();
-            builder.setQuery(nativeQuerySpec.getQuery());
-            queries.add(builder.build());
+        Collection<NativeQuery> queries = newArrayList();
+        if (nativeQuerySpecs != null) {
+            for (NativeQuerySpec nativeQuerySpec : nativeQuerySpecs) {
+                NativeQueryBuilder builder = new NativeQueryBuilder();
+                builder.setQuery(nativeQuerySpec.getQuery());
+                queries.add(builder.build());
+            }
         }
         return queries;
     }

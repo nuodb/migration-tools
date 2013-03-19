@@ -39,10 +39,15 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.model.ValueModelList;
-import com.nuodb.migrator.jdbc.query.*;
+import com.nuodb.migrator.jdbc.query.InsertQuery;
+import com.nuodb.migrator.jdbc.query.InsertQueryBuilder;
+import com.nuodb.migrator.jdbc.query.InsertType;
+import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.query.StatementCallback;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccessProvider;
-import com.nuodb.migrator.job.JobBase;
-import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.decorate.DecoratingJobBase;
 import com.nuodb.migrator.resultset.catalog.Catalog;
 import com.nuodb.migrator.resultset.catalog.CatalogEntry;
 import com.nuodb.migrator.resultset.catalog.CatalogReader;
@@ -69,7 +74,7 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 /**
  * @author Sergey Bushik
  */
-public class LoadJob extends JobBase {
+public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private ConnectionProvider connectionProvider;
@@ -82,52 +87,39 @@ public class LoadJob extends JobBase {
     private InsertType insertType;
     private Map<String, InsertType> tableInsertTypes;
 
-    @Override
-    public void execute(JobExecution execution) throws Exception {
-        validate();
-        execute(new LoadJobExecution(execution));
+    public LoadJob() {
+        super(LoadJobExecution.class);
     }
 
-    protected void validate() {
+    @Override
+    protected void initExecution(LoadJobExecution execution) throws SQLException {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
         isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
-    }
 
-    protected void execute(LoadJobExecution execution) throws SQLException {
         ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
-        try {
-            execution.setConnectionServices(connectionServices);
-            load(execution);
-        } finally {
-            close(connectionServices);
-        }
+        execution.setConnectionServices(connectionServices);
+        Connection connection = connectionServices.getConnection();
+        execution.setConnection(connection);
+
+        execution.setCatalogReader(getCatalog().getCatalogReader());
+        execution.setDialect(getDialectResolver().resolve(connection));
+        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
     }
 
-    protected void load(LoadJobExecution execution) throws SQLException {
-        ConnectionServices connectionServices = execution.getConnectionServices();
-
-        Connection connection = connectionServices.getConnection();
-        InspectionManager inspectionManager = new InspectionManager();
-        inspectionManager.setDialectResolver(getDialectResolver());
-        inspectionManager.setConnection(connection);
-        Database database = inspectionManager.inspect(
-                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
-                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE, MetaDataType.COLUMN
-        ).getObject(MetaDataType.DATABASE);
-
-        execution.setDatabase(database);
-        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
-
-        CatalogReader catalogReader = getCatalog().getCatalogReader();
-        execution.setCatalogReader(catalogReader);
-
-        Dialect dialect = database.getDialect();
+    @Override
+    protected void executeWith(LoadJobExecution execution) throws Exception {
+        Connection connection = execution.getConnection();
+        Dialect dialect = execution.getDialect();
         try {
             if (dialect.supportsSessionTimeZone()) {
-                dialect.setSessionTimeZone(connection, timeZone);
+                dialect.setSessionTimeZone(connection, getTimeZone());
             }
+            Database database = inspect(execution);
+            execution.setDatabase(database);
+
+            CatalogReader catalogReader = execution.getCatalogReader();
             for (CatalogEntry catalogEntry : catalogReader.readAll()) {
                 load(execution, catalogEntry);
             }
@@ -142,8 +134,25 @@ public class LoadJob extends JobBase {
             if (dialect.supportsSessionTimeZone()) {
                 dialect.setSessionTimeZone(connection, null);
             }
-            closeQuietly(catalogReader);
         }
+    }
+
+    protected Database inspect(LoadJobExecution execution) throws SQLException {
+        InspectionManager inspectionManager = new InspectionManager();
+        inspectionManager.setDialectResolver(getDialectResolver());
+        inspectionManager.setConnection(execution.getConnection());
+        ConnectionServices connectionServices = execution.getConnectionServices();
+        return inspectionManager.inspect(
+                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
+                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE,
+                MetaDataType.COLUMN
+        ).getObject(MetaDataType.DATABASE);
+    }
+
+    @Override
+    protected void releaseExecution(LoadJobExecution execution) throws Exception {
+        close(execution.getConnectionServices());
+        closeQuietly(execution.getCatalogReader());
     }
 
     protected void load(LoadJobExecution execution, CatalogEntry catalogEntry) throws SQLException {
@@ -183,9 +192,9 @@ public class LoadJob extends JobBase {
         }
         final InsertQuery query = createInsertQuery(table, valueFormatModelList);
 
-        StatementTemplate template = new StatementTemplate(execution.getConnectionServices().getConnection());
+        StatementTemplate template = new StatementTemplate(execution.getConnection());
         template.execute(
-                new StatementCreator<PreparedStatement>() {
+                new StatementFactory<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
                         return createStatement(connection, query);
@@ -193,8 +202,8 @@ public class LoadJob extends JobBase {
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void execute(PreparedStatement preparedStatement) throws SQLException {
-                        load(execution, formatInput, preparedStatement);
+                    public void execute(PreparedStatement statement) throws SQLException {
+                        load(execution, formatInput, statement);
                     }
                 }
         );
@@ -205,8 +214,8 @@ public class LoadJob extends JobBase {
     }
 
     protected void load(LoadJobExecution execution, FormatInput formatInput,
-                        PreparedStatement preparedStatement) throws SQLException {
-        formatInput.setPreparedStatement(preparedStatement);
+                        PreparedStatement statement) throws SQLException {
+        formatInput.setPreparedStatement(statement);
         formatInput.initValueFormatModel();
         while (execution.isRunning() && formatInput.hasNextRow()) {
             formatInput.readRow();
@@ -253,22 +262,6 @@ public class LoadJob extends JobBase {
         this.connectionProvider = connectionProvider;
     }
 
-    public InsertType getInsertType() {
-        return insertType;
-    }
-
-    public void setInsertType(InsertType insertType) {
-        this.insertType = insertType;
-    }
-
-    public void setTableInsertTypes(Map<String, InsertType> tableInsertTypes) {
-        this.tableInsertTypes = tableInsertTypes;
-    }
-
-    public Map<String, InsertType> getTableInsertTypes() {
-        return tableInsertTypes;
-    }
-
     public TimeZone getTimeZone() {
         return timeZone;
     }
@@ -313,8 +306,23 @@ public class LoadJob extends JobBase {
         return valueFormatRegistryResolver;
     }
 
-    public void setValueFormatRegistryResolver(
-            ValueFormatRegistryResolver valueFormatRegistryResolver) {
+    public void setValueFormatRegistryResolver(ValueFormatRegistryResolver valueFormatRegistryResolver) {
         this.valueFormatRegistryResolver = valueFormatRegistryResolver;
+    }
+
+    public InsertType getInsertType() {
+        return insertType;
+    }
+
+    public void setInsertType(InsertType insertType) {
+        this.insertType = insertType;
+    }
+
+    public Map<String, InsertType> getTableInsertTypes() {
+        return tableInsertTypes;
+    }
+
+    public void setTableInsertTypes(Map<String, InsertType> tableInsertTypes) {
+        this.tableInsertTypes = tableInsertTypes;
     }
 }

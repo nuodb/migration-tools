@@ -27,11 +27,11 @@
  */
 package com.nuodb.migrator.resultset.format.value;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import static java.util.Collections.unmodifiableMap;
 
 /**
  * @author Sergey Bushik
@@ -52,9 +52,9 @@ public enum ValueVariantType {
 
     static {
         Map<String, ValueVariantType> aliases = new TreeMap<String, ValueVariantType>(CASE_INSENSITIVE_ORDER);
-        for (ValueVariantType valueVariantType : values()) {
-            aliases.put(valueVariantType.name(), valueVariantType);
+        for (ValueVariantType type : values()) {
+            aliases.put(type.name(), type);
         }
-        ALIASES = Collections.unmodifiableMap(aliases);
+        ALIASES = unmodifiableMap(aliases);
     }
 }

@@ -32,8 +32,12 @@ package com.nuodb.migrator.jdbc.metadata;
  */
 public class MetaDataUtils {
 
+    public static Database createDatabase() {
+        return new Database();
+    }
+
     public static Catalog createCatalog(String catalogName) {
-        return new Database().addCatalog(catalogName);
+        return createDatabase().addCatalog(catalogName);
     }
 
     public static Schema createSchema(String catalogName, String schemaName) {

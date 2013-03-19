@@ -25,48 +25,33 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.job;
+package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import java.util.Map;
+import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.MetaDataException;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+
+import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public class JobExecutionDelegate implements JobExecution {
+public class PostgreSQLSchemaInspector extends InspectorBase<Catalog, SchemaInspectionScope> {
 
-    private JobExecution execution;
-
-    public JobExecutionDelegate(JobExecution execution) {
-        this.execution = execution;
+    public PostgreSQLSchemaInspector() {
+        super(MetaDataType.SCHEMA, SchemaInspectionScope.class);
     }
 
     @Override
-    public boolean isRunning() {
-        return execution.isRunning();
+    public void inspectScope(InspectionContext inspectionContext,
+                             SchemaInspectionScope inspectionScope) throws SQLException {
+        throw new MetaDataException("Method is not implemented yet");
     }
 
     @Override
-    public boolean isPaused() {
-        return execution.isPaused();
-    }
-
-    @Override
-    public boolean isStopped() {
-        return execution.isStopped();
-    }
-
-    @Override
-    public Job getJob() {
-        return execution.getJob();
-    }
-
-    @Override
-    public JobStatus getJobStatus() {
-        return execution.getJobStatus();
-    }
-
-    @Override
-    public Map<String, Object> getContext() {
-        return execution.getContext();
+    public void inspectObjects(InspectionContext inspectionContext,
+                               Collection<? extends Catalog> objects) throws SQLException {
+        throw new MetaDataException("Method is not implemented yet");
     }
 }

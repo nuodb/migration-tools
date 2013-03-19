@@ -32,6 +32,7 @@ import com.nuodb.migrator.jdbc.model.ValueModel;
 
 import java.util.Set;
 
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.upperCase;
 
@@ -92,13 +93,12 @@ public class Column extends IdentifiableBase implements ValueModel {
 
     private DefaultValue defaultValue;
 
-    public Column(Table table, String name) {
-        this(table, Identifier.valueOf(name));
+    public Column(String name) {
+        this(valueOf(name));
     }
 
-    public Column(Table table, Identifier identifier) {
+    public Column(Identifier identifier) {
         super(MetaDataType.COLUMN, identifier);
-        this.table = table;
     }
 
     @Override
@@ -143,6 +143,13 @@ public class Column extends IdentifiableBase implements ValueModel {
 
     public Table getTable() {
         return table;
+    }
+
+    public void setTable(Table table) {
+        if (this.table != null) {
+            this.table.getColumns().remove(this);
+        }
+        this.table = table;
     }
 
     public int getSize() {

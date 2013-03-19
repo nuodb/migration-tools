@@ -211,31 +211,5 @@
 				</plugins>
 			</build>
 		</profile>
-		<profile>
-			<id>cli-handler-help</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.2.1</version>
-						<executions>
-							<execution>
-								<phase>test</phase>
-								<goals>
-									<goal>java</goal>
-								</goals>
-								<configuration>
-									<mainClass>com.nuodb.migrator.cli.CliHandler</mainClass>
-									<arguments>
-										<argument>--help</argument>
-									</arguments>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 	</profiles>
 </project>

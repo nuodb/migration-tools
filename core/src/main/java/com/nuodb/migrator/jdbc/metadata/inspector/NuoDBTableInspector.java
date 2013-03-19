@@ -32,7 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryUtils;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementCreator;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
 import java.sql.Connection;
@@ -97,7 +97,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
         final String query = QueryUtils.where(QUERY, filters, "AND");
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
-                new StatementCreator<PreparedStatement>() {
+                new StatementFactory<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
                         return connection.prepareStatement(query,
@@ -123,7 +123,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
         final String query = QueryUtils.where(QUERY, newArrayList("SCHEMA=?"), "AND");
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
-                new StatementCreator<PreparedStatement>() {
+                new StatementFactory<PreparedStatement>() {
                     @Override
                     public PreparedStatement create(Connection connection) throws SQLException {
                         return connection.prepareStatement(query,

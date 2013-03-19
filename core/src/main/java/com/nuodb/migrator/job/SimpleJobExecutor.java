@@ -84,7 +84,7 @@ public class SimpleJobExecutor implements JobExecutor {
     }
 
     @Override
-    public boolean execute(Map<String, Object> context) {
+    public boolean execute(Map<Object, Object> context) {
         synchronized (jobStatus) {
             if (!jobStatus.isRunning() && !jobStatus.isStopped()) {
                 jobStatus.setRunning(true);
@@ -108,21 +108,21 @@ public class SimpleJobExecutor implements JobExecutor {
                 jobStatus.setRunning(false);
             }
             fireJobExecutionEvent(new JobExecutionEvent(execution));
-        } catch (Throwable error) {
+        } catch (Throwable failure) {
             if (logger.isDebugEnabled()) {
                 logger.debug(format("Job %1$s execution failed", job.getName()));
             }
             synchronized (jobStatus) {
                 jobStatus.setExecutionEndDate(new Date());
                 jobStatus.setRunning(false);
-                jobStatus.setFailure(error);
+                jobStatus.setFailure(failure);
             }
             fireJobExecutionEvent(new JobExecutionEvent(execution));
         }
         return true;
     }
 
-    protected JobExecution createJobExecution(Map<String, Object> context) {
+    protected JobExecution createJobExecution(Map<Object, Object> context) {
         return new SimpleJobExecution(job, jobStatus, context);
     }
 

@@ -29,15 +29,17 @@ package com.nuodb.migrator.schema;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.connection.ConnectionServices;
+import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorContext;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
-import com.nuodb.migrator.job.JobBase;
-import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.decorate.DecoratingJobBase;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
@@ -46,48 +48,37 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 /**
  * @author Sergey Bushik
  */
-public class SchemaJob extends JobBase {
+public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
 
-    private ScriptGeneratorContext context;
-    private ScriptExporter scriptExporter;
     private ConnectionProvider connectionProvider;
+    private DialectResolver dialectResolver;
+    private ScriptExporter scriptExporter;
+    private ScriptGeneratorContext scriptGeneratorContext;
     private boolean failOnEmptyScripts;
 
+    public SchemaJob() {
+        super(SchemaJobExecution.class);
+    }
+
     @Override
-    public void execute(JobExecution execution) throws Exception {
-        validate();
-        execution(new SchemaJobExecution(execution));
-    }
-
-    protected void validate() {
+    protected void initExecution(SchemaJobExecution execution) throws Exception {
         isNotNull(getConnectionProvider(), "Connection provider is required");
-        isNotNull(getContext(), "Script generator context is required");
+        isNotNull(getDialectResolver(), "Dialect resolver is required");
         isNotNull(getScriptExporter(), "Script exporter is required");
-    }
+        isNotNull(getScriptGeneratorContext(), "Script generator context is required");
 
-    protected void execution(SchemaJobExecution execution) throws Exception {
         ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
-        try {
-            execution.setConnectionServices(connectionServices);
-            generate(execution);
-        } finally {
-            close(connectionServices);
-        }
+        execution.setConnectionServices(connectionServices);
+        Connection connection = connectionServices.getConnection();
+        execution.setConnection(connection);
     }
 
-    protected void generate(SchemaJobExecution execution) throws Exception {
-        ConnectionServices connectionServices = execution.getConnectionServices();
-
-        InspectionManager inspectionManager = new InspectionManager();
-        inspectionManager.setConnection(connectionServices.getConnection());
-        Database database = inspectionManager.inspect(
-                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
-                MetaDataType.TYPES
-        ).getObject(MetaDataType.DATABASE);
-
-        Collection<String> scripts = getContext().getScripts(database);
+    @Override
+    protected void executeWith(SchemaJobExecution execution) throws Exception {
+        Database database = inspect(execution);
+        Collection<String> scripts = getScriptGeneratorContext().getScripts(database);
         if (isFailOnEmptyScripts() && scripts.isEmpty()) {
-            throw new SchemaJobException("Scripts are empty");
+            throw new SchemaJobException("Scripts are empty: nothing to export");
         }
         ScriptExporter scriptExporter = getScriptExporter();
         try {
@@ -98,12 +89,19 @@ public class SchemaJob extends JobBase {
         }
     }
 
-    public boolean isFailOnEmptyScripts() {
-        return failOnEmptyScripts;
+    protected Database inspect(SchemaJobExecution execution) throws SQLException {
+        InspectionManager inspectionManager = new InspectionManager();
+        inspectionManager.setConnection(execution.getConnection());
+        inspectionManager.setDialectResolver(getDialectResolver());
+        ConnectionServices connectionServices = execution.getConnectionServices();
+        return inspectionManager.inspect(new TableInspectionScope(
+                connectionServices.getCatalog(), connectionServices.getSchema()), MetaDataType.TYPES
+        ).getObject(MetaDataType.DATABASE);
     }
 
-    public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
-        this.failOnEmptyScripts = failOnEmptyScripts;
+    @Override
+    protected void releaseExecution(SchemaJobExecution execution) throws Exception {
+        close(execution.getConnectionServices());
     }
 
     public ConnectionProvider getConnectionProvider() {
@@ -114,12 +112,12 @@ public class SchemaJob extends JobBase {
         this.connectionProvider = connectionProvider;
     }
 
-    public ScriptGeneratorContext getContext() {
-        return context;
+    public DialectResolver getDialectResolver() {
+        return dialectResolver;
     }
 
-    public void setContext(ScriptGeneratorContext context) {
-        this.context = context;
+    public void setDialectResolver(DialectResolver dialectResolver) {
+        this.dialectResolver = dialectResolver;
     }
 
     public ScriptExporter getScriptExporter() {
@@ -128,5 +126,21 @@ public class SchemaJob extends JobBase {
 
     public void setScriptExporter(ScriptExporter scriptExporter) {
         this.scriptExporter = scriptExporter;
+    }
+
+    public ScriptGeneratorContext getScriptGeneratorContext() {
+        return scriptGeneratorContext;
+    }
+
+    public void setScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
+        this.scriptGeneratorContext = scriptGeneratorContext;
+    }
+
+    public boolean isFailOnEmptyScripts() {
+        return failOnEmptyScripts;
+    }
+
+    public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
+        this.failOnEmptyScripts = failOnEmptyScripts;
     }
 }

@@ -31,26 +31,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-
 /**
  * @author Sergey Bushik
  */
-public class StatementTemplate {
+public interface StatementFactory<X extends Statement> {
 
-    private final Connection connection;
-
-    public StatementTemplate(Connection connection) {
-        this.connection = connection;
-    }
-
-    public <X extends Statement> void execute(StatementFactory<X> factory, StatementCallback<X> callback) throws SQLException {
-        X statement = factory.create(connection);
-        try {
-            callback.execute(statement);
-        } finally {
-            close(statement != null ? statement.getResultSet() : null);
-            close(statement);
-        }
-    }
+    X create(Connection connection) throws SQLException;
 }
