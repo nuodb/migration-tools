@@ -25,26 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.context.support;
+package com.nuodb.migrator.context;
 
-import com.nuodb.migrator.context.ApplicationContext;
-import com.nuodb.migrator.context.ApplicationContextHolder;
 import com.nuodb.migrator.i18n.Messages;
+import org.springframework.context.MessageSource;
+
+import java.util.Locale;
 
 /**
  * @author Sergey Bushik
  */
-public class ApplicationSupport {
+public class SpringMessages implements Messages {
 
-    public ApplicationContext getApplicationContext() {
-        return ApplicationContextHolder.getApplicationContext();
+    private MessageSource messageSource;
+
+    public SpringMessages(MessageSource messageSource) {
+        this.messageSource = messageSource;
     }
 
-    public Messages getResources() {
-        return getApplicationContext().getMessages();
-    }
-
-    public String getMessage(String key, Object... values) {
-        return getResources().getMessage(key, values);
+    @Override
+    public String getMessage(String code, Object... values) {
+        return messageSource.getMessage(code, values, Locale.getDefault());
     }
 }

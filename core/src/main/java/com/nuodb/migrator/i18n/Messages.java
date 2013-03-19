@@ -27,53 +27,10 @@
  */
 package com.nuodb.migrator.i18n;
 
-import java.text.MessageFormat;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
 /**
  * @author Sergey Bushik
  */
-public class Resources {
+public interface Messages {
 
-    public static final String DEFAULT_BUNDLE = "com.nuodb.migrator.i18n.messages";
-
-    private static Resources resources;
-
-    private ResourceBundle bundle;
-
-    public static Resources getResources() {
-        if (resources == null) {
-            resources = new Resources(DEFAULT_BUNDLE);
-        }
-        return resources;
-    }
-
-    public Resources(String bundle) {
-        int first = bundle.indexOf('_');
-        int second = bundle.indexOf('_', first + 1);
-        Locale locale;
-        if (first != -1) {
-            String language = bundle.substring(first + 1, second);
-            String country = bundle.substring(second + 1);
-            locale = new Locale(language, country);
-        } else {
-            locale = Locale.getDefault();
-        }
-        try {
-            this.bundle = ResourceBundle.getBundle(bundle, locale);
-        } catch (MissingResourceException exp) {
-            this.bundle = ResourceBundle.getBundle(DEFAULT_BUNDLE, locale);
-        }
-    }
-
-    public String getMessage(String key, Object... values) {
-        String message = bundle.getString(key);
-        if (values != null && values.length > 0) {
-            return new MessageFormat(message).format(values);
-        } else {
-            return message;
-        }
-    }
+    String getMessage(String code, Object... values);
 }

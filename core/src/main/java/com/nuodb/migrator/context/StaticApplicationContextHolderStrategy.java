@@ -27,6 +27,11 @@
  */
 package com.nuodb.migrator.context;
 
+import static com.nuodb.migrator.bootstrap.config.Config.CONTEXT_CLASS;
+import static com.nuodb.migrator.bootstrap.config.Config.DEFAULT_CONTEXT_CLASS;
+import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
+import static java.lang.System.getProperty;
+
 /**
  * @author Sergey Bushik
  */
@@ -39,11 +44,15 @@ public class StaticApplicationContextHolderStrategy implements ApplicationContex
         if (applicationContext == null) {
             synchronized (StaticApplicationContextHolderStrategy.class) {
                 if (applicationContext == null) {
-                    applicationContext = new ApplicationContextImpl();
+                    applicationContext = createApplicationContext();
                 }
             }
         }
         return applicationContext;
+    }
+
+    protected ApplicationContext createApplicationContext() {
+        return newInstance(getProperty(CONTEXT_CLASS, DEFAULT_CONTEXT_CLASS));
     }
 
     @Override
