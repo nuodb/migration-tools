@@ -27,17 +27,55 @@
  */
 package com.nuodb.migrator.context;
 
-import com.nuodb.migrator.i18n.Resources;
+import com.nuodb.migrator.i18n.Messages;
+
+import java.text.MessageFormat;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 /**
  * @author Sergey Bushik
  */
-public class ApplicationContextImpl implements ApplicationContext {
+public class SimpleMessages implements Messages {
 
-    private Resources resource = Resources.getResources();
+    public static final String DEFAULT_BUNDLE = "com.nuodb.migrator.i18n.messages";
 
-    @Override
-    public Resources getResources() {
-        return resource;
+    private static SimpleMessages INSTANCE;
+
+    private ResourceBundle bundle;
+
+    public static Messages getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new SimpleMessages(DEFAULT_BUNDLE);
+        }
+        return INSTANCE;
+    }
+
+    public SimpleMessages(String bundle) {
+        int first = bundle.indexOf('_');
+        int second = bundle.indexOf('_', first + 1);
+        Locale locale;
+        if (first != -1) {
+            String language = bundle.substring(first + 1, second);
+            String country = bundle.substring(second + 1);
+            locale = new Locale(language, country);
+        } else {
+            locale = Locale.getDefault();
+        }
+        try {
+            this.bundle = ResourceBundle.getBundle(bundle, locale);
+        } catch (MissingResourceException exp) {
+            this.bundle = ResourceBundle.getBundle(DEFAULT_BUNDLE, locale);
+        }
+    }
+
+    public String getMessage(String code, Object... values) {
+        String message = bundle.getString(code);
+        if (values != null && values.length > 0) {
+            return new MessageFormat(message).format(values);
+        } else {
+            return message;
+        }
     }
 }

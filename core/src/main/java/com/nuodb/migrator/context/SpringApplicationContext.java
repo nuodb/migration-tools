@@ -25,26 +25,31 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.context.support;
+package com.nuodb.migrator.context;
 
-import com.nuodb.migrator.context.ApplicationContext;
-import com.nuodb.migrator.context.ApplicationContextHolder;
 import com.nuodb.migrator.i18n.Messages;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Sergey Bushik
  */
-public class ApplicationSupport {
+public class SpringApplicationContext implements com.nuodb.migrator.context.ApplicationContext {
 
-    public ApplicationContext getApplicationContext() {
-        return ApplicationContextHolder.getApplicationContext();
+    private static final String XML_CONFIG_LOCATION = "/com/nuodb/migrator/context/spring-application-context.xml";
+
+    private Messages messages;
+
+    public SpringApplicationContext() {
+        this(new ClassPathXmlApplicationContext(XML_CONFIG_LOCATION));
     }
 
-    public Messages getResources() {
-        return getApplicationContext().getMessages();
+    public SpringApplicationContext(ApplicationContext applicationContext) {
+        this.messages = new SpringMessages(applicationContext);
     }
 
-    public String getMessage(String key, Object... values) {
-        return getResources().getMessage(key, values);
+    @Override
+    public Messages getMessages() {
+        return messages;
     }
 }

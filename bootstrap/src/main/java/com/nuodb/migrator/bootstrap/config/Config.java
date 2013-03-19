@@ -38,9 +38,15 @@ public interface Config {
 
     final String EXECUTABLE = "com.nuodb.migrator.executable";
 
-    final String LOADER = "com.nuodb.migrator.bootstrap.loader";
+    final String CLASS_LOADER = "com.nuodb.migrator.class.loader";
 
-    final String BOOTABLE = "com.nuodb.migrator.bootstrap.bootable";
+    final String BOOTABLE_CLASS = "com.nuodb.migrator.bootable.class";
+
+    final String DEFAULT_BOOTABLE_CLASS = "com.nuodb.migrator.cli.CliHandler";
+
+    final String CONTEXT_CLASS = "com.nuodb.migrator.context.class";
+
+    final String DEFAULT_CONTEXT_CLASS = "com.nuodb.migrator.context.SimpleApplicationContext";
 
     String getProperty(String property);
 

@@ -69,8 +69,8 @@ public class DriverInfo {
 
     @Override
     public String toString() {
-        return format("name=%s, version=%s, minor version=%s, major version=%s",
-                name, version, minorVersion, majorVersion);
+        return format("name=%s, version=%s, major version=%s, minor version=%s",
+                name, version, majorVersion, minorVersion);
     }
 
     @Override

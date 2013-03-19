@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.context;
 
-import com.nuodb.migrator.i18n.Resources;
+import com.nuodb.migrator.i18n.Messages;
 
 /**
  * @author Sergey Bushik
  */
 public interface ApplicationContext {
 
-    Resources getResources();
+    Messages getMessages();
 }

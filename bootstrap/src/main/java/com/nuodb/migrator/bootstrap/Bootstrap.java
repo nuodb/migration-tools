@@ -44,8 +44,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import static com.nuodb.migrator.bootstrap.config.Config.BOOTABLE;
-import static com.nuodb.migrator.bootstrap.config.Config.LOADER;
+import static com.nuodb.migrator.bootstrap.config.Config.BOOTABLE_CLASS;
+import static com.nuodb.migrator.bootstrap.config.Config.CLASS_LOADER;
+import static com.nuodb.migrator.bootstrap.config.Config.DEFAULT_BOOTABLE_CLASS;
 
 /**
  * @author Sergey Bushik
@@ -90,7 +91,7 @@ public class Bootstrap {
     }
 
     protected ClassLoader createClassLoader() throws IOException {
-        String loader = getConfig().getProperty(LOADER);
+        String loader = getConfig().getProperty(CLASS_LOADER);
         if (loader == null || loader.equals("")) {
             return getClass().getClassLoader();
         }
@@ -115,7 +116,7 @@ public class Bootstrap {
     }
 
     protected Bootable createBootable() throws Exception {
-        String bootableName = getConfig().getProperty(BOOTABLE);
+        String bootableName = getConfig().getProperty(BOOTABLE_CLASS, DEFAULT_BOOTABLE_CLASS);
         Class<? extends Bootable> bootableType = (Class<? extends Bootable>) getClassLoader().loadClass(bootableName);
         Constructor<? extends Bootable> constructor = bootableType.getConstructor();
         return constructor.newInstance();
