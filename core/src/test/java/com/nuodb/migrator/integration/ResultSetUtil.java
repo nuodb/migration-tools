@@ -98,6 +98,10 @@ public class ResultSetUtil {
 					String colNameTar = pairsTar.getKey();
 					// String dTypeTar = pairsTar.getValue();
 					JDBCGetMethod[] matchTypes = dbTypes.getJDBCTypes(dTypeSrc);
+					Assert.assertNotNull(matchTypes, "No type match for "
+							+ dTypeSrc);
+					Assert.assertNotEquals(matchTypes.length, 0,
+							"No type match for " + dTypeSrc);
 					for (JDBCGetMethod jdbcType : matchTypes) {
 						Object o1 = getValue(source, colName, jdbcType);
 						Object o2 = getValue(target, colNameTar, jdbcType);

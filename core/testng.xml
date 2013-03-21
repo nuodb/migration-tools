@@ -5,6 +5,8 @@
         <groups>
             <run>
                 <exclude name="integrationtest"/>
+                <exclude name="mysqlintegrationtest"/>
+                <exclude name="nuodbintegrationtest"/>
                 <exclude name="disabled"/>
             </run>
         </groups>
