@@ -48,6 +48,8 @@ public interface BasicOptionBuilder<O extends BasicOption> extends AugmentOption
 
     BasicOptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
 
+    BasicOptionBuilder withOptionValidator(OptionValidator optionValidator);
+
     BasicOptionBuilder withArgument(Argument argument);
 
     BasicOptionBuilder withGroup(Group group);

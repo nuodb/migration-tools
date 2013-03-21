@@ -35,8 +35,8 @@ import com.nuodb.migrator.utils.SimplePriorityList;
 import java.util.*;
 
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
+import static com.nuodb.migrator.cli.parse.option.OptionValidations.optionUnexpected;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
-import static java.lang.String.format;
 
 /**
  * Basic command line option which accepts arguments and may have name aliases.
@@ -104,7 +104,7 @@ public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
     }
 
     protected void processUnexpected(String argument) {
-        throw new OptionException(this, format("Unexpected token %1$s", argument));
+        optionUnexpected(this, argument);
     }
 
     @Override

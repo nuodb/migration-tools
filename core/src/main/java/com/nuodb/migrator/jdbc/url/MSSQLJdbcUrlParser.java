@@ -27,16 +27,47 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import java.util.Map;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.MSSQL_SUB_PROTOCOL;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public class MSSQLJdbcUrlParser extends JdbcUrlParserBase {
 
-    boolean canParse(String url);
+    public MSSQLJdbcUrlParser() {
+        super(MSSQL_SUB_PROTOCOL);
+    }
 
-    JdbcUrl parseUrl(String url);
+    @Override
+    protected JdbcUrl createJdbcUrl(String url) {
+        return new MSSQLJdbcUrl(url);
+    }
 
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    class MSSQLJdbcUrl extends JdbcUrlBase {
+
+        protected MSSQLJdbcUrl(String url) {
+            super(url, MSSQL_SUB_PROTOCOL);
+        }
+
+        @Override
+        protected void parseSubName(String subName) {
+            parseParameters(getProperties(), substringAfter(subName, ";"), ";");
+        }
+
+        @Override
+        public String getCatalog() {
+            return null;
+        }
+
+        @Override
+        public String getSchema() {
+            return null;
+        }
+
+        @Override
+        public String getQualifier() {
+            return null;
+        }
+    }
 }

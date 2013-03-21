@@ -27,36 +27,35 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.startsWith;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.NUODB_SUB_PROTOCOL;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBJdbcUrlParser implements JdbcUrlParser {
+public class NuoDBJdbcUrlParser extends JdbcUrlParserBase {
 
-    @Override
-    public boolean canParse(String url) {
-        return startsWith(url, "jdbc:com.nuodb");
+    public NuoDBJdbcUrlParser() {
+        super(NUODB_SUB_PROTOCOL);
     }
 
     @Override
-    public JdbcUrl parse(String url, Map<String, Object> overrides) {
-        return new NuoDBJdbcUrl(url, overrides);
+    protected JdbcUrl createJdbcUrl(String url) {
+        return new NuoDBJdbcUrl(url);
     }
 
     class NuoDBJdbcUrl extends JdbcUrlBase {
 
-        public NuoDBJdbcUrl(String url, Map<String, Object> overrides) {
-            super(url);
-            int prefix = url.indexOf("://");
-            int start;
-            if (prefix > 0 && (start = url.indexOf('?', prefix + 3)) > 0) {
-                parseParameters(getProperties(), url, start);
-            }
-            if (overrides != null) {
-                getProperties().putAll(overrides);
+        public NuoDBJdbcUrl(String url) {
+            super(url, NUODB_SUB_PROTOCOL);
+        }
+
+        @Override
+        protected void parseSubName(String subName) {
+            int prefix = subName.indexOf("//");
+            int parameters;
+            if (prefix >= 0 && (parameters = subName.indexOf('?', prefix + 3)) > 0) {
+                parseParameters(getProperties(), substring(subName, parameters + 1), "&");
             }
         }
 
@@ -68,6 +67,11 @@ public class NuoDBJdbcUrlParser implements JdbcUrlParser {
         @Override
         public String getSchema() {
             return (String) getProperties().get("schema");
+        }
+
+        @Override
+        public String getQualifier() {
+            return null;
         }
     }
 }

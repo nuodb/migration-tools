@@ -29,6 +29,7 @@ package com.nuodb.migrator.cli.parse.option;
 
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionProcessor;
+import com.nuodb.migrator.cli.parse.OptionValidator;
 import com.nuodb.migrator.cli.parse.Trigger;
 
 /**
@@ -49,6 +50,8 @@ public interface OptionBuilder<O extends Option> {
     OptionBuilder withOptionFormat(OptionFormat optionFormat);
 
     OptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
+
+    OptionBuilder withOptionValidator(OptionValidator optionValidator);
 
     O build();
 }

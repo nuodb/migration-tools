@@ -27,11 +27,7 @@
  */
 package com.nuodb.migrator.cli.parse.option;
 
-import com.nuodb.migrator.cli.parse.Argument;
-import com.nuodb.migrator.cli.parse.AugmentOption;
-import com.nuodb.migrator.cli.parse.Group;
-import com.nuodb.migrator.cli.parse.OptionProcessor;
-import com.nuodb.migrator.cli.parse.Trigger;
+import com.nuodb.migrator.cli.parse.*;
 
 /**
  * @author Sergey Bushik
@@ -51,6 +47,8 @@ public interface AugmentOptionBuilder<O extends AugmentOption> extends OptionBui
     AugmentOptionBuilder withOptionFormat(OptionFormat optionFormat);
 
     AugmentOptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
+
+    AugmentOptionBuilder withOptionValidator(OptionValidator optionValidator);
 
     AugmentOptionBuilder withArgument(Argument argument);
 

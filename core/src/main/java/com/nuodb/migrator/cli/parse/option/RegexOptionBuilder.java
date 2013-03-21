@@ -48,6 +48,8 @@ public interface RegexOptionBuilder<O extends RegexOption> extends AugmentOption
 
     RegexOptionBuilder withOptionProcessor(OptionProcessor optionProcessor);
 
+    RegexOptionBuilder withOptionValidator(OptionValidator optionValidator);
+
     RegexOptionBuilder withArgument(Argument argument);
 
     RegexOptionBuilder withGroup(Group group);

@@ -101,6 +101,13 @@ public interface Option {
     void setOptionFormat(OptionFormat optionFormat);
 
     /**
+     * Associates option validator with this option.
+     *
+     * @param optionValidator to be associated.
+     */
+    void addOptionValidator(OptionValidator optionValidator);
+
+    /**
      * Associates option processor with this option.
      *
      * @param optionProcessor to be associated.

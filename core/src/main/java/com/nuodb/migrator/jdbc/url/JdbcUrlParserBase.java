@@ -29,14 +29,41 @@ package com.nuodb.migrator.jdbc.url;
 
 import java.util.Map;
 
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.PROTOCOL;
+import static org.apache.commons.lang3.StringUtils.startsWith;
+
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public abstract class JdbcUrlParserBase implements JdbcUrlParser {
 
-    boolean canParse(String url);
+    private final String subProtocol;
 
-    JdbcUrl parseUrl(String url);
+    protected JdbcUrlParserBase(String subProtocol) {
+        this.subProtocol = subProtocol;
+    }
 
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    @Override
+    public boolean canParse(String url) {
+        return startsWith(url, PROTOCOL + COLON + subProtocol + COLON);
+    }
+
+    @Override
+    public JdbcUrl parseUrl(String url) {
+        return parse(url, null);
+    }
+
+    @Override
+    public JdbcUrl parse(String url, Map<String, Object> parameters) {
+        JdbcUrl jdbcUrl = createJdbcUrl(url);
+        if (parameters != null) {
+            jdbcUrl.getProperties().putAll(parameters);
+        }
+        return jdbcUrl;
+    }
+
+    protected abstract JdbcUrl createJdbcUrl(String url);
+
+    public static final String COLON = ":";
+
 }

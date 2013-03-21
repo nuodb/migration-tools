@@ -33,7 +33,7 @@ import java.sql.Driver;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.nuodb.migrator.jdbc.url.JdbcUrlParserUtils.getInstance;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlParsers.getInstance;
 
 public class JdbcConnectionSpec extends ConnectionSpecBase {
 

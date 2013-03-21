@@ -25,18 +25,19 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.url;
+package com.nuodb.migrator.cli.validator;
 
-import java.util.Map;
+import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public class ConnectionGroupValidators {
 
-    boolean canParse(String url);
-
-    JdbcUrl parseUrl(String url);
-
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    public static void addConnectionGroupValidators(GroupBuilder connection, ConnectionGroupInfo connectionGroupInfo) {
+        connection.withOptionValidator(new NuoDBConnectionGroupValidator(connectionGroupInfo));
+        connection.withOptionValidator(new MySQLConnectionGroupValidator(connectionGroupInfo));
+        connection.withOptionValidator(new PostgreSQLConnectionGroupValidator(connectionGroupInfo));
+        connection.withOptionValidator(new OracleConnectionGroupValidator(connectionGroupInfo));
+    }
 }

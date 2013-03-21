@@ -27,16 +27,24 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import java.util.Map;
-
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public interface JdbcUrlConstants {
 
-    boolean canParse(String url);
+    final String PROTOCOL = "jdbc";
 
-    JdbcUrl parseUrl(String url);
+    final String SEPARATOR = ":";
 
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    final String JTDS_SUB_PROTOCOL = "jtds";
+
+    final String MSSQL_SUB_PROTOCOL = "sqlserver";
+
+    final String MYSQL_SUB_PROTOCOL = "mysql";
+
+    final String NUODB_SUB_PROTOCOL = "com.nuodb";
+
+    final String ORACLE_SUB_PROTOCOL = "oracle";
+
+    final String POSTGRESQL_PROTOCOL = "postgresql";
 }

@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER_CLASS_NAME;
+import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.assertEquals;
 
@@ -88,7 +88,7 @@ public class CliLoadJobTest {
         LoadSpec loadSpec = new LoadSpec();
 
         JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
-        connectionSpec.setDriverClassName(NUODB_DRIVER_CLASS_NAME);
+        connectionSpec.setDriverClassName(NUODB_DRIVER);
         connectionSpec.setUrl("jdbc:com.nuodb://localhost/test?schema=hockey");
         connectionSpec.setUsername("dba");
         connectionSpec.setPassword("goalie");

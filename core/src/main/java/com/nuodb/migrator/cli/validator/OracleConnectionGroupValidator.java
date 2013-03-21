@@ -25,16 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.cli.validator;
+
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import org.apache.commons.lang3.StringUtils;
+
+import static com.nuodb.migrator.jdbc.JdbcConstants.ORACLE_DRIVER;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public interface StatementFormatter {
+public class OracleConnectionGroupValidator extends ConnectionGroupValidator {
 
-    String format();
+    public OracleConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
+        super(connectionGroupInfo);
+    }
 
-    Object getParameter(int index);
+    @Override
+    public boolean canValidate(CommandLine commandLine, Option option) {
+        return StringUtils.equals(getDriver(commandLine), ORACLE_DRIVER);
+    }
 
-    void setParameter(int index, Object value);
+    @Override
+    public void validate(CommandLine commandLine, Option option) {
+        String catalog = getCatalog(commandLine);
+        if (!isEmpty(catalog)) {
+            throw new OptionException(option,
+                    format("Unexpected option %1$s. Oracle catalog is always equal to database, " +
+                            "use %2$s option to access user data",
+                            getCatalogOption(commandLine).getName(), getSchemaOption(commandLine).getName()));
+        }
+    }
 }

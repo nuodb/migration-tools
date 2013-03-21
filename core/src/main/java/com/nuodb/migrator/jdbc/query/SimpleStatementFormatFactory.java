@@ -32,10 +32,10 @@ import java.sql.Statement;
 /**
  * @author Sergey Bushik
  */
-public class SimpleStatementFormatterFactory implements StatementFormatterFactory {
+public class SimpleStatementFormatFactory implements StatementFormatFactory {
 
     @Override
-    public StatementFormatter createStatementFormatter(Statement statement, String query) {
-        return new SimpleStatementFormatter(query);
+    public StatementFormat createStatementFormat(Statement statement, String query) {
+        return new SimpleStatementFormat(query);
     }
 }

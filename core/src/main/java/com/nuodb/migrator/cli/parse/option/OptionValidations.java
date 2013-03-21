@@ -25,14 +25,41 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.cli.parse.option;
 
-import java.sql.Statement;
+import com.nuodb.migrator.cli.parse.Argument;
+import com.nuodb.migrator.cli.parse.Group;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
-public interface StatementFormatterFactory {
+public class OptionValidations {
 
-    StatementFormatter createStatementFormatter(Statement statement, String query);
+    public static void groupMinimum(Group group) {
+        throw new OptionException(group, "Missing option");
+    }
+
+    public static void groupMaximum(Group group, Option option) {
+        throw new OptionException(group, format("Unexpected option %1$s", option.getName()));
+    }
+
+    public static void optionRequired(Option option) {
+        throw new OptionException(option, format("Missing required option %1$s", option.getName()));
+    }
+
+    public static void optionUnexpected(Option option, String argument) {
+        throw new OptionException(option, format("Unexpected token %1$s", argument));
+    }
+
+    public static void argumentMinimum(Argument argument) {
+        throw new OptionException(argument, format("Missing value for %1$s argument", argument.getName()));
+    }
+
+    public static void argumentMaximum(Argument argument) {
+        throw new OptionException(argument, format("Too many values for %1$s argument", argument.getName()));
+    }
 }

@@ -36,20 +36,22 @@ import java.util.regex.Pattern;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.valueOf;
 import static java.util.regex.Matcher.quoteReplacement;
+import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.quote;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleStatementFormatter implements StatementFormatter {
+public class SimpleStatementFormat implements StatementFormat {
 
     private static final String PARAMETER = "?";
-    public static final Pattern PARAMETER_PATTERN = Pattern.compile(Pattern.quote(PARAMETER));
+    public static final Pattern PARAMETER_PATTERN = compile(quote(PARAMETER));
 
     private final String query;
     private final List<Object> parameters;
 
-    public SimpleStatementFormatter(String query) {
+    public SimpleStatementFormat(String query) {
         this.query = query;
         this.parameters = newArrayList(new Object[countMatches(query, PARAMETER)]);
     }
@@ -75,8 +77,7 @@ public class SimpleStatementFormatter implements StatementFormatter {
         } else if (parameter instanceof Blob) {
             return "[BLOB]";
         } else {
-            String value = valueOf(parameter);
-            return new StringBuilder(value.length() + 2).append("'").append(value).append("'").toString();
+            return "'" + valueOf(parameter) + "'";
         }
     }
 

@@ -32,5 +32,8 @@ package com.nuodb.migrator.jdbc;
  */
 public interface JdbcConstants {
 
-    final String NUODB_DRIVER_CLASS_NAME = "com.nuodb.jdbc.Driver";
+    final String NUODB_DRIVER = "com.nuodb.jdbc.Driver";
+    final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
+    final String POSTGRESQL_DRIVER = "org.postgresql.Driver";
+    final String ORACLE_DRIVER = "oracle.jdbc.driver.OracleDriver";
 }

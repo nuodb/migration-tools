@@ -24,7 +24,7 @@ import java.util.*;
 
 import static com.nuodb.migrator.cli.parse.HelpHint.ARGUMENT_BRACKETED;
 import static com.nuodb.migrator.cli.parse.HelpHint.PROPERTY;
-import static java.lang.String.format;
+import static com.nuodb.migrator.cli.parse.option.OptionValidations.optionUnexpected;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -99,7 +99,7 @@ public class Property extends OptionBase {
     }
 
     protected void processUnexpected(String argument) {
-        throw new OptionException(this, format("Unexpected token %1$s", argument));
+        optionUnexpected(this, argument);
     }
 
     @Override

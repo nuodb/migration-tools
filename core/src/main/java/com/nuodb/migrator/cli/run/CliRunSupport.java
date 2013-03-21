@@ -34,6 +34,7 @@ import com.nuodb.migrator.cli.parse.OptionException;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
+import com.nuodb.migrator.cli.validator.ConnectionGroupInfo;
 import com.nuodb.migrator.jdbc.JdbcConstants;
 import com.nuodb.migrator.spec.JdbcConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
@@ -46,6 +47,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.nuodb.migrator.cli.validator.ConnectionGroupValidators.addConnectionGroupValidators;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.String.format;
@@ -138,9 +140,13 @@ public class CliRunSupport extends CliSupport {
                                 withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(schema);
-
+        
+        addConnectionGroupValidators(group, new ConnectionGroupInfo(
+                SOURCE_DRIVER_OPTION, SOURCE_URL_OPTION, SOURCE_USERNAME_OPTION, SOURCE_PASSWORD_OPTION,
+                SOURCE_CATALOG_OPTION, SOURCE_SCHEMA_OPTION, SOURCE_PROPERTIES_OPTION));
         return group.build();
     }
+
 
     protected Group createOutputGroup() {
         GroupBuilder group = newGroupBuilder().
@@ -324,6 +330,10 @@ public class CliRunSupport extends CliSupport {
         group.withOption(schema);
         group.withRequired(true);
         group.withMinimum(1);
+
+        addConnectionGroupValidators(group, new ConnectionGroupInfo(
+                null, TARGET_URL_OPTION, TARGET_USERNAME_OPTION, TARGET_PASSWORD_OPTION,
+                null, TARGET_SCHEMA_OPTION, TARGET_PROPERTIES_OPTION));
         return group.build();
     }
 
@@ -362,7 +372,7 @@ public class CliRunSupport extends CliSupport {
         JdbcConnectionSpec connectionSpec = null;
         if (optionSet.hasOption(TARGET_URL_OPTION)) {
             connectionSpec = new JdbcConnectionSpec();
-            connectionSpec.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
+            connectionSpec.setDriverClassName(JdbcConstants.NUODB_DRIVER);
             connectionSpec.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
             connectionSpec.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
             connectionSpec.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
