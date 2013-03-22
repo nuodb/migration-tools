@@ -35,6 +35,8 @@ import com.nuodb.migrator.resultset.format.value.ValueVariant;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.toAlias;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
@@ -44,7 +46,7 @@ import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
  */
 public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes {
 
-    private JsonGenerator writer;
+    private JsonGenerator bsonGenerator;
 
     @Override
     public String getType() {
@@ -56,10 +58,12 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
         BsonFactory factory = new BsonFactory();
         factory.enable(ENABLE_STREAMING);
         try {
-            if (getWriter() != null) {
-                writer = factory.createJsonGenerator(getWriter());
-            } else if (getOutputStream() != null) {
-                writer = factory.createJsonGenerator(getOutputStream());
+            Writer writer = getWriter();
+            OutputStream outputStream = getOutputStream();
+            if (writer != null) {
+                bsonGenerator = factory.createJsonGenerator(wrapWriter(writer));
+            } else if (outputStream != null) {
+                bsonGenerator = factory.createJsonGenerator(wrapOutputStream(outputStream));
             }
         } catch (IOException exception) {
             throw new FormatOutputException(exception);
@@ -70,18 +74,18 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
     @Override
     protected void doWriteBegin() {
         try {
-            writer.writeStartObject();
+            bsonGenerator.writeStartObject();
 
-            writer.writeFieldName(COLUMNS_FIELD);
-            writer.writeStartObject();
+            bsonGenerator.writeFieldName(COLUMNS_FIELD);
+            bsonGenerator.writeStartObject();
             for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
-                writer.writeStringField(COLUMN_FIELD, valueFormatModel.getName());
-                writer.writeStringField(VARIANT_FIELD, toAlias(valueFormatModel.getValueVariantType()));
+                bsonGenerator.writeStringField(COLUMN_FIELD, valueFormatModel.getName());
+                bsonGenerator.writeStringField(VARIANT_FIELD, toAlias(valueFormatModel.getValueVariantType()));
             }
-            writer.writeEndObject();
+            bsonGenerator.writeEndObject();
 
-            writer.writeFieldName(ROWS_FIELD);
-            writer.writeStartArray();
+            bsonGenerator.writeFieldName(ROWS_FIELD);
+            bsonGenerator.writeStartArray();
         } catch (IOException exception) {
             throw new FormatOutputException(exception);
         }
@@ -93,14 +97,14 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
             int i = 0;
             for (ValueVariant variant : variants) {
                 if (variant.isNull()) {
-                    writer.writeNull();
+                    bsonGenerator.writeNull();
                 } else {
                     switch (getValueFormatModelList().get(i).getValueVariantType()) {
                         case BINARY:
-                            writer.writeBinary(variant.asBytes());
+                            bsonGenerator.writeBinary(variant.asBytes());
                             break;
                         case STRING:
-                            writer.writeString(variant.asString());
+                            bsonGenerator.writeString(variant.asString());
                             break;
                     }
                 }
@@ -114,10 +118,10 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
     @Override
     protected void doWriteEnd() {
         try {
-            writer.writeEndArray();
-            writer.writeEndObject();
-            writer.flush();
-            writer.close();
+            bsonGenerator.writeEndArray();
+            bsonGenerator.writeEndObject();
+            bsonGenerator.flush();
+            bsonGenerator.close();
         } catch (IOException exception) {
             throw new FormatOutputException(exception);
         }

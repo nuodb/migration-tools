@@ -61,7 +61,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  */
 public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
 
-    private CSVParser parser;
+    private CSVParser csvParser;
     private String doubleQuote;
     private Iterator<CSVRecord> iterator;
 
@@ -78,15 +78,15 @@ public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
         doubleQuote = valueOf(quote) + valueOf(quote);
         try {
             if (getReader() != null) {
-                parser = new CSVParser(getReader(), format);
+                csvParser = new CSVParser(getReader(), format);
             } else if (getInputStream() != null) {
                 String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
-                parser = new CSVParser(new InputStreamReader(getInputStream(), forName(encoding)), format);
+                csvParser = new CSVParser(new InputStreamReader(getInputStream(), forName(encoding)), format);
             }
         } catch (IOException exception) {
             throw new FormatInputException(exception);
         }
-        iterator = parser.iterator();
+        iterator = csvParser.iterator();
     }
 
     @Override
