@@ -43,3 +43,4 @@ CREATE INDEX "IDX_F9318FCFB0640681DC2320DA94B428E7" ON "datatypes3" ("fk1");
 
 ALTER TABLE "datatypes3" ADD FOREIGN KEY ("fk1") REFERENCES "datatypes2" ("k1");
 
+INSERT INTO "datatypes3" ("fk1", "c1") VALUES ('1', 'nuodb');
