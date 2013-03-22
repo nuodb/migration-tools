@@ -29,6 +29,7 @@ package com.nuodb.migrator.resultset.format.utils;
 
 import com.nuodb.migrator.resultset.format.value.ValueFormatException;
 import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
 /**
@@ -49,6 +50,18 @@ public abstract class BinaryEncoder {
             } catch (DecoderException exception) {
                 throw new ValueFormatException(exception);
             }
+        }
+    };
+
+    public static final BinaryEncoder BASE64 = new BinaryEncoder() {
+        @Override
+        public String encode(byte[] value) {
+            return value != null ? new String(Base64.encodeBase64(value)) : null;
+        }
+
+        @Override
+        public byte[] decode(String value) {
+            return value != null ? Base64.decodeBase64(value) : null;
         }
     };
 

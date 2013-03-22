@@ -25,39 +25,45 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.validator;
+package com.nuodb.migrator.resultset.format.utils;
 
-import com.nuodb.migrator.cli.parse.CommandLine;
-import com.nuodb.migrator.cli.parse.Option;
-import com.nuodb.migrator.cli.parse.OptionException;
-import org.apache.commons.lang3.StringUtils;
+import java.util.BitSet;
 
-import static com.nuodb.migrator.jdbc.JdbcConstants.ORACLE_DRIVER;
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static java.lang.Character.digit;
+import static java.lang.Character.forDigit;
 
 /**
  * @author Sergey Bushik
  */
-public class OracleConnectionGroupValidator extends ConnectionGroupValidator {
+public class BitSetUtils {
 
-    public OracleConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
-        super(connectionGroupInfo);
-    }
-
-    @Override
-    public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.equals(getDriver(commandLine), ORACLE_DRIVER);
-    }
-
-    @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalog(commandLine);
-        if (!isEmpty(catalog)) {
-            throw new OptionException(option,
-                    format("Unexpected option %1$s. Oracle catalog is always equal to database, " +
-                            "use %2$s option to access user data",
-                            getCatalogOption(commandLine).getName(), getSchemaOption(commandLine).getName()));
+    public static String toHex(BitSet bitSet) {
+        int length = bitSet.length();
+        int digits = (length / 4) + (length % 4 > 0 ? 1 : 0);
+        int index = digits - 1;
+        char[] value = new char[digits];
+        for (int bit = 0; bit < length; index--) {
+            int hex = 0;
+            hex |= bitSet.get(bit++) ? 0x1 : 0;
+            hex |= bitSet.get(bit++) ? 0x2 : 0;
+            hex |= bitSet.get(bit++) ? 0x4 : 0;
+            hex |= bitSet.get(bit++) ? 0x8 : 0;
+            value[index] = forDigit(hex, 0x10);
         }
+        return new String(value);
+    }
+
+    public static BitSet fromHex(String value) {
+        char[] hex = value.toCharArray();
+        BitSet bitSet = new BitSet(hex.length << 2);
+        int bit = 0;
+        for (int index = hex.length - 1; index >= 0; index--) {
+            int digit = digit(hex[index], 0x10);
+            bitSet.set(bit++, (digit & 0x1) > 0);
+            bitSet.set(bit++, (digit & 0x2) > 0);
+            bitSet.set(bit++, (digit & 0x4) > 0);
+            bitSet.set(bit++, (digit & 0x8) > 0);
+        }
+        return bitSet;
     }
 }

@@ -34,7 +34,7 @@ import com.nuodb.migrator.cli.parse.OptionException;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
-import com.nuodb.migrator.cli.validator.ConnectionGroupInfo;
+import com.nuodb.migrator.cli.validation.ConnectionGroupInfo;
 import com.nuodb.migrator.jdbc.JdbcConstants;
 import com.nuodb.migrator.spec.JdbcConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.nuodb.migrator.cli.validator.ConnectionGroupValidators.addConnectionGroupValidators;
+import static com.nuodb.migrator.cli.validation.ConnectionGroupValidators.addConnectionGroupValidators;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.String.format;

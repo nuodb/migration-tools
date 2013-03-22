@@ -78,7 +78,8 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
         Database database = inspect(execution);
         Collection<String> scripts = getScriptGeneratorContext().getScripts(database);
         if (isFailOnEmptyScripts() && scripts.isEmpty()) {
-            throw new SchemaJobException("Scripts are empty: nothing to export");
+            throw new SchemaJobException(
+                    "No scripts were generated: nothing to export. Verify connection & meta data inspection settings");
         }
         ScriptExporter scriptExporter = getScriptExporter();
         try {

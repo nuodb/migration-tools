@@ -29,7 +29,6 @@ package com.nuodb.migrator.resultset.format.csv;
 
 import com.nuodb.migrator.resultset.format.FormatOutputBase;
 import com.nuodb.migrator.resultset.format.FormatOutputException;
-import com.nuodb.migrator.resultset.format.utils.BinaryEncoder;
 import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueVariant;
 import org.apache.commons.csv.CSVFormat;
@@ -37,10 +36,11 @@ import org.apache.commons.csv.CSVPrinter;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 
+import static com.nuodb.migrator.resultset.format.utils.BinaryEncoder.BASE64;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.toAlias;
 import static java.lang.String.valueOf;
+import static java.nio.charset.Charset.forName;
 
 /**
  * @author Sergey Bushik
@@ -67,7 +67,7 @@ public class CsvOutputFormat extends FormatOutputBase implements CsvAttributes {
             printer = new CSVPrinter(getWriter(), format);
         } else if (getOutputStream() != null) {
             String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
-            printer = new CSVPrinter(new OutputStreamWriter(getOutputStream(), Charset.forName(encoding)), format);
+            printer = new CSVPrinter(new OutputStreamWriter(getOutputStream(), forName(encoding)), format);
         }
     }
 
@@ -102,7 +102,7 @@ public class CsvOutputFormat extends FormatOutputBase implements CsvAttributes {
                 String value = null;
                 switch (getValueFormatModelList().get(i).getValueVariantType()) {
                     case BINARY:
-                        value = BinaryEncoder.HEX.encode(variant.asBytes());
+                        value = BASE64.encode(variant.asBytes());
                         break;
                     case STRING:
                         value = variant.asString();

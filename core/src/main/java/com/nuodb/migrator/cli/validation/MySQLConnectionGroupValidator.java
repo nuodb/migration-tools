@@ -25,24 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.resultset.format.xml;
+package com.nuodb.migrator.cli.validation;
+
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import org.apache.commons.lang3.StringUtils;
+
+import static com.nuodb.migrator.jdbc.JdbcConstants.MYSQL_DRIVER;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public interface XmlAttributes {
-    final String FORMAT_TYPE = "xml";
+public class MySQLConnectionGroupValidator extends ConnectionGroupValidator {
 
-    final String ATTRIBUTE_ENCODING = "xml.encoding";
-    final String ATTRIBUTE_VERSION = "xml.version";
+    public MySQLConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
+        super(connectionGroupInfo);
+    }
 
-    final String ENCODING = "utf-8";
-    final String VERSION = "1.0";
-    final String ELEMENT_RESULT_SET = "rs";
-    final String ELEMENT_COLUMNS = "cs";
-    final String ELEMENT_COLUMN = "c";
-    final String ELEMENT_ROW = "r";
-    final String ATTRIBUTE_NAME = "n";
-    final String ATTRIBUTE_NULLS = "ns";
-    final String ATTRIBUTE_VARIANT = "v";
+    @Override
+    public boolean canValidate(CommandLine commandLine, Option option) {
+        return StringUtils.equals(getDriver(commandLine), MYSQL_DRIVER);
+    }
+
+    @Override
+    public void validate(CommandLine commandLine, Option option) {
+        String schema = getSchema(commandLine);
+        if (!isEmpty(schema)) {
+            throw new OptionException(option,
+                    format("Unexpected option %1$s. MySQL supports catalogs only, not schemas",
+                            getSchemaOption(commandLine).getName()));
+        }
+    }
 }

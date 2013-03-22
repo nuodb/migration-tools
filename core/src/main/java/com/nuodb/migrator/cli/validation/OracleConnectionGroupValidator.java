@@ -25,19 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.validator;
+package com.nuodb.migrator.cli.validation;
 
-import com.nuodb.migrator.cli.parse.option.GroupBuilder;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import org.apache.commons.lang3.StringUtils;
+
+import static com.nuodb.migrator.jdbc.JdbcConstants.ORACLE_DRIVER;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionGroupValidators {
+public class OracleConnectionGroupValidator extends ConnectionGroupValidator {
 
-    public static void addConnectionGroupValidators(GroupBuilder connection, ConnectionGroupInfo connectionGroupInfo) {
-        connection.withOptionValidator(new NuoDBConnectionGroupValidator(connectionGroupInfo));
-        connection.withOptionValidator(new MySQLConnectionGroupValidator(connectionGroupInfo));
-        connection.withOptionValidator(new PostgreSQLConnectionGroupValidator(connectionGroupInfo));
-        connection.withOptionValidator(new OracleConnectionGroupValidator(connectionGroupInfo));
+    public OracleConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
+        super(connectionGroupInfo);
+    }
+
+    @Override
+    public boolean canValidate(CommandLine commandLine, Option option) {
+        return StringUtils.equals(getDriver(commandLine), ORACLE_DRIVER);
+    }
+
+    @Override
+    public void validate(CommandLine commandLine, Option option) {
+        String catalog = getCatalog(commandLine);
+        if (!isEmpty(catalog)) {
+            throw new OptionException(option,
+                    format("Unexpected option %1$s. Oracle catalog is always equal to database, " +
+                            "use %2$s option to access user data",
+                            getCatalogOption(commandLine).getName(), getSchemaOption(commandLine).getName()));
+        }
     }
 }

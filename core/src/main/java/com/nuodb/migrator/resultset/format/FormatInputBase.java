@@ -141,7 +141,7 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
     }
 
     protected void onReadRowFailure(Exception exception, int row, ValueVariant[] values) {
-        String message = format("Failed to load row #%d", row);
+        String message = format("Failed to load row %d", row);
         if (isLenient()) {
             if (logger.isErrorEnabled()) {
                 logger.error(message);

@@ -25,38 +25,19 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.validator;
+package com.nuodb.migrator.cli.validation;
 
-import com.nuodb.migrator.cli.parse.CommandLine;
-import com.nuodb.migrator.cli.parse.Option;
-import com.nuodb.migrator.cli.parse.OptionException;
-import org.apache.commons.lang3.StringUtils;
-
-import static com.nuodb.migrator.jdbc.JdbcConstants.MYSQL_DRIVER;
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLConnectionGroupValidator extends ConnectionGroupValidator {
+public class ConnectionGroupValidators {
 
-    public MySQLConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
-        super(connectionGroupInfo);
-    }
-
-    @Override
-    public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.equals(getDriver(commandLine), MYSQL_DRIVER);
-    }
-
-    @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String schema = getSchema(commandLine);
-        if (!isEmpty(schema)) {
-            throw new OptionException(option,
-                    format("Unexpected option %1$s. MySQL supports catalogs only, not schemas",
-                            getSchemaOption(commandLine).getName()));
-        }
+    public static void addConnectionGroupValidators(GroupBuilder connection, ConnectionGroupInfo connectionGroupInfo) {
+        connection.withOptionValidator(new NuoDBConnectionGroupValidator(connectionGroupInfo));
+        connection.withOptionValidator(new MySQLConnectionGroupValidator(connectionGroupInfo));
+        connection.withOptionValidator(new PostgreSQLConnectionGroupValidator(connectionGroupInfo));
+        connection.withOptionValidator(new OracleConnectionGroupValidator(connectionGroupInfo));
     }
 }

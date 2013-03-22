@@ -34,8 +34,8 @@ public interface BsonAttributes {
 
     final String FORMAT_TYPE = "bson";
 
-    final String COLUMNS_FIELD = "columns";
-    final String VARIANT_FIELD = "variant";
-    final String COLUMN_FIELD = "column";
-    final String ROWS_FIELD = "rows";
+    final String COLUMNS_FIELD = "cs";
+    final String VARIANT_FIELD = "v";
+    final String COLUMN_FIELD = "c";
+    final String ROWS_FIELD = "rs";
 }

@@ -25,49 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.validator;
+package com.nuodb.migrator.cli.validation;
 
 import com.nuodb.migrator.cli.parse.CommandLine;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
-import com.nuodb.migrator.jdbc.url.JdbcUrl;
 import org.apache.commons.lang3.StringUtils;
 
-import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER;
-import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.NUODB_SUB_PROTOCOL;
-import static com.nuodb.migrator.jdbc.url.JdbcUrlParsers.getInstance;
+import static com.nuodb.migrator.jdbc.JdbcConstants.POSTGRESQL_DRIVER;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBConnectionGroupValidator extends ConnectionGroupValidator {
+public class PostgreSQLConnectionGroupValidator extends ConnectionGroupValidator {
 
-    public NuoDBConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
+    public PostgreSQLConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
         super(connectionGroupInfo);
     }
 
     @Override
     public boolean canValidate(CommandLine commandLine, Option option) {
-        boolean driver = StringUtils.equals(getDriver(commandLine), NUODB_DRIVER);
-        JdbcUrl jdbcUrl = getInstance().parse(getUrl(commandLine));
-        return driver || ((jdbcUrl != null) && StringUtils.equals(jdbcUrl.getSubProtocol(), NUODB_SUB_PROTOCOL));
+        return StringUtils.equals(getDriver(commandLine), POSTGRESQL_DRIVER);
     }
 
     @Override
     public void validate(CommandLine commandLine, Option option) {
-        String username = getUsername(commandLine);
-        if (isEmpty(username)) {
+        String catalog = getCatalog(commandLine);
+        if (!isEmpty(catalog)) {
             throw new OptionException(option,
-                    format("Missing required option %1$s. The user name to authenticate with should be provided",
-                            getUsernameOption(commandLine).getName()));
-        }
-        String password = getPassword(commandLine);
-        if (isEmpty(password)) {
-            throw new OptionException(option,
-                    format("Missing required option %1$s. The user's password should be provided",
-                            getPasswordOption(commandLine).getName()));
+                    format("Unexpected option %1$s. PostgreSQL catalogs hold meta data only and built-in objects, " +
+                            "use %2$s option to access user data",
+                            getCatalogOption(commandLine).getName(), getSchemaOption(commandLine).getName()));
         }
     }
 }

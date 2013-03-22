@@ -140,7 +140,7 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
     protected abstract void writeValues(ValueVariant[] variants);
 
     protected void onWriteRowFailure(Exception exception, int row, ValueVariant[] values) {
-        String message = format("Failed to dump row #%d", row);
+        String message = format("Failed to dump row %d", row);
         if (isLenient()) {
             if (logger.isErrorEnabled()) {
                 logger.error(message);
