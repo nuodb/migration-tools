@@ -37,6 +37,8 @@ import com.nuodb.migrator.resultset.format.value.ValueVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.ResultSet;
@@ -51,12 +53,17 @@ import static java.lang.String.format;
 @SuppressWarnings("unchecked")
 public abstract class FormatOutputBase extends FormatBase implements FormatOutput {
 
+    public static final boolean DEFAULT_BUFFERING = true;
+    public static final int DEFAULT_BUFFER_SIZE = 8 * 1024 * 1024;
+
     private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     private Writer writer;
     private OutputStream outputStream;
     private ResultSet resultSet;
     private int row;
+    private boolean buffering = DEFAULT_BUFFERING;
+    private int bufferSize = DEFAULT_BUFFER_SIZE;
 
     public Writer getWriter() {
         return writer;
@@ -74,6 +81,14 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
     @Override
     public void setOutputStream(OutputStream outputStream) {
         this.outputStream = outputStream;
+    }
+
+    protected Writer wrapWriter(Writer writer) {
+        return isBuffering() ? new BufferedWriter(writer, getBufferSize()) : writer;
+    }
+
+    protected OutputStream wrapOutputStream(OutputStream outputStream) {
+        return isBuffering() ? new BufferedOutputStream(outputStream, getBufferSize()) : outputStream;
     }
 
     @Override
@@ -167,5 +182,21 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
     @Override
     public void setResultSet(ResultSet resultSet) {
         this.resultSet = resultSet;
+    }
+
+    public boolean isBuffering() {
+        return buffering;
+    }
+
+    public void setBuffering(boolean buffering) {
+        this.buffering = buffering;
+    }
+
+    public int getBufferSize() {
+        return bufferSize;
+    }
+
+    public void setBufferSize(int bufferSize) {
+        this.bufferSize = bufferSize;
     }
 }

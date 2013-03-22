@@ -54,7 +54,7 @@ import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
  */
 public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
 
-    private JsonParser reader;
+    private JsonParser bsonParser;
     private Iterator<ValueVariant[]> iterator;
 
     @Override
@@ -68,9 +68,9 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
         factory.enable(ENABLE_STREAMING);
         try {
             if (getReader() != null) {
-                reader = factory.createJsonParser(getReader());
+                bsonParser = factory.createJsonParser(getReader());
             } else if (getInputStream() != null) {
-                reader = factory.createJsonParser(getInputStream());
+                bsonParser = factory.createJsonParser(getInputStream());
             }
         } catch (IOException exception) {
             throw new FormatInputException(exception);
@@ -90,21 +90,21 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
                 while (true) {
                     ValueFormatModel valueFormatModel = new SimpleValueFormatModel();
                     if (isNextField(COLUMN_FIELD) && isNextToken(VALUE_STRING)) {
-                        valueFormatModel.setName(reader.getText());
+                        valueFormatModel.setName(bsonParser.getText());
                     } else {
                         break;
                     }
                     if (isNextField(VARIANT_FIELD) && isNextToken(VALUE_STRING)) {
-                        valueFormatModel.setValueVariantType(fromAlias(reader.getText()));
+                        valueFormatModel.setValueVariantType(fromAlias(bsonParser.getText()));
                     } else {
                         break;
                     }
                     valueFormatModelList.add(valueFormatModel);
                 }
-                reader.nextToken();
+                bsonParser.nextToken();
             }
-            reader.nextToken();
-            reader.nextToken();
+            bsonParser.nextToken();
+            bsonParser.nextToken();
         } catch (IOException exception) {
             throw new FormatInputException(exception);
         }
@@ -112,11 +112,11 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
     }
 
     protected boolean isNextToken(JsonToken... tokens) throws IOException {
-        return isToken(reader.nextToken(), tokens);
+        return isToken(bsonParser.nextToken(), tokens);
     }
 
     protected boolean isCurrentToken(JsonToken... tokens) throws IOException {
-        return isToken(reader.getCurrentToken(), tokens);
+        return isToken(bsonParser.getCurrentToken(), tokens);
     }
 
     protected boolean isToken(JsonToken target, JsonToken... tokens) {
@@ -129,7 +129,7 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
     }
 
     protected boolean isNextField(String field) throws IOException {
-        return isNextToken(FIELD_NAME) && field.equals(reader.getText());
+        return isNextToken(FIELD_NAME) && field.equals(bsonParser.getText());
     }
 
     @Override
@@ -154,14 +154,14 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
                     valueVariantType = valueVariantType != null ? valueVariantType : STRING;
                     switch (valueVariantType) {
                         case BINARY:
-                            values[index] = binary((byte[]) reader.getEmbeddedObject());
+                            values[index] = binary((byte[]) bsonParser.getEmbeddedObject());
                             break;
                         case STRING:
-                            values[index] = string((String) reader.getEmbeddedObject());
+                            values[index] = string((String) bsonParser.getEmbeddedObject());
                             break;
                     }
                     index++;
-                    reader.nextToken();
+                    bsonParser.nextToken();
                 }
             }
         } catch (IOException exception) {
@@ -173,7 +173,7 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
     @Override
     protected void doReadEnd() {
         try {
-            reader.close();
+            bsonParser.close();
         } catch (IOException exception) {
             throw new FormatInputException(exception);
         }

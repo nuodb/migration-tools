@@ -35,10 +35,12 @@ import com.nuodb.migrator.resultset.format.value.ValueVariant;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.BitSet;
 
-import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.toHex;
 import static com.nuodb.migrator.resultset.format.utils.BinaryEncoder.BASE64;
+import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.toHex;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.toAlias;
 import static javax.xml.XMLConstants.DEFAULT_NS_PREFIX;
 import static javax.xml.XMLConstants.NULL_NS_URI;
@@ -51,7 +53,7 @@ public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
     private String encoding;
     private String version;
 
-    private XMLStreamWriter writer;
+    private XMLStreamWriter xmlStreamWriter;
 
     @Override
     public String getType() {
@@ -65,29 +67,31 @@ public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
 
         XMLOutputFactory factory = XMLOutputFactory.newInstance();
         try {
-            if (getWriter() != null) {
-                writer = factory.createXMLStreamWriter(getWriter());
-            } else if (getOutputStream() != null) {
-                writer = factory.createXMLStreamWriter(getOutputStream(), getEncoding());
+            Writer writer = getWriter();
+            OutputStream outputStream = getOutputStream();
+            if (writer != null) {
+                xmlStreamWriter = factory.createXMLStreamWriter(wrapWriter(writer));
+            } else if (outputStream != null) {
+                xmlStreamWriter = factory.createXMLStreamWriter(wrapOutputStream(outputStream), getEncoding());
             }
-        } catch (XMLStreamException e) {
-            throw new FormatOutputException(e);
+        } catch (XMLStreamException exception) {
+            throw new FormatOutputException(exception);
         }
     }
 
     @Override
     protected void doWriteBegin() {
         try {
-            writer.writeStartDocument(getEncoding(), getVersion());
-            writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
-            writer.writeStartElement(ELEMENT_RESULT_SET);
-            writer.writeStartElement(ELEMENT_COLUMNS);
+            xmlStreamWriter.writeStartDocument(getEncoding(), getVersion());
+            xmlStreamWriter.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
+            xmlStreamWriter.writeStartElement(ELEMENT_RESULT_SET);
+            xmlStreamWriter.writeStartElement(ELEMENT_COLUMNS);
             for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
-                writer.writeEmptyElement(ELEMENT_COLUMN);
-                writer.writeAttribute(ATTRIBUTE_NAME, valueFormatModel.getName());
-                writer.writeAttribute(ATTRIBUTE_VARIANT, toAlias(valueFormatModel.getValueVariantType()));
+                xmlStreamWriter.writeEmptyElement(ELEMENT_COLUMN);
+                xmlStreamWriter.writeAttribute(ATTRIBUTE_NAME, valueFormatModel.getName());
+                xmlStreamWriter.writeAttribute(ATTRIBUTE_VARIANT, toAlias(valueFormatModel.getValueVariantType()));
             }
-            writer.writeEndElement();
+            xmlStreamWriter.writeEndElement();
         } catch (XMLStreamException e) {
             throw new FormatOutputException(e);
         }
@@ -96,18 +100,18 @@ public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
     @Override
     protected void writeValues(ValueVariant[] variants) {
         try {
-            writer.writeStartElement(ELEMENT_ROW);
+            xmlStreamWriter.writeStartElement(ELEMENT_ROW);
             BitSet nulls = new BitSet();
             for (int i = 0; i < variants.length; i++) {
                 nulls.set(i, variants[i].isNull());
             }
             if (!nulls.isEmpty()) {
-                writer.writeAttribute(ATTRIBUTE_NULLS, toHex(nulls));
+                xmlStreamWriter.writeAttribute(ATTRIBUTE_NULLS, toHex(nulls));
             }
             int i = 0;
             for (ValueVariant variant : variants) {
                 if (!variant.isNull()) {
-                    writer.writeStartElement(ELEMENT_COLUMN);
+                    xmlStreamWriter.writeStartElement(ELEMENT_COLUMN);
                     String value = null;
                     switch (getValueFormatModelList().get(i).getValueVariantType()) {
                         case BINARY:
@@ -117,12 +121,12 @@ public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
                             value = variant.asString();
                             break;
                     }
-                    writer.writeCharacters(value);
-                    writer.writeEndElement();
+                    xmlStreamWriter.writeCharacters(value);
+                    xmlStreamWriter.writeEndElement();
                 }
                 i++;
             }
-            writer.writeEndElement();
+            xmlStreamWriter.writeEndElement();
         } catch (XMLStreamException e) {
             throw new FormatOutputException(e);
         }
@@ -131,10 +135,10 @@ public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
     @Override
     protected void doWriteEnd() {
         try {
-            writer.writeEndElement();
-            writer.writeEndDocument();
-            writer.flush();
-            writer.close();
+            xmlStreamWriter.writeEndElement();
+            xmlStreamWriter.writeEndDocument();
+            xmlStreamWriter.flush();
+            xmlStreamWriter.close();
         } catch (XMLStreamException e) {
             throw new FormatOutputException(e);
         }

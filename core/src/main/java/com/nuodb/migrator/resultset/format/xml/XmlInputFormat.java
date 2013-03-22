@@ -37,6 +37,7 @@ import com.nuodb.migrator.resultset.format.value.ValueVariantType;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.*;
+import java.io.Reader;
 import java.util.BitSet;
 import java.util.Iterator;
 
@@ -56,7 +57,7 @@ import static javax.xml.XMLConstants.NULL_NS_URI;
  */
 public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
 
-    private XMLStreamReader reader;
+    private XMLStreamReader xmlStreamReader;
     private Iterator<ValueVariant[]> iterator;
 
     @Override
@@ -70,10 +71,11 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
 
         XMLInputFactory factory = XMLInputFactory.newInstance();
         try {
-            if (getReader() != null) {
-                reader = factory.createXMLStreamReader(getReader());
+            Reader reader = getReader();
+            if (reader != null) {
+                xmlStreamReader = factory.createXMLStreamReader(reader);
             } else if (getInputStream() != null) {
-                reader = factory.createXMLStreamReader(getInputStream(), encoding);
+                xmlStreamReader = factory.createXMLStreamReader(getInputStream(), encoding);
             }
         } catch (XMLStreamException e) {
             throw new FormatInputException(e);
@@ -96,7 +98,7 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
                 valueFormatModel.setName(column);
                 valueFormatModel.setValueVariantType(fromAlias(getAttributeValue(NULL_NS_URI, ATTRIBUTE_VARIANT)));
                 if (column == null) {
-                    Location location = reader.getLocation();
+                    Location location = xmlStreamReader.getLocation();
                     throw new FormatInputException(
                             format("Element %s doesn't have %s attribute [location at %d:%d]",
                                     ELEMENT_COLUMN, ATTRIBUTE_NAME,
@@ -129,7 +131,7 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
             while (isNextElement(ELEMENT_COLUMN)) {
                 String value;
                 try {
-                    value = nulls.get(index) ? null : reader.getElementText();
+                    value = nulls.get(index) ? null : xmlStreamReader.getElementText();
                 } catch (XMLStreamException exception) {
                     throw new FormatInputException(exception);
                 }
@@ -151,11 +153,11 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
     }
 
     protected boolean isNextElement(String name) {
-        while (reader.getEventType() != XMLStreamConstants.END_DOCUMENT) {
+        while (xmlStreamReader.getEventType() != XMLStreamConstants.END_DOCUMENT) {
             try {
-                switch (reader.next()) {
+                switch (xmlStreamReader.next()) {
                     case XMLStreamConstants.START_ELEMENT:
-                        return reader.getLocalName().equals(name);
+                        return xmlStreamReader.getLocalName().equals(name);
                 }
             } catch (XMLStreamException exception) {
                 throw new FormatInputException(exception);
@@ -165,15 +167,15 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
     }
 
     protected boolean isCurrentElement(String element) {
-        return reader.getEventType() == XMLStreamConstants.START_ELEMENT &&
-                reader.getLocalName().equals(element);
+        return xmlStreamReader.getEventType() == XMLStreamConstants.START_ELEMENT &&
+                xmlStreamReader.getLocalName().equals(element);
     }
 
     protected String getAttributeValue(String namespace, String attribute) {
-        for (int index = 0; index < reader.getAttributeCount(); index++) {
-            QName name = reader.getAttributeName(index);
+        for (int index = 0; index < xmlStreamReader.getAttributeCount(); index++) {
+            QName name = xmlStreamReader.getAttributeName(index);
             if (name.getNamespaceURI().equals(namespace) && name.getLocalPart().equals(attribute)) {
-                return reader.getAttributeValue(index);
+                return xmlStreamReader.getAttributeValue(index);
             }
         }
         return null;
@@ -182,7 +184,7 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
     @Override
     protected void doReadEnd() {
         try {
-            reader.close();
+            xmlStreamReader.close();
         } catch (XMLStreamException exception) {
             throw new FormatInputException(exception);
         }

@@ -35,7 +35,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import static com.nuodb.migrator.resultset.format.utils.BinaryEncoder.BASE64;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.toAlias;
@@ -48,7 +50,7 @@ import static java.nio.charset.Charset.forName;
 @SuppressWarnings("unchecked")
 public class CsvOutputFormat extends FormatOutputBase implements CsvAttributes {
 
-    private CSVPrinter printer;
+    private CSVPrinter csvPrinter;
     private String doubleQuote;
 
     @Override
@@ -63,11 +65,15 @@ public class CsvOutputFormat extends FormatOutputBase implements CsvAttributes {
         Character quote = builder.getQuote();
         doubleQuote = valueOf(quote) + valueOf(quote);
 
-        if (getWriter() != null) {
-            printer = new CSVPrinter(getWriter(), format);
-        } else if (getOutputStream() != null) {
+        Writer writer = getWriter();
+        OutputStream outputStream = getOutputStream();
+        if (writer != null) {
+            csvPrinter = new CSVPrinter(wrapWriter(writer), format);
+        } else if (outputStream != null) {
             String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
-            printer = new CSVPrinter(new OutputStreamWriter(getOutputStream(), forName(encoding)), format);
+            csvPrinter = new CSVPrinter(wrapWriter(new OutputStreamWriter(outputStream, forName(encoding))), format);
+        } else {
+            throw new FormatOutputException("Neither writer nor output stream were configured");
         }
     }
 
@@ -82,12 +88,11 @@ public class CsvOutputFormat extends FormatOutputBase implements CsvAttributes {
                 }
                 variant.append(toAlias(valueFormatModel.getValueVariantType()));
             }
-            printer.printComment(variant.toString());
+            csvPrinter.printComment(variant.toString());
             for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
-                printer.print(valueFormatModel.getName());
-
+                csvPrinter.print(valueFormatModel.getName());
             }
-            printer.println();
+            csvPrinter.println();
         } catch (IOException e) {
             throw new FormatOutputException(e);
         }
@@ -113,7 +118,7 @@ public class CsvOutputFormat extends FormatOutputBase implements CsvAttributes {
                 }
                 values[i] = value;
             }
-            printer.printRecord(values);
+            csvPrinter.printRecord(values);
         } catch (IOException e) {
             throw new FormatOutputException(e);
         }
@@ -122,7 +127,7 @@ public class CsvOutputFormat extends FormatOutputBase implements CsvAttributes {
     @Override
     protected void doWriteEnd() {
         try {
-            printer.close();
+            csvPrinter.close();
         } catch (IOException e) {
             throw new FormatOutputException(e);
         }

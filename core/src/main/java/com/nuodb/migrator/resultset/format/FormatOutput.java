@@ -54,4 +54,12 @@ public interface FormatOutput extends Format {
     void setOutputStream(OutputStream outputStream);
 
     void initOutput();
+
+    boolean isBuffering();
+
+    void setBuffering(boolean buffering);
+
+    int getBufferSize();
+
+    void setBufferSize(int bufferSize);
 }
