@@ -30,7 +30,6 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.metadata.Catalog;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.jdbc.query.QueryUtils;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
@@ -45,7 +44,7 @@ import java.util.Iterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
-import static com.nuodb.migrator.jdbc.query.QueryUtils.ASC;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.*;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 import static java.util.Collections.singleton;
@@ -79,8 +78,8 @@ public class NuoDBSchemaInspector extends InspectorBase<Catalog, SchemaInspectio
             parameters.add(schemaName);
         }
         final StringBuilder query = new StringBuilder(QUERY);
-        QueryUtils.where(query, filters, "AND");
-        QueryUtils.orderBy(query, singleton("SCHEMA"), ASC);
+        where(query, filters, "AND");
+        orderBy(query, singleton("SCHEMA"), ASC);
 
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(

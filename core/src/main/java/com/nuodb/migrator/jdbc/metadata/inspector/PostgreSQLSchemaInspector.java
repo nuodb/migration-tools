@@ -27,17 +27,33 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.metadata.Catalog;
-import com.nuodb.migrator.jdbc.metadata.MetaDataException;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.query.StatementCallback;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+
+import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
+import static java.util.Collections.singleton;
 
 /**
  * @author Sergey Bushik
  */
 public class PostgreSQLSchemaInspector extends InspectorBase<Catalog, SchemaInspectionScope> {
+
+    private static final String QUERY =
+            "SELECT NSPNAME AS TABLE_SCHEM FROM PG_CATALOG.PG_NAMESPACE\n" +
+            "WHERE NSPNAME !~ '^PG_TOAST' AND NSPNAME !~ '^PG_TEMP' AND NSPNAME LIKE ? ORDER BY TABLE_SCHEM";
 
     public PostgreSQLSchemaInspector() {
         super(MetaDataType.SCHEMA, SchemaInspectionScope.class);
@@ -46,12 +62,48 @@ public class PostgreSQLSchemaInspector extends InspectorBase<Catalog, SchemaInsp
     @Override
     public void inspectScope(InspectionContext inspectionContext,
                              SchemaInspectionScope inspectionScope) throws SQLException {
-        throw new MetaDataException("Method is not implemented yet");
+        inspectScopes(inspectionContext, singleton(inspectionScope));
     }
 
     @Override
     public void inspectObjects(InspectionContext inspectionContext,
-                               Collection<? extends Catalog> objects) throws SQLException {
-        throw new MetaDataException("Method is not implemented yet");
+                               Collection<? extends Catalog> catalogs) throws SQLException {
+        inspectScopes(inspectionContext,
+                Lists.newArrayList(Iterables.transform(catalogs, new Function<Catalog, SchemaInspectionScope>() {
+                    @Override
+                    public SchemaInspectionScope apply(Catalog catalog) {
+                        return new SchemaInspectionScope(catalog.getName(), null);
+                    }
+                })));
+    }
+
+    protected void inspectScopes(final InspectionContext inspectionContext,
+                                 final Collection<SchemaInspectionScope> inspectionScopes) throws SQLException {
+        StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
+        template.execute(
+                new StatementFactory<PreparedStatement>() {
+                    @Override
+                    public PreparedStatement create(Connection connection) throws SQLException {
+                        return connection.prepareStatement(QUERY);
+                    }
+                }, new StatementCallback<PreparedStatement>() {
+                    @Override
+                    public void execute(PreparedStatement statement) throws SQLException {
+                        for (SchemaInspectionScope inspectionScope : inspectionScopes) {
+                            String schema = inspectionScope.getSchema();
+                            statement.setString(1, schema != null ? schema : "%");
+                            inspect(inspectionContext, statement.executeQuery());
+                        }
+                    }
+                }
+        );
+    }
+
+    private void inspect(InspectionContext inspectionContext, ResultSet schemas) throws SQLException {
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        while (schemas.next()) {
+            Schema schema = addSchema(inspectionResults, null, schemas.getString("TABLE_SCHEM"));
+            inspectionResults.addObject(schema);
+        }
     }
 }
