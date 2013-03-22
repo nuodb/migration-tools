@@ -30,30 +30,58 @@ package com.nuodb.migrator.jdbc.url;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.PROTOCOL;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.SEPARATOR;
+import static org.apache.commons.lang3.StringUtils.substring;
+
 /**
  * @author Sergey Bushik
  */
 public abstract class JdbcUrlBase implements JdbcUrl {
 
     private final String url;
+    private final String subProtocol;
     private Map<String, Object> properties = new HashMap<String, Object>();
 
-    protected JdbcUrlBase(String url) {
+    protected JdbcUrlBase(String url, String subProtocol) {
         this.url = url;
+        this.subProtocol = subProtocol;
+        this.parse();
+    }
+
+    protected void parse() {
+        parseSubName(substring(url, (PROTOCOL + SEPARATOR + subProtocol + SEPARATOR).length()));
+    }
+
+    protected void parseSubName(String subName) {
+    }
+
+    public static void parseParameters(Map<String, Object> parameters, String url, String separator) {
+        String[] pairs = url.split(separator);
+        for (String pair : pairs) {
+            String[] values = pair.split("=");
+            parameters.put(values[0], values.length > 1 ? values[1] : null);
+        }
+    }
+
+    @Override
+    public String getUrl() {
+        return url;
+    }
+
+    @Override
+    public String getProtocol() {
+        return PROTOCOL;
+    }
+
+    @Override
+    public String getSubProtocol() {
+        return subProtocol;
     }
 
     @Override
     public Map<String, Object> getProperties() {
         return properties;
-    }
-
-    public static void parseParameters(Map<String, Object> parameters, String url, int offset) {
-        String[] pairs = url.substring(offset + 1).split("&");
-        int length = pairs.length;
-        for (int i = 0; i < length; i++) {
-            String[] pair = pairs[i].split("=");
-            parameters.put(pair[0], pair.length > 1 ? pair[1] : null);
-        }
     }
 
     @Override

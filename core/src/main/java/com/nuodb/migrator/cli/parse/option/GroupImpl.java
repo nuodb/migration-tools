@@ -25,7 +25,8 @@ import java.util.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
-import static java.lang.String.format;
+import static com.nuodb.migrator.cli.parse.option.OptionValidations.groupMinimum;
+import static com.nuodb.migrator.cli.parse.option.OptionValidations.groupMaximum;
 
 /**
  * An implementation of the group of options.
@@ -159,7 +160,7 @@ public class GroupImpl extends OptionBase implements Group {
     }
 
     @Override
-    public void preProcess(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void preProcessOption(CommandLine commandLine, ListIterator<String> arguments) {
         for (Option option : this.options) {
             option.preProcess(commandLine, arguments);
         }
@@ -170,7 +171,7 @@ public class GroupImpl extends OptionBase implements Group {
 
     @Override
     @SuppressWarnings("StringEquality")
-    public void process(CommandLine commandLine, ListIterator<String> arguments) {
+    protected void processOption(CommandLine commandLine, ListIterator<String> arguments) {
         String previous = null;
         while (arguments.hasNext()) {
             // grab the next argument
@@ -212,7 +213,7 @@ public class GroupImpl extends OptionBase implements Group {
     }
 
     @Override
-    public void postProcess(CommandLine commandLine) {
+    protected void postProcessOption(CommandLine commandLine) {
         // number of options found
         int present = 0;
         // reference to first unexpected option
@@ -235,11 +236,11 @@ public class GroupImpl extends OptionBase implements Group {
         }
         // too many options
         if (unexpected != null) {
-            postProcessUnexpected(unexpected);
+            postProcessMaximum(unexpected);
         }
         // too few options
         if (present < this.minimum) {
-            postProcessMissing(present);
+            postProcessMinimum();
         }
         // post process each arguments
         for (Argument argument : arguments) {
@@ -247,12 +248,12 @@ public class GroupImpl extends OptionBase implements Group {
         }
     }
 
-    protected void postProcessMissing(int present) {
-        throw new OptionException(this, "Missing option");
+    protected void postProcessMinimum() {
+        groupMinimum(this);
     }
 
-    protected void postProcessUnexpected(Option option) {
-        throw new OptionException(this, format("Unexpected option %1$s", option.getName()));
+    protected void postProcessMaximum(Option option) {
+        groupMaximum(this, option);
     }
 
     @Override

@@ -28,11 +28,7 @@
 package com.nuodb.migrator.cli.parse.option;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migrator.cli.parse.Argument;
-import com.nuodb.migrator.cli.parse.Group;
-import com.nuodb.migrator.cli.parse.OptionProcessor;
-import com.nuodb.migrator.cli.parse.RegexOption;
-import com.nuodb.migrator.cli.parse.Trigger;
+import com.nuodb.migrator.cli.parse.*;
 
 import java.util.List;
 
@@ -81,6 +77,11 @@ public class RegexOptionBuilderImpl<O extends RegexOption>
     @Override
     public RegexOptionBuilder withOptionProcessor(OptionProcessor optionProcessor) {
         return (RegexOptionBuilder) super.withOptionProcessor(optionProcessor);
+    }
+
+    @Override
+    public RegexOptionBuilder withOptionValidator(OptionValidator optionValidator) {
+        return (RegexOptionBuilder) super.withOptionValidator(optionValidator);
     }
 
     @Override

@@ -27,48 +27,47 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.jdbc.query.SimpleStatementFormatterFactory;
-import com.nuodb.migrator.jdbc.query.StatementFormatter;
-import com.nuodb.migrator.jdbc.query.StatementFormatterFactory;
-import com.nuodb.migrator.utils.ReflectionUtils;
+import com.nuodb.migrator.jdbc.query.SimpleStatementFormatFactory;
+import com.nuodb.migrator.jdbc.query.StatementFormat;
+import com.nuodb.migrator.jdbc.query.StatementFormatFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.sql.*;
 import java.util.Collection;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
+import static java.lang.reflect.Proxy.newProxyInstance;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
 
-    private StatementFormatterFactory statementFormatterFactory;
+    private StatementFormatFactory statementFormatFactory;
     private ConnectionProvider connectionProvider;
     private Logger logger;
 
     public JdbcLoggingConnectionProvider(ConnectionProvider connectionProvider) {
-        this(connectionProvider, new SimpleStatementFormatterFactory());
+        this(connectionProvider, new SimpleStatementFormatFactory());
     }
 
     public JdbcLoggingConnectionProvider(ConnectionProvider connectionProvider,
-                                         StatementFormatterFactory statementFormatterFactory) {
-        this(connectionProvider, LoggerFactory.getLogger(JdbcLoggingConnectionProvider.class),
-                statementFormatterFactory);
+                                         StatementFormatFactory statementFormatFactory) {
+        this(connectionProvider, getLogger(JdbcLoggingConnectionProvider.class), statementFormatFactory);
     }
 
     public JdbcLoggingConnectionProvider(ConnectionProvider connectionProvider, Logger logger) {
-        this(connectionProvider, logger, new SimpleStatementFormatterFactory());
+        this(connectionProvider, logger, new SimpleStatementFormatFactory());
     }
 
     public JdbcLoggingConnectionProvider(ConnectionProvider connectionProvider, Logger logger,
-                                         StatementFormatterFactory statementFormatterFactory) {
+                                         StatementFormatFactory statementFormatFactory) {
         this.connectionProvider = connectionProvider;
         this.logger = logger;
-        this.statementFormatterFactory = statementFormatterFactory;
+        this.statementFormatFactory = statementFormatFactory;
     }
 
     @Override
@@ -93,8 +92,16 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
 
     @Override
     protected ConnectionProxy createConnectionProxy(Connection connection) {
-        return (ConnectionProxy) Proxy.newProxyInstance(ReflectionUtils.getClassLoader(),
+        return (ConnectionProxy) newProxyInstance(getClassLoader(),
                 new Class<?>[]{ConnectionProxy.class}, new ConnectionInvocationHandler(connection));
+    }
+
+    protected StatementFormat createStatementFormat(Statement statement, String query) {
+        return statementFormatFactory.createStatementFormat(statement, query);
+    }
+
+    protected void log(Statement statement, String query) {
+        log(createStatementFormat(statement, query).format());
     }
 
     protected void log(String query) {
@@ -106,21 +113,21 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
     protected Object invokeConnectionGetMetaData(TargetInvocationHandler<Connection> targetInvocationHandler,
                                                  Object proxy, Method method, Object[] args) {
         DatabaseMetaData databaseMetaData = targetInvocationHandler.invokeTarget(method, args);
-        return Proxy.newProxyInstance(ReflectionUtils.getClassLoader(), new Class<?>[]{DatabaseMetaData.class},
+        return newProxyInstance(getClassLoader(), new Class<?>[]{DatabaseMetaData.class},
                 new ConnectionAwareInvocationHandler((Connection) proxy, databaseMetaData));
     }
 
     protected Object invokeConnectionCreateStatement(TargetInvocationHandler<Connection> targetInvocationHandler,
                                                      Object proxy, Method method, Object[] args) {
         Statement statement = targetInvocationHandler.invokeTarget(method, args);
-        return Proxy.newProxyInstance(ReflectionUtils.getClassLoader(), new Class<?>[]{Statement.class},
+        return newProxyInstance(getClassLoader(), new Class<?>[]{Statement.class},
                 new StatementInvocationHandler((Connection) proxy, statement));
     }
 
     protected Object invokeConnectionPrepareStatement(TargetInvocationHandler<Connection> targetInvocationHandler,
                                                       Object proxy, Method method, Object[] args) {
         PreparedStatement preparedStatement = targetInvocationHandler.invokeTarget(method, args);
-        return Proxy.newProxyInstance(ReflectionUtils.getClassLoader(), new Class<?>[]{PreparedStatement.class},
+        return newProxyInstance(getClassLoader(), new Class<?>[]{PreparedStatement.class},
                 new PreparedStatementInvocationHandler((Connection) proxy, preparedStatement,
                         (String) args[0]));
     }
@@ -201,7 +208,7 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
         }
 
         public Object invokeExecute(Method method, Object[] args) {
-            log(statementFormatterFactory.createStatementFormatter(getTarget(), (String) args[0]).format());
+            log(getTarget(), (String) args[0]);
             return invokeTarget(method, args);
         }
     }
@@ -217,13 +224,11 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
                 "setClob", "setArray", "setURL", "setRowId", "setNString", "setNCharacterStream", "setNClob",
                 "setSQLXML"
         );
-        private final StatementFormatter statementFormatter;
+        private final StatementFormat statementFormat;
 
-
-        public PreparedStatementInvocationHandler(Connection connection,
-                                                  PreparedStatement preparedStatement, String query) {
-            super(connection, preparedStatement);
-            this.statementFormatter = statementFormatterFactory.createStatementFormatter(getTarget(), query);
+        public PreparedStatementInvocationHandler(Connection connection, PreparedStatement statement, String query) {
+            super(connection, statement);
+            this.statementFormat = createStatementFormat(getTarget(), query);
         }
 
         @Override
@@ -240,7 +245,7 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
                 Object parameter = args[0];
                 if (parameter instanceof Integer) {
                     Object value = SET_NULL.equals(method.getName()) ? null : args[1];
-                    statementFormatter.setParameter(((Integer) parameter) - 1, value);
+                    statementFormat.setParameter(((Integer) parameter) - 1, value);
                 }
             }
             return invokeTarget(method, args);
@@ -248,7 +253,7 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
 
         @Override
         public Object invokeExecute(Method method, Object[] args) {
-            log(statementFormatter.format());
+            log(statementFormat.format());
             return invokeTarget(method, args);
         }
     }

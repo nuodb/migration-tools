@@ -25,14 +25,45 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.resultset.format.utils;
 
-import java.sql.Statement;
+import java.util.BitSet;
+
+import static java.lang.Character.digit;
+import static java.lang.Character.forDigit;
 
 /**
  * @author Sergey Bushik
  */
-public interface StatementFormatterFactory {
+public class BitSetUtils {
 
-    StatementFormatter createStatementFormatter(Statement statement, String query);
+    public static String toHex(BitSet bitSet) {
+        int length = bitSet.length();
+        int digits = (length / 4) + (length % 4 > 0 ? 1 : 0);
+        int index = digits - 1;
+        char[] value = new char[digits];
+        for (int bit = 0; bit < length; index--) {
+            int hex = 0;
+            hex |= bitSet.get(bit++) ? 0x1 : 0;
+            hex |= bitSet.get(bit++) ? 0x2 : 0;
+            hex |= bitSet.get(bit++) ? 0x4 : 0;
+            hex |= bitSet.get(bit++) ? 0x8 : 0;
+            value[index] = forDigit(hex, 0x10);
+        }
+        return new String(value);
+    }
+
+    public static BitSet fromHex(String value) {
+        char[] hex = value.toCharArray();
+        BitSet bitSet = new BitSet(hex.length << 2);
+        int bit = 0;
+        for (int index = hex.length - 1; index >= 0; index--) {
+            int digit = digit(hex[index], 0x10);
+            bitSet.set(bit++, (digit & 0x1) > 0);
+            bitSet.set(bit++, (digit & 0x2) > 0);
+            bitSet.set(bit++, (digit & 0x4) > 0);
+            bitSet.set(bit++, (digit & 0x8) > 0);
+        }
+        return bitSet;
+    }
 }

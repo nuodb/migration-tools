@@ -27,10 +27,7 @@
  */
 package com.nuodb.migrator.cli.parse.option;
 
-import com.nuodb.migrator.cli.parse.Group;
-import com.nuodb.migrator.cli.parse.Option;
-import com.nuodb.migrator.cli.parse.OptionProcessor;
-import com.nuodb.migrator.cli.parse.Trigger;
+import com.nuodb.migrator.cli.parse.*;
 
 /**
  * @author Sergey Bushik
@@ -50,6 +47,8 @@ public interface GroupBuilder<O extends Group> extends OptionBuilder<O> {
     GroupBuilder withOptionFormat(OptionFormat optionFormat);
 
     GroupBuilder withOptionProcessor(OptionProcessor optionProcessor);
+
+    GroupBuilder withOptionValidator(OptionValidator optionValidator);
 
     GroupBuilder withMinimum(int minimum);
 

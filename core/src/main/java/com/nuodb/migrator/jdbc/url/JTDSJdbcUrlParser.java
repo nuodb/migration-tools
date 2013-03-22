@@ -27,16 +27,51 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import java.util.Map;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.JTDS_SUB_PROTOCOL;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public class JTDSJdbcUrlParser extends JdbcUrlParserBase {
 
-    boolean canParse(String url);
+    public JTDSJdbcUrlParser() {
+        super(JTDS_SUB_PROTOCOL);
+    }
 
-    JdbcUrl parseUrl(String url);
+    @Override
+    protected JdbcUrl createJdbcUrl(String url) {
+        return new JTDSJdbcUrl(url);
+    }
 
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    class JTDSJdbcUrl extends JdbcUrlBase {
+
+        private String qualifier;
+
+        public JTDSJdbcUrl(String url) {
+            super(url, JTDS_SUB_PROTOCOL);
+        }
+
+        @Override
+        protected void parseSubName(String subName) {
+            qualifier = substringBefore(subName, ":");
+            parseParameters(getProperties(), substringAfter(subName, ";"), ";");
+        }
+
+        @Override
+        public String getQualifier() {
+            return qualifier;
+        }
+
+        @Override
+        public String getCatalog() {
+            return null;
+        }
+
+        @Override
+        public String getSchema() {
+            return (String) getProperties().get("schema");
+        }
+    }
 }

@@ -27,16 +27,49 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import java.util.Map;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.POSTGRESQL_PROTOCOL;
+import static org.apache.commons.lang3.StringUtils.contains;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public class PostgreSQLJdbcUrlParser extends JdbcUrlParserBase {
 
-    boolean canParse(String url);
+    public PostgreSQLJdbcUrlParser() {
+        super(POSTGRESQL_PROTOCOL);
+    }
 
-    JdbcUrl parseUrl(String url);
+    @Override
+    protected JdbcUrl createJdbcUrl(String url) {
+        return new PostgreSQLJdbcUrl(url);
+    }
 
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    class PostgreSQLJdbcUrl extends JdbcUrlBase {
+
+        public PostgreSQLJdbcUrl(String url) {
+            super(url, POSTGRESQL_PROTOCOL);
+        }
+
+        @Override
+        protected void parseSubName(String subName) {
+            parseParameters(getProperties(), substringAfter(subName, "?"), "&");
+        }
+
+        @Override
+        public String getQualifier() {
+            return null;
+        }
+
+        @Override
+        public String getCatalog() {
+            return null;
+        }
+
+        @Override
+        public String getSchema() {
+            String searchPath = (String) getProperties().get("searchpath");
+            return contains(searchPath, ",") ? null : searchPath;
+        }
+    }
 }

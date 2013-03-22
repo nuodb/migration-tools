@@ -25,18 +25,57 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.url;
-
-import java.util.Map;
+package com.nuodb.migrator.cli.validation;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public class ConnectionGroupInfo {
 
-    boolean canParse(String url);
+    private String driverOption;
+    private String urlOption;
+    private String usernameOption;
+    private String passwordOption;
+    private String catalogOption;
+    private String schemaOption;
+    private String propertiesOption;
 
-    JdbcUrl parseUrl(String url);
+    public ConnectionGroupInfo(String driverOption, String urlOption, String usernameOption, String passwordOption,
+                               String catalogOption, String schemaOption, String propertiesOption) {
+        this.driverOption = driverOption;
+        this.urlOption = urlOption;
+        this.usernameOption = usernameOption;
+        this.passwordOption = passwordOption;
+        this.catalogOption = catalogOption;
+        this.schemaOption = schemaOption;
+        this.propertiesOption = propertiesOption;
+    }
 
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    public String getDriverOption() {
+        return driverOption;
+    }
+
+    public String getUrlOption() {
+        return urlOption;
+    }
+
+    public String getUsernameOption() {
+        return usernameOption;
+    }
+
+    public String getPasswordOption() {
+        return passwordOption;
+    }
+
+    public String getCatalogOption() {
+        return catalogOption;
+    }
+
+    public String getSchemaOption() {
+        return schemaOption;
+    }
+
+    public String getPropertiesOption() {
+        return propertiesOption;
+    }
 }

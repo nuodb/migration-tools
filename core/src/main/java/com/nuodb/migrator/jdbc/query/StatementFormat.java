@@ -25,18 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.url;
-
-import java.util.Map;
+package com.nuodb.migrator.jdbc.query;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public interface StatementFormat {
 
-    boolean canParse(String url);
+    String format();
 
-    JdbcUrl parseUrl(String url);
+    Object getParameter(int index);
 
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    void setParameter(int index, Object value);
 }

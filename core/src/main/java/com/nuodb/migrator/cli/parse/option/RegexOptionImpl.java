@@ -42,7 +42,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
-import static java.lang.String.format;
+import static com.nuodb.migrator.cli.parse.option.OptionValidations.optionUnexpected;
 
 /**
  * @author Sergey Bushik
@@ -102,7 +102,7 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
     }
 
     protected void processUnexpected(String argument) {
-        throw new OptionException(this, format("Unexpected token %1$s", argument));
+        optionUnexpected(this, argument);
     }
 
     protected void processTrigger(CommandLine commandLine, Trigger trigger, String argument) {

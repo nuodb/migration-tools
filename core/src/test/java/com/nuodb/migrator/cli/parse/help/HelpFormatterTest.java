@@ -110,6 +110,7 @@ public class HelpFormatterTest {
 
         verify(helpFormatter).divider(writer);
         verify(helpFormatter).line(writer, message);
+        verify(helpFormatter).line(writer);
         verify(exception).getMessage();
     }
 

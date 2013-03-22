@@ -27,13 +27,14 @@
  */
 package com.nuodb.migrator.cli.parse.option;
 
-import com.google.common.collect.Sets;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionProcessor;
+import com.nuodb.migrator.cli.parse.OptionValidator;
 import com.nuodb.migrator.cli.parse.Trigger;
 
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 
 /**
@@ -49,8 +50,9 @@ public abstract class OptionBuilderBase<O extends Option> implements OptionBuild
     protected boolean required;
 
     protected OptionFormat optionFormat;
-    protected OptionProcessor optionProcessor;
-    protected Set<Trigger> triggers = Sets.newHashSet();
+    protected Set<OptionValidator> optionValidators = newHashSet();
+    protected Set<OptionProcessor> optionProcessors = newHashSet();
+    protected Set<Trigger> triggers = newHashSet();
 
     public OptionBuilderBase(Class<? extends O> optionClass, OptionFormat optionFormat) {
         this.optionClass = optionClass;
@@ -82,8 +84,14 @@ public abstract class OptionBuilderBase<O extends Option> implements OptionBuild
     }
 
     @Override
+    public OptionBuilder withOptionValidator(OptionValidator optionValidator) {
+        this.optionValidators.add(optionValidator);
+        return this;
+    }
+
+    @Override
     public OptionBuilder withOptionProcessor(OptionProcessor optionProcessor) {
-        this.optionProcessor = optionProcessor;
+        this.optionProcessors.add(optionProcessor);
         return this;
     }
 
@@ -107,11 +115,14 @@ public abstract class OptionBuilderBase<O extends Option> implements OptionBuild
         option.setDescription(description);
         option.setRequired(required);
         option.setOptionFormat(optionFormat);
-        if (optionProcessor != null) {
-            option.addOptionProcessor(optionProcessor);
-        }
         for (Trigger trigger : triggers) {
             option.addTrigger(trigger);
+        }
+        for (OptionValidator optionValidator : optionValidators) {
+            option.addOptionValidator(optionValidator);
+        }
+        for (OptionProcessor optionProcessor : optionProcessors) {
+            option.addOptionProcessor(optionProcessor);
         }
         return option;
     }

@@ -29,16 +29,19 @@ package com.nuodb.migrator.resultset.format.xml;
 
 import com.nuodb.migrator.resultset.format.FormatOutputBase;
 import com.nuodb.migrator.resultset.format.FormatOutputException;
-import com.nuodb.migrator.resultset.format.utils.BinaryEncoder;
 import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueVariant;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import java.util.BitSet;
 
+import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.toHex;
+import static com.nuodb.migrator.resultset.format.utils.BinaryEncoder.BASE64;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.toAlias;
-import static javax.xml.XMLConstants.*;
+import static javax.xml.XMLConstants.DEFAULT_NS_PREFIX;
+import static javax.xml.XMLConstants.NULL_NS_URI;
 
 /**
  * @author Sergey Bushik
@@ -76,12 +79,11 @@ public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
     protected void doWriteBegin() {
         try {
             writer.writeStartDocument(getEncoding(), getVersion());
-            writer.writeStartElement(RESULT_SET_ELEMENT);
-            writer.writeNamespace("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
-            writer.writeStartElement(COLUMNS_ELEMENT);
+            writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
+            writer.writeStartElement(ELEMENT_RESULT_SET);
+            writer.writeStartElement(ELEMENT_COLUMNS);
             for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
-                writer.writeEmptyElement(COLUMN_ELEMENT);
-                writer.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
+                writer.writeEmptyElement(ELEMENT_COLUMN);
                 writer.writeAttribute(ATTRIBUTE_NAME, valueFormatModel.getName());
                 writer.writeAttribute(ATTRIBUTE_VARIANT, toAlias(valueFormatModel.getValueVariantType()));
             }
@@ -94,21 +96,25 @@ public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
     @Override
     protected void writeValues(ValueVariant[] variants) {
         try {
-            writer.writeStartElement(ROW_ELEMENT);
+            writer.writeStartElement(ELEMENT_ROW);
+            BitSet nulls = new BitSet();
+            for (int i = 0; i < variants.length; i++) {
+                nulls.set(i, variants[i].isNull());
+            }
+            if (!nulls.isEmpty()) {
+                writer.writeAttribute(ATTRIBUTE_NULLS, toHex(nulls));
+            }
             int i = 0;
             for (ValueVariant variant : variants) {
-                if (variant.isNull()) {
-                    writer.writeEmptyElement(COLUMN_ELEMENT);
-                    writer.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE, "true");
-                } else {
-                    writer.writeStartElement(COLUMN_ELEMENT);
+                if (!variant.isNull()) {
+                    writer.writeStartElement(ELEMENT_COLUMN);
                     String value = null;
                     switch (getValueFormatModelList().get(i).getValueVariantType()) {
                         case BINARY:
-                            value = BinaryEncoder.HEX.encode(variant.asBytes());
+                            value = BASE64.encode(variant.asBytes());
                             break;
                         case STRING:
-                            value = XmlEscape.INSTANCE.escape(variant.asString());
+                            value = variant.asString();
                             break;
                     }
                     writer.writeCharacters(value);

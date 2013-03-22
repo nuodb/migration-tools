@@ -25,18 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.url;
-
-import java.util.Map;
+package com.nuodb.migrator.cli.parse;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public interface OptionValidator {
 
-    boolean canParse(String url);
+    boolean canValidate(CommandLine commandLine, Option option);
 
-    JdbcUrl parseUrl(String url);
-
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    void validate(CommandLine commandLine, Option option);
 }

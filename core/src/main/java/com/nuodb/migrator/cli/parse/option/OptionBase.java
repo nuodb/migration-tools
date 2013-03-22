@@ -25,8 +25,9 @@ import com.nuodb.migrator.utils.SimplePriorityList;
 import java.util.*;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.cli.parse.OptionValidators.toOptionProcessor;
+import static com.nuodb.migrator.cli.parse.option.OptionValidations.optionRequired;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
-import static java.lang.String.format;
 
 /**
  * A base implementation of the option providing limited ground work for further implementations.
@@ -99,6 +100,11 @@ public abstract class OptionBase implements Option {
     @Override
     public void setOptionFormat(OptionFormat optionFormat) {
         this.optionFormat = optionFormat;
+    }
+
+    @Override
+    public void addOptionValidator(OptionValidator optionValidator) {
+        addOptionProcessor(toOptionProcessor(optionValidator));
     }
 
     @Override
@@ -212,7 +218,7 @@ public abstract class OptionBase implements Option {
     }
 
     protected void postProcessRequired() {
-        throw new OptionException(this, format("Missing required option %1$s", getName()));
+        optionRequired(this);
     }
 
     public static void createTriggers(PriorityList<Trigger> triggers, Set<String> prefixes, String trigger) {

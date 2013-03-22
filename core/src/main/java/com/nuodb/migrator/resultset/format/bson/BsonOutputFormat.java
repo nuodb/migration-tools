@@ -71,6 +71,7 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
     protected void doWriteBegin() {
         try {
             writer.writeStartObject();
+
             writer.writeFieldName(COLUMNS_FIELD);
             writer.writeStartObject();
             for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
@@ -78,6 +79,7 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
                 writer.writeStringField(VARIANT_FIELD, toAlias(valueFormatModel.getValueVariantType()));
             }
             writer.writeEndObject();
+
             writer.writeFieldName(ROWS_FIELD);
             writer.writeStartArray();
         } catch (IOException exception) {
@@ -88,7 +90,6 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
     @Override
     protected void writeValues(ValueVariant[] variants) {
         try {
-            writer.writeStartArray();
             int i = 0;
             for (ValueVariant variant : variants) {
                 if (variant.isNull()) {
@@ -105,7 +106,6 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
                 }
                 i++;
             }
-            writer.writeEndArray();
         } catch (IOException exception) {
             throw new FormatOutputException(exception);
         }

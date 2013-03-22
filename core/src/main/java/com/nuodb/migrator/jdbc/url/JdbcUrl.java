@@ -34,9 +34,53 @@ import java.util.Map;
  */
 public interface JdbcUrl {
 
+    /**
+     * Returns full url jdbc:com.nuodb://localhost/test
+     *
+     * @return original url
+     */
+    String getUrl();
+
+    /**
+     * Always returns "jdbc"
+     *
+     * @return constant protocol part of the url, which is "jdbc"
+     */
+    String getProtocol();
+
+    /**
+     * Vendor dependent sub protocol name, i.e. for jdbc:com.nuodb://localhost/test returns "com.nuodb"
+     *
+     * @return sub protocol part of the url
+     */
+    String getSubProtocol();
+
+    /**
+     * Vendor dependent qualifier of the data source, i.e. for jdbc:jtds:sqlserver://localhost:1433/test sub protocol is
+     * "jtds" and qualifier is "sqlserver"
+     *
+     * @return qualifier describing data source.
+     */
+    String getQualifier();
+
+    /**
+     * Default catalog to be used by driver
+     *
+     * @return the name of the default catalog
+     */
     String getCatalog();
 
+    /**
+     * Default schema to be used by driver
+     *
+     * @return the name of the default schema
+     */
     String getSchema();
 
+    /**
+     * Optional key value parameters
+     *
+     * @return
+     */
     Map<String, Object> getProperties();
 }

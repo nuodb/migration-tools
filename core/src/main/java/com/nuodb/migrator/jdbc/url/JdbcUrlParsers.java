@@ -27,16 +27,68 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
+import com.google.common.collect.Sets;
+
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public class JdbcUrlParsers {
 
-    boolean canParse(String url);
+    private static JdbcUrlParsers INSTANCE;
 
-    JdbcUrl parseUrl(String url);
+    public static JdbcUrlParsers getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new JdbcUrlParsers();
+        }
+        return INSTANCE;
+    }
 
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    private Collection<JdbcUrlParser> parsers = Sets.newLinkedHashSet();
+
+    private JdbcUrlParsers() {
+        addParser(new JTDSJdbcUrlParser());
+        addParser(new MSSQLJdbcUrlParser());
+        addParser(new MySQLJdbcUrlParser());
+        addParser(new NuoDBJdbcUrlParser());
+        addParser(new OracleJdbcUrlParser());
+        addParser(new PostgreSQLJdbcUrlParser());
+    }
+
+    public boolean canParse(String url) {
+        return getParser(url) != null;
+    }
+
+    public JdbcUrl parse(String url) {
+        return parse(url, Collections.<String, Object>emptyMap());
+    }
+
+    public JdbcUrl parse(String url, Map<String, Object> overrides) {
+        for (JdbcUrlParser parser : getParsers()) {
+            if (parser.canParse(url)) {
+                return parser.parse(url, overrides);
+            }
+        }
+        return null;
+    }
+
+    public void addParser(JdbcUrlParser jdbcUrlParser) {
+        getParsers().add(jdbcUrlParser);
+    }
+
+    public JdbcUrlParser getParser(String url) {
+        for (JdbcUrlParser parser : getParsers()) {
+            if (parser.canParse(url)) {
+                return parser;
+            }
+        }
+        return null;
+    }
+
+    public Collection<JdbcUrlParser> getParsers() {
+        return parsers;
+    }
 }

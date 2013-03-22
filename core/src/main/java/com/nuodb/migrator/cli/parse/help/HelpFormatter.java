@@ -127,9 +127,11 @@ public class HelpFormatter {
     }
 
     protected void exception(Writer writer) throws IOException {
-        if (getException() != null) {
+        OptionException exception = getException();
+        if (exception != null) {
             divider(writer);
-            line(writer, getException().getMessage());
+            line(writer, exception.getMessage());
+            line(writer);
         }
     }
 

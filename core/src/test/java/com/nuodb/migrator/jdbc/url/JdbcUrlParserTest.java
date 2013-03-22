@@ -33,6 +33,7 @@ import org.testng.annotations.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.PROTOCOL;
 import static org.testng.Assert.*;
 
 /**
@@ -45,18 +46,37 @@ public class JdbcUrlParserTest {
     @DataProvider(name = "parseUrl")
     public Object[][] createParseUrlData() {
         return new Object[][]{
-                {"jdbc:com.nuodb://localhost/database", null, null, EMPTY_PROPERTIES},
-                {"jdbc:com.nuodb://localhost/database?user=admin&schema=test", null, "test",
-                        new PropertiesBuilder().put("user", "admin").put("schema", "test").build()},
-                {"jdbc:mysql://localhost:3306/database", "database", null, EMPTY_PROPERTIES},
-                {"jdbc:mysql://localhost:3306/database?connectTimeout=1000", "database", null,
-                        new PropertiesBuilder().put("connectTimeout", "1000").build()}
+                {"jdbc:jtds:sqlserver://localhost:1433/test;autoCommit=true;batchSize=0",
+                        "jtds", "sqlserver", null, null,
+                        new PropertiesBuilder("autoCommit", "true").put("batchSize", "0").build()},
+                {"jdbc:sqlserver://localhost:1433;database=test",
+                        "sqlserver", null, null, null,
+                        new PropertiesBuilder("database", "test").build()},
+                {"jdbc:mysql://localhost:3306/database",
+                        "mysql", null, "database", null,
+                        EMPTY_PROPERTIES},
+                {"jdbc:mysql://localhost:3306/database?connectTimeout=1000",
+                        "mysql", null, "database", null,
+                        new PropertiesBuilder("connectTimeout", "1000").build()},
+                {"jdbc:com.nuodb://localhost/database",
+                        "com.nuodb", null, null, null,
+                        EMPTY_PROPERTIES},
+                {"jdbc:com.nuodb://localhost/database?user=admin&schema=test",
+                        "com.nuodb", null, null, "test",
+                        new PropertiesBuilder("user", "admin").put("schema", "test").build()},
+                {"jdbc:oracle:thin:@//localhost:1521/sid",
+                        "oracle", "thin", null, null,
+                        EMPTY_PROPERTIES},
+                {"jdbc:postgresql:localhost?user=admin&searchpath=schema",
+                        "postgresql", null, null, "schema",
+                        new PropertiesBuilder("user", "admin").put("searchpath", "schema").build()}
         };
     }
 
     @Test(dataProvider = "parseUrl")
-    public void testParseUrl(String url, String catalog, String schema, Map<String, Object> properties) {
-        JdbcUrlParser jdbcUrlParser = JdbcUrlParserUtils.getInstance().getParser(url);
+    public void testParseUrl(String url, String subProtocol, String qualifier,
+                             String catalog, String schema, Map<String, Object> properties) {
+        JdbcUrlParser jdbcUrlParser = JdbcUrlParsers.getInstance().getParser(url);
 
         assertNotNull(jdbcUrlParser);
         assertTrue(jdbcUrlParser.canParse(url));
@@ -64,6 +84,9 @@ public class JdbcUrlParserTest {
         JdbcUrl jdbcUrl = jdbcUrlParser.parse(url, null);
 
         assertNotNull(jdbcUrl);
+        assertEquals(jdbcUrl.getProtocol(), PROTOCOL);
+        assertEquals(jdbcUrl.getSubProtocol(), subProtocol);
+        assertEquals(jdbcUrl.getQualifier(), qualifier);
         assertEquals(jdbcUrl.getCatalog(), catalog);
         assertEquals(jdbcUrl.getSchema(), schema);
         assertEquals(jdbcUrl.getProperties(), properties);
@@ -72,6 +95,13 @@ public class JdbcUrlParserTest {
     static class PropertiesBuilder {
 
         private Map<String, Object> properties = new HashMap<String, Object>();
+
+        public PropertiesBuilder() {
+        }
+
+        public PropertiesBuilder(String key, Object value) {
+            put(key, value);
+        }
 
         public PropertiesBuilder put(String key, Object value) {
             properties.put(key, value);

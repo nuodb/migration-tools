@@ -45,11 +45,9 @@ import static com.fasterxml.jackson.core.JsonToken.*;
 import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModelList;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.STRING;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.fromAlias;
-import static com.nuodb.migrator.resultset.format.value.ValueVariantUtils.fill;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.binary;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.string;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
-import static java.util.Arrays.asList;
 
 /**
  * @author Sergey Bushik
@@ -113,16 +111,25 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
         setValueFormatModelList(valueFormatModelList);
     }
 
-    protected boolean isCurrentToken(JsonToken... tokens) {
-        return asList(tokens).contains(reader.getCurrentToken());
+    protected boolean isNextToken(JsonToken... tokens) throws IOException {
+        return isToken(reader.nextToken(), tokens);
     }
 
-    protected boolean isNextToken(JsonToken... tokens) throws IOException {
-        return asList(tokens).contains(reader.nextToken());
+    protected boolean isCurrentToken(JsonToken... tokens) throws IOException {
+        return isToken(reader.getCurrentToken(), tokens);
+    }
+
+    protected boolean isToken(JsonToken target, JsonToken... tokens) {
+        for (JsonToken token : tokens) {
+            if (token == target) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected boolean isNextField(String field) throws IOException {
-        return isNextToken(JsonToken.FIELD_NAME) && field.equals(reader.getText());
+        return isNextToken(FIELD_NAME) && field.equals(reader.getText());
     }
 
     @Override
@@ -137,12 +144,12 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
     protected ValueVariant[] doReadValues() {
         ValueVariant[] values = null;
         try {
-            if (isCurrentToken(START_ARRAY)) {
+            if (!isCurrentToken(END_ARRAY)) {
                 ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
-                values = new ValueVariant[valueFormatModelList.size()];
-                reader.nextToken();
+                int length = valueFormatModelList.size();
+                values = new ValueVariant[length];
                 int index = 0;
-                while (isCurrentToken(VALUE_NULL, VALUE_STRING, VALUE_EMBEDDED_OBJECT)) {
+                while (index < length && isCurrentToken(VALUE_NULL, VALUE_STRING, VALUE_EMBEDDED_OBJECT)) {
                     ValueVariantType valueVariantType = valueFormatModelList.get(index).getValueVariantType();
                     valueVariantType = valueVariantType != null ? valueVariantType : STRING;
                     switch (valueVariantType) {
@@ -156,8 +163,6 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
                     index++;
                     reader.nextToken();
                 }
-                reader.nextToken();
-                fill(values, valueFormatModelList, index);
             }
         } catch (IOException exception) {
             throw new FormatInputException(exception);

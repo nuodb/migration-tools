@@ -79,7 +79,8 @@ public class CliSchemaJob extends CliRunJob {
     public static final String IDENTIFIER_NORMALIZER_LOWERCASE = "lowercase";
 
     public static final String IDENTIFIER_NORMALIZER_UPPERCASE = "uppercase";
-    private JdbcTypeSpecValuesCollector jdbcTypeSpecValuesCollector = new JdbcTypeSpecValuesCollector();
+
+    private JdbcTypeOptionProcessor jdbcTypeOptionProcessor = new JdbcTypeOptionProcessor();
 
     public CliSchemaJob() {
         super(COMMAND, new SchemaJobFactory());
@@ -116,7 +117,7 @@ public class CliSchemaJob extends CliRunJob {
                         newArgumentBuilder().
                                 withName(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME)).
                                 withHelpValues(singleton(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME))).
-                                withOptionProcessor(jdbcTypeSpecValuesCollector).
+                                withOptionProcessor(jdbcTypeOptionProcessor).
                                 withMinimum(1).withMaximum(Integer.MAX_VALUE).withRequired(true).build()
                 ).build();
         typeGroup.withOption(typeName);
@@ -228,7 +229,7 @@ public class CliSchemaJob extends CliRunJob {
     @Override
     protected JdbcConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
         JdbcConnectionSpec connection = new JdbcConnectionSpec();
-        connection.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
+        connection.setDriverClassName(JdbcConstants.NUODB_DRIVER);
         connection.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
         connection.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
         connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
@@ -307,7 +308,7 @@ public class CliSchemaJob extends CliRunJob {
         schemaSpec.setIdentifierNormalizer(
                 identifierNormalizer != null ? identifierNormalizer : NOOP);
 
-        ListMultimap<String, Object> values = jdbcTypeSpecValuesCollector.getValues();
+        ListMultimap<String, Object> values = jdbcTypeOptionProcessor.getValues();
         int count = values.get(JDBC_TYPE_NAME_OPTION).size();
         Collection<JdbcTypeSpec> jdbcTypeSpecs = Lists.newArrayList();
         for (int i = 0; i < count; i++) {
@@ -425,7 +426,7 @@ public class CliSchemaJob extends CliRunJob {
         return group.build();
     }
 
-    class JdbcTypeSpecValuesCollector implements OptionProcessor {
+    class JdbcTypeOptionProcessor implements OptionProcessor {
 
         private ListMultimap<String, Object> lastVisitedValues = newListMultimap(
                 Maps.<String, Collection<Object>>newLinkedHashMap(),

@@ -89,6 +89,11 @@ public abstract class CliRunAdapter extends CliRunSupport implements CliRun {
     }
 
     @Override
+    public void addOptionValidator(OptionValidator optionValidator) {
+        getOption().addOptionValidator(optionValidator);
+    }
+
+    @Override
     public void addOptionProcessor(OptionProcessor optionProcessor) {
         getOption().addOptionProcessor(optionProcessor);
     }

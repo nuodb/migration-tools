@@ -30,8 +30,10 @@ package com.nuodb.migrator.resultset.format.csv;
 import com.nuodb.migrator.jdbc.model.ValueModelList;
 import com.nuodb.migrator.resultset.format.FormatInputBase;
 import com.nuodb.migrator.resultset.format.FormatInputException;
-import com.nuodb.migrator.resultset.format.utils.BinaryEncoder;
-import com.nuodb.migrator.resultset.format.value.*;
+import com.nuodb.migrator.resultset.format.value.SimpleValueFormatModel;
+import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
+import com.nuodb.migrator.resultset.format.value.ValueVariant;
+import com.nuodb.migrator.resultset.format.value.ValueVariantType;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -39,17 +41,18 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModelList;
+import static com.nuodb.migrator.resultset.format.utils.BinaryEncoder.BASE64;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.STRING;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.fromAlias;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantUtils.fill;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.binary;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.string;
 import static java.lang.String.valueOf;
+import static java.nio.charset.Charset.forName;
 import static org.apache.commons.lang3.StringUtils.split;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -78,7 +81,7 @@ public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
                 parser = new CSVParser(getReader(), format);
             } else if (getInputStream() != null) {
                 String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
-                parser = new CSVParser(new InputStreamReader(getInputStream(), Charset.forName(encoding)), format);
+                parser = new CSVParser(new InputStreamReader(getInputStream(), forName(encoding)), format);
             }
         } catch (IOException exception) {
             throw new FormatInputException(exception);
@@ -127,7 +130,7 @@ public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
             type = type != null ? type : STRING;
             switch (type) {
                 case BINARY:
-                    values[index] = binary(BinaryEncoder.HEX.decode(value));
+                    values[index] = binary(BASE64.decode(value));
                     break;
                 case STRING:
                     values[index] = string(value);

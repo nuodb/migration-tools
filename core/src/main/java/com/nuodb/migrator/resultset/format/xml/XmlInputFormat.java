@@ -30,18 +30,19 @@ package com.nuodb.migrator.resultset.format.xml;
 import com.nuodb.migrator.jdbc.model.ValueModelList;
 import com.nuodb.migrator.resultset.format.FormatInputBase;
 import com.nuodb.migrator.resultset.format.FormatInputException;
-import com.nuodb.migrator.resultset.format.utils.BinaryEncoder;
 import com.nuodb.migrator.resultset.format.value.SimpleValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueVariant;
 import com.nuodb.migrator.resultset.format.value.ValueVariantType;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.*;
+import java.util.BitSet;
 import java.util.Iterator;
 
 import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModelList;
+import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.fromHex;
+import static com.nuodb.migrator.resultset.format.utils.BinaryEncoder.BASE64;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.STRING;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.fromAlias;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantUtils.fill;
@@ -49,7 +50,6 @@ import static com.nuodb.migrator.resultset.format.value.ValueVariants.binary;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.string;
 import static java.lang.String.format;
 import static javax.xml.XMLConstants.NULL_NS_URI;
-import static javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI;
 
 /**
  * @author Sergey Bushik
@@ -89,8 +89,8 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
     @Override
     protected void doReadBegin() {
         ValueModelList<ValueFormatModel> valueFormatModelList = createValueModelList();
-        if (isNextElement(RESULT_SET_ELEMENT) && isNextElement(COLUMNS_ELEMENT)) {
-            while (isNextElement(COLUMN_ELEMENT)) {
+        if (isNextElement(ELEMENT_RESULT_SET) && isNextElement(ELEMENT_COLUMNS)) {
+            while (isNextElement(ELEMENT_COLUMN)) {
                 String column = getAttributeValue(NULL_NS_URI, ATTRIBUTE_NAME);
                 ValueFormatModel valueFormatModel = new SimpleValueFormatModel();
                 valueFormatModel.setName(column);
@@ -99,7 +99,7 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
                     Location location = reader.getLocation();
                     throw new FormatInputException(
                             format("Element %s doesn't have %s attribute [location at %d:%d]",
-                                    COLUMN_ELEMENT, ATTRIBUTE_NAME,
+                                    ELEMENT_COLUMN, ATTRIBUTE_NAME,
                                     location.getLineNumber(), location.getColumnNumber()));
                 }
                 valueFormatModelList.add(valueFormatModel);
@@ -120,16 +120,16 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
 
     protected ValueVariant[] doReadValues() {
         ValueVariant[] values = null;
-        if (isCurrentElement(ROW_ELEMENT) || isNextElement(ROW_ELEMENT)) {
+        if (isCurrentElement(ELEMENT_ROW) || isNextElement(ELEMENT_ROW)) {
+            String nullsValue = getAttributeValue(NULL_NS_URI, ATTRIBUTE_NULLS);
+            BitSet nulls = nullsValue != null ? fromHex(nullsValue) : new BitSet();
             int index = 0;
             ValueModelList<ValueFormatModel> model = getValueFormatModelList();
             values = new ValueVariant[model.size()];
-            while (isNextElement(COLUMN_ELEMENT)) {
-                boolean nil = StringUtils.equals(
-                        getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, SCHEMA_NIL_ATTRIBUTE), "true");
+            while (isNextElement(ELEMENT_COLUMN)) {
                 String value;
                 try {
-                     value = nil ? null : reader.getElementText();
+                    value = nulls.get(index) ? null : reader.getElementText();
                 } catch (XMLStreamException exception) {
                     throw new FormatInputException(exception);
                 }
@@ -137,11 +137,11 @@ public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
                 type = type != null ? type : STRING;
                 switch (type) {
                     case BINARY:
-                        values[index] = binary(BinaryEncoder.HEX.decode(value));
-                    break;
+                        values[index] = binary(BASE64.decode(value));
+                        break;
                     case STRING:
-                        values[index] = string(XmlEscape.INSTANCE.unescape(value));
-                    break;
+                        values[index] = string(value);
+                        break;
                 }
                 index++;
             }

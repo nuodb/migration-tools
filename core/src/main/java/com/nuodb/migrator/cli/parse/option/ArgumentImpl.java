@@ -21,7 +21,7 @@ import com.nuodb.migrator.cli.parse.*;
 
 import java.util.*;
 
-import static java.lang.String.format;
+import static com.nuodb.migrator.cli.parse.option.OptionValidations.*;
 import static java.util.Collections.singletonList;
 
 /**
@@ -150,7 +150,7 @@ public class ArgumentImpl extends OptionBase implements Argument {
     }
 
     protected void postProcessUnexpected(String argument) {
-        throw new OptionException(this, format("Unexpected token %1$s", argument));
+        optionUnexpected(this, argument);
     }
 
     @Override
@@ -175,11 +175,11 @@ public class ArgumentImpl extends OptionBase implements Argument {
         List<Object> values = commandLine.getValues(option);
         int minimum = getMinimum();
         if (values.size() < minimum) {
-            throw new OptionException(option, format("Missing value for %1$s argument", getName()));
+            argumentMinimum(this);
         }
         int maximum = getMaximum();
         if (values.size() > maximum) {
-            throw new OptionException(option, format("Too many values for %1$s argument", getName()));
+            argumentMaximum(this);
         }
     }
 

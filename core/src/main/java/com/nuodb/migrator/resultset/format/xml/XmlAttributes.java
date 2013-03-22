@@ -31,19 +31,18 @@ package com.nuodb.migrator.resultset.format.xml;
  * @author Sergey Bushik
  */
 public interface XmlAttributes {
-
     final String FORMAT_TYPE = "xml";
-    final String SCHEMA_NIL_ATTRIBUTE = "nil";
 
     final String ATTRIBUTE_ENCODING = "xml.encoding";
     final String ATTRIBUTE_VERSION = "xml.version";
 
     final String ENCODING = "utf-8";
     final String VERSION = "1.0";
-    final String RESULT_SET_ELEMENT = "result-set";
-    final String COLUMNS_ELEMENT = "columns";
-    final String COLUMN_ELEMENT = "column";
-    final String ATTRIBUTE_NAME = "name";
-    final String ATTRIBUTE_VARIANT = "variant";
-    final String ROW_ELEMENT = "row";
+    final String ELEMENT_RESULT_SET = "rs";
+    final String ELEMENT_COLUMNS = "cs";
+    final String ELEMENT_COLUMN = "c";
+    final String ELEMENT_ROW = "r";
+    final String ATTRIBUTE_NAME = "n";
+    final String ATTRIBUTE_NULLS = "ns";
+    final String ATTRIBUTE_VARIANT = "v";
 }

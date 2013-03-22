@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
 
 import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER_CLASS_NAME;
+import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.assertEquals;
 
@@ -103,7 +103,7 @@ public class CliSchemaJobTest {
         schemaSpec.setSourceConnectionSpec(sourceConnectionSpec);
 
         JdbcConnectionSpec targetConnectionSpec = new JdbcConnectionSpec();
-        targetConnectionSpec.setDriverClassName(NUODB_DRIVER_CLASS_NAME);
+        targetConnectionSpec.setDriverClassName(NUODB_DRIVER);
         targetConnectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
         targetConnectionSpec.setUsername("dba");
         targetConnectionSpec.setPassword("goalie");

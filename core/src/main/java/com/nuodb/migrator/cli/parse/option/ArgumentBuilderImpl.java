@@ -30,6 +30,7 @@ package com.nuodb.migrator.cli.parse.option;
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.cli.parse.Argument;
 import com.nuodb.migrator.cli.parse.OptionProcessor;
+import com.nuodb.migrator.cli.parse.OptionValidator;
 import com.nuodb.migrator.cli.parse.Trigger;
 
 import java.util.Collection;
@@ -85,6 +86,11 @@ public class ArgumentBuilderImpl<O extends Argument>
     @Override
     public ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor) {
         return (ArgumentBuilder) super.withOptionProcessor(optionProcessor);
+    }
+
+    @Override
+    public ArgumentBuilder withOptionValidator(OptionValidator optionValidator) {
+        return (ArgumentBuilder) super.withOptionValidator(optionValidator);
     }
 
     @Override

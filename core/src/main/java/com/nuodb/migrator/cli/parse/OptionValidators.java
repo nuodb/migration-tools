@@ -25,58 +25,58 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.url;
+package com.nuodb.migrator.cli.parse;
 
-import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.MYSQL_SUB_PROTOCOL;
-import static org.apache.commons.lang3.StringUtils.substring;
-import static org.apache.commons.lang3.StringUtils.substringAfterLast;
+import java.util.ListIterator;
 
 /**
  * @author Sergey Bushik
  */
-public class MySQLJdbcUrlParser extends JdbcUrlParserBase {
+public class OptionValidators {
 
-    public MySQLJdbcUrlParser() {
-        super(MYSQL_SUB_PROTOCOL);
+    public static OptionProcessor toOptionProcessor(OptionValidator optionValidator) {
+        return new OptionProcessorValidator(optionValidator);
     }
 
-    @Override
-    protected JdbcUrl createJdbcUrl(String url) {
-        return new MySQLJdbcUrl(url);
-    }
+    static class OptionProcessorValidator implements OptionProcessor {
 
-    class MySQLJdbcUrl extends JdbcUrlBase {
+        private OptionValidator optionValidator;
 
-        private String catalog;
-
-        public MySQLJdbcUrl(String url) {
-            super(url, MYSQL_SUB_PROTOCOL);
+        public OptionProcessorValidator(OptionValidator optionValidator) {
+            this.optionValidator = optionValidator;
         }
 
         @Override
-        protected void parseSubName(String subName) {
-            int prefix = subName.indexOf("//");
-            int parameters = 0;
-            if (prefix >= 0 && (parameters = subName.indexOf('?', prefix + 3)) > 0) {
-                parseParameters(getProperties(), substring(subName, parameters + 1), "&");
+        public void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments) {
+        }
+
+        @Override
+        public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
+        }
+
+        @Override
+        public void postProcess(CommandLine commandLine, Option option) {
+            if (optionValidator.canValidate(commandLine, option)) {
+                optionValidator.validate(commandLine, option);
             }
-            String base = parameters > 0 ? subName.substring(0, parameters) : subName;
-            catalog = substringAfterLast(base, "/");
         }
 
         @Override
-        public String getCatalog() {
-            return catalog;
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof OptionProcessorValidator)) return false;
+            OptionProcessorValidator that = (OptionProcessorValidator) o;
+
+            if (optionValidator != null ? !optionValidator.equals(
+                    that.optionValidator) : that.optionValidator != null) {
+                return false;
+            }
+            return true;
         }
 
         @Override
-        public String getSchema() {
-            return null;
-        }
-
-        @Override
-        public String getQualifier() {
-            return null;
+        public int hashCode() {
+            return optionValidator != null ? optionValidator.hashCode() : 0;
         }
     }
 }

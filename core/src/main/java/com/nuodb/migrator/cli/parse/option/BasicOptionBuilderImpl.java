@@ -28,11 +28,7 @@
 package com.nuodb.migrator.cli.parse.option;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.cli.parse.Argument;
-import com.nuodb.migrator.cli.parse.BasicOption;
-import com.nuodb.migrator.cli.parse.Group;
-import com.nuodb.migrator.cli.parse.OptionProcessor;
-import com.nuodb.migrator.cli.parse.Trigger;
+import com.nuodb.migrator.cli.parse.*;
 
 import java.util.Map;
 
@@ -81,6 +77,11 @@ public class BasicOptionBuilderImpl<O extends BasicOption>
     @Override
     public BasicOptionBuilder withOptionProcessor(OptionProcessor optionProcessor) {
         return (BasicOptionBuilder) super.withOptionProcessor(optionProcessor);
+    }
+
+    @Override
+    public BasicOptionBuilder withOptionValidator(OptionValidator optionValidator) {
+        return (BasicOptionBuilder) super.withOptionValidator(optionValidator);
     }
 
     @Override

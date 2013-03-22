@@ -29,6 +29,7 @@ package com.nuodb.migrator.cli.parse.option;
 
 import com.nuodb.migrator.cli.parse.Argument;
 import com.nuodb.migrator.cli.parse.OptionProcessor;
+import com.nuodb.migrator.cli.parse.OptionValidator;
 import com.nuodb.migrator.cli.parse.Trigger;
 
 import java.util.Collection;
@@ -53,6 +54,8 @@ public interface ArgumentBuilder<O extends Argument> extends OptionBuilder<O> {
     ArgumentBuilder withOptionFormat(OptionFormat optionFormat);
 
     ArgumentBuilder withOptionProcessor(OptionProcessor optionProcessor);
+
+    ArgumentBuilder withOptionValidator(OptionValidator optionValidator);
 
     ArgumentBuilder withMinimum(int minimum);
 

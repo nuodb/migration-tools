@@ -25,18 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.url;
+package com.nuodb.migrator.cli.validation;
 
-import java.util.Map;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import org.apache.commons.lang3.StringUtils;
+
+import static com.nuodb.migrator.jdbc.JdbcConstants.POSTGRESQL_DRIVER;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcUrlParser {
+public class PostgreSQLConnectionGroupValidator extends ConnectionGroupValidator {
 
-    boolean canParse(String url);
+    public PostgreSQLConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
+        super(connectionGroupInfo);
+    }
 
-    JdbcUrl parseUrl(String url);
+    @Override
+    public boolean canValidate(CommandLine commandLine, Option option) {
+        return StringUtils.equals(getDriver(commandLine), POSTGRESQL_DRIVER);
+    }
 
-    JdbcUrl parse(String url, Map<String, Object> parameters);
+    @Override
+    public void validate(CommandLine commandLine, Option option) {
+        String catalog = getCatalog(commandLine);
+        if (!isEmpty(catalog)) {
+            throw new OptionException(option,
+                    format("Unexpected option %1$s. PostgreSQL catalogs hold meta data only and built-in objects, " +
+                            "use %2$s option to access user data",
+                            getCatalogOption(commandLine).getName(), getSchemaOption(commandLine).getName()));
+        }
+    }
 }

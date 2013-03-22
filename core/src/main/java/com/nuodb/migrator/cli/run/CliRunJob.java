@@ -28,6 +28,7 @@
 package com.nuodb.migrator.cli.run;
 
 import com.google.common.collect.Maps;
+import com.nuodb.migrator.MigrationException;
 import com.nuodb.migrator.job.*;
 
 import java.util.Map;
@@ -56,7 +57,11 @@ public abstract class CliRunJob extends CliRunAdapter {
         executor.execute(context);
         Throwable failure = executor.getJobStatus().getFailure();
         if (failure != null) {
-            throw new CliRunException(failure);
+            if (failure instanceof MigrationException) {
+                throw (MigrationException)failure;
+            } else {
+                throw new CliRunException(failure);
+            }
         }
     }
 

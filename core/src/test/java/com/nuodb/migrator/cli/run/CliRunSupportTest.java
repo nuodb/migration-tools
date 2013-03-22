@@ -121,7 +121,7 @@ public class CliRunSupportTest {
         };
 
         JdbcConnectionSpec expected = new JdbcConnectionSpec();
-        expected.setDriverClassName(JdbcConstants.NUODB_DRIVER_CLASS_NAME);
+        expected.setDriverClassName(JdbcConstants.NUODB_DRIVER);
         expected.setUrl("jdbc:com.nuodb://localhost/test");
         expected.setUsername("dba");
         expected.setPassword("goalie");

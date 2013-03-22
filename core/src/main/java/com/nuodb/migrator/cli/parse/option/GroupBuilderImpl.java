@@ -28,10 +28,7 @@
 package com.nuodb.migrator.cli.parse.option;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migrator.cli.parse.Group;
-import com.nuodb.migrator.cli.parse.Option;
-import com.nuodb.migrator.cli.parse.OptionProcessor;
-import com.nuodb.migrator.cli.parse.Trigger;
+import com.nuodb.migrator.cli.parse.*;
 
 import java.util.List;
 
@@ -81,6 +78,11 @@ public class GroupBuilderImpl<O extends Group> extends OptionBuilderBase<O> impl
     @Override
     public GroupBuilder withOptionProcessor(OptionProcessor optionProcessor) {
         return (GroupBuilder) super.withOptionProcessor(optionProcessor);
+    }
+
+    @Override
+    public GroupBuilder withOptionValidator(OptionValidator optionValidator) {
+        return (GroupBuilder) super.withOptionValidator(optionValidator);
     }
 
     @Override
