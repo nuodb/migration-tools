@@ -7,6 +7,8 @@ public class DatabaseTypesFactory {
 			return new MySQLTypes();
 		} else if (driverClassName.toLowerCase().contains("nuodb")) {
 			return new NuoDBTypes();
+		} else if (driverClassName.toLowerCase().contains("jtds")) {
+			return new SQLServerTypes();
 		}
 		return null;
 	}
