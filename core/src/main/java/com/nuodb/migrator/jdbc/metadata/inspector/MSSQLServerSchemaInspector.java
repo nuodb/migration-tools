@@ -87,7 +87,6 @@ public class MSSQLServerSchemaInspector extends InspectorBase<Catalog, SchemaIns
                 })));
     }
 
-
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  Collection<SchemaInspectionScope> inspectionScopes) throws SQLException {
         for (SchemaInspectionScope inspectionScope : inspectionScopes) {
