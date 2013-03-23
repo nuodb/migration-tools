@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Catalog;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
@@ -42,6 +41,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.*;
@@ -58,7 +58,7 @@ public class NuoDBSchemaInspector extends InspectorBase<Catalog, SchemaInspectio
     private static final String QUERY = "SELECT DISTINCT SCHEMA FROM SYSTEM.TABLES";
 
     public NuoDBSchemaInspector() {
-        super(MetaDataType.SCHEMA, SchemaInspectionScope.class);
+        super(SCHEMA, SchemaInspectionScope.class);
     }
 
     @Override

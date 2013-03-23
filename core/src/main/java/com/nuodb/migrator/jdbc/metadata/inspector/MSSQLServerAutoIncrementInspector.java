@@ -39,6 +39,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -58,7 +59,7 @@ public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table,
             "  AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?";
 
     public MSSQLServerAutoIncrementInspector() {
-        super(MetaDataType.AUTO_INCREMENT, TableInspectionScope.class);
+        super(AUTO_INCREMENT, TableInspectionScope.class);
     }
 
     @Override

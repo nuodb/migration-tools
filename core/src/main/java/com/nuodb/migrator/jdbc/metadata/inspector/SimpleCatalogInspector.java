@@ -29,13 +29,13 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CATALOG;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addCatalog;
 
 /**
@@ -44,7 +44,7 @@ import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.
 public class SimpleCatalogInspector extends MetaDataHandlerBase implements Inspector<Database, InspectionScope> {
 
     public SimpleCatalogInspector() {
-        super(MetaDataType.CATALOG);
+        super(CATALOG);
     }
 
     @Override

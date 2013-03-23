@@ -30,7 +30,6 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
 
@@ -40,6 +39,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 
 /**
@@ -48,7 +49,7 @@ import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.
 public class SimpleTableInspector extends TableInspectorBase<Schema, TableInspectionScope> {
 
     public SimpleTableInspector() {
-        super(MetaDataType.TABLE, MetaDataType.SCHEMA, TableInspectionScope.class);
+        super(TABLE, SCHEMA, TableInspectionScope.class);
     }
 
     @Override

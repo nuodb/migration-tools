@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.containsAny;
@@ -51,10 +52,10 @@ import static org.apache.commons.lang3.StringUtils.containsAny;
 public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public static final String QUERY_TABLE = "SELECT TABLE_SCHEMA, TABLE_NAME, AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES";
-    public static final String QUERY_COLUMN = "SHOW COLUMNS FROM `%1$s`.`%2$s` WHERE EXTRA='AUTO_INCREMENT'";
+    public static final String QUERY_COLUMN = "SHOW COLUMNS FROM `%s`.`%s` WHERE EXTRA='AUTO_INCREMENT'";
 
     public MySQLAutoIncrementInspector() {
-        super(MetaDataType.AUTO_INCREMENT, TableInspectionScope.class);
+        super(AUTO_INCREMENT, TableInspectionScope.class);
     }
 
     @Override

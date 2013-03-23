@@ -27,10 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.QueryUtils;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
@@ -43,8 +41,11 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 import static org.apache.commons.lang3.StringUtils.containsAny;
@@ -57,7 +58,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
     private static final String QUERY = "SELECT * FROM SYSTEM.TABLES";
 
     public NuoDBTableInspector() {
-        super(MetaDataType.TABLE, MetaDataType.SCHEMA, TableInspectionScope.class);
+        super(TABLE, SCHEMA, TableInspectionScope.class);
     }
 
     @Override
@@ -94,7 +95,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
             filters.add(filter.toString());
         }
 
-        final String query = QueryUtils.where(QUERY, filters, "AND");
+        final String query = where(QUERY, filters, "AND");
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementFactory<PreparedStatement>() {
@@ -120,7 +121,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
     @Override
     public void inspectObjects(final InspectionContext inspectionContext,
                                final Collection<? extends Schema> schemas) throws SQLException {
-        final String query = QueryUtils.where(QUERY, newArrayList("SCHEMA=?"), "AND");
+        final String query = where(QUERY, newArrayList("SCHEMA=?"), "AND");
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementFactory<PreparedStatement>() {

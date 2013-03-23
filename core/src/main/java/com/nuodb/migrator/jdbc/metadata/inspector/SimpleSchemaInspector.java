@@ -31,7 +31,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.metadata.Catalog;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.model.ValueModel;
 import com.nuodb.migrator.jdbc.model.ValueModelList;
 
@@ -41,6 +40,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
 import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModelList;
 import static java.util.Collections.singleton;
@@ -51,7 +51,7 @@ import static java.util.Collections.singleton;
 public class SimpleSchemaInspector extends InspectorBase<Catalog, SchemaInspectionScope> {
 
     public SimpleSchemaInspector() {
-        super(MetaDataType.SCHEMA, SchemaInspectionScope.class);
+        super(SCHEMA, SchemaInspectionScope.class);
     }
 
     @Override

@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Check;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
@@ -41,6 +40,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
@@ -59,7 +59,7 @@ public class PostgreSQLCheckInspector extends InspectorBase<Table, TableInspecti
             "WHERE CCU.TABLE_SCHEMA = ? AND CCU.TABLE_NAME = ?";
 
     public PostgreSQLCheckInspector() {
-        super(MetaDataType.CHECK, TableInspectionScope.class);
+        super(CHECK, TableInspectionScope.class);
     }
 
     @Override

@@ -36,6 +36,7 @@ import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.sql.DatabaseMetaData.tableIndexStatistic;
 
@@ -45,7 +46,7 @@ import static java.sql.DatabaseMetaData.tableIndexStatistic;
 public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public SimpleIndexInspector() {
-        super(MetaDataType.INDEX, TableInspectionScope.class);
+        super(INDEX, TableInspectionScope.class);
     }
 
     @Override

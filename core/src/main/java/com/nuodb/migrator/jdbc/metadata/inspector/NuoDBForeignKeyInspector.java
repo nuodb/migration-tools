@@ -68,9 +68,6 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
             "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID\n" +
             "WHERE SCHEMA=? AND TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
 
-    public static void main(String[] args) {
-        System.out.println(QUERY);
-    }
     @Override
     public void inspectScope(InspectionContext inspectionContext,
                              TableInspectionScope inspectionScope) throws SQLException {

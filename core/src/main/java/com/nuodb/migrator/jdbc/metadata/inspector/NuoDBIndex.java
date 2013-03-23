@@ -27,11 +27,10 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.query.QueryUtils;
-
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 
 /**
  * @author Sergey Bushik
@@ -68,6 +67,6 @@ public class NuoDBIndex {
                 filters.add(filter.toString());
             }
         }
-        return QueryUtils.where(QUERY, filters, "AND");
+        return where(QUERY, filters, "AND");
     }
 }

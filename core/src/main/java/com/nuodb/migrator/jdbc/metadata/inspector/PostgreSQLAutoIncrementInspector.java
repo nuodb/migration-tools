@@ -39,6 +39,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
 import static com.nuodb.migrator.jdbc.metadata.inspector.PostgreSQLColumn.adopt;
 import static java.lang.String.format;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
@@ -52,7 +53,7 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
     private static final String QUERY = "SELECT * FROM %s.%s";
 
     public PostgreSQLAutoIncrementInspector() {
-        super(MetaDataType.AUTO_INCREMENT, TableInspectionScope.class);
+        super(AUTO_INCREMENT, TableInspectionScope.class);
     }
 
     @Override

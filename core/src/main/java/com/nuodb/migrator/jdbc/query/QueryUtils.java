@@ -37,11 +37,15 @@ public class QueryUtils {
 
     public static final String OR = "OR";
     public static final String AND = "AND";
-    public static final String ASC = "ASC";
     public static final String DESC = "DESC";
+    public static final String ASC = "ASC";
 
     public static String where(String query, Collection<String> filters, String operator) {
         return where(new StringBuilder(query), filters, operator).toString();
+    }
+
+    public static StringBuilder where(StringBuilder query, Collection<String> filters) {
+        return where(query, filters, AND);
     }
 
     public static StringBuilder where(StringBuilder query, Collection<String> filters, String operator) {
@@ -63,6 +67,10 @@ public class QueryUtils {
 
     public static String orderBy(String query, Collection<String> columns, String order) {
         return orderBy(new StringBuilder(query), columns, order).toString();
+    }
+
+    public static StringBuilder orderBy(StringBuilder query, Collection<String> columns) {
+        return orderBy(query, columns, null);
     }
 
     public static StringBuilder orderBy(StringBuilder query, Collection<String> columns, String order) {

@@ -29,7 +29,6 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Index;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
@@ -42,6 +41,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.*;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
@@ -54,7 +54,7 @@ import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public NuoDBIndexInspector() {
-        super(MetaDataType.INDEX, TableInspectionScope.class);
+        super(INDEX, TableInspectionScope.class);
     }
 
     @Override

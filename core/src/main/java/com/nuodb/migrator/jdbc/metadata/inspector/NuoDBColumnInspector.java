@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
@@ -44,6 +43,7 @@ import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
@@ -59,7 +59,7 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
             "WHERE SCHEMA=? AND TABLENAME=?";
 
     public NuoDBColumnInspector() {
-        super(MetaDataType.COLUMN, TableInspectionScope.class);
+        super(COLUMN, TableInspectionScope.class);
     }
 
     @Override

@@ -31,7 +31,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.metadata.Catalog;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
@@ -43,6 +42,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
 import static java.util.Collections.singleton;
 
@@ -56,7 +56,7 @@ public class PostgreSQLSchemaInspector extends InspectorBase<Catalog, SchemaInsp
             "WHERE NSPNAME !~ '^PG_TOAST' AND NSPNAME !~ '^PG_TEMP' AND NSPNAME LIKE ? ORDER BY TABLE_SCHEM";
 
     public PostgreSQLSchemaInspector() {
-        super(MetaDataType.SCHEMA, SchemaInspectionScope.class);
+        super(SCHEMA, SchemaInspectionScope.class);
     }
 
     @Override

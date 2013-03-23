@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Identifier;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Table;
 
@@ -38,6 +37,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.PRIMARY_KEY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 
 /**
@@ -46,7 +46,7 @@ import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.
 public class SimplePrimaryKeyInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public SimplePrimaryKeyInspector() {
-        super(MetaDataType.PRIMARY_KEY, TableInspectionScope.class);
+        super(PRIMARY_KEY, TableInspectionScope.class);
     }
 
     @Override

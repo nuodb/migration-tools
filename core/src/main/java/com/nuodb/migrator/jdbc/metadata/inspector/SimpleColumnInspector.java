@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.model.ValueModel;
 import com.nuodb.migrator.jdbc.model.ValueModelList;
@@ -42,6 +41,7 @@ import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModelList;
 
@@ -51,7 +51,7 @@ import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModelLi
 public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public SimpleColumnInspector() {
-        super(MetaDataType.COLUMN, TableInspectionScope.class);
+        super(COLUMN, TableInspectionScope.class);
     }
 
     @Override
