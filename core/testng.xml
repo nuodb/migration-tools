@@ -8,6 +8,7 @@
                 <exclude name="mysqlintegrationtest"/>
                 <exclude name="nuodbintegrationtest"/>
                 <exclude name="sqlserverintegrationtest"/>
+                <exclude name="postgresqlintegrationtest"/>
                 <exclude name="disabled"/>
             </run>
         </groups>

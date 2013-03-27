@@ -145,6 +145,8 @@ public class ResultSetUtil {
 							// fixed
 							if (o1 instanceof java.sql.Timestamp)
 								continue;
+							if (o1 instanceof java.sql.Time)
+								continue;
 							Assert.assertEquals(o2, o1, "Data not matched for "
 									+ colName + " via " + jdbcType.name()
 									+ " comparison.");

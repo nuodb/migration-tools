@@ -9,6 +9,8 @@ public class DatabaseTypesFactory {
 			return new NuoDBTypes();
 		} else if (driverClassName.toLowerCase().contains("jtds")) {
 			return new SQLServerTypes();
+		} else if (driverClassName.toLowerCase().contains("postgresql")) {
+			return new PostgreSQLTypes();
 		}
 		return null;
 	}
