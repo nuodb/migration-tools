@@ -28,7 +28,6 @@
 package com.nuodb.migrator.cli.validation;
 
 import com.nuodb.migrator.cli.parse.CommandLine;
-import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionValidator;
 
 /**
@@ -42,68 +41,64 @@ public abstract class ConnectionGroupValidator implements OptionValidator {
         this.connectionGroupInfo = connectionGroupInfo;
     }
 
-    protected String getDriver(CommandLine commandLine) {
-        return getValue(commandLine, connectionGroupInfo.getDriverOption());
+    public String getDriverValue(CommandLine commandLine) {
+        return getOptionValue(commandLine, connectionGroupInfo.getDriverOption());
     }
 
-    protected Option getDriverOption(CommandLine commandLine) {
-        return getOption(commandLine, connectionGroupInfo.getDriverOption());
+    public String getUrlValue(CommandLine commandLine) {
+        return getOptionValue(commandLine, connectionGroupInfo.getUrlOption());
     }
 
-    protected String getUrl(CommandLine commandLine) {
-        return getValue(commandLine, connectionGroupInfo.getUrlOption());
+    public String getUsernameValue(CommandLine commandLine) {
+        return getOptionValue(commandLine, connectionGroupInfo.getUsernameOption());
     }
 
-    protected Option getUrlOption(CommandLine commandLine) {
-        return getOption(commandLine, connectionGroupInfo.getUrlOption());
+    public String getPasswordValue(CommandLine commandLine) {
+        return getOptionValue(commandLine, connectionGroupInfo.getPasswordOption());
     }
 
-    protected String getUsername(CommandLine commandLine) {
-        return getValue(commandLine, connectionGroupInfo.getUsernameOption());
+    public String getCatalogValue(CommandLine commandLine) {
+        return getOptionValue(commandLine, connectionGroupInfo.getCatalogOption());
     }
 
-    protected Option getUsernameOption(CommandLine commandLine) {
-        return getOption(commandLine, connectionGroupInfo.getUsernameOption());
+    public String getSchemaValue(CommandLine commandLine) {
+        return getOptionValue(commandLine, connectionGroupInfo.getSchemaOption());
     }
 
-    protected String getPassword(CommandLine commandLine) {
-        return getValue(commandLine, connectionGroupInfo.getPasswordOption());
+    public String getPropertiesValue(CommandLine commandLine) {
+        return getOptionValue(commandLine, connectionGroupInfo.getPropertiesOption());
     }
 
-    protected Option getPasswordOption(CommandLine commandLine) {
-        return getOption(commandLine, connectionGroupInfo.getPasswordOption());
-    }
-
-    protected String getCatalog(CommandLine commandLine) {
-        return getValue(commandLine, connectionGroupInfo.getCatalogOption());
-    }
-
-    protected Option getCatalogOption(CommandLine commandLine) {
-        return getOption(commandLine, connectionGroupInfo.getCatalogOption());
-    }
-
-    protected String getSchema(CommandLine commandLine) {
-        return getValue(commandLine, connectionGroupInfo.getSchemaOption());
-    }
-
-    protected Option getSchemaOption(CommandLine commandLine) {
-        return getOption(commandLine, connectionGroupInfo.getSchemaOption());
-    }
-
-    protected String getProperties(CommandLine commandLine) {
-        return getValue(commandLine, connectionGroupInfo.getPropertiesOption());
-    }
-
-    protected Option getPropertiesOption(CommandLine commandLine) {
-        return getOption(commandLine, connectionGroupInfo.getPropertiesOption());
-    }
-
-    protected String getValue(CommandLine commandLine, String option) {
+    public String getOptionValue(CommandLine commandLine, String option) {
         return option != null ? (String) commandLine.getValue(option) : null;
     }
 
-    protected Option getOption(CommandLine commandLine, String option) {
-        return option != null ? commandLine.getOption(option) : null;
+    public String getDriverOption() {
+        return connectionGroupInfo.getDriverOption();
+    }
+
+    public String getUrlOption() {
+        return connectionGroupInfo.getUrlOption();
+    }
+
+    public String getCatalogOption() {
+        return connectionGroupInfo.getCatalogOption();
+    }
+
+    public String getSchemaOption() {
+        return connectionGroupInfo.getSchemaOption();
+    }
+
+    public String getUsernameOption() {
+        return connectionGroupInfo.getUsernameOption();
+    }
+
+    public String getPropertiesOption() {
+        return connectionGroupInfo.getPropertiesOption();
+    }
+
+    public String getPasswordOption() {
+        return connectionGroupInfo.getPasswordOption();
     }
 }
 

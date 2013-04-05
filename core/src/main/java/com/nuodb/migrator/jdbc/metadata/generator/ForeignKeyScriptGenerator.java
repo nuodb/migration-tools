@@ -85,7 +85,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
         buffer.append(' ');
         buffer.append(dialect.getDropForeignKey());
         buffer.append(' ');
-        for (Iterator<Column> iterator = foreignKey.getSourceColumns().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Column> iterator = foreignKey.getPrimaryColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
             buffer.append(scriptGeneratorContext.getName(column));
             if (iterator.hasNext()) {
@@ -104,7 +104,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
         Dialect dialect = scriptGeneratorContext.getDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("FOREIGN KEY (");
-        for (Iterator<Column> iterator = foreignKey.getSourceColumns().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Column> iterator = foreignKey.getPrimaryColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
             buffer.append(scriptGeneratorContext.getName(column));
             if (iterator.hasNext()) {
@@ -116,7 +116,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
         buffer.append(getForeignScriptGeneratorContext(foreignKey, scriptGeneratorContext).getQualifiedName(
                 foreignKey.getForeignTable()));
         buffer.append(" (");
-        for (Iterator<Column> iterator = foreignKey.getTargetColumns().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Column> iterator = foreignKey.getForeignColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
             buffer.append(scriptGeneratorContext.getName(column));
             if (iterator.hasNext()) {

@@ -47,16 +47,15 @@ public class MySQLConnectionGroupValidator extends ConnectionGroupValidator {
 
     @Override
     public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.equals(getDriver(commandLine), MYSQL_DRIVER);
+        return StringUtils.equals(getDriverValue(commandLine), MYSQL_DRIVER);
     }
 
     @Override
     public void validate(CommandLine commandLine, Option option) {
-        String schema = getSchema(commandLine);
+        String schema = getSchemaValue(commandLine);
         if (!isEmpty(schema)) {
             throw new OptionException(option,
-                    format("Unexpected option %1$s. MySQL supports catalogs only, not schemas",
-                            getSchemaOption(commandLine).getName()));
+                    format("Unexpected option %1$s. MySQL supports catalogs only, not schemas", getSchemaOption()));
         }
     }
 }

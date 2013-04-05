@@ -60,7 +60,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         buffer.append(' ').append(scriptGeneratorContext.getQualifiedName(table)).append(" (");
         Collection<Column> columns = table.getColumns();
         final Collection<Index> indexes = table.getIndexes();
-        Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getMetaDataTypes();
+        Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getObjectTypes();
         Dialect sourceDialect = table.getDatabase().getDialect();
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();

@@ -47,17 +47,16 @@ public class PostgreSQLConnectionGroupValidator extends ConnectionGroupValidator
 
     @Override
     public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.equals(getDriver(commandLine), POSTGRESQL_DRIVER);
+        return StringUtils.equals(getDriverValue(commandLine), POSTGRESQL_DRIVER);
     }
 
     @Override
     public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalog(commandLine);
+        String catalog = getCatalogValue(commandLine);
         if (!isEmpty(catalog)) {
             throw new OptionException(option,
-                    format("Unexpected option %1$s. PostgreSQL catalogs hold meta data and built-in objects, " +
-                            "use %2$s option to access user data",
-                            getCatalogOption(commandLine).getName(), getSchemaOption(commandLine).getName()));
+                    format("Unexpected option %1$s. PostgreSQL catalogs store meta data and built-in objects, " +
+                            "use %2$s option to access user data", getCatalogOption(), getSchemaOption()));
         }
     }
 }

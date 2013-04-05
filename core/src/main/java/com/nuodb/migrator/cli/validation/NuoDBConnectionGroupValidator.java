@@ -50,24 +50,29 @@ public class NuoDBConnectionGroupValidator extends ConnectionGroupValidator {
 
     @Override
     public boolean canValidate(CommandLine commandLine, Option option) {
-        boolean driver = StringUtils.equals(getDriver(commandLine), NUODB_DRIVER);
-        JdbcUrl jdbcUrl = getInstance().parse(getUrl(commandLine));
+        boolean driver = StringUtils.equals(getDriverValue(commandLine), NUODB_DRIVER);
+        JdbcUrl jdbcUrl = getInstance().parse(getUrlValue(commandLine));
         return driver || ((jdbcUrl != null) && StringUtils.equals(jdbcUrl.getSubProtocol(), NUODB_SUB_PROTOCOL));
     }
 
     @Override
     public void validate(CommandLine commandLine, Option option) {
-        String username = getUsername(commandLine);
+        String catalog = getCatalogValue(commandLine);
+        if (!isEmpty(catalog)) {
+            throw new OptionException(option,
+                    format("Unexpected option %1$s. NuoDB doesn't supports catalogs", getCatalogOption()));
+        }
+        String username = getUsernameValue(commandLine);
         if (isEmpty(username)) {
             throw new OptionException(option,
                     format("Missing required option %1$s. The user name to authenticate with should be provided",
-                            getUsernameOption(commandLine).getName()));
+                            getUsernameOption()));
         }
-        String password = getPassword(commandLine);
+        String password = getPasswordValue(commandLine);
         if (isEmpty(password)) {
             throw new OptionException(option,
                     format("Missing required option %1$s. The user's password should be provided",
-                            getPasswordOption(commandLine).getName()));
+                            getPasswordOption()));
         }
     }
 }

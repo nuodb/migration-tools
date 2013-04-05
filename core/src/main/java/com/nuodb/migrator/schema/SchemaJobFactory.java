@@ -82,7 +82,7 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
     protected ScriptGeneratorContext createScriptGeneratorContext() {
         ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext();
         scriptGeneratorContext.getAttributes().put(GROUP_SCRIPTS_BY, getSchemaSpec().getGroupScriptsBy());
-        scriptGeneratorContext.setMetaDataTypes(getSchemaSpec().getMetaDataTypes());
+        scriptGeneratorContext.setObjectTypes(getSchemaSpec().getMetaDataTypes());
         scriptGeneratorContext.setScriptTypes(getSchemaSpec().getScriptTypes());
 
         NuoDBDialect dialect = new NuoDBDialect();

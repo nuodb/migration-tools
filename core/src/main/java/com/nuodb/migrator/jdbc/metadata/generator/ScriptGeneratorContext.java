@@ -63,7 +63,7 @@ public class ScriptGeneratorContext {
             new SimplePriorityList<ScriptGenerator<? extends MetaData>>();
 
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
-    private Collection<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
+    private Collection<MetaDataType> objectTypes = newHashSet(MetaDataType.TYPES);
 
     public ScriptGeneratorContext() {
         addScriptGenerator(new HasTablesScriptGenerator(), Priority.LOW);
@@ -90,7 +90,7 @@ public class ScriptGeneratorContext {
 
         attributes = newHashMap(scriptGeneratorContext.getAttributes());
         scriptTypes = newHashSet(scriptGeneratorContext.getScriptTypes());
-        metaDataTypes = newHashSet(scriptGeneratorContext.getMetaDataTypes());
+        objectTypes = newHashSet(scriptGeneratorContext.getObjectTypes());
 
         namingStrategies.addAll(scriptGeneratorContext.getNamingStrategies());
         scriptGenerators.addAll(scriptGeneratorContext.getScriptGenerators());
@@ -209,12 +209,12 @@ public class ScriptGeneratorContext {
         this.attributes = attributes;
     }
 
-    public Collection<MetaDataType> getMetaDataTypes() {
-        return this.metaDataTypes;
+    public Collection<MetaDataType> getObjectTypes() {
+        return this.objectTypes;
     }
 
-    public void setMetaDataTypes(Collection<MetaDataType> metaDataTypes) {
-        this.metaDataTypes = metaDataTypes;
+    public void setObjectTypes(Collection<MetaDataType> objectTypes) {
+        this.objectTypes = objectTypes;
     }
 
     public PriorityList<NamingStrategy<? extends MetaData>> getNamingStrategies() {

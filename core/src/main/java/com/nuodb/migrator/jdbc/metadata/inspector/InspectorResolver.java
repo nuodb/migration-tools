@@ -46,16 +46,16 @@ public class InspectorResolver extends MetaDataHandlerBase implements Inspector 
 
     private ServiceResolver<Inspector> inspectorResolver;
 
-    public InspectorResolver(MetaDataType metaDataType) {
-        this(metaDataType, new SimpleServiceResolver<Inspector>());
+    public InspectorResolver(MetaDataType objectType) {
+        this(objectType, new SimpleServiceResolver<Inspector>());
     }
 
-    public InspectorResolver(MetaDataType metaDataType, Inspector inspector) {
-        this(metaDataType, new SimpleServiceResolver<Inspector>(inspector));
+    public InspectorResolver(MetaDataType objectType, Inspector inspector) {
+        this(objectType, new SimpleServiceResolver<Inspector>(inspector));
     }
 
-    public InspectorResolver(MetaDataType metaDataType, ServiceResolver<Inspector> inspectorResolver) {
-        super(metaDataType);
+    public InspectorResolver(MetaDataType objectType, ServiceResolver<Inspector> inspectorResolver) {
+        super(objectType);
         this.inspectorResolver = inspectorResolver;
     }
 

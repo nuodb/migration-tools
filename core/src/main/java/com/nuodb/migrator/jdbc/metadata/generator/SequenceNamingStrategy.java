@@ -41,15 +41,16 @@ public class SequenceNamingStrategy extends IdentifiableNamingStrategy<Sequence>
 
     @Override
     protected String getIdentifiableName(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("SEQ");
-        buffer.append('_');
-
         StringBuilder qualifier = new StringBuilder();
         Column column = sequence.getColumn();
         qualifier.append(scriptGeneratorContext.getName(column.getTable(), false));
+        qualifier.append('_');
         qualifier.append(scriptGeneratorContext.getName(column, false));
-        buffer.append(md5Hex(qualifier.toString()));
+
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("SEQ");
+        buffer.append('_');
+        buffer.append(qualifier.toString());
 
         return buffer.toString();
     }

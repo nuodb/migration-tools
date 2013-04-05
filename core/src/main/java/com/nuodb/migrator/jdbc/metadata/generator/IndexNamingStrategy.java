@@ -41,22 +41,20 @@ public class IndexNamingStrategy extends IdentifiableNamingStrategy<Index> {
 
     @Override
     protected String getIdentifiableName(Index index, ScriptGeneratorContext scriptGeneratorContext) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("IDX");
-        buffer.append("_");
-
         StringBuilder qualifier = new StringBuilder();
-        if (index.isUnique()) {
-            qualifier.append("UNIQUE");
-            qualifier.append("_");
-        }
         qualifier.append(scriptGeneratorContext.getName(index.getTable(), false));
+        if (index.isUnique()) {
+            qualifier.append("_");
+            qualifier.append("UNIQUE");
+        }
         for (Column column : index.getColumns()) {
             qualifier.append("_");
             qualifier.append(scriptGeneratorContext.getName(column, false));
         }
-        buffer.append(md5Hex(qualifier.toString()));
-
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("IDX");
+        buffer.append("_");
+        buffer.append(qualifier.toString());
         return buffer.toString();
     }
 }

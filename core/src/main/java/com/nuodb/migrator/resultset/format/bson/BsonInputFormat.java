@@ -86,15 +86,15 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
     protected void doReadBegin() {
         ValueModelList<ValueFormatModel> valueFormatModelList = createValueModelList();
         try {
-            if (isNextToken(START_OBJECT) && isNextField(COLUMNS_FIELD) && isNextToken(START_OBJECT)) {
+            if (isNextToken(START_OBJECT) && isNextField(FIELD_COLUMNS) && isNextToken(START_OBJECT)) {
                 while (true) {
                     ValueFormatModel valueFormatModel = new SimpleValueFormatModel();
-                    if (isNextField(COLUMN_FIELD) && isNextToken(VALUE_STRING)) {
+                    if (isNextField(FIELD_COLUMN) && isNextToken(VALUE_STRING)) {
                         valueFormatModel.setName(bsonParser.getText());
                     } else {
                         break;
                     }
-                    if (isNextField(VARIANT_FIELD) && isNextToken(VALUE_STRING)) {
+                    if (isNextField(FIELD_VARIANT) && isNextToken(VALUE_STRING)) {
                         valueFormatModel.setValueVariantType(fromAlias(bsonParser.getText()));
                     } else {
                         break;

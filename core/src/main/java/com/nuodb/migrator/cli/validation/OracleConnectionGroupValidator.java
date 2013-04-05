@@ -47,17 +47,16 @@ public class OracleConnectionGroupValidator extends ConnectionGroupValidator {
 
     @Override
     public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.equals(getDriver(commandLine), ORACLE_DRIVER);
+        return StringUtils.equals(getDriverValue(commandLine), ORACLE_DRIVER);
     }
 
     @Override
     public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalog(commandLine);
+        String catalog = getCatalogValue(commandLine);
         if (!isEmpty(catalog)) {
             throw new OptionException(option,
                     format("Unexpected option %1$s. Oracle catalog is always equal to database, " +
-                            "use %2$s option to access user data",
-                            getCatalogOption(commandLine).getName(), getSchemaOption(commandLine).getName()));
+                            "use %2$s option to access user data", getCatalogOption(), getSchemaOption()));
         }
     }
 }
