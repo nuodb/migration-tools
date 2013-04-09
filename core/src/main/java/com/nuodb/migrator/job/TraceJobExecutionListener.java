@@ -27,14 +27,12 @@
  */
 package com.nuodb.migrator.job;
 
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
 import static java.lang.String.format;
-import static org.mockito.BDDMockito.given;
 
 /**
  * @author Sergey Bushik
