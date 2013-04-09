@@ -76,7 +76,7 @@ public class BsonParser extends ParserBase {
     /**
      * Counts the number of bytes read from {@link #_in}
      */
-    private de.undercouch.bson4jackson.io.CountingInputStream _counter;
+    private CountingInputStream _counter;
 
     /**
      * The raw input stream passed in
