@@ -131,7 +131,7 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
 
     @Override
     public final void writeRow() {
-        ValueVariant []values = null;
+        ValueVariant[] values = null;
         try {
             writeValues(values = getValues());
             row++;
@@ -161,7 +161,7 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
                 logger.error(message);
             }
         } else {
-            throw new FormatInputException(message, exception);
+            throw new FormatOutputException(message, exception);
         }
     }
 
