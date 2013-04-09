@@ -32,9 +32,6 @@ import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.IdentifiableBase;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 
-import static org.apache.commons.codec.binary.Hex.encodeHex;
-import static org.apache.commons.codec.digest.DigestUtils.md5;
-
 /**
  * @author Sergey Bushik
  */
@@ -49,25 +46,21 @@ public class IdentifiableNamingStrategy<T extends Identifiable> extends MetaData
     }
 
     @Override
-    public String getName(T identifiable, ScriptGeneratorContext scriptGeneratorContext, boolean normalize) {
+    public String getName(T object, ScriptGeneratorContext scriptGeneratorContext, boolean normalize) {
         Dialect dialect = normalize ? scriptGeneratorContext.getDialect() : null;
-        String name = getIdentifiableName(identifiable, scriptGeneratorContext);
-        return IdentifiableBase.getName(dialect, name, identifiable);
+        String name = getIdentifiableName(object, scriptGeneratorContext);
+        return IdentifiableBase.getName(dialect, name, object);
     }
 
     @Override
-    public String getQualifiedName(T identifiable, ScriptGeneratorContext scriptGeneratorContext, boolean normalize) {
+    public String getQualifiedName(T object, ScriptGeneratorContext scriptGeneratorContext, boolean normalize) {
         Dialect dialect = normalize ? scriptGeneratorContext.getDialect() : null;
-        String name = getIdentifiableName(identifiable, scriptGeneratorContext);
+        String name = getIdentifiableName(object, scriptGeneratorContext);
         return IdentifiableBase.getQualifiedName(dialect, scriptGeneratorContext.getTargetCatalog(),
-                scriptGeneratorContext.getTargetSchema(), name, identifiable);
+                scriptGeneratorContext.getTargetSchema(), name, object);
     }
 
-    protected String getIdentifiableName(T identifiable, ScriptGeneratorContext scriptGeneratorContext) {
-        return identifiable.getName();
-    }
-
-    public static String md5Hex(String data) {
-        return new String(encodeHex(md5(data), false));
+    protected String getIdentifiableName(T object, ScriptGeneratorContext scriptGeneratorContext) {
+        return object.getName();
     }
 }
