@@ -401,8 +401,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
         return valueFormatRegistryResolver;
     }
 
-    public void setValueFormatRegistryResolver(
-            ValueFormatRegistryResolver valueFormatRegistryResolver) {
+    public void setValueFormatRegistryResolver(ValueFormatRegistryResolver valueFormatRegistryResolver) {
         this.valueFormatRegistryResolver = valueFormatRegistryResolver;
     }
 }
