@@ -11,7 +11,7 @@
     <dependencySets>
         <dependencySet>
             <outputDirectory>bin</outputDirectory>
-            <outputFileNameMapping>bootstrap.jar</outputFileNameMapping>
+            <outputFileNameMapping>nuodb-migrator.jar</outputFileNameMapping>
             <includes>
                 <include>com.nuodb:nuodb-migrator-bootstrap</include>
             </includes>

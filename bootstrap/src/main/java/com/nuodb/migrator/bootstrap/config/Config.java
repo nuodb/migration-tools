@@ -48,6 +48,12 @@ public interface Config {
 
     final String DEFAULT_CONTEXT_CLASS = "com.nuodb.migrator.context.SimpleApplicationContext";
 
+    final String CONFIG = "com.nuodb.migrator.config";
+
+    final String DEFAULT_CONFIG = "nuodb-migrator.properties";
+
+    final String CONFIG_FOLDER = "conf";
+
     String getProperty(String property);
 
     String getProperty(String property, String defaultValue);

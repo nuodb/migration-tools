@@ -47,6 +47,6 @@ else
 fi
 
 JAVA_OPTS="-Xmx$MAX_HEAP_SIZE -Dnuodb.home=$NUODB_HOME -Dnuodb.migrator.home=$NUODB_MIGRATOR_HOME"
-CLASSPATH=$NUODB_MIGRATOR_HOME/bin/bootstrap.jar:$CLASSPATH
+CLASSPATH=$NUODB_MIGRATOR_HOME/bin/nuodb-migrator.jar:$CLASSPATH
 
 $JAVA $JAVA_OPTS -cp $CLASSPATH com.nuodb.migrator.bootstrap.Bootstrap "$@"
