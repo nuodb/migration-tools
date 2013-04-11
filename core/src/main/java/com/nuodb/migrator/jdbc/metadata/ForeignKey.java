@@ -71,8 +71,8 @@ public class ForeignKey extends ConstraintBase {
         this.foreignTable = foreignTable;
     }
 
-    public void addReference(Column sourceColumn, Column targetColumn, int position) {
-        references.put(position, new ForeignKeyReference(sourceColumn, targetColumn));
+    public void addReference(Column foreignColumn, Column primaryColumn, int position) {
+        references.put(position, new ForeignKeyReference(foreignColumn, primaryColumn));
     }
 
     public ReferenceAction getUpdateAction() {

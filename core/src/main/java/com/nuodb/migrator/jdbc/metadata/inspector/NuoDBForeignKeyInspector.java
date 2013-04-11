@@ -66,7 +66,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
             "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA\n" +
             "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME\n" +
             "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID\n" +
-            "WHERE PKTABLE_SCHEM=? AND PKTABLE_NAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
+            "WHERE FKTABLE_SCHEM=? AND FKTABLE_NAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
 
     @Override
     public void inspectScope(InspectionContext inspectionContext,
@@ -108,19 +108,17 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         ForeignKey foreignKey = null;
         while (foreignKeys.next()) {
-            Table primaryTable = addTable(inspectionResults, null, foreignKeys.getString("FKTABLE_SCHEM"),
-                    foreignKeys.getString("FKTABLE_NAME"));
-
-            final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
-
-            Table foreignTable = addTable(inspectionResults, null, foreignKeys.getString("PKTABLE_SCHEM"),
+            Table primaryTable = addTable(inspectionResults, null, foreignKeys.getString("PKTABLE_SCHEM"),
                     foreignKeys.getString("PKTABLE_NAME"));
-
-            final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
+            final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
             int position = foreignKeys.getInt("KEY_SEQ");
 
+            Table foreignTable = addTable(inspectionResults, null, foreignKeys.getString("FKTABLE_SCHEM"),
+                    foreignKeys.getString("FKTABLE_NAME"));
+            final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
+
             if (position == 1) {
-                primaryTable.addForeignKey(foreignKey = new ForeignKey(Identifier.EMPTY_IDENTIFIER));
+                foreignTable.addForeignKey(foreignKey = new ForeignKey(Identifier.EMPTY_IDENTIFIER));
                 foreignKey.setPrimaryTable(primaryTable);
                 foreignKey.setForeignTable(foreignTable);
                 foreignKey.setUpdateAction(getReferentialAction(foreignKeys.getInt("UPDATE_RULE")));
@@ -129,7 +127,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
                 inspectionResults.addObject(foreignKey);
             }
             if (foreignKey != null) {
-                foreignKey.addReference(primaryColumn, foreignColumn, position);
+                foreignKey.addReference(foreignColumn, primaryColumn, position);
             }
         }
     }
