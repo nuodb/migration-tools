@@ -136,7 +136,7 @@ public class Bootstrap {
             bootstrap.boot(arguments);
         } catch (Throwable error) {
             if (log.isErrorEnabled()) {
-                log.error("Boot failed", error);
+                log.error("Execution failed", error);
             }
             System.exit(BOOT_ERROR);
         }

@@ -27,13 +27,12 @@
  */
 package com.nuodb.migrator.integration.nuodb;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
+import com.nuodb.migrator.integration.MigrationTestBase;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.nuodb.migrator.integration.MigrationTestBase;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 /**
  * Test to make sure all the Tables, Constraints, Views, Triggers etc have been
@@ -105,7 +104,7 @@ public class StructureTest extends MigrationTestBase {
 				+ "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA "
 				+ "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME "
 				+ "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID "
-				+ "WHERE SCHEMA=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
+				+ "WHERE PKTABLE_SCHEM=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
 		matchResultSetForSQL(sqlStr);
 	}
 

@@ -27,16 +27,15 @@
  */
 package com.nuodb.migrator.integration.mysql;
 
+import com.nuodb.migrator.integration.MigrationTestBase;
+import com.nuodb.migrator.integration.types.MySQLTypes;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import com.nuodb.migrator.integration.MigrationTestBase;
-import com.nuodb.migrator.integration.types.MySQLTypes;
 
 /**
  * Test to make sure all the Tables, Constraints, Views, Triggers etc have been
@@ -255,7 +254,7 @@ public class StructureTest extends MigrationTestBase {
 				+ "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA "
 				+ "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME "
 				+ "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID "
-				+ "WHERE SCHEMA=? AND TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
+				+ "WHERE PKTABLE_SCHEM=? AND PKTABLE_NAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
