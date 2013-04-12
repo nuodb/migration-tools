@@ -25,27 +25,57 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.config;
+package com.nuodb.migrator.bootstrap.classpath.filter;
 
-import java.util.Properties;
+import java.io.File;
+import java.io.FileFilter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static java.util.regex.Pattern.compile;
 
 /**
  * @author Sergey Bushik
  */
-public class PropertiesReplacement implements Replacement {
+public class WildcardFileFilter implements FileFilter {
 
-    private Properties properties;
+    public static final Pattern WILDCARDS = compile("\\?|\\*|\\{([^/]+?)\\}", CASE_INSENSITIVE);
+    private static final String EMPTY = "";
 
-    public PropertiesReplacement() {
-        this(System.getProperties());
-    }
+    private final Pattern pattern;
 
-    public PropertiesReplacement(Properties properties) {
-        this.properties = properties;
+    public WildcardFileFilter(String pattern) {
+        this.pattern = createPattern(pattern);
     }
 
     @Override
-    public String getReplacement(String placeholder) {
-        return properties.getProperty(placeholder);
+    public boolean accept(File file) {
+        return pattern.matcher(file.getName()).matches();
+    }
+
+    private static Pattern createPattern(String path) {
+        StringBuilder builder = new StringBuilder();
+        Matcher matcher = WILDCARDS.matcher(path);
+        int end = 0;
+        while (matcher.find()) {
+            builder.append(quote(path, end, matcher.start()));
+            String match = matcher.group();
+            if ("?".equals(match)) {
+                builder.append(".");
+            } else if ("*".equals(match)) {
+                builder.append(".*");
+            } else {
+                builder.append(matcher.group());
+            }
+            end = matcher.end();
+        }
+        builder.append(quote(path, end, path.length()));
+        return compile(builder.toString());
+    }
+
+    private static String quote(String pattern, int start, int end) {
+        return start == end ? EMPTY :
+                Pattern.quote(pattern.substring(start, end));
     }
 }

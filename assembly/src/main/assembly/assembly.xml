@@ -10,16 +10,8 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>bin</outputDirectory>
-            <outputFileNameMapping>nuodb-migrator.jar</outputFileNameMapping>
-            <includes>
-                <include>com.nuodb:nuodb-migrator-bootstrap</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
             <outputDirectory>jar</outputDirectory>
             <excludes>
-                <exclude>com.nuodb:nuodb-migrator-bootstrap</exclude>
                 <exclude>com.nuodb:nuodb-migrator-assembly</exclude>
             </excludes>
         </dependencySet>
@@ -29,6 +21,7 @@
             <directory>src/main/assembly/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <fileMode>755</fileMode>
+            <filtered>true</filtered>
         </fileSet>
         <fileSet>
             <directory>src/main/assembly/conf</directory>

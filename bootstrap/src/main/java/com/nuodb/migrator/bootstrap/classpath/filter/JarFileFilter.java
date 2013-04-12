@@ -25,38 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.config;
+package com.nuodb.migrator.bootstrap.classpath.filter;
 
-import java.util.Properties;
+import java.io.File;
+import java.io.FileFilter;
 
 /**
  * @author Sergey Bushik
  */
-public interface Config {
+public class JarFileFilter implements FileFilter {
 
-    final String HOME = "nuodb.migrator.home";
+    private static final String JAR_EXTENSION = ".jar";
+    private static final String ZIP_EXTENSION = ".zip";
 
-    final String EXECUTABLE = "com.nuodb.migrator.executable";
+    public static final JarFileFilter INSTANCE = new JarFileFilter();
 
-    final String CLASSPATH = "com.nuodb.migrator.classpath";
+    private JarFileFilter() {
+    }
 
-    final String BOOTABLE_CLASS = "com.nuodb.migrator.bootable.class";
-
-    final String DEFAULT_BOOTABLE_CLASS = "com.nuodb.migrator.cli.CliHandler";
-
-    final String CONTEXT_CLASS = "com.nuodb.migrator.context.class";
-
-    final String DEFAULT_CONTEXT_CLASS = "com.nuodb.migrator.context.SimpleApplicationContext";
-
-    final String CONFIG = "com.nuodb.migrator.config";
-
-    final String DEFAULT_CONFIG = "nuodb-migrator.properties";
-
-    final String CONFIG_FOLDER = "conf";
-
-    String getProperty(String property);
-
-    String getProperty(String property, String defaultValue);
-
-    Properties getProperties(Properties properties);
+    @Override
+    public boolean accept(File file) {
+        return file.isFile() && (file.getName().endsWith(JAR_EXTENSION) || file.getName().endsWith(ZIP_EXTENSION));
+    }
 }

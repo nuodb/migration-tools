@@ -44,6 +44,14 @@ public class Replacer {
 
     private Replacement replacement;
 
+    public Replacer() {
+        this(new PropertiesReplacement());
+    }
+
+    public Replacer(Replacement replacement) {
+        this.replacement = replacement;
+    }
+
     public String replace(String property) {
         if (property == null) {
             return null;
@@ -107,21 +115,5 @@ public class Replacer {
 
     public void setReplacement(Replacement replacement) {
         this.replacement = replacement;
-    }
-
-    public static void main(String[] args) {
-        System.setProperty("nuodb.migrator.home", "../bin");
-        System.setProperty("nuodb.home", "/opt/nuodb");
-
-        Replacer replacer = new Replacer();
-        replacer.setReplacement(new PropertiesReplacement(System.getProperties()));
-
-        StringBuilder property = new StringBuilder();
-        property.append("${nuodb.home}/jar/nuodbjdbc.jar,");
-        property.append("${nuodb.migrator.home}/conf,");
-        property.append("${nuodb.migrator.home}/jar,");
-        property.append("${nuodb.migrator.home}/jar/*.jar");
-
-        System.out.println(replacer.replace(property.toString()));
     }
 }

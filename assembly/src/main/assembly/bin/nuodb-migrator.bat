@@ -45,7 +45,7 @@ set NUODB_MIGRATOR_HOME="%CURRENT_DIR%\.."
 
 :okHome
 set JAVA_OPTS=-Xmx%MAX_HEAP_SIZE% -Dnuodb.home=%NUODB_HOME% -Dnuodb.migrator.home=%NUODB_MIGRATOR_HOME%
-set CLASSPATH=%NUODB_MIGRATOR_HOME%\bin\nuodb-migrator.jar;%CLASSPATH%
+set CLASSPATH=%NUODB_MIGRATOR_HOME%\jar\nuodb-migrator-bootstrap-${project.version}.jar;%CLASSPATH%
 
 "%JAVA_HOME%\bin\java" %JAVA_OPTS% -cp "%CLASSPATH%" com.nuodb.migrator.bootstrap.Bootstrap %*
 

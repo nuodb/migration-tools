@@ -25,38 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.config;
+package com.nuodb.migrator.bootstrap.classpath;
 
-import java.util.Properties;
+import java.io.File;
+import java.io.IOException;
+
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
-public interface Config {
+public class DirClassPath implements FileClassPath {
 
-    final String HOME = "nuodb.migrator.home";
+    private File dir;
 
-    final String EXECUTABLE = "com.nuodb.migrator.executable";
+    public DirClassPath(File dir) {
+        this.dir = dir;
+    }
 
-    final String CLASSPATH = "com.nuodb.migrator.classpath";
+    @Override
+    public void exposeClassPath(ClassPathLoader classPathLoader) {
+        try {
+            classPathLoader.addUrl(dir.toURI().toURL());
+        } catch (IOException exception) {
+            throw new ClassPathException(exception);
+        }
+    }
 
-    final String BOOTABLE_CLASS = "com.nuodb.migrator.bootable.class";
-
-    final String DEFAULT_BOOTABLE_CLASS = "com.nuodb.migrator.cli.CliHandler";
-
-    final String CONTEXT_CLASS = "com.nuodb.migrator.context.class";
-
-    final String DEFAULT_CONTEXT_CLASS = "com.nuodb.migrator.context.SimpleApplicationContext";
-
-    final String CONFIG = "com.nuodb.migrator.config";
-
-    final String DEFAULT_CONFIG = "nuodb-migrator.properties";
-
-    final String CONFIG_FOLDER = "conf";
-
-    String getProperty(String property);
-
-    String getProperty(String property, String defaultValue);
-
-    Properties getProperties(Properties properties);
+    public static DirClassPath toDirClassPath(String path) {
+        File dir = new File(path);
+        if (dir.exists() && dir.isDirectory() && dir.canRead()) {
+            return new DirClassPath(dir);
+        } else {
+            throw new ClassPathException(format("%1$s is not valid directory", path));
+        }
+    }
 }

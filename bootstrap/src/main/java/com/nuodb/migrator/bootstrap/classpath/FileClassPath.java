@@ -25,38 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.config;
-
-import java.util.Properties;
+package com.nuodb.migrator.bootstrap.classpath;
 
 /**
  * @author Sergey Bushik
  */
-public interface Config {
+public interface FileClassPath extends ClassPath {
 
-    final String HOME = "nuodb.migrator.home";
+    final char WINDOWS_FILE_SEPARATOR = '\\' ;
 
-    final String EXECUTABLE = "com.nuodb.migrator.executable";
-
-    final String CLASSPATH = "com.nuodb.migrator.classpath";
-
-    final String BOOTABLE_CLASS = "com.nuodb.migrator.bootable.class";
-
-    final String DEFAULT_BOOTABLE_CLASS = "com.nuodb.migrator.cli.CliHandler";
-
-    final String CONTEXT_CLASS = "com.nuodb.migrator.context.class";
-
-    final String DEFAULT_CONTEXT_CLASS = "com.nuodb.migrator.context.SimpleApplicationContext";
-
-    final String CONFIG = "com.nuodb.migrator.config";
-
-    final String DEFAULT_CONFIG = "nuodb-migrator.properties";
-
-    final String CONFIG_FOLDER = "conf";
-
-    String getProperty(String property);
-
-    String getProperty(String property, String defaultValue);
-
-    Properties getProperties(Properties properties);
+    final char UNIX_FILE_SEPARATOR = '/' ;
 }

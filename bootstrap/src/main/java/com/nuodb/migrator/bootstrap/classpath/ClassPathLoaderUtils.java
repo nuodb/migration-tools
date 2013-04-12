@@ -25,38 +25,50 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.config;
+package com.nuodb.migrator.bootstrap.classpath;
 
-import java.util.Properties;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * @author Sergey Bushik
  */
-public interface Config {
+public class ClassPathLoaderUtils {
 
-    final String HOME = "nuodb.migrator.home";
+    public static final String PATH_SEPARATOR = ",";
 
-    final String EXECUTABLE = "com.nuodb.migrator.executable";
+    public static ClassPathLoader createClassPathLoader(String paths, ClassLoader parent) {
+        Set<String> pathSet = new LinkedHashSet<String>();
+        for (StringTokenizer tokenizer = new StringTokenizer(paths, PATH_SEPARATOR); tokenizer.hasMoreElements(); ) {
+            pathSet.add(tokenizer.nextToken());
+        }
+        return createClassPathLoader(pathSet, parent);
+    }
 
-    final String CLASSPATH = "com.nuodb.migrator.classpath";
-
-    final String BOOTABLE_CLASS = "com.nuodb.migrator.bootable.class";
-
-    final String DEFAULT_BOOTABLE_CLASS = "com.nuodb.migrator.cli.CliHandler";
-
-    final String CONTEXT_CLASS = "com.nuodb.migrator.context.class";
-
-    final String DEFAULT_CONTEXT_CLASS = "com.nuodb.migrator.context.SimpleApplicationContext";
-
-    final String CONFIG = "com.nuodb.migrator.config";
-
-    final String DEFAULT_CONFIG = "nuodb-migrator.properties";
-
-    final String CONFIG_FOLDER = "conf";
-
-    String getProperty(String property);
-
-    String getProperty(String property, String defaultValue);
-
-    Properties getProperties(Properties properties);
+    public static ClassPathLoader createClassPathLoader(Collection<String> paths, ClassLoader parent) {
+        ClassPathLoader classPathLoader = new ClassPathLoader(parent);
+        for (String path : paths) {
+            try {
+                classPathLoader.addUrl(path);
+                continue;
+            } catch (ClassPathException exception) {
+                // continue trying
+            }
+            try {
+                classPathLoader.addJarDir(path);
+                continue;
+            } catch (ClassPathException exception) {
+                // continue trying
+            }
+            try {
+                classPathLoader.addDir(path);
+            } catch (ClassPathException exception) {
+                // continue trying
+            }
+        }
+        return classPathLoader;
+    }
 }
+
