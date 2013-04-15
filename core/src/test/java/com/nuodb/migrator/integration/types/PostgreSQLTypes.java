@@ -194,6 +194,8 @@ public class PostgreSQLTypes implements DatabaseTypes {
 			return Types.BLOB;
 		} else if ("FLOAT8".equalsIgnoreCase(type)) {
 			return Types.DOUBLE;
+		} else if ("DOUBLE PRECISION".equalsIgnoreCase(type)) {
+			return Types.DOUBLE;
 		} else if ("CHARACTER VARYING".equalsIgnoreCase(type)) {
 			return Types.VARCHAR;
 		} else if ("BOOLEAN".equalsIgnoreCase(type)) {
@@ -211,7 +213,7 @@ public class PostgreSQLTypes implements DatabaseTypes {
 		}
 		return 0;
 	}
-
+	
 	public static String getMappedLength(String type, String length) {
 		if ("CHAR".equalsIgnoreCase(type)) {
 			return length;

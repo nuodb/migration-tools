@@ -13,20 +13,21 @@ CREATE TABLE datatypes1
   c8 character(20),
   c9 date, 
   c10 numeric(5,2), 
-  c11 integer
+  c11 integer,
+  c12 double precision
 );
 
 /*Dumping data for table `datatypes1`*/
 
 INSERT INTO datatypes1 (
             c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, 
-            c11)
-    VALUES (456,'G','test', 10.25, 100,6,false,'sample text', 'jan-08-1999', 99.9, 567);
+            c11,c12)
+    VALUES (456,'G','test', 10.25, 100,6,false,'sample text', 'jan-08-1999', 99.9, 567,10.3);
 
 INSERT INTO datatypes1 (
             c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, 
-            c11)
-    VALUES (9624,'A','check',20.55, 300,3,'yes','abcd','sep-09-1987', 9.99, 345);
+            c11,c12)
+    VALUES (9624,'A','check',20.55, 300,3,'yes','abcd','sep-09-1987', 9.99, 345,11.8);
 
 /*Table structure for table `datatypes2`*/
 DROP TABLE datatypes2 cascade;
