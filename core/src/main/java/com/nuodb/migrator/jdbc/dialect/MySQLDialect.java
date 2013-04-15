@@ -46,6 +46,7 @@ public class MySQLDialect extends SimpleDialect {
     public MySQLDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
 
+        addJdbcType(MySQLIntUnsignedType.INSTANCE);
         addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
 
         addJdbcTypeDescAlias(Types.LONGVARCHAR, "TINYTEXT", Types.CLOB);

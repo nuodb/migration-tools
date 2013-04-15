@@ -55,8 +55,8 @@ public class OracleConnectionGroupValidator extends ConnectionGroupValidator {
         String catalog = getCatalogValue(commandLine);
         if (!isEmpty(catalog)) {
             throw new OptionException(option,
-                    format("Unexpected option %1$s. Oracle catalog is always equal to database, " +
-                            "use %2$s option to access user data", getCatalogOption(), getSchemaOption()));
+                    format("Unexpected option %s. Oracle catalog is always equal to database, " +
+                            "use %s option to access user data", getCatalogOption(), getSchemaOption()));
         }
     }
 }

@@ -62,7 +62,7 @@ public class ClassPathLoaderUtils {
                 // Great, the path was recognized
             } else {
                 if (log.isWarnEnabled()) {
-                    log.warn(format("Path is neither one of the recognized class path types %1$s", path));
+                    log.warn(format("Path is neither one of the recognized class path types %s", path));
                 }
             }
         }

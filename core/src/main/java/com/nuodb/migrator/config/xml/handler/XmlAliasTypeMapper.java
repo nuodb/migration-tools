@@ -56,7 +56,7 @@ public class XmlAliasTypeMapper<T> implements XmlReadHandler<T>, XmlConstants {
         String alias = XmlAttributesAccessor.get(input, TYPE_ATTRIBUTE);
         Class<? extends T> definitionType = lookup(input.getReference(), input.getName(), alias);
         if (definitionType == null) {
-            throw new XmlPersisterException(String.format("Unable to resolve %1$s name to class", alias));
+            throw new XmlPersisterException(String.format("Unable to resolve %s name to class", alias));
         }
         return context.read(input, definitionType);
     }

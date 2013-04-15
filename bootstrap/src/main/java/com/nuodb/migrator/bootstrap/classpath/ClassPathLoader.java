@@ -50,10 +50,6 @@ public class ClassPathLoader extends URLClassLoader {
         super(new URL[]{}, parent);
     }
 
-    public void addUrl(URL url) {
-        addURL(url);
-    }
-
     public boolean addUrl(String path) {
         try {
             addClassPath(new UrlClassPath(path));
@@ -92,8 +88,12 @@ public class ClassPathLoader extends URLClassLoader {
 
     public void addClassPath(ClassPath classPath) {
         if (log.isDebugEnabled()) {
-            log.debug(format("Adding class path %1$s", classPath));
+            log.debug(format("Adding class path %s", classPath));
         }
         classPath.exposeClassPath(this);
+    }
+
+    public void addUrl(URL url) {
+        addURL(url);
     }
 }

@@ -58,7 +58,7 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
 
     protected ValueFormatException newGetValueFailure(JdbcTypeValueAccess valueAccess, Exception exception) {
         ValueModel valueModel = valueAccess.getValueModel();
-        return new ValueFormatException(format("Can't get value %s %s of column",
+        return new ValueFormatException(format("Can't get %s %s column value",
                 getValueName(valueModel), valueModel.getTypeName()), exception);
     }
 
@@ -79,7 +79,7 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
 
     protected ValueFormatException newSetValueFailure(JdbcTypeValueAccess valueAccess, Exception exception) {
         ValueModel valueModel = valueAccess.getValueModel();
-        return new ValueFormatException(format("Can't set value on %s %s column",
+        return new ValueFormatException(format("Can't set %s %s column value",
                 getValueName(valueModel), valueModel.getTypeName()), exception);
     }
 

@@ -51,13 +51,13 @@ public class NuoDBBigIntType extends JdbcTypeBase<String> {
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, String value, int column,
-                                    Map<String, Object> options) throws SQLException {
-        statement.setString(column, value);
+    public String getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+        return resultSet.getString(column);
     }
 
     @Override
-    public String getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
-        return resultSet.getString(column);
+    protected void setNullSafeValue(PreparedStatement statement, String value, int column,
+                                    Map<String, Object> options) throws SQLException {
+        statement.setString(column, value);
     }
 }

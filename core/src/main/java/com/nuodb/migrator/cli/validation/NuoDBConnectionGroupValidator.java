@@ -60,18 +60,18 @@ public class NuoDBConnectionGroupValidator extends ConnectionGroupValidator {
         String catalog = getCatalogValue(commandLine);
         if (!isEmpty(catalog)) {
             throw new OptionException(option,
-                    format("Unexpected option %1$s. NuoDB doesn't supports catalogs", getCatalogOption()));
+                    format("Unexpected option %s. NuoDB doesn't supports catalogs", getCatalogOption()));
         }
         String username = getUsernameValue(commandLine);
         if (isEmpty(username)) {
             throw new OptionException(option,
-                    format("Missing required option %1$s. The user name to authenticate with should be provided",
+                    format("Missing required option %s. The user name to authenticate with should be provided",
                             getUsernameOption()));
         }
         String password = getPasswordValue(commandLine);
         if (isEmpty(password)) {
             throw new OptionException(option,
-                    format("Missing required option %1$s. The user's password should be provided",
+                    format("Missing required option %s. The user's password should be provided",
                             getPasswordOption()));
         }
     }

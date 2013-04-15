@@ -268,7 +268,7 @@ public class CliRunSupport extends CliSupport {
             for (String param : params) {
                 String[] pair = param.split("=");
                 if (pair.length != 2) {
-                    throw new OptionException(option, format("Malformed name-value pair %1$s", pair));
+                    throw new OptionException(option, format("Malformed name-value pair %s", pair));
                 }
                 properties.put(pair[0], pair[1]);
             }

@@ -56,10 +56,10 @@ public class JarDirClassPath implements FileClassPath {
         }
         File dir = new File(base);
         if (!dir.isDirectory()) {
-            throw new ClassPathException(format("%1$s is not a valid directory", dir));
+            throw new ClassPathException(format("%s is not a valid directory", dir));
         }
         if (name == null || !WILDCARDS.matcher(name).find()) {
-            throw new ClassPathException(format("Name %1$s is not a valid JAR file pattern", path));
+            throw new ClassPathException(format("Name %s is not a valid JAR file pattern", path));
         }
         this.dir = dir;
         this.fileFilter = new AndFileFilter(JarFileFilter.INSTANCE, new WildcardFileFilter(name));

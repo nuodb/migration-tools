@@ -92,18 +92,18 @@ public class SimpleFormatFactory implements FormatFactory {
     protected Format createFormat(String formatType, Class<? extends Format> formatClass) {
         if (formatClass == null) {
             if (logger.isTraceEnabled()) {
-                logger.trace(format("Can't resolve format type %1$s to a class", formatType));
+                logger.trace(format("Can't resolve format type %s to a class", formatType));
             }
             ClassLoader classLoader = ReflectionUtils.getClassLoader();
             try {
                 formatClass = (Class<? extends Format>) classLoader.loadClass(formatType);
             } catch (ClassNotFoundException e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn(format("Loading %1$s as class failed", formatType));
+                    logger.warn(format("Loading %s as class failed", formatType));
                 }
             }
             if (formatClass == null) {
-                throw new FormatInputException(format("Format %1$s is not recognized", formatType));
+                throw new FormatInputException(format("Format %s is not recognized", formatType));
             }
         }
         return ReflectionUtils.newInstance(formatClass);

@@ -42,7 +42,7 @@ public class XmlAttributesAccessor {
             try {
                 value = attribute.getValue();
             } catch (Exception e) {
-                throw new XmlPersisterException(String.format("Can't access value of %1$s attribute", name), e);
+                throw new XmlPersisterException(String.format("Can't access value of %s attribute", name), e);
             }
         }
         return value;

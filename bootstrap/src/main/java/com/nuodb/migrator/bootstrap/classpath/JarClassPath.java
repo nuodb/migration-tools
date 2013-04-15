@@ -45,7 +45,7 @@ public class JarClassPath implements FileClassPath {
 
     public JarClassPath(File jar) {
         if (!jar.isFile()) {
-            throw new ClassPathException(format("%1$s is not a valid JAR", jar));
+            throw new ClassPathException(format("%s is not a valid JAR", jar));
         }
         this.jar = jar;
     }

@@ -45,7 +45,7 @@ public class DirClassPath implements FileClassPath {
 
     public DirClassPath(File dir) {
         if (!dir.isDirectory()) {
-            throw new ClassPathException(format("%1$s is not a valid directory", dir));
+            throw new ClassPathException(format("%s is not a valid directory", dir));
         }
         this.dir = dir;
     }

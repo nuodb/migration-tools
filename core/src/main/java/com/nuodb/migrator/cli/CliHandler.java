@@ -183,14 +183,14 @@ public class CliHandler extends CliSupport implements Bootable {
 
     protected void handleConfig(OptionSet options) {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Handling --config %1$s option", options.getValue("config")));
+            logger.trace(format("Handling --config %s option", options.getValue("config")));
         }
     }
 
     protected void handleRun(OptionSet options) {
         CliRun cliRun = (CliRun) options.getValue(COMMAND_OPTION);
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Running %1$s command", cliRun.getCommand()));
+            logger.trace(format("Running %s command", cliRun.getCommand()));
         }
         if (cliRun instanceof CliRunJob) {
             configure(((CliRunJob) cliRun).getJobFactory());
@@ -200,7 +200,7 @@ public class CliHandler extends CliSupport implements Bootable {
 
     protected void configure(JobFactory jobFactory) {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Configuring %1$s job factory", jobFactory.getClass()));
+            logger.trace(format("Configuring %s job factory", jobFactory.getClass()));
         }
     }
 

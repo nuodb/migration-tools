@@ -25,38 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.validation;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.cli.parse.CommandLine;
-import com.nuodb.migrator.cli.parse.Option;
-import com.nuodb.migrator.cli.parse.OptionException;
-import org.apache.commons.lang3.StringUtils;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 
-import static com.nuodb.migrator.jdbc.JdbcConstants.POSTGRESQL_DRIVER;
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class PostgreSQLConnectionGroupValidator extends ConnectionGroupValidator {
+public class MySQLIntUnsignedType extends JdbcTypeBase<Long> {
 
-    public PostgreSQLConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
-        super(connectionGroupInfo);
+    public static JdbcType INSTANCE = new MySQLBigIntUnsignedType();
+
+    public MySQLIntUnsignedType() {
+        super(Types.INTEGER, "INT UNSIGNED", Long.class);
     }
 
     @Override
-    public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.equals(getDriverValue(commandLine), POSTGRESQL_DRIVER);
+    public Long getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+        return resultSet.getLong(column);
     }
 
     @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalogValue(commandLine);
-        if (!isEmpty(catalog)) {
-            throw new OptionException(option,
-                    format("Unexpected option %s. PostgreSQL catalogs store meta data and built-in objects, " +
-                            "use %s option to access user data", getCatalogOption(), getSchemaOption()));
-        }
+    protected void setNullSafeValue(PreparedStatement statement, Long value, int column,
+                                    Map<String, Object> options) throws SQLException {
+        statement.setLong(column, value);
     }
 }
