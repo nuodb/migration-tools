@@ -62,16 +62,13 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
             try {
                 boolean fixPosition = false;
                 while (foreignKeys.next()) {
-                    Table primaryTable = addTable(inspectionResults, foreignKeys.getString("FKTABLE_CAT"),
-                            foreignKeys.getString("FKTABLE_SCHEM"), foreignKeys.getString("FKTABLE_NAME"));
-
-                    final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
-
-                    final Table foreignTable = addTable(inspectionResults, foreignKeys.getString("PKTABLE_CAT"),
+                    final Table primaryTable = addTable(inspectionResults, foreignKeys.getString("PKTABLE_CAT"),
                             foreignKeys.getString("PKTABLE_SCHEM"), foreignKeys.getString("PKTABLE_NAME"));
+                    final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
 
-                    final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
-
+                    final Table foreignTable = addTable(inspectionResults, foreignKeys.getString("FKTABLE_CAT"),
+                            foreignKeys.getString("FKTABLE_SCHEM"), foreignKeys.getString("FKTABLE_NAME"));
+                    final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
                     int position = foreignKeys.getInt("KEY_SEQ");
                     if (fixPosition || position == 0) {
                         fixPosition = true;
@@ -80,7 +77,7 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
                         position += 1;
                     }
                     final Identifier identifier = valueOf(foreignKeys.getString("FK_NAME"));
-                    Optional<ForeignKey> optional = Iterables.tryFind(primaryTable.getForeignKeys(),
+                    Optional<ForeignKey> optional = Iterables.tryFind(foreignTable.getForeignKeys(),
                             new Predicate<ForeignKey>() {
                                 @Override
                                 public boolean apply(ForeignKey foreignKey) {
@@ -88,7 +85,7 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
                                         return identifier.equals(foreignKey.getIdentifier());
                                     }
                                     for (ForeignKeyReference foreignKeyReference : foreignKey.getReferences()) {
-                                        if (foreignTable.equals(foreignKeyReference.getForeignTable())) {
+                                        if (primaryTable.equals(foreignKeyReference.getPrimaryTable())) {
                                             return true;
                                         }
                                     }
@@ -99,7 +96,7 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
                     if (optional.isPresent()) {
                         foreignKey = optional.get();
                     } else {
-                        primaryTable.addForeignKey(foreignKey = new ForeignKey(identifier));
+                        foreignTable.addForeignKey(foreignKey = new ForeignKey(identifier));
                         foreignKey.setPrimaryTable(primaryTable);
                         foreignKey.setForeignTable(foreignTable);
                         foreignKey.setUpdateAction(getReferentialAction(foreignKeys.getInt("UPDATE_RULE")));
@@ -108,7 +105,7 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
 
                         inspectionResults.addObject(foreignKey);
                     }
-                    foreignKey.addReference(primaryColumn, foreignColumn, position);
+                    foreignKey.addReference(foreignColumn, primaryColumn, position);
                 }
             } finally {
                 close(foreignKeys);

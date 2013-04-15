@@ -76,15 +76,15 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
         try {
             bsonGenerator.writeStartObject();
 
-            bsonGenerator.writeFieldName(COLUMNS_FIELD);
+            bsonGenerator.writeFieldName(FIELD_COLUMNS);
             bsonGenerator.writeStartObject();
             for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
-                bsonGenerator.writeStringField(COLUMN_FIELD, valueFormatModel.getName());
-                bsonGenerator.writeStringField(VARIANT_FIELD, toAlias(valueFormatModel.getValueVariantType()));
+                bsonGenerator.writeStringField(FIELD_COLUMN, valueFormatModel.getName());
+                bsonGenerator.writeStringField(FIELD_VARIANT, toAlias(valueFormatModel.getValueVariantType()));
             }
             bsonGenerator.writeEndObject();
 
-            bsonGenerator.writeFieldName(ROWS_FIELD);
+            bsonGenerator.writeFieldName(FIELD_RESULT_SET);
             bsonGenerator.writeStartArray();
         } catch (IOException exception) {
             throw new FormatOutputException(exception);

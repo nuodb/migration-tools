@@ -36,6 +36,10 @@ public class PropertiesReplacement implements Replacement {
 
     private Properties properties;
 
+    public PropertiesReplacement() {
+        this(System.getProperties());
+    }
+
     public PropertiesReplacement(Properties properties) {
         this.properties = properties;
     }

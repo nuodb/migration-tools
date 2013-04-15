@@ -147,7 +147,6 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
-
     protected Group createOutputGroup() {
         GroupBuilder group = newGroupBuilder().
                 withName(getMessage(OUTPUT_GROUP_NAME)).

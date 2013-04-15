@@ -52,7 +52,7 @@ public class ForeignKey extends ConstraintBase {
 
     @Override
     public Collection<Column> getColumns() {
-        return getTargetColumns();
+        return getForeignColumns();
     }
 
     public Table getPrimaryTable() {
@@ -71,8 +71,8 @@ public class ForeignKey extends ConstraintBase {
         this.foreignTable = foreignTable;
     }
 
-    public void addReference(Column sourceColumn, Column targetColumn, int position) {
-        references.put(position, new ForeignKeyReference(sourceColumn, targetColumn));
+    public void addReference(Column foreignColumn, Column primaryColumn, int position) {
+        references.put(position, new ForeignKeyReference(foreignColumn, primaryColumn));
     }
 
     public ReferenceAction getUpdateAction() {
@@ -103,7 +103,7 @@ public class ForeignKey extends ConstraintBase {
         return references.values();
     }
 
-    public Collection<Column> getSourceColumns() {
+    public Collection<Column> getPrimaryColumns() {
         return Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
             @Override
             public Column apply(ForeignKeyReference input) {
@@ -112,7 +112,7 @@ public class ForeignKey extends ConstraintBase {
         });
     }
 
-    public Collection<Column> getTargetColumns() {
+    public Collection<Column> getForeignColumns() {
         return Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
             @Override
             public Column apply(ForeignKeyReference input) {

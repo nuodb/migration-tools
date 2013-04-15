@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 
 /**
@@ -40,16 +41,24 @@ public class ForeignKeyNamingStrategy extends IdentifiableNamingStrategy<Foreign
 
     @Override
     protected String getIdentifiableName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
+        StringBuilder qualifier = new StringBuilder();
+        qualifier.append(scriptGeneratorContext.getQualifiedName(foreignKey.getPrimaryTable(), false));
+        for (Column column : foreignKey.getPrimaryColumns()) {
+            qualifier.append("_");
+            qualifier.append(scriptGeneratorContext.getName(column, false));
+        }
+        qualifier.append("_");
+
+        qualifier.append(scriptGeneratorContext.getQualifiedName(foreignKey.getForeignTable(), false));
+        for (Column column : foreignKey.getPrimaryColumns()) {
+            qualifier.append("_");
+            qualifier.append(scriptGeneratorContext.getName(column, false));
+        }
+
         StringBuilder buffer = new StringBuilder();
         buffer.append("FK");
         buffer.append('_');
-
-        StringBuilder qualifier = new StringBuilder();
-        qualifier.append(scriptGeneratorContext.getQualifiedName(foreignKey.getPrimaryTable(), false));
-        qualifier.append(' ');
-        qualifier.append(scriptGeneratorContext.getQualifiedName(foreignKey.getForeignTable(), false));
-
-        buffer.append(md5Hex(qualifier.toString()));
+        buffer.append(qualifier.toString());
         return buffer.toString();
     }
 }

@@ -110,7 +110,7 @@ public class SimpleJobExecutor implements JobExecutor {
             fireJobExecutionEvent(new JobExecutionEvent(execution));
         } catch (Throwable failure) {
             if (logger.isDebugEnabled()) {
-                logger.debug(format("Job %1$s execution failed", job.getName()));
+                logger.debug(format("Job %1$s execution failed", job.getName()), failure);
             }
             synchronized (jobStatus) {
                 jobStatus.setExecutionEndDate(new Date());

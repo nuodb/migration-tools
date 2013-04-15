@@ -38,6 +38,7 @@ public interface XmlAttributes {
 
     final String ENCODING = "utf-8";
     final String VERSION = "1.0";
+
     final String ELEMENT_RESULT_SET = "rs";
     final String ELEMENT_COLUMNS = "cs";
     final String ELEMENT_COLUMN = "c";

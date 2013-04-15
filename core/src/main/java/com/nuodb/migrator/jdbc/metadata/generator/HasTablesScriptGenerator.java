@@ -149,7 +149,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
 
     protected void addCreateScripts(ScriptGeneratorContext scriptGeneratorContext, Collection<String> scripts,
                                     Collection<Table> tables) {
-        Collection<MetaDataType> objectTypes = scriptGeneratorContext.getMetaDataTypes();
+        Collection<MetaDataType> objectTypes = scriptGeneratorContext.getObjectTypes();
         Dialect dialect = scriptGeneratorContext.getDialect();
         if (objectTypes.contains(AUTO_INCREMENT)) {
             for (Table table : tables) {
@@ -167,7 +167,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             ScriptGeneratorContext tableScriptGeneratorContext = new ScriptGeneratorContext(scriptGeneratorContext);
             Collection<Table> processedTables = (Collection<Table>)
                     tableScriptGeneratorContext.getAttributes().get(PROCESSED_TABLES);
-            tableScriptGeneratorContext.getMetaDataTypes().remove(FOREIGN_KEY);
+            tableScriptGeneratorContext.getObjectTypes().remove(FOREIGN_KEY);
             for (Table table : tables) {
                 if (!isGenerateTable(scriptGeneratorContext, table)) {
                     continue;
@@ -215,7 +215,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
 
     protected void addForeignKeysScripts(ScriptGeneratorContext scriptGeneratorContext, Collection<String> scripts,
                                          boolean force) {
-        Collection<MetaDataType> objectTypes = scriptGeneratorContext.getMetaDataTypes();
+        Collection<MetaDataType> objectTypes = scriptGeneratorContext.getObjectTypes();
         if (objectTypes.contains(FOREIGN_KEY)) {
             Collection<Table> processedTables =
                     (Collection<Table>) scriptGeneratorContext.getAttributes().get(PROCESSED_TABLES);
@@ -236,7 +236,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
 
     protected void addDropScripts(ScriptGeneratorContext scriptGeneratorContext, Collection<String> scripts,
                                   Collection<Table> tables) {
-        Collection<MetaDataType> objectTypes = scriptGeneratorContext.getMetaDataTypes();
+        Collection<MetaDataType> objectTypes = scriptGeneratorContext.getObjectTypes();
         Dialect dialect = scriptGeneratorContext.getDialect();
         if (objectTypes.contains(FOREIGN_KEY) && dialect.supportsDropConstraints()) {
             for (Table table : tables) {

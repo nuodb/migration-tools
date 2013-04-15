@@ -44,6 +44,7 @@ import java.io.PrintStream;
 import java.util.Collection;
 
 import static java.lang.String.format;
+import static java.lang.System.exit;
 
 /**
  * Main entry point of the command line interface, for the names of the available options see {@link CliOptions}.
@@ -71,7 +72,7 @@ public class CliHandler extends CliSupport implements Bootable {
             handleOptionSet(optionSet, option);
         } catch (OptionException exception) {
             handleOptionException(exception);
-            System.exit(CLI_ERROR);
+            exit(CLI_ERROR);
         }
     }
 

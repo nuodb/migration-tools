@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
@@ -44,7 +46,7 @@ public class TraceJobExecutionListener implements JobExecutionListener {
         JobExecution execution = event.getJobExecution();
         JobStatus jobStatus = execution.getJobStatus();
         if (logger.isInfoEnabled()) {
-            logger.info(String.format("Job %s status is %s",
+            logger.info(format("Job %s status is %s",
                     execution.getJob().getName(), jobStatus.getJobStatusType()));
         }
         if (!jobStatus.isRunning()) {
@@ -63,9 +65,8 @@ public class TraceJobExecutionListener implements JobExecutionListener {
             long seconds = left % 60;
             left = left / 60;
             long minutes = left % 60;
-            left = left / 60;
             long hours = left / 60;
-            logger.info(String.format("Job %1s execution duration %02d:%02d:%02d.%03d",
+            logger.info(format("Job %1s execution duration %02d:%02d:%02d.%03d",
                     execution.getJob().getName(), hours, minutes, seconds, millis));
         }
     }

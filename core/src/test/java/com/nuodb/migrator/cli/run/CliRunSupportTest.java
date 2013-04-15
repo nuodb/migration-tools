@@ -28,10 +28,7 @@
 package com.nuodb.migrator.cli.run;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.cli.parse.Group;
-import com.nuodb.migrator.cli.parse.Option;
-import com.nuodb.migrator.cli.parse.OptionSet;
-import com.nuodb.migrator.cli.parse.Parser;
+import com.nuodb.migrator.cli.parse.*;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.jdbc.JdbcConstants;
 import com.nuodb.migrator.spec.JdbcConnectionSpec;
@@ -45,19 +42,16 @@ import java.util.TimeZone;
 
 import static java.util.TimeZone.getTimeZone;
 import static org.mockito.Mockito.spy;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 /**
  * Verifies functionality of the create & parse pairs of methods in {@link CliRunSupport} for creating option & parsing
- * that option to the required spec classes. Correspondingly tested pairs are:
- * <ul>
- *     <li>{@link CliRunSupport#createSourceGroup()} & {@link CliRunSupport#parseSourceGroup(OptionSet, Option)}</li>
- *     <li>{@link CliRunSupport#createTargetGroup()} & {@link CliRunSupport#parseTargetGroup(OptionSet, Option)}</li>
- *     <li>{@link CliRunSupport#createInputGroup()} & {@link CliRunSupport#parseInputGroup(OptionSet, Option)}</li>
- *     <li>{@link CliRunSupport#createOutputGroup()} & {@link CliRunSupport#parseOutputGroup(OptionSet, Option)}</li>
- *     <li>{@link CliRunSupport#createTimeZoneOption()} & {@link CliRunSupport#parseTimeZoneOption(OptionSet, Option)}</li>
- * </ul>
+ * that option to the required spec classes. Correspondingly tested pairs are: <ul> <li>{@link
+ * CliRunSupport#createSourceGroup()} & {@link CliRunSupport#parseSourceGroup(OptionSet, Option)}</li> <li>{@link
+ * CliRunSupport#createTargetGroup()} & {@link CliRunSupport#parseTargetGroup(OptionSet, Option)}</li> <li>{@link
+ * CliRunSupport#createInputGroup()} & {@link CliRunSupport#parseInputGroup(OptionSet, Option)}</li> <li>{@link
+ * CliRunSupport#createOutputGroup()} & {@link CliRunSupport#parseOutputGroup(OptionSet, Option)}</li> <li>{@link
+ * CliRunSupport#createTimeZoneOption()} & {@link CliRunSupport#parseTimeZoneOption(OptionSet, Option)}</li> </ul>
  *
  * @author Sergey Bushik
  */
@@ -109,6 +103,73 @@ public class CliRunSupportTest {
         JdbcConnectionSpec actual = cliRunSupport.parseSourceGroup(options, group);
         assertNotNull(actual, "Connection specification is expected");
         assertEquals(actual, expected);
+    }
+
+    @DataProvider(name = "sourceGroupValidation")
+    public Object[][] createSourceGroupValidationData() {
+        return new Object[][]{
+                {
+                        new String[]{
+                                "--source.driver=com.mysql.jdbc.Driver",
+                                "--source.url=jdbc:mysql://localhost:3306/test",
+                                "--source.username=root",
+                                "--source.catalog=catalog",
+                                "--source.schema=schema"
+                        },
+                        "MySQL does not support source.schema option"
+                },
+                {
+                        new String[]{
+                                "--source.driver=com.nuodb.jdbc.Driver",
+                                "--source.url=jdbc:com.nuodb://localhost/test",
+                                "--source.catalog=test",
+                                "--source.password=goalie",
+                                "--source.schema=schema"
+                        },
+                        "NuoDB doesn't source.catalog option"
+                },
+                {
+                        new String[]{
+                                "--source.driver=com.nuodb.jdbc.Driver",
+                                "--source.url=jdbc:com.nuodb://localhost/test",
+                                "--source.password=goalie",
+                                "--source.schema=schema"
+                        },
+                        "NuoDB requires source.username option"
+                },
+                {
+                        new String[]{
+                                "--source.driver=com.nuodb.jdbc.Driver",
+                                "--source.url=jdbc:com.nuodb://localhost/test",
+                                "--source.username=dba",
+                                "--source.schema=schema"
+                        },
+                        "NuoDB requires source.password option"
+                },
+                {
+                        new String[]{
+                                "--source.driver=oracle.jdbc.driver.OracleDriver",
+                                "--source.url=jdbc:oracle:thin:@//localhost/test",
+                                "--source.catalog=catalog"
+                        },
+                        "Oracle doesn't support source.catalog option"
+                },
+                {
+                        new String[]{
+                                "--source.driver=org.postgresql.Driver",
+                                "--source.url=jdbc:postgresql:test",
+                                "--source.catalog=catalog"
+                        },
+                        "PostgreSQL doesn't support source.catalog option"
+                }
+        };
+    }
+
+    @Test(dataProvider = "sourceGroupValidation", expectedExceptions = OptionException.class)
+    public void testSourceGroupValidation(String[] arguments, String exception) {
+        Group group = cliRunSupport.createSourceGroup();
+        parser.parse(arguments, group);
+        fail(exception);
     }
 
     @DataProvider(name = "targetGroup")

@@ -61,7 +61,7 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
     private Writer writer;
     private OutputStream outputStream;
     private ResultSet resultSet;
-    private int row;
+    private long row;
     private boolean buffering = DEFAULT_BUFFERING;
     private int bufferSize = DEFAULT_BUFFER_SIZE;
 
@@ -124,6 +124,7 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("Write begin %s", getClass().getName()));
         }
+        row = 0;
         doWriteBegin();
     }
 
@@ -131,10 +132,9 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
 
     @Override
     public final void writeRow() {
-        ValueVariant []values = null;
+        ValueVariant[] values = null;
         try {
             writeValues(values = getValues());
-            row++;
         } catch (Exception exception) {
             onWriteRowFailure(exception, row, values);
         }
@@ -154,14 +154,14 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
 
     protected abstract void writeValues(ValueVariant[] variants);
 
-    protected void onWriteRowFailure(Exception exception, int row, ValueVariant[] values) {
+    protected void onWriteRowFailure(Exception exception, long row, ValueVariant[] values) {
         String message = format("Failed to dump row %d", row);
         if (isLenient()) {
             if (logger.isErrorEnabled()) {
                 logger.error(message);
             }
         } else {
-            throw new FormatInputException(message, exception);
+            throw new FormatOutputException(message, exception);
         }
     }
 

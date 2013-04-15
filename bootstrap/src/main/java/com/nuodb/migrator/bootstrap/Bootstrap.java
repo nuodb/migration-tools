@@ -29,24 +29,17 @@ package com.nuodb.migrator.bootstrap;
 
 import com.nuodb.migrator.bootstrap.config.Config;
 import com.nuodb.migrator.bootstrap.config.PropertiesConfigLoader;
-import com.nuodb.migrator.bootstrap.config.Replacer;
 import com.nuodb.migrator.bootstrap.config.PropertiesReplacement;
-import com.nuodb.migrator.bootstrap.loader.DynamicClassLoaderFactory;
-import com.nuodb.migrator.bootstrap.loader.DynamicClassLoaderType;
+import com.nuodb.migrator.bootstrap.config.Replacer;
 import com.nuodb.migrator.bootstrap.log.Log;
 import com.nuodb.migrator.bootstrap.log.LogFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
 
-import static com.nuodb.migrator.bootstrap.config.Config.BOOTABLE_CLASS;
-import static com.nuodb.migrator.bootstrap.config.Config.CLASS_LOADER;
-import static com.nuodb.migrator.bootstrap.config.Config.DEFAULT_BOOTABLE_CLASS;
+import static com.nuodb.migrator.bootstrap.classpath.ClassPathLoaderUtils.createClassPathLoader;
+import static com.nuodb.migrator.bootstrap.config.Config.*;
+import static java.lang.Thread.currentThread;
 
 /**
  * @author Sergey Bushik
@@ -69,7 +62,7 @@ public class Bootstrap {
         config = loadConfig();
 
         if (log.isDebugEnabled()) {
-            log.debug("Creating class loader");
+            log.debug("Creating class classpath");
         }
         classLoader = createClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
@@ -82,37 +75,17 @@ public class Bootstrap {
     }
 
     protected Config loadConfig() {
-        Replacer replacer = new Replacer();
-        replacer.setReplacement(new PropertiesReplacement(System.getProperties()));
-
         PropertiesConfigLoader loader = new PropertiesConfigLoader();
-        loader.setReplacer(replacer);
+        loader.setReplacer(new Replacer(new PropertiesReplacement()));
         return loader.loadConfig();
     }
 
     protected ClassLoader createClassLoader() throws IOException {
-        String loader = getConfig().getProperty(CLASS_LOADER);
-        if (loader == null || loader.equals("")) {
+        String classPath = getConfig().getProperty(CLASSPATH);
+        if (classPath == null || classPath.equals("")) {
             return getClass().getClassLoader();
         }
-        Map<String, DynamicClassLoaderType> loaderTypes = new LinkedHashMap<String, DynamicClassLoaderType>();
-        for (StringTokenizer tokenizer = new StringTokenizer(loader, ","); tokenizer.hasMoreElements(); ) {
-            String repository = tokenizer.nextToken();
-            try {
-                new URL(repository);
-                loaderTypes.put(repository, DynamicClassLoaderType.URL);
-            } catch (MalformedURLException exception) {
-                if (repository.endsWith("*.jar")) {
-                    repository = repository.substring(0, repository.length() - "*.jar".length());
-                    loaderTypes.put(repository, DynamicClassLoaderType.JAR_DIR);
-                } else if (repository.endsWith(".jar")) {
-                    loaderTypes.put(repository, DynamicClassLoaderType.JAR);
-                } else {
-                    loaderTypes.put(repository, DynamicClassLoaderType.DIR);
-                }
-            }
-        }
-        return DynamicClassLoaderFactory.createClassLoader(loaderTypes, Thread.currentThread().getContextClassLoader());
+        return createClassPathLoader(classPath, currentThread().getContextClassLoader());
     }
 
     protected Bootable createBootable() throws Exception {
@@ -136,7 +109,7 @@ public class Bootstrap {
             bootstrap.boot(arguments);
         } catch (Throwable error) {
             if (log.isErrorEnabled()) {
-                log.error("Boot failed", error);
+                log.error("Execution failed", error);
             }
             System.exit(BOOT_ERROR);
         }

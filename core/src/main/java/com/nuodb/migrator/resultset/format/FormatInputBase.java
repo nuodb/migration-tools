@@ -54,7 +54,7 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
     private Reader reader;
     private InputStream inputStream;
     private PreparedStatement preparedStatement;
-    private int row;
+    private long row;
 
     public Reader getReader() {
         return reader;
@@ -120,10 +120,10 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
         try {
             setValues(values = readValues());
             executeUpdate();
-            row++;
         } catch (Exception exception) {
             onReadRowFailure(exception, row, values);
         }
+        row++;
     }
 
     protected void executeUpdate() throws SQLException {
@@ -140,7 +140,7 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
         }
     }
 
-    protected void onReadRowFailure(Exception exception, int row, ValueVariant[] values) {
+    protected void onReadRowFailure(Exception exception, long row, ValueVariant[] values) {
         String message = format("Failed to load row %d", row);
         if (isLenient()) {
             if (logger.isErrorEnabled()) {

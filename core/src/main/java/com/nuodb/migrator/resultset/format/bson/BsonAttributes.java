@@ -31,11 +31,10 @@ package com.nuodb.migrator.resultset.format.bson;
  * @author Sergey Bushik
  */
 public interface BsonAttributes {
-
     final String FORMAT_TYPE = "bson";
 
-    final String COLUMNS_FIELD = "cs";
-    final String VARIANT_FIELD = "v";
-    final String COLUMN_FIELD = "c";
-    final String ROWS_FIELD = "rs";
+    final String FIELD_RESULT_SET = "rs";
+    final String FIELD_COLUMNS = "cs";
+    final String FIELD_VARIANT = "v";
+    final String FIELD_COLUMN = "c";
 }
