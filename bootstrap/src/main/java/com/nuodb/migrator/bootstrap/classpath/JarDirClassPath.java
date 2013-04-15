@@ -35,7 +35,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 
-import static com.nuodb.migrator.bootstrap.classpath.filter.WildcardFileFilter.WILDCARDS;
 import static java.lang.String.format;
 
 /**
@@ -46,13 +45,23 @@ public class JarDirClassPath implements FileClassPath {
     private File dir;
     private FileFilter fileFilter;
 
-    public JarDirClassPath(File dir) {
-        this(dir, JarFileFilter.INSTANCE);
-    }
-
-    public JarDirClassPath(File dir, FileFilter fileFilter) {
+    public JarDirClassPath(String path) {
+        int fileSeparator = Math.max(path.lastIndexOf(WINDOWS_FILE_SEPARATOR), path.lastIndexOf(UNIX_FILE_SEPARATOR));
+        String base = path;
+        String name = null;
+        if (fileSeparator != -1) {
+            base = path.substring(0, fileSeparator);
+            name = path.substring(fileSeparator + 1);
+        }
+        File dir = new File(base);
+        if (!dir.exists() || !dir.isDirectory() || !dir.canRead()) {
+            throw new ClassPathException(format("%1$s is not a valid directory", dir));
+        }
+        if (name == null) {
+            throw new ClassPathException(format("Directory %1$s has not a valid file name nor a pattern", path));
+        }
         this.dir = dir;
-        this.fileFilter = fileFilter;
+        this.fileFilter = new AndFileFilter(JarFileFilter.INSTANCE, new WildcardFileFilter(name));
     }
 
     @Override
@@ -64,24 +73,6 @@ public class JarDirClassPath implements FileClassPath {
                 throw new ClassPathException(exception);
             }
         }
-    }
-
-    public static JarDirClassPath toJarDirClassPath(String path) {
-        int fileSeparator = Math.max(path.lastIndexOf(WINDOWS_FILE_SEPARATOR), path.lastIndexOf(UNIX_FILE_SEPARATOR));
-        String base = path;
-        String name = null;
-        if (fileSeparator != -1) {
-            base = path.substring(0, fileSeparator);
-            name = path.substring(fileSeparator + 1);
-        }
-        File dir = new File(base);
-        if (!dir.exists() || !dir.isDirectory() || !dir.canRead()) {
-            throw new ClassPathException(format("%1$s is not a valid directory", path));
-        }
-        if (name == null || !WILDCARDS.matcher(name).find()) {
-            throw new ClassPathException(format("Directory %1$s has not a valid file name nor a pattern", path));
-        }
-        return new JarDirClassPath(dir, new AndFileFilter(JarFileFilter.INSTANCE, new WildcardFileFilter(name)));
     }
 
     public FileFilter getFileFilter() {

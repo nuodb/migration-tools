@@ -39,7 +39,14 @@ public class DirClassPath implements FileClassPath {
 
     private File dir;
 
+    public DirClassPath(String dir) {
+        this(new File(dir));
+    }
+
     public DirClassPath(File dir) {
+        if (!dir.exists() || !dir.isDirectory() || !dir.canRead()) {
+            throw new ClassPathException(format("%1$s is not a valid directory", dir));
+        }
         this.dir = dir;
     }
 
@@ -49,15 +56,6 @@ public class DirClassPath implements FileClassPath {
             classPathLoader.addUrl(dir.toURI().toURL());
         } catch (IOException exception) {
             throw new ClassPathException(exception);
-        }
-    }
-
-    public static DirClassPath toDirClassPath(String path) {
-        File dir = new File(path);
-        if (dir.exists() && dir.isDirectory() && dir.canRead()) {
-            return new DirClassPath(dir);
-        } else {
-            throw new ClassPathException(format("%1$s is not valid directory", path));
         }
     }
 }
