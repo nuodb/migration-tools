@@ -102,7 +102,7 @@ public class ContinuityTest extends MigrationTestBase {
 	 */
 	public void testAutoIncrement() throws Exception {
 		String sqlStr = "insert into \"datatypes2\" (\"c5\") values (?)";
-		String sqlStr2 = "select \"k1\" from datatypes2 where \"c5\"=?";
+		String sqlStr2 = "select \"k1\" from \"datatypes2\" where \"c5\"=?";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs2 = null;
 		int firstId = -1;
