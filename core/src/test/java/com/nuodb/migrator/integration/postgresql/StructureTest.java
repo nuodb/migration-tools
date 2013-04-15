@@ -64,11 +64,13 @@ public class StructureTest extends MigrationTestBase {
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
+			boolean sourceFound = false;
 
 			while (rs1.next()) {
+				sourceFound = true;
 				list1.add(rs1.getString(1).toUpperCase());
 			}
-
+			Assert.assertTrue(sourceFound);
 			Assert.assertFalse(list1.isEmpty());
 
 			stmt2 = nuodbConnection.prepareStatement(sqlStr2);
@@ -76,11 +78,12 @@ public class StructureTest extends MigrationTestBase {
 			rs2 = stmt2.executeQuery();
 
 			Assert.assertNotNull(rs2);
-
+			boolean targetFound = false;
 			while (rs2.next()) {
+				targetFound = true;
 				list2.add(rs2.getString(1).toUpperCase());
 			}
-
+			Assert.assertTrue(targetFound);
 			Assert.assertFalse(list2.isEmpty());
 
 			for (String tname : list1) {
@@ -114,20 +117,21 @@ public class StructureTest extends MigrationTestBase {
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
-
+			boolean sourceFound = false;
 			while (rs1.next()) {
+				sourceFound = true;
 				HashMap<String, String> tabColDetailsMap = new HashMap<String, String>();
 				for (String colName : colNames) {
 					tabColDetailsMap.put(colName, rs1.getString(colName));
 				}
-
+				Assert.assertTrue(sourceFound);
 				Assert.assertFalse(tabColDetailsMap.isEmpty(), tableName
 						+ " column details empty at source");
 
 				tabColMap.put(tabColDetailsMap.get(colNames[0]),
 						tabColDetailsMap);
 			}
-
+			Assert.assertTrue(sourceFound);
 			Assert.assertFalse(tabColMap.isEmpty(), tableName
 					+ " column details map empty at source");
 
@@ -137,8 +141,9 @@ public class StructureTest extends MigrationTestBase {
 			rs2 = stmt2.executeQuery();
 
 			Assert.assertNotNull(rs2);
-
+			boolean targetFound = false;
 			while (rs2.next()) {
+				targetFound = true;
 				String colName = rs2.getString("FIELD");
 				HashMap<String, String> tabColDetailsMap = tabColMap
 						.get(colName);
@@ -166,6 +171,7 @@ public class StructureTest extends MigrationTestBase {
 				// tabColDetailsMap.get(colNames[2])));
 
 			}
+			Assert.assertTrue(targetFound);
 		} finally {
 			closeAll(rs1, stmt1, rs2, stmt2);
 		}
@@ -200,8 +206,9 @@ public class StructureTest extends MigrationTestBase {
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
-
+			boolean sourceFound = false;
 			while (rs1.next()) {
+				sourceFound = true;
 				String tName = rs1.getString("TABLE_NAME");
 				String cName = rs1.getString("COLUMN_NAME");
 				String cKey = rs1.getString("constraint_type");
@@ -220,6 +227,7 @@ public class StructureTest extends MigrationTestBase {
 				rs2.close();
 				stmt2.close();
 			}
+			Assert.assertTrue(sourceFound);
 		} finally {
 			closeAll(rs1, stmt1, rs2, stmt2);
 		}
@@ -268,8 +276,9 @@ public class StructureTest extends MigrationTestBase {
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
-
+			boolean sourceFound = false;
 			while (rs1.next()) {
+				sourceFound = true;
 				String tName = rs1.getString("TABLE_NAME");
 				String cName = rs1.getString("COLUMN_NAME");
 				String rtName = rs1.getString("REFERENCED_TABLE_NAME");
@@ -293,6 +302,7 @@ public class StructureTest extends MigrationTestBase {
 				rs2.close();
 				stmt2.close();
 			}
+			Assert.assertTrue(sourceFound);
 		} finally {
 			closeAll(rs1, stmt1, rs2, stmt2);
 		}
@@ -383,8 +393,9 @@ public class StructureTest extends MigrationTestBase {
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
-
+			boolean sourceFound = false;
 			while (rs1.next()) {
+				sourceFound = true;
 				String tName = rs1.getString("TABLE_NAME");
 				String cName = rs1.getString("indkey_names");
 
@@ -405,6 +416,7 @@ public class StructureTest extends MigrationTestBase {
 				stmt2.close();
 
 			}
+			Assert.assertTrue(sourceFound);
 		} finally {
 			closeAll(rs1, stmt1, rs2, stmt2);
 		}
