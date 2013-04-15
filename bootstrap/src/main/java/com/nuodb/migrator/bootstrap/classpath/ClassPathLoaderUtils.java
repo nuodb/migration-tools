@@ -27,45 +27,43 @@
  */
 package com.nuodb.migrator.bootstrap.classpath;
 
+import com.nuodb.migrator.bootstrap.log.Log;
+import com.nuodb.migrator.bootstrap.log.LogFactory;
+
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
 public class ClassPathLoaderUtils {
 
+    private static final Log log = LogFactory.getLog(ClassPathLoaderUtils.class);
+
     public static final String PATH_SEPARATOR = ",";
 
-    public static ClassPathLoader createClassPathLoader(String paths, ClassLoader parent) {
-        Set<String> pathSet = new LinkedHashSet<String>();
-        for (StringTokenizer tokenizer = new StringTokenizer(paths, PATH_SEPARATOR); tokenizer.hasMoreElements(); ) {
-            pathSet.add(tokenizer.nextToken());
+    public static ClassPathLoader createClassPathLoader(String path, ClassLoader parent) {
+        Set<String> paths = new LinkedHashSet<String>();
+        for (StringTokenizer tokenizer = new StringTokenizer(path, PATH_SEPARATOR); tokenizer.hasMoreElements(); ) {
+            paths.add(tokenizer.nextToken());
         }
-        return createClassPathLoader(pathSet, parent);
+        return createClassPathLoader(paths, parent);
     }
 
     public static ClassPathLoader createClassPathLoader(Collection<String> paths, ClassLoader parent) {
-        ClassPathLoader classPathLoader = new ClassPathLoader(parent);
+        ClassPathLoader classPathLoader = parent != null ? new ClassPathLoader() : new ClassPathLoader(parent);
         for (String path : paths) {
-            try {
-                classPathLoader.addUrl(path);
-                continue;
-            } catch (ClassPathException exception) {
-                // continue trying
-            }
-            try {
-                classPathLoader.addJarDir(path);
-                continue;
-            } catch (ClassPathException exception) {
-                // continue trying
-            }
-            try {
-                classPathLoader.addDir(path);
-            } catch (ClassPathException exception) {
-                // continue trying
+            if ((classPathLoader.addUrl(path) || classPathLoader.addJar(path) ||
+                    classPathLoader.addJarDir(path) || classPathLoader.addDir(path))) {
+                // Great, the path was recognized
+            } else {
+                if (log.isWarnEnabled()) {
+                    log.warn(format("Path is neither one of the recognized class path types %1$s", path));
+                }
             }
         }
         return classPathLoader;

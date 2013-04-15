@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.classpath.filter;
+package com.nuodb.migrator.bootstrap.classpath.file;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -43,10 +43,12 @@ public class WildcardFileFilter implements FileFilter {
     public static final Pattern WILDCARDS = compile("\\?|\\*|\\{([^/]+?)\\}", CASE_INSENSITIVE);
     private static final String EMPTY = "";
 
+    private final String name;
     private final Pattern pattern;
 
-    public WildcardFileFilter(String pattern) {
-        this.pattern = createPattern(pattern);
+    public WildcardFileFilter(String name) {
+        this.name = name;
+        this.pattern = createPattern(name);
     }
 
     @Override
@@ -77,5 +79,27 @@ public class WildcardFileFilter implements FileFilter {
     private static String quote(String pattern, int start, int end) {
         return start == end ? EMPTY :
                 Pattern.quote(pattern.substring(start, end));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof WildcardFileFilter)) return false;
+
+        WildcardFileFilter that = (WildcardFileFilter) o;
+
+        if (pattern != null ? !pattern.equals(that.pattern) : that.pattern != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return pattern != null ? pattern.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "WildcardFileFilter{name=" + name + '}';
     }
 }

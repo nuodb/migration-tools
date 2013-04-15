@@ -27,14 +27,15 @@
  */
 package com.nuodb.migrator.bootstrap.classpath;
 
-import com.nuodb.migrator.bootstrap.classpath.filter.AndFileFilter;
-import com.nuodb.migrator.bootstrap.classpath.filter.JarFileFilter;
-import com.nuodb.migrator.bootstrap.classpath.filter.WildcardFileFilter;
+import com.nuodb.migrator.bootstrap.classpath.file.AndFileFilter;
+import com.nuodb.migrator.bootstrap.classpath.file.JarFileFilter;
+import com.nuodb.migrator.bootstrap.classpath.file.WildcardFileFilter;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 
+import static com.nuodb.migrator.bootstrap.classpath.file.WildcardFileFilter.WILDCARDS;
 import static java.lang.String.format;
 
 /**
@@ -54,11 +55,11 @@ public class JarDirClassPath implements FileClassPath {
             name = path.substring(fileSeparator + 1);
         }
         File dir = new File(base);
-        if (!dir.exists() || !dir.isDirectory() || !dir.canRead()) {
+        if (!dir.isDirectory()) {
             throw new ClassPathException(format("%1$s is not a valid directory", dir));
         }
-        if (name == null) {
-            throw new ClassPathException(format("Directory %1$s has not a valid file name nor a pattern", path));
+        if (name == null || !WILDCARDS.matcher(name).find()) {
+            throw new ClassPathException(format("Name %1$s is not a valid JAR file pattern", path));
         }
         this.dir = dir;
         this.fileFilter = new AndFileFilter(JarFileFilter.INSTANCE, new WildcardFileFilter(name));
@@ -81,5 +82,30 @@ public class JarDirClassPath implements FileClassPath {
 
     public void setFileFilter(FileFilter fileFilter) {
         this.fileFilter = fileFilter;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JarDirClassPath)) return false;
+
+        JarDirClassPath that = (JarDirClassPath) o;
+
+        if (!dir.equals(that.dir)) return false;
+        if (!fileFilter.equals(that.fileFilter)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = dir.hashCode();
+        result = 31 * result + fileFilter.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "JarDirClassPath{dir=" + dir + ", fileFilter=" + fileFilter + '}';
     }
 }

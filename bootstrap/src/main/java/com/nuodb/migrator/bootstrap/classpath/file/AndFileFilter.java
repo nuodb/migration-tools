@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.classpath.filter;
+package com.nuodb.migrator.bootstrap.classpath.file;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -57,5 +57,27 @@ public class AndFileFilter implements FileFilter {
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AndFileFilter)) return false;
+
+        AndFileFilter that = (AndFileFilter) o;
+
+        if (fileFilters != null ? !fileFilters.equals(that.fileFilters) : that.fileFilters != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return fileFilters != null ? fileFilters.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "AndFileFilter{fileFilters=" + fileFilters + '}';
     }
 }

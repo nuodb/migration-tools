@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.classpath.filter;
+package com.nuodb.migrator.bootstrap.classpath.file;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -46,5 +46,10 @@ public class JarFileFilter implements FileFilter {
     @Override
     public boolean accept(File file) {
         return file.isFile() && (file.getName().endsWith(JAR_EXTENSION) || file.getName().endsWith(ZIP_EXTENSION));
+    }
+
+    @Override
+    public String toString() {
+        return "JarFileFilter";
     }
 }

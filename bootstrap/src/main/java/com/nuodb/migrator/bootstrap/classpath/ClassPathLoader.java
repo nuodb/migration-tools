@@ -33,7 +33,6 @@ import com.nuodb.migrator.bootstrap.log.LogFactory;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import static com.nuodb.migrator.bootstrap.classpath.UrlClassPath.toUrlClassPath;
 import static java.lang.String.format;
 
 /**
@@ -55,25 +54,45 @@ public class ClassPathLoader extends URLClassLoader {
         addURL(url);
     }
 
-    public void addUrl(String path) {
-        addClassPath(toUrlClassPath(path));
+    public boolean addUrl(String path) {
+        try {
+            addClassPath(new UrlClassPath(path));
+            return true;
+        } catch (ClassPathException exception) {
+            return false;
+        }
     }
 
-    public void addDir(String path) {
-        addClassPath(new DirClassPath(path));
+    public boolean addDir(String path) {
+        try {
+            addClassPath(new DirClassPath(path));
+            return true;
+        } catch (ClassPathException exception) {
+            return false;
+        }
     }
 
-    public void addJar(String path) {
-        addClassPath(new JarDirClassPath(path));
+    public boolean addJar(String path) {
+        try {
+            addClassPath(new JarClassPath(path));
+            return true;
+        } catch (ClassPathException exception) {
+            return false;
+        }
     }
 
-    public void addJarDir(String path) {
-        addClassPath(new JarDirClassPath(path));
+    public boolean addJarDir(String path) {
+        try {
+            addClassPath(new JarDirClassPath(path));
+            return true;
+        } catch (ClassPathException exception) {
+            return false;
+        }
     }
 
     public void addClassPath(ClassPath classPath) {
-        if (log.isTraceEnabled()) {
-            log.trace(format("Adding class path %1$s", classPath));
+        if (log.isDebugEnabled()) {
+            log.debug(format("Adding class path %1$s", classPath));
         }
         classPath.exposeClassPath(this);
     }

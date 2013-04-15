@@ -27,56 +27,57 @@
  */
 package com.nuodb.migrator.bootstrap.classpath;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.io.File;
+import java.io.IOException;
+
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
-public class UrlClassPath implements ClassPath {
+public class JarClassPath implements FileClassPath {
 
-    private Collection<URL> urls = new LinkedHashSet<URL>();
+    private File jar;
 
-    public UrlClassPath(String url) {
-        try {
-            urls.add(new URL(url));
-        } catch (MalformedURLException exception) {
-            throw new ClassPathException(exception);
-        }
+    public JarClassPath(String jar) {
+        this(new File(jar));
     }
 
-    public UrlClassPath(Collection<URL> urls) {
-        this.urls = urls;
+    public JarClassPath(File jar) {
+        if (!jar.isFile()) {
+            throw new ClassPathException(format("%1$s is not a valid JAR", jar));
+        }
+        this.jar = jar;
     }
 
     @Override
     public void exposeClassPath(ClassPathLoader classPathLoader) {
-        for (URL url : urls) {
-            classPathLoader.addUrl(url);
+        try {
+            classPathLoader.addUrl(jar.toURI().toURL());
+        } catch (IOException exception) {
+            throw new ClassPathException(exception);
         }
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UrlClassPath)) return false;
+        if (!(o instanceof JarClassPath)) return false;
 
-        UrlClassPath that = (UrlClassPath) o;
+        JarClassPath that = (JarClassPath) o;
 
-        if (urls != null ? !urls.equals(that.urls) : that.urls != null) return false;
+        if (jar != null ? !jar.equals(that.jar) : that.jar != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return urls != null ? urls.hashCode() : 0;
+        return jar != null ? jar.hashCode() : 0;
     }
 
     @Override
     public String toString() {
-        return "UrlClassPath{urls=" + urls + '}';
+        return "JarClassPath{jar=" + jar + '}';
     }
 }
