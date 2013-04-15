@@ -46,17 +46,18 @@ public class BasicMigrationTest extends MigrationTestBase {
 	 */
 	@Test(groups = { "dataloadperformed" })
 	public void testDataLoaded() throws Exception {
-		String sqlStr = "select count(*) from datatypes1";
+		String sqlStr1 = "select count(*) from datatypes1";
+		String sqlStr2 = "select count(*) from \"datatypes1\"";
 		Statement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
 			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr);
+			rs1 = stmt1.executeQuery(sqlStr1);
 
 			Assert.assertNotNull(rs1);
 
 			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr);
+			rs2 = stmt2.executeQuery(sqlStr2);
 
 			Assert.assertNotNull(rs2);
 
@@ -80,17 +81,18 @@ public class BasicMigrationTest extends MigrationTestBase {
 	 */
 	@Test(dependsOnGroups = { "dataloadperformed" })
 	public void testDataTypes1() throws Exception {
-		String sqlStr = "select * from datatypes1";
+		String sqlStr1 = "select * from datatypes1";
+		String sqlStr2 = "select * from \"datatypes1\"";
 		Statement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
 			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr);
+			rs1 = stmt1.executeQuery(sqlStr1);
 
 			Assert.assertNotNull(rs1);
 
 			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr);
+			rs2 = stmt2.executeQuery(sqlStr2);
 
 			Assert.assertNotNull(rs2);
 
@@ -106,17 +108,18 @@ public class BasicMigrationTest extends MigrationTestBase {
 	 */
 	@Test(dependsOnGroups = { "dataloadperformed" })
 	public void testDataTypes2() throws Exception {
-		String sqlStr = "select * from datatypes2";
+		String sqlStr1 = "select * from datatypes2";
+		String sqlStr2 = "select * from \"datatypes2\"";
 		Statement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
 			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr);
+			rs1 = stmt1.executeQuery(sqlStr1);
 
 			Assert.assertNotNull(rs1);
 
 			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr);
+			rs2 = stmt2.executeQuery(sqlStr2);
 
 			Assert.assertNotNull(rs2);
 
@@ -132,17 +135,18 @@ public class BasicMigrationTest extends MigrationTestBase {
 	 */
 	@Test(dependsOnGroups = { "dataloadperformed" })
 	public void testDataTypes3() throws Exception {
-		String sqlStr = "select * from datatypes3";
+		String sqlStr1 = "select * from datatypes3";
+		String sqlStr2 = "select * from \"datatypes3\"";
 		Statement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
 			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr);
+			rs1 = stmt1.executeQuery(sqlStr1);
 
 			Assert.assertNotNull(rs1);
 
 			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr);
+			rs2 = stmt2.executeQuery(sqlStr2);
 
 			Assert.assertNotNull(rs2);
 

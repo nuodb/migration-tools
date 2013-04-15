@@ -27,15 +27,18 @@
  */
 package com.nuodb.migrator.integration.mysql;
 
-import com.nuodb.migrator.integration.MigrationTestBase;
-import com.nuodb.migrator.integration.types.MySQLTypes;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.nuodb.migrator.integration.MigrationTestBase;
+import com.nuodb.migrator.integration.types.MySQLTypes;
 
 /**
  * Test to make sure all the Tables, Constraints, Views, Triggers etc have been
@@ -184,18 +187,18 @@ public class StructureTest extends MigrationTestBase {
 	}
 
 	/*
-	 * test if all the Primary and Unique Key Constraints are migrated
+	 * test if all the Primary Key Constraints are migrated
 	 */
-	public void testPrimaryAndUniqueKeyConstraints() throws Exception {
+	public void testPrimaryConstraints() throws Exception {
 		String sqlStr1 = "select TC.TABLE_NAME, C.COLUMN_NAME, C.COLUMN_KEY from information_schema.TABLE_CONSTRAINTS TC "
 				+ "inner join information_schema.COLUMNS C on TC.CONSTRAINT_SCHEMA=? "
 				+ "and C.TABLE_SCHEMA = TC.CONSTRAINT_SCHEMA "
 				+ "and TC.TABLE_NAME=C.TABLE_NAME AND C.COLUMN_KEY=SUBSTRING(TC.CONSTRAINT_TYPE,1,3) "
-				+ "AND C.COLUMN_KEY IN ('PRI', 'UNI')";
+				+ "AND C.COLUMN_KEY IN ('PRI')";
 		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES INNER JOIN SYSTEM.INDEXFIELDS ON "
 				+ "INDEXES.SCHEMA=INDEXFIELDS.SCHEMA AND "
 				+ "INDEXES.TABLENAME=INDEXFIELDS.TABLENAME AND "
-				+ "INDEXES.INDEXNAME=INDEXFIELDS.INDEXNAME WHERE SCHEMA=? AND TABLENAME=? AND INDEXTYPE=?";
+				+ "INDEXES.INDEXNAME=INDEXFIELDS.INDEXNAME WHERE SCHEMA=? AND TABLENAME=? AND INDEXTYPE=? AND INDEXNAME LIKE '%PRIMARY_KEY%'";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
@@ -232,6 +235,73 @@ public class StructureTest extends MigrationTestBase {
 	}
 
 	/*
+	 * test if all the Unique Key Constraints are migrated
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testUniqueKeyConstraints() throws Exception {
+		String sqlStr1 = "select distinct TC.TABLE_NAME, C.COLUMN_NAME, C.COLUMN_KEY from information_schema.TABLE_CONSTRAINTS TC "
+				+ "inner join information_schema.COLUMNS C on TC.CONSTRAINT_SCHEMA=? "
+				+ "and C.TABLE_SCHEMA = TC.CONSTRAINT_SCHEMA "
+				+ "and TC.TABLE_NAME=C.TABLE_NAME AND C.COLUMN_KEY=SUBSTRING(TC.CONSTRAINT_TYPE,1,3) "
+				+ "AND C.COLUMN_KEY IN ('UNI')";
+		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES INNER JOIN SYSTEM.INDEXFIELDS ON "
+				+ "INDEXES.SCHEMA=INDEXFIELDS.SCHEMA AND "
+				+ "INDEXES.TABLENAME=INDEXFIELDS.TABLENAME AND "
+				+ "INDEXES.INDEXNAME=INDEXFIELDS.INDEXNAME WHERE SCHEMA=? AND TABLENAME=? AND INDEXNAME LIKE '%UNIQUE%'";
+		PreparedStatement stmt1 = null, stmt2 = null;
+		ResultSet rs1 = null, rs2 = null;
+		HashMap map = new HashMap();
+		try {
+			stmt1 = sourceConnection.prepareStatement(sqlStr1);
+			stmt1.setString(1, sourceConnection.getCatalog());
+			rs1 = stmt1.executeQuery();
+			Assert.assertNotNull(rs1);
+			boolean sourceFound = false;
+			while (rs1.next()) {
+				sourceFound = true;
+				String tName = rs1.getString("TABLE_NAME");
+				String cName = rs1.getString("COLUMN_NAME");
+
+				if (!map.containsKey(tName)) {
+					ArrayList list = new ArrayList();
+					list.add(cName);
+					map.put(tName, list);
+				} else {
+					ArrayList list = (ArrayList) map.get(tName);
+					list.add(cName);
+					map.put(tName, list);
+				}
+			}
+			Assert.assertTrue(sourceFound);
+			Iterator<Entry<String, ArrayList>> uniKey = map.entrySet()
+					.iterator();
+			while (uniKey.hasNext()) {
+				Entry<String, ArrayList> pairs = uniKey.next();
+				String srcTname = pairs.getKey();
+				ArrayList<String> srcColList = pairs.getValue();
+				ArrayList<String> tarColList = new ArrayList<String>();
+
+				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
+				stmt2.setString(1, nuodbSchemaUsed);
+				stmt2.setString(2, srcTname);
+				rs2 = stmt2.executeQuery();
+				boolean found = false;
+				while (rs2.next()) {
+					found = true;
+					tarColList.add(rs2.getString(1));
+				}
+				Assert.assertTrue(found);
+				Assert.assertEquals(srcColList, tarColList);
+				rs2.close();
+				stmt2.close();
+			}
+
+		} finally {
+			closeAll(rs1, stmt1, rs2, stmt2);
+		}
+	}
+
+	/*
 	 * test if all the Check Constraints are migrated
 	 */
 	@Test(groups = { "disabled" })
@@ -247,21 +317,21 @@ public class StructureTest extends MigrationTestBase {
 				+ "from information_schema.TABLE_CONSTRAINTS TC INNER JOIN information_schema.KEY_COLUMN_USAGE CU "
 				+ "on TC.CONSTRAINT_SCHEMA=? and CU.TABLE_SCHEMA = TC.CONSTRAINT_SCHEMA and "
 				+ "TC.TABLE_NAME = CU.TABLE_NAME AND TC.CONSTRAINT_TYPE = 'FOREIGN KEY';";
-        String sqlStr2 = "SELECT PRIMARYTABLE.SCHEMA AS PKTABLE_SCHEM, PRIMARYTABLE.TABLENAME AS PKTABLE_NAME, "
-                + " PRIMARYFIELD.FIELD AS PKCOLUMN_NAME, FOREIGNTABLE.SCHEMA AS FKTABLE_SCHEM, "
-                + " FOREIGNTABLE.TABLENAME AS FKTABLE_NAME, FOREIGNFIELD.FIELD AS FKCOLUMN_NAME, "
-                + " FOREIGNKEYS.POSITION+1 AS KEY_SEQ, FOREIGNKEYS.UPDATERULE AS UPDATE_RULE, "
-                + " FOREIGNKEYS.DELETERULE AS DELETE_RULE, FOREIGNKEYS.DEFERRABILITY AS DEFERRABILITY "
-                + "FROM SYSTEM.FOREIGNKEYS "
-                + "INNER JOIN SYSTEM.TABLES PRIMARYTABLE ON PRIMARYTABLEID=PRIMARYTABLE.TABLEID "
-                + "INNER JOIN SYSTEM.FIELDS PRIMARYFIELD ON PRIMARYTABLE.SCHEMA=PRIMARYFIELD.SCHEMA "
-                + "AND PRIMARYTABLE.TABLENAME=PRIMARYFIELD.TABLENAME "
-                + "AND FOREIGNKEYS.PRIMARYFIELDID=PRIMARYFIELD.FIELDID "
-                + "INNER JOIN SYSTEM.TABLES FOREIGNTABLE ON FOREIGNTABLEID=FOREIGNTABLE.TABLEID "
-                + "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA "
-                + "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME "
-                + "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID "
-                + "WHERE FOREIGNTABLE.SCHEMA=? AND FOREIGNTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
+		String sqlStr2 = "SELECT PRIMARYTABLE.SCHEMA AS PKTABLE_SCHEM, PRIMARYTABLE.TABLENAME AS PKTABLE_NAME, "
+				+ " PRIMARYFIELD.FIELD AS PKCOLUMN_NAME, FOREIGNTABLE.SCHEMA AS FKTABLE_SCHEM, "
+				+ " FOREIGNTABLE.TABLENAME AS FKTABLE_NAME, FOREIGNFIELD.FIELD AS FKCOLUMN_NAME, "
+				+ " FOREIGNKEYS.POSITION+1 AS KEY_SEQ, FOREIGNKEYS.UPDATERULE AS UPDATE_RULE, "
+				+ " FOREIGNKEYS.DELETERULE AS DELETE_RULE, FOREIGNKEYS.DEFERRABILITY AS DEFERRABILITY "
+				+ "FROM SYSTEM.FOREIGNKEYS "
+				+ "INNER JOIN SYSTEM.TABLES PRIMARYTABLE ON PRIMARYTABLEID=PRIMARYTABLE.TABLEID "
+				+ "INNER JOIN SYSTEM.FIELDS PRIMARYFIELD ON PRIMARYTABLE.SCHEMA=PRIMARYFIELD.SCHEMA "
+				+ "AND PRIMARYTABLE.TABLENAME=PRIMARYFIELD.TABLENAME "
+				+ "AND FOREIGNKEYS.PRIMARYFIELDID=PRIMARYFIELD.FIELDID "
+				+ "INNER JOIN SYSTEM.TABLES FOREIGNTABLE ON FOREIGNTABLEID=FOREIGNTABLE.TABLEID "
+				+ "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA "
+				+ "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME "
+				+ "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID "
+				+ "WHERE FOREIGNTABLE.SCHEMA=? AND FOREIGNTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
@@ -338,8 +408,7 @@ public class StructureTest extends MigrationTestBase {
 					found = true;
 					String seqName = rs2.getString("SEQUENCENAME");
 					Assert.assertNotNull(seqName);
-					if (seqName.equals(nuodbSchemaUsed + "$"
-							+ "IDENTITY_SEQUENCE")) {
+					if (seqName.endsWith("$IDENTITY_SEQUENCE")) {
 						continue;
 					}
 					Assert.assertEquals(seqName.substring(0, 4), "SEQ_");

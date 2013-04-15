@@ -50,6 +50,7 @@ public class MySQLTypes implements DatabaseTypes {
 
 		map.put("INT", new JDBCGetMethod[] { JDBCGetMethod.SHORT,
 				JDBCGetMethod.INT });
+		map.put("BIT", new JDBCGetMethod[] { JDBCGetMethod.BOOLEAN });
 		map.put("TINYINT", new JDBCGetMethod[] { JDBCGetMethod.SHORT,
 				JDBCGetMethod.INT });
 		map.put("SMALLINT", new JDBCGetMethod[] { JDBCGetMethod.SHORT,
@@ -58,7 +59,8 @@ public class MySQLTypes implements DatabaseTypes {
 				JDBCGetMethod.LONG });
 		map.put("BIGINT", new JDBCGetMethod[] { JDBCGetMethod.INT,
 				JDBCGetMethod.LONG });
-
+		map.put("BIGINT UNSIGNED", new JDBCGetMethod[] { JDBCGetMethod.INT,
+				JDBCGetMethod.LONG });
 		map.put("FLOAT", new JDBCGetMethod[] { JDBCGetMethod.FLOAT });
 		map.put("DOUBLE", new JDBCGetMethod[] { JDBCGetMethod.DOUBLE });
 		// TODO: revert back to double after bug fix
@@ -137,11 +139,24 @@ public class MySQLTypes implements DatabaseTypes {
 			return Types.BLOB;
 		} else if ("LONGBLOB".equalsIgnoreCase(type)) {
 			return Types.BLOB;
+		} else if ("VARBINARY".equalsIgnoreCase(type)) {
+			return Types.BLOB;
+		} else if ("BINARY".equalsIgnoreCase(type)) {
+			return Types.BLOB;
 		} else if ("MEDIUMTEXT".equalsIgnoreCase(type)) {
 			return Types.CLOB;
 		} else if ("LONGTEXT".equalsIgnoreCase(type)) {
 			return Types.CLOB;
+		} else if ("BIT".equalsIgnoreCase(type)) {
+			return Types.BOOLEAN;
+		}else if ("TINYBLOB".equalsIgnoreCase(type)) {
+			return Types.BLOB;
+		}else if ("ENUM".equalsIgnoreCase(type)) {
+			return Types.CHAR;
+		}else if ("SET".equalsIgnoreCase(type)) {
+			return Types.CHAR;
 		}
+
 		return 0;
 	}
 
@@ -190,6 +205,18 @@ public class MySQLTypes implements DatabaseTypes {
 			return "8";
 		} else if ("LONGTEXT".equalsIgnoreCase(type)) {
 			return "8";
+		}else if ("BIT".equalsIgnoreCase(type)) {
+			return "2";
+		}else if ("VARBINARY".equalsIgnoreCase(type)) {
+			return "90";
+		}else if ("BINARY".equalsIgnoreCase(type)) {
+			return "90";
+		}else if ("TINYBLOB".equalsIgnoreCase(type)) {
+			return "255";
+		}else if ("ENUM".equalsIgnoreCase(type)) {
+			return "11";
+		}else if ("SET".equalsIgnoreCase(type)) {
+			return "14";
 		}
 		return null;
 	}

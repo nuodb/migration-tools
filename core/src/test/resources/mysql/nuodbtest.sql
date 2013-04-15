@@ -33,10 +33,16 @@ CREATE TABLE `datatypes1` (
   `c8` bigint(20) DEFAULT NULL,
   `c9` float(10,2) DEFAULT NULL,
   `c10` double DEFAULT NULL,
+  `c11` bit,
+  `c12` varbinary(90),
+  `c13` binary(90),
+  `c14` tinyblob,
+  `c15` serial,
   PRIMARY KEY (`c6`),
   UNIQUE KEY `c2` (`c2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
 
 --
 -- Dumping data for table `datatypes1`
@@ -44,7 +50,7 @@ CREATE TABLE `datatypes1` (
 
 LOCK TABLES `datatypes1` WRITE;
 /*!40000 ALTER TABLE `datatypes1` DISABLE KEYS */;
-INSERT INTO `datatypes1` VALUES ('test1',23,'sample text value','2012-09-29',45,345,67,8767,243.34,345.455),('test 2',83,'','1995-03-19',454,3445,97,876765,123.54,235.565);
+INSERT INTO `datatypes1` VALUES ('test1',23,'sample text value','2012-09-29',45,345,67,8767,243.34,345.455,1,'^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk',10),('test 2',83,'','1995-03-19',454,3445,97,876765,123.54,235.565,0,'^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk','^W.I_¼ÑÜ<~DÄx?Eö&^¼°\r^\^ÿ3F\r\nSoÆWloMoOuwu÷0ï%?.Térêz_}ï§_^X#!cƒ|µvü^\¿nòë^Xµ^F%.x~åx-Sk',11);
 /*!40000 ALTER TABLE `datatypes1` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -77,6 +83,8 @@ CREATE TABLE `datatypes2` (
   `c3` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `c4` year(4) DEFAULT NULL,
   `c5` char(20) NOT NULL,
+  `c6` ENUM('abcd', 'check', 'sample test') DEFAULT NULL,
+  `c7` SET('one', 'two', '','three') DEFAULT NULL,
   PRIMARY KEY (`k1`),
   KEY `idx_c5` (`c5`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
@@ -88,7 +96,7 @@ CREATE TABLE `datatypes2` (
 
 LOCK TABLES `datatypes2` WRITE;
 /*!40000 ALTER TABLE `datatypes2` DISABLE KEYS */;
-INSERT INTO `datatypes2` VALUES (1,'345.23','1986-12-29 23:45:59','1986-12-29 07:29:59',2012,'12345678900987654321'),(2,'125.63','2000-10-19 23:45:59','2000-10-19 03:19:49',2013,'abcd');
+INSERT INTO `datatypes2` VALUES (1,'345.23','1986-12-29 23:45:59','1986-12-29 07:29:59',2012,'12345678900987654321','check',''),(2,'125.63','2000-10-19 23:45:59','2000-10-19 03:19:49',2013,'abcd','sample test','two');
 /*!40000 ALTER TABLE `datatypes2` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -48,6 +48,7 @@ public class SQLServerTypes implements DatabaseTypes {
 		map.put("mediumtext", new JDBCGetMethod[] { JDBCGetMethod.STRING });
 		map.put("longtext", new JDBCGetMethod[] { JDBCGetMethod.STRING });
 		map.put("char", new JDBCGetMethod[] { JDBCGetMethod.STRING });
+		map.put("uniqueidentifier", new JDBCGetMethod[] { JDBCGetMethod.STRING });
 		map.put("nchar", new JDBCGetMethod[] { JDBCGetMethod.STRING });
 		map.put("ntext", new JDBCGetMethod[] { JDBCGetMethod.STRING });
 		map.put("int", new JDBCGetMethod[] { JDBCGetMethod.SHORT,
@@ -152,6 +153,8 @@ public class SQLServerTypes implements DatabaseTypes {
 			return Types.VARCHAR;
 		} else if ("char".equalsIgnoreCase(type)) {
 			return Types.CHAR;
+		} else if ("uniqueidentifier".equalsIgnoreCase(type)) {
+			return Types.CHAR;
 		} else if ("datetimeoffset".equalsIgnoreCase(type)) {
 			return Types.VARCHAR;
 		} else if ("nchar".equalsIgnoreCase(type)) {
@@ -163,6 +166,8 @@ public class SQLServerTypes implements DatabaseTypes {
 		} else if ("binary".equalsIgnoreCase(type)) {
 			return Types.BLOB;
 		} else if ("varbinary".equalsIgnoreCase(type)) {
+			return Types.BLOB;
+		}else if ("hierarchyid".equalsIgnoreCase(type)) {
 			return Types.BLOB;
 		}
 		return 0;
@@ -227,6 +232,10 @@ public class SQLServerTypes implements DatabaseTypes {
 			return "2";
 		} else if ("time".equalsIgnoreCase(type)) {
 			return "16";
+		}else if ("uniqueidentifier".equalsIgnoreCase(type)) {
+			return "36";
+		}else if ("hierarchyid".equalsIgnoreCase(type)) {
+			return "8";
 		}
 		return null;
 	}
