@@ -32,7 +32,7 @@ public class TestSetUpHelper {
 	public TestSetUpHelper() throws Exception {
 		String sourceJdbcJar = System.getProperty("source.jdbcjar");
 		String nuodbJdbcJar = System.getProperty("nuodb.jdbcjar");
-		String nuodbHome = System.getProperty("nuodb.home");
+		String nuodbRoot = System.getProperty("nuodb.root");
 		String sourceDriver = System.getProperty("source.driver");
 		String sourceUsername = System.getProperty("source.username");
 		String sourcePassword = System.getProperty("source.password");
@@ -47,14 +47,14 @@ public class TestSetUpHelper {
 			urls.add(sourceJdbcJarFile.toURI().toURL());
 		}
 
-		String nuoddbJdbJarLoc = nuodbJdbcJar;
-		if (nuoddbJdbJarLoc == null || nuoddbJdbJarLoc.trim().length() == 0) {
-			// Take it from the nuodb.home
-			nuoddbJdbJarLoc = nuodbHome + File.separator + "jar"
+		String nuodbJdbcJarLoc = nuodbJdbcJar;
+		if (nuodbJdbcJarLoc == null || nuodbJdbcJarLoc.trim().length() == 0) {
+			// Take it from the nuodb.root
+			nuodbJdbcJarLoc = nuodbRoot + File.separator + "jar"
 					+ File.separator + NUODB_JDBC_JAR;
 		}
-		if (nuoddbJdbJarLoc != null || nuoddbJdbJarLoc.trim().length() > 0) {
-			File nuodbJdbcJarFile = new File(nuoddbJdbJarLoc);
+		if (nuodbJdbcJarLoc != null || nuodbJdbcJarLoc.trim().length() > 0) {
+			File nuodbJdbcJarFile = new File(nuodbJdbcJarLoc);
 			nuodbJdbcJarFile = new File(nuodbJdbcJarFile.getCanonicalPath());
 			urls.add(nuodbJdbcJarFile.toURI().toURL());
 		}

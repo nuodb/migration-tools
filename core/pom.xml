@@ -141,8 +141,8 @@
 								<suiteXmlFile>testng.xml</suiteXmlFile>
 							</suiteXmlFiles>
 							<systemPropertyVariables>
-								<nuodb.home>${NUODB_HOME}</nuodb.home>
-								<nuodb.migrator.home>${NUODB_MIGRATOR_HOME}</nuodb.migrator.home>
+								<nuodb.root>${NUODB_ROOT}</nuodb.root>
+								<nuodb.migrator.root>${NUODB_MIGRATOR_ROOT}</nuodb.migrator.root>
 							</systemPropertyVariables>	
 					</configuration>
 					</plugin>
@@ -175,7 +175,7 @@
 								<source.password>${SOURCE_PASSWORD}</source.password>
 								<source.schema>${SOURCE_SCHEMA}</source.schema>
 								<source.jdbcjar>${SOURCE_JDBCJAR}</source.jdbcjar>
-								<nuodb.home>${NUODB_HOME}</nuodb.home>
+								<nuodb.root>${NUODB_ROOT}</nuodb.root>
 								<nuodb.driver>${NUODB_DRIVER}</nuodb.driver>
 								<nuodb.url>${NUODB_URL}</nuodb.url>
 								<nuodb.username>${NUODB_USERNAME}</nuodb.username>
@@ -214,7 +214,7 @@
 								<source.password>${SOURCE_PASSWORD}</source.password>
 								<source.schema>${SOURCE_SCHEMA}</source.schema>
 								<source.jdbcjar>${SOURCE_JDBCJAR}</source.jdbcjar>
-								<nuodb.home>${NUODB_HOME}</nuodb.home>
+								<nuodb.root>${NUODB_ROOT}</nuodb.root>
 								<nuodb.driver>${NUODB_DRIVER}</nuodb.driver>
 								<nuodb.url>${NUODB_URL}</nuodb.url>
 								<nuodb.username>${NUODB_USERNAME}</nuodb.username>
@@ -246,7 +246,7 @@
 								<source.password>${SOURCE_PASSWORD}</source.password>
 								<source.schema>${SOURCE_SCHEMA}</source.schema>
 								<source.jdbcjar>${SOURCE_JDBCJAR}</source.jdbcjar>
-								<nuodb.home>${NUODB_HOME}</nuodb.home>
+								<nuodb.root>${NUODB_ROOT}</nuodb.root>
 								<nuodb.driver>${NUODB_DRIVER}</nuodb.driver>
 								<nuodb.url>${NUODB_URL}</nuodb.url>
 								<nuodb.username>${NUODB_USERNAME}</nuodb.username>
@@ -285,7 +285,7 @@
 								<source.password>${SOURCE_PASSWORD}</source.password>
 								<source.schema>${SOURCE_SCHEMA}</source.schema>
 								<source.jdbcjar>${SOURCE_JDBCJAR}</source.jdbcjar>
-								<nuodb.home>${NUODB_HOME}</nuodb.home>
+								<nuodb.root>${NUODB_ROOT}</nuodb.root>
 								<nuodb.driver>${NUODB_DRIVER}</nuodb.driver>
 								<nuodb.url>${NUODB_URL}</nuodb.url>
 								<nuodb.username>${NUODB_USERNAME}</nuodb.username>

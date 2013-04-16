@@ -59,10 +59,10 @@ public class ClassPathLoaderUtils {
         for (String path : paths) {
             if ((classPathLoader.addUrl(path) || classPathLoader.addJar(path) ||
                     classPathLoader.addJarDir(path) || classPathLoader.addDir(path))) {
-                // Great, the path was recognized
+                // alright, the path was recognized
             } else {
-                if (log.isWarnEnabled()) {
-                    log.warn(format("Path is neither one of the recognized class path types %s", path));
+                if (log.isDebugEnabled()) {
+                    log.debug(format("Path is neither one of the recognized class path types %s", path));
                 }
             }
         }

@@ -27,28 +27,21 @@
  */
 package com.nuodb.migrator.integration;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.logging.Logger;
-
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * @author Krishnamoorthy Dhandapani
@@ -64,14 +57,14 @@ public class MigrationTestBase {
 	protected ResultSetUtil rsUtil;
 
 	@Parameters({ "source.driver", "source.url", "source.username",
-			"source.password", "source.schema", "source.jdbcjar", "nuodb.home",
+			"source.password", "source.schema", "source.jdbcjar", "nuodb.root",
 			"nuodb.driver", "nuodb.url", "nuodb.username", "nuodb.password",
 			"nuodb.schema", "nuodb.jdbcjar" })
 	@BeforeClass(alwaysRun = true)
 	public void beforeTest(String sourceDriver, String sourceUrl,
 			String sourceUsername, @Optional("") String sourcePassword,
 			@Optional("") String sourceSchema,
-			@Optional("") String sourceJdbcJar, @Optional("") String nuodbHome,
+			@Optional("") String sourceJdbcJar, @Optional("") String nuodbRoot,
 			String nuodbDriver, String nuodbUrl, String nuodbUsername,
 			String nuodbPassword, String nuodbSchema,
 			@Optional("") String nuodbJdbcJar) throws ClassNotFoundException,
@@ -88,15 +81,15 @@ public class MigrationTestBase {
 			urls.add(sourceJdbcJarFile.toURI().toURL());
 		}
 
-		String nuoddbJdbJarLoc = nuodbJdbcJar;
-		if (nuoddbJdbJarLoc == null || nuoddbJdbJarLoc.trim().length() == 0) {
-			// Take it from the nuodb.home
-			nuoddbJdbJarLoc = nuodbHome + File.separator + "jar"
+		String nuodbJdbcJarLoc = nuodbJdbcJar;
+		if (nuodbJdbcJarLoc == null || nuodbJdbcJarLoc.trim().length() == 0) {
+			// Take it from the nuodb.root
+			nuodbJdbcJarLoc = nuodbRoot + File.separator + "jar"
 					+ File.separator + NUODB_JDBC_JAR;
 		}
 
-		if (nuoddbJdbJarLoc != null || nuoddbJdbJarLoc.trim().length() > 0) {
-			File nuodbJdbcJarFile = new File(nuoddbJdbJarLoc);
+		if (nuodbJdbcJarLoc != null || nuodbJdbcJarLoc.trim().length() > 0) {
+			File nuodbJdbcJarFile = new File(nuodbJdbcJarLoc);
 			nuodbJdbcJarFile = new File(nuodbJdbcJarFile.getCanonicalPath());
 			Assert.assertTrue(nuodbJdbcJarFile.exists());
 			Assert.assertTrue(nuodbJdbcJarFile.canRead());
