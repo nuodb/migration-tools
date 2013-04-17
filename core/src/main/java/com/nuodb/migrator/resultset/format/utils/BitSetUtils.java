@@ -29,41 +29,41 @@ package com.nuodb.migrator.resultset.format.utils;
 
 import java.util.BitSet;
 
-import static java.lang.Character.digit;
-import static java.lang.Character.forDigit;
+import static com.nuodb.migrator.resultset.format.utils.BinaryEncoder.HEX;
 
 /**
  * @author Sergey Bushik
  */
 public class BitSetUtils {
 
-    public static String toHex(BitSet bitSet) {
-        int length = bitSet.length();
-        int digits = (length / 4) + (length % 4 > 0 ? 1 : 0);
-        int index = digits - 1;
-        char[] value = new char[digits];
-        for (int bit = 0; bit < length; index--) {
-            int hex = 0;
-            hex |= bitSet.get(bit++) ? 0x1 : 0;
-            hex |= bitSet.get(bit++) ? 0x2 : 0;
-            hex |= bitSet.get(bit++) ? 0x4 : 0;
-            hex |= bitSet.get(bit++) ? 0x8 : 0;
-            value[index] = forDigit(hex, 0x10);
+    public static final BitSet EMPTY = new BitSet();
+
+    public static byte[] toByteArray(BitSet bits) {
+        byte[] bytes = new byte[(bits.length() + 7) / 8];
+        for (int i = 0; i < bits.length(); i++) {
+            if (bits.get(i)) {
+                bytes[i / 8] |= 1 << (i % 8);
+            }
         }
-        return new String(value);
+        return bytes;
     }
 
-    public static BitSet fromHex(String value) {
-        char[] hex = value.toCharArray();
-        BitSet bitSet = new BitSet(hex.length << 2);
-        int bit = 0;
-        for (int index = hex.length - 1; index >= 0; index--) {
-            int digit = digit(hex[index], 0x10);
-            bitSet.set(bit++, (digit & 0x1) > 0);
-            bitSet.set(bit++, (digit & 0x2) > 0);
-            bitSet.set(bit++, (digit & 0x4) > 0);
-            bitSet.set(bit++, (digit & 0x8) > 0);
+    public static BitSet fromByteArray(byte[] bytes) {
+        int length = bytes.length * 8;
+        BitSet bits = new BitSet(length);
+        for (int i = 0; i < length; i++) {
+            if ((bytes[i / 8] & (1 << (i % 8))) > 0) {
+                bits.set(i);
+            }
         }
-        return bitSet;
+        return bits;
+    }
+
+    public static String toHexString(BitSet bits) {
+        return HEX.encode(toByteArray(bits));
+    }
+
+    public static BitSet fromHexString(String value) {
+        return fromByteArray(HEX.decode(value));
     }
 }

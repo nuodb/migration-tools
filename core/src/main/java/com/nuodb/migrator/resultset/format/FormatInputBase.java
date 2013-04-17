@@ -122,8 +122,9 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
             executeUpdate();
         } catch (Exception exception) {
             onReadRowFailure(exception, row, values);
+        } finally {
+            row++;
         }
-        row++;
     }
 
     protected void executeUpdate() throws SQLException {

@@ -40,7 +40,7 @@ import java.io.Writer;
 import java.util.BitSet;
 
 import static com.nuodb.migrator.resultset.format.utils.BinaryEncoder.BASE64;
-import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.toHex;
+import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.toHexString;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.toAlias;
 import static javax.xml.XMLConstants.DEFAULT_NS_PREFIX;
 import static javax.xml.XMLConstants.NULL_NS_URI;
@@ -106,7 +106,7 @@ public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
                 nulls.set(i, variants[i].isNull());
             }
             if (!nulls.isEmpty()) {
-                xmlStreamWriter.writeAttribute(ATTRIBUTE_NULLS, toHex(nulls));
+                xmlStreamWriter.writeAttribute(ATTRIBUTE_NULLS, toHexString(nulls));
             }
             int i = 0;
             for (ValueVariant variant : variants) {

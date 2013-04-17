@@ -137,6 +137,8 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
             writeValues(values = getValues());
         } catch (Exception exception) {
             onWriteRowFailure(exception, row, values);
+        } finally {
+            row++;
         }
     }
 

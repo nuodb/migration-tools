@@ -39,7 +39,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSizePrecisionScale;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -196,7 +196,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         if (scale < 0 && !dialect.supportsNegativeScale()) {
             scale = 0;
         }
-        JdbcTypeSpecifiers typeSpecifiers = newSizePrecisionScale(column.getSize(), column.getPrecision(), scale);
+        JdbcTypeSpecifiers typeSpecifiers = newSpecifiers(column.getSize(), column.getPrecision(), scale);
         String typeName = dialect.getJdbcTypeNameMap().getTypeName(
                 new JdbcTypeDesc(column.getTypeCode(), column.getTypeName()), typeSpecifiers);
         if (typeName == null) {

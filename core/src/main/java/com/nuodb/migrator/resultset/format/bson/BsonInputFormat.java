@@ -39,10 +39,13 @@ import com.nuodb.migrator.resultset.format.value.ValueVariantType;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
+import java.util.BitSet;
 import java.util.Iterator;
 
 import static com.fasterxml.jackson.core.JsonToken.*;
 import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModelList;
+import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.EMPTY;
+import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.fromByteArray;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.STRING;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.fromAlias;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.binary;
@@ -149,20 +152,29 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
                 int length = valueFormatModelList.size();
                 values = new ValueVariant[length];
                 int index = 0;
-                while (index < length && isCurrentToken(VALUE_NULL, VALUE_STRING, VALUE_EMBEDDED_OBJECT)) {
-                    ValueVariantType valueVariantType = valueFormatModelList.get(index).getValueVariantType();
-                    valueVariantType = valueVariantType != null ? valueVariantType : STRING;
-                    switch (valueVariantType) {
+                BitSet nulls = isCurrentToken(VALUE_NULL) ? EMPTY :
+                        fromByteArray((byte[]) bsonParser.getEmbeddedObject());
+                while (index < length) {
+                    Object value;
+                    if (nulls.get(index)) {
+                        value = null;
+                    } else {
+                        bsonParser.nextToken();
+                        value = bsonParser.getEmbeddedObject();
+                    }
+                    ValueVariantType valueType = valueFormatModelList.get(index).getValueVariantType();
+                    valueType = valueType != null ? valueType : STRING;
+                    switch (valueType) {
                         case BINARY:
-                            values[index] = binary((byte[]) bsonParser.getEmbeddedObject());
+                            values[index] = binary((byte[]) value);
                             break;
                         case STRING:
-                            values[index] = string((String) bsonParser.getEmbeddedObject());
+                            values[index] = string((String) value);
                             break;
                     }
                     index++;
-                    bsonParser.nextToken();
                 }
+                bsonParser.nextToken();
             }
         } catch (IOException exception) {
             throw new FormatInputException(exception);

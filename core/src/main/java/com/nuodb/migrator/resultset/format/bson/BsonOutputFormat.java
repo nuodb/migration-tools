@@ -37,7 +37,9 @@ import de.undercouch.bson4jackson.BsonFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.BitSet;
 
+import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.toByteArray;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.toAlias;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 
@@ -94,11 +96,18 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
     @Override
     protected void writeValues(ValueVariant[] variants) {
         try {
-            int i = 0;
-            for (ValueVariant variant : variants) {
-                if (variant.isNull()) {
-                    bsonGenerator.writeNull();
-                } else {
+            BitSet nulls = new BitSet();
+            for (int i = 0; i < variants.length; i++) {
+                nulls.set(i, variants[i].isNull());
+            }
+            if (nulls.isEmpty()) {
+                bsonGenerator.writeNull();
+            } else {
+                bsonGenerator.writeBinary(toByteArray(nulls));
+            }
+            for (int i = 0; i < variants.length; i++) {
+                ValueVariant variant = variants[i];
+                if (!variant.isNull()) {
                     switch (getValueFormatModelList().get(i).getValueVariantType()) {
                         case BINARY:
                             bsonGenerator.writeBinary(variant.asBytes());
@@ -108,7 +117,6 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
                             break;
                     }
                 }
-                i++;
             }
         } catch (IOException exception) {
             throw new FormatOutputException(exception);

@@ -31,12 +31,14 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import org.apache.commons.lang3.StringUtils;
 
+import java.sql.Types;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSizePrecisionScale;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newPrecision;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 
 /**
  * @author Sergey Bushik
@@ -49,7 +51,7 @@ public class JdbcTypeNameMap {
     public static final String VARIABLE_PREFIX = "{";
     public static final String VARIABLE_SUFFIX = "}";
 
-    private Map<JdbcTypeDesc, Map<JdbcTypeSpecifiers, String>> typeCodeTypeSpecifiersMap = Maps.newHashMap();
+    private Map<JdbcTypeDesc, Map<JdbcTypeSpecifiers, String>> typeDescTypeSpecifiersMap = Maps.newHashMap();
 
     public void addTypeName(int typeCode, String typeName) {
         addTypeName(new JdbcTypeDesc(typeCode), typeName);
@@ -64,41 +66,46 @@ public class JdbcTypeNameMap {
     }
 
     public void addTypeName(JdbcTypeDesc typeDesc, String typeName, JdbcTypeSpecifiers typeSpecifiers) {
-        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeDesc);
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeDescTypeSpecifiersMap.get(typeDesc);
         if (typeSpecifiersMap == null) {
-            typeSpecifiersMap = Maps.newHashMap();
-            typeCodeTypeSpecifiersMap.put(typeDesc, typeSpecifiersMap);
+            typeDescTypeSpecifiersMap.put(typeDesc, typeSpecifiersMap = Maps.newHashMap());
         }
-        typeSpecifiersMap.put(typeSpecifiers, typeName.toUpperCase());
+        typeSpecifiersMap.put(typeSpecifiers, typeName);
     }
 
     public String getTypeName(JdbcTypeDesc typeDesc) {
-        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeDesc);
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeDescTypeSpecifiersMap.get(typeDesc);
         return typeSpecifiersMap != null ? typeSpecifiersMap.get(null) : null;
     }
 
     public String getTypeName(JdbcTypeDesc typeDesc, int size, int precision, int scale) {
-        return getTypeName(typeDesc, newSizePrecisionScale(size, precision, scale));
+        return getTypeName(typeDesc, newSpecifiers(size, precision, scale));
     }
 
     public String getTypeName(JdbcTypeDesc typeDesc, JdbcTypeSpecifiers typeSpecifiers) {
-        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeDesc);
-        String typeName = null;
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeDescTypeSpecifiersMap.get(typeDesc);
+        String targetTypeName = getTypeName(typeDesc);
+        JdbcTypeSpecifiers targetTypeSpecifiers = typeSpecifiers;
         if (typeSpecifiersMap != null) {
-            for (Map.Entry<JdbcTypeSpecifiers, String> entry : typeSpecifiersMap.entrySet()) {
-                JdbcTypeSpecifiers entryTypeSpecifiers = entry.getKey();
-                if (TYPE_SPECIFIERS_COMPARATOR.compare(entryTypeSpecifiers, typeSpecifiers) >= 0) {
-                    if (typeSpecifiers != null) {
-                        typeSpecifiers = entryTypeSpecifiers;
-                    }
-                    typeName = entry.getValue();
+            for (Map.Entry<JdbcTypeSpecifiers, String> typeSpecifiersEntry : typeSpecifiersMap.entrySet()) {
+                String entryTypeName = typeSpecifiersEntry.getValue();
+                JdbcTypeSpecifiers entryTypeSpecifiers = typeSpecifiersEntry.getKey();
+                if (entryTypeSpecifiers == null) {
+                    continue;
+                }
+                int entryTypeSpecifierOrder = compareTypeSpecifiers(typeSpecifiers, entryTypeSpecifiers);
+                if (entryTypeSpecifierOrder == 0) {
+                    targetTypeName = entryTypeName;
+                    break;
+                }
+                int targetTypeSpecifierOrder = compareTypeSpecifiers(entryTypeSpecifiers, targetTypeSpecifiers);
+                if (entryTypeSpecifierOrder > 0 && targetTypeSpecifierOrder >= 0) {
+                    targetTypeName = entryTypeName;
+                    targetTypeSpecifiers = entryTypeSpecifiers;
                 }
             }
         }
-        if (typeName == null) {
-            typeName = getTypeName(typeDesc);
-        }
-        return expand(typeName, typeSpecifiers);
+        return expandVariables(targetTypeName, typeSpecifiers);
     }
 
     public void removeTypeName(int typeCode) {
@@ -110,47 +117,62 @@ public class JdbcTypeNameMap {
     }
 
     public void removeTypeName(JdbcTypeDesc typeDesc, JdbcTypeSpecifiers typeSpecifiers) {
-        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeCodeTypeSpecifiersMap.get(typeDesc);
+        Map<JdbcTypeSpecifiers, String> typeSpecifiersMap = typeDescTypeSpecifiersMap.get(typeDesc);
         if (typeSpecifiersMap != null) {
             typeSpecifiersMap.remove(typeSpecifiers);
         }
     }
 
-    private static String expand(String typeName, JdbcTypeSpecifiers typeSpecifiers) {
+    protected String expandVariables(String typeName, JdbcTypeSpecifiers typeSpecifiers) {
         if (!StringUtils.isEmpty(typeName)) {
             Integer size = typeSpecifiers.getSize();
             Integer precision = typeSpecifiers.getPrecision();
             Integer scale = typeSpecifiers.getScale();
-            typeName = expand(typeName, SIZE, size != null ? Integer.toString(size) : null);
-            typeName = expand(typeName, PRECISION, precision != null ? Integer.toString(precision) : null);
-            typeName = expand(typeName, SCALE, scale != null ? Integer.toString(scale) : null);
+            typeName = expandVariable(typeName, SIZE, size != null ? Integer.toString(size) : null);
+            typeName = expandVariable(typeName, PRECISION, precision != null ? Integer.toString(precision) : null);
+            typeName = expandVariable(typeName, SCALE, scale != null ? Integer.toString(scale) : null);
         }
         return typeName;
     }
 
-    private static String expand(String typeName, String variable, String value) {
+    protected String expandVariable(String typeName, String variable, String value) {
         Pattern compile = Pattern.compile(
                 Pattern.quote(VARIABLE_PREFIX + variable + VARIABLE_SUFFIX), Pattern.CASE_INSENSITIVE);
         Matcher matcher = compile.matcher(typeName);
         return value != null && matcher.find() ? matcher.replaceAll(value) : typeName;
     }
 
+    protected int compareTypeSpecifiers(JdbcTypeSpecifiers t1, JdbcTypeSpecifiers t2) {
+        return TYPE_SPECIFIERS_COMPARATOR.compare(t1, t2);
+    }
+
     private static final Comparator<JdbcTypeSpecifiers> TYPE_SPECIFIERS_COMPARATOR = new Ordering<JdbcTypeSpecifiers>() {
         @Override
-        public int compare(JdbcTypeSpecifiers left, JdbcTypeSpecifiers right) {
-            int result = compare(left.getSize(), right.getSize());
+        public int compare(JdbcTypeSpecifiers t1, JdbcTypeSpecifiers t2) {
+            int result = compare(t1.getSize(), t2.getSize());
             if (result == 0) {
-                result = compare(left.getPrecision(), right.getPrecision());
+                result = compare(t1.getPrecision(), t2.getPrecision());
             }
             if (result == 0) {
-                result = compare(left.getScale(), right.getScale());
+                result = compare(t1.getScale(), t2.getScale());
             }
             return result;
         }
 
-        private int compare(Integer left, Integer right) {
-            return left != null && right != null ? left.compareTo(right) : 0;
+        private int compare(Integer i1, Integer i2) {
+            return i1 != null && i2 != null ? i1.compareTo(i2) : 0;
         }
 
     }.nullsFirst();
+
+    public static void main(String[] args) {
+        JdbcTypeNameMap typeNameMap = new JdbcTypeNameMap();
+        typeNameMap.addTypeName(Types.BIGINT, "BIGINT");
+        typeNameMap.addTypeName(Types.BIGINT, "BIGINT_PRECISION_1({P})", newPrecision(1));
+        typeNameMap.addTypeName(Types.BIGINT, "BIGINT_PRECISION_8({P})", newPrecision(8));
+        typeNameMap.addTypeName(Types.BIGINT, "BIGINT_PRECISION_10({P})", newPrecision(10));
+        typeNameMap.addTypeName(Types.BIGINT, "BIGINT_PRECISION_6({P})", newPrecision(6));
+        JdbcTypeDesc typeDesc = new JdbcTypeDesc(Types.BIGINT);
+        System.out.println(typeNameMap.getTypeName(typeDesc, newSpecifiers(1, 5, 0)));
+    }
 }

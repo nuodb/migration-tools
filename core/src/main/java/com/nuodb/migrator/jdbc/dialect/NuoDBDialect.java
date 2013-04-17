@@ -37,8 +37,7 @@ import java.sql.Types;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newScale;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSize;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.*;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static org.apache.commons.lang3.StringUtils.isAllUpperCase;
@@ -62,11 +61,15 @@ public class NuoDBDialect extends SimpleDialect {
 
         removeTypeName(Types.BIT);
         addTypeName(Types.BIT, "BOOLEAN", newSize(1));
-
         addTypeName(Types.TINYINT, "SMALLINT");
         addTypeName(Types.SMALLINT, "SMALLINT");
+
         addTypeName(Types.INTEGER, "INTEGER");
+        addTypeName(Types.INTEGER, "NUMERIC({P})", newPrecision(11));
+        addTypeName(new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT"); // MySQL unsigned int type
+
         addTypeName(Types.BIGINT, "BIGINT");
+        addTypeName(Types.BIGINT, "NUMERIC({P})", newPrecision(20));
 
         addTypeName(Types.REAL, "REAL");
         addTypeName(Types.FLOAT, "FLOAT");
@@ -76,13 +79,14 @@ public class NuoDBDialect extends SimpleDialect {
         addTypeName(Types.CHAR, "CHAR({N})");
 
         addTypeName(Types.VARCHAR, "VARCHAR({N})");
+        addTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
         addTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
 
         addTypeName(Types.DATE, "DATE");
         addTypeName(Types.TIME, "TIME", newScale(0));
         addTypeName(Types.TIME, "TIME({S})");
-        addTypeName(Types.TIMESTAMP, "TIMESTAMP({S})");
         addTypeName(Types.TIMESTAMP, "TIMESTAMP", newScale(0));
+        addTypeName(Types.TIMESTAMP, "TIMESTAMP({S})");
 
         addTypeName(Types.BINARY, "BINARY({N})");
         addTypeName(Types.VARBINARY, "VARBINARY({N})");
@@ -96,7 +100,6 @@ public class NuoDBDialect extends SimpleDialect {
         addTypeName(Types.NCHAR, "NCHAR({N})");
         addTypeName(Types.NVARCHAR, "NVARCHAR({N})");
         addTypeName(Types.NCLOB, "NCLOB");
-        addTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
 
         addJdbcType(NuoDBIntegerType.INSTANCE);
         addJdbcType(NuoDBBigIntType.INSTANCE);

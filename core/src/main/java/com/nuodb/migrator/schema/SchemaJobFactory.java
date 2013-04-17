@@ -47,7 +47,7 @@ import java.util.Collection;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSizePrecisionScale;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
 /**
@@ -90,7 +90,7 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         for (JdbcTypeSpec jdbcTypeSpec : getSchemaSpec().getJdbcTypeSpecs()) {
             jdbcTypeNameMap.addTypeName(
                     jdbcTypeSpec.getTypeCode(), jdbcTypeSpec.getTypeName(),
-                    newSizePrecisionScale(
+                    newSpecifiers(
                             jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()));
         }
         dialect.setIdentifierQuoting(getSchemaSpec().getIdentifierQuoting());

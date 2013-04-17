@@ -49,7 +49,8 @@ public class MySQLIntUnsignedType extends JdbcTypeBase<Long> {
 
     @Override
     public Long getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
-        return resultSet.getLong(column);
+        Long value = resultSet.getLong(column);
+        return resultSet.wasNull() ? null : value;
     }
 
     @Override

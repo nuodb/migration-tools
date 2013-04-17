@@ -52,20 +52,30 @@ public class JdbcTypeNameMapTest {
         jdbcTypeNameMap.addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
         jdbcTypeNameMap.addTypeName(Types.CHAR, "CHAR({N})");
         jdbcTypeNameMap.addTypeName(Types.VARCHAR, "VARCHAR({N})");
+        jdbcTypeNameMap.addTypeName(Types.BIGINT, "BIGINT");
+        jdbcTypeNameMap.addTypeName(Types.BIGINT, "NUMBER({P})", newPrecision(20));
+        jdbcTypeNameMap.addTypeName(Types.BIT, "BIT({N})");
+        jdbcTypeNameMap.addTypeName(Types.BIT, "BOOLEAN", newSize(1));
     }
 
     @DataProvider(name = "getTypeName")
     public Object[][] createGetTypeNameData() {
         return new Object[][]{
-                {JdbcDoubleType.INSTANCE, newSizePrecisionScale(8, 8, 0), "DOUBLE"},
-                {JdbcDoubleType.INSTANCE, newSizePrecisionScale(8, 6, 2), "DOUBLE"},
-                {JdbcTimeType.INSTANCE, newSizePrecisionScale(19, 19, 0), "TIME"},
-                {JdbcTimeType.INSTANCE, newSizePrecisionScale(19, 15, 4), "TIME(4)"},
-                {JdbcDecimalType.INSTANCE, newSizePrecisionScale(8, 8, 0), "DECIMAL(8,0)"},
-                {JdbcDecimalType.INSTANCE, newSizePrecisionScale(8, 6, 2), "DECIMAL(6,2)"},
+                {JdbcDoubleType.INSTANCE, newSpecifiers(8, 8, 0), "DOUBLE"},
+                {JdbcDoubleType.INSTANCE, newSpecifiers(8, 6, 2), "DOUBLE"},
+                {JdbcTimeType.INSTANCE, newSpecifiers(19, 19, 0), "TIME"},
+                {JdbcTimeType.INSTANCE, newSpecifiers(19, 15, 4), "TIME(4)"},
+                {JdbcDecimalType.INSTANCE, newSpecifiers(8, 8, 0), "DECIMAL(8,0)"},
+                {JdbcDecimalType.INSTANCE, newSpecifiers(8, 6, 2), "DECIMAL(6,2)"},
                 {JdbcCharType.INSTANCE, newSize(1), "CHAR(1)"},
                 {JdbcVarCharType.INSTANCE, newSize(128), "VARCHAR(128)"},
                 {JdbcLongVarCharType.INSTANCE, newSize(128), null},
+                {JdbcBigIntType.INSTANCE, newPrecision(10), "BIGINT"},
+                {JdbcBigIntType.INSTANCE, newPrecision(15), "BIGINT"},
+                {JdbcBigIntType.INSTANCE, newPrecision(19), "BIGINT"},
+                {JdbcBigIntType.INSTANCE, newPrecision(20), "NUMBER(20)"},
+                {JdbcBitType.INSTANCE, newSize(1), "BOOLEAN"},
+                {JdbcBitType.INSTANCE, newSize(10), "BIT(10)"},
         };
     }
 

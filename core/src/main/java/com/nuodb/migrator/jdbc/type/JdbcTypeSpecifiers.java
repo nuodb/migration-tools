@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import com.nuodb.migrator.utils.ObjectUtils;
+
 /**
  * @author Sergey Bushik
  */
@@ -40,38 +42,76 @@ public class JdbcTypeSpecifiers {
         return size;
     }
 
+    public void setSize(Integer size) {
+        this.size = size;
+    }
+
     public Integer getPrecision() {
         return precision;
+    }
+
+    public void setPrecision(Integer precision) {
+        this.precision = precision;
     }
 
     public Integer getScale() {
         return scale;
     }
 
-    public JdbcTypeSpecifiers withSize(Integer size) {
-        this.size = size;
-        return this;
-    }
-
-    public JdbcTypeSpecifiers withPrecision(Integer precision) {
-        this.precision = precision;
-        return this;
-    }
-
-    public JdbcTypeSpecifiers withScale(Integer scale) {
+    public void setScale(Integer scale) {
         this.scale = scale;
-        return this;
     }
 
     public static JdbcTypeSpecifiers newSize(Integer size) {
-        return new JdbcTypeSpecifiers().withSize(size);
+        JdbcTypeSpecifiers typeSpecifiers = new JdbcTypeSpecifiers();
+        typeSpecifiers.setSize(size);
+        return typeSpecifiers;
+    }
+
+    public static JdbcTypeSpecifiers newPrecision(Integer precision) {
+        JdbcTypeSpecifiers typeSpecifiers = new JdbcTypeSpecifiers();
+        typeSpecifiers.setPrecision(precision);
+        return typeSpecifiers;
     }
 
     public static JdbcTypeSpecifiers newScale(Integer scale) {
-        return new JdbcTypeSpecifiers().withScale(scale);
+        JdbcTypeSpecifiers typeSpecifiers = new JdbcTypeSpecifiers();
+        typeSpecifiers.setScale(scale);
+        return typeSpecifiers;
     }
 
-    public static JdbcTypeSpecifiers newSizePrecisionScale(Integer size, Integer precision, Integer scale) {
-        return new JdbcTypeSpecifiers().withSize(size).withPrecision(precision).withScale(scale);
+    public static JdbcTypeSpecifiers newSpecifiers(Integer size, Integer precision, Integer scale) {
+        JdbcTypeSpecifiers typeSpecifiers = new JdbcTypeSpecifiers();
+        typeSpecifiers.setSize(size);
+        typeSpecifiers.setPrecision(precision);
+        typeSpecifiers.setScale(scale);
+        return typeSpecifiers;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JdbcTypeSpecifiers)) return false;
+
+        JdbcTypeSpecifiers that = (JdbcTypeSpecifiers) o;
+
+        if (precision != null ? !precision.equals(that.precision) : that.precision != null) return false;
+        if (scale != null ? !scale.equals(that.scale) : that.scale != null) return false;
+        if (size != null ? !size.equals(that.size) : that.size != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = size != null ? size.hashCode() : 0;
+        result = 31 * result + (precision != null ? precision.hashCode() : 0);
+        result = 31 * result + (scale != null ? scale.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }
