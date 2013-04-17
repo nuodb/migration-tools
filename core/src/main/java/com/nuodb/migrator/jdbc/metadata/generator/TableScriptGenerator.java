@@ -191,6 +191,9 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected String getTypeName(Column column, ScriptGeneratorContext context) {
+        if (column.getName().equals("c15")) {
+            System.out.println("");
+        }
         Dialect dialect = context.getDialect();
         int scale = column.getScale();
         if (scale < 0 && !dialect.supportsNegativeScale()) {

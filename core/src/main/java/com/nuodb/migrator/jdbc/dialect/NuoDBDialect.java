@@ -69,7 +69,8 @@ public class NuoDBDialect extends SimpleDialect {
         addTypeName(new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT"); // MySQL unsigned int type
 
         addTypeName(Types.BIGINT, "BIGINT");
-        addTypeName(Types.BIGINT, "NUMERIC({P})", newPrecision(20));
+        // maximum precision should be 20
+        addTypeName(Types.BIGINT, "NUMERIC({P})", newPrecision(21));
 
         addTypeName(Types.REAL, "REAL");
         addTypeName(Types.FLOAT, "FLOAT");
