@@ -27,33 +27,45 @@
 
 @REM JAVA_HOME can optionally be set here
 
+if exist "%JAVA_HOME%" goto okJavaHome
+echo The JAVA_HOME variable must be set to a Java installation!
+goto FAIL
+
+:okJavaHome
+
 @REM NUODB_ROOT is set here
-if exist %NUODB_ROOT% goto okNuoDBHome
-set NUODB_ROOT="C:\Program Files\NuoDB"
-if exist %NUODB_ROOT% goto okNuoDBHome
-set NUODB_ROOT="C:\Program Files (x86)\NuoDB"
+if exist "%NUODB_ROOT%" goto okNuoDBHome
+set NUODB_ROOT=C:\Program Files\NuoDB
+if exist "%NUODB_ROOT%" goto okNuoDBHome
+set NUODB_ROOT=C:\Program Files (x86)\NuoDB
+if exist "%NUODB_ROOT%" goto okNuoDBHome
+
+echo Cannot locate the NuoDB installation directory!
+echo Set NUODB_ROOT appropriately.
+goto FAIL
 
 :okNuoDBHome
 
 @REM Maximum heap size
-set MAX_HEAP_SIZE="256M"
+set MAX_HEAP_SIZE=256M
 
-if "%JAVA_HOME%" == "" goto error
-if not "%NUODB_MIGRATOR_ROOT%" == "" goto okHome
-set CURRENT_DIR=%cd%
-set NUODB_MIGRATOR_ROOT="%CURRENT_DIR%\.."
+if exist "%NUODB_MIGRATOR_ROOT%\jar" goto okHome
+set NUODB_MIGRATOR_ROOT=%~dp0\..
+if exist "%NUODB_MIGRATOR_ROOT%\jar" goto okHome
+
+echo Cannot locate the NuoDB Migrator installation directory!
+echo Set NUODB_MIGRATOR_ROOT appropriately.
+goto FAIL
 
 :okHome
-set JAVA_OPTS=-Xmx%MAX_HEAP_SIZE% -Dnuodb.root=%NUODB_ROOT% -Dnuodb.migrator.root=%NUODB_MIGRATOR_ROOT%
 set CLASSPATH=%NUODB_MIGRATOR_ROOT%\jar\nuodb-migrator-bootstrap-${project.version}.jar;%CLASSPATH%
+
+set JAVA_OPTS=-Xmx%MAX_HEAP_SIZE% "-Dnuodb.root=%NUODB_ROOT%" "-Dnuodb.migrator.root=%NUODB_MIGRATOR_ROOT%"
 
 "%JAVA_HOME%\bin\java" %JAVA_OPTS% -cp "%CLASSPATH%" com.nuodb.migrator.bootstrap.Bootstrap %*
 
-GOTO :finally
+exit /b 0
 
-:error
-echo The JAVA_HOME variable must be set to run this program!
+:FAIL
 pause
-
-:finally
-endlocal
+exit /b 1
