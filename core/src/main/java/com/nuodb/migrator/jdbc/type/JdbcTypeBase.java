@@ -37,38 +37,38 @@ import java.util.Map;
  */
 public abstract class JdbcTypeBase<T> implements JdbcType<T> {
 
-    private final JdbcTypeDesc typeDesc;
-    private final Class<? extends T> typeClass;
+    private final JdbcTypeDesc jdbcTypeDesc;
+    private final Class<? extends T> valueClass;
 
-    protected JdbcTypeBase(int typeCode, Class<? extends T> typeClass) {
-        this(new JdbcTypeDesc(typeCode), typeClass);
+    protected JdbcTypeBase(int typeCode, Class<? extends T> valueClass) {
+        this(new JdbcTypeDesc(typeCode), valueClass);
     }
 
-    protected JdbcTypeBase(int typeCode, String typeName, Class<? extends T> typeClass) {
-        this(new JdbcTypeDesc(typeCode, typeName), typeClass);
+    protected JdbcTypeBase(int typeCode, String typeName, Class<? extends T> valueClass) {
+        this(new JdbcTypeDesc(typeCode, typeName), valueClass);
     }
 
-    protected JdbcTypeBase(JdbcTypeDesc typeDesc, Class<? extends T> typeClass) {
-        this.typeDesc = typeDesc;
-        this.typeClass = typeClass;
+    protected JdbcTypeBase(JdbcTypeDesc jdbcTypeDesc, Class<? extends T> valueClass) {
+        this.jdbcTypeDesc = jdbcTypeDesc;
+        this.valueClass = valueClass;
     }
 
     protected final int getTypeCode() {
-        return typeDesc.getTypeCode();
+        return jdbcTypeDesc.getTypeCode();
     }
 
     protected final String getTypeName() {
-        return typeDesc.getTypeName();
+        return jdbcTypeDesc.getTypeName();
     }
 
     @Override
-    public JdbcTypeDesc getTypeDesc() {
-        return typeDesc;
+    public JdbcTypeDesc getJdbcTypeDesc() {
+        return jdbcTypeDesc;
     }
 
     @Override
-    public Class<? extends T> getTypeClass() {
-        return typeClass;
+    public Class<? extends T> getValueClass() {
+        return valueClass;
     }
 
     @Override
@@ -100,18 +100,18 @@ public abstract class JdbcTypeBase<T> implements JdbcType<T> {
 
         JdbcTypeBase that = (JdbcTypeBase) o;
 
-        if (typeDesc != null ? !typeDesc.equals(that.typeDesc) : that.typeDesc != null) return false;
+        if (jdbcTypeDesc != null ? !jdbcTypeDesc.equals(that.jdbcTypeDesc) : that.jdbcTypeDesc != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return typeDesc != null ? typeDesc.hashCode() : 0;
+        return jdbcTypeDesc != null ? jdbcTypeDesc.hashCode() : 0;
     }
 
     @Override
     public String toString() {
-        return typeDesc.toString();
+        return jdbcTypeDesc.toString();
     }
 }

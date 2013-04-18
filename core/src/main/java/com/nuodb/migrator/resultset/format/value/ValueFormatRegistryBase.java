@@ -50,7 +50,7 @@ public class ValueFormatRegistryBase implements ValueFormatRegistry {
 
     @Override
     public void addValueFormat(JdbcType jdbcType, ValueFormat valueFormat) {
-        addValueFormat(jdbcType.getTypeDesc(), valueFormat);
+        addValueFormat(jdbcType.getJdbcTypeDesc(), valueFormat);
     }
 
     @Override

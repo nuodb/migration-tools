@@ -194,7 +194,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
                     public PreparedStatement create(Connection connection) throws SQLException {
                         PreparedStatement statement = connection.prepareStatement(
                                 query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                        execution.getDialect().setStreamResults(statement, true);
+                        execution.getDialect().setStatementStreamResults(statement, true);
                         return statement;
                     }
                 },

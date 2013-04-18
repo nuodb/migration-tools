@@ -45,6 +45,11 @@ public class MySQLDialect extends SimpleDialect {
 
     public MySQLDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
+    }
+
+    @Override
+    protected void initJdbcTypes() {
+        super.initJdbcTypes();
 
         addJdbcType(MySQLIntUnsignedType.INSTANCE);
         addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
@@ -131,7 +136,7 @@ public class MySQLDialect extends SimpleDialect {
      * @throws SQLException
      */
     @Override
-    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
+    public void setStatementStreamResults(Statement statement, boolean streamResults) throws SQLException {
         statement.setFetchSize(streamResults ? Integer.MIN_VALUE : 0);
     }
 

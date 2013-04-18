@@ -27,13 +27,13 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeRegistry;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -105,12 +105,12 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
 
     private void inspect(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        JdbcTypeRegistry typeRegistry = inspectionContext.getDialect().getJdbcTypeRegistry();
+        Dialect dialect = inspectionContext.getDialect();
         while (columns.next()) {
             Table table = addTable(inspectionResults, null, columns.getString("SCHEMA"), columns.getString("TABLENAME"));
 
             Column column = table.addColumn(columns.getString("FIELD"));
-            JdbcTypeDesc typeDescAlias = typeRegistry.getJdbcTypeDescAlias(
+            JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeDescAlias(
                     columns.getInt("JDBCTYPE"), columns.getString("NAME"));
             column.setTypeCode(typeDescAlias.getTypeCode());
             column.setTypeName(typeDescAlias.getTypeName());

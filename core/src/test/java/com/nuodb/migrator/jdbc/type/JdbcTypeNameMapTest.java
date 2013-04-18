@@ -46,16 +46,16 @@ public class JdbcTypeNameMapTest {
 
     @BeforeMethod
     public void setUp() {
-        jdbcTypeNameMap.addTypeName(Types.DOUBLE, "DOUBLE");
-        jdbcTypeNameMap.addTypeName(Types.TIME, "TIME", newScale(0));
-        jdbcTypeNameMap.addTypeName(Types.TIME, "TIME({S})");
-        jdbcTypeNameMap.addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
-        jdbcTypeNameMap.addTypeName(Types.CHAR, "CHAR({N})");
-        jdbcTypeNameMap.addTypeName(Types.VARCHAR, "VARCHAR({N})");
-        jdbcTypeNameMap.addTypeName(Types.BIGINT, "BIGINT");
-        jdbcTypeNameMap.addTypeName(Types.BIGINT, "NUMBER({P})", newPrecision(20));
-        jdbcTypeNameMap.addTypeName(Types.BIT, "BIT({N})");
-        jdbcTypeNameMap.addTypeName(Types.BIT, "BOOLEAN", newSize(1));
+        jdbcTypeNameMap.addJdbcTypeName(Types.DOUBLE, "DOUBLE");
+        jdbcTypeNameMap.addJdbcTypeName(Types.TIME, "TIME", newScale(0));
+        jdbcTypeNameMap.addJdbcTypeName(Types.TIME, "TIME({S})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.CHAR, "CHAR({N})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.BIGINT, "BIGINT");
+        jdbcTypeNameMap.addJdbcTypeName(Types.BIGINT, "NUMBER({P})", newPrecision(20));
+        jdbcTypeNameMap.addJdbcTypeName(Types.BIT, "BIT({N})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.BIT, "BOOLEAN", newSize(1));
     }
 
     @DataProvider(name = "getTypeName")
@@ -81,6 +81,6 @@ public class JdbcTypeNameMapTest {
 
     @Test(dataProvider = "getTypeName")
     public void testGetTypeName(JdbcType jdbcType, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
-        assertEquals(jdbcTypeNameMap.getTypeName(jdbcType.getTypeDesc(), jdbcTypeSpecifiers), typeName);
+        assertEquals(jdbcTypeNameMap.getJdbcTypeName(jdbcType.getJdbcTypeDesc(), jdbcTypeSpecifiers), typeName);
     }
 }

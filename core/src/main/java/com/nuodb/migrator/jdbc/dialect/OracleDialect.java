@@ -46,7 +46,11 @@ public class OracleDialect extends SimpleDialect {
 
     public OracleDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
+    }
 
+    @Override
+    protected void initJdbcTypes() {
+        super.initJdbcTypes();
         addJdbcTypeAdapter(new OracleBlobTypeAdapter());
         addJdbcTypeAdapter(new OracleClobTypeAdapter());
     }

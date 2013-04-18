@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.model.ValueModel;
 import com.nuodb.migrator.jdbc.model.ValueModelList;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeRegistry;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -63,8 +63,8 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
         DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
-        JdbcTypeRegistry jdbcTypeRegistry = inspectionContext.getDialect().getJdbcTypeRegistry();
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        Dialect dialect = inspectionContext.getDialect();
         for (TableInspectionScope inspectionScope : inspectionScopes) {
             ResultSet columns = databaseMetaData.getColumns(
                     inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable(), null);
@@ -75,7 +75,8 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
                             columns.getString("TABLE_SCHEM"), columns.getString("TABLE_NAME"));
 
                     Column column = table.addColumn(columns.getString("COLUMN_NAME"));
-                    JdbcTypeDesc typeDescAlias = jdbcTypeRegistry.getJdbcTypeDescAlias(
+
+                    JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeDescAlias(
                             columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
                     column.setTypeCode(typeDescAlias.getTypeCode());
                     column.setTypeName(typeDescAlias.getTypeName());

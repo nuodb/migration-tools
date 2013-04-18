@@ -41,6 +41,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
@@ -60,45 +62,57 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private ScriptTranslationManager scriptTranslationManager = new ScriptTranslationManager();
-    private JdbcTypeNameMap jdbcTypeNameMap = new JdbcTypeNameMap();
-    private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
     private IdentifierNormalizer identifierNormalizer = NOOP;
     private IdentifierQuoting identifierQuoting = ALWAYS;
+    private Map<DatabaseInfo, JdbcTypeNameMap> jdbcTypeNameMaps = new HashMap<DatabaseInfo, JdbcTypeNameMap>();
+    private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
+    private ScriptTranslationManager scriptTranslationManager = new ScriptTranslationManager();
     private ScriptEscapeUtils scriptEscapeUtils = new ScriptEscapeUtils();
     private DatabaseInfo databaseInfo;
 
     public SimpleDialect(DatabaseInfo databaseInfo) {
         this.databaseInfo = databaseInfo;
 
-        addTypeName(Types.BIT, "BIT");
-        addTypeName(Types.BOOLEAN, "BOOLEAN");
-        addTypeName(Types.TINYINT, "TINYINT");
-        addTypeName(Types.SMALLINT, "SMALLINT");
-        addTypeName(Types.INTEGER, "INTEGER");
-        addTypeName(Types.BIGINT, "BIGINT");
-        addTypeName(Types.FLOAT, "FLOAT({P})");
-        addTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
-        addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
-        addTypeName(Types.REAL, "REAL");
+        initJdbcTypes();
+        initJdbcTypeNames();
+        initScriptTranslations();
+    }
 
-        addTypeName(Types.DATE, "DATE");
-        addTypeName(Types.TIME, "TIME");
-        addTypeName(Types.TIMESTAMP, "TIMESTAMP");
+    protected void initJdbcTypes() {
+    }
 
-        addTypeName(Types.BLOB, "BLOB");
+    protected void initJdbcTypeNames() {
+        addJdbcTypeName(Types.BIT, "BIT");
+        addJdbcTypeName(Types.BOOLEAN, "BOOLEAN");
+        addJdbcTypeName(Types.TINYINT, "TINYINT");
+        addJdbcTypeName(Types.SMALLINT, "SMALLINT");
+        addJdbcTypeName(Types.INTEGER, "INTEGER");
+        addJdbcTypeName(Types.BIGINT, "BIGINT");
+        addJdbcTypeName(Types.FLOAT, "FLOAT({P})");
+        addJdbcTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
+        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+        addJdbcTypeName(Types.REAL, "REAL");
 
-        addTypeName(Types.CHAR, "CHAR({N})");
-        addTypeName(Types.NCHAR, "NCHAR({N})");
+        addJdbcTypeName(Types.DATE, "DATE");
+        addJdbcTypeName(Types.TIME, "TIME");
+        addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP");
 
-        addTypeName(Types.VARCHAR, "VARCHAR({N})");
-        addTypeName(Types.NVARCHAR, "NVARCHAR({N})");
+        addJdbcTypeName(Types.BLOB, "BLOB");
 
-        addTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
-        addTypeName(Types.LONGNVARCHAR, "NVARCHAR({N})");
+        addJdbcTypeName(Types.CHAR, "CHAR({N})");
+        addJdbcTypeName(Types.NCHAR, "NCHAR({N})");
 
-        addTypeName(Types.CLOB, "CLOB");
-        addTypeName(Types.NCLOB, "NCLOB");
+        addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(Types.NVARCHAR, "NVARCHAR({N})");
+
+        addJdbcTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(Types.LONGNVARCHAR, "NVARCHAR({N})");
+
+        addJdbcTypeName(Types.CLOB, "CLOB");
+        addJdbcTypeName(Types.NCLOB, "NCLOB");
+    }
+
+    protected void initScriptTranslations() {
     }
 
     @Override
@@ -121,9 +135,13 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return ALLOWED_IDENTIFIER_PATTERN.matcher(identifier).matches();
     }
 
-
     public boolean isSQLKeyword(String identifier, Identifiable identifiable) {
         return getSQLKeywords().contains(identifier);
+    }
+
+    @Override
+    public JdbcTypeDesc getJdbcTypeDescAlias(int typeCode, String typeName) {
+        return getJdbcTypeRegistry().getJdbcTypeDescAlias(typeCode, typeName);
     }
 
     protected String quote(String identifier) {
@@ -145,16 +163,17 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return valueOf('"');
     }
 
-    protected String getScriptTranslation(String sourceScript, Dialect sourceDialect) {
-        Script targetScript = getScriptTranslationManager().getScriptTranslation(
-                sourceDialect, this, new SimpleScript(sourceScript));
-        return targetScript != null ? targetScript.getScript() : null;
+    protected void addScriptTranslation(DatabaseInfo databaseInfo, String sourceScript, String targetScript) {
+        getScriptTranslationManager().addScriptTranslation(
+                new ScriptTranslation(databaseInfo, this,
+                        new SimpleScript(sourceScript), new SimpleScript(targetScript)));
     }
 
-    protected void addScriptTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript, String targetScript) {
-        getScriptTranslationManager().addScriptTranslation(
-                new ScriptTranslation(sourceDatabaseInfo, this,
-                        new SimpleScript(sourceScript), new SimpleScript(targetScript)));
+    @Override
+    public String getScriptTranslation(DatabaseInfo databaseInfo, String script) {
+        Script targetScript = getScriptTranslationManager().getScriptTranslation(
+                databaseInfo, getDatabaseInfo(), new SimpleScript(script));
+        return targetScript != null ? targetScript.getScript() : null;
     }
 
     @Override
@@ -226,12 +245,21 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public JdbcTypeNameMap getJdbcTypeNameMap() {
-        return jdbcTypeNameMap;
+        return getJdbcTypeNameMap(getDatabaseInfo());
     }
 
     @Override
     public JdbcTypeRegistry getJdbcTypeRegistry() {
         return jdbcTypeRegistry;
+    }
+
+    @Override
+    public JdbcTypeNameMap getJdbcTypeNameMap(DatabaseInfo databaseInfo) {
+        JdbcTypeNameMap jdbcTypeNameMap = jdbcTypeNameMaps.get(databaseInfo);
+        if (jdbcTypeNameMap == null) {
+            jdbcTypeNameMaps.put(databaseInfo, jdbcTypeNameMap = new JdbcTypeNameMap());
+        }
+        return jdbcTypeNameMap;
     }
 
     @Override
@@ -327,7 +355,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public String getCheckClause(String clause) {
-        clause = getScriptQuotation(clause);
+        clause = getScriptQuoted(clause);
         if (!clause.startsWith("(") && !clause.endsWith(")")) {
             return "(" + clause + ")";
         } else {
@@ -340,7 +368,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         if (defaultValue == null) {
             return null;
         }
-        defaultValue = getScriptTranslation(defaultValue, dialect);
+        defaultValue = getScriptTranslation(dialect.getDatabaseInfo(), defaultValue);
         String defaultValueUnquoted = defaultValue;
         boolean opening = false;
         if (defaultValue.startsWith("'")) {
@@ -354,7 +382,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return "'" + defaultValueUnquoted + "'";
     }
 
-    protected String getScriptQuotation(String script) {
+    protected String getScriptQuoted(String script) {
         if (script == null) {
             return null;
         }
@@ -464,7 +492,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
+    public void setStatementStreamResults(Statement statement, boolean streamResults) throws SQLException {
     }
 
     @Override
@@ -472,36 +500,87 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return true;
     }
 
-    public void addTypeName(int typeCode, String typeName) {
-        jdbcTypeNameMap.addTypeName(typeCode, typeName);
+    @Override
+    public String getJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc,
+                                  JdbcTypeSpecifiers jdbcTypeSpecifiers) {
+        String jdbcTypeName = getJdbcTypeName(getJdbcTypeNameMap(databaseInfo), jdbcTypeDesc,
+                jdbcTypeSpecifiers);
+        if (jdbcTypeName == null) {
+            jdbcTypeName = getJdbcTypeName(getJdbcTypeNameMap(), jdbcTypeDesc, jdbcTypeSpecifiers);
+        }
+        return jdbcTypeName;
     }
 
-    public void addTypeName(int typeCode, String typeName, JdbcTypeSpecifiers typeSpecifiers) {
-        jdbcTypeNameMap.addTypeName(typeCode, typeName, typeSpecifiers);
+    protected void addJdbcType(JdbcType type) {
+        getJdbcTypeRegistry().addJdbcType(type);
     }
 
-    public void addTypeName(JdbcTypeDesc typeDesc, String typeName) {
-        jdbcTypeNameMap.addTypeName(typeDesc, typeName);
+    protected void addJdbcTypeAdapter(JdbcTypeAdapter typeAdapter) {
+        getJdbcTypeRegistry().addJdbcTypeAdapter(typeAdapter);
     }
 
-    public void removeTypeName(int typeCode) {
-        jdbcTypeNameMap.removeTypeName(typeCode);
+    protected void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias) {
+        getJdbcTypeRegistry().addJdbcTypeDescAlias(typeCode, typeName, typeCodeAlias);
     }
 
-    public void removeTypeName(JdbcTypeDesc typeDesc) {
-        jdbcTypeNameMap.removeTypeName(typeDesc);
+    protected void addJdbcTypeName(int typeCode, String typeName) {
+        getJdbcTypeNameMap().addJdbcTypeName(typeCode, typeName);
     }
 
-    public void addJdbcType(JdbcType type) {
-        jdbcTypeRegistry.addJdbcType(type);
+    protected void addJdbcTypeName(int typeCode, String typeName, JdbcTypeSpecifiers jdbcTypeSpecifiers) {
+        getJdbcTypeNameMap().addJdbcTypeName(typeCode, typeName, jdbcTypeSpecifiers);
     }
 
-    public void addJdbcTypeAdapter(JdbcTypeAdapter typeAdapter) {
-        jdbcTypeRegistry.addJdbcTypeAdapter(typeAdapter);
+    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, String typeName) {
+        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, typeName);
     }
 
-    public void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias) {
-        jdbcTypeRegistry.addJdbcTypeDescAlias(typeCode, typeName, typeCodeAlias);
+    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, String typeName, JdbcTypeSpecifiers jdbcTypeSpecifiers) {
+        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, typeName, jdbcTypeSpecifiers);
+    }
+
+    protected void addJdbcTypeName(DatabaseInfo databaseInfo, int typeCode, String typeName) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, typeName);
+    }
+
+    protected void addJdbcTypeName(DatabaseInfo databaseInfo, int typeCode, String typeName,
+                                JdbcTypeSpecifiers jdbcTypeSpecifiers) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, typeName, jdbcTypeSpecifiers);
+    }
+
+    protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, typeName);
+    }
+
+    protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName,
+                                JdbcTypeSpecifiers jdbcTypeSpecifiers) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, typeName, jdbcTypeSpecifiers);
+    }
+
+    protected String getJdbcTypeName(JdbcTypeNameMap jdbcTypeNameMap, JdbcTypeDesc jdbcTypeDesc,
+                                     JdbcTypeSpecifiers jdbcTypeSpecifiers) {
+        String jdbcTypeName = jdbcTypeNameMap.getJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers);
+        if (jdbcTypeName == null) {
+            jdbcTypeName = jdbcTypeNameMap.getJdbcTypeName(
+                    new JdbcTypeDesc(jdbcTypeDesc.getTypeCode()), jdbcTypeSpecifiers);
+        }
+        return jdbcTypeName;
+    }
+
+    protected void removeJdbcTypeName(int typeCode) {
+        getJdbcTypeNameMap().removeJdbcTypeName(typeCode);
+    }
+
+    protected void removeJdbcTypeName(JdbcTypeDesc typeDesc) {
+        getJdbcTypeNameMap().removeJdbcTypeName(typeDesc);
+    }
+
+    protected void removeJdbcTypeName(DatabaseInfo databaseInfo, int typeCode) {
+        getJdbcTypeNameMap(databaseInfo).removeJdbcTypeName(typeCode);
+    }
+
+    protected void removeJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc typeDesc) {
+        getJdbcTypeNameMap(databaseInfo).removeJdbcTypeName(typeDesc);
     }
 
     @Override
@@ -513,7 +592,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
         if (identifierNormalizer != null ? !identifierNormalizer.equals(
                 that.identifierNormalizer) : that.identifierNormalizer != null) return false;
-        if (jdbcTypeNameMap != null ? !jdbcTypeNameMap.equals(that.jdbcTypeNameMap) : that.jdbcTypeNameMap != null)
+        if (jdbcTypeNameMaps != null ? !jdbcTypeNameMaps.equals(that.jdbcTypeNameMaps) : that.jdbcTypeNameMaps != null)
             return false;
         if (jdbcTypeRegistry != null ? !jdbcTypeRegistry.equals(that.jdbcTypeRegistry) : that.jdbcTypeRegistry != null)
             return false;

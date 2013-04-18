@@ -88,7 +88,7 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         NuoDBDialect dialect = new NuoDBDialect();
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         for (JdbcTypeSpec jdbcTypeSpec : getSchemaSpec().getJdbcTypeSpecs()) {
-            jdbcTypeNameMap.addTypeName(
+            jdbcTypeNameMap.addJdbcTypeName(
                     jdbcTypeSpec.getTypeCode(), jdbcTypeSpec.getTypeName(),
                     newSpecifiers(
                             jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()));

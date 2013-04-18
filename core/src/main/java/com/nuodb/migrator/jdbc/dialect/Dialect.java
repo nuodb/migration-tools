@@ -30,8 +30,10 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migrator.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -115,17 +117,9 @@ public interface Dialect {
 
     String getIdentifier(String identifier, Identifiable identifiable);
 
-    SQLKeywords getSQLKeywords();
-
-    DatabaseInfo getDatabaseInfo();
-
-    JdbcTypeNameMap getJdbcTypeNameMap();
-
-    JdbcTypeRegistry getJdbcTypeRegistry();
-
-    void setStreamResults(Statement statement, boolean streamResults) throws SQLException;
-
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
+
+    void setStatementStreamResults(Statement statement, boolean streamResults) throws SQLException;
 
     void setTransactionIsolationLevel(Connection connection, int[] transactionIsolationLevels) throws SQLException;
 
@@ -140,6 +134,22 @@ public interface Dialect {
     boolean isQuotingIdentifier(String identifier, Identifiable identifiable);
 
     boolean isSQLKeyword(String identifier, Identifiable identifiable);
+
+    String getJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers);
+
+    JdbcTypeDesc getJdbcTypeDescAlias(int typeCode, String typeName);
+
+    String getScriptTranslation(DatabaseInfo databaseInfo, String script);
+
+    DatabaseInfo getDatabaseInfo();
+
+    SQLKeywords getSQLKeywords();
+
+    JdbcTypeNameMap getJdbcTypeNameMap();
+
+    JdbcTypeNameMap getJdbcTypeNameMap(DatabaseInfo databaseInfo);
+
+    JdbcTypeRegistry getJdbcTypeRegistry();
 
     IdentifierNormalizer getIdentifierNormalizer();
 
@@ -157,3 +167,4 @@ public interface Dialect {
 
     void setScriptTranslationManager(ScriptTranslationManager scriptTranslationManager);
 }
+

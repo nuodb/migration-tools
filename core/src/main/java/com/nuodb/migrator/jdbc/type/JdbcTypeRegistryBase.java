@@ -38,16 +38,16 @@ import java.util.Map;
 public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
 
     private Map<JdbcTypeDesc, JdbcType> jdbcTypeMap = Maps.newHashMap();
-    private Map<JdbcTypeDesc, JdbcTypeDesc> jdbcTypeDescAliasMap = Maps.newHashMap();
     private Map<Class, JdbcTypeAdapter> jdbcTypeAdapterMap = Maps.newHashMap();
+    private Map<JdbcTypeDesc, JdbcTypeDesc> jdbcTypeDescAliasMap = Maps.newHashMap();
 
     public JdbcTypeRegistryBase() {
     }
 
-    public JdbcTypeRegistryBase(JdbcTypeRegistry jdbcTypeRegistry) {
-        addJdbcTypes(jdbcTypeRegistry.getJdbcTypeMap());
-        addJdbcTypeAdapters(jdbcTypeRegistry.getJdbcTypeAdapterMap());
-        addJdbcTypeDescAliases(jdbcTypeRegistry.getJdbcTypeDescAliases());
+    public JdbcTypeRegistryBase(JdbcTypeRegistry typeRegistry) {
+        addJdbcTypes(typeRegistry.getJdbcTypes());
+        addJdbcTypeAdapters(typeRegistry.getJdbcTypeAdapters());
+        addJdbcTypeDescAliases(typeRegistry.getJdbcTypeDescAliases());
     }
 
     @Override
@@ -67,12 +67,12 @@ public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
 
     @Override
     public void addJdbcType(JdbcType jdbcType) {
-        JdbcTypeDesc typeDesc = jdbcType.getTypeDesc();
+        JdbcTypeDesc typeDesc = jdbcType.getJdbcTypeDesc();
         jdbcTypeMap.put(typeDesc, jdbcType);
     }
 
     @Override
-    public Collection<JdbcType> getJdbcTypeMap() {
+    public Collection<JdbcType> getJdbcTypes() {
         return jdbcTypeMap.values();
     }
 
@@ -89,18 +89,18 @@ public class JdbcTypeRegistryBase implements JdbcTypeRegistry {
     }
 
     @Override
-    public Collection<JdbcTypeAdapter> getJdbcTypeAdapterMap() {
+    public Collection<JdbcTypeAdapter> getJdbcTypeAdapters() {
         return jdbcTypeAdapterMap.values();
     }
 
     @Override
-    public JdbcTypeAdapter getJdbcTypeAdapter(Class typeClass) {
-        return jdbcTypeAdapterMap.get(typeClass);
+    public JdbcTypeAdapter getJdbcTypeAdapter(Class valueClass) {
+        return jdbcTypeAdapterMap.get(valueClass);
     }
 
     @Override
     public void addJdbcTypes(JdbcTypeRegistry jdbcTypeRegistry) {
-        addJdbcTypes(jdbcTypeRegistry.getJdbcTypeMap());
+        addJdbcTypes(jdbcTypeRegistry.getJdbcTypes());
     }
 
     @Override

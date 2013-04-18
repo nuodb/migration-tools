@@ -37,9 +37,9 @@ import java.util.Map;
  */
 public interface JdbcType<T> {
 
-    JdbcTypeDesc getTypeDesc();
+    JdbcTypeDesc getJdbcTypeDesc();
 
-    Class<? extends T> getTypeClass();
+    Class<? extends T> getValueClass();
 
     T getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException;
 

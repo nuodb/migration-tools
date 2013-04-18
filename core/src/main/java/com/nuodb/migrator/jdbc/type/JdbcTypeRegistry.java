@@ -35,7 +35,7 @@ import java.util.Map;
  */
 public interface JdbcTypeRegistry {
 
-    void addJdbcType(JdbcType jdbcType);
+    void addJdbcType(JdbcType type);
 
     JdbcType getJdbcType(int typeCode);
 
@@ -47,15 +47,15 @@ public interface JdbcTypeRegistry {
 
     void addJdbcTypes(JdbcTypeRegistry jdbcTypeRegistry);
 
-    Collection<JdbcType> getJdbcTypeMap();
+    Collection<JdbcType> getJdbcTypes();
 
     void addJdbcTypeAdapter(JdbcTypeAdapter jdbcTypeAdapter);
 
     void addJdbcTypeAdapters(Collection<JdbcTypeAdapter> jdbcTypeAdapters);
 
-    Collection<JdbcTypeAdapter> getJdbcTypeAdapterMap();
+    Collection<JdbcTypeAdapter> getJdbcTypeAdapters();
 
-    JdbcTypeAdapter getJdbcTypeAdapter(Class typeClass);
+    JdbcTypeAdapter getJdbcTypeAdapter(Class valueClass);
 
     void addJdbcTypeDescAlias(int typeCode, int typeCodeAlias);
 
