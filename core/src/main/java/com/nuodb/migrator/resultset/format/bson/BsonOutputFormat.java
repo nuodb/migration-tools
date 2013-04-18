@@ -96,6 +96,7 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
     @Override
     protected void writeValues(ValueVariant[] variants) {
         try {
+            bsonGenerator.writeStartArray();
             BitSet nulls = new BitSet();
             for (int i = 0; i < variants.length; i++) {
                 nulls.set(i, variants[i].isNull());
@@ -118,6 +119,7 @@ public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes
                     }
                 }
             }
+            bsonGenerator.writeEndArray();
         } catch (IOException exception) {
             throw new FormatOutputException(exception);
         }

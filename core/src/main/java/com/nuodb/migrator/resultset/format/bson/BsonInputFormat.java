@@ -107,7 +107,6 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
                 bsonParser.nextToken();
             }
             bsonParser.nextToken();
-            bsonParser.nextToken();
         } catch (IOException exception) {
             throw new FormatInputException(exception);
         }
@@ -147,12 +146,12 @@ public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
     protected ValueVariant[] doReadValues() {
         ValueVariant[] values = null;
         try {
-            if (!isCurrentToken(END_ARRAY)) {
+            if (isNextToken(START_ARRAY)) {
                 ValueModelList<ValueFormatModel> valueFormatModelList = getValueFormatModelList();
                 int length = valueFormatModelList.size();
                 values = new ValueVariant[length];
                 int index = 0;
-                BitSet nulls = isCurrentToken(VALUE_NULL) ? EMPTY :
+                BitSet nulls = isNextToken(VALUE_NULL) ? EMPTY :
                         fromByteArray((byte[]) bsonParser.getEmbeddedObject());
                 while (index < length) {
                     Object value;

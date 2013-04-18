@@ -78,8 +78,8 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(Types.INTEGER, "NUMERIC({P})", newPrecision(11));
 
         addJdbcTypeName(Types.BIGINT, "BIGINT");
-        // maximum precision should be 20
-        // addTypeName(Types.BIGINT, "NUMERIC({P})", newPrecision(20));
+        // Maximum precision should be 20
+        addJdbcTypeName(Types.BIGINT, "NUMERIC({P})", newPrecision(21));
         addJdbcTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
         addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
 
