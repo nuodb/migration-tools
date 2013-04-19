@@ -34,6 +34,7 @@ import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migrator.resultset.format.value.ValueFormat;
 import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueVariant;
+import com.nuodb.migrator.utils.ReflectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,6 +136,8 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
         ValueVariant[] values = null;
         try {
             writeValues(values = getValues());
+        } catch (ReflectionException exception) {
+            onWriteRowFailure(exception.getCause(), row, values);
         } catch (Exception exception) {
             onWriteRowFailure(exception, row, values);
         } finally {
@@ -156,8 +159,8 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
 
     protected abstract void writeValues(ValueVariant[] variants);
 
-    protected void onWriteRowFailure(Exception exception, long row, ValueVariant[] values) {
-        String message = format("Failed to dump row %d", row);
+    protected void onWriteRowFailure(Throwable exception, long row, ValueVariant[] values) {
+        String message = format("Failed to dump row #%d: %s", row, exception.getMessage());
         if (isLenient()) {
             if (logger.isErrorEnabled()) {
                 logger.error(message);

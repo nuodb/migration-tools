@@ -46,7 +46,7 @@ import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 /**
  * @author Sergey Bushik
  */
-public class BsonOutputFormat extends FormatOutputBase implements BsonAttributes {
+public class BsonFormatOutput extends FormatOutputBase implements BsonAttributes {
 
     private JsonGenerator bsonGenerator;
 

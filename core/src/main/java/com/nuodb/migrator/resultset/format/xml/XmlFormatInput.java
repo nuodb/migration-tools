@@ -55,7 +55,7 @@ import static javax.xml.XMLConstants.NULL_NS_URI;
 /**
  * @author Sergey Bushik
  */
-public class XmlInputFormat extends FormatInputBase implements XmlAttributes {
+public class XmlFormatInput extends FormatInputBase implements XmlAttributes {
 
     private XMLStreamReader xmlStreamReader;
     private Iterator<ValueVariant[]> iterator;

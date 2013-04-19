@@ -28,14 +28,14 @@
 package com.nuodb.migrator.resultset.format;
 
 import com.nuodb.migrator.resultset.format.bson.BsonAttributes;
-import com.nuodb.migrator.resultset.format.bson.BsonInputFormat;
-import com.nuodb.migrator.resultset.format.bson.BsonOutputFormat;
+import com.nuodb.migrator.resultset.format.bson.BsonFormatInput;
+import com.nuodb.migrator.resultset.format.bson.BsonFormatOutput;
 import com.nuodb.migrator.resultset.format.csv.CsvAttributes;
-import com.nuodb.migrator.resultset.format.csv.CsvInputFormat;
-import com.nuodb.migrator.resultset.format.csv.CsvOutputFormat;
+import com.nuodb.migrator.resultset.format.csv.CsvFormatInput;
+import com.nuodb.migrator.resultset.format.csv.CsvFormatOutput;
 import com.nuodb.migrator.resultset.format.xml.XmlAttributes;
-import com.nuodb.migrator.resultset.format.xml.XmlInputFormat;
-import com.nuodb.migrator.resultset.format.xml.XmlOutputFormat;
+import com.nuodb.migrator.resultset.format.xml.XmlFormatInput;
+import com.nuodb.migrator.resultset.format.xml.XmlFormatOutput;
 import com.nuodb.migrator.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static java.lang.String.*;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -60,13 +61,15 @@ public class SimpleFormatFactory implements FormatFactory {
             new TreeMap<String, Class<? extends FormatOutput>>(CASE_INSENSITIVE_ORDER);
 
     public SimpleFormatFactory() {
-        registerFormat(CsvAttributes.FORMAT_TYPE, CsvInputFormat.class);
-        registerFormat(XmlAttributes.FORMAT_TYPE, XmlInputFormat.class);
-        registerFormat(BsonAttributes.FORMAT_TYPE, BsonInputFormat.class);
+        registerFormat(CsvAttributes.FORMAT_TYPE, CsvFormatInput.class);
+        registerFormat(XmlAttributes.FORMAT_TYPE, XmlFormatInput.class);
+        registerFormat(BsonAttributes.FORMAT_TYPE, BsonFormatInput.class);
+        // registerFormat(SqlAttributes.FORMAT_TYPE, SqlFormatInput.class);
 
-        registerFormat(CsvAttributes.FORMAT_TYPE, CsvOutputFormat.class);
-        registerFormat(XmlAttributes.FORMAT_TYPE, XmlOutputFormat.class);
-        registerFormat(BsonAttributes.FORMAT_TYPE, BsonOutputFormat.class);
+        registerFormat(CsvAttributes.FORMAT_TYPE, CsvFormatOutput.class);
+        registerFormat(XmlAttributes.FORMAT_TYPE, XmlFormatOutput.class);
+        registerFormat(BsonAttributes.FORMAT_TYPE, BsonFormatOutput.class);
+        // registerFormat(SqlAttributes.FORMAT_TYPE, SqlFormatOutput.class);
     }
 
     @Override

@@ -48,7 +48,7 @@ import static javax.xml.XMLConstants.NULL_NS_URI;
 /**
  * @author Sergey Bushik
  */
-public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
+public class XmlFormatOutput extends FormatOutputBase implements XmlAttributes {
 
     private String encoding;
     private String version;

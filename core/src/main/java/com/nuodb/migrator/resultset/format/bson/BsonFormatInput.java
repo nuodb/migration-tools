@@ -55,7 +55,7 @@ import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 /**
  * @author Sergey Bushik
  */
-public class BsonInputFormat extends FormatInputBase implements BsonAttributes {
+public class BsonFormatInput extends FormatInputBase implements BsonAttributes {
 
     private JsonParser bsonParser;
     private Iterator<ValueVariant[]> iterator;

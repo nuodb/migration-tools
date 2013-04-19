@@ -59,7 +59,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 /**
  * @author Sergey Bushik
  */
-public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
+public class CsvFormatInput extends FormatInputBase implements CsvAttributes {
 
     private CSVParser csvParser;
     private String doubleQuote;

@@ -48,7 +48,7 @@ import static java.nio.charset.Charset.forName;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class CsvOutputFormat extends FormatOutputBase implements CsvAttributes {
+public class CsvFormatOutput extends FormatOutputBase implements CsvAttributes {
 
     private CSVPrinter csvPrinter;
     private String doubleQuote;
