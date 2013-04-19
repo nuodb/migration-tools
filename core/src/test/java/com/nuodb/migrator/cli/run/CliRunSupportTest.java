@@ -31,7 +31,7 @@ import com.google.common.collect.Maps;
 import com.nuodb.migrator.cli.parse.*;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.jdbc.JdbcConstants;
-import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -78,7 +78,7 @@ public class CliRunSupportTest {
                 "--source.properties=profileSQL=true"
         };
 
-        JdbcConnectionSpec expected = new JdbcConnectionSpec();
+        DriverConnectionSpec expected = new DriverConnectionSpec();
         expected.setDriverClassName("com.mysql.jdbc.Driver");
         expected.setUrl("jdbc:mysql://localhost:3306/test");
         expected.setUsername("root");
@@ -92,7 +92,7 @@ public class CliRunSupportTest {
     }
 
     @Test(dataProvider = "sourceGroup")
-    public void testSourceGroup(String[] arguments, JdbcConnectionSpec expected) {
+    public void testSourceGroup(String[] arguments, DriverConnectionSpec expected) {
         Group group = cliRunSupport.createSourceGroup();
         assertNotNull(group, "Source group of options is required");
 
@@ -100,7 +100,7 @@ public class CliRunSupportTest {
         OptionSet options = parser.parse(arguments, group);
         assertNotNull(options, "Option set containing source group options is expected");
 
-        JdbcConnectionSpec actual = cliRunSupport.parseSourceGroup(options, group);
+        DriverConnectionSpec actual = cliRunSupport.parseSourceGroup(options, group);
         assertNotNull(actual, "Connection specification is expected");
         assertEquals(actual, expected);
     }
@@ -181,7 +181,7 @@ public class CliRunSupportTest {
                 "--target.schema=hockey"
         };
 
-        JdbcConnectionSpec expected = new JdbcConnectionSpec();
+        DriverConnectionSpec expected = new DriverConnectionSpec();
         expected.setDriverClassName(JdbcConstants.NUODB_DRIVER);
         expected.setUrl("jdbc:com.nuodb://localhost/test");
         expected.setUsername("dba");
@@ -191,13 +191,13 @@ public class CliRunSupportTest {
     }
 
     @Test(dataProvider = "targetGroup")
-    public void testTargetGroup(String[] arguments, JdbcConnectionSpec expected) {
+    public void testTargetGroup(String[] arguments, DriverConnectionSpec expected) {
         Group group = cliRunSupport.createTargetGroup();
         assertNotNull(group, "Target group of options is required");
 
         OptionSet options = parser.parse(arguments, group);
 
-        JdbcConnectionSpec actual = cliRunSupport.parseTargetGroup(options, group);
+        DriverConnectionSpec actual = cliRunSupport.parseTargetGroup(options, group);
         assertNotNull(actual, "Connection specification is expected");
         assertEquals(actual, expected);
     }

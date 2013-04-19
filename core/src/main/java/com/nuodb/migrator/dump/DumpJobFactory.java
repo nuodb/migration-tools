@@ -41,17 +41,15 @@ import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.DumpSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
 public class DumpJobFactory extends ConnectionProviderFactory implements JobFactory<DumpJob> {
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private DumpSpec dumpSpec;
 

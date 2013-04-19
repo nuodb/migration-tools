@@ -27,27 +27,15 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class DataSourceConnectionProvider extends ConnectionProviderBase {
+public class SimpleStatementFormatterFactory implements StatementFormatterFactory {
 
-    private DataSource dataSource;
-
-    protected Connection createConnection() throws SQLException {
-        if (dataSource == null) {
-            synchronized (this) {
-                if (dataSource == null) {
-                    dataSource = createDataSource();
-                }
-            }
-        }
-        return dataSource.getConnection();
+    @Override
+    public StatementFormatter createStatementFormat(Statement statement, String query) {
+        return new SimpleStatementFormatter(query);
     }
-
-    protected abstract DataSource createDataSource() throws SQLException;
 }

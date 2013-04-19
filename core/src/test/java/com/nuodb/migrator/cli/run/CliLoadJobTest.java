@@ -33,7 +33,7 @@ import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.load.LoadJobFactory;
 import com.nuodb.migrator.resultset.format.csv.CsvAttributes;
-import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.LoadSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import org.testng.annotations.BeforeMethod;
@@ -87,7 +87,7 @@ public class CliLoadJobTest {
     private LoadSpec createLoadSpec() {
         LoadSpec loadSpec = new LoadSpec();
 
-        JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
+        DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setDriverClassName(NUODB_DRIVER);
         connectionSpec.setUrl("jdbc:com.nuodb://localhost/test?schema=hockey");
         connectionSpec.setUsername("dba");

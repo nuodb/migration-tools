@@ -57,8 +57,6 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
 
     public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
-
     private SchemaSpec schemaSpec;
     private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
     private DialectResolver dialectResolver = new SimpleDialectResolver();

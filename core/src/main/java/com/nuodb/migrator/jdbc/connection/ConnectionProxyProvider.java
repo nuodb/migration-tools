@@ -27,22 +27,22 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
 import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import static java.lang.reflect.Proxy.*;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class ConnectionProviderBase implements ConnectionProvider {
+public abstract class ConnectionProxyProvider implements ConnectionProvider {
 
     protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -55,12 +55,7 @@ public abstract class ConnectionProviderBase implements ConnectionProvider {
     public Connection getConnection() throws SQLException {
         Connection connection = createConnection();
         initConnection(connection);
-        return createConnectionProxy(connection);
-    }
-
-    protected ConnectionProxy createConnectionProxy(Connection connection) {
-        return (ConnectionProxy) Proxy.newProxyInstance(ReflectionUtils.getClassLoader(),
-                new Class<?>[]{ConnectionProxy.class}, new ConnectionInvocationHandler(connection));
+        return wrapConnection(connection);
     }
 
     protected abstract Connection createConnection() throws SQLException;
@@ -68,15 +63,28 @@ public abstract class ConnectionProviderBase implements ConnectionProvider {
     protected void initConnection(Connection connection) throws SQLException {
     }
 
-    protected Connection invokeGetConnection(Connection connection) {
+    protected Connection wrapConnection(Connection connection) {
+        return (Connection) newProxyInstance(
+                getClassLoader(), new Class<?>[]{ConnectionProxy.class},
+                new ConnectionHandler(connection));
+    }
+
+    public Connection unwrapConnection(Connection connection) {
+        if (!isProxyClass(connection.getClass())) {
+            return connection;
+        }
+        InvocationHandler invocationHandler = getInvocationHandler(connection);
+        if (invocationHandler instanceof TargetHandler) {
+            return (Connection) ((TargetHandler) invocationHandler).getTarget();
+        }
         return connection;
     }
 
-    public abstract class TargetInvocationHandler<T> implements InvocationHandler {
+    public abstract class TargetHandler<T> implements InvocationHandler {
 
         private final T target;
 
-        public TargetInvocationHandler(T target) {
+        public TargetHandler(T target) {
             this.target = target;
         }
 
@@ -94,18 +102,18 @@ public abstract class ConnectionProviderBase implements ConnectionProvider {
         }
     }
 
-    public class ConnectionInvocationHandler extends TargetInvocationHandler<Connection> {
+    public class ConnectionHandler extends TargetHandler<Connection> {
 
         private static final String GET_CONNECTION_METHOD = "getConnection";
 
-        public ConnectionInvocationHandler(Connection connection) {
+        public ConnectionHandler(Connection connection) {
             super(connection);
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (GET_CONNECTION_METHOD.equals(method.getName())) {
-                return invokeGetConnection(getTarget());
+                return unwrapConnection(getTarget());
             } else {
                 return super.invoke(proxy, method, args);
             }

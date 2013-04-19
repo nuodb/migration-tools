@@ -25,14 +25,37 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.jdbc.connection;
 
-import java.sql.Statement;
+import com.nuodb.migrator.spec.ConnectionSpec;
 
 /**
  * @author Sergey Bushik
  */
-public interface StatementFormatFactory {
+public abstract class ConnectionSpecProvider<T extends ConnectionSpec> extends ConnectionProxyProvider {
 
-    StatementFormat createStatementFormat(Statement statement, String query);
+    private T connectionSpec;
+
+    public ConnectionSpecProvider(T connectionSpec) {
+        this.connectionSpec = connectionSpec;
+    }
+
+    public T getConnectionSpec() {
+        return connectionSpec;
+    }
+
+    @Override
+    public String getCatalog() {
+        return connectionSpec.getCatalog();
+    }
+
+    @Override
+    public String getSchema() {
+        return connectionSpec.getSchema();
+    }
+
+    @Override
+    public String toString() {
+        return connectionSpec.toString();
+    }
 }

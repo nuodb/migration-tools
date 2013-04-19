@@ -25,17 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.jdbc.connection;
 
 import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleStatementFormatFactory implements StatementFormatFactory {
+public interface StatementFormatterFactory {
 
-    @Override
-    public StatementFormat createStatementFormat(Statement statement, String query) {
-        return new SimpleStatementFormat(query);
-    }
+    StatementFormatter createStatementFormat(Statement statement, String query);
 }

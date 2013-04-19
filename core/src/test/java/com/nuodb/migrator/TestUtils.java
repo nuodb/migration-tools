@@ -1,11 +1,11 @@
 package com.nuodb.migrator;
 
-import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 
 public class TestUtils {
 
-    public static JdbcConnectionSpec createConnectionSpec() {
-        final JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
+    public static DriverConnectionSpec createConnectionSpec() {
+        final DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
         connectionSpec.setUsername("dba");
         connectionSpec.setPassword("goalie");

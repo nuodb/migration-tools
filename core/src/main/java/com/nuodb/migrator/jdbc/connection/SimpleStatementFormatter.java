@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.jdbc.connection;
 
 import java.sql.Blob;
 import java.sql.Clob;
@@ -43,7 +43,7 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 /**
  * @author Sergey Bushik
  */
-public class SimpleStatementFormat implements StatementFormat {
+public class SimpleStatementFormatter implements StatementFormatter {
 
     private static final String PARAMETER = "?";
     public static final Pattern PARAMETER_PATTERN = compile(quote(PARAMETER));
@@ -51,7 +51,7 @@ public class SimpleStatementFormat implements StatementFormat {
     private final String query;
     private final List<Object> parameters;
 
-    public SimpleStatementFormat(String query) {
+    public SimpleStatementFormatter(String query) {
         this.query = query;
         this.parameters = newArrayList(new Object[countMatches(query, PARAMETER)]);
     }

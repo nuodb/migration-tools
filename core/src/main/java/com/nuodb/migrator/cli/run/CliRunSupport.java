@@ -36,7 +36,7 @@ import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.validation.ConnectionGroupInfo;
 import com.nuodb.migrator.jdbc.JdbcConstants;
-import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 
 import java.io.UnsupportedEncodingException;
@@ -191,8 +191,8 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
-    protected JdbcConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
-        JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
+    protected DriverConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
+        DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setDriverClassName((String) optionSet.getValue(SOURCE_DRIVER_OPTION));
         connectionSpec.setUrl((String) optionSet.getValue(SOURCE_URL_OPTION));
         connectionSpec.setUsername((String) optionSet.getValue(SOURCE_USERNAME_OPTION));
@@ -367,10 +367,10 @@ public class CliRunSupport extends CliSupport {
                 withOption(attributes).build();
     }
 
-    protected JdbcConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
-        JdbcConnectionSpec connectionSpec = null;
+    protected DriverConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
+        DriverConnectionSpec connectionSpec = null;
         if (optionSet.hasOption(TARGET_URL_OPTION)) {
-            connectionSpec = new JdbcConnectionSpec();
+            connectionSpec = new DriverConnectionSpec();
             connectionSpec.setDriverClassName(JdbcConstants.NUODB_DRIVER);
             connectionSpec.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
             connectionSpec.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
