@@ -100,7 +100,7 @@ public class JdbcTimestampValueFormat extends ValueFormatBase<Timestamp> {
     }
 
     @Override
-    public ValueVariantType getVariantType(ValueModel ValueModel) {
+    public ValueVariantType getValueType(ValueModel ValueModel) {
         return ValueVariantType.STRING;
     }
 }

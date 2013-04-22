@@ -39,6 +39,7 @@ import java.sql.RowId;
 import java.sql.Types;
 import java.util.Map;
 
+import static com.nuodb.migrator.resultset.format.value.ValueVariantType.BYTES;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.STRING;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.binary;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.string;
@@ -226,7 +227,7 @@ public class SimpleValueFormat extends ValueFormatBase<Object> {
     }
 
     @Override
-    public ValueVariantType getVariantType(ValueModel valueModel) {
+    public ValueVariantType getValueType(ValueModel valueModel) {
         ValueVariantType valueVariantType;
         switch (valueModel.getTypeCode()) {
             case Types.BINARY:
@@ -239,7 +240,7 @@ public class SimpleValueFormat extends ValueFormatBase<Object> {
             case Types.REF:
             case Types.DATALINK:
             case Types.ROWID:
-                valueVariantType = ValueVariantType.BYTES;
+                valueVariantType = BYTES;
                 break;
             default:
                 valueVariantType = STRING;

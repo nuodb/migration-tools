@@ -62,7 +62,7 @@ public class JdbcTimeValueFormat extends ValueFormatBase<Time> {
     }
 
     @Override
-    public ValueVariantType getVariantType(ValueModel ValueModel) {
+    public ValueVariantType getValueType(ValueModel ValueModel) {
         return ValueVariantType.STRING;
     }
 }

@@ -106,7 +106,7 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
             ValueFormat valueFormat = getValueFormatRegistry().getValueFormat(typeDescAlias);
             JdbcTypeValueAccess valueAccess = getValueAccessProvider().getResultSetAccess(
                     getResultSet(), valueFormatModel, index + 1);
-            valueFormatModel.setValueVariantType(valueFormat.getVariantType(valueFormatModel));
+            valueFormatModel.setValueVariantType(valueFormat.getValueType(valueFormatModel));
             valueFormatModel.setValueFormat(valueFormat);
             valueFormatModel.setValueAccess(valueAccess);
             visitValueFormatModel(valueFormatModel);
