@@ -114,7 +114,7 @@ public class XmlFormatOutput extends FormatOutputBase implements XmlAttributes {
                     xmlStreamWriter.writeStartElement(ELEMENT_COLUMN);
                     String value = null;
                     switch (getValueFormatModelList().get(i).getValueVariantType()) {
-                        case BINARY:
+                        case BYTES:
                             value = BASE64.encode(variant.asBytes());
                             break;
                         case STRING:

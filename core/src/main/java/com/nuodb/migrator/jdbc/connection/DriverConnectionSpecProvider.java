@@ -38,6 +38,7 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -50,7 +51,6 @@ public class DriverConnectionSpecProvider extends ConnectionSpecProvider<DriverC
     private DataSource dataSource;
     private Boolean autoCommit;
     private Integer transactionIsolation;
-    private boolean driverRegistered;
 
     public DriverConnectionSpecProvider(DriverConnectionSpec connectionSpec) {
         this(connectionSpec, false);
@@ -73,24 +73,35 @@ public class DriverConnectionSpecProvider extends ConnectionSpecProvider<DriverC
 
     protected DataSource getDataSource() throws SQLException {
         if (dataSource == null) {
+            loadDriver();
             dataSource = createDataSource();
         }
         return dataSource;
     }
 
-    protected DataSource createDataSource() throws SQLException {
-        if (!driverRegistered) {
-            Driver driver = getConnectionSpec().getDriver();
-            if (driver == null) {
-                String driverClassName = getConnectionSpec().getDriverClassName();
-                if (logger.isDebugEnabled()) {
-                    logger.debug(format("Loading driver %s", driverClassName));
-                }
-                driver = ReflectionUtils.newInstance(driverClassName);
+    protected void loadDriver() throws SQLException {
+        Enumeration<Driver> drivers = DriverManager.getDrivers();
+        while (drivers.hasMoreElements()) {
+            Driver driver = drivers.nextElement();
+            if (driver.acceptsURL(getConnectionSpec().getUrl())) {
+                return;
             }
-            DriverManager.registerDriver(driver);
-            driverRegistered = true;
         }
+        Driver driver = getConnectionSpec().getDriver();
+        String driverClassName = getConnectionSpec().getDriverClassName();
+        if (driver != null) {
+            DriverManager.registerDriver(driver);
+        } else if (driverClassName != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Loading driver %s", driverClassName));
+            }
+            ReflectionUtils.newInstance(driverClassName);
+        } else {
+            throw new ConnectionException("Neither driver nor driver class name provided");
+        }
+    }
+
+    private BasicDataSource createDataSource() {
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setUrl(getConnectionSpec().getUrl());
         dataSource.setUsername(getConnectionSpec().getUsername());
@@ -145,11 +156,6 @@ public class DriverConnectionSpecProvider extends ConnectionSpecProvider<DriverC
         }
     }
 
-    @Override
-    public String toString() {
-        return getConnectionSpec().getUrl();
-    }
-
     public Boolean getAutoCommit() {
         return autoCommit;
     }
@@ -164,5 +170,10 @@ public class DriverConnectionSpecProvider extends ConnectionSpecProvider<DriverC
 
     public void setTransactionIsolation(Integer transactionIsolation) {
         this.transactionIsolation = transactionIsolation;
+    }
+
+    @Override
+    public String toString() {
+        return getConnectionSpec().getUrl();
     }
 }

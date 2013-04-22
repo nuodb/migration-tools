@@ -99,7 +99,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP", newScale(0));
         addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP({S})");
 
-        addJdbcTypeName(Types.BINARY, "BINARY({N})");
+        addJdbcTypeName(Types.BINARY, "BIN({N})");
         addJdbcTypeName(Types.VARBINARY, "VARBINARY({N})");
         addJdbcTypeName(Types.LONGVARBINARY, "VARBINARY({N})");
 

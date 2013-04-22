@@ -110,7 +110,7 @@ public class BsonFormatOutput extends FormatOutputBase implements BsonAttributes
                 ValueVariant variant = variants[i];
                 if (!variant.isNull()) {
                     switch (getValueFormatModelList().get(i).getValueVariantType()) {
-                        case BINARY:
+                        case BYTES:
                             bsonGenerator.writeBinary(variant.asBytes());
                             break;
                         case STRING:

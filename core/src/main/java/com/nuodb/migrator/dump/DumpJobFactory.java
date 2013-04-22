@@ -40,10 +40,8 @@ import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.DumpSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
-import org.slf4j.Logger;
 
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
@@ -62,7 +60,7 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
 
         DumpJob dumpJob = new DumpJob();
         ConnectionSpec connectionSpec = dumpSpec.getConnectionSpec();
-        dumpJob.setConnectionProvider(createConnectionProvider(connectionSpec, false));
+        dumpJob.setConnectionProvider(createConnectionProvider(connectionSpec));
         ResourceSpec outputSpec = dumpSpec.getOutputSpec();
         dumpJob.setOutputType(outputSpec.getType());
         dumpJob.setAttributes(outputSpec.getAttributes());

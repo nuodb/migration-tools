@@ -25,36 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.resultset.format.value;
+package com.nuodb.migrator.jdbc.connection;
 
-import java.util.Map;
-import java.util.TreeMap;
-
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
-import static java.util.Collections.unmodifiableMap;
+import com.nuodb.migrator.MigrationException;
 
 /**
  * @author Sergey Bushik
  */
-public enum ValueVariantType {
+public class ConnectionException extends MigrationException {
 
-    STRING, BYTES;
-
-    private static final Map<String, ValueVariantType> ALIASES;
-
-    public static String toAlias(ValueVariantType valueVariantType) {
-        return valueVariantType.name().toLowerCase();
+    public ConnectionException(String message) {
+        super(message);
     }
 
-    public static ValueVariantType fromAlias(String alias) {
-        return ALIASES.get(alias);
+    public ConnectionException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    static {
-        Map<String, ValueVariantType> aliases = new TreeMap<String, ValueVariantType>(CASE_INSENSITIVE_ORDER);
-        for (ValueVariantType type : values()) {
-            aliases.put(type.name(), type);
-        }
-        ALIASES = unmodifiableMap(aliases);
+    public ConnectionException(Throwable cause) {
+        super(cause);
     }
 }

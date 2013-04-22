@@ -123,21 +123,21 @@ public class StatementLoggerConnectionProvider extends ConnectionProxyProvider {
     }
 
     protected Object invokeGetMetaData(TargetHandler<Connection> targetHandler,
-                                       Object proxy, Method method, Object[] args) {
+                                       Object proxy, Method method, Object[] args) throws Throwable {
         DatabaseMetaData databaseMetaData = targetHandler.invokeTarget(method, args);
         return newProxyInstance(getClassLoader(), new Class<?>[]{DatabaseMetaData.class},
                 new ConnectionAwareHandler((Connection) proxy, databaseMetaData));
     }
 
     protected Object invokeCreateStatement(TargetHandler<Connection> targetHandler,
-                                           Object proxy, Method method, Object[] args) {
+                                           Object proxy, Method method, Object[] args) throws Throwable {
         Statement statement = targetHandler.invokeTarget(method, args);
         return newProxyInstance(getClassLoader(), new Class<?>[]{Statement.class},
                 new StatementHandler((Connection) proxy, statement));
     }
 
     protected Object invokePrepareStatement(TargetHandler<Connection> targetHandler,
-                                            Object proxy, Method method, Object[] args) {
+                                            Object proxy, Method method, Object[] args) throws Throwable {
         PreparedStatement preparedStatement = targetHandler.invokeTarget(method, args);
         return newProxyInstance(getClassLoader(), new Class<?>[]{PreparedStatement.class},
                 new PreparedStatementHandler((Connection) proxy, preparedStatement,
@@ -145,12 +145,12 @@ public class StatementLoggerConnectionProvider extends ConnectionProxyProvider {
     }
 
     protected Object invokeExecute(TargetHandler<? extends Statement> targetHandler,
-                                   Object proxy, Method method, Object[] args) {
+                                   Object proxy, Method method, Object[] args) throws Throwable {
         return ((StatementHandler) targetHandler).invokeExecute(method, args);
     }
 
     protected Object invokeSet(TargetHandler<PreparedStatement> targetHandler,
-                               Object proxy, Method method, Object[] args) {
+                               Object proxy, Method method, Object[] args) throws Throwable {
         return ((PreparedStatementHandler) targetHandler).invokeSet(method, args);
     }
 
@@ -219,7 +219,7 @@ public class StatementLoggerConnectionProvider extends ConnectionProxyProvider {
             }
         }
 
-        public Object invokeExecute(Method method, Object[] args) {
+        public Object invokeExecute(Method method, Object[] args) throws Throwable {
             log(getTarget(), (String) args[0]);
             return invokeTarget(method, args);
         }
@@ -252,7 +252,7 @@ public class StatementLoggerConnectionProvider extends ConnectionProxyProvider {
             }
         }
 
-        public Object invokeSet(Method method, Object[] args) {
+        public Object invokeSet(Method method, Object[] args) throws Throwable {
             if (args != null) {
                 Object parameter = args[0];
                 if (parameter instanceof Integer) {
@@ -264,7 +264,7 @@ public class StatementLoggerConnectionProvider extends ConnectionProxyProvider {
         }
 
         @Override
-        public Object invokeExecute(Method method, Object[] args) {
+        public Object invokeExecute(Method method, Object[] args) throws Throwable {
             log(statementFormatter.format());
             return invokeTarget(method, args);
         }

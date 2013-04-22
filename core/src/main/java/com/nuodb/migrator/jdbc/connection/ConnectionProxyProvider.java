@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
+import com.nuodb.migrator.utils.ReflectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,8 +98,12 @@ public abstract class ConnectionProxyProvider implements ConnectionProvider {
             return invokeTarget(method, args);
         }
 
-        public <R> R invokeTarget(Method method, Object[] args) {
-            return invokeMethod(getTarget(), method, args);
+        public <R> R invokeTarget(Method method, Object[] args) throws Throwable {
+            try {
+                return invokeMethod(getTarget(), method, args);
+            } catch (ReflectionException exception) {
+                throw exception.getCause();
+            }
         }
     }
 

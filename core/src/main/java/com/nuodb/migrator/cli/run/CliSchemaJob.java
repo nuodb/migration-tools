@@ -226,18 +226,6 @@ public class CliSchemaJob extends CliRunJob {
         group.withOption(identifierNormalizer);
     }
 
-    @Override
-    protected DriverConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
-        DriverConnectionSpec connection = new DriverConnectionSpec();
-        connection.setDriverClassName(JdbcConstants.NUODB_DRIVER);
-        connection.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
-        connection.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
-        connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
-        connection.setSchema((String) optionSet.getValue(TARGET_SCHEMA_OPTION));
-        connection.setProperties(parseProperties(optionSet, TARGET_PROPERTIES_OPTION, option));
-        return connection;
-    }
-
     protected void parseSchemaOptions(SchemaSpec schemaSpec, OptionSet optionSet, Option option) {
         if (optionSet.hasOption(SCHEMA_META_DATA_OPTION)) {
             Collection<String> values = optionSet.getValues(SCHEMA_META_DATA_OPTION);

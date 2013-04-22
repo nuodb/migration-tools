@@ -238,9 +238,8 @@ public class SimpleValueFormat extends ValueFormatBase<Object> {
             case Types.STRUCT:
             case Types.REF:
             case Types.DATALINK:
-            case Types.BOOLEAN:
             case Types.ROWID:
-                valueVariantType = ValueVariantType.BINARY;
+                valueVariantType = ValueVariantType.BYTES;
                 break;
             default:
                 valueVariantType = STRING;

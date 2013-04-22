@@ -164,7 +164,7 @@ public class BsonFormatInput extends FormatInputBase implements BsonAttributes {
                     ValueVariantType valueType = valueFormatModelList.get(index).getValueVariantType();
                     valueType = valueType != null ? valueType : STRING;
                     switch (valueType) {
-                        case BINARY:
+                        case BYTES:
                             values[index] = binary((byte[]) value);
                             break;
                         case STRING:

@@ -39,8 +39,6 @@ import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaSpec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -71,10 +69,6 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         schemaJob.setScriptGeneratorContext(createScriptGeneratorContext());
         schemaJob.setScriptExporter(createScriptExporter());
         return schemaJob;
-    }
-
-    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return connectionSpec != null ? createConnectionProvider(connectionSpec, false) : null;
     }
 
     protected ScriptGeneratorContext createScriptGeneratorContext() {

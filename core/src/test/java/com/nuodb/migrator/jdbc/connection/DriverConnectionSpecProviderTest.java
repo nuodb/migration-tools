@@ -29,7 +29,6 @@ public class DriverConnectionSpecProviderTest {
         driver = mock(Driver.class);
         when(driver.connect(anyString(), any(Properties.class))).thenReturn(connection);
         when(driver.acceptsURL(URL)).thenReturn(true);
-        DriverManager.registerDriver(driver);
 
         connectionSpec = mock(DriverConnectionSpec.class);
         when(connectionSpec.getDriver()).thenReturn(driver);
@@ -46,6 +45,7 @@ public class DriverConnectionSpecProviderTest {
 
         assertNotNull(connectionProvider.getConnection());
         verify(connectionSpec).getDriver();
+        verify(connectionSpec).getDriverClassName();
         verify(connectionSpec).getUsername();
         verify(connectionSpec).getPassword();
         verify(connection).setTransactionIsolation(anyInt());

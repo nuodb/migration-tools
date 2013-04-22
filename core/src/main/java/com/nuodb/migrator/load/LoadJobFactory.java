@@ -66,7 +66,7 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
         ResourceSpec inputSpec = loadSpec.getInputSpec();
         LoadJob job = new LoadJob();
         ConnectionSpec connectionSpec = loadSpec.getConnectionSpec();
-        job.setConnectionProvider(createConnectionProvider(connectionSpec, false));
+        job.setConnectionProvider(createConnectionProvider(connectionSpec));
 
         job.setAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));

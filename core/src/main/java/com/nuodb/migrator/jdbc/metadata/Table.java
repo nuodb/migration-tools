@@ -32,12 +32,13 @@ import com.google.common.collect.Sets;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 
 public class Table extends IdentifiableBase {
 
@@ -169,7 +170,7 @@ public class Table extends IdentifiableBase {
         Column column = columns.get(identifier);
         if (column == null) {
             if (create) {
-                addColumn(column = new Column(identifier));
+                column = addColumn(identifier, columns.size() + 1);
             } else {
                 throw new MetaDataException(format("Table %s doesn't have %s column", getName(), identifier));
             }
@@ -177,13 +178,28 @@ public class Table extends IdentifiableBase {
         return column;
     }
 
-    public void addColumn(Column column) {
+    public Column addColumn(Identifier identifier, int position) {
+        Column column = new Column(identifier);
+        column.setPosition(position);
+        return addColumn(column);
+    }
+
+    public Column addColumn(Column column) {
         column.setTable(this);
         columns.put(column.getIdentifier(), column);
+        return column;
     }
 
     public Collection<Column> getColumns() {
-        return newArrayList(columns.values());
+        Collection<Column> columns = newTreeSet(new Comparator<Column>() {
+
+            @Override
+            public int compare(Column o1, Column o2) {
+                return Integer.compare(o1.getPosition(), o2.getPosition());
+            }
+        });
+        columns.addAll(this.columns.values());
+        return columns;
     }
 
     public Collection<Check> getChecks() {
@@ -213,7 +229,7 @@ public class Table extends IdentifiableBase {
             outputNewLine(buffer);
             output(indent, buffer, "primary key");
             buffer.append(' ');
-            output(indent, buffer, Collections.singleton(primaryKey));
+            output(indent, buffer, singleton(primaryKey));
         }
 
         Collection<Index> indexes = getIndexes();

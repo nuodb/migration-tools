@@ -33,7 +33,6 @@ import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccess;
 import com.nuodb.migrator.resultset.format.value.ValueFormat;
 import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueVariant;
-import com.nuodb.migrator.utils.ReflectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,8 +120,6 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
         try {
             setValues(values = readValues());
             executeUpdate();
-        } catch (ReflectionException exception) {
-            onReadRowFailure(exception.getCause(), row, values);
         } catch (Exception exception) {
             onReadRowFailure(exception, row, values);
         } finally {

@@ -71,7 +71,7 @@ public class ValueVariants {
 
         @Override
         public ValueVariantType getValueVariantType() {
-            return ValueVariantType.BINARY;
+            return ValueVariantType.BYTES;
         }
 
         @Override

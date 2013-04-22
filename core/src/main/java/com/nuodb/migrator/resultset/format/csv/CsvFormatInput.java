@@ -129,7 +129,7 @@ public class CsvFormatInput extends FormatInputBase implements CsvAttributes {
             ValueVariantType type = list.get(index).getValueVariantType();
             type = type != null ? type : STRING;
             switch (type) {
-                case BINARY:
+                case BYTES:
                     values[index] = binary(BASE64.decode(value));
                     break;
                 case STRING:

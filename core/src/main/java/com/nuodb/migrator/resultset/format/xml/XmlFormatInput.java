@@ -141,7 +141,7 @@ public class XmlFormatInput extends FormatInputBase implements XmlAttributes {
                 ValueVariantType valueType = model.get(index).getValueVariantType();
                 valueType = valueType != null ? valueType : STRING;
                 switch (valueType) {
-                    case BINARY:
+                    case BYTES:
                         values[index] = binary(BASE64.decode(value));
                         break;
                     case STRING:

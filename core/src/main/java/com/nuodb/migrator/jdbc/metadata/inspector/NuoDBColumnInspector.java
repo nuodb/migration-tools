@@ -56,7 +56,7 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
 
     public static final String QUERY =
             "SELECT * FROM SYSTEM.FIELDS INNER JOIN SYSTEM.DATATYPES ON FIELDS.DATATYPE = DATATYPES.ID\n" +
-            "WHERE SCHEMA=? AND TABLENAME=?";
+            "WHERE SCHEMA=? AND TABLENAME=? ORDER BY FIELDPOSITION ASC";
 
     public NuoDBColumnInspector() {
         super(COLUMN, TableInspectionScope.class);

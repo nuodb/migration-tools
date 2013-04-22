@@ -368,17 +368,18 @@ public class CliRunSupport extends CliSupport {
     }
 
     protected DriverConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
-        DriverConnectionSpec connectionSpec = null;
         if (optionSet.hasOption(TARGET_URL_OPTION)) {
-            connectionSpec = new DriverConnectionSpec();
-            connectionSpec.setDriverClassName(JdbcConstants.NUODB_DRIVER);
-            connectionSpec.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
-            connectionSpec.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
-            connectionSpec.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
-            connectionSpec.setProperties(parseProperties(optionSet, TARGET_PROPERTIES_OPTION, option));
-            connectionSpec.setSchema((String) optionSet.getValue(TARGET_SCHEMA_OPTION));
+            DriverConnectionSpec connection = new DriverConnectionSpec();
+            connection.setDriverClassName(JdbcConstants.NUODB_DRIVER);
+            connection.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
+            connection.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
+            connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
+            connection.setSchema((String) optionSet.getValue(TARGET_SCHEMA_OPTION));
+            connection.setProperties(parseProperties(optionSet, TARGET_PROPERTIES_OPTION, option));
+            return connection;
+        } else {
+            return null;
         }
-        return connectionSpec;
     }
 
     protected ResourceSpec parseInputGroup(OptionSet optionSet, Option option) {

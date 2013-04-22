@@ -51,7 +51,7 @@ public class ValueVariantUtils {
             ValueVariantType type = types[offset];
             type = type != null ? type : STRING;
             switch (type) {
-                case BINARY:
+                case BYTES:
                     values[offset] = ValueVariants.BINARY_NULL;
                     break;
                 case STRING:
