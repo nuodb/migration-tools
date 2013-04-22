@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Ints;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 
 import java.util.Collection;
@@ -195,7 +196,7 @@ public class Table extends IdentifiableBase {
 
             @Override
             public int compare(Column o1, Column o2) {
-                return Integer.compare(o1.getPosition(), o2.getPosition());
+                return Ints.compare(o1.getPosition(), o2.getPosition());
             }
         });
         columns.addAll(this.columns.values());
