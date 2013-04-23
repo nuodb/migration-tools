@@ -260,7 +260,7 @@ public class CliRunSupportTest {
     @DataProvider(name = "timeZone")
     public Object[][] createTimeZoneData() {
         return new Object[][]{
-                {new String[]{"-tz=UTC"}, getTimeZone("UTC")},
+                {new String[]{"-t=UTC"}, getTimeZone("UTC")},
                 {new String[]{"--time.zone=EST"}, getTimeZone("EST")},
                 {new String[]{"--time.zone=GMT+2"}, getTimeZone("GMT+2")}
         };

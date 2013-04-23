@@ -40,25 +40,25 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class StatementLoggerConnectionProvider extends ConnectionProxyProvider {
+public class StatementLoggingConnectionProvider extends ConnectionProxyProvider {
 
     private final ConnectionProvider connectionProvider;
     private final StatementFormatterFactory statementFormatterFactory;
     private final StatementLogger statementLogger;
 
-    public StatementLoggerConnectionProvider(ConnectionProvider connectionProvider) {
+    public StatementLoggingConnectionProvider(ConnectionProvider connectionProvider) {
         this(connectionProvider, new SimpleStatementFormatterFactory());
     }
 
-    public StatementLoggerConnectionProvider(ConnectionProvider connectionProvider,
-                                             StatementFormatterFactory statementFormatterFactory) {
+    public StatementLoggingConnectionProvider(ConnectionProvider connectionProvider,
+                                              StatementFormatterFactory statementFormatterFactory) {
         this(connectionProvider, statementFormatterFactory,
-                new SimpleStatementLogger(getLogger(StatementLoggerConnectionProvider.class)));
+                new SimpleStatementLogger(getLogger(StatementLoggingConnectionProvider.class)));
     }
 
-    public StatementLoggerConnectionProvider(ConnectionProvider connectionProvider,
-                                             StatementFormatterFactory statementFormatterFactory,
-                                             StatementLogger statementLogger) {
+    public StatementLoggingConnectionProvider(ConnectionProvider connectionProvider,
+                                              StatementFormatterFactory statementFormatterFactory,
+                                              StatementLogger statementLogger) {
         this.connectionProvider = connectionProvider;
         this.statementFormatterFactory = statementFormatterFactory;
         this.statementLogger = statementLogger;
@@ -213,7 +213,7 @@ public class StatementLoggerConnectionProvider extends ConnectionProxyProvider {
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             String methodName = method.getName();
             if (EXECUTE_METHODS.contains(methodName)) {
-                return StatementLoggerConnectionProvider.this.invokeExecute(this, proxy, method, args);
+                return StatementLoggingConnectionProvider.this.invokeExecute(this, proxy, method, args);
             } else {
                 return super.invoke(proxy, method, args);
             }
@@ -246,7 +246,7 @@ public class StatementLoggerConnectionProvider extends ConnectionProxyProvider {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (SET_METHODS.contains(method.getName())) {
-                return StatementLoggerConnectionProvider.this.invokeSet(this, proxy, method, args);
+                return StatementLoggingConnectionProvider.this.invokeSet(this, proxy, method, args);
             } else {
                 return super.invoke(proxy, method, args);
             }

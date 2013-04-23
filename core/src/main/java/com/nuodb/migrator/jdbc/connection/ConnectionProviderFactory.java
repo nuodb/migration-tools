@@ -53,7 +53,7 @@ public class ConnectionProviderFactory {
         } else {
             throw new ConnectionException(format("Connection specification is not supported %s", connectionSpec));
         }
-        return new StatementLoggerConnectionProvider(connectionProvider);
+        return new StatementLoggingConnectionProvider(connectionProvider);
     }
 
     public boolean isAutoCommit() {

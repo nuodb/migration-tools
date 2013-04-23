@@ -306,7 +306,7 @@ public class GroupImpl extends OptionBase implements Group {
                 // append help information
                 option.help(buffer, optionHints, comparator);
 
-                // registerCommandExecutor separators as needed
+                // add separator as needed
                 if (i.hasNext()) {
                     buffer.append(separator);
                 }
@@ -320,7 +320,7 @@ public class GroupImpl extends OptionBase implements Group {
         }
         if (arguments) {
             for (Argument argument : this.arguments) {
-                buffer.append(' ');
+                buffer.append(separator);
                 argument.help(buffer, hints, comparator);
             }
         }

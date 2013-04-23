@@ -60,7 +60,7 @@ public interface CliOptions {
     final String SOURCE_SCHEMA_OPTION = "source.schema";
 
     final String TIME_ZONE_OPTION = "time.zone";
-    final String TIME_ZONE_SHORT_OPTION = "tz";
+    final String TIME_ZONE_SHORT_OPTION = "t";
     final String OUTPUT_OPTION = "output.*";
     final String OUTPUT_TYPE_OPTION = "output.type";
     final String OUTPUT_PATH_OPTION = "output.path";
