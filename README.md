@@ -34,72 +34,71 @@ This tool is designed to assist you in migrating data from supported SQL databas
 
 ### Dump data from an existing database ###
 
-    $ bin/nuodb-migrator dump
-        [source database connection, required]
-            --source.driver<driver> |
-            --source.url=<url> |
-            --source.username=<username> |
-            --source.password=<password> |
-            --source.properties=<properties> |
-            --source.catalog=<catalog> |
-            --source.schema=<schema> |
-        [output specification, required]
-            --output.type=<output type> |
-            --output.path=<output path> |
-            --output.*=<attribute value> |
-        [table names & query filters, optional]
-            --table=<table> |
-            --table.type=<table type> |
-            --table.*.filter=<query filter> |
-        [select statements, optional]
-            --query=<query> |
-        --time.zone=<time zone>
+    $ bin/nuodb-migrator dump                                                
+        [source database connection, required]                       
+            --source.driver=driver                          JDBC driver class name
+            --source.url=url                                Source database connection URL in the standard syntax jdbc:<subprotocol>:<subname>
+            [--source.username=[username]]                  Source database username
+            [--source.password=[password]]                  Source database password
+            [--source.properties=[properties]]              Additional connection properties encoded as URL query string "property1=value1&property2=value2"
+            [--source.catalog=[catalog]]                    Default database catalog name to use
+            [--source.schema=[schema]]                      Default database schema name to use
+        [output specification, required]                              
+            --output.type=output type                       Output type (CVS, XML, BSON)
+            [--output.path=[output path]]                   Path on the file system
+            [--output.*=[attribute value]]                  Output format attributes
+        [table names, types & query filters, optional]              
+            [--table=table [table ...]]                     Table name
+            [--table.type=[table type [table type ...]]]    Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE is included into dump
+            [--table.*.filter=[query filter]]               Filters table records using specified filter by appending it to the SELECT statement after WHERE clause
+        [select statements, optional]                               
+            [--query=query]                                 Select statement
+        [--time.zone (-t)=time zone]                        Time zone enables date columns to be dumped and reloaded between servers in different time zones
 
 ### Load data to a target NuoDB database ###
 
     $ bin/nuodb-migrator load
         [target database connection, required]
-            --target.url=<url> |
-            --target.username=<username> |
-            --target.password=<password> |
-            --target.properties=<properties> |
-            --target.schema=<schema> |
+            --target.url=url                      Target database connection URL in the format jdbc:com.nuodb://{broker}:{port}/{database}
+            [--target.username=[username]]        Target database username
+            [--target.password=[password]]        Target database password
+            [--target.properties=[properties]]    Additional connection properties encoded as URL query string "property1=value1&property2=value2"
+            [--target.schema=[schema]]            Default database schema name to use
         [input specification, required]
-            --input.type=<input type> |
-            --input.path=<input path> |
-            --input.*=<attribute value> |
-        --time.zone=<time zone>
+            --input.path=[input path]             Path on the file system
+            [--input.*=[attribute value]]         Input format attributes
+        [--time.zone (-t)=time zone]            Time zone enables date columns to be dumped and reloaded between servers in different time zones
 
 ### Generate a schema for a target NuoDB database ###
 
     $ bin/nuodb-migrator schema
-        [source database connection, required]
-            --source.driver=<driver> |
-            --source.url=<url> |
-            --source.username=<username> |
-            --source.password=<password> |
-            --source.properties=<properties> |
-            --source.catalog=<catalog> |
-            --source.schema=<schema> |
-        [target database connection, optional]
-            --target.url=<url> |
-            --target.username=<username> |
-            --target.password=<password> |
-            --target.properties=<properties> |
-            --target.schema=<schema> |
-            --output.path=<output path> |
-        [custom type declarations, optional]
-            --type.name=<type name> |
-            --type.code=<type code> |
-            --type.size=<type size> |
-            --type.precision=<type precision> |
-            --type.scale=<type scale>
-        [schema output options, optional]
-            --meta.data.*=<[true] | [false]> |
-            --script.type=<[drop] , [create]> |
-            --group.scripts.by=<[table] | [meta.data]> |
-            --identifier.normalizer=<[noop] | [standard] | [lower.case] | [upper.case]>
-
+        [source database connection, required]                           
+            --source.driver=driver                             JDBC driver class name
+            --source.url=url                                   Source database connection URL in the standard syntax jdbc:<subprotocol>:<subname>
+            [--source.username=[username]]                     Source database username
+            [--source.password=[password]]                     Source database password
+            [--source.properties=[properties]]                 Additional connection properties encoded as URL query string "property1=value1&property2=value2"
+            [--source.catalog=[catalog]]                       Default database catalog name to use
+            [--source.schema=[schema]]                         Default database schema name to use
+        [target database connection, optional]                         
+            [--target.url=url]                                 Target database connection URL in the format jdbc:com.nuodb://{broker}:{port}/{database}
+            [--target.username=[username]]                     Target database username
+            [--target.password=[password]]                     Target database password
+            [--target.properties=[properties]]                 Additional connection properties encoded as URL query string "property1=value1&property2=value2"
+            [--target.schema=[schema]]                         Default database schema name to use
+        [script output, optional]                                      
+            --output.path=output path                          Saves script to a file specified by path
+        [custom type declarations, optional]                           
+            [--type.name=type name]                            SQL type name template, i.e. decimal({p},{s}) or varchar({n}), where {p} is a placeholder for a precision, {s} is a scale and {n} is a maximum size
+            [--type.code=type code]                            Integer code of declared SQL type
+            [--type.size=[type size]]                          Maximum size of custom data type
+            [--type.precision=[type precision]]                The maximum total number of decimal digits that can be stored, both to the left and to the right of the decimal point. Typically, type precision is in the range of 1 through the maximum precision of 38.
+            [--type.scale=[type scale]]                        The number of fractional digits for numeric data types
+        [--meta.data.*=[true | false]]                         Includes of excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check.constraint, auto.increment) from the generated output, by default all objects are generated
+        [--script.type=drop [create]]                          Comma separated types of statements to be generated, default is drop & create
+        [--group.scripts.by=[table | meta.data]]               Group generated DDL scripts, table by default
+        [--identifier.quoting=[identifier quoting]]            Identifier quoting policy name, minimal, always or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierQuoting, default is always
+        [--identifier.normalizer=[identifier normalizer]]      Identifier transformer to use, available normalizers are noop, standard, lower.case, upper.case or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer, default is noop
 ## Connect to Third-party Databases ##
 
 To interface with third-party databases through JDBC-compliant drivers you should download & install appropriate JAR files.
