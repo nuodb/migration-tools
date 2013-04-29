@@ -67,19 +67,19 @@ public class FileCatalog implements Catalog {
     }
 
     protected File getCatalogDir() {
-        return isPathCatalogFile(pathFile) ? pathFile.getParentFile() : pathFile;
+        return isCatalogFile(pathFile) ? pathFile.getParentFile() : pathFile;
     }
 
-    protected boolean isPathCatalogFile(File pathFile) {
-        return ((pathFile.exists() && pathFile.isFile()) || isLikeCatalogFile(pathFile));
+    protected boolean isCatalogFile(File path) {
+        return ((path.exists() && path.isFile()) || isCatalogFileName(path));
     }
 
-    protected boolean isLikeCatalogFile(File pathFile) {
-        return CATALOG_FILE_REGEX.test(pathFile.getName());
+    protected boolean isCatalogFileName(File path) {
+        return CATALOG_FILE_REGEX.test(path.getName());
     }
 
     protected File getCatalogFile() {
-        String catalogFile = isPathCatalogFile(pathFile) ? pathFile.getName() : CATALOG_FILE_NAME;
+        String catalogFile = isCatalogFile(pathFile) ? pathFile.getName() : CATALOG_FILE_NAME;
         return new File(catalogDir, catalogFile);
     }
 

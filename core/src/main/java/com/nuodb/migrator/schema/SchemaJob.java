@@ -28,7 +28,6 @@
 package com.nuodb.migrator.schema;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
-import com.nuodb.migrator.jdbc.connection.ConnectionServices;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
@@ -38,7 +37,6 @@ import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.job.decorate.DecoratingJobBase;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -67,10 +65,7 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
         isNotNull(getScriptExporter(), "Script exporter is required");
         isNotNull(getScriptGeneratorContext(), "Script generator context is required");
 
-        ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
-        execution.setConnectionServices(connectionServices);
-        Connection connection = connectionServices.getConnection();
-        execution.setConnection(connection);
+        execution.setConnection(getConnectionProvider().getConnection());
     }
 
     @Override
@@ -94,15 +89,14 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
         InspectionManager inspectionManager = new InspectionManager();
         inspectionManager.setConnection(execution.getConnection());
         inspectionManager.setDialectResolver(getDialectResolver());
-        ConnectionServices connectionServices = execution.getConnectionServices();
         return inspectionManager.inspect(new TableInspectionScope(
-                connectionServices.getCatalog(), connectionServices.getSchema()), MetaDataType.TYPES
+                getConnectionProvider().getCatalog(), getConnectionProvider().getSchema()), MetaDataType.TYPES
         ).getObject(MetaDataType.DATABASE);
     }
 
     @Override
     protected void releaseExecution(SchemaJobExecution execution) throws Exception {
-        close(execution.getConnectionServices());
+        close(execution.getConnection());
     }
 
     public ConnectionProvider getConnectionProvider() {
