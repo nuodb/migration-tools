@@ -55,8 +55,8 @@ import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public static final String QUERY =
-            "SELECT * FROM SYSTEM.FIELDS INNER JOIN SYSTEM.DATATYPES ON FIELDS.DATATYPE = DATATYPES.ID\n" +
-            "WHERE SCHEMA=? AND TABLENAME=? ORDER BY FIELDPOSITION ASC";
+            "SELECT * FROM SYSTEM.FIELDS AS F INNER JOIN SYSTEM.DATATYPES AS D ON F.DATATYPE = D.ID\n" +
+            "WHERE F.SCHEMA=? AND F.TABLENAME=? ORDER BY F.FIELDPOSITION ASC";
 
     public NuoDBColumnInspector() {
         super(COLUMN, TableInspectionScope.class);
