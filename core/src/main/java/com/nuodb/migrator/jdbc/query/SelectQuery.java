@@ -40,10 +40,9 @@ import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 /**
  * @author Sergey Bushik
  */
-public class SelectQuery implements Query {
+public class SelectQuery extends QueryBase {
 
     private Dialect dialect;
-    private boolean qualifyNames;
     private Collection<Table> tables = Lists.newArrayList();
     private Collection<Object> columns = Lists.newArrayList();
     private Collection<String> filters = Lists.newArrayList();
@@ -61,18 +60,12 @@ public class SelectQuery implements Query {
     }
 
     @Override
-    public String toQuery() {
-        return buildQuery().toString();
-    }
-
-    protected StringBuilder buildQuery() {
-        StringBuilder query = new StringBuilder();
+    public void buildQuery(StringBuilder query) {
         query.append("SELECT ");
         addColumns(query);
         query.append(" FROM ");
         addTables(query);
         addFilters(query);
-        return query;
     }
 
     protected void addColumns(StringBuilder query) {
@@ -106,7 +99,7 @@ public class SelectQuery implements Query {
     }
 
     protected void addTable(StringBuilder query, Table table) {
-        query.append(qualifyNames ? table.getQualifiedName(dialect) : table.getName(dialect));
+        query.append(isQualifyNames() ? table.getQualifiedName(dialect) : table.getName(dialect));
     }
 
     public Dialect getDialect() {
@@ -115,14 +108,6 @@ public class SelectQuery implements Query {
 
     public void setDialect(Dialect dialect) {
         this.dialect = dialect;
-    }
-
-    public boolean isQualifyNames() {
-        return qualifyNames;
-    }
-
-    public void setQualifyNames(boolean qualifyNames) {
-        this.qualifyNames = qualifyNames;
     }
 
     public Collection<Table> getTables() {
@@ -135,10 +120,5 @@ public class SelectQuery implements Query {
 
     public Collection<String> getFilters() {
         return filters;
-    }
-
-    @Override
-    public String toString() {
-        return toQuery();
     }
 }

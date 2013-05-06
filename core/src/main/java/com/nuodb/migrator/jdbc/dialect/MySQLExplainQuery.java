@@ -25,18 +25,35 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.jdbc.dialect;
+
+import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.query.QueryBase;
 
 /**
  * @author Sergey Bushik
  */
-public interface Query {
+public class MySQLExplainQuery extends QueryBase {
 
-    boolean isQualifyNames();
+    private Query query;
 
-    void setQualifyNames(boolean qualifyNames);
+    public MySQLExplainQuery() {
+    }
 
-    void buildQuery(StringBuilder query);
+    public MySQLExplainQuery(Query query) {
+        this.query = query;
+    }
 
-    String toQuery();
+    public Query getQuery() {
+        return query;
+    }
+
+    public void setQuery(Query query) {
+        this.query = query;
+    }
+
+    @Override
+    public void buildQuery(StringBuilder query) {
+        query.append("EXPLAIN ").append(getQuery().toString());
+    }
 }

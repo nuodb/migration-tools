@@ -30,7 +30,7 @@ package com.nuodb.migrator.jdbc.query;
 /**
  * @author Sergey Bushik
  */
-public class NativeQuery implements Query {
+public class NativeQuery extends QueryBase {
 
     private String query;
 
@@ -39,12 +39,12 @@ public class NativeQuery implements Query {
     }
 
     @Override
-    public String toQuery() {
-        return query;
+    public void buildQuery(StringBuilder query) {
+        query.append(query);
     }
 
     @Override
-    public String toString() {
-        return toQuery();
+    public String toQuery() {
+        return query;
     }
 }

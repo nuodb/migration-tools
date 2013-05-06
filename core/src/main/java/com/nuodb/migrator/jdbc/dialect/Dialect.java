@@ -82,7 +82,7 @@ public interface Dialect {
 
     boolean supportsRowCount(Table table, RowCountType rowCountType);
 
-    long getRowCount(Connection connection, Table table, RowCountType rowCountType) throws SQLException;
+    RowCountValue getRowCount(Connection connection, Table table, RowCountType rowCountType) throws SQLException;
 
     String getNullColumnString();
 

@@ -28,13 +28,16 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.query.*;
+import com.nuodb.migrator.jdbc.query.SelectQuery;
+import com.nuodb.migrator.jdbc.query.StatementCallback;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.resolve.ServiceResolver;
 import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolverAware;
 import com.nuodb.migrator.jdbc.type.*;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
-import org.apache.commons.lang3.mutable.MutableLong;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +57,6 @@ import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.sql.Connection.*;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
@@ -344,64 +345,86 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public boolean supportsRowCount(Table table, RowCountType rowCountType) {
-        return EXACT == rowCountType;
+        return createRowCountQuery(table, rowCountType) != null;
     }
 
     @Override
-    public long getRowCount(Connection connection, Table table, RowCountType rowCountType) throws SQLException {
-        if (supportsRowCount(table, rowCountType)) {
-            long rowCount = 0;
-            switch (rowCountType) {
-                case APPROX:
-                    rowCount = getRowCountApprox(connection, table);
-                    break;
-                case EXACT:
-                    rowCount = getRowCountExact(connection, table);
-                    break;
-            }
-            return rowCount;
+    public RowCountValue getRowCount(Connection connection, Table table,
+                                     RowCountType rowCountType) throws SQLException {
+        RowCountQuery rowCountQuery = createRowCountQuery(table, rowCountType);
+        if (rowCountQuery != null) {
+            return executeRowCountQuery(connection, rowCountQuery);
         } else {
             throw new DialectException(format("Row count type is not supported %s", rowCountType));
         }
     }
 
-    protected long getRowCountExact(Connection connection, final Table table) throws SQLException {
-        final Query query = getRowCountExactQuery(table);
-        final MutableLong rowCount = new MutableLong();
-        new StatementTemplate(connection).execute(
-                new StatementFactory<Statement>() {
-                    @Override
-                    public Statement create(Connection connection) throws SQLException {
-                        return connection.createStatement(TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                    }
-                }, new StatementCallback<Statement>() {
-                    @Override
-                    public void execute(Statement statement) throws SQLException {
-                        ResultSet resultSet = statement.executeQuery(query.toQuery());
-                        resultSet.next();
-                        rowCount.setValue(resultSet.getLong(1));
-                    }
-                }
-        );
-        return rowCount.getValue();
+    protected RowCountQuery createRowCountQuery(Table table, RowCountType rowCountType) {
+        RowCountQuery rowCountQuery = null;
+        switch (rowCountType) {
+            case APPROX:
+                rowCountQuery = createRowCountApproxQuery(table);
+                break;
+            case EXACT:
+                rowCountQuery = createRowCountExactQuery(table);
+                break;
+        }
+        return rowCountQuery;
     }
 
-    protected Query getRowCountExactQuery(Table table) {
+    protected RowCountQuery createRowCountApproxQuery(Table table) {
+        return null;
+    }
+
+    protected RowCountQuery createRowCountExactQuery(Table table) {
         SelectQuery query = new SelectQuery();
         query.setQualifyNames(true);
         query.setDialect(this);
         query.addTable(table);
         PrimaryKey primaryKey = table.getPrimaryKey();
         Column column = null;
-        if (primaryKey != null && size(primaryKey.getColumns()) == 1) {
+        if (primaryKey != null && size(primaryKey.getColumns()) > 0) {
             column = get(primaryKey.getColumns(), 0);
         }
         query.addColumn("COUNT(" + (column != null ? column.getName(this) : "*") + ")");
-        return query;
+
+        RowCountQuery rowCountQuery = new RowCountQuery();
+        rowCountQuery.setRowCountType(EXACT);
+        rowCountQuery.setQuery(query);
+        rowCountQuery.setColumn(column);
+        return rowCountQuery;
     }
 
-    protected long getRowCountApprox(Connection connection, Table table) {
-        throw new DialectException("Approx row count is not supported");
+    protected RowCountValue executeRowCountQuery(Connection connection,
+                                                 final RowCountQuery rowCountQuery) throws SQLException {
+        final MutableObject<RowCountValue> rowCountValue = new MutableObject<RowCountValue>();
+        new StatementTemplate(connection).execute(
+                new StatementFactory<Statement>() {
+                    @Override
+                    public Statement create(Connection connection) throws SQLException {
+                        return connection.createStatement();
+                    }
+                }, new StatementCallback<Statement>() {
+                    @Override
+                    public void execute(Statement statement) throws SQLException {
+                        rowCountValue.setValue(executeRowCountQuery(statement, rowCountQuery));
+                    }
+                }
+        );
+        return rowCountValue.getValue();
+    }
+
+    protected RowCountValue executeRowCountQuery(Statement statement, RowCountQuery rowCountQuery) throws SQLException {
+        ResultSet rowCount = statement.executeQuery(rowCountQuery.getQuery().toQuery());
+        RowCountValue rowCountValue = null;
+        if (rowCount.next()) {
+            rowCountValue = extractRowCountValue(rowCount, rowCountQuery);
+        }
+        return rowCountValue;
+    }
+
+    protected RowCountValue extractRowCountValue(ResultSet rowCount, RowCountQuery rowCountQuery) throws SQLException {
+        return new RowCountValue(rowCountQuery, rowCount.getLong(1));
     }
 
     @Override

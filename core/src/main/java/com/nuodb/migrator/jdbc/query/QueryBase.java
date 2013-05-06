@@ -30,13 +30,29 @@ package com.nuodb.migrator.jdbc.query;
 /**
  * @author Sergey Bushik
  */
-public interface Query {
+public abstract class QueryBase implements Query {
 
-    boolean isQualifyNames();
+    public static final boolean QUALIFY_NAMES = true;
 
-    void setQualifyNames(boolean qualifyNames);
+    private boolean qualifyNames = QUALIFY_NAMES;
 
-    void buildQuery(StringBuilder query);
+    public boolean isQualifyNames() {
+        return qualifyNames;
+    }
 
-    String toQuery();
+    public void setQualifyNames(boolean qualifyNames) {
+        this.qualifyNames = qualifyNames;
+    }
+
+    @Override
+    public String toQuery() {
+        StringBuilder query = new StringBuilder();
+        buildQuery(query);
+        return query.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toQuery();
+    }
 }

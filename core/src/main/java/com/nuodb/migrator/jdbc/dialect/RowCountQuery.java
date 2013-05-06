@@ -25,18 +25,54 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.jdbc.dialect;
+
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.query.Query;
 
 /**
  * @author Sergey Bushik
  */
-public interface Query {
+public class RowCountQuery {
 
-    boolean isQualifyNames();
+    private Query query;
+    private Column column;
+    private RowCountType rowCountType;
 
-    void setQualifyNames(boolean qualifyNames);
+    public RowCountQuery() {
+    }
 
-    void buildQuery(StringBuilder query);
+    public RowCountQuery(RowCountQuery rowCountQuery) {
+        this(rowCountQuery.getQuery(), rowCountQuery.getColumn(), rowCountQuery.getRowCountType());
+    }
 
-    String toQuery();
+    public RowCountQuery(Query query, Column column, RowCountType rowCountType) {
+        this.query = query;
+        this.column = column;
+        this.rowCountType = rowCountType;
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
+    public void setQuery(Query query) {
+        this.query = query;
+    }
+
+    public Column getColumn() {
+        return column;
+    }
+
+    public void setColumn(Column column) {
+        this.column = column;
+    }
+
+    public RowCountType getRowCountType() {
+        return rowCountType;
+    }
+
+    public void setRowCountType(RowCountType rowCountType) {
+        this.rowCountType = rowCountType;
+    }
 }

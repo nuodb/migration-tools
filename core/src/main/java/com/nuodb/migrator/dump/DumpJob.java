@@ -33,7 +33,6 @@ import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.dialect.RowCountType;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -197,11 +196,6 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
     }
 
     protected void dump(DumpJobExecution execution, Query query, PreparedStatement statement) throws SQLException {
-        if (query instanceof SelectQuery) {
-            System.out.println("DumpJob.dump" + execution.getDialect().getRowCount(
-                    execution.getConnection(), ((SelectQuery) query).getTables().iterator().next(),
-                    RowCountType.EXACT));
-        }
         final FormatOutput formatOutput = getFormatFactory().createOutput(getOutputType());
         formatOutput.setAttributes(getOutputAttributes());
         formatOutput.setValueFormatRegistry(execution.getValueFormatRegistry());
@@ -247,7 +241,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
             valueModelList = Lists.newArrayList();
             for (Object column : ((SelectQuery) query).getColumns()) {
                 if (column instanceof ValueModel) {
-                    valueModelList.add((ValueModel)column);
+                    valueModelList.add((ValueModel) column);
                 }
             }
         } else {
@@ -305,7 +299,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
         builder.setQualifyNames(true);
         builder.setDialect(database.getDialect());
         builder.setTable(database.findTable(table));
-        if (selectQuerySpec.getColumns() !=  null) {
+        if (selectQuerySpec.getColumns() != null) {
             for (String column : selectQuerySpec.getColumns()) {
                 builder.addColumn(column);
             }

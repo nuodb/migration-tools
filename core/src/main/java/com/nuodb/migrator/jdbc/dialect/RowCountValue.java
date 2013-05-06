@@ -25,18 +25,25 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.jdbc.dialect;
 
 /**
  * @author Sergey Bushik
  */
-public interface Query {
+public class RowCountValue extends RowCountQuery {
 
-    boolean isQualifyNames();
+    private long value;
 
-    void setQualifyNames(boolean qualifyNames);
+    public RowCountValue(RowCountQuery rowCountQuery, long value) {
+        super(rowCountQuery);
+        this.value = value;
+    }
 
-    void buildQuery(StringBuilder query);
+    public long getValue() {
+        return value;
+    }
 
-    String toQuery();
+    public void setValue(long value) {
+        this.value = value;
+    }
 }
