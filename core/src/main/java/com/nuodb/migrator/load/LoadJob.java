@@ -72,7 +72,7 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private ConnectionProvider connectionProvider;
     private TimeZone timeZone;
-    private Map<String, Object> attributes;
+    private Map<String, Object> inputAttributes;
     private Catalog catalog;
     private DialectResolver dialectResolver;
     private FormatFactory formatFactory;
@@ -149,7 +149,7 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
         try {
             Dialect dialect = execution.getDatabase().getDialect();
             FormatInput formatInput = getFormatFactory().createInput(catalogEntry.getType());
-            formatInput.setAttributes(getAttributes());
+            formatInput.setAttributes(getInputAttributes());
             formatInput.setValueFormatRegistry(execution.getValueFormatRegistry());
             formatInput.setValueAccessProvider(
                     new JdbcTypeValueAccessProvider(dialect.getJdbcTypeRegistry()));
@@ -258,12 +258,12 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
         this.timeZone = timeZone;
     }
 
-    public Map<String, Object> getAttributes() {
-        return attributes;
+    public Map<String, Object> getInputAttributes() {
+        return inputAttributes;
     }
 
-    public void setAttributes(Map<String, Object> attributes) {
-        this.attributes = attributes;
+    public void setInputAttributes(Map<String, Object> inputAttributes) {
+        this.inputAttributes = inputAttributes;
     }
 
     public Catalog getCatalog() {

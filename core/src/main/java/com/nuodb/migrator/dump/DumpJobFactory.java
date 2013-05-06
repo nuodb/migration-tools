@@ -63,7 +63,7 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
         dumpJob.setConnectionProvider(createConnectionProvider(connectionSpec));
         ResourceSpec outputSpec = dumpSpec.getOutputSpec();
         dumpJob.setOutputType(outputSpec.getType());
-        dumpJob.setAttributes(outputSpec.getAttributes());
+        dumpJob.setOutputAttributes(outputSpec.getAttributes());
         dumpJob.setCatalog(createCatalog(outputSpec.getPath()));
         dumpJob.setTimeZone(dumpSpec.getTimeZone());
         dumpJob.setSelectQuerySpecs(dumpSpec.getSelectQuerySpecs());

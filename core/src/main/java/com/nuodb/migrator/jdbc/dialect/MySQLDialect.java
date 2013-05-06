@@ -27,6 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Connection;
@@ -36,6 +39,8 @@ import java.sql.Types;
 import java.util.TimeZone;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.dialect.MySQLSelectQuery.IndexHint;
+import static com.nuodb.migrator.jdbc.dialect.MySQLSelectQuery.IndexUsage;
 import static java.lang.String.valueOf;
 
 /**
@@ -129,6 +134,23 @@ public class MySQLDialect extends SimpleDialect {
         return value.toString();
     }
 
+    @Override
+    protected Query getRowCountExactQuery(Table table) {
+        MySQLSelectQuery query = new MySQLSelectQuery();
+        query.setQualifyNames(true);
+        query.setDialect(this);
+        query.addTable(table);
+        for (Index index : table.getIndexes()) {
+            if (index.isPrimary()) {
+                query.setIndexHint(new IndexHint(IndexUsage.FORCE, index));
+                break;
+            }
+        }
+        query.addColumn("COUNT(*)");
+        return query;
+    }
+
+
     /**
      * Forces driver to stream ResultSet http://goo.gl/kl1Nr
      *
@@ -136,7 +158,7 @@ public class MySQLDialect extends SimpleDialect {
      * @throws SQLException
      */
     @Override
-    public void setStatementStreamResults(Statement statement, boolean streamResults) throws SQLException {
+    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
         statement.setFetchSize(streamResults ? Integer.MIN_VALUE : 0);
     }
 

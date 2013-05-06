@@ -43,26 +43,21 @@ public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
     private Dialect dialect;
     private Table table;
     private boolean qualifyNames;
-    private Collection<String> columns = Lists.newArrayList();
+    private Collection<Object> columns = Lists.newArrayList();
     private Collection<String> filters = Lists.newArrayList();
 
     @Override
     public SelectQuery build() {
-        Collection<Column> selectQueryColumns;
-        Collection<Column> tableColumns = table.getColumns();
+        SelectQuery selectQuery = new SelectQuery();
         if (columns == null || columns.isEmpty()) {
-            selectQueryColumns = tableColumns;
+            for (Column column : table.getColumns()) {
+                selectQuery.addColumn(column);
+            }
         } else {
-            selectQueryColumns = Lists.newArrayList();
-            for (String column : columns) {
-                for (Column tableColumn : tableColumns) {
-                    if (tableColumn.getName().equals(column)) {
-                        selectQueryColumns.add(tableColumn);
-                    }
-                }
+            for (Object column : columns) {
+                selectQuery.addColumn(column);
             }
         }
-        SelectQuery selectQuery = new SelectQuery();
         Database database = table.getDatabase();
         if (dialect != null) {
             selectQuery.setDialect(dialect);
@@ -70,9 +65,7 @@ public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
             selectQuery.setDialect(database.getDialect());
         }
         selectQuery.setQualifyNames(qualifyNames);
-        for (Column selectQueryColumn : selectQueryColumns) {
-            selectQuery.addColumn(selectQueryColumn);
-        }
+
         selectQuery.addTable(table);
         if (filters != null) {
             for (String filter : filters) {
@@ -110,12 +103,8 @@ public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
         this.columns.add(column);
     }
 
-    public Collection<String> getColumns() {
-        return columns;
-    }
-
-    public void setColumns(Collection<String> columns) {
-        this.columns = columns;
+    public void addColumn(Column column) {
+        this.columns.add(column);
     }
 
     public void addFilter(String filter) {

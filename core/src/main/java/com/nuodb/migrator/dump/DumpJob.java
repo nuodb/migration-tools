@@ -29,9 +29,11 @@ package com.nuodb.migrator.dump;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
+import com.nuodb.migrator.jdbc.dialect.RowCountType;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -96,7 +98,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
-    private Map<String, Object> attributes;
+    private Map<String, Object> outputAttributes;
     private ConnectionProvider connectionProvider;
     private FormatFactory formatFactory;
     private DialectResolver dialectResolver;
@@ -169,7 +171,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
         InspectionResults inspectionResults = inspectionManager.inspect(
                 new TableInspectionScope(getConnectionProvider().getCatalog(), getConnectionProvider().getSchema()),
                 MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA,
-                MetaDataType.TABLE, MetaDataType.COLUMN);
+                MetaDataType.TABLE, MetaDataType.COLUMN, MetaDataType.INDEX, MetaDataType.PRIMARY_KEY);
         return inspectionResults.getObject(MetaDataType.DATABASE);
     }
 
@@ -181,7 +183,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
                     public PreparedStatement create(Connection connection) throws SQLException {
                         PreparedStatement statement = connection.prepareStatement(
                                 query.toQuery(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                        execution.getDialect().setStatementStreamResults(statement, true);
+                        execution.getDialect().setStreamResults(statement, true);
                         return statement;
                     }
                 },
@@ -195,8 +197,13 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
     }
 
     protected void dump(DumpJobExecution execution, Query query, PreparedStatement statement) throws SQLException {
+        if (query instanceof SelectQuery) {
+            System.out.println("DumpJob.dump" + execution.getDialect().getRowCount(
+                    execution.getConnection(), ((SelectQuery) query).getTables().iterator().next(),
+                    RowCountType.EXACT));
+        }
         final FormatOutput formatOutput = getFormatFactory().createOutput(getOutputType());
-        formatOutput.setAttributes(getAttributes());
+        formatOutput.setAttributes(getOutputAttributes());
         formatOutput.setValueFormatRegistry(execution.getValueFormatRegistry());
 
         Dialect dialect = execution.getDialect();
@@ -235,8 +242,17 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
 
     protected ValueModelList<ValueFormatModel> createValueModelList(ResultSet resultSet,
                                                                     Query query) throws SQLException {
-        Collection<? extends ValueModel> valueModelList = query instanceof SelectQuery ?
-                ((SelectQuery) query).getColumns() : ValueModelFactory.createValueModelList(resultSet);
+        Collection<ValueModel> valueModelList;
+        if (query instanceof SelectQuery) {
+            valueModelList = Lists.newArrayList();
+            for (Object column : ((SelectQuery) query).getColumns()) {
+                if (column instanceof ValueModel) {
+                    valueModelList.add((ValueModel)column);
+                }
+            }
+        } else {
+            valueModelList = ValueModelFactory.createValueModelList(resultSet);
+        }
         return ValueModelFactory.createValueModelList(
                 Iterables.transform(valueModelList,
                         new Function<ValueModel, ValueFormatModel>() {
@@ -289,7 +305,11 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
         builder.setQualifyNames(true);
         builder.setDialect(database.getDialect());
         builder.setTable(database.findTable(table));
-        builder.setColumns(selectQuerySpec.getColumns());
+        if (selectQuerySpec.getColumns() !=  null) {
+            for (String column : selectQuerySpec.getColumns()) {
+                builder.addColumn(column);
+            }
+        }
         if (!isEmpty(selectQuerySpec.getFilter())) {
             builder.addFilter(selectQuerySpec.getFilter());
         }
@@ -369,12 +389,12 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
         this.outputType = outputType;
     }
 
-    public Map<String, Object> getAttributes() {
-        return attributes;
+    public Map<String, Object> getOutputAttributes() {
+        return outputAttributes;
     }
 
-    public void setAttributes(Map<String, Object> attributes) {
-        this.attributes = attributes;
+    public void setOutputAttributes(Map<String, Object> outputAttributes) {
+        this.outputAttributes = outputAttributes;
     }
 
     public DialectResolver getDialectResolver() {

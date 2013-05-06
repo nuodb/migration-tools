@@ -27,31 +27,35 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
-import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
+import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.query.*;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.resolve.ServiceResolver;
 import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolverAware;
 import com.nuodb.migrator.jdbc.type.*;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.NOOP;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
+import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
+import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.sql.Connection.*;
+import static java.sql.ResultSet.CONCUR_READ_ONLY;
+import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
@@ -339,6 +343,68 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public boolean supportsRowCount(Table table, RowCountType rowCountType) {
+        return EXACT == rowCountType;
+    }
+
+    @Override
+    public long getRowCount(Connection connection, Table table, RowCountType rowCountType) throws SQLException {
+        if (supportsRowCount(table, rowCountType)) {
+            long rowCount = 0;
+            switch (rowCountType) {
+                case APPROX:
+                    rowCount = getRowCountApprox(connection, table);
+                    break;
+                case EXACT:
+                    rowCount = getRowCountExact(connection, table);
+                    break;
+            }
+            return rowCount;
+        } else {
+            throw new DialectException(format("Row count type is not supported %s", rowCountType));
+        }
+    }
+
+    protected long getRowCountExact(Connection connection, final Table table) throws SQLException {
+        final Query query = getRowCountExactQuery(table);
+        final MutableLong rowCount = new MutableLong();
+        new StatementTemplate(connection).execute(
+                new StatementFactory<Statement>() {
+                    @Override
+                    public Statement create(Connection connection) throws SQLException {
+                        return connection.createStatement(TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                    }
+                }, new StatementCallback<Statement>() {
+                    @Override
+                    public void execute(Statement statement) throws SQLException {
+                        ResultSet resultSet = statement.executeQuery(query.toQuery());
+                        resultSet.next();
+                        rowCount.setValue(resultSet.getLong(1));
+                    }
+                }
+        );
+        return rowCount.getValue();
+    }
+
+    protected Query getRowCountExactQuery(Table table) {
+        SelectQuery query = new SelectQuery();
+        query.setQualifyNames(true);
+        query.setDialect(this);
+        query.addTable(table);
+        PrimaryKey primaryKey = table.getPrimaryKey();
+        Column column = null;
+        if (primaryKey != null && size(primaryKey.getColumns()) == 1) {
+            column = get(primaryKey.getColumns(), 0);
+        }
+        query.addColumn("COUNT(" + (column != null ? column.getName(this) : "*") + ")");
+        return query;
+    }
+
+    protected long getRowCountApprox(Connection connection, Table table) {
+        throw new DialectException("Approx row count is not supported");
+    }
+
+    @Override
     public String getColumnComment(String comment) {
         return "";
     }
@@ -492,7 +558,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public void setStatementStreamResults(Statement statement, boolean streamResults) throws SQLException {
+    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
     }
 
     @Override
@@ -544,7 +610,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, int typeCode, String typeName,
-                                JdbcTypeSpecifiers jdbcTypeSpecifiers) {
+                                   JdbcTypeSpecifiers jdbcTypeSpecifiers) {
         getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, typeName, jdbcTypeSpecifiers);
     }
 
@@ -553,7 +619,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName,
-                                JdbcTypeSpecifiers jdbcTypeSpecifiers) {
+                                   JdbcTypeSpecifiers jdbcTypeSpecifiers) {
         getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, typeName, jdbcTypeSpecifiers);
     }
 

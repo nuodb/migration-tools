@@ -28,7 +28,10 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.AutoIncrement;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
@@ -89,7 +92,8 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
         }
     }
 
-    protected void inspect(InspectionContext inspectionContext, Column column, ResultSet autoIncrements) throws SQLException {
+    protected void inspect(InspectionContext inspectionContext, Column column,
+                           ResultSet autoIncrements) throws SQLException {
         if (autoIncrements.next()) {
             Sequence sequence = new AutoIncrement();
             sequence.setName(autoIncrements.getString("SEQUENCE_NAME"));
