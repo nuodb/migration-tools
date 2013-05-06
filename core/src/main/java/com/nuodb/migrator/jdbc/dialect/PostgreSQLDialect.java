@@ -27,15 +27,23 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.size;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
+import static java.lang.Long.parseLong;
 
 /**
  * @author Sergey Bushik
@@ -46,12 +54,57 @@ public class PostgreSQLDialect extends SimpleDialect {
         super(databaseInfo);
     }
 
+    @Override
+    protected RowCountQuery createRowCountApproxQuery(Table table) {
+        PrimaryKey primaryKey = table.getPrimaryKey();
+        Column column = null;
+        if (primaryKey != null && size(primaryKey.getColumns()) > 0) {
+            column = get(primaryKey.getColumns(), 0);
+        }
+        if (column == null) {
+            for (Index index : table.getIndexes()) {
+                if (index.isUnique() && size(index.getColumns()) > 0) {
+                    column = get(index.getColumns(), 0);
+                }
+            }
+        }
+        SelectQuery selectQuery = new SelectQuery();
+        selectQuery.setDialect(this);
+        selectQuery.addTable(table);
+        selectQuery.addColumn(column != null ? column : "*");
+
+        RowCountQuery rowCountQuery = new RowCountQuery();
+        rowCountQuery.setColumn(column);
+        rowCountQuery.setRowCountType(APPROX);
+        rowCountQuery.setQuery(new ExplainQuery(selectQuery));
+        return rowCountQuery;
+    }
+
+    @Override
+    protected RowCountValue extractRowCountValue(ResultSet rowCount, RowCountQuery rowCountQuery) throws SQLException {
+        RowCountValue rowCountValue = null;
+        switch (rowCountQuery.getRowCountType()) {
+            case APPROX:
+                Pattern pattern = Pattern.compile("rows=(\\d+)");
+                do {
+                    Matcher matcher = pattern.matcher(rowCount.getString(1));
+                    if (matcher.find()) {
+                        rowCountValue = new RowCountValue(rowCountQuery, parseLong(matcher.group(1)));
+                    }
+                } while (rowCount.next() && rowCountValue == null);
+                break;
+            case EXACT:
+                rowCountValue = new RowCountValue(rowCountQuery, rowCount.getLong(1));
+                break;
+        }
+        return rowCountValue;
+    }
+
     /**
      * The standard says that unquoted identifiers should be normalized to upper case but PostgreSQL normalizes to lower
      * case.
      *
-     *
-     * @param identifier to be normalized.
+     * @param identifier   to be normalized.
      * @param identifiable
      * @return boolean indicating whether quoting is required.
      */

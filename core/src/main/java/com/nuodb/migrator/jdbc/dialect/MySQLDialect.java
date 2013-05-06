@@ -177,7 +177,7 @@ public class MySQLDialect extends SimpleDialect {
         RowCountQuery rowCountQuery = new RowCountQuery();
         rowCountQuery.setColumn(column);
         rowCountQuery.setRowCountType(APPROX);
-        rowCountQuery.setQuery(new MySQLExplainQuery(selectQuery));
+        rowCountQuery.setQuery(new ExplainQuery(selectQuery));
         return rowCountQuery;
     }
 

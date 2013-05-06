@@ -33,15 +33,26 @@ import com.nuodb.migrator.jdbc.query.QueryBase;
 /**
  * @author Sergey Bushik
  */
-public class MySQLExplainQuery extends QueryBase {
+public class ExplainQuery extends QueryBase {
 
+    public static final String EXPLAIN_CLAUSE = "EXPLAIN";
+
+    private String explainClause = EXPLAIN_CLAUSE;
     private Query query;
 
-    public MySQLExplainQuery() {
+    public ExplainQuery() {
     }
 
-    public MySQLExplainQuery(Query query) {
+    public ExplainQuery(Query query) {
         this.query = query;
+    }
+
+    public String getExplainClause() {
+        return explainClause;
+    }
+
+    public void setExplainClause(String explainClause) {
+        this.explainClause = explainClause;
     }
 
     public Query getQuery() {
@@ -54,6 +65,6 @@ public class MySQLExplainQuery extends QueryBase {
 
     @Override
     public void buildQuery(StringBuilder query) {
-        query.append("EXPLAIN ").append(getQuery().toString());
+        query.append(getExplainClause()).append(" ").append(getQuery().toString());
     }
 }

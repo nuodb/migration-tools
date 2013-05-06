@@ -344,13 +344,13 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public boolean supportsRowCount(Table table, RowCountType rowCountType) {
+    public boolean supportsRowCountType(Table table, RowCountType rowCountType) {
         return createRowCountQuery(table, rowCountType) != null;
     }
 
     @Override
-    public RowCountValue getRowCount(Connection connection, Table table,
-                                     RowCountType rowCountType) throws SQLException {
+    public RowCountValue getRowCountValue(Connection connection, Table table,
+                                          RowCountType rowCountType) throws SQLException {
         RowCountQuery rowCountQuery = createRowCountQuery(table, rowCountType);
         if (rowCountQuery != null) {
             return executeRowCountQuery(connection, rowCountQuery);
