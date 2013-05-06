@@ -109,7 +109,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
     }
 
     @Override
-    protected void initExecution(DumpJobExecution execution) throws SQLException {
+    protected void init(DumpJobExecution execution) throws SQLException {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
@@ -132,7 +132,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
      * @throws SQLException
      */
     @Override
-    protected void executeWith(DumpJobExecution execution) throws SQLException {
+    protected void doExecute(DumpJobExecution execution) throws SQLException {
         Connection connection = execution.getConnection();
         Dialect dialect = execution.getDialect();
         try {
@@ -159,7 +159,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
     }
 
     @Override
-    protected void releaseExecution(DumpJobExecution execution) throws SQLException {
+    protected void release(DumpJobExecution execution) throws SQLException {
         closeQuietly(execution.getCatalogWriter());
         close(execution.getConnection());
     }

@@ -59,7 +59,7 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
     }
 
     @Override
-    protected void initExecution(SchemaJobExecution execution) throws Exception {
+    protected void init(SchemaJobExecution execution) throws Exception {
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
         isNotNull(getScriptExporter(), "Script exporter is required");
@@ -69,7 +69,7 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
     }
 
     @Override
-    protected void executeWith(SchemaJobExecution execution) throws Exception {
+    protected void doExecute(SchemaJobExecution execution) throws Exception {
         Database database = inspect(execution);
         Collection<String> scripts = getScriptGeneratorContext().getScripts(database);
         if (isFailOnEmptyScripts() && scripts.isEmpty()) {
@@ -95,7 +95,7 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
     }
 
     @Override
-    protected void releaseExecution(SchemaJobExecution execution) throws Exception {
+    protected void release(SchemaJobExecution execution) throws Exception {
         close(execution.getConnection());
     }
 
