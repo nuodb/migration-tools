@@ -150,6 +150,7 @@ public class MySQLDialect extends SimpleDialect {
         }
         query.addColumn("COUNT(*)");
         RowCountQuery rowCountQuery = new RowCountQuery();
+        rowCountQuery.setTable(table);
         rowCountQuery.setRowCountType(EXACT);
         rowCountQuery.setQuery(query);
         return rowCountQuery;
@@ -175,6 +176,7 @@ public class MySQLDialect extends SimpleDialect {
         selectQuery.addColumn(column != null ? column : "*");
 
         RowCountQuery rowCountQuery = new RowCountQuery();
+        rowCountQuery.setTable(table);
         rowCountQuery.setColumn(column);
         rowCountQuery.setRowCountType(APPROX);
         rowCountQuery.setQuery(new ExplainQuery(selectQuery));
@@ -184,13 +186,15 @@ public class MySQLDialect extends SimpleDialect {
     @Override
     protected RowCountValue extractRowCountValue(ResultSet rowCount, RowCountQuery rowCountQuery) throws SQLException {
         RowCountValue rowCountValue = null;
-        switch (rowCountQuery.getRowCountType()) {
-            case APPROX:
-                rowCountValue = new RowCountValue(rowCountQuery, rowCount.getLong("ROWS"));
-                break;
-            case EXACT:
-                rowCountValue = new RowCountValue(rowCountQuery, rowCount.getLong(1));
-                break;
+        if (rowCount.next()) {
+            switch (rowCountQuery.getRowCountType()) {
+                case APPROX:
+                    rowCountValue = new RowCountValue(rowCountQuery, rowCount.getLong("ROWS"));
+                    break;
+                case EXACT:
+                    rowCountValue = new RowCountValue(rowCountQuery, rowCount.getLong(1));
+                    break;
+            }
         }
         return rowCountValue;
     }

@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
 
 /**
@@ -35,6 +36,7 @@ import com.nuodb.migrator.jdbc.query.Query;
  */
 public class RowCountQuery {
 
+    private Table table;
     private Query query;
     private Column column;
     private RowCountType rowCountType;
@@ -43,13 +45,23 @@ public class RowCountQuery {
     }
 
     public RowCountQuery(RowCountQuery rowCountQuery) {
-        this(rowCountQuery.getQuery(), rowCountQuery.getColumn(), rowCountQuery.getRowCountType());
+        this(rowCountQuery.getTable(), rowCountQuery.getQuery(), rowCountQuery.getColumn(),
+                rowCountQuery.getRowCountType());
     }
 
-    public RowCountQuery(Query query, Column column, RowCountType rowCountType) {
+    public RowCountQuery(Table table, Query query, Column column, RowCountType rowCountType) {
+        this.table = table;
         this.query = query;
         this.column = column;
         this.rowCountType = rowCountType;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public void setTable(Table table) {
+        this.table = table;
     }
 
     public Query getQuery() {

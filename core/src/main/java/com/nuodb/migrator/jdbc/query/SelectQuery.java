@@ -43,12 +43,16 @@ import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 public class SelectQuery extends QueryBase {
 
     private Dialect dialect;
-    private Collection<Table> tables = Lists.newArrayList();
+    private Collection<Object> tables = Lists.newArrayList();
     private Collection<Object> columns = Lists.newArrayList();
     private Collection<String> filters = Lists.newArrayList();
 
     public void addColumn(Object column) {
         columns.add(column);
+    }
+
+    public void addTable(String table) {
+        tables.add(table);
     }
 
     public void addTable(Table table) {
@@ -86,7 +90,7 @@ public class SelectQuery extends QueryBase {
     }
 
     protected void addTables(StringBuilder query) {
-        for (Iterator<Table> iterator = tables.iterator(); iterator.hasNext(); ) {
+        for (Iterator<Object> iterator = tables.iterator(); iterator.hasNext(); ) {
             addTable(query, iterator.next());
             if (iterator.hasNext()) {
                 query.append(", ");
@@ -98,8 +102,13 @@ public class SelectQuery extends QueryBase {
         where(query, filters, "AND");
     }
 
-    protected void addTable(StringBuilder query, Table table) {
-        query.append(isQualifyNames() ? table.getQualifiedName(dialect) : table.getName(dialect));
+    protected void addTable(StringBuilder query, Object table) {
+        if (table instanceof Table) {
+            query.append(isQualifyNames() ?
+                    ((Table)table).getQualifiedName(dialect) : ((Table)table).getName(dialect));
+        } else {
+            query.append(table);
+        }
     }
 
     public Dialect getDialect() {
@@ -110,7 +119,7 @@ public class SelectQuery extends QueryBase {
         this.dialect = dialect;
     }
 
-    public Collection<Table> getTables() {
+    public Collection<Object> getTables() {
         return tables;
     }
 

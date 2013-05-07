@@ -50,6 +50,8 @@ import static java.lang.Long.parseLong;
  */
 public class PostgreSQLDialect extends SimpleDialect {
 
+    private static final Pattern EXPLAIN_QUERY_ROW_COUNT = Pattern.compile("rows=(\\d+)");
+
     public PostgreSQLDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
     }
@@ -74,6 +76,7 @@ public class PostgreSQLDialect extends SimpleDialect {
         selectQuery.addColumn(column != null ? column : "*");
 
         RowCountQuery rowCountQuery = new RowCountQuery();
+        rowCountQuery.setTable(table);
         rowCountQuery.setColumn(column);
         rowCountQuery.setRowCountType(APPROX);
         rowCountQuery.setQuery(new ExplainQuery(selectQuery));
@@ -85,16 +88,15 @@ public class PostgreSQLDialect extends SimpleDialect {
         RowCountValue rowCountValue = null;
         switch (rowCountQuery.getRowCountType()) {
             case APPROX:
-                Pattern pattern = Pattern.compile("rows=(\\d+)");
-                do {
-                    Matcher matcher = pattern.matcher(rowCount.getString(1));
+                while (rowCountValue == null && rowCount.next()) {
+                    Matcher matcher = EXPLAIN_QUERY_ROW_COUNT.matcher(rowCount.getString(1));
                     if (matcher.find()) {
                         rowCountValue = new RowCountValue(rowCountQuery, parseLong(matcher.group(1)));
                     }
-                } while (rowCount.next() && rowCountValue == null);
+                }
                 break;
             case EXACT:
-                rowCountValue = new RowCountValue(rowCountQuery, rowCount.getLong(1));
+                rowCountValue = rowCount.next() ? new RowCountValue(rowCountQuery, rowCount.getLong(1)) : null;
                 break;
         }
         return rowCountValue;

@@ -42,7 +42,7 @@ import static java.util.Collections.singleton;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "RedundantCast"})
 public abstract class InspectorBase<M extends MetaData, I extends InspectionScope>
         extends MetaDataHandlerBase implements Inspector<M, I> {
 

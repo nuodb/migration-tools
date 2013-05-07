@@ -33,8 +33,6 @@ import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.dialect.RowCountType;
-import com.nuodb.migrator.jdbc.dialect.RowCountValue;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -229,7 +227,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
 
     protected CatalogEntry createCatalogEntry(Query query) {
         if (query instanceof SelectQuery) {
-            Table table = get(((SelectQuery) query).getTables(), 0);
+            Table table = (Table) get(((SelectQuery) query).getTables(), 0);
             return new CatalogEntry(table.getName().toLowerCase(), getOutputType());
         } else {
             return new CatalogEntry(format(QUERY_ENTRY_NAME, new Date()), getOutputType());
@@ -243,7 +241,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
             valueModelList = Lists.newArrayList();
             for (Object column : ((SelectQuery) query).getColumns()) {
                 if (column instanceof ValueModel) {
-                    valueModelList.add((ValueModel)column);
+                    valueModelList.add((ValueModel) column);
                 }
             }
         } else {
@@ -301,7 +299,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
         builder.setQualifyNames(true);
         builder.setDialect(database.getDialect());
         builder.setTable(database.findTable(table));
-        if (selectQuerySpec.getColumns() !=  null) {
+        if (selectQuerySpec.getColumns() != null) {
             for (String column : selectQuerySpec.getColumns()) {
                 builder.addColumn(column);
             }

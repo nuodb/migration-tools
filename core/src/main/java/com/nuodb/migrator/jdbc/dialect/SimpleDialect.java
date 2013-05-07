@@ -389,6 +389,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         query.addColumn("COUNT(" + (column != null ? column.getName(this) : "*") + ")");
 
         RowCountQuery rowCountQuery = new RowCountQuery();
+        rowCountQuery.setTable(table);
         rowCountQuery.setRowCountType(EXACT);
         rowCountQuery.setQuery(query);
         rowCountQuery.setColumn(column);
@@ -402,7 +403,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
                 new StatementFactory<Statement>() {
                     @Override
                     public Statement create(Connection connection) throws SQLException {
-                        return connection.createStatement();
+                        return createRowCountStatement(connection, rowCountQuery);
                     }
                 }, new StatementCallback<Statement>() {
                     @Override
@@ -414,17 +415,18 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return rowCountValue.getValue();
     }
 
+    protected Statement createRowCountStatement(Connection connection,
+                                                RowCountQuery rowCountQuery) throws SQLException {
+        return connection.createStatement();
+    }
+
     protected RowCountValue executeRowCountQuery(Statement statement, RowCountQuery rowCountQuery) throws SQLException {
         ResultSet rowCount = statement.executeQuery(rowCountQuery.getQuery().toQuery());
-        RowCountValue rowCountValue = null;
-        if (rowCount.next()) {
-            rowCountValue = extractRowCountValue(rowCount, rowCountQuery);
-        }
-        return rowCountValue;
+        return extractRowCountValue(rowCount, rowCountQuery);
     }
 
     protected RowCountValue extractRowCountValue(ResultSet rowCount, RowCountQuery rowCountQuery) throws SQLException {
-        return new RowCountValue(rowCountQuery, rowCount.getLong(1));
+        return rowCount.next() ? new RowCountValue(rowCountQuery, rowCount.getLong(1)) : null;
     }
 
     @Override
