@@ -36,7 +36,7 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.schema.SchemaJobFactory;
-import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaSpec;
 import org.testng.annotations.BeforeMethod;
@@ -94,7 +94,7 @@ public class CliSchemaJobTest {
     private SchemaSpec createSchemaSpec() {
         SchemaSpec schemaSpec = new SchemaSpec();
 
-        JdbcConnectionSpec sourceConnectionSpec = new JdbcConnectionSpec();
+        DriverConnectionSpec sourceConnectionSpec = new DriverConnectionSpec();
         sourceConnectionSpec.setDriverClassName("oracle.jdbc.driver.OracleDriver");
         sourceConnectionSpec.setUrl("jdbc:oracle:thin:@//localhost:1521/test");
         sourceConnectionSpec.setUsername("test");
@@ -102,7 +102,7 @@ public class CliSchemaJobTest {
         sourceConnectionSpec.setSchema("test");
         schemaSpec.setSourceConnectionSpec(sourceConnectionSpec);
 
-        JdbcConnectionSpec targetConnectionSpec = new JdbcConnectionSpec();
+        DriverConnectionSpec targetConnectionSpec = new DriverConnectionSpec();
         targetConnectionSpec.setDriverClassName(NUODB_DRIVER);
         targetConnectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
         targetConnectionSpec.setUsername("dba");

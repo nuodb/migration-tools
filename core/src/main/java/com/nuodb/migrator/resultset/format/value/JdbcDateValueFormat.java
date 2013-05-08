@@ -97,7 +97,7 @@ public class JdbcDateValueFormat extends ValueFormatBase<Date> {
     }
 
     @Override
-    public ValueVariantType getVariantType(ValueModel ValueModel) {
+    public ValueVariantType getValueType(ValueModel ValueModel) {
         return ValueVariantType.STRING;
     }
 }

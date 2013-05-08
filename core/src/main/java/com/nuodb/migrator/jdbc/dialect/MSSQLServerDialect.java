@@ -42,6 +42,11 @@ public class MSSQLServerDialect extends SimpleDialect {
 
     public MSSQLServerDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
+    }
+
+    @Override
+    protected void initJdbcTypes() {
+        super.initJdbcTypes();
         addJdbcTypeDescAlias(Types.LONGVARBINARY, "IMAGE", Types.BLOB);
         addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
         addJdbcTypeDescAlias(Types.LONGNVARCHAR, "XML", Types.CLOB);

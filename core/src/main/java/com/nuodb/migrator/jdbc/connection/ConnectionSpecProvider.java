@@ -25,26 +25,37 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.classpath.filter;
+package com.nuodb.migrator.jdbc.connection;
 
-import java.io.File;
-import java.io.FileFilter;
+import com.nuodb.migrator.spec.ConnectionSpec;
 
 /**
  * @author Sergey Bushik
  */
-public class JarFileFilter implements FileFilter {
+public abstract class ConnectionSpecProvider<T extends ConnectionSpec> extends ConnectionProxyProvider {
 
-    private static final String JAR_EXTENSION = ".jar";
-    private static final String ZIP_EXTENSION = ".zip";
+    private T connectionSpec;
 
-    public static final JarFileFilter INSTANCE = new JarFileFilter();
+    public ConnectionSpecProvider(T connectionSpec) {
+        this.connectionSpec = connectionSpec;
+    }
 
-    private JarFileFilter() {
+    public T getConnectionSpec() {
+        return connectionSpec;
     }
 
     @Override
-    public boolean accept(File file) {
-        return file.isFile() && (file.getName().endsWith(JAR_EXTENSION) || file.getName().endsWith(ZIP_EXTENSION));
+    public String getCatalog() {
+        return connectionSpec.getCatalog();
+    }
+
+    @Override
+    public String getSchema() {
+        return connectionSpec.getSchema();
+    }
+
+    @Override
+    public String toString() {
+        return connectionSpec.toString();
     }
 }

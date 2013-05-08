@@ -122,8 +122,9 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
             executeUpdate();
         } catch (Exception exception) {
             onReadRowFailure(exception, row, values);
+        } finally {
+            row++;
         }
-        row++;
     }
 
     protected void executeUpdate() throws SQLException {
@@ -140,8 +141,8 @@ public abstract class FormatInputBase extends FormatBase implements FormatInput 
         }
     }
 
-    protected void onReadRowFailure(Exception exception, long row, ValueVariant[] values) {
-        String message = format("Failed to load row %d", row);
+    protected void onReadRowFailure(Throwable exception, long row, ValueVariant[] values) {
+        String message = format("Failed to load row #%d: %s", row, exception.getMessage());
         if (isLenient()) {
             if (logger.isErrorEnabled()) {
                 logger.error(message);

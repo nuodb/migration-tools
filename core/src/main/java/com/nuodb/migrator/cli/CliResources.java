@@ -41,9 +41,11 @@ public interface CliResources {
     final String HELP_ARGUMENT_NAME = "com.nuodb.migrator.help.argument.name";
     final String LIST_OPTION_DESCRIPTION = "com.nuodb.migrator.list.option.description";
     final String LIST_OPTION_OUTPUT = "com.nuodb.migrator.list.option.output";
+    final String COMMAND_OPTION_DESCRIPTION = "com.nuodb.migrator.command.option.description";
+    final String COMMAND_OPTION_HELP_VALUES = "com.nuodb.migrator.command.option.help.values";
     final String CONFIG_OPTION_DESCRIPTION = "com.nuodb.migrator.config.option.description";
     final String CONFIG_ARGUMENT_NAME = "com.nuodb.migrator.config.argument.name";
-    final String COMMAND_OPTION_DESCRIPTION = "com.nuodb.migrator.command.option.description";
+
     /**
      * Dump plugin resources
      */

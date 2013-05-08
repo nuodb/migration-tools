@@ -61,22 +61,22 @@ public class ScriptTranslationManager extends SimpleServiceResolverAware<Dialect
     public Script getScriptTranslation(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
                                        Script sourceScript) {
         DialectResolver dialectResolver = getDialectResolver();
-        Script script = null;
+        Script targetScript = null;
         if (dialectResolver != null) {
             Dialect sourceDialect = dialectResolver.resolve(sourceDatabaseInfo);
             Dialect targetDialect = dialectResolver.resolve(targetDatabaseInfo);
-            script = getScriptTranslation(sourceDialect, targetDialect, sourceScript);
+            targetScript = getScriptTranslation(sourceDialect, targetDialect, sourceScript);
         } else {
             for (ScriptTranslation scriptTranslation : scriptTranslations) {
-                if (scriptTranslation.getSourceDatabaseInfo().equals(sourceDatabaseInfo) &&
-                        scriptTranslation.getTargetDatabaseInfo().equals(targetDatabaseInfo) &&
-                        sourceScript.equals(sourceScript)) {
-                    script = scriptTranslation.getTargetScript();
+                if (scriptTranslation.getSourceDatabaseInfo().matches(sourceDatabaseInfo) &&
+                        scriptTranslation.getTargetDatabaseInfo().matches(targetDatabaseInfo) &&
+                        scriptTranslation.getSourceScript().equals(sourceScript)) {
+                    targetScript = scriptTranslation.getTargetScript();
                     break;
                 }
             }
         }
-        return script;
+        return targetScript != null ? targetScript : sourceScript;
     }
 
     public Script getScriptTranslation(Dialect sourceDialect, Dialect targetDialect, Script sourceScript) {

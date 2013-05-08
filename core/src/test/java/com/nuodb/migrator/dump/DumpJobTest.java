@@ -153,8 +153,8 @@ public class DumpJobTest {
 
     private void verifyValidate() throws Exception {
         assertNotNull(jobExecutor.getJobStatus().getFailure());
-        verify(dumpJob).initExecution(any(DumpJobExecution.class));
-        verify(dumpJob, never()).executeWith(any(DumpJobExecution.class));
+        verify(dumpJob).init(any(DumpJobExecution.class));
+        verify(dumpJob, never()).doExecute(any(DumpJobExecution.class));
     }
 
     @Test

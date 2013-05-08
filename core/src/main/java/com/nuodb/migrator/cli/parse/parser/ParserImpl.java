@@ -56,7 +56,7 @@ public class ParserImpl implements Parser {
             option.process(commandLine, iterator);
         }
         if (iterator.hasNext()) {
-            throw new OptionException(option, format("Unexpected argument '%1$s'", iterator.next()));
+            throw new OptionException(option, format("Unexpected argument %s", iterator.next()));
         }
         option.postProcess(commandLine);
         return commandLine;

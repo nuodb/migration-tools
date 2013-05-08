@@ -67,7 +67,7 @@ public class FileCatalogWriter implements CatalogWriter {
             initOutput();
             String entryName = valueOf(catalogEntry);
             if (logger.isTraceEnabled()) {
-                logger.trace(format("Adding entry %1$s", entryName));
+                logger.trace(format("Adding entry %s", entryName));
             }
             if (!entries.isEmpty()) {
                 IOUtils.write(getProperty("line.separator"), output);

@@ -28,7 +28,8 @@
 package com.nuodb.migrator.jdbc.type;
 
 import com.nuodb.migrator.utils.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 /**
  * @author Sergey Bushik
@@ -61,7 +62,7 @@ public class JdbcTypeDesc {
     }
 
     public static boolean isTypeNameEquals(String typeName1, String typeName2) {
-        return StringUtils.equalsIgnoreCase(typeName1, typeName2);
+        return equalsIgnoreCase(typeName1, typeName2);
     }
 
     @Override

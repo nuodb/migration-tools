@@ -38,10 +38,9 @@ import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 public class NuoDBIndex {
 
     public static final String QUERY =
-            "SELECT * FROM SYSTEM.INDEXES\n" +
-            "INNER JOIN SYSTEM.INDEXFIELDS ON INDEXES.SCHEMA=INDEXFIELDS.SCHEMA\n" +
-            "AND INDEXES.TABLENAME=INDEXFIELDS.TABLENAME\n" +
-            "AND INDEXES.INDEXNAME=INDEXFIELDS.INDEXNAME";
+            "SELECT * FROM SYSTEM.INDEXES AS I " +
+            "INNER JOIN SYSTEM.INDEXFIELDS AS F ON I.SCHEMA=F.SCHEMA " +
+            "AND I.TABLENAME=F.TABLENAME AND I.INDEXNAME=F.INDEXNAME";
 
     public static final int PRIMARY_KEY = 0;
     public static final int UNIQUE = 1;
@@ -49,14 +48,14 @@ public class NuoDBIndex {
 
     public static String createQuery(int... indexTypes) {
         final Collection<String> filters = newArrayList();
-        filters.add("SCHEMA=?");
-        filters.add("TABLENAME=?");
+        filters.add("I.SCHEMA=?");
+        filters.add("I.TABLENAME=?");
         if (indexTypes != null && indexTypes.length > 0) {
             if (indexTypes.length == 1) {
-                filters.add("INDEXTYPE=" + indexTypes[0]);
+                filters.add("I.INDEXTYPE=" + indexTypes[0]);
             } else {
                 StringBuilder filter = new StringBuilder();
-                filter.append("INDEXTYPE IN (");
+                filter.append("I.INDEXTYPE IN (");
                 for (int i = 0; i < indexTypes.length; i++) {
                     filter.append(indexTypes[i]);
                     if (i + 1 < indexTypes.length) {

@@ -30,7 +30,7 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,27 +40,22 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class MySQLBigIntUnsignedType extends JdbcTypeBase<BigDecimal> {
+public class MySQLBigIntUnsignedType extends JdbcTypeBase<BigInteger> {
 
-    public static JdbcType INSTANCE = new MySQLBigIntUnsignedType();
+    public static JdbcType INSTANCE = new MySQLIntUnsignedType();
 
     public MySQLBigIntUnsignedType() {
-        super(Types.BIGINT, "BIGINT UNSIGNED", BigDecimal.class);
+        super(Types.BIGINT, "BIGINT UNSIGNED", BigInteger.class);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int column,
+    public BigInteger getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+        return (BigInteger) resultSet.getObject(column);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, BigInteger value, int column,
                                     Map<String, Object> options) throws SQLException {
-        statement.setBigDecimal(column, value);
-    }
-
-    @Override
-    public Class<? extends BigDecimal> getTypeClass() {
-        return BigDecimal.class;
-    }
-
-    @Override
-    public BigDecimal getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
-        return resultSet.getBigDecimal(column);
+        statement.setObject(column, value);
     }
 }

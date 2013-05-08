@@ -42,7 +42,7 @@ import com.nuodb.migrator.resultset.format.SimpleFormatFactory;
 import com.nuodb.migrator.resultset.format.value.SimpleValueFormatRegistryResolver;
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.LoadSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 
@@ -66,9 +66,9 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
         ResourceSpec inputSpec = loadSpec.getInputSpec();
         LoadJob job = new LoadJob();
         ConnectionSpec connectionSpec = loadSpec.getConnectionSpec();
-        job.setConnectionProvider(createConnectionProvider(connectionSpec, false));
+        job.setConnectionProvider(createConnectionProvider(connectionSpec));
 
-        job.setAttributes(inputSpec.getAttributes());
+        job.setInputAttributes(inputSpec.getAttributes());
         job.setCatalog(createCatalog(inputSpec.getPath()));
         job.setTimeZone(loadSpec.getTimeZone());
         job.setInsertType(loadSpec.getInsertType());
@@ -120,7 +120,7 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
         LoadJobFactory jobFactory = new LoadJobFactory();
         jobFactory.setLoadSpec(new LoadSpec() {
             {
-                JdbcConnectionSpec connectionSpec = new JdbcConnectionSpec();
+                DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
                 connectionSpec.setDriverClassName("com.nuodb.jdbc.Driver");
                 connectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
                 connectionSpec.setUsername("dba");

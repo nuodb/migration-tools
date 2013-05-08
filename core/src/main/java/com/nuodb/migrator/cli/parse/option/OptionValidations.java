@@ -44,22 +44,22 @@ public class OptionValidations {
     }
 
     public static void groupMaximum(Group group, Option option) {
-        throw new OptionException(group, format("Unexpected option %1$s", option.getName()));
+        throw new OptionException(group, format("Unexpected option %s", option.getName()));
     }
 
     public static void optionRequired(Option option) {
-        throw new OptionException(option, format("Missing required option %1$s", option.getName()));
+        throw new OptionException(option, format("Missing required option %s", option.getName()));
     }
 
     public static void optionUnexpected(Option option, String argument) {
-        throw new OptionException(option, format("Unexpected token %1$s", argument));
+        throw new OptionException(option, format("Unexpected token %s", argument));
     }
 
     public static void argumentMinimum(Argument argument) {
-        throw new OptionException(argument, format("Missing value for %1$s argument", argument.getName()));
+        throw new OptionException(argument, format("Missing value for %s argument", argument.getName()));
     }
 
     public static void argumentMaximum(Argument argument) {
-        throw new OptionException(argument, format("Too many values for %1$s argument", argument.getName()));
+        throw new OptionException(argument, format("Too many values for %s argument", argument.getName()));
     }
 }

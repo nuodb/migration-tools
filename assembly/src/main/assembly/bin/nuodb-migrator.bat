@@ -1,4 +1,4 @@
-@echo off
+@ECHO OFF
 @REM Copyright (c) 2012, NuoDB, Inc.
 @REM All rights reserved.
 @REM
@@ -27,33 +27,45 @@
 
 @REM JAVA_HOME can optionally be set here
 
-@REM NUODB_HOME is set here
-if exist %NUODB_HOME% goto okNuoDBHome
-set NUODB_HOME="C:\Program Files\NuoDB"
-if exist %NUODB_HOME% goto okNuoDBHome
-set NUODB_HOME="C:\Program Files (x86)\NuoDB"
+IF EXIST "%JAVA_HOME%" GOTO OK_JAVA_HOME
+ECHO The JAVA_HOME variable must be set to a Java installation!
+GOTO FAIL
 
-:okNuoDBHome
+:OK_JAVA_HOME
 
-@REM  Maximum heap size
-set MAX_HEAP_SIZE="256M"
+@REM NUODB_ROOT is set here
+IF EXIST "%NUODB_ROOT%" GOTO OK_NUODB_ROOT
+SET NUODB_ROOT=C:\Program Files\NuoDB
+IF EXIST "%NUODB_ROOT%" GOTO OK_NUODB_ROOT
+SET NUODB_ROOT=C:\Program Files (x86)\NuoDB
+IF EXIST "%NUODB_ROOT%" GOTO OK_NUODB_ROOT
 
-if "%JAVA_HOME%" == "" goto error
-if not "%NUODB_MIGRATOR_HOME%" == "" goto okHome
-set CURRENT_DIR=%cd%
-set NUODB_MIGRATOR_HOME="%CURRENT_DIR%\.."
+ECHO Cannot locate the NuoDB installation directory!
+ECHO Set NUODB_ROOT appropriately.
+GOTO FAIL
 
-:okHome
-set JAVA_OPTS=-Xmx%MAX_HEAP_SIZE% -Dnuodb.home=%NUODB_HOME% -Dnuodb.migrator.home=%NUODB_MIGRATOR_HOME%
-set CLASSPATH=%NUODB_MIGRATOR_HOME%\jar\nuodb-migrator-bootstrap-${project.version}.jar;%CLASSPATH%
+:OK_NUODB_ROOT
+
+@REM Maximum heap size
+SET MAX_HEAP_SIZE=256M
+
+IF EXIST "%NUODB_MIGRATOR_ROOT%\jar" GOTO OK_NUODB_MIGRATOR_ROOT
+SET NUODB_MIGRATOR_ROOT=%~dp0\..
+IF EXIST "%NUODB_MIGRATOR_ROOT%\jar" GOTO OK_NUODB_MIGRATOR_ROOT
+
+ECHO Cannot locate the NuoDB Migrator installation directory!
+ECHO Set NUODB_MIGRATOR_ROOT appropriately.
+GOTO FAIL
+
+:OK_NUODB_MIGRATOR_ROOT
+SET CLASSPATH=%NUODB_MIGRATOR_ROOT%\jar\nuodb-migrator-bootstrap-${project.version}.jar;%CLASSPATH%
+
+SET JAVA_OPTS=-Xmx%MAX_HEAP_SIZE% "-Dnuodb.root=%NUODB_ROOT%" "-Dnuodb.migrator.root=%NUODB_MIGRATOR_ROOT%"
 
 "%JAVA_HOME%\bin\java" %JAVA_OPTS% -cp "%CLASSPATH%" com.nuodb.migrator.bootstrap.Bootstrap %*
 
-GOTO :finally
+EXIT /b 0
 
-:error
-echo The JAVA_HOME variable must be set to run this program!
-pause
-
-:finally
-endlocal
+:FAIL
+PAUSE
+EXIT /b 1

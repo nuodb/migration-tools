@@ -299,6 +299,7 @@ public class Column extends IdentifiableBase implements ValueModel {
             Long lastValue = sequence != null ? sequence.getLastValue() : null;
             buffer.append(format(", auto increment=%d", lastValue != null ? lastValue : 0));
         }
+        buffer.append(format(", position=%d", position));
         buffer.append(format(", size=%d", size));
         buffer.append(format(", precision=%d", precision));
         buffer.append(format(", scale=%d", scale));

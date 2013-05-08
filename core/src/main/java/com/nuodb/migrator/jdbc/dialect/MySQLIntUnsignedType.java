@@ -25,17 +25,37 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.jdbc.dialect;
 
-import java.sql.Statement;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleStatementFormatFactory implements StatementFormatFactory {
+public class MySQLIntUnsignedType extends JdbcTypeBase<Long> {
+
+    public static JdbcType INSTANCE = new MySQLBigIntUnsignedType();
+
+    public MySQLIntUnsignedType() {
+        super(Types.INTEGER, "INT UNSIGNED", Long.class);
+    }
 
     @Override
-    public StatementFormat createStatementFormat(Statement statement, String query) {
-        return new SimpleStatementFormat(query);
+    public Long getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+        Long value = resultSet.getLong(column);
+        return resultSet.wasNull() ? null : value;
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Long value, int column,
+                                    Map<String, Object> options) throws SQLException {
+        statement.setLong(column, value);
     }
 }

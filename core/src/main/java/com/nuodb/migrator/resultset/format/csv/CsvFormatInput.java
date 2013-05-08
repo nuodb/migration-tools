@@ -59,7 +59,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 /**
  * @author Sergey Bushik
  */
-public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
+public class CsvFormatInput extends FormatInputBase implements CsvAttributes {
 
     private CSVParser csvParser;
     private String doubleQuote;
@@ -129,7 +129,7 @@ public class CsvInputFormat extends FormatInputBase implements CsvAttributes {
             ValueVariantType type = list.get(index).getValueVariantType();
             type = type != null ? type : STRING;
             switch (type) {
-                case BINARY:
+                case BYTES:
                     values[index] = binary(BASE64.decode(value));
                     break;
                 case STRING:

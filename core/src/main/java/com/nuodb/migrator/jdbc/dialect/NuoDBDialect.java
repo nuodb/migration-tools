@@ -37,10 +37,10 @@ import java.sql.Types;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newScale;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSize;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.*;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
+import static java.util.regex.Pattern.compile;
 import static org.apache.commons.lang3.StringUtils.isAllUpperCase;
 
 /**
@@ -48,7 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isAllUpperCase;
  */
 public class NuoDBDialect extends SimpleDialect {
 
-    private static final Pattern ALLOWED_IDENTIFIER_PATTERN = Pattern.compile("^[a-zA-Z_]+\\w*$");
+    private static final Pattern ALLOWED_IDENTIFIER_PATTERN = compile("^[a-zA-Z_]+\\w*$");
 
     private static final int WRITE_COMMITTED = 5;
     private static final int CONSISTENT_READ = 7;
@@ -59,49 +59,65 @@ public class NuoDBDialect extends SimpleDialect {
 
     public NuoDBDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
+    }
 
-        removeTypeName(Types.BIT);
-        addTypeName(Types.BIT, "BOOLEAN", newSize(1));
-
-        addTypeName(Types.TINYINT, "SMALLINT");
-        addTypeName(Types.SMALLINT, "SMALLINT");
-        addTypeName(Types.INTEGER, "INTEGER");
-        addTypeName(Types.BIGINT, "BIGINT");
-
-        addTypeName(Types.REAL, "REAL");
-        addTypeName(Types.FLOAT, "FLOAT");
-        addTypeName(Types.DOUBLE, "DOUBLE");
-        addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
-
-        addTypeName(Types.CHAR, "CHAR({N})");
-
-        addTypeName(Types.VARCHAR, "VARCHAR({N})");
-        addTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
-
-        addTypeName(Types.DATE, "DATE");
-        addTypeName(Types.TIME, "TIME", newScale(0));
-        addTypeName(Types.TIME, "TIME({S})");
-        addTypeName(Types.TIMESTAMP, "TIMESTAMP({S})");
-        addTypeName(Types.TIMESTAMP, "TIMESTAMP", newScale(0));
-
-        addTypeName(Types.BINARY, "BINARY({N})");
-        addTypeName(Types.VARBINARY, "VARBINARY({N})");
-        addTypeName(Types.LONGVARBINARY, "VARBINARY({N})");
-
-        addTypeName(Types.NULL, "NULL");
-        addTypeName(Types.BLOB, "BLOB");
-        addTypeName(Types.CLOB, "CLOB");
-        addTypeName(Types.BOOLEAN, "BOOLEAN");
-
-        addTypeName(Types.NCHAR, "NCHAR({N})");
-        addTypeName(Types.NVARCHAR, "NVARCHAR({N})");
-        addTypeName(Types.NCLOB, "NCLOB");
-        addTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
-
+    @Override
+    protected void initJdbcTypes() {
         addJdbcType(NuoDBIntegerType.INSTANCE);
         addJdbcType(NuoDBBigIntType.INSTANCE);
         addJdbcType(NuoDBTimeType.INSTANCE);
+    }
 
+    @Override
+    protected void initJdbcTypeNames() {
+        addJdbcTypeName(Types.BIT, "BOOLEAN", newSize(1));
+        addJdbcTypeName(Types.TINYINT, "SMALLINT");
+        addJdbcTypeName(Types.SMALLINT, "SMALLINT");
+
+        addJdbcTypeName(Types.INTEGER, "INTEGER");
+        addJdbcTypeName(Types.INTEGER, "NUMERIC({P})", newPrecision(11));
+
+        addJdbcTypeName(Types.BIGINT, "BIGINT");
+        // Maximum precision should be 20
+        addJdbcTypeName(Types.BIGINT, "NUMERIC({P})", newPrecision(21));
+        addJdbcTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
+        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+
+        addJdbcTypeName(Types.REAL, "REAL");
+        addJdbcTypeName(Types.FLOAT, "FLOAT");
+        addJdbcTypeName(Types.DOUBLE, "DOUBLE");
+        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+
+        addJdbcTypeName(Types.CHAR, "CHAR({N})");
+
+        addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
+
+        addJdbcTypeName(Types.DATE, "DATE");
+        addJdbcTypeName(Types.TIME, "TIME", newScale(0));
+        addJdbcTypeName(Types.TIME, "TIME({S})");
+        addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP", newScale(0));
+        addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP({S})");
+
+        addJdbcTypeName(Types.BINARY, "BINARY({N})");
+        addJdbcTypeName(Types.VARBINARY, "VARBINARY({N})");
+        addJdbcTypeName(Types.LONGVARBINARY, "VARBINARY({N})");
+
+        addJdbcTypeName(Types.NULL, "NULL");
+        addJdbcTypeName(Types.BLOB, "BLOB");
+        addJdbcTypeName(Types.CLOB, "CLOB");
+        addJdbcTypeName(Types.BOOLEAN, "BOOLEAN");
+
+        addJdbcTypeName(Types.NCHAR, "NCHAR({N})");
+        addJdbcTypeName(Types.NVARCHAR, "NVARCHAR({N})");
+        addJdbcTypeName(Types.NCLOB, "NCLOB");
+        addJdbcTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
+
+        addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
+    }
+
+    @Override
+    protected void initScriptTranslations() {
         addScriptTranslation(new DatabaseInfo("MySQL"), "CURRENT_TIMESTAMP", "NOW");
     }
 
@@ -123,8 +139,8 @@ public class NuoDBDialect extends SimpleDialect {
     @Override
     public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) {
         return newArrayList(
-                WRITE_COMMITTED, CONSISTENT_READ,
-                TRANSACTION_READ_COMMITTED, TRANSACTION_SERIALIZABLE).contains(transactionIsolationLevel);
+                WRITE_COMMITTED, CONSISTENT_READ, TRANSACTION_READ_COMMITTED, TRANSACTION_SERIALIZABLE
+        ).contains(transactionIsolationLevel);
     }
 
     @Override

@@ -25,14 +25,59 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.bootstrap.classpath.file;
 
-import java.sql.Statement;
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public interface StatementFormatFactory {
+public class AndFileFilter implements FileFilter {
 
-    StatementFormat createStatementFormat(Statement statement, String query);
+    private Collection<FileFilter> fileFilters = new ArrayList<FileFilter>();
+
+    public AndFileFilter(FileFilter... fileFilters) {
+        for (FileFilter fileFilter : fileFilters) {
+            addFileFilter(fileFilter);
+        }
+    }
+
+    public void addFileFilter(FileFilter fileFilter) {
+        fileFilters.add(fileFilter);
+    }
+
+    @Override
+    public boolean accept(File path) {
+        for (FileFilter fileFilter : fileFilters) {
+            if (!fileFilter.accept(path)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AndFileFilter)) return false;
+
+        AndFileFilter that = (AndFileFilter) o;
+
+        if (fileFilters != null ? !fileFilters.equals(that.fileFilters) : that.fileFilters != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return fileFilters != null ? fileFilters.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "AndFileFilter{fileFilters=" + fileFilters + '}';
+    }
 }

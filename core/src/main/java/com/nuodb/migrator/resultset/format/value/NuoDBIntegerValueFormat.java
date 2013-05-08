@@ -54,7 +54,7 @@ public class NuoDBIntegerValueFormat extends ValueFormatBase<String> {
     }
 
     @Override
-    public ValueVariantType getVariantType(ValueModel ValueModel) {
+    public ValueVariantType getValueType(ValueModel ValueModel) {
         return ValueVariantType.STRING;
     }
 }

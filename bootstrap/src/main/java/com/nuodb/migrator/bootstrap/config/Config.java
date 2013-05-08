@@ -34,7 +34,7 @@ import java.util.Properties;
  */
 public interface Config {
 
-    final String HOME = "nuodb.migrator.home";
+    final String ROOT = "nuodb.migrator.root";
 
     final String EXECUTABLE = "com.nuodb.migrator.executable";
 

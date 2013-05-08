@@ -155,7 +155,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         public <X> X getValue(ResultSet resultSet, int column, Class<X> valueClass,
                               Map<String, Object> options) throws SQLException {
             X value = (X) jdbcType.getValue(resultSet, column, options);
-            JdbcTypeAdapter<X> adapter = getJdbcTypeAdapter(valueClass, jdbcType.getTypeClass());
+            JdbcTypeAdapter<X> adapter = getJdbcTypeAdapter(valueClass, jdbcType.getValueClass());
             if (adapter != null) {
                 Statement statement = resultSet.getStatement();
                 Connection connection = statement.getConnection();
@@ -182,7 +182,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         public <X> void setValue(PreparedStatement preparedStatement, int column, X value,
                                  Map<String, Object> options) throws SQLException {
             JdbcTypeAdapter<X> adapter = getJdbcTypeAdapter(value != null ? value.getClass() : null,
-                    jdbcType.getTypeClass());
+                    jdbcType.getValueClass());
             if (adapter != null) {
                 Connection connection = preparedStatement.getConnection();
                 value = adapter.wrap(value, getConnection(connection));

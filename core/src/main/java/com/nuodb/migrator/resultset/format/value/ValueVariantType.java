@@ -38,7 +38,7 @@ import static java.util.Collections.unmodifiableMap;
  */
 public enum ValueVariantType {
 
-    STRING, BINARY;
+    STRING, BYTES;
 
     private static final Map<String, ValueVariantType> ALIASES;
 

@@ -25,37 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.classpath.filter;
+package com.nuodb.migrator.jdbc.connection;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
-public class AndFileFilter implements FileFilter {
+public interface StatementFormatterFactory {
 
-    private Collection<FileFilter> fileFilters = new ArrayList<FileFilter>();
-
-    public AndFileFilter(FileFilter... fileFilters) {
-        for (FileFilter fileFilter : fileFilters) {
-            addFileFilter(fileFilter);
-        }
-    }
-
-    public void addFileFilter(FileFilter fileFilter) {
-        fileFilters.add(fileFilter);
-    }
-
-    @Override
-    public boolean accept(File path) {
-        for (FileFilter fileFilter : fileFilters) {
-            if (!fileFilter.accept(path)) {
-                return false;
-            }
-        }
-        return true;
-    }
+    StatementFormatter createStatementFormat(Statement statement, String query);
 }

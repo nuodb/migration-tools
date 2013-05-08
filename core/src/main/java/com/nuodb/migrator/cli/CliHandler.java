@@ -43,8 +43,10 @@ import org.slf4j.LoggerFactory;
 import java.io.PrintStream;
 import java.util.Collection;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.lang.System.exit;
+import static org.apache.commons.lang3.StringUtils.split;
 
 /**
  * Main entry point of the command line interface, for the names of the available options see {@link CliOptions}.
@@ -102,22 +104,23 @@ public class CliHandler extends CliSupport implements Bootable {
                 withAlias(LIST_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(LIST_OPTION_DESCRIPTION)).build();
 
-        BasicOption config = newBasicOptionBuilder().
-                withId(CONFIG_OPTION_ID).
-                withName(CONFIG_OPTION).
-                withAlias(CONFIG_SHORT_OPTION, OptionFormat.SHORT).
-                withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(CONFIG_ARGUMENT_NAME)).
-                                withMinimum(1).
-                                withMaximum(1).build()
-                ).build();
+//        BasicOption config = newBasicOptionBuilder().
+//                withId(CONFIG_OPTION_ID).
+//                withName(CONFIG_OPTION).
+//                withAlias(CONFIG_SHORT_OPTION, OptionFormat.SHORT).
+//                withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
+//                withArgument(
+//                        newArgumentBuilder().
+//                                withName(getMessage(CONFIG_ARGUMENT_NAME)).
+//                                withMinimum(1).
+//                                withMaximum(1).build()
+//                ).build();
 
         CliCommand command = new CliCommand();
         command.setId(COMMAND_OPTION_ID);
         command.setName(COMMAND_OPTION);
         command.setDescription(getMessage(COMMAND_OPTION_DESCRIPTION));
+        command.setHelpValues(newArrayList(split(getMessage(COMMAND_OPTION_HELP_VALUES))));
         command.setRequired(false);
         command.setCliRunLookup(cliRunLookup);
         command.setOptionFormat(getOptionFormat());
@@ -126,7 +129,6 @@ public class CliHandler extends CliSupport implements Bootable {
                 withName(getMessage(ROOT_GROUP_NAME)).
                 withOption(help).
                 withOption(list).
-                withOption(config).
                 withOption(command).
                 withRequired(true).build();
     }
@@ -183,14 +185,14 @@ public class CliHandler extends CliSupport implements Bootable {
 
     protected void handleConfig(OptionSet options) {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Handling --config %1$s option", options.getValue("config")));
+            logger.trace(format("Handling --config %s option", options.getValue("config")));
         }
     }
 
     protected void handleRun(OptionSet options) {
         CliRun cliRun = (CliRun) options.getValue(COMMAND_OPTION);
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Running %1$s command", cliRun.getCommand()));
+            logger.trace(format("Running %s command", cliRun.getCommand()));
         }
         if (cliRun instanceof CliRunJob) {
             configure(((CliRunJob) cliRun).getJobFactory());
@@ -200,7 +202,7 @@ public class CliHandler extends CliSupport implements Bootable {
 
     protected void configure(JobFactory jobFactory) {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Configuring %1$s job factory", jobFactory.getClass()));
+            logger.trace(format("Configuring %s job factory", jobFactory.getClass()));
         }
     }
 

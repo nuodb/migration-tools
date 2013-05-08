@@ -106,7 +106,7 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
             ValueFormat valueFormat = getValueFormatRegistry().getValueFormat(typeDescAlias);
             JdbcTypeValueAccess valueAccess = getValueAccessProvider().getResultSetAccess(
                     getResultSet(), valueFormatModel, index + 1);
-            valueFormatModel.setValueVariantType(valueFormat.getVariantType(valueFormatModel));
+            valueFormatModel.setValueVariantType(valueFormat.getValueType(valueFormatModel));
             valueFormatModel.setValueFormat(valueFormat);
             valueFormatModel.setValueAccess(valueAccess);
             visitValueFormatModel(valueFormatModel);
@@ -137,6 +137,8 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
             writeValues(values = getValues());
         } catch (Exception exception) {
             onWriteRowFailure(exception, row, values);
+        } finally {
+            row++;
         }
     }
 
@@ -154,8 +156,8 @@ public abstract class FormatOutputBase extends FormatBase implements FormatOutpu
 
     protected abstract void writeValues(ValueVariant[] variants);
 
-    protected void onWriteRowFailure(Exception exception, long row, ValueVariant[] values) {
-        String message = format("Failed to dump row %d", row);
+    protected void onWriteRowFailure(Throwable exception, long row, ValueVariant[] values) {
+        String message = format("Failed to dump row #%d: %s", row, exception.getMessage());
         if (isLenient()) {
             if (logger.isErrorEnabled()) {
                 logger.error(message);

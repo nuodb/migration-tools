@@ -27,11 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.jdbc.query.SimpleStatementFormatFactory;
-import com.nuodb.migrator.jdbc.query.StatementFormat;
-import com.nuodb.migrator.jdbc.query.StatementFormatFactory;
-import org.slf4j.Logger;
-
 import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.Collection;
@@ -44,30 +39,29 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
+@SuppressWarnings("unchecked")
+public class StatementLoggingConnectionProvider extends ConnectionProxyProvider {
 
-    private StatementFormatFactory statementFormatFactory;
-    private ConnectionProvider connectionProvider;
-    private Logger logger;
+    private final ConnectionProvider connectionProvider;
+    private final StatementFormatterFactory statementFormatterFactory;
+    private final StatementLogger statementLogger;
 
-    public JdbcLoggingConnectionProvider(ConnectionProvider connectionProvider) {
-        this(connectionProvider, new SimpleStatementFormatFactory());
+    public StatementLoggingConnectionProvider(ConnectionProvider connectionProvider) {
+        this(connectionProvider, new SimpleStatementFormatterFactory());
     }
 
-    public JdbcLoggingConnectionProvider(ConnectionProvider connectionProvider,
-                                         StatementFormatFactory statementFormatFactory) {
-        this(connectionProvider, getLogger(JdbcLoggingConnectionProvider.class), statementFormatFactory);
+    public StatementLoggingConnectionProvider(ConnectionProvider connectionProvider,
+                                              StatementFormatterFactory statementFormatterFactory) {
+        this(connectionProvider, statementFormatterFactory,
+                new SimpleStatementLogger(getLogger(StatementLoggingConnectionProvider.class)));
     }
 
-    public JdbcLoggingConnectionProvider(ConnectionProvider connectionProvider, Logger logger) {
-        this(connectionProvider, logger, new SimpleStatementFormatFactory());
-    }
-
-    public JdbcLoggingConnectionProvider(ConnectionProvider connectionProvider, Logger logger,
-                                         StatementFormatFactory statementFormatFactory) {
+    public StatementLoggingConnectionProvider(ConnectionProvider connectionProvider,
+                                              StatementFormatterFactory statementFormatterFactory,
+                                              StatementLogger statementLogger) {
         this.connectionProvider = connectionProvider;
-        this.logger = logger;
-        this.statementFormatFactory = statementFormatFactory;
+        this.statementFormatterFactory = statementFormatterFactory;
+        this.statementLogger = statementLogger;
     }
 
     @Override
@@ -82,7 +76,33 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
 
     @Override
     protected Connection createConnection() throws SQLException {
-        return connectionProvider.getConnection();
+        if (connectionProvider instanceof ConnectionProxyProvider) {
+            return ((ConnectionProxyProvider) connectionProvider).createConnection();
+        } else {
+            return connectionProvider.getConnection();
+        }
+    }
+
+    @Override
+    protected void initConnection(Connection connection) throws SQLException {
+        if (connectionProvider instanceof ConnectionProxyProvider) {
+            ((ConnectionProxyProvider) connectionProvider).initConnection(connection);
+        }
+    }
+
+    @Override
+    protected Connection wrapConnection(Connection connection) {
+        return (Connection) newProxyInstance(getClassLoader(),
+                new Class<?>[]{ConnectionProxy.class}, new ConnectionHandler(connection));
+    }
+
+    @Override
+    public Connection unwrapConnection(Connection connection) {
+        if (connectionProvider instanceof ConnectionProxyProvider) {
+            return ((ConnectionProxyProvider) connectionProvider).unwrapConnection(connection);
+        } else {
+            return connection;
+        }
     }
 
     @Override
@@ -90,59 +110,51 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
         connectionProvider.closeConnection(connection);
     }
 
-    @Override
-    protected ConnectionProxy createConnectionProxy(Connection connection) {
-        return (ConnectionProxy) newProxyInstance(getClassLoader(),
-                new Class<?>[]{ConnectionProxy.class}, new ConnectionInvocationHandler(connection));
-    }
-
-    protected StatementFormat createStatementFormat(Statement statement, String query) {
-        return statementFormatFactory.createStatementFormat(statement, query);
+    protected StatementFormatter createStatementFormatter(Statement statement, String query) {
+        return statementFormatterFactory.createStatementFormat(statement, query);
     }
 
     protected void log(Statement statement, String query) {
-        log(createStatementFormat(statement, query).format());
+        log(createStatementFormatter(statement, query).format());
     }
 
-    protected void log(String query) {
-        if (logger.isTraceEnabled()) {
-            logger.trace(query);
-        }
+    protected void log(String statement) {
+        statementLogger.log(statement);
     }
 
-    protected Object invokeConnectionGetMetaData(TargetInvocationHandler<Connection> targetInvocationHandler,
-                                                 Object proxy, Method method, Object[] args) {
-        DatabaseMetaData databaseMetaData = targetInvocationHandler.invokeTarget(method, args);
+    protected Object invokeGetMetaData(TargetHandler<Connection> targetHandler,
+                                       Object proxy, Method method, Object[] args) throws Throwable {
+        DatabaseMetaData databaseMetaData = targetHandler.invokeTarget(method, args);
         return newProxyInstance(getClassLoader(), new Class<?>[]{DatabaseMetaData.class},
-                new ConnectionAwareInvocationHandler((Connection) proxy, databaseMetaData));
+                new ConnectionAwareHandler((Connection) proxy, databaseMetaData));
     }
 
-    protected Object invokeConnectionCreateStatement(TargetInvocationHandler<Connection> targetInvocationHandler,
-                                                     Object proxy, Method method, Object[] args) {
-        Statement statement = targetInvocationHandler.invokeTarget(method, args);
+    protected Object invokeCreateStatement(TargetHandler<Connection> targetHandler,
+                                           Object proxy, Method method, Object[] args) throws Throwable {
+        Statement statement = targetHandler.invokeTarget(method, args);
         return newProxyInstance(getClassLoader(), new Class<?>[]{Statement.class},
-                new StatementInvocationHandler((Connection) proxy, statement));
+                new StatementHandler((Connection) proxy, statement));
     }
 
-    protected Object invokeConnectionPrepareStatement(TargetInvocationHandler<Connection> targetInvocationHandler,
-                                                      Object proxy, Method method, Object[] args) {
-        PreparedStatement preparedStatement = targetInvocationHandler.invokeTarget(method, args);
+    protected Object invokePrepareStatement(TargetHandler<Connection> targetHandler,
+                                            Object proxy, Method method, Object[] args) throws Throwable {
+        PreparedStatement preparedStatement = targetHandler.invokeTarget(method, args);
         return newProxyInstance(getClassLoader(), new Class<?>[]{PreparedStatement.class},
-                new PreparedStatementInvocationHandler((Connection) proxy, preparedStatement,
+                new PreparedStatementHandler((Connection) proxy, preparedStatement,
                         (String) args[0]));
     }
 
-    protected Object invokeStatementExecute(TargetInvocationHandler<? extends Statement> targetInvocationHandler,
-                                            Object proxy, Method method, Object[] args) {
-        return ((StatementInvocationHandler) targetInvocationHandler).invokeExecute(method, args);
+    protected Object invokeExecute(TargetHandler<? extends Statement> targetHandler,
+                                   Object proxy, Method method, Object[] args) throws Throwable {
+        return ((StatementHandler) targetHandler).invokeExecute(method, args);
     }
 
-    protected Object invokePreparedStatementSet(TargetInvocationHandler<PreparedStatement> targetInvocationHandler,
-                                                Object proxy, Method method, Object[] args) {
-        return ((PreparedStatementInvocationHandler) targetInvocationHandler).invokeSet(method, args);
+    protected Object invokeSet(TargetHandler<PreparedStatement> targetHandler,
+                               Object proxy, Method method, Object[] args) throws Throwable {
+        return ((PreparedStatementHandler) targetHandler).invokeSet(method, args);
     }
 
-    protected class ConnectionInvocationHandler extends ConnectionProviderBase.ConnectionInvocationHandler {
+    protected class ConnectionHandler extends ConnectionProxyProvider.ConnectionHandler {
 
         private static final String GET_META_DATA_METHOD = "getMetaData";
 
@@ -150,31 +162,31 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
 
         private static final String PREPARE_STATEMENT_METHOD = "prepareStatement";
 
-        public ConnectionInvocationHandler(Connection connection) {
+        public ConnectionHandler(Connection connection) {
             super(connection);
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (CREATE_STATEMENT_METHOD.equals(method.getName())) {
-                return invokeConnectionCreateStatement(this, proxy, method, args);
+                return invokeCreateStatement(this, proxy, method, args);
             } else if (PREPARE_STATEMENT_METHOD.equals(method.getName()) && args != null) {
-                return invokeConnectionPrepareStatement(this, proxy, method, args);
+                return invokePrepareStatement(this, proxy, method, args);
             } else if (GET_META_DATA_METHOD.equals(method.getName())) {
-                return invokeConnectionGetMetaData(this, proxy, method, args);
+                return invokeGetMetaData(this, proxy, method, args);
             } else {
                 return super.invoke(proxy, method, args);
             }
         }
     }
 
-    protected class ConnectionAwareInvocationHandler<T> extends TargetInvocationHandler<T> {
+    protected class ConnectionAwareHandler<T> extends TargetHandler<T> {
 
         private static final String GET_CONNECTION_METHOD = "getConnection";
 
         private Connection connection;
 
-        public ConnectionAwareInvocationHandler(Connection connection, T target) {
+        public ConnectionAwareHandler(Connection connection, T target) {
             super(target);
             this.connection = connection;
         }
@@ -189,11 +201,11 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
         }
     }
 
-    public class StatementInvocationHandler<T extends Statement> extends ConnectionAwareInvocationHandler<T> {
+    public class StatementHandler<T extends Statement> extends ConnectionAwareHandler<T> {
 
         private final Collection<String> EXECUTE_METHODS = newHashSet("execute", "executeQuery", "executeUpdate");
 
-        public StatementInvocationHandler(Connection connection, T statement) {
+        public StatementHandler(Connection connection, T statement) {
             super(connection, statement);
         }
 
@@ -201,19 +213,19 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             String methodName = method.getName();
             if (EXECUTE_METHODS.contains(methodName)) {
-                return invokeStatementExecute(this, proxy, method, args);
+                return StatementLoggingConnectionProvider.this.invokeExecute(this, proxy, method, args);
             } else {
                 return super.invoke(proxy, method, args);
             }
         }
 
-        public Object invokeExecute(Method method, Object[] args) {
+        public Object invokeExecute(Method method, Object[] args) throws Throwable {
             log(getTarget(), (String) args[0]);
             return invokeTarget(method, args);
         }
     }
 
-    protected class PreparedStatementInvocationHandler extends StatementInvocationHandler<PreparedStatement> {
+    protected class PreparedStatementHandler extends StatementHandler<PreparedStatement> {
 
         private static final String SET_NULL = "setNull";
 
@@ -224,36 +236,36 @@ public class JdbcLoggingConnectionProvider extends ConnectionProviderBase {
                 "setClob", "setArray", "setURL", "setRowId", "setNString", "setNCharacterStream", "setNClob",
                 "setSQLXML"
         );
-        private final StatementFormat statementFormat;
+        private final StatementFormatter statementFormatter;
 
-        public PreparedStatementInvocationHandler(Connection connection, PreparedStatement statement, String query) {
+        public PreparedStatementHandler(Connection connection, PreparedStatement statement, String query) {
             super(connection, statement);
-            this.statementFormat = createStatementFormat(getTarget(), query);
+            this.statementFormatter = createStatementFormatter(getTarget(), query);
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (SET_METHODS.contains(method.getName())) {
-                return invokePreparedStatementSet(this, proxy, method, args);
+                return StatementLoggingConnectionProvider.this.invokeSet(this, proxy, method, args);
             } else {
                 return super.invoke(proxy, method, args);
             }
         }
 
-        public Object invokeSet(Method method, Object[] args) {
+        public Object invokeSet(Method method, Object[] args) throws Throwable {
             if (args != null) {
                 Object parameter = args[0];
                 if (parameter instanceof Integer) {
                     Object value = SET_NULL.equals(method.getName()) ? null : args[1];
-                    statementFormat.setParameter(((Integer) parameter) - 1, value);
+                    statementFormatter.setParameter(((Integer) parameter) - 1, value);
                 }
             }
             return invokeTarget(method, args);
         }
 
         @Override
-        public Object invokeExecute(Method method, Object[] args) {
-            log(statementFormat.format());
+        public Object invokeExecute(Method method, Object[] args) throws Throwable {
+            log(statementFormatter.format());
             return invokeTarget(method, args);
         }
     }

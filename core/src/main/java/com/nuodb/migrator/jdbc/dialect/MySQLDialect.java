@@ -27,6 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Connection;
@@ -36,6 +39,8 @@ import java.sql.Types;
 import java.util.TimeZone;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.dialect.MySQLSelectQuery.IndexHint;
+import static com.nuodb.migrator.jdbc.dialect.MySQLSelectQuery.IndexUsage;
 import static java.lang.String.valueOf;
 
 /**
@@ -45,7 +50,13 @@ public class MySQLDialect extends SimpleDialect {
 
     public MySQLDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
+    }
 
+    @Override
+    protected void initJdbcTypes() {
+        super.initJdbcTypes();
+
+        addJdbcType(MySQLIntUnsignedType.INSTANCE);
         addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
 
         addJdbcTypeDescAlias(Types.LONGVARCHAR, "TINYTEXT", Types.CLOB);
@@ -122,6 +133,23 @@ public class MySQLDialect extends SimpleDialect {
         value.append(minutesOffset);
         return value.toString();
     }
+
+    @Override
+    protected Query getRowCountExactQuery(Table table) {
+        MySQLSelectQuery query = new MySQLSelectQuery();
+        query.setQualifyNames(true);
+        query.setDialect(this);
+        query.addTable(table);
+        for (Index index : table.getIndexes()) {
+            if (index.isPrimary()) {
+                query.setIndexHint(new IndexHint(IndexUsage.FORCE, index));
+                break;
+            }
+        }
+        query.addColumn("COUNT(*)");
+        return query;
+    }
+
 
     /**
      * Forces driver to stream ResultSet http://goo.gl/kl1Nr

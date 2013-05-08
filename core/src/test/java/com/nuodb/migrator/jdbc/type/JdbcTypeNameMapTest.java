@@ -46,31 +46,41 @@ public class JdbcTypeNameMapTest {
 
     @BeforeMethod
     public void setUp() {
-        jdbcTypeNameMap.addTypeName(Types.DOUBLE, "DOUBLE");
-        jdbcTypeNameMap.addTypeName(Types.TIME, "TIME", newScale(0));
-        jdbcTypeNameMap.addTypeName(Types.TIME, "TIME({S})");
-        jdbcTypeNameMap.addTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
-        jdbcTypeNameMap.addTypeName(Types.CHAR, "CHAR({N})");
-        jdbcTypeNameMap.addTypeName(Types.VARCHAR, "VARCHAR({N})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.DOUBLE, "DOUBLE");
+        jdbcTypeNameMap.addJdbcTypeName(Types.TIME, "TIME", newScale(0));
+        jdbcTypeNameMap.addJdbcTypeName(Types.TIME, "TIME({S})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.CHAR, "CHAR({N})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.BIGINT, "BIGINT");
+        jdbcTypeNameMap.addJdbcTypeName(Types.BIGINT, "NUMBER({P})", newPrecision(20));
+        jdbcTypeNameMap.addJdbcTypeName(Types.BIT, "BIT({N})");
+        jdbcTypeNameMap.addJdbcTypeName(Types.BIT, "BOOLEAN", newSize(1));
     }
 
     @DataProvider(name = "getTypeName")
     public Object[][] createGetTypeNameData() {
         return new Object[][]{
-                {JdbcDoubleType.INSTANCE, newSizePrecisionScale(8, 8, 0), "DOUBLE"},
-                {JdbcDoubleType.INSTANCE, newSizePrecisionScale(8, 6, 2), "DOUBLE"},
-                {JdbcTimeType.INSTANCE, newSizePrecisionScale(19, 19, 0), "TIME"},
-                {JdbcTimeType.INSTANCE, newSizePrecisionScale(19, 15, 4), "TIME(4)"},
-                {JdbcDecimalType.INSTANCE, newSizePrecisionScale(8, 8, 0), "DECIMAL(8,0)"},
-                {JdbcDecimalType.INSTANCE, newSizePrecisionScale(8, 6, 2), "DECIMAL(6,2)"},
+                {JdbcDoubleType.INSTANCE, newSpecifiers(8, 8, 0), "DOUBLE"},
+                {JdbcDoubleType.INSTANCE, newSpecifiers(8, 6, 2), "DOUBLE"},
+                {JdbcTimeType.INSTANCE, newSpecifiers(19, 19, 0), "TIME"},
+                {JdbcTimeType.INSTANCE, newSpecifiers(19, 15, 4), "TIME(4)"},
+                {JdbcDecimalType.INSTANCE, newSpecifiers(8, 8, 0), "DECIMAL(8,0)"},
+                {JdbcDecimalType.INSTANCE, newSpecifiers(8, 6, 2), "DECIMAL(6,2)"},
                 {JdbcCharType.INSTANCE, newSize(1), "CHAR(1)"},
                 {JdbcVarCharType.INSTANCE, newSize(128), "VARCHAR(128)"},
                 {JdbcLongVarCharType.INSTANCE, newSize(128), null},
+                {JdbcBigIntType.INSTANCE, newPrecision(10), "BIGINT"},
+                {JdbcBigIntType.INSTANCE, newPrecision(15), "BIGINT"},
+                {JdbcBigIntType.INSTANCE, newPrecision(19), "BIGINT"},
+                {JdbcBigIntType.INSTANCE, newPrecision(20), "NUMBER(20)"},
+                {JdbcBitType.INSTANCE, newSize(1), "BOOLEAN"},
+                {JdbcBitType.INSTANCE, newSize(10), "BIT(10)"},
         };
     }
 
     @Test(dataProvider = "getTypeName")
     public void testGetTypeName(JdbcType jdbcType, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
-        assertEquals(jdbcTypeNameMap.getTypeName(jdbcType.getTypeDesc(), jdbcTypeSpecifiers), typeName);
+        assertEquals(jdbcTypeNameMap.getJdbcTypeName(jdbcType.getJdbcTypeDesc(), jdbcTypeSpecifiers), typeName);
     }
 }

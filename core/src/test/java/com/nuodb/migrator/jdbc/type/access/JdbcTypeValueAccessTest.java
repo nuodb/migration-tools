@@ -91,7 +91,7 @@ public class JdbcTypeValueAccessTest {
         return new Object[][]{
                 {new JdbcTypeDesc(Types.TIMESTAMP)},
                 {new JdbcTypeDesc(Types.TIMESTAMP, "TIMESTAMP")},
-                {JdbcTimestampType.INSTANCE.getTypeDesc()},
+                {JdbcTimestampType.INSTANCE.getJdbcTypeDesc()},
         };
     }
 

@@ -28,15 +28,15 @@
 
 # JAVA_HOME can optionally be set here
 
-# NUODB_HOME is set here
-: ${NUODB_HOME:="/opt/nuodb"}
+# NUODB_ROOT is set here
+: ${NUODB_ROOT:="/opt/nuodb"}
 
 # Maximum heap size
 MAX_HEAP_SIZE="256M"
 
 # One level up
-if [ "x$NUODB_MIGRATOR_HOME" = "x" ]; then
-    NUODB_MIGRATOR_HOME=`dirname $0`/..
+if [ "x$NUODB_MIGRATOR_ROOT" = "x" ]; then
+    NUODB_MIGRATOR_ROOT=`dirname $0`/..
 fi
 
 # Expand java executable
@@ -46,7 +46,7 @@ else
     JAVA=`which java`
 fi
 
-JAVA_OPTS="-Xmx$MAX_HEAP_SIZE -Dnuodb.home=$NUODB_HOME -Dnuodb.migrator.home=$NUODB_MIGRATOR_HOME"
-CLASSPATH=$NUODB_MIGRATOR_HOME/jar/nuodb-migrator-bootstrap-${project.version}.jar:$CLASSPATH
+JAVA_OPTS="-Xmx$MAX_HEAP_SIZE -Dnuodb.root=$NUODB_ROOT -Dnuodb.migrator.root=$NUODB_MIGRATOR_ROOT"
+CLASSPATH=$NUODB_MIGRATOR_ROOT/jar/nuodb-migrator-bootstrap-${project.version}.jar:$CLASSPATH
 
 $JAVA $JAVA_OPTS -cp $CLASSPATH com.nuodb.migrator.bootstrap.Bootstrap "$@"

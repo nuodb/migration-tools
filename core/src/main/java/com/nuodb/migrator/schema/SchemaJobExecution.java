@@ -27,9 +27,8 @@
  */
 package com.nuodb.migrator.schema;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionServices;
-import com.nuodb.migrator.job.decorate.DecoratingJobExecution;
 import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.decorate.DecoratingJobExecution;
 
 import java.sql.Connection;
 
@@ -39,7 +38,6 @@ import java.sql.Connection;
 public class SchemaJobExecution extends DecoratingJobExecution {
 
     private static final Object CONNECTION = "connection";
-    private static final String CONNECTION_SERVICES = "connection.services";
 
     public SchemaJobExecution(JobExecution execution) {
         super(execution);
@@ -51,13 +49,5 @@ public class SchemaJobExecution extends DecoratingJobExecution {
 
     public void setConnection(Connection connection) {
         getContext().put(CONNECTION, connection);
-    }
-
-    public ConnectionServices getConnectionServices() {
-        return (ConnectionServices) getContext().get(CONNECTION_SERVICES);
-    }
-
-    public void setConnectionServices(ConnectionServices connectionServices) {
-        getContext().put(CONNECTION_SERVICES, connectionServices);
     }
 }

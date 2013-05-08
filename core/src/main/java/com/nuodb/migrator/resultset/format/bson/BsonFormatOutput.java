@@ -25,35 +25,30 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.resultset.format.xml;
+package com.nuodb.migrator.resultset.format.bson;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.nuodb.migrator.resultset.format.FormatOutputBase;
 import com.nuodb.migrator.resultset.format.FormatOutputException;
 import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueVariant;
+import de.undercouch.bson4jackson.BsonFactory;
 
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.BitSet;
 
-import static com.nuodb.migrator.resultset.format.utils.BinaryEncoder.BASE64;
-import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.toHex;
+import static com.nuodb.migrator.resultset.format.utils.BitSetUtils.toByteArray;
 import static com.nuodb.migrator.resultset.format.value.ValueVariantType.toAlias;
-import static javax.xml.XMLConstants.DEFAULT_NS_PREFIX;
-import static javax.xml.XMLConstants.NULL_NS_URI;
+import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 
 /**
  * @author Sergey Bushik
  */
-public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
+public class BsonFormatOutput extends FormatOutputBase implements BsonAttributes {
 
-    private String encoding;
-    private String version;
-
-    private XMLStreamWriter xmlStreamWriter;
+    private JsonGenerator bsonGenerator;
 
     @Override
     public String getType() {
@@ -62,101 +57,83 @@ public class XmlOutputFormat extends FormatOutputBase implements XmlAttributes {
 
     @Override
     public void initOutput() {
-        version = (String) getAttribute(ATTRIBUTE_VERSION, VERSION);
-        encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
-
-        XMLOutputFactory factory = XMLOutputFactory.newInstance();
+        BsonFactory factory = new BsonFactory();
+        factory.enable(ENABLE_STREAMING);
         try {
             Writer writer = getWriter();
             OutputStream outputStream = getOutputStream();
             if (writer != null) {
-                xmlStreamWriter = factory.createXMLStreamWriter(wrapWriter(writer));
+                bsonGenerator = factory.createJsonGenerator(wrapWriter(writer));
             } else if (outputStream != null) {
-                xmlStreamWriter = factory.createXMLStreamWriter(wrapOutputStream(outputStream), getEncoding());
+                bsonGenerator = factory.createJsonGenerator(wrapOutputStream(outputStream));
             }
-        } catch (XMLStreamException exception) {
+        } catch (IOException exception) {
             throw new FormatOutputException(exception);
         }
+
     }
 
     @Override
     protected void doWriteBegin() {
         try {
-            xmlStreamWriter.writeStartDocument(getEncoding(), getVersion());
-            xmlStreamWriter.setPrefix(DEFAULT_NS_PREFIX, NULL_NS_URI);
-            xmlStreamWriter.writeStartElement(ELEMENT_RESULT_SET);
-            xmlStreamWriter.writeStartElement(ELEMENT_COLUMNS);
+            bsonGenerator.writeStartObject();
+
+            bsonGenerator.writeFieldName(FIELD_COLUMNS);
+            bsonGenerator.writeStartObject();
             for (ValueFormatModel valueFormatModel : getValueFormatModelList()) {
-                xmlStreamWriter.writeEmptyElement(ELEMENT_COLUMN);
-                xmlStreamWriter.writeAttribute(ATTRIBUTE_NAME, valueFormatModel.getName());
-                xmlStreamWriter.writeAttribute(ATTRIBUTE_VARIANT, toAlias(valueFormatModel.getValueVariantType()));
+                bsonGenerator.writeStringField(FIELD_COLUMN, valueFormatModel.getName());
+                bsonGenerator.writeStringField(FIELD_VARIANT, toAlias(valueFormatModel.getValueVariantType()));
             }
-            xmlStreamWriter.writeEndElement();
-        } catch (XMLStreamException e) {
-            throw new FormatOutputException(e);
+            bsonGenerator.writeEndObject();
+
+            bsonGenerator.writeFieldName(FIELD_RESULT_SET);
+            bsonGenerator.writeStartArray();
+        } catch (IOException exception) {
+            throw new FormatOutputException(exception);
         }
     }
 
     @Override
     protected void writeValues(ValueVariant[] variants) {
         try {
-            xmlStreamWriter.writeStartElement(ELEMENT_ROW);
+            bsonGenerator.writeStartArray();
             BitSet nulls = new BitSet();
             for (int i = 0; i < variants.length; i++) {
                 nulls.set(i, variants[i].isNull());
             }
-            if (!nulls.isEmpty()) {
-                xmlStreamWriter.writeAttribute(ATTRIBUTE_NULLS, toHex(nulls));
+            if (nulls.isEmpty()) {
+                bsonGenerator.writeNull();
+            } else {
+                bsonGenerator.writeBinary(toByteArray(nulls));
             }
-            int i = 0;
-            for (ValueVariant variant : variants) {
+            for (int i = 0; i < variants.length; i++) {
+                ValueVariant variant = variants[i];
                 if (!variant.isNull()) {
-                    xmlStreamWriter.writeStartElement(ELEMENT_COLUMN);
-                    String value = null;
                     switch (getValueFormatModelList().get(i).getValueVariantType()) {
-                        case BINARY:
-                            value = BASE64.encode(variant.asBytes());
+                        case BYTES:
+                            bsonGenerator.writeBinary(variant.asBytes());
                             break;
                         case STRING:
-                            value = variant.asString();
+                            bsonGenerator.writeString(variant.asString());
                             break;
                     }
-                    xmlStreamWriter.writeCharacters(value);
-                    xmlStreamWriter.writeEndElement();
                 }
-                i++;
             }
-            xmlStreamWriter.writeEndElement();
-        } catch (XMLStreamException e) {
-            throw new FormatOutputException(e);
+            bsonGenerator.writeEndArray();
+        } catch (IOException exception) {
+            throw new FormatOutputException(exception);
         }
     }
 
     @Override
     protected void doWriteEnd() {
         try {
-            xmlStreamWriter.writeEndElement();
-            xmlStreamWriter.writeEndDocument();
-            xmlStreamWriter.flush();
-            xmlStreamWriter.close();
-        } catch (XMLStreamException e) {
-            throw new FormatOutputException(e);
+            bsonGenerator.writeEndArray();
+            bsonGenerator.writeEndObject();
+            bsonGenerator.flush();
+            bsonGenerator.close();
+        } catch (IOException exception) {
+            throw new FormatOutputException(exception);
         }
-    }
-
-    public String getEncoding() {
-        return encoding;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 }

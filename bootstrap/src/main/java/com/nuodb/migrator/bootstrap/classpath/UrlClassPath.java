@@ -32,8 +32,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-import static java.util.Collections.singleton;
-
 /**
  * @author Sergey Bushik
  */
@@ -41,8 +39,12 @@ public class UrlClassPath implements ClassPath {
 
     private Collection<URL> urls = new LinkedHashSet<URL>();
 
-    public UrlClassPath(URL url) {
-        this(singleton(url));
+    public UrlClassPath(String url) {
+        try {
+            urls.add(new URL(url));
+        } catch (MalformedURLException exception) {
+            throw new ClassPathException(exception);
+        }
     }
 
     public UrlClassPath(Collection<URL> urls) {
@@ -56,11 +58,25 @@ public class UrlClassPath implements ClassPath {
         }
     }
 
-    public static UrlClassPath toUrlClassPath(String path) {
-        try {
-            return new UrlClassPath(new URL(path));
-        } catch (MalformedURLException exception) {
-            throw new ClassPathException(exception);
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UrlClassPath)) return false;
+
+        UrlClassPath that = (UrlClassPath) o;
+
+        if (urls != null ? !urls.equals(that.urls) : that.urls != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return urls != null ? urls.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "UrlClassPath{urls=" + urls + '}';
     }
 }

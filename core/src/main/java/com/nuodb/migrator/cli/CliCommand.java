@@ -27,9 +27,7 @@
  */
 package com.nuodb.migrator.cli;
 
-import com.nuodb.migrator.cli.parse.CommandLine;
-import com.nuodb.migrator.cli.parse.OptionException;
-import com.nuodb.migrator.cli.parse.Trigger;
+import com.nuodb.migrator.cli.parse.*;
 import com.nuodb.migrator.cli.parse.option.ArgumentImpl;
 import com.nuodb.migrator.cli.parse.option.TriggerImpl;
 import com.nuodb.migrator.cli.run.CliRun;
@@ -37,6 +35,9 @@ import com.nuodb.migrator.cli.run.CliRunLookup;
 import com.nuodb.migrator.utils.PriorityList;
 import com.nuodb.migrator.utils.SimplePriorityList;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.ListIterator;
 
 /**
@@ -78,6 +79,16 @@ public class CliCommand extends ArgumentImpl {
         } catch (OptionException exception) {
             throw new OptionException(cliRun, exception.getMessage());
         }
+    }
+
+    @Override
+    public void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator) {
+        super.help(buffer, hints, comparator);
+    }
+
+    @Override
+    public List<Help> help(int indent, Collection<HelpHint> hints, Comparator<Option> comparator) {
+        return super.help(indent, hints, comparator);
     }
 
     public CliRunLookup getCliRunLookup() {

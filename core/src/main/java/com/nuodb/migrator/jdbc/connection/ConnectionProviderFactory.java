@@ -27,9 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.MigrationException;
 import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 
 import static java.lang.String.format;
 
@@ -38,26 +37,30 @@ import static java.lang.String.format;
  */
 public class ConnectionProviderFactory {
 
+    private boolean autoCommit;
+
+    public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
+        return createConnectionProvider(connectionSpec, isAutoCommit());
+    }
+
     public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec, boolean autoCommit) {
         if (connectionSpec == null) {
             return null;
         }
         ConnectionProvider connectionProvider;
-        if (connectionSpec instanceof JdbcConnectionSpec) {
-            connectionProvider = createConnectionProvider((JdbcConnectionSpec) connectionSpec, autoCommit);
+        if (connectionSpec instanceof DriverConnectionSpec) {
+            connectionProvider = new DriverConnectionSpecProvider((DriverConnectionSpec) connectionSpec, autoCommit);
         } else {
-            throw new MigrationException(format("Connection specification is not supported %s", connectionSpec));
+            throw new ConnectionException(format("Connection specification is not supported %s", connectionSpec));
         }
-        if (connectionProvider != null) {
-            connectionProvider = new JdbcLoggingConnectionProvider(connectionProvider);
-        }
-        return connectionProvider;
+        return new StatementLoggingConnectionProvider(connectionProvider);
     }
 
-    public ConnectionProvider createConnectionProvider(JdbcConnectionSpec jdbcConnectionSpec, boolean autoCommit) {
-        if (jdbcConnectionSpec.getUrl() == null) {
-            return null;
-        }
-        return new JdbcPoolingConnectionProvider(jdbcConnectionSpec, autoCommit);
+    public boolean isAutoCommit() {
+        return autoCommit;
+    }
+
+    public void setAutoCommit(boolean autoCommit) {
+        this.autoCommit = autoCommit;
     }
 }

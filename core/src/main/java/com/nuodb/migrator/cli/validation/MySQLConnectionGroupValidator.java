@@ -55,7 +55,7 @@ public class MySQLConnectionGroupValidator extends ConnectionGroupValidator {
         String schema = getSchemaValue(commandLine);
         if (!isEmpty(schema)) {
             throw new OptionException(option,
-                    format("Unexpected option %1$s. MySQL supports catalogs only, not schemas", getSchemaOption()));
+                    format("Unexpected option %s. MySQL supports catalogs only, not schemas", getSchemaOption()));
         }
     }
 }

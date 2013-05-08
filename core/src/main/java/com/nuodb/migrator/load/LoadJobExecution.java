@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.load;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionServices;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.job.JobExecution;
@@ -44,7 +43,6 @@ public class LoadJobExecution extends DecoratingJobExecution {
 
     private static final String CATALOG_READER = "catalog.reader";
     private static final String CONNECTION = "connection";
-    private static final String CONNECTION_SERVICES = "connection.services";
     private static final String DATABASE = "database";
     private static final String DIALECT = "dialect";
     private static final String VALUE_FORMAT_REGISTRY = "value.format.registry";
@@ -67,14 +65,6 @@ public class LoadJobExecution extends DecoratingJobExecution {
 
     public void setConnection(Connection connection) {
         getContext().put(CONNECTION, connection);
-    }
-
-    public ConnectionServices getConnectionServices() {
-        return (ConnectionServices) getContext().get(CONNECTION_SERVICES);
-    }
-
-    public void setConnectionServices(ConnectionServices connectionServices) {
-        getContext().put(CONNECTION_SERVICES, connectionServices);
     }
 
     public Database getDatabase() {

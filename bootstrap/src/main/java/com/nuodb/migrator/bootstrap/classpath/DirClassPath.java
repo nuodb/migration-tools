@@ -44,8 +44,8 @@ public class DirClassPath implements FileClassPath {
     }
 
     public DirClassPath(File dir) {
-        if (!dir.exists() || !dir.isDirectory() || !dir.canRead()) {
-            throw new ClassPathException(format("%1$s is not a valid directory", dir));
+        if (!dir.isDirectory()) {
+            throw new ClassPathException(format("%s is not a valid directory", dir));
         }
         this.dir = dir;
     }
@@ -57,5 +57,27 @@ public class DirClassPath implements FileClassPath {
         } catch (IOException exception) {
             throw new ClassPathException(exception);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DirClassPath)) return false;
+
+        DirClassPath that = (DirClassPath) o;
+
+        if (dir != null ? !dir.equals(that.dir) : that.dir != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return dir != null ? dir.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "DirClassPath{dir=" + dir + '}';
     }
 }

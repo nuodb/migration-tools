@@ -45,10 +45,10 @@ public class SelectQuery implements Query {
     private Dialect dialect;
     private boolean qualifyNames;
     private Collection<Table> tables = Lists.newArrayList();
-    private Collection<Column> columns = Lists.newArrayList();
+    private Collection<Object> columns = Lists.newArrayList();
     private Collection<String> filters = Lists.newArrayList();
 
-    public void addColumn(Column column) {
+    public void addColumn(Object column) {
         columns.add(column);
     }
 
@@ -62,25 +62,51 @@ public class SelectQuery implements Query {
 
     @Override
     public String toQuery() {
+        return buildQuery().toString();
+    }
+
+    protected StringBuilder buildQuery() {
         StringBuilder query = new StringBuilder();
         query.append("SELECT ");
-        for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
-            Column column = iterator.next();
-            query.append(column.getName(dialect));
-            if (iterator.hasNext()) {
-                query.append(", ");
-            }
-        }
+        addColumns(query);
         query.append(" FROM ");
-        for (Iterator<Table> iterator = tables.iterator(); iterator.hasNext(); ) {
-            Table table = iterator.next();
-            query.append(qualifyNames ? table.getQualifiedName(dialect) : table.getName(dialect));
+        addTables(query);
+        addFilters(query);
+        return query;
+    }
+
+    protected void addColumns(StringBuilder query) {
+        for (Iterator<Object> iterator = columns.iterator(); iterator.hasNext(); ) {
+            addColumn(query, iterator.next());
             if (iterator.hasNext()) {
                 query.append(", ");
             }
         }
+    }
+
+    protected void addColumn(StringBuilder query, Object column) {
+        if (column instanceof Column) {
+            query.append(((Column) column).getName(dialect));
+        } else {
+            query.append(column);
+        }
+    }
+
+    protected void addTables(StringBuilder query) {
+        for (Iterator<Table> iterator = tables.iterator(); iterator.hasNext(); ) {
+            addTable(query, iterator.next());
+            if (iterator.hasNext()) {
+                query.append(", ");
+            }
+        }
+    }
+
+    protected void addFilters(StringBuilder query) {
         where(query, filters, "AND");
-        return query.toString();
+    }
+
+    protected void addTable(StringBuilder query, Table table) {
+        query.append(qualifyNames ? table.getQualifiedName(dialect) : table.getName(dialect));
     }
 
     public Dialect getDialect() {
@@ -103,7 +129,7 @@ public class SelectQuery implements Query {
         return tables;
     }
 
-    public Collection<Column> getColumns() {
+    public Collection<Object> getColumns() {
         return columns;
     }
 

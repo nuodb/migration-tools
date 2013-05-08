@@ -27,13 +27,13 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeRegistry;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -55,8 +55,8 @@ import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public static final String QUERY =
-            "SELECT * FROM SYSTEM.FIELDS INNER JOIN SYSTEM.DATATYPES ON FIELDS.DATATYPE = DATATYPES.ID\n" +
-            "WHERE SCHEMA=? AND TABLENAME=?";
+            "SELECT * FROM SYSTEM.FIELDS AS F INNER JOIN SYSTEM.DATATYPES AS D ON F.DATATYPE = D.ID\n" +
+            "WHERE F.SCHEMA=? AND F.TABLENAME=? ORDER BY F.FIELDPOSITION ASC";
 
     public NuoDBColumnInspector() {
         super(COLUMN, TableInspectionScope.class);
@@ -105,12 +105,12 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
 
     private void inspect(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        JdbcTypeRegistry typeRegistry = inspectionContext.getDialect().getJdbcTypeRegistry();
+        Dialect dialect = inspectionContext.getDialect();
         while (columns.next()) {
             Table table = addTable(inspectionResults, null, columns.getString("SCHEMA"), columns.getString("TABLENAME"));
 
             Column column = table.addColumn(columns.getString("FIELD"));
-            JdbcTypeDesc typeDescAlias = typeRegistry.getJdbcTypeDescAlias(
+            JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeDescAlias(
                     columns.getInt("JDBCTYPE"), columns.getString("NAME"));
             column.setTypeCode(typeDescAlias.getTypeCode());
             column.setTypeName(typeDescAlias.getTypeName());

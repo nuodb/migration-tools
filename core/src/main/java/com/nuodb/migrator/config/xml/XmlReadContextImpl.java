@@ -57,7 +57,7 @@ public class XmlReadContextImpl implements XmlReadContext {
         if (value != null && value.isReference()) {
             return (T) value.getValue();
         } else {
-            throw new XmlPersisterException(String.format("Failed reading %1$s from %2$s", type, node));
+            throw new XmlPersisterException(String.format("Failed reading %s from %s", type, node));
         }
     }
 

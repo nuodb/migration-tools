@@ -60,7 +60,7 @@ public class FileCatalogReader implements CatalogReader {
     @Override
     public CatalogEntry[] readAll() {
         if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Entry catalog file is %1$s", catalogFile.getPath()));
+            logger.debug(String.format("Entry catalog file is %s", catalogFile.getPath()));
         }
         InputStream input = getCatalogInput();
         try {

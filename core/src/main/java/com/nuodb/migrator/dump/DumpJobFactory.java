@@ -40,8 +40,6 @@ import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.DumpSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
@@ -50,8 +48,6 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
  */
 @SuppressWarnings("unchecked")
 public class DumpJobFactory extends ConnectionProviderFactory implements JobFactory<DumpJob> {
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private DumpSpec dumpSpec;
 
@@ -64,10 +60,10 @@ public class DumpJobFactory extends ConnectionProviderFactory implements JobFact
 
         DumpJob dumpJob = new DumpJob();
         ConnectionSpec connectionSpec = dumpSpec.getConnectionSpec();
-        dumpJob.setConnectionProvider(createConnectionProvider(connectionSpec, false));
+        dumpJob.setConnectionProvider(createConnectionProvider(connectionSpec));
         ResourceSpec outputSpec = dumpSpec.getOutputSpec();
         dumpJob.setOutputType(outputSpec.getType());
-        dumpJob.setAttributes(outputSpec.getAttributes());
+        dumpJob.setOutputAttributes(outputSpec.getAttributes());
         dumpJob.setCatalog(createCatalog(outputSpec.getPath()));
         dumpJob.setTimeZone(dumpSpec.getTimeZone());
         dumpJob.setSelectQuerySpecs(dumpSpec.getSelectQuerySpecs());

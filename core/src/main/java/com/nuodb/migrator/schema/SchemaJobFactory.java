@@ -39,15 +39,13 @@ import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaSpec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSizePrecisionScale;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
 /**
@@ -56,8 +54,6 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 public class SchemaJobFactory extends ConnectionProviderFactory implements JobFactory<SchemaJob> {
 
     public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private SchemaSpec schemaSpec;
     private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
@@ -75,10 +71,6 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         return schemaJob;
     }
 
-    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return connectionSpec != null ? createConnectionProvider(connectionSpec, false) : null;
-    }
-
     protected ScriptGeneratorContext createScriptGeneratorContext() {
         ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext();
         scriptGeneratorContext.getAttributes().put(GROUP_SCRIPTS_BY, getSchemaSpec().getGroupScriptsBy());
@@ -88,9 +80,9 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         NuoDBDialect dialect = new NuoDBDialect();
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         for (JdbcTypeSpec jdbcTypeSpec : getSchemaSpec().getJdbcTypeSpecs()) {
-            jdbcTypeNameMap.addTypeName(
+            jdbcTypeNameMap.addJdbcTypeName(
                     jdbcTypeSpec.getTypeCode(), jdbcTypeSpec.getTypeName(),
-                    newSizePrecisionScale(
+                    newSpecifiers(
                             jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()));
         }
         dialect.setIdentifierQuoting(getSchemaSpec().getIdentifierQuoting());

@@ -35,7 +35,7 @@ import java.util.Map;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.jdbc.url.JdbcUrlParsers.getInstance;
 
-public class JdbcConnectionSpec extends ConnectionSpecBase {
+public class DriverConnectionSpec extends ConnectionSpecBase {
 
     private String driverClassName;
     private Driver driver;
@@ -67,7 +67,6 @@ public class JdbcConnectionSpec extends ConnectionSpecBase {
     public JdbcUrl getJdbcUrl() {
         return getInstance().parse(url, properties);
     }
-
 
     public Driver getDriver() {
         return driver;
@@ -127,7 +126,7 @@ public class JdbcConnectionSpec extends ConnectionSpecBase {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        JdbcConnectionSpec that = (JdbcConnectionSpec) o;
+        DriverConnectionSpec that = (DriverConnectionSpec) o;
 
         if (driver != null ? !driver.equals(that.driver) : that.driver != null) return false;
         if (driverClassName != null ? !driverClassName.equals(that.driverClassName) : that.driverClassName != null)

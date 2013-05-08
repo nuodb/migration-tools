@@ -82,6 +82,7 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         String comment = "remarks";
         Boolean nullable = false;
         Boolean autoIncrement = true;
+        Integer position = 1;
 
         ResultSet resultSet = mock(ResultSet.class);
         given(query.executeQuery()).willReturn(resultSet);
@@ -95,6 +96,7 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         given(resultSet.getString("DEFAULTVALUE")).willReturn(defaultValue);
         given(resultSet.getInt("SCALE")).willReturn(scale);
         given(resultSet.getString("REMARKS")).willReturn(comment);
+        given(resultSet.getInt("FIELDPOSITION")).willReturn(position);
         given(resultSet.getInt("FLAGS")).willReturn(nullable ? 0 : 1);
         given(resultSet.getString("GENERATOR_SEQUENCE")).willReturn(autoIncrement ? "sequence" : null);
 
@@ -113,6 +115,7 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         column.setPrecision(columnSize);
         column.setDefaultValue(valueOf(defaultValue));
         column.setScale(scale);
+        column.setPosition(position);
         column.setComment(comment);
         column.setNullable(nullable);
         column.setAutoIncrement(autoIncrement);

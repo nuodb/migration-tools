@@ -30,11 +30,7 @@ package com.nuodb.migrator.jdbc.type.jdbc2;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 
-import java.sql.Array;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.util.Map;
 
 /**
@@ -54,7 +50,8 @@ public class JdbcArrayType extends JdbcTypeBase<Array> {
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Array value, int column, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Array value, int column,
+                                    Map<String, Object> options) throws SQLException {
         statement.setArray(column, value);
     }
 }

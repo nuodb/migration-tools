@@ -30,7 +30,6 @@ package com.nuodb.migrator.load;
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.MigrationException;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
-import com.nuodb.migrator.jdbc.connection.ConnectionServices;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
@@ -39,13 +38,7 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.model.ValueModelList;
-import com.nuodb.migrator.jdbc.query.InsertQuery;
-import com.nuodb.migrator.jdbc.query.InsertQueryBuilder;
-import com.nuodb.migrator.jdbc.query.InsertType;
-import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.query.*;
 import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccessProvider;
 import com.nuodb.migrator.job.decorate.DecoratingJobBase;
 import com.nuodb.migrator.resultset.catalog.Catalog;
@@ -79,7 +72,7 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private ConnectionProvider connectionProvider;
     private TimeZone timeZone;
-    private Map<String, Object> attributes;
+    private Map<String, Object> inputAttributes;
     private Catalog catalog;
     private DialectResolver dialectResolver;
     private FormatFactory formatFactory;
@@ -92,24 +85,20 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
     }
 
     @Override
-    protected void initExecution(LoadJobExecution execution) throws SQLException {
+    protected void init(LoadJobExecution execution) throws SQLException {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
         isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
 
-        ConnectionServices connectionServices = getConnectionProvider().getConnectionServices();
-        execution.setConnectionServices(connectionServices);
-        Connection connection = connectionServices.getConnection();
-        execution.setConnection(connection);
-
         execution.setCatalogReader(getCatalog().getCatalogReader());
-        execution.setDialect(getDialectResolver().resolve(connection));
-        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
+        execution.setConnection(getConnectionProvider().getConnection());
+        execution.setDialect(getDialectResolver().resolve(execution.getConnection()));
+        execution.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(execution.getConnection()));
     }
 
     @Override
-    protected void executeWith(LoadJobExecution execution) throws Exception {
+    protected void doExecute(LoadJobExecution execution) throws Exception {
         Connection connection = execution.getConnection();
         Dialect dialect = execution.getDialect();
         try {
@@ -141,18 +130,17 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
         InspectionManager inspectionManager = new InspectionManager();
         inspectionManager.setDialectResolver(getDialectResolver());
         inspectionManager.setConnection(execution.getConnection());
-        ConnectionServices connectionServices = execution.getConnectionServices();
         return inspectionManager.inspect(
-                new TableInspectionScope(connectionServices.getCatalog(), connectionServices.getSchema()),
-                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE,
-                MetaDataType.COLUMN
+                new TableInspectionScope(getConnectionProvider().getCatalog(), getConnectionProvider().getSchema()),
+                MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA,
+                MetaDataType.TABLE, MetaDataType.COLUMN
         ).getObject(MetaDataType.DATABASE);
     }
 
     @Override
-    protected void releaseExecution(LoadJobExecution execution) throws Exception {
-        close(execution.getConnectionServices());
+    protected void release(LoadJobExecution execution) throws Exception {
         closeQuietly(execution.getCatalogReader());
+        close(execution.getConnection());
     }
 
     protected void load(LoadJobExecution execution, CatalogEntry catalogEntry) throws SQLException {
@@ -161,7 +149,7 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
         try {
             Dialect dialect = execution.getDatabase().getDialect();
             FormatInput formatInput = getFormatFactory().createInput(catalogEntry.getType());
-            formatInput.setAttributes(getAttributes());
+            formatInput.setAttributes(getInputAttributes());
             formatInput.setValueFormatRegistry(execution.getValueFormatRegistry());
             formatInput.setValueAccessProvider(
                     new JdbcTypeValueAccessProvider(dialect.getJdbcTypeRegistry()));
@@ -270,12 +258,12 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
         this.timeZone = timeZone;
     }
 
-    public Map<String, Object> getAttributes() {
-        return attributes;
+    public Map<String, Object> getInputAttributes() {
+        return inputAttributes;
     }
 
-    public void setAttributes(Map<String, Object> attributes) {
-        this.attributes = attributes;
+    public void setInputAttributes(Map<String, Object> inputAttributes) {
+        this.inputAttributes = inputAttributes;
     }
 
     public Catalog getCatalog() {

@@ -42,7 +42,7 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.schema.SchemaJobFactory;
-import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaSpec;
@@ -224,18 +224,6 @@ public class CliSchemaJob extends CliRunJob {
                                 withName(getMessage(SCHEMA_IDENTIFIER_NORMALIZER_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(identifierNormalizer);
-    }
-
-    @Override
-    protected JdbcConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
-        JdbcConnectionSpec connection = new JdbcConnectionSpec();
-        connection.setDriverClassName(JdbcConstants.NUODB_DRIVER);
-        connection.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
-        connection.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
-        connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
-        connection.setSchema((String) optionSet.getValue(TARGET_SCHEMA_OPTION));
-        connection.setProperties(parseProperties(optionSet, TARGET_PROPERTIES_OPTION, option));
-        return connection;
     }
 
     protected void parseSchemaOptions(SchemaSpec schemaSpec, OptionSet optionSet, Option option) {

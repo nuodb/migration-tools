@@ -91,13 +91,13 @@ public class SimpleJobExecutor implements JobExecutor {
                 jobStatus.setExecutionStartDate(new Date());
             } else {
                 if (logger.isDebugEnabled()) {
-                    logger.info(format("Job %1$s is already running or it has been stop", job.getName()));
+                    logger.info(format("Job %s is already running or it has been stop", job.getName()));
                 }
                 return false;
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug(format("Starting execution of job %1$s", job.getName()));
+            logger.debug(format("Starting execution of job %s", job.getName()));
         }
         JobExecution execution = createJobExecution(context);
         try {
@@ -110,7 +110,7 @@ public class SimpleJobExecutor implements JobExecutor {
             fireJobExecutionEvent(new JobExecutionEvent(execution));
         } catch (Throwable failure) {
             if (logger.isDebugEnabled()) {
-                logger.debug(format("Job %1$s execution failed", job.getName()), failure);
+                logger.debug(format("Job %s execution failed", job.getName()), failure);
             }
             synchronized (jobStatus) {
                 jobStatus.setExecutionEndDate(new Date());

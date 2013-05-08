@@ -29,8 +29,11 @@ package com.nuodb.migrator.resultset.format.utils;
 
 import com.nuodb.migrator.resultset.format.value.ValueFormatException;
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
+
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
+import static org.apache.commons.codec.binary.Hex.decodeHex;
+import static org.apache.commons.codec.binary.Hex.encodeHex;
 
 /**
  * @author Sergey Bushik
@@ -40,13 +43,13 @@ public abstract class BinaryEncoder {
     public static final BinaryEncoder HEX = new BinaryEncoder() {
         @Override
         public String encode(byte[] value) {
-            return value != null ? new String(Hex.encodeHex(value, false)) : null;
+            return value != null ? new String(encodeHex(value, false)) : null;
         }
 
         @Override
         public byte[] decode(String value) {
             try {
-                return value != null ? Hex.decodeHex(value.toCharArray()) : null;
+                return value != null ? decodeHex(value.toCharArray()) : null;
             } catch (DecoderException exception) {
                 throw new ValueFormatException(exception);
             }
@@ -56,12 +59,12 @@ public abstract class BinaryEncoder {
     public static final BinaryEncoder BASE64 = new BinaryEncoder() {
         @Override
         public String encode(byte[] value) {
-            return value != null ? new String(Base64.encodeBase64(value)) : null;
+            return value != null ? new String(encodeBase64(value)) : null;
         }
 
         @Override
         public byte[] decode(String value) {
-            return value != null ? Base64.decodeBase64(value) : null;
+            return value != null ? decodeBase64(value) : null;
         }
     };
 

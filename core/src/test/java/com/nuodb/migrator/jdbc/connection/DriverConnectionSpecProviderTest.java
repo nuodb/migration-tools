@@ -1,6 +1,6 @@
 package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.spec.JdbcConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -13,13 +13,13 @@ import java.util.Properties;
 import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
-public class JdbcConnectionProviderTest {
+public class DriverConnectionSpecProviderTest {
 
     private static final String URL = "jdbc:com.nuodb://localhost/test";
 
     private static final int TRANSACTION_ISOLATION = Connection.TRANSACTION_READ_COMMITTED;
 
-    private JdbcConnectionSpec connectionSpec;
+    private DriverConnectionSpec connectionSpec;
     private Driver driver;
     private Connection connection;
 
@@ -29,9 +29,8 @@ public class JdbcConnectionProviderTest {
         driver = mock(Driver.class);
         when(driver.connect(anyString(), any(Properties.class))).thenReturn(connection);
         when(driver.acceptsURL(URL)).thenReturn(true);
-        DriverManager.registerDriver(driver);
 
-        connectionSpec = mock(JdbcConnectionSpec.class);
+        connectionSpec = mock(DriverConnectionSpec.class);
         when(connectionSpec.getDriver()).thenReturn(driver);
         when(connectionSpec.getUrl()).thenReturn(URL);
         when(connectionSpec.getUsername()).thenReturn("username");
@@ -40,13 +39,13 @@ public class JdbcConnectionProviderTest {
 
     @Test
     public void testGetConnection() throws Exception {
-        JdbcConnectionProvider connectionProvider =
-                new JdbcPoolingConnectionProvider(connectionSpec);
+        DriverConnectionSpecProvider connectionProvider = new DriverConnectionSpecProvider(connectionSpec);
         connectionProvider.setTransactionIsolation(TRANSACTION_ISOLATION);
         connectionProvider.setAutoCommit(false);
 
         assertNotNull(connectionProvider.getConnection());
         verify(connectionSpec).getDriver();
+        verify(connectionSpec).getDriverClassName();
         verify(connectionSpec).getUsername();
         verify(connectionSpec).getPassword();
         verify(connection).setTransactionIsolation(anyInt());
