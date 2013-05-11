@@ -37,10 +37,9 @@ import java.util.Collection;
 import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createSequence;
-import static com.nuodb.migrator.jdbc.metadata.inspector.MSSQLServerAutoIncrementInspector.QUERY;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -58,7 +57,7 @@ public class MSSQLServerAutoIncrementInspectorTest extends InspectorTestBase {
     @Test
     public void testInspect() throws Exception {
         PreparedStatement query = mock(PreparedStatement.class);
-        given(getConnection().prepareStatement(eq(QUERY), anyInt(), anyInt())).willReturn(query);
+        given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(query);
 
         ResultSet resultSet = mock(ResultSet.class);
         given(query.executeQuery()).willReturn(resultSet);

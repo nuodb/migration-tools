@@ -27,36 +27,31 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.metadata.AutoIncrement;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Iterator;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
 public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table, TableInspectionScope> {
-
-    public static final String QUERY =
-            "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME,\n" +
-            "IDENT_SEED(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS START_WITH,\n" +
-            "IDENT_CURRENT(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS LAST_VALUE,\n" +
-            "IDENT_INCR(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)) AS INCREMENT_BY\n" +
-            "FROM INFORMATION_SCHEMA.COLUMNS\n" +
-            "WHERE COLUMNPROPERTY(OBJECT_ID(QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME)), COLUMN_NAME, 'ISIDENTITY') = 1\n" +
-            "  AND TABLE_CATALOG = ? AND TABLE_SCHEMA = ? AND TABLE_NAME = ?";
 
     public MSSQLServerAutoIncrementInspector() {
         super(AUTO_INCREMENT, TableInspectionScope.class);
@@ -70,31 +65,78 @@ public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table,
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
-                new StatementFactory<PreparedStatement>() {
-                    @Override
-                    public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                    }
-                },
-                new StatementCallback<PreparedStatement>() {
-                    @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
-                            statement.setString(1, inspectionScope.getCatalog());
-                            statement.setString(2, inspectionScope.getSchema());
-                            statement.setString(3, inspectionScope.getTable());
-                            ResultSet checks = statement.executeQuery();
+        final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
+        for (TableInspectionScope inspectionScope : inspectionScopes) {
+            final Collection<String> parameters = newArrayList();
+            final SelectQuery selectQuery = createSelectQuery(inspectionScope, parameters);
+            template.execute(
+                    new StatementFactory<PreparedStatement>() {
+                        @Override
+                        public PreparedStatement create(Connection connection) throws SQLException {
+                            return connection.prepareStatement(selectQuery.toString(),
+                                    TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                        }
+                    },
+                    new StatementCallback<PreparedStatement>() {
+                        @Override
+                        public void execute(PreparedStatement statement) throws SQLException {
+                            int parameter = 1;
+                            for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
+                                statement.setString(parameter++, iterator.next());
+                            }
+                            ResultSet autoIncrements = null;
                             try {
-                                inspect(inspectionContext, checks);
+                                autoIncrements = statement.executeQuery();
+                                inspect(inspectionContext, autoIncrements);
                             } finally {
-                                close(checks);
+                                close(autoIncrements);
                             }
                         }
                     }
-                }
-        );
+            );
+        }
+    }
+
+    protected SelectQuery createSelectQuery(TableInspectionScope inspectionScope, Collection<String> parameters) {
+        SelectQuery selectColumn = new SelectQuery();
+        if (isEmpty(inspectionScope.getCatalog())) {
+            selectColumn.column("DB_NAME() AS TABLE_CATALOG");
+        } else {
+            selectColumn.column("? AS TABLE_CATALOG");
+            parameters.add(inspectionScope.getCatalog());
+        }
+        selectColumn.column("SCHEMAS.NAME AS TABLE_SCHEMA");
+        selectColumn.column("TABLES.NAME AS TABLE_NAME");
+        selectColumn.column("COLUMNS.NAME AS COLUMN_NAME");
+
+        String catalog = isEmpty(inspectionScope.getCatalog()) ? "" : (inspectionScope.getCatalog() + ".");
+        selectColumn.from(catalog + "SYS.SCHEMAS");
+        selectColumn.innerJoin(catalog + "SYS.TABLES", "SCHEMAS.SCHEMA_ID=TABLES.SCHEMA_ID");
+        selectColumn.innerJoin(catalog + "SYS.COLUMNS", "COLUMNS.OBJECT_ID=TABLES.OBJECT_ID");
+
+        if (!isEmpty(inspectionScope.getSchema())) {
+            selectColumn.where("SCHEMAS.NAME=?");
+            parameters.add(inspectionScope.getSchema());
+        }
+        if (!isEmpty(inspectionScope.getTable())) {
+            selectColumn.where("TABLES.NAME=?");
+            parameters.add(inspectionScope.getTable());
+        }
+        selectColumn.where("IS_IDENTITY=1");
+
+        SelectQuery selectTable = new SelectQuery();
+        selectTable.column("C.*");
+        selectTable.column(
+                "QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME) AS TABLE_QUALIFIED_NAME");
+        selectTable.from("(" + selectColumn + ") C");
+
+        SelectQuery selectIdentity = new SelectQuery();
+        selectIdentity.column("C.*");
+        selectIdentity.column("IDENT_SEED(TABLE_QUALIFIED_NAME) AS START_WITH");
+        selectIdentity.column("IDENT_CURRENT(TABLE_QUALIFIED_NAME) AS LAST_VALUE");
+        selectIdentity.column("IDENT_INCR(TABLE_QUALIFIED_NAME) AS INCREMENT_BY");
+        selectIdentity.from("(" + selectTable + ") C");
+        return selectIdentity;
     }
 
     private void inspect(InspectionContext context, ResultSet autoIncrements) throws SQLException {
@@ -108,16 +150,9 @@ public class MSSQLServerAutoIncrementInspector extends TableInspectorBase<Table,
             sequence.setStartWith(autoIncrements.getLong("START_WITH"));
             sequence.setLastValue(autoIncrements.getLong("LAST_VALUE"));
             sequence.setIncrementBy(autoIncrements.getLong("INCREMENT_BY"));
-
             Column column = table.addColumn(autoIncrements.getString("COLUMN_NAME"));
             column.setSequence(sequence);
-
             inspectionResults.addObject(sequence);
         }
-    }
-
-    @Override
-    protected boolean supports(TableInspectionScope inspectionScope) {
-        return inspectionScope.getCatalog() != null && inspectionScope.getSchema() != null && inspectionScope.getTable() != null;
     }
 }

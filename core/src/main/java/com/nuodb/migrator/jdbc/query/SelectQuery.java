@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.query;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -35,7 +34,8 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import java.util.Collection;
 import java.util.Iterator;
 
-import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.*;
 
 /**
  * @author Sergey Bushik
@@ -43,40 +43,68 @@ import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 public class SelectQuery extends QueryBase {
 
     private Dialect dialect;
-    private Collection<Object> tables = Lists.newArrayList();
-    private Collection<Object> columns = Lists.newArrayList();
-    private Collection<String> filters = Lists.newArrayList();
+    private Collection<Object> from = newArrayList();
+    private Collection<Object> columns = newArrayList();
+    private Collection<String> where = newArrayList();
+    private Collection<OrderBy> orderBy = newArrayList();
+    private Collection<Join> joins = newArrayList();
 
-    public void addColumn(Object column) {
+    public void column(Object column) {
         columns.add(column);
     }
 
-    public void addTable(String table) {
-        tables.add(table);
+    public void from(String from) {
+        this.from.add(from);
     }
 
-    public void addTable(Table table) {
-        tables.add(table);
+    public void from(Table table) {
+        from.add(table);
     }
 
-    public void addFilter(String filter) {
-        filters.add(filter);
+    public void join(String type, String table, String condition) {
+        joins.add(new Join(type, table, condition));
+    }
+
+    public void innerJoin(String table, String condition) {
+        join(INNER, table, condition);
+    }
+
+    public void leftJoin(String table, String condition) {
+        join(LEFT, table, condition);
+    }
+
+    public void rightJoin(String table, String condition) {
+        join(RIGHT, table, condition);
+    }
+
+    public void where(String filter) {
+        where.add(filter);
+    }
+
+    public void orderBy(Collection<String> columns) {
+        orderBy(columns, null);
+    }
+
+    public void orderBy(Collection<String> columns, String order) {
+        orderBy.add(new OrderBy(columns, order));
     }
 
     @Override
-    public void buildQuery(StringBuilder query) {
-        query.append("SELECT ");
-        addColumns(query);
-        query.append(" FROM ");
-        addTables(query);
-        addFilters(query);
+    public void toQuery(StringBuilder query) {
+        addSelect(query);
+        addFrom(query);
+        addJoins(query);
+        addWhere(query);
+        addOrderBy(query);
     }
 
-    protected void addColumns(StringBuilder query) {
+    protected void addSelect(StringBuilder query) {
+        query.append("SELECT");
         for (Iterator<Object> iterator = columns.iterator(); iterator.hasNext(); ) {
+            query.append(" ");
             addColumn(query, iterator.next());
             if (iterator.hasNext()) {
-                query.append(", ");
+                query.append(",");
             }
         }
     }
@@ -89,8 +117,10 @@ public class SelectQuery extends QueryBase {
         }
     }
 
-    protected void addTables(StringBuilder query) {
-        for (Iterator<Object> iterator = tables.iterator(); iterator.hasNext(); ) {
+    protected void addFrom(StringBuilder query) {
+        query.append(" FROM");
+        for (Iterator<Object> iterator = from.iterator(); iterator.hasNext(); ) {
+            query.append(" ");
             addTable(query, iterator.next());
             if (iterator.hasNext()) {
                 query.append(", ");
@@ -98,14 +128,22 @@ public class SelectQuery extends QueryBase {
         }
     }
 
-    protected void addFilters(StringBuilder query) {
-        where(query, filters, "AND");
+    protected void addJoins(StringBuilder query) {
+        QueryUtils.join(query, joins);
+    }
+
+    protected void addWhere(StringBuilder query) {
+        QueryUtils.where(query, where, AND);
+    }
+
+    protected void addOrderBy(StringBuilder query) {
+        QueryUtils.orderBy(query, orderBy);
     }
 
     protected void addTable(StringBuilder query, Object table) {
         if (table instanceof Table) {
             query.append(isQualifyNames() ?
-                    ((Table)table).getQualifiedName(dialect) : ((Table)table).getName(dialect));
+                    ((Table) table).getQualifiedName(dialect) : ((Table) table).getName(dialect));
         } else {
             query.append(table);
         }
@@ -119,15 +157,43 @@ public class SelectQuery extends QueryBase {
         this.dialect = dialect;
     }
 
-    public Collection<Object> getTables() {
-        return tables;
+    public Collection<Object> getFrom() {
+        return from;
+    }
+
+    public void setFrom(Collection<Object> from) {
+        this.from = from;
     }
 
     public Collection<Object> getColumns() {
         return columns;
     }
 
-    public Collection<String> getFilters() {
-        return filters;
+    public void setColumns(Collection<Object> columns) {
+        this.columns = columns;
+    }
+
+    public Collection<String> getWhere() {
+        return where;
+    }
+
+    public void setWhere(Collection<String> where) {
+        this.where = where;
+    }
+
+    public Collection<OrderBy> getOrderBy() {
+        return orderBy;
+    }
+
+    public void setOrderBy(Collection<OrderBy> orderBy) {
+        this.orderBy = orderBy;
+    }
+
+    public Collection<Join> getJoins() {
+        return joins;
+    }
+
+    public void setJoins(Collection<Join> joins) {
+        this.joins = joins;
     }
 }

@@ -62,11 +62,11 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
+        DatabaseMetaData metaData = inspectionContext.getConnection().getMetaData();
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         Dialect dialect = inspectionContext.getDialect();
         for (TableInspectionScope inspectionScope : inspectionScopes) {
-            ResultSet columns = databaseMetaData.getColumns(
+            ResultSet columns = metaData.getColumns(
                     inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable(), null);
             ValueModelList<ValueModel> columnsModel = createValueModelList(columns.getMetaData());
             try {

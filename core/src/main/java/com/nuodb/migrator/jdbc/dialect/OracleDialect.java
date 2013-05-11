@@ -93,10 +93,10 @@ public class OracleDialect extends SimpleDialect {
     protected RowCountQuery createRowCountApproxQuery(Table table) {
         SelectQuery selectQuery = new SelectQuery();
         selectQuery.setDialect(this);
-        selectQuery.addTable("SYS.ALL_TABLES");
-        selectQuery.addColumn("NUM_ROWS");
-        selectQuery.addFilter("ALL_TABLES.OWNER='" + table.getSchema().getName() + "'");
-        selectQuery.addFilter("ALL_TABLES.TABLE_NAME='" + table.getName() + "'");
+        selectQuery.from("SYS.ALL_TABLES");
+        selectQuery.column("NUM_ROWS");
+        selectQuery.where("ALL_TABLES.OWNER='" + table.getSchema().getName() + "'");
+        selectQuery.where("ALL_TABLES.TABLE_NAME='" + table.getName() + "'");
 
         RowCountQuery rowCountQuery = new RowCountQuery();
         rowCountQuery.setTable(table);

@@ -95,7 +95,7 @@ public class InsertQuery extends QueryBase {
     }
 
     @Override
-    public void buildQuery(StringBuilder query) {
+    public void toQuery(StringBuilder query) {
         query.append(insertType == null ? InsertType.INSERT : insertType.getCommand());
         query.append(" INTO ")
                 .append(qualifyNames ? table.getQualifiedName(dialect) : table.getName(dialect));

@@ -31,61 +31,36 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
-import java.sql.Types;
-
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
-import static java.lang.String.valueOf;
 
 /**
  * @author Sergey Bushik
  */
-public class MSSQLServerDialect extends SimpleDialect {
+public class MSSQLServer2005Dialect extends MSSQLServerDialect {
 
-    public static final int DATETIMEOFFSET = -155;
-
-    public MSSQLServerDialect(DatabaseInfo databaseInfo) {
+    public MSSQLServer2005Dialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
     }
 
-    @Override
-    protected void initJdbcTypes() {
-        super.initJdbcTypes();
-        addJdbcTypeDescAlias(Types.LONGVARBINARY, "IMAGE", Types.BLOB);
-        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
-        addJdbcTypeDescAlias(Types.LONGNVARCHAR, "XML", Types.CLOB);
-        addJdbcTypeDescAlias(DATETIMEOFFSET, "DATETIMEOFFSET", Types.TIMESTAMP);
-    }
-
-    @Override
-    public String openQuote() {
-        return valueOf('[');
-    }
-
-    @Override
-    public String closeQuote() {
-        return valueOf(']');
-    }
-
-    @Override
-    public String getNoColumnsInsert() {
-        return "DEFAULT VALUES";
-    }
-
-    @Override
-    public boolean supportsSessionTimeZone() {
-        return false;
-    }
-
+    /**
+     * Row counts using SYS.DM_DB_PARTITION_STATS dynamic management view.
+     * http://www.sqlservercentral.com/articles/T-SQL/67624/
+     *
+     * @param table to estimate row count for.
+     * @return query used to estimate row count number.
+     */
     @Override
     protected RowCountQuery createRowCountApproxQuery(Table table) {
         String catalog = table.getCatalog().getName() + ".";
 
         SelectQuery selectQuery = new SelectQuery();
-        selectQuery.column("I.ROWCNT");
-        selectQuery.from(catalog + "SYS.SYSINDEXES AS I");
-        selectQuery.innerJoin(catalog + "SYS.TABLES AS T", "I.ID=T.OBJECT_ID");
+        selectQuery.column("DDPS.ROW_COUNT");
+        selectQuery.from(catalog + "SYS.INDEXES AS I");
+        selectQuery.innerJoin(catalog + "SYS.TABLES AS T", "I.OBJECT_ID = t.OBJECT_ID");
         selectQuery.innerJoin(catalog + "SYS.SCHEMAS AS S", "T.SCHEMA_ID=S.SCHEMA_ID");
-        selectQuery.where("I.INDID < 2");
+        selectQuery.innerJoin(catalog + "SYS.DM_DB_PARTITION_STATS AS DDPS",
+                "I.OBJECT_ID = DDPS.OBJECT_ID AND I.INDEX_ID = DDPS.INDEX_ID");
+        selectQuery.where("I.INDEX_ID < 2");
         selectQuery.where("T.IS_MS_SHIPPED=0");
         selectQuery.where("S.NAME='" + table.getSchema().getName() + "'");
         selectQuery.where("T.NAME='" + table.getName() + "'");

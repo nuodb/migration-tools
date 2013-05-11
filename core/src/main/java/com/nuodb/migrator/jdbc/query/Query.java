@@ -36,7 +36,7 @@ public interface Query {
 
     void setQualifyNames(boolean qualifyNames);
 
-    void buildQuery(StringBuilder query);
+    void toQuery(StringBuilder query);
 
     String toQuery();
 }

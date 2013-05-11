@@ -25,46 +25,31 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
-
-import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.query.QueryBase;
+package com.nuodb.migrator.jdbc.query;
 
 /**
  * @author Sergey Bushik
  */
-public class ExplainQuery extends QueryBase {
+public class Join {
+    private String type;
+    private String table;
+    private String condition;
 
-    public static final String EXPLAIN_CLAUSE = "EXPLAIN";
-
-    private String explainClause = EXPLAIN_CLAUSE;
-    private Query query;
-
-    public ExplainQuery() {
+    public Join(String type, String table, String condition) {
+        this.type = type;
+        this.table = table;
+        this.condition = condition;
     }
 
-    public ExplainQuery(Query query) {
-        this.query = query;
+    public String getType() {
+        return type;
     }
 
-    public String getExplainClause() {
-        return explainClause;
+    public String getTable() {
+        return table;
     }
 
-    public void setExplainClause(String explainClause) {
-        this.explainClause = explainClause;
-    }
-
-    public Query getQuery() {
-        return query;
-    }
-
-    public void setQuery(Query query) {
-        this.query = query;
-    }
-
-    @Override
-    public void toQuery(StringBuilder query) {
-        query.append(getExplainClause()).append(" ").append(getQuery().toString());
+    public String getCondition() {
+        return condition;
     }
 }

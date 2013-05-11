@@ -62,7 +62,7 @@ public class QueryUtilsTest {
     @DataProvider(name = "orderBy")
     public Object[][] getOrderByData() {
         return new Object[][]{
-                {"SELECT \"column1\", \"column2\" FROM \"table\"", emptySet(),
+                {"SELECT \"column1\", \"column2\" FROM \"table\"", null,
                         null, "SELECT \"column1\", \"column2\" FROM \"table\""},
                 {"SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\""),
                         null, "SELECT \"column1\", \"column2\" FROM \"table\" ORDER BY \"column1\""},

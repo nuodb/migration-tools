@@ -141,14 +141,14 @@ public class MySQLDialect extends SimpleDialect {
     protected RowCountQuery createRowCountExactQuery(Table table) {
         MySQLSelectQuery query = new MySQLSelectQuery();
         query.setDialect(this);
-        query.addTable(table);
+        query.from(table);
         for (Index index : table.getIndexes()) {
             if (index.isPrimary()) {
                 query.setIndexHint(new IndexHint(IndexUsage.FORCE, index));
                 break;
             }
         }
-        query.addColumn("COUNT(*)");
+        query.column("COUNT(*)");
         RowCountQuery rowCountQuery = new RowCountQuery();
         rowCountQuery.setTable(table);
         rowCountQuery.setRowCountType(EXACT);
@@ -172,8 +172,8 @@ public class MySQLDialect extends SimpleDialect {
         }
         SelectQuery selectQuery = new SelectQuery();
         selectQuery.setDialect(this);
-        selectQuery.addTable(table);
-        selectQuery.addColumn(column != null ? column : "*");
+        selectQuery.from(table);
+        selectQuery.column(column != null ? column : "*");
 
         RowCountQuery rowCountQuery = new RowCountQuery();
         rowCountQuery.setTable(table);

@@ -380,13 +380,13 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         SelectQuery query = new SelectQuery();
         query.setQualifyNames(true);
         query.setDialect(this);
-        query.addTable(table);
+        query.from(table);
         PrimaryKey primaryKey = table.getPrimaryKey();
         Column column = null;
         if (primaryKey != null && size(primaryKey.getColumns()) > 0) {
             column = get(primaryKey.getColumns(), 0);
         }
-        query.addColumn("COUNT(" + (column != null ? column.getName(this) : "*") + ")");
+        query.column("COUNT(" + (column != null ? column.getName(this) : "*") + ")");
 
         RowCountQuery rowCountQuery = new RowCountQuery();
         rowCountQuery.setTable(table);

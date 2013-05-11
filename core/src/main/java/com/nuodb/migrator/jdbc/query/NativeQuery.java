@@ -39,7 +39,7 @@ public class NativeQuery extends QueryBase {
     }
 
     @Override
-    public void buildQuery(StringBuilder query) {
+    public void toQuery(StringBuilder query) {
         query.append(query);
     }
 

@@ -72,8 +72,8 @@ public class PostgreSQLDialect extends SimpleDialect {
         }
         SelectQuery selectQuery = new SelectQuery();
         selectQuery.setDialect(this);
-        selectQuery.addTable(table);
-        selectQuery.addColumn(column != null ? column : "*");
+        selectQuery.from(table);
+        selectQuery.column(column != null ? column : "*");
 
         RowCountQuery rowCountQuery = new RowCountQuery();
         rowCountQuery.setTable(table);

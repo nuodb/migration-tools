@@ -47,7 +47,7 @@ public abstract class QueryBase implements Query {
     @Override
     public String toQuery() {
         StringBuilder query = new StringBuilder();
-        buildQuery(query);
+        toQuery(query);
         return query.toString();
     }
 

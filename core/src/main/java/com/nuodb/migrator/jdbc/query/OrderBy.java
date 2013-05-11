@@ -25,46 +25,27 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.jdbc.query;
 
-import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.query.QueryBase;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public class ExplainQuery extends QueryBase {
+public class OrderBy {
+    private Collection<String> columns;
+    private String sortOrder;
 
-    public static final String EXPLAIN_CLAUSE = "EXPLAIN";
-
-    private String explainClause = EXPLAIN_CLAUSE;
-    private Query query;
-
-    public ExplainQuery() {
+    public OrderBy(Collection<String> columns, String order) {
+        this.columns = columns;
+        this.sortOrder = order;
     }
 
-    public ExplainQuery(Query query) {
-        this.query = query;
+    public Collection<String> getColumns() {
+        return columns;
     }
 
-    public String getExplainClause() {
-        return explainClause;
-    }
-
-    public void setExplainClause(String explainClause) {
-        this.explainClause = explainClause;
-    }
-
-    public Query getQuery() {
-        return query;
-    }
-
-    public void setQuery(Query query) {
-        this.query = query;
-    }
-
-    @Override
-    public void toQuery(StringBuilder query) {
-        query.append(getExplainClause()).append(" ").append(getQuery().toString());
+    public String getSortOrder() {
+        return sortOrder;
     }
 }

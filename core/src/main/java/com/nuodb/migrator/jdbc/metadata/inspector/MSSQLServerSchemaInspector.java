@@ -30,9 +30,11 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,9 +47,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
-import static com.nuodb.migrator.jdbc.query.QueryUtils.orderBy;
-import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
-import static java.lang.String.format;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 import static java.util.Collections.singleton;
@@ -57,13 +56,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * @author Sergey Bushik
  */
 public class MSSQLServerSchemaInspector extends InspectorBase<Catalog, SchemaInspectionScope> {
-
-    private static final String QUERY =
-            "SELECT NAME AS 'TABLE_SCHEM',\n" +
-            "CASE WHEN NAME IN ('DBO', 'GUEST', 'INFORMATION_SCHEMA', 'SYS', 'DB_OWNER', 'DB_ACCESSADMIN',\n" +
-            "                   'DB_SECURITYADMIN', 'DB_DDLADMIN', 'DB_BACKUPOPERATOR', 'DB_DATAREADER',\n" +
-            "                   'DB_DATAWRITER', 'DB_DENYDATAREADER', 'DB_DENYDATAWRITER') THEN NULL\n" +
-            "ELSE %s END AS 'TABLE_CATALOG' FROM %s";
 
     public MSSQLServerSchemaInspector() {
         super(SCHEMA, SchemaInspectionScope.class);
@@ -89,33 +81,16 @@ public class MSSQLServerSchemaInspector extends InspectorBase<Catalog, SchemaIns
 
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  Collection<SchemaInspectionScope> inspectionScopes) throws SQLException {
+        final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         for (SchemaInspectionScope inspectionScope : inspectionScopes) {
             final Collection<String> parameters = newArrayList();
-            String catalog;
-            if (isEmpty(inspectionScope.getCatalog())) {
-                catalog = "DB_NAME()";
-            } else {
-                catalog = "?";
-                parameters.add(inspectionScope.getCatalog());
-            }
-            String table;
-            if (isEmpty(inspectionScope.getCatalog())) {
-                table = "SYS.SCHEMAS";
-            } else {
-                table = inspectionScope.getCatalog() + ".SYS.SCHEMAS";
-            }
-            final StringBuilder query = new StringBuilder(format(QUERY, catalog, table));
-            if (!isEmpty(inspectionScope.getSchema())) {
-                where(query, newArrayList("NAME LIKE ?"));
-                parameters.add(inspectionScope.getSchema());
-            }
-            orderBy(query, newArrayList("2", "1"));
-            StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
+            final SelectQuery selectQuery = createSelectQuery(inspectionScope, parameters);
             template.execute(
                     new StatementFactory<PreparedStatement>() {
                         @Override
                         public PreparedStatement create(Connection connection) throws SQLException {
-                            return connection.prepareStatement(query.toString(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                            return connection.prepareStatement(selectQuery.toString(),
+                                    TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
                         }
                     },
                     new StatementCallback<PreparedStatement>() {
@@ -132,11 +107,33 @@ public class MSSQLServerSchemaInspector extends InspectorBase<Catalog, SchemaIns
         }
     }
 
+    protected SelectQuery createSelectQuery(SchemaInspectionScope inspectionScope, Collection<String> parameters) {
+        SelectQuery schemaQuery = new SelectQuery();
+        if (isEmpty(inspectionScope.getCatalog())) {
+            schemaQuery.column("DB_NAME() AS TABLE_CATALOG");
+        } else {
+            schemaQuery.column("? AS TABLE_CATALOG");
+            parameters.add(inspectionScope.getCatalog());
+        }
+        schemaQuery.column("S.NAME AS TABLE_SCHEMA");
+        String catalog = isEmpty(inspectionScope.getCatalog()) ? StringUtils.EMPTY : inspectionScope.getCatalog() + ".";
+        schemaQuery.from(catalog + "SYS.SCHEMAS S");
+        schemaQuery.leftJoin(catalog + "SYS.SYSUSERS U", "U.NAME=S.NAME");
+
+        schemaQuery.where("(ISSQLROLE=0 OR ISSQLROLE IS NULL)");
+        if (!isEmpty(inspectionScope.getSchema())) {
+            schemaQuery.where("S.NAME LIKE ?");
+            parameters.add(inspectionScope.getSchema());
+        }
+        schemaQuery.orderBy(newArrayList("TABLE_CATALOG", "TABLE_SCHEMA"));
+        return schemaQuery;
+    }
+
     protected void inspect(InspectionContext inspectionContext, ResultSet schemas) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         try {
             while (schemas.next()) {
-                addSchema(inspectionResults, schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
+                addSchema(inspectionResults, schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEMA"));
             }
         } finally {
             close(schemas);

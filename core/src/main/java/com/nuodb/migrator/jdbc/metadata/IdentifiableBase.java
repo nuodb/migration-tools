@@ -121,20 +121,21 @@ public class IdentifiableBase extends IndentedBase implements Identifiable {
 
     public static String getQualifiedName(Dialect dialect, String catalog, String schema, String name,
                                           Identifiable identifiable) {
-        if (!identifiable.isQualified()) {
+        if (identifiable.isQualified()) {
+            StringBuilder buffer = new StringBuilder();
+            if (catalog != null) {
+                buffer.append(dialect != null ? dialect.getIdentifier(catalog, null) : catalog);
+                buffer.append('.');
+            }
+            if (schema != null) {
+                buffer.append(dialect != null ? dialect.getIdentifier(schema, null) : schema);
+                buffer.append('.');
+            }
+            buffer.append(dialect != null ? dialect.getIdentifier(name, identifiable) : identifiable.getName());
+            return buffer.toString();
+        } else {
             return getName(dialect, name, identifiable);
         }
-        StringBuilder buffer = new StringBuilder();
-        if (catalog != null) {
-            buffer.append(dialect != null ? dialect.getIdentifier(catalog, null) : catalog);
-            buffer.append('.');
-        }
-        if (schema != null) {
-            buffer.append(dialect != null ? dialect.getIdentifier(schema, null) : schema);
-            buffer.append('.');
-        }
-        buffer.append(dialect != null ? dialect.getIdentifier(name, identifiable) : identifiable.getName());
-        return buffer.toString();
     }
 
     @Override
