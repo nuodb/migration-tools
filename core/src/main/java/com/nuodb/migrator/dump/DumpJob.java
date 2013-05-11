@@ -227,7 +227,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
 
     protected CatalogEntry createCatalogEntry(Query query) {
         if (query instanceof SelectQuery) {
-            Table table = (Table) get(((SelectQuery) query).getTables(), 0);
+            Table table = (Table) get(((SelectQuery) query).getFrom(), 0);
             return new CatalogEntry(table.getName().toLowerCase(), getOutputType());
         } else {
             return new CatalogEntry(format(QUERY_ENTRY_NAME, new Date()), getOutputType());
