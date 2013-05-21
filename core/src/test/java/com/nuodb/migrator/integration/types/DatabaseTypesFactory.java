@@ -11,6 +11,8 @@ public class DatabaseTypesFactory {
 			return new SQLServerTypes();
 		} else if (driverClassName.toLowerCase().contains("postgresql")) {
 			return new PostgreSQLTypes();
+		} else if (driverClassName.toLowerCase().contains("oracle")) {
+			return new OracleTypes();
 		}
 		return null;
 	}

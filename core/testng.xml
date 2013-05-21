@@ -9,6 +9,7 @@
                 <exclude name="nuodbintegrationtest"/>
                 <exclude name="sqlserverintegrationtest"/>
                 <exclude name="postgresqlintegrationtest"/>
+                <exclude name="oracleintegrationtest"/>
                 <exclude name="disabled"/>
             </run>
         </groups>

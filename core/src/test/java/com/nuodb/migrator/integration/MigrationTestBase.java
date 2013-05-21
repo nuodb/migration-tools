@@ -53,6 +53,7 @@ public class MigrationTestBase {
 	protected Connection sourceConnection;
 	protected Connection nuodbConnection;
 	protected String nuodbSchemaUsed = null;
+	protected String sourceSchemaUsed = null;
 
 	protected ResultSetUtil rsUtil;
 
@@ -110,6 +111,8 @@ public class MigrationTestBase {
 		sourceProp.put("schema", sourceSchema);
 		sourceConnection = DriverManager.getConnection(sourceUrl, sourceProp);
 		sourceConnection.setAutoCommit(false);
+		
+		sourceSchemaUsed = sourceSchema;
 
 		Driver d2 = (Driver) Class.forName(nuodbDriver, true, ucl)
 				.newInstance();

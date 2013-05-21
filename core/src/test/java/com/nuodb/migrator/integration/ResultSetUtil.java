@@ -74,6 +74,7 @@ public class ResultSetUtil {
 
 			if (!dbTypes.isCaseSensitive()) {
 				colNameSrc = colNameSrc.toLowerCase();
+				colNameTar=colNameTar.toLowerCase(); 
 			}
 			if (compareMetaData) {
 				Assert.assertEquals(colNameTar, colNameSrc,
