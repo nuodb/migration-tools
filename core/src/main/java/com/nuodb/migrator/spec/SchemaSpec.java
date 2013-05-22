@@ -33,16 +33,18 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
 
 /**
  * @author Sergey Bushik
  */
 public class SchemaSpec extends JobSpecBase {
 
-    private String[] tableTypes;
+    private String[] tableTypes = new String[]{TABLE};
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;
     private ResourceSpec outputSpec;
@@ -141,7 +143,7 @@ public class SchemaSpec extends JobSpecBase {
 
         SchemaSpec that = (SchemaSpec) o;
 
-        if (tableTypes != that.tableTypes) return false;
+        if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
         if (identifierNormalizer != null ? !identifierNormalizer.equals(
                 that.identifierNormalizer) : that.identifierNormalizer != null) return false;
         if (identifierQuoting != null ? !identifierQuoting.equals(
@@ -165,7 +167,7 @@ public class SchemaSpec extends JobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (tableTypes != null ? tableTypes.hashCode() : 0);
+        result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
         result = 31 * result + (sourceConnectionSpec != null ? sourceConnectionSpec.hashCode() : 0);
         result = 31 * result + (targetConnectionSpec != null ? targetConnectionSpec.hashCode() : 0);
         result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);

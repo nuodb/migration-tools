@@ -52,6 +52,7 @@ import java.util.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.newListMultimap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
@@ -326,7 +327,7 @@ public class CliSchemaJob extends CliRunJob {
         }
         schemaSpec.setJdbcTypeSpecs(jdbcTypeSpecs);
 
-        Collection<String> tableTypes = newTreeSet(String.CASE_INSENSITIVE_ORDER);
+        Collection<String> tableTypes = newLinkedHashSet();
         tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
         if (tableTypes.isEmpty()) {
             tableTypes.add(Table.TABLE);

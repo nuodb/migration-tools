@@ -120,7 +120,7 @@ public class DumpSpec extends JobSpecBase {
         int result = super.hashCode();
         result = 31 * result + (connectionSpec != null ? connectionSpec.hashCode() : 0);
         result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
-        result = 31 * result + (tableTypes != null ? tableTypes.hashCode() : 0);
+        result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
         result = 31 * result + (selectQuerySpecs != null ? selectQuerySpecs.hashCode() : 0);
         result = 31 * result + (nativeQuerySpecs != null ? nativeQuerySpecs.hashCode() : 0);
         result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);
