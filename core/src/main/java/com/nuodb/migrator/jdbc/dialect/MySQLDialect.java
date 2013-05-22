@@ -27,20 +27,23 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
 import java.util.TimeZone;
 
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.size;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.dialect.MySQLSelectQuery.IndexHint;
 import static com.nuodb.migrator.jdbc.dialect.MySQLSelectQuery.IndexUsage;
+import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
+import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.lang.String.valueOf;
 
 /**
@@ -56,6 +59,7 @@ public class MySQLDialect extends SimpleDialect {
     protected void initJdbcTypes() {
         super.initJdbcTypes();
 
+        addJdbcType(MySQLSmallIntUnsigned.INSTANCE);
         addJdbcType(MySQLIntUnsignedType.INSTANCE);
         addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
 
@@ -135,21 +139,66 @@ public class MySQLDialect extends SimpleDialect {
     }
 
     @Override
-    protected Query getRowCountExactQuery(Table table) {
+    protected RowCountQuery createRowCountExactQuery(Table table) {
         MySQLSelectQuery query = new MySQLSelectQuery();
-        query.setQualifyNames(true);
         query.setDialect(this);
-        query.addTable(table);
+        query.from(table);
         for (Index index : table.getIndexes()) {
             if (index.isPrimary()) {
                 query.setIndexHint(new IndexHint(IndexUsage.FORCE, index));
                 break;
             }
         }
-        query.addColumn("COUNT(*)");
-        return query;
+        query.column("COUNT(*)");
+        RowCountQuery rowCountQuery = new RowCountQuery();
+        rowCountQuery.setTable(table);
+        rowCountQuery.setRowCountType(EXACT);
+        rowCountQuery.setQuery(query);
+        return rowCountQuery;
     }
 
+    @Override
+    protected RowCountQuery createRowCountApproxQuery(Table table) {
+        PrimaryKey primaryKey = table.getPrimaryKey();
+        Column column = null;
+        if (primaryKey != null && size(primaryKey.getColumns()) > 0) {
+            column = get(primaryKey.getColumns(), 0);
+        }
+        if (column == null) {
+            for (Index index : table.getIndexes()) {
+                if (index.isUnique() && size(index.getColumns()) > 0) {
+                    column = get(index.getColumns(), 0);
+                }
+            }
+        }
+        SelectQuery selectQuery = new SelectQuery();
+        selectQuery.setDialect(this);
+        selectQuery.from(table);
+        selectQuery.column(column != null ? column : "*");
+
+        RowCountQuery rowCountQuery = new RowCountQuery();
+        rowCountQuery.setTable(table);
+        rowCountQuery.setColumn(column);
+        rowCountQuery.setRowCountType(APPROX);
+        rowCountQuery.setQuery(new ExplainQuery(selectQuery));
+        return rowCountQuery;
+    }
+
+    @Override
+    protected RowCountValue extractRowCountValue(ResultSet rowCount, RowCountQuery rowCountQuery) throws SQLException {
+        RowCountValue rowCountValue = null;
+        if (rowCount.next()) {
+            switch (rowCountQuery.getRowCountType()) {
+                case APPROX:
+                    rowCountValue = new RowCountValue(rowCountQuery, rowCount.getLong("ROWS"));
+                    break;
+                case EXACT:
+                    rowCountValue = new RowCountValue(rowCountQuery, rowCount.getLong(1));
+                    break;
+            }
+        }
+        return rowCountValue;
+    }
 
     /**
      * Forces driver to stream ResultSet http://goo.gl/kl1Nr

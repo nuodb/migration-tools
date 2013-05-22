@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class InsertQuery implements Query {
+public class InsertQuery extends QueryBase {
 
     private InsertType insertType = InsertType.INSERT;
     private Dialect dialect;
@@ -95,8 +95,7 @@ public class InsertQuery implements Query {
     }
 
     @Override
-    public String toQuery() {
-        StringBuilder query = new StringBuilder();
+    public void toQuery(StringBuilder query) {
         query.append(insertType == null ? InsertType.INSERT : insertType.getCommand());
         query.append(" INTO ")
                 .append(qualifyNames ? table.getQualifiedName(dialect) : table.getName(dialect));
@@ -122,11 +121,5 @@ public class InsertQuery implements Query {
             }
             query.append(')');
         }
-        return query.toString();
-    }
-
-    @Override
-    public String toString() {
-        return toQuery();
     }
 }

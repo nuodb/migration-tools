@@ -30,11 +30,16 @@ package com.nuodb.migrator.jdbc.query;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static java.util.Collections.singleton;
+
 /**
  * @author Sergey Bushik
  */
 public class QueryUtils {
 
+    public static final String INNER = "INNER";
+    public static final String LEFT = "LEFT";
+    public static final String RIGHT = "RIGHT";
     public static final String OR = "OR";
     public static final String AND = "AND";
     public static final String DESC = "DESC";
@@ -49,7 +54,7 @@ public class QueryUtils {
     }
 
     public static StringBuilder where(StringBuilder query, Collection<String> filters, String operator) {
-        if (!filters.isEmpty()) {
+        if (filters != null && !filters.isEmpty()) {
             query.append(' ');
             query.append("WHERE");
             for (Iterator<String> iterator = filters.iterator(); iterator.hasNext(); ) {
@@ -69,25 +74,50 @@ public class QueryUtils {
         return orderBy(new StringBuilder(query), columns, order).toString();
     }
 
-    public static StringBuilder orderBy(StringBuilder query, Collection<String> columns) {
-        return orderBy(query, columns, null);
+    public static StringBuilder orderBy(StringBuilder query, Collection<String> columns, String order) {
+        return orderBy(query, columns != null ? singleton(new OrderBy(columns, order)) : null);
     }
 
-    public static StringBuilder orderBy(StringBuilder query, Collection<String> columns, String order) {
-        if (!columns.isEmpty()) {
+    public static StringBuilder orderBy(StringBuilder query, Collection<OrderBy> orderBys) {
+        if (orderBys != null && !orderBys.isEmpty()) {
             query.append(' ');
             query.append("ORDER BY");
-            for (Iterator<String> iterator = columns.iterator(); iterator.hasNext(); ) {
-                String column = iterator.next();
-                query.append(' ');
-                query.append(column);
-                if (iterator.hasNext()) {
+            for (Iterator<OrderBy> orderByIterator = orderBys.iterator(); orderByIterator.hasNext(); ) {
+                OrderBy orderBy = orderByIterator.next();
+                for (Iterator<String> columnsIterator = orderBy.getColumns().iterator(); columnsIterator.hasNext(); ) {
+                    String column = columnsIterator.next();
+                    query.append(' ');
+                    query.append(column);
+                    if (columnsIterator.hasNext()) {
+                        query.append(',');
+                    }
+                }
+                String sortOrder = orderBy.getSortOrder();
+                if (sortOrder != null) {
+                    query.append(' ');
+                    query.append(sortOrder);
+                }
+                if (orderByIterator.hasNext()) {
                     query.append(',');
                 }
             }
-            if (order != null) {
-                query.append(' ');
-                query.append(order);
+
+        }
+        return query;
+    }
+
+    public static StringBuilder join(StringBuilder query, Collection<Join> joins) {
+        if (joins != null && !joins.isEmpty()) {
+            for (Iterator<Join> iterator = joins.iterator(); iterator.hasNext(); ) {
+                Join join = iterator.next();
+                query.append(join.getType());
+                query.append(" JOIN ");
+                query.append(join.getTable());
+                query.append(" ON ");
+                query.append(join.getCondition());
+                if (iterator.hasNext()) {
+                    query.append(' ');
+                }
             }
         }
         return query;

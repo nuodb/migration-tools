@@ -40,10 +40,11 @@ public class SimpleDialectResolver extends SimpleServiceResolver<Dialect> implem
     public SimpleDialectResolver() {
         super(SimpleDialect.class);
         register("MySQL", MySQLDialect.class);
-        register("PostgreSQL", PostgreSQLDialect.class);
-        register("Microsoft SQL Server", MSSQLServerDialect.class);
-        register("Oracle", OracleDialect.class);
         register("NuoDB", NuoDBDialect.class);
+        register("PostgreSQL", PostgreSQLDialect.class);
+        register("Oracle", OracleDialect.class);
+        register("Microsoft SQL Server", MSSQLServerDialect.class);
+        register(new DatabaseInfo("Microsoft SQL Server", null, 9), MSSQLServer2005Dialect.class);
     }
 
     @Override

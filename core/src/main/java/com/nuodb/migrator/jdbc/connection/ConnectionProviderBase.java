@@ -28,49 +28,78 @@
 package com.nuodb.migrator.jdbc.connection;
 
 import com.nuodb.migrator.spec.ConnectionSpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
-public class SimpleConnectionServices<C extends ConnectionSpec> implements ConnectionServices<C> {
+public abstract class ConnectionProviderBase<C extends ConnectionSpec> implements ConnectionProvider<C> {
 
-    private ConnectionProvider<C> connectionProvider;
-    private Connection connection;
+    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public SimpleConnectionServices(ConnectionProvider<C> connectionProvider) {
-        this.connectionProvider = connectionProvider;
+    private C connectionSpec;
+
+    protected ConnectionProviderBase() {
+    }
+
+    protected ConnectionProviderBase(C connectionSpec) {
+        this.connectionSpec = connectionSpec;
     }
 
     @Override
     public C getConnectionSpec() {
-        return connectionProvider.getConnectionSpec();
+        return connectionSpec;
+    }
+
+    @Override
+    public ConnectionServices<C> getConnectionServices() throws SQLException {
+        return new SimpleConnectionServices<C>(this);
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        Connection connection = this.connection;
-        if (connection == null) {
-            synchronized (this) {
-                connection = this.connection;
-                if (connection == null) {
-                    connection = this.connection = connectionProvider.getConnection();
-                }
-            }
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Acquiring connection using %s", getConnectionSpec()));
         }
+        Connection connection = createConnection();
+        initConnection(connection);
         return connection;
     }
 
-    @Override
-    public void closeConnection() throws SQLException {
-        connectionProvider.closeConnection(connection);
-        connection = null;
+    protected abstract Connection createConnection() throws SQLException;
+
+    protected void initConnection(Connection connection) throws SQLException {
+        Integer transactionIsolation = getConnectionSpec().getTransactionIsolation();
+        if (transactionIsolation != null) {
+            connection.setTransactionIsolation(transactionIsolation);
+        }
+        Boolean autoCommit = getConnectionSpec().getAutoCommit();
+        if (autoCommit != null) {
+            connection.setAutoCommit(autoCommit);
+        }
     }
 
     @Override
+    public void closeConnection(Connection connection) throws SQLException {
+        if (connection != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Closing connection");
+            }
+            connection.close();
+        }
+    }
+
+    @Override
+    public abstract void close() throws SQLException;
+
+    @Override
     public String toString() {
-        return connectionProvider.toString();
+        return getConnectionSpec().toString();
     }
 }

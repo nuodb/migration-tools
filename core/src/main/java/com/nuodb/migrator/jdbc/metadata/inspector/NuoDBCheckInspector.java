@@ -47,6 +47,8 @@ import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.quote;
 
 /**
  * @author Sergey Bushik
@@ -54,10 +56,8 @@ import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public static final String QUERY =
-            "SELECT T.SCHEMA, T.TABLENAME, T.CONSTRAINTNAME, T.CONSTRAINTTEXT\n" +
-            "FROM SYSTEM.TABLECONSTRAINTS AS T\n" +
-            "INNER JOIN SYSTEM.FIELDS AS F ON T.SCHEMA = F.SCHEMA\n" +
-            "AND T.TABLENAME = F.TABLENAME\n" +
+            "SELECT T.SCHEMA, T.TABLENAME, T.CONSTRAINTNAME, T.CONSTRAINTTEXT FROM SYSTEM.TABLECONSTRAINTS AS T " +
+            "INNER JOIN SYSTEM.FIELDS AS F ON T.SCHEMA = F.SCHEMA AND T.TABLENAME = F.TABLENAME " +
             "WHERE T.SCHEMA=? AND T.TABLENAME=?";
 
     public NuoDBCheckInspector() {
@@ -109,9 +109,7 @@ public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspecti
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (checks.next()) {
             Table table = addTable(inspectionResults, null, checks.getString("SCHEMA"), checks.getString("TABLENAME"));
-            String regex = Pattern.quote(table.getName() + "$constraint");
-            Pattern pattern = Pattern.compile(regex + "\\d+");
-
+            Pattern pattern = compile(quote(table.getName() + "$constraint") + "\\d+");
             String constraint = checks.getString("CONSTRAINTNAME");
             Check check = new Check(constraint);
             check.setTable(table);

@@ -27,50 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
-
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleConnectionServices<C extends ConnectionSpec> implements ConnectionServices<C> {
+public interface QueryFormatterFactory {
 
-    private ConnectionProvider<C> connectionProvider;
-    private Connection connection;
-
-    public SimpleConnectionServices(ConnectionProvider<C> connectionProvider) {
-        this.connectionProvider = connectionProvider;
-    }
-
-    @Override
-    public C getConnectionSpec() {
-        return connectionProvider.getConnectionSpec();
-    }
-
-    @Override
-    public Connection getConnection() throws SQLException {
-        Connection connection = this.connection;
-        if (connection == null) {
-            synchronized (this) {
-                connection = this.connection;
-                if (connection == null) {
-                    connection = this.connection = connectionProvider.getConnection();
-                }
-            }
-        }
-        return connection;
-    }
-
-    @Override
-    public void closeConnection() throws SQLException {
-        connectionProvider.closeConnection(connection);
-        connection = null;
-    }
-
-    @Override
-    public String toString() {
-        return connectionProvider.toString();
-    }
+    QueryFormatter createQueryFormatter(Statement statement, String query);
 }

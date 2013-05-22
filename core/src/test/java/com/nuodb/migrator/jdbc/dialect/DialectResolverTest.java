@@ -56,7 +56,9 @@ public class DialectResolverTest {
                         "With the Partitioning, OLAP, Data Mining and Real Application Testing options", 2, 11))
                 instanceof OracleDialect);
         assertTrue(dialectResolver.resolve(
-                new DatabaseInfo("Microsoft SQL Server", "11.00.3339", 0, 11)) instanceof MSSQLServerDialect);
+                new DatabaseInfo("Microsoft SQL Server", "8", 0, 8)) instanceof MSSQLServerDialect);
+        assertTrue(dialectResolver.resolve(
+                new DatabaseInfo("Microsoft SQL Server", "11.00.3339", 0, 11)) instanceof MSSQLServer2005Dialect);
         assertNotNull(dialectResolver.resolve(new DatabaseInfo("DB2", "DSN10015", 10, 1)));
     }
 }

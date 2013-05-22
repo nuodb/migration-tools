@@ -58,6 +58,7 @@ public interface CliOptions {
     final String SOURCE_PROPERTIES_OPTION = "source.properties";
     final String SOURCE_CATALOG_OPTION = "source.catalog";
     final String SOURCE_SCHEMA_OPTION = "source.schema";
+    final String SOURCE_AUTO_COMMIT_OPTION = "source.auto.commit";
 
     final String TIME_ZONE_OPTION = "time.zone";
     final String TIME_ZONE_SHORT_OPTION = "t";
@@ -78,6 +79,7 @@ public interface CliOptions {
     final String TARGET_PASSWORD_OPTION = "target.password";
     final String TARGET_PROPERTIES_OPTION = "target.properties";
     final String TARGET_SCHEMA_OPTION = "target.schema";
+    final String TARGET_AUTO_COMMIT_OPTION = "target.auto.commit";
 
     final String REPLACE_OPTION = "replace";
     final String REPLACE_SHORT_OPTION = "r";

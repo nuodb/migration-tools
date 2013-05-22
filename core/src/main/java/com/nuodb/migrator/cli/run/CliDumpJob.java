@@ -45,6 +45,7 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
@@ -138,12 +139,12 @@ public class CliDumpJob extends CliRunJob {
     }
 
     protected void parseTableGroup(OptionSet optionSet, DumpSpec dumpSpec) {
-        Collection<String> tableTypes = newTreeSet(String.CASE_INSENSITIVE_ORDER);
+        Collection<String> tableTypes = newLinkedHashSet();
         tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
         if (tableTypes.isEmpty()) {
             tableTypes.add(Table.TABLE);
         }
-        dumpSpec.setTableTypes(tableTypes);
+        dumpSpec.setTableTypes(tableTypes.toArray(new String[tableTypes.size()]));
 
         Map<String, SelectQuerySpec> tableQueryMapping = newHashMap();
         for (String table : optionSet.<String>getValues(TABLE_OPTION)) {

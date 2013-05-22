@@ -43,7 +43,7 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 /**
  * @author Sergey Bushik
  */
-public class SimpleStatementFormatter implements StatementFormatter {
+public class SimpleQueryFormatter implements QueryFormatter {
 
     private static final String PARAMETER = "?";
     public static final Pattern PARAMETER_PATTERN = compile(quote(PARAMETER));
@@ -51,12 +51,15 @@ public class SimpleStatementFormatter implements StatementFormatter {
     private final String query;
     private final List<Object> parameters;
 
-    public SimpleStatementFormatter(String query) {
+    public SimpleQueryFormatter(String query) {
         this.query = query;
         this.parameters = newArrayList(new Object[countMatches(query, PARAMETER)]);
     }
 
     public String format() {
+        if (query.startsWith("IN")) {
+            System.out.println("SimpleStatementFormatter.format");
+        }
         Matcher matcher = PARAMETER_PATTERN.matcher(query);
         StringBuffer result = new StringBuffer(query.length());
         int index = 0;
@@ -70,9 +73,7 @@ public class SimpleStatementFormatter implements StatementFormatter {
     protected String format(Object parameter) {
         if (parameter == null) {
             return "NULL";
-        } else if (parameter instanceof Number) {
-            return valueOf(parameter);
-        } else if (parameter instanceof Clob) {
+        } if (parameter instanceof Clob) {
             return "[CLOB]";
         } else if (parameter instanceof Blob) {
             return "[BLOB]";

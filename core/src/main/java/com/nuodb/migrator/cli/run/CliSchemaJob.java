@@ -35,14 +35,13 @@ import com.google.common.collect.Maps;
 import com.nuodb.migrator.cli.parse.*;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
-import com.nuodb.migrator.jdbc.JdbcConstants;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.schema.SchemaJobFactory;
-import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaSpec;
@@ -53,6 +52,8 @@ import java.util.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.newListMultimap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newLinkedHashSet;
+import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
@@ -163,6 +164,16 @@ public class CliSchemaJob extends CliRunJob {
         typeGroup.withOption(typeScale);
         typeGroup.withMaximum(Integer.MAX_VALUE);
         group.withOption(typeGroup.build());
+
+        Option tableType = newBasicOptionBuilder().
+                withName(TABLE_TYPE_OPTION).
+                withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).
+                                withMaximum(Integer.MAX_VALUE).build()
+                ).build();
+        group.withOption(tableType);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
@@ -315,6 +326,13 @@ public class CliSchemaJob extends CliRunJob {
             jdbcTypeSpecs.add(jdbcTypeSpec);
         }
         schemaSpec.setJdbcTypeSpecs(jdbcTypeSpecs);
+
+        Collection<String> tableTypes = newLinkedHashSet();
+        tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
+        if (tableTypes.isEmpty()) {
+            tableTypes.add(Table.TABLE);
+        }
+        schemaSpec.setTableTypes(tableTypes.toArray(new String[tableTypes.size()]));
     }
 
     protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {
@@ -411,6 +429,15 @@ public class CliSchemaJob extends CliRunJob {
                                 withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(schema);
+
+        Option autoCommit = newBasicOptionBuilder().
+                withName(TARGET_AUTO_COMMIT_OPTION).
+                withDescription(getMessage(TARGET_AUTO_COMMIT_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(TARGET_AUTO_COMMIT_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(autoCommit);
         return group.build();
     }
 

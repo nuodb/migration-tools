@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.resolve;
 
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.nuodb.migrator.utils.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +35,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Comparator;
 
+import static com.google.common.collect.ComparisonChain.start;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
@@ -108,7 +108,7 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
 
     public boolean matches(DatabaseInfo databaseInfo) {
         Ordering<Comparable> comparator = Ordering.natural().nullsLast();
-        return ComparisonChain.start().
+        return start().
                 compare(productName, databaseInfo.productName, new Comparator<String>() {
                     @Override
                     public int compare(String productName1, String productName2) {
@@ -123,7 +123,7 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
     @Override
     public int compareTo(DatabaseInfo databaseInfo) {
         Ordering<Comparable> ordering = Ordering.natural().nullsFirst();
-        return ComparisonChain.start().
+        return start().
                 compare(productName, databaseInfo.productName, ordering).
                 compare(productVersion, databaseInfo.productVersion, ordering).
                 compare(majorVersion, databaseInfo.majorVersion, ordering).

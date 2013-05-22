@@ -25,52 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
-
-import com.nuodb.migrator.spec.ConnectionSpec;
-
-import java.sql.Connection;
-import java.sql.SQLException;
+package com.nuodb.migrator.jdbc.query;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleConnectionServices<C extends ConnectionSpec> implements ConnectionServices<C> {
+public abstract class QueryBase implements Query {
 
-    private ConnectionProvider<C> connectionProvider;
-    private Connection connection;
+    public static final boolean QUALIFY_NAMES = true;
 
-    public SimpleConnectionServices(ConnectionProvider<C> connectionProvider) {
-        this.connectionProvider = connectionProvider;
+    private boolean qualifyNames = QUALIFY_NAMES;
+
+    public boolean isQualifyNames() {
+        return qualifyNames;
+    }
+
+    public void setQualifyNames(boolean qualifyNames) {
+        this.qualifyNames = qualifyNames;
     }
 
     @Override
-    public C getConnectionSpec() {
-        return connectionProvider.getConnectionSpec();
-    }
-
-    @Override
-    public Connection getConnection() throws SQLException {
-        Connection connection = this.connection;
-        if (connection == null) {
-            synchronized (this) {
-                connection = this.connection;
-                if (connection == null) {
-                    connection = this.connection = connectionProvider.getConnection();
-                }
-            }
-        }
-        return connection;
-    }
-
-    @Override
-    public void closeConnection() throws SQLException {
-        connectionProvider.closeConnection(connection);
-        connection = null;
+    public String toQuery() {
+        StringBuilder query = new StringBuilder();
+        toQuery(query);
+        return query.toString();
     }
 
     @Override
     public String toString() {
-        return connectionProvider.toString();
+        return toQuery();
     }
 }

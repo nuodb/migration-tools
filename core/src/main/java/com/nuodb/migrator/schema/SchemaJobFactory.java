@@ -29,6 +29,8 @@ package com.nuodb.migrator.schema;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
+import com.nuodb.migrator.jdbc.connection.DriverConnectionSpecProviderFactory;
+import com.nuodb.migrator.jdbc.connection.QueryLoggingConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
@@ -40,6 +42,7 @@ import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaSpec;
 
+import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -51,18 +54,23 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 /**
  * @author Sergey Bushik
  */
-public class SchemaJobFactory extends ConnectionProviderFactory implements JobFactory<SchemaJob> {
+public class SchemaJobFactory implements JobFactory<SchemaJob> {
 
     public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
 
     private SchemaSpec schemaSpec;
     private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
     private DialectResolver dialectResolver = new SimpleDialectResolver();
+    private ConnectionProviderFactory connectionProviderFactory = new QueryLoggingConnectionProviderFactory(
+            new DriverConnectionSpecProviderFactory());
 
     @Override
     public SchemaJob createJob() {
         isNotNull(schemaSpec, "Schema spec is required");
+
+        SchemaSpec schemaSpec = getSchemaSpec();
         SchemaJob schemaJob = new SchemaJob();
+        schemaJob.setTableTypes(schemaSpec.getTableTypes());
         schemaJob.setConnectionProvider(createConnectionProvider(schemaSpec.getSourceConnectionSpec()));
         schemaJob.setDialectResolver(getDialectResolver());
         schemaJob.setFailOnEmptyScripts(isFailOnEmptyScripts());
@@ -71,29 +79,34 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
         return schemaJob;
     }
 
+    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
+        return getConnectionProviderFactory().createConnectionProvider(connectionSpec);
+    }
+
     protected ScriptGeneratorContext createScriptGeneratorContext() {
+        SchemaSpec schemaSpec = getSchemaSpec();
         ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext();
-        scriptGeneratorContext.getAttributes().put(GROUP_SCRIPTS_BY, getSchemaSpec().getGroupScriptsBy());
-        scriptGeneratorContext.setObjectTypes(getSchemaSpec().getMetaDataTypes());
-        scriptGeneratorContext.setScriptTypes(getSchemaSpec().getScriptTypes());
+        scriptGeneratorContext.getAttributes().put(GROUP_SCRIPTS_BY, schemaSpec.getGroupScriptsBy());
+        scriptGeneratorContext.setObjectTypes(schemaSpec.getMetaDataTypes());
+        scriptGeneratorContext.setScriptTypes(schemaSpec.getScriptTypes());
 
         NuoDBDialect dialect = new NuoDBDialect();
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
-        for (JdbcTypeSpec jdbcTypeSpec : getSchemaSpec().getJdbcTypeSpecs()) {
+        for (JdbcTypeSpec jdbcTypeSpec : schemaSpec.getJdbcTypeSpecs()) {
             jdbcTypeNameMap.addJdbcTypeName(
                     jdbcTypeSpec.getTypeCode(), jdbcTypeSpec.getTypeName(),
                     newSpecifiers(
                             jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()));
         }
-        dialect.setIdentifierQuoting(getSchemaSpec().getIdentifierQuoting());
-        dialect.setIdentifierNormalizer(getSchemaSpec().getIdentifierNormalizer());
+        dialect.setIdentifierQuoting(schemaSpec.getIdentifierQuoting());
+        dialect.setIdentifierNormalizer(schemaSpec.getIdentifierNormalizer());
         scriptGeneratorContext.setDialect(dialect);
 
-        ConnectionSpec sourceConnectionSpec = getSchemaSpec().getSourceConnectionSpec();
+        ConnectionSpec sourceConnectionSpec = schemaSpec.getSourceConnectionSpec();
         scriptGeneratorContext.setSourceCatalog(sourceConnectionSpec.getCatalog());
         scriptGeneratorContext.setSourceSchema(sourceConnectionSpec.getSchema());
 
-        ConnectionSpec targetConnectionSpec = getSchemaSpec().getTargetConnectionSpec();
+        ConnectionSpec targetConnectionSpec = schemaSpec.getTargetConnectionSpec();
         if (targetConnectionSpec != null) {
             scriptGeneratorContext.setTargetCatalog(targetConnectionSpec.getCatalog());
             scriptGeneratorContext.setTargetSchema(targetConnectionSpec.getSchema());
@@ -104,9 +117,13 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
     protected ScriptExporter createScriptExporter() {
         Collection<ScriptExporter> exporters = newArrayList();
         ConnectionSpec targetConnectionSpec = schemaSpec.getTargetConnectionSpec();
-        ConnectionProvider connectionProvider = createConnectionProvider(targetConnectionSpec);
-        if (connectionProvider != null) {
-            exporters.add(new ConnectionScriptExporter(connectionProvider.getConnectionServices()));
+        if (targetConnectionSpec != null) {
+            try {
+                ConnectionProvider connectionProvider = createConnectionProvider(targetConnectionSpec);
+                exporters.add(new ConnectionScriptExporter(connectionProvider.getConnectionServices()));
+            } catch (SQLException exception) {
+                throw new SchemaJobException("Failed creating connection script exporter", exception);
+            }
         }
         ResourceSpec outputSpec = schemaSpec.getOutputSpec();
         if (outputSpec != null) {
@@ -141,5 +158,13 @@ public class SchemaJobFactory extends ConnectionProviderFactory implements JobFa
 
     public void setDialectResolver(DialectResolver dialectResolver) {
         this.dialectResolver = dialectResolver;
+    }
+
+    public ConnectionProviderFactory getConnectionProviderFactory() {
+        return connectionProviderFactory;
+    }
+
+    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
+        this.connectionProviderFactory = connectionProviderFactory;
     }
 }

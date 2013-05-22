@@ -29,7 +29,6 @@ package com.nuodb.migrator.spec;
 
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 
-import java.sql.Driver;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
@@ -38,10 +37,9 @@ import static com.nuodb.migrator.jdbc.url.JdbcUrlParsers.getInstance;
 public class DriverConnectionSpec extends ConnectionSpecBase {
 
     private String driverClassName;
-    private Driver driver;
     private String url;
     private String username;
-    private String password;
+    private transient String password;
     private Map<String, Object> properties = newHashMap();
 
     @Override
@@ -66,14 +64,6 @@ public class DriverConnectionSpec extends ConnectionSpecBase {
 
     public JdbcUrl getJdbcUrl() {
         return getInstance().parse(url, properties);
-    }
-
-    public Driver getDriver() {
-        return driver;
-    }
-
-    public void setDriver(Driver driver) {
-        this.driver = driver;
     }
 
     public String getDriverClassName() {
@@ -128,7 +118,6 @@ public class DriverConnectionSpec extends ConnectionSpecBase {
 
         DriverConnectionSpec that = (DriverConnectionSpec) o;
 
-        if (driver != null ? !driver.equals(that.driver) : that.driver != null) return false;
         if (driverClassName != null ? !driverClassName.equals(that.driverClassName) : that.driverClassName != null)
             return false;
         if (password != null ? !password.equals(that.password) : that.password != null) return false;
@@ -143,7 +132,6 @@ public class DriverConnectionSpec extends ConnectionSpecBase {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (driverClassName != null ? driverClassName.hashCode() : 0);
-        result = 31 * result + (driver != null ? driver.hashCode() : 0);
         result = 31 * result + (url != null ? url.hashCode() : 0);
         result = 31 * result + (username != null ? username.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);

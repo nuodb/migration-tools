@@ -27,50 +27,23 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
-
-import java.sql.Connection;
-import java.sql.SQLException;
+import org.slf4j.Logger;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleConnectionServices<C extends ConnectionSpec> implements ConnectionServices<C> {
+public class SimpleQueryLogger implements QueryLogger {
 
-    private ConnectionProvider<C> connectionProvider;
-    private Connection connection;
+    private final Logger logger;
 
-    public SimpleConnectionServices(ConnectionProvider<C> connectionProvider) {
-        this.connectionProvider = connectionProvider;
+    public SimpleQueryLogger(Logger logger) {
+        this.logger = logger;
     }
 
     @Override
-    public C getConnectionSpec() {
-        return connectionProvider.getConnectionSpec();
-    }
-
-    @Override
-    public Connection getConnection() throws SQLException {
-        Connection connection = this.connection;
-        if (connection == null) {
-            synchronized (this) {
-                connection = this.connection;
-                if (connection == null) {
-                    connection = this.connection = connectionProvider.getConnection();
-                }
-            }
+    public void log(String statement) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(statement);
         }
-        return connection;
-    }
-
-    @Override
-    public void closeConnection() throws SQLException {
-        connectionProvider.closeConnection(connection);
-        connection = null;
-    }
-
-    @Override
-    public String toString() {
-        return connectionProvider.toString();
     }
 }

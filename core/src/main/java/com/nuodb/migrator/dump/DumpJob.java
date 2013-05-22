@@ -33,7 +33,6 @@ import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.dialect.RowCountType;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -55,6 +54,7 @@ import com.nuodb.migrator.resultset.format.FormatOutput;
 import com.nuodb.migrator.resultset.format.value.SimpleValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.NativeQuerySpec;
 import com.nuodb.migrator.spec.SelectQuerySpec;
 import org.slf4j.Logger;
@@ -73,14 +73,12 @@ import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.io.Closeables.closeQuietly;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
-import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -94,7 +92,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
 
     private TimeZone timeZone;
     private Catalog catalog;
-    private Collection<String> tableTypes = singleton(TABLE);
+    private String[] tableTypes;
     private Collection<SelectQuerySpec> selectQuerySpecs;
     private Collection<NativeQuerySpec> nativeQuerySpecs;
     private String outputType;
@@ -109,7 +107,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
     }
 
     @Override
-    protected void init(DumpJobExecution execution) throws SQLException {
+    protected void doInit(DumpJobExecution execution) throws SQLException {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
@@ -159,7 +157,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
     }
 
     @Override
-    protected void release(DumpJobExecution execution) throws SQLException {
+    protected void doRelease(DumpJobExecution execution) throws SQLException {
         closeQuietly(execution.getCatalogWriter());
         close(execution.getConnection());
     }
@@ -168,8 +166,9 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
         InspectionManager inspectionManager = new InspectionManager();
         inspectionManager.setDialectResolver(getDialectResolver());
         inspectionManager.setConnection(execution.getConnection());
+        ConnectionSpec connectionSpec = getConnectionProvider().getConnectionSpec();
         InspectionResults inspectionResults = inspectionManager.inspect(
-                new TableInspectionScope(getConnectionProvider().getCatalog(), getConnectionProvider().getSchema()),
+                new TableInspectionScope(connectionSpec.getCatalog(), connectionSpec.getSchema(), getTableTypes()),
                 MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA,
                 MetaDataType.TABLE, MetaDataType.COLUMN, MetaDataType.INDEX, MetaDataType.PRIMARY_KEY);
         return inspectionResults.getObject(MetaDataType.DATABASE);
@@ -197,11 +196,6 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
     }
 
     protected void dump(DumpJobExecution execution, Query query, PreparedStatement statement) throws SQLException {
-        if (query instanceof SelectQuery) {
-            System.out.println("DumpJob.dump" + execution.getDialect().getRowCount(
-                    execution.getConnection(), ((SelectQuery) query).getTables().iterator().next(),
-                    RowCountType.EXACT));
-        }
         final FormatOutput formatOutput = getFormatFactory().createOutput(getOutputType());
         formatOutput.setAttributes(getOutputAttributes());
         formatOutput.setValueFormatRegistry(execution.getValueFormatRegistry());
@@ -233,7 +227,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
 
     protected CatalogEntry createCatalogEntry(Query query) {
         if (query instanceof SelectQuery) {
-            Table table = get(((SelectQuery) query).getTables(), 0);
+            Table table = (Table) get(((SelectQuery) query).getFrom(), 0);
             return new CatalogEntry(table.getName().toLowerCase(), getOutputType());
         } else {
             return new CatalogEntry(format(QUERY_ENTRY_NAME, new Date()), getOutputType());
@@ -247,7 +241,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
             valueModelList = Lists.newArrayList();
             for (Object column : ((SelectQuery) query).getColumns()) {
                 if (column instanceof ValueModel) {
-                    valueModelList.add((ValueModel)column);
+                    valueModelList.add((ValueModel) column);
                 }
             }
         } else {
@@ -277,16 +271,9 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
     }
 
     protected Collection<SelectQuery> createSelectQueries(Database database) {
-        Dialect dialect = database.getDialect();
         Collection<SelectQuery> queries = newArrayList();
         for (Table table : database.getTables()) {
-            if (getTableTypes().contains(table.getType())) {
-                queries.add(createSelectQuery(database, table));
-            } else {
-                if (logger.isTraceEnabled()) {
-                    logger.trace(format("Skip table %s type %s", table.getQualifiedName(dialect), table.getType()));
-                }
-            }
+            queries.add(createSelectQuery(database, table));
         }
         return queries;
     }
@@ -305,7 +292,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
         builder.setQualifyNames(true);
         builder.setDialect(database.getDialect());
         builder.setTable(database.findTable(table));
-        if (selectQuerySpec.getColumns() !=  null) {
+        if (selectQuerySpec.getColumns() != null) {
             for (String column : selectQuerySpec.getColumns()) {
                 builder.addColumn(column);
             }
@@ -357,11 +344,11 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
         this.catalog = catalog;
     }
 
-    public Collection<String> getTableTypes() {
+    public String[] getTableTypes() {
         return tableTypes;
     }
 
-    public void setTableTypes(Collection<String> tableTypes) {
+    public void setTableTypes(String[] tableTypes) {
         this.tableTypes = tableTypes;
     }
 

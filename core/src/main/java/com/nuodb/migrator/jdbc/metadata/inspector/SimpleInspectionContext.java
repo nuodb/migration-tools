@@ -121,7 +121,10 @@ public class SimpleInspectionContext implements InspectionContext {
 
     @Override
     public void commit() throws SQLException {
-        getConnection().commit();
+        Connection connection = getConnection();
+        if (!connection.getAutoCommit()) {
+            connection.commit();
+        }
     }
 
     protected Inspector findInspector(MetaDataType objectType) {

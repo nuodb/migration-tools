@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
@@ -38,25 +39,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Iterator;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
 public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
-
-    public static final String QUERY =
-            "SELECT CTU.TABLE_CATALOG, CTU.TABLE_SCHEMA, CTU.TABLE_NAME, CC.CHECK_CLAUSE, CTU.CONSTRAINT_NAME\n" +
-            "FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE AS CTU\n" +
-            "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON CTU.TABLE_CATALOG=CC.CONSTRAINT_CATALOG\n" +
-            "AND CTU.TABLE_SCHEMA=CC.CONSTRAINT_SCHEMA\n" +
-            "AND CTU.CONSTRAINT_NAME=CC.CONSTRAINT_NAME\n" +
-            "WHERE CTU.TABLE_CATALOG=? AND CTU.TABLE_SCHEMA=? AND CTU.TABLE_NAME=?";
 
     public MSSQLServerCheckInspector() {
         super(CHECK, TableInspectionScope.class);
@@ -70,47 +66,76 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
-                new StatementFactory<PreparedStatement>() {
-                    @Override
-                    public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                    }
-                },
-                new StatementCallback<PreparedStatement>() {
-                    @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
-                            statement.setString(1, inspectionScope.getCatalog());
-                            statement.setString(2, inspectionScope.getSchema());
-                            statement.setString(3, inspectionScope.getTable());
-                            ResultSet checks = statement.executeQuery();
+        final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
+        for (final TableInspectionScope inspectionScope : inspectionScopes) {
+            final Collection<String> parameters = newArrayList();
+            final SelectQuery selectQuery = createSelectQuery(inspectionScope, parameters);
+            template.execute(
+                    new StatementFactory<PreparedStatement>() {
+                        @Override
+                        public PreparedStatement create(Connection connection) throws SQLException {
+                            return connection.prepareStatement(selectQuery.toString(),
+                                    TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                        }
+                    },
+                    new StatementCallback<PreparedStatement>() {
+                        @Override
+                        public void execute(PreparedStatement statement) throws SQLException {
+                            int parameter = 1;
+                            for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
+                                statement.setString(parameter++, iterator.next());
+                            }
+                            ResultSet checks = null;
                             try {
+                                checks = statement.executeQuery();
                                 inspect(inspectionContext, checks);
                             } finally {
                                 close(checks);
                             }
                         }
                     }
-                }
-        );
+            );
+        }
+    }
+
+    protected SelectQuery createSelectQuery(TableInspectionScope inspectionScope, Collection<String> parameters) {
+        String catalog = isEmpty(inspectionScope.getCatalog()) ? "" : (inspectionScope.getCatalog() + ".");
+        SelectQuery selectCheck = new SelectQuery();
+        selectCheck.column("CTU.TABLE_CATALOG");
+        selectCheck.column("CTU.TABLE_SCHEMA");
+        selectCheck.column("CTU.TABLE_NAME");
+        selectCheck.column("CC.CHECK_CLAUSE");
+        selectCheck.column("CTU.CONSTRAINT_NAME");
+        selectCheck.from(catalog + "INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE AS CTU");
+        selectCheck.innerJoin(catalog + "INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC",
+                "CTU.TABLE_CATALOG=CC.CONSTRAINT_CATALOG AND " +
+                        "CTU.TABLE_SCHEMA=CC.CONSTRAINT_SCHEMA AND " +
+                        "CTU.CONSTRAINT_NAME=CC.CONSTRAINT_NAME");
+        if (!isEmpty(inspectionScope.getCatalog())) {
+            selectCheck.where("CTU.TABLE_CATALOG=?");
+            parameters.add(inspectionScope.getCatalog());
+        }
+        if (!isEmpty(inspectionScope.getSchema())) {
+            selectCheck.where("CTU.TABLE_SCHEMA=?");
+            parameters.add(inspectionScope.getSchema());
+        }
+        if (!isEmpty(inspectionScope.getTable())) {
+            selectCheck.where("CTU.TABLE_NAME=?");
+            parameters.add(inspectionScope.getTable());
+        }
+        return selectCheck;
     }
 
     protected void inspect(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (checks.next()) {
             Table table = addTable(inspectionResults,
-                    checks.getString("TABLE_CATALOG"), checks.getString("TABLE_SCHEMA"), checks.getString("TABLE_NAME"));
+                    checks.getString("TABLE_CATALOG"), checks.getString("TABLE_SCHEMA"),
+                    checks.getString("TABLE_NAME"));
             Check check = new Check(checks.getString("CONSTRAINT_NAME"));
             check.setClause(checks.getString("CHECK_CLAUSE"));
             table.addCheck(check);
             inspectionResults.addObject(check);
         }
-    }
-
-    @Override
-    protected boolean supports(TableInspectionScope inspectionScope) {
-        return inspectionScope.getCatalog() != null && inspectionScope.getSchema() != null && inspectionScope.getTable() != null;
     }
 }

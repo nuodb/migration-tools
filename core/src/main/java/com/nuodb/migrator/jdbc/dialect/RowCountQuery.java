@@ -25,12 +25,66 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.jdbc.dialect;
+
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.Query;
 
 /**
  * @author Sergey Bushik
  */
-public interface StatementLogger {
+public class RowCountQuery {
 
-    void log(String statement);
+    private Table table;
+    private Query query;
+    private Column column;
+    private RowCountType rowCountType;
+
+    public RowCountQuery() {
+    }
+
+    public RowCountQuery(RowCountQuery rowCountQuery) {
+        this(rowCountQuery.getTable(), rowCountQuery.getQuery(), rowCountQuery.getColumn(),
+                rowCountQuery.getRowCountType());
+    }
+
+    public RowCountQuery(Table table, Query query, Column column, RowCountType rowCountType) {
+        this.table = table;
+        this.query = query;
+        this.column = column;
+        this.rowCountType = rowCountType;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public void setTable(Table table) {
+        this.table = table;
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
+    public void setQuery(Query query) {
+        this.query = query;
+    }
+
+    public Column getColumn() {
+        return column;
+    }
+
+    public void setColumn(Column column) {
+        this.column = column;
+    }
+
+    public RowCountType getRowCountType() {
+        return rowCountType;
+    }
+
+    public void setRowCountType(RowCountType rowCountType) {
+        this.rowCountType = rowCountType;
+    }
 }

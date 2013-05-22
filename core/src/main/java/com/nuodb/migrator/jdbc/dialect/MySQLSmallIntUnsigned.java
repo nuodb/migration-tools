@@ -25,52 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 
-import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleConnectionServices<C extends ConnectionSpec> implements ConnectionServices<C> {
+public class MySQLSmallIntUnsigned extends JdbcTypeBase<Integer> {
 
-    private ConnectionProvider<C> connectionProvider;
-    private Connection connection;
+    public static JdbcType INSTANCE = new MySQLSmallIntUnsigned();
 
-    public SimpleConnectionServices(ConnectionProvider<C> connectionProvider) {
-        this.connectionProvider = connectionProvider;
+    public MySQLSmallIntUnsigned() {
+        super(Types.SMALLINT, "SMALLINT UNSIGNED", Integer.class);
     }
 
     @Override
-    public C getConnectionSpec() {
-        return connectionProvider.getConnectionSpec();
+    public Integer getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+        Integer value = resultSet.getInt(column);
+        return resultSet.wasNull() ? null : value;
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
-        Connection connection = this.connection;
-        if (connection == null) {
-            synchronized (this) {
-                connection = this.connection;
-                if (connection == null) {
-                    connection = this.connection = connectionProvider.getConnection();
-                }
-            }
-        }
-        return connection;
-    }
-
-    @Override
-    public void closeConnection() throws SQLException {
-        connectionProvider.closeConnection(connection);
-        connection = null;
-    }
-
-    @Override
-    public String toString() {
-        return connectionProvider.toString();
+    protected void setNullSafeValue(PreparedStatement statement, Integer value, int column,
+                                    Map<String, Object> options) throws SQLException {
+        statement.setInt(column, value);
     }
 }
+

@@ -27,37 +27,70 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.utils.ObjectUtils;
+
 public class ConnectionSpecBase extends SpecBase implements ConnectionSpec {
+
+    public static final Boolean DEFAULT_AUTO_COMMIT = false;
 
     private String catalog;
     private String schema;
+    private Boolean autoCommit = DEFAULT_AUTO_COMMIT;
+    private Integer transactionIsolation;
 
+    @Override
     public String getCatalog() {
         return catalog;
     }
 
+    @Override
     public void setCatalog(String catalog) {
         this.catalog = catalog;
     }
 
+    @Override
     public String getSchema() {
         return schema;
     }
 
+    @Override
     public void setSchema(String schema) {
         this.schema = schema;
     }
 
     @Override
+    public Boolean getAutoCommit() {
+        return autoCommit;
+    }
+
+    @Override
+    public void setAutoCommit(Boolean autoCommit) {
+        this.autoCommit = autoCommit;
+    }
+
+    @Override
+    public Integer getTransactionIsolation() {
+        return transactionIsolation;
+    }
+
+    @Override
+    public void setTransactionIsolation(Integer transactionIsolation) {
+        this.transactionIsolation = transactionIsolation;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ConnectionSpecBase)) return false;
         if (!super.equals(o)) return false;
 
         ConnectionSpecBase that = (ConnectionSpecBase) o;
 
+        if (autoCommit != null ? !autoCommit.equals(that.autoCommit) : that.autoCommit != null) return false;
         if (catalog != null ? !catalog.equals(that.catalog) : that.catalog != null) return false;
         if (schema != null ? !schema.equals(that.schema) : that.schema != null) return false;
+        if (transactionIsolation != null ? !transactionIsolation.equals(
+                that.transactionIsolation) : that.transactionIsolation != null) return false;
 
         return true;
     }
@@ -67,6 +100,8 @@ public class ConnectionSpecBase extends SpecBase implements ConnectionSpec {
         int result = super.hashCode();
         result = 31 * result + (catalog != null ? catalog.hashCode() : 0);
         result = 31 * result + (schema != null ? schema.hashCode() : 0);
+        result = 31 * result + (autoCommit != null ? autoCommit.hashCode() : 0);
+        result = 31 * result + (transactionIsolation != null ? transactionIsolation.hashCode() : 0);
         return result;
     }
 }

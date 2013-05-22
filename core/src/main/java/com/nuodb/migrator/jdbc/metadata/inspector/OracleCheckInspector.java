@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Check;
-import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
@@ -42,31 +41,39 @@ import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
+import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
  */
-public class OracleCheckInspector extends InspectorBase<Table, TableInspectionScope> {
+public class OracleCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     private static final String CONSTRAINT_TYPE_CHECK = "C";
     private static final String STATUS_ENABLED = "ENABLED";
 
     private static final String QUERY =
-            "SELECT ALL_CONSTRAINTS.CONSTRAINT_NAME, ALL_CONS_COLUMNS.COLUMN_NAME, ALL_CONSTRAINTS.SEARCH_CONDITION\n" +
+            "SELECT ALL_CONSTRAINTS.CONSTRAINT_NAME, ALL_CONS_COLUMNS.COLUMN_NAME, " +
+                    "ALL_CONSTRAINTS.SEARCH_CONDITION, ALL_CONSTRAINTS.TABLE_NAME, ALL_CONSTRAINTS.OWNER " +
             "FROM SYS.ALL_CONS_COLUMNS\n" +
             "JOIN SYS.ALL_CONSTRAINTS ON ALL_CONS_COLUMNS.TABLE_NAME=ALL_CONSTRAINTS.TABLE_NAME\n" +
             "AND ALL_CONS_COLUMNS.CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME\n" +
-            "WHERE ALL_CONSTRAINTS.CONSTRAINT_TYPE=? AND ALL_CONSTRAINTS.STATUS=? AND ALL_CONSTRAINTS.TABLE_NAME=?";
+            "WHERE ALL_CONSTRAINTS.CONSTRAINT_TYPE=? AND ALL_CONSTRAINTS.STATUS=? AND " +
+                    "ALL_CONSTRAINTS.OWNER=? AND ALL_CONSTRAINTS.TABLE_NAME=?";
 
     public OracleCheckInspector() {
         super(CHECK, TableInspectionScope.class);
     }
 
     @Override
-    public void inspectObjects(final InspectionContext inspectionContext,
-                               final Collection<? extends Table> tables) throws SQLException {
+    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
+        return createTableInspectionScopes(tables);
+    }
+
+    @Override
+    protected void inspectScopes(final InspectionContext inspectionContext,
+                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
                 new StatementFactory<PreparedStatement>() {
@@ -79,13 +86,14 @@ public class OracleCheckInspector extends InspectorBase<Table, TableInspectionSc
 
                     @Override
                     public void execute(PreparedStatement statement) throws SQLException {
-                        for (Table table : tables) {
+                        for (TableInspectionScope inspectionScope : inspectionScopes) {
                             statement.setString(1, CONSTRAINT_TYPE_CHECK);
                             statement.setString(2, STATUS_ENABLED);
-                            statement.setString(3, table.getName());
+                            statement.setString(3, inspectionScope.getSchema());
+                            statement.setString(4, inspectionScope.getTable());
                             ResultSet checks = statement.executeQuery();
                             try {
-                                inspect(inspectionContext, table, checks);
+                                inspect(inspectionContext, checks);
                             } finally {
                                 close(checks);
                             }
@@ -95,20 +103,24 @@ public class OracleCheckInspector extends InspectorBase<Table, TableInspectionSc
         );
     }
 
-    private void inspect(InspectionContext inspectionContext, Table table, ResultSet checks) throws SQLException {
+    private void inspect(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (checks.next()) {
             String condition = checks.getString("SEARCH_CONDITION");
             if (!condition.endsWith("IS NOT NULL")) {
-                Check check = new Check(Identifier.EMPTY_IDENTIFIER);
-                check.setClause(checks.getString("CONSTRAINT_NAME"));
+                Table table = addTable(inspectionResults, null,
+                        checks.getString("OWNER"), checks.getString("TABLE_NAME"));
+                Check check = new Check(checks.getString("CONSTRAINT_NAME"));
+                check.setClause(condition);
                 table.addCheck(check);
-                inspectionContext.getInspectionResults().addObject(check);
+                inspectionResults.addObject(check);
             }
         }
     }
 
     @Override
-    public void inspectScope(InspectionContext inspectionContext, TableInspectionScope inspectionScope) throws SQLException {
+    public void inspectScope(InspectionContext inspectionContext,
+                             TableInspectionScope inspectionScope) throws SQLException {
         throw new InspectorException("Not implemented yet");
     }
 

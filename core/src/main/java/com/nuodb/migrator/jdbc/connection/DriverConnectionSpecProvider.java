@@ -31,149 +31,75 @@ import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.utils.ReflectionUtils;
 import org.apache.commons.dbcp.BasicDataSource;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.Map;
 
-import static java.lang.String.format;
-
 @SuppressWarnings("unchecked")
-public class DriverConnectionSpecProvider extends ConnectionSpecProvider<DriverConnectionSpec> {
+public class DriverConnectionSpecProvider extends ConnectionProxyProviderBase<DriverConnectionSpec> {
 
     private static final String GET_INNERMOST_DELEGATE = "getInnermostDelegate";
 
-    private DataSource dataSource;
-    private Boolean autoCommit;
-    private Integer transactionIsolation;
+    private BasicDataSource basicDataSource;
+
+    public DriverConnectionSpecProvider() {
+    }
 
     public DriverConnectionSpecProvider(DriverConnectionSpec connectionSpec) {
-        this(connectionSpec, false);
-    }
-
-    public DriverConnectionSpecProvider(DriverConnectionSpec connectionSpec, Boolean autoCommit) {
-        this(connectionSpec, autoCommit, null);
-    }
-
-    public DriverConnectionSpecProvider(DriverConnectionSpec connectionSpec, Boolean autoCommit,
-                                        Integer transactionIsolation) {
         super(connectionSpec);
-        this.autoCommit = autoCommit;
-        this.transactionIsolation = transactionIsolation;
-    }
-
-    protected Connection createConnection() throws SQLException {
-        return getDataSource().getConnection();
-    }
-
-    protected DataSource getDataSource() throws SQLException {
-        if (dataSource == null) {
-            loadDriver();
-            dataSource = createDataSource();
-        }
-        return dataSource;
-    }
-
-    protected void loadDriver() throws SQLException {
-        Enumeration<Driver> drivers = DriverManager.getDrivers();
-        while (drivers.hasMoreElements()) {
-            Driver driver = drivers.nextElement();
-            if (driver.acceptsURL(getConnectionSpec().getUrl())) {
-                return;
-            }
-        }
-        Driver driver = getConnectionSpec().getDriver();
-        String driverClassName = getConnectionSpec().getDriverClassName();
-        if (driver != null) {
-            DriverManager.registerDriver(driver);
-        } else if (driverClassName != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(format("Loading driver %s", driverClassName));
-            }
-            ReflectionUtils.newInstance(driverClassName);
-        } else {
-            throw new ConnectionException("Neither driver nor driver class name provided");
-        }
-    }
-
-    private BasicDataSource createDataSource() {
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setUrl(getConnectionSpec().getUrl());
-        dataSource.setUsername(getConnectionSpec().getUsername());
-        dataSource.setPassword(getConnectionSpec().getPassword());
-        Map<String, Object> properties = getConnectionSpec().getProperties();
-        if (properties != null) {
-            for (Map.Entry<String, Object> entry : properties.entrySet()) {
-                dataSource.addConnectionProperty(entry.getKey(), (String) entry.getValue());
-            }
-        }
-        dataSource.setAccessToUnderlyingConnectionAllowed(true);
-        return dataSource;
-    }
-
-    protected void initConnection(Connection connection) throws SQLException {
-        if (autoCommit != null) {
-            connection.setAutoCommit(autoCommit);
-        }
-        if (transactionIsolation != null) {
-            connection.setTransactionIsolation(transactionIsolation);
-        }
     }
 
     @Override
-    public Connection unwrapConnection(Connection proxy) {
-        if (proxy == null) {
+    protected Connection createTargetConnection() throws SQLException {
+        if (basicDataSource == null) {
+            DriverConnectionSpec driverConnectionSpec = getConnectionSpec();
+
+            BasicDataSource basicDataSource = new BasicDataSource();
+            basicDataSource.setDriverClassName(driverConnectionSpec.getDriverClassName());
+            basicDataSource.setDriverClassLoader(ReflectionUtils.getClassLoader());
+            basicDataSource.setUrl(driverConnectionSpec.getUrl());
+            basicDataSource.setUsername(driverConnectionSpec.getUsername());
+            basicDataSource.setPassword(driverConnectionSpec.getPassword());
+            Map<String, Object> properties = driverConnectionSpec.getProperties();
+            if (properties != null) {
+                for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                    basicDataSource.addConnectionProperty(entry.getKey(), (String) entry.getValue());
+                }
+            }
+            basicDataSource.setAccessToUnderlyingConnectionAllowed(true);
+
+            this.basicDataSource = basicDataSource;
+        }
+        return basicDataSource.getConnection();
+    }
+
+    @Override
+    public Connection getTargetConnection(Connection connection) {
+        if (connection == null) {
             return null;
         }
         try {
-            Class connectionClass = proxy.getClass();
+            Class connectionClass = connection.getClass();
             while (!Modifier.isPublic(connectionClass.getModifiers())) {
                 connectionClass = connectionClass.getSuperclass();
                 if (connectionClass == null) {
-                    return proxy;
+                    return connection;
                 }
             }
             Method method = connectionClass.getMethod(GET_INNERMOST_DELEGATE, (Class[]) null);
-            Connection delegate = ReflectionUtils.invokeMethod(proxy, method);
-            return (delegate != null ? delegate : proxy);
+            Connection delegate = ReflectionUtils.invokeMethod(connection, method);
+            return (delegate != null ? delegate : connection);
         } catch (NoSuchMethodException exception) {
-            return proxy;
+            return connection;
         }
     }
 
     @Override
-    public void closeConnection(Connection connection) throws SQLException {
-        if (connection != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Closing connection");
-            }
-            connection.close();
+    public void close() throws SQLException {
+        if (basicDataSource != null) {
+            basicDataSource.close();
         }
-    }
-
-    public Boolean getAutoCommit() {
-        return autoCommit;
-    }
-
-    public void setAutoCommit(Boolean autoCommit) {
-        this.autoCommit = autoCommit;
-    }
-
-    public Integer getTransactionIsolation() {
-        return transactionIsolation;
-    }
-
-    public void setTransactionIsolation(Integer transactionIsolation) {
-        this.transactionIsolation = transactionIsolation;
-    }
-
-    @Override
-    public String toString() {
-        return getConnectionSpec().getUrl();
     }
 }

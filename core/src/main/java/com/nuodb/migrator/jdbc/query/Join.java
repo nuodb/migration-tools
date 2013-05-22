@@ -25,25 +25,31 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
-
-import org.slf4j.Logger;
+package com.nuodb.migrator.jdbc.query;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleStatementLogger implements StatementLogger {
+public class Join {
+    private String type;
+    private String table;
+    private String condition;
 
-    private final Logger logger;
-
-    public SimpleStatementLogger(Logger logger) {
-        this.logger = logger;
+    public Join(String type, String table, String condition) {
+        this.type = type;
+        this.table = table;
+        this.condition = condition;
     }
 
-    @Override
-    public void log(String statement) {
-        if (logger.isTraceEnabled()) {
-            logger.trace(statement);
-        }
+    public String getType() {
+        return type;
+    }
+
+    public String getTable() {
+        return table;
+    }
+
+    public String getCondition() {
+        return condition;
     }
 }

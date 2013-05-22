@@ -27,19 +27,17 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
+import com.nuodb.migrator.spec.ConnectionSpec;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionServices {
-
-    String getCatalog();
-
-    String getSchema();
+public interface ConnectionServices<C extends ConnectionSpec> extends HasConnectionSpec<C> {
 
     Connection getConnection() throws SQLException;
 
-    void close() throws SQLException;
+    void closeConnection() throws SQLException;
 }

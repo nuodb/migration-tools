@@ -27,14 +27,15 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
+import java.sql.Statement;
+
 /**
  * @author Sergey Bushik
  */
-public interface StatementFormatter {
+public class SimpleQueryFormatterFactory implements QueryFormatterFactory {
 
-    String format();
-
-    Object getParameter(int index);
-
-    void setParameter(int index, Object value);
+    @Override
+    public QueryFormatter createQueryFormatter(Statement statement, String query) {
+        return new SimpleQueryFormatter(query);
+    }
 }

@@ -32,5 +32,11 @@ package com.nuodb.migrator.jdbc.query;
  */
 public interface Query {
 
+    boolean isQualifyNames();
+
+    void setQualifyNames(boolean qualifyNames);
+
+    void toQuery(StringBuilder query);
+
     String toQuery();
 }

@@ -65,6 +65,8 @@ public interface CliResources {
     final String SOURCE_CATALOG_ARGUMENT_NAME = "com.nuodb.migrator.source.catalog.argument.name";
     final String SOURCE_SCHEMA_OPTION_DESCRIPTION = "com.nuodb.migrator.source.schema.option.description";
     final String SOURCE_SCHEMA_ARGUMENT_NAME = "com.nuodb.migrator.source.schema.argument.name";
+    final String SOURCE_AUTO_COMMIT_OPTION_DESCRIPTION = "com.nuodb.migrator.source.auto.commit.option.description";
+    final String SOURCE_AUTO_COMMIT_ARGUMENT_NAME = "com.nuodb.migrator.source.auto.commit.argument.name";
 
     final String OUTPUT_GROUP_NAME = "com.nuodb.migrator.output.group";
     final String OUTPUT_TYPE_OPTION_DESCRIPTION = "com.nuodb.migrator.output.type.option.description";
@@ -101,6 +103,8 @@ public interface CliResources {
     final String TARGET_PROPERTIES_ARGUMENT_NAME = "com.nuodb.migrator.target.properties.argument.name";
     final String TARGET_SCHEMA_OPTION_DESCRIPTION = "com.nuodb.migrator.target.schema.option.description";
     final String TARGET_SCHEMA_ARGUMENT_NAME = "com.nuodb.migrator.target.schema.argument.name";
+    final String TARGET_AUTO_COMMIT_OPTION_DESCRIPTION = "com.nuodb.migrator.target.auto.commit.option.description";
+    final String TARGET_AUTO_COMMIT_ARGUMENT_NAME = "com.nuodb.migrator.target.auto.commit.argument.name";
 
     final String REPLACE_OPTION_DESCRIPTION = "com.nuodb.migrator.replace.option.description";
 

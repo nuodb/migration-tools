@@ -51,11 +51,11 @@ public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
         SelectQuery selectQuery = new SelectQuery();
         if (columns == null || columns.isEmpty()) {
             for (Column column : table.getColumns()) {
-                selectQuery.addColumn(column);
+                selectQuery.column(column);
             }
         } else {
             for (Object column : columns) {
-                selectQuery.addColumn(column);
+                selectQuery.column(column);
             }
         }
         Database database = table.getDatabase();
@@ -66,10 +66,10 @@ public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
         }
         selectQuery.setQualifyNames(qualifyNames);
 
-        selectQuery.addTable(table);
+        selectQuery.from(table);
         if (filters != null) {
             for (String filter : filters) {
-                selectQuery.addFilter(filter);
+                selectQuery.where(filter);
             }
         }
         return selectQuery;

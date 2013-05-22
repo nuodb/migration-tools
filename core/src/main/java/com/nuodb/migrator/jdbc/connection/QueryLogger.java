@@ -27,35 +27,10 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
-
 /**
  * @author Sergey Bushik
  */
-public abstract class ConnectionSpecProvider<T extends ConnectionSpec> extends ConnectionProxyProvider {
+public interface QueryLogger {
 
-    private T connectionSpec;
-
-    public ConnectionSpecProvider(T connectionSpec) {
-        this.connectionSpec = connectionSpec;
-    }
-
-    public T getConnectionSpec() {
-        return connectionSpec;
-    }
-
-    @Override
-    public String getCatalog() {
-        return connectionSpec.getCatalog();
-    }
-
-    @Override
-    public String getSchema() {
-        return connectionSpec.getSchema();
-    }
-
-    @Override
-    public String toString() {
-        return connectionSpec.toString();
-    }
+    void log(String statement);
 }

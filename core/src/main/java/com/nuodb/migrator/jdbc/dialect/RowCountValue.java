@@ -25,52 +25,25 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
-
-import com.nuodb.migrator.spec.ConnectionSpec;
-
-import java.sql.Connection;
-import java.sql.SQLException;
+package com.nuodb.migrator.jdbc.dialect;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleConnectionServices<C extends ConnectionSpec> implements ConnectionServices<C> {
+public class RowCountValue extends RowCountQuery {
 
-    private ConnectionProvider<C> connectionProvider;
-    private Connection connection;
+    private long value;
 
-    public SimpleConnectionServices(ConnectionProvider<C> connectionProvider) {
-        this.connectionProvider = connectionProvider;
+    public RowCountValue(RowCountQuery rowCountQuery, long value) {
+        super(rowCountQuery);
+        this.value = value;
     }
 
-    @Override
-    public C getConnectionSpec() {
-        return connectionProvider.getConnectionSpec();
+    public long getValue() {
+        return value;
     }
 
-    @Override
-    public Connection getConnection() throws SQLException {
-        Connection connection = this.connection;
-        if (connection == null) {
-            synchronized (this) {
-                connection = this.connection;
-                if (connection == null) {
-                    connection = this.connection = connectionProvider.getConnection();
-                }
-            }
-        }
-        return connection;
-    }
-
-    @Override
-    public void closeConnection() throws SQLException {
-        connectionProvider.closeConnection(connection);
-        connection = null;
-    }
-
-    @Override
-    public String toString() {
-        return connectionProvider.toString();
+    public void setValue(long value) {
+        this.value = value;
     }
 }

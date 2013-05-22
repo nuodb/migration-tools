@@ -27,15 +27,21 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import java.sql.Statement;
+import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleStatementFormatterFactory implements StatementFormatterFactory {
+public class DriverConnectionSpecProviderFactory extends ConnectionProviderFactoryBase {
 
     @Override
-    public StatementFormatter createStatementFormat(Statement statement, String query) {
-        return new SimpleStatementFormatter(query);
+    protected ConnectionProvider createConnectionProviderSafe(ConnectionSpec connectionSpec) {
+        return new DriverConnectionSpecProvider((DriverConnectionSpec) connectionSpec);
+    }
+
+    @Override
+    public boolean supportsConnectionSpec(ConnectionSpec connectionSpec) {
+        return connectionSpec instanceof DriverConnectionSpec;
     }
 }

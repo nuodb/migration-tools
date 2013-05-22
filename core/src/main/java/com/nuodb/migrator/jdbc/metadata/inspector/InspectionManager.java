@@ -130,7 +130,7 @@ public class InspectionManager {
         try {
             inspectionContext.inspect(inspectionScope, objectTypes);
         } finally {
-            commitInspectionContext(inspectionContext);
+            closeInspectionContext(inspectionContext);
         }
     }
 
@@ -140,7 +140,7 @@ public class InspectionManager {
         try {
             inspectionContext.inspect(object, objectTypes);
         } finally {
-            commitInspectionContext(inspectionContext);
+            closeInspectionContext(inspectionContext);
         }
     }
 
@@ -150,7 +150,7 @@ public class InspectionManager {
         try {
             inspectionContext.inspect(objects, objectTypes);
         } finally {
-            commitInspectionContext(inspectionContext);
+            closeInspectionContext(inspectionContext);
         }
     }
 
@@ -163,7 +163,7 @@ public class InspectionManager {
         return new SimpleInspectionContext(this, inspectionResults, objectTypes);
     }
 
-    protected void commitInspectionContext(InspectionContext inspectionContext) throws SQLException {
+    protected void closeInspectionContext(InspectionContext inspectionContext) throws SQLException {
         inspectionContext.commit();
     }
 

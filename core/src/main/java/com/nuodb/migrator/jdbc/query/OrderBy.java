@@ -25,52 +25,27 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.jdbc.query;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
-
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleConnectionServices<C extends ConnectionSpec> implements ConnectionServices<C> {
+public class OrderBy {
+    private Collection<String> columns;
+    private String sortOrder;
 
-    private ConnectionProvider<C> connectionProvider;
-    private Connection connection;
-
-    public SimpleConnectionServices(ConnectionProvider<C> connectionProvider) {
-        this.connectionProvider = connectionProvider;
+    public OrderBy(Collection<String> columns, String order) {
+        this.columns = columns;
+        this.sortOrder = order;
     }
 
-    @Override
-    public C getConnectionSpec() {
-        return connectionProvider.getConnectionSpec();
+    public Collection<String> getColumns() {
+        return columns;
     }
 
-    @Override
-    public Connection getConnection() throws SQLException {
-        Connection connection = this.connection;
-        if (connection == null) {
-            synchronized (this) {
-                connection = this.connection;
-                if (connection == null) {
-                    connection = this.connection = connectionProvider.getConnection();
-                }
-            }
-        }
-        return connection;
-    }
-
-    @Override
-    public void closeConnection() throws SQLException {
-        connectionProvider.closeConnection(connection);
-        connection = null;
-    }
-
-    @Override
-    public String toString() {
-        return connectionProvider.toString();
+    public String getSortOrder() {
+        return sortOrder;
     }
 }

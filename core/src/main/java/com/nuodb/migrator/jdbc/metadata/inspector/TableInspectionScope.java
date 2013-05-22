@@ -47,6 +47,11 @@ public class TableInspectionScope extends SchemaInspectionScope {
         this.table = table;
     }
 
+    public TableInspectionScope(String catalog, String schema, String[] tableTypes) {
+        super(catalog, schema);
+        this.tableTypes = tableTypes;
+    }
+
     public String getTable() {
         return table;
     }

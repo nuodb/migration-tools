@@ -29,48 +29,25 @@ package com.nuodb.migrator.jdbc.connection;
 
 import com.nuodb.migrator.spec.ConnectionSpec;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 /**
  * @author Sergey Bushik
  */
-public class SimpleConnectionServices<C extends ConnectionSpec> implements ConnectionServices<C> {
+public class QueryLoggingConnectionProviderFactory implements ConnectionProviderFactory {
 
-    private ConnectionProvider<C> connectionProvider;
-    private Connection connection;
+    private ConnectionProviderFactory connectionProviderFactory;
 
-    public SimpleConnectionServices(ConnectionProvider<C> connectionProvider) {
-        this.connectionProvider = connectionProvider;
+    public QueryLoggingConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
+        this.connectionProviderFactory = connectionProviderFactory;
     }
 
     @Override
-    public C getConnectionSpec() {
-        return connectionProvider.getConnectionSpec();
+    public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
+        return new QueryLoggingConnectionProvider(
+                connectionProviderFactory.createConnectionProvider(connectionSpec));
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
-        Connection connection = this.connection;
-        if (connection == null) {
-            synchronized (this) {
-                connection = this.connection;
-                if (connection == null) {
-                    connection = this.connection = connectionProvider.getConnection();
-                }
-            }
-        }
-        return connection;
-    }
-
-    @Override
-    public void closeConnection() throws SQLException {
-        connectionProvider.closeConnection(connection);
-        connection = null;
-    }
-
-    @Override
-    public String toString() {
-        return connectionProvider.toString();
+    public boolean supportsConnectionSpec(ConnectionSpec connectionSpec) {
+        return connectionProviderFactory.supportsConnectionSpec(connectionSpec);
     }
 }

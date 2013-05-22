@@ -80,9 +80,9 @@ public interface Dialect {
 
     boolean supportsNegativeScale();
 
-    boolean supportsRowCount(Table table, RowCountType rowCountType);
+    boolean supportsRowCountType(Table table, RowCountType rowCountType);
 
-    long getRowCount(Connection connection, Table table, RowCountType rowCountType) throws SQLException;
+    RowCountValue getRowCountValue(Connection connection, Table table, RowCountType rowCountType) throws SQLException;
 
     String getNullColumnString();
 
