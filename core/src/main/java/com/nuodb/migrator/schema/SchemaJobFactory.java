@@ -66,10 +66,10 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
 
     @Override
     public SchemaJob createJob() {
-        isNotNull(schemaSpec, "Schema spec is required");
+        isNotNull(getSchemaSpec(), "Schema spec is required");
 
-        SchemaSpec schemaSpec = getSchemaSpec();
         SchemaJob schemaJob = new SchemaJob();
+        SchemaSpec schemaSpec = getSchemaSpec();
         schemaJob.setTableTypes(schemaSpec.getTableTypes());
         schemaJob.setConnectionProvider(createConnectionProvider(schemaSpec.getSourceConnectionSpec()));
         schemaJob.setDialectResolver(getDialectResolver());
@@ -116,7 +116,7 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
 
     protected ScriptExporter createScriptExporter() {
         Collection<ScriptExporter> exporters = newArrayList();
-        ConnectionSpec targetConnectionSpec = schemaSpec.getTargetConnectionSpec();
+        ConnectionSpec targetConnectionSpec = getSchemaSpec().getTargetConnectionSpec();
         if (targetConnectionSpec != null) {
             try {
                 ConnectionProvider connectionProvider = createConnectionProvider(targetConnectionSpec);
@@ -125,7 +125,7 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
                 throw new SchemaJobException("Failed creating connection script exporter", exception);
             }
         }
-        ResourceSpec outputSpec = schemaSpec.getOutputSpec();
+        ResourceSpec outputSpec = getSchemaSpec().getOutputSpec();
         if (outputSpec != null) {
             exporters.add(new FileScriptExporter(outputSpec.getPath()));
         }

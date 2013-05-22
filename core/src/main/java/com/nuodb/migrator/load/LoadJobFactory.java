@@ -42,7 +42,6 @@ import com.nuodb.migrator.resultset.format.value.SimpleValueFormatRegistryResolv
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.LoadSpec;
-import com.nuodb.migrator.spec.ResourceSpec;
 
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
@@ -61,13 +60,13 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
 
     @Override
     public LoadJob createJob() {
-        isNotNull(loadSpec, "Load spec is required");
-        ResourceSpec inputSpec = loadSpec.getInputSpec();
-        ConnectionSpec connectionSpec = loadSpec.getConnectionSpec();
+        isNotNull(getLoadSpec(), "Load spec is required");
+
         LoadJob loadJob = new LoadJob();
-        loadJob.setConnectionProvider(createConnectionProvider(connectionSpec));
-        loadJob.setInputAttributes(inputSpec.getAttributes());
-        loadJob.setCatalog(createCatalog(inputSpec.getPath()));
+        LoadSpec loadSpec = getLoadSpec();
+        loadJob.setConnectionProvider(createConnectionProvider(loadSpec.getConnectionSpec()));
+        loadJob.setInputAttributes(loadSpec.getInputSpec().getAttributes());
+        loadJob.setCatalog(createCatalog(loadSpec.getInputSpec().getPath()));
         loadJob.setTimeZone(loadSpec.getTimeZone());
         loadJob.setInsertType(loadSpec.getInsertType());
         loadJob.setTableInsertTypes(loadSpec.getTableInsertTypes());

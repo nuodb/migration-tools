@@ -42,7 +42,6 @@ import com.nuodb.migrator.resultset.format.value.SimpleValueFormatRegistryResolv
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.DumpSpec;
-import com.nuodb.migrator.spec.ResourceSpec;
 
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
@@ -61,16 +60,14 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
             new DriverConnectionSpecProviderFactory());
 
     public DumpJob createJob() {
-        isNotNull(dumpSpec, "Dump spec is required");
-
-        ConnectionSpec connectionSpec = dumpSpec.getConnectionSpec();
-        ResourceSpec outputSpec = dumpSpec.getOutputSpec();
+        isNotNull(getDumpSpec(), "Dump spec is required");
 
         DumpJob dumpJob = new DumpJob();
-        dumpJob.setConnectionProvider(createConnectionProvider(connectionSpec));
-        dumpJob.setOutputType(outputSpec.getType());
-        dumpJob.setOutputAttributes(outputSpec.getAttributes());
-        dumpJob.setCatalog(createCatalog(outputSpec.getPath()));
+        DumpSpec dumpSpec = getDumpSpec();
+        dumpJob.setConnectionProvider(createConnectionProvider(dumpSpec.getConnectionSpec()));
+        dumpJob.setOutputType(dumpSpec.getOutputSpec().getType());
+        dumpJob.setOutputAttributes(dumpSpec.getOutputSpec().getAttributes());
+        dumpJob.setCatalog(createCatalog(dumpSpec.getOutputSpec().getPath()));
         dumpJob.setTimeZone(dumpSpec.getTimeZone());
         dumpJob.setSelectQuerySpecs(dumpSpec.getSelectQuerySpecs());
         dumpJob.setNativeQuerySpecs(dumpSpec.getNativeQuerySpecs());
