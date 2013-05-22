@@ -59,19 +59,19 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
     public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
 
     private SchemaSpec schemaSpec;
-    private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
-    private DialectResolver dialectResolver = new SimpleDialectResolver();
+
     private ConnectionProviderFactory connectionProviderFactory = new QueryLoggingConnectionProviderFactory(
             new DriverConnectionSpecProviderFactory());
+    private DialectResolver dialectResolver = new SimpleDialectResolver();
+    private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
 
     @Override
     public SchemaJob createJob() {
         isNotNull(getSchemaSpec(), "Schema spec is required");
 
         SchemaJob schemaJob = new SchemaJob();
-        SchemaSpec schemaSpec = getSchemaSpec();
-        schemaJob.setTableTypes(schemaSpec.getTableTypes());
-        schemaJob.setConnectionProvider(createConnectionProvider(schemaSpec.getSourceConnectionSpec()));
+        schemaJob.setTableTypes(getSchemaSpec().getTableTypes());
+        schemaJob.setConnectionProvider(createConnectionProvider(getSchemaSpec().getSourceConnectionSpec()));
         schemaJob.setDialectResolver(getDialectResolver());
         schemaJob.setFailOnEmptyScripts(isFailOnEmptyScripts());
         schemaJob.setScriptGeneratorContext(createScriptGeneratorContext());
@@ -144,12 +144,12 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
         this.schemaSpec = schemaSpec;
     }
 
-    public boolean isFailOnEmptyScripts() {
-        return failOnEmptyScripts;
+    public ConnectionProviderFactory getConnectionProviderFactory() {
+        return connectionProviderFactory;
     }
 
-    public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
-        this.failOnEmptyScripts = failOnEmptyScripts;
+    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
+        this.connectionProviderFactory = connectionProviderFactory;
     }
 
     public DialectResolver getDialectResolver() {
@@ -160,11 +160,11 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
         this.dialectResolver = dialectResolver;
     }
 
-    public ConnectionProviderFactory getConnectionProviderFactory() {
-        return connectionProviderFactory;
+    public boolean isFailOnEmptyScripts() {
+        return failOnEmptyScripts;
     }
 
-    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
-        this.connectionProviderFactory = connectionProviderFactory;
+    public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
+        this.failOnEmptyScripts = failOnEmptyScripts;
     }
 }

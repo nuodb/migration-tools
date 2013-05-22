@@ -52,24 +52,23 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
 
     private LoadSpec loadSpec;
 
+    private ConnectionProviderFactory connectionProviderFactory =
+            new QueryLoggingConnectionProviderFactory(new DriverConnectionSpecProviderFactory());
     private DialectResolver dialectResolver = new SimpleDialectResolver();
     private FormatFactory formatFactory = new SimpleFormatFactory();
     private ValueFormatRegistryResolver valueFormatRegistryResolver = new SimpleValueFormatRegistryResolver();
-    private ConnectionProviderFactory connectionProviderFactory = new QueryLoggingConnectionProviderFactory(
-            new DriverConnectionSpecProviderFactory());
 
     @Override
     public LoadJob createJob() {
         isNotNull(getLoadSpec(), "Load spec is required");
 
         LoadJob loadJob = new LoadJob();
-        LoadSpec loadSpec = getLoadSpec();
-        loadJob.setConnectionProvider(createConnectionProvider(loadSpec.getConnectionSpec()));
-        loadJob.setInputAttributes(loadSpec.getInputSpec().getAttributes());
-        loadJob.setCatalog(createCatalog(loadSpec.getInputSpec().getPath()));
-        loadJob.setTimeZone(loadSpec.getTimeZone());
-        loadJob.setInsertType(loadSpec.getInsertType());
-        loadJob.setTableInsertTypes(loadSpec.getTableInsertTypes());
+        loadJob.setConnectionProvider(createConnectionProvider(getLoadSpec().getConnectionSpec()));
+        loadJob.setInputAttributes(getLoadSpec().getInputSpec().getAttributes());
+        loadJob.setCatalog(createCatalog(getLoadSpec().getInputSpec().getPath()));
+        loadJob.setTimeZone(getLoadSpec().getTimeZone());
+        loadJob.setInsertType(getLoadSpec().getInsertType());
+        loadJob.setTableInsertTypes(getLoadSpec().getTableInsertTypes());
         loadJob.setDialectResolver(getDialectResolver());
         loadJob.setFormatFactory(getFormatFactory());
         loadJob.setValueFormatRegistryResolver(getValueFormatRegistryResolver());
@@ -90,6 +89,14 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
 
     public void setLoadSpec(LoadSpec loadSpec) {
         this.loadSpec = loadSpec;
+    }
+
+    public ConnectionProviderFactory getConnectionProviderFactory() {
+        return connectionProviderFactory;
+    }
+
+    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
+        this.connectionProviderFactory = connectionProviderFactory;
     }
 
     public DialectResolver getDialectResolver() {
@@ -114,13 +121,5 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
 
     public void setValueFormatRegistryResolver(ValueFormatRegistryResolver valueFormatRegistryResolver) {
         this.valueFormatRegistryResolver = valueFormatRegistryResolver;
-    }
-
-    public ConnectionProviderFactory getConnectionProviderFactory() {
-        return connectionProviderFactory;
-    }
-
-    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
-        this.connectionProviderFactory = connectionProviderFactory;
     }
 }

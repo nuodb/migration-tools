@@ -63,15 +63,14 @@ public class DumpJobFactory implements JobFactory<DumpJob> {
         isNotNull(getDumpSpec(), "Dump spec is required");
 
         DumpJob dumpJob = new DumpJob();
-        DumpSpec dumpSpec = getDumpSpec();
-        dumpJob.setConnectionProvider(createConnectionProvider(dumpSpec.getConnectionSpec()));
-        dumpJob.setOutputType(dumpSpec.getOutputSpec().getType());
-        dumpJob.setOutputAttributes(dumpSpec.getOutputSpec().getAttributes());
-        dumpJob.setCatalog(createCatalog(dumpSpec.getOutputSpec().getPath()));
-        dumpJob.setTimeZone(dumpSpec.getTimeZone());
-        dumpJob.setSelectQuerySpecs(dumpSpec.getSelectQuerySpecs());
-        dumpJob.setNativeQuerySpecs(dumpSpec.getNativeQuerySpecs());
-        dumpJob.setTableTypes(dumpSpec.getTableTypes());
+        dumpJob.setConnectionProvider(createConnectionProvider(getDumpSpec().getConnectionSpec()));
+        dumpJob.setOutputType(getDumpSpec().getOutputSpec().getType());
+        dumpJob.setOutputAttributes(getDumpSpec().getOutputSpec().getAttributes());
+        dumpJob.setCatalog(createCatalog(getDumpSpec().getOutputSpec().getPath()));
+        dumpJob.setTimeZone(getDumpSpec().getTimeZone());
+        dumpJob.setSelectQuerySpecs(getDumpSpec().getSelectQuerySpecs());
+        dumpJob.setNativeQuerySpecs(getDumpSpec().getNativeQuerySpecs());
+        dumpJob.setTableTypes(getDumpSpec().getTableTypes());
         dumpJob.setDialectResolver(getDialectResolver());
         dumpJob.setFormatFactory(getFormatFactory());
         dumpJob.setValueFormatRegistryResolver(getValueFormatRegistryResolver());
