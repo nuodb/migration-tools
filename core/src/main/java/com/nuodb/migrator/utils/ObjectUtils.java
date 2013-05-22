@@ -27,8 +27,9 @@
  */
 package com.nuodb.migrator.utils;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
+import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
 import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 /**
@@ -36,7 +37,17 @@ import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
  */
 public class ObjectUtils {
 
+    private static final ToStringStyle TO_STRING_STYLE = MULTI_LINE_STYLE;
+
     public static String toString(Object object) {
-        return ToStringBuilder.reflectionToString(object, MULTI_LINE_STYLE);
+        return reflectionToString(object, TO_STRING_STYLE);
+    }
+
+    public static String toString(Object object, boolean outputTransients) {
+        return reflectionToString(object, TO_STRING_STYLE, outputTransients);
+    }
+
+    public static String toString(Object object, boolean outputTransients, Class reflectUpToClass) {
+        return reflectionToString(object, TO_STRING_STYLE, outputTransients, reflectUpToClass);
     }
 }

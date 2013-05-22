@@ -113,7 +113,9 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(Types.NCLOB, "NCLOB");
         addJdbcTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
 
+        addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
+        addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"), "NUMERIC({N})");
     }
 
     @Override

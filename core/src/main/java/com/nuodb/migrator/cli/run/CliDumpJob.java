@@ -143,7 +143,7 @@ public class CliDumpJob extends CliRunJob {
         if (tableTypes.isEmpty()) {
             tableTypes.add(Table.TABLE);
         }
-        dumpSpec.setTableTypes(tableTypes);
+        dumpSpec.setTableTypes(tableTypes.toArray(new String[tableTypes.size()]));
 
         Map<String, SelectQuerySpec> tableQueryMapping = newHashMap();
         for (String table : optionSet.<String>getValues(TABLE_OPTION)) {

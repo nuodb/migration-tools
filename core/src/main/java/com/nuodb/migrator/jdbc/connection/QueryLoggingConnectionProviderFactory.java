@@ -27,10 +27,27 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
+import com.nuodb.migrator.spec.ConnectionSpec;
+
 /**
  * @author Sergey Bushik
  */
-public interface StatementLogger {
+public class QueryLoggingConnectionProviderFactory implements ConnectionProviderFactory {
 
-    void log(String statement);
+    private ConnectionProviderFactory connectionProviderFactory;
+
+    public QueryLoggingConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
+        this.connectionProviderFactory = connectionProviderFactory;
+    }
+
+    @Override
+    public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
+        return new QueryLoggingConnectionProvider(
+                connectionProviderFactory.createConnectionProvider(connectionSpec));
+    }
+
+    @Override
+    public boolean supportsConnectionSpec(ConnectionSpec connectionSpec) {
+        return connectionProviderFactory.supportsConnectionSpec(connectionSpec);
+    }
 }

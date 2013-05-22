@@ -28,34 +28,20 @@
 package com.nuodb.migrator.jdbc.connection;
 
 import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class ConnectionSpecProvider<T extends ConnectionSpec> extends ConnectionProxyProvider {
+public class DriverConnectionSpecProviderFactory extends ConnectionProviderFactoryBase {
 
-    private T connectionSpec;
-
-    public ConnectionSpecProvider(T connectionSpec) {
-        this.connectionSpec = connectionSpec;
-    }
-
-    public T getConnectionSpec() {
-        return connectionSpec;
+    @Override
+    protected ConnectionProvider createConnectionProviderSafe(ConnectionSpec connectionSpec) {
+        return new DriverConnectionSpecProvider((DriverConnectionSpec) connectionSpec);
     }
 
     @Override
-    public String getCatalog() {
-        return connectionSpec.getCatalog();
-    }
-
-    @Override
-    public String getSchema() {
-        return connectionSpec.getSchema();
-    }
-
-    @Override
-    public String toString() {
-        return connectionSpec.toString();
+    public boolean supportsConnectionSpec(ConnectionSpec connectionSpec) {
+        return connectionSpec instanceof DriverConnectionSpec;
     }
 }

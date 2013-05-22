@@ -27,12 +27,10 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import java.sql.Statement;
-
 /**
  * @author Sergey Bushik
  */
-public interface StatementFormatterFactory {
+public interface QueryLogger {
 
-    StatementFormatter createStatementFormat(Statement statement, String query);
+    void log(String statement);
 }

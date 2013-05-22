@@ -27,14 +27,13 @@
  */
 package com.nuodb.migrator.load;
 
-import com.google.common.collect.Maps;
+import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
+import com.nuodb.migrator.jdbc.connection.DriverConnectionSpecProviderFactory;
+import com.nuodb.migrator.jdbc.connection.QueryLoggingConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
-import com.nuodb.migrator.job.JobExecutor;
-import com.nuodb.migrator.job.JobExecutors;
 import com.nuodb.migrator.job.JobFactory;
-import com.nuodb.migrator.job.TraceJobExecutionListener;
 import com.nuodb.migrator.resultset.catalog.Catalog;
 import com.nuodb.migrator.resultset.catalog.FileCatalog;
 import com.nuodb.migrator.resultset.format.FormatFactory;
@@ -42,7 +41,6 @@ import com.nuodb.migrator.resultset.format.SimpleFormatFactory;
 import com.nuodb.migrator.resultset.format.value.SimpleValueFormatRegistryResolver;
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.LoadSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 
@@ -51,32 +49,36 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 /**
  * @author Sergey Bushik
  */
-public class LoadJobFactory extends ConnectionProviderFactory implements JobFactory<LoadJob> {
+public class LoadJobFactory implements JobFactory<LoadJob> {
 
     private LoadSpec loadSpec;
 
     private DialectResolver dialectResolver = new SimpleDialectResolver();
     private FormatFactory formatFactory = new SimpleFormatFactory();
     private ValueFormatRegistryResolver valueFormatRegistryResolver = new SimpleValueFormatRegistryResolver();
+    private ConnectionProviderFactory connectionProviderFactory = new QueryLoggingConnectionProviderFactory(
+            new DriverConnectionSpecProviderFactory());
 
     @Override
     public LoadJob createJob() {
         isNotNull(loadSpec, "Load spec is required");
-
         ResourceSpec inputSpec = loadSpec.getInputSpec();
-        LoadJob job = new LoadJob();
         ConnectionSpec connectionSpec = loadSpec.getConnectionSpec();
-        job.setConnectionProvider(createConnectionProvider(connectionSpec));
+        LoadJob loadJob = new LoadJob();
+        loadJob.setConnectionProvider(createConnectionProvider(connectionSpec));
+        loadJob.setInputAttributes(inputSpec.getAttributes());
+        loadJob.setCatalog(createCatalog(inputSpec.getPath()));
+        loadJob.setTimeZone(loadSpec.getTimeZone());
+        loadJob.setInsertType(loadSpec.getInsertType());
+        loadJob.setTableInsertTypes(loadSpec.getTableInsertTypes());
+        loadJob.setDialectResolver(getDialectResolver());
+        loadJob.setFormatFactory(getFormatFactory());
+        loadJob.setValueFormatRegistryResolver(getValueFormatRegistryResolver());
+        return loadJob;
+    }
 
-        job.setInputAttributes(inputSpec.getAttributes());
-        job.setCatalog(createCatalog(inputSpec.getPath()));
-        job.setTimeZone(loadSpec.getTimeZone());
-        job.setInsertType(loadSpec.getInsertType());
-        job.setTableInsertTypes(loadSpec.getTableInsertTypes());
-        job.setDialectResolver(getDialectResolver());
-        job.setFormatFactory(getFormatFactory());
-        job.setValueFormatRegistryResolver(getValueFormatRegistryResolver());
-        return job;
+    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
+        return getConnectionProviderFactory().createConnectionProvider(connectionSpec);
     }
 
     public Catalog createCatalog(String path) {
@@ -111,30 +113,15 @@ public class LoadJobFactory extends ConnectionProviderFactory implements JobFact
         return valueFormatRegistryResolver;
     }
 
-    public void setValueFormatRegistryResolver(
-            ValueFormatRegistryResolver valueFormatRegistryResolver) {
+    public void setValueFormatRegistryResolver(ValueFormatRegistryResolver valueFormatRegistryResolver) {
         this.valueFormatRegistryResolver = valueFormatRegistryResolver;
     }
 
-    public static void main(String[] args) {
-        LoadJobFactory jobFactory = new LoadJobFactory();
-        jobFactory.setLoadSpec(new LoadSpec() {
-            {
-                DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
-                connectionSpec.setDriverClassName("com.nuodb.jdbc.Driver");
-                connectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
-                connectionSpec.setUsername("dba");
-                connectionSpec.setPassword("goalie");
-                connectionSpec.setSchema("hockey");
-                setConnectionSpec(connectionSpec);
+    public ConnectionProviderFactory getConnectionProviderFactory() {
+        return connectionProviderFactory;
+    }
 
-                ResourceSpec inputSpec = new ResourceSpec();
-                inputSpec.setPath("/tmp/test/dump.cat");
-                setInputSpec(inputSpec);
-            }
-        });
-        JobExecutor executor = JobExecutors.createJobExecutor(jobFactory.createJob());
-        executor.addJobExecutionListener(new TraceJobExecutionListener());
-        executor.execute(Maps.<Object, Object>newHashMap());
+    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
+        this.connectionProviderFactory = connectionProviderFactory;
     }
 }

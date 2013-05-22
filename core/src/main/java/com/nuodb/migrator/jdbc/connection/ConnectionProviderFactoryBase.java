@@ -29,48 +29,23 @@ package com.nuodb.migrator.jdbc.connection;
 
 import com.nuodb.migrator.spec.ConnectionSpec;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleConnectionServices<C extends ConnectionSpec> implements ConnectionServices<C> {
-
-    private ConnectionProvider<C> connectionProvider;
-    private Connection connection;
-
-    public SimpleConnectionServices(ConnectionProvider<C> connectionProvider) {
-        this.connectionProvider = connectionProvider;
-    }
+public abstract class ConnectionProviderFactoryBase implements ConnectionProviderFactory {
 
     @Override
-    public C getConnectionSpec() {
-        return connectionProvider.getConnectionSpec();
-    }
-
-    @Override
-    public Connection getConnection() throws SQLException {
-        Connection connection = this.connection;
-        if (connection == null) {
-            synchronized (this) {
-                connection = this.connection;
-                if (connection == null) {
-                    connection = this.connection = connectionProvider.getConnection();
-                }
-            }
+    public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
+        isNotNull(connectionSpec, "Connection spec should be provided");
+        if (supportsConnectionSpec(connectionSpec)) {
+            return createConnectionProviderSafe(connectionSpec);
+        } else {
+            throw new ConnectionException(format("Connection specification is not supported %s", connectionSpec));
         }
-        return connection;
     }
 
-    @Override
-    public void closeConnection() throws SQLException {
-        connectionProvider.closeConnection(connection);
-        connection = null;
-    }
-
-    @Override
-    public String toString() {
-        return connectionProvider.toString();
-    }
+    protected abstract ConnectionProvider createConnectionProviderSafe(ConnectionSpec connectionSpec);
 }

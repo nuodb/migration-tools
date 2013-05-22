@@ -41,7 +41,7 @@ import java.util.Map;
  */
 public class MySQLIntUnsignedType extends JdbcTypeBase<Long> {
 
-    public static JdbcType INSTANCE = new MySQLBigIntUnsignedType();
+    public static JdbcType INSTANCE = new MySQLIntUnsignedType();
 
     public MySQLIntUnsignedType() {
         super(Types.INTEGER, "INT UNSIGNED", Long.class);

@@ -122,7 +122,7 @@ public class CliDumpJobTest {
                 new SelectQuerySpec("users_roles", "role_id in (1,2,3,4,5)")
         ));
         dumpSpec.setNativeQuerySpecs(asList(new NativeQuerySpec("SELECT id, name, definition FROM definitions")));
-        dumpSpec.setTableTypes(asList("TABLE", "SYSTEM TABLE"));
+        dumpSpec.setTableTypes(new String[]{"TABLE", "SYSTEM TABLE"});
         dumpSpec.setTimeZone(TimeZone.getTimeZone("GMT"));
         return dumpSpec;
     }

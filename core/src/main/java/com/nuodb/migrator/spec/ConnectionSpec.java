@@ -36,4 +36,12 @@ public interface ConnectionSpec extends Spec {
     String getSchema();
 
     void setSchema(String schema);
+
+    Boolean getAutoCommit();
+
+    void setAutoCommit(Boolean autoCommit);
+
+    Integer getTransactionIsolation();
+
+    void setTransactionIsolation(Integer transactionIsolation);
 }

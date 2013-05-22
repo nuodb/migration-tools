@@ -27,14 +27,12 @@
  */
 package com.nuodb.migrator.spec;
 
-import com.google.common.collect.Sets;
-
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
-import static java.util.Collections.singleton;
 
 /**
  * @author Sergey Bushik
@@ -43,7 +41,7 @@ public class DumpSpec extends JobSpecBase {
 
     private ConnectionSpec connectionSpec;
     private TimeZone timeZone;
-    private Collection<String> tableTypes = singleton(TABLE);
+    private String[] tableTypes = new String[]{TABLE};
     private Collection<SelectQuerySpec> selectQuerySpecs = newArrayList();
     private Collection<NativeQuerySpec> nativeQuerySpecs = newArrayList();
     private ResourceSpec outputSpec;
@@ -64,12 +62,12 @@ public class DumpSpec extends JobSpecBase {
         this.timeZone = timeZone;
     }
 
-    public Collection<String> getTableTypes() {
+    public String[] getTableTypes() {
         return tableTypes;
     }
 
-    public void setTableTypes(Collection<String> tableTypes) {
-        this.tableTypes = Sets.newLinkedHashSet(tableTypes);
+    public void setTableTypes(String[] tableTypes) {
+        this.tableTypes = tableTypes;
     }
 
     public Collection<SelectQuerySpec> getSelectQuerySpecs() {
@@ -111,7 +109,7 @@ public class DumpSpec extends JobSpecBase {
         if (outputSpec != null ? !outputSpec.equals(dumpSpec.outputSpec) : dumpSpec.outputSpec != null) return false;
         if (selectQuerySpecs != null ? !selectQuerySpecs.equals(
                 dumpSpec.selectQuerySpecs) : dumpSpec.selectQuerySpecs != null) return false;
-        if (tableTypes != null ? !tableTypes.equals(dumpSpec.tableTypes) : dumpSpec.tableTypes != null) return false;
+        if (tableTypes != null ? !Arrays.equals(tableTypes, dumpSpec.tableTypes) : dumpSpec.tableTypes != null) return false;
         if (timeZone != null ? !timeZone.equals(dumpSpec.timeZone) : dumpSpec.timeZone != null) return false;
 
         return true;

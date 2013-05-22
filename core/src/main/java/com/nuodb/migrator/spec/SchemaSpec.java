@@ -42,6 +42,7 @@ import static com.google.common.collect.Sets.newHashSet;
  */
 public class SchemaSpec extends JobSpecBase {
 
+    private String[] tableTypes;
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;
     private ResourceSpec outputSpec;
@@ -51,6 +52,14 @@ public class SchemaSpec extends JobSpecBase {
     private Collection<JdbcTypeSpec> jdbcTypeSpecs = newHashSet();
     private IdentifierQuoting identifierQuoting;
     private IdentifierNormalizer identifierNormalizer;
+
+    public String[] getTableTypes() {
+        return tableTypes;
+    }
+
+    public void setTableTypes(String[] tableTypes) {
+        this.tableTypes = tableTypes;
+    }
 
     public ConnectionSpec getSourceConnectionSpec() {
         return sourceConnectionSpec;
@@ -132,7 +141,7 @@ public class SchemaSpec extends JobSpecBase {
 
         SchemaSpec that = (SchemaSpec) o;
 
-        if (groupScriptsBy != that.groupScriptsBy) return false;
+        if (tableTypes != that.tableTypes) return false;
         if (identifierNormalizer != null ? !identifierNormalizer.equals(
                 that.identifierNormalizer) : that.identifierNormalizer != null) return false;
         if (identifierQuoting != null ? !identifierQuoting.equals(
@@ -142,6 +151,7 @@ public class SchemaSpec extends JobSpecBase {
             return false;
         if (metaDataTypes != null ? !metaDataTypes.equals(that.metaDataTypes) : that.metaDataTypes != null)
             return false;
+        if (groupScriptsBy != that.groupScriptsBy) return false;
         if (outputSpec != null ? !outputSpec.equals(that.outputSpec) : that.outputSpec != null) return false;
         if (scriptTypes != null ? !scriptTypes.equals(that.scriptTypes) : that.scriptTypes != null) return false;
         if (sourceConnectionSpec != null ? !sourceConnectionSpec.equals(
@@ -155,6 +165,7 @@ public class SchemaSpec extends JobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + (tableTypes != null ? tableTypes.hashCode() : 0);
         result = 31 * result + (sourceConnectionSpec != null ? sourceConnectionSpec.hashCode() : 0);
         result = 31 * result + (targetConnectionSpec != null ? targetConnectionSpec.hashCode() : 0);
         result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);

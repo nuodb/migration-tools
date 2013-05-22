@@ -27,14 +27,23 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
+import org.slf4j.Logger;
+
 /**
  * @author Sergey Bushik
  */
-public interface StatementFormatter {
+public class SimpleQueryLogger implements QueryLogger {
 
-    String format();
+    private final Logger logger;
 
-    Object getParameter(int index);
+    public SimpleQueryLogger(Logger logger) {
+        this.logger = logger;
+    }
 
-    void setParameter(int index, Object value);
+    @Override
+    public void log(String statement) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(statement);
+        }
+    }
 }

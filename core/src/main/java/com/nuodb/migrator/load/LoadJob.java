@@ -48,6 +48,7 @@ import com.nuodb.migrator.resultset.format.FormatFactory;
 import com.nuodb.migrator.resultset.format.FormatInput;
 import com.nuodb.migrator.resultset.format.value.ValueFormatModel;
 import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.spec.ConnectionSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +86,7 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
     }
 
     @Override
-    protected void init(LoadJobExecution execution) throws SQLException {
+    protected void doInit(LoadJobExecution execution) throws SQLException {
         isNotNull(getCatalog(), "Catalog is required");
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
@@ -130,15 +131,16 @@ public class LoadJob extends DecoratingJobBase<LoadJobExecution> {
         InspectionManager inspectionManager = new InspectionManager();
         inspectionManager.setDialectResolver(getDialectResolver());
         inspectionManager.setConnection(execution.getConnection());
+        ConnectionSpec connectionSpec = getConnectionProvider().getConnectionSpec();
         return inspectionManager.inspect(
-                new TableInspectionScope(getConnectionProvider().getCatalog(), getConnectionProvider().getSchema()),
+                new TableInspectionScope(connectionSpec.getCatalog(), connectionSpec.getSchema()),
                 MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA,
                 MetaDataType.TABLE, MetaDataType.COLUMN
         ).getObject(MetaDataType.DATABASE);
     }
 
     @Override
-    protected void release(LoadJobExecution execution) throws Exception {
+    protected void doRelease(LoadJobExecution execution) throws Exception {
         closeQuietly(execution.getCatalogReader());
         close(execution.getConnection());
     }

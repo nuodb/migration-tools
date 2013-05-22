@@ -59,6 +59,7 @@ public class MySQLDialect extends SimpleDialect {
     protected void initJdbcTypes() {
         super.initJdbcTypes();
 
+        addJdbcType(MySQLSmallIntUnsigned.INSTANCE);
         addJdbcType(MySQLIntUnsignedType.INSTANCE);
         addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
 

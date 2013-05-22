@@ -42,7 +42,7 @@ import java.util.Map;
  */
 public class MySQLBigIntUnsignedType extends JdbcTypeBase<BigInteger> {
 
-    public static JdbcType INSTANCE = new MySQLIntUnsignedType();
+    public static JdbcType INSTANCE = new MySQLBigIntUnsignedType();
 
     public MySQLBigIntUnsignedType() {
         super(Types.BIGINT, "BIGINT UNSIGNED", BigInteger.class);

@@ -36,6 +36,7 @@ import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorContext;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.job.decorate.DecoratingJobBase;
+import com.nuodb.migrator.spec.ConnectionSpec;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -48,6 +49,7 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
  */
 public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
 
+    private String[] tableTypes;
     private ConnectionProvider connectionProvider;
     private DialectResolver dialectResolver;
     private ScriptExporter scriptExporter;
@@ -59,12 +61,11 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
     }
 
     @Override
-    protected void init(SchemaJobExecution execution) throws Exception {
+    protected void doInit(SchemaJobExecution execution) throws Exception {
         isNotNull(getConnectionProvider(), "Connection provider is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
         isNotNull(getScriptExporter(), "Script exporter is required");
         isNotNull(getScriptGeneratorContext(), "Script generator context is required");
-
         execution.setConnection(getConnectionProvider().getConnection());
     }
 
@@ -89,13 +90,14 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
         InspectionManager inspectionManager = new InspectionManager();
         inspectionManager.setConnection(execution.getConnection());
         inspectionManager.setDialectResolver(getDialectResolver());
+        ConnectionSpec connectionSpec = getConnectionProvider().getConnectionSpec();
         return inspectionManager.inspect(new TableInspectionScope(
-                getConnectionProvider().getCatalog(), getConnectionProvider().getSchema()), MetaDataType.TYPES
+                connectionSpec.getCatalog(), connectionSpec.getSchema(), getTableTypes()), MetaDataType.TYPES
         ).getObject(MetaDataType.DATABASE);
     }
 
     @Override
-    protected void release(SchemaJobExecution execution) throws Exception {
+    protected void doRelease(SchemaJobExecution execution) throws Exception {
         close(execution.getConnection());
     }
 
@@ -137,5 +139,13 @@ public class SchemaJob extends DecoratingJobBase<SchemaJobExecution> {
 
     public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
         this.failOnEmptyScripts = failOnEmptyScripts;
+    }
+
+    public String[] getTableTypes() {
+        return tableTypes;
+    }
+
+    public void setTableTypes(String[] tableTypes) {
+        this.tableTypes = tableTypes;
     }
 }

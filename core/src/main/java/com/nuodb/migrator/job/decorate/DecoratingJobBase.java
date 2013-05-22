@@ -46,10 +46,10 @@ public class DecoratingJobBase<E extends JobExecution> extends JobBase {
     public final void execute(JobExecution execution) throws Exception {
         E target = decorate(execution);
         try {
-            init(target);
+            doInit(target);
             doExecute(target);
         } finally {
-            release(target);
+            doRelease(target);
         }
     }
 
@@ -57,12 +57,12 @@ public class DecoratingJobBase<E extends JobExecution> extends JobBase {
         return newInstance(executionClass, execution);
     }
 
-    protected void init(E execution) throws Exception {
+    protected void doInit(E execution) throws Exception {
     }
 
     protected void doExecute(E execution) throws Exception {
     }
 
-    protected void release(E execution) throws Exception {
+    protected void doRelease(E execution) throws Exception {
     }
 }

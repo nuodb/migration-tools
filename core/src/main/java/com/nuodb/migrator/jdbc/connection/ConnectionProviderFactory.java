@@ -28,39 +28,13 @@
 package com.nuodb.migrator.jdbc.connection;
 
 import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.DriverConnectionSpec;
-
-import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionProviderFactory {
+public interface ConnectionProviderFactory {
 
-    private boolean autoCommit;
+    ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec);
 
-    public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return createConnectionProvider(connectionSpec, isAutoCommit());
-    }
-
-    public ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec, boolean autoCommit) {
-        if (connectionSpec == null) {
-            return null;
-        }
-        ConnectionProvider connectionProvider;
-        if (connectionSpec instanceof DriverConnectionSpec) {
-            connectionProvider = new DriverConnectionSpecProvider((DriverConnectionSpec) connectionSpec, autoCommit);
-        } else {
-            throw new ConnectionException(format("Connection specification is not supported %s", connectionSpec));
-        }
-        return new StatementLoggingConnectionProvider(connectionProvider);
-    }
-
-    public boolean isAutoCommit() {
-        return autoCommit;
-    }
-
-    public void setAutoCommit(boolean autoCommit) {
-        this.autoCommit = autoCommit;
-    }
+    boolean supportsConnectionSpec(ConnectionSpec connectionSpec);
 }

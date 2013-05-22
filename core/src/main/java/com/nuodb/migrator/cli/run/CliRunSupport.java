@@ -140,7 +140,16 @@ public class CliRunSupport extends CliSupport {
                                 withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(schema);
-        
+
+        Option autoCommit = newBasicOptionBuilder().
+                withName(SOURCE_AUTO_COMMIT_OPTION).
+                withDescription(getMessage(SOURCE_AUTO_COMMIT_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(SOURCE_AUTO_COMMIT_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(autoCommit);
+
         addConnectionGroupValidators(group, new ConnectionGroupInfo(
                 SOURCE_DRIVER_OPTION, SOURCE_URL_OPTION, SOURCE_USERNAME_OPTION, SOURCE_PASSWORD_OPTION,
                 SOURCE_CATALOG_OPTION, SOURCE_SCHEMA_OPTION, SOURCE_PROPERTIES_OPTION));
@@ -200,6 +209,9 @@ public class CliRunSupport extends CliSupport {
         connectionSpec.setProperties(parseProperties(optionSet, SOURCE_PROPERTIES_OPTION, option));
         connectionSpec.setCatalog((String) optionSet.getValue(SOURCE_CATALOG_OPTION));
         connectionSpec.setSchema((String) optionSet.getValue(SOURCE_SCHEMA_OPTION));
+        if (optionSet.hasOption(SOURCE_AUTO_COMMIT_OPTION)) {
+            connectionSpec.setAutoCommit(Boolean.parseBoolean((String) optionSet.getValue(SOURCE_AUTO_COMMIT_OPTION)));
+        }
         return connectionSpec;
     }
 
