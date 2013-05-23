@@ -39,7 +39,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 /**
  * @author Sergey Bushik
  */
-public class FileCatalog implements Catalog {
+public class SimpleCatalog implements Catalog {
 
     private static Regex CATALOG_FILE_REGEX = INSTANCE.compile("*.cat");
     private static final String CATALOG_FILE_NAME = "dump.cat";
@@ -51,7 +51,7 @@ public class FileCatalog implements Catalog {
     private File catalogDir;
     private File catalogFile;
 
-    public FileCatalog(String path) {
+    public SimpleCatalog(String path) {
         this.path = path;
         this.pathFile = getPathFile();
         this.catalogDir = getCatalogDir();
@@ -85,11 +85,11 @@ public class FileCatalog implements Catalog {
 
     @Override
     public CatalogReader getCatalogReader() {
-        return new FileCatalogReader(catalogDir, catalogFile);
+        return new SimpleCatalogReader(catalogDir, catalogFile);
     }
 
     @Override
     public CatalogWriter getCatalogWriter() {
-        return new FileCatalogWriter(catalogDir, catalogFile);
+        return new SimpleCatalogWriter(catalogDir, catalogFile);
     }
 }

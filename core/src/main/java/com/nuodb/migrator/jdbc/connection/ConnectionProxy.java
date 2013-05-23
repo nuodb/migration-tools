@@ -27,12 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
+import com.nuodb.migrator.spec.ConnectionSpec;
+
 import java.sql.Connection;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionProxy extends Connection {
+public interface ConnectionProxy<C extends ConnectionSpec> extends Connection, HasConnectionSpec<C> {
 
     Connection getConnection();
 }

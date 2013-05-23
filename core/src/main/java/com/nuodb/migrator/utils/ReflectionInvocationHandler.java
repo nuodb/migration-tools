@@ -25,48 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.resultset.format.csv;
+package com.nuodb.migrator.utils;
 
-import static java.lang.System.getProperty;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
 
 /**
  * @author Sergey Bushik
  */
-public interface CsvAttributes {
-    /**
-     * Input & output stream encoding
-     */
-    final String ATTRIBUTE_ENCODING = "csv.encoding";
-    /**
-     * The symbol used for value separation, must not be a line break character.
-     */
-    final String ATTRIBUTE_DELIMITER = "csv.delimiter";
-    /**
-     * Indicates whether quotation should be used.
-     */
-    final String ATTRIBUTE_QUOTING = "csv.quoting";
-    /**
-     * The symbol used as value encapsulation marker.
-     */
-    final String ATTRIBUTE_QUOTE = "csv.quote";
-    /**
-     * The symbol used to escape special characters in values.
-     */
-    final String ATTRIBUTE_ESCAPE = "csv.escape";
-    /**
-     * The record separator to use.
-     */
-    final String ATTRIBUTE_LINE_SEPARATOR = "csv.line.separator";
+public class ReflectionInvocationHandler<T> implements InvocationHandler {
 
-    final String FORMAT_TYPE = "csv";
-    final String ATTRIBUTE_DELIMITER_TAB = "tab";
-    final char COMMENT_START = '#';
-    final String ENCODING = getProperty("file.encoding");
-    final Character TAB = '\t';
-    final Character COMMA = ',';
-    final Character DELIMITER = COMMA;
-    final String LINE_SEPARATOR = "\r\n";
-    final boolean QUOTING = false;
-    final Character QUOTE = '"';
-    final Character ESCAPE = '|';
+    private final T target;
+
+    public ReflectionInvocationHandler(T target) {
+        this.target = target;
+    }
+
+    public T getTarget() {
+        return target;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        return invokeTarget(method, args);
+    }
+
+    protected <R> R invokeTarget(Method method, Object[] args) throws Throwable {
+        try {
+            return invokeMethod(getTarget(), method, args);
+        } catch (ReflectionException exception) {
+            throw exception.getCause();
+        }
+    }
 }

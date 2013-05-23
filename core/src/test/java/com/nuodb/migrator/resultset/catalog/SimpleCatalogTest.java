@@ -13,9 +13,9 @@ import static org.apache.commons.io.FileUtils.getTempDirectoryPath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class FileCatalogTest {
+public class SimpleCatalogTest {
 
-    private FileCatalog fileCatalog;
+    private SimpleCatalog simpleCatalog;
     private CatalogWriter writer;
 
     @Before
@@ -25,14 +25,14 @@ public class FileCatalogTest {
         outputSpec.setPath(fileCatalogPath);
         outputSpec.setType(CsvAttributes.FORMAT_TYPE);
 
-        fileCatalog = new FileCatalog(outputSpec.getPath());
-        assertEquals(fileCatalog.getPath(), fileCatalogPath);
+        simpleCatalog = new SimpleCatalog(outputSpec.getPath());
+        assertEquals(simpleCatalog.getPath(), fileCatalogPath);
     }
 
     @Test
     public void testOpen() throws Exception {
         try {
-            writer = fileCatalog.getCatalogWriter();
+            writer = simpleCatalog.getCatalogWriter();
         } catch (CatalogException exception) {
             fail(exception.getMessage());
         }
@@ -43,7 +43,7 @@ public class FileCatalogTest {
         if (writer != null) {
             writer.close();
         }
-        File file = fileCatalog.getCatalogDir();
+        File file = simpleCatalog.getCatalogDir();
         if (file != null && file.exists()) {
             forceDelete(file);
         }

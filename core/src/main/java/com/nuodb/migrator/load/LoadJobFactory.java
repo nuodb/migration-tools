@@ -35,7 +35,7 @@ import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migrator.job.JobFactory;
 import com.nuodb.migrator.resultset.catalog.Catalog;
-import com.nuodb.migrator.resultset.catalog.FileCatalog;
+import com.nuodb.migrator.resultset.catalog.SimpleCatalog;
 import com.nuodb.migrator.resultset.format.FormatFactory;
 import com.nuodb.migrator.resultset.format.SimpleFormatFactory;
 import com.nuodb.migrator.resultset.format.value.SimpleValueFormatRegistryResolver;
@@ -80,7 +80,7 @@ public class LoadJobFactory implements JobFactory<LoadJob> {
     }
 
     public Catalog createCatalog(String path) {
-        return new FileCatalog(path);
+        return new SimpleCatalog(path);
     }
 
     public LoadSpec getLoadSpec() {

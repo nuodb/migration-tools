@@ -28,7 +28,7 @@
 package com.nuodb.migrator.jdbc.connection;
 
 import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.utils.ReflectionException;
+import com.nuodb.migrator.utils.ReflectionInvocationHandler;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -36,7 +36,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
-import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
 import static java.lang.reflect.Proxy.*;
 
 /**
@@ -69,41 +68,16 @@ public abstract class ConnectionProxyProviderBase<C extends ConnectionSpec> exte
             return connection;
         }
         InvocationHandler invocationHandler = getInvocationHandler(connection);
-        if (invocationHandler instanceof TargetInvocationHandler) {
-            return (Connection) ((TargetInvocationHandler) invocationHandler).getTarget();
+        if (invocationHandler instanceof ReflectionInvocationHandler) {
+            return (Connection) ((ReflectionInvocationHandler) invocationHandler).getTarget();
         }
         return connection;
     }
 
-    public static class TargetInvocationHandler<T> implements InvocationHandler {
-
-        private final T target;
-
-        public TargetInvocationHandler(T target) {
-            this.target = target;
-        }
-
-        public T getTarget() {
-            return target;
-        }
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            return invokeTarget(method, args);
-        }
-
-        public <R> R invokeTarget(Method method, Object[] args) throws Throwable {
-            try {
-                return invokeMethod(getTarget(), method, args);
-            } catch (ReflectionException exception) {
-                throw exception.getCause();
-            }
-        }
-    }
-
-    public class ConnectionInvocationHandler extends TargetInvocationHandler<Connection> {
+    protected class ConnectionInvocationHandler extends ReflectionInvocationHandler<Connection> {
 
         private static final String GET_CONNECTION_METHOD = "getConnection";
+        private static final String GET_CONNECTION_SPEC_METHOD = "getConnectionSpec";
 
         public ConnectionInvocationHandler(Connection connection) {
             super(connection);
@@ -113,6 +87,8 @@ public abstract class ConnectionProxyProviderBase<C extends ConnectionSpec> exte
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (GET_CONNECTION_METHOD.equals(method.getName())) {
                 return getTargetConnection(getTarget());
+            } else if (GET_CONNECTION_SPEC_METHOD.equals(method.getName())) {
+                return getConnectionSpec();
             } else {
                 return super.invoke(proxy, method, args);
             }

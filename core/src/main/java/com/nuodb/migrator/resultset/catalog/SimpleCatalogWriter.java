@@ -47,7 +47,7 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 /**
  * @author Sergey Bushik
  */
-public class FileCatalogWriter implements CatalogWriter {
+public class SimpleCatalogWriter implements CatalogWriter {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private OutputStream output;
@@ -56,7 +56,7 @@ public class FileCatalogWriter implements CatalogWriter {
     private File catalogDir;
     private File catalogFile;
 
-    public FileCatalogWriter(File catalogDir, File catalogFile) {
+    public SimpleCatalogWriter(File catalogDir, File catalogFile) {
         this.catalogDir = catalogDir;
         this.catalogFile = catalogFile;
     }

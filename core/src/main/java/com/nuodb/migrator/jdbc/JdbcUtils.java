@@ -43,6 +43,9 @@ public class JdbcUtils {
 
     private static transient final Logger logger = LoggerFactory.getLogger(JdbcUtils.class);
 
+    private JdbcUtils() {
+    }
+
     public static void close(ResultSet resultSet) {
         try {
             if (resultSet != null) {
@@ -61,8 +64,8 @@ public class JdbcUtils {
                 statement.close();
             }
         } catch (SQLException exception) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed closing statement", exception);
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed closing statement", exception);
             }
         }
     }

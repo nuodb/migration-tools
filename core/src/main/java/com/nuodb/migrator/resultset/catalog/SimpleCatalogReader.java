@@ -45,14 +45,14 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 /**
  * @author Sergey Bushik
  */
-public class FileCatalogReader implements CatalogReader {
+public class SimpleCatalogReader implements CatalogReader {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private File catalogDir;
     private File catalogFile;
 
-    public FileCatalogReader(File catalogDir, File catalogFile) {
+    public SimpleCatalogReader(File catalogDir, File catalogFile) {
         this.catalogDir = catalogDir;
         this.catalogFile = catalogFile;
     }

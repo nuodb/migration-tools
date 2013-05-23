@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.connection;
 
 import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.utils.ReflectionInvocationHandler;
 
 import java.lang.reflect.Method;
 import java.sql.*;
@@ -167,7 +168,7 @@ public class QueryLoggingConnectionProvider extends ConnectionProxyProviderBase 
         }
     }
 
-    protected class ConnectionAwareInvocationHandlerBase<T> extends TargetInvocationHandler<T> {
+    protected class ConnectionAwareInvocationHandlerBase<T> extends ReflectionInvocationHandler<T> {
 
         private static final String GET_CONNECTION_METHOD = "getConnection";
 
@@ -188,7 +189,7 @@ public class QueryLoggingConnectionProvider extends ConnectionProxyProviderBase 
         }
     }
 
-    public class ConnectionAwareStatementHandler<T extends Statement> extends ConnectionAwareInvocationHandlerBase<T> {
+    protected class ConnectionAwareStatementHandler<T extends Statement> extends ConnectionAwareInvocationHandlerBase<T> {
 
         private final Collection<String> EXECUTE_METHODS = newHashSet("execute", "executeQuery", "executeUpdate");
 
