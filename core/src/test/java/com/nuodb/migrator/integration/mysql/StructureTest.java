@@ -149,16 +149,24 @@ public class StructureTest extends MigrationTestBase {
 				HashMap<String, String> tabColDetailsMap = tabColMap
 						.get(colName);
 				Assert.assertNotNull(tabColDetailsMap);
-				Assert.assertEquals(colName, tabColDetailsMap.get(colNames[0]));
+				Assert.assertEquals(colName, tabColDetailsMap.get(colNames[0]),
+						"Column name " + colName + " of table " + tableName
+								+ " did not match");
 				Assert.assertEquals(rs2.getInt("JDBCTYPE"), MySQLTypes
-						.getMappedJDBCType(tabColDetailsMap.get(colNames[4])));
+						.getMappedJDBCType(tabColDetailsMap.get(colNames[4]),
+								tabColDetailsMap.get(colNames[10])),
+						"JDBCTYPE of column " + colName + " of table "
+								+ tableName + " did not match");
 				// System.out.print("mysqlcoltype="
 				// + tabColDetailsMap.get(colNames[4]) + ",");
 				// System.out.println("mysqlval="
 				// + tabColDetailsMap.get(colNames[5]));
 				Assert.assertEquals(rs2.getString("LENGTH"), MySQLTypes
 						.getMappedLength(tabColDetailsMap.get(colNames[4]),
-								tabColDetailsMap.get(colNames[5])));
+								tabColDetailsMap.get(colNames[10]),
+								tabColDetailsMap.get(colNames[5])),
+						"LENGTH of column " + colName + " of table "
+								+ tableName + " did not match");
 				// TBD
 				// String val = tabColDetailsMap.get(colNames[7]);
 				// Assert.assertEquals(rs2.getInt("SCALE"), val == null ? 0
@@ -170,7 +178,9 @@ public class StructureTest extends MigrationTestBase {
 				String val = tabColDetailsMap.get(colNames[2]);
 				Assert.assertEquals(rs2.getString("DEFAULTVALUE"), MySQLTypes
 						.getMappedDefault(tabColDetailsMap.get(colNames[4]),
-								tabColDetailsMap.get(colNames[2])));
+								tabColDetailsMap.get(colNames[2])),
+						"DEFAULTVALUE of column " + colName + " of table "
+								+ tableName + " did not match");
 			}
 			Assert.assertTrue(targetFound);
 		} finally {

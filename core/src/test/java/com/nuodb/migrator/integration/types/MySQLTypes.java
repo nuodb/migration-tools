@@ -98,7 +98,7 @@ public class MySQLTypes implements DatabaseTypes {
 		return -1;
 	}
 
-	public static int getMappedJDBCType(String type) {
+	public static int getMappedJDBCType(String type, String colType) {
 		if ("VARCHAR".equalsIgnoreCase(type)) {
 			return Types.VARCHAR;
 		} else if ("VARCHAR2".equalsIgnoreCase(type)) {
@@ -114,7 +114,11 @@ public class MySQLTypes implements DatabaseTypes {
 		} else if ("MEDIUMINT".equalsIgnoreCase(type)) {
 			return Types.INTEGER;
 		} else if ("BIGINT".equalsIgnoreCase(type)) {
-			return Types.BIGINT;
+			if (colType != null && colType.toLowerCase().contains("unsigned")) {
+				return Types.NUMERIC;
+			} else {
+				return Types.BIGINT;
+			}
 		} else if ("INT".equalsIgnoreCase(type)) {
 			return Types.INTEGER;
 		} else if ("FLOAT".equalsIgnoreCase(type)) {
@@ -149,18 +153,19 @@ public class MySQLTypes implements DatabaseTypes {
 			return Types.CLOB;
 		} else if ("BIT".equalsIgnoreCase(type)) {
 			return Types.BOOLEAN;
-		}else if ("TINYBLOB".equalsIgnoreCase(type)) {
+		} else if ("TINYBLOB".equalsIgnoreCase(type)) {
 			return Types.BLOB;
-		}else if ("ENUM".equalsIgnoreCase(type)) {
+		} else if ("ENUM".equalsIgnoreCase(type)) {
 			return Types.CHAR;
-		}else if ("SET".equalsIgnoreCase(type)) {
+		} else if ("SET".equalsIgnoreCase(type)) {
 			return Types.CHAR;
 		}
 
 		return 0;
 	}
 
-	public static String getMappedLength(String type, String length) {
+	public static String getMappedLength(String type, String colType,
+			String length) {
 		if ("VARCHAR".equalsIgnoreCase(type)) {
 			return length;
 		} else if ("VARCHAR2".equalsIgnoreCase(type)) {
@@ -176,7 +181,11 @@ public class MySQLTypes implements DatabaseTypes {
 		} else if ("MEDIUMINT".equalsIgnoreCase(type)) {
 			return "4";
 		} else if ("BIGINT".equalsIgnoreCase(type)) {
-			return "8";
+			if (colType != null && colType.toLowerCase().contains("unsigned")) {
+				return "32";
+			} else {
+				return "8";
+			}
 		} else if ("INT".equalsIgnoreCase(type)) {
 			return "4";
 		} else if ("FLOAT".equalsIgnoreCase(type)) {
@@ -205,17 +214,17 @@ public class MySQLTypes implements DatabaseTypes {
 			return "8";
 		} else if ("LONGTEXT".equalsIgnoreCase(type)) {
 			return "8";
-		}else if ("BIT".equalsIgnoreCase(type)) {
+		} else if ("BIT".equalsIgnoreCase(type)) {
 			return "2";
-		}else if ("VARBINARY".equalsIgnoreCase(type)) {
+		} else if ("VARBINARY".equalsIgnoreCase(type)) {
 			return "90";
-		}else if ("BINARY".equalsIgnoreCase(type)) {
+		} else if ("BINARY".equalsIgnoreCase(type)) {
 			return "90";
-		}else if ("TINYBLOB".equalsIgnoreCase(type)) {
+		} else if ("TINYBLOB".equalsIgnoreCase(type)) {
 			return "255";
-		}else if ("ENUM".equalsIgnoreCase(type)) {
+		} else if ("ENUM".equalsIgnoreCase(type)) {
 			return "11";
-		}else if ("SET".equalsIgnoreCase(type)) {
+		} else if ("SET".equalsIgnoreCase(type)) {
 			return "14";
 		}
 		return null;
