@@ -31,7 +31,11 @@ import com.nuodb.migrator.resultset.format.Format;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.Quote;
 
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newTreeMap;
 import static java.lang.Boolean.parseBoolean;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.apache.commons.csv.CSVFormat.CSVFormatBuilder;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -40,60 +44,116 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  */
 class CsvFormatBuilder implements CsvAttributes {
 
+    private static Map<String, Character> DELIMITERS;
+    private static Map<String, String> LINE_SEPARATORS;
+
+    static {
+        DELIMITERS = newTreeMap(CASE_INSENSITIVE_ORDER);
+        DELIMITERS.put(ATTRIBUTE_DELIMITER_TAB, DELIMITER_TAB);
+
+        LINE_SEPARATORS = newTreeMap(CASE_INSENSITIVE_ORDER);
+        LINE_SEPARATORS.put(ATTRIBUTE_LINE_SEPARATOR_CRLF, LINE_SEPARATOR_CRLF);
+        LINE_SEPARATORS.put(ATTRIBUTE_LINE_SEPARATOR_CR, LINE_SEPARATOR_CR);
+        LINE_SEPARATORS.put(ATTRIBUTE_LINE_SEPARATOR_LF, LINE_SEPARATOR_LF);
+    }
+
     private Format format;
 
     private Character delimiter;
-    private boolean quoting;
     private Character quote;
     private Character escape;
+    private Character commentStart;
     private String lineSeparator;
+    private boolean quoting;
 
     public CsvFormatBuilder(Format format) {
         this.format = format;
     }
 
     public CSVFormat build() {
-        String delimiterValue = (String) format.getAttribute(ATTRIBUTE_DELIMITER);
-        if (isEmpty(delimiterValue)) {
-            delimiter = DELIMITER;
-        } else {
-            if (delimiterValue.equalsIgnoreCase(ATTRIBUTE_DELIMITER_TAB)) {
-                delimiter = TAB;
-            } else {
-                delimiter = delimiterValue.charAt(0);
-            }
+        quote = createQuote();
+        escape = createEscape();
+        quoting = createQuoting();
+        delimiter = createDelimiter();
+        commentStart = createCommentStart();
+        lineSeparator = createLineSeparator();
+        CSVFormatBuilder builder = CSVFormat.newBuilder(delimiter);
+        if (quoting && quote != null) {
+            builder.withQuotePolicy(Quote.MINIMAL);
+            builder.withQuoteChar(quote);
         }
-        String quotingValue = (String) format.getAttribute(ATTRIBUTE_QUOTING);
-        if (isEmpty(quotingValue)) {
-            quoting = QUOTING;
-        } else {
-            quoting = parseBoolean(quotingValue);
-        }
+        builder.withCommentStart(commentStart);
+        builder.withRecordSeparator(lineSeparator);
+        builder.withEscape(escape);
+        return builder.build();
+    }
 
-        String quoteValue = (String) format.getAttribute(ATTRIBUTE_QUOTE);
-        if (isEmpty(quoteValue)) {
-            quote = QUOTE;
-        } else {
-            quote = quoteValue.charAt(0);
-        }
-
+    protected Character createEscape() {
         String escapeValue = (String) format.getAttribute(ATTRIBUTE_ESCAPE);
         if (isEmpty(escapeValue)) {
             escape = ESCAPE;
         } else {
             escape = escapeValue.charAt(0);
         }
-        lineSeparator = (String) format.getAttribute(ATTRIBUTE_LINE_SEPARATOR, LINE_SEPARATOR);
+        return escape;
+    }
 
-        CSVFormatBuilder builder = CSVFormat.newBuilder(delimiter);
-        if (quoting && quote != null) {
-            builder.withQuotePolicy(Quote.MINIMAL);
-            builder.withQuoteChar(quote);
+    protected Character createQuote() {
+        Character quote;
+        String quoteValue = (String) format.getAttribute(ATTRIBUTE_QUOTE);
+        if (isEmpty(quoteValue)) {
+            quote = QUOTE;
+        } else {
+            quote = quoteValue.charAt(0);
         }
-        builder.withCommentStart(COMMENT_START);
-        builder.withRecordSeparator(lineSeparator);
-        builder.withEscape(escape);
-        return builder.build();
+        return quote;
+    }
+
+    protected boolean createQuoting() {
+        boolean quoting;
+        String quotingValue = (String) format.getAttribute(ATTRIBUTE_QUOTING);
+        if (isEmpty(quotingValue)) {
+            quoting = QUOTING;
+        } else {
+            quoting = parseBoolean(quotingValue);
+        }
+        return quoting;
+    }
+
+    protected Character createDelimiter() {
+        Character delimiter = null;
+        String delimiterValue = (String) format.getAttribute(ATTRIBUTE_DELIMITER);
+        if (delimiterValue != null) {
+            delimiter = DELIMITERS.get(delimiterValue);
+        }
+        if (delimiter == null) {
+            if (isEmpty(delimiterValue)) {
+                delimiter = DELIMITER;
+            } else {
+                delimiter = delimiterValue.charAt(0);
+            }
+        }
+        return delimiter;
+    }
+
+    protected String createLineSeparator() {
+        String lineSeparator = null;
+        String lineSeparatorValue = (String) format.getAttribute(ATTRIBUTE_LINE_SEPARATOR);
+        if (lineSeparatorValue != null) {
+            lineSeparator = LINE_SEPARATORS.get(lineSeparatorValue);
+        }
+        if (lineSeparator == null) {
+            if (isEmpty(lineSeparatorValue)) {
+                lineSeparator = LINE_SEPARATOR;
+            } else {
+                lineSeparator = lineSeparatorValue;
+            }
+        }
+        return lineSeparator;
+    }
+
+    protected Character createCommentStart() {
+        return COMMENT_START;
     }
 
     public Character getDelimiter() {
@@ -114,5 +174,9 @@ class CsvFormatBuilder implements CsvAttributes {
 
     public String getLineSeparator() {
         return lineSeparator;
+    }
+
+    public Character getCommentStart() {
+        return commentStart;
     }
 }

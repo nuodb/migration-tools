@@ -94,9 +94,9 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         for (JdbcTypeSpec jdbcTypeSpec : schemaSpec.getJdbcTypeSpecs()) {
             jdbcTypeNameMap.addJdbcTypeName(
-                    jdbcTypeSpec.getTypeCode(), jdbcTypeSpec.getTypeName(),
-                    newSpecifiers(
-                            jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()));
+                    jdbcTypeSpec.getTypeCode(), newSpecifiers(
+                            jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()), jdbcTypeSpec.getTypeName()
+            );
         }
         dialect.setIdentifierQuoting(schemaSpec.getIdentifierQuoting());
         dialect.setIdentifierNormalizer(schemaSpec.getIdentifierNormalizer());

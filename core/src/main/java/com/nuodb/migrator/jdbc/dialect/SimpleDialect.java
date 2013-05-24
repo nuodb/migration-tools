@@ -632,16 +632,21 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         getJdbcTypeNameMap().addJdbcTypeName(typeCode, typeName);
     }
 
-    protected void addJdbcTypeName(int typeCode, String typeName, JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        getJdbcTypeNameMap().addJdbcTypeName(typeCode, typeName, jdbcTypeSpecifiers);
+    protected void addJdbcTypeName(int typeCode, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
+        getJdbcTypeNameMap().addJdbcTypeName(typeCode, jdbcTypeSpecifiers, typeName);
+    }
+
+    protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc,
+                                   JdbcTypeNameBuilder jdbcTypeNameBuilder) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, jdbcTypeNameBuilder);
     }
 
     protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, String typeName) {
         getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, typeName);
     }
 
-    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, String typeName, JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, typeName, jdbcTypeSpecifiers);
+    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers,  String typeName) {
+        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers, typeName);
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, int typeCode, String typeName) {
@@ -650,7 +655,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, int typeCode, String typeName,
                                    JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, typeName, jdbcTypeSpecifiers);
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, jdbcTypeSpecifiers, typeName);
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName) {
@@ -659,7 +664,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName,
                                    JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, typeName, jdbcTypeSpecifiers);
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers, typeName);
     }
 
     protected String getJdbcTypeName(JdbcTypeNameMap jdbcTypeNameMap, JdbcTypeDesc jdbcTypeDesc,

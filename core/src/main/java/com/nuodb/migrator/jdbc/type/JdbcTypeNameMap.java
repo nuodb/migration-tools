@@ -29,66 +29,53 @@ package com.nuodb.migrator.jdbc.type;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Comparator;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
-import static java.util.regex.Pattern.quote;
 
 /**
  * @author Sergey Bushik
  */
 public class JdbcTypeNameMap {
 
-    public static final String SIZE = "N";
-    public static final String PRECISION = "P";
-    public static final String SCALE = "S";
-    public static final String VARIABLE_PREFIX = "{";
-    public static final String VARIABLE_SUFFIX = "}";
-
-    private Map<JdbcTypeDesc, Map<JdbcTypeSpecifiers, String>> jdbcTypeDescMap = Maps.newHashMap();
+    private Map<JdbcTypeDesc, Map<JdbcTypeSpecifiers, JdbcTypeNameBuilder>> jdbcTypeDescMap = Maps.newHashMap();
 
     public void addJdbcTypeName(int typeCode, String typeName) {
         addJdbcTypeName(new JdbcTypeDesc(typeCode), typeName);
     }
 
     public void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, String typeName) {
-        addJdbcTypeName(jdbcTypeDesc, typeName, null);
+        addJdbcTypeName(jdbcTypeDesc, null, typeName);
     }
 
-    public void addJdbcTypeName(int typeCode, String typeName, JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        addJdbcTypeName(new JdbcTypeDesc(typeCode), typeName, jdbcTypeSpecifiers);
+    public void addJdbcTypeName(int typeCode, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
+        addJdbcTypeName(new JdbcTypeDesc(typeCode), jdbcTypeSpecifiers, typeName);
     }
 
-    public void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, String typeName, JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        Map<JdbcTypeSpecifiers, String> jdbcTypeSpecifiersMap = jdbcTypeDescMap.get(jdbcTypeDesc);
+    public void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
+        addJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers, new JdbcTypeNameTemplateBuilder(typeName));
+    }
+
+    public void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeNameBuilder jdbcTypeNameBuilder) {
+        addJdbcTypeName(jdbcTypeDesc, null, jdbcTypeNameBuilder);
+    }
+
+    public void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers,
+                                JdbcTypeNameBuilder jdbcTypeNameBuilder) {
+        Map<JdbcTypeSpecifiers, JdbcTypeNameBuilder> jdbcTypeSpecifiersMap = jdbcTypeDescMap.get(jdbcTypeDesc);
         if (jdbcTypeSpecifiersMap == null) {
             jdbcTypeDescMap.put(jdbcTypeDesc, jdbcTypeSpecifiersMap = Maps.newHashMap());
         }
-        jdbcTypeSpecifiersMap.put(jdbcTypeSpecifiers, typeName);
-    }
-
-    public String getJdbcTypeName(JdbcTypeDesc jdbcTypeDesc) {
-        Map<JdbcTypeSpecifiers, String> jdbcTypeSpecifiersMap = jdbcTypeDescMap.get(jdbcTypeDesc);
-        return jdbcTypeSpecifiersMap != null ? jdbcTypeSpecifiersMap.get(null) : null;
-    }
-
-    public String getJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, int size, int precision, int scale) {
-        return getJdbcTypeName(jdbcTypeDesc, newSpecifiers(size, precision, scale));
+        jdbcTypeSpecifiersMap.put(jdbcTypeSpecifiers, jdbcTypeNameBuilder);
     }
 
     public String getJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        Map<JdbcTypeSpecifiers, String> jdbcTypeSpecifiersMap = jdbcTypeDescMap.get(jdbcTypeDesc);
-        String jdbcTypeName = getJdbcTypeName(jdbcTypeDesc);
+        Map<JdbcTypeSpecifiers, JdbcTypeNameBuilder> jdbcTypeSpecifiersMap = jdbcTypeDescMap.get(jdbcTypeDesc);
+        JdbcTypeNameBuilder jdbcTypeNameBuilder = getJdbcTypeName(jdbcTypeDesc);
         if (jdbcTypeSpecifiersMap != null) {
             JdbcTypeSpecifiers targetJdbcTypeSpecifiers = jdbcTypeSpecifiers;
-            for (Map.Entry<JdbcTypeSpecifiers, String> jdbcTypeSpecifiersEntry : jdbcTypeSpecifiersMap.entrySet()) {
-                String entryJdbcTypeName = jdbcTypeSpecifiersEntry.getValue();
+            for (Map.Entry<JdbcTypeSpecifiers, JdbcTypeNameBuilder> jdbcTypeSpecifiersEntry : jdbcTypeSpecifiersMap.entrySet()) {
+                JdbcTypeNameBuilder entryJdbcTypeNameBuilder = jdbcTypeSpecifiersEntry.getValue();
                 JdbcTypeSpecifiers entryJdbcTypeSpecifiers = jdbcTypeSpecifiersEntry.getKey();
                 if (entryJdbcTypeSpecifiers == null) {
                     continue;
@@ -96,39 +83,24 @@ public class JdbcTypeNameMap {
                 int entryJdbcTypeSpecifiersOrder = compareJdbcTypeSpecifiers(jdbcTypeSpecifiers,
                         entryJdbcTypeSpecifiers);
                 if (entryJdbcTypeSpecifiersOrder == 0) {
-                    jdbcTypeName = entryJdbcTypeName;
+                    jdbcTypeNameBuilder = entryJdbcTypeNameBuilder;
                     break;
                 }
                 int targetJdbcTypeSpecifiersOrder = compareJdbcTypeSpecifiers(entryJdbcTypeSpecifiers,
                         targetJdbcTypeSpecifiers);
                 if (entryJdbcTypeSpecifiersOrder > 0 && targetJdbcTypeSpecifiersOrder >= 0) {
-                    jdbcTypeName = entryJdbcTypeName;
+                    jdbcTypeNameBuilder = entryJdbcTypeNameBuilder;
                     targetJdbcTypeSpecifiers = entryJdbcTypeSpecifiers;
                 }
             }
         }
-        return compileJdbcTypeName(jdbcTypeName, jdbcTypeSpecifiers);
+        return jdbcTypeNameBuilder != null ?
+                jdbcTypeNameBuilder.buildJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers) : null;
     }
 
-    protected String compileJdbcTypeName(String jdbcTypeName, JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        if (!StringUtils.isEmpty(jdbcTypeName)) {
-            Integer size = jdbcTypeSpecifiers.getSize();
-            Integer precision = jdbcTypeSpecifiers.getPrecision();
-            Integer scale = jdbcTypeSpecifiers.getScale();
-            jdbcTypeName = compileJdbcTypeName(jdbcTypeName, SIZE,
-                    size != null ? Integer.toString(size) : null);
-            jdbcTypeName = compileJdbcTypeName(jdbcTypeName, PRECISION,
-                    precision != null ? Integer.toString(precision) : null);
-            jdbcTypeName = compileJdbcTypeName(jdbcTypeName, SCALE,
-                    scale != null ? Integer.toString(scale) : null);
-        }
-        return jdbcTypeName;
-    }
-
-    protected String compileJdbcTypeName(String typeName, String variable, String value) {
-        Pattern pattern = Pattern.compile(quote(VARIABLE_PREFIX + variable + VARIABLE_SUFFIX), CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(typeName);
-        return value != null && matcher.find() ? matcher.replaceAll(value) : typeName;
+    protected JdbcTypeNameBuilder getJdbcTypeName(JdbcTypeDesc jdbcTypeDesc) {
+        Map<JdbcTypeSpecifiers, JdbcTypeNameBuilder> jdbcTypeSpecifiersMap = jdbcTypeDescMap.get(jdbcTypeDesc);
+        return jdbcTypeSpecifiersMap != null ? jdbcTypeSpecifiersMap.get(null) : null;
     }
 
     protected int compareJdbcTypeSpecifiers(JdbcTypeSpecifiers jdbcTypeSpecifiers1,
@@ -145,7 +117,7 @@ public class JdbcTypeNameMap {
     }
 
     public void removeJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        Map<JdbcTypeSpecifiers, String> jdbcTypeSpecifiersMap = jdbcTypeDescMap.get(jdbcTypeDesc);
+        Map<JdbcTypeSpecifiers, JdbcTypeNameBuilder> jdbcTypeSpecifiersMap = jdbcTypeDescMap.get(jdbcTypeDesc);
         if (jdbcTypeSpecifiersMap != null) {
             jdbcTypeSpecifiersMap.remove(jdbcTypeSpecifiers);
         }

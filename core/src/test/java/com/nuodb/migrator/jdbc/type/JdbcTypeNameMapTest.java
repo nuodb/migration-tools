@@ -47,15 +47,15 @@ public class JdbcTypeNameMapTest {
     @BeforeMethod
     public void setUp() {
         jdbcTypeNameMap.addJdbcTypeName(Types.DOUBLE, "DOUBLE");
-        jdbcTypeNameMap.addJdbcTypeName(Types.TIME, "TIME", newScale(0));
+        jdbcTypeNameMap.addJdbcTypeName(Types.TIME, newScale(0), "TIME");
         jdbcTypeNameMap.addJdbcTypeName(Types.TIME, "TIME({S})");
         jdbcTypeNameMap.addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
         jdbcTypeNameMap.addJdbcTypeName(Types.CHAR, "CHAR({N})");
         jdbcTypeNameMap.addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
         jdbcTypeNameMap.addJdbcTypeName(Types.BIGINT, "BIGINT");
-        jdbcTypeNameMap.addJdbcTypeName(Types.BIGINT, "NUMBER({P})", newPrecision(20));
+        jdbcTypeNameMap.addJdbcTypeName(Types.BIGINT, newPrecision(20), "NUMBER({P})");
         jdbcTypeNameMap.addJdbcTypeName(Types.BIT, "BIT({N})");
-        jdbcTypeNameMap.addJdbcTypeName(Types.BIT, "BOOLEAN", newSize(1));
+        jdbcTypeNameMap.addJdbcTypeName(Types.BIT, newSize(1), "BOOLEAN");
     }
 
     @DataProvider(name = "getTypeName")

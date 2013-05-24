@@ -32,12 +32,14 @@ import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifiersBuilder;
 
 import java.sql.Types;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.*;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newScale;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSize;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static java.util.regex.Pattern.compile;
@@ -70,16 +72,14 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     protected void initJdbcTypeNames() {
-        addJdbcTypeName(Types.BIT, "BOOLEAN", newSize(1));
+        addJdbcTypeName(Types.BIT, newSize(0), "BOOLEAN");
+        addJdbcTypeName(Types.BIT, newSize(1), "BOOLEAN");
         addJdbcTypeName(Types.TINYINT, "SMALLINT");
         addJdbcTypeName(Types.SMALLINT, "SMALLINT");
 
         addJdbcTypeName(Types.INTEGER, "INTEGER");
-        addJdbcTypeName(Types.INTEGER, "NUMERIC({P})", newPrecision(11));
 
         addJdbcTypeName(Types.BIGINT, "BIGINT");
-        // Maximum precision should be 20
-        addJdbcTypeName(Types.BIGINT, "NUMERIC({P})", newPrecision(21));
         addJdbcTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
         addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
 
@@ -94,9 +94,9 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
 
         addJdbcTypeName(Types.DATE, "DATE");
-        addJdbcTypeName(Types.TIME, "TIME", newScale(0));
+        addJdbcTypeName(Types.TIME, newScale(0), "TIME");
         addJdbcTypeName(Types.TIME, "TIME({S})");
-        addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP", newScale(0));
+        addJdbcTypeName(Types.TIMESTAMP, newScale(0), "TIMESTAMP");
         addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP({S})");
 
         addJdbcTypeName(Types.BINARY, "BINARY({N})");
@@ -115,7 +115,8 @@ public class NuoDBDialect extends SimpleDialect {
 
         addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
-        addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"), "NUMERIC({N})");
+        addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"),
+                new JdbcTypeNameChangeSpecifiersBuilder("NUMERIC({N})", 1));
     }
 
     @Override

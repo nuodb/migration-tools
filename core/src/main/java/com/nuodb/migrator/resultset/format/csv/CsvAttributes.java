@@ -59,13 +59,22 @@ public interface CsvAttributes {
     final String ATTRIBUTE_LINE_SEPARATOR = "csv.line.separator";
 
     final String FORMAT_TYPE = "csv";
+    final String ATTRIBUTE_LINE_SEPARATOR_CRLF = "CRLF";
+    final String ATTRIBUTE_LINE_SEPARATOR_CR = "CR";
+    final String ATTRIBUTE_LINE_SEPARATOR_LF = "LF";
+
+    final String LINE_SEPARATOR_CRLF = "\r\n";
+    final String LINE_SEPARATOR_CR = "\r";
+    final String LINE_SEPARATOR_LF = "\n";
+    final String LINE_SEPARATOR = LINE_SEPARATOR_CRLF;
+
     final String ATTRIBUTE_DELIMITER_TAB = "tab";
+    final Character DELIMITER_TAB = '\t';
+    final Character DELIMITER_COMMA = ',';
+    final Character DELIMITER = DELIMITER_COMMA;
+
     final char COMMENT_START = '#';
     final String ENCODING = getProperty("file.encoding");
-    final Character TAB = '\t';
-    final Character COMMA = ',';
-    final Character DELIMITER = COMMA;
-    final String LINE_SEPARATOR = "\r\n";
     final boolean QUOTING = false;
     final Character QUOTE = '"';
     final Character ESCAPE = '|';
