@@ -57,7 +57,7 @@ public class DriverConnectionSpecProvider extends ConnectionProxyProviderBase<Dr
             DriverConnectionSpec driverConnectionSpec = getConnectionSpec();
 
             BasicDataSource basicDataSource = new BasicDataSource();
-            basicDataSource.setDriverClassName(driverConnectionSpec.getDriverClassName());
+            basicDataSource.setDriverClassName(driverConnectionSpec.getDriver());
             basicDataSource.setDriverClassLoader(ReflectionUtils.getClassLoader());
             basicDataSource.setUrl(driverConnectionSpec.getUrl());
             basicDataSource.setUsername(driverConnectionSpec.getUsername());

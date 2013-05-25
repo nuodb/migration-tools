@@ -54,8 +54,8 @@ public class XmlPersisterBuilder implements XmlConstants {
         handlerRegistryReader.read(handlerRegistry);
 
         XmlAliasTypeMapper<Spec> aliasTypeMapper = new XmlAliasTypeMapper<Spec>();
-        aliasTypeMapper.bind(MIGRATION_NAMESPACE, CONNECTION_ELEMENT, JDBC, DriverConnectionSpec.class);
-        aliasTypeMapper.bind(MIGRATION_NAMESPACE, TASK_ELEMENT, DUMP, DumpSpec.class);
+        aliasTypeMapper.bind(MIGRATOR_NAMESPACE, CONNECTION_ELEMENT, JDBC, DriverConnectionSpec.class);
+        aliasTypeMapper.bind(MIGRATOR_NAMESPACE, TASK_ELEMENT, DUMP, DumpSpec.class);
         handlerRegistry.registerHandler(aliasTypeMapper, Priority.LOW);
 
         return new XmlPersister(handlerRegistry);
@@ -69,7 +69,7 @@ public class XmlPersisterBuilder implements XmlConstants {
         MigratorSpec migratorSpec = new MigratorSpec();
         DriverConnectionSpec connection = new DriverConnectionSpec();
         connection.setId("mysql");
-        connection.setDriverClassName("com.mysql.jdbc.Driver");
+        connection.setDriver("com.mysql.jdbc.Driver");
         connection.setUrl("jdbc:mysql://localhost:3306/test");
         connection.setUsername("root");
         migratorSpec.setConnectionSpecs(Arrays.asList(connection));

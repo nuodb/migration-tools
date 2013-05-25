@@ -95,7 +95,7 @@ public class CliSchemaJobTest {
         SchemaSpec schemaSpec = new SchemaSpec();
 
         DriverConnectionSpec sourceConnectionSpec = new DriverConnectionSpec();
-        sourceConnectionSpec.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+        sourceConnectionSpec.setDriver("oracle.jdbc.driver.OracleDriver");
         sourceConnectionSpec.setUrl("jdbc:oracle:thin:@//localhost:1521/test");
         sourceConnectionSpec.setUsername("test");
         sourceConnectionSpec.setPassword("12345");
@@ -103,7 +103,7 @@ public class CliSchemaJobTest {
         schemaSpec.setSourceConnectionSpec(sourceConnectionSpec);
 
         DriverConnectionSpec targetConnectionSpec = new DriverConnectionSpec();
-        targetConnectionSpec.setDriverClassName(NUODB_DRIVER);
+        targetConnectionSpec.setDriver(NUODB_DRIVER);
         targetConnectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
         targetConnectionSpec.setUsername("dba");
         targetConnectionSpec.setPassword("goalie");

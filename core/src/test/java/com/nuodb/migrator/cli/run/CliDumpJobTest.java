@@ -94,7 +94,7 @@ public class CliDumpJobTest {
         DumpSpec dumpSpec = new DumpSpec();
 
         DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
-        connectionSpec.setDriverClassName("com.mysql.jdbc.Driver");
+        connectionSpec.setDriver("com.mysql.jdbc.Driver");
         connectionSpec.setUrl("jdbc:mysql://localhost:3306/test");
         connectionSpec.setUsername("root");
         connectionSpec.setCatalog("test");

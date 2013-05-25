@@ -32,8 +32,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.Quote;
 
 import java.util.Map;
+import java.util.TreeMap;
 
-import static com.google.common.collect.Maps.newTreeMap;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.apache.commons.csv.CSVFormat.CSVFormatBuilder;
@@ -48,10 +48,10 @@ class CsvFormatBuilder implements CsvAttributes {
     private static Map<String, String> LINE_SEPARATORS;
 
     static {
-        DELIMITERS = newTreeMap(CASE_INSENSITIVE_ORDER);
+        DELIMITERS = new TreeMap<String, Character>(CASE_INSENSITIVE_ORDER);
         DELIMITERS.put(ATTRIBUTE_DELIMITER_TAB, DELIMITER_TAB);
 
-        LINE_SEPARATORS = newTreeMap(CASE_INSENSITIVE_ORDER);
+        LINE_SEPARATORS = new TreeMap<String, String>(CASE_INSENSITIVE_ORDER);
         LINE_SEPARATORS.put(ATTRIBUTE_LINE_SEPARATOR_CRLF, LINE_SEPARATOR_CRLF);
         LINE_SEPARATORS.put(ATTRIBUTE_LINE_SEPARATOR_CR, LINE_SEPARATOR_CR);
         LINE_SEPARATORS.put(ATTRIBUTE_LINE_SEPARATOR_LF, LINE_SEPARATOR_LF);

@@ -33,7 +33,7 @@ public interface XmlConstants {
 
     final String TYPE_ATTRIBUTE = "type";
 
-    final String MIGRATION_NAMESPACE = "http://nuodb.com/schema/migrator";
+    final String MIGRATOR_NAMESPACE = "http://nuodb.com/schema/migrator";
 
     final String CONNECTION_ELEMENT = "connection";
 

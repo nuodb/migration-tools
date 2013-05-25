@@ -88,7 +88,7 @@ public class CliLoadJobTest {
         LoadSpec loadSpec = new LoadSpec();
 
         DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
-        connectionSpec.setDriverClassName(NUODB_DRIVER);
+        connectionSpec.setDriver(NUODB_DRIVER);
         connectionSpec.setUrl("jdbc:com.nuodb://localhost/test?schema=hockey");
         connectionSpec.setUsername("dba");
         connectionSpec.setPassword("goalie");

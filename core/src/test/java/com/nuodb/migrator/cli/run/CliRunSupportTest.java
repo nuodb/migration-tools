@@ -79,7 +79,7 @@ public class CliRunSupportTest {
         };
 
         DriverConnectionSpec expected = new DriverConnectionSpec();
-        expected.setDriverClassName("com.mysql.jdbc.Driver");
+        expected.setDriver("com.mysql.jdbc.Driver");
         expected.setUrl("jdbc:mysql://localhost:3306/test");
         expected.setUsername("root");
         expected.setCatalog("test");
@@ -182,7 +182,7 @@ public class CliRunSupportTest {
         };
 
         DriverConnectionSpec expected = new DriverConnectionSpec();
-        expected.setDriverClassName(JdbcConstants.NUODB_DRIVER);
+        expected.setDriver(JdbcConstants.NUODB_DRIVER);
         expected.setUrl("jdbc:com.nuodb://localhost/test");
         expected.setUsername("dba");
         expected.setPassword("goalie");

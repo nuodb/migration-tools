@@ -9,7 +9,7 @@ public class TestUtils {
         connectionSpec.setUrl("jdbc:com.nuodb://localhost/test");
         connectionSpec.setUsername("dba");
         connectionSpec.setPassword("goalie");
-        connectionSpec.setDriverClassName("com.nuodb.jdbc.Driver");
+        connectionSpec.setDriver("com.nuodb.jdbc.Driver");
         return connectionSpec;
     }
 }

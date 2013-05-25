@@ -44,12 +44,12 @@ public class XmlDriverConnectionSpecHandler extends XmlReadWriteHandlerBase<Driv
 
     @Override
     protected boolean write(DriverConnectionSpec connection, OutputNode output, XmlWriteContext context) throws Exception {
-        output.getNamespaces().setReference(MIGRATION_NAMESPACE);
+        output.getNamespaces().setReference(MIGRATOR_NAMESPACE);
         set(output, ID_ATTRIBUTE, connection.getId());
         set(output, TYPE_ATTRIBUTE, connection.getType());
         output.getChild("catalog").setValue(connection.getCatalog());
         output.getChild("schema").setValue(connection.getSchema());
-        output.getChild("driver").setValue(connection.getDriverClassName());
+        output.getChild("driver").setValue(connection.getDriver());
         output.getChild("url").setValue(connection.getUrl());
         output.getChild("username").setValue(connection.getUsername());
         output.getChild("password").setValue(connection.getPassword());

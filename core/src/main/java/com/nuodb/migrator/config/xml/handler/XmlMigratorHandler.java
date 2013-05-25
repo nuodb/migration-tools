@@ -47,7 +47,7 @@ public class XmlMigratorHandler extends XmlReadWriteHandlerBase<MigratorSpec> im
 
     @Override
     public boolean write(MigratorSpec migratorSpec, OutputNode output, XmlWriteContext context) throws Exception {
-        output.getNamespaces().setReference(MIGRATION_NAMESPACE);
+        output.getNamespaces().setReference(MIGRATOR_NAMESPACE);
         for (ConnectionSpec connection : migratorSpec.getConnectionSpecs()) {
             context.write(connection, ConnectionSpec.class, output.getChild(CONNECTION_ELEMENT));
         }
