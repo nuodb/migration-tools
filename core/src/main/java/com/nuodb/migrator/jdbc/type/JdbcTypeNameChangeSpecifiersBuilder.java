@@ -51,8 +51,8 @@ public class JdbcTypeNameChangeSpecifiersBuilder extends JdbcTypeNameTemplateBui
     @Override
     protected String expandPrecision(String template, Integer precision) {
         Integer precisionDelta = getPrecisionDelta();
-        return super.expandPrecision(template,
-                precisionDelta != null && precision != null ? precisionDelta + precision : precision);
+        return super.expandPrecision(template, precisionDelta != null && precision != null ?
+                precisionDelta + precision : precision);
     }
 
     @Override
