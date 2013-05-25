@@ -46,8 +46,4 @@ public class ScriptEscapeUtils {
     public String escapeDefaultValue(String input) {
         return defaultValueTranslator.translate(input);
     }
-
-    public boolean isEscapeChar(char symbol) {
-        return symbol == '\\';
-    }
 }

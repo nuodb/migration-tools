@@ -30,7 +30,7 @@ package com.nuodb.migrator.config.xml;
 import com.nuodb.migrator.config.xml.handler.XmlAliasTypeMapper;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.DumpSpec;
-import com.nuodb.migrator.spec.MigrationSpec;
+import com.nuodb.migrator.spec.MigratorSpec;
 import com.nuodb.migrator.spec.Spec;
 import com.nuodb.migrator.utils.Priority;
 
@@ -66,21 +66,21 @@ public class XmlPersisterBuilder implements XmlConstants {
         builder.addRegistry(XML_HANDLER_REGISTRY);
         XmlPersister persister = builder.build();
 
-        MigrationSpec migrationSpec = new MigrationSpec();
+        MigratorSpec migratorSpec = new MigratorSpec();
         DriverConnectionSpec connection = new DriverConnectionSpec();
         connection.setId("mysql");
         connection.setDriverClassName("com.mysql.jdbc.Driver");
         connection.setUrl("jdbc:mysql://localhost:3306/test");
         connection.setUsername("root");
-        migrationSpec.setConnectionSpecs(Arrays.asList(connection));
+        migratorSpec.setConnectionSpecs(Arrays.asList(connection));
 
 
         System.out.println("Writing migrator:");
-        persister.write(migrationSpec, System.out);
+        persister.write(migratorSpec, System.out);
 
         System.out.println("\n");
         System.out.println("Reading migrator:");
-        migrationSpec = persister.read(MigrationSpec.class,
+        migratorSpec = persister.read(MigratorSpec.class,
                 new ByteArrayInputStream((
                         "<?xml version=\"1.0\"?>\n" +
                         "<migrator xmlns=\"http://nuodb.com/schema/migrator\">\n" +
@@ -88,6 +88,6 @@ public class XmlPersisterBuilder implements XmlConstants {
                         "   <connection id=\"mysql\" type=\"jdbc\"/>\n" +
                         "   <connection id=\"\" type=\"jdbc\"/>\n" +
                         "</migrator>").getBytes()));
-        System.out.println(migrationSpec);
+        System.out.println(migratorSpec);
     }
 }

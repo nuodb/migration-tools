@@ -31,7 +31,7 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-public class MigrationSpec {
+public class MigratorSpec {
 
     private List<? extends ConnectionSpec> connectionSpecs = Lists.newArrayList();
     private List<? extends JobSpec> taskSpecs = Lists.newArrayList();

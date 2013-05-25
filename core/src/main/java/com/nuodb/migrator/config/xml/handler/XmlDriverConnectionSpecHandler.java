@@ -36,9 +36,9 @@ import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Map;
 
-public class XmlJdbcConnectionHandler extends XmlReadWriteHandlerBase<DriverConnectionSpec> implements XmlConstants {
+public class XmlDriverConnectionSpecHandler extends XmlReadWriteHandlerBase<DriverConnectionSpec> implements XmlConstants {
 
-    public XmlJdbcConnectionHandler() {
+    public XmlDriverConnectionSpecHandler() {
         super(DriverConnectionSpec.class);
     }
 

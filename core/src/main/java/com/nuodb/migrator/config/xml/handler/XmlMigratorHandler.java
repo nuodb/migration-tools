@@ -33,32 +33,32 @@ import com.nuodb.migrator.config.xml.XmlReadContext;
 import com.nuodb.migrator.config.xml.XmlWriteContext;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.JobSpec;
-import com.nuodb.migrator.spec.MigrationSpec;
+import com.nuodb.migrator.spec.MigratorSpec;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.List;
 
-public class XmlMigrationHandler extends XmlReadWriteHandlerBase<MigrationSpec> implements XmlConstants {
+public class XmlMigratorHandler extends XmlReadWriteHandlerBase<MigratorSpec> implements XmlConstants {
 
-    public XmlMigrationHandler() {
-        super(MigrationSpec.class);
+    public XmlMigratorHandler() {
+        super(MigratorSpec.class);
     }
 
     @Override
-    public boolean write(MigrationSpec migrationSpec, OutputNode output, XmlWriteContext context) throws Exception {
+    public boolean write(MigratorSpec migratorSpec, OutputNode output, XmlWriteContext context) throws Exception {
         output.getNamespaces().setReference(MIGRATION_NAMESPACE);
-        for (ConnectionSpec connection : migrationSpec.getConnectionSpecs()) {
+        for (ConnectionSpec connection : migratorSpec.getConnectionSpecs()) {
             context.write(connection, ConnectionSpec.class, output.getChild(CONNECTION_ELEMENT));
         }
-        for (JobSpec task : migrationSpec.getTaskSpecs()) {
+        for (JobSpec task : migratorSpec.getTaskSpecs()) {
             context.write(task, JobSpec.class, output.getChild(TASK_ELEMENT));
         }
         return true;
     }
 
     @Override
-    protected void read(InputNode input, MigrationSpec migrationSpec, XmlReadContext context) throws Exception {
+    protected void read(InputNode input, MigratorSpec migratorSpec, XmlReadContext context) throws Exception {
         List<ConnectionSpec> connections = Lists.newArrayList();
         List<JobSpec> tasks = Lists.newArrayList();
         InputNode node;
@@ -72,7 +72,7 @@ public class XmlMigrationHandler extends XmlReadWriteHandlerBase<MigrationSpec> 
                 tasks.add(context.read(node, JobSpec.class));
             }
         }
-        migrationSpec.setConnectionSpecs(connections);
-        migrationSpec.setTaskSpecs(tasks);
+        migratorSpec.setConnectionSpecs(connections);
+        migratorSpec.setTaskSpecs(tasks);
     }
 }
