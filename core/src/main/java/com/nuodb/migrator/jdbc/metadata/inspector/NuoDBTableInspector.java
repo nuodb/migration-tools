@@ -83,6 +83,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
         if (tableTypes != null && tableTypes.length > 0) {
             StringBuilder filter = new StringBuilder("TYPE IN");
             filter.append(' ');
+            filter.append('(');
             for (int i = 0, length = tableTypes.length; i < length; i++) {
                 String tableType = tableTypes[i];
                 filter.append('?');
