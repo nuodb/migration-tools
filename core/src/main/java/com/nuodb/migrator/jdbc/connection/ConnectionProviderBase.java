@@ -65,7 +65,7 @@ public abstract class ConnectionProviderBase<C extends ConnectionSpec> implement
     @Override
     public Connection getConnection() throws SQLException {
         if (logger.isDebugEnabled()) {
-            logger.debug(format("Acquiring connection using %s", getConnectionSpec()));
+            logger.debug(format("Creating connection using %s", getConnectionSpec()));
         }
         Connection connection = createConnection();
         initConnection(connection);

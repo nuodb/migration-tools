@@ -50,7 +50,7 @@ public class Sequence extends IdentifiableBase {
     private Integer cache;
 
     protected Sequence(MetaDataType objectType) {
-        super(objectType);
+        super(objectType, true);
     }
 
     public Column getColumn() {

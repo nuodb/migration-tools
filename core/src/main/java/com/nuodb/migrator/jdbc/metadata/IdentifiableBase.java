@@ -43,6 +43,11 @@ public class IdentifiableBase extends IndentedBase implements Identifiable {
         this(objectType, Identifier.EMPTY_IDENTIFIER);
     }
 
+    public IdentifiableBase(MetaDataType objectType, boolean qualified) {
+        this.objectType = objectType;
+        this.qualified = qualified;
+    }
+
     public IdentifiableBase(MetaDataType objectType, String name) {
         this(objectType, Identifier.valueOf(name));
     }

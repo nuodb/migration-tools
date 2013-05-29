@@ -57,9 +57,6 @@ public class SimpleQueryFormatter implements QueryFormatter {
     }
 
     public String format() {
-        if (query.startsWith("IN")) {
-            System.out.println("SimpleStatementFormatter.format");
-        }
         Matcher matcher = PARAMETER_PATTERN.matcher(query);
         StringBuffer result = new StringBuffer(query.length());
         int index = 0;
