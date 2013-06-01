@@ -123,13 +123,18 @@ public class NuoDBDialect extends SimpleDialect {
     protected void initScriptTranslations() {
         addScriptTranslations(new DatabaseInfo("MySQL"),
                 newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()",
-                        "LOCALTIME", "LOCALTIME()", "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW()");
+                        "LOCALTIME", "LOCALTIME()", "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW");
 
         addScriptTranslations(new DatabaseInfo("Microsoft SQL Server"),
-                newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW()");
+                newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW");
         addScriptTranslationRegex(new DatabaseInfo("Microsoft SQL Server"), "N'(.*)'", "$1");
 
+        addScriptTranslations(new DatabaseInfo("PostgreSQL"),
+                newArrayList("CURRENT_TIMESTAMP", "NOW()"), "NOW");
         addScriptTranslationRegex(new DatabaseInfo("PostgreSQL"), "'(.*)'::.*", "$1");
+
+        addScriptTranslations(new DatabaseInfo("Oracle"),
+                newArrayList("CURRENT_DATE", "SYSDATE"), "NOW");
     }
 
     @Override
