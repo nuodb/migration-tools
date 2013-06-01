@@ -27,44 +27,71 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import com.nuodb.migrator.utils.ObjectUtils;
+
 /**
  * @author Sergey Bushik
  */
 public class DefaultValue {
 
     private String value;
+    private boolean processed;
 
     private DefaultValue(String value) {
         this.value = value;
     }
 
+    public DefaultValue(String value, boolean processed) {
+        this.value = value;
+        this.processed = processed;
+    }
+
     public static DefaultValue valueOf(String value) {
-        return value != null ? new DefaultValue(value) : null;
+        return valueOf(value, false);
+    }
+
+    public static DefaultValue valueOf(String value, boolean processed) {
+        return value != null ? new DefaultValue(value, processed) : null;
     }
 
     public String getValue() {
         return value;
     }
 
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public boolean isProcessed() {
+        return processed;
+    }
+
+    public void setProcessed(boolean processed) {
+        this.processed = processed;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof DefaultValue)) return false;
 
         DefaultValue that = (DefaultValue) o;
 
         if (value != null ? !value.equals(that.value) : that.value != null) return false;
+        if (processed != that.processed) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return value != null ? value.hashCode() : 0;
+        int result = value != null ? value.hashCode() : 0;
+        result = 31 * result + (processed ? 1 : 0);
+        return result;
     }
 
     @Override
     public String toString() {
-        return value;
+        return ObjectUtils.toString(this);
     }
 }

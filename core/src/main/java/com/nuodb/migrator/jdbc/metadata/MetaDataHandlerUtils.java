@@ -38,12 +38,21 @@ public class MetaDataHandlerUtils {
 
     public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,
                                                                     MetaData object) {
-        return findMetaDataHandler(objectHandlers, object.getObjectType(), true);
+        return findMetaDataHandler(objectHandlers, object, true);
     }
 
     public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,
                                                                     MetaData object, boolean required) {
-        return findMetaDataHandler(objectHandlers, object.getObjectType(), required);
+        for (T objectHandler : objectHandlers) {
+            if (objectHandler.supports(object)) {
+                return objectHandler;
+            }
+        }
+        if (required) {
+            throw new MetaDataException(format("Required %s handler not found", object));
+        } else {
+            return null;
+        }
     }
 
     public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,

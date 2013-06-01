@@ -27,14 +27,11 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DefaultValue;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.model.ValueModel;
-import com.nuodb.migrator.jdbc.model.ValueModelList;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -62,44 +59,90 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        DatabaseMetaData metaData = inspectionContext.getConnection().getMetaData();
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        Dialect dialect = inspectionContext.getDialect();
         for (TableInspectionScope inspectionScope : inspectionScopes) {
-            ResultSet columns = metaData.getColumns(
+            ResultSet columns = inspectionContext.getConnection().getMetaData().getColumns(
                     inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable(), null);
-            ValueModelList<ValueModel> columnsModel = createValueModelList(columns.getMetaData());
+            InspectionResults inspectionResults = inspectionContext.getInspectionResults();
             try {
                 while (columns.next()) {
-                    Table table = addTable(inspectionResults, columns.getString("TABLE_CAT"),
-                            columns.getString("TABLE_SCHEM"), columns.getString("TABLE_NAME"));
-
-                    Column column = table.addColumn(columns.getString("COLUMN_NAME"));
-
-                    JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeDescAlias(
-                            columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
-                    column.setTypeCode(typeDescAlias.getTypeCode());
-                    column.setTypeName(typeDescAlias.getTypeName());
-
-                    int columnSize = columns.getInt("COLUMN_SIZE");
-                    column.setSize(columnSize);
-                    column.setPrecision(columnSize);
-                    column.setDefaultValue(valueOf(columns.getString("COLUMN_DEF")));
-                    column.setScale(columns.getInt("DECIMAL_DIGITS"));
-                    column.setComment(columns.getString("REMARKS"));
-                    column.setPosition(columns.getInt("ORDINAL_POSITION"));
-                    String nullable = columns.getString("IS_NULLABLE");
-                    column.setNullable("YES".equals(nullable));
-                    String autoIncrement = columnsModel.get("IS_AUTOINCREMENT") != null ?
-                            columns.getString("IS_AUTOINCREMENT") : null;
-                    column.setAutoIncrement("YES".equals(autoIncrement));
-
-                    inspectionResults.addObject(column);
+                    inspectionResults.addObject(getColumn(inspectionContext, columns));
                 }
             } finally {
                 close(columns);
             }
         }
+    }
+
+    protected Column getColumn(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        Table table = addTable(inspectionResults, columns.getString("TABLE_CAT"),
+                columns.getString("TABLE_SCHEM"), columns.getString("TABLE_NAME"));
+        Column column = table.addColumn(columns.getString("COLUMN_NAME"));
+        initColumn(inspectionContext, columns, column);
+        return column;
+    }
+
+    protected void initColumn(InspectionContext inspectionContext, ResultSet columns,
+                              Column column) throws SQLException {
+        initTypeDesc(inspectionContext, columns, column);
+        initComment(columns, column);
+        initPosition(columns, column);
+        initAutoIncrement(inspectionContext, column, columns);
+        initNullable(inspectionContext, column, columns);
+        initDefaultValue(inspectionContext, column, columns);
+    }
+
+    protected void initTypeDesc(InspectionContext inspectionContext, ResultSet columns,
+                                Column column) throws SQLException {
+        JdbcTypeDesc typeDescAlias = inspectionContext.getDialect().getJdbcTypeDescAlias(
+                columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
+        column.setTypeCode(typeDescAlias.getTypeCode());
+        column.setTypeName(typeDescAlias.getTypeName());
+
+        int columnSize = columns.getInt("COLUMN_SIZE");
+        column.setSize(columnSize);
+        column.setPrecision(columnSize);
+        column.setScale(columns.getInt("DECIMAL_DIGITS"));
+    }
+
+    protected void initComment(ResultSet columns, Column column) throws SQLException {
+        column.setComment(columns.getString("REMARKS"));
+    }
+
+    protected void initPosition(ResultSet columns, Column column) throws SQLException {
+        column.setPosition(columns.getInt("ORDINAL_POSITION"));
+    }
+
+    protected void initAutoIncrement(InspectionContext inspectionContext, Column column,
+                                     ResultSet columns) throws SQLException {
+        column.setAutoIncrement(isAutoIncrement(inspectionContext, column, columns));
+    }
+
+    protected boolean isAutoIncrement(InspectionContext inspectionContext, Column column,
+                                      ResultSet columns) throws SQLException {
+        String autoIncrement = createValueModelList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
+                columns.getString("IS_AUTOINCREMENT") : null;
+        return "YES".equals(autoIncrement);
+    }
+
+    protected void initNullable(InspectionContext inspectionContext, Column column,
+                                ResultSet columns) throws SQLException {
+        column.setNullable(isNullable(inspectionContext, column, columns));
+    }
+
+    protected boolean isNullable(InspectionContext inspectionContext, Column column,
+                                 ResultSet columns) throws SQLException {
+        return "YES".equals(columns.getString("IS_NULLABLE"));
+    }
+
+    protected void initDefaultValue(InspectionContext inspectionContext, Column column,
+                                    ResultSet columns) throws SQLException {
+        column.setDefaultValue(getDefaultValue(inspectionContext, column, columns));
+    }
+
+    protected DefaultValue getDefaultValue(InspectionContext inspectionContext, Column column,
+                                           ResultSet columns) throws SQLException {
+        return valueOf(columns.getString("COLUMN_DEF"));
     }
 
     @Override

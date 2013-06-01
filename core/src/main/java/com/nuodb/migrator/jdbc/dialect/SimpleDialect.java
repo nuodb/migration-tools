@@ -33,7 +33,6 @@ import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.jdbc.resolve.ServiceResolver;
 import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolverAware;
 import com.nuodb.migrator.jdbc.type.*;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
@@ -42,10 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Iterables.get;
@@ -120,6 +116,49 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     protected void initScriptTranslations() {
     }
 
+    protected PatternScriptTranslator addScriptTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript,
+                                                           String targetScript) {
+        PatternScriptTranslator patternScriptTranslator = new PatternScriptTranslator(
+                sourceDatabaseInfo, getDatabaseInfo());
+        patternScriptTranslator.addScriptTranslation(sourceScript, targetScript);
+        addScriptTranslator(patternScriptTranslator);
+        return patternScriptTranslator;
+    }
+
+    protected PatternScriptTranslator addScriptTranslations(DatabaseInfo sourceDatabaseInfo,
+                                                            Collection<String> sourceScripts,
+                                                            String targetScript) {
+        PatternScriptTranslator patternScriptTranslator = new PatternScriptTranslator(
+                sourceDatabaseInfo, getDatabaseInfo());
+        patternScriptTranslator.addScriptTranslations(sourceScripts, targetScript);
+        addScriptTranslator(patternScriptTranslator);
+        return patternScriptTranslator;
+    }
+
+    protected PatternScriptTranslator addScriptTranslationRegex(DatabaseInfo sourceDatabaseInfo,
+                                                                String sourceScriptRegex,
+                                                                String targetScript) {
+        PatternScriptTranslator patternScriptTranslator = new PatternScriptTranslator(
+                sourceDatabaseInfo, getDatabaseInfo());
+        patternScriptTranslator.addScriptTranslationRegex(sourceScriptRegex, targetScript);
+        addScriptTranslator(patternScriptTranslator);
+        return patternScriptTranslator;
+    }
+
+    protected PatternScriptTranslator addScriptTranslationRegex(DatabaseInfo sourceDatabaseInfo,
+                                                                Pattern sourceScriptPattern,
+                                                                String targetScript) {
+        PatternScriptTranslator patternScriptTranslator = new PatternScriptTranslator(
+                sourceDatabaseInfo, getDatabaseInfo());
+        patternScriptTranslator.addScriptTranslationPattern(sourceScriptPattern, targetScript);
+        addScriptTranslator(patternScriptTranslator);
+        return patternScriptTranslator;
+    }
+
+    protected void addScriptTranslator(ScriptTranslator scriptTranslator) {
+        getScriptTranslationManager().addScriptTranslator(scriptTranslator);
+    }
+
     @Override
     public String getIdentifier(String identifier, Identifiable identifiable) {
         if (identifier == null) {
@@ -168,17 +207,18 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return valueOf('"');
     }
 
-    protected void addScriptTranslation(DatabaseInfo databaseInfo, String sourceScript, String targetScript) {
-        getScriptTranslationManager().addScriptTranslation(
-                new ScriptTranslation(databaseInfo, this,
-                        new SimpleScript(sourceScript), new SimpleScript(targetScript)));
+    @Override
+    public String translateScript(String sourceScript, DatabaseInfo sourceDatabaseInfo) {
+        if (sourceScript.equals("CURRENT_TIMESTAMP")) {
+            System.out.println("SimpleDialect.translateScript");
+        }
+        Script targetScript = translateScript(new SimpleScript(sourceScript, sourceDatabaseInfo));
+        return targetScript != null ? targetScript.getScript() : sourceScript;
     }
 
     @Override
-    public String getScriptTranslation(DatabaseInfo databaseInfo, String script) {
-        Script targetScript = getScriptTranslationManager().getScriptTranslation(
-                databaseInfo, getDatabaseInfo(), new SimpleScript(script));
-        return targetScript != null ? targetScript.getScript() : null;
+    public Script translateScript(Script sourceScript) {
+        return getScriptTranslationManager().translateScript(sourceScript, getDatabaseInfo());
     }
 
     @Override
@@ -216,22 +256,19 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) {
+    public boolean supportsTransactionIsolation(int level) {
         return newArrayList(
-                TRANSACTION_NONE,
-                TRANSACTION_READ_UNCOMMITTED,
-                TRANSACTION_READ_COMMITTED,
-                TRANSACTION_REPEATABLE_READ,
-                TRANSACTION_SERIALIZABLE).contains(transactionIsolationLevel);
+                TRANSACTION_NONE, TRANSACTION_READ_UNCOMMITTED, TRANSACTION_READ_COMMITTED,
+                TRANSACTION_REPEATABLE_READ, TRANSACTION_SERIALIZABLE
+        ).contains(level);
     }
 
     @Override
-    public void setTransactionIsolationLevel(Connection connection,
-                                             int[] transactionIsolationLevels) throws SQLException {
-        if (transactionIsolationLevels != null) {
-            for (int transactionIsolationLevel : transactionIsolationLevels) {
-                if (supportsTransactionIsolationLevel(transactionIsolationLevel)) {
-                    connection.setTransactionIsolation(transactionIsolationLevel);
+    public void setTransactionIsolation(Connection connection, int[] levels) throws SQLException {
+        if (levels != null) {
+            for (int level : levels) {
+                if (supportsTransactionIsolation(level)) {
+                    connection.setTransactionIsolation(level);
                     return;
                 }
             }
@@ -264,7 +301,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         if (targetJdbcTypeNameMap == null) {
             DatabaseInfo targetDatabaseInfo = null;
             for (Map.Entry<DatabaseInfo, JdbcTypeNameMap> entry : jdbcTypeNameMaps.entrySet()) {
-                if (!entry.getKey().matches(databaseInfo)) {
+                if (!entry.getKey().successorOf(databaseInfo)) {
                     continue;
                 }
                 if (targetDatabaseInfo == null) {
@@ -309,12 +346,6 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     @Override
     public void setScriptTranslationManager(ScriptTranslationManager scriptTranslationManager) {
         this.scriptTranslationManager = scriptTranslationManager;
-    }
-
-    @Override
-    public void setServiceResolver(ServiceResolver<Dialect> serviceResolver) {
-        super.setServiceResolver(serviceResolver);
-        scriptTranslationManager.setServiceResolver(serviceResolver);
     }
 
     @Override
@@ -473,7 +504,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         if (defaultValue == null) {
             return null;
         }
-        defaultValue = getScriptTranslation(dialect.getDatabaseInfo(), defaultValue);
+        defaultValue = translateScript(defaultValue, dialect.getDatabaseInfo());
         String defaultValueUnquoted = defaultValue;
         boolean opening = false;
         if (defaultValue.startsWith("'")) {
@@ -645,7 +676,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, typeName);
     }
 
-    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers,  String typeName) {
+    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
         getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers, typeName);
     }
 
@@ -697,19 +728,13 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         SimpleDialect that = (SimpleDialect) o;
-
         if (identifierNormalizer != null ? !identifierNormalizer.equals(
                 that.identifierNormalizer) : that.identifierNormalizer != null) return false;
         if (jdbcTypeNameMaps != null ? !jdbcTypeNameMaps.equals(that.jdbcTypeNameMaps) : that.jdbcTypeNameMaps != null)
             return false;
         if (jdbcTypeRegistry != null ? !jdbcTypeRegistry.equals(that.jdbcTypeRegistry) : that.jdbcTypeRegistry != null)
             return false;
-        if (logger != null ? !logger.equals(that.logger) : that.logger != null) return false;
-        if (scriptTranslationManager != null ? !scriptTranslationManager.equals(
-                that.scriptTranslationManager) : that.scriptTranslationManager != null) return false;
-
         return true;
     }
 

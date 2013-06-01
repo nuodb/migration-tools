@@ -28,11 +28,9 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-
 
 /**
  * @author Sergey Bushik
@@ -40,19 +38,9 @@ import java.util.Collection;
 public class PostgreSQLColumnInspector extends SimpleColumnInspector {
 
     @Override
-    protected void inspectScopes(InspectionContext inspectionContext,
-                                 Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        InspectionResultsDelta inspectionResultsDelta = new InspectionResultsDelta(
-                inspectionContext.getInspectionResults());
-        inspectionContext.setInspectionResults(inspectionResultsDelta);
-        try {
-            super.inspectScopes(inspectionContext, inspectionScopes);
-            InspectionResults deltaInspectionResults = inspectionResultsDelta.getDeltaInspectionResults();
-            for (Column column : deltaInspectionResults.<Column>getObjects(MetaDataType.COLUMN)) {
-                PostgreSQLColumn.adopt(inspectionContext, column);
-            }
-        } finally {
-            inspectionContext.setInspectionResults(inspectionResultsDelta.getRootInspectionResults());
-        }
+    protected void initColumn(InspectionContext inspectionContext, ResultSet columns,
+                              Column column) throws SQLException {
+        super.initColumn(inspectionContext, columns, column);
+        PostgreSQLColumn.initColumn(inspectionContext, column);
     }
 }

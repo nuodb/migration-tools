@@ -25,16 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DefaultValue;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
+import static org.apache.commons.lang3.StringUtils.endsWith;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 /**
  * @author Sergey Bushik
  */
-public interface ScriptTranslator {
+public class MSSQLServerColumnInspector extends SimpleColumnInspector {
 
-    boolean canTranslateScript(Script sourceScript, DatabaseInfo targetDatabaseInfo);
-
-    Script translateScript(Script sourceScript, DatabaseInfo targetDatabaseInfo);
+    @Override
+    protected DefaultValue getDefaultValue(InspectionContext inspectionContext, Column column,
+                                           ResultSet columns) throws SQLException {
+        DefaultValue defaultValue = super.getDefaultValue(inspectionContext, column, columns);
+        if (defaultValue != null && !defaultValue.isProcessed()) {
+            String value = defaultValue.getValue();
+            while (startsWith(value, "(") && endsWith(value, ")")) {
+                value = value.substring(1, value.length() - 1);
+            }
+            defaultValue = valueOf(value);
+        }
+        return defaultValue;
+    }
 }

@@ -60,7 +60,7 @@ public interface Dialect {
 
     boolean supportsTableCheck();
 
-    boolean supportsTransactionIsolationLevel(int transactionIsolationLevel);
+    boolean supportsTransactionIsolation(int transactionIsolationLevel);
 
     boolean supportsIfExistsBeforeDropTable();
 
@@ -126,7 +126,7 @@ public interface Dialect {
 
     void setStreamResults(Statement statement, boolean streamResults) throws SQLException;
 
-    void setTransactionIsolationLevel(Connection connection, int[] transactionIsolationLevels) throws SQLException;
+    void setTransactionIsolation(Connection connection, int[] levels) throws SQLException;
 
     String openQuote();
 
@@ -144,7 +144,9 @@ public interface Dialect {
 
     JdbcTypeDesc getJdbcTypeDescAlias(int typeCode, String typeName);
 
-    String getScriptTranslation(DatabaseInfo databaseInfo, String script);
+    String translateScript(String script, DatabaseInfo databaseInfo);
+
+    Script translateScript(Script script);
 
     DatabaseInfo getDatabaseInfo();
 

@@ -120,9 +120,8 @@ public class ScriptGeneratorContext {
         namingStrategies.add(namingStrategy, priority);
     }
 
-    public NamingStrategy getNamingStrategy(MetaData metaData) {
-        return (NamingStrategy) findMetaDataHandler(namingStrategies,
-                metaData.getObjectType());
+    public NamingStrategy getNamingStrategy(MetaData object) {
+        return (NamingStrategy) findMetaDataHandler(namingStrategies, object);
     }
 
     public void addScriptGenerator(ScriptGenerator<? extends MetaData> scriptGenerator) {
@@ -134,7 +133,7 @@ public class ScriptGeneratorContext {
     }
 
     public ScriptGenerator getScriptGenerator(MetaData object) {
-        return (ScriptGenerator) findMetaDataHandler(scriptGenerators, object.getObjectType());
+        return (ScriptGenerator) findMetaDataHandler(scriptGenerators, object);
     }
 
     public Collection<String> getScripts(MetaData object) {

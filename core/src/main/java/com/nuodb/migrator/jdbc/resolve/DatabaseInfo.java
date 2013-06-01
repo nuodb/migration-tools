@@ -36,7 +36,6 @@ import java.sql.SQLException;
 import java.util.Comparator;
 
 import static com.google.common.collect.ComparisonChain.start;
-import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
 /**
@@ -67,7 +66,6 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
     }
 
     public DatabaseInfo(String productName, String productVersion, Integer majorVersion, Integer minorVersion) {
-        isNotNull(productName, "Product name is required");
         this.productName = productName;
         this.productVersion = productVersion;
         this.minorVersion = minorVersion;
@@ -106,7 +104,7 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
         this.minorVersion = minorVersion;
     }
 
-    public boolean matches(DatabaseInfo databaseInfo) {
+    public boolean successorOf(DatabaseInfo databaseInfo) {
         Ordering<Comparable> comparator = Ordering.natural().nullsLast();
         return start().
                 compare(productName, databaseInfo.productName, new Comparator<String>() {
@@ -158,5 +156,10 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
     @Override
     public String toString() {
         return ObjectUtils.toString(this);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("DatabaseInfo.main " + new DatabaseInfo("MySQL", "5", 7).successorOf(
+                new DatabaseInfo("MySQL", "5", 6)));
     }
 }

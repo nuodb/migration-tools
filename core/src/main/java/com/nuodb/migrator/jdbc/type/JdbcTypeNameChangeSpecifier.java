@@ -33,19 +33,33 @@ package com.nuodb.migrator.jdbc.type;
  *
  * @author Sergey Bushik
  */
-public class JdbcTypeNameChangeSpecifiersBuilder extends JdbcTypeNameTemplateBuilder {
+public class JdbcTypeNameChangeSpecifier extends JdbcTypeNameTemplateBuilder {
 
     private Integer sizeDelta;
     private Integer precisionDelta;
     private Integer scaleDelta;
 
-    public JdbcTypeNameChangeSpecifiersBuilder(String template) {
+    public JdbcTypeNameChangeSpecifier(String template) {
         super(template);
     }
 
-    public JdbcTypeNameChangeSpecifiersBuilder(String template, Integer sizeDelta) {
+    public JdbcTypeNameChangeSpecifier(String template, int sizeDelta) {
         super(template);
         this.sizeDelta = sizeDelta;
+    }
+
+    public JdbcTypeNameChangeSpecifier(String template, Integer sizeDelta, Integer precisionDelta) {
+        super(template);
+        this.sizeDelta = sizeDelta;
+        this.precisionDelta = precisionDelta;
+    }
+
+    public JdbcTypeNameChangeSpecifier(String template, Integer sizeDelta, Integer precisionDelta,
+                                       Integer scaleDelta) {
+        super(template);
+        this.sizeDelta = sizeDelta;
+        this.precisionDelta = precisionDelta;
+        this.scaleDelta = scaleDelta;
     }
 
     @Override

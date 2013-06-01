@@ -32,7 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifiersBuilder;
+import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifier;
 
 import java.sql.Types;
 import java.util.regex.Pattern;
@@ -116,12 +116,20 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
         addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"),
-                new JdbcTypeNameChangeSpecifiersBuilder("NUMERIC({N})", 1));
+                new JdbcTypeNameChangeSpecifier("NUMERIC({N})", 1));
     }
 
     @Override
     protected void initScriptTranslations() {
-        addScriptTranslation(new DatabaseInfo("MySQL"), "CURRENT_TIMESTAMP", "NOW");
+        addScriptTranslations(new DatabaseInfo("MySQL"),
+                newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()",
+                        "LOCALTIME", "LOCALTIME()", "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW()");
+
+        addScriptTranslations(new DatabaseInfo("Microsoft SQL Server"),
+                newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW()");
+        addScriptTranslationRegex(new DatabaseInfo("Microsoft SQL Server"), "N'(.*)'", "$1");
+
+        addScriptTranslationRegex(new DatabaseInfo("PostgreSQL"), "'(.*)'::.*", "$1");
     }
 
     @Override
@@ -140,10 +148,10 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
-    public boolean supportsTransactionIsolationLevel(int transactionIsolationLevel) {
+    public boolean supportsTransactionIsolation(int level) {
         return newArrayList(
                 WRITE_COMMITTED, CONSISTENT_READ, TRANSACTION_READ_COMMITTED, TRANSACTION_SERIALIZABLE
-        ).contains(transactionIsolationLevel);
+        ).contains(level);
     }
 
     @Override

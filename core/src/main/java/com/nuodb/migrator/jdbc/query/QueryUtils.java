@@ -108,6 +108,7 @@ public class QueryUtils {
 
     public static StringBuilder join(StringBuilder query, Collection<Join> joins) {
         if (joins != null && !joins.isEmpty()) {
+            query.append(' ');
             for (Iterator<Join> iterator = joins.iterator(); iterator.hasNext(); ) {
                 Join join = iterator.next();
                 query.append(join.getType());

@@ -27,158 +27,60 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.google.common.base.Supplier;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.jdbc.resolve.ServiceResolver;
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolverAware;
-import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
-import java.util.Set;
 
-import static com.google.common.collect.Multimaps.newSetMultimap;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.collect.Sets.newLinkedHashSet;
 
 /**
  * @author Sergey Bushik
  */
-public class ScriptTranslationManager extends SimpleServiceResolverAware<Dialect> {
+public class ScriptTranslationManager {
 
-    private Set<ScriptTranslation> scriptTranslations = newLinkedHashSet();
+    private Collection<ScriptTranslator> scriptTranslators = newHashSet();
 
-    private Multimap<Dialect, ScriptTranslator> scriptTranslatorsMap = newSetMultimap(
-            Maps.<Dialect, Collection<ScriptTranslator>>newHashMap(),
-            new Supplier<Set<ScriptTranslator>>() {
-                @Override
-                public Set<ScriptTranslator> get() {
-                    return newHashSet();
-                }
-            });
-
-    public Script getScriptTranslation(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                       Script sourceScript) {
-        DialectResolver dialectResolver = getDialectResolver();
+    public Script translateScript(Script sourceScript, DatabaseInfo targetDatabaseInfo) {
         Script targetScript = null;
-        if (dialectResolver != null) {
-            Dialect sourceDialect = dialectResolver.resolve(sourceDatabaseInfo);
-            Dialect targetDialect = dialectResolver.resolve(targetDatabaseInfo);
-            targetScript = getScriptTranslation(sourceDialect, targetDialect, sourceScript);
-        } else {
-            for (ScriptTranslation scriptTranslation : scriptTranslations) {
-                if (scriptTranslation.getSourceDatabaseInfo().matches(sourceDatabaseInfo) &&
-                        scriptTranslation.getTargetDatabaseInfo().matches(targetDatabaseInfo) &&
-                        scriptTranslation.getSourceScript().equals(sourceScript)) {
-                    targetScript = scriptTranslation.getTargetScript();
-                    break;
-                }
+        for (ScriptTranslator scriptTranslator : getScriptTranslators()) {
+            if (scriptTranslator.canTranslateScript(sourceScript, targetDatabaseInfo)) {
+                targetScript = scriptTranslator.translateScript(sourceScript, targetDatabaseInfo);
             }
-        }
-        return targetScript != null ? targetScript : sourceScript;
-    }
-
-    public Script getScriptTranslation(Dialect sourceDialect, Dialect targetDialect, Script sourceScript) {
-        Collection<ScriptTranslator> scriptTranslators = scriptTranslatorsMap.get(sourceDialect);
-        Script targetScript = null;
-        for (ScriptTranslator scriptTranslator : scriptTranslators) {
-            if (scriptTranslator.getTargetDialect().equals(targetDialect)) {
-                targetScript = scriptTranslator.translateScript(sourceScript);
+            if (targetScript != null) {
                 break;
             }
         }
-        if (targetScript == null) {
-            for (ScriptTranslation scriptTranslation : scriptTranslations) {
-                boolean sourceDialectInfoMatches = scriptTranslation.getSourceDialect() != null ?
-                        scriptTranslation.getSourceDialect().equals(sourceDialect) :
-                        scriptTranslation.getSourceDatabaseInfo().matches(sourceDialect.getDatabaseInfo());
-                boolean targetDialectInfoMatches = scriptTranslation.getTargetDialect() != null ?
-                        scriptTranslation.getTargetDialect().equals(targetDialect) :
-                        scriptTranslation.getTargetDatabaseInfo().matches(sourceDialect.getDatabaseInfo());
-                boolean sourceScriptEquals = ObjectUtils.equals(scriptTranslation.getSourceScript(), sourceScript);
-                if (sourceDialectInfoMatches && targetDialectInfoMatches && sourceScriptEquals) {
-                    targetScript = scriptTranslation.getTargetScript();
-                    break;
-                }
-            }
-        }
-        return targetScript != null ? targetScript : sourceScript;
+        return targetScript;
     }
 
-    public void addScriptTranslation(ScriptTranslation scriptTranslation) {
-        DialectResolver dialectResolver = getDialectResolver();
-        if (dialectResolver != null) {
-            Dialect sourceDialect = scriptTranslation.getSourceDialect() != null ?
-                    scriptTranslation.getSourceDialect() :
-                    dialectResolver.resolve(scriptTranslation.getSourceDatabaseInfo());
-            Dialect targetDialect = scriptTranslation.getTargetDialect() != null ?
-                    scriptTranslation.getTargetDialect() :
-                    dialectResolver.resolve(scriptTranslation.getTargetDatabaseInfo());
-            Collection<ScriptTranslator> sourceScriptTranslators = scriptTranslatorsMap.get(sourceDialect);
-            ScriptTranslator scriptTranslator = null;
-            for (ScriptTranslator sourceScriptTranslator : sourceScriptTranslators) {
-                if (sourceScriptTranslator.getTargetDialect().equals(targetDialect)) {
-                    scriptTranslator = sourceScriptTranslator;
-                    break;
-                }
-            }
-            if (scriptTranslator == null) {
-                sourceScriptTranslators.add(
-                        scriptTranslator = new SimpleScriptTranslator(sourceDialect, targetDialect));
-            }
-            scriptTranslator.addScriptTranslation(
-                    scriptTranslation.getSourceScript(), scriptTranslation.getTargetScript());
-        } else {
-            scriptTranslations.add(scriptTranslation);
-        }
+    public void addScriptTranslator(ScriptTranslator scriptTranslator) {
+        scriptTranslators.add(scriptTranslator);
     }
 
-    @Override
-    public ServiceResolver<Dialect> getServiceResolver() {
-        return super.getServiceResolver();
+    public Collection<ScriptTranslator> getScriptTranslators() {
+        return scriptTranslators;
     }
 
-    @Override
-    public void setServiceResolver(ServiceResolver<Dialect> serviceResolver) {
-        super.setServiceResolver(serviceResolver);
-
-        DialectResolver dialectResolver = getDialectResolver();
-        if (dialectResolver != null) {
-            for (ScriptTranslation scriptTranslation : scriptTranslations) {
-                addScriptTranslation(scriptTranslation);
-            }
-            scriptTranslations.clear();
-        }
-    }
-
-    protected DialectResolver getDialectResolver() {
-        return (DialectResolver) getServiceResolver();
+    public void setScriptTranslators(Collection<ScriptTranslator> scriptTranslators) {
+        this.scriptTranslators = scriptTranslators;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ScriptTranslationManager)) return false;
 
         ScriptTranslationManager that = (ScriptTranslationManager) o;
-        DialectResolver dialectResolver = getDialectResolver();
-        if (dialectResolver != null ? !dialectResolver.equals(
-                that.getDialectResolver()) : that.getDialectResolver() != null)
+
+        if (scriptTranslators != null ? !scriptTranslators.equals(
+                that.scriptTranslators) : that.scriptTranslators != null)
             return false;
-        if (scriptTranslations != null ? !scriptTranslations.equals(
-                that.scriptTranslations) : that.scriptTranslations != null) return false;
-        if (scriptTranslatorsMap != null ? !scriptTranslatorsMap.equals(
-                that.scriptTranslatorsMap) : that.scriptTranslatorsMap != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = getDialectResolver() != null ? getDialectResolver().hashCode() : 0;
-        result = 31 * result + (scriptTranslations != null ? scriptTranslations.hashCode() : 0);
-        result = 31 * result + (scriptTranslatorsMap != null ? scriptTranslatorsMap.hashCode() : 0);
-        return result;
+        return scriptTranslators != null ? scriptTranslators.hashCode() : 0;
     }
 }

@@ -27,10 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+
 /**
  * @author Sergey Bushik
  */
 public interface Script extends Comparable<Script> {
 
     String getScript();
+
+    DatabaseInfo getDatabaseInfo();
 }

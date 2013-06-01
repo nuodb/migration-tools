@@ -32,6 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.AutoIncrement;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
@@ -43,20 +44,16 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
-import static com.nuodb.migrator.jdbc.metadata.inspector.PostgreSQLColumn.adopt;
-import static java.lang.String.format;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
+import static com.nuodb.migrator.jdbc.metadata.inspector.PostgreSQLColumn.initColumn;
 
 /**
  * @author Sergey Bushik
  */
 public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, TableInspectionScope> {
 
-    private static final String QUERY = "SELECT * FROM %s.%s";
-
     public PostgreSQLAutoIncrementInspector() {
-        super(AUTO_INCREMENT, TableInspectionScope.class);
+        super(AUTO_INCREMENT, TABLE, TableInspectionScope.class);
     }
 
     @Override
@@ -65,19 +62,23 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
         Dialect dialect = inspectionContext.getDialect();
         for (Table table : tables) {
             for (final Column column : table.getColumns()) {
-                Sequence sequence = adopt(inspectionContext, column).getSequence();
-                if (sequence != null) {
+                initColumn(inspectionContext, column);
+                Sequence sequence = column.getSequence();
+                if (sequence == null) {
                     continue;
                 }
-                final String query = format(QUERY,
-                        dialect.getIdentifier(table.getSchema().getName(), null),
-                        dialect.getIdentifier(sequence.getName(), null));
+                final SelectQuery selectQuery = new SelectQuery();
+                selectQuery.column("*");
+                String schemaName = dialect.getIdentifier(table.getSchema().getName(), null);
+                String sequenceName = dialect.getIdentifier(sequence.getName(), null);
+                selectQuery.from(schemaName + "." + sequenceName);
+
                 StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
                 template.execute(
                         new StatementFactory<PreparedStatement>() {
                             @Override
                             public PreparedStatement create(Connection connection) throws SQLException {
-                                return connection.prepareStatement(query, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+                                return connection.prepareStatement(selectQuery.toString());
                             }
                         },
                         new StatementCallback<PreparedStatement>() {
@@ -87,7 +88,6 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
                             }
                         }
                 );
-                column.setDefaultValue(null);
             }
         }
     }
@@ -105,7 +105,6 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
             sequence.setCache(autoIncrements.getInt("CACHE_VALUE"));
             sequence.setCycle("T".equalsIgnoreCase(autoIncrements.getString("IS_CYCLED")));
             column.setSequence(sequence);
-
             inspectionContext.getInspectionResults().addObject(sequence);
         }
     }

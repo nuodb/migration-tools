@@ -58,9 +58,9 @@ public class SimplePrimaryKeyInspector extends TableInspectorBase<Table, TableIn
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
+        DatabaseMetaData metaData = inspectionContext.getConnection().getMetaData();
         for (TableInspectionScope inspectionScope : inspectionScopes) {
-            ResultSet primaryKeys = databaseMetaData.getPrimaryKeys(
+            ResultSet primaryKeys = metaData.getPrimaryKeys(
                     inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable());
             try {
                 while (primaryKeys.next()) {

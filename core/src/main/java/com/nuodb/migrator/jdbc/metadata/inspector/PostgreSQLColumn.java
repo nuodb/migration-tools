@@ -30,13 +30,13 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.metadata.AutoIncrement;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DefaultValue;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 
 import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.nuodb.migrator.jdbc.dialect.DialectUtils.stripQuotes;
-import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.compile;
 
@@ -47,22 +47,19 @@ public class PostgreSQLColumn {
 
     private static final String VALUE_CLASS_REGEX = "'(.*)'::.*";
     private static final String AUTO_INCREMENT_REGEX = "nextval\\(" + VALUE_CLASS_REGEX + "\\)";
-    private static final Pattern VALUE_CLASS = compile(VALUE_CLASS_REGEX, CASE_INSENSITIVE);
-    private static final Pattern AUTO_INCREMENT = compile(AUTO_INCREMENT_REGEX, CASE_INSENSITIVE);
+    private static final Pattern AUTO_INCREMENT_PATTERN = compile(AUTO_INCREMENT_REGEX, CASE_INSENSITIVE);
 
-    public static Column adopt(InspectionContext inspectionContext, Column column) throws SQLException {
+    public static void initColumn(InspectionContext inspectionContext, Column column) throws SQLException {
         DefaultValue defaultValue = column.getDefaultValue();
-        if (defaultValue != null) {
+        if (defaultValue != null && !defaultValue.isProcessed()) {
             Matcher matcher;
-            if ((matcher = AUTO_INCREMENT.matcher(defaultValue.getValue())).matches()) {
-                AutoIncrement autoIncrement = new AutoIncrement();
-                autoIncrement.setName(stripQuotes(inspectionContext.getDialect(), matcher.group(1)));
+            String value = defaultValue.getValue();
+            if ((matcher = AUTO_INCREMENT_PATTERN.matcher(value)).matches()) {
+                Sequence sequence = new AutoIncrement();
+                sequence.setName(stripQuotes(inspectionContext.getDialect(), matcher.group(1)));
+                column.setSequence(sequence);
                 column.setDefaultValue(null);
-                column.setSequence(autoIncrement);
-            } else if ((matcher = VALUE_CLASS.matcher(defaultValue.getValue())).matches()) {
-                column.setDefaultValue(valueOf(matcher.group(1)));
             }
         }
-        return column;
     }
 }

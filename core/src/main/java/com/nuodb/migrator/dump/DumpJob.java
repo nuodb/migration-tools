@@ -134,7 +134,7 @@ public class DumpJob extends DecoratingJobBase<DumpJobExecution> {
         Connection connection = execution.getConnection();
         Dialect dialect = execution.getDialect();
         try {
-            dialect.setTransactionIsolationLevel(connection,
+            dialect.setTransactionIsolation(connection,
                     new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
             if (dialect.supportsSessionTimeZone()) {
                 dialect.setSessionTimeZone(connection, getTimeZone());

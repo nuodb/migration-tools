@@ -69,6 +69,7 @@ public class InspectionManager {
         InspectorResolver columnInspector = new InspectorResolver(COLUMN, new SimpleColumnInspector());
         columnInspector.register("NuoDB", new NuoDBColumnInspector());
         columnInspector.register("PostgreSQL", new PostgreSQLColumnInspector());
+        columnInspector.register("Microsoft SQL Server", new MSSQLServerColumnInspector());
         addInspector(columnInspector);
 
         InspectorResolver indexInspector = new InspectorResolver(INDEX, new SimpleIndexInspector());
