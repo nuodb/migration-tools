@@ -209,9 +209,6 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public String translateScript(String sourceScript, DatabaseInfo sourceDatabaseInfo) {
-        if (sourceScript.equals("CURRENT_TIMESTAMP")) {
-            System.out.println("SimpleDialect.translateScript");
-        }
         Script targetScript = translateScript(new SimpleScript(sourceScript, sourceDatabaseInfo));
         return targetScript != null ? targetScript.getScript() : sourceScript;
     }
