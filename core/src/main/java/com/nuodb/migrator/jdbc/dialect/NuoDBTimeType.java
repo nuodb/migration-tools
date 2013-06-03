@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -43,21 +44,18 @@ public class NuoDBTimeType extends JdbcTypeBase<String> {
 
     public static final JdbcType INSTANCE = new NuoDBTimeType();
 
-    /**
-     * Notice Types.BIGINT passed instead of Types.DECIMAL. Awaiting for DB-2288 to be resolved
-     */
     public NuoDBTimeType() {
         super(Types.TIME, String.class);
     }
 
     @Override
-    public String getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+    public String getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         return resultSet.getString(column);
     }
 
     @Override
     protected void setNullSafeValue(PreparedStatement statement, String value, int column,
-                                    Map<String, Object> options) throws SQLException {
+                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         statement.setString(column, value);
     }
 }

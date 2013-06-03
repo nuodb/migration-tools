@@ -65,6 +65,7 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     protected void initJdbcTypes() {
+        addJdbcType(NuoDBSmallIntType.INSTANCE);
         addJdbcType(NuoDBIntegerType.INSTANCE);
         addJdbcType(NuoDBBigIntType.INSTANCE);
         addJdbcType(NuoDBTimeType.INSTANCE);

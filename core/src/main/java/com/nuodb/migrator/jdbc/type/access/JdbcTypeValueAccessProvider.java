@@ -35,6 +35,7 @@ import java.sql.*;
 import java.util.Map;
 
 import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModel;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 import static java.lang.String.format;
 
 /**
@@ -128,7 +129,8 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         JdbcType jdbcType = getJdbcType(jdbcTypeDesc);
         if (jdbcType == null) {
             throw new JdbcTypeException(
-                    format("Jdbc type %s, code(%d) is not supported", jdbcTypeDesc.getTypeName(), jdbcTypeDesc.getTypeCode()));
+                    format("Jdbc type %s, code(%d) is not supported", jdbcTypeDesc.getTypeName(),
+                            jdbcTypeDesc.getTypeCode()));
         }
         return jdbcType;
     }
@@ -147,14 +149,15 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
         }
 
         @Override
-        public T getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
-            return jdbcType.getValue(resultSet, column, options);
+        public T getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                          Map<String, Object> options) throws SQLException {
+            return jdbcType.getValue(resultSet, column, specifiers, options);
         }
 
         @Override
         public <X> X getValue(ResultSet resultSet, int column, Class<X> valueClass,
-                              Map<String, Object> options) throws SQLException {
-            X value = (X) jdbcType.getValue(resultSet, column, options);
+                              JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
+            X value = (X) jdbcType.getValue(resultSet, column, specifiers, options);
             JdbcTypeAdapter<X> adapter = getJdbcTypeAdapter(valueClass, jdbcType.getValueClass());
             if (adapter != null) {
                 Statement statement = resultSet.getStatement();
@@ -180,14 +183,14 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
 
         @Override
         public <X> void setValue(PreparedStatement preparedStatement, int column, X value,
-                                 Map<String, Object> options) throws SQLException {
+                                 JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
             JdbcTypeAdapter<X> adapter = getJdbcTypeAdapter(value != null ? value.getClass() : null,
                     jdbcType.getValueClass());
             if (adapter != null) {
                 Connection connection = preparedStatement.getConnection();
                 value = adapter.wrap(value, getConnection(connection));
             }
-            jdbcType.setValue(preparedStatement, column, (T) value, options);
+            jdbcType.setValue(preparedStatement, column, (T) value, specifiers, options);
         }
     }
 
@@ -203,6 +206,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
 
         private JdbcTypeValueGetter<T> getter;
         private JdbcTypeValueSetter<T> setter;
+        private JdbcTypeSpecifiers specifiers;
         private JdbcType<T> jdbcType;
         private ResultSet resultSet;
         private PreparedStatement statement;
@@ -216,6 +220,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
             this.resultSet = resultSet;
             this.valueModel = valueModel;
             this.column = column;
+            this.specifiers = newSpecifiers(valueModel.getSize(), valueModel.getPrecision(), valueModel.getScale());
         }
 
         public JdbcTypeValueAccessImpl(JdbcTypeValueSetter<T> setter, PreparedStatement statement,
@@ -225,6 +230,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
             this.statement = statement;
             this.valueModel = valueModel;
             this.column = column;
+            this.specifiers = newSpecifiers(valueModel.getSize(), valueModel.getPrecision(), valueModel.getScale());
         }
 
         @Override
@@ -232,7 +238,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
             if (getter == null) {
                 throw new JdbcTypeException("Get value is unsupported");
             }
-            return getter.getValue(resultSet, column, options);
+            return getter.getValue(resultSet, column, specifiers, options);
         }
 
         @Override
@@ -240,7 +246,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
             if (getter == null) {
                 throw new JdbcTypeException("Get value is unsupported");
             }
-            return getter.getValue(resultSet, column, valueClass, options);
+            return getter.getValue(resultSet, column, valueClass, specifiers, options);
         }
 
         @Override
@@ -248,7 +254,7 @@ public class JdbcTypeValueAccessProvider extends JdbcTypeRegistryBase {
             if (setter == null) {
                 throw new JdbcTypeException("Set value is unsupported");
             }
-            setter.setValue(statement, column, value, options);
+            setter.setValue(statement, column, value, specifiers, options);
         }
 
         @Override

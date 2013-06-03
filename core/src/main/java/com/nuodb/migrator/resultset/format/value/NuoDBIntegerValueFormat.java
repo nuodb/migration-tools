@@ -43,7 +43,7 @@ public class NuoDBIntegerValueFormat extends ValueFormatBase<String> {
     @Override
     protected ValueVariant doGetValue(JdbcTypeValueAccess<String> valueAccess,
                                       Map<String, Object> valueAccessOptions) throws Exception {
-        return string(valueAccess.getValue(valueAccessOptions));
+        return string(valueAccess.getValue(String.class, valueAccessOptions));
     }
 
     @Override

@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.type.access;
 
 import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -40,5 +41,6 @@ public interface JdbcTypeValueSetter<T> {
 
     JdbcType<T> getJdbcType();
 
-    <X> void setValue(PreparedStatement statement, int column, X value, Map<String, Object> options) throws SQLException;
+    <X> void setValue(PreparedStatement statement, int column, X value, JdbcTypeSpecifiers specifiers,
+                      Map<String, Object> options) throws SQLException;
 }

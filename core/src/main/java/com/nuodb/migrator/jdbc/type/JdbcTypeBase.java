@@ -73,11 +73,11 @@ public abstract class JdbcTypeBase<T> implements JdbcType<T> {
 
     @Override
     public void setValue(PreparedStatement statement, int column, T value,
-                         Map<String, Object> options) throws SQLException {
+                         JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         if (value == null) {
             setNullValue(statement, column);
         } else {
-            setNullSafeValue(statement, value, column, options);
+            setNullSafeValue(statement, value, column, specifiers, options);
         }
     }
 
@@ -91,6 +91,7 @@ public abstract class JdbcTypeBase<T> implements JdbcType<T> {
     }
 
     protected abstract void setNullSafeValue(PreparedStatement statement, T value, int column,
+                                             JdbcTypeSpecifiers specifiers,
                                              Map<String, Object> options) throws SQLException;
 
     @Override

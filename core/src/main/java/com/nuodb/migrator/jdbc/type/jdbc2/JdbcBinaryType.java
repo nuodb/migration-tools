@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.type.jdbc2;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,12 +62,14 @@ public class JdbcBinaryType extends JdbcTypeBase<byte[]> {
     }
 
     @Override
-    public byte[] getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+    public byte[] getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                           Map<String, Object> options) throws SQLException {
         return resultSet.getBytes(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, byte[] value, int column, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, byte[] value, int column,
+                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         statement.setBytes(column, value);
     }
 }

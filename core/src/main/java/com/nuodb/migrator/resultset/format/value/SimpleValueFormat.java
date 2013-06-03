@@ -134,6 +134,8 @@ public class SimpleValueFormat extends ValueFormatBase<Object> {
                 break;
             case Types.TINYINT:
             case Types.SMALLINT:
+                if (valueAccess.getValueModel().getScale() > 0) {
+                }
                 valueAccess.setValue(!isEmpty(value) ? Short.parseShort(value) : null, valueAccessOptions);
                 break;
             case Types.INTEGER:

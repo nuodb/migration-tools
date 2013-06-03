@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.type.jdbc4;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.*;
 import java.util.Map;
@@ -58,12 +59,14 @@ public class JdbcSqlXmlType extends JdbcTypeBase<SQLXML> {
     }
 
     @Override
-    public SQLXML getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+    public SQLXML getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                           Map<String, Object> options) throws SQLException {
         return resultSet.getSQLXML(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, SQLXML value, int column, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, SQLXML value, int column,
+                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         statement.setSQLXML(column, value);
     }
 }

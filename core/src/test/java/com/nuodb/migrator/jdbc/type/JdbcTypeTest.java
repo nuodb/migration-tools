@@ -50,13 +50,14 @@ public class JdbcTypeTest {
     public void setUp() {
         jdbcTypeBase = spy(new JdbcTypeBase<Object>(Types.OTHER, Object.class) {
             @Override
-            public Object getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+            public Object getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                                   Map<String, Object> options) throws SQLException {
                 return null;
             }
 
             @Override
             protected void setNullSafeValue(PreparedStatement statement, Object value, int column,
-                                            Map<String, Object> options) throws SQLException {
+                                            JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
             }
         });
     }
@@ -64,7 +65,7 @@ public class JdbcTypeTest {
     @Test
     public void testSetNullValue() throws Exception {
         PreparedStatement statement = mock(PreparedStatement.class);
-        jdbcTypeBase.setValue(statement, COLUMN, null, null);
+        jdbcTypeBase.setValue(statement, COLUMN, null, null, null);
         verify(jdbcTypeBase).setNullValue(statement, COLUMN);
     }
 
@@ -72,7 +73,7 @@ public class JdbcTypeTest {
     public void testSetNullSafeValue() throws Exception {
         PreparedStatement statement = mock(PreparedStatement.class);
         Object value = new Object();
-        jdbcTypeBase.setValue(statement, COLUMN, value, null);
-        verify(jdbcTypeBase).setNullSafeValue(statement, value, COLUMN, null);
+        jdbcTypeBase.setValue(statement, COLUMN, value, null, null);
+        verify(jdbcTypeBase).setNullSafeValue(statement, value, COLUMN, null, null);
     }
 }

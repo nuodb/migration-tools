@@ -29,7 +29,9 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,25 +41,25 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class NuoDBIntegerType extends JdbcTypeBase<String> {
+public class NuoDBIntegerType extends JdbcTypeBase<BigDecimal> {
 
     public static final JdbcType INSTANCE = new NuoDBIntegerType();
 
     /**
-     * Notice Types.BIGINT passed instead of Types.DECIMAL. Awaiting for DB-2288 to be resolved
+     * Got Types.BIGINT instead of Types.DECIMAL. Awaiting for DB-2288 to be resolved
      */
     public NuoDBIntegerType() {
-        super(Types.INTEGER, String.class);
+        super(Types.INTEGER, BigDecimal.class);
     }
 
     @Override
-    public String getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
-        return resultSet.getString(column);
+    public BigDecimal getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
+        return resultSet.getBigDecimal(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, String value, int column,
-                                    Map<String, Object> options) throws SQLException {
-        statement.setString(column, value);
+    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int column,
+                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
+        statement.setBigDecimal(column, value);
     }
 }

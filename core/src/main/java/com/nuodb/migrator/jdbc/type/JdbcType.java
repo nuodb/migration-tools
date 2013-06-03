@@ -41,7 +41,9 @@ public interface JdbcType<T> {
 
     Class<? extends T> getValueClass();
 
-    T getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException;
+    T getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+               Map<String, Object> options) throws SQLException;
 
-    void setValue(PreparedStatement statement, int column, T value, Map<String, Object> options) throws SQLException;
+    void setValue(PreparedStatement statement, int column, T value, JdbcTypeSpecifiers specifiers,
+                  Map<String, Object> options) throws SQLException;
 }

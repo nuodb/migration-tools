@@ -25,34 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.model;
+package com.nuodb.migrator.resultset.format.value;
+
+import com.nuodb.migrator.jdbc.model.ValueModel;
+import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccess;
+
+import java.util.Map;
+
+import static com.nuodb.migrator.resultset.format.value.ValueVariants.string;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public interface ValueModel extends IsValueModel {
+public class NuoDBSmallIntValueFormat extends ValueFormatBase<String> {
 
-    String getName();
+    @Override
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<String> valueAccess,
+                                      Map<String, Object> valueAccessOptions) throws Exception {
+        return string(valueAccess.getValue(String.class, valueAccessOptions));
+    }
 
-    void setName(String name);
+    @Override
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<String> valueAccess,
+                              Map<String, Object> valueAccessOptions) throws Exception {
+        String value = variant.asString();
+        valueAccess.setValue(!isEmpty(value) ? value : null, valueAccessOptions);
+    }
 
-    int getTypeCode();
-
-    void setTypeCode(int typeCode);
-
-    String getTypeName();
-
-    void setTypeName(String typeName);
-
-    int getSize();
-
-    void setSize(int size);
-
-    int getPrecision();
-
-    void setPrecision(int precision);
-
-    int getScale();
-
-    void setScale(int scale);
+    @Override
+    public ValueVariantType getValueType(ValueModel ValueModel) {
+        return ValueVariantType.STRING;
+    }
 }

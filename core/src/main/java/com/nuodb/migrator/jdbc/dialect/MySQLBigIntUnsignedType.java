@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
@@ -49,13 +50,14 @@ public class MySQLBigIntUnsignedType extends JdbcTypeBase<BigInteger> {
     }
 
     @Override
-    public BigInteger getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+    public BigInteger getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                               Map<String, Object> options) throws SQLException {
         return (BigInteger) resultSet.getObject(column);
     }
 
     @Override
     protected void setNullSafeValue(PreparedStatement statement, BigInteger value, int column,
-                                    Map<String, Object> options) throws SQLException {
+                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         statement.setObject(column, value);
     }
 }

@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.model;
 
+import com.nuodb.migrator.utils.ObjectUtils;
+
 /**
  * @author Sergey Bushik
  */
@@ -35,6 +37,7 @@ public class SimpleValueModel implements ValueModel {
     private String name;
     private int typeCode;
     private String typeName;
+    private int size;
     private int precision;
     private int scale;
     private ValueModel valueModel;
@@ -76,6 +79,7 @@ public class SimpleValueModel implements ValueModel {
         this.name = valueModel.getName();
         this.typeCode = valueModel.getTypeCode();
         this.typeName = valueModel.getTypeName();
+        this.size = valueModel.getSize();
         this.precision = valueModel.getPrecision();
         this.scale = valueModel.getScale();
         this.valueModel = valueModel;
@@ -91,6 +95,7 @@ public class SimpleValueModel implements ValueModel {
         setName(valueModel.getName());
         setTypeName(valueModel.getTypeName());
         setTypeCode(valueModel.getTypeCode());
+        setSize(valueModel.getSize());
         setPrecision(valueModel.getPrecision());
         setScale(valueModel.getScale());
         this.valueModel = valueModel;
@@ -116,12 +121,24 @@ public class SimpleValueModel implements ValueModel {
         this.typeCode = typeCode;
     }
 
+    @Override
     public String getTypeName() {
         return typeName;
     }
 
+    @Override
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    @Override
+    public int getSize() {
+        return size;
+    }
+
+    @Override
+    public void setSize(int size) {
+        this.size = size;
     }
 
     @Override
@@ -163,6 +180,7 @@ public class SimpleValueModel implements ValueModel {
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + typeCode;
+        result = 31 * result + size;
         result = 31 * result + precision;
         result = 31 * result + scale;
         return result;
@@ -170,12 +188,6 @@ public class SimpleValueModel implements ValueModel {
 
     @Override
     public String toString() {
-        return "ColumnModel{" +
-                "name='" + name + '\'' +
-                ", typeCode=" + typeCode +
-                ", typeName=" + typeName +
-                ", precision=" + precision +
-                ", scale=" + scale +
-                '}';
+        return ObjectUtils.toString(this);
     }
 }

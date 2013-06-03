@@ -25,34 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.model;
+package com.nuodb.migrator.jdbc.dialect;
+
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
+
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface ValueModel extends IsValueModel {
+public class NuoDBSmallIntType extends JdbcTypeBase<BigDecimal> {
 
-    String getName();
+    public static final JdbcType INSTANCE = new NuoDBSmallIntType();
 
-    void setName(String name);
+    public NuoDBSmallIntType() {
+        super(Types.SMALLINT, BigDecimal.class);
+    }
 
-    int getTypeCode();
+    @Override
+    public BigDecimal getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                           Map<String, Object> options) throws SQLException {
+        return resultSet.getBigDecimal(column);
+    }
 
-    void setTypeCode(int typeCode);
-
-    String getTypeName();
-
-    void setTypeName(String typeName);
-
-    int getSize();
-
-    void setSize(int size);
-
-    int getPrecision();
-
-    void setPrecision(int precision);
-
-    int getScale();
-
-    void setScale(int scale);
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int column,
+                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
+        statement.setBigDecimal(column, value);
+    }
 }

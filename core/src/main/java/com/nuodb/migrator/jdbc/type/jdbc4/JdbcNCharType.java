@@ -30,8 +30,12 @@ package com.nuodb.migrator.jdbc.type.jdbc4;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Map;
 
 /**
@@ -58,12 +62,14 @@ public class JdbcNCharType extends JdbcTypeBase<String> {
     }
 
     @Override
-    public String getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+    public String getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                           Map<String, Object> options) throws SQLException {
         return resultSet.getNString(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, String value, int column, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, String value, int column,
+                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         statement.setNString(column, value);
     }
 }

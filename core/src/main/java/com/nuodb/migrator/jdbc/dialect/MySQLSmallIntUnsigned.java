@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -48,14 +49,15 @@ public class MySQLSmallIntUnsigned extends JdbcTypeBase<Integer> {
     }
 
     @Override
-    public Integer getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+    public Integer getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                            Map<String, Object> options) throws SQLException {
         Integer value = resultSet.getInt(column);
         return resultSet.wasNull() ? null : value;
     }
 
     @Override
     protected void setNullSafeValue(PreparedStatement statement, Integer value, int column,
-                                    Map<String, Object> options) throws SQLException {
+                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         statement.setInt(column, value);
     }
 }

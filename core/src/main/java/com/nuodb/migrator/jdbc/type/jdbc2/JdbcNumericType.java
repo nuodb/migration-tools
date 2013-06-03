@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.type.jdbc2;
 
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -53,13 +54,14 @@ public class JdbcNumericType extends JdbcTypeBase<BigDecimal> {
     }
 
     @Override
-    public BigDecimal getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+    public BigDecimal getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                               Map<String, Object> options) throws SQLException {
         return resultSet.getBigDecimal(column);
     }
 
     @Override
     protected void setNullSafeValue(PreparedStatement statement, BigDecimal value,
-                                    int column, Map<String, Object> options) throws SQLException {
+                                    int column, JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         statement.setBigDecimal(column, value);
     }
 }

@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.type.jdbc3;
 
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.net.URL;
 import java.sql.PreparedStatement;
@@ -49,13 +50,14 @@ public class JdbcDataLinkType extends JdbcTypeBase<URL> {
     }
 
     @Override
-    public URL getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+    public URL getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                        Map<String, Object> options) throws SQLException {
         return resultSet.getURL(column);
     }
 
     @Override
     protected void setNullSafeValue(PreparedStatement statement, URL value, int column,
-                                    Map<String, Object> options) throws SQLException {
+                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         statement.setURL(column, value);
     }
 }

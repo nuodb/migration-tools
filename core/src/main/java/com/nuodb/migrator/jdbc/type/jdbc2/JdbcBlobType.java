@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.type.jdbc2;
 
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.*;
 import java.util.Map;
@@ -43,14 +44,16 @@ public class JdbcBlobType extends JdbcTypeBase<Blob> {
     public JdbcBlobType() {
         super(Types.BLOB, Blob.class);
     }
-    
+
     @Override
-    public Blob getValue(ResultSet resultSet, int column, Map<String, Object> options) throws SQLException {
+    public Blob getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
+                         Map<String, Object> options) throws SQLException {
         return resultSet.getBlob(column);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Blob value, int column, Map<String, Object> options) throws SQLException {
+    protected void setNullSafeValue(PreparedStatement statement, Blob value, int column,
+                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
         statement.setBlob(column, value);
     }
 }

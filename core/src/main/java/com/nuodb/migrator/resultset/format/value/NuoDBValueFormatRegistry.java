@@ -29,6 +29,7 @@ package com.nuodb.migrator.resultset.format.value;
 
 import com.nuodb.migrator.jdbc.dialect.NuoDBBigIntType;
 import com.nuodb.migrator.jdbc.dialect.NuoDBIntegerType;
+import com.nuodb.migrator.jdbc.dialect.NuoDBSmallIntType;
 import com.nuodb.migrator.jdbc.dialect.NuoDBTimeType;
 
 /**
@@ -37,8 +38,10 @@ import com.nuodb.migrator.jdbc.dialect.NuoDBTimeType;
 public class NuoDBValueFormatRegistry extends SimpleValueFormatRegistry {
 
     public NuoDBValueFormatRegistry() {
-        addValueFormat(NuoDBTimeType.INSTANCE, new NuoDBTimeValueFormat());
-        addValueFormat(NuoDBBigIntType.INSTANCE, new NuoDBBigIntValueFormat());
+        addValueFormat(NuoDBSmallIntType.INSTANCE, new NuoDBSmallIntValueFormat());
         addValueFormat(NuoDBIntegerType.INSTANCE, new NuoDBIntegerValueFormat());
+        addValueFormat(NuoDBBigIntType.INSTANCE, new NuoDBBigIntValueFormat());
+        addValueFormat(NuoDBTimeType.INSTANCE, new NuoDBTimeValueFormat());
+
     }
 }
