@@ -312,6 +312,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the auto increment settings are migrated
 	 */
+	@Test(groups = { "disabled" })
 	public void testAutoIncrement() throws Exception {
 		String sqlStr1 = "select T.TABLE_NAME, c.ordinal_position as AUTO_INCREMENT, C.COLUMN_NAME "
 				+ "from information_schema.TABLES T INNER JOIN information_schema.COLUMNS C "

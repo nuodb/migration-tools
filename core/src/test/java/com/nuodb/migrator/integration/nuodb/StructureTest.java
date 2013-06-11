@@ -112,6 +112,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the auto increment settings are migrated
 	 */
+	@Test(groups = { "disabled" })
 	public void testAutoIncrement() throws Exception {
 		String sqlStr = "SELECT * FROM SYSTEM.SEQUENCES S "
 				+ "INNER JOIN SYSTEM.FIELDS F ON S.SCHEMA=F.SCHEMA "

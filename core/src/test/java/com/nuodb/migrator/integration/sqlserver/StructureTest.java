@@ -371,6 +371,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the auto increment settings are migrated
 	 */
+	@Test(groups = { "disabled" })
 	public void testAutoIncrement() throws Exception {
 		String sqlStr1 = "SELECT  t.TABLE_NAME,c.COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
 				+ "AS c JOIN INFORMATION_SCHEMA.TABLES AS t ON t.TABLE_NAME = c.TABLE_NAME "
