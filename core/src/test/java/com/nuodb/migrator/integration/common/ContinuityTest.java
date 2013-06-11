@@ -100,6 +100,7 @@ public class ContinuityTest extends MigrationTestBase {
 	 * run. So we are going to execute it twice and make sure the id is
 	 * incremented by 1 between those runs.
 	 */
+	@Test(groups = { "disabled" })
 	public void testAutoIncrement() throws Exception {
 		String sqlStr = "insert into \"datatypes2\" (\"c5\") values (?)";
 		String sqlStr2 = "select \"k1\" from \"datatypes2\" where \"c5\"=?";
