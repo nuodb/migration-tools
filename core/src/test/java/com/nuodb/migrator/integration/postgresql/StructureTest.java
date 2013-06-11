@@ -195,10 +195,10 @@ public class StructureTest extends MigrationTestBase {
 				+ " JOIN information_schema.key_column_usage AS kcu ON tc.constraint_name = kcu.constraint_name"
 				+ " JOIN information_schema.columns as clm ON kcu.column_name = clm.column_name"
 				+ " WHERE constraint_type in ('PRIMARY KEY', 'UNIQUE') and tc.table_catalog=?";
-		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES INNER JOIN SYSTEM.INDEXFIELDS ON "
-				+ "INDEXES.SCHEMA=INDEXFIELDS.SCHEMA AND "
-				+ "INDEXES.TABLENAME=INDEXFIELDS.TABLENAME AND "
-				+ "INDEXES.INDEXNAME=INDEXFIELDS.INDEXNAME WHERE SCHEMA=? AND TABLENAME=? AND INDEXTYPE=?";
+		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES SI INNER JOIN SYSTEM.INDEXFIELDS SFI ON "
+				+ "SI.SCHEMA=SFI.SCHEMA AND "
+				+ "SI.TABLENAME=SFI.TABLENAME AND "
+				+ "SI.INDEXNAME=SFI.INDEXNAME WHERE SI.SCHEMA=? AND SI.TABLENAME=? AND SI.INDEXTYPE=?";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
