@@ -61,19 +61,24 @@ public abstract class CountingScriptExporter implements ScriptExporter {
                 exportScript(script);
                 count++;
             } catch (Exception exception) {
-                if (logger.isErrorEnabled()) {
-                    logger.error(format("Failed exporting script #%d of #%d %s", getCount(), scripts.size(), script));
-                }
-                throw exception;
+                onExportScriptsError(scripts, script, exception);
             }
         }
+    }
+
+    protected void onExportScriptsError(Collection<String> scripts, String script,
+                                        Exception exception) throws Exception {
+        if (logger.isErrorEnabled()) {
+            logger.error(format("Failed exporting script #%d of #%d %s", getCount(), scripts.size(), script));
+        }
+        throw exception;
     }
 
     public int getCount() {
         return count;
     }
 
-    protected abstract void exportScript(String script) throws Exception;
+    public abstract void exportScript(String script) throws Exception;
 
     @Override
     public final void close() throws Exception {

@@ -30,6 +30,7 @@ package com.nuodb.migrator.spec;
 public class ResourceSpec extends SpecBase implements Spec {
 
     private String path;
+    private String encoding;
 
     public String getPath() {
         return path;
@@ -39,14 +40,23 @@ public class ResourceSpec extends SpecBase implements Spec {
         this.path = path;
     }
 
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ResourceSpec)) return false;
         if (!super.equals(o)) return false;
 
         ResourceSpec that = (ResourceSpec) o;
 
+        if (encoding != null ? !encoding.equals(that.encoding) : that.encoding != null) return false;
         if (path != null ? !path.equals(that.path) : that.path != null) return false;
 
         return true;
@@ -56,6 +66,7 @@ public class ResourceSpec extends SpecBase implements Spec {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (path != null ? path.hashCode() : 0);
+        result = 31 * result + (encoding != null ? encoding.hashCode() : 0);
         return result;
     }
 }

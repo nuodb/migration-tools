@@ -95,7 +95,8 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
         for (JdbcTypeSpec jdbcTypeSpec : schemaSpec.getJdbcTypeSpecs()) {
             jdbcTypeNameMap.addJdbcTypeName(
                     jdbcTypeSpec.getTypeCode(), newSpecifiers(
-                            jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()), jdbcTypeSpec.getTypeName()
+                    jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()),
+                    jdbcTypeSpec.getTypeName()
             );
         }
         dialect.setIdentifierQuoting(schemaSpec.getIdentifierQuoting());
@@ -127,7 +128,7 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
         }
         ResourceSpec outputSpec = getSchemaSpec().getOutputSpec();
         if (outputSpec != null) {
-            exporters.add(new FileScriptExporter(outputSpec.getPath()));
+            exporters.add(new FileScriptExporter(outputSpec.getPath(), outputSpec.getEncoding()));
         }
         // Fallback to the standard output if neither target connection nor target file were specified
         if (exporters.isEmpty()) {

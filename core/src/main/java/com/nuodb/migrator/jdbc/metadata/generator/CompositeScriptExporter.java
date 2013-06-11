@@ -27,9 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -38,9 +35,8 @@ import static com.google.common.collect.Sets.newLinkedHashSet;
 /**
  * @author Sergey Bushik
  */
-public class CompositeScriptExporter implements ScriptExporter {
+public class CompositeScriptExporter extends CountingScriptExporter {
 
-    private final transient Logger logger = LoggerFactory.getLogger(getClass());
     private Collection<ScriptExporter> scriptExporters = newLinkedHashSet();
 
     public CompositeScriptExporter() {
@@ -54,26 +50,22 @@ public class CompositeScriptExporter implements ScriptExporter {
         this.scriptExporters.addAll(scriptExporters);
     }
 
-    public void addScriptExporter(ScriptExporter scriptExporter) {
-        this.scriptExporters.add(scriptExporter);
-    }
-
     @Override
-    public void open() throws Exception {
+    protected void doOpen() throws Exception {
         for (ScriptExporter scriptExporter : scriptExporters) {
             scriptExporter.open();
         }
     }
 
     @Override
-    public void exportScripts(Collection<String> scripts) throws Exception {
+    public void exportScript(String script) throws Exception {
         for (ScriptExporter scriptExporter : scriptExporters) {
-            scriptExporter.exportScripts(scripts);
+            scriptExporter.exportScript(script);
         }
     }
 
     @Override
-    public void close() throws Exception {
+    protected void doClose() throws Exception {
         for (ScriptExporter scriptExporter : scriptExporters) {
             try {
                 scriptExporter.close();
@@ -83,5 +75,13 @@ public class CompositeScriptExporter implements ScriptExporter {
                 }
             }
         }
+    }
+
+    public Collection<ScriptExporter> getScriptExporters() {
+        return scriptExporters;
+    }
+
+    public void setScriptExporters(Collection<ScriptExporter> scriptExporters) {
+        this.scriptExporters = scriptExporters;
     }
 }

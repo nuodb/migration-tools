@@ -32,16 +32,15 @@ import com.google.common.io.Files;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.nio.charset.Charset;
 
 import static java.lang.String.format;
+import static java.lang.System.getProperty;
+import static java.nio.charset.Charset.forName;
 
 /**
  * @author Sergey Bushik
  */
 public class FileScriptExporter extends CountingScriptExporter {
-
-    public static final String OUTPUT_ENCODING = "UTF-8";
 
     private static final String SEMICOLON = ";";
     private File file;
@@ -49,29 +48,33 @@ public class FileScriptExporter extends CountingScriptExporter {
     private BufferedWriter writer;
 
     public FileScriptExporter(String file) {
-        this(file, OUTPUT_ENCODING);
+        this(file, null);
     }
 
     public FileScriptExporter(String file, String encoding) {
         this(new File(file), encoding);
     }
 
+    public FileScriptExporter(File file) {
+        this(file, null);
+    }
+
     public FileScriptExporter(File file, String encoding) {
         this.file = file;
-        this.encoding = encoding;
+        this.encoding = encoding != null ? encoding : getProperty("file.encoding");
     }
 
     @Override
     protected void doOpen() throws Exception {
         if (logger.isDebugEnabled()) {
-            logger.debug(format("Exporting scripts to file %s", file));
+            logger.debug(format("Opening file to export scripts to %s", file));
         }
         Files.createParentDirs(file);
-        writer = Files.newWriter(file, Charset.forName(encoding));
+        writer = Files.newWriter(file, forName(encoding));
     }
 
     @Override
-    protected void exportScript(String script) throws Exception {
+    public void exportScript(String script) throws Exception {
         if (writer == null) {
             throw new GeneratorException("File is not opened");
         }
@@ -79,7 +82,7 @@ public class FileScriptExporter extends CountingScriptExporter {
             writer.newLine();
         }
         writer.write(script);
-        if (!script.endsWith(";")) {
+        if (!script.endsWith(SEMICOLON)) {
             writer.write(SEMICOLON);
         }
     }

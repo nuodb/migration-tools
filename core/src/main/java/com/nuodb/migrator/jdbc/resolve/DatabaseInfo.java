@@ -157,9 +157,4 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
     public String toString() {
         return ObjectUtils.toString(this);
     }
-
-    public static void main(String[] args) {
-        System.out.println("DatabaseInfo.main " + new DatabaseInfo("MySQL", "5", 7).successorOf(
-                new DatabaseInfo("MySQL", "5", 6)));
-    }
 }

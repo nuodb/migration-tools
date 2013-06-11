@@ -39,15 +39,14 @@ import java.sql.Types;
 import java.util.Map;
 
 /**
+ * Pending DB-2288 for resolution.
+ *
  * @author Sergey Bushik
  */
 public class NuoDBBigIntType extends JdbcTypeBase<BigDecimal> {
 
     public static final JdbcType INSTANCE = new NuoDBBigIntType();
 
-    /**
-     * Got Types.BIGINT instead of Types.DECIMAL. Awaiting for DB-2288 to be resolved
-     */
     public NuoDBBigIntType() {
         super(Types.BIGINT, BigDecimal.class);
     }

@@ -40,7 +40,6 @@ import java.sql.Statement;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.generator.FileScriptExporter.OUTPUT_ENCODING;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -74,7 +73,7 @@ public class ScriptExporterTest {
         when(connection.createStatement()).thenReturn(statement);
 
         return new Object[][] {
-                {new FileScriptExporter(file, OUTPUT_ENCODING)},
+                {new FileScriptExporter(file)},
                 {new ConnectionScriptExporter(connectionServices)},
                 {new WriterScriptExporter(new NullOutputStream())}
         };

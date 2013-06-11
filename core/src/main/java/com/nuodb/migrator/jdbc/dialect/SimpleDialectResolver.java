@@ -39,6 +39,7 @@ public class SimpleDialectResolver extends SimpleServiceResolver<Dialect> implem
 
     public SimpleDialectResolver() {
         super(SimpleDialect.class);
+        register("DB2", DB2Dialect.class);
         register("MySQL", MySQLDialect.class);
         register("NuoDB", NuoDBDialect.class);
         register("PostgreSQL", PostgreSQLDialect.class);

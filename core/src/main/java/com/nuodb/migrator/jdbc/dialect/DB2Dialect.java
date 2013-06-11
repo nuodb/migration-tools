@@ -25,56 +25,20 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata.generator;
+package com.nuodb.migrator.jdbc.dialect;
 
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 /**
  * @author Sergey Bushik
  */
-public class WriterScriptExporter extends CountingScriptExporter {
+public class DB2Dialect extends SimpleDialect {
 
-    public static final ScriptExporter SYSTEM_OUT_SCRIPT_EXPORTER = new WriterScriptExporter(System.out, false);
-
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-    private static final String SEMICOLON = ";";
-
-    private final Writer writer;
-    private final boolean close;
-
-    public WriterScriptExporter(OutputStream outputStream) {
-        this(outputStream, true);
+    public DB2Dialect() {
+        this(new DatabaseInfo("DB2"));
     }
 
-    public WriterScriptExporter(Writer writer) {
-        this(writer, true);
-    }
-
-    public WriterScriptExporter(OutputStream outputStream, boolean close) {
-        this(new OutputStreamWriter(outputStream), close);
-    }
-
-    public WriterScriptExporter(Writer writer, boolean close) {
-        this.writer = writer;
-        this.close = close;
-    }
-
-    @Override
-    public void exportScript(String script) throws Exception {
-        writer.write(script);
-        if (!script.endsWith(SEMICOLON)) {
-            writer.write(SEMICOLON);
-        }
-        writer.write(LINE_SEPARATOR);
-    }
-
-    @Override
-    protected void doClose() throws Exception {
-        writer.flush();
-        if (close) {
-            writer.close();
-        }
+    public DB2Dialect(DatabaseInfo databaseInfo) {
+        super(databaseInfo);
     }
 }

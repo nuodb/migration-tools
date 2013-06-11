@@ -73,7 +73,7 @@ public class CsvFormatOutput extends FormatOutputBase implements CsvAttributes {
             String encoding = (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING);
             csvPrinter = new CSVPrinter(wrapWriter(new OutputStreamWriter(outputStream, forName(encoding))), format);
         } else {
-            throw new FormatOutputException("Neither writer nor output stream were configured");
+            throw new FormatOutputException("Neither writer nor output stream were initialized");
         }
     }
 
