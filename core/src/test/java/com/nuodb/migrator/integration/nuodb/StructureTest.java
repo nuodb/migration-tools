@@ -72,10 +72,10 @@ public class StructureTest extends MigrationTestBase {
 	 * test if all the Primary and Unique Key Constraints are migrated
 	 */
 	public void testPrimaryAndUniqueKeyConstraints() throws Exception {
-		String sqlStr = "SELECT * FROM SYSTEM.INDEXES INNER JOIN SYSTEM.INDEXFIELDS ON "
-				+ "INDEXES.SCHEMA=INDEXFIELDS.SCHEMA AND "
-				+ "INDEXES.TABLENAME=INDEXFIELDS.TABLENAME AND "
-				+ "INDEXES.INDEXNAME=INDEXFIELDS.INDEXNAME WHERE SCHEMA=?";
+		String sqlStr = "SELECT * FROM SYSTEM.INDEXES SI INNER JOIN SYSTEM.INDEXFIELDS SIF ON "
+				+ "SI.SCHEMA=SIF.SCHEMA AND "
+				+ "SI.TABLENAME=SIF.TABLENAME AND "
+				+ "SI.INDEXNAME=SIF.INDEXNAME WHERE SI.SCHEMA=?";
 		matchResultSetForSQL(sqlStr);
 	}
 
