@@ -145,23 +145,28 @@ public class StructureTest extends MigrationTestBase {
 				HashMap<String, String> tabColDetailsMap = tabColMap
 						.get(colName);
 				Assert.assertNotNull(tabColDetailsMap);
-				Assert.assertEquals(colName, tabColDetailsMap.get(colNames[0]));
-				
+				Assert.assertEquals(colName, tabColDetailsMap.get(colNames[0]),
+						"Column name " + colName + " of table " + tableName
+								+ " did not match");
+
 				int srcJdbcType = rs2.getInt("JDBCTYPE");
 				int tarJdbcType = OracleTypes
 						.getMappedJDBCType(tabColDetailsMap.get(colNames[1]));
-				/*System.out.println("colName:" + colName + " ::" + " tableName:"
-						+ tableName + " ::" + " datatype:"
-						+ tabColDetailsMap.get(colNames[1]));*/
-				Assert.assertEquals(srcJdbcType, tarJdbcType);
-				
-				
-				
+				/*
+				 * System.out.println("colName:" + colName + " ::" +
+				 * " tableName:" + tableName + " ::" + " datatype:" +
+				 * tabColDetailsMap.get(colNames[1]));
+				 */
+				Assert.assertEquals(srcJdbcType, tarJdbcType,
+						"JDBCTYPE of column " + colName + " of table "
+								+ tableName + " did not match");
+
 				String srcLength = rs2.getString("LENGTH");
 				String tarLength = OracleTypes.getMappedLength(
 						tabColDetailsMap.get(colNames[1]),
 						tabColDetailsMap.get(colNames[2]));
-				Assert.assertEquals(srcLength, tarLength);
+				Assert.assertEquals(srcLength, tarLength, "LENGTH of column "
+						+ colName + " of table " + tableName + " did not match");
 				// TBD
 				// String val = tabColDetailsMap.get(colNames[7]);
 				// Assert.assertEquals(rs2.getInt("SCALE"), val == null ? 0
@@ -170,11 +175,13 @@ public class StructureTest extends MigrationTestBase {
 				// Assert.assertEquals(rs2.getString("PRECISION"),
 				// tabColDetailsMap.get(colNames[6]));
 
-				/*String val = tabColDetailsMap.get(colNames[3]);
-				Assert.assertEquals(rs2.getString("DEFAULTVALUE"),
-						OracleTypes.getMappedDefault(
-								tabColDetailsMap.get(colNames[1]),
-								tabColDetailsMap.get(colNames[3])));*/
+				/*
+				 * String val = tabColDetailsMap.get(colNames[3]);
+				 * Assert.assertEquals(rs2.getString("DEFAULTVALUE"),
+				 * OracleTypes.getMappedDefault(
+				 * tabColDetailsMap.get(colNames[1]),
+				 * tabColDetailsMap.get(colNames[3])));
+				 */
 			}
 			Assert.assertTrue(targetFound);
 		} finally {
@@ -222,7 +229,9 @@ public class StructureTest extends MigrationTestBase {
 				while (rs2.next()) {
 					found = true;
 					String tarCol = rs2.getString(1);
-					Assert.assertEquals(tarCol, cName);
+					Assert.assertEquals(tarCol, cName, "Source column name "
+							+ cName + " of table " + tName
+							+ " did not match with target column name ");
 				}
 				Assert.assertTrue(found);
 				rs2.close();
@@ -313,7 +322,7 @@ public class StructureTest extends MigrationTestBase {
 				+ "FROM all_cons_columns a JOIN all_constraints c ON a.owner = c.owner AND a.constraint_name = c.constraint_name "
 				+ "JOIN all_constraints c_pk ON c.r_owner = c_pk.owner AND c.r_constraint_name = c_pk.constraint_name "
 				+ "join USER_CONS_COLUMNS uc on uc.constraint_name = c.r_constraint_name";
-		// WHERE  C.R_OWNER = ? 
+		// WHERE C.R_OWNER = ?
 		String sqlStr2 = "SELECT PRIMARYTABLE.SCHEMA AS PKTABLE_SCHEM, PRIMARYTABLE.TABLENAME AS PKTABLE_NAME, "
 				+ " PRIMARYFIELD.FIELD AS PKCOLUMN_NAME, FOREIGNTABLE.SCHEMA AS FKTABLE_SCHEM, "
 				+ " FOREIGNTABLE.TABLENAME AS FKTABLE_NAME, FOREIGNFIELD.FIELD AS FKCOLUMN_NAME, "
@@ -333,7 +342,7 @@ public class StructureTest extends MigrationTestBase {
 		ResultSet rs1 = null, rs2 = null;
 		try {
 			stmt1 = sourceConnection.prepareStatement(sqlStr1);
-			//stmt1.setString(1, sourceConnection.getCatalog());
+			// stmt1.setString(1, sourceConnection.getCatalog());
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
@@ -353,11 +362,28 @@ public class StructureTest extends MigrationTestBase {
 				while (rs2.next()) {
 					found = true;
 					Assert.assertEquals(rs2.getString("FKTABLE_SCHEM"),
-							rs2.getString("PKTABLE_SCHEM"));
-					Assert.assertEquals(rs2.getString("FKTABLE_NAME"), tName);
-					Assert.assertEquals(rs2.getString("FKCOLUMN_NAME"), cName);
-					Assert.assertEquals(rs2.getString("PKTABLE_NAME"), rtName);
-					Assert.assertEquals(rs2.getString("PKCOLUMN_NAME"), rcName);
+							rs2.getString("PKTABLE_SCHEM"),
+							"Foreign key and Primary key Schema did not match");
+					Assert.assertEquals(rs2.getString("FKTABLE_NAME"), tName,
+							"Foreign key table name did not match");
+					Assert.assertEquals(
+							rs2.getString("FKCOLUMN_NAME"),
+							cName,
+							"Foreign key column name"
+									+ rs2.getString("FKCOLUMN_NAME")
+									+ "of table"
+									+ rs2.getString("FKTABLE_NAME")
+									+ "did not match");
+					Assert.assertEquals(rs2.getString("PKTABLE_NAME"), rtName,
+							"Primary key table name did not match");
+					Assert.assertEquals(
+							rs2.getString("PKCOLUMN_NAME"),
+							rcName,
+							"Primary key column name"
+									+ rs2.getString("PKCOLUMN_NAME")
+									+ "of table"
+									+ rs2.getString("PKTABLE_NAME")
+									+ "did not match");
 				}
 				Assert.assertTrue(found);
 				rs2.close();
@@ -374,8 +400,8 @@ public class StructureTest extends MigrationTestBase {
 	 */
 	@Test(groups = { "disabled" })
 	public void testAutoIncrement() throws Exception {
-		String sqlStr1 = "select ut.table_name , ud.referenced_name as sequence_name from   user_dependencies ud " 
-				+ "join user_triggers ut on (ut.trigger_name = ud.name) where ud.type='TRIGGER'  and ud.referenced_type='SEQUENCE' " 
+		String sqlStr1 = "select ut.table_name , ud.referenced_name as sequence_name from   user_dependencies ud "
+				+ "join user_triggers ut on (ut.trigger_name = ud.name) where ud.type='TRIGGER'  and ud.referenced_type='SEQUENCE' "
 				+ "and ut.TABLE_NAME not like 'BIN$%' ";
 		String sqlStr2 = "SELECT S.SEQUENCENAME FROM SYSTEM.SEQUENCES S "
 				+ "INNER JOIN SYSTEM.FIELDS F ON S.SCHEMA=F.SCHEMA "
@@ -384,7 +410,7 @@ public class StructureTest extends MigrationTestBase {
 		ResultSet rs1 = null, rs2 = null;
 		try {
 			stmt1 = sourceConnection.prepareStatement(sqlStr1);
-			//stmt1.setString(1, sourceConnection.getCatalog());
+			// stmt1.setString(1, sourceConnection.getCatalog());
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
@@ -439,7 +465,7 @@ public class StructureTest extends MigrationTestBase {
 			boolean sourceFound = false;
 			while (rs1.next()) {
 				sourceFound = true;
-				String iName = rs1.getString(1);
+				// String iName = rs1.getString(1);
 				String cName = rs1.getString(2);
 				String tName = rs1.getString(3);
 				stmt2 = nuodbConnection.prepareStatement(sqlStr2);

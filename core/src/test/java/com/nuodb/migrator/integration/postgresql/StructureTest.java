@@ -149,14 +149,20 @@ public class StructureTest extends MigrationTestBase {
 				HashMap<String, String> tabColDetailsMap = tabColMap
 						.get(colName);
 				Assert.assertNotNull(tabColDetailsMap);
-				Assert.assertEquals(colName, tabColDetailsMap.get(colNames[0]));
+				Assert.assertEquals(colName, tabColDetailsMap.get(colNames[0]),
+						"Column name " + colName + " of table " + tableName
+								+ " did not match");
 
 				Assert.assertEquals(rs2.getInt("JDBCTYPE"), PostgreSQLTypes
-						.getMappedJDBCType(tabColDetailsMap.get(colNames[4])));
+						.getMappedJDBCType(tabColDetailsMap.get(colNames[4])),
+						"JDBCTYPE of column " + colName + " of table "
+								+ tableName + " did not match");
 
 				Assert.assertEquals(rs2.getString("LENGTH"), PostgreSQLTypes
 						.getMappedLength(tabColDetailsMap.get(colNames[4]),
-								tabColDetailsMap.get(colNames[5])));
+								tabColDetailsMap.get(colNames[5])),
+						"LENGTH of column " + colName + " of table "
+								+ tableName + " did not match");
 				// TBD
 				// String val = tabColDetailsMap.get(colNames[7]);
 				// Assert.assertEquals(rs2.getInt("SCALE"), val == null ? 0
@@ -222,7 +228,10 @@ public class StructureTest extends MigrationTestBase {
 				boolean found = false;
 				while (rs2.next()) {
 					found = true;
-					Assert.assertEquals(rs2.getString(1), cName);
+					Assert.assertEquals(rs2.getString(1), cName,
+							"Source column name " + cName + " of table "
+									+ tName
+									+ " did not match with target column name ");
 				}
 				Assert.assertTrue(found);
 				rs2.close();
@@ -293,11 +302,28 @@ public class StructureTest extends MigrationTestBase {
 				while (rs2.next()) {
 					found = true;
 					Assert.assertEquals(rs2.getString("FKTABLE_SCHEM"),
-							rs2.getString("PKTABLE_SCHEM"));
-					Assert.assertEquals(rs2.getString("FKTABLE_NAME"), tName);
-					Assert.assertEquals(rs2.getString("FKCOLUMN_NAME"), cName);
-					Assert.assertEquals(rs2.getString("PKTABLE_NAME"), rtName);
-					Assert.assertEquals(rs2.getString("PKCOLUMN_NAME"), rcName);
+							rs2.getString("PKTABLE_SCHEM"),
+							"Foreign key and Primary key Schema did not match");
+					Assert.assertEquals(rs2.getString("FKTABLE_NAME"), tName,
+							"Foreign key table name did not match");
+					Assert.assertEquals(
+							rs2.getString("FKCOLUMN_NAME"),
+							cName,
+							"Foreign key column name"
+									+ rs2.getString("FKCOLUMN_NAME")
+									+ "of table"
+									+ rs2.getString("FKTABLE_NAME")
+									+ "did not match");
+					Assert.assertEquals(rs2.getString("PKTABLE_NAME"), rtName,
+							"Primary key table name did not match");
+					Assert.assertEquals(
+							rs2.getString("PKCOLUMN_NAME"),
+							rcName,
+							"Primary key column name"
+									+ rs2.getString("PKCOLUMN_NAME")
+									+ "of table"
+									+ rs2.getString("PKTABLE_NAME")
+									+ "did not match");
 				}
 				Assert.assertTrue(found);
 				rs2.close();
@@ -336,7 +362,7 @@ public class StructureTest extends MigrationTestBase {
 				sourceFound = true;
 				String tName = rs1.getString("TABLE_NAME");
 				String cName = rs1.getString("COLUMN_NAME");
-				long ai = rs1.getLong("AUTO_INCREMENT");
+				// long ai = rs1.getLong("AUTO_INCREMENT");
 				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
 				stmt2.setString(1, nuodbSchemaUsed);
 				stmt2.setString(2, tName);
