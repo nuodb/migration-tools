@@ -36,10 +36,6 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
  */
 public class DB2Dialect extends SimpleDialect {
 
-    public DB2Dialect() {
-        this(new DatabaseInfo("DB2"));
-    }
-
     public DB2Dialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
     }

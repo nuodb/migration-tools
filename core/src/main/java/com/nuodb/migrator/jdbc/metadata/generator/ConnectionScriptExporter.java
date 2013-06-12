@@ -59,21 +59,10 @@ public class ConnectionScriptExporter extends CountingScriptExporter {
         statement = connection.createStatement();
     }
 
-    int check1 = 0;
-    int check2 = 0;
-
     @Override
     public void exportScript(String script) throws Exception {
         if (connection == null) {
             throw new GeneratorException("Database connection is not opened");
-        }
-        if (script.equals("CREATE INDEX \"IDX_InventoryDocumentHeader_SiteID\" ON \"InvQA\".\"InventoryDocumentHeader\" (\"SiteID\")") && check1++ > 0) {
-            System.out.println("ConnectionScriptExporter.exportScript check1");
-            return;
-        }
-        if (script.equals("CREATE INDEX \"IDX_InventoryDocumentHeader_DocumentTypeID\" ON \"InvQA\".\"InventoryDocumentHeader\" (\"DocumentTypeID\")") && check2++ > 0) {
-            System.out.println("ConnectionScriptExporter.exportScript check2");
-            return;
         }
         statement.executeUpdate(script);
         processWarning(statement.getWarnings());

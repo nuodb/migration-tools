@@ -179,9 +179,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                     tableScriptGeneratorContext.getAttributes().get(TABLES_GENERATED);
             tableScriptGeneratorContext.getObjectTypes().remove(FOREIGN_KEY);
             for (Table table : tables) {
-                if (table.getName().equals("InventoryDocumentHeader")) {
-                    System.out.println("HasTablesScriptGenerator.addCreateScripts" + table);
-                }
                 if (!isGenerateScript(scriptGeneratorContext, table)) {
                     continue;
                 }
