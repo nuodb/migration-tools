@@ -7,6 +7,8 @@
                 <exclude name="integrationtest"/>
                 <exclude name="mysqlintegrationtest"/>
                 <exclude name="nuodbintegrationtest"/>
+                <exclude name="linqdataloadperformed"/>
+                <exclude name="nuodblinqtest"/>
                 <exclude name="sqlserverintegrationtest"/>
                 <exclude name="postgresqlintegrationtest"/>
                 <exclude name="oracleintegrationtest"/>

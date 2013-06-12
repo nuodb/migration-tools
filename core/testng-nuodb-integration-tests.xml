@@ -6,6 +6,8 @@
 	  <run>
 	    <include name="integrationtest"/>
 	    <include name="nuodbintegrationtest"/>
+	    <include name="linqdataloadperformed"/>
+	    <include name="nuodblinqtest"/>
         <exclude name="disabled"/>
 	  </run>
 	</groups>

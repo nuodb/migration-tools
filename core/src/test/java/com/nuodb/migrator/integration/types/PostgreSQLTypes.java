@@ -94,6 +94,7 @@ public class PostgreSQLTypes implements DatabaseTypes {
 		map.put("FLOAT8", new JDBCGetMethod[] { JDBCGetMethod.DOUBLE });
 		map.put("CHARACTER VARYING",
 				new JDBCGetMethod[] { JDBCGetMethod.STRING });
+		map.put("SERIAL", new JDBCGetMethod[] { JDBCGetMethod.INT });
 		map.put("SERIAL4", new JDBCGetMethod[] { JDBCGetMethod.INT });
 		map.put("VARCHAR", new JDBCGetMethod[] { JDBCGetMethod.STRING });
 
@@ -213,7 +214,7 @@ public class PostgreSQLTypes implements DatabaseTypes {
 		}
 		return 0;
 	}
-	
+
 	public static String getMappedLength(String type, String length) {
 		if ("CHAR".equalsIgnoreCase(type)) {
 			return length;
@@ -281,6 +282,10 @@ public class PostgreSQLTypes implements DatabaseTypes {
 			return "4";
 		} else if ("SERIAL8".equalsIgnoreCase(type)) {
 			return "8";
+		} else if ("SERIAL4".equalsIgnoreCase(type)) {
+			return "4";
+		} else if ("SERIAL".equalsIgnoreCase(type)) {
+			return "4";
 		} else if ("DECIMAL".equalsIgnoreCase(type)) {
 			return "8";
 		} else if ("INTEGER".equalsIgnoreCase(type)) {

@@ -147,16 +147,21 @@ public class StructureTest extends MigrationTestBase {
 				HashMap<String, String> tabColDetailsMap = tabColMap
 						.get(colName);
 				Assert.assertNotNull(tabColDetailsMap);
-				Assert.assertEquals(colName, tabColDetailsMap.get(colNames[0]));
+				Assert.assertEquals(colName, tabColDetailsMap.get(colNames[0]),
+						"Column name " + colName + " of table " + tableName
+								+ " did not match");
 				int srcJdbcType = rs2.getInt("JDBCTYPE");
 				int tarJdbcType = SQLServerTypes
 						.getMappedJDBCType(tabColDetailsMap.get(colNames[4]));
-				Assert.assertEquals(srcJdbcType, tarJdbcType);
+				Assert.assertEquals(srcJdbcType, tarJdbcType,
+						"JDBCTYPE of column " + colName + " of table "
+								+ tableName + " did not match");
 				String srcLength = rs2.getString("LENGTH");
 				String tarLength = SQLServerTypes.getMappedLength(
 						tabColDetailsMap.get(colNames[4]),
 						tabColDetailsMap.get(colNames[5]));
-				Assert.assertEquals(srcLength, tarLength);
+				Assert.assertEquals(srcLength, tarLength, "LENGTH of column "
+						+ colName + " of table " + tableName + " did not match");
 				// TBD
 				// String val = tabColDetailsMap.get(colNames[7]);
 				// Assert.assertEquals(rs2.getInt("SCALE"), val == null ? 0
@@ -165,11 +170,13 @@ public class StructureTest extends MigrationTestBase {
 				// Assert.assertEquals(rs2.getString("PRECISION"),
 				// tabColDetailsMap.get(colNames[6]));
 
-				String val = tabColDetailsMap.get(colNames[2]);
+				// String val = tabColDetailsMap.get(colNames[2]);
 				Assert.assertEquals(rs2.getString("DEFAULTVALUE"),
 						SQLServerTypes.getMappedDefault(
 								tabColDetailsMap.get(colNames[4]),
-								tabColDetailsMap.get(colNames[2])));
+								tabColDetailsMap.get(colNames[2])),
+						"DEFAULTVALUE of column " + colName + " of table "
+								+ tableName + " did not match");
 			}
 			Assert.assertTrue(targetFound);
 		} finally {
@@ -218,7 +225,9 @@ public class StructureTest extends MigrationTestBase {
 				while (rs2.next()) {
 					found = true;
 					String tarCol = rs2.getString(1);
-					Assert.assertEquals(tarCol, cName);
+					Assert.assertEquals(tarCol, cName, "Source column name "
+							+ cName + " of table " + tName
+							+ " did not match with target column name ");
 				}
 				Assert.assertTrue(found);
 				rs2.close();
@@ -352,11 +361,28 @@ public class StructureTest extends MigrationTestBase {
 				while (rs2.next()) {
 					found = true;
 					Assert.assertEquals(rs2.getString("FKTABLE_SCHEM"),
-							rs2.getString("PKTABLE_SCHEM"));
-					Assert.assertEquals(rs2.getString("FKTABLE_NAME"), tName);
-					Assert.assertEquals(rs2.getString("FKCOLUMN_NAME"), cName);
-					Assert.assertEquals(rs2.getString("PKTABLE_NAME"), rtName);
-					Assert.assertEquals(rs2.getString("PKCOLUMN_NAME"), rcName);
+							rs2.getString("PKTABLE_SCHEM"),
+							"Foreign key and Primary key Schema did not match");
+					Assert.assertEquals(rs2.getString("FKTABLE_NAME"), tName,
+							"Foreign key table name did not match");
+					Assert.assertEquals(
+							rs2.getString("FKCOLUMN_NAME"),
+							cName,
+							"Foreign key column name"
+									+ rs2.getString("FKCOLUMN_NAME")
+									+ "of table"
+									+ rs2.getString("FKTABLE_NAME")
+									+ "did not match");
+					Assert.assertEquals(rs2.getString("PKTABLE_NAME"), rtName,
+							"Primary key table name did not match");
+					Assert.assertEquals(
+							rs2.getString("PKCOLUMN_NAME"),
+							rcName,
+							"Primary key column name"
+									+ rs2.getString("PKCOLUMN_NAME")
+									+ "of table"
+									+ rs2.getString("PKTABLE_NAME")
+									+ "did not match");
 				}
 				Assert.assertTrue(found);
 				rs2.close();
@@ -371,6 +397,7 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the auto increment settings are migrated
 	 */
+	@Test(groups = { "disabled" })
 	public void testAutoIncrement() throws Exception {
 		String sqlStr1 = "SELECT  t.TABLE_NAME,c.COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
 				+ "AS c JOIN INFORMATION_SCHEMA.TABLES AS t ON t.TABLE_NAME = c.TABLE_NAME "
@@ -445,7 +472,7 @@ public class StructureTest extends MigrationTestBase {
 			boolean sourceFound = false;
 			while (rs1.next()) {
 				sourceFound = true;
-				String iName = rs1.getString(1);
+				// String iName = rs1.getString(1);
 				String cName = rs1.getString(2);
 				String tName = rs1.getString(3);
 				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
