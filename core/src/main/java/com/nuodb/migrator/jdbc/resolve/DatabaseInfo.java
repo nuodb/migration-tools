@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.resolve;
 
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.nuodb.migrator.utils.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +37,7 @@ import java.sql.SQLException;
 import java.util.Comparator;
 
 import static com.google.common.collect.ComparisonChain.start;
+import static com.google.common.collect.Ordering.natural;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
 /**
@@ -48,21 +50,23 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
     private Integer majorVersion;
     private Integer minorVersion;
 
+    public DatabaseInfo() {
+    }
+
     public DatabaseInfo(String productName) {
-        this(productName, null);
+        this.productName = productName;
     }
 
     public DatabaseInfo(String productName, String productVersion) {
-        this(productName, productVersion, null);
+        this.productName = productName;
+        this.productVersion = productVersion;
     }
+
 
     public DatabaseInfo(String productName, String productVersion, Integer majorVersion) {
-        this(productName, productVersion, majorVersion, null);
-    }
-
-    public DatabaseInfo(DatabaseMetaData databaseMetaData) throws SQLException {
-        this(databaseMetaData.getDatabaseProductName(), databaseMetaData.getDatabaseProductVersion(),
-                databaseMetaData.getDatabaseMajorVersion(), databaseMetaData.getDatabaseMinorVersion());
+        this.productName = productName;
+        this.productVersion = productVersion;
+        this.majorVersion = majorVersion;
     }
 
     public DatabaseInfo(String productName, String productVersion, Integer majorVersion, Integer minorVersion) {
@@ -70,6 +74,11 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
         this.productVersion = productVersion;
         this.minorVersion = minorVersion;
         this.majorVersion = majorVersion;
+    }
+
+    public DatabaseInfo(DatabaseMetaData databaseMetaData) throws SQLException {
+        this(databaseMetaData.getDatabaseProductName(), databaseMetaData.getDatabaseProductVersion(),
+                databaseMetaData.getDatabaseMajorVersion(), databaseMetaData.getDatabaseMinorVersion());
     }
 
     public String getProductName() {
@@ -104,28 +113,45 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
         this.minorVersion = minorVersion;
     }
 
-    public boolean successorOf(DatabaseInfo databaseInfo) {
-        Ordering<Comparable> comparator = Ordering.natural().nullsLast();
-        return start().
-                compare(productName, databaseInfo.productName, new Comparator<String>() {
+    public boolean isInherited(DatabaseInfo databaseInfo) {
+        ComparisonChain comparator = start();
+        comparator = isProductNameInherited(databaseInfo, comparator);
+        comparator = isProductVersionInherited(databaseInfo, comparator);
+        comparator = isMajorVersionInherited(databaseInfo, comparator);
+        comparator = isMinorVersionInherited(databaseInfo, comparator);
+        return comparator.result() >= 0;
+    }
+
+    protected ComparisonChain isProductNameInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getProductName(), databaseInfo.getProductName(),
+                new Comparator<String>() {
                     @Override
                     public int compare(String productName1, String productName2) {
                         return StringUtils.equals(productName1, productName2) ? 0 : -1;
                     }
-                }).
-                compare(productVersion, databaseInfo.productVersion, comparator).
-                compare(majorVersion, databaseInfo.majorVersion, comparator).
-                compare(minorVersion, databaseInfo.minorVersion, comparator).result() >= 0;
+                });
+    }
+
+    protected ComparisonChain isProductVersionInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getProductVersion(), databaseInfo.getProductVersion(), natural().nullsLast());
+    }
+
+    protected ComparisonChain isMajorVersionInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getMajorVersion(), databaseInfo.getMajorVersion(), natural().nullsLast());
+    }
+
+    protected ComparisonChain isMinorVersionInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getMinorVersion(), databaseInfo.getMinorVersion(), natural().nullsLast());
     }
 
     @Override
     public int compareTo(DatabaseInfo databaseInfo) {
-        Ordering<Comparable> ordering = Ordering.natural().nullsFirst();
+        Ordering<Comparable> ordering = natural().nullsFirst();
         return start().
-                compare(productName, databaseInfo.productName, ordering).
-                compare(productVersion, databaseInfo.productVersion, ordering).
-                compare(majorVersion, databaseInfo.majorVersion, ordering).
-                compare(minorVersion, databaseInfo.minorVersion, ordering).result();
+                compare(getProductName(), databaseInfo.getProductName(), ordering).
+                compare(getProductVersion(), databaseInfo.getProductVersion(), ordering).
+                compare(getMajorVersion(), databaseInfo.getMajorVersion(), ordering).
+                compare(getMinorVersion(), databaseInfo.getMinorVersion(), ordering).result();
     }
 
     @Override

@@ -96,20 +96,25 @@ public class ScriptGeneratorContext {
         scriptGenerators.addAll(scriptGeneratorContext.getScriptGenerators());
     }
 
-    public String getName(MetaData metaData) {
-        return getNamingStrategy(metaData).getName(metaData, this, true);
+    public String getName(MetaData object) {
+        return getNamingStrategy(object).getName(object, this, true);
     }
 
-    public String getName(MetaData metaData, boolean normalize) {
-        return getNamingStrategy(metaData).getName(metaData, this, normalize);
+    public String getName(MetaData object, boolean normalize) {
+        return getNamingStrategy(object).getName(object, this, normalize);
     }
 
-    public String getQualifiedName(MetaData metaData) {
-        return getNamingStrategy(metaData).getQualifiedName(metaData, this, true);
+    public String getQualifiedName(MetaData object) {
+        return getNamingStrategy(object).getQualifiedName(object, this, getTargetCatalog(), getTargetSchema(), true);
     }
 
-    public String getQualifiedName(MetaData metaData, boolean normalize) {
-        return getNamingStrategy(metaData).getQualifiedName(metaData, this, normalize);
+    public String getQualifiedName(MetaData object, boolean normalize) {
+        return getNamingStrategy(object).getQualifiedName(object, this, getTargetCatalog(), getTargetSchema(),
+                normalize);
+    }
+
+    public String getQualifiedName(MetaData object, String catalog, String schema, boolean normalize) {
+        return getNamingStrategy(object).getQualifiedName(object, this, catalog, schema, normalize);
     }
 
     public void addNamingStrategy(NamingStrategy<? extends MetaData> namingStrategy) {

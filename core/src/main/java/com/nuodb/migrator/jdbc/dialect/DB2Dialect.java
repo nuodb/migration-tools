@@ -30,6 +30,8 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 /**
+ * http://grepcode.com/file/repository.jboss.org/nexus/content/repositories/releases/org.hibernate/hibernate-core/3.5.0-CR-1/org/hibernate/dialect/DB2Dialect.java
+ *
  * @author Sergey Bushik
  */
 public class DB2Dialect extends SimpleDialect {

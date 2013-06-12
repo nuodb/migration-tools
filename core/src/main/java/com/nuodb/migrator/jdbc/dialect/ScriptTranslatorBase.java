@@ -67,8 +67,8 @@ public abstract class ScriptTranslatorBase implements ScriptTranslator {
 
     @Override
     public boolean canTranslateScript(Script sourceScript, DatabaseInfo targetDatabaseInfo) {
-        return (this.sourceDatabaseInfo == null || this.sourceDatabaseInfo.successorOf(sourceScript.getDatabaseInfo())
-                && (this.targetDatabaseInfo == null || this.targetDatabaseInfo.successorOf(targetDatabaseInfo)));
+        return (this.sourceDatabaseInfo == null || this.sourceDatabaseInfo.isInherited(sourceScript.getDatabaseInfo())
+                && (this.targetDatabaseInfo == null || this.targetDatabaseInfo.isInherited(targetDatabaseInfo)));
     }
 
     @Override

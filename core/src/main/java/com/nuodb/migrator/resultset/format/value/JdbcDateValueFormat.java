@@ -28,6 +28,7 @@
 package com.nuodb.migrator.resultset.format.value;
 
 import com.nuodb.migrator.jdbc.model.ValueModel;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccess;
 
 import java.sql.Date;
@@ -37,7 +38,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
-import static com.nuodb.migrator.jdbc.type.JdbcTypeDesc.isTypeNameEquals;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.STRING_NULL;
 import static com.nuodb.migrator.resultset.format.value.ValueVariants.string;
 import static java.lang.String.format;
@@ -58,7 +58,7 @@ public class JdbcDateValueFormat extends ValueFormatBase<Date> {
         Date date = valueAccess.getValue(valueAccessOptions);
         if (date == null) {
             return STRING_NULL;
-        } else if (isTypeNameEquals(valueAccess.getValueModel().getTypeName(), YEAR_TYPE)) {
+        } else if (JdbcTypeDesc.equals(valueAccess.getValueModel().getTypeName(), YEAR_TYPE)) {
             return string(YEAR_FORMAT.format(date));
         } else {
             return string(date.toString());

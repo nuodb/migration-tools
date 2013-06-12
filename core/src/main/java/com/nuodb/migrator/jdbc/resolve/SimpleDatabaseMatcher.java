@@ -40,6 +40,6 @@ public class SimpleDatabaseMatcher implements DatabaseMatcher {
 
     @Override
     public boolean matches(DatabaseInfo databaseInfo) {
-        return this.databaseInfo.successorOf(databaseInfo);
+        return this.databaseInfo.isInherited(databaseInfo);
     }
 }

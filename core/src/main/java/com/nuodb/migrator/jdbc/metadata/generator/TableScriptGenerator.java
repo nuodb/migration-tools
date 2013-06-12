@@ -202,11 +202,12 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         JdbcTypeSpecifiers jdbcTypeSpecifiers = newSpecifiers(column.getSize(), column.getPrecision(), scale);
         String columnTypeName = dialect.getJdbcTypeName(databaseInfo, jdbcTypeDesc, jdbcTypeSpecifiers);
         if (columnTypeName == null) {
+            String tableName = scriptGeneratorContext.getQualifiedName(column.getTable(),
+                    column.getTable().getSchema().getName(), column.getTable().getCatalog().getName(), false);
+            String columnName = scriptGeneratorContext.getName(column, false);
             throw new GeneratorException(
-                    format("Unsupported type %s, type code %d, length %d on table %s column %s",
-                            column.getTypeName(), column.getTypeCode(), column.getSize(),
-                            scriptGeneratorContext.getQualifiedName(column.getTable(), false),
-                            scriptGeneratorContext.getName(column, false)));
+                    format("Unsupported type %s with type code %d, %d length found on %s table %s column",
+                            column.getTypeName(), column.getTypeCode(), column.getSize(), tableName, columnName));
         }
         return columnTypeName;
     }

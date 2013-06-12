@@ -298,7 +298,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         if (targetJdbcTypeNameMap == null) {
             DatabaseInfo targetDatabaseInfo = null;
             for (Map.Entry<DatabaseInfo, JdbcTypeNameMap> entry : jdbcTypeNameMaps.entrySet()) {
-                if (!entry.getKey().successorOf(databaseInfo)) {
+                if (!entry.getKey().isInherited(databaseInfo)) {
                     continue;
                 }
                 if (targetDatabaseInfo == null) {

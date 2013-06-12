@@ -46,18 +46,18 @@ public class IdentifiableNamingStrategy<T extends Identifiable> extends MetaData
     }
 
     @Override
-    public String getName(T object, ScriptGeneratorContext scriptGeneratorContext, boolean normalize) {
-        Dialect dialect = normalize ? scriptGeneratorContext.getDialect() : null;
-        String name = getIdentifiableName(object, scriptGeneratorContext);
+    public String getName(T object, ScriptGeneratorContext context, boolean normalize) {
+        Dialect dialect = normalize ? context.getDialect() : null;
+        String name = getIdentifiableName(object, context);
         return IdentifiableBase.getName(dialect, name, object);
     }
 
     @Override
-    public String getQualifiedName(T object, ScriptGeneratorContext scriptGeneratorContext, boolean normalize) {
-        Dialect dialect = normalize ? scriptGeneratorContext.getDialect() : null;
-        String name = getIdentifiableName(object, scriptGeneratorContext);
-        return IdentifiableBase.getQualifiedName(dialect, scriptGeneratorContext.getTargetCatalog(),
-                scriptGeneratorContext.getTargetSchema(), name, object);
+    public String getQualifiedName(T object, ScriptGeneratorContext context, String catalog, String schema,
+                                   boolean normalize) {
+        Dialect dialect = normalize ? context.getDialect() : null;
+        String name = getIdentifiableName(object, context);
+        return IdentifiableBase.getQualifiedName(dialect, catalog, schema, name, object);
     }
 
     protected String getIdentifiableName(T object, ScriptGeneratorContext scriptGeneratorContext) {

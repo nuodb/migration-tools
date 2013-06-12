@@ -61,7 +61,7 @@ public class JdbcTypeDesc {
         return typeName;
     }
 
-    public static boolean isTypeNameEquals(String typeName1, String typeName2) {
+    public static boolean equals(String typeName1, String typeName2) {
         return equalsIgnoreCase(typeName1, typeName2);
     }
 
@@ -70,7 +70,7 @@ public class JdbcTypeDesc {
         if (this == o) return true;
         if (!(o instanceof JdbcTypeDesc)) return false;
         JdbcTypeDesc that = (JdbcTypeDesc) o;
-        return typeCode == that.getTypeCode() && isTypeNameEquals(typeName, that.getTypeName());
+        return typeCode == that.getTypeCode() && equals(typeName, that.getTypeName());
     }
 
     @Override

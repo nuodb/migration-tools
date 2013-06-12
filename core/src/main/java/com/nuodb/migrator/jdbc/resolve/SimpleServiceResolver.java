@@ -114,7 +114,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         DatabaseInfo serviceDatabaseInfo = null;
         for (Map.Entry<DatabaseInfo, T> databaseInfoServiceEntry : databaseInfoServiceMap.entrySet()) {
             DatabaseInfo currentServiceDatabaseInfo = databaseInfoServiceEntry.getKey();
-            if (currentServiceDatabaseInfo.successorOf(databaseInfo) &&
+            if (currentServiceDatabaseInfo.isInherited(databaseInfo) &&
                     (serviceDatabaseInfo == null ||
                             currentServiceDatabaseInfo.compareTo(serviceDatabaseInfo) >= 0)) {
                 service = databaseInfoServiceEntry.getValue();
@@ -139,7 +139,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         DatabaseInfo serviceClassDatabaseInfo = null;
         for (Map.Entry<DatabaseInfo, Class<? extends T>> databaseInfoServiceClassEntry : databaseInfoServiceClassMap.entrySet()) {
             DatabaseInfo currentServiceClassDatabaseInfo = databaseInfoServiceClassEntry.getKey();
-            if (currentServiceClassDatabaseInfo.successorOf(databaseInfo) &&
+            if (currentServiceClassDatabaseInfo.isInherited(databaseInfo) &&
                     (serviceClassDatabaseInfo == null ||
                             currentServiceClassDatabaseInfo.compareTo(serviceClassDatabaseInfo) >= 0)) {
                 serviceClass = databaseInfoServiceClassEntry.getValue();
