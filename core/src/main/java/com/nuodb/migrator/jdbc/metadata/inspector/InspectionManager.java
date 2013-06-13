@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.dialect.DB2Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
@@ -56,47 +57,49 @@ public class InspectionManager {
         addInspector(new SimpleDatabaseInspector());
         addInspector(new SimpleCatalogInspector());
 
-        InspectorResolver schemaInspector = new InspectorResolver(SCHEMA, new SimpleSchemaInspector());
-        schemaInspector.register("NuoDB", new NuoDBSchemaInspector());
-        schemaInspector.register("PostgreSQL", new PostgreSQLSchemaInspector());
-        schemaInspector.register("Microsoft SQL Server", new MSSQLServerSchemaInspector());
-        addInspector(schemaInspector);
+        InspectorResolver schema = new InspectorResolver(SCHEMA, new SimpleSchemaInspector());
+        schema.register("NuoDB", new NuoDBSchemaInspector());
+        schema.register("PostgreSQL", new PostgreSQLSchemaInspector());
+        schema.register("Microsoft SQL Server", new MSSQLServerSchemaInspector());
+        addInspector(schema);
 
-        InspectorResolver tableInspector = new InspectorResolver(TABLE, new SimpleTableInspector());
-        tableInspector.register("NuoDB", new NuoDBTableInspector());
-        addInspector(tableInspector);
+        InspectorResolver table = new InspectorResolver(TABLE, new SimpleTableInspector());
+        table.register("NuoDB", new NuoDBTableInspector());
+        addInspector(table);
 
-        InspectorResolver indexInspector = new InspectorResolver(INDEX, new SimpleIndexInspector());
-        indexInspector.register("NuoDB", new NuoDBIndexInspector());
-        indexInspector.register("PostgreSQL", new PostgreSQLIndexInspector());
-        addInspector(indexInspector);
+        InspectorResolver index = new InspectorResolver(INDEX, new SimpleIndexInspector());
+        index.register("NuoDB", new NuoDBIndexInspector());
+        index.register("PostgreSQL", new PostgreSQLIndexInspector());
+        addInspector(index);
 
-        InspectorResolver primaryKeyInspector = new InspectorResolver(PRIMARY_KEY, new SimplePrimaryKeyInspector());
-        primaryKeyInspector.register("NuoDB", new NuoDBPrimaryKeyInspector());
-        addInspector(primaryKeyInspector);
+        InspectorResolver primaryKey = new InspectorResolver(PRIMARY_KEY, new SimplePrimaryKeyInspector());
+        primaryKey.register("NuoDB", new NuoDBPrimaryKeyInspector());
+        addInspector(primaryKey);
 
-        InspectorResolver foreignKeyInspector = new InspectorResolver(FOREIGN_KEY, new SimpleForeignKeyInspector());
-        foreignKeyInspector.register("NuoDB", new NuoDBForeignKeyInspector());
-        addInspector(foreignKeyInspector);
+        InspectorResolver foreignKey = new InspectorResolver(FOREIGN_KEY, new SimpleForeignKeyInspector());
+        foreignKey.register("NuoDB", new NuoDBForeignKeyInspector());
+        addInspector(foreignKey);
 
-        InspectorResolver columnInspector = new InspectorResolver(COLUMN, new SimpleColumnInspector());
-        columnInspector.register("NuoDB", new NuoDBColumnInspector());
-        columnInspector.register("PostgreSQL", new PostgreSQLColumnInspector());
-        columnInspector.register("Microsoft SQL Server", new MSSQLServerColumnInspector());
-        addInspector(columnInspector);
+        InspectorResolver column = new InspectorResolver(COLUMN, new SimpleColumnInspector());
+        column.register("NuoDB", new NuoDBColumnInspector());
+        column.register("PostgreSQL", new PostgreSQLColumnInspector());
+        column.register("Microsoft SQL Server", new MSSQLServerColumnInspector());
+        addInspector(column);
 
-        InspectorResolver checkInspector = new InspectorResolver(CHECK);
-        checkInspector.register("NuoDB", new NuoDBCheckInspector());
-        checkInspector.register("PostgreSQL", new PostgreSQLCheckInspector());
-        checkInspector.register("Microsoft SQL Server", new MSSQLServerCheckInspector());
-        checkInspector.register("Oracle", new OracleCheckInspector());
-        addInspector(checkInspector);
+        InspectorResolver check = new InspectorResolver(CHECK);
+        check.register("NuoDB", new NuoDBCheckInspector());
+        check.register("PostgreSQL", new PostgreSQLCheckInspector());
+        check.register("Microsoft SQL Server", new DB2CheckInspector());
+        check.register("Oracle", new OracleCheckInspector());
+        check.register(DB2Dialect.DATABASE_INFO, new DB2CheckInspector());
+        addInspector(check);
 
-        InspectorResolver autoIncrementInspector = new InspectorResolver(AUTO_INCREMENT);
-        autoIncrementInspector.register("MySQL", new MySQLAutoIncrementInspector());
-        autoIncrementInspector.register("PostgreSQL", new PostgreSQLAutoIncrementInspector());
-        autoIncrementInspector.register("Microsoft SQL Server", new MSSQLServerAutoIncrementInspector());
-        addInspector(autoIncrementInspector);
+        InspectorResolver autoIncrement = new InspectorResolver(AUTO_INCREMENT);
+        autoIncrement.register("MySQL", new MySQLAutoIncrementInspector());
+        autoIncrement.register("PostgreSQL", new PostgreSQLAutoIncrementInspector());
+        autoIncrement.register("Microsoft SQL Server", new MSSQLServerAutoIncrementInspector());
+        autoIncrement.register(DB2Dialect.DATABASE_INFO, new DB2AutoIncrementInspector());
+        addInspector(autoIncrement);
     }
 
     public InspectionResults inspect() throws SQLException {
