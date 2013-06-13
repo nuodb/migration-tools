@@ -133,7 +133,7 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
                     checks.getString("TABLE_CATALOG"), checks.getString("TABLE_SCHEMA"),
                     checks.getString("TABLE_NAME"));
             Check check = new Check(checks.getString("CONSTRAINT_NAME"));
-            check.setClause(checks.getString("CHECK_CLAUSE"));
+            check.setText(checks.getString("CHECK_CLAUSE"));
             table.addCheck(check);
             inspectionResults.addObject(check);
         }

@@ -40,6 +40,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
 
 /**
  * Reads database meta data and creates meta model from it. Root meta model object is {@link Database} containing set of
@@ -58,48 +59,48 @@ public class InspectionManager {
         addInspector(new SimpleCatalogInspector());
 
         InspectorResolver schema = new InspectorResolver(SCHEMA, new SimpleSchemaInspector());
-        schema.register(DatabaseInfoUtils.NUODB, new NuoDBSchemaInspector());
-        schema.register(DatabaseInfoUtils.POSTGRE_SQL, new PostgreSQLSchemaInspector());
-        schema.register(DatabaseInfoUtils.MSSQL_SERVER, new MSSQLServerSchemaInspector());
+        schema.register(NUODB, new NuoDBSchemaInspector());
+        schema.register(POSTGRE_SQL, new PostgreSQLSchemaInspector());
+        schema.register(MSSQL_SERVER, new MSSQLServerSchemaInspector());
         addInspector(schema);
 
         InspectorResolver table = new InspectorResolver(TABLE, new SimpleTableInspector());
-        table.register(DatabaseInfoUtils.NUODB, new NuoDBTableInspector());
+        table.register(NUODB, new NuoDBTableInspector());
         addInspector(table);
 
         InspectorResolver index = new InspectorResolver(INDEX, new SimpleIndexInspector());
-        index.register(DatabaseInfoUtils.NUODB, new NuoDBIndexInspector());
-        index.register(DatabaseInfoUtils.POSTGRE_SQL, new PostgreSQLIndexInspector());
+        index.register(NUODB, new NuoDBIndexInspector());
+        index.register(POSTGRE_SQL, new PostgreSQLIndexInspector());
         addInspector(index);
 
         InspectorResolver primaryKey = new InspectorResolver(PRIMARY_KEY, new SimplePrimaryKeyInspector());
-        primaryKey.register(DatabaseInfoUtils.NUODB, new NuoDBPrimaryKeyInspector());
+        primaryKey.register(NUODB, new NuoDBPrimaryKeyInspector());
         addInspector(primaryKey);
 
         InspectorResolver foreignKey = new InspectorResolver(FOREIGN_KEY, new SimpleForeignKeyInspector());
-        foreignKey.register(DatabaseInfoUtils.NUODB, new NuoDBForeignKeyInspector());
+        foreignKey.register(NUODB, new NuoDBForeignKeyInspector());
         addInspector(foreignKey);
 
         InspectorResolver column = new InspectorResolver(COLUMN, new SimpleColumnInspector());
-        column.register(DatabaseInfoUtils.NUODB, new NuoDBColumnInspector());
-        column.register(DatabaseInfoUtils.POSTGRE_SQL, new PostgreSQLColumnInspector());
-        column.register(DatabaseInfoUtils.MSSQL_SERVER, new MSSQLServerColumnInspector());
+        column.register(NUODB, new NuoDBColumnInspector());
+        column.register(POSTGRE_SQL, new PostgreSQLColumnInspector());
+        column.register(MSSQL_SERVER, new MSSQLServerColumnInspector());
         addInspector(column);
 
         InspectorResolver check = new InspectorResolver(CHECK);
-        check.register(DatabaseInfoUtils.NUODB, new NuoDBCheckInspector());
-        check.register(DatabaseInfoUtils.POSTGRE_SQL, new PostgreSQLCheckInspector());
-        check.register(DatabaseInfoUtils.MSSQL_SERVER, new DB2CheckInspector());
+        check.register(NUODB, new NuoDBCheckInspector());
+        check.register(POSTGRE_SQL, new PostgreSQLCheckInspector());
+        check.register(MSSQL_SERVER, new DB2CheckInspector());
         check.register(DatabaseInfoUtils.ORACLE, new OracleCheckInspector());
-        check.register(DatabaseInfoUtils.DB2, new DB2CheckInspector());
+        check.register(DB2, new DB2CheckInspector());
         addInspector(check);
 
-        InspectorResolver autoIncrement = new InspectorResolver(AUTO_INCREMENT);
-        autoIncrement.register(DatabaseInfoUtils.MYSQL, new MySQLAutoIncrementInspector());
-        autoIncrement.register(DatabaseInfoUtils.POSTGRE_SQL, new PostgreSQLAutoIncrementInspector());
-        autoIncrement.register(DatabaseInfoUtils.MSSQL_SERVER, new MSSQLServerAutoIncrementInspector());
-        autoIncrement.register(DatabaseInfoUtils.DB2, new DB2AutoIncrementInspector());
-        addInspector(autoIncrement);
+        InspectorResolver sequence = new InspectorResolver(IDENTITY);
+        sequence.register(MYSQL, new MySQLIdentityInspector());
+        sequence.register(POSTGRE_SQL, new PostgreSQLIdentityInspector());
+        sequence.register(MSSQL_SERVER, new MSSQLServerIdentityInspector());
+        sequence.register(DB2, new DB2IdentityInspector());
+        addInspector(sequence);
     }
 
     public InspectionResults inspect() throws SQLException {

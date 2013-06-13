@@ -113,7 +113,7 @@ public class NuoDBCheckInspector extends TableInspectorBase<Table, TableInspecti
             String constraint = checks.getString("CONSTRAINTNAME");
             Check check = new Check(constraint);
             check.setTable(table);
-            check.setClause(checks.getString("CONSTRAINTTEXT"));
+            check.setText(checks.getString("CONSTRAINTTEXT"));
             if (pattern.matcher(constraint).matches()) {
                 table.addCheck(check);
             } else {

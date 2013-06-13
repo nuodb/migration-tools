@@ -95,7 +95,7 @@ public class PostgreSQLCheckInspector extends InspectorBase<Table, TableInspecti
     protected void inspect(InspectionContext inspectionContext, Table table, ResultSet checks) throws SQLException {
         while (checks.next()) {
             Check check = new Check(checks.getString("CONSTRAINT_NAME"));
-            check.setClause(checks.getString("CHECK_CLAUSE"));
+            check.setText(checks.getString("CHECK_CLAUSE"));
             table.addCheck(check);
             inspectionContext.getInspectionResults().addObject(check);
         }

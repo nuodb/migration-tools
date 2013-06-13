@@ -113,7 +113,7 @@ public class InspectorResolver extends MetaDataHandlerBase implements Inspector 
         inspectorResolver.register(databaseInfo, serviceClass);
     }
 
-    public Inspector resolve(DatabaseInfo databaseInfo) {
+    public Inspector resolve(DatabaseInfo databaseInfo) throws SQLException {
         return inspectorResolver.resolve(databaseInfo);
     }
 

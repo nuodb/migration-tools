@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
 import java.util.Collection;
 
@@ -42,7 +43,11 @@ import static java.util.Collections.emptySet;
  */
 public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHandlerBase implements ScriptGenerator<T> {
 
-    protected ScriptGeneratorBase(Class<T> objectClass) {
+    protected ScriptGeneratorBase(MetaDataType objectType) {
+        super(objectType);
+    }
+
+    protected ScriptGeneratorBase(Class<? extends MetaData> objectClass) {
         super(objectClass);
     }
 

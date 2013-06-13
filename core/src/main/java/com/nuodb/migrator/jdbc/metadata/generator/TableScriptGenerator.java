@@ -68,7 +68,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             buffer.append(scriptGeneratorContext.getName(column));
             buffer.append(' ');
             buffer.append(getColumnTypeName(column, scriptGeneratorContext));
-            if (column.isIdentity() && objectTypes.contains(AUTO_INCREMENT)) {
+            if (column.isIdentity() && objectTypes.contains(IDENTITY)) {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
                         column.getSequence() != null ?
@@ -109,7 +109,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             if (objectTypes.contains(CHECK) && dialect.supportsColumnCheck()) {
                 for (Check check : column.getChecks()) {
                     buffer.append(", CHECK ");
-                    buffer.append(dialect.getCheckClause(check.getClause()));
+                    buffer.append(dialect.getCheckClause(check.getText()));
                 }
             }
             String comment = column.getComment();
@@ -157,7 +157,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         if (objectTypes.contains(CHECK) && dialect.supportsTableCheck()) {
             for (Check check : table.getChecks()) {
                 buffer.append(", CHECK ");
-                buffer.append(dialect.getCheckClause(check.getClause()));
+                buffer.append(dialect.getCheckClause(check.getText()));
             }
         }
         buffer.append(')');

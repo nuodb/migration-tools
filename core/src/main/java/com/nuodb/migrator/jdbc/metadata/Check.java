@@ -38,7 +38,7 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
  */
 public class Check extends ConstraintBase {
 
-    private String clause;
+    private String text;
     private Collection columns = Sets.newHashSet();
 
     public Check() {
@@ -53,22 +53,22 @@ public class Check extends ConstraintBase {
         super(CHECK, identifier);
     }
 
-    public Check(String name, String clause) {
+    public Check(String name, String text) {
         super(CHECK, name);
-        setClause(clause);
+        setText(text);
     }
 
-    public Check(Identifier identifier, String clause) {
+    public Check(Identifier identifier, String text) {
         super(CHECK, identifier);
-        setClause(clause);
+        setText(text);
     }
 
-    public String getClause() {
-        return clause;
+    public String getText() {
+        return text;
     }
 
-    public void setClause(String clause) {
-        this.clause = clause;
+    public void setText(String text) {
+        this.text = text;
     }
 
     @Override
@@ -86,14 +86,14 @@ public class Check extends ConstraintBase {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Check check = (Check) o;
-        if (clause != null ? !clause.equals(check.clause) : check.clause != null) return false;
+        if (text != null ? !text.equals(check.text) : check.text != null) return false;
         return true;
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (clause != null ? clause.hashCode() : 0);
+        result = 31 * result + (text != null ? text.hashCode() : 0);
         return result;
     }
 }

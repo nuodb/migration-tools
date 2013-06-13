@@ -58,7 +58,7 @@ public class IndentedBase implements Indented {
 
     @Override
     public void output(int indent, StringBuilder buffer) {
-        output(indent, buffer, getIdentity());
+        output(indent, buffer, getIdentityString());
     }
 
     protected void output(int indent, StringBuilder buffer, String value) {
@@ -90,7 +90,7 @@ public class IndentedBase implements Indented {
         }
     }
 
-    protected String getIdentity() {
+    protected String getIdentityString() {
         return getClass().getName() + "@" + System.identityHashCode(this);
     }
 

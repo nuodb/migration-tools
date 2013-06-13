@@ -239,19 +239,19 @@ public class CliSchemaJob extends CliRunJob {
     protected void parseSchemaOptions(SchemaSpec schemaSpec, OptionSet optionSet, Option option) {
         if (optionSet.hasOption(SCHEMA_META_DATA_OPTION)) {
             Collection<String> values = optionSet.getValues(SCHEMA_META_DATA_OPTION);
-            Set<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
-            Map<String, MetaDataType> nameTypeMap = new TreeMap(String.CASE_INSENSITIVE_ORDER);
-            nameTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
+            Set<MetaDataType> objectTypes = newHashSet(MetaDataType.TYPES);
+            Map<String, MetaDataType> objectTypeMap = new TreeMap<String, MetaDataType>(String.CASE_INSENSITIVE_ORDER);
+            objectTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
             for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
-                MetaDataType metaDataType = nameTypeMap.get(replace(iterator.next(), ".", "_"));
+                MetaDataType objectType = objectTypeMap.get(replace(iterator.next(), ".", "_"));
                 String booleanValue = iterator.next();
                 if (booleanValue == null || parseBoolean(booleanValue)) {
-                    metaDataTypes.add(metaDataType);
+                    objectTypes.add(objectType);
                 } else {
-                    metaDataTypes.remove(metaDataType);
+                    objectTypes.remove(objectType);
                 }
             }
-            schemaSpec.setObjectTypes(metaDataTypes);
+            schemaSpec.setObjectTypes(objectTypes);
         }
         List<String> scriptTypeValues = optionSet.getValues(SCHEMA_SCRIPT_TYPE_OPTION);
         Collection<ScriptType> scriptTypes = newHashSet();

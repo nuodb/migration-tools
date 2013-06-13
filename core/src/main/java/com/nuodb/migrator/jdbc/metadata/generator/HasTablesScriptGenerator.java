@@ -50,9 +50,9 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
 
     public static final String TABLE_TYPES = "TABLE_TYPES";
 
-    private static final String TABLES_GENERATED = "TABLES_GENERATED";
+    private static final String TABLES = "TABLES";
 
-    private static final String FOREIGN_KEY_PENDING_PRIMARY_TABLE = "FOREIGN_KEY_PENDING_PRIMARY_TABLE";
+    private static final String FOREIGN_KEYS = "FOREIGN_KEYS";
 
     public HasTablesScriptGenerator() {
         this((Class<H>) HasTables.class);
@@ -158,7 +158,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                                     Collection<Table> tables) {
         Collection<MetaDataType> objectTypes = context.getObjectTypes();
         Dialect dialect = context.getDialect();
-        if (objectTypes.contains(AUTO_INCREMENT)) {
+        if (objectTypes.contains(IDENTITY)) {
             for (Table table : tables) {
                 if (!isGenerateScript(context, table)) {
                     continue;
@@ -173,7 +173,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         if (objectTypes.contains(TABLE)) {
             ScriptGeneratorContext tableScriptGeneratorContext = new ScriptGeneratorContext(context);
             Collection<Table> tablesGenerated = (Collection<Table>)
-                    tableScriptGeneratorContext.getAttributes().get(TABLES_GENERATED);
+                    tableScriptGeneratorContext.getAttributes().get(TABLES);
             tableScriptGeneratorContext.getObjectTypes().remove(FOREIGN_KEY);
             for (Table table : tables) {
                 if (!isGenerateScript(context, table)) {
@@ -199,9 +199,9 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             }
         }
         if (objectTypes.contains(FOREIGN_KEY)) {
-            Collection<Table> tablesGenerated = (Collection<Table>) context.getAttributes().get(TABLES_GENERATED);
-            Multimap<Table, ForeignKey> foreignKeyPending =
-                    (Multimap<Table, ForeignKey>) context.getAttributes().get(FOREIGN_KEY_PENDING_PRIMARY_TABLE);
+            Collection<Table> generatedTables = (Collection<Table>) context.getAttributes().get(TABLES);
+            Multimap<Table, ForeignKey> pendingForeignKeys =
+                    (Multimap<Table, ForeignKey>) context.getAttributes().get(FOREIGN_KEYS);
             for (Table table : tables) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
                     Table primaryTable = foreignKey.getPrimaryTable();
@@ -209,10 +209,10 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                             !isGenerateScript(context, foreignKey.getForeignTable())) {
                         continue;
                     }
-                    if (tablesGenerated.contains(primaryTable)) {
+                    if (generatedTables.contains(primaryTable)) {
                         scripts.addAll(context.getCreateScripts(foreignKey));
                     } else {
-                        foreignKeyPending.put(primaryTable, foreignKey);
+                        pendingForeignKeys.put(primaryTable, foreignKey);
                     }
                 }
             }
@@ -223,18 +223,18 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
     protected void addForeignKeysScripts(ScriptGeneratorContext context, Collection<String> scripts, boolean force) {
         Collection<MetaDataType> objectTypes = context.getObjectTypes();
         if (objectTypes.contains(FOREIGN_KEY)) {
-            Collection<Table> tablesGenerated = (Collection<Table>) context.getAttributes().get(TABLES_GENERATED);
-            Multimap<Table, ForeignKey> foreignKeyPending =
-                    (Multimap<Table, ForeignKey>) context.getAttributes().get(FOREIGN_KEY_PENDING_PRIMARY_TABLE);
-            for (ForeignKey foreignKey : newArrayList(foreignKeyPending.values())) {
+            Collection<Table> generatedTables = (Collection<Table>) context.getAttributes().get(TABLES);
+            Multimap<Table, ForeignKey> pendingForeignKeys =
+                    (Multimap<Table, ForeignKey>) context.getAttributes().get(FOREIGN_KEYS);
+            for (ForeignKey foreignKey : newArrayList(pendingForeignKeys.values())) {
                 Table primaryTable = foreignKey.getPrimaryTable();
                 if (!isGenerateScript(context, primaryTable) ||
                         !isGenerateScript(context, foreignKey.getForeignTable())) {
                     continue;
                 }
-                if (tablesGenerated.contains(primaryTable) || force) {
+                if (generatedTables.contains(primaryTable) || force) {
                     scripts.addAll(context.getCreateScripts(foreignKey));
-                    foreignKeyPending.remove(primaryTable, foreignKey);
+                    pendingForeignKeys.remove(primaryTable, foreignKey);
                 }
             }
         }
@@ -261,7 +261,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                 scripts.addAll(context.getDropScripts(table));
             }
         }
-        if (objectTypes.contains(AUTO_INCREMENT) && dialect.supportsSequence()) {
+        if (objectTypes.contains(IDENTITY) && dialect.supportsSequence()) {
             for (Table table : tables) {
                 if (!isGenerateScript(context, table)) {
                     continue;
@@ -282,8 +282,8 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
 
     protected void initScriptGeneratorContext(ScriptGeneratorContext context) {
         Map<String, Object> attributes = context.getAttributes();
-        attributes.put(TABLES_GENERATED, newLinkedHashSet());
-        attributes.put(FOREIGN_KEY_PENDING_PRIMARY_TABLE,
+        attributes.put(TABLES, newLinkedHashSet());
+        attributes.put(FOREIGN_KEYS,
                 Multimaps.<Table, ForeignKey>newSetMultimap(new HashMap<Table, Collection<ForeignKey>>(),
                         new Supplier<Set<ForeignKey>>() {
                             @Override
@@ -296,7 +296,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
 
     protected void releaseScriptGeneratorContext(ScriptGeneratorContext context) {
         Map<String, Object> attributes = context.getAttributes();
-        attributes.remove(TABLES_GENERATED);
-        attributes.remove(FOREIGN_KEY_PENDING_PRIMARY_TABLE);
+        attributes.remove(TABLES);
+        attributes.remove(FOREIGN_KEYS);
     }
 }

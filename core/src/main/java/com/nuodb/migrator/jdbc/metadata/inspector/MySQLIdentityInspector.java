@@ -41,7 +41,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.containsAny;
@@ -49,13 +49,13 @@ import static org.apache.commons.lang3.StringUtils.containsAny;
 /**
  * @author Sergey Bushik
  */
-public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, TableInspectionScope> {
+public class MySQLIdentityInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public static final String QUERY_TABLE = "SELECT TABLE_SCHEMA, TABLE_NAME, AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES";
     public static final String QUERY_COLUMN = "SHOW COLUMNS FROM `%s`.`%s` WHERE EXTRA='AUTO_INCREMENT'";
 
-    public MySQLAutoIncrementInspector() {
-        super(AUTO_INCREMENT, TableInspectionScope.class);
+    public MySQLIdentityInspector() {
+        super(IDENTITY, TableInspectionScope.class);
     }
 
     @Override
@@ -108,12 +108,12 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
 
     private void inspect(final InspectionContext inspectionContext, ResultSet tables) throws SQLException {
         final InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        final Map<Table, Sequence> autoIncrementMap = Maps.newHashMap();
+        final Map<Table, Sequence> sequenceMap = Maps.newHashMap();
         while (tables.next()) {
             Table table = addTable(inspectionResults, tables.getString("TABLE_SCHEMA"), null, tables.getString("TABLE_NAME"));
-            Sequence sequence = new AutoIncrement();
+            Sequence sequence = new Sequence();
             sequence.setLastValue(tables.getLong("AUTO_INCREMENT"));
-            autoIncrementMap.put(table, sequence);
+            sequenceMap.put(table, sequence);
         }
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.execute(
@@ -127,9 +127,9 @@ public class MySQLAutoIncrementInspector extends TableInspectorBase<Table, Table
 
                     @Override
                     public void execute(Statement statement) throws SQLException {
-                        for (Map.Entry<Table, Sequence> autoIncrementEntry : autoIncrementMap.entrySet()) {
-                            Table table = autoIncrementEntry.getKey();
-                            Sequence sequence = autoIncrementEntry.getValue();
+                        for (Map.Entry<Table, Sequence> sequenceEntry : sequenceMap.entrySet()) {
+                            Table table = sequenceEntry.getKey();
+                            Sequence sequence = sequenceEntry.getValue();
                             ResultSet columns = statement.executeQuery(
                                     format(QUERY_COLUMN, table.getCatalog().getName(), table.getName()));
                             Column column;
