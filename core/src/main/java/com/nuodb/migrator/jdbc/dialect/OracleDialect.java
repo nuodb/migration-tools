@@ -49,12 +49,12 @@ import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
  */
 public class OracleDialect extends SimpleDialect {
 
-    public static final DatabaseInfo DATABASE_INFO = new DatabaseInfo("Oracle");
-
     public static final String UPDATE_TABLE_STATISTICS_QUERY = "ANALYZE TABLE %s ESTIMATE STATISTICS SAMPLE 10 PERCENT";
+
     public static final boolean UPDATE_TABLE_STATISTICS = true;
 
     private String updateTableStatisticsQuery = UPDATE_TABLE_STATISTICS_QUERY;
+
     private boolean updateTableStatistics = UPDATE_TABLE_STATISTICS;
 
     public OracleDialect(DatabaseInfo databaseInfo) {

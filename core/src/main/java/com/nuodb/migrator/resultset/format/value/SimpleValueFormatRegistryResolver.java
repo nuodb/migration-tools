@@ -27,9 +27,10 @@
  */
 package com.nuodb.migrator.resultset.format.value;
 
-import com.nuodb.migrator.jdbc.dialect.DB2Dialect;
-import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
+
+import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.DB2;
+import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
 
 /**
  * @author Sergey Bushik
@@ -39,7 +40,7 @@ public class SimpleValueFormatRegistryResolver extends SimpleServiceResolver<Val
 
     public SimpleValueFormatRegistryResolver() {
         super(SimpleValueFormatRegistry.class);
-        register(DB2Dialect.DATABASE_INFO, new DB2ValueFormatRegistry());
-        register(NuoDBDialect.DATABASE_INFO, new NuoDBValueFormatRegistry());
+        register(DB2, new DB2ValueFormatRegistry());
+        register(NUODB, new NuoDBValueFormatRegistry());
     }
 }

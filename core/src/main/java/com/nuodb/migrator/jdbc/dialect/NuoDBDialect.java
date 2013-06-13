@@ -38,6 +38,7 @@ import java.sql.Types;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newScale;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSize;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
@@ -50,15 +51,13 @@ import static org.apache.commons.lang3.StringUtils.isAllUpperCase;
  */
 public class NuoDBDialect extends SimpleDialect {
 
-    public static final DatabaseInfo DATABASE_INFO = new DatabaseInfo("NuoDB");
-
     private static final Pattern ALLOWED_IDENTIFIER_PATTERN = compile("^[a-zA-Z_]+\\w*$");
 
     private static final int WRITE_COMMITTED = 5;
     private static final int CONSISTENT_READ = 7;
 
     public NuoDBDialect() {
-        this(DATABASE_INFO);
+        this(NUODB);
     }
 
     public NuoDBDialect(DatabaseInfo databaseInfo) {
@@ -116,32 +115,30 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(Types.NCLOB, "NCLOB");
         addJdbcTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
 
-        addJdbcTypeName(MySQLDialect.DATABASE_INFO, new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
-        addJdbcTypeName(MySQLDialect.DATABASE_INFO, new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
-        addJdbcTypeName(MySQLDialect.DATABASE_INFO, new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"),
+        addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
+        addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
+        addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"),
                 new JdbcTypeNameChangeSpecifier("NUMERIC({N})", 1));
 
-        addJdbcTypeName(DB2Dialect.DATABASE_INFO, new JdbcTypeDesc(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
-        addJdbcTypeName(DB2Dialect.DATABASE_INFO, new JdbcTypeDesc(Types.OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
-        addJdbcTypeName(DB2Dialect.DATABASE_INFO, new JdbcTypeDesc(Types.OTHER, "XML"), "CLOB");
+        addJdbcTypeName(DB2, new JdbcTypeDesc(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
+        addJdbcTypeName(DB2, new JdbcTypeDesc(Types.OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
+        addJdbcTypeName(DB2, new JdbcTypeDesc(Types.OTHER, "XML"), "CLOB");
     }
 
     @Override
     protected void initScriptTranslations() {
-        addScriptTranslations(new DatabaseInfo("MySQL"),
-                newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()",
+        addScriptTranslations(MYSQL, newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()",
                         "LOCALTIME", "LOCALTIME()", "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW");
 
-        addScriptTranslations(new DatabaseInfo("Microsoft SQL Server"),
-                newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW");
-        addScriptTranslationRegex(new DatabaseInfo("Microsoft SQL Server"), "N'(.*)'", "$1");
+        addScriptTranslations(MSSQL_SERVER,newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW");
+        addScriptTranslationRegex(MSSQL_SERVER, "N'(.*)'", "$1");
 
-        addScriptTranslations(new DatabaseInfo("PostgreSQL"),
-                newArrayList("CURRENT_TIMESTAMP", "NOW()"), "NOW");
-        addScriptTranslationRegex(new DatabaseInfo("PostgreSQL"), "'(.*)'::.*", "$1");
+        addScriptTranslations(POSTGRE_SQL,newArrayList("CURRENT_TIMESTAMP", "NOW()"), "NOW");
+        addScriptTranslationRegex(POSTGRE_SQL, "'(.*)'::.*", "$1");
 
-        addScriptTranslations(new DatabaseInfo("Oracle"),
-                newArrayList("CURRENT_DATE", "SYSDATE"), "NOW");
+        addScriptTranslations(ORACLE,newArrayList("CURRENT_DATE", "SYSDATE"), "NOW");
+
+        addScriptTranslations(DB2, newArrayList("CURRENT DATE", "CURRENT TIME", "CURRENT TIMESTAMP"), "NOW");
     }
 
     @Override

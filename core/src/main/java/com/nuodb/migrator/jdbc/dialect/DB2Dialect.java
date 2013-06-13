@@ -27,29 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.google.common.collect.ComparisonChain;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Types;
-import java.util.Comparator;
 
 /**
  * @author Sergey Bushik
  */
 public class DB2Dialect extends SimpleDialect {
-
-    public static DatabaseInfo DATABASE_INFO = new DatabaseInfo("DB2/") {
-        @Override
-        protected ComparisonChain isProductNameInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
-            return comparator.compare(getProductName(), databaseInfo.getProductName(),
-                    new Comparator<String>() {
-                        @Override
-                        public int compare(String productName1, String productName2) {
-                            return productName2.startsWith(productName1) ? 0 : -1;
-                        }
-                    });
-        }
-    };
 
     public DB2Dialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);

@@ -41,8 +41,6 @@ import static java.lang.String.valueOf;
  */
 public class MSSQLServerDialect extends SimpleDialect {
 
-    public static final DatabaseInfo DATABASE_INFO = new DatabaseInfo("Microsoft SQL Server");
-
     public static final int DATETIMEOFFSET = -155;
 
     public MSSQLServerDialect(DatabaseInfo databaseInfo) {
