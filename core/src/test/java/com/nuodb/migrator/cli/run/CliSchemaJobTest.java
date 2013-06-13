@@ -117,7 +117,7 @@ public class CliSchemaJobTest {
         Collection<MetaDataType> metaDataTypes = Lists.newArrayList(MetaDataType.TYPES);
         metaDataTypes.remove(MetaDataType.CHECK);
         metaDataTypes.remove(MetaDataType.AUTO_INCREMENT);
-        schemaSpec.setMetaDataTypes(metaDataTypes);
+        schemaSpec.setObjectTypes(metaDataTypes);
 
         schemaSpec.setScriptTypes(Lists.newArrayList(ScriptType.DROP, ScriptType.CREATE));
         schemaSpec.setGroupScriptsBy(GroupScriptsBy.META_DATA);

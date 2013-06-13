@@ -25,36 +25,69 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.resultset.format.value;
+package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.jdbc.model.ValueModel;
-import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccess;
+import com.nuodb.migrator.utils.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import java.util.Collection;
 
-import static com.nuodb.migrator.resultset.format.value.ValueVariants.string;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBSmallIntValueFormat extends ValueFormatBase<String> {
+public abstract class ScriptExporterBase implements ScriptExporter {
+
+    protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    protected ValueVariant doGetValue(JdbcTypeValueAccess<String> access,
-                                      Map<String, Object> accessOptions) throws Exception {
-        return string(access.getValue(String.class, accessOptions));
+    public final void open() throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Opening script exporter %s", this));
+        }
+        doOpen();
+    }
+
+    protected abstract void doOpen() throws Exception;
+
+    @Override
+    public void exportScript(String script) throws Exception {
+        try {
+            doExportScript(script);
+        } catch (Exception exception) {
+            if (logger.isErrorEnabled()) {
+                logger.error(format("Failed exporting script %s", script));
+            }
+            throw exception;
+        }
     }
 
     @Override
-    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<String> access,
-                              Map<String, Object> accessOptions) throws Exception {
-        String value = variant.asString();
-        access.setValue(!isEmpty(value) ? value : null, accessOptions);
+    public void exportScripts(Collection<String> scripts) throws Exception {
+        if (scripts == null) {
+            return;
+        }
+        for (String script : scripts) {
+            exportScript(script);
+        }
     }
 
+    protected abstract void doExportScript(String script) throws Exception;
+
     @Override
-    public ValueVariantType getValueType(ValueModel ValueModel) {
-        return ValueVariantType.STRING;
+    public final void close() throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Closing script exporter %s", this));
+        }
+        doClose();
+    }
+
+    protected abstract void doClose() throws Exception;
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

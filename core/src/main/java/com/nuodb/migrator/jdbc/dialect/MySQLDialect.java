@@ -51,6 +51,8 @@ import static java.lang.String.valueOf;
  */
 public class MySQLDialect extends SimpleDialect {
 
+    public static final DatabaseInfo DATABASE_INFO = new DatabaseInfo("MySQL");
+
     public MySQLDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
     }

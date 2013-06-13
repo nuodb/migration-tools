@@ -38,6 +38,8 @@ import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
  */
 public class MSSQLServer2005Dialect extends MSSQLServerDialect {
 
+    public static final DatabaseInfo DATABASE_INFO = new DatabaseInfo("Microsoft SQL Server", null, 9);
+
     public MSSQLServer2005Dialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
     }

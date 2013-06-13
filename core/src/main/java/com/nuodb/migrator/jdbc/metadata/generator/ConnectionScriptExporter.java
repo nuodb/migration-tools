@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.JdbcUtils;
-import com.nuodb.migrator.jdbc.connection.ConnectionServices;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -40,35 +39,30 @@ import static java.lang.String.format;
 /**
  * @author Sergey Bushik
  */
-public class ConnectionScriptExporter extends CountingScriptExporter {
+public class ConnectionScriptExporter extends ScriptExporterBase {
 
-    private ConnectionServices connectionServices;
     private Connection connection;
     private Statement statement;
 
-    public ConnectionScriptExporter(ConnectionServices connectionServices) {
-        this.connectionServices = connectionServices;
+    public ConnectionScriptExporter(Connection connection) {
+        this.connection = connection;
     }
 
     @Override
     protected void doOpen() throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Exporting scripts to %s", connectionServices));
-        }
-        connection = connectionServices.getConnection();
         statement = connection.createStatement();
     }
 
     @Override
-    public void exportScript(String script) throws Exception {
-        if (connection == null) {
-            throw new GeneratorException("Database connection is not opened");
+    public void doExportScript(String script) throws Exception {
+        if (statement == null) {
+            throw new GeneratorException("Connection is not opened");
         }
         statement.executeUpdate(script);
-        processWarning(statement.getWarnings());
+        processWarnings(statement.getWarnings());
     }
 
-    protected void processWarning(SQLWarning warning) throws SQLException {
+    protected void processWarnings(SQLWarning warning) throws SQLException {
         while (warning != null) {
             if (logger.isWarnEnabled()) {
                 logger.warn(format("Warning code: %d, state: %s", warning.getErrorCode(), warning.getSQLState()));
@@ -80,7 +74,7 @@ public class ConnectionScriptExporter extends CountingScriptExporter {
 
     @Override
     protected void doClose() throws Exception {
-        JdbcUtils.close(connectionServices);
         JdbcUtils.close(statement);
+        JdbcUtils.close(connection);
     }
 }

@@ -35,7 +35,7 @@ import static com.google.common.collect.Sets.newLinkedHashSet;
 /**
  * @author Sergey Bushik
  */
-public class CompositeScriptExporter extends CountingScriptExporter {
+public class CompositeScriptExporter implements ScriptExporter {
 
     private Collection<ScriptExporter> scriptExporters = newLinkedHashSet();
 
@@ -47,33 +47,34 @@ public class CompositeScriptExporter extends CountingScriptExporter {
     }
 
     public CompositeScriptExporter(Collection<ScriptExporter> scriptExporters) {
-        this.scriptExporters.addAll(scriptExporters);
+        this.scriptExporters = scriptExporters;
     }
 
     @Override
-    protected void doOpen() throws Exception {
-        for (ScriptExporter scriptExporter : scriptExporters) {
+    public void open() throws Exception {
+        for (ScriptExporter scriptExporter : getScriptExporters()) {
             scriptExporter.open();
         }
     }
 
     @Override
     public void exportScript(String script) throws Exception {
-        for (ScriptExporter scriptExporter : scriptExporters) {
+        for (ScriptExporter scriptExporter : getScriptExporters()) {
             scriptExporter.exportScript(script);
         }
     }
 
     @Override
-    protected void doClose() throws Exception {
-        for (ScriptExporter scriptExporter : scriptExporters) {
-            try {
-                scriptExporter.close();
-            } catch (Exception exception) {
-                if (logger.isErrorEnabled()) {
-                    logger.error("Error closing script exporter", exception);
-                }
-            }
+    public void exportScripts(Collection<String> scripts) throws Exception {
+        for (String script : scripts) {
+            exportScript(script);
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        for (ScriptExporter scriptExporter : getScriptExporters()) {
+            scriptExporter.close();
         }
     }
 

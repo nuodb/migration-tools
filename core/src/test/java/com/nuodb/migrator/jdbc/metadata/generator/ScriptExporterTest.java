@@ -74,7 +74,7 @@ public class ScriptExporterTest {
 
         return new Object[][] {
                 {new FileScriptExporter(file)},
-                {new ConnectionScriptExporter(connectionServices)},
+                {new ConnectionScriptExporter(connectionServices.getConnection())},
                 {new WriterScriptExporter(new NullOutputStream())}
         };
     }

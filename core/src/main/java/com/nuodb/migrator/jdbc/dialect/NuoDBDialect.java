@@ -50,13 +50,15 @@ import static org.apache.commons.lang3.StringUtils.isAllUpperCase;
  */
 public class NuoDBDialect extends SimpleDialect {
 
+    public static final DatabaseInfo DATABASE_INFO = new DatabaseInfo("NuoDB");
+
     private static final Pattern ALLOWED_IDENTIFIER_PATTERN = compile("^[a-zA-Z_]+\\w*$");
 
     private static final int WRITE_COMMITTED = 5;
     private static final int CONSISTENT_READ = 7;
 
     public NuoDBDialect() {
-        this(new DatabaseInfo("NuoDB"));
+        this(DATABASE_INFO);
     }
 
     public NuoDBDialect(DatabaseInfo databaseInfo) {
@@ -114,10 +116,14 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(Types.NCLOB, "NCLOB");
         addJdbcTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
 
-        addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
-        addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
-        addJdbcTypeName(new DatabaseInfo("MySQL"), new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"),
+        addJdbcTypeName(MySQLDialect.DATABASE_INFO, new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
+        addJdbcTypeName(MySQLDialect.DATABASE_INFO, new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
+        addJdbcTypeName(MySQLDialect.DATABASE_INFO, new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"),
                 new JdbcTypeNameChangeSpecifier("NUMERIC({N})", 1));
+
+        addJdbcTypeName(DB2Dialect.DATABASE_INFO, new JdbcTypeDesc(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
+        addJdbcTypeName(DB2Dialect.DATABASE_INFO, new JdbcTypeDesc(Types.OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
+        addJdbcTypeName(DB2Dialect.DATABASE_INFO, new JdbcTypeDesc(Types.OTHER, "XML"), "CLOB");
     }
 
     @Override

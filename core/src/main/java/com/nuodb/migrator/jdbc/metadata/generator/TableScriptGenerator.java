@@ -61,14 +61,14 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         buffer.append(' ').append(scriptGeneratorContext.getQualifiedName(table)).append(" (");
         Collection<Column> columns = table.getColumns();
         final Collection<Index> indexes = table.getIndexes();
-        Collection<MetaDataType> metaDataTypes = scriptGeneratorContext.getObjectTypes();
+        Collection<MetaDataType> objectTypes = scriptGeneratorContext.getObjectTypes();
         Dialect sourceDialect = table.getDatabase().getDialect();
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();
             buffer.append(scriptGeneratorContext.getName(column));
             buffer.append(' ');
             buffer.append(getColumnTypeName(column, scriptGeneratorContext));
-            if (column.isIdentity() && metaDataTypes.contains(AUTO_INCREMENT)) {
+            if (column.isIdentity() && objectTypes.contains(AUTO_INCREMENT)) {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
                         column.getSequence() != null ?
@@ -88,7 +88,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             if (defaultValue != null) {
                 buffer.append(" DEFAULT ").append(defaultValue);
             }
-            if (metaDataTypes.contains(INDEX)) {
+            if (objectTypes.contains(INDEX)) {
                 Optional<Index> index = Iterables.tryFind(indexes, new Predicate<Index>() {
                     @Override
                     public boolean apply(Index index) {
@@ -106,7 +106,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                     }
                 }
             }
-            if (metaDataTypes.contains(CHECK) && dialect.supportsColumnCheck()) {
+            if (objectTypes.contains(CHECK) && dialect.supportsColumnCheck()) {
                 for (Check check : column.getChecks()) {
                     buffer.append(", CHECK ");
                     buffer.append(dialect.getCheckClause(check.getClause()));
@@ -120,7 +120,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(", ");
             }
         }
-        if (metaDataTypes.contains(PRIMARY_KEY)) {
+        if (objectTypes.contains(PRIMARY_KEY)) {
             PrimaryKey primaryKey = table.getPrimaryKey();
             if (primaryKey != null) {
                 ConstraintScriptGenerator<PrimaryKey> generator = (ConstraintScriptGenerator<PrimaryKey>)
@@ -128,7 +128,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(", ").append(generator.getConstraintScript(primaryKey, scriptGeneratorContext));
             }
         }
-        if (metaDataTypes.contains(INDEX) && dialect.supportsIndexInCreateTable()) {
+        if (objectTypes.contains(INDEX) && dialect.supportsIndexInCreateTable()) {
             boolean primary = false;
             for (Index index : indexes) {
                 if (!primary && index.isPrimary()) {
@@ -144,7 +144,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
 
             }
         }
-        if (metaDataTypes.contains(FOREIGN_KEY)) {
+        if (objectTypes.contains(FOREIGN_KEY)) {
             for (ForeignKey foreignKey : table.getForeignKeys()) {
                 ConstraintScriptGenerator<ForeignKey> generator = (ConstraintScriptGenerator<ForeignKey>)
                         scriptGeneratorContext.getScriptGenerator(foreignKey);
@@ -154,7 +154,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 }
             }
         }
-        if (metaDataTypes.contains(CHECK) && dialect.supportsTableCheck()) {
+        if (objectTypes.contains(CHECK) && dialect.supportsTableCheck()) {
             for (Check check : table.getChecks()) {
                 buffer.append(", CHECK ");
                 buffer.append(dialect.getCheckClause(check.getClause()));

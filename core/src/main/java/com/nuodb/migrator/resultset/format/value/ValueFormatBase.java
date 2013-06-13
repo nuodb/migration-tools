@@ -43,18 +43,18 @@ import static java.lang.String.format;
 public abstract class ValueFormatBase<T> implements ValueFormat<T> {
 
     @Override
-    public ValueVariant getValue(JdbcTypeValueAccess<T> valueAccess, Map<String, Object> valueAccessOptions) {
+    public ValueVariant getValue(JdbcTypeValueAccess<T> access, Map<String, Object> accessOptions) {
         try {
-            return doGetValue(valueAccess, valueAccessOptions);
+            return doGetValue(access, accessOptions);
         } catch (ValueFormatException exception) {
             throw exception;
         } catch (Exception exception) {
-            throw newGetValueFailure(valueAccess, exception);
+            throw newGetValueFailure(access, exception);
         }
     }
 
-    protected abstract ValueVariant doGetValue(JdbcTypeValueAccess<T> valueAccess,
-                                               Map<String, Object> valueAccessOptions) throws Exception;
+    protected abstract ValueVariant doGetValue(JdbcTypeValueAccess<T> access,
+                                               Map<String, Object> accessOptions) throws Exception;
 
     protected ValueFormatException newGetValueFailure(JdbcTypeValueAccess valueAccess, Exception exception) {
         ValueModel valueModel = valueAccess.getValueModel();
@@ -63,19 +63,18 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
     }
 
     @Override
-    public void setValue(ValueVariant variant, JdbcTypeValueAccess<T> valueAccess,
-                         Map<String, Object> valueAccessOptions) {
+    public void setValue(ValueVariant variant, JdbcTypeValueAccess<T> access, Map<String, Object> accessOptions) {
         try {
-            doSetValue(variant, valueAccess, valueAccessOptions);
+            doSetValue(variant, access, accessOptions);
         } catch (ValueFormatException exception) {
             throw exception;
         } catch (Exception exception) {
-            throw newSetValueFailure(valueAccess, exception);
+            throw newSetValueFailure(access, exception);
         }
     }
 
-    protected abstract void doSetValue(ValueVariant variant, JdbcTypeValueAccess<T> valueAccess,
-                                       Map<String, Object> valueAccessOptions) throws Exception;
+    protected abstract void doSetValue(ValueVariant variant, JdbcTypeValueAccess<T> access,
+                                       Map<String, Object> accessOptions) throws Exception;
 
     protected ValueFormatException newSetValueFailure(JdbcTypeValueAccess valueAccess, Exception exception) {
         ValueModel valueModel = valueAccess.getValueModel();

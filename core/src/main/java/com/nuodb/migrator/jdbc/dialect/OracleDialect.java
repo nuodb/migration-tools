@@ -49,6 +49,8 @@ import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
  */
 public class OracleDialect extends SimpleDialect {
 
+    public static final DatabaseInfo DATABASE_INFO = new DatabaseInfo("Oracle");
+
     public static final String UPDATE_TABLE_STATISTICS_QUERY = "ANALYZE TABLE %s ESTIMATE STATISTICS SAMPLE 10 PERCENT";
     public static final boolean UPDATE_TABLE_STATISTICS = true;
 
@@ -68,9 +70,7 @@ public class OracleDialect extends SimpleDialect {
 
     @Override
     public boolean supportsTransactionIsolation(int level) {
-        return newArrayList(
-                TRANSACTION_READ_COMMITTED,
-                TRANSACTION_SERIALIZABLE).contains(level);
+        return newArrayList(TRANSACTION_READ_COMMITTED, TRANSACTION_SERIALIZABLE).contains(level);
     }
 
     @Override

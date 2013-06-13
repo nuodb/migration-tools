@@ -33,19 +33,18 @@ import com.google.common.io.Files;
 import java.io.BufferedWriter;
 import java.io.File;
 
-import static java.lang.String.format;
 import static java.lang.System.getProperty;
 import static java.nio.charset.Charset.forName;
 
 /**
  * @author Sergey Bushik
  */
-public class FileScriptExporter extends CountingScriptExporter {
+public class FileScriptExporter extends ScriptExporterBase {
 
     private static final String SEMICOLON = ";";
     private File file;
     private String encoding;
-    private BufferedWriter writer;
+    private transient BufferedWriter writer;
 
     public FileScriptExporter(String file) {
         this(file, null);
@@ -66,25 +65,20 @@ public class FileScriptExporter extends CountingScriptExporter {
 
     @Override
     protected void doOpen() throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug(format("Opening file to export scripts to %s", file));
-        }
         Files.createParentDirs(file);
         writer = Files.newWriter(file, forName(encoding));
     }
 
     @Override
-    public void exportScript(String script) throws Exception {
+    protected void doExportScript(String script) throws Exception {
         if (writer == null) {
             throw new GeneratorException("File is not opened");
-        }
-        if (getCount() > 0) {
-            writer.newLine();
         }
         writer.write(script);
         if (!script.endsWith(SEMICOLON)) {
             writer.write(SEMICOLON);
         }
+        writer.newLine();
     }
 
     @Override

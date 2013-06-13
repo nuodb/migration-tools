@@ -66,12 +66,6 @@ public class InspectionManager {
         tableInspector.register("NuoDB", new NuoDBTableInspector());
         addInspector(tableInspector);
 
-        InspectorResolver columnInspector = new InspectorResolver(COLUMN, new SimpleColumnInspector());
-        columnInspector.register("NuoDB", new NuoDBColumnInspector());
-        columnInspector.register("PostgreSQL", new PostgreSQLColumnInspector());
-        columnInspector.register("Microsoft SQL Server", new MSSQLServerColumnInspector());
-        addInspector(columnInspector);
-
         InspectorResolver indexInspector = new InspectorResolver(INDEX, new SimpleIndexInspector());
         indexInspector.register("NuoDB", new NuoDBIndexInspector());
         indexInspector.register("PostgreSQL", new PostgreSQLIndexInspector());
@@ -84,6 +78,12 @@ public class InspectionManager {
         InspectorResolver foreignKeyInspector = new InspectorResolver(FOREIGN_KEY, new SimpleForeignKeyInspector());
         foreignKeyInspector.register("NuoDB", new NuoDBForeignKeyInspector());
         addInspector(foreignKeyInspector);
+
+        InspectorResolver columnInspector = new InspectorResolver(COLUMN, new SimpleColumnInspector());
+        columnInspector.register("NuoDB", new NuoDBColumnInspector());
+        columnInspector.register("PostgreSQL", new PostgreSQLColumnInspector());
+        columnInspector.register("Microsoft SQL Server", new MSSQLServerColumnInspector());
+        addInspector(columnInspector);
 
         InspectorResolver checkInspector = new InspectorResolver(CHECK);
         checkInspector.register("NuoDB", new NuoDBCheckInspector());

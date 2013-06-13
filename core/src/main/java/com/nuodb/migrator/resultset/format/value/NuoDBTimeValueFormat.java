@@ -40,16 +40,16 @@ import static com.nuodb.migrator.resultset.format.value.ValueVariants.string;
 public class NuoDBTimeValueFormat extends ValueFormatBase<String> {
 
     @Override
-    protected ValueVariant doGetValue(JdbcTypeValueAccess<String> valueAccess,
-                                      Map<String, Object> valueAccessOptions) throws Exception {
-        return string(valueAccess.getValue(String.class, valueAccessOptions));
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<String> access,
+                                      Map<String, Object> accessOptions) throws Exception {
+        return string(access.getValue(String.class, accessOptions));
     }
 
     @Override
-    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<String> valueAccess,
-                              Map<String, Object> valueAccessOptions) throws Exception {
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<String> access,
+                              Map<String, Object> accessOptions) throws Exception {
         String value = variant.asString();
-        valueAccess.setValue(value, valueAccessOptions);
+        access.setValue(value, accessOptions);
     }
 
     @Override

@@ -31,18 +31,21 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
+import static java.lang.System.getProperty;
+
 /**
  * @author Sergey Bushik
  */
-public class WriterScriptExporter extends CountingScriptExporter {
+public class WriterScriptExporter extends ScriptExporterBase {
 
-    public static final ScriptExporter SYSTEM_OUT_SCRIPT_EXPORTER = new WriterScriptExporter(System.out, false);
+    public static final ScriptExporter SYSTEM_OUT = new WriterScriptExporter(System.out, false);
 
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
     private static final String SEMICOLON = ";";
 
-    private final Writer writer;
+    private transient final Writer writer;
     private final boolean close;
+    private String endOfLine = SEMICOLON;
+    private String lineSeparator = getProperty("line.separator");
 
     public WriterScriptExporter(OutputStream outputStream) {
         this(outputStream, true);
@@ -62,12 +65,16 @@ public class WriterScriptExporter extends CountingScriptExporter {
     }
 
     @Override
-    public void exportScript(String script) throws Exception {
+    protected void doOpen() throws Exception {
+    }
+
+    @Override
+    protected void doExportScript(String script) throws Exception {
         writer.write(script);
-        if (!script.endsWith(SEMICOLON)) {
-            writer.write(SEMICOLON);
+        if (!script.endsWith(endOfLine)) {
+            writer.write(endOfLine);
         }
-        writer.write(LINE_SEPARATOR);
+        writer.write(lineSeparator);
     }
 
     @Override
@@ -76,5 +83,21 @@ public class WriterScriptExporter extends CountingScriptExporter {
         if (close) {
             writer.close();
         }
+    }
+
+    public String getEndOfLine() {
+        return endOfLine;
+    }
+
+    public void setEndOfLine(String endOfLine) {
+        this.endOfLine = endOfLine;
+    }
+
+    public String getLineSeparator() {
+        return lineSeparator;
+    }
+
+    public void setLineSeparator(String lineSeparator) {
+        this.lineSeparator = lineSeparator;
     }
 }

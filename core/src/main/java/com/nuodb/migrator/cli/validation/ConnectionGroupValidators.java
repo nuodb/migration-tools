@@ -39,5 +39,6 @@ public class ConnectionGroupValidators {
         connection.withOptionValidator(new MySQLConnectionGroupValidator(connectionGroupInfo));
         connection.withOptionValidator(new PostgreSQLConnectionGroupValidator(connectionGroupInfo));
         connection.withOptionValidator(new OracleConnectionGroupValidator(connectionGroupInfo));
+        connection.withOptionValidator(new DB2ConnectionGroupValidator(connectionGroupInfo));
     }
 }

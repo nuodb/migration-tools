@@ -27,11 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.google.common.collect.ComparisonChain;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
-
-import java.util.Comparator;
 
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 
@@ -42,24 +39,13 @@ public class SimpleDialectResolver extends SimpleServiceResolver<Dialect> implem
 
     public SimpleDialectResolver() {
         super(SimpleDialect.class);
-        register("MySQL", MySQLDialect.class);
-        register("NuoDB", NuoDBDialect.class);
-        register("PostgreSQL", PostgreSQLDialect.class);
-        register("Oracle", OracleDialect.class);
-        register("Microsoft SQL Server", MSSQLServerDialect.class);
-        register(new DatabaseInfo("Microsoft SQL Server", null, 9), MSSQLServer2005Dialect.class);
-        register(new DatabaseInfo("DB2/") {
-            @Override
-            protected ComparisonChain isProductNameInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
-                return comparator.compare(getProductName(), databaseInfo.getProductName(),
-                        new Comparator<String>() {
-                            @Override
-                            public int compare(String productName1, String productName2) {
-                                return productName2.startsWith(productName1) ? 0 : -1;
-                            }
-                        });
-            }
-        }, DB2Dialect.class);
+        register(MySQLDialect.DATABASE_INFO, MySQLDialect.class);
+        register(NuoDBDialect.DATABASE_INFO, NuoDBDialect.class);
+        register(PostgreSQLDialect.DATABASE_INFO, PostgreSQLDialect.class);
+        register(OracleDialect.DATABASE_INFO, OracleDialect.class);
+        register(MSSQLServerDialect.DATABASE_INFO, MSSQLServerDialect.class);
+        register(MSSQLServer2005Dialect.DATABASE_INFO, MSSQLServer2005Dialect.class);
+        register(DB2Dialect.DATABASE_INFO, DB2Dialect.class);
     }
 
     @Override

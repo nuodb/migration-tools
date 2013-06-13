@@ -50,6 +50,8 @@ import static java.lang.Long.parseLong;
  */
 public class PostgreSQLDialect extends SimpleDialect {
 
+    public static final DatabaseInfo DATABASE_INFO = new DatabaseInfo("PostgreSQL");
+
     private static final Pattern EXPLAIN_QUERY_ROW_COUNT = Pattern.compile("rows=(\\d+)");
 
     public PostgreSQLDialect(DatabaseInfo databaseInfo) {

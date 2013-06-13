@@ -53,7 +53,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.newListMultimap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
-import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
@@ -252,7 +251,7 @@ public class CliSchemaJob extends CliRunJob {
                     metaDataTypes.remove(metaDataType);
                 }
             }
-            schemaSpec.setMetaDataTypes(metaDataTypes);
+            schemaSpec.setObjectTypes(metaDataTypes);
         }
         List<String> scriptTypeValues = optionSet.getValues(SCHEMA_SCRIPT_TYPE_OPTION);
         Collection<ScriptType> scriptTypes = newHashSet();
@@ -331,6 +330,7 @@ public class CliSchemaJob extends CliRunJob {
         tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
         if (tableTypes.isEmpty()) {
             tableTypes.add(Table.TABLE);
+            tableTypes.add(Table.ALIAS);
         }
         schemaSpec.setTableTypes(tableTypes.toArray(new String[tableTypes.size()]));
     }

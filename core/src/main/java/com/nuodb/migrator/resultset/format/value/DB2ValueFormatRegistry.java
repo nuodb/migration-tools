@@ -27,34 +27,14 @@
  */
 package com.nuodb.migrator.resultset.format.value;
 
-import com.nuodb.migrator.jdbc.model.ValueModel;
-import com.nuodb.migrator.jdbc.type.access.JdbcTypeValueAccess;
-
-import java.util.Map;
-
-import static com.nuodb.migrator.resultset.format.value.ValueVariants.string;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import com.nuodb.migrator.jdbc.dialect.DB2XmlType;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBSmallIntValueFormat extends ValueFormatBase<String> {
+public class DB2ValueFormatRegistry extends SimpleValueFormatRegistry {
 
-    @Override
-    protected ValueVariant doGetValue(JdbcTypeValueAccess<String> access,
-                                      Map<String, Object> accessOptions) throws Exception {
-        return string(access.getValue(String.class, accessOptions));
-    }
-
-    @Override
-    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<String> access,
-                              Map<String, Object> accessOptions) throws Exception {
-        String value = variant.asString();
-        access.setValue(!isEmpty(value) ? value : null, accessOptions);
-    }
-
-    @Override
-    public ValueVariantType getValueType(ValueModel ValueModel) {
-        return ValueVariantType.STRING;
+    public DB2ValueFormatRegistry() {
+        addValueFormat(DB2XmlType.INSTANCE, new DB2XmlValueFormat());
     }
 }

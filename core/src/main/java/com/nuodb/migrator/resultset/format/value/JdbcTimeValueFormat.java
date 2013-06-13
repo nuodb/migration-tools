@@ -44,18 +44,18 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class JdbcTimeValueFormat extends ValueFormatBase<Time> {
 
     @Override
-    protected ValueVariant doGetValue(JdbcTypeValueAccess<Time> valueAccess,
-                                      Map<String, Object> valueAccessOptions) throws SQLException {
-        Time time = valueAccess.getValue(valueAccessOptions);
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<Time> access,
+                                      Map<String, Object> accessOptions) throws SQLException {
+        Time time = access.getValue(accessOptions);
         return string(time != null ? time.toString() : null);
     }
 
     @Override
-    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Time> valueAccess,
-                              Map<String, Object> valueAccessOptions) throws SQLException {
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Time> access,
+                              Map<String, Object> accessOptions) throws SQLException {
         final String value = variant.asString();
         try {
-            valueAccess.setValue(!isEmpty(value) ? value : null, valueAccessOptions);
+            access.setValue(!isEmpty(value) ? value : null, accessOptions);
         } catch (IllegalArgumentException exception) {
             throw new ValueFormatException(format("Value %s is not in the hh:mm:ss format", value));
         }

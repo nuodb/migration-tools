@@ -47,7 +47,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
-import static com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT_SCRIPT_EXPORTER;
+import static com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
@@ -60,8 +60,8 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
 
     private SchemaSpec schemaSpec;
 
-    private ConnectionProviderFactory connectionProviderFactory = new QueryLoggingConnectionProviderFactory(
-            new DriverConnectionSpecProviderFactory());
+    private ConnectionProviderFactory connectionProviderFactory =
+            new QueryLoggingConnectionProviderFactory(new DriverConnectionSpecProviderFactory());
     private DialectResolver dialectResolver = new SimpleDialectResolver();
     private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
 
@@ -87,7 +87,7 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
         SchemaSpec schemaSpec = getSchemaSpec();
         ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext();
         scriptGeneratorContext.getAttributes().put(GROUP_SCRIPTS_BY, schemaSpec.getGroupScriptsBy());
-        scriptGeneratorContext.setObjectTypes(schemaSpec.getMetaDataTypes());
+        scriptGeneratorContext.setObjectTypes(schemaSpec.getObjectTypes());
         scriptGeneratorContext.setScriptTypes(schemaSpec.getScriptTypes());
 
         NuoDBDialect dialect = new NuoDBDialect();
@@ -121,7 +121,7 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
         if (targetConnectionSpec != null) {
             try {
                 ConnectionProvider connectionProvider = createConnectionProvider(targetConnectionSpec);
-                exporters.add(new ConnectionScriptExporter(connectionProvider.getConnectionServices()));
+                exporters.add(new ConnectionScriptExporter(connectionProvider.getConnection()));
             } catch (SQLException exception) {
                 throw new SchemaJobException("Failed creating connection script exporter", exception);
             }
@@ -132,7 +132,7 @@ public class SchemaJobFactory implements JobFactory<SchemaJob> {
         }
         // Fallback to the standard output if neither target connection nor target file were specified
         if (exporters.isEmpty()) {
-            exporters.add(SYSTEM_OUT_SCRIPT_EXPORTER);
+            exporters.add(SYSTEM_OUT);
         }
         return new CompositeScriptExporter(exporters);
     }
