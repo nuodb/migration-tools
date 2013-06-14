@@ -104,10 +104,12 @@ public class OracleTypes implements DatabaseTypes {
 		} else if ("NTEXT".equalsIgnoreCase(type)) {
 			return Types.CLOB;
 		} else if ("DATE".equalsIgnoreCase(type)) {
-			return Types.DATE;
+			// return Types.DATE;
+			// testing using latest jdbc jar version returns this as TIMESTAMP
+			return Types.TIMESTAMP;
 		} else if ("SMALLINT".equalsIgnoreCase(type)) {
 			return Types.SMALLINT;
-		}  else if ("INT".equalsIgnoreCase(type)) {
+		} else if ("INT".equalsIgnoreCase(type)) {
 			return Types.INTEGER;
 		} else if ("NUMERIC".equalsIgnoreCase(type)) {
 			return Types.BIGINT;
@@ -119,11 +121,11 @@ public class OracleTypes implements DatabaseTypes {
 			return Types.DOUBLE;
 		} else if ("DECIMAL".equalsIgnoreCase(type)) {
 			return Types.BIGINT;
-		}  else if ("RAW".equalsIgnoreCase(type)) {
+		} else if ("RAW".equalsIgnoreCase(type)) {
 			return Types.BLOB;
 		} else if ("DATETIME".equalsIgnoreCase(type)) {
 			return Types.TIMESTAMP;
-		}  else if ("DATETIME2".equalsIgnoreCase(type)) {
+		} else if ("DATETIME2".equalsIgnoreCase(type)) {
 			return Types.VARCHAR;
 		} else if ("TIMESTAMP".equalsIgnoreCase(type)) {
 			return Types.BLOB;
@@ -159,8 +161,10 @@ public class OracleTypes implements DatabaseTypes {
 		} else if ("NTEXT".equalsIgnoreCase(type)) {
 			return "8";
 		} else if ("DATE".equalsIgnoreCase(type)) {
-			return "8";
-		}  else if ("INT".equalsIgnoreCase(type)) {
+			// return "8";
+			// latest jdbc jar treats this as TIMESTAMP
+			return "12";
+		} else if ("INT".equalsIgnoreCase(type)) {
 			return "4";
 		} else if ("FLOAT".equalsIgnoreCase(type)) {
 			return "8";
@@ -172,7 +176,7 @@ public class OracleTypes implements DatabaseTypes {
 			return "1000";
 		} else if ("DATETIME".equalsIgnoreCase(type)) {
 			return "12";
-		}  else if ("TIMESTAMP".equalsIgnoreCase(type)) {
+		} else if ("TIMESTAMP".equalsIgnoreCase(type)) {
 			return "8";
 		} else if ("CHAR".equalsIgnoreCase(type)) {
 			return "20";
@@ -194,7 +198,7 @@ public class OracleTypes implements DatabaseTypes {
 			return "4";
 		} else if ("NUMERIC".equalsIgnoreCase(type)) {
 			return "8";
-		}  else if ("NUMBER".equalsIgnoreCase(type)) {
+		} else if ("NUMBER".equalsIgnoreCase(type)) {
 			return "4";
 		} else if ("TIME".equalsIgnoreCase(type)) {
 			return "16";
