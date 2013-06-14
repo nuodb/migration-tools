@@ -57,7 +57,8 @@ public class ContinuityTest extends MigrationTestBase {
 			try {
 				rows = stmt1.executeUpdate(sqlStr);
 			} catch (SQLException e) {
-				Assert.assertTrue(e.getMessage().contains("datatypes1_UNIQUE"));
+				Assert.assertTrue(e.getMessage().toUpperCase()
+						.contains("DATATYPES1_UNIQUE"));
 			}
 		} finally {
 			nuodbConnection.rollback();
@@ -79,7 +80,8 @@ public class ContinuityTest extends MigrationTestBase {
 			try {
 				rows = stmt1.executeUpdate(sqlStr);
 			} catch (SQLException e) {
-				Assert.assertTrue(e.getMessage().contains("datatypes1_UNIQUE"));
+				Assert.assertTrue(e.getMessage().toUpperCase()
+						.contains("DATATYPES1_UNIQUE"));
 			}
 		} finally {
 			nuodbConnection.rollback();
