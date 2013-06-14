@@ -204,10 +204,10 @@ public class StructureTest extends MigrationTestBase {
 		String sqlStr1 = "SELECT cols.table_name, cols.column_name FROM all_constraints cons, all_cons_columns"
 				+ " cols WHERE cons.constraint_type = 'P' AND cons.constraint_name = cols.constraint_name AND cons.owner = cols.owner "
 				+ " AND cons.owner= ? AND cols.TABLE_NAME not like 'BIN$%' ORDER BY cols.table_name, cols.position ";
-		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES INNER JOIN SYSTEM.INDEXFIELDS ON "
-				+ "INDEXES.SCHEMA=INDEXFIELDS.SCHEMA AND "
-				+ "INDEXES.TABLENAME=INDEXFIELDS.TABLENAME AND "
-				+ "INDEXES.INDEXNAME=INDEXFIELDS.INDEXNAME WHERE SCHEMA=? AND TABLENAME=? AND INDEXNAME LIKE '%PRIMARY_KEY%'";
+		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES SI INNER JOIN SYSTEM.INDEXFIELDS SIF ON "
+				+ "SI.SCHEMA=SIF.SCHEMA AND "
+				+ "SI.TABLENAME=SIF.TABLENAME AND "
+				+ "SI.INDEXNAME=SIF.INDEXNAME WHERE SI.SCHEMA=? AND SI.TABLENAME=? AND SI.INDEXNAME LIKE '%PRIMARY_KEY%'";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
@@ -251,10 +251,10 @@ public class StructureTest extends MigrationTestBase {
 		String sqlStr1 = "SELECT cols.table_name, cols.column_name FROM all_constraints cons, all_cons_columns"
 				+ " cols WHERE cons.constraint_type = 'U' AND cons.constraint_name = cols.constraint_name AND cons.owner = cols.owner "
 				+ " AND cons.owner= ? AND cols.TABLE_NAME not like 'BIN$%' ORDER BY cols.table_name, cols.position ";
-		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES INNER JOIN SYSTEM.INDEXFIELDS ON "
-				+ "INDEXES.SCHEMA=INDEXFIELDS.SCHEMA AND "
-				+ "INDEXES.TABLENAME=INDEXFIELDS.TABLENAME AND "
-				+ "INDEXES.INDEXNAME=INDEXFIELDS.INDEXNAME WHERE SCHEMA=? AND TABLENAME=? AND INDEXNAME LIKE '%UNIQUE%'";
+		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES SI INNER JOIN SYSTEM.INDEXFIELDS SIF ON "
+				+ "SI.SCHEMA=SIF.SCHEMA AND "
+				+ "SI.TABLENAME=SIF.TABLENAME AND "
+				+ "SI.INDEXNAME=SIF.INDEXNAME WHERE SI.SCHEMA=? AND SI.TABLENAME=? AND SI.INDEXNAME LIKE '%UNIQUE%'";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		HashMap map = new HashMap();
@@ -337,7 +337,7 @@ public class StructureTest extends MigrationTestBase {
 				+ "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA "
 				+ "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME "
 				+ "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID "
-				+ "WHERE SCHEMA=? AND TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
+				+ "WHERE PRIMARYTABLE.SCHEMA=? AND PRIMARYTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
@@ -356,7 +356,7 @@ public class StructureTest extends MigrationTestBase {
 
 				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
 				stmt2.setString(1, nuodbSchemaUsed);
-				stmt2.setString(2, tName);
+				stmt2.setString(2, rtName);
 				rs2 = stmt2.executeQuery();
 				boolean found = false;
 				while (rs2.next()) {
@@ -398,7 +398,6 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the auto increment settings are migrated
 	 */
-	@Test(groups = { "disabled" })
 	public void testAutoIncrement() throws Exception {
 		String sqlStr1 = "select ut.table_name , ud.referenced_name as sequence_name from   user_dependencies ud "
 				+ "join user_triggers ut on (ut.trigger_name = ud.name) where ud.type='TRIGGER'  and ud.referenced_type='SEQUENCE' "
