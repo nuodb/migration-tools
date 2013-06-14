@@ -11,7 +11,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
 3. Dump data from an existing database
 4. Load data to a target NuoDB database
 
-*These functions are initially tested on MySQL, SQL Server, Oracle and PostgreSQL and should work with any JDBC-compliant database.*
+*These functions are tested on MySQL, SQL Server, Oracle, PostgreSQL, IBM DB2, Sybase Adaptive Server Enterprise and should work with any JDBC-compliant database.*
 
 ## Building from Source ##
 
