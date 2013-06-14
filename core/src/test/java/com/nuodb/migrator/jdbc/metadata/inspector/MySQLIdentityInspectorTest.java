@@ -32,13 +32,13 @@ import org.testng.annotations.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Collection;
 
 import static com.google.common.collect.Iterables.get;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createSequence;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
@@ -47,51 +47,48 @@ import static org.testng.Assert.assertNotNull;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
-public class MSSQLServerAutoIncrementInspectorTest extends InspectorTestBase {
+public class MySQLIdentityInspectorTest extends InspectorTestBase {
 
-    public MSSQLServerAutoIncrementInspectorTest() {
-        super(MSSQLServerAutoIncrementInspector.class);
+    public MySQLIdentityInspectorTest() {
+        super(MySQLIdentityInspector.class);
     }
 
     @Test
     public void testInspect() throws Exception {
-        PreparedStatement query = mock(PreparedStatement.class);
-        given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(query);
-
-        ResultSet resultSet = mock(ResultSet.class);
-        given(query.executeQuery()).willReturn(resultSet);
+        PreparedStatement queryTable = mock(PreparedStatement.class);
+        given(getConnection().prepareStatement(anyString())).willReturn(queryTable);
 
         String catalogName = "catalog";
-        String schemaName = "schema";
+        String schemaName = null;
         String tableName = "table";
         String columnName = "column";
-        long startWith = 1L;
-        long lastValue = 100L;
-        long incrementBy = 1L;
+        long lastValue = 5L;
 
-        given(resultSet.next()).willReturn(true, false);
-        given(resultSet.getString("TABLE_CATALOG")).willReturn(catalogName);
-        given(resultSet.getString("TABLE_SCHEMA")).willReturn(schemaName);
-        given(resultSet.getString("TABLE_NAME")).willReturn(tableName);
-        given(resultSet.getLong("START_WITH")).willReturn(startWith);
-        given(resultSet.getLong("LAST_VALUE")).willReturn(lastValue);
-        given(resultSet.getLong("INCREMENT_BY")).willReturn(incrementBy);
-        given(resultSet.getString("COLUMN_NAME")).willReturn(columnName);
+        ResultSet tables = mock(ResultSet.class);
+        given(tables.next()).willReturn(true, false);
+        given(queryTable.executeQuery()).willReturn(tables);
+        given(tables.getString("TABLE_SCHEMA")).willReturn(catalogName);
+        given(tables.getString("TABLE_NAME")).willReturn(tableName);
+        given(tables.getLong("AUTO_INCREMENT")).willReturn(lastValue);
 
-        TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, AUTO_INCREMENT);
+        Statement queryColumn = mock(Statement.class);
+        given(getConnection().createStatement()).willReturn(queryColumn);
 
+        ResultSet columns = mock(ResultSet.class);
+        given(columns.next()).willReturn(true, false);
+        given(queryColumn.executeQuery(anyString())).willReturn(columns);
+        given(columns.getString("FIELD")).willReturn(columnName);
+
+        TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, null, tableName);
+        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, IDENTITY);
         verifyInspectScope(getInspector(), inspectionScope);
-        Collection<Sequence> sequences = inspectionResults.getObjects(AUTO_INCREMENT);
 
+        Collection<Sequence> sequences = inspectionResults.getObjects(IDENTITY);
         assertNotNull(sequences);
         assertEquals(sequences.size(), 1);
 
         Sequence sequence = createSequence(catalogName, schemaName, tableName, columnName);
-        sequence.setStartWith(startWith);
         sequence.setLastValue(lastValue);
-        sequence.setIncrementBy(incrementBy);
         assertEquals(get(sequences, 0), sequence);
     }
 }

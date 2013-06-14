@@ -25,66 +25,37 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata.generator;
+package com.nuodb.migrator.cli.validation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import org.apache.commons.lang3.StringUtils;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class CountingScriptExporter implements ScriptExporter {
+public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
 
-    protected final transient Logger logger = LoggerFactory.getLogger(getClass());
-    private int count;
-
-    @Override
-    public final void open() throws Exception {
-        count = 0;
-        doOpen();
-    }
-
-    protected void doOpen() throws Exception {
+    public DB2ConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
+        super(connectionGroupInfo);
     }
 
     @Override
-    public void exportScripts(Collection<String> scripts) throws Exception {
-        if (scripts == null) {
-            return;
-        }
-        for (String script : scripts) {
-            try {
-                exportScript(script);
-                count++;
-            } catch (Exception exception) {
-                onExportScriptsError(scripts, script, exception);
-            }
-        }
+    public boolean canValidate(CommandLine commandLine, Option option) {
+        return StringUtils.startsWith(getUrlValue(commandLine), "jdbc:db2");
     }
-
-    protected void onExportScriptsError(Collection<String> scripts, String script,
-                                        Exception exception) throws Exception {
-        if (logger.isErrorEnabled()) {
-            logger.error(format("Failed exporting script #%d of #%d %s", getCount(), scripts.size(), script));
-        }
-        throw exception;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public abstract void exportScript(String script) throws Exception;
 
     @Override
-    public final void close() throws Exception {
-        doClose();
-    }
-
-    protected void doClose() throws Exception {
+    public void validate(CommandLine commandLine, Option option) {
+        String catalog = getCatalogValue(commandLine);
+        if (!isEmpty(catalog)) {
+            throw new OptionException(option,
+                    format("Unexpected option %s. DB2 doesn't supports catalogs", getCatalogOption()));
+        }
     }
 }
+

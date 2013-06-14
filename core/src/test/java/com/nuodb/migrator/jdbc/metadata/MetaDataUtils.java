@@ -54,7 +54,7 @@ public class MetaDataUtils {
 
     public static Sequence createSequence(String catalogName, String schemaName, String tableName, String columnName) {
         Column column = createColumn(catalogName, schemaName, tableName, columnName);
-        Sequence sequence = new AutoIncrement();
+        Sequence sequence = new Sequence();
         column.setSequence(sequence);
         return sequence;
     }

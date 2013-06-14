@@ -50,18 +50,18 @@ public class JdbcTimestampValueFormat extends ValueFormatBase<Timestamp> {
     private static final DateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
 
     @Override
-    protected ValueVariant doGetValue(JdbcTypeValueAccess<Timestamp> valueAccess,
-                                 Map<String, Object> valueAccessOptions) throws SQLException {
-        Timestamp timestamp = valueAccess.getValue(valueAccessOptions);
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<Timestamp> access,
+                                 Map<String, Object> accessOptions) throws SQLException {
+        Timestamp timestamp = access.getValue(accessOptions);
         return string(timestamp != null ? timestamp.toString() : null);
     }
 
     @Override
-    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Timestamp> valueAccess,
-                              Map<String, Object> valueAccessOptions) throws SQLException {
-        if (!(doSetValueAsTimestamp(variant, valueAccess, valueAccessOptions) || doSetValueAsDate(variant,
-                valueAccess, valueAccessOptions) ||
-                doSetValueAsYear(variant, valueAccess, valueAccessOptions))) {
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Timestamp> access,
+                              Map<String, Object> accessOptions) throws SQLException {
+        if (!(doSetValueAsTimestamp(variant, access, accessOptions) || doSetValueAsDate(variant,
+                access, accessOptions) ||
+                doSetValueAsYear(variant, access, accessOptions))) {
             throw new ValueFormatException(format("Value %s is not a timestamp, date nor year", variant));
         }
     }

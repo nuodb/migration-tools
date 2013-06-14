@@ -30,6 +30,8 @@ package com.nuodb.migrator.jdbc.metadata;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+
 /**
  * @author Sergey Bushik
  */
@@ -49,7 +51,11 @@ public class IdentifiableBase extends IndentedBase implements Identifiable {
     }
 
     public IdentifiableBase(MetaDataType objectType, String name) {
-        this(objectType, Identifier.valueOf(name));
+        this(objectType, name, false);
+    }
+
+    public IdentifiableBase(MetaDataType objectType, String name, boolean qualified) {
+        this(objectType, valueOf(name), qualified);
     }
 
     public IdentifiableBase(MetaDataType objectType, Identifier identifier) {
@@ -69,7 +75,7 @@ public class IdentifiableBase extends IndentedBase implements Identifiable {
 
     @Override
     public void setName(String name) {
-        this.identifier = Identifier.valueOf(name);
+        this.identifier = valueOf(name);
     }
 
     @Override

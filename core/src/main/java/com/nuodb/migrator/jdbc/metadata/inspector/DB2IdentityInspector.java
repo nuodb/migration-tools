@@ -27,35 +27,37 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.Check;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * @author Sergey Bushik
  */
-public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
+public class DB2IdentityInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    public MSSQLServerCheckInspector() {
-        super(CHECK, TableInspectionScope.class);
+    public DB2IdentityInspector() {
+        super(IDENTITY, TableInspectionScope.class);
     }
 
     @Override
@@ -65,9 +67,9 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
 
     @Override
     protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+                                 Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        for (final TableInspectionScope inspectionScope : inspectionScopes) {
+        for (TableInspectionScope inspectionScope : inspectionScopes) {
             final Collection<String> parameters = newArrayList();
             final SelectQuery selectQuery = createSelectQuery(inspectionScope, parameters);
             template.execute(
@@ -81,61 +83,62 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
                     new StatementCallback<PreparedStatement>() {
                         @Override
                         public void execute(PreparedStatement statement) throws SQLException {
-                            int parameter = 1;
-                            for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
-                                statement.setString(parameter++, iterator.next());
+                            int index = 1;
+                            for (String parameter : parameters) {
+                                statement.setString(index++, parameter);
                             }
-                            ResultSet checks = null;
+                            ResultSet identities = null;
                             try {
-                                checks = statement.executeQuery();
-                                inspect(inspectionContext, checks);
+                                identities = statement.executeQuery();
+                                inspect(inspectionContext, identities);
                             } finally {
-                                close(checks);
+                                close(identities);
                             }
                         }
                     }
             );
         }
+
     }
 
     protected SelectQuery createSelectQuery(TableInspectionScope inspectionScope, Collection<String> parameters) {
-        String catalog = isEmpty(inspectionScope.getCatalog()) ? "" : (inspectionScope.getCatalog() + ".");
-        SelectQuery selectCheck = new SelectQuery();
-        selectCheck.column("CTU.TABLE_CATALOG");
-        selectCheck.column("CTU.TABLE_SCHEMA");
-        selectCheck.column("CTU.TABLE_NAME");
-        selectCheck.column("CC.CHECK_CLAUSE");
-        selectCheck.column("CTU.CONSTRAINT_NAME");
-        selectCheck.from(catalog + "INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE AS CTU");
-        selectCheck.innerJoin(catalog + "INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC",
-                "CTU.TABLE_CATALOG=CC.CONSTRAINT_CATALOG AND " +
-                        "CTU.TABLE_SCHEMA=CC.CONSTRAINT_SCHEMA AND " +
-                        "CTU.CONSTRAINT_NAME=CC.CONSTRAINT_NAME");
-        if (!isEmpty(inspectionScope.getCatalog())) {
-            selectCheck.where("CTU.TABLE_CATALOG=?");
-            parameters.add(inspectionScope.getCatalog());
-        }
+        SelectQuery selectQuery = new SelectQuery();
+        selectQuery.column(
+                "T.TABSCHEMA", "T.TABNAME", "C.COLNAME", "S.SEQNAME", "S.INCREMENT", "S.START", "S.MINVALUE", "S.MAXVALUE",
+                "S.CYCLE", "S.CACHE", "S.ORDER");
+        selectQuery.from("SYSCAT.SEQUENCES S");
+        selectQuery.innerJoin("SYSCAT.TABLES T", "S.SEQSCHEMA=T.TABSCHEMA AND S.CREATE_TIME=T.CREATE_TIME");
+        selectQuery.innerJoin("SYSCAT.COLUMNS C", "T.TABSCHEMA=C.TABSCHEMA AND T.TABNAME=C.TABNAME");
+        selectQuery.where("S.SEQNAME LIKE 'SQL%'");
+        selectQuery.where("C.IDENTITY='Y'");
         if (!isEmpty(inspectionScope.getSchema())) {
-            selectCheck.where("CTU.TABLE_SCHEMA=?");
+            selectQuery.where("T.TABSCHEMA=?");
             parameters.add(inspectionScope.getSchema());
         }
         if (!isEmpty(inspectionScope.getTable())) {
-            selectCheck.where("CTU.TABLE_NAME=?");
+            selectQuery.where("T.TABNAME=?");
             parameters.add(inspectionScope.getTable());
         }
-        return selectCheck;
+        return selectQuery;
     }
 
-    protected void inspect(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
+    protected void inspect(InspectionContext inspectionContext, ResultSet identities) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        while (checks.next()) {
-            Table table = addTable(inspectionResults,
-                    checks.getString("TABLE_CATALOG"), checks.getString("TABLE_SCHEMA"),
-                    checks.getString("TABLE_NAME"));
-            Check check = new Check(checks.getString("CONSTRAINT_NAME"));
-            check.setText(checks.getString("CHECK_CLAUSE"));
-            table.addCheck(check);
-            inspectionResults.addObject(check);
+        while (identities.next()) {
+            Table table = addTable(inspectionResults, null, trim(identities.getString("TABSCHEMA")),
+                    trim(identities.getString("TABNAME")));
+            Column column = table.addColumn(identities.getString("COLNAME"));
+
+            Sequence sequence = new Sequence(identities.getString("SEQNAME"));
+            sequence.setStartWith(identities.getLong("START"));
+            sequence.setIncrementBy(identities.getLong("INCREMENT"));
+            sequence.setMinValue(identities.getLong("MINVALUE"));
+            sequence.setMaxValue(identities.getLong("MAXVALUE"));
+            sequence.setCache(identities.getInt("CACHE"));
+            sequence.setOrder(StringUtils.equals("Y", identities.getString("ORDER")));
+
+            column.setSequence(sequence);
+            inspectionResults.addObject(sequence);
         }
     }
 }

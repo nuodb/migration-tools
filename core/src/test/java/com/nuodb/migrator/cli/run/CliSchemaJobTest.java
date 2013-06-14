@@ -79,7 +79,7 @@ public class CliSchemaJobTest {
                 "--output.path=/tmp/schema.sql",
 
                 "--meta.data.check=false",
-                "--meta.data.auto.increment=false",
+                "--meta.data.identity=false",
                 "--script.type=drop,create",
                 "--group.scripts.by=meta.data",
                 "--identifier.quoting=always",
@@ -116,8 +116,8 @@ public class CliSchemaJobTest {
 
         Collection<MetaDataType> metaDataTypes = Lists.newArrayList(MetaDataType.TYPES);
         metaDataTypes.remove(MetaDataType.CHECK);
-        metaDataTypes.remove(MetaDataType.AUTO_INCREMENT);
-        schemaSpec.setMetaDataTypes(metaDataTypes);
+        metaDataTypes.remove(MetaDataType.IDENTITY);
+        schemaSpec.setObjectTypes(metaDataTypes);
 
         schemaSpec.setScriptTypes(Lists.newArrayList(ScriptType.DROP, ScriptType.CREATE));
         schemaSpec.setGroupScriptsBy(GroupScriptsBy.META_DATA);

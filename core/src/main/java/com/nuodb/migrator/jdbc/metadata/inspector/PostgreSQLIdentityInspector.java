@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.metadata.AutoIncrement;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -43,17 +42,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.AUTO_INCREMENT;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.PostgreSQLColumn.initColumn;
 
 /**
  * @author Sergey Bushik
  */
-public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, TableInspectionScope> {
+public class PostgreSQLIdentityInspector extends InspectorBase<Table, TableInspectionScope> {
 
-    public PostgreSQLAutoIncrementInspector() {
-        super(AUTO_INCREMENT, TABLE, TableInspectionScope.class);
+    public PostgreSQLIdentityInspector() {
+        super(IDENTITY, TABLE, TableInspectionScope.class);
     }
 
     @Override
@@ -93,17 +92,17 @@ public class PostgreSQLAutoIncrementInspector extends InspectorBase<Table, Table
     }
 
     protected void inspect(InspectionContext inspectionContext, Column column,
-                           ResultSet autoIncrements) throws SQLException {
-        if (autoIncrements.next()) {
-            Sequence sequence = new AutoIncrement();
-            sequence.setName(autoIncrements.getString("SEQUENCE_NAME"));
-            sequence.setLastValue(autoIncrements.getLong("LAST_VALUE"));
-            sequence.setStartWith(autoIncrements.getLong("START_VALUE"));
-            sequence.setMinValue(autoIncrements.getLong("MIN_VALUE"));
-            sequence.setMaxValue(autoIncrements.getLong("MAX_VALUE"));
-            sequence.setIncrementBy(autoIncrements.getLong("INCREMENT_BY"));
-            sequence.setCache(autoIncrements.getInt("CACHE_VALUE"));
-            sequence.setCycle("T".equalsIgnoreCase(autoIncrements.getString("IS_CYCLED")));
+                           ResultSet identities) throws SQLException {
+        if (identities.next()) {
+            Sequence sequence = new Sequence();
+            sequence.setName(identities.getString("SEQUENCE_NAME"));
+            sequence.setLastValue(identities.getLong("LAST_VALUE"));
+            sequence.setStartWith(identities.getLong("START_VALUE"));
+            sequence.setMinValue(identities.getLong("MIN_VALUE"));
+            sequence.setMaxValue(identities.getLong("MAX_VALUE"));
+            sequence.setIncrementBy(identities.getLong("INCREMENT_BY"));
+            sequence.setCache(identities.getInt("CACHE_VALUE"));
+            sequence.setCycle("T".equalsIgnoreCase(identities.getString("IS_CYCLED")));
             column.setSequence(sequence);
             inspectionContext.getInspectionResults().addObject(sequence);
         }

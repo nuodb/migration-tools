@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.metadata;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.join;
 
@@ -49,8 +50,16 @@ public class Sequence extends IdentifiableBase {
     private boolean temporary;
     private Integer cache;
 
-    protected Sequence(MetaDataType objectType) {
-        super(objectType, true);
+    public Sequence() {
+        super(IDENTITY, true);
+    }
+
+    public Sequence(String name) {
+        super(IDENTITY, name, true);
+    }
+
+    public Sequence(Identifier identifier) {
+        super(IDENTITY, identifier, true);
     }
 
     public Column getColumn() {

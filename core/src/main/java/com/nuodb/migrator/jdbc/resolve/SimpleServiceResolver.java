@@ -90,7 +90,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
     }
 
     @Override
-    public T resolve(DatabaseInfo databaseInfo) {
+    public T resolve(DatabaseInfo databaseInfo) throws SQLException {
         if (databaseInfo == null) {
             return null;
         }

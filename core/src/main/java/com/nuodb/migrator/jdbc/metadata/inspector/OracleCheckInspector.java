@@ -111,7 +111,7 @@ public class OracleCheckInspector extends TableInspectorBase<Table, TableInspect
                 Table table = addTable(inspectionResults, null,
                         checks.getString("OWNER"), checks.getString("TABLE_NAME"));
                 Check check = new Check(checks.getString("CONSTRAINT_NAME"));
-                check.setClause(condition);
+                check.setText(condition);
                 table.addCheck(check);
                 inspectionResults.addObject(check);
             }

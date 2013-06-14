@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.jdbc.metadata.Table.ALIAS;
 import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
 
 /**
@@ -44,11 +45,11 @@ import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
  */
 public class SchemaSpec extends JobSpecBase {
 
-    private String[] tableTypes = new String[]{TABLE};
+    private String[] tableTypes = new String[]{TABLE, ALIAS};
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;
     private ResourceSpec outputSpec;
-    private Collection<MetaDataType> metaDataTypes = newHashSet(MetaDataType.TYPES);
+    private Collection<MetaDataType> objectTypes = newHashSet(MetaDataType.TYPES);
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
     private Collection<JdbcTypeSpec> jdbcTypeSpecs = newHashSet();
@@ -87,12 +88,12 @@ public class SchemaSpec extends JobSpecBase {
         this.outputSpec = outputSpec;
     }
 
-    public Collection<MetaDataType> getMetaDataTypes() {
-        return metaDataTypes;
+    public Collection<MetaDataType> getObjectTypes() {
+        return objectTypes;
     }
 
-    public void setMetaDataTypes(Collection<MetaDataType> metaDataTypes) {
-        this.metaDataTypes = newHashSet(metaDataTypes);
+    public void setObjectTypes(Collection<MetaDataType> objectTypes) {
+        this.objectTypes = newHashSet(objectTypes);
     }
 
     public Collection<ScriptType> getScriptTypes() {
@@ -151,7 +152,7 @@ public class SchemaSpec extends JobSpecBase {
             return false;
         if (jdbcTypeSpecs != null ? !jdbcTypeSpecs.equals(that.jdbcTypeSpecs) : that.jdbcTypeSpecs != null)
             return false;
-        if (metaDataTypes != null ? !metaDataTypes.equals(that.metaDataTypes) : that.metaDataTypes != null)
+        if (objectTypes != null ? !objectTypes.equals(that.objectTypes) : that.objectTypes != null)
             return false;
         if (groupScriptsBy != that.groupScriptsBy) return false;
         if (outputSpec != null ? !outputSpec.equals(that.outputSpec) : that.outputSpec != null) return false;
@@ -171,7 +172,7 @@ public class SchemaSpec extends JobSpecBase {
         result = 31 * result + (sourceConnectionSpec != null ? sourceConnectionSpec.hashCode() : 0);
         result = 31 * result + (targetConnectionSpec != null ? targetConnectionSpec.hashCode() : 0);
         result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);
-        result = 31 * result + (metaDataTypes != null ? metaDataTypes.hashCode() : 0);
+        result = 31 * result + (objectTypes != null ? objectTypes.hashCode() : 0);
         result = 31 * result + (scriptTypes != null ? scriptTypes.hashCode() : 0);
         result = 31 * result + (groupScriptsBy != null ? groupScriptsBy.hashCode() : 0);
         result = 31 * result + (jdbcTypeSpecs != null ? jdbcTypeSpecs.hashCode() : 0);

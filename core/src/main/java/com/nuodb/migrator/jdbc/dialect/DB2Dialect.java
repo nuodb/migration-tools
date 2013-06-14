@@ -29,18 +29,41 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
+import java.sql.Types;
+
 /**
- * http://grepcode.com/file/repository.jboss.org/nexus/content/repositories/releases/org.hibernate/hibernate-core/3.5.0-CR-1/org/hibernate/dialect/DB2Dialect.java
- *
  * @author Sergey Bushik
  */
 public class DB2Dialect extends SimpleDialect {
 
-    public DB2Dialect() {
-        this(new DatabaseInfo("DB2"));
-    }
-
     public DB2Dialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
+    }
+
+    @Override
+    protected void initJdbcTypes() {
+        addJdbcType(DB2XmlType.INSTANCE);
+    }
+
+    @Override
+    protected void initJdbcTypeNames() {
+        addJdbcTypeName(Types.BIT, "SMALLINT");
+        addJdbcTypeName(Types.BIGINT, "BIGINT");
+        addJdbcTypeName(Types.SMALLINT, "SMALLINT");
+        addJdbcTypeName(Types.TINYINT, "SMALLINT");
+        addJdbcTypeName(Types.INTEGER, "INTEGER");
+        addJdbcTypeName(Types.CHAR, "CHAR({N})");
+        addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(Types.FLOAT, "FLOAT");
+        addJdbcTypeName(Types.DOUBLE, "DOUBLE");
+        addJdbcTypeName(Types.DATE, "DATE");
+        addJdbcTypeName(Types.TIME, "TIME");
+        addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP");
+        addJdbcTypeName(Types.VARBINARY, "VARCHAR({N}) FOR BIT DATA");
+        addJdbcTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
+        addJdbcTypeName(Types.BLOB, "BLOB({N})");
+        addJdbcTypeName(Types.CLOB, "CLOB({N})");
+        addJdbcTypeName(Types.LONGVARCHAR, "LONG VARCHAR");
+        addJdbcTypeName(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
     }
 }

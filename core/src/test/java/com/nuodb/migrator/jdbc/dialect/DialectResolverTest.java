@@ -31,6 +31,8 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.sql.SQLException;
+
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -47,7 +49,7 @@ public class DialectResolverTest {
     }
 
     @Test
-    public void testResolve() {
+    public void testResolve() throws SQLException {
         assertTrue(dialectResolver.resolve(new DatabaseInfo("NuoDB", "1.0.0-118", 15, 1)) instanceof NuoDBDialect);
         assertTrue(dialectResolver.resolve(new DatabaseInfo("MySQL", "5.5.5.28", 5, 5)) instanceof MySQLDialect);
         assertTrue(dialectResolver.resolve(new DatabaseInfo("PostgreSQL", "9.2.3", 2, 9)) instanceof PostgreSQLDialect);

@@ -53,12 +53,12 @@ public class JdbcDateValueFormat extends ValueFormatBase<Date> {
     private static final DateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
 
     @Override
-    protected ValueVariant doGetValue(JdbcTypeValueAccess<Date> valueAccess,
-                                      Map<String, Object> valueAccessOptions) throws SQLException {
-        Date date = valueAccess.getValue(valueAccessOptions);
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<Date> access,
+                                      Map<String, Object> accessOptions) throws SQLException {
+        Date date = access.getValue(accessOptions);
         if (date == null) {
             return STRING_NULL;
-        } else if (JdbcTypeDesc.equals(valueAccess.getValueModel().getTypeName(), YEAR_TYPE)) {
+        } else if (JdbcTypeDesc.equals(access.getValueModel().getTypeName(), YEAR_TYPE)) {
             return string(YEAR_FORMAT.format(date));
         } else {
             return string(date.toString());
@@ -66,10 +66,10 @@ public class JdbcDateValueFormat extends ValueFormatBase<Date> {
     }
 
     @Override
-    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Date> valueAccess,
-                              Map<String, Object> valueAccessOptions) throws SQLException {
-        if (!(doSetValueAsDate(valueAccess, variant, valueAccessOptions) ||
-                doSetValueAsYear(valueAccess, variant, valueAccessOptions))) {
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Date> access,
+                              Map<String, Object> accessOptions) throws SQLException {
+        if (!(doSetValueAsDate(access, variant, accessOptions) ||
+                doSetValueAsYear(access, variant, accessOptions))) {
             throw new ValueFormatException(format("Value %s is not a date nor year", variant));
         }
     }

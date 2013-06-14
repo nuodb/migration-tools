@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.AutoIncrement;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DefaultValue;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
@@ -46,16 +45,16 @@ import static java.util.regex.Pattern.compile;
 public class PostgreSQLColumn {
 
     private static final String VALUE_CLASS_REGEX = "'(.*)'::.*";
-    private static final String AUTO_INCREMENT_REGEX = "nextval\\(" + VALUE_CLASS_REGEX + "\\)";
-    private static final Pattern AUTO_INCREMENT_PATTERN = compile(AUTO_INCREMENT_REGEX, CASE_INSENSITIVE);
+    private static final String NEXT_VAL_REGEX = "nextval\\(" + VALUE_CLASS_REGEX + "\\)";
+    private static final Pattern NEXT_VAL_PATTERN = compile(NEXT_VAL_REGEX, CASE_INSENSITIVE);
 
     public static void initColumn(InspectionContext inspectionContext, Column column) throws SQLException {
         DefaultValue defaultValue = column.getDefaultValue();
         if (defaultValue != null && !defaultValue.isProcessed()) {
             Matcher matcher;
             String value = defaultValue.getValue();
-            if ((matcher = AUTO_INCREMENT_PATTERN.matcher(value)).matches()) {
-                Sequence sequence = new AutoIncrement();
+            if ((matcher = NEXT_VAL_PATTERN.matcher(value)).matches()) {
+                Sequence sequence = new Sequence();
                 sequence.setName(stripQuotes(inspectionContext.getDialect(), matcher.group(1)));
                 column.setSequence(sequence);
                 column.setDefaultValue(null);

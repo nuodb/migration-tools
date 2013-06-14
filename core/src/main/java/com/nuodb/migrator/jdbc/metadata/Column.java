@@ -83,7 +83,7 @@ public class Column extends IdentifiableBase implements ValueModel {
      */
     private boolean autoIncrement;
     /**
-     * Associated auto incremented sequence
+     * Associated identity sequence
      */
     private Sequence sequence;
     /**
@@ -184,16 +184,16 @@ public class Column extends IdentifiableBase implements ValueModel {
         this.nullable = nullable;
     }
 
-    public boolean isIdentity() {
-        return isAutoIncrement();
-    }
-
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
 
     public void setAutoIncrement(boolean autoIncrement) {
         this.autoIncrement = autoIncrement;
+    }
+
+    public boolean isIdentity() {
+        return isAutoIncrement();
     }
 
     public Sequence getSequence() {

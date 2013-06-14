@@ -37,11 +37,11 @@ import java.util.Map;
  */
 public interface ValueFormat<T> {
 
-    ValueVariant getValue(JdbcTypeValueAccess<T> valueAccess,
-                          Map<String, Object> valueAccessOptions) throws ValueFormatException;
+    ValueVariant getValue(JdbcTypeValueAccess<T> access,
+                          Map<String, Object> accessOptions) throws ValueFormatException;
 
-    void setValue(ValueVariant variant, JdbcTypeValueAccess<T> valueAccess,
-                  Map<String, Object> valueAccessOptions) throws ValueFormatException;
+    void setValue(ValueVariant variant, JdbcTypeValueAccess<T> access,
+                  Map<String, Object> accessOptions) throws ValueFormatException;
 
     ValueVariantType getValueType(ValueModel ValueModel);
 }

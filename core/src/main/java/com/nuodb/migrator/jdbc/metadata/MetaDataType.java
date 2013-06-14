@@ -50,7 +50,7 @@ public class MetaDataType implements Comparable<MetaDataType> {
     public static final MetaDataType PRIMARY_KEY = new MetaDataType(PrimaryKey.class);
     public static final MetaDataType FOREIGN_KEY = new MetaDataType(ForeignKey.class);
     public static final MetaDataType INDEX = new MetaDataType(Index.class);
-    public static final MetaDataType AUTO_INCREMENT = new MetaDataType(AutoIncrement.class);
+    public static final MetaDataType IDENTITY = new MetaDataType(Sequence.class);
     public static final MetaDataType CHECK = new MetaDataType(Check.class);
 
     private Class<? extends MetaData> objectType;

@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.resolve;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
@@ -46,7 +47,7 @@ public interface ServiceResolver<T> {
 
     T resolve(Connection connection) throws SQLException;
 
-    T resolve(DatabaseInfo databaseInfo);
+    T resolve(DatabaseInfo databaseInfo) throws SQLException;
 
     T resolve(DatabaseMetaData databaseMetaData) throws SQLException;
 }

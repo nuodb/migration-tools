@@ -25,14 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata;
+package com.nuodb.migrator.resultset.format.value;
+
+import com.nuodb.migrator.jdbc.dialect.DB2XmlType;
 
 /**
  * @author Sergey Bushik
  */
-public class AutoIncrement extends Sequence {
+public class DB2ValueFormatRegistry extends SimpleValueFormatRegistry {
 
-    public AutoIncrement() {
-        super(MetaDataType.AUTO_INCREMENT);
+    public DB2ValueFormatRegistry() {
+        addValueFormat(DB2XmlType.INSTANCE, new DB2XmlValueFormat());
     }
 }

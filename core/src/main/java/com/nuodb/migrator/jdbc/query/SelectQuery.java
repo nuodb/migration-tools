@@ -49,8 +49,14 @@ public class SelectQuery extends QueryBase {
     private Collection<OrderBy> orderBy = newArrayList();
     private Collection<Join> joins = newArrayList();
 
+    public void column(Object... columns) {
+        for (Object column : columns) {
+            column(column);
+        }
+    }
+
     public void column(Object column) {
-        columns.add(column);
+        this.columns.add(column);
     }
 
     public void from(String from) {
@@ -58,11 +64,7 @@ public class SelectQuery extends QueryBase {
     }
 
     public void from(Table table) {
-        from.add(table);
-    }
-
-    public void join(String type, String table, String condition) {
-        joins.add(new Join(type, table, condition));
+        this.from.add(table);
     }
 
     public void innerJoin(String table, String condition) {
@@ -77,8 +79,12 @@ public class SelectQuery extends QueryBase {
         join(RIGHT, table, condition);
     }
 
+    public void join(String type, String table, String condition) {
+        this.joins.add(new Join(type, table, condition));
+    }
+
     public void where(String filter) {
-        where.add(filter);
+        this.where.add(filter);
     }
 
     public void orderBy(Collection<String> columns) {
@@ -86,7 +92,7 @@ public class SelectQuery extends QueryBase {
     }
 
     public void orderBy(Collection<String> columns, String order) {
-        orderBy.add(new OrderBy(columns, order));
+        this.orderBy.add(new OrderBy(columns, order));
     }
 
     @Override

@@ -27,7 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.Check;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
@@ -39,11 +40,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -52,10 +52,10 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 /**
  * @author Sergey Bushik
  */
-public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
+public class MSSQLServerIdentityInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    public MSSQLServerCheckInspector() {
-        super(CHECK, TableInspectionScope.class);
+    public MSSQLServerIdentityInspector() {
+        super(IDENTITY, TableInspectionScope.class);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
     protected void inspectScopes(final InspectionContext inspectionContext,
                                  final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
         final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        for (final TableInspectionScope inspectionScope : inspectionScopes) {
+        for (TableInspectionScope inspectionScope : inspectionScopes) {
             final Collection<String> parameters = newArrayList();
             final SelectQuery selectQuery = createSelectQuery(inspectionScope, parameters);
             template.execute(
@@ -81,16 +81,16 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
                     new StatementCallback<PreparedStatement>() {
                         @Override
                         public void execute(PreparedStatement statement) throws SQLException {
-                            int parameter = 1;
-                            for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
-                                statement.setString(parameter++, iterator.next());
+                            int index = 1;
+                            for (String parameter : parameters) {
+                                statement.setString(index++, parameter);
                             }
-                            ResultSet checks = null;
+                            ResultSet identities = null;
                             try {
-                                checks = statement.executeQuery();
-                                inspect(inspectionContext, checks);
+                                identities = statement.executeQuery();
+                                inspect(inspectionContext, identities);
                             } finally {
-                                close(checks);
+                                close(identities);
                             }
                         }
                     }
@@ -99,43 +99,61 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
     }
 
     protected SelectQuery createSelectQuery(TableInspectionScope inspectionScope, Collection<String> parameters) {
-        String catalog = isEmpty(inspectionScope.getCatalog()) ? "" : (inspectionScope.getCatalog() + ".");
-        SelectQuery selectCheck = new SelectQuery();
-        selectCheck.column("CTU.TABLE_CATALOG");
-        selectCheck.column("CTU.TABLE_SCHEMA");
-        selectCheck.column("CTU.TABLE_NAME");
-        selectCheck.column("CC.CHECK_CLAUSE");
-        selectCheck.column("CTU.CONSTRAINT_NAME");
-        selectCheck.from(catalog + "INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE AS CTU");
-        selectCheck.innerJoin(catalog + "INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC",
-                "CTU.TABLE_CATALOG=CC.CONSTRAINT_CATALOG AND " +
-                        "CTU.TABLE_SCHEMA=CC.CONSTRAINT_SCHEMA AND " +
-                        "CTU.CONSTRAINT_NAME=CC.CONSTRAINT_NAME");
-        if (!isEmpty(inspectionScope.getCatalog())) {
-            selectCheck.where("CTU.TABLE_CATALOG=?");
+        SelectQuery selectColumn = new SelectQuery();
+        if (isEmpty(inspectionScope.getCatalog())) {
+            selectColumn.column("DB_NAME() AS TABLE_CATALOG");
+        } else {
+            selectColumn.column("? AS TABLE_CATALOG");
             parameters.add(inspectionScope.getCatalog());
         }
+        selectColumn.column("SCHEMAS.NAME AS TABLE_SCHEMA");
+        selectColumn.column("TABLES.NAME AS TABLE_NAME");
+        selectColumn.column("COLUMNS.NAME AS COLUMN_NAME");
+
+        String catalog = isEmpty(inspectionScope.getCatalog()) ? "" : (inspectionScope.getCatalog() + ".");
+        selectColumn.from(catalog + "SYS.SCHEMAS");
+        selectColumn.innerJoin(catalog + "SYS.TABLES", "SCHEMAS.SCHEMA_ID=TABLES.SCHEMA_ID");
+        selectColumn.innerJoin(catalog + "SYS.COLUMNS", "COLUMNS.OBJECT_ID=TABLES.OBJECT_ID");
+
         if (!isEmpty(inspectionScope.getSchema())) {
-            selectCheck.where("CTU.TABLE_SCHEMA=?");
+            selectColumn.where("SCHEMAS.NAME=?");
             parameters.add(inspectionScope.getSchema());
         }
         if (!isEmpty(inspectionScope.getTable())) {
-            selectCheck.where("CTU.TABLE_NAME=?");
+            selectColumn.where("TABLES.NAME=?");
             parameters.add(inspectionScope.getTable());
         }
-        return selectCheck;
+        selectColumn.where("IS_IDENTITY=1");
+
+        SelectQuery selectTable = new SelectQuery();
+        selectTable.column("C.*");
+        selectTable.column(
+                "QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME) AS TABLE_QUALIFIED_NAME");
+        selectTable.from("(" + selectColumn + ") C");
+
+        SelectQuery selectIdentity = new SelectQuery();
+        selectIdentity.column("C.*");
+        selectIdentity.column("IDENT_SEED(TABLE_QUALIFIED_NAME) AS START_WITH");
+        selectIdentity.column("IDENT_CURRENT(TABLE_QUALIFIED_NAME) AS LAST_VALUE");
+        selectIdentity.column("IDENT_INCR(TABLE_QUALIFIED_NAME) AS INCREMENT_BY");
+        selectIdentity.from("(" + selectTable + ") C");
+        return selectIdentity;
     }
 
-    protected void inspect(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        while (checks.next()) {
+    private void inspect(InspectionContext context, ResultSet identities) throws SQLException {
+        InspectionResults inspectionResults = context.getInspectionResults();
+        if (identities.next()) {
             Table table = addTable(inspectionResults,
-                    checks.getString("TABLE_CATALOG"), checks.getString("TABLE_SCHEMA"),
-                    checks.getString("TABLE_NAME"));
-            Check check = new Check(checks.getString("CONSTRAINT_NAME"));
-            check.setText(checks.getString("CHECK_CLAUSE"));
-            table.addCheck(check);
-            inspectionResults.addObject(check);
+                    identities.getString("TABLE_CATALOG"),
+                    identities.getString("TABLE_SCHEMA"),
+                    identities.getString("TABLE_NAME"));
+            Sequence sequence = new Sequence();
+            sequence.setStartWith(identities.getLong("START_WITH"));
+            sequence.setLastValue(identities.getLong("LAST_VALUE"));
+            sequence.setIncrementBy(identities.getLong("INCREMENT_BY"));
+            Column column = table.addColumn(identities.getString("COLUMN_NAME"));
+            column.setSequence(sequence);
+            inspectionResults.addObject(sequence);
         }
     }
 }

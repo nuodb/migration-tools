@@ -53,10 +53,10 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class SimpleValueFormat extends ValueFormatBase<Object> {
 
     @Override
-    protected ValueVariant doGetValue(JdbcTypeValueAccess<Object> valueAccess,
-                                 Map<String, Object> valueAccessOptions) throws Exception {
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<Object> access,
+                                 Map<String, Object> accessOptions) throws Exception {
         Object value;
-        ValueModel valueModel = valueAccess.getValueModel();
+        ValueModel valueModel = access.getValueModel();
         ValueVariant variant;
         switch (valueModel.getTypeCode()) {
             case Types.BIT:
@@ -69,7 +69,7 @@ public class SimpleValueFormat extends ValueFormatBase<Object> {
             case Types.DOUBLE:
             case Types.NUMERIC:
             case Types.DECIMAL:
-                value = valueAccess.getValue(valueAccessOptions);
+                value = access.getValue(accessOptions);
                 variant = string(value != null ? value.toString() : null);
                 break;
             case Types.CHAR:
@@ -78,42 +78,42 @@ public class SimpleValueFormat extends ValueFormatBase<Object> {
             case Types.NVARCHAR:
             case Types.LONGNVARCHAR:
             case Types.NCHAR:
-                variant = string(valueAccess.getValue(String.class, valueAccessOptions));
+                variant = string(access.getValue(String.class, accessOptions));
                 break;
             case Types.BINARY:
             case Types.VARBINARY:
             case Types.LONGVARBINARY:
             case Types.BLOB:
-                variant = binary(valueAccess.getValue(byte[].class, valueAccessOptions));
+                variant = binary(access.getValue(byte[].class, accessOptions));
                 break;
             case Types.OTHER:
             case Types.JAVA_OBJECT:
             case Types.STRUCT:
-                value = valueAccess.getValue(valueAccessOptions);
+                value = access.getValue(accessOptions);
                 variant = binary(value != null ? write(value) : null);
                 break;
             case Types.CLOB:
             case Types.NCLOB:
-                variant = string(valueAccess.getValue(String.class, valueAccessOptions));
+                variant = string(access.getValue(String.class, accessOptions));
                 break;
             case Types.REF:
-                value = valueAccess.getValue(valueAccessOptions);
+                value = access.getValue(accessOptions);
                 variant = binary(write(new SerialRef((Ref) value)));
                 break;
             case Types.DATALINK:
-                value = valueAccess.getValue(valueAccessOptions);
+                value = access.getValue(accessOptions);
                 variant = string(value != null ? value.toString() : null);
                 break;
             case Types.BOOLEAN:
-                value = valueAccess.getValue(valueAccessOptions);
+                value = access.getValue(accessOptions);
                 variant = string(value != null ? value.toString() : null);
                 break;
             case Types.ROWID:
-                value = valueAccess.getValue(valueAccessOptions);
+                value = access.getValue(accessOptions);
                 variant = binary(value != null ? ((RowId) value).getBytes() : null);
                 break;
             case Types.SQLXML:
-                variant = string(valueAccess.getValue(String.class, valueAccessOptions));
+                variant = string(access.getValue(String.class, accessOptions));
                 break;
             default:
                 throw new ValueFormatException(format("Unsupported data type %s, type code %d on %s column",
@@ -123,37 +123,37 @@ public class SimpleValueFormat extends ValueFormatBase<Object> {
     }
 
     @Override
-    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Object> valueAccess,
-                              Map<String, Object> valueAccessOptions) throws Exception {
-        ValueModel valueModel = valueAccess.getValueModel();
+    protected void doSetValue(ValueVariant variant, JdbcTypeValueAccess<Object> access,
+                              Map<String, Object> accessOptions) throws Exception {
+        ValueModel valueModel = access.getValueModel();
         final String value = variant.asString();
         switch (valueModel.getTypeCode()) {
             case Types.BIT:
             case Types.BOOLEAN:
-                valueAccess.setValue(!isEmpty(value) ? Boolean.parseBoolean(value) : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? Boolean.parseBoolean(value) : null, accessOptions);
                 break;
             case Types.TINYINT:
             case Types.SMALLINT:
-                if (valueAccess.getValueModel().getScale() > 0) {
+                if (access.getValueModel().getScale() > 0) {
                 }
-                valueAccess.setValue(!isEmpty(value) ? Short.parseShort(value) : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? Short.parseShort(value) : null, accessOptions);
                 break;
             case Types.INTEGER:
-                valueAccess.setValue(!isEmpty(value) ? Integer.parseInt(value) : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? Integer.parseInt(value) : null, accessOptions);
                 break;
             case Types.BIGINT:
-                valueAccess.setValue(!isEmpty(value) ? Long.parseLong(value) : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? Long.parseLong(value) : null, accessOptions);
                 break;
             case Types.FLOAT:
             case Types.REAL:
-                valueAccess.setValue(!isEmpty(value) ? Float.parseFloat(value) : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? Float.parseFloat(value) : null, accessOptions);
                 break;
             case Types.DOUBLE:
-                valueAccess.setValue(!isEmpty(value) ? Double.parseDouble(value) : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? Double.parseDouble(value) : null, accessOptions);
                 break;
             case Types.NUMERIC:
             case Types.DECIMAL:
-                valueAccess.setValue(!isEmpty(value) ? new BigDecimal(value) : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? new BigDecimal(value) : null, accessOptions);
                 break;
             case Types.CHAR:
             case Types.VARCHAR:
@@ -161,35 +161,35 @@ public class SimpleValueFormat extends ValueFormatBase<Object> {
             case Types.NVARCHAR:
             case Types.LONGNVARCHAR:
             case Types.NCHAR:
-                valueAccess.setValue(value, valueAccessOptions);
+                access.setValue(value, accessOptions);
                 break;
             case Types.BINARY:
             case Types.VARBINARY:
             case Types.LONGVARBINARY:
-                valueAccess.setValue(!isEmpty(value) ? value : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? value : null, accessOptions);
                 break;
             case Types.OTHER:
             case Types.JAVA_OBJECT:
             case Types.STRUCT:
-                valueAccess.setValue(read(variant.asBytes()), valueAccessOptions);
+                access.setValue(read(variant.asBytes()), accessOptions);
                 break;
             case Types.BLOB:
-                valueAccess.setValue(variant.asBytes(), valueAccessOptions);
+                access.setValue(variant.asBytes(), accessOptions);
                 break;
             case Types.CLOB:
-                valueAccess.setValue(value, valueAccessOptions);
+                access.setValue(value, accessOptions);
                 break;
             case Types.NCLOB:
-                valueAccess.setValue(value, valueAccessOptions);
+                access.setValue(value, accessOptions);
                 break;
             case Types.REF:
-                valueAccess.setValue(!isEmpty(value) ? read(variant.asBytes()) : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? read(variant.asBytes()) : null, accessOptions);
                 break;
             case Types.DATALINK:
-                valueAccess.setValue(!isEmpty(value) ? new URL(value) : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? new URL(value) : null, accessOptions);
                 break;
             case Types.SQLXML:
-                valueAccess.setValue(!isEmpty(value) ? value : null, valueAccessOptions);
+                access.setValue(!isEmpty(value) ? value : null, accessOptions);
                 break;
             default:
                 throw new ValueFormatException(format("Unsupported data type %s, type code %d on %s column",

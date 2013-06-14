@@ -45,6 +45,7 @@ public class Table extends IdentifiableBase {
 
     public static final String TABLE = "TABLE";
     public static final String VIEW = "VIEW";
+    public static final String ALIAS = "ALIAS";
 
     private Database database;
     private Catalog catalog;

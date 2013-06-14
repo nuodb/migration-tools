@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
@@ -123,7 +124,12 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
             column.setComment(columns.getString("REMARKS"));
             column.setPosition(columns.getInt("FIELDPOSITION"));
             column.setNullable(columns.getInt("FLAGS") == 0);
-            column.setAutoIncrement(columns.getString("GENERATOR_SEQUENCE") != null);
+
+            String sequence = columns.getString("GENERATOR_SEQUENCE");
+            if (sequence != null) {
+                column.setSequence(new Sequence(sequence));
+            }
+            column.setAutoIncrement(sequence != null);
 
             inspectionResults.addObject(column);
         }

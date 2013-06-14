@@ -38,11 +38,10 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 /**
  * @author Sergey Bushik
  */
-public class NuoDBSmallIntValueFormat extends ValueFormatBase<String> {
+public class DB2XmlValueFormat extends ValueFormatBase<String> {
 
     @Override
-    protected ValueVariant doGetValue(JdbcTypeValueAccess<String> access,
-                                      Map<String, Object> accessOptions) throws Exception {
+    protected ValueVariant doGetValue(JdbcTypeValueAccess<String> access, Map<String, Object> accessOptions) throws Exception {
         return string(access.getValue(String.class, accessOptions));
     }
 
@@ -57,4 +56,5 @@ public class NuoDBSmallIntValueFormat extends ValueFormatBase<String> {
     public ValueVariantType getValueType(ValueModel ValueModel) {
         return ValueVariantType.STRING;
     }
+
 }
