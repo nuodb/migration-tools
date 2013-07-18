@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class MetaDataException extends MigrationException {
+public class MetaDataException extends MigratorException {
 
     public MetaDataException(String message) {
         super(message);

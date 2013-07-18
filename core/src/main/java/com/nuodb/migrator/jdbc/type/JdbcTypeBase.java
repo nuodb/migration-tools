@@ -28,6 +28,8 @@
 package com.nuodb.migrator.jdbc.type;
 
 
+import com.nuodb.migrator.jdbc.model.Column;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
@@ -53,11 +55,11 @@ public abstract class JdbcTypeBase<T> implements JdbcType<T> {
         this.valueClass = valueClass;
     }
 
-    protected final int getTypeCode() {
+    public int getTypeCode() {
         return jdbcTypeDesc.getTypeCode();
     }
 
-    protected final String getTypeName() {
+    public String getTypeName() {
         return jdbcTypeDesc.getTypeName();
     }
 
@@ -72,12 +74,12 @@ public abstract class JdbcTypeBase<T> implements JdbcType<T> {
     }
 
     @Override
-    public void setValue(PreparedStatement statement, int column, T value,
-                         JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
+    public void setValue(PreparedStatement statement, int columnIndex, Column column, T value,
+                         Map<String, Object> options) throws SQLException {
         if (value == null) {
-            setNullValue(statement, column);
+            setNullValue(statement, columnIndex, column);
         } else {
-            setNullSafeValue(statement, value, column, specifiers, options);
+            setNullSafeValue(statement, value, columnIndex, column, options);
         }
     }
 
@@ -86,12 +88,11 @@ public abstract class JdbcTypeBase<T> implements JdbcType<T> {
         return options != null ? (T) options.get(option) : null;
     }
 
-    protected void setNullValue(PreparedStatement statement, int column) throws SQLException {
-        statement.setNull(column, getTypeCode());
+    protected void setNullValue(PreparedStatement statement, int columnIndex, Column column) throws SQLException {
+        statement.setNull(columnIndex, jdbcTypeDesc.getTypeCode());
     }
 
-    protected abstract void setNullSafeValue(PreparedStatement statement, T value, int column,
-                                             JdbcTypeSpecifiers specifiers,
+    protected abstract void setNullSafeValue(PreparedStatement statement, T value, int columnIndex, Column column,
                                              Map<String, Object> options) throws SQLException;
 
     @Override

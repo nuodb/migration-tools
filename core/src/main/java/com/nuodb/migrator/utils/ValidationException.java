@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.utils;
 
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 
-public class ValidationException extends MigrationException {
+public class ValidationException extends MigratorException {
 
     public ValidationException(String message) {
         super(message);

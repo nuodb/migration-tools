@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.Properties;
 
 import static com.nuodb.migrator.bootstrap.config.Config.*;
+import static java.lang.System.getProperty;
 
 @SuppressWarnings("unchecked")
 public class PropertiesConfigLoader {
@@ -24,18 +25,18 @@ public class PropertiesConfigLoader {
     }
 
     private static void setHome() {
-        if (System.getProperty(ROOT) != null) {
+        if (getProperty(ROOT) != null) {
             return;
         }
         try {
-            System.setProperty(ROOT, new File(System.getProperty("user.dir"), "..").getCanonicalPath());
+            System.setProperty(ROOT, new File(getProperty("user.dir"), "..").getCanonicalPath());
         } catch (IOException e) {
-            System.setProperty(ROOT, System.getProperty("user.dir"));
+            System.setProperty(ROOT, getProperty("user.dir"));
         }
     }
 
     private static String getHome() {
-        return System.getProperty(ROOT);
+        return getProperty(ROOT);
     }
 
     public Config loadConfig() {
@@ -66,7 +67,7 @@ public class PropertiesConfigLoader {
     private static InputStream getConfigFromProperty() {
         InputStream stream = null;
         try {
-            String config = System.getProperty(CONFIG);
+            String config = getProperty(CONFIG);
             if (config != null) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Attempting to load properties from %s", config));

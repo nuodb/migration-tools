@@ -76,9 +76,9 @@ public class DatabaseInfo implements Comparable<DatabaseInfo> {
         this.majorVersion = majorVersion;
     }
 
-    public DatabaseInfo(DatabaseMetaData databaseMetaData) throws SQLException {
-        this(databaseMetaData.getDatabaseProductName(), databaseMetaData.getDatabaseProductVersion(),
-                databaseMetaData.getDatabaseMajorVersion(), databaseMetaData.getDatabaseMinorVersion());
+    public DatabaseInfo(DatabaseMetaData metaData) throws SQLException {
+        this(metaData.getDatabaseProductName(), metaData.getDatabaseProductVersion(),
+                metaData.getDatabaseMajorVersion(), metaData.getDatabaseMinorVersion());
     }
 
     public String getProductName() {

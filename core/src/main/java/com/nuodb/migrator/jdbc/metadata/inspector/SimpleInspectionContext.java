@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.context.ContextSupport;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
@@ -45,17 +46,20 @@ import static java.lang.String.format;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class SimpleInspectionContext implements InspectionContext {
+public class SimpleInspectionContext extends ContextSupport implements InspectionContext {
 
     protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     private InspectionManager inspectionManager;
+    private Connection connection;
     private InspectionResults inspectionResults;
     private MetaDataType[] objectTypes;
 
-    public SimpleInspectionContext(InspectionManager inspectionManager, InspectionResults inspectionResults,
+    public SimpleInspectionContext(InspectionManager inspectionManager, Connection connection,
+                                   InspectionResults inspectionResults,
                                    MetaDataType... objectTypes) {
         this.inspectionManager = inspectionManager;
+        this.connection = connection;
         this.inspectionResults = inspectionResults;
         this.objectTypes = objectTypes;
     }
@@ -63,22 +67,20 @@ public class SimpleInspectionContext implements InspectionContext {
     @Override
     public Dialect getDialect() throws SQLException {
         DialectResolver dialectResolver = inspectionManager.getDialectResolver();
+        if (dialectResolver == null) {
+            dialectResolver = getService(DialectResolver.class);
+        }
         return dialectResolver.resolve(getConnection());
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return inspectionManager.getConnection();
+        return connection;
     }
 
     @Override
     public InspectionResults getInspectionResults() {
         return inspectionResults;
-    }
-
-    @Override
-    public void setInspectionResults(InspectionResults inspectionResults) {
-        this.inspectionResults = inspectionResults;
     }
 
     @Override
@@ -120,7 +122,7 @@ public class SimpleInspectionContext implements InspectionContext {
     }
 
     @Override
-    public void commit() throws SQLException {
+    public void close() throws SQLException {
         Connection connection = getConnection();
         if (!connection.getAutoCommit()) {
             connection.commit();

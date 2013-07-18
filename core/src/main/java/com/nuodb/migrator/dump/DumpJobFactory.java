@@ -27,20 +27,13 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
+import com.nuodb.migrator.backup.format.FormatFactory;
+import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.context.ContextSupport;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
-import com.nuodb.migrator.jdbc.connection.DriverConnectionSpecProviderFactory;
-import com.nuodb.migrator.jdbc.connection.QueryLoggingConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
+import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.job.JobFactory;
-import com.nuodb.migrator.resultset.catalog.Catalog;
-import com.nuodb.migrator.resultset.catalog.SimpleCatalog;
-import com.nuodb.migrator.resultset.format.FormatFactory;
-import com.nuodb.migrator.resultset.format.SimpleFormatFactory;
-import com.nuodb.migrator.resultset.format.value.SimpleValueFormatRegistryResolver;
-import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
-import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.DumpSpec;
 
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
@@ -49,80 +42,26 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DumpJobFactory implements JobFactory<DumpJob> {
+public class DumpJobFactory extends ContextSupport implements JobFactory<DumpJob> {
 
     private DumpSpec dumpSpec;
 
-    private DialectResolver dialectResolver = new SimpleDialectResolver();
-    private FormatFactory formatFactory = new SimpleFormatFactory();
-    private ValueFormatRegistryResolver valueFormatRegistryResolver = new SimpleValueFormatRegistryResolver();
-    private ConnectionProviderFactory connectionProviderFactory = new QueryLoggingConnectionProviderFactory(
-            new DriverConnectionSpecProviderFactory());
+    public DumpJobFactory(DumpSpec dumpSpec) {
+        isNotNull(dumpSpec, "Dump spec is required");
+        this.dumpSpec = dumpSpec;
+    }
 
     public DumpJob createJob() {
-        isNotNull(getDumpSpec(), "Dump spec is required");
-
-        DumpJob dumpJob = new DumpJob();
-        dumpJob.setConnectionProvider(createConnectionProvider(getDumpSpec().getConnectionSpec()));
-        dumpJob.setOutputType(getDumpSpec().getOutputSpec().getType());
-        dumpJob.setOutputAttributes(getDumpSpec().getOutputSpec().getAttributes());
-        dumpJob.setCatalog(createCatalog(getDumpSpec().getOutputSpec().getPath()));
-        dumpJob.setTimeZone(getDumpSpec().getTimeZone());
-        dumpJob.setSelectQuerySpecs(getDumpSpec().getSelectQuerySpecs());
-        dumpJob.setNativeQuerySpecs(getDumpSpec().getNativeQuerySpecs());
-        dumpJob.setTableTypes(getDumpSpec().getTableTypes());
-        dumpJob.setDialectResolver(getDialectResolver());
-        dumpJob.setFormatFactory(getFormatFactory());
-        dumpJob.setValueFormatRegistryResolver(getValueFormatRegistryResolver());
+        DumpJob dumpJob = new DumpJob(getDumpSpec());
+        dumpJob.setFormatFactory(getService(FormatFactory.class));
+        dumpJob.setDialectResolver(getService(DialectResolver.class));
+        dumpJob.setInspectionManager(getService(InspectionManager.class));
+        dumpJob.setConnectionProviderFactory(getService(ConnectionProviderFactory.class));
+        dumpJob.setValueFormatRegistryResolver(getService(ValueFormatRegistryResolver.class));
         return dumpJob;
-    }
-
-    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return getConnectionProviderFactory().createConnectionProvider(connectionSpec);
-    }
-
-    protected Catalog createCatalog(String path) {
-        return new SimpleCatalog(path);
     }
 
     public DumpSpec getDumpSpec() {
         return dumpSpec;
-    }
-
-    public void setDumpSpec(DumpSpec dumpSpec) {
-        this.dumpSpec = dumpSpec;
-    }
-
-    public DialectResolver getDialectResolver() {
-        return dialectResolver;
-    }
-
-    public void setDialectResolver(DialectResolver dialectResolver) {
-        this.dialectResolver = dialectResolver;
-    }
-
-    public FormatFactory getFormatFactory() {
-        return formatFactory;
-    }
-
-    public void setFormatFactory(FormatFactory formatFactory) {
-        this.formatFactory = formatFactory;
-    }
-
-    public ValueFormatRegistryResolver getValueFormatRegistryResolver() {
-        return valueFormatRegistryResolver;
-    }
-
-    public void setValueFormatRegistryResolver(
-            ValueFormatRegistryResolver valueFormatRegistryResolver) {
-        this.valueFormatRegistryResolver = valueFormatRegistryResolver;
-    }
-
-    public ConnectionProviderFactory getConnectionProviderFactory() {
-        return connectionProviderFactory;
-    }
-
-    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
-        this.connectionProviderFactory = connectionProviderFactory;
     }
 }

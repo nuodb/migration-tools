@@ -88,7 +88,7 @@ public class PostgreSQLSchemaInspector extends InspectorBase<Catalog, SchemaInsp
                     }
                 }, new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
+                    public void process(PreparedStatement statement) throws SQLException {
                         for (SchemaInspectionScope inspectionScope : inspectionScopes) {
                             String schema = inspectionScope.getSchema();
                             statement.setString(1, schema != null ? schema : "%");

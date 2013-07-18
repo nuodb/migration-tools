@@ -101,7 +101,7 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         given(resultSet.getString("GENERATOR_SEQUENCE")).willReturn(autoIncrement ? "sequence" : null);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, COLUMN);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope, COLUMN);
         verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Column> columns = inspectionResults.getObjects(COLUMN);

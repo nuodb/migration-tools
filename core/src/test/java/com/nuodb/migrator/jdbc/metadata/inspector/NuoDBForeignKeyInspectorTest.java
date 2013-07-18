@@ -93,7 +93,7 @@ public class NuoDBForeignKeyInspectorTest extends InspectorTestBase {
         given(resultSet.getInt("DEFERRABILITY")).willReturn(deferrability);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, pkSchemaName, pkTableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, FOREIGN_KEY);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope, FOREIGN_KEY);
         verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<ForeignKey> foreignKeys = inspectionResults.getObjects(FOREIGN_KEY);

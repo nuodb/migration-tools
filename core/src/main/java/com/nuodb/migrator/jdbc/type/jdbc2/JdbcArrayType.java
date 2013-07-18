@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.type.jdbc2;
 
+import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
-import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.*;
 import java.util.Map;
@@ -46,14 +46,14 @@ public class JdbcArrayType extends JdbcTypeBase<Array> {
     }
 
     @Override
-    public Array getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
-                          Map<String, Object> options) throws SQLException {
-        return resultSet.getArray(column);
+    public Array getValue(ResultSet resultSet, int columnIndex,
+                          Column column, Map<String, Object> options) throws SQLException {
+        return resultSet.getArray(columnIndex);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Array value, int column,
-                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
-        statement.setArray(column, value);
+    protected void setNullSafeValue(PreparedStatement statement, Array value, int columnIndex,
+                                    Column column, Map<String, Object> options) throws SQLException {
+        statement.setArray(columnIndex, value);
     }
 }

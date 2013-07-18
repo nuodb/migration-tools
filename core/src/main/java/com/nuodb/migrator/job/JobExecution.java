@@ -45,4 +45,5 @@ public interface JobExecution {
     JobStatus getJobStatus();
 
     Map<Object, Object> getContext();
+
 }

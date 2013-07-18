@@ -80,7 +80,7 @@ public class MySQLIdentityInspectorTest extends InspectorTestBase {
         given(columns.getString("FIELD")).willReturn(columnName);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, null, tableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, IDENTITY);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope, IDENTITY);
         verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Sequence> sequences = inspectionResults.getObjects(IDENTITY);

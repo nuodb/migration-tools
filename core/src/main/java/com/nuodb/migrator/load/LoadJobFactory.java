@@ -27,20 +27,13 @@
  */
 package com.nuodb.migrator.load;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
+import com.nuodb.migrator.backup.format.FormatFactory;
+import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.context.ContextSupport;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
-import com.nuodb.migrator.jdbc.connection.DriverConnectionSpecProviderFactory;
-import com.nuodb.migrator.jdbc.connection.QueryLoggingConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
+import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.job.JobFactory;
-import com.nuodb.migrator.resultset.catalog.Catalog;
-import com.nuodb.migrator.resultset.catalog.SimpleCatalog;
-import com.nuodb.migrator.resultset.format.FormatFactory;
-import com.nuodb.migrator.resultset.format.SimpleFormatFactory;
-import com.nuodb.migrator.resultset.format.value.SimpleValueFormatRegistryResolver;
-import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
-import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.LoadSpec;
 
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
@@ -48,78 +41,27 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 /**
  * @author Sergey Bushik
  */
-public class LoadJobFactory implements JobFactory<LoadJob> {
+public class LoadJobFactory extends ContextSupport implements JobFactory<LoadJob> {
 
     private LoadSpec loadSpec;
 
-    private ConnectionProviderFactory connectionProviderFactory =
-            new QueryLoggingConnectionProviderFactory(new DriverConnectionSpecProviderFactory());
-    private DialectResolver dialectResolver = new SimpleDialectResolver();
-    private FormatFactory formatFactory = new SimpleFormatFactory();
-    private ValueFormatRegistryResolver valueFormatRegistryResolver = new SimpleValueFormatRegistryResolver();
+    public LoadJobFactory(LoadSpec loadSpec) {
+        isNotNull(loadSpec, "Load spec is required");
+        this.loadSpec = loadSpec;
+    }
 
     @Override
     public LoadJob createJob() {
-        isNotNull(getLoadSpec(), "Load spec is required");
-
-        LoadJob loadJob = new LoadJob();
-        loadJob.setConnectionProvider(createConnectionProvider(getLoadSpec().getConnectionSpec()));
-        loadJob.setInputAttributes(getLoadSpec().getInputSpec().getAttributes());
-        loadJob.setCatalog(createCatalog(getLoadSpec().getInputSpec().getPath()));
-        loadJob.setTimeZone(getLoadSpec().getTimeZone());
-        loadJob.setInsertType(getLoadSpec().getInsertType());
-        loadJob.setTableInsertTypes(getLoadSpec().getTableInsertTypes());
-        loadJob.setDialectResolver(getDialectResolver());
-        loadJob.setFormatFactory(getFormatFactory());
-        loadJob.setValueFormatRegistryResolver(getValueFormatRegistryResolver());
+        LoadJob loadJob = new LoadJob(getLoadSpec());
+        loadJob.setFormatFactory(getService(FormatFactory.class));
+        loadJob.setDialectResolver(getService(DialectResolver.class));
+        loadJob.setInspectionManager(getService(InspectionManager.class));
+        loadJob.setConnectionProviderFactory(getService(ConnectionProviderFactory.class));
+        loadJob.setValueFormatRegistryResolver(getService(ValueFormatRegistryResolver.class));
         return loadJob;
-    }
-
-    protected ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec) {
-        return getConnectionProviderFactory().createConnectionProvider(connectionSpec);
-    }
-
-    public Catalog createCatalog(String path) {
-        return new SimpleCatalog(path);
     }
 
     public LoadSpec getLoadSpec() {
         return loadSpec;
-    }
-
-    public void setLoadSpec(LoadSpec loadSpec) {
-        this.loadSpec = loadSpec;
-    }
-
-    public ConnectionProviderFactory getConnectionProviderFactory() {
-        return connectionProviderFactory;
-    }
-
-    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
-        this.connectionProviderFactory = connectionProviderFactory;
-    }
-
-    public DialectResolver getDialectResolver() {
-        return dialectResolver;
-    }
-
-    public void setDialectResolver(DialectResolver dialectResolver) {
-        this.dialectResolver = dialectResolver;
-    }
-
-    public FormatFactory getFormatFactory() {
-        return formatFactory;
-    }
-
-    public void setFormatFactory(FormatFactory formatFactory) {
-        this.formatFactory = formatFactory;
-    }
-
-    public ValueFormatRegistryResolver getValueFormatRegistryResolver() {
-        return valueFormatRegistryResolver;
-    }
-
-    public void setValueFormatRegistryResolver(ValueFormatRegistryResolver valueFormatRegistryResolver) {
-        this.valueFormatRegistryResolver = valueFormatRegistryResolver;
     }
 }

@@ -27,8 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.type.jdbc2;
 
+import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcType;
-import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.*;
 import java.util.Calendar;
@@ -46,24 +46,24 @@ public class JdbcTimestampType extends JdbcDateTypeBase<Timestamp> {
     }
 
     @Override
-    public Timestamp getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
-                              Map<String, Object> options) throws SQLException {
+    public Timestamp getValue(ResultSet resultSet, int columnIndex,
+                              Column column, Map<String, Object> options) throws SQLException {
         Calendar calendar = getCalendar(options);
         if (calendar != null) {
-            return resultSet.getTimestamp(column, calendar);
+            return resultSet.getTimestamp(columnIndex, calendar);
         } else {
-            return resultSet.getTimestamp(column);
+            return resultSet.getTimestamp(columnIndex);
         }
     }
 
     @Override
     protected void setNullSafeValue(PreparedStatement statement, Timestamp value,
-                                    int column, JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
+                                    int columnIndex, Column column, Map<String, Object> options) throws SQLException {
         Calendar calendar = getCalendar(options);
         if (calendar == null) {
-            statement.setTimestamp(column, value);
+            statement.setTimestamp(columnIndex, value);
         } else {
-            statement.setTimestamp(column, value, calendar);
+            statement.setTimestamp(columnIndex, value, calendar);
         }
     }
 }

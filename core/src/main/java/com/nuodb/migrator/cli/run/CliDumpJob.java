@@ -35,8 +35,8 @@ import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.dump.DumpJobFactory;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.spec.DumpSpec;
-import com.nuodb.migrator.spec.NativeQuerySpec;
-import com.nuodb.migrator.spec.SelectQuerySpec;
+import com.nuodb.migrator.spec.QuerySpec;
+import com.nuodb.migrator.spec.TableSpec;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -46,7 +46,6 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newLinkedHashSet;
-import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
 
@@ -64,17 +63,17 @@ public class CliDumpJob extends CliRunJob {
     public static final String COMMAND = "dump";
 
     public CliDumpJob() {
-        super(COMMAND, new DumpJobFactory());
+        super(COMMAND);
     }
 
     @Override
     protected Option createOption() {
         return newGroupBuilder()
-                .withName(getResources().getMessage(DUMP_GROUP_NAME))
+                .withName(getMessage(DUMP_GROUP_NAME))
                 .withOption(createSourceGroup())
                 .withOption(createOutputGroup())
                 .withOption(createTableGroup())
-                .withOption(createNativeQueryGroup())
+                .withOption(createQueryGroup())
                 .withOption(createTimeZoneOption())
                 .withRequired(true).build();
     }
@@ -84,11 +83,11 @@ public class CliDumpJob extends CliRunJob {
         DumpSpec dumpSpec = new DumpSpec();
         dumpSpec.setConnectionSpec(parseSourceGroup(optionSet, this));
         dumpSpec.setOutputSpec(parseOutputGroup(optionSet, this));
-        dumpSpec.setNativeQuerySpecs(parseNativeQueryGroup(optionSet));
+        dumpSpec.setQuerySpecs(parseQueryGroup(optionSet));
         dumpSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
         parseTableGroup(optionSet, dumpSpec);
 
-        ((DumpJobFactory) getJobFactory()).setDumpSpec(dumpSpec);
+        setJobFactory(new DumpJobFactory(dumpSpec));
     }
 
     /**
@@ -146,23 +145,23 @@ public class CliDumpJob extends CliRunJob {
         }
         dumpSpec.setTableTypes(tableTypes.toArray(new String[tableTypes.size()]));
 
-        Map<String, SelectQuerySpec> tableQueryMapping = newHashMap();
+        Map<String, TableSpec> tableQueryMapping = newHashMap();
         for (String table : optionSet.<String>getValues(TABLE_OPTION)) {
-            tableQueryMapping.put(table, new SelectQuerySpec(table));
+            tableQueryMapping.put(table, new TableSpec(table));
         }
         for (Iterator<String> iterator = optionSet.<String>getValues(
                 TABLE_FILTER_OPTION).iterator(); iterator.hasNext(); ) {
             String name = iterator.next();
-            SelectQuerySpec selectQuerySpec = tableQueryMapping.get(name);
-            if (selectQuerySpec == null) {
-                tableQueryMapping.put(name, selectQuerySpec = new SelectQuerySpec(name));
+            TableSpec tableSpec = tableQueryMapping.get(name);
+            if (tableSpec == null) {
+                tableQueryMapping.put(name, tableSpec = new TableSpec(name));
             }
-            selectQuerySpec.setFilter(iterator.next());
+            tableSpec.setFilter(iterator.next());
         }
-        dumpSpec.setSelectQuerySpecs(tableQueryMapping.values());
+        dumpSpec.setTableSpecs(tableQueryMapping.values());
     }
 
-    protected Option createNativeQueryGroup() {
+    protected Option createQueryGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(MAX_VALUE);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
@@ -175,6 +174,7 @@ public class CliDumpJob extends CliRunJob {
                         newArgumentBuilder().
                                 withName(getMessage(QUERY_ARGUMENT_NAME)).
                                 withMinimum(1).
+                                withMaximum(MAX_VALUE).
                                 withOptionFormat(optionFormat).
                                 withRequired(true).build()
                 ).build();
@@ -183,11 +183,11 @@ public class CliDumpJob extends CliRunJob {
         return group.build();
     }
 
-    protected Collection<NativeQuerySpec> parseNativeQueryGroup(OptionSet optionSet) {
-        List<NativeQuerySpec> nativeQuerySpecs = newArrayList();
+    protected Collection<QuerySpec> parseQueryGroup(OptionSet optionSet) {
+        List<QuerySpec> querySpecs = newArrayList();
         for (String query : optionSet.<String>getValues(QUERY_OPTION)) {
-            nativeQuerySpecs.add(new NativeQuerySpec(query));
+            querySpecs.add(new QuerySpec(query));
         }
-        return nativeQuerySpecs;
+        return querySpecs;
     }
 }

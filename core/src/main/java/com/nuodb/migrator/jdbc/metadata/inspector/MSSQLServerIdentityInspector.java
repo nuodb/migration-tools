@@ -80,7 +80,7 @@ public class MSSQLServerIdentityInspector extends TableInspectorBase<Table, Tabl
                     },
                     new StatementCallback<PreparedStatement>() {
                         @Override
-                        public void execute(PreparedStatement statement) throws SQLException {
+                        public void process(PreparedStatement statement) throws SQLException {
                             int index = 1;
                             for (String parameter : parameters) {
                                 statement.setString(index++, parameter);

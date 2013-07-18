@@ -80,7 +80,7 @@ public class MSSQLServerCheckInspector extends TableInspectorBase<Table, TableIn
                     },
                     new StatementCallback<PreparedStatement>() {
                         @Override
-                        public void execute(PreparedStatement statement) throws SQLException {
+                        public void process(PreparedStatement statement) throws SQLException {
                             int parameter = 1;
                             for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
                                 statement.setString(parameter++, iterator.next());

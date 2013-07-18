@@ -34,7 +34,7 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
  */
 public interface ScriptTranslator {
 
-    boolean canTranslateScript(Script sourceScript, DatabaseInfo targetDatabaseInfo);
+    boolean canTranslateScript(Script script, DatabaseInfo targetDatabaseInfo);
 
-    Script translateScript(Script sourceScript, DatabaseInfo targetDatabaseInfo);
+    Script translateScript(Script script, DatabaseInfo targetDatabaseInfo);
 }

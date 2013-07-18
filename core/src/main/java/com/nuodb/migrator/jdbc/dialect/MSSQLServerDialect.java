@@ -27,13 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Types;
 
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
+import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.lang.String.valueOf;
 
 /**
@@ -77,23 +78,33 @@ public class MSSQLServerDialect extends SimpleDialect {
     }
 
     @Override
-    protected RowCountQuery createRowCountApproxQuery(Table table) {
-        String catalog = table.getCatalog().getName() + ".";
+    public boolean supportsRowCount(Table table, Column column, String filter, RowCountType rowCountType) {
+        return (rowCountType == APPROX && column == null && filter == null) || rowCountType == EXACT;
+    }
 
-        SelectQuery selectQuery = new SelectQuery();
-        selectQuery.column("I.ROWCNT");
-        selectQuery.from(catalog + "SYS.SYSINDEXES AS I");
-        selectQuery.innerJoin(catalog + "SYS.TABLES AS T", "I.ID=T.OBJECT_ID");
-        selectQuery.innerJoin(catalog + "SYS.SCHEMAS AS S", "T.SCHEMA_ID=S.SCHEMA_ID");
-        selectQuery.where("I.INDID < 2");
-        selectQuery.where("T.IS_MS_SHIPPED=0");
-        selectQuery.where("S.NAME='" + table.getSchema().getName() + "'");
-        selectQuery.where("T.NAME='" + table.getName() + "'");
+    @Override
+    public boolean supportsLimit() {
+        return true;
+    }
 
-        RowCountQuery rowCountQuery = new RowCountQuery();
-        rowCountQuery.setTable(table);
-        rowCountQuery.setRowCountType(APPROX);
-        rowCountQuery.setQuery(selectQuery);
-        return rowCountQuery;
+    @Override
+    public boolean supportsLimitOffset() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsLimitParameters() {
+        return true;
+    }
+
+    @Override
+    public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
+        return new MSSQLServerLimitHandler(this, query, queryLimit);
+    }
+
+    @Override
+    public RowCountHandler createRowCountHandler(Table table, Column column, String filter,
+                                                      RowCountType rowCountType) {
+        return new MSSQLServerTableRowCountHandler(this, table, column, filter, rowCountType);
     }
 }

@@ -27,28 +27,28 @@
  */
 package com.nuodb.migrator.spec;
 
-import com.google.common.collect.Lists;
+import java.util.Collection;
 
-import java.util.List;
+import static com.google.common.collect.Lists.newArrayList;
 
-public class MigratorSpec {
+public class MigratorSpec extends SpecBase {
 
-    private List<? extends ConnectionSpec> connectionSpecs = Lists.newArrayList();
-    private List<? extends JobSpec> taskSpecs = Lists.newArrayList();
+    private Collection<ConnectionSpec> connectionSpecs = newArrayList();
+    private Collection<JobSpec> jobSpecs = newArrayList();
 
-    public List<? extends ConnectionSpec> getConnectionSpecs() {
+    public Collection<ConnectionSpec> getConnectionSpecs() {
         return connectionSpecs;
     }
 
-    public void setConnectionSpecs(List<? extends ConnectionSpec> connectionSpecs) {
+    public void setConnectionSpecs(Collection<ConnectionSpec> connectionSpecs) {
         this.connectionSpecs = connectionSpecs;
     }
 
-    public List<? extends JobSpec> getTaskSpecs() {
-        return taskSpecs;
+    public Collection<JobSpec> getJobSpecs() {
+        return jobSpecs;
     }
 
-    public void setTaskSpecs(List<? extends JobSpec> taskSpecs) {
-        this.taskSpecs = taskSpecs;
+    public void setJobSpecs(Collection<JobSpec> jobSpecs) {
+        this.jobSpecs = jobSpecs;
     }
 }

@@ -70,17 +70,17 @@ public class QueryBuilderTest {
     public void testInsertQueryBuilder(Table table, Dialect dialect, boolean qualifyNames, InsertType insertType,
                                        String query) {
         InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder();
-        insertQueryBuilder.setTable(table);
-        insertQueryBuilder.setDialect(dialect);
-        insertQueryBuilder.setQualifyNames(qualifyNames);
-        insertQueryBuilder.setInsertType(insertType);
+        insertQueryBuilder.into(table);
+        insertQueryBuilder.dialect(dialect);
+        insertQueryBuilder.qualifyNames(qualifyNames);
+        insertQueryBuilder.insertType(insertType);
         InsertQuery insertQuery = insertQueryBuilder.build();
 
         assertNotNull(insertQuery);
         assertEquals(insertQuery.getInsertType(), insertType);
         assertEquals(insertQuery.getDialect(), dialect);
         assertEquals(insertQuery.getColumns().keySet(), table.getColumns());
-        assertEquals(insertQuery.toQuery(), query);
+        assertEquals(insertQuery.toString(), query);
     }
 
     @DataProvider(name = "selectQueryBuilder")
@@ -104,16 +104,12 @@ public class QueryBuilderTest {
     @Test(dataProvider = "selectQueryBuilder")
     public void testSelectQueryBuilder(Table table, Dialect dialect, boolean qualifyNames, Collection<String> filters,
                                        String query) {
-        SelectQueryBuilder selectQueryBuilder = new SelectQueryBuilder();
-        selectQueryBuilder.setTable(table);
-        selectQueryBuilder.setDialect(dialect);
-        selectQueryBuilder.setQualifyNames(qualifyNames);
-        selectQueryBuilder.setFilters(filters);
-        SelectQuery selectQuery = selectQueryBuilder.build();
+        SelectQuery selectQuery = new SelectQueryBuilder().dialect(dialect).qualifyNames(
+                qualifyNames).from(table).filters(filters).build();
 
         assertNotNull(selectQuery);
         assertEquals(selectQuery.getDialect(), dialect);
         assertEquals(selectQuery.getColumns(), table.getColumns());
-        assertEquals(selectQuery.toQuery(), query);
+        assertEquals(selectQuery.toString(), query);
     }
 }

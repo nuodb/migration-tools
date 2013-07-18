@@ -85,7 +85,7 @@ public class OracleCheckInspector extends TableInspectorBase<Table, TableInspect
                 new StatementCallback<PreparedStatement>() {
 
                     @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
+                    public void process(PreparedStatement statement) throws SQLException {
                         for (TableInspectionScope inspectionScope : inspectionScopes) {
                             statement.setString(1, CONSTRAINT_TYPE_CHECK);
                             statement.setString(2, STATUS_ENABLED);

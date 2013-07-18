@@ -7,6 +7,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.sql.Connection;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Matchers.any;
@@ -26,13 +28,14 @@ public class InspectionManagerTest {
     public void setUp() throws Exception {
         inspectionManager = spy(new InspectionManager());
 
-        given(inspectionManager.createInspectionContext(any(InspectionResults.class), (MetaDataType[]) anyVararg())).
+        given(inspectionManager.createInspectionContext(
+                any(Connection.class), any(InspectionResults.class), (MetaDataType[]) anyVararg())).
                 will(new Answer<InspectionContext>() {
                     @Override
                     public InspectionContext answer(InvocationOnMock invocation) throws Throwable {
                         InspectionContext inspectionContext =
                                 (InspectionContext) spy(invocation.callRealMethod());
-                        willDoNothing().given(inspectionContext).commit();
+                        willDoNothing().given(inspectionContext).close();
                         return inspectionContext;
                     }
                 });
@@ -63,7 +66,7 @@ public class InspectionManagerTest {
 
         inspectionManager.addInspector(inspector);
 
-        assertNotNull(inspectionManager.inspect(objectType));
+        assertNotNull(inspectionManager.inspect(mock(Connection.class), objectType));
         verify(inspector).inspectScope(any(InspectionContext.class), any(InspectionScope.class));
     }
 }

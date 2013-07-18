@@ -88,7 +88,7 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
+                    public void process(PreparedStatement statement) throws SQLException {
                         for (TableInspectionScope inspectionScope : inspectionScopes) {
                             statement.setString(1, inspectionScope.getSchema());
                             statement.setString(2, inspectionScope.getTable());
@@ -111,7 +111,7 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
             Table table = addTable(inspectionResults, null, columns.getString("SCHEMA"), columns.getString("TABLENAME"));
 
             Column column = table.addColumn(columns.getString("FIELD"));
-            JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeDescAlias(
+            JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeAlias(
                     columns.getInt("JDBCTYPE"), columns.getString("NAME"));
             column.setTypeCode(typeDescAlias.getTypeCode());
             column.setTypeName(typeDescAlias.getTypeName());

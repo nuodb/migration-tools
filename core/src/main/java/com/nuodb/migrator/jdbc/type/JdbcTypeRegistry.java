@@ -35,13 +35,15 @@ import java.util.Map;
  */
 public interface JdbcTypeRegistry {
 
-    void addJdbcType(JdbcType type);
-
     JdbcType getJdbcType(int typeCode);
 
     JdbcType getJdbcType(int typeCode, String typeName);
 
     JdbcType getJdbcType(JdbcTypeDesc jdbcTypeDesc);
+
+    JdbcType getJdbcType(JdbcTypeDesc jdbcTypeDesc, boolean required);
+
+    void addJdbcType(JdbcType type);
 
     void addJdbcTypes(Collection<JdbcType> jdbcTypes);
 
@@ -49,25 +51,28 @@ public interface JdbcTypeRegistry {
 
     Collection<JdbcType> getJdbcTypes();
 
+    JdbcTypeAdapter getJdbcTypeAdapter(Class valueClass);
+
+    JdbcTypeAdapter getJdbcTypeAdapter(Class valueClass, Class typeClass);
+
     void addJdbcTypeAdapter(JdbcTypeAdapter jdbcTypeAdapter);
 
     void addJdbcTypeAdapters(Collection<JdbcTypeAdapter> jdbcTypeAdapters);
 
     Collection<JdbcTypeAdapter> getJdbcTypeAdapters();
 
-    JdbcTypeAdapter getJdbcTypeAdapter(Class valueClass);
+    JdbcTypeDesc getJdbcTypeAlias(int typeCode);
 
-    void addJdbcTypeDescAlias(int typeCode, int typeCodeAlias);
+    JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName);
 
-    void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias);
+    JdbcTypeDesc getJdbcTypeAlias(JdbcTypeDesc jdbcTypeDesc);
 
-    void addJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc, JdbcTypeDesc jdbcTypeDescAlias);
+    void addJdbcTypeAlias(int typeCode, int typeAlias);
 
-    JdbcTypeDesc getJdbcTypeDescAlias(int typeCode);
+    void addJdbcTypeAlias(int typeCode, String typeName, int typeAlias);
 
-    JdbcTypeDesc getJdbcTypeDescAlias(int typeCode, String typeName);
+    void addJdbcTypeAlias(JdbcTypeDesc jdbcTypeDesc, JdbcTypeDesc jdbcTypeAlias);
 
-    JdbcTypeDesc getJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc);
+    Map<JdbcTypeDesc, JdbcTypeDesc> getJdbcTypeAliases();
 
-    Map<JdbcTypeDesc, JdbcTypeDesc> getJdbcTypeDescAliases();
 }

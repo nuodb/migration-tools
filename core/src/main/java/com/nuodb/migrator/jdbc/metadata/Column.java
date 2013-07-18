@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.collect.Sets;
-import com.nuodb.migrator.jdbc.model.ValueModel;
 
 import java.util.Set;
 
@@ -36,7 +35,7 @@ import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.upperCase;
 
-public class Column extends IdentifiableBase implements ValueModel {
+public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.model.Column {
 
     /**
      * Default precision is maximum value
@@ -54,7 +53,7 @@ public class Column extends IdentifiableBase implements ValueModel {
      */
     private String typeName;
     /**
-     * Holds column size.
+     * Holds value size.
      */
     private int size;
     /**
@@ -67,19 +66,19 @@ public class Column extends IdentifiableBase implements ValueModel {
      */
     private int scale = DEFAULT_SCALE;
     /**
-     * Contains column remarks, may be null.
+     * Contains value remarks, may be null.
      */
     private String comment;
     /**
-     * Ordinal position of column in table, starting at 1.
+     * Ordinal position of value in table, starting at 1.
      */
     private int position;
     /**
-     * Determines the nullability for a column.
+     * Determines the nullability for a value.
      */
     private boolean nullable;
     /**
-     * Indicates whether this column is auto incremented.
+     * Indicates whether this value is auto incremented.
      */
     private boolean autoIncrement;
     /**
@@ -141,6 +140,16 @@ public class Column extends IdentifiableBase implements ValueModel {
         this.scale = scale;
     }
 
+    @Override
+    public int getPosition() {
+        return position;
+    }
+
+    @Override
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
     public Table getTable() {
         return table;
     }
@@ -166,14 +175,6 @@ public class Column extends IdentifiableBase implements ValueModel {
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public int getPosition() {
-        return position;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
     }
 
     public boolean isNullable() {
@@ -232,17 +233,17 @@ public class Column extends IdentifiableBase implements ValueModel {
     }
 
     @Override
-    public ValueModel asValueModel() {
+    public com.nuodb.migrator.jdbc.model.Column asColumn() {
         return this;
     }
 
     @Override
-    public void fromValueModel(ValueModel valueModel) {
-        setName(valueModel.getName());
-        setTypeName(valueModel.getTypeName());
-        setTypeCode(valueModel.getTypeCode());
-        setPrecision(valueModel.getPrecision());
-        setScale(valueModel.getScale());
+    public void fromColumn(com.nuodb.migrator.jdbc.model.Column column) {
+        setName(column.getName());
+        setTypeName(column.getTypeName());
+        setTypeCode(column.getTypeCode());
+        setPrecision(column.getPrecision());
+        setScale(column.getScale());
     }
 
     @Override

@@ -39,5 +39,5 @@ public interface ConnectionServices<C extends ConnectionSpec> extends HasConnect
 
     Connection getConnection() throws SQLException;
 
-    void closeConnection() throws SQLException;
+    void close() throws SQLException;
 }

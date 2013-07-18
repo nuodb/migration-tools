@@ -30,9 +30,10 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.ColumnFactory;
+import com.nuodb.migrator.jdbc.model.ColumnList;
 import com.nuodb.migrator.jdbc.metadata.Catalog;
-import com.nuodb.migrator.jdbc.model.ValueModel;
-import com.nuodb.migrator.jdbc.model.ValueModelList;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -42,7 +43,6 @@ import java.util.Collection;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
-import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModelList;
 import static java.util.Collections.singleton;
 
 /**
@@ -79,11 +79,11 @@ public class SimpleSchemaInspector extends InspectorBase<Catalog, SchemaInspecti
             DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
             ResultSet schemas = inspectionScope.getCatalog() != null ?
                     databaseMetaData.getSchemas(inspectionScope.getCatalog(), null) : databaseMetaData.getSchemas();
-            ValueModelList<ValueModel> columns = createValueModelList(schemas);
+            ColumnList<Column> columnModels = ColumnFactory.createColumnList(schemas);
             try {
                 while (schemas.next()) {
                     addSchema(inspectionResults,
-                            columns.get("TABLE_CATALOG") != null ? schemas.getString("TABLE_CATALOG") : null,
+                            columnModels.get("TABLE_CATALOG") != null ? schemas.getString("TABLE_CATALOG") : null,
                             schemas.getString("TABLE_SCHEM"));
                 }
             } finally {

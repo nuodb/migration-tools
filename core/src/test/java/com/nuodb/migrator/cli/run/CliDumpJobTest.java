@@ -30,7 +30,7 @@ package com.nuodb.migrator.cli.run;
 import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.dump.DumpJobFactory;
-import com.nuodb.migrator.resultset.format.csv.CsvAttributes;
+import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.spec.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -117,11 +117,11 @@ public class CliDumpJobTest {
         outputSpec.setAttributes(attributes);
 
         dumpSpec.setOutputSpec(outputSpec);
-        dumpSpec.setSelectQuerySpecs(asList(
-                new SelectQuerySpec("users"),
-                new SelectQuerySpec("users_roles", "role_id in (1,2,3,4,5)")
+        dumpSpec.setTableSpecs(asList(
+                new TableSpec("users"),
+                new TableSpec("users_roles", "role_id in (1,2,3,4,5)")
         ));
-        dumpSpec.setNativeQuerySpecs(asList(new NativeQuerySpec("SELECT id, name, definition FROM definitions")));
+        dumpSpec.setQuerySpecs(asList(new QuerySpec("SELECT id, name, definition FROM definitions")));
         dumpSpec.setTableTypes(new String[]{"TABLE", "SYSTEM TABLE"});
         dumpSpec.setTimeZone(TimeZone.getTimeZone("GMT"));
         return dumpSpec;

@@ -27,14 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.type.jdbc2;
 
+import com.nuodb.migrator.jdbc.type.SimpleJdbcTypeRegistry;
 import com.nuodb.migrator.jdbc.type.JdbcTypeRegistry;
-import com.nuodb.migrator.jdbc.type.JdbcTypeRegistryBase;
 import com.nuodb.migrator.jdbc.type.adapter.*;
 
 /**
  * @author Sergey Bushik
  */
-public class Jdbc2TypeRegistry extends JdbcTypeRegistryBase {
+public class Jdbc2TypeRegistry extends SimpleJdbcTypeRegistry {
 
     public static final JdbcTypeRegistry INSTANCE = new Jdbc2TypeRegistry();
 

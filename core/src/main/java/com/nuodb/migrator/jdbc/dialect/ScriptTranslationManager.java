@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -40,17 +41,32 @@ public class ScriptTranslationManager {
 
     private Collection<ScriptTranslator> scriptTranslators = newHashSet();
 
-    public Script translateScript(Script sourceScript, DatabaseInfo targetDatabaseInfo) {
-        Script targetScript = null;
-        for (ScriptTranslator scriptTranslator : getScriptTranslators()) {
-            if (scriptTranslator.canTranslateScript(sourceScript, targetDatabaseInfo)) {
-                targetScript = scriptTranslator.translateScript(sourceScript, targetDatabaseInfo);
-            }
-            if (targetScript != null) {
-                break;
-            }
-        }
-        return targetScript;
+    public void addScriptTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript,
+                                     DatabaseInfo targetDatabaseInfo, String targetScript) {
+        PatternScriptTranslator scriptTranslator = new PatternScriptTranslator(sourceDatabaseInfo, targetDatabaseInfo);
+        scriptTranslator.addScriptTranslation(sourceScript, targetScript);
+        addScriptTranslator(scriptTranslator);
+    }
+
+    public void addScriptTranslations(DatabaseInfo sourceDatabaseInfo, Collection<String> sourceScripts,
+                                      DatabaseInfo targetDatabaseInfo, String targetScript) {
+        PatternScriptTranslator scriptTranslator = new PatternScriptTranslator(sourceDatabaseInfo, targetDatabaseInfo);
+        scriptTranslator.addScriptTranslations(sourceScripts, targetScript);
+        addScriptTranslator(scriptTranslator);
+    }
+
+    public void addScriptTranslationRegex(DatabaseInfo sourceDatabaseInfo, String sourceScript,
+                                          DatabaseInfo targetDatabaseInfo, String targetScript) {
+        PatternScriptTranslator scriptTranslator = new PatternScriptTranslator(sourceDatabaseInfo, targetDatabaseInfo);
+        scriptTranslator.addScriptTranslationRegex(sourceScript, targetScript);
+        addScriptTranslator(scriptTranslator);
+    }
+
+    public void addScriptTranslationPattern(DatabaseInfo sourceDatabaseInfo, Pattern sourceScript,
+                                            DatabaseInfo targetDatabaseInfo, String targetScript) {
+        PatternScriptTranslator scriptTranslator = new PatternScriptTranslator(sourceDatabaseInfo, targetDatabaseInfo);
+        scriptTranslator.addScriptTranslationPattern(sourceScript, targetScript);
+        addScriptTranslator(scriptTranslator);
     }
 
     public void addScriptTranslator(ScriptTranslator scriptTranslator) {
@@ -63,6 +79,19 @@ public class ScriptTranslationManager {
 
     public void setScriptTranslators(Collection<ScriptTranslator> scriptTranslators) {
         this.scriptTranslators = scriptTranslators;
+    }
+
+    public Script translateScript(Script sourceScript, DatabaseInfo targetDatabaseInfo) {
+        Script targetScript = null;
+        for (ScriptTranslator scriptTranslator : getScriptTranslators()) {
+            if (scriptTranslator.canTranslateScript(sourceScript, targetDatabaseInfo)) {
+                targetScript = scriptTranslator.translateScript(sourceScript, targetDatabaseInfo);
+            }
+            if (targetScript != null) {
+                break;
+            }
+        }
+        return targetScript;
     }
 
     @Override

@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionException extends MigrationException {
+public class ConnectionException extends MigratorException {
 
     public ConnectionException(String message) {
         super(message);

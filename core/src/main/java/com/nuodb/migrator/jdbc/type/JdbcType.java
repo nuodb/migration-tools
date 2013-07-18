@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import com.nuodb.migrator.jdbc.model.Column;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,9 +43,7 @@ public interface JdbcType<T> {
 
     Class<? extends T> getValueClass();
 
-    T getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
-               Map<String, Object> options) throws SQLException;
+    T getValue(ResultSet resultSet, int columnIndex, Column column, Map<String, Object> options) throws SQLException;
 
-    void setValue(PreparedStatement statement, int column, T value, JdbcTypeSpecifiers specifiers,
-                  Map<String, Object> options) throws SQLException;
+    void setValue(PreparedStatement statement, int columnIndex, Column column, T value, Map<String, Object> options) throws SQLException;
 }

@@ -121,12 +121,12 @@ import java.util.*;
  * aggressively simplified form</b>, in which : <ul> <li>the Gregorian calendar is extended back in time as if it was in
  * use previous to its inception (the 'proleptic' Gregorian calendar) <li>the transition between Julian and Gregorian
  * calendars is entirely ignored <li>leap seconds are entirely ignored <li>summer hours are entirely ignored <li>often,
- * even time zones are ignored, in the sense that <i>the underlying database column doesn't usually explicitly store any
+ * even time zones are ignored, in the sense that <i>the underlying database value doesn't usually explicitly store any
  * time zone information</i>. </ul>
  * <p/>
  * <P><a name='NoTimeZoneInDb'></a>The final point requires elaboration. Some may doubt its veracity, since they have
  * seen date-time information "change time zone" when retrieved from a database. But this sort of change is usually
- * applied using logic which is <i>external</i> to the data stored in the particular column.
+ * applied using logic which is <i>external</i> to the data stored in the particular value.
  * <p/>
  * <P> For example, the following items might be used in the calculation of a time zone difference : <ul> <li>time zone
  * setting for the client (or JDBC driver) <li>time zone setting for the client's connection to the database server

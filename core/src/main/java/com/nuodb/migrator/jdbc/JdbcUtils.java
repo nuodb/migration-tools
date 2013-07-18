@@ -73,7 +73,7 @@ public class JdbcUtils {
     public static void close(ConnectionServices connectionServices) {
         try {
             if (connectionServices != null) {
-                connectionServices.closeConnection();
+                connectionServices.close();
             }
         } catch (SQLException exception) {
             if (logger.isWarnEnabled()) {

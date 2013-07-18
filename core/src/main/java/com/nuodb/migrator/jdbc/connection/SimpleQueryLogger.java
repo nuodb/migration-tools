@@ -41,9 +41,9 @@ public class SimpleQueryLogger implements QueryLogger {
     }
 
     @Override
-    public void log(String statement) {
+    public void log(String query) {
         if (logger.isTraceEnabled()) {
-            logger.trace(statement);
+            logger.trace(query);
         }
     }
 }

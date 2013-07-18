@@ -27,64 +27,52 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.utils.ObjectUtils;
 
 /**
  * @author Sergey Bushik
  */
 public class RowCountQuery {
 
-    private Table table;
     private Query query;
-    private Column column;
     private RowCountType rowCountType;
 
-    public RowCountQuery() {
-    }
-
-    public RowCountQuery(RowCountQuery rowCountQuery) {
-        this(rowCountQuery.getTable(), rowCountQuery.getQuery(), rowCountQuery.getColumn(),
-                rowCountQuery.getRowCountType());
-    }
-
-    public RowCountQuery(Table table, Query query, Column column, RowCountType rowCountType) {
-        this.table = table;
+    public RowCountQuery(Query query, RowCountType rowCountType) {
         this.query = query;
-        this.column = column;
         this.rowCountType = rowCountType;
-    }
-
-    public Table getTable() {
-        return table;
-    }
-
-    public void setTable(Table table) {
-        this.table = table;
     }
 
     public Query getQuery() {
         return query;
     }
 
-    public void setQuery(Query query) {
-        this.query = query;
-    }
-
-    public Column getColumn() {
-        return column;
-    }
-
-    public void setColumn(Column column) {
-        this.column = column;
-    }
-
     public RowCountType getRowCountType() {
         return rowCountType;
     }
 
-    public void setRowCountType(RowCountType rowCountType) {
-        this.rowCountType = rowCountType;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof RowCountQuery)) return false;
+
+        RowCountQuery that = (RowCountQuery) o;
+
+        if (query != null ? !query.equals(that.query) : that.query != null) return false;
+        if (rowCountType != that.rowCountType) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = query != null ? query.hashCode() : 0;
+        result = 31 * result + (rowCountType != null ? rowCountType.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

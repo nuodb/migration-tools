@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeException extends MigrationException {
+public class JdbcTypeException extends MigratorException {
 
     public JdbcTypeException(String message) {
         super(message);

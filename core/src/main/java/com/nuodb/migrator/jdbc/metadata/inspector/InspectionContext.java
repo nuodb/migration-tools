@@ -46,8 +46,6 @@ public interface InspectionContext {
 
     InspectionResults getInspectionResults();
 
-    void setInspectionResults(InspectionResults inspectionResults);
-
     void inspect(InspectionScope scope) throws SQLException;
 
     void inspect(InspectionScope scope, MetaDataType... objectTypes) throws SQLException;
@@ -58,5 +56,5 @@ public interface InspectionContext {
 
     void inspect(Collection<MetaData> objects, MetaDataType... objectTypes) throws SQLException;
 
-    void commit() throws SQLException;
+    void close() throws SQLException;
 }

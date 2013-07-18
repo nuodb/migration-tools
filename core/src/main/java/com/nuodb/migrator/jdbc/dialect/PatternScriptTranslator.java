@@ -35,8 +35,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.quote;
 
 /**
  * @author Sergey Bushik
@@ -57,7 +57,7 @@ public class PatternScriptTranslator extends ScriptTranslatorBase {
     }
 
     public void addScriptTranslation(String sourceScript, String targetScript) {
-        addScriptTranslationRegex("^" + Pattern.quote(sourceScript) + "$", targetScript);
+        addScriptTranslationRegex("^(?i)" + quote(sourceScript) + "$", targetScript);
     }
 
     public void addScriptTranslations(Collection<String> sourceScripts, String targetScript) {
@@ -67,11 +67,7 @@ public class PatternScriptTranslator extends ScriptTranslatorBase {
     }
 
     public void addScriptTranslationRegex(String sourceScriptRegex, String targetScript) {
-        addScriptTranslationRegex(sourceScriptRegex, CASE_INSENSITIVE, targetScript);
-    }
-
-    public void addScriptTranslationRegex(String sourceScriptRegex, int flags, String targetScript) {
-        addScriptTranslationPattern(compile(sourceScriptRegex, flags), targetScript);
+        addScriptTranslationPattern(compile(sourceScriptRegex), targetScript);
     }
 
     public void addScriptTranslationPattern(Pattern sourceScriptPattern, String targetScript) {
@@ -79,10 +75,10 @@ public class PatternScriptTranslator extends ScriptTranslatorBase {
     }
 
     @Override
-    protected String getScriptTranslation(String sourceScript, DatabaseInfo sourceDatabaseInfo,
+    protected String getScriptTranslation(String script, DatabaseInfo sourceDatabaseInfo,
                                           DatabaseInfo targetDatabaseInfo) {
         for (Map.Entry<Pattern, String> scriptTranslation : scriptTranslations.entrySet()) {
-            Matcher matcher = scriptTranslation.getKey().matcher(sourceScript);
+            Matcher matcher = scriptTranslation.getKey().matcher(script);
             if (matcher.find()) {
                 return getScriptTranslation(matcher, scriptTranslation.getValue());
             }

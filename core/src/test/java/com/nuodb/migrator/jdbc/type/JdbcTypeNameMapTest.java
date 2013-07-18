@@ -80,7 +80,7 @@ public class JdbcTypeNameMapTest {
     }
 
     @Test(dataProvider = "getTypeName")
-    public void testGetTypeName(JdbcType jdbcType, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
-        assertEquals(jdbcTypeNameMap.getJdbcTypeName(jdbcType.getJdbcTypeDesc(), jdbcTypeSpecifiers), typeName);
+    public void testGetTypeName(JdbcType type, JdbcTypeSpecifiers specifiers, String typeName) {
+        assertEquals(jdbcTypeNameMap.getJdbcTypeName(type.getJdbcTypeDesc(), specifiers), typeName);
     }
 }

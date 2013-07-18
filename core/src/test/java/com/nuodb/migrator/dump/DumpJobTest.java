@@ -27,37 +27,38 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.google.common.collect.Maps;
+import com.nuodb.migrator.backup.format.FormatFactory;
+import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
-import com.nuodb.migrator.jdbc.connection.ConnectionServices;
+import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
-import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.job.JobExecution;
 import com.nuodb.migrator.job.JobExecutor;
-import com.nuodb.migrator.resultset.catalog.Catalog;
-import com.nuodb.migrator.resultset.format.FormatFactory;
-import com.nuodb.migrator.resultset.format.SimpleFormatFactory;
-import com.nuodb.migrator.resultset.format.csv.CsvAttributes;
-import com.nuodb.migrator.resultset.format.value.SimpleValueFormatRegistryResolver;
-import com.nuodb.migrator.resultset.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.spec.DumpSpec;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Types;
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY_IDENTIFIER;
 import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -69,22 +70,29 @@ import static org.testng.Assert.assertNotNull;
 public class DumpJobTest {
 
     @Mock
-    private Catalog catalog;
+    private InspectionManager inspectionManager;
     @Mock
     private ConnectionProvider connectionProvider;
-    @Spy
-    private DialectResolver dialectResolver = new SimpleDialectResolver();
-    @Spy
-    private FormatFactory formatFactory = new SimpleFormatFactory();
-    @Spy
-    private ValueFormatRegistryResolver valueFormatRegistryResolver = new SimpleValueFormatRegistryResolver();
+    @Mock
+    private ConnectionProviderFactory connectionProviderFactory;
+    @Mock
+    private DialectResolver dialectResolver;
+    @Mock
+    private FormatFactory formatFactory;
+    @Mock
+    private ValueFormatRegistryResolver valueFormatRegistryResolver;
+    @Mock
+    private Dialect dialect;
     @Mock
     private Connection connection;
     @Mock
-    private ConnectionServices connectionServices;
+    private DumpWriter dumpWriter;
     @Spy
     @InjectMocks
-    private DumpJob dumpJob = new DumpJob();
+    private DumpJob dumpJob = new DumpJob(new DumpSpec());
+    @Spy
+    @InjectMocks
+    private DumpContext dumpContext = new DumpContext();
 
     private JobExecutor jobExecutor;
     private Map<Object, Object> jobContext;
@@ -92,32 +100,23 @@ public class DumpJobTest {
     @BeforeMethod
     public void setUp() throws Exception {
         initMocks(this);
-        dumpJob.setOutputType(CsvAttributes.FORMAT_TYPE);
-
         DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
         given(databaseMetaData.getDatabaseProductName()).willReturn("NuoDB");
         given(connection.getMetaData()).willReturn(databaseMetaData);
 
-        given(connectionServices.getConnection()).willReturn(connection);
-        given(connectionProvider.getConnection()).willReturn(connection);
-        given(connectionProvider.getConnectionServices()).willReturn(connectionServices);
+        willDoNothing().given(dumpJob).initDumpContext();
+        willDoNothing().given(dumpJob).releaseDumpContext();
+        dumpJob.setDumpContext(dumpContext);
 
-        jobContext = Maps.newHashMap();
+        jobContext = newHashMap();
         jobExecutor = createJobExecutor(dumpJob);
     }
 
     @Test
-    public void validateCatalog() throws Exception {
-        dumpJob.setCatalog(null);
-        jobExecutor.execute(jobContext);
-        verifyValidate();
-    }
-
-    @Test
     public void validateConnectionProvider() throws Exception {
-        dumpJob.setConnectionProvider(null);
+        dumpJob.setConnectionProviderFactory(null);
         jobExecutor.execute(jobContext);
-        verifyValidate();
+        verifyInit();
     }
 
     @Test
@@ -125,7 +124,7 @@ public class DumpJobTest {
         dumpJob.setDialectResolver(null);
         jobExecutor.execute(jobContext);
 
-        verifyValidate();
+        verifyInit();
     }
 
     @Test
@@ -133,7 +132,7 @@ public class DumpJobTest {
         dumpJob.setValueFormatRegistryResolver(null);
         jobExecutor.execute(jobContext);
 
-        verifyValidate();
+        verifyInit();
     }
 
     @Test
@@ -141,20 +140,13 @@ public class DumpJobTest {
         dumpJob.setFormatFactory(null);
         jobExecutor.execute(jobContext);
 
-        verifyValidate();
+        verifyInit();
     }
 
-    @Test
-    public void validateOutputType() throws Exception {
-        dumpJob.setOutputType(null);
-        jobExecutor.execute(jobContext);
-        verifyValidate();
-    }
-
-    private void verifyValidate() throws Exception {
+    private void verifyInit() throws Exception {
         assertNotNull(jobExecutor.getJobStatus().getFailure());
-        verify(dumpJob).doInit(any(DumpJobExecution.class));
-        verify(dumpJob, never()).doExecute(any(DumpJobExecution.class));
+        verify(dumpJob).init(any(JobExecution.class));
+        verify(dumpJob, never()).execute(any(JobExecution.class));
     }
 
     @Test
@@ -168,8 +160,8 @@ public class DumpJobTest {
         Column column2 = table.addColumn("column2");
         column2.setTypeCode(Types.LONGVARCHAR);
 
-        willReturn(database).given(dumpJob).inspect(any(DumpJobExecution.class));
-        willDoNothing().given(dumpJob).dump(any(DumpJobExecution.class), any(Query.class));
+        willReturn(database).given(dumpJob).inspect();
+        willReturn(dumpWriter).given(dumpJob).getDumpWriter();
 
         jobExecutor.execute(jobContext);
 
@@ -178,11 +170,4 @@ public class DumpJobTest {
             throw failure;
         }
     }
-
-    public void test() throws SQLException {
-        // dump prepared statement
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        given(connection.prepareStatement(anyString(), anyInt(), anyInt())).willReturn(preparedStatement);
-    }
-
 }

@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import com.nuodb.migrator.jdbc.model.Column;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -50,14 +51,14 @@ public class JdbcTypeTest {
     public void setUp() {
         jdbcTypeBase = spy(new JdbcTypeBase<Object>(Types.OTHER, Object.class) {
             @Override
-            public Object getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
-                                   Map<String, Object> options) throws SQLException {
+            public Object getValue(ResultSet resultSet, int columnIndex,
+                                   Column column, Map<String, Object> options) throws SQLException {
                 return null;
             }
 
             @Override
-            protected void setNullSafeValue(PreparedStatement statement, Object value, int column,
-                                            JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
+            protected void setNullSafeValue(PreparedStatement statement, Object value, int columnIndex,
+                                            Column column, Map<String, Object> options) throws SQLException {
             }
         });
     }
@@ -66,14 +67,14 @@ public class JdbcTypeTest {
     public void testSetNullValue() throws Exception {
         PreparedStatement statement = mock(PreparedStatement.class);
         jdbcTypeBase.setValue(statement, COLUMN, null, null, null);
-        verify(jdbcTypeBase).setNullValue(statement, COLUMN);
+        verify(jdbcTypeBase).setNullValue(statement, COLUMN, null);
     }
 
     @Test
     public void testSetNullSafeValue() throws Exception {
         PreparedStatement statement = mock(PreparedStatement.class);
         Object value = new Object();
-        jdbcTypeBase.setValue(statement, COLUMN, value, null, null);
+        jdbcTypeBase.setValue(statement, COLUMN, null, value, null);
         verify(jdbcTypeBase).setNullSafeValue(statement, value, COLUMN, null, null);
     }
 }

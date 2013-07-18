@@ -74,9 +74,8 @@ public class PostgreSQLCheckInspector extends InspectorBase<Table, TableInspecti
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
-
                     @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
+                    public void process(PreparedStatement statement) throws SQLException {
                         for (Table table : tables) {
                             statement.setString(1, table.getSchema().getName());
                             statement.setString(2, table.getName());

@@ -64,7 +64,7 @@ public class ExplainQuery extends QueryBase {
     }
 
     @Override
-    public void toQuery(StringBuilder query) {
+    public void append(StringBuilder query) {
         query.append(getExplainClause()).append(" ").append(getQuery().toString());
     }
 }

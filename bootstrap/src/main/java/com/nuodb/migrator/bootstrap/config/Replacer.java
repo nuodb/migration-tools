@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.bootstrap.config;
 
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
@@ -68,7 +70,7 @@ public class Replacer {
                     if (isIgnoreUnknownPlaceholders()) {
                         prefixStart = buffer.indexOf(placeholderPrefix, suffixStart);
                     } else {
-                        throw new IllegalArgumentException(String.format("Can't find replacement for %s", placeholder));
+                        throw new IllegalArgumentException(format("Can't find replacement for %s", placeholder));
                     }
                 } else {
                     buffer.replace(prefixStart, suffixStart + placeholderSuffix.length(), replacement);

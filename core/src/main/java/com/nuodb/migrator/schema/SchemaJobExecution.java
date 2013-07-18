@@ -27,27 +27,22 @@
  */
 package com.nuodb.migrator.schema;
 
-import com.nuodb.migrator.job.JobExecution;
-import com.nuodb.migrator.job.decorate.DecoratingJobExecution;
-
-import java.sql.Connection;
-
 /**
  * @author Sergey Bushik
  */
-public class SchemaJobExecution extends DecoratingJobExecution {
+public class SchemaJobExecution {
 
-    private static final Object CONNECTION = "connection";
-
-    public SchemaJobExecution(JobExecution execution) {
-        super(execution);
-    }
-
-    public Connection getConnection() {
-        return (Connection) getContext().get(CONNECTION);
-    }
-
-    public void setConnection(Connection connection) {
-        getContext().put(CONNECTION, connection);
-    }
+//    private static final Object CONNECTION = "connection";
+//
+//    public SchemaJobExecution(JobExecution execution) {
+//        super(execution);
+//    }
+//
+//    public Connection getConnection() {
+//        return (Connection) getContext().get(CONNECTION);
+//    }
+//
+//    public void setConnection(Connection connection) {
+//        getContext().put(CONNECTION, connection);
+//    }
 }

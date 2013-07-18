@@ -35,6 +35,4 @@ import com.nuodb.migrator.spec.ConnectionSpec;
 public interface ConnectionProviderFactory {
 
     ConnectionProvider createConnectionProvider(ConnectionSpec connectionSpec);
-
-    boolean supportsConnectionSpec(ConnectionSpec connectionSpec);
 }

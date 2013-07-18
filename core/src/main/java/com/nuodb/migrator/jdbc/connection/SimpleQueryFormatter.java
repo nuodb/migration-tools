@@ -70,10 +70,13 @@ public class SimpleQueryFormatter implements QueryFormatter {
     protected String format(Object parameter) {
         if (parameter == null) {
             return "NULL";
-        } if (parameter instanceof Clob) {
+        }
+        if (parameter instanceof Clob) {
             return "[CLOB]";
         } else if (parameter instanceof Blob) {
             return "[BLOB]";
+        } else if (parameter instanceof Number) {
+            return valueOf(parameter);
         } else {
             return "'" + valueOf(parameter) + "'";
         }

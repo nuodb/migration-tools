@@ -27,11 +27,11 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import com.google.common.collect.Sets;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+
+import static com.google.common.collect.Sets.newLinkedHashSet;
 
 /**
  * @author Sergey Bushik
@@ -47,7 +47,7 @@ public class JdbcUrlParsers {
         return INSTANCE;
     }
 
-    private Collection<JdbcUrlParser> parsers = Sets.newLinkedHashSet();
+    private Collection<JdbcUrlParser> parsers = newLinkedHashSet();
 
     private JdbcUrlParsers() {
         addParser(new JTDSJdbcUrlParser());

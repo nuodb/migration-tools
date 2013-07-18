@@ -27,18 +27,13 @@
  */
 package com.nuodb.migrator.cli;
 
-import com.nuodb.migrator.cli.parse.option.ArgumentBuilder;
-import com.nuodb.migrator.cli.parse.option.BasicOptionBuilder;
-import com.nuodb.migrator.cli.parse.option.GroupBuilder;
-import com.nuodb.migrator.cli.parse.option.OptionFormat;
-import com.nuodb.migrator.cli.parse.option.OptionToolkit;
-import com.nuodb.migrator.cli.parse.option.RegexOptionBuilder;
-import com.nuodb.migrator.context.support.ApplicationSupport;
+import com.nuodb.migrator.cli.parse.option.*;
+import com.nuodb.migrator.context.ContextSupport;
 
 /**
  * @author Sergey Bushik
  */
-public class CliSupport extends ApplicationSupport implements CliResources, CliOptions {
+public class CliSupport extends ContextSupport implements CliResources, CliOptions {
 
     private OptionToolkit optionToolkit;
 
@@ -70,15 +65,7 @@ public class CliSupport extends ApplicationSupport implements CliResources, CliO
         return getOptionToolkit().getOptionFormat();
     }
 
-    public void setOptionFormat(OptionFormat optionFormat) {
-        optionToolkit = OptionToolkit.getInstance(optionFormat);
-    }
-
     public OptionToolkit getOptionToolkit() {
         return optionToolkit;
-    }
-
-    public void setOptionToolkit(OptionToolkit optionToolkit) {
-        this.optionToolkit = optionToolkit;
     }
 }

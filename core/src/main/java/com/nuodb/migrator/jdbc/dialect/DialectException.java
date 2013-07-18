@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class DialectException extends MigrationException {
+public class DialectException extends MigratorException {
 
     public DialectException(String message) {
         super(message);

@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DefaultValue;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.model.ColumnFactory;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.sql.ResultSet;
@@ -40,7 +41,6 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
-import static com.nuodb.migrator.jdbc.model.ValueModelFactory.createValueModelList;
 
 /**
  * @author Sergey Bushik
@@ -94,7 +94,7 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
 
     protected void initTypeDesc(InspectionContext inspectionContext, ResultSet columns,
                                 Column column) throws SQLException {
-        JdbcTypeDesc typeDescAlias = inspectionContext.getDialect().getJdbcTypeDescAlias(
+        JdbcTypeDesc typeDescAlias = inspectionContext.getDialect().getJdbcTypeAlias(
                 columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
         column.setTypeCode(typeDescAlias.getTypeCode());
         column.setTypeName(typeDescAlias.getTypeName());
@@ -120,7 +120,7 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
 
     protected boolean isAutoIncrement(InspectionContext inspectionContext, Column column,
                                       ResultSet columns) throws SQLException {
-        String autoIncrement = createValueModelList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
+        String autoIncrement = ColumnFactory.createColumnList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
                 columns.getString("IS_AUTOINCREMENT") : null;
         return "YES".equals(autoIncrement);
     }

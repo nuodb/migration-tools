@@ -36,16 +36,15 @@ import static java.lang.String.format;
  */
 public class MetaDataHandlerUtils {
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,
-                                                                    MetaData object) {
-        return findMetaDataHandler(objectHandlers, object, true);
+    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> handlers, MetaData object) {
+        return findMetaDataHandler(handlers, object, true);
     }
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,
+    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> handlers,
                                                                     MetaData object, boolean required) {
-        for (T objectHandler : objectHandlers) {
-            if (objectHandler.supports(object)) {
-                return objectHandler;
+        for (T handler : handlers) {
+            if (handler.supports(object)) {
+                return handler;
             }
         }
         if (required) {
@@ -55,16 +54,16 @@ public class MetaDataHandlerUtils {
         }
     }
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,
+    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> handlers,
                                                                     MetaDataType objectType) {
-        return findMetaDataHandler(objectHandlers, objectType, true);
+        return findMetaDataHandler(handlers, objectType, true);
     }
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> objectHandlers,
+    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> handlers,
                                                                     MetaDataType objectType, boolean required) {
-        for (T objectHandler : objectHandlers) {
-            if (objectHandler.supports(objectType)) {
-                return objectHandler;
+        for (T handler : handlers) {
+            if (handler.supports(objectType)) {
+                return handler;
             }
         }
         if (required) {

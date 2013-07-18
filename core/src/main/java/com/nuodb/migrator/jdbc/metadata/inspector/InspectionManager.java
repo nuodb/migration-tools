@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.dialect.SimpleDialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
@@ -50,88 +49,90 @@ import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
  */
 public class InspectionManager {
 
-    private Connection connection;
-    private DialectResolver dialectResolver = new SimpleDialectResolver();
+    private DialectResolver dialectResolver;
     private Collection<Inspector> inspectors = new SimplePriorityList<Inspector>();
 
     public InspectionManager() {
         addInspector(new SimpleDatabaseInspector());
         addInspector(new SimpleCatalogInspector());
 
-        InspectorResolver schema = new InspectorResolver(SCHEMA, new SimpleSchemaInspector());
-        schema.register(NUODB, new NuoDBSchemaInspector());
-        schema.register(POSTGRE_SQL, new PostgreSQLSchemaInspector());
-        schema.register(MSSQL_SERVER, new MSSQLServerSchemaInspector());
-        addInspector(schema);
+        InspectorResolver schemaInspector = new InspectorResolver(SCHEMA, new SimpleSchemaInspector());
+        schemaInspector.register(NUODB, new NuoDBSchemaInspector());
+        schemaInspector.register(POSTGRE_SQL, new PostgreSQLSchemaInspector());
+        schemaInspector.register(MSSQL_SERVER, new MSSQLServerSchemaInspector());
+        addInspector(schemaInspector);
 
-        InspectorResolver table = new InspectorResolver(TABLE, new SimpleTableInspector());
-        table.register(NUODB, new NuoDBTableInspector());
-        addInspector(table);
+        InspectorResolver tableInspector = new InspectorResolver(TABLE, new SimpleTableInspector());
+        tableInspector.register(NUODB, new NuoDBTableInspector());
+        addInspector(tableInspector);
 
-        InspectorResolver index = new InspectorResolver(INDEX, new SimpleIndexInspector());
-        index.register(NUODB, new NuoDBIndexInspector());
-        index.register(POSTGRE_SQL, new PostgreSQLIndexInspector());
-        addInspector(index);
+        InspectorResolver indexIndex = new InspectorResolver(INDEX, new SimpleIndexInspector());
+        indexIndex.register(NUODB, new NuoDBIndexInspector());
+        indexIndex.register(POSTGRE_SQL, new PostgreSQLIndexInspector());
+        addInspector(indexIndex);
 
-        InspectorResolver primaryKey = new InspectorResolver(PRIMARY_KEY, new SimplePrimaryKeyInspector());
-        primaryKey.register(NUODB, new NuoDBPrimaryKeyInspector());
-        addInspector(primaryKey);
+        InspectorResolver primaryKeyInspector = new InspectorResolver(PRIMARY_KEY, new SimplePrimaryKeyInspector());
+        primaryKeyInspector.register(NUODB, new NuoDBPrimaryKeyInspector());
+        addInspector(primaryKeyInspector);
 
-        InspectorResolver foreignKey = new InspectorResolver(FOREIGN_KEY, new SimpleForeignKeyInspector());
-        foreignKey.register(NUODB, new NuoDBForeignKeyInspector());
-        addInspector(foreignKey);
+        InspectorResolver foreignKeyInspector = new InspectorResolver(FOREIGN_KEY, new SimpleForeignKeyInspector());
+        foreignKeyInspector.register(NUODB, new NuoDBForeignKeyInspector());
+        addInspector(foreignKeyInspector);
 
-        InspectorResolver column = new InspectorResolver(COLUMN, new SimpleColumnInspector());
-        column.register(NUODB, new NuoDBColumnInspector());
-        column.register(POSTGRE_SQL, new PostgreSQLColumnInspector());
-        column.register(MSSQL_SERVER, new MSSQLServerColumnInspector());
-        addInspector(column);
+        InspectorResolver columnInspector = new InspectorResolver(COLUMN, new SimpleColumnInspector());
+        columnInspector.register(NUODB, new NuoDBColumnInspector());
+        columnInspector.register(POSTGRE_SQL, new PostgreSQLColumnInspector());
+        columnInspector.register(MSSQL_SERVER, new MSSQLServerColumnInspector());
+        addInspector(columnInspector);
 
-        InspectorResolver check = new InspectorResolver(CHECK);
-        check.register(NUODB, new NuoDBCheckInspector());
-        check.register(POSTGRE_SQL, new PostgreSQLCheckInspector());
-        check.register(MSSQL_SERVER, new DB2CheckInspector());
-        check.register(DatabaseInfoUtils.ORACLE, new OracleCheckInspector());
-        check.register(DB2, new DB2CheckInspector());
-        addInspector(check);
+        InspectorResolver checkInspector = new InspectorResolver(CHECK);
+        checkInspector.register(NUODB, new NuoDBCheckInspector());
+        checkInspector.register(POSTGRE_SQL, new PostgreSQLCheckInspector());
+        checkInspector.register(MSSQL_SERVER, new DB2CheckInspector());
+        checkInspector.register(DatabaseInfoUtils.ORACLE, new OracleCheckInspector());
+        checkInspector.register(DB2, new DB2CheckInspector());
+        addInspector(checkInspector);
 
-        InspectorResolver sequence = new InspectorResolver(IDENTITY);
-        sequence.register(MYSQL, new MySQLIdentityInspector());
-        sequence.register(POSTGRE_SQL, new PostgreSQLIdentityInspector());
-        sequence.register(MSSQL_SERVER, new MSSQLServerIdentityInspector());
-        sequence.register(DB2, new DB2IdentityInspector());
-        addInspector(sequence);
+        InspectorResolver identityInspector = new InspectorResolver(IDENTITY);
+        identityInspector.register(MYSQL, new MySQLIdentityInspector());
+        identityInspector.register(POSTGRE_SQL, new PostgreSQLIdentityInspector());
+        identityInspector.register(MSSQL_SERVER, new MSSQLServerIdentityInspector());
+        identityInspector.register(DB2, new DB2IdentityInspector());
+        addInspector(identityInspector);
     }
 
-    public InspectionResults inspect() throws SQLException {
-        return inspect(MetaDataType.TYPES);
+    public InspectionResults inspect(Connection connection) throws SQLException {
+        return inspect(connection, MetaDataType.TYPES);
     }
 
-    public InspectionResults inspect(MetaDataType... objectTypes) throws SQLException {
-        return inspect(new TableInspectionScope(), objectTypes);
+    public InspectionResults inspect(Connection connection, MetaDataType... objectTypes) throws SQLException {
+        return inspect(connection, new TableInspectionScope(), objectTypes);
     }
 
-    public InspectionResults inspect(InspectionScope inspectionScope, MetaDataType... objectTypes) throws SQLException {
+    public InspectionResults inspect(Connection connection, InspectionScope inspectionScope,
+                                     MetaDataType... objectTypes) throws SQLException {
         InspectionResults inspectionResults = createInspectionResults();
-        inspect(inspectionResults, inspectionScope, objectTypes);
+        inspect(connection, inspectionResults, inspectionScope, objectTypes);
         return inspectionResults;
     }
 
-    public InspectionResults inspect(MetaData object, MetaDataType... objectTypes) throws SQLException {
+    public InspectionResults inspect(Connection connection, MetaData object,
+                                     MetaDataType... objectTypes) throws SQLException {
         InspectionResults inspectionResults = createInspectionResults();
-        inspect(inspectionResults, object, objectTypes);
+        inspect(connection, inspectionResults, object, objectTypes);
         return inspectionResults;
     }
 
-    public InspectionResults inspect(Collection<MetaData> objects, MetaDataType... objectTypes) throws SQLException {
+    public InspectionResults inspect(Connection connection, Collection<MetaData> objects,
+                                     MetaDataType... objectTypes) throws SQLException {
         InspectionResults inspectionResults = createInspectionResults();
-        inspect(inspectionResults, objects, objectTypes);
+        inspect(connection, inspectionResults, objects, objectTypes);
         return inspectionResults;
     }
 
-    public void inspect(InspectionResults inspectionResults, InspectionScope inspectionScope,
+    public void inspect(Connection connection, InspectionResults inspectionResults, InspectionScope inspectionScope,
                         MetaDataType... objectTypes) throws SQLException {
-        InspectionContext inspectionContext = createInspectionContext(inspectionResults, objectTypes);
+        InspectionContext inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
         try {
             inspectionContext.inspect(inspectionScope, objectTypes);
         } finally {
@@ -139,9 +140,9 @@ public class InspectionManager {
         }
     }
 
-    public void inspect(InspectionResults inspectionResults, MetaData object,
+    public void inspect(Connection connection, InspectionResults inspectionResults, MetaData object,
                         MetaDataType... objectTypes) throws SQLException {
-        InspectionContext inspectionContext = createInspectionContext(inspectionResults, objectTypes);
+        InspectionContext inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
         try {
             inspectionContext.inspect(object, objectTypes);
         } finally {
@@ -149,9 +150,9 @@ public class InspectionManager {
         }
     }
 
-    public void inspect(InspectionResults inspectionResults, Collection<MetaData> objects,
+    public void inspect(Connection connection, InspectionResults inspectionResults, Collection<MetaData> objects,
                         MetaDataType... objectTypes) throws SQLException {
-        InspectionContext inspectionContext = createInspectionContext(inspectionResults, objectTypes);
+        InspectionContext inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
         try {
             inspectionContext.inspect(objects, objectTypes);
         } finally {
@@ -163,29 +164,13 @@ public class InspectionManager {
         return new SimpleInspectionResults();
     }
 
-    protected InspectionContext createInspectionContext(InspectionResults inspectionResults,
+    protected InspectionContext createInspectionContext(Connection connection, InspectionResults inspectionResults,
                                                         MetaDataType... objectTypes) {
-        return new SimpleInspectionContext(this, inspectionResults, objectTypes);
+        return new SimpleInspectionContext(this, connection, inspectionResults, objectTypes);
     }
 
     protected void closeInspectionContext(InspectionContext inspectionContext) throws SQLException {
-        inspectionContext.commit();
-    }
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
-
-    public DialectResolver getDialectResolver() {
-        return dialectResolver;
-    }
-
-    public void setDialectResolver(DialectResolver dialectResolver) {
-        this.dialectResolver = dialectResolver;
+        inspectionContext.close();
     }
 
     public void addInspector(Inspector inspector) {
@@ -198,5 +183,13 @@ public class InspectionManager {
 
     public void setInspectors(Collection<Inspector> inspectors) {
         this.inspectors = inspectors;
+    }
+
+    public DialectResolver getDialectResolver() {
+        return dialectResolver;
+    }
+
+    public void setDialectResolver(DialectResolver dialectResolver) {
+        this.dialectResolver = dialectResolver;
     }
 }

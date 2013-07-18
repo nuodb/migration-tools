@@ -83,13 +83,13 @@ public class CliSchemaJob extends CliRunJob {
     private JdbcTypeOptionProcessor jdbcTypeOptionProcessor = new JdbcTypeOptionProcessor();
 
     public CliSchemaJob() {
-        super(COMMAND, new SchemaJobFactory());
+        super(COMMAND);
     }
 
     @Override
     protected Option createOption() {
         GroupBuilder group = newGroupBuilder().
-                withName(getResources().getMessage(SCHEMA_GROUP_NAME));
+                withName(getMessage(SCHEMA_GROUP_NAME));
         group.withRequired(true);
         group.withOption(createSourceGroup());
         group.withOption(createTargetGroup());
@@ -105,11 +105,12 @@ public class CliSchemaJob extends CliRunJob {
         schemaSpec.setTargetConnectionSpec(parseTargetGroup(optionSet, this));
         schemaSpec.setOutputSpec(parseOutputGroup(optionSet, this));
         parseSchemaOptions(schemaSpec, optionSet, this);
-        ((SchemaJobFactory) getJobFactory()).setSchemaSpec(schemaSpec);
+
+        setJobFactory(new SchemaJobFactory(schemaSpec));
     }
 
     protected void createSchemaOptions(GroupBuilder group) {
-        GroupBuilder typeGroup = newGroupBuilder().withName(getResources().getMessage(JDBC_TYPE_GROUP_NAME));
+        GroupBuilder typeGroup = newGroupBuilder().withName(getMessage(JDBC_TYPE_GROUP_NAME));
         Option typeName = newBasicOptionBuilder().
                 withName(JDBC_TYPE_NAME_OPTION).
                 withDescription(getMessage(JDBC_TYPE_NAME_OPTION_DESCRIPTION)).

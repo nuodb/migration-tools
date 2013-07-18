@@ -71,7 +71,8 @@ public class Table extends IdentifiableBase {
 
     @Override
     public String getQualifiedName(Dialect dialect) {
-        return getQualifiedName(dialect, getCatalog().getName(), getSchema().getName());
+        return getQualifiedName(dialect, getCatalog() != null ? getCatalog().getName() : null,
+                getSchema() != null ? getSchema().getName() : null);
     }
 
     public void addForeignKey(ForeignKey foreignKey) {

@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -35,6 +36,7 @@ import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migrator.jdbc.type.JdbcTypeRegistry;
 import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
+import com.nuodb.migrator.jdbc.type.JdbcValueAccessProvider;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -80,9 +82,17 @@ public interface Dialect {
 
     boolean supportsNegativeScale();
 
-    boolean supportsRowCountType(Table table, RowCountType rowCountType);
+    boolean supportsLimit();
 
-    RowCountValue getRowCountValue(Connection connection, Table table, RowCountType rowCountType) throws SQLException;
+    boolean supportsLimitOffset();
+
+    boolean supportsLimitParameters();
+
+    LimitHandler createLimitHandler(String query, QueryLimit queryLimit);
+
+    boolean supportsRowCount(Table table, Column column, String filter, RowCountType rowCountType);
+
+    RowCountHandler createRowCountHandler(Table table, Column column, String filter, RowCountType rowCountType);
 
     String getNullColumnString();
 
@@ -140,15 +150,13 @@ public interface Dialect {
 
     boolean isSQLKeyword(String identifier, Identifiable identifiable);
 
-    String getJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers);
+    String getJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc typeDesc, JdbcTypeSpecifiers typeSpecifiers);
 
-    JdbcTypeDesc getJdbcTypeDescAlias(int typeCode, String typeName);
+    JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName);
 
     String translateScript(String script, DatabaseInfo databaseInfo);
 
     Script translateScript(Script script);
-
-    DatabaseInfo getDatabaseInfo();
 
     SQLKeywords getSQLKeywords();
 
@@ -158,7 +166,11 @@ public interface Dialect {
 
     JdbcTypeRegistry getJdbcTypeRegistry();
 
+    JdbcValueAccessProvider getJdbcValueAccessProvider();
+
     IdentifierNormalizer getIdentifierNormalizer();
+
+    DatabaseInfo getDatabaseInfo();
 
     void setIdentifierNormalizer(IdentifierNormalizer identifierNormalizer);
 

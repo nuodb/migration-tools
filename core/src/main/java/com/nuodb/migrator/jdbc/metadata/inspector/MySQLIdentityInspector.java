@@ -94,7 +94,7 @@ public class MySQLIdentityInspector extends TableInspectorBase<Table, TableInspe
                     },
                     new StatementCallback<PreparedStatement>() {
                         @Override
-                        public void execute(PreparedStatement statement) throws SQLException {
+                        public void process(PreparedStatement statement) throws SQLException {
                             int parameter = 1;
                             for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
                                 statement.setString(parameter++, iterator.next());
@@ -126,7 +126,7 @@ public class MySQLIdentityInspector extends TableInspectorBase<Table, TableInspe
                 new StatementCallback<Statement>() {
 
                     @Override
-                    public void execute(Statement statement) throws SQLException {
+                    public void process(Statement statement) throws SQLException {
                         for (Map.Entry<Table, Sequence> sequenceEntry : sequenceMap.entrySet()) {
                             Table table = sequenceEntry.getKey();
                             Sequence sequence = sequenceEntry.getValue();

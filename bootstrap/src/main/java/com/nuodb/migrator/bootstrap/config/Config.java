@@ -28,6 +28,7 @@
 package com.nuodb.migrator.bootstrap.config;
 
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Sergey Bushik
@@ -46,13 +47,15 @@ public interface Config {
 
     final String CONTEXT_CLASS = "com.nuodb.migrator.context.class";
 
-    final String DEFAULT_CONTEXT_CLASS = "com.nuodb.migrator.context.SimpleApplicationContext";
+    final String DEFAULT_CONTEXT_CLASS = "com.nuodb.migrator.context.SimpleContext";
 
     final String CONFIG = "com.nuodb.migrator.config";
 
     final String DEFAULT_CONFIG = "nuodb-migrator.properties";
 
     final String CONFIG_FOLDER = "conf";
+
+    Set<String> getPropertyNames();
 
     String getProperty(String property);
 

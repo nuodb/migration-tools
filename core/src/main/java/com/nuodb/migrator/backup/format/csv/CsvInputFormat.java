@@ -1,0 +1,127 @@
+/**
+ * Copyright (c) 2012, NuoDB, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of NuoDB, Inc. nor the names of its contributors may
+ *       be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL NUODB, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.nuodb.migrator.backup.format.csv;
+
+import com.nuodb.migrator.backup.format.InputFormatBase;
+import com.nuodb.migrator.backup.format.InputFormatException;
+import com.nuodb.migrator.backup.format.value.Value;
+import com.nuodb.migrator.backup.format.value.ValueHandleList;
+import com.nuodb.migrator.backup.format.value.ValueType;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.*;
+import java.util.Iterator;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.backup.format.utils.BinaryEncoder.BASE64;
+import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
+import static com.nuodb.migrator.backup.format.value.ValueUtils.*;
+import static java.lang.String.valueOf;
+
+/**
+ * @author Sergey Bushik
+ */
+public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
+
+    private String doubleQuote;
+    private Iterator<CSVRecord> iterator;
+
+    @Override
+    public String getFormat() {
+        return FORMAT;
+    }
+
+    @Override
+    protected void open(InputStream inputStream) {
+        try {
+            open(new InputStreamReader(getInputStream(), (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING)));
+        } catch (UnsupportedEncodingException exception) {
+            throw new InputFormatException(exception);
+        }
+    }
+
+    @Override
+    protected void open(Reader reader) {
+        CsvFormatBuilder builder = new CsvFormatBuilder(this);
+        CSVFormat format = builder.build();
+        Character quote = builder.getQuote();
+
+        doubleQuote = valueOf(quote) + valueOf(quote);
+        try {
+            iterator = new CSVParser(reader, format).iterator();
+        } catch (IOException exception) {
+            throw new InputFormatException(exception);
+        }
+    }
+
+    @Override
+    public void readStart() {
+        if (iterator.hasNext()) {
+            iterator.next();
+        }
+    }
+
+    @Override
+    public Value[] readValues() {
+        return iterator.hasNext() ? readRecord() : null;
+    }
+
+    protected Value[] readRecord() {
+        CSVRecord record = iterator.next();
+        ValueHandleList list = getValueHandleList();
+        Value[] values = new Value[list.size()];
+        int index = 0;
+        for (String value : newArrayList(record.iterator())) {
+            if (doubleQuote.equals(value)) {
+                value = StringUtils.EMPTY;
+            } else if (value != null && value.length() == 0) {
+                value = null;
+            }
+            ValueType type = list.get(index).getValueType();
+            type = type != null ? type : STRING;
+            switch (type) {
+                case BINARY:
+                    values[index] = binary(BASE64.decode(value));
+                    break;
+                case STRING:
+                    values[index] = string(value);
+                    break;
+            }
+            index++;
+        }
+        fill(values, list, index);
+        return values;
+    }
+
+    @Override
+    public void readEnd() {
+    }
+}

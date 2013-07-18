@@ -27,9 +27,14 @@
  */
 package com.nuodb.migrator.utils;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
+import java.lang.reflect.Field;
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 /**
@@ -40,14 +45,67 @@ public class ObjectUtils {
     private static final ToStringStyle TO_STRING_STYLE = MULTI_LINE_STYLE;
 
     public static String toString(Object object) {
-        return reflectionToString(object, TO_STRING_STYLE);
+        return toString(object, null);
     }
 
-    public static String toString(Object object, boolean outputTransients) {
-        return reflectionToString(object, TO_STRING_STYLE, outputTransients);
+    public static String toString(Object object, Collection<String> includedFields) {
+        return toString(object, includedFields, null);
     }
 
-    public static String toString(Object object, boolean outputTransients, Class reflectUpToClass) {
-        return reflectionToString(object, TO_STRING_STYLE, outputTransients, reflectUpToClass);
+    public static String toString(Object object, Collection<String> includedFields, Collection<String> excludedFields) {
+        FilterFieldsToStringBuilder filterFieldsToStringBuilder =
+                new FilterFieldsToStringBuilder(object, TO_STRING_STYLE);
+        if (!isEmpty(includedFields)) {
+            filterFieldsToStringBuilder.addIncludeFields(includedFields);
+        }
+        if (!isEmpty(excludedFields)) {
+            filterFieldsToStringBuilder.addExcludedFields(excludedFields);
+        }
+        return filterFieldsToStringBuilder.build();
+    }
+
+    static class FilterFieldsToStringBuilder extends ReflectionToStringBuilder {
+
+        private Collection<String> includedFields = newArrayList();
+        private Collection<String> excludedFields = newArrayList();
+
+        public FilterFieldsToStringBuilder(Object object) {
+            super(object);
+        }
+
+        public FilterFieldsToStringBuilder(Object object, ToStringStyle style) {
+            super(object, style);
+        }
+
+        public FilterFieldsToStringBuilder(Object object, ToStringStyle style, StringBuffer buffer) {
+            super(object, style, buffer);
+        }
+
+        public <T> FilterFieldsToStringBuilder(T object, ToStringStyle style, StringBuffer buffer,
+                                               Class<? super T> reflectUpToClass, boolean outputTransients,
+                                               boolean outputStatics) {
+            super(object, style, buffer, reflectUpToClass, outputTransients, outputStatics);
+        }
+
+        public void addIncludeFields(Collection<String> fields) {
+            includedFields.addAll(fields);
+        }
+
+        public void addExcludedFields(Collection<String> fields) {
+            excludedFields.addAll(fields);
+        }
+
+        @Override
+        protected boolean accept(Field field) {
+            boolean accept = super.accept(field);
+            if (accept) {
+                if (includedFields.isEmpty()) {
+                    accept = !excludedFields.contains(field.getName());
+                } else {
+                    accept = includedFields.contains(field.getName());
+                }
+            }
+            return accept;
+        }
     }
 }

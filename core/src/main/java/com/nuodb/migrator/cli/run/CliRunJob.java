@@ -28,10 +28,12 @@
 package com.nuodb.migrator.cli.run;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.job.*;
 
 import java.util.Map;
+
+import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
 
 /**
  * @author Sergey Bushik
@@ -40,9 +42,8 @@ public abstract class CliRunJob extends CliRunAdapter {
 
     private JobFactory jobFactory;
 
-    public CliRunJob(String command, JobFactory jobFactory) {
+    public CliRunJob(String command) {
         super(command);
-        this.jobFactory = jobFactory;
     }
 
     @Override
@@ -52,13 +53,13 @@ public abstract class CliRunJob extends CliRunAdapter {
 
     @Override
     public void run(Map<Object, Object> context) {
-        JobExecutor executor = JobExecutors.createJobExecutor(createJob());
+        JobExecutor executor = createJobExecutor(createJob());
         executor.addJobExecutionListener(new TraceJobExecutionListener());
         executor.execute(context);
         Throwable failure = executor.getJobStatus().getFailure();
         if (failure != null) {
-            if (failure instanceof MigrationException) {
-                throw (MigrationException)failure;
+            if (failure instanceof MigratorException) {
+                throw (MigratorException)failure;
             } else {
                 throw new CliRunException(failure);
             }

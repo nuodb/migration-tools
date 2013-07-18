@@ -51,8 +51,8 @@ public class MySQLSelectQuery extends SelectQuery {
     }
 
     @Override
-    public void toQuery(StringBuilder query) {
-        super.toQuery(query);
+    public void append(StringBuilder query) {
+        super.append(query);
         if (indexHint != null) {
             query.append(" ");
             query.append(indexHint.getIndexUsage());
@@ -66,7 +66,6 @@ public class MySQLSelectQuery extends SelectQuery {
             }
             query.append(")");
         }
-
     }
 
     public static class IndexHint {

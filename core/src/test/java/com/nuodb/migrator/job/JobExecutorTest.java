@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.job;
 
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -73,7 +73,7 @@ public class JobExecutorTest {
 
     @Test
     public void testExecuteFailure() throws Exception {
-        MigrationException failure = new MigrationException("Failure");
+        MigratorException failure = new MigratorException("Failure");
         willThrow(failure).given(job).execute(any(JobExecution.class));
 
         JobStatus jobStatus = jobExecutor.getJobStatus();

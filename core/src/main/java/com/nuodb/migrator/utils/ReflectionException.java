@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.utils;
 
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class ReflectionException extends MigrationException {
+public class ReflectionException extends MigratorException {
 
     public ReflectionException(String message) {
         super(message);

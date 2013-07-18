@@ -39,6 +39,7 @@ import java.lang.reflect.Constructor;
 
 import static com.nuodb.migrator.bootstrap.classpath.ClassPathLoaderUtils.createClassPathLoader;
 import static com.nuodb.migrator.bootstrap.config.Config.*;
+import static java.lang.System.setProperty;
 import static java.lang.Thread.currentThread;
 
 /**
@@ -62,6 +63,13 @@ public class Bootstrap {
         config = loadConfig();
 
         if (log.isDebugEnabled()) {
+            log.debug("Exposing migrator config to a system properties");
+        }
+        for (String property : config.getPropertyNames()) {
+            setProperty(property, config.getProperty(property));
+        }
+
+        if (log.isDebugEnabled()) {
             log.debug("Creating class classpath");
         }
         classLoader = createClassLoader();
@@ -75,9 +83,9 @@ public class Bootstrap {
     }
 
     protected Config loadConfig() {
-        PropertiesConfigLoader loader = new PropertiesConfigLoader();
-        loader.setReplacer(new Replacer(new PropertiesReplacement()));
-        return loader.loadConfig();
+        PropertiesConfigLoader configLoader = new PropertiesConfigLoader();
+        configLoader.setReplacer(new Replacer(new PropertiesReplacement()));
+        return configLoader.loadConfig();
     }
 
     protected ClassLoader createClassLoader() throws IOException {

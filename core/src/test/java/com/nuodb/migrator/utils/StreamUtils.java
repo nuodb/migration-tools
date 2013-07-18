@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.utils;
 
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -130,7 +130,7 @@ public class StreamUtils {
             try {
                 return other instanceof Reader && StreamUtils.equals(this, (Reader) other);
             } catch (IOException exception) {
-                throw new MigrationException(exception);
+                throw new MigratorException(exception);
             }
         }
     }
@@ -193,7 +193,7 @@ public class StreamUtils {
             try {
                 return other instanceof InputStream && StreamUtils.equals(this, (InputStream) other);
             } catch (IOException exception) {
-                throw new MigrationException(exception);
+                throw new MigratorException(exception);
             }
         }
 

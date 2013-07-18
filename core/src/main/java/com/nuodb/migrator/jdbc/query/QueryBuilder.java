@@ -31,5 +31,6 @@ package com.nuodb.migrator.jdbc.query;
  * @author Sergey Bushik
  */
 public interface QueryBuilder<T extends Query> {
+
     T build();
 }

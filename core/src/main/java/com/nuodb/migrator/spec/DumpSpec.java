@@ -42,8 +42,8 @@ public class DumpSpec extends JobSpecBase {
     private ConnectionSpec connectionSpec;
     private TimeZone timeZone;
     private String[] tableTypes = new String[]{TABLE};
-    private Collection<SelectQuerySpec> selectQuerySpecs = newArrayList();
-    private Collection<NativeQuerySpec> nativeQuerySpecs = newArrayList();
+    private Collection<TableSpec> tableSpecs = newArrayList();
+    private Collection<QuerySpec> querySpecs = newArrayList();
     private ResourceSpec outputSpec;
 
     public ConnectionSpec getConnectionSpec() {
@@ -70,20 +70,20 @@ public class DumpSpec extends JobSpecBase {
         this.tableTypes = tableTypes;
     }
 
-    public Collection<SelectQuerySpec> getSelectQuerySpecs() {
-        return selectQuerySpecs;
+    public Collection<TableSpec> getTableSpecs() {
+        return tableSpecs;
     }
 
-    public void setSelectQuerySpecs(Collection<SelectQuerySpec> selectQuerySpecs) {
-        this.selectQuerySpecs = newArrayList(selectQuerySpecs);
+    public void setTableSpecs(Collection<TableSpec> tableSpecs) {
+        this.tableSpecs = newArrayList(tableSpecs);
     }
 
-    public Collection<NativeQuerySpec> getNativeQuerySpecs() {
-        return nativeQuerySpecs;
+    public Collection<QuerySpec> getQuerySpecs() {
+        return querySpecs;
     }
 
-    public void setNativeQuerySpecs(Collection<NativeQuerySpec> nativeQuerySpecs) {
-        this.nativeQuerySpecs = newArrayList(nativeQuerySpecs);
+    public void setQuerySpecs(Collection<QuerySpec> querySpecs) {
+        this.querySpecs = newArrayList(querySpecs);
     }
 
     public ResourceSpec getOutputSpec() {
@@ -104,11 +104,11 @@ public class DumpSpec extends JobSpecBase {
 
         if (connectionSpec != null ? !connectionSpec.equals(dumpSpec.connectionSpec) : dumpSpec.connectionSpec != null)
             return false;
-        if (nativeQuerySpecs != null ? !nativeQuerySpecs.equals(
-                dumpSpec.nativeQuerySpecs) : dumpSpec.nativeQuerySpecs != null) return false;
+        if (querySpecs != null ? !querySpecs.equals(
+                dumpSpec.querySpecs) : dumpSpec.querySpecs != null) return false;
         if (outputSpec != null ? !outputSpec.equals(dumpSpec.outputSpec) : dumpSpec.outputSpec != null) return false;
-        if (selectQuerySpecs != null ? !selectQuerySpecs.equals(
-                dumpSpec.selectQuerySpecs) : dumpSpec.selectQuerySpecs != null) return false;
+        if (tableSpecs != null ? !tableSpecs.equals(
+                dumpSpec.tableSpecs) : dumpSpec.tableSpecs != null) return false;
         if (tableTypes != null ? !Arrays.equals(tableTypes, dumpSpec.tableTypes) : dumpSpec.tableTypes != null) return false;
         if (timeZone != null ? !timeZone.equals(dumpSpec.timeZone) : dumpSpec.timeZone != null) return false;
 
@@ -121,8 +121,8 @@ public class DumpSpec extends JobSpecBase {
         result = 31 * result + (connectionSpec != null ? connectionSpec.hashCode() : 0);
         result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
         result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
-        result = 31 * result + (selectQuerySpecs != null ? selectQuerySpecs.hashCode() : 0);
-        result = 31 * result + (nativeQuerySpecs != null ? nativeQuerySpecs.hashCode() : 0);
+        result = 31 * result + (tableSpecs != null ? tableSpecs.hashCode() : 0);
+        result = 31 * result + (querySpecs != null ? querySpecs.hashCode() : 0);
         result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);
         return result;
     }

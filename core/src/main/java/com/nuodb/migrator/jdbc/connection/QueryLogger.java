@@ -32,5 +32,5 @@ package com.nuodb.migrator.jdbc.connection;
  */
 public interface QueryLogger {
 
-    void log(String statement);
+    void log(String query);
 }

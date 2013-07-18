@@ -44,7 +44,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Sergey Bushik
@@ -79,7 +80,7 @@ public class NuoDBCheckInspectorTest extends InspectorTestBase {
         given(resultSet.getString("CONSTRAINTTEXT")).willReturn(checkClause1, checkClause2);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, CHECK);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope, CHECK);
         verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Check> checks = inspectionResults.getObjects(CHECK);

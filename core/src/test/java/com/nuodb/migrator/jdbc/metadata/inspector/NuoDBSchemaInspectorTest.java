@@ -67,7 +67,7 @@ public class NuoDBSchemaInspectorTest extends InspectorTestBase {
         given(resultSet.getString("SCHEMA")).willReturn(schemaName);
 
         SchemaInspectionScope inspectionScope = new SchemaInspectionScope(catalogName, schemaName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, SCHEMA);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope, SCHEMA);
 
         verifyInspectScope(getInspector(), inspectionScope);
 

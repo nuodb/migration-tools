@@ -82,7 +82,7 @@ public class PostgreSQLIdentityInspector extends InspectorBase<Table, TableInspe
                         },
                         new StatementCallback<PreparedStatement>() {
                             @Override
-                            public void execute(PreparedStatement statement) throws SQLException {
+                            public void process(PreparedStatement statement) throws SQLException {
                                 inspect(inspectionContext, column, statement.executeQuery());
                             }
                         }

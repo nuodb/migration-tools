@@ -66,31 +66,30 @@ public abstract class ScriptTranslatorBase implements ScriptTranslator {
     }
 
     @Override
-    public boolean canTranslateScript(Script sourceScript, DatabaseInfo targetDatabaseInfo) {
-        return (this.sourceDatabaseInfo == null || this.sourceDatabaseInfo.isInherited(sourceScript.getDatabaseInfo())
+    public boolean canTranslateScript(Script script, DatabaseInfo targetDatabaseInfo) {
+        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isInherited(script.getDatabaseInfo())
                 && (this.targetDatabaseInfo == null || this.targetDatabaseInfo.isInherited(targetDatabaseInfo)));
     }
 
     @Override
-    public Script translateScript(Script sourceScript, DatabaseInfo targetDatabaseInfo) {
-        if (canTranslateScript(sourceScript, targetDatabaseInfo)) {
-            return getScriptTranslation(sourceScript, targetDatabaseInfo);
+    public Script translateScript(Script script, DatabaseInfo targetDatabaseInfo) {
+        if (canTranslateScript(script, targetDatabaseInfo)) {
+            return getScriptTranslation(script, targetDatabaseInfo);
         } else {
             return null;
         }
     }
 
-    protected Script getScriptTranslation(Script sourceScript, DatabaseInfo targetDatabaseInfo) {
-        String translation = getScriptTranslation(sourceScript.getScript(), sourceScript.getDatabaseInfo(),
-                targetDatabaseInfo);
+    protected Script getScriptTranslation(Script script, DatabaseInfo databaseInfo) {
+        String translation = getScriptTranslation(script.getScript(), script.getDatabaseInfo(), databaseInfo);
         if (translation != null) {
-            return new SimpleScript(translation, targetDatabaseInfo);
+            return new SimpleScript(translation, databaseInfo);
         } else {
             return null;
         }
     }
 
-    protected abstract String getScriptTranslation(String sourceScript, DatabaseInfo sourceDatabaseInfo,
+    protected abstract String getScriptTranslation(String script, DatabaseInfo sourceDatabaseInfo,
                                                    DatabaseInfo targetDatabaseInfo);
 
     @Override

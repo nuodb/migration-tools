@@ -35,87 +35,82 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 
 import java.util.Collection;
 
+import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
+
 /**
  * @author Sergey Bushik
  */
 public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
 
+    private static final boolean QUALIFY_NAMES = true;
+
     private Dialect dialect;
-    private Table table;
-    private boolean qualifyNames;
+    private Table from;
+    private boolean qualifyNames = QUALIFY_NAMES;
     private Collection<Object> columns = Lists.newArrayList();
     private Collection<String> filters = Lists.newArrayList();
 
     @Override
     public SelectQuery build() {
-        SelectQuery selectQuery = new SelectQuery();
-        if (columns == null || columns.isEmpty()) {
-            for (Column column : table.getColumns()) {
-                selectQuery.column(column);
+        SelectQuery query = new SelectQuery();
+        query.setQualifyNames(qualifyNames);
+        query.from(from);
+
+        Database database = from.getDatabase();
+        if (dialect != null) {
+            query.setDialect(dialect);
+        } else if (database != null) {
+            query.setDialect(database.getDialect());
+        }
+        if (isEmpty(columns)) {
+            for (Column column : from.getColumns()) {
+                query.column(column);
             }
         } else {
             for (Object column : columns) {
-                selectQuery.column(column);
+                query.column(column);
             }
         }
-        Database database = table.getDatabase();
-        if (dialect != null) {
-            selectQuery.setDialect(dialect);
-        } else if (database != null) {
-            selectQuery.setDialect(database.getDialect());
-        }
-        selectQuery.setQualifyNames(qualifyNames);
-
-        selectQuery.from(table);
         if (filters != null) {
             for (String filter : filters) {
-                selectQuery.where(filter);
+                query.where(filter);
             }
         }
-        return selectQuery;
+        return query;
     }
 
-    public Dialect getDialect() {
-        return dialect;
-    }
-
-    public void setDialect(Dialect dialect) {
+    public SelectQueryBuilder dialect(Dialect dialect) {
         this.dialect = dialect;
+        return this;
     }
 
-    public Table getTable() {
-        return table;
+    public SelectQueryBuilder from(Table from) {
+        this.from = from;
+        return this;
     }
 
-    public void setTable(Table table) {
-        this.table = table;
-    }
-
-    public boolean isQualifyNames() {
-        return qualifyNames;
-    }
-
-    public void setQualifyNames(boolean qualifyNames) {
+    public SelectQueryBuilder qualifyNames(boolean qualifyNames) {
         this.qualifyNames = qualifyNames;
+        return this;
     }
 
-    public void addColumn(String column) {
+    public SelectQueryBuilder column(String column) {
         this.columns.add(column);
+        return this;
     }
 
-    public void addColumn(Column column) {
+    public SelectQueryBuilder column(Column column) {
         this.columns.add(column);
+        return this;
     }
 
-    public void addFilter(String filter) {
+    public SelectQueryBuilder filter(String filter) {
         this.filters.add(filter);
+        return this;
     }
 
-    public Collection<String> getFilters() {
-        return filters;
-    }
-
-    public void setFilters(Collection<String> filters) {
+    public SelectQueryBuilder filters(Collection<String> filters) {
         this.filters = filters;
+        return this;
     }
 }

@@ -108,7 +108,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
+                    public void process(PreparedStatement statement) throws SQLException {
                         int parameter = 1;
                         for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
                             statement.setString(parameter++, iterator.next());
@@ -134,7 +134,7 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
+                    public void process(PreparedStatement statement) throws SQLException {
                         for (Schema schema : schemas) {
                             statement.setString(1, schema.getName());
                             inspect(inspectionContext, statement.executeQuery());

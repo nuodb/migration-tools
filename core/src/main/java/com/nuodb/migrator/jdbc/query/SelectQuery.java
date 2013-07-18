@@ -47,7 +47,7 @@ public class SelectQuery extends QueryBase {
     private Collection<Object> columns = newArrayList();
     private Collection<String> where = newArrayList();
     private Collection<OrderBy> orderBy = newArrayList();
-    private Collection<Join> joins = newArrayList();
+    private Collection<Join> join = newArrayList();
 
     public void column(Object... columns) {
         for (Object column : columns) {
@@ -56,15 +56,15 @@ public class SelectQuery extends QueryBase {
     }
 
     public void column(Object column) {
-        this.columns.add(column);
+        columns.add(column);
     }
 
-    public void from(String from) {
-        this.from.add(from);
+    public void from(String table) {
+        from.add(table);
     }
 
     public void from(Table table) {
-        this.from.add(table);
+        from.add(table);
     }
 
     public void innerJoin(String table, String condition) {
@@ -80,11 +80,11 @@ public class SelectQuery extends QueryBase {
     }
 
     public void join(String type, String table, String condition) {
-        this.joins.add(new Join(type, table, condition));
+        join.add(new Join(type, table, condition));
     }
 
     public void where(String filter) {
-        this.where.add(filter);
+        where.add(filter);
     }
 
     public void orderBy(Collection<String> columns) {
@@ -92,11 +92,11 @@ public class SelectQuery extends QueryBase {
     }
 
     public void orderBy(Collection<String> columns, String order) {
-        this.orderBy.add(new OrderBy(columns, order));
+        orderBy.add(new OrderBy(columns, order));
     }
 
     @Override
-    public void toQuery(StringBuilder query) {
+    public void append(StringBuilder query) {
         addSelect(query);
         addFrom(query);
         addJoins(query);
@@ -129,13 +129,13 @@ public class SelectQuery extends QueryBase {
             query.append(" ");
             addTable(query, iterator.next());
             if (iterator.hasNext()) {
-                query.append(", ");
+                query.append(",");
             }
         }
     }
 
     protected void addJoins(StringBuilder query) {
-        QueryUtils.join(query, joins);
+        QueryUtils.join(query, join);
     }
 
     protected void addWhere(StringBuilder query) {
@@ -195,11 +195,39 @@ public class SelectQuery extends QueryBase {
         this.orderBy = orderBy;
     }
 
-    public Collection<Join> getJoins() {
-        return joins;
+    public Collection<Join> getJoin() {
+        return join;
     }
 
-    public void setJoins(Collection<Join> joins) {
-        this.joins = joins;
+    public void setJoin(Collection<Join> join) {
+        this.join = join;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SelectQuery)) return false;
+
+        SelectQuery that = (SelectQuery) o;
+
+        if (columns != null ? !columns.equals(that.columns) : that.columns != null) return false;
+        if (dialect != null ? !dialect.equals(that.dialect) : that.dialect != null) return false;
+        if (from != null ? !from.equals(that.from) : that.from != null) return false;
+        if (join != null ? !join.equals(that.join) : that.join != null) return false;
+        if (orderBy != null ? !orderBy.equals(that.orderBy) : that.orderBy != null) return false;
+        if (where != null ? !where.equals(that.where) : that.where != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = dialect != null ? dialect.hashCode() : 0;
+        result = 31 * result + (from != null ? from.hashCode() : 0);
+        result = 31 * result + (columns != null ? columns.hashCode() : 0);
+        result = 31 * result + (where != null ? where.hashCode() : 0);
+        result = 31 * result + (orderBy != null ? orderBy.hashCode() : 0);
+        result = 31 * result + (join != null ? join.hashCode() : 0);
+        return result;
     }
 }

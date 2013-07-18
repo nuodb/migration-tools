@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.type.jdbc2;
 
+import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
-import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,15 +53,15 @@ public class JdbcSmallIntType extends JdbcTypeBase<Short> {
     }
 
     @Override
-    public Short getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
-                          Map<String, Object> options) throws SQLException {
-        short shortValue = resultSet.getShort(column);
+    public Short getValue(ResultSet resultSet, int columnIndex,
+                          Column column, Map<String, Object> options) throws SQLException {
+        short shortValue = resultSet.getShort(columnIndex);
         return resultSet.wasNull() ? null : shortValue;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Short value, int column,
-                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
-        statement.setShort(column, value);
+    protected void setNullSafeValue(PreparedStatement statement, Short value, int columnIndex,
+                                    Column column, Map<String, Object> options) throws SQLException {
+        statement.setShort(columnIndex, value);
     }
 }

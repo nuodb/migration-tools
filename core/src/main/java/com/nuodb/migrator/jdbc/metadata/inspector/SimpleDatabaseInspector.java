@@ -55,23 +55,23 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
     @Override
     public void inspect(InspectionContext inspectionContext) throws SQLException {
         Database database = addDatabase(inspectionContext.getInspectionResults());
-        DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
+        DatabaseMetaData metaData = inspectionContext.getConnection().getMetaData();
 
         DriverInfo driverInfo = new DriverInfo();
-        driverInfo.setName(databaseMetaData.getDriverName());
-        driverInfo.setVersion(databaseMetaData.getDriverVersion());
-        driverInfo.setMinorVersion(databaseMetaData.getDriverMinorVersion());
-        driverInfo.setMajorVersion(databaseMetaData.getDriverMajorVersion());
+        driverInfo.setName(metaData.getDriverName());
+        driverInfo.setVersion(metaData.getDriverVersion());
+        driverInfo.setMinorVersion(metaData.getDriverMinorVersion());
+        driverInfo.setMajorVersion(metaData.getDriverMajorVersion());
         if (logger.isDebugEnabled()) {
             logger.debug(format("DriverInfo: %s", driverInfo));
         }
         database.setDriverInfo(driverInfo);
 
         DatabaseInfo databaseInfo = new DatabaseInfo();
-        databaseInfo.setProductName(databaseMetaData.getDatabaseProductName());
-        databaseInfo.setProductVersion(databaseMetaData.getDatabaseProductVersion());
-        databaseInfo.setMinorVersion(databaseMetaData.getDatabaseMinorVersion());
-        databaseInfo.setMajorVersion(databaseMetaData.getDatabaseMajorVersion());
+        databaseInfo.setProductName(metaData.getDatabaseProductName());
+        databaseInfo.setProductVersion(metaData.getDatabaseProductVersion());
+        databaseInfo.setMinorVersion(metaData.getDatabaseMinorVersion());
+        databaseInfo.setMajorVersion(metaData.getDatabaseMajorVersion());
         if (logger.isDebugEnabled()) {
             logger.debug(format("DatabaseInfo: %s", databaseInfo));
         }

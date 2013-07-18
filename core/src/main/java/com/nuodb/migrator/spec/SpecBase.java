@@ -27,16 +27,17 @@
  */
 package com.nuodb.migrator.spec;
 
-import com.google.common.collect.Maps;
 import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
 
 public class SpecBase implements Spec {
 
     private String id;
     private String type;
-    private Map<String, Object> attributes = Maps.newHashMap();
+    private Map<String, Object> attributes = newHashMap();
 
     public String getId() {
         return id;

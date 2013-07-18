@@ -48,13 +48,13 @@ public class CliLoadJob extends CliRunJob {
     public static final String COMMAND = "load";
 
     public CliLoadJob() {
-        super(COMMAND, new LoadJobFactory());
+        super(COMMAND);
     }
 
     @Override
     protected Option createOption() {
         return newGroupBuilder()
-                .withName(getResources().getMessage(LOAD_GROUP_NAME))
+                .withName(getMessage(LOAD_GROUP_NAME))
                 .withOption(createTargetGroup())
                 .withOption(createInputGroup())
                 .withOption(createInsertTypeGroup())
@@ -69,7 +69,8 @@ public class CliLoadJob extends CliRunJob {
         loadSpec.setInputSpec(parseInputGroup(optionSet, this));
         loadSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
         parseInsertTypeGroup(optionSet, loadSpec);
-        ((LoadJobFactory) getJobFactory()).setLoadSpec(loadSpec);
+
+        setJobFactory(new LoadJobFactory(loadSpec));
     }
 
     protected Option createInsertTypeGroup() {

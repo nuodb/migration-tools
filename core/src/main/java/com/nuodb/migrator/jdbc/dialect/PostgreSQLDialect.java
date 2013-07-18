@@ -27,79 +27,27 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.query.SelectQuery;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static com.google.common.collect.Iterables.get;
-import static com.google.common.collect.Iterables.size;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
-import static java.lang.Long.parseLong;
+import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 
 /**
  * @author Sergey Bushik
  */
 public class PostgreSQLDialect extends SimpleDialect {
 
-    private static final Pattern EXPLAIN_QUERY_ROW_COUNT = Pattern.compile("rows=(\\d+)");
-
     public PostgreSQLDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
-    }
-
-    @Override
-    protected RowCountQuery createRowCountApproxQuery(Table table) {
-        PrimaryKey primaryKey = table.getPrimaryKey();
-        Column column = null;
-        if (primaryKey != null && size(primaryKey.getColumns()) > 0) {
-            column = get(primaryKey.getColumns(), 0);
-        }
-        if (column == null) {
-            for (Index index : table.getIndexes()) {
-                if (index.isUnique() && size(index.getColumns()) > 0) {
-                    column = get(index.getColumns(), 0);
-                }
-            }
-        }
-        SelectQuery selectQuery = new SelectQuery();
-        selectQuery.setDialect(this);
-        selectQuery.from(table);
-        selectQuery.column(column != null ? column : "*");
-
-        RowCountQuery rowCountQuery = new RowCountQuery();
-        rowCountQuery.setTable(table);
-        rowCountQuery.setColumn(column);
-        rowCountQuery.setRowCountType(APPROX);
-        rowCountQuery.setQuery(new ExplainQuery(selectQuery));
-        return rowCountQuery;
-    }
-
-    @Override
-    protected RowCountValue extractRowCountValue(ResultSet rowCount, RowCountQuery rowCountQuery) throws SQLException {
-        RowCountValue rowCountValue = null;
-        switch (rowCountQuery.getRowCountType()) {
-            case APPROX:
-                while (rowCountValue == null && rowCount.next()) {
-                    Matcher matcher = EXPLAIN_QUERY_ROW_COUNT.matcher(rowCount.getString(1));
-                    if (matcher.find()) {
-                        rowCountValue = new RowCountValue(rowCountQuery, parseLong(matcher.group(1)));
-                    }
-                }
-                break;
-            case EXACT:
-                rowCountValue = rowCount.next() ? new RowCountValue(rowCountQuery, rowCount.getLong(1)) : null;
-                break;
-        }
-        return rowCountValue;
     }
 
     /**
@@ -107,7 +55,7 @@ public class PostgreSQLDialect extends SimpleDialect {
      * case.
      *
      * @param identifier   to be normalized.
-     * @param identifiable
+     * @param identifiable object identified by specified identifier.
      * @return boolean indicating whether quoting is required.
      */
     @Override
@@ -178,5 +126,30 @@ public class PostgreSQLDialect extends SimpleDialect {
     @Override
     public boolean supportsDropSequenceIfExists() {
         return true;
+    }
+
+    @Override
+    public boolean supportsLimit() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsLimitParameters() {
+        return true;
+    }
+
+    @Override
+    public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
+        return new PostgreSQLLimitHandler(this, query, queryLimit);
+    }
+
+    @Override
+    public boolean supportsRowCount(Table table, Column column, String filter, RowCountType rowCountType) {
+        return rowCountType == APPROX || rowCountType == EXACT;
+    }
+
+    @Override
+    public RowCountHandler createRowCountHandler(Table table, Column column, String filter, RowCountType rowCountType) {
+        return new PostgreSQLTableRowCountHandler(this, table, column, filter, rowCountType);
     }
 }

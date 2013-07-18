@@ -27,10 +27,10 @@
  */
 package com.nuodb.migrator.jdbc.type.jdbc4;
 
+import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.*;
 import java.util.Map;
@@ -59,14 +59,14 @@ public class JdbcNClobType extends JdbcTypeBase<NClob> {
     }
 
     @Override
-    public NClob getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
-                          Map<String, Object> options) throws SQLException {
-        return resultSet.getNClob(column);
+    public NClob getValue(ResultSet resultSet, int columnIndex,
+                          Column column, Map<String, Object> options) throws SQLException {
+        return resultSet.getNClob(columnIndex);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, NClob value, int column,
-                                    JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
-        statement.setNClob(column, value);
+    protected void setNullSafeValue(PreparedStatement statement, NClob value, int columnIndex,
+                                    Column column, Map<String, Object> options) throws SQLException {
+        statement.setNClob(columnIndex, value);
     }
 }

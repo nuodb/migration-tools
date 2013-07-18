@@ -160,7 +160,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         Dialect dialect = context.getDialect();
         if (objectTypes.contains(IDENTITY)) {
             for (Table table : tables) {
-                if (!isGenerateScript(context, table)) {
+                if (!addScriptForTable(context, table)) {
                     continue;
                 }
                 for (Column column : table.getColumns()) {
@@ -176,7 +176,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                     tableScriptGeneratorContext.getAttributes().get(TABLES);
             tableScriptGeneratorContext.getObjectTypes().remove(FOREIGN_KEY);
             for (Table table : tables) {
-                if (!isGenerateScript(context, table)) {
+                if (!addScriptForTable(context, table)) {
                     continue;
                 }
                 scripts.addAll(tableScriptGeneratorContext.getCreateScripts(table));
@@ -191,7 +191,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                         primary = true;
                         continue;
                     }
-                    if (!isGenerateScript(context, index.getTable())) {
+                    if (!addScriptForTable(context, index.getTable())) {
                         continue;
                     }
                     scripts.addAll(context.getCreateScripts(index));
@@ -205,8 +205,8 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             for (Table table : tables) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
                     Table primaryTable = foreignKey.getPrimaryTable();
-                    if (!isGenerateScript(context, primaryTable) ||
-                            !isGenerateScript(context, foreignKey.getForeignTable())) {
+                    if (!addScriptForTable(context, primaryTable) ||
+                            !addScriptForTable(context, foreignKey.getForeignTable())) {
                         continue;
                     }
                     if (generatedTables.contains(primaryTable)) {
@@ -228,8 +228,8 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                     (Multimap<Table, ForeignKey>) context.getAttributes().get(FOREIGN_KEYS);
             for (ForeignKey foreignKey : newArrayList(pendingForeignKeys.values())) {
                 Table primaryTable = foreignKey.getPrimaryTable();
-                if (!isGenerateScript(context, primaryTable) ||
-                        !isGenerateScript(context, foreignKey.getForeignTable())) {
+                if (!addScriptForTable(context, primaryTable) ||
+                        !addScriptForTable(context, foreignKey.getForeignTable())) {
                     continue;
                 }
                 if (generatedTables.contains(primaryTable) || force) {
@@ -245,7 +245,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         Dialect dialect = context.getDialect();
         if (objectTypes.contains(FOREIGN_KEY) && dialect.supportsDropConstraints()) {
             for (Table table : tables) {
-                if (!isGenerateScript(context, table)) {
+                if (!addScriptForTable(context, table)) {
                     continue;
                 }
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
@@ -255,7 +255,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
         if (objectTypes.contains(TABLE)) {
             for (Table table : tables) {
-                if (!isGenerateScript(context, table)) {
+                if (!addScriptForTable(context, table)) {
                     continue;
                 }
                 scripts.addAll(context.getDropScripts(table));
@@ -263,7 +263,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
         if (objectTypes.contains(IDENTITY) && dialect.supportsSequence()) {
             for (Table table : tables) {
-                if (!isGenerateScript(context, table)) {
+                if (!addScriptForTable(context, table)) {
                     continue;
                 }
                 for (Column column : table.getColumns()) {
@@ -275,7 +275,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
     }
 
-    protected boolean isGenerateScript(ScriptGeneratorContext context, Table table) {
+    protected boolean addScriptForTable(ScriptGeneratorContext context, Table table) {
         Collection<String> tableTypes = (Collection<String>) context.getAttributes().get(TABLE_TYPES);
         return tableTypes != null ? tableTypes.contains(table.getType()) : Table.TABLE.equals(table.getType());
     }

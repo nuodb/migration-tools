@@ -27,8 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.type.jdbc2;
 
+import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcType;
-import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.*;
 import java.util.Calendar;
@@ -46,24 +46,24 @@ public class JdbcDateType extends JdbcDateTypeBase<Date> {
     }
 
     @Override
-    public Date getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
-                         Map<String, Object> options) throws SQLException {
+    public Date getValue(ResultSet resultSet, int columnIndex,
+                         Column column, Map<String, Object> options) throws SQLException {
         Calendar calendar = getCalendar(options);
         if (calendar != null) {
-            return resultSet.getDate(column, calendar);
+            return resultSet.getDate(columnIndex, calendar);
         } else {
-            return resultSet.getDate(column);
+            return resultSet.getDate(columnIndex);
         }
     }
 
     @Override
     protected void setNullSafeValue(PreparedStatement statement, Date value,
-                                    int column, JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
+                                    int columnIndex, Column column, Map<String, Object> options) throws SQLException {
         Calendar calendar = getCalendar(options);
         if (calendar == null) {
-            statement.setDate(column, value);
+            statement.setDate(columnIndex, value);
         } else {
-            statement.setDate(column, value, calendar);
+            statement.setDate(columnIndex, value, calendar);
         }
     }
 }

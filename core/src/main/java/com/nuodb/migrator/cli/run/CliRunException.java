@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.cli.run;
 
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class CliRunException extends MigrationException {
+public class CliRunException extends MigratorException {
 
     public CliRunException(String message) {
         super(message);

@@ -40,10 +40,12 @@ import java.util.Collection;
  */
 public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
 
+    private static final boolean QUALIFY_NAMES = true;
+
     private Dialect dialect;
     private InsertType insertType;
     private Table table;
-    private boolean qualifyNames;
+    private boolean qualifyNames = QUALIFY_NAMES;
     private Collection<String> columns = Lists.newArrayList();
 
     @Override
@@ -51,7 +53,7 @@ public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
         InsertQuery insertQuery = new InsertQuery();
         insertQuery.setInsertType(insertType);
         insertQuery.setQualifyNames(qualifyNames);
-        insertQuery.setTable(table);
+        insertQuery.setInto(table);
         Database database = table.getDatabase();
         if (dialect != null) {
             insertQuery.setDialect(dialect);
@@ -70,43 +72,29 @@ public class InsertQueryBuilder implements QueryBuilder<InsertQuery> {
         return insertQuery;
     }
 
-    public Dialect getDialect() {
-        return dialect;
-    }
 
-    public void setDialect(Dialect dialect) {
+    public InsertQueryBuilder dialect(Dialect dialect) {
         this.dialect = dialect;
+        return this;
     }
 
-    public InsertType getInsertType() {
-        return insertType;
-    }
-
-    public void setInsertType(InsertType insertType) {
+    public InsertQueryBuilder insertType(InsertType insertType) {
         this.insertType = insertType;
+        return this;
     }
 
-    public Table getTable() {
-        return table;
-    }
-
-    public void setTable(Table table) {
+    public InsertQueryBuilder into(Table table) {
         this.table = table;
+        return this;
     }
 
-    public boolean isQualifyNames() {
-        return qualifyNames;
-    }
-
-    public void setQualifyNames(boolean qualifyNames) {
+    public InsertQueryBuilder qualifyNames(boolean qualifyNames) {
         this.qualifyNames = qualifyNames;
+        return this;
     }
 
-    public Collection<String> getColumns() {
-        return columns;
-    }
-
-    public void setColumns(Collection<String> columns) {
+    public InsertQueryBuilder columns(Collection<String> columns) {
         this.columns = columns;
+        return this;
     }
 }

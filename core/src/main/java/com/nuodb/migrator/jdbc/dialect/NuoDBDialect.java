@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -127,18 +128,18 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     protected void initScriptTranslations() {
-        addScriptTranslations(MYSQL, newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()",
-                        "LOCALTIME", "LOCALTIME()", "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW");
+        addScriptTranslation(MYSQL, newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()",
+                "LOCALTIME", "LOCALTIME()", "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW");
 
-        addScriptTranslations(MSSQL_SERVER,newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW");
+        addScriptTranslation(MSSQL_SERVER, newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW");
         addScriptTranslationRegex(MSSQL_SERVER, "N'(.*)'", "$1");
 
-        addScriptTranslations(POSTGRE_SQL,newArrayList("CURRENT_TIMESTAMP", "NOW()"), "NOW");
+        addScriptTranslation(POSTGRE_SQL, newArrayList("CURRENT_TIMESTAMP", "NOW()"), "NOW");
         addScriptTranslationRegex(POSTGRE_SQL, "'(.*)'::.*", "$1");
 
-        addScriptTranslations(ORACLE,newArrayList("CURRENT_DATE", "SYSDATE"), "NOW");
+        addScriptTranslation(ORACLE, newArrayList("CURRENT_DATE", "SYSDATE"), "NOW");
 
-        addScriptTranslations(DB2, newArrayList("CURRENT DATE", "CURRENT TIME", "CURRENT TIMESTAMP"), "NOW");
+        addScriptTranslation(DB2, newArrayList("CURRENT DATE", "CURRENT TIME", "CURRENT TIMESTAMP"), "NOW");
     }
 
     @Override
@@ -273,5 +274,26 @@ public class NuoDBDialect extends SimpleDialect {
             buffer.append(')');
         }
         return buffer.toString();
+    }
+
+    @Override
+    public boolean supportsLimit() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsLimitParameters() {
+        return true;
+    }
+
+    @Override
+    public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
+        return new NuoDBLimitHandler(this, query, queryLimit);
+    }
+
+    @Override
+    public boolean supportsRowCount(Table table, Column column, String filter, RowCountType rowCountType) {
+        // row count disabled temporary for performance reasons
+        return false;
     }
 }

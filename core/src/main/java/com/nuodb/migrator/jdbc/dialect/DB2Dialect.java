@@ -66,4 +66,14 @@ public class DB2Dialect extends SimpleDialect {
         addJdbcTypeName(Types.LONGVARCHAR, "LONG VARCHAR");
         addJdbcTypeName(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA");
     }
+
+    @Override
+    public boolean supportsLimit() {
+        return true;
+    }
+
+    @Override
+    public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
+        return new DB2LimitHandler(this, query, queryLimit);
+    }
 }

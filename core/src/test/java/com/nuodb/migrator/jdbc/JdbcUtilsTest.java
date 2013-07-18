@@ -69,6 +69,6 @@ public class JdbcUtilsTest {
     public void testCloseConnectionServices() throws SQLException {
         ConnectionServices connectionServices = mock(ConnectionServices.class);
         close(connectionServices);
-        verify(connectionServices).closeConnection();
+        verify(connectionServices).close();
     }
 }

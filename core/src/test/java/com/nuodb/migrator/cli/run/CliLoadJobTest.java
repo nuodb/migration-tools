@@ -32,7 +32,7 @@ import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.load.LoadJobFactory;
-import com.nuodb.migrator.resultset.format.csv.CsvAttributes;
+import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.LoadSpec;
 import com.nuodb.migrator.spec.ResourceSpec;

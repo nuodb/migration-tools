@@ -16,12 +16,12 @@
  */
 package com.nuodb.migrator.cli.parse;
 
-import com.nuodb.migrator.MigrationException;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * A problem found while dealing with executable line options.
  */
-public class OptionException extends MigrationException {
+public class OptionException extends MigratorException {
 
     private Option option;
 

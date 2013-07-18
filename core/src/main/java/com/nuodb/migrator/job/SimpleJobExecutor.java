@@ -31,7 +31,9 @@ import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -99,15 +101,19 @@ public class SimpleJobExecutor implements JobExecutor {
         if (logger.isDebugEnabled()) {
             logger.debug(format("Starting execution of job %s", job.getName()));
         }
-        JobExecution execution = createJobExecution(context);
+        JobExecution execution = createExecution(context);
         try {
-            fireJobExecutionEvent(new JobExecutionEvent(execution));
+            fire(new JobExecutionEvent(execution));
+
+            job.init(execution);
             job.execute(execution);
+
             synchronized (jobStatus) {
                 jobStatus.setExecutionEndDate(new Date());
                 jobStatus.setRunning(false);
             }
-            fireJobExecutionEvent(new JobExecutionEvent(execution));
+
+            fire(new JobExecutionEvent(execution));
         } catch (Throwable failure) {
             if (logger.isDebugEnabled()) {
                 logger.debug(format("Job %s execution failed", job.getName()), failure);
@@ -117,16 +123,24 @@ public class SimpleJobExecutor implements JobExecutor {
                 jobStatus.setRunning(false);
                 jobStatus.setFailure(failure);
             }
-            fireJobExecutionEvent(new JobExecutionEvent(execution));
+            fire(new JobExecutionEvent(execution));
+        } finally {
+            try {
+                job.release(execution);
+            } catch (Exception exception) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(format("Job release %s failure", job.getName()), exception);
+                }
+            }
         }
         return true;
     }
 
-    protected JobExecution createJobExecution(Map<Object, Object> context) {
+    protected JobExecution createExecution(Map<Object, Object> context) {
         return new SimpleJobExecution(job, jobStatus, context);
     }
 
-    protected void fireJobExecutionEvent(JobExecutionEvent event) {
+    protected void fire(JobExecutionEvent event) {
         for (JobExecutionListener listener : listeners) {
             listener.onJobExecuted(event);
         }

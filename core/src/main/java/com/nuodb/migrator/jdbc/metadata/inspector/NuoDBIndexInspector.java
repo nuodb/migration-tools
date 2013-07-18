@@ -83,7 +83,7 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void execute(PreparedStatement statement) throws SQLException {
+                    public void process(PreparedStatement statement) throws SQLException {
                         for (TableInspectionScope inspectionScope : inspectionScopes) {
                             statement.setString(1, inspectionScope.getSchema());
                             statement.setString(2, inspectionScope.getTable());

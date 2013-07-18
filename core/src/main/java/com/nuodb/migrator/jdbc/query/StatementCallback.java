@@ -33,7 +33,7 @@ import java.sql.Statement;
 /**
  * @author Sergey Bushik
  */
-public interface StatementCallback<T extends Statement> {
+public interface StatementCallback<S extends Statement> {
 
-    void execute(T statement) throws SQLException;
+    void process(S statement) throws SQLException;
 }

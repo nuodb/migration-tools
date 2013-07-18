@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.type.jdbc2;
 
+import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
-import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -49,15 +49,15 @@ public class JdbcIntegerType extends JdbcTypeBase<Integer> {
     }
 
     @Override
-    public Integer getValue(ResultSet resultSet, int column, JdbcTypeSpecifiers specifiers,
-                            Map<String, Object> options) throws SQLException {
-        int intValue = resultSet.getInt(column);
+    public Integer getValue(ResultSet resultSet, int columnIndex,
+                            Column column, Map<String, Object> options) throws SQLException {
+        int intValue = resultSet.getInt(columnIndex);
         return resultSet.wasNull() ? null : intValue;
     }
 
     @Override
     protected void setNullSafeValue(PreparedStatement statement, Integer value,
-                                    int column, JdbcTypeSpecifiers specifiers, Map<String, Object> options) throws SQLException {
-        statement.setInt(column, value);
+                                    int columnIndex, Column column, Map<String, Object> options) throws SQLException {
+        statement.setInt(columnIndex, value);
     }
 }

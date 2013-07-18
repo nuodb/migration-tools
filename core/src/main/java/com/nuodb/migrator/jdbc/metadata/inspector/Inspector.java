@@ -40,11 +40,11 @@ public interface Inspector<M extends MetaData, I extends InspectionScope> extend
 
     void inspect(InspectionContext inspectionContext) throws SQLException;
 
-    void inspectScope(InspectionContext inspectionContext, I inspectionScope) throws SQLException;
-
     void inspectObject(InspectionContext inspectionContext, M object) throws SQLException;
 
     void inspectObjects(InspectionContext inspectionContext, Collection<? extends M> objects) throws SQLException;
+
+    void inspectScope(InspectionContext inspectionContext, I inspectionScope) throws SQLException;
 
     boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException;
 }

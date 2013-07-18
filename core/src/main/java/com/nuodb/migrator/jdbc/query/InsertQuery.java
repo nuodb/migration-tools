@@ -35,15 +35,16 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import java.util.Iterator;
 import java.util.Map;
 
+import static com.nuodb.migrator.jdbc.query.InsertType.INSERT;
+
 /**
  * @author Sergey Bushik
  */
 public class InsertQuery extends QueryBase {
 
-    private InsertType insertType = InsertType.INSERT;
+    private InsertType insertType = INSERT;
     private Dialect dialect;
-    private Table table;
-    private boolean qualifyNames;
+    private Table into;
     private Map<Column, String> columns = Maps.newLinkedHashMap();
 
     public InsertType getInsertType() {
@@ -62,20 +63,12 @@ public class InsertQuery extends QueryBase {
         this.dialect = dialect;
     }
 
-    public Table getTable() {
-        return table;
+    public Table getInto() {
+        return into;
     }
 
-    public void setTable(Table table) {
-        this.table = table;
-    }
-
-    public boolean isQualifyNames() {
-        return qualifyNames;
-    }
-
-    public void setQualifyNames(boolean qualifyNames) {
-        this.qualifyNames = qualifyNames;
+    public void setInto(Table into) {
+        this.into = into;
     }
 
     public Map<Column, String> getColumns() {
@@ -95,10 +88,10 @@ public class InsertQuery extends QueryBase {
     }
 
     @Override
-    public void toQuery(StringBuilder query) {
-        query.append(insertType == null ? InsertType.INSERT : insertType.getCommand());
+    public void append(StringBuilder query) {
+        query.append(insertType == null ? INSERT : insertType.getCommand());
         query.append(" INTO ")
-                .append(qualifyNames ? table.getQualifiedName(dialect) : table.getName(dialect));
+                .append(isQualifyNames() ? into.getQualifiedName(dialect) : into.getName(dialect));
         if (columns.size() == 0) {
             query.append(' ').append(dialect.getNoColumnsInsert());
         } else {

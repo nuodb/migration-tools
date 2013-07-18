@@ -78,7 +78,7 @@ public class NuoDBIndexInspectorTest extends InspectorTestBase {
         given(resultSet.getInt("POSITION")).willReturn(position);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, INDEX);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope, INDEX);
         verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Index> indexes = inspectionResults.getObjects(INDEX);

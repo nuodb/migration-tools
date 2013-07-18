@@ -27,11 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-
-import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 
 /**
  * @author Sergey Bushik
@@ -42,33 +40,19 @@ public class MSSQLServer2005Dialect extends MSSQLServerDialect {
         super(databaseInfo);
     }
 
-    /**
-     * Row counts using SYS.DM_DB_PARTITION_STATS dynamic management view.
-     * http://www.sqlservercentral.com/articles/T-SQL/67624/
-     *
-     * @param table to estimate row count for.
-     * @return query used to estimate row count number.
-     */
     @Override
-    protected RowCountQuery createRowCountApproxQuery(Table table) {
-        String catalog = table.getCatalog().getName() + ".";
+    public boolean supportsLimitOffset() {
+        return true;
+    }
 
-        SelectQuery selectQuery = new SelectQuery();
-        selectQuery.column("DDPS.ROW_COUNT");
-        selectQuery.from(catalog + "SYS.INDEXES AS I");
-        selectQuery.innerJoin(catalog + "SYS.TABLES AS T", "I.OBJECT_ID = t.OBJECT_ID");
-        selectQuery.innerJoin(catalog + "SYS.SCHEMAS AS S", "T.SCHEMA_ID=S.SCHEMA_ID");
-        selectQuery.innerJoin(catalog + "SYS.DM_DB_PARTITION_STATS AS DDPS",
-                "I.OBJECT_ID = DDPS.OBJECT_ID AND I.INDEX_ID = DDPS.INDEX_ID");
-        selectQuery.where("I.INDEX_ID < 2");
-        selectQuery.where("T.IS_MS_SHIPPED=0");
-        selectQuery.where("S.NAME='" + table.getSchema().getName() + "'");
-        selectQuery.where("T.NAME='" + table.getName() + "'");
+    @Override
+    public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
+        return new MSSQLServer2005LimitHandler(this, query, queryLimit);
+    }
 
-        RowCountQuery rowCountQuery = new RowCountQuery();
-        rowCountQuery.setTable(table);
-        rowCountQuery.setRowCountType(APPROX);
-        rowCountQuery.setQuery(selectQuery);
-        return rowCountQuery;
+    @Override
+    public RowCountHandler createRowCountHandler(Table table, Column column, String filter,
+                                                      RowCountType rowCountType) {
+        return new MSSQLServer2005TableRowCountHandler(this, table, column, filter, rowCountType);
     }
 }

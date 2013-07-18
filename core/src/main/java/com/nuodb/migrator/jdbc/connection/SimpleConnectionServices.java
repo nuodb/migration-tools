@@ -64,7 +64,7 @@ public class SimpleConnectionServices<C extends ConnectionSpec> implements Conne
     }
 
     @Override
-    public void closeConnection() throws SQLException {
+    public void close() throws SQLException {
         connectionProvider.closeConnection(connection);
         connection = null;
     }

@@ -29,6 +29,7 @@ package com.nuodb.migrator.bootstrap.config;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Sergey Bushik
@@ -41,6 +42,11 @@ public class PropertiesConfig implements Config {
     public PropertiesConfig(Properties properties, Replacer replacer) {
         this.properties = properties;
         this.replacer = replacer;
+    }
+
+    @Override
+    public Set<String> getPropertyNames() {
+        return properties.stringPropertyNames();
     }
 
     @Override

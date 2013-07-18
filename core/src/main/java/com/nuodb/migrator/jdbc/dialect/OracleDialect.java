@@ -27,12 +27,11 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimeZone;
@@ -40,7 +39,7 @@ import java.util.TimeZone;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
-import static java.lang.String.format;
+import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 
@@ -48,14 +47,6 @@ import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
  * @author Sergey Bushik
  */
 public class OracleDialect extends SimpleDialect {
-
-    public static final String UPDATE_TABLE_STATISTICS_QUERY = "ANALYZE TABLE %s ESTIMATE STATISTICS SAMPLE 10 PERCENT";
-
-    public static final boolean UPDATE_TABLE_STATISTICS = true;
-
-    private String updateTableStatisticsQuery = UPDATE_TABLE_STATISTICS_QUERY;
-
-    private boolean updateTableStatistics = UPDATE_TABLE_STATISTICS;
 
     public OracleDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -89,32 +80,6 @@ public class OracleDialect extends SimpleDialect {
         }
     }
 
-    @Override
-    protected RowCountQuery createRowCountApproxQuery(Table table) {
-        SelectQuery selectQuery = new SelectQuery();
-        selectQuery.setDialect(this);
-        selectQuery.from("SYS.ALL_TABLES");
-        selectQuery.column("NUM_ROWS");
-        selectQuery.where("ALL_TABLES.OWNER='" + table.getSchema().getName() + "'");
-        selectQuery.where("ALL_TABLES.TABLE_NAME='" + table.getName() + "'");
-
-        RowCountQuery rowCountQuery = new RowCountQuery();
-        rowCountQuery.setTable(table);
-        rowCountQuery.setRowCountType(APPROX);
-        rowCountQuery.setQuery(selectQuery);
-        return rowCountQuery;
-    }
-
-    @Override
-    protected RowCountValue executeRowCountQuery(Statement statement, RowCountQuery rowCountQuery) throws SQLException {
-        if (isUpdateTableStatistics()) {
-            Table table = rowCountQuery.getTable();
-            statement.execute(format(getUpdateTableStatisticsQuery(), table.getQualifiedName(this)));
-        }
-        ResultSet rowCount = statement.executeQuery(rowCountQuery.getQuery().toQuery());
-        return extractRowCountValue(rowCount, rowCountQuery);
-    }
-
     protected String timeZoneAsValue(TimeZone timeZone) {
         int rawOffset = timeZone.getRawOffset();
         int dstSavings = timeZone.getDSTSavings();
@@ -132,22 +97,6 @@ public class OracleDialect extends SimpleDialect {
         value.append(zeros.substring(0, zeros.length() - minutesOffset.length()));
         value.append("'");
         return value.toString();
-    }
-
-    public String getUpdateTableStatisticsQuery() {
-        return updateTableStatisticsQuery;
-    }
-
-    public void setUpdateTableStatisticsQuery(String updateTableStatisticsQuery) {
-        this.updateTableStatisticsQuery = updateTableStatisticsQuery;
-    }
-
-    public boolean isUpdateTableStatistics() {
-        return updateTableStatistics;
-    }
-
-    public void setUpdateTableStatistics(boolean updateTableStatistics) {
-        this.updateTableStatistics = updateTableStatistics;
     }
 
     @Override
@@ -178,5 +127,30 @@ public class OracleDialect extends SimpleDialect {
     @Override
     public String getSequenceCycle(boolean cycle) {
         return cycle ? "CYCLE" : "NOCYCLE";
+    }
+
+    @Override
+    public boolean supportsLimit() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsLimitParameters() {
+        return true;
+    }
+
+    @Override
+    public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
+        return new OracleLimitHandler(this, query, queryLimit);
+    }
+
+    @Override
+    public boolean supportsRowCount(Table table, Column column, String filter, RowCountType rowCountType) {
+        return (rowCountType == APPROX && column == null && filter == null) || (rowCountType == EXACT);
+    }
+
+    @Override
+    public RowCountHandler createRowCountHandler(Table table, Column column, String filter, RowCountType rowCountType) {
+        return new OracleTableRowCountHandler(this, table, column, filter, rowCountType);
     }
 }

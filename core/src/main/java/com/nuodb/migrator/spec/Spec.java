@@ -27,9 +27,10 @@
  */
 package com.nuodb.migrator.spec;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public interface Spec {
+public interface Spec extends Serializable {
 
     String getId();
 

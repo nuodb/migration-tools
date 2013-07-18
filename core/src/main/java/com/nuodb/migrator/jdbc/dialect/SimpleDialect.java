@@ -27,30 +27,28 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.query.SelectQuery;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolverAware;
 import com.nuodb.migrator.jdbc.type.*;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static com.google.common.collect.Iterables.get;
-import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.NOOP;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
-import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.sql.Connection.*;
 
@@ -116,43 +114,27 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     protected void initScriptTranslations() {
     }
 
-    protected PatternScriptTranslator addScriptTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript,
-                                                           String targetScript) {
-        PatternScriptTranslator patternScriptTranslator = new PatternScriptTranslator(
-                sourceDatabaseInfo, getDatabaseInfo());
-        patternScriptTranslator.addScriptTranslation(sourceScript, targetScript);
-        addScriptTranslator(patternScriptTranslator);
-        return patternScriptTranslator;
+    protected void addScriptTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript, String targetScript) {
+        getScriptTranslationManager().addScriptTranslation(sourceDatabaseInfo, sourceScript, getDatabaseInfo(),
+                targetScript);
     }
 
-    protected PatternScriptTranslator addScriptTranslations(DatabaseInfo sourceDatabaseInfo,
-                                                            Collection<String> sourceScripts,
-                                                            String targetScript) {
-        PatternScriptTranslator patternScriptTranslator = new PatternScriptTranslator(
-                sourceDatabaseInfo, getDatabaseInfo());
-        patternScriptTranslator.addScriptTranslations(sourceScripts, targetScript);
-        addScriptTranslator(patternScriptTranslator);
-        return patternScriptTranslator;
+    protected void addScriptTranslation(DatabaseInfo sourceDatabaseInfo, Collection<String> sourceScripts,
+                                        String targetScript) {
+        getScriptTranslationManager().addScriptTranslations(sourceDatabaseInfo, sourceScripts, getDatabaseInfo(),
+                targetScript);
     }
 
-    protected PatternScriptTranslator addScriptTranslationRegex(DatabaseInfo sourceDatabaseInfo,
-                                                                String sourceScriptRegex,
-                                                                String targetScript) {
-        PatternScriptTranslator patternScriptTranslator = new PatternScriptTranslator(
-                sourceDatabaseInfo, getDatabaseInfo());
-        patternScriptTranslator.addScriptTranslationRegex(sourceScriptRegex, targetScript);
-        addScriptTranslator(patternScriptTranslator);
-        return patternScriptTranslator;
+    protected void addScriptTranslationRegex(DatabaseInfo sourceDatabaseInfo, String sourceScript,
+                                             String targetScript) {
+        getScriptTranslationManager().addScriptTranslationRegex(
+                sourceDatabaseInfo, sourceScript, getDatabaseInfo(), targetScript);
     }
 
-    protected PatternScriptTranslator addScriptTranslationRegex(DatabaseInfo sourceDatabaseInfo,
-                                                                Pattern sourceScriptPattern,
-                                                                String targetScript) {
-        PatternScriptTranslator patternScriptTranslator = new PatternScriptTranslator(
-                sourceDatabaseInfo, getDatabaseInfo());
-        patternScriptTranslator.addScriptTranslationPattern(sourceScriptPattern, targetScript);
-        addScriptTranslator(patternScriptTranslator);
-        return patternScriptTranslator;
+    protected void addScriptTranslationPattern(DatabaseInfo sourceDatabaseInfo, Pattern sourceScript,
+                                               String targetScript) {
+        getScriptTranslationManager().addScriptTranslationPattern(sourceDatabaseInfo, sourceScript, getDatabaseInfo(),
+                targetScript);
     }
 
     protected void addScriptTranslator(ScriptTranslator scriptTranslator) {
@@ -184,8 +166,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public JdbcTypeDesc getJdbcTypeDescAlias(int typeCode, String typeName) {
-        return getJdbcTypeRegistry().getJdbcTypeDescAlias(typeCode, typeName);
+    public JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName) {
+        return getJdbcTypeRegistry().getJdbcTypeAlias(typeCode, typeName);
     }
 
     protected String quote(String identifier) {
@@ -293,9 +275,14 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public JdbcValueAccessProvider getJdbcValueAccessProvider() {
+        return new SimpleJdbcValueAccessProvider(getJdbcTypeRegistry());
+    }
+
+    @Override
     public JdbcTypeNameMap getJdbcTypeNameMap(DatabaseInfo databaseInfo) {
-        JdbcTypeNameMap targetJdbcTypeNameMap = jdbcTypeNameMaps.get(databaseInfo);
-        if (targetJdbcTypeNameMap == null) {
+        JdbcTypeNameMap jdbcTypeNameMap = jdbcTypeNameMaps.get(databaseInfo);
+        if (jdbcTypeNameMap == null) {
             DatabaseInfo targetDatabaseInfo = null;
             for (Map.Entry<DatabaseInfo, JdbcTypeNameMap> entry : jdbcTypeNameMaps.entrySet()) {
                 if (!entry.getKey().isInherited(databaseInfo)) {
@@ -303,16 +290,16 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
                 }
                 if (targetDatabaseInfo == null) {
                     targetDatabaseInfo = entry.getKey();
-                    targetJdbcTypeNameMap = entry.getValue();
+                    jdbcTypeNameMap = entry.getValue();
                 } else if (targetDatabaseInfo.compareTo(entry.getKey()) >= 0) {
-                    targetJdbcTypeNameMap = entry.getValue();
+                    jdbcTypeNameMap = entry.getValue();
                 }
             }
         }
-        if (targetJdbcTypeNameMap == null) {
-            jdbcTypeNameMaps.put(databaseInfo, targetJdbcTypeNameMap = new JdbcTypeNameMap());
+        if (jdbcTypeNameMap == null) {
+            jdbcTypeNameMaps.put(databaseInfo, jdbcTypeNameMap = new JdbcTypeNameMap());
         }
-        return targetJdbcTypeNameMap;
+        return jdbcTypeNameMap;
     }
 
     @Override
@@ -386,89 +373,43 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public boolean supportsRowCountType(Table table, RowCountType rowCountType) {
-        return createRowCountQuery(table, rowCountType) != null;
+    public boolean supportsRowCount(Table table, Column column, String filter, RowCountType rowCountType) {
+        return rowCountType == EXACT;
     }
 
     @Override
-    public RowCountValue getRowCountValue(Connection connection, Table table,
-                                          RowCountType rowCountType) throws SQLException {
-        RowCountQuery rowCountQuery = createRowCountQuery(table, rowCountType);
-        if (rowCountQuery != null) {
-            return executeRowCountQuery(connection, rowCountQuery);
-        } else {
-            throw new DialectException(format("Row count type is not supported %s", rowCountType));
-        }
+    public RowCountHandler createRowCountHandler(Table table, Column column, String filter, RowCountType rowCountType) {
+        return new SimpleTableRowCountHandler(this, table, column, filter, rowCountType);
     }
 
-    protected RowCountQuery createRowCountQuery(Table table, RowCountType rowCountType) {
-        RowCountQuery rowCountQuery = null;
-        switch (rowCountType) {
-            case APPROX:
-                rowCountQuery = createRowCountApproxQuery(table);
-                break;
-            case EXACT:
-                rowCountQuery = createRowCountExactQuery(table);
-                break;
-        }
-        return rowCountQuery;
+    /**
+     * Supports LIMIT {row count} syntax.
+     *
+     * @return true if limit query syntax is supported.
+     */
+    @Override
+    public boolean supportsLimit() {
+        return false;
     }
 
-    protected RowCountQuery createRowCountApproxQuery(Table table) {
-        return null;
+    /**
+     * Supports LIMIT {offset, row count} syntax.
+     *
+     * @return true if limit with offset syntax is supported.
+     */
+    @Override
+    public boolean supportsLimitOffset() {
+        return supportsLimit();
     }
 
-    protected RowCountQuery createRowCountExactQuery(Table table) {
-        SelectQuery query = new SelectQuery();
-        query.setQualifyNames(true);
-        query.setDialect(this);
-        query.from(table);
-        PrimaryKey primaryKey = table.getPrimaryKey();
-        Column column = null;
-        if (primaryKey != null && size(primaryKey.getColumns()) > 0) {
-            column = get(primaryKey.getColumns(), 0);
-        }
-        query.column("COUNT(" + (column != null ? column.getName(this) : "*") + ")");
-
-        RowCountQuery rowCountQuery = new RowCountQuery();
-        rowCountQuery.setTable(table);
-        rowCountQuery.setRowCountType(EXACT);
-        rowCountQuery.setQuery(query);
-        rowCountQuery.setColumn(column);
-        return rowCountQuery;
+    @Override
+    public boolean supportsLimitParameters() {
+        return false;
     }
 
-    protected RowCountValue executeRowCountQuery(Connection connection,
-                                                 final RowCountQuery rowCountQuery) throws SQLException {
-        final MutableObject<RowCountValue> rowCountValue = new MutableObject<RowCountValue>();
-        new StatementTemplate(connection).execute(
-                new StatementFactory<Statement>() {
-                    @Override
-                    public Statement create(Connection connection) throws SQLException {
-                        return createRowCountStatement(connection, rowCountQuery);
-                    }
-                }, new StatementCallback<Statement>() {
-                    @Override
-                    public void execute(Statement statement) throws SQLException {
-                        rowCountValue.setValue(executeRowCountQuery(statement, rowCountQuery));
-                    }
-                }
-        );
-        return rowCountValue.getValue();
-    }
-
-    protected Statement createRowCountStatement(Connection connection,
-                                                RowCountQuery rowCountQuery) throws SQLException {
-        return connection.createStatement();
-    }
-
-    protected RowCountValue executeRowCountQuery(Statement statement, RowCountQuery rowCountQuery) throws SQLException {
-        ResultSet rowCount = statement.executeQuery(rowCountQuery.getQuery().toQuery());
-        return extractRowCountValue(rowCount, rowCountQuery);
-    }
-
-    protected RowCountValue extractRowCountValue(ResultSet rowCount, RowCountQuery rowCountQuery) throws SQLException {
-        return rowCount.next() ? new RowCountValue(rowCountQuery, rowCount.getLong(1)) : null;
+    @Override
+    public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
+        return new SimpleLimitHandler(this, query, queryLimit);
     }
 
     @Override
@@ -634,12 +575,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc,
-                                  JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        String jdbcTypeName = getJdbcTypeName(getJdbcTypeNameMap(databaseInfo), jdbcTypeDesc,
-                jdbcTypeSpecifiers);
+    public String getJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc typeDesc,
+                                  JdbcTypeSpecifiers typeSpecifiers) {
+        String jdbcTypeName = getJdbcTypeName(getJdbcTypeNameMap(databaseInfo), typeDesc, typeSpecifiers);
         if (jdbcTypeName == null) {
-            jdbcTypeName = getJdbcTypeName(getJdbcTypeNameMap(), jdbcTypeDesc, jdbcTypeSpecifiers);
+            jdbcTypeName = getJdbcTypeName(getJdbcTypeNameMap(), typeDesc, typeSpecifiers);
         }
         return jdbcTypeName;
     }
@@ -653,7 +593,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias) {
-        getJdbcTypeRegistry().addJdbcTypeDescAlias(typeCode, typeName, typeCodeAlias);
+        getJdbcTypeRegistry().addJdbcTypeAlias(typeCode, typeName, typeCodeAlias);
     }
 
     protected void addJdbcTypeName(int typeCode, String typeName) {
@@ -695,12 +635,12 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers, typeName);
     }
 
-    protected String getJdbcTypeName(JdbcTypeNameMap jdbcTypeNameMap, JdbcTypeDesc jdbcTypeDesc,
-                                     JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        String jdbcTypeName = jdbcTypeNameMap.getJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers);
+    protected String getJdbcTypeName(JdbcTypeNameMap typeNameMap, JdbcTypeDesc typeDesc,
+                                     JdbcTypeSpecifiers typeSpecifiers) {
+        String jdbcTypeName = typeNameMap.getJdbcTypeName(typeDesc, typeSpecifiers);
         if (jdbcTypeName == null) {
-            jdbcTypeName = jdbcTypeNameMap.getJdbcTypeName(
-                    new JdbcTypeDesc(jdbcTypeDesc.getTypeCode()), jdbcTypeSpecifiers);
+            jdbcTypeName = typeNameMap.getJdbcTypeName(
+                    new JdbcTypeDesc(typeDesc.getTypeCode()), typeSpecifiers);
         }
         return jdbcTypeName;
     }

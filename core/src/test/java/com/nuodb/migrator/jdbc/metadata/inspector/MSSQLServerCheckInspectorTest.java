@@ -77,7 +77,7 @@ public class MSSQLServerCheckInspectorTest extends InspectorTestBase {
         given(resultSet.getString("CHECK_CLAUSE")).willReturn(checkClause);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, CHECK);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope, CHECK);
         verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Check> checks = inspectionResults.getObjects(CHECK);

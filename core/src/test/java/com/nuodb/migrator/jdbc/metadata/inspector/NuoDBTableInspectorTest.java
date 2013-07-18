@@ -73,7 +73,7 @@ public class NuoDBTableInspectorTest extends InspectorTestBase {
         given(resultSet.getString("TYPE")).willReturn(type);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(inspectionScope, TABLE);
+        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope, TABLE);
         verifyInspectScope(getInspector(), inspectionScope);
 
         Collection<Table> tables = inspectionResults.getObjects(TABLE);
