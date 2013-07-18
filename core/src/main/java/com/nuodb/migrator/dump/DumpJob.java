@@ -102,14 +102,15 @@ public class DumpJob extends JobBase {
         if (logger.isDebugEnabled()) {
             logger.debug("Initializing dump job context");
         }
+        final DumpContext dumpContext = getDumpContext();
         dumpContext.setTimeZone(getTimeZone());
 
-        ResourceSpec outputSpec = getOutputSpec();
+        final ResourceSpec outputSpec = getOutputSpec();
         dumpContext.setFormat(outputSpec.getType());
         dumpContext.setFormatAttributes(outputSpec.getAttributes());
         dumpContext.setCatalogManager(new XmlCatalogManager(outputSpec.getPath()));
 
-        Connection connection = getConnectionProviderFactory().createConnectionProvider(
+        final Connection connection = getConnectionProviderFactory().createConnectionProvider(
                 getConnectionSpec()).getConnection();
         dumpContext.setConnection(connection);
         dumpContext.setDialect(getDialectResolver().resolve(connection));
@@ -127,8 +128,9 @@ public class DumpJob extends JobBase {
      */
     @Override
     public void execute(JobExecution execution) throws Exception {
-        Dialect dialect = dumpContext.getDialect();
-        Connection connection = dumpContext.getConnection();
+        final DumpContext dumpContext = getDumpContext();
+        final Dialect dialect = dumpContext.getDialect();
+        final Connection connection = dumpContext.getConnection();
         try {
             dialect.setTransactionIsolation(connection,
                     new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
@@ -158,7 +160,7 @@ public class DumpJob extends JobBase {
         InspectionScope inspectionScope = new TableInspectionScope(
                 getConnectionSpec().getCatalog(), getConnectionSpec().getSchema(), getTableTypes());
         InspectionResults inspectionResults = getInspectionManager().inspect(
-                dumpContext.getConnection(), inspectionScope, META_DATA_TYPES);
+                getDumpContext().getConnection(), inspectionScope, META_DATA_TYPES);
         return inspectionResults.getObject(DATABASE);
     }
 
@@ -172,7 +174,7 @@ public class DumpJob extends JobBase {
         // TODO: configure default query limit from CLI parameter
         // dumpWriter.setDefaultQueryLimit(new QueryLimit(100000L));
 
-        Database database = dumpContext.getDatabase();
+        Database database = getDumpContext().getDatabase();
         Collection<TableSpec> tableSpecs = getTableSpecs();
         if (isEmpty(tableSpecs)) {
             String[] tableTypes = getTableTypes();

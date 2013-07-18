@@ -97,12 +97,13 @@ class DumpQuery implements DumpTask {
 
     @Override
     public void execute() throws Exception {
+        final DumpQueryMonitor dumpQueryMonitor = getDumpQueryMonitor();
         dumpQueryMonitor.executeStart(this);
 
-        Chunk chunk = null;
-        ResultSet resultSet = getResultSet();
-        OutputFormat outputFormat = getOutputFormat();
+        final ResultSet resultSet = getResultSet();
+        final OutputFormat outputFormat = getOutputFormat();
 
+        Chunk chunk = null;
         while (dumpQueryMonitor.canWrite(this) && resultSet.next()) {
             if (chunk == null) {
                 writeStart(chunk = addChunk());
@@ -122,13 +123,13 @@ class DumpQuery implements DumpTask {
 
     @Override
     public void close() {
-        JdbcUtils.close(resultSet);
-        JdbcUtils.close(statement);
+        JdbcUtils.close(getResultSet());
+        JdbcUtils.close(getStatement());
     }
 
     protected ValueHandleList createValueHandleList() throws SQLException {
-        return newBuilder(resultSet).
-                withColumns(createColumnList(resultSet)).
+        return newBuilder(getResultSet()).
+                withColumns(createColumnList(getResultSet())).
                 withDialect(getDumpContext().getDialect()).
                 withTimeZone(getDumpContext().getTimeZone()).
                 withValueFormatRegistry(getDumpContext().getValueFormatRegistry()).build();
@@ -137,21 +138,24 @@ class DumpQuery implements DumpTask {
     protected OutputFormat createOutputFormat() {
         OutputFormat outputFormat = getDumpContext().getFormatFactory().createOutputFormat(
                 getDumpContext().getFormat(), getDumpContext().getFormatAttributes());
-        outputFormat.setValueHandleList(valueHandleList);
+        outputFormat.setValueHandleList(getValueHandleList());
         return outputFormat;
     }
 
     protected void writeStart(Chunk chunk) throws Exception {
+        final OutputFormat outputFormat = getOutputFormat();
         outputFormat.setOutputStream(getDumpContext().getCatalogManager().openOutputStream(chunk.getName()));
         outputFormat.open();
         outputFormat.writeStart();
-        dumpQueryMonitor.writeStart(this, chunk);
+
+        getDumpQueryMonitor().writeStart(this, chunk);
     }
 
     protected void writeEnd(Chunk chunk) throws Exception {
+        final OutputFormat outputFormat = getOutputFormat();
         outputFormat.writeEnd();
         outputFormat.close();
-        dumpQueryMonitor.writeEnd(this, chunk);
+        getDumpQueryMonitor().writeEnd(this, chunk);
     }
 
     protected Chunk addChunk() {
@@ -175,7 +179,7 @@ class DumpQuery implements DumpTask {
     protected String getChunkName(int chunkIndex) {
         Collection parts = newArrayList(getRowSetName());
         int splitIndex = getQuerySplit().getSplitIndex();
-        if (splitIndex != 0 || hasNextQuerySplit) {
+        if (splitIndex != 0 || isHasNextQuerySplit()) {
             parts.add(splitIndex + 1);
         }
         if (chunkIndex > 0) {

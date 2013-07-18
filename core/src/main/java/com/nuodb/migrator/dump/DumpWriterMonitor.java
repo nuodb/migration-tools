@@ -31,7 +31,9 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.primitives.Ints;
 import com.nuodb.migrator.backup.catalog.Chunk;
+import com.nuodb.migrator.backup.catalog.Column;
 import com.nuodb.migrator.backup.catalog.RowSet;
 import com.nuodb.migrator.backup.format.value.ValueHandle;
 import org.slf4j.Logger;
@@ -66,7 +68,7 @@ class DumpWriterMonitor implements DumpQueryMonitor {
             return newTreeSet(new Comparator<DumpQuery>() {
                 @Override
                 public int compare(DumpQuery o1, DumpQuery o2) {
-                    return Integer.compare(o1.getQuerySplit().getSplitIndex(), o2.getQuerySplit().getSplitIndex());
+                    return Ints.compare(o1.getQuerySplit().getSplitIndex(), o2.getQuerySplit().getSplitIndex());
                 }
             });
         }
@@ -76,9 +78,9 @@ class DumpWriterMonitor implements DumpQueryMonitor {
     public void executeStart(DumpQuery dumpQuery) {
         Boolean queryDescInit = queryHandleInitMap.get(dumpQuery.getQueryHandle());
         if (queryDescInit == null || !queryDescInit) {
-            Collection<com.nuodb.migrator.backup.catalog.Column> columns = newArrayList();
+            Collection<Column> columns = newArrayList();
             for (ValueHandle valueHandle : dumpQuery.getValueHandleList()) {
-                columns.add(new com.nuodb.migrator.backup.catalog.Column(valueHandle.getName(),
+                columns.add(new Column(valueHandle.getName(),
                         toAlias(valueHandle.getValueType())));
             }
             dumpQuery.getRowSet().setColumns(columns);

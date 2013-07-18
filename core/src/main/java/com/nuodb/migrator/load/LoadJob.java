@@ -104,11 +104,12 @@ public class LoadJob extends JobBase {
         if (logger.isDebugEnabled()) {
             logger.debug("Initializing load job context");
         }
-        ResourceSpec inputSpec = getInputSpec();
+        final LoadContext loadContext = getLoadContext();
+        final ResourceSpec inputSpec = getInputSpec();
         loadContext.setFormatAttributes(inputSpec.getAttributes());
         loadContext.setCatalogManager(new XmlCatalogManager(inputSpec.getPath()));
 
-        Connection connection = getConnectionProviderFactory().createConnectionProvider(
+        final Connection connection = getConnectionProviderFactory().createConnectionProvider(
                 getConnectionSpec()).getConnection();
         loadContext.setConnection(connection);
         loadContext.setDialect(getDialectResolver().resolve(connection));
@@ -118,8 +119,9 @@ public class LoadJob extends JobBase {
 
     @Override
     public void execute(JobExecution execution) throws Exception {
-        Connection connection = loadContext.getConnection();
-        Dialect dialect = loadContext.getDialect();
+        final LoadContext loadContext = getLoadContext();
+        final Connection connection = loadContext.getConnection();
+        final Dialect dialect = loadContext.getDialect();
         try {
             if (dialect.supportsSessionTimeZone()) {
                 dialect.setSessionTimeZone(connection, getTimeZone());
@@ -156,7 +158,7 @@ public class LoadJob extends JobBase {
             final Table table = getRowSetMapper().getTable(getLoadContext(), rowSet);
             if (table != null) {
                 final InsertQuery query = createInsertQuery(table, rowSet.getColumns());
-                final StatementTemplate template = new StatementTemplate(loadContext.getConnection());
+                final StatementTemplate template = new StatementTemplate(getLoadContext().getConnection());
                 template.execute(
                         new StatementFactory<PreparedStatement>() {
                             @Override
@@ -183,9 +185,9 @@ public class LoadJob extends JobBase {
         ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
         for (Chunk chunk : rowSet.getChunks()) {
             InputFormat inputFormat = getFormatFactory().createInputFormat(
-                    rowSet.getCatalog().getFormat(), loadContext.getFormatAttributes());
+                    rowSet.getCatalog().getFormat(), getLoadContext().getFormatAttributes());
             inputFormat.setValueHandleList(valueHandleList);
-            inputFormat.setInputStream(loadContext.getCatalogManager().openInputStream(chunk.getName()));
+            inputFormat.setInputStream(getLoadContext().getCatalogManager().openInputStream(chunk.getName()));
             inputFormat.open();
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Loading %d rows from %s chunk to %s table",
@@ -226,9 +228,9 @@ public class LoadJob extends JobBase {
                 });
         return newBuilder(statement).
                 withColumns(newArrayList(columns)).
-                withDialect(loadContext.getDialect()).
+                withDialect(getLoadContext().getDialect()).
                 withTimeZone(getTimeZone()).
-                withValueFormatRegistry(loadContext.getValueFormatRegistry()).build();
+                withValueFormatRegistry(getLoadContext().getValueFormatRegistry()).build();
     }
 
     protected InsertQuery createInsertQuery(Table table, Collection<Column> columns) {
