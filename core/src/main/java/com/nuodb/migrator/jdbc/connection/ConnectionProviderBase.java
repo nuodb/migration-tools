@@ -58,11 +58,6 @@ public abstract class ConnectionProviderBase<C extends ConnectionSpec> implement
     }
 
     @Override
-    public ConnectionServices<C> getConnectionServices() throws SQLException {
-        return new SimpleConnectionServices<C>(this);
-    }
-
-    @Override
     public Connection getConnection() throws SQLException {
         if (logger.isDebugEnabled()) {
             logger.debug(format("Creating connection using %s", getConnectionSpec()));

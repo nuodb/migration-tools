@@ -44,7 +44,6 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 public class LoadContext {
 
-    private Map<String, Object> formatAttributes = newHashMap();
     private Dialect dialect;
     private Database database;
     private TimeZone timeZone;
@@ -52,6 +51,7 @@ public class LoadContext {
     private FormatFactory formatFactory;
     private CatalogManager catalogManager;
     private ValueFormatRegistry valueFormatRegistry;
+    private Map<String, Object> formatAttributes = newHashMap();
 
     public Map<String, Object> getFormatAttributes() {
         return formatAttributes;

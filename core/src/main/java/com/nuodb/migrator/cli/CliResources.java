@@ -91,6 +91,11 @@ public interface CliResources {
     final String QUERY_OPTION_DESCRIPTION = "com.nuodb.migrator.query.option.description";
     final String QUERY_ARGUMENT_NAME = "com.nuodb.migrator.query.argument.name";
 
+    final String THREADS_OPTION_DESCRIPTION = "com.nuodb.migrator.threads.option.description";
+    final String THREADS_ARGUMENT_NAME = "com.nuodb.migrator.threads.argument.name";
+    final String QUERY_LIMIT_OPTION_DESCRIPTION = "com.nuodb.migrator.query.limit.option.description";
+    final String QUERY_LIMIT_ARGUMENT_NAME = "com.nuodb.migrator.query.limit.argument.name";
+
     final String LOAD_GROUP_NAME = "com.nuodb.migrator.load.group.name";
     final String TARGET_GROUP_NAME = "com.nuodb.migrator.target.group.name";
     final String TARGET_URL_OPTION_DESCRIPTION = "com.nuodb.migrator.target.url.option.description";

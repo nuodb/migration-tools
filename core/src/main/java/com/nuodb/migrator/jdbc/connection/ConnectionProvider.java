@@ -34,8 +34,6 @@ import java.sql.SQLException;
 
 public interface ConnectionProvider<C extends ConnectionSpec> extends HasConnectionSpec<C> {
 
-    ConnectionServices<C> getConnectionServices() throws SQLException;
-
     Connection getConnection() throws SQLException;
 
     void closeConnection(Connection connection) throws SQLException;

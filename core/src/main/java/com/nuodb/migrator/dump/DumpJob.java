@@ -34,6 +34,7 @@ import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
+import com.nuodb.migrator.jdbc.dialect.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
@@ -169,10 +170,11 @@ public class DumpJob extends JobBase {
             logger.debug("Initializing dump writer");
         }
         DumpWriter dumpWriter = new DumpWriter(getDumpContext());
-        dumpWriter.setThreads(1);
-        // TODO: dumpContext.setThreads(Runtime.getRuntime().availableProcessors());
+        // dumpWriter.setThreads(Runtime.getRuntime().availableProcessors());
         // TODO: configure default query limit from CLI parameter
-        // dumpWriter.setDefaultQueryLimit(new QueryLimit(100000L));
+        // dumpWriter.setQueryLimit(new QueryLimit(1000000L));
+        dumpWriter.setThreads(getThreads() != null ? getThreads() : DumpWriter.THREADS);
+        dumpWriter.setQueryLimit(getQueryLimit());
 
         Database database = getDumpContext().getDatabase();
         Collection<TableSpec> tableSpecs = getTableSpecs();
@@ -271,6 +273,10 @@ public class DumpJob extends JobBase {
         this.valueFormatRegistryResolver = valueFormatRegistryResolver;
     }
 
+    public Integer getThreads() {
+        return dumpSpec.getThreads();
+    }
+
     protected ResourceSpec getOutputSpec() {
         return dumpSpec.getOutputSpec();
     }
@@ -293,5 +299,9 @@ public class DumpJob extends JobBase {
 
     protected ConnectionSpec getConnectionSpec() {
         return dumpSpec.getConnectionSpec();
+    }
+
+    public QueryLimit getQueryLimit() {
+        return dumpSpec.getQueryLimit();
     }
 }

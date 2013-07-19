@@ -134,7 +134,7 @@ public abstract class ValueHandleListBuilder {
         valueHandle.setJdbcValueAccessOptions(buildJdbcValueAccessOptions(valueHandle));
     }
 
-    private Map<String, Object> buildJdbcValueAccessOptions(ValueHandle valueHandle) {
+    protected Map<String, Object> buildJdbcValueAccessOptions(ValueHandle valueHandle) {
         Map<String, Object> jdbcValueAccessOptions = null;
         switch (valueHandle.getTypeCode()) {
             case Types.DATE:

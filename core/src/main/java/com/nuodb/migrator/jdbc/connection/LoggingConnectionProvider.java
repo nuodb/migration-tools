@@ -67,11 +67,6 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
     }
 
     @Override
-    public ConnectionServices getConnectionServices() throws SQLException {
-        return connectionProvider.getConnectionServices();
-    }
-
-    @Override
     public ConnectionSpec getConnectionSpec() {
         return connectionProvider.getConnectionSpec();
     }
@@ -122,7 +117,7 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
         return connectionProvider.toString();
     }
 
-    protected class ConnectionInvocationHandler extends
+    class ConnectionInvocationHandler extends
             ConnectionProxyProviderBase.ConnectionInvocationHandler {
 
         private static final String GET_META_DATA_METHOD = "getMetaData";
@@ -168,7 +163,7 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
         }
     }
 
-    protected class ConnectionAwareInvocationHandlerBase<T> extends ReflectionInvocationHandler<T> {
+    class ConnectionAwareInvocationHandlerBase<T> extends ReflectionInvocationHandler<T> {
 
         private static final String GET_CONNECTION_METHOD = "getConnection";
 
@@ -189,7 +184,7 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
         }
     }
 
-    protected class ConnectionAwareStatementHandler<T extends Statement> extends ConnectionAwareInvocationHandlerBase<T> {
+    class ConnectionAwareStatementHandler<T extends Statement> extends ConnectionAwareInvocationHandlerBase<T> {
 
         private final Collection<String> EXECUTE_METHODS = newHashSet("execute", "executeQuery", "executeUpdate");
 
@@ -213,7 +208,7 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
         }
     }
 
-    protected class ConnectionAwarePreparedStatementHandler extends ConnectionAwareStatementHandler<PreparedStatement> {
+    class ConnectionAwarePreparedStatementHandler extends ConnectionAwareStatementHandler<PreparedStatement> {
 
         private static final String SET_NULL = "setNull";
 

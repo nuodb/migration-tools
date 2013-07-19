@@ -72,6 +72,11 @@ public interface CliOptions {
     final String TABLE_INSERT_OPTION = "table.*.insert";
     final String TABLE_REPLACE_OPTION = "table.*.replace";
 
+    final String THREADS_OPTION = "threads";
+    final String THREADS_SHORT_OPTION = "t";
+
+    final String QUERY_LIMIT_OPTION = "query.limit";
+
     final String QUERY_OPTION = "query";
 
     final String TARGET_URL_OPTION = "target.url";

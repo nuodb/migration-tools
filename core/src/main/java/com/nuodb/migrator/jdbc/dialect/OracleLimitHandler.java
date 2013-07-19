@@ -31,8 +31,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getLimit;
-import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getOffset;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.AND;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 import static java.util.Arrays.asList;
@@ -48,12 +46,22 @@ public class OracleLimitHandler extends SimpleLimitHandler {
     }
 
     @Override
-    protected String createLimitQuery(String query) {
+    protected String createLimitQuery(String query, long limit) {
+        return createLimitQuery(query, asList("ROWNUM_ <= " + limit));
+    }
+
+    @Override
+    protected String createParameterizedLimitQuery(String query) {
         return createLimitQuery(query, asList("ROWNUM_ <= ?"));
     }
 
     @Override
-    protected String createLimitOffsetQuery(String query) {
+    protected String createLimitOffsetQuery(String query, long limit, long offset) {
+        return createLimitQuery(query, asList("ROWNUM_ > " + offset, "ROWNUM_ <= " + (limit + offset)));
+    }
+
+    @Override
+    protected String createParameterizedLimitOffsetQuery(String query) {
         return createLimitQuery(query, asList("ROWNUM_ > ?", "ROWNUM_ <= ?"));
     }
 
@@ -78,12 +86,12 @@ public class OracleLimitHandler extends SimpleLimitHandler {
 
     @Override
     protected void bindLimit(PreparedStatement statement, int index) throws SQLException {
-        statement.setLong(index, getLimit(getQueryLimit()));
+        statement.setLong(index, getLimit());
     }
 
     @Override
     protected void bindLimitOffset(PreparedStatement statement, int index) throws SQLException {
-        statement.setLong(index, getOffset(getQueryLimit()));
-        statement.setLong(index + 1, getLimit(getQueryLimit()) + getOffset(getQueryLimit()));
+        statement.setLong(index, getOffset());
+        statement.setLong(index + 1, getLimit() + getOffset());
     }
 }

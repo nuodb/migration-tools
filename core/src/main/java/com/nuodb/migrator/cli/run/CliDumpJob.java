@@ -33,6 +33,7 @@ import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.dump.DumpJobFactory;
+import com.nuodb.migrator.jdbc.dialect.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.spec.DumpSpec;
 import com.nuodb.migrator.spec.QuerySpec;
@@ -46,8 +47,11 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newLinkedHashSet;
+import static com.nuodb.impl.util.StringUtils.isEmpty;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
 
 /**
  * An implementation of {@link CliRunAdapter} which assembles dump spec from provided command line after the validation
@@ -75,17 +79,22 @@ public class CliDumpJob extends CliRunJob {
                 .withOption(createTableGroup())
                 .withOption(createQueryGroup())
                 .withOption(createTimeZoneOption())
+                .withOption(createThreadsOption())
+                .withOption(createQueryLimitOption())
                 .withRequired(true).build();
     }
 
     @Override
     protected void bind(OptionSet optionSet) {
         DumpSpec dumpSpec = new DumpSpec();
+
+        parseTableGroup(optionSet, dumpSpec);
         dumpSpec.setConnectionSpec(parseSourceGroup(optionSet, this));
         dumpSpec.setOutputSpec(parseOutputGroup(optionSet, this));
         dumpSpec.setQuerySpecs(parseQueryGroup(optionSet));
         dumpSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
-        parseTableGroup(optionSet, dumpSpec);
+        dumpSpec.setThreads(parseThreadsOption(optionSet, this));
+        dumpSpec.setQueryLimit(parseQueryLimitOption(optionSet, this));
 
         setJobFactory(new DumpJobFactory(dumpSpec));
     }
@@ -135,6 +144,27 @@ public class CliDumpJob extends CliRunJob {
 
         group.withOption(tableFilter);
         return group.build();
+    }
+
+    protected Option createThreadsOption() {
+        return newBasicOptionBuilder().
+                withName(THREADS_OPTION).
+                withAlias(THREADS_SHORT_OPTION, OptionFormat.SHORT).
+                withDescription(getMessage(THREADS_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(THREADS_ARGUMENT_NAME)).build()
+                ).build();
+    }
+
+    protected Option createQueryLimitOption() {
+        return newBasicOptionBuilder().
+                withName(QUERY_LIMIT_OPTION).
+                withDescription(getMessage(QUERY_LIMIT_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(QUERY_LIMIT_ARGUMENT_NAME)).build()
+                ).build();
     }
 
     protected void parseTableGroup(OptionSet optionSet, DumpSpec dumpSpec) {
@@ -189,5 +219,15 @@ public class CliDumpJob extends CliRunJob {
             querySpecs.add(new QuerySpec(query));
         }
         return querySpecs;
+    }
+
+    protected Integer parseThreadsOption(OptionSet optionSet, Option option) {
+        String threadsValue = (String) optionSet.getValue(THREADS_OPTION);
+        return !isEmpty(threadsValue) ? parseInt(threadsValue) : null;
+    }
+
+    protected QueryLimit parseQueryLimitOption(OptionSet optionSet, Option option) {
+        String queryLimitValue = (String) optionSet.getValue(QUERY_LIMIT_OPTION);
+        return !isEmpty(queryLimitValue) ? new QueryLimit(parseLong(queryLimitValue)) : null;
     }
 }

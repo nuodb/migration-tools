@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.jdbc.dialect.QueryLimit;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.TimeZone;
@@ -39,12 +41,22 @@ import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
  */
 public class DumpSpec extends JobSpecBase {
 
+    private Integer threads;
     private ConnectionSpec connectionSpec;
     private TimeZone timeZone;
     private String[] tableTypes = new String[]{TABLE};
     private Collection<TableSpec> tableSpecs = newArrayList();
     private Collection<QuerySpec> querySpecs = newArrayList();
     private ResourceSpec outputSpec;
+    private QueryLimit queryLimit;
+
+    public Integer getThreads() {
+        return threads;
+    }
+
+    public void setThreads(Integer threads) {
+        this.threads = threads;
+    }
 
     public ConnectionSpec getConnectionSpec() {
         return connectionSpec;
@@ -94,22 +106,30 @@ public class DumpSpec extends JobSpecBase {
         this.outputSpec = outputSpec;
     }
 
+    public QueryLimit getQueryLimit() {
+        return queryLimit;
+    }
+
+    public void setQueryLimit(QueryLimit queryLimit) {
+        this.queryLimit = queryLimit;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof DumpSpec)) return false;
         if (!super.equals(o)) return false;
 
         DumpSpec dumpSpec = (DumpSpec) o;
 
         if (connectionSpec != null ? !connectionSpec.equals(dumpSpec.connectionSpec) : dumpSpec.connectionSpec != null)
             return false;
-        if (querySpecs != null ? !querySpecs.equals(
-                dumpSpec.querySpecs) : dumpSpec.querySpecs != null) return false;
         if (outputSpec != null ? !outputSpec.equals(dumpSpec.outputSpec) : dumpSpec.outputSpec != null) return false;
-        if (tableSpecs != null ? !tableSpecs.equals(
-                dumpSpec.tableSpecs) : dumpSpec.tableSpecs != null) return false;
-        if (tableTypes != null ? !Arrays.equals(tableTypes, dumpSpec.tableTypes) : dumpSpec.tableTypes != null) return false;
+        if (queryLimit != null ? !queryLimit.equals(dumpSpec.queryLimit) : dumpSpec.queryLimit != null) return false;
+        if (querySpecs != null ? !querySpecs.equals(dumpSpec.querySpecs) : dumpSpec.querySpecs != null) return false;
+        if (tableSpecs != null ? !tableSpecs.equals(dumpSpec.tableSpecs) : dumpSpec.tableSpecs != null) return false;
+        if (!Arrays.equals(tableTypes, dumpSpec.tableTypes)) return false;
+        if (threads != null ? !threads.equals(dumpSpec.threads) : dumpSpec.threads != null) return false;
         if (timeZone != null ? !timeZone.equals(dumpSpec.timeZone) : dumpSpec.timeZone != null) return false;
 
         return true;
@@ -118,12 +138,14 @@ public class DumpSpec extends JobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + (threads != null ? threads.hashCode() : 0);
         result = 31 * result + (connectionSpec != null ? connectionSpec.hashCode() : 0);
         result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
         result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
         result = 31 * result + (tableSpecs != null ? tableSpecs.hashCode() : 0);
         result = 31 * result + (querySpecs != null ? querySpecs.hashCode() : 0);
         result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);
+        result = 31 * result + (queryLimit != null ? queryLimit.hashCode() : 0);
         return result;
     }
 }

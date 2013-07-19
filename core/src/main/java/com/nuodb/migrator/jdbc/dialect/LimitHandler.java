@@ -35,7 +35,7 @@ import java.sql.SQLException;
  */
 public interface LimitHandler {
 
-    String getLimitQuery();
+    String getLimitQuery(boolean parameterized);
 
     String getQuery();
 
@@ -43,7 +43,7 @@ public interface LimitHandler {
 
     QueryLimit getQueryLimit();
 
-    int bindParametersAtStart(PreparedStatement preparedStatement, int index) throws SQLException;
+    int bindParametersAtStart(PreparedStatement statement, int index) throws SQLException;
 
-    int bindParametersAtEnd(PreparedStatement preparedStatement, int index) throws SQLException;
+    int bindParametersAtEnd(PreparedStatement statement, int index) throws SQLException;
 }

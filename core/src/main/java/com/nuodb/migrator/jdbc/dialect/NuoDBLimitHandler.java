@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import static java.lang.String.valueOf;
+
 /**
  * @author Sergey Bushik
  */
@@ -37,12 +39,22 @@ public class NuoDBLimitHandler extends SimpleLimitHandler {
     }
 
     @Override
-    public String createLimitQuery(String query) {
+    protected String createLimitQuery(String query, long limit) {
+        return query + " LIMIT " + valueOf(limit);
+    }
+
+    @Override
+    protected String createParameterizedLimitQuery(String query) {
         return query + " LIMIT ?";
     }
 
     @Override
-    public String createLimitOffsetQuery(String query) {
+    protected String createLimitOffsetQuery(String query, long limit, long offset) {
+        return query + " LIMIT " + limit + " OFFSET " + offset;
+    }
+
+    @Override
+    protected String createParameterizedLimitOffsetQuery(String query) {
         return query + " LIMIT ? OFFSET ?";
     }
 }

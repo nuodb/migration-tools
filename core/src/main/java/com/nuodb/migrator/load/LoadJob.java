@@ -112,8 +112,8 @@ public class LoadJob extends JobBase {
         final Connection connection = getConnectionProviderFactory().createConnectionProvider(
                 getConnectionSpec()).getConnection();
         loadContext.setConnection(connection);
-        loadContext.setDialect(getDialectResolver().resolve(connection));
         loadContext.setFormatFactory(getFormatFactory());
+        loadContext.setDialect(getDialectResolver().resolve(connection));
         loadContext.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
     }
 

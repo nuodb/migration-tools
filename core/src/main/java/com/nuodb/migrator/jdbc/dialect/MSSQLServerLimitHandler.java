@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import static com.nuodb.migrator.utils.StringUtils.indexOf;
+import static java.lang.String.valueOf;
 
 /**
  * @author Sergey Bushik
@@ -39,14 +40,23 @@ public class MSSQLServerLimitHandler extends SimpleLimitHandler {
     }
 
     @Override
-    protected String createLimitQuery(String query) {
+    protected String createParameterizedLimitQuery(String query) {
+        return createLimitQuery(query, "?");
+    }
+
+    @Override
+    protected String createLimitQuery(String query, long limit) {
+        return createLimitQuery(query, valueOf(limit));
+    }
+
+    protected String createLimitQuery(String query, String limit) {
         StringBuilder limitQuery = new StringBuilder(query);
         final int distinct = indexOf(query, DISTINCT, 0);
         if (distinct != -1) {
-            limitQuery.insert(distinct + DISTINCT.length(), " TOP(?)");
+            limitQuery.insert(distinct + DISTINCT.length(), " TOP(" + limit + ")");
         } else {
             int selectStart = indexOf(query, SELECT, 0, true);
-            limitQuery.insert(selectStart + SELECT.length(), " TOP(?)");
+            limitQuery.insert(selectStart + SELECT.length(), " TOP(" + limit + ")");
         }
         return limitQuery.toString();
     }

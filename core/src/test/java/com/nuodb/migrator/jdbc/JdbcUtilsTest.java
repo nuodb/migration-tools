@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionServices;
 import org.testng.annotations.Test;
 
 import java.sql.Connection;
@@ -63,12 +62,5 @@ public class JdbcUtilsTest {
         Connection connection = mock(Connection.class);
         close(connection);
         verify(connection).close();
-    }
-
-    @Test
-    public void testCloseConnectionServices() throws SQLException {
-        ConnectionServices connectionServices = mock(ConnectionServices.class);
-        close(connectionServices);
-        verify(connectionServices).close();
     }
 }

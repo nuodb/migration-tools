@@ -30,8 +30,7 @@ package com.nuodb.migrator.jdbc.dialect;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getLimit;
-import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getOffset;
+import static java.lang.String.valueOf;
 
 /**
  * @author Sergey Bushik
@@ -43,11 +42,20 @@ public class MSSQLServer2005LimitHandler extends MSSQLServerLimitHandler {
     }
 
     @Override
-    protected String createLimitOffsetQuery(String query) {
+    protected String createParameterizedLimitOffsetQuery(String query) {
+        return createLimitOffsetQuery(query, "?", "?");
+    }
+
+    @Override
+    protected String createLimitOffsetQuery(String query, long limit, long offset) {
+        return createLimitOffsetQuery(query, valueOf(offset), valueOf(offset + limit));
+    }
+
+    protected String createLimitOffsetQuery(String query, String rowStart, String rowEnd) {
         StringBuilder limitQuery = new StringBuilder(query.length());
         limitQuery.append("SELECT ").append(getColumns(query)).append(" FROM (");
         limitQuery.append(addColumn(query, "ROW_NUMBER() OVER (ORDER BY CURRENT_TIMESTAMP) AS ROW_NUMBER__"));
-        limitQuery.append(") QUERY__ WHERE ROW_NUMBER__ > ? AND ROW_NUMBER__ <= ?");
+        limitQuery.append(") QUERY__ WHERE ROW_NUMBER__ > " + rowStart + " AND ROW_NUMBER__ <= " + rowEnd);
         return limitQuery.toString();
     }
 
@@ -58,7 +66,7 @@ public class MSSQLServer2005LimitHandler extends MSSQLServerLimitHandler {
 
     @Override
     protected void bindLimitOffset(PreparedStatement statement, int index) throws SQLException {
-        statement.setLong(index, getOffset(getQueryLimit()));
-        statement.setLong(index + 1, getLimit(getQueryLimit()) + getOffset(getQueryLimit()));
+        statement.setLong(index, getOffset());
+        statement.setLong(index + 1, getLimit() + getOffset());
     }
 }

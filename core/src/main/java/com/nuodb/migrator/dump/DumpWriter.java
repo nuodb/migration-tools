@@ -59,7 +59,6 @@ import static com.nuodb.migrator.jdbc.split.QuerySplitters.*;
 import static com.nuodb.migrator.jdbc.split.RowCountHandlerStrategies.createCachingStrategy;
 import static com.nuodb.migrator.jdbc.split.RowCountHandlerStrategies.createHandlerStrategy;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
-import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -71,12 +70,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 @SuppressWarnings({"unchecked", "ThrowableResultOfMethodCallIgnored"})
 public class DumpWriter {
 
-    public static final int DEFAULT_THREADS = getRuntime().availableProcessors();
+    // TODO: Runtime.getRuntime().availableProcessors()
+    public static final int THREADS = 1;
     private final transient Logger logger = getLogger(getClass());
 
-    private int threads = DEFAULT_THREADS;
+    private int threads = THREADS;
     private DumpContext dumpContext;
-    private QueryLimit defaultQueryLimit;
+    private QueryLimit queryLimit;
     private Collection<QueryHandle> queryHandles = newArrayList();
 
     public DumpWriter(DumpContext dumpContext) {
@@ -92,7 +92,7 @@ public class DumpWriter {
     }
 
     public void addTable(Table table, Collection<Column> columns, String filter) {
-        addTable(table, columns, filter, getDefaultQueryLimit());
+        addTable(table, columns, filter, getQueryLimit());
     }
 
     /**
@@ -109,7 +109,7 @@ public class DumpWriter {
     }
 
     public void addQuery(String query) {
-        addQuery(createQueryDesc(query, getDefaultQueryLimit()));
+        addQuery(createQueryDesc(query, getQueryLimit()));
     }
 
     protected void addQuery(QueryHandle queryHandle) {
@@ -125,11 +125,10 @@ public class DumpWriter {
     }
 
     public void write(Catalog catalog) throws Exception {
-        if (logger.isTraceEnabled()) {
-            logger.trace(format("Constructing fixed thread pool with %d thread(s) to write dump", getThreads()));
-        }
         ExecutorService executorService = newFixedThreadPool(getThreads());
-
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Constructed fixed thread pool with %d thread(s) to write dump", getThreads()));
+        }
         DumpQueryMonitor dumpQueryMonitor = createDumpQueryMonitor();
         try {
             write(executorService, catalog, dumpQueryMonitor);
@@ -158,8 +157,7 @@ public class DumpWriter {
     protected void execute(ExecutorService executorService, final DumpQueryMonitor dumpQueryMonitor,
                            QueryHandle queryHandle, QuerySplitter querySplitter, RowSet rowSet) throws SQLException {
         while (querySplitter.hasNextQuerySplit(getConnection())) {
-            final DumpQuery dumpQuery = createDumpQuery(dumpQueryMonitor, queryHandle, querySplitter,
-                    rowSet);
+            final DumpQuery dumpQuery = createDumpQuery(dumpQueryMonitor, queryHandle, querySplitter, rowSet);
             executorService.submit(new Callable() {
                 @Override
                 public Object call() throws Exception {
@@ -253,12 +251,12 @@ public class DumpWriter {
         this.threads = threads;
     }
 
-    public QueryLimit getDefaultQueryLimit() {
-        return defaultQueryLimit;
+    public QueryLimit getQueryLimit() {
+        return queryLimit;
     }
 
-    public void setDefaultQueryLimit(QueryLimit defaultQueryLimit) {
-        this.defaultQueryLimit = defaultQueryLimit;
+    public void setQueryLimit(QueryLimit queryLimit) {
+        this.queryLimit = queryLimit;
     }
 
     protected QueryHandle createQueryDesc(Table table, Collection<Column> columns, String filter,

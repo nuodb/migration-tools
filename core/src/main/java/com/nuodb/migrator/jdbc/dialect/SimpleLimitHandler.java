@@ -32,9 +32,6 @@ import com.nuodb.migrator.jdbc.query.QueryHelper;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getLimit;
-import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getOffset;
-
 /**
  * @author Sergey Bushik
  */
@@ -50,36 +47,44 @@ public class SimpleLimitHandler extends QueryHelper implements LimitHandler {
     }
 
     @Override
-    public String getLimitQuery() {
-        return hasOffset() ? createLimitOffsetQuery() : createLimitQuery();
+    public String getLimitQuery(boolean parameterized) {
+        String limitQuery;
+        if (hasOffset()) {
+            limitQuery = parameterized ? createParameterizedLimitOffsetQuery(query) :
+                    createLimitOffsetQuery(query, getLimit(), getOffset());
+        } else {
+            limitQuery = parameterized ? createParameterizedLimitQuery(query) :
+                    createLimitQuery(query, getLimit());
+        }
+        return limitQuery;
     }
 
     protected boolean hasOffset() {
-        return getOffset(queryLimit) > 0;
-    }
-
-    protected String createLimitQuery() {
-        return createLimitQuery(query);
-    }
-
-    protected String createLimitQuery(String query) {
-        return createLimitQuery(query, getLimit(queryLimit));
+        return getOffset() > 0;
     }
 
     protected String createLimitQuery(String query, long limit) {
         throw new DialectException("Limit query syntax is not supported");
     }
 
-    protected String createLimitOffsetQuery() {
-        return createLimitOffsetQuery(query);
-    }
-
-    protected String createLimitOffsetQuery(String query) {
-        return createLimitOffsetQuery(query, getLimit(queryLimit), getOffset(queryLimit));
+    protected String createParameterizedLimitQuery(String query) {
+        throw new DialectException("Limit query syntax with parameters is not supported");
     }
 
     protected String createLimitOffsetQuery(String query, long limit, long offset) {
         throw new DialectException("Limit offset query syntax is not supported");
+    }
+
+    protected String createParameterizedLimitOffsetQuery(String query) {
+        throw new DialectException("Limit offset query syntax with parameters is not supported");
+    }
+
+    protected long getLimit() {
+        return QueryLimitUtils.getLimit(queryLimit);
+    }
+
+    protected long getOffset() {
+        return QueryLimitUtils.getOffset(queryLimit);
     }
 
     @Override
@@ -123,12 +128,12 @@ public class SimpleLimitHandler extends QueryHelper implements LimitHandler {
     }
 
     protected void bindLimit(PreparedStatement statement, int index) throws SQLException {
-        statement.setLong(index, getLimit(queryLimit));
+        statement.setLong(index, getLimit());
     }
 
     protected void bindLimitOffset(PreparedStatement statement, int index) throws SQLException {
-        statement.setLong(index, getLimit(queryLimit));
-        statement.setLong(index + 1, getOffset(queryLimit));
+        statement.setLong(index, getLimit());
+        statement.setLong(index + 1, getOffset());
     }
 }
 

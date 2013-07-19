@@ -29,7 +29,8 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.google.common.io.Files;
 import com.google.common.io.NullOutputStream;
-import com.nuodb.migrator.jdbc.connection.ConnectionServices;
+import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
+import org.mockito.BDDMockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -65,16 +66,16 @@ public class ScriptExporterTest {
         File file = new File(dir, "schema.sql");
         file.deleteOnExit();
 
-        ConnectionServices connectionServices = mock(ConnectionServices.class);
+        ConnectionProvider connectionProvider = mock(ConnectionProvider.class);
         Connection connection = mock(Connection.class);
-        when(connectionServices.getConnection()).thenReturn(connection);
+        when(connectionProvider.getConnection()).thenReturn(connection);
 
         Statement statement = mock(Statement.class);
         when(connection.createStatement()).thenReturn(statement);
 
         return new Object[][] {
                 {new FileScriptExporter(file)},
-                {new ConnectionScriptExporter(connectionServices.getConnection())},
+                {new ConnectionScriptExporter(connectionProvider.getConnection())},
                 {new WriterScriptExporter(new NullOutputStream())}
         };
     }
