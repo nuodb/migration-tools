@@ -88,8 +88,8 @@ public class InspectionManager {
         InspectorResolver checkInspector = new InspectorResolver(CHECK);
         checkInspector.register(NUODB, new NuoDBCheckInspector());
         checkInspector.register(POSTGRE_SQL, new PostgreSQLCheckInspector());
-        checkInspector.register(MSSQL_SERVER, new DB2CheckInspector());
-        checkInspector.register(DatabaseInfoUtils.ORACLE, new OracleCheckInspector());
+        checkInspector.register(MSSQL_SERVER, new MSSQLServerCheckInspector());
+        checkInspector.register(ORACLE, new OracleCheckInspector());
         checkInspector.register(DB2, new DB2CheckInspector());
         addInspector(checkInspector);
 

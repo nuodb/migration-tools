@@ -168,13 +168,9 @@ public class SchemaJob extends JobBase {
             throw new SchemaException(
                     "Database is empty: no scripts to export. Verify connection & data inspection settings");
         }
-        ScriptExporter scriptExporter = createScriptExporter();
-        try {
-            scriptExporter.open();
-            scriptExporter.exportScripts(scripts);
-        } finally {
-            scriptExporter.close();
-        }
+        ScriptExporter scriptExporter = schemaContext.getScriptExporter();
+        scriptExporter.open();
+        scriptExporter.exportScripts(scripts);
     }
 
     @Override
