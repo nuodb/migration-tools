@@ -47,11 +47,11 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newLinkedHashSet;
-import static com.nuodb.impl.util.StringUtils.isEmpty;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * An implementation of {@link CliRunAdapter} which assembles dump spec from provided command line after the validation
