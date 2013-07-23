@@ -59,7 +59,7 @@ public class JdbcUrlParserTest {
                         new PropertiesBuilder(ZERO_DATE_TIME_BEHAVIOR, CONVERT_TO_NULL).build()},
                 {"jdbc:mysql://localhost:3306/database?connectTimeout=1000",
                         "mysql", null, "database", null,
-                        new PropertiesBuilder("connectTimeout", "1000").build()},
+                        new PropertiesBuilder(ZERO_DATE_TIME_BEHAVIOR, CONVERT_TO_NULL).put("connectTimeout", "1000").build()},
                 {"jdbc:com.nuodb://localhost/database",
                         "com.nuodb", null, null, null,
                         EMPTY_PROPERTIES},
