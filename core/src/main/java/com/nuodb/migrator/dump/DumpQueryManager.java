@@ -59,7 +59,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "SynchronizationOnLocalVariableOrMethodParameter"})
-class DumpWriterContext implements DumpQueryObserver, WorkManager {
+class DumpQueryManager implements DumpQueryMonitor, WorkManager {
 
     private final transient Logger logger = getLogger(getClass());
 
@@ -138,7 +138,7 @@ class DumpWriterContext implements DumpQueryObserver, WorkManager {
     @Override
     public void error(Work work, Exception exception) throws Exception {
         if (logger.isDebugEnabled()) {
-            logger.debug("Dump writer error", exception);
+            logger.debug("Dump query error", exception);
         }
         errors.put(work, exception);
     }

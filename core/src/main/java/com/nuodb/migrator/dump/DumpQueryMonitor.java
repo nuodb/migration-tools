@@ -32,7 +32,7 @@ import com.nuodb.migrator.backup.catalog.Chunk;
 /**
  * @author Sergey Bushik
  */
-public interface DumpQueryObserver {
+public interface DumpQueryMonitor {
 
     void writeStart(DumpQuery dumpQuery);
 

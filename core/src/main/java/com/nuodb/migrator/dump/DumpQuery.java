@@ -64,7 +64,7 @@ public class DumpQuery extends WorkBase {
     private static final String QUERY = "query";
 
     private final DumpQueryContext dumpQueryContext;
-    private final DumpQueryObserver dumpQueryObserver;
+    private final DumpQueryMonitor dumpQueryMonitor;
     private final QueryInfo queryInfo;
     private final QuerySplit querySplit;
     private final boolean hasNextQuerySplit;
@@ -75,10 +75,10 @@ public class DumpQuery extends WorkBase {
     private OutputFormat outputFormat;
     private Collection<Chunk> chunks;
 
-    public DumpQuery(DumpQueryContext dumpQueryContext, DumpQueryObserver dumpQueryObserver,
+    public DumpQuery(DumpQueryContext dumpQueryContext, DumpQueryMonitor dumpQueryMonitor,
                      QueryInfo queryInfo, QuerySplit querySplit, boolean hasNextQuerySplit, RowSet rowSet) {
         this.dumpQueryContext = dumpQueryContext;
-        this.dumpQueryObserver = dumpQueryObserver;
+        this.dumpQueryMonitor = dumpQueryMonitor;
         this.queryInfo = queryInfo;
         this.querySplit = querySplit;
         this.hasNextQuerySplit = hasNextQuerySplit;
@@ -112,14 +112,14 @@ public class DumpQuery extends WorkBase {
 
     @Override
     public void execute() throws Exception {
-        DumpQueryObserver dumpQueryObserver = getDumpQueryObserver();
-        dumpQueryObserver.writeStart(this);
+        DumpQueryMonitor dumpQueryMonitor = getDumpQueryMonitor();
+        dumpQueryMonitor.writeStart(this);
 
         ResultSet resultSet = getResultSet();
         OutputFormat outputFormat = getOutputFormat();
 
         Chunk chunk = null;
-        while (dumpQueryObserver.canWrite(this) && resultSet.next()) {
+        while (dumpQueryMonitor.canWrite(this) && resultSet.next()) {
             if (chunk == null) {
                 writeStart(chunk = addChunk());
             }
@@ -128,12 +128,12 @@ public class DumpQuery extends WorkBase {
                 writeStart(chunk = addChunk());
             }
             outputFormat.writeValues();
-            dumpQueryObserver.writeValues(this, chunk);
+            dumpQueryMonitor.writeValues(this, chunk);
         }
         if (chunk != null) {
             writeEnd(chunk);
         }
-        dumpQueryObserver.writeEnd(this);
+        dumpQueryMonitor.writeEnd(this);
     }
 
     @Override
@@ -146,13 +146,13 @@ public class DumpQuery extends WorkBase {
         outputFormat.open();
         outputFormat.writeStart();
 
-        dumpQueryObserver.writeStart(this, chunk);
+        dumpQueryMonitor.writeStart(this, chunk);
     }
 
     protected void writeEnd(Chunk chunk) throws Exception {
         outputFormat.writeEnd();
         outputFormat.close();
-        dumpQueryObserver.writeEnd(this, chunk);
+        dumpQueryMonitor.writeEnd(this, chunk);
     }
 
     protected Chunk addChunk() {
@@ -197,8 +197,8 @@ public class DumpQuery extends WorkBase {
         return dumpQueryContext;
     }
 
-    public DumpQueryObserver getDumpQueryObserver() {
-        return dumpQueryObserver;
+    public DumpQueryMonitor getDumpQueryMonitor() {
+        return dumpQueryMonitor;
     }
 
     public QueryInfo getQueryInfo() {

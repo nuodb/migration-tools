@@ -129,24 +129,30 @@ public class DumpWriter implements DumpQueryContext {
     }
 
     public Catalog write() throws Exception {
-        DumpWriterContext dumpWriterContext = createDumpWriterContext();
-        write(dumpWriterContext);
-        return dumpWriterContext.getCatalog();
+        DumpQueryManager dumpQueryManager = createDumpQueryManager();
+        write(dumpQueryManager);
+        return dumpQueryManager.getCatalog();
     }
 
-    protected DumpWriterContext createDumpWriterContext() {
-        DumpWriterContext dumpWriterContext = new DumpWriterContext();
+    protected DumpQueryManager createDumpQueryManager() {
+        DumpQueryManager dumpQueryManager = new DumpQueryManager();
+        dumpQueryManager.setCatalog(createCatalog());
+        dumpQueryManager.setExecutorService(createExecutorService());
+        dumpQueryManager.setSessionFactory(getSessionFactory());
+        return dumpQueryManager;
+    }
+
+    protected Catalog createCatalog() {
         Catalog catalog = new Catalog();
         catalog.setFormat(getFormat());
         catalog.setDatabaseInfo(getDatabase().getDatabaseInfo());
-        dumpWriterContext.setCatalog(catalog);
+        return catalog;
+    }
 
-        dumpWriterContext.setExecutorService(createExecutorService());
-
+    protected SessionFactory getSessionFactory() {
         SessionFactory sessionFactory = newSessionFactory(getConnectionProvider(), getDialect());
         sessionFactory.addSessionObserver(new DumpQuerySessionObserver(this));
-        dumpWriterContext.setSessionFactory(sessionFactory);
-        return dumpWriterContext;
+        return sessionFactory;
     }
 
     protected ExecutorService createExecutorService() {
@@ -156,14 +162,14 @@ public class DumpWriter implements DumpQueryContext {
         return newFixedThreadPool(getThreads());
     }
 
-    protected void write(DumpWriterContext dumpWriterContext) throws Exception {
-        ExecutorService executorService = dumpWriterContext.getExecutorService();
-        Catalog catalog = dumpWriterContext.getCatalog();
+    protected void write(DumpQueryManager dumpQueryManager) throws Exception {
+        ExecutorService executorService = dumpQueryManager.getExecutorService();
+        Catalog catalog = dumpQueryManager.getCatalog();
         try {
             RowSet rowSet;
             for (QueryInfo queryInfo : queryInfos) {
                 catalog.addRowSet(rowSet = createRowSet(queryInfo));
-                write(dumpWriterContext, queryInfo, createQuerySplitter(queryInfo), rowSet);
+                write(dumpQueryManager, queryInfo, createQuerySplitter(queryInfo), rowSet);
             }
             executorService.shutdown();
             while (!executorService.isTerminated()) {
@@ -173,12 +179,12 @@ public class DumpWriter implements DumpQueryContext {
             executorService.shutdownNow();
             throw exception;
         } finally {
-            errors(dumpWriterContext);
+            errors(dumpQueryManager);
         }
         getCatalogManager().writeCatalog(catalog);
     }
 
-    protected void write(final DumpWriterContext dumpWriterContext,
+    protected void write(final DumpQueryManager dumpQueryManager,
                          QueryInfo queryInfo, QuerySplitter querySplitter, RowSet rowSet) throws SQLException {
         while (querySplitter.hasNextQuerySplit(getConnection())) {
             QuerySplit querySplit = querySplitter.getNextQuerySplit(getConnection(), new StatementCallback() {
@@ -187,19 +193,19 @@ public class DumpWriter implements DumpQueryContext {
                     getDialect().setStreamResults(statement, true);
                 }
             });
-            write(dumpWriterContext, new DumpQuery(this, dumpWriterContext, queryInfo, querySplit,
+            write(dumpQueryManager, new DumpQuery(this, dumpQueryManager, queryInfo, querySplit,
                     querySplitter.hasNextQuerySplit(getConnection()), rowSet));
         }
     }
 
-    protected void write(final DumpWriterContext dumpWriterContext, final DumpQuery dumpQuery) {
-        dumpWriterContext.getExecutorService().submit(new Callable() {
+    protected void write(final DumpQueryManager dumpQueryManager, final DumpQuery dumpQuery) {
+        dumpQueryManager.getExecutorService().submit(new Callable() {
             @Override
             public Object call() throws Exception {
                 Session session = null;
                 try {
-                    session = dumpWriterContext.getSessionFactory().openSession();
-                    session.execute(dumpQuery, dumpWriterContext);
+                    session = dumpQueryManager.getSessionFactory().openSession();
+                    session.execute(dumpQuery, dumpQueryManager);
                     return null;
                 } finally {
                     if (session != null) {
@@ -210,8 +216,8 @@ public class DumpWriter implements DumpQueryContext {
         });
     }
 
-    protected void errors(DumpWriterContext dumpWriterContext) throws Exception {
-        Map<Work, Exception> errors = dumpWriterContext.getErrors();
+    protected void errors(DumpQueryManager dumpQueryManager) throws Exception {
+        Map<Work, Exception> errors = dumpQueryManager.getErrors();
         if (!isEmpty(errors)) {
             throw get(errors.values(), 0);
         }

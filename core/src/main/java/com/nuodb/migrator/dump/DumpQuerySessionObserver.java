@@ -38,9 +38,11 @@ import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 
 /**
+ * Sets session time zone after session is open and restores it back before closing (returning to pool).
+ *
  * @author Sergey Bushik
  */
-public class DumpQuerySessionObserver implements SessionObserver {
+class DumpQuerySessionObserver implements SessionObserver {
 
     private DumpQueryContext dumpQueryContext;
 
