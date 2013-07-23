@@ -58,10 +58,6 @@ public class JdbcUrlParsers {
         addParser(new PostgreSQLJdbcUrlParser());
     }
 
-    public boolean canParse(String url) {
-        return getParser(url) != null;
-    }
-
     public JdbcUrl parse(String url) {
         return parse(url, Collections.<String, Object>emptyMap());
     }

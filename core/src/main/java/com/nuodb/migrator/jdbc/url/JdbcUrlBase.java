@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
+import com.nuodb.migrator.utils.ObjectUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +48,6 @@ public abstract class JdbcUrlBase implements JdbcUrl {
     protected JdbcUrlBase(String url, String subProtocol) {
         this.url = url;
         this.subProtocol = subProtocol;
-
         addParameters();
         parseUrl();
     }
@@ -101,6 +102,6 @@ public abstract class JdbcUrlBase implements JdbcUrl {
 
     @Override
     public String toString() {
-        return url;
+        return ObjectUtils.toString(this);
     }
 }

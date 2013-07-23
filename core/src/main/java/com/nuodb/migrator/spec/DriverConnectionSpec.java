@@ -28,6 +28,7 @@
 package com.nuodb.migrator.spec;
 
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
+import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Map;
 
@@ -137,5 +138,10 @@ public class DriverConnectionSpec extends ConnectionSpecBase {
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (properties != null ? properties.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

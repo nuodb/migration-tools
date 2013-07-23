@@ -34,6 +34,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.primitives.Ints;
 import com.nuodb.migrator.backup.catalog.Catalog;
 import com.nuodb.migrator.backup.catalog.Chunk;
+import com.nuodb.migrator.backup.catalog.Column;
 import com.nuodb.migrator.backup.catalog.RowSet;
 import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
@@ -59,7 +60,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "SynchronizationOnLocalVariableOrMethodParameter"})
-class DumpQueryManager implements DumpQueryMonitor, WorkManager {
+class DumpQueryManager implements DumpQueryObserver, WorkManager {
 
     private final transient Logger logger = getLogger(getClass());
 
@@ -68,7 +69,7 @@ class DumpQueryManager implements DumpQueryMonitor, WorkManager {
     private ExecutorService executorService;
 
     private final Map<Work, Exception> errors = newConcurrentMap();
-    private final Map<QueryInfo, Boolean> queryInfoStarts = newConcurrentMap();
+    private final Map<QueryInfo, Boolean> queryInfoInitFlags = newConcurrentMap();
     private Multimap<QueryInfo, DumpQuery> queryInfoDumpQueries = newSetMultimap(
             Maps.<QueryInfo, Collection<DumpQuery>>newHashMap(), new Supplier<Set<DumpQuery>>() {
         @Override
@@ -84,15 +85,14 @@ class DumpQueryManager implements DumpQueryMonitor, WorkManager {
 
     @Override
     public void writeStart(DumpQuery dumpQuery) {
-        Boolean queryInfoStart = queryInfoStarts.get(dumpQuery.getQueryInfo());
-        if (queryInfoStart == null || !queryInfoStart) {
-            Collection<com.nuodb.migrator.backup.catalog.Column> columns = newArrayList();
+        Boolean queryInfoInitFlag = queryInfoInitFlags.get(dumpQuery.getQueryInfo());
+        if (queryInfoInitFlag == null || !queryInfoInitFlag) {
+            Collection<Column> columns = newArrayList();
             for (ValueHandle valueHandle : dumpQuery.getValueHandleList()) {
-                columns.add(new com.nuodb.migrator.backup.catalog.Column(valueHandle.getName(),
-                        toAlias(valueHandle.getValueType())));
+                columns.add(new Column(valueHandle.getName(), toAlias(valueHandle.getValueType())));
             }
             dumpQuery.getRowSet().setColumns(columns);
-            queryInfoStarts.put(dumpQuery.getQueryInfo(), true);
+            queryInfoInitFlags.put(dumpQuery.getQueryInfo(), true);
         }
     }
 
@@ -138,7 +138,7 @@ class DumpQueryManager implements DumpQueryMonitor, WorkManager {
     @Override
     public void error(Work work, Exception exception) throws Exception {
         if (logger.isDebugEnabled()) {
-            logger.debug("Dump query error", exception);
+            logger.debug("Dump writer error", exception);
         }
         errors.put(work, exception);
     }

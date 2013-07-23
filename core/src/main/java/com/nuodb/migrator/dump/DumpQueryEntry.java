@@ -27,46 +27,33 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.session.Session;
-import com.nuodb.migrator.jdbc.session.SessionObserver;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
-import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
+import com.nuodb.migrator.backup.catalog.RowSet;
+import com.nuodb.migrator.jdbc.split.QuerySplitter;
 
 /**
- * Sets session time zone after session is open and restores it back before closing (returning to pool).
- *
  * @author Sergey Bushik
  */
-class DumpQuerySessionObserver implements SessionObserver {
+class DumpQueryEntry {
 
-    private DumpQueryContext dumpQueryContext;
+    private QueryInfo queryInfo;
+    private QuerySplitter querySplitter;
+    private RowSet rowSet;
 
-    public DumpQuerySessionObserver(DumpQueryContext dumpQueryContext) {
-        this.dumpQueryContext = dumpQueryContext;
+    public DumpQueryEntry(QueryInfo queryInfo, QuerySplitter querySplitter, RowSet rowSet) {
+        this.queryInfo = queryInfo;
+        this.querySplitter = querySplitter;
+        this.rowSet = rowSet;
     }
 
-    @Override
-    public void afterOpen(Session session) throws SQLException {
-        Connection connection = session.getConnection();
-        Dialect dialect = session.getDialect();
-        dialect.setTransactionIsolation(connection,
-                new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
-        if (dialect.supportsSessionTimeZone()) {
-            dialect.setSessionTimeZone(connection, dumpQueryContext.getTimeZone());
-        }
+    public QueryInfo getQueryInfo() {
+        return queryInfo;
     }
 
-    @Override
-    public void beforeClose(Session session) throws SQLException {
-        Dialect dialect = session.getDialect();
-        Connection connection = session.getConnection();
-        if (dialect.supportsSessionTimeZone()) {
-            dialect.setSessionTimeZone(connection, null);
-        }
+    public QuerySplitter getQuerySplitter() {
+        return querySplitter;
+    }
+
+    public RowSet getRowSet() {
+        return rowSet;
     }
 }

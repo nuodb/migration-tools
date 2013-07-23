@@ -29,7 +29,6 @@ package com.nuodb.migrator.dump;
 
 import com.nuodb.migrator.backup.catalog.*;
 import com.nuodb.migrator.backup.format.FormatFactory;
-import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
@@ -42,6 +41,7 @@ import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.jdbc.session.Work;
+import com.nuodb.migrator.jdbc.session.WorkManager;
 import com.nuodb.migrator.jdbc.split.QuerySplit;
 import com.nuodb.migrator.jdbc.split.QuerySplitter;
 import org.slf4j.Logger;
@@ -59,8 +59,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.nuodb.migrator.backup.format.csv.CsvAttributes.FORMAT;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
+import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneObserver;
+import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationObserver;
 import static com.nuodb.migrator.jdbc.split.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.split.QuerySplitters.*;
 import static com.nuodb.migrator.jdbc.split.RowCountHandlerStrategies.newCachingStrategy;
@@ -68,6 +71,8 @@ import static com.nuodb.migrator.jdbc.split.RowCountHandlerStrategies.newHandler
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -76,12 +81,12 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings({"unchecked", "ThrowableResultOfMethodCallIgnored"})
-public class DumpWriter implements DumpQueryContext {
+public class DumpWriter implements DumpWriterContext {
 
     private final transient Logger logger = getLogger(getClass());
     public static final int THREADS = getRuntime().availableProcessors();
 
-    private String format = CsvAttributes.FORMAT;
+    private String format = FORMAT;
     private int threads = THREADS;
     private Dialect dialect;
     private Database database;
@@ -94,7 +99,7 @@ public class DumpWriter implements DumpQueryContext {
     private Map<String, Object> formatAttributes = newHashMap();
     private QueryLimit queryLimit;
 
-    private Collection<QueryInfo> queryInfos = newArrayList();
+    private Collection<DumpQueryEntry> dumpQueryEntries = newArrayList();
 
     public void addTable(Table table) {
         addTable(table, table.getColumns());
@@ -118,59 +123,35 @@ public class DumpWriter implements DumpQueryContext {
      *                   be constructed.
      */
     public void addTable(Table table, Collection<Column> columns, String filter, QueryLimit queryLimit) {
-        addQuery(createQueryDesc(table, columns, filter, queryLimit));
+        QueryInfo queryInfo = createQueryInfo(table, columns, filter, queryLimit);
+        QuerySplitter querySplitter = createQuerySplitter(table, columns, filter, queryLimit);
+        addQuery(queryInfo, querySplitter, new TableRowSet(table));
     }
 
     public void addQuery(String query) {
-        addQuery(createQueryDesc(query, getQueryLimit()));
+        QueryInfo queryInfo = createQueryInfo(query, getQueryLimit());
+        QuerySplitter querySplitter = createQuerySplitter(query);
+        addQuery(queryInfo, querySplitter, new QueryRowSet(query));
     }
 
-    protected void addQuery(QueryInfo queryInfo) {
-        queryInfos.add(queryInfo);
+    protected void addQuery(QueryInfo queryInfo, QuerySplitter querySplitter, RowSet rowSet) {
+        dumpQueryEntries.add(new DumpQueryEntry(queryInfo, querySplitter, rowSet));
     }
 
     public Catalog write() throws Exception {
-        DumpQueryManager dumpQueryManager = createDumpQueryManager();
+        DumpQueryManager dumpQueryManager = new DumpQueryManager();
+        dumpQueryManager.setCatalog(createCatalog());
+        dumpQueryManager.setExecutorService(createExecutorService());
+        dumpQueryManager.setSessionFactory(createSessionFactory());
         write(dumpQueryManager);
         return dumpQueryManager.getCatalog();
     }
 
-    protected DumpQueryManager createDumpQueryManager() {
-        DumpQueryManager dumpQueryManager = new DumpQueryManager();
-        dumpQueryManager.setCatalog(createCatalog());
-        dumpQueryManager.setExecutorService(createExecutorService());
-        dumpQueryManager.setSessionFactory(getSessionFactory());
-        return dumpQueryManager;
-    }
-
-    protected Catalog createCatalog() {
-        Catalog catalog = new Catalog();
-        catalog.setFormat(getFormat());
-        catalog.setDatabaseInfo(getDatabase().getDatabaseInfo());
-        return catalog;
-    }
-
-    protected SessionFactory getSessionFactory() {
-        SessionFactory sessionFactory = newSessionFactory(getConnectionProvider(), getDialect());
-        sessionFactory.addSessionObserver(new DumpQuerySessionObserver(this));
-        return sessionFactory;
-    }
-
-    protected ExecutorService createExecutorService() {
-        if (logger.isTraceEnabled()) {
-            logger.trace(format("Constructed fixed thread pool with %d thread(s) to write dump", getThreads()));
-        }
-        return newFixedThreadPool(getThreads());
-    }
-
     protected void write(DumpQueryManager dumpQueryManager) throws Exception {
         ExecutorService executorService = dumpQueryManager.getExecutorService();
-        Catalog catalog = dumpQueryManager.getCatalog();
         try {
-            RowSet rowSet;
-            for (QueryInfo queryInfo : queryInfos) {
-                catalog.addRowSet(rowSet = createRowSet(queryInfo));
-                write(dumpQueryManager, queryInfo, createQuerySplitter(queryInfo), rowSet);
+            for (DumpQueryEntry dumpQueryEntry : dumpQueryEntries) {
+                write(dumpQueryManager, dumpQueryEntry);
             }
             executorService.shutdown();
             while (!executorService.isTerminated()) {
@@ -182,11 +163,23 @@ public class DumpWriter implements DumpQueryContext {
         } finally {
             errors(dumpQueryManager);
         }
-        getCatalogManager().writeCatalog(catalog);
+        getCatalogManager().writeCatalog(dumpQueryManager.getCatalog());
     }
 
-    protected void write(final DumpQueryManager dumpQueryManager,
-                         QueryInfo queryInfo, QuerySplitter querySplitter, RowSet rowSet) throws SQLException {
+    protected void errors(DumpQueryManager dumpQueryManager) throws Exception {
+        Map<Work, Exception> errors = dumpQueryManager.getErrors();
+        if (!isEmpty(errors)) {
+            throw get(errors.values(), 0);
+        }
+    }
+
+    protected void write(DumpQueryManager dumpQueryManager, DumpQueryEntry dumpQueryEntry) throws SQLException {
+        write(dumpQueryManager, dumpQueryEntry.getQueryInfo(), dumpQueryEntry.getQuerySplitter(),
+                dumpQueryEntry.getRowSet());
+    }
+
+    protected void write(final DumpQueryManager dumpQueryManager, QueryInfo queryInfo, QuerySplitter querySplitter,
+                         RowSet rowSet) throws SQLException {
         while (querySplitter.hasNextQuerySplit(getConnection())) {
             QuerySplit querySplit = querySplitter.getNextQuerySplit(getConnection(), new StatementCallback() {
                 @Override
@@ -199,79 +192,84 @@ public class DumpWriter implements DumpQueryContext {
         }
     }
 
-    protected void write(final DumpQueryManager dumpQueryManager, final DumpQuery dumpQuery) {
-        dumpQueryManager.getExecutorService().submit(new Callable() {
+    protected void write(DumpQueryManager dumpQueryManager, DumpQuery dumpQuery) {
+        execute(dumpQueryManager.getExecutorService(), dumpQueryManager.getSessionFactory(),
+                dumpQueryManager, dumpQuery);
+    }
+
+    protected void execute(final ExecutorService executorService, final SessionFactory sessionFactory,
+                           final WorkManager workManager, final Work work) {
+        executorService.submit(new Callable() {
             @Override
             public Object call() throws Exception {
                 Session session = null;
                 try {
-                    session = dumpQueryManager.getSessionFactory().openSession();
-                    session.execute(dumpQuery, dumpQueryManager);
-                    return null;
+                    session = sessionFactory.openSession();
+                    session.execute(work, workManager);
+                } catch (Exception exception) {
+                    workManager.error(work, exception);
                 } finally {
                     if (session != null) {
                         session.close();
                     }
                 }
+                return null;
             }
         });
     }
 
-    protected void errors(DumpQueryManager dumpQueryManager) throws Exception {
-        Map<Work, Exception> errors = dumpQueryManager.getErrors();
-        if (!isEmpty(errors)) {
-            throw get(errors.values(), 0);
+    protected Catalog createCatalog() {
+        Catalog catalog = new Catalog();
+        catalog.setFormat(getFormat());
+        catalog.setDatabaseInfo(getDatabase().getDatabaseInfo());
+        for (DumpQueryEntry dumpQueryEntry : dumpQueryEntries) {
+            catalog.addRowSet(dumpQueryEntry.getRowSet());
         }
+        return catalog;
     }
 
-    protected QuerySplitter createQuerySplitter(QueryInfo queryInfo) {
-        QuerySplitter querySplitter;
-        if (queryInfo instanceof TableQueryInfo) {
-            TableQueryInfo tableQueryDesc = (TableQueryInfo) queryInfo;
-            querySplitter = createQuerySplitter(tableQueryDesc.getTable(), tableQueryDesc.getColumns(),
-                    tableQueryDesc.getFilter(), queryInfo.getQueryLimit());
-        } else {
-            querySplitter = createQuerySplitter(queryInfo.getQuery());
-        }
-        return querySplitter;
+    protected SessionFactory createSessionFactory() {
+        SessionFactory sessionFactory = newSessionFactory(getConnectionProvider(), getDialect());
+        sessionFactory.addSessionObserver(newTransactionIsolationObserver(new int[]{
+                TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
+        }));
+        sessionFactory.addSessionObserver(newSessionTimeZoneObserver(getTimeZone()));
+        return sessionFactory;
     }
 
-    protected RowSet createRowSet(QueryInfo queryInfo) {
-        RowSet rowSet;
-        if (queryInfo instanceof TableQueryInfo) {
-            rowSet = new TableRowSet(((TableQueryInfo) queryInfo).getTable());
-        } else {
-            rowSet = new QueryRowSet(queryInfo.getQuery().toString());
+    protected ExecutorService createExecutorService() {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Constructing fixed thread pool with %d thread(s) to write dump", getThreads()));
         }
-        return rowSet;
+        return newFixedThreadPool(getThreads());
+    }
+
+    protected QuerySplitter createQuerySplitter(String query) {
+        return newNoLimitSplitter(newQuery(query));
     }
 
     protected QuerySplitter createQuerySplitter(Table table, Collection<Column> columns, String filter,
                                                 QueryLimit queryLimit) {
-        Query query = newQuery(table, columns, filter);
         QuerySplitter querySplitter;
+        Query query = newQuery(table, columns, filter);
         if (queryLimit != null && supportsLimitSplitter(getDialect(), table, filter)) {
             querySplitter = newLimitSplitter(getDialect(),
-                    newCachingStrategy(new ReentrantLock(), newHandlerStrategy(
-                            getDialect().createRowCountHandler(table, null, filter, EXACT))), query, queryLimit
-            );
+                    newCachingStrategy(new ReentrantLock(),
+                            newHandlerStrategy(
+                                    getDialect().createRowCountHandler(table, null, filter, EXACT))), query, queryLimit);
         } else {
-            querySplitter = createQuerySplitter(query);
+            querySplitter = newNoLimitSplitter(query);
         }
         return querySplitter;
     }
 
-    protected QueryInfo createQueryDesc(Table table, Collection<Column> columns, String filter,
+    protected QueryInfo createQueryInfo(Table table, Collection<Column> columns, String filter,
                                         QueryLimit queryLimit) {
         return new TableQueryInfo(table, columns, filter, queryLimit);
     }
 
-    protected QueryInfo createQueryDesc(String query, QueryLimit queryLimit) {
+    protected QueryInfo createQueryInfo(String query, QueryLimit queryLimit) {
         return new QueryInfo(newQuery(query), queryLimit);
-    }
-
-    protected QuerySplitter createQuerySplitter(Query query) {
-        return newNoLimitSplitter(query);
     }
 
     @Override

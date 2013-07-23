@@ -38,7 +38,7 @@ import java.util.TimeZone;
 /**
  * @author Sergey Bushik
  */
-public interface DumpQueryContext {
+public interface DumpWriterContext {
 
     String getFormat();
 
