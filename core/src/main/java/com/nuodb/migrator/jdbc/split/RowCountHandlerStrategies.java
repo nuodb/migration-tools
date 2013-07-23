@@ -39,7 +39,7 @@ import java.util.concurrent.locks.Lock;
  */
 public class RowCountHandlerStrategies {
 
-    public static RowCountStrategy createCachingStrategy(final Lock lock, final RowCountStrategy strategy) {
+    public static RowCountStrategy newCachingStrategy(final Lock lock, final RowCountStrategy strategy) {
         return new RowCountStrategy() {
             private volatile Long rowCount;
 
@@ -65,7 +65,7 @@ public class RowCountHandlerStrategies {
         };
     }
 
-    public static RowCountStrategy createProvidedStrategy(final long rowCount) {
+    public static RowCountStrategy newProvidedStrategy(final long rowCount) {
         return new RowCountStrategy() {
 
             @Override
@@ -80,7 +80,7 @@ public class RowCountHandlerStrategies {
         };
     }
 
-    public static RowCountStrategy createHandlerStrategy(final RowCountHandler handler) {
+    public static RowCountStrategy newHandlerStrategy(final RowCountHandler handler) {
         return new RowCountStrategy() {
 
             @Override

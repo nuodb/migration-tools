@@ -63,9 +63,10 @@ import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.split.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.split.QuerySplitters.*;
-import static com.nuodb.migrator.jdbc.split.RowCountHandlerStrategies.createCachingStrategy;
-import static com.nuodb.migrator.jdbc.split.RowCountHandlerStrategies.createHandlerStrategy;
+import static com.nuodb.migrator.jdbc.split.RowCountHandlerStrategies.newCachingStrategy;
+import static com.nuodb.migrator.jdbc.split.RowCountHandlerStrategies.newHandlerStrategy;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
+import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -78,7 +79,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class DumpWriter implements DumpQueryContext {
 
     private final transient Logger logger = getLogger(getClass());
-    public static final int THREADS = Runtime.getRuntime().availableProcessors();
+    public static final int THREADS = getRuntime().availableProcessors();
 
     private String format = CsvAttributes.FORMAT;
     private int threads = THREADS;
@@ -251,11 +252,11 @@ public class DumpWriter implements DumpQueryContext {
         QuerySplitter querySplitter;
         if (queryLimit != null && supportsLimitSplitter(getDialect(), table, filter)) {
             querySplitter = newLimitSplitter(getDialect(),
-                    createCachingStrategy(new ReentrantLock(), createHandlerStrategy(
+                    newCachingStrategy(new ReentrantLock(), newHandlerStrategy(
                             getDialect().createRowCountHandler(table, null, filter, EXACT))), query, queryLimit
             );
         } else {
-            querySplitter = newNoLimitSplitter(query);
+            querySplitter = createQuerySplitter(query);
         }
         return querySplitter;
     }

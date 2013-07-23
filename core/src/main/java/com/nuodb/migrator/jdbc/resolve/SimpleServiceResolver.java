@@ -105,7 +105,9 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         if (service instanceof ServiceResolverAware) {
             ((ServiceResolverAware) service).setServiceResolver(this);
         }
-        databaseInfoServiceCacheMap.put(databaseInfo, service);
+        if (service != null) {
+            databaseInfoServiceCacheMap.put(databaseInfo, service);
+        }
         return service;
     }
 
