@@ -56,7 +56,7 @@ public class XmlCatalogHandler extends XmlReadWriteHandlerBase<Catalog> implemen
         if (DATABASE_INFO_ELEMENT.equals(input.getName())) {
             catalog.setDatabaseInfo(context.read(input, DatabaseInfo.class));
         } else if (ROW_SET.equals(input.getName())) {
-            catalog.addQueryChunkSet(context.read(input, RowSet.class));
+            catalog.addRowSet(context.read(input, RowSet.class));
         }
     }
 
@@ -67,7 +67,9 @@ public class XmlCatalogHandler extends XmlReadWriteHandlerBase<Catalog> implemen
 
     @Override
     protected void writeElements(Catalog catalog, OutputNode output, XmlWriteContext context) throws Exception {
-        context.writeElement(output, DATABASE_INFO_ELEMENT, catalog.getDatabaseInfo());
+        if (catalog.getDatabaseInfo() != null) {
+            context.writeElement(output, DATABASE_INFO_ELEMENT, catalog.getDatabaseInfo());
+        }
         for (RowSet rowSet : catalog.getRowSets()) {
             context.writeElement(output, ROW_SET, rowSet);
         }

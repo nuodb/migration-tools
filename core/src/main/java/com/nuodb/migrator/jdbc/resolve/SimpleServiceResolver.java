@@ -34,9 +34,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.WeakHashMap;
 
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.String.format;
 
@@ -49,9 +48,9 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     private T defaultService;
     private Class<? extends T> defaultServiceClass;
-    private Map<DatabaseInfo, T> databaseInfoServiceMap = newHashMap();
-    private Map<DatabaseInfo, T> databaseInfoServiceCacheMap = new WeakHashMap<DatabaseInfo, T>();
-    private Map<DatabaseInfo, Class<? extends T>> databaseInfoServiceClassMap = newHashMap();
+    private Map<DatabaseInfo, T> databaseInfoServiceMap = newConcurrentMap();
+    private Map<DatabaseInfo, T> databaseInfoServiceCacheMap = newConcurrentMap();
+    private Map<DatabaseInfo, Class<? extends T>> databaseInfoServiceClassMap = newConcurrentMap();
 
     public SimpleServiceResolver() {
     }
@@ -90,6 +89,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public T resolve(DatabaseInfo databaseInfo) throws SQLException {
         if (databaseInfo == null) {
             return null;

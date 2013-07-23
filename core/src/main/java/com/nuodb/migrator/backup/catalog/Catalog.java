@@ -67,7 +67,7 @@ public class Catalog {
         this.databaseInfo = databaseInfo;
     }
 
-    public void addQueryChunkSet(RowSet rowSet) {
+    public void addRowSet(RowSet rowSet) {
         rowSet.setCatalog(this);
         rowSets.add(rowSet);
     }

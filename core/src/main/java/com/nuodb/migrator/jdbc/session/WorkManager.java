@@ -25,34 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
-
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
-import com.nuodb.migrator.jdbc.query.Query;
+package com.nuodb.migrator.jdbc.session;
 
 /**
  * @author Sergey Bushik
  */
-class QueryHandle {
+public interface WorkManager {
 
-    private final Query query;
-    private final QueryLimit queryLimit;
-
-    public QueryHandle(Query query, QueryLimit queryLimit) {
-        this.query = query;
-        this.queryLimit = queryLimit;
-    }
-
-    public Query getQuery() {
-        return query;
-    }
-
-    public QueryLimit getQueryLimit() {
-        return queryLimit;
-    }
-
-    @Override
-    public String toString() {
-        return query.toString();
-    }
+    void error(Work work, Exception exception) throws Exception;
 }

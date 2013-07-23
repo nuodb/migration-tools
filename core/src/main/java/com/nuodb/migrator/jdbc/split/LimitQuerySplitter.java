@@ -41,23 +41,16 @@ import static java.lang.Math.min;
 /**
  * @author Sergey Bushik
  */
-public class LimitQuerySplitter extends LazyQuerySplitterBase<Statement> {
+public class LimitQuerySplitter extends QuerySplitterBase<Statement> {
 
     private final Dialect dialect;
     private final RowCountStrategy rowCountStrategy;
-    private final boolean parameterized;
 
-    protected LimitQuerySplitter(Dialect dialect, Query query, QueryLimit queryLimit,
-                                 RowCountStrategy rowCountStrategy) {
-        this(dialect, query, queryLimit, rowCountStrategy, false);
-    }
-
-    protected LimitQuerySplitter(Dialect dialect, Query query, QueryLimit queryLimit,
-                                 RowCountStrategy rowCountStrategy, boolean parameterized) {
-        super(query, queryLimit);
+    protected LimitQuerySplitter(Dialect dialect, RowCountStrategy rowCountStrategy,
+                                 Query query, QueryLimit queryLimit, ParametersBinder parametersBinder) {
+        super(query, queryLimit, parametersBinder);
         this.dialect = dialect;
         this.rowCountStrategy = rowCountStrategy;
-        this.parameterized = parameterized;
     }
 
     @Override
@@ -79,28 +72,26 @@ public class LimitQuerySplitter extends LazyQuerySplitterBase<Statement> {
         return getRowCountStrategy().getRowCount(connection);
     }
 
+
     @Override
     protected Statement createStatement(Connection connection, QueryLimit queryLimit,
                                         int splitIndex) throws SQLException {
-        return isParameterized() ? prepareStatement(connection, queryLimit) : createStatement(connection);
-    }
-
-    protected Statement createStatement(Connection connection) throws SQLException {
         return connection.createStatement();
     }
 
-    protected Statement prepareStatement(Connection connection, QueryLimit queryLimit) throws SQLException {
+    @Override
+    protected Statement prepareStatement(Connection connection, QueryLimit queryLimit,
+                                         int splitIndex) throws SQLException {
         LimitHandler limitHandler = getDialect().createLimitHandler(getQuery().toString(), queryLimit);
-        PreparedStatement statement = connection.prepareStatement(limitHandler.getLimitQuery(isParameterized()));
+        PreparedStatement statement = connection.prepareStatement(limitHandler.getLimitQuery(true));
         int column = 1;
         column += limitHandler.bindParametersAtStart(statement, column);
-        column += bindParameters(statement, column);
+        ParametersBinder parametersBinder = getParametersBinder();
+        if (parametersBinder != null) {
+            column += parametersBinder.bindParameters(statement, column);
+        }
         column += limitHandler.bindParametersAtEnd(statement, column);
         return statement;
-    }
-
-    protected int bindParameters(PreparedStatement statement, int column) {
-        return 0;
     }
 
     @Override
@@ -120,9 +111,5 @@ public class LimitQuerySplitter extends LazyQuerySplitterBase<Statement> {
 
     public RowCountStrategy getRowCountStrategy() {
         return rowCountStrategy;
-    }
-
-    public boolean isParameterized() {
-        return parameterized;
     }
 }

@@ -42,7 +42,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
-import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
+import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validate;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
@@ -71,7 +71,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
     @Override
     public void inspectScope(InspectionContext inspectionContext,
                              TableInspectionScope inspectionScope) throws SQLException {
-        validateInspectionScope(inspectionScope);
+        validate(inspectionScope);
         super.inspectScope(inspectionContext, inspectionScope);
     }
 

@@ -27,18 +27,19 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.google.common.collect.Maps;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * @author Sergey Bushik
  */
 public class ValueFormatRegistryBase implements ValueFormatRegistry {
 
-    private Map<JdbcTypeDesc, ValueFormat> valueFormatMap = Maps.newHashMap();
+    private Map<JdbcTypeDesc, ValueFormat> valueFormatMap = newHashMap();
     private ValueFormat defaultValueFormat;
 
     public ValueFormatRegistryBase() {
@@ -73,11 +74,6 @@ public class ValueFormatRegistryBase implements ValueFormatRegistry {
     @Override
     public void addValueFormat(JdbcTypeDesc jdbcTypeDesc, ValueFormat valueFormat) {
         valueFormatMap.put(jdbcTypeDesc, valueFormat);
-    }
-
-    @Override
-    public Map<JdbcTypeDesc, ValueFormat> getValueFormats() {
-        return valueFormatMap;
     }
 
     public ValueFormat getDefaultValueFormat() {

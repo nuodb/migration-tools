@@ -32,21 +32,25 @@ import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class QuerySplitterBase<T extends Statement> implements QuerySplitter<T> {
+public abstract class QuerySplitterBase<S extends Statement> implements QuerySplitter<S> {
 
     private Query query;
     private QueryLimit queryLimit;
+    private ParametersBinder parametersBinder;
+
     private int splitIndex;
 
-    protected QuerySplitterBase(Query query, QueryLimit queryLimit) {
+    protected QuerySplitterBase(Query query, QueryLimit queryLimit, ParametersBinder parametersBinder) {
         this.query = query;
         this.queryLimit = queryLimit;
+        this.parametersBinder = parametersBinder;
     }
 
     @Override
@@ -67,17 +71,65 @@ public abstract class QuerySplitterBase<T extends Statement> implements QuerySpl
     protected abstract boolean hasNextQuerySplit(Connection connection, int splitIndex) throws SQLException;
 
     @Override
-    public QuerySplit getNextQuerySplit(Connection connection, StatementCallback<T> callback) throws SQLException {
+    public QuerySplit getNextQuerySplit(Connection connection, StatementCallback<S> callback) throws SQLException {
         return hasNextQuerySplit(connection) ? createNextQuerySplit(connection, callback) : null;
     }
 
     protected QuerySplit createNextQuerySplit(Connection connection,
-                                              StatementCallback<T> callback) throws SQLException {
+                                              StatementCallback<S> callback) throws SQLException {
         return createQuerySplit(connection, callback, createQueryLimit(connection, splitIndex), splitIndex++);
     }
 
     protected abstract QueryLimit createQueryLimit(Connection connection, int splitIndex) throws SQLException;
 
-    protected abstract QuerySplit createQuerySplit(Connection connection, StatementCallback<T> callback,
-                                                   QueryLimit queryLimit, int splitIndex) throws SQLException;
+    protected abstract S prepareStatement(Connection connection, QueryLimit queryLimit,
+                                          int splitIndex) throws SQLException;
+
+    protected abstract S createStatement(Connection connection, QueryLimit queryLimit,
+                                         int splitIndex) throws SQLException;
+
+    protected abstract ResultSet executeStatement(S statement, QueryLimit queryLimit,
+                                                  int splitIndex) throws SQLException;
+
+    protected QuerySplit createQuerySplit(final Connection connection, final StatementCallback<S> callback,
+                                          final QueryLimit queryLimit, final int splitIndex) throws SQLException {
+        return new QuerySplit() {
+            @Override
+            public int getSplitIndex() {
+                return splitIndex;
+            }
+
+            @Override
+            public Query getQuery() {
+                return query;
+            }
+
+            @Override
+            public QueryLimit getQueryLimit() {
+                return queryLimit;
+            }
+
+            @Override
+            public ResultSet getResultSet() throws SQLException {
+                return getResultSet(connection);
+            }
+
+            public ResultSet getResultSet(Connection connection) throws SQLException {
+                final S statement = isParameterized() ? prepareStatement(connection, queryLimit,
+                        splitIndex) : createStatement(connection, queryLimit, splitIndex);
+                if (callback != null) {
+                    callback.process(statement);
+                }
+                return executeStatement(statement, queryLimit, splitIndex);
+            }
+        };
+    }
+
+    public boolean isParameterized() {
+        return parametersBinder != null;
+    }
+
+    public ParametersBinder getParametersBinder() {
+        return parametersBinder;
+    }
 }

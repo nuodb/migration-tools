@@ -34,13 +34,14 @@ import com.nuodb.migrator.backup.catalog.RowSet;
 import com.nuodb.migrator.backup.format.OutputFormat;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.jdbc.JdbcUtils;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.session.WorkBase;
 import com.nuodb.migrator.jdbc.split.QuerySplit;
 import com.nuodb.migrator.utils.ObjectUtils;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collection;
 
 import static com.google.common.base.Predicates.equalTo;
@@ -58,53 +59,67 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-class DumpQuery implements DumpTask {
+public class DumpQuery extends WorkBase {
 
     private static final String QUERY = "query";
 
-    private final DumpQueryMonitor dumpQueryMonitor;
-    private final QueryHandle queryHandle;
+    private final DumpQueryContext dumpQueryContext;
+    private final DumpQueryObserver dumpQueryObserver;
+    private final QueryInfo queryInfo;
     private final QuerySplit querySplit;
-    private final RowSet rowSet;
     private final boolean hasNextQuerySplit;
+    private final RowSet rowSet;
 
-    private DumpContext dumpContext;
     private ResultSet resultSet;
-    private Statement statement;
     private ValueHandleList valueHandleList;
     private OutputFormat outputFormat;
     private Collection<Chunk> chunks;
 
-    public DumpQuery(DumpQueryMonitor dumpQueryMonitor, QueryHandle queryHandle, QuerySplit querySplit,
-                     RowSet rowSet, boolean hasNextQuerySplit) {
-        this.dumpQueryMonitor = dumpQueryMonitor;
-        this.queryHandle = queryHandle;
+    public DumpQuery(DumpQueryContext dumpQueryContext, DumpQueryObserver dumpQueryObserver,
+                     QueryInfo queryInfo, QuerySplit querySplit, boolean hasNextQuerySplit, RowSet rowSet) {
+        this.dumpQueryContext = dumpQueryContext;
+        this.dumpQueryObserver = dumpQueryObserver;
+        this.queryInfo = queryInfo;
         this.querySplit = querySplit;
-        this.rowSet = rowSet;
         this.hasNextQuerySplit = hasNextQuerySplit;
+        this.rowSet = rowSet;
     }
 
     @Override
-    public void init(DumpContext dumpContext) throws Exception {
-        setDumpContext(dumpContext);
+    public void init() throws Exception {
         setChunks(Lists.<Chunk>newArrayList());
-        setResultSet(getQuerySplit().getResultSet());
-        setStatement(getResultSet().getStatement());
-        setValueHandleList(createValueHandleList());
-        setOutputFormat(createOutputFormat());
-        initRowSetName();
+
+        Connection connection = getSession().getConnection();
+        Dialect dialect = getSession().getDialect();
+        setResultSet(getQuerySplit().getResultSet(connection));
+
+        setValueHandleList(newBuilder(getResultSet()).
+                withDialect(dialect).
+                withColumns(createColumnList(getResultSet())).
+                withTimeZone(dumpQueryContext.getTimeZone()).
+                withValueFormatRegistry(dumpQueryContext.getValueFormatRegistry()).build());
+
+        OutputFormat outputFormat = dumpQueryContext.getFormatFactory().createOutputFormat(
+                dumpQueryContext.getFormat(), dumpQueryContext.getFormatAttributes());
+        outputFormat.setValueHandleList(getValueHandleList());
+
+        setOutputFormat(outputFormat);
+
+        if (getRowSet().getName() == null) {
+            getRowSet().setName(getRowSetName());
+        }
     }
 
     @Override
     public void execute() throws Exception {
-        final DumpQueryMonitor dumpQueryMonitor = getDumpQueryMonitor();
-        dumpQueryMonitor.executeStart(this);
+        DumpQueryObserver dumpQueryObserver = getDumpQueryObserver();
+        dumpQueryObserver.writeStart(this);
 
-        final ResultSet resultSet = getResultSet();
-        final OutputFormat outputFormat = getOutputFormat();
+        ResultSet resultSet = getResultSet();
+        OutputFormat outputFormat = getOutputFormat();
 
         Chunk chunk = null;
-        while (dumpQueryMonitor.canWrite(this) && resultSet.next()) {
+        while (dumpQueryObserver.canWrite(this) && resultSet.next()) {
             if (chunk == null) {
                 writeStart(chunk = addChunk());
             }
@@ -113,49 +128,31 @@ class DumpQuery implements DumpTask {
                 writeStart(chunk = addChunk());
             }
             outputFormat.writeValues();
-            dumpQueryMonitor.writeValues(this, chunk);
+            dumpQueryObserver.writeValues(this, chunk);
         }
         if (chunk != null) {
             writeEnd(chunk);
         }
-        dumpQueryMonitor.executeEnd(this);
+        dumpQueryObserver.writeEnd(this);
     }
 
     @Override
-    public void close() {
-        JdbcUtils.close(getResultSet());
-        JdbcUtils.close(getStatement());
-    }
-
-    protected ValueHandleList createValueHandleList() throws SQLException {
-        return newBuilder(getResultSet()).
-                withColumns(createColumnList(getResultSet())).
-                withDialect(getDumpContext().getDialect()).
-                withTimeZone(getDumpContext().getTimeZone()).
-                withValueFormatRegistry(getDumpContext().getValueFormatRegistry()).build();
-    }
-
-    protected OutputFormat createOutputFormat() {
-        OutputFormat outputFormat = getDumpContext().getFormatFactory().createOutputFormat(
-                getDumpContext().getFormat(), getDumpContext().getFormatAttributes());
-        outputFormat.setValueHandleList(getValueHandleList());
-        return outputFormat;
+    public void close() throws Exception {
+        JdbcUtils.close(resultSet);
     }
 
     protected void writeStart(Chunk chunk) throws Exception {
-        final OutputFormat outputFormat = getOutputFormat();
-        outputFormat.setOutputStream(getDumpContext().getCatalogManager().openOutputStream(chunk.getName()));
+        outputFormat.setOutputStream(dumpQueryContext.getCatalogManager().openOutputStream(chunk.getName()));
         outputFormat.open();
         outputFormat.writeStart();
 
-        getDumpQueryMonitor().writeStart(this, chunk);
+        dumpQueryObserver.writeStart(this, chunk);
     }
 
     protected void writeEnd(Chunk chunk) throws Exception {
-        final OutputFormat outputFormat = getOutputFormat();
         outputFormat.writeEnd();
         outputFormat.close();
-        getDumpQueryMonitor().writeEnd(this, chunk);
+        dumpQueryObserver.writeEnd(this, chunk);
     }
 
     protected Chunk addChunk() {
@@ -170,12 +167,6 @@ class DumpQuery implements DumpTask {
         return chunk;
     }
 
-    protected void initRowSetName() {
-        if (getRowSet().getName() == null) {
-            getRowSet().setName(getRowSetName());
-        }
-    }
-
     protected String getChunkName(int chunkIndex) {
         Collection parts = newArrayList(getRowSetName());
         int splitIndex = getQuerySplit().getSplitIndex();
@@ -185,30 +176,33 @@ class DumpQuery implements DumpTask {
         if (chunkIndex > 0) {
             parts.add(chunkIndex + 1);
         }
-        parts.add(getDumpContext().getFormat());
+        parts.add(dumpQueryContext.getFormat());
         return lowerCase(join(parts, "."));
     }
 
     protected String getRowSetName() {
         String rowSetName;
-        QueryHandle queryHandle = getQueryHandle();
-        if (queryHandle instanceof TableQueryHandle) {
-            Table table = ((TableQueryHandle) queryHandle).getTable();
+        if (queryInfo instanceof TableQueryInfo) {
+            Table table = ((TableQueryInfo) queryInfo).getTable();
             rowSetName = table.getQualifiedName(null);
         } else {
-            int rowSetIndex = indexOf(filter(getRowSet().getCatalog().getRowSets(),
+            int rowSetIndex = indexOf(filter(rowSet.getCatalog().getRowSets(),
                     instanceOf(QueryRowSet.class)), equalTo(getRowSet()));
             rowSetName = join(asList(QUERY, rowSetIndex + 1), "-");
         }
         return rowSetName;
     }
 
-    public DumpQueryMonitor getDumpQueryMonitor() {
-        return dumpQueryMonitor;
+    public DumpQueryContext getDumpQueryContext() {
+        return dumpQueryContext;
     }
 
-    public QueryHandle getQueryHandle() {
-        return queryHandle;
+    public DumpQueryObserver getDumpQueryObserver() {
+        return dumpQueryObserver;
+    }
+
+    public QueryInfo getQueryInfo() {
+        return queryInfo;
     }
 
     public QuerySplit getQuerySplit() {
@@ -223,28 +217,12 @@ class DumpQuery implements DumpTask {
         return rowSet;
     }
 
-    public DumpContext getDumpContext() {
-        return dumpContext;
-    }
-
-    public void setDumpContext(DumpContext dumpContext) {
-        this.dumpContext = dumpContext;
-    }
-
     public ResultSet getResultSet() {
         return resultSet;
     }
 
     public void setResultSet(ResultSet resultSet) {
         this.resultSet = resultSet;
-    }
-
-    public Statement getStatement() {
-        return statement;
-    }
-
-    public void setStatement(Statement statement) {
-        this.statement = statement;
     }
 
     public ValueHandleList getValueHandleList() {

@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.split;
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;
 import com.nuodb.migrator.jdbc.query.Query;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -45,4 +46,6 @@ public interface QuerySplit {
     QueryLimit getQueryLimit();
 
     ResultSet getResultSet() throws SQLException;
+
+    ResultSet getResultSet(Connection connection) throws SQLException;
 }

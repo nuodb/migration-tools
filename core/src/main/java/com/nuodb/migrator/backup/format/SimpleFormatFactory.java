@@ -36,13 +36,13 @@ import com.nuodb.migrator.backup.format.csv.CsvOutputFormat;
 import com.nuodb.migrator.backup.format.xml.XmlAttributes;
 import com.nuodb.migrator.backup.format.xml.XmlInputFormat;
 import com.nuodb.migrator.backup.format.xml.XmlOutputFormat;
-import com.nuodb.migrator.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
@@ -65,15 +65,14 @@ public class SimpleFormatFactory implements FormatFactory {
         addFormat(CsvAttributes.FORMAT, CsvInputFormat.class);
         addFormat(XmlAttributes.FORMAT, XmlInputFormat.class);
         addFormat(BsonAttributes.FORMAT, BsonInputFormat.class);
-        // registerFormat(SqlAttributes.FORMAT, SqlFormatReader.class);
+        // addFormat(SqlAttributes.FORMAT, SqlFormatReader.class);
 
         addFormat(CsvAttributes.FORMAT, CsvOutputFormat.class);
         addFormat(XmlAttributes.FORMAT, XmlOutputFormat.class);
         addFormat(BsonAttributes.FORMAT, BsonOutputFormat.class);
-        // registerFormat(SqlAttributes.FORMAT, SqlFormatWriter.class);
+        // addFormat(SqlAttributes.FORMAT, SqlFormatWriter.class);
     }
 
-    @Override
     public void addFormat(String format, Class<? extends Format> formatClass) {
         if (OutputFormat.class.isAssignableFrom(formatClass)) {
             outputFormats.put(format, (Class<? extends OutputFormat>) formatClass);
@@ -98,7 +97,7 @@ public class SimpleFormatFactory implements FormatFactory {
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Can't resolve format %s to a class", type));
             }
-            ClassLoader classLoader = ReflectionUtils.getClassLoader();
+            ClassLoader classLoader = getClassLoader();
             try {
                 formatClass = (Class<? extends Format>) classLoader.loadClass(type);
             } catch (ClassNotFoundException e) {

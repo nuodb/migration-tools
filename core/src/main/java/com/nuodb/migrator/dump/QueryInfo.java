@@ -27,14 +27,32 @@
  */
 package com.nuodb.migrator.dump;
 
+import com.nuodb.migrator.jdbc.dialect.QueryLimit;
+import com.nuodb.migrator.jdbc.query.Query;
+
 /**
  * @author Sergey Bushik
  */
-interface DumpTask {
+class QueryInfo {
 
-    void init(DumpContext dumpContext) throws Exception;
+    private final Query query;
+    private final QueryLimit queryLimit;
 
-    void execute() throws Exception;
+    public QueryInfo(Query query, QueryLimit queryLimit) {
+        this.query = query;
+        this.queryLimit = queryLimit;
+    }
 
-    void close();
+    public Query getQuery() {
+        return query;
+    }
+
+    public QueryLimit getQueryLimit() {
+        return queryLimit;
+    }
+
+    @Override
+    public String toString() {
+        return query.toString();
+    }
 }

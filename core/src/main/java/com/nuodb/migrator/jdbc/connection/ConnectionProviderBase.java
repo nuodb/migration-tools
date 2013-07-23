@@ -83,8 +83,8 @@ public abstract class ConnectionProviderBase<C extends ConnectionSpec> implement
     @Override
     public void closeConnection(Connection connection) throws SQLException {
         if (connection != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Closing connection");
+            if (logger.isTraceEnabled()) {
+                logger.trace("Closing connection");
             }
             connection.close();
         }

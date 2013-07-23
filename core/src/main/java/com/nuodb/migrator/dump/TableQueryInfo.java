@@ -25,34 +25,41 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.split;
+package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.Query;
 
-import java.sql.Statement;
+import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
+import static com.nuodb.migrator.jdbc.split.Queries.newQuery;
 
 /**
- * Static factories for creating query splitters.
- *
  * @author Sergey Bushik
  */
-public class QuerySplitters {
+class TableQueryInfo extends QueryInfo {
 
-    public static boolean supportsLimitSplitter(Dialect dialect, Table table, String filter) {
-        return dialect.supportsLimitOffset() && dialect.supportsRowCount(table, null, filter, EXACT);
+    private final Table table;
+    private final Collection<Column> columns;
+    private final String filter;
+
+    public TableQueryInfo(Table table, Collection<Column> columns, String filter, QueryLimit queryLimit) {
+        super(newQuery(table, columns, filter), queryLimit);
+        this.table = table;
+        this.columns = columns;
+        this.filter = filter;
     }
 
-    public static QuerySplitter<Statement> newLimitSplitter(Dialect dialect, RowCountStrategy rowCountStrategy,
-                                                            Query query, QueryLimit queryLimit) {
-        return new LimitQuerySplitter(dialect, rowCountStrategy, query, queryLimit, null);
+    public Table getTable() {
+        return table;
     }
 
-    public static QuerySplitter<Statement> newNoLimitSplitter(Query query) {
-        return new NoLimitQuerySplitter(query, null);
+    public Collection<Column> getColumns() {
+        return columns;
+    }
+
+    public String getFilter() {
+        return filter;
     }
 }

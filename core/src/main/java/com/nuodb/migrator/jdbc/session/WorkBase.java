@@ -25,41 +25,25 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
-
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Table;
-
-import java.util.Collection;
-
-import static com.nuodb.migrator.jdbc.split.Queries.newQuery;
+package com.nuodb.migrator.jdbc.session;
 
 /**
  * @author Sergey Bushik
  */
-class TableQueryHandle extends QueryHandle {
+public abstract class WorkBase implements Work {
 
-    private final Table table;
-    private final Collection<Column> columns;
-    private final String filter;
+    private Session session;
 
-    public TableQueryHandle(Table table, Collection<Column> columns, String filter, QueryLimit queryLimit) {
-        super(newQuery(table, columns, filter), queryLimit);
-        this.table = table;
-        this.columns = columns;
-        this.filter = filter;
+    @Override
+    public void init(Session session) throws Exception {
+        this.session = session;
+        init();
     }
 
-    public Table getTable() {
-        return table;
+    protected void init() throws Exception {
     }
 
-    public Collection<Column> getColumns() {
-        return columns;
-    }
-
-    public String getFilter() {
-        return filter;
+    public Session getSession() {
+        return session;
     }
 }

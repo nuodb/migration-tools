@@ -85,14 +85,12 @@ public class DumpJobTest {
     private Dialect dialect;
     @Mock
     private Connection connection;
-    @Mock
-    private DumpWriter dumpWriter;
     @Spy
     @InjectMocks
     private DumpJob dumpJob = new DumpJob(new DumpSpec());
     @Spy
     @InjectMocks
-    private DumpContext dumpContext = new DumpContext();
+    private DumpWriter dumpWriter = new DumpWriter();
 
     private JobExecutor jobExecutor;
     private Map<Object, Object> jobContext;
@@ -104,9 +102,8 @@ public class DumpJobTest {
         given(databaseMetaData.getDatabaseProductName()).willReturn("NuoDB");
         given(connection.getMetaData()).willReturn(databaseMetaData);
 
-        willDoNothing().given(dumpJob).initDumpContext();
-        willDoNothing().given(dumpJob).releaseDumpContext();
-        dumpJob.setDumpContext(dumpContext);
+        willDoNothing().given(dumpJob).init();
+        willDoNothing().given(dumpJob).write();
 
         jobContext = newHashMap();
         jobExecutor = createJobExecutor(dumpJob);

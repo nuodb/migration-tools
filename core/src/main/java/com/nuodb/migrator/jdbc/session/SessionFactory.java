@@ -25,34 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.split;
+package com.nuodb.migrator.jdbc.session;
 
-import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.Query;
-
-import java.sql.Statement;
-
-import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
+import java.sql.SQLException;
+import java.util.Map;
 
 /**
- * Static factories for creating query splitters.
- *
  * @author Sergey Bushik
  */
-public class QuerySplitters {
+public interface SessionFactory {
 
-    public static boolean supportsLimitSplitter(Dialect dialect, Table table, String filter) {
-        return dialect.supportsLimitOffset() && dialect.supportsRowCount(table, null, filter, EXACT);
-    }
+    Session openSession() throws SQLException;
 
-    public static QuerySplitter<Statement> newLimitSplitter(Dialect dialect, RowCountStrategy rowCountStrategy,
-                                                            Query query, QueryLimit queryLimit) {
-        return new LimitQuerySplitter(dialect, rowCountStrategy, query, queryLimit, null);
-    }
+    Session openSession(Map<Object, Object> context) throws SQLException;
 
-    public static QuerySplitter<Statement> newNoLimitSplitter(Query query) {
-        return new NoLimitQuerySplitter(query, null);
-    }
+    void addSessionObserver(SessionObserver sessionObserver);
+
+    void removeSessionObserver(SessionObserver sessionObserver);
 }

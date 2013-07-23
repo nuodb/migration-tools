@@ -25,63 +25,46 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.split;
+package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
-import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.session.SessionObserver;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 
 /**
  * @author Sergey Bushik
  */
-public class LazyQuerySplit<T extends Statement> implements QuerySplit {
+public class DumpQuerySessionObserver implements SessionObserver {
 
-    private final LazyQuerySplitterBase<T> querySplitter;
-    private final StatementCallback<T> callback;
-    private final Connection connection;
-    private final QueryLimit queryLimit;
-    private final int splitIndex;
+    private DumpQueryContext dumpQueryContext;
 
-    private ResultSet resultSet;
-
-    public LazyQuerySplit(LazyQuerySplitterBase<T> querySplitter, Connection connection, StatementCallback<T> callback,
-                          QueryLimit queryLimit, int splitIndex) {
-        this.querySplitter = querySplitter;
-        this.connection = connection;
-        this.callback = callback;
-        this.queryLimit = queryLimit;
-        this.splitIndex = splitIndex;
+    public DumpQuerySessionObserver(DumpQueryContext dumpQueryContext) {
+        this.dumpQueryContext = dumpQueryContext;
     }
 
     @Override
-    public int getSplitIndex() {
-        return splitIndex;
-    }
-
-    @Override
-    public Query getQuery() {
-        return querySplitter.getQuery();
-    }
-
-    @Override
-    public QueryLimit getQueryLimit() {
-        return queryLimit;
-    }
-
-    @Override
-    public ResultSet getResultSet() throws SQLException {
-        if (resultSet == null) {
-            final T statement = querySplitter.createStatement(connection, queryLimit, splitIndex);
-            if (callback != null) {
-                callback.process(statement);
-            }
-            resultSet = querySplitter.executeStatement(statement, queryLimit, splitIndex);
+    public void afterOpen(Session session) throws SQLException {
+        Connection connection = session.getConnection();
+        Dialect dialect = session.getDialect();
+        dialect.setTransactionIsolation(connection,
+                new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
+        if (dialect.supportsSessionTimeZone()) {
+            dialect.setSessionTimeZone(connection, dumpQueryContext.getTimeZone());
         }
-        return resultSet;
+    }
+
+    @Override
+    public void beforeClose(Session session) throws SQLException {
+        Dialect dialect = session.getDialect();
+        Connection connection = session.getConnection();
+        if (dialect.supportsSessionTimeZone()) {
+            dialect.setSessionTimeZone(connection, null);
+        }
     }
 }

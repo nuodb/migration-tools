@@ -34,8 +34,8 @@ import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
  */
 public class NuoDBInspectorUtils {
 
-    public static void validateInspectionScope(SchemaInspectionScope inspectionScope) {
-        if (valueOf(inspectionScope.getCatalog()) != null) {
+    public static void validate(SchemaInspectionScope schemaInspectionScope) {
+        if (valueOf(schemaInspectionScope.getCatalog()) != null) {
             throw new InspectorException("NuoDB does not support catalogs");
         }
     }

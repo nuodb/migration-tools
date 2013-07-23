@@ -27,14 +27,22 @@
  */
 package com.nuodb.migrator.dump;
 
-import java.util.Map;
+import com.nuodb.migrator.backup.catalog.Chunk;
 
 /**
  * @author Sergey Bushik
  */
-interface DumpTaskMonitor {
+public interface DumpQueryObserver {
 
-    void error(DumpTask dumpTask, Exception exception) throws Exception;
+    void writeStart(DumpQuery dumpQuery);
 
-    Map<DumpTask, Exception> getErrors();
+    boolean canWrite(DumpQuery dumpQuery);
+
+    void writeStart(DumpQuery dumpQuery, Chunk chunk);
+
+    void writeValues(DumpQuery dumpQuery, Chunk chunk);
+
+    void writeEnd(DumpQuery dumpQuery, Chunk chunk);
+
+    void writeEnd(DumpQuery dumpQuery);
 }

@@ -27,12 +27,11 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.backup.catalog.XmlCatalogManager;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
-import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.Column;
@@ -40,12 +39,15 @@ import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
-import com.nuodb.migrator.jdbc.metadata.inspector.InspectionResults;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.job.JobBase;
 import com.nuodb.migrator.job.JobExecution;
-import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.DumpSpec;
+import com.nuodb.migrator.spec.QuerySpec;
+import com.nuodb.migrator.spec.ResourceSpec;
+import com.nuodb.migrator.spec.TableSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +57,12 @@ import java.util.Collection;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.dump.DumpWriter.THREADS;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
-import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
-import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
 
 /**
@@ -82,7 +83,9 @@ public class DumpJob extends JobBase {
     private ConnectionProviderFactory connectionProviderFactory;
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
 
-    private DumpContext dumpContext = new DumpContext();
+    private Connection connection;
+    private Database database;
+    private DumpWriter dumpWriter;
 
     public DumpJob(DumpSpec dumpSpec) {
         this.dumpSpec = dumpSpec;
@@ -91,32 +94,49 @@ public class DumpJob extends JobBase {
     @Override
     public void init(JobExecution execution) throws Exception {
         isNotNull(getDumpSpec(), "Dump spec is required");
-        isNotNull(getFormatFactory(), "Backup format factory is required");
+        isNotNull(getFormatFactory(), "Format factory is required");
         isNotNull(getDialectResolver(), "Dialect resolver is required");
         isNotNull(getConnectionProviderFactory(), "Connection provider factory is required");
         isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
 
-        initDumpContext();
+        init();
     }
 
-    protected void initDumpContext() throws SQLException {
+    protected void init() throws SQLException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Initializing dump job context");
+            logger.debug("Initializing dump writer");
         }
-        final DumpContext dumpContext = getDumpContext();
-        dumpContext.setTimeZone(getTimeZone());
+        dumpWriter = new DumpWriter();
+        dumpWriter.setThreads(getThreads() != null ? getThreads() : THREADS);
+        dumpWriter.setQueryLimit(getQueryLimit());
+        dumpWriter.setTimeZone(getTimeZone());
 
-        final ResourceSpec outputSpec = getOutputSpec();
-        dumpContext.setFormat(outputSpec.getType());
-        dumpContext.setFormatAttributes(outputSpec.getAttributes());
-        dumpContext.setCatalogManager(new XmlCatalogManager(outputSpec.getPath()));
+        ResourceSpec outputSpec = getOutputSpec();
+        dumpWriter.setFormat(outputSpec.getType());
+        dumpWriter.setFormatAttributes(outputSpec.getAttributes());
+        dumpWriter.setFormatFactory(getFormatFactory());
+        dumpWriter.setCatalogManager(new XmlCatalogManager(outputSpec.getPath()));
 
-        final Connection connection = getConnectionProviderFactory().createConnectionProvider(
-                getConnectionSpec()).getConnection();
-        dumpContext.setConnection(connection);
-        dumpContext.setDialect(getDialectResolver().resolve(connection));
-        dumpContext.setFormatFactory(getFormatFactory());
-        dumpContext.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
+        ConnectionProvider connectionProvider = getConnectionProviderFactory().
+                createConnectionProvider(getConnectionSpec());
+        dumpWriter.setConnectionProvider(connectionProvider);
+        dumpWriter.setConnection(connection = connectionProvider.getConnection());
+
+        DialectResolver dialectResolver = getDialectResolver();
+        dumpWriter.setDialect(dialectResolver.resolve(connection));
+
+        ValueFormatRegistryResolver valueFormatRegistryResolver = getValueFormatRegistryResolver();
+        dumpWriter.setValueFormatRegistry(valueFormatRegistryResolver.resolve(connection));
+        dumpWriter.setDatabase(database = inspect());
+    }
+
+    protected Database inspect() throws SQLException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Inspecting source database");
+        }
+        InspectionScope inspectionScope = new TableInspectionScope(
+                getConnectionSpec().getCatalog(), getConnectionSpec().getSchema(), getTableTypes());
+        return getInspectionManager().inspect(connection, inspectionScope, META_DATA_TYPES).getObject(DATABASE);
     }
 
     /**
@@ -129,54 +149,13 @@ public class DumpJob extends JobBase {
      */
     @Override
     public void execute(JobExecution execution) throws Exception {
-        final DumpContext dumpContext = getDumpContext();
-        final Dialect dialect = dumpContext.getDialect();
-        final Connection connection = dumpContext.getConnection();
-        try {
-            dialect.setTransactionIsolation(connection,
-                    new int[]{TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED});
-            if (dialect.supportsSessionTimeZone()) {
-                dialect.setSessionTimeZone(connection, getTimeZone());
-            }
-            dumpContext.setDatabase(inspect());
-
-            getDumpWriter().write();
-
-            connection.commit();
-        } catch (MigratorException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new DumpException(exception);
-        } finally {
-            if (dialect.supportsSessionTimeZone()) {
-                dialect.setSessionTimeZone(connection, null);
-            }
-        }
+        write();
     }
 
-    protected Database inspect() throws SQLException {
+    protected void write() throws Exception {
         if (logger.isDebugEnabled()) {
-            logger.debug("Inspecting source database");
+            logger.debug("Adding tables & queries to dump writer");
         }
-        InspectionScope inspectionScope = new TableInspectionScope(
-                getConnectionSpec().getCatalog(), getConnectionSpec().getSchema(), getTableTypes());
-        InspectionResults inspectionResults = getInspectionManager().inspect(
-                getDumpContext().getConnection(), inspectionScope, META_DATA_TYPES);
-        return inspectionResults.getObject(DATABASE);
-    }
-
-    protected DumpWriter getDumpWriter() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Initializing dump writer");
-        }
-        DumpWriter dumpWriter = new DumpWriter(getDumpContext());
-        // dumpWriter.setThreads(Runtime.getRuntime().availableProcessors());
-        // TODO: configure default query limit from CLI parameter
-        // dumpWriter.setQueryLimit(new QueryLimit(1000000L));
-        dumpWriter.setThreads(getThreads() != null ? getThreads() : DumpWriter.THREADS);
-        dumpWriter.setQueryLimit(getQueryLimit());
-
-        Database database = getDumpContext().getDatabase();
         Collection<TableSpec> tableSpecs = getTableSpecs();
         if (isEmpty(tableSpecs)) {
             String[] tableTypes = getTableTypes();
@@ -209,28 +188,23 @@ public class DumpJob extends JobBase {
         for (QuerySpec querySpec : getQuerySpecs()) {
             dumpWriter.addQuery(querySpec.getQuery());
         }
-        return dumpWriter;
+        if (logger.isDebugEnabled()) {
+            logger.debug("Writing database dump");
+        }
+        dumpWriter.write();
     }
 
     @Override
     public void release(JobExecution execution) throws Exception {
-        releaseDumpContext();
-    }
-
-    protected void releaseDumpContext() {
-        close(dumpContext.getConnection());
+        close(connection);
     }
 
     public DumpSpec getDumpSpec() {
         return dumpSpec;
     }
 
-    public DumpContext getDumpContext() {
-        return dumpContext;
-    }
-
-    public void setDumpContext(DumpContext dumpContext) {
-        this.dumpContext = dumpContext;
+    public DumpWriter getDumpWriter() {
+        return dumpWriter;
     }
 
     public FormatFactory getFormatFactory() {
@@ -273,7 +247,7 @@ public class DumpJob extends JobBase {
         this.valueFormatRegistryResolver = valueFormatRegistryResolver;
     }
 
-    public Integer getThreads() {
+    protected Integer getThreads() {
         return dumpSpec.getThreads();
     }
 

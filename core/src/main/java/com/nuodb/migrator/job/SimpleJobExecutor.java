@@ -107,7 +107,6 @@ public class SimpleJobExecutor implements JobExecutor {
 
             job.init(execution);
             job.execute(execution);
-
             synchronized (jobStatus) {
                 jobStatus.setExecutionEndDate(new Date());
                 jobStatus.setRunning(false);

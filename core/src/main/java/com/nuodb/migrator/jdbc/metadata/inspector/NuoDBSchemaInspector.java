@@ -43,7 +43,7 @@ import java.util.Iterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
-import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
+import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validate;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.*;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -68,7 +68,7 @@ public class NuoDBSchemaInspector extends InspectorBase<Catalog, SchemaInspectio
 
     @Override
     public void inspectScope(final InspectionContext inspectionContext, final SchemaInspectionScope inspectionScope) throws SQLException {
-        validateInspectionScope(inspectionScope);
+        validate(inspectionScope);
 
         final Collection<String> filters = newArrayList();
         final Collection<String> parameters = newArrayList();

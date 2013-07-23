@@ -25,24 +25,15 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
+package com.nuodb.migrator.jdbc.split;
 
-import com.nuodb.migrator.backup.catalog.Chunk;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * @author Sergey Bushik
  */
-interface DumpQueryMonitor extends DumpTaskMonitor {
+public interface ParametersBinder {
 
-    void executeStart(DumpQuery dumpQuery);
-
-    boolean canWrite(DumpQuery dumpQuery);
-
-    void writeStart(DumpQuery dumpQuery, Chunk chunk);
-
-    void writeValues(DumpQuery dumpQuery, Chunk chunk);
-
-    void writeEnd(DumpQuery dumpQuery, Chunk chunk);
-
-    void executeEnd(DumpQuery dumpQuery);
+    int bindParameters(PreparedStatement statement, int column) throws SQLException;
 }

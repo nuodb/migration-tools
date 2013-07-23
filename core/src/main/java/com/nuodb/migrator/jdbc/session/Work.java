@@ -25,34 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.split;
-
-import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.Query;
-
-import java.sql.Statement;
-
-import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
+package com.nuodb.migrator.jdbc.session;
 
 /**
- * Static factories for creating query splitters.
- *
  * @author Sergey Bushik
  */
-public class QuerySplitters {
+public interface Work {
 
-    public static boolean supportsLimitSplitter(Dialect dialect, Table table, String filter) {
-        return dialect.supportsLimitOffset() && dialect.supportsRowCount(table, null, filter, EXACT);
-    }
+    void init(Session session) throws Exception;
 
-    public static QuerySplitter<Statement> newLimitSplitter(Dialect dialect, RowCountStrategy rowCountStrategy,
-                                                            Query query, QueryLimit queryLimit) {
-        return new LimitQuerySplitter(dialect, rowCountStrategy, query, queryLimit, null);
-    }
+    void execute() throws Exception;
 
-    public static QuerySplitter<Statement> newNoLimitSplitter(Query query) {
-        return new NoLimitQuerySplitter(query, null);
-    }
+    void close() throws Exception;
 }

@@ -38,7 +38,7 @@ import java.sql.Statement;
 /**
  * @author Sergey Bushik
  */
-public interface QuerySplitter<T extends Statement> {
+public interface QuerySplitter<S extends Statement> {
 
     Query getQuery();
 
@@ -46,5 +46,5 @@ public interface QuerySplitter<T extends Statement> {
 
     boolean hasNextQuerySplit(Connection connection) throws SQLException;
 
-    QuerySplit getNextQuerySplit(Connection connection, StatementCallback<T> callback) throws SQLException;
+    QuerySplit getNextQuerySplit(Connection connection, StatementCallback<S> callback) throws SQLException;
 }

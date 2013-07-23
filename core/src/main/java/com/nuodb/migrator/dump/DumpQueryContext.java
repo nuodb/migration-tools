@@ -25,35 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.split;
+package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
-import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
+import com.nuodb.migrator.backup.catalog.CatalogManager;
+import com.nuodb.migrator.backup.format.FormatFactory;
+import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
+import com.nuodb.migrator.jdbc.metadata.Database;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class LazyQuerySplitterBase<T extends Statement> extends QuerySplitterBase<T> {
+public interface DumpQueryContext {
 
-    protected LazyQuerySplitterBase(Query query, QueryLimit queryLimit) {
-        super(query, queryLimit);
-    }
+    String getFormat();
 
-    protected abstract T createStatement(Connection connection, QueryLimit queryLimit,
-                                         int splitIndex) throws SQLException;
+    TimeZone getTimeZone();
 
-    protected abstract ResultSet executeStatement(T statement, QueryLimit queryLimit,
-                                                  int splitIndex) throws SQLException;
+    Database getDatabase();
 
-    @Override
-    protected QuerySplit createQuerySplit(Connection connection, StatementCallback<T> callback,
-                                          QueryLimit queryLimit, int splitIndex) throws SQLException {
-        return new LazyQuerySplit<T>(this, connection, callback, queryLimit, splitIndex);
-    }
+    FormatFactory getFormatFactory();
+
+    CatalogManager getCatalogManager();
+
+    Map<String, Object> getFormatAttributes();
+
+    ValueFormatRegistry getValueFormatRegistry();
 }

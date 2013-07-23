@@ -32,16 +32,20 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Ints;
+import com.nuodb.migrator.backup.catalog.Catalog;
 import com.nuodb.migrator.backup.catalog.Chunk;
-import com.nuodb.migrator.backup.catalog.Column;
 import com.nuodb.migrator.backup.catalog.RowSet;
 import com.nuodb.migrator.backup.format.value.ValueHandle;
+import com.nuodb.migrator.jdbc.session.SessionFactory;
+import com.nuodb.migrator.jdbc.session.Work;
+import com.nuodb.migrator.jdbc.session.WorkManager;
 import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import static com.google.common.collect.Iterables.all;
 import static com.google.common.collect.Lists.newArrayList;
@@ -55,14 +59,18 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "SynchronizationOnLocalVariableOrMethodParameter"})
-class DumpWriterMonitor implements DumpQueryMonitor {
+class DumpWriterContext implements DumpQueryObserver, WorkManager {
 
     private final transient Logger logger = getLogger(getClass());
 
-    private final Map<DumpTask, Exception> errorMap = newConcurrentMap();
-    private final Map<QueryHandle, Boolean> queryHandleInitMap = newConcurrentMap();
-    private Multimap<QueryHandle, DumpQuery> queryHandleDumpQueryMap = newSetMultimap(
-            Maps.<QueryHandle, Collection<DumpQuery>>newHashMap(), new Supplier<Set<DumpQuery>>() {
+    private Catalog catalog;
+    private SessionFactory sessionFactory;
+    private ExecutorService executorService;
+
+    private final Map<Work, Exception> errors = newConcurrentMap();
+    private final Map<QueryInfo, Boolean> queryInfoStarts = newConcurrentMap();
+    private Multimap<QueryInfo, DumpQuery> queryInfoDumpQueries = newSetMultimap(
+            Maps.<QueryInfo, Collection<DumpQuery>>newHashMap(), new Supplier<Set<DumpQuery>>() {
         @Override
         public Set<DumpQuery> get() {
             return newTreeSet(new Comparator<DumpQuery>() {
@@ -75,22 +83,22 @@ class DumpWriterMonitor implements DumpQueryMonitor {
     });
 
     @Override
-    public void executeStart(DumpQuery dumpQuery) {
-        Boolean queryDescInit = queryHandleInitMap.get(dumpQuery.getQueryHandle());
-        if (queryDescInit == null || !queryDescInit) {
-            Collection<Column> columns = newArrayList();
+    public void writeStart(DumpQuery dumpQuery) {
+        Boolean queryInfoStart = queryInfoStarts.get(dumpQuery.getQueryInfo());
+        if (queryInfoStart == null || !queryInfoStart) {
+            Collection<com.nuodb.migrator.backup.catalog.Column> columns = newArrayList();
             for (ValueHandle valueHandle : dumpQuery.getValueHandleList()) {
-                columns.add(new Column(valueHandle.getName(),
+                columns.add(new com.nuodb.migrator.backup.catalog.Column(valueHandle.getName(),
                         toAlias(valueHandle.getValueType())));
             }
             dumpQuery.getRowSet().setColumns(columns);
-            queryHandleInitMap.put(dumpQuery.getQueryHandle(), true);
+            queryInfoStarts.put(dumpQuery.getQueryInfo(), true);
         }
     }
 
     @Override
     public boolean canWrite(DumpQuery dumpQuery) {
-        return errorMap.isEmpty();
+        return errors.isEmpty();
     }
 
     @Override
@@ -111,12 +119,12 @@ class DumpWriterMonitor implements DumpQueryMonitor {
     }
 
     @Override
-    public void executeEnd(DumpQuery dumpQuery) {
+    public void writeEnd(DumpQuery dumpQuery) {
         final RowSet rowSet = dumpQuery.getRowSet();
         synchronized (rowSet) {
-            queryHandleDumpQueryMap.put(dumpQuery.getQueryHandle(), dumpQuery);
+            queryInfoDumpQueries.put(dumpQuery.getQueryInfo(), dumpQuery);
             final Collection<Chunk> chunks = newArrayList();
-            all(queryHandleDumpQueryMap.get(dumpQuery.getQueryHandle()), new Predicate<DumpQuery>() {
+            all(queryInfoDumpQueries.get(dumpQuery.getQueryInfo()), new Predicate<DumpQuery>() {
                 @Override
                 public boolean apply(DumpQuery dumpQuery) {
                     chunks.addAll(dumpQuery.getChunks());
@@ -128,15 +136,38 @@ class DumpWriterMonitor implements DumpQueryMonitor {
     }
 
     @Override
-    public void error(DumpTask dumpTask, Exception exception) throws Exception {
+    public void error(Work work, Exception exception) throws Exception {
         if (logger.isDebugEnabled()) {
-            logger.debug("Dump write error reported", exception);
+            logger.debug("Dump writer error", exception);
         }
-        errorMap.put(dumpTask, exception);
+        errors.put(work, exception);
     }
 
-    @Override
-    public Map<DumpTask, Exception> getErrors() {
-        return errorMap;
+    public Map<Work, Exception> getErrors() {
+        return errors;
+    }
+
+    public Catalog getCatalog() {
+        return catalog;
+    }
+
+    public void setCatalog(Catalog catalog) {
+        this.catalog = catalog;
+    }
+
+    public SessionFactory getSessionFactory() {
+        return sessionFactory;
+    }
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+    public ExecutorService getExecutorService() {
+        return executorService;
+    }
+
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 }

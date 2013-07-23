@@ -25,51 +25,62 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.split;
+package com.nuodb.migrator.jdbc.session;
 
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
-import com.nuodb.migrator.jdbc.query.Query;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Collection;
+import java.util.Map;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * @author Sergey Bushik
  */
-public class NoLimitQuerySplitter extends QuerySplitterBase<Statement> {
+public abstract class SessionFactoryBase implements SessionFactory {
 
+    private Collection<SessionObserver> sessionObservers = newArrayList();
 
-    protected NoLimitQuerySplitter(Query query, ParametersBinder parametersBinder) {
-        super(query, null, parametersBinder);
+    @Override
+    public Session openSession() throws SQLException {
+        return openSession(newHashMap());
     }
 
     @Override
-    protected boolean hasNextQuerySplit(Connection connection, int splitIndex) throws SQLException {
-        return splitIndex == 0;
+    public Session openSession(Map<Object, Object> context) throws SQLException {
+        Session session = open(context);
+        afterOpen(session);
+        return session;
+    }
+
+    protected abstract Session open(Map<Object, Object> context) throws SQLException;
+
+    @Override
+    public void addSessionObserver(SessionObserver sessionObserver) {
+        sessionObservers.add(sessionObserver);
     }
 
     @Override
-    protected QueryLimit createQueryLimit(Connection connection, int splitIndex) {
-        return null;
+    public void removeSessionObserver(SessionObserver sessionObserver) {
+        sessionObservers.remove(sessionObserver);
     }
 
-    @Override
-    protected Statement createStatement(Connection connection, QueryLimit queryLimit,
-                                        int splitIndex) throws SQLException {
-        return connection.createStatement();
+    protected void afterOpen(Session session) throws SQLException {
+        for (SessionObserver sessionObserver : sessionObservers) {
+            sessionObserver.afterOpen(session);
+        }
     }
 
-    @Override
-    protected Statement prepareStatement(Connection connection, QueryLimit queryLimit,
-                                         int splitIndex) throws SQLException {
-        return connection.prepareStatement(getQuery().toString());
+    protected void beforeClose(Session session) throws SQLException {
+        for (SessionObserver sessionObserver : sessionObservers) {
+            sessionObserver.beforeClose(session);
+        }
     }
 
-    @Override
-    protected ResultSet executeStatement(Statement statement, QueryLimit queryLimit,
-                                         int splitIndex) throws SQLException {
-        return statement.executeQuery(getQuery().toString());
+    public void closeSession(Session session) throws SQLException {
+        beforeClose(session);
+        close(session);
     }
+
+    protected abstract void close(Session session) throws SQLException;
 }

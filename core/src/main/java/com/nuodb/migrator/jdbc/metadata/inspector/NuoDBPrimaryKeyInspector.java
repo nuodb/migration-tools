@@ -44,7 +44,7 @@ import java.util.Collection;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.PRIMARY_KEY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.createQuery;
-import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validateInspectionScope;
+import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validate;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
@@ -60,7 +60,7 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
     @Override
     public void inspectScope(InspectionContext inspectionContext,
                              TableInspectionScope inspectionScope) throws SQLException {
-        validateInspectionScope(inspectionScope);
+        validate(inspectionScope);
         super.inspectScope(inspectionContext, inspectionScope);
     }
 

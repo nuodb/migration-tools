@@ -69,13 +69,16 @@ public abstract class CatalogManagerBase implements CatalogManager {
     }
 
     public CatalogManagerBase(File file) {
-        this(isCatalogFile(file) ? file.getParent() : file.getPath(),
+        this(isCatalogFile(file) ? file.getParent() : file.getAbsolutePath(),
                 isCatalogFile(file) ? file.getName() : CATALOG);
     }
 
     public CatalogManagerBase(String directory, String catalog) {
         this.directory = directory;
         this.catalog = catalog;
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Using %s directory for catalog output", directory));
+        }
     }
 
     private static boolean isCatalogFile(File file) {
@@ -96,7 +99,7 @@ public abstract class CatalogManagerBase implements CatalogManager {
             }
             return FileUtils.openInputStream(file);
         } catch (IOException exception) {
-            throw new CatalogException("Error file for reading", exception);
+            throw new CatalogException("Error opening file for reading", exception);
         }
     }
 
@@ -109,7 +112,7 @@ public abstract class CatalogManagerBase implements CatalogManager {
             }
             return FileUtils.openOutputStream(file);
         } catch (IOException exception) {
-            throw new CatalogException("Error file for writing", exception);
+            throw new CatalogException("Error opening file for writing", exception);
         }
     }
 
