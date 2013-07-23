@@ -37,6 +37,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
+import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
+
 @SuppressWarnings("unchecked")
 public class DriverConnectionProvider extends ConnectionProxyProviderBase<DriverConnectionSpec> {
 
@@ -55,21 +58,25 @@ public class DriverConnectionProvider extends ConnectionProxyProviderBase<Driver
 
             BasicDataSource basicDataSource = new BasicDataSource();
             basicDataSource.setDriverClassName(driverConnectionSpec.getDriver());
-            basicDataSource.setDriverClassLoader(ReflectionUtils.getClassLoader());
+            basicDataSource.setDriverClassLoader(getClassLoader());
             basicDataSource.setUrl(driverConnectionSpec.getUrl());
             basicDataSource.setUsername(driverConnectionSpec.getUsername());
             basicDataSource.setPassword(driverConnectionSpec.getPassword());
-            Map<String, Object> properties = driverConnectionSpec.getProperties();
-            if (properties != null) {
-                for (Map.Entry<String, Object> entry : properties.entrySet()) {
-                    basicDataSource.addConnectionProperty(entry.getKey(), (String) entry.getValue());
-                }
-            }
+            addParameters(basicDataSource, driverConnectionSpec.getJdbcUrl().getParameters());
+            addParameters(basicDataSource, driverConnectionSpec.getProperties());
             basicDataSource.setAccessToUnderlyingConnectionAllowed(true);
 
             this.basicDataSource = basicDataSource;
         }
         return basicDataSource.getConnection();
+    }
+
+    protected void addParameters(BasicDataSource basicDataSource, Map<String, Object> properties) {
+        if (!isEmpty(properties)) {
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                basicDataSource.addConnectionProperty(entry.getKey(), (String) entry.getValue());
+            }
+        }
     }
 
     @Override

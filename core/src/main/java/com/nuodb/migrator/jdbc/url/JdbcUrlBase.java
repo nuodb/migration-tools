@@ -41,15 +41,20 @@ public abstract class JdbcUrlBase implements JdbcUrl {
 
     private final String url;
     private final String subProtocol;
-    private Map<String, Object> properties = new HashMap<String, Object>();
+    private Map<String, Object> parameters = new HashMap<String, Object>();
 
     protected JdbcUrlBase(String url, String subProtocol) {
         this.url = url;
         this.subProtocol = subProtocol;
-        this.parse();
+
+        addParameters();
+        parseUrl();
     }
 
-    protected void parse() {
+    protected void addParameters() {
+    }
+
+    protected void parseUrl() {
         parseSubName(substring(url, (PROTOCOL + SEPARATOR + subProtocol + SEPARATOR).length()));
     }
 
@@ -80,8 +85,18 @@ public abstract class JdbcUrlBase implements JdbcUrl {
     }
 
     @Override
-    public Map<String, Object> getProperties() {
-        return properties;
+    public void addParameter(String parameter, Object value) {
+        parameters.put(parameter, value);
+    }
+
+    @Override
+    public void addParameters(Map<String, Object> parameters) {
+        parameters.putAll(parameters);
+    }
+
+    @Override
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
 
     @Override

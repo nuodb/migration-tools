@@ -52,7 +52,7 @@ public class MSSQLJdbcUrlParser extends JdbcUrlParserBase {
 
         @Override
         protected void parseSubName(String subName) {
-            parseParameters(getProperties(), substringAfter(subName, ";"), ";");
+            parseParameters(getParameters(), substringAfter(subName, ";"), ";");
         }
 
         @Override

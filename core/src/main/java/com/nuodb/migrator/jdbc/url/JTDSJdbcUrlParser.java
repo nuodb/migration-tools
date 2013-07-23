@@ -56,7 +56,7 @@ public class JTDSJdbcUrlParser extends JdbcUrlParserBase {
         @Override
         protected void parseSubName(String subName) {
             qualifier = substringBefore(subName, ":");
-            parseParameters(getProperties(), substringAfter(subName, ";"), ";");
+            parseParameters(getParameters(), substringAfter(subName, ";"), ";");
         }
 
         @Override
@@ -71,7 +71,7 @@ public class JTDSJdbcUrlParser extends JdbcUrlParserBase {
 
         @Override
         public String getSchema() {
-            return (String) getProperties().get("schema");
+            return (String) getParameters().get("schema");
         }
     }
 }

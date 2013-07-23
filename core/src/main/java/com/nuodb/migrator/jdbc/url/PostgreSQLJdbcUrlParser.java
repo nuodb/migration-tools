@@ -53,7 +53,7 @@ public class PostgreSQLJdbcUrlParser extends JdbcUrlParserBase {
 
         @Override
         protected void parseSubName(String subName) {
-            parseParameters(getProperties(), substringAfter(subName, "?"), "&");
+            parseParameters(getParameters(), substringAfter(subName, "?"), "&");
         }
 
         @Override
@@ -68,7 +68,7 @@ public class PostgreSQLJdbcUrlParser extends JdbcUrlParserBase {
 
         @Override
         public String getSchema() {
-            String searchPath = (String) getProperties().get("searchpath");
+            String searchPath = (String) getParameters().get("searchpath");
             return contains(searchPath, ",") ? null : searchPath;
         }
     }

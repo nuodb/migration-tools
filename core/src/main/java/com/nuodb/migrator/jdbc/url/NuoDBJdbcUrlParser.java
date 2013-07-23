@@ -55,7 +55,7 @@ public class NuoDBJdbcUrlParser extends JdbcUrlParserBase {
             int prefix = subName.indexOf("//");
             int parameters;
             if (prefix >= 0 && (parameters = subName.indexOf('?', prefix + 3)) > 0) {
-                parseParameters(getProperties(), substring(subName, parameters + 1), "&");
+                parseParameters(getParameters(), substring(subName, parameters + 1), "&");
             }
         }
 
@@ -66,7 +66,7 @@ public class NuoDBJdbcUrlParser extends JdbcUrlParserBase {
 
         @Override
         public String getSchema() {
-            return (String) getProperties().get("schema");
+            return (String) getParameters().get("schema");
         }
 
         @Override

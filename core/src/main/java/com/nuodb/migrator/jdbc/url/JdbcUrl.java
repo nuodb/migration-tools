@@ -78,9 +78,24 @@ public interface JdbcUrl {
     String getSchema();
 
     /**
+     * Adds parameter with specified value to the url parameters map.
+     *
+     * @param parameter name of the parameter to add.
+     * @param value     parameter value.
+     */
+    void addParameter(String parameter, Object value);
+
+    /**
+     * Merges parameters with current url parameters.
+     *
+     * @param parameters to be added to url parameters.
+     */
+    void addParameters(Map<String, Object> parameters);
+
+    /**
      * Optional key value parameters
      *
      * @return
      */
-    Map<String, Object> getProperties();
+    Map<String, Object> getParameters();
 }

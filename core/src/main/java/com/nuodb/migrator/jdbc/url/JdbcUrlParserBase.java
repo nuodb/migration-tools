@@ -57,7 +57,7 @@ public abstract class JdbcUrlParserBase implements JdbcUrlParser {
     public JdbcUrl parse(String url, Map<String, Object> parameters) {
         JdbcUrl jdbcUrl = createJdbcUrl(url);
         if (parameters != null) {
-            jdbcUrl.getProperties().putAll(parameters);
+            jdbcUrl.addParameters(parameters);
         }
         return jdbcUrl;
     }

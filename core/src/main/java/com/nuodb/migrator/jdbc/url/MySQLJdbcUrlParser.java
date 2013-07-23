@@ -36,6 +36,9 @@ import static org.apache.commons.lang3.StringUtils.substringAfterLast;
  */
 public class MySQLJdbcUrlParser extends JdbcUrlParserBase {
 
+    private static final String ZERO_DATE_TIME_BEHAVIOR = "zeroDateTimeBehavior";
+    private static final String CONVERT_TO_NULL = "convertToNull";
+
     public MySQLJdbcUrlParser() {
         super(MYSQL_SUB_PROTOCOL);
     }
@@ -54,11 +57,16 @@ public class MySQLJdbcUrlParser extends JdbcUrlParserBase {
         }
 
         @Override
+        protected void addParameters() {
+            addParameter(ZERO_DATE_TIME_BEHAVIOR, CONVERT_TO_NULL);
+        }
+
+        @Override
         protected void parseSubName(String subName) {
             int prefix = subName.indexOf("//");
             int parameters = 0;
             if (prefix >= 0 && (parameters = subName.indexOf('?', prefix + 3)) > 0) {
-                parseParameters(getProperties(), substring(subName, parameters + 1), "&");
+                parseParameters(getParameters(), substring(subName, parameters + 1), "&");
             }
             String base = parameters > 0 ? subName.substring(0, parameters) : subName;
             catalog = substringAfterLast(base, "/");

@@ -89,7 +89,7 @@ public class JdbcUrlParserTest {
         assertEquals(jdbcUrl.getQualifier(), qualifier);
         assertEquals(jdbcUrl.getCatalog(), catalog);
         assertEquals(jdbcUrl.getSchema(), schema);
-        assertEquals(jdbcUrl.getProperties(), properties);
+        assertEquals(jdbcUrl.getParameters(), properties);
     }
 
     static class PropertiesBuilder {
