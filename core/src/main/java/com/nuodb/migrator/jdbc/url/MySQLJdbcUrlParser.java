@@ -36,8 +36,8 @@ import static org.apache.commons.lang3.StringUtils.substringAfterLast;
  */
 public class MySQLJdbcUrlParser extends JdbcUrlParserBase {
 
-    private static final String ZERO_DATE_TIME_BEHAVIOR = "zeroDateTimeBehavior";
-    private static final String CONVERT_TO_NULL = "convertToNull";
+    public static final String ZERO_DATE_TIME_BEHAVIOR = "zeroDateTimeBehavior";
+    public static final String CONVERT_TO_NULL = "convertToNull";
 
     public MySQLJdbcUrlParser() {
         super(MYSQL_SUB_PROTOCOL);

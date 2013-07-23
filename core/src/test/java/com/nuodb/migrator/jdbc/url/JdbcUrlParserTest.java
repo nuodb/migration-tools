@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.PROTOCOL;
+import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrlParser.CONVERT_TO_NULL;
+import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrlParser.ZERO_DATE_TIME_BEHAVIOR;
 import static org.testng.Assert.*;
 
 /**
@@ -54,7 +56,7 @@ public class JdbcUrlParserTest {
                         new PropertiesBuilder("database", "test").build()},
                 {"jdbc:mysql://localhost:3306/database",
                         "mysql", null, "database", null,
-                        EMPTY_PROPERTIES},
+                        new PropertiesBuilder(ZERO_DATE_TIME_BEHAVIOR, CONVERT_TO_NULL).build()},
                 {"jdbc:mysql://localhost:3306/database?connectTimeout=1000",
                         "mysql", null, "database", null,
                         new PropertiesBuilder("connectTimeout", "1000").build()},
