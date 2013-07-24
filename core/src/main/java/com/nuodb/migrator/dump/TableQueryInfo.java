@@ -41,22 +41,16 @@ import static com.nuodb.migrator.jdbc.split.Queries.newQuery;
 class TableQueryInfo extends QueryInfo {
 
     private final Table table;
-    private final Collection<Column> columns;
     private final String filter;
 
     public TableQueryInfo(Table table, Collection<Column> columns, String filter, QueryLimit queryLimit) {
-        super(newQuery(table, columns, filter), queryLimit);
+        super(newQuery(table, columns, filter), queryLimit, columns);
         this.table = table;
-        this.columns = columns;
         this.filter = filter;
     }
 
     public Table getTable() {
         return table;
-    }
-
-    public Collection<Column> getColumns() {
-        return columns;
     }
 
     public String getFilter() {

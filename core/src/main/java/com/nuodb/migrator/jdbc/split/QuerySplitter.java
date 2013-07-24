@@ -46,5 +46,7 @@ public interface QuerySplitter<S extends Statement> {
 
     boolean hasNextQuerySplit(Connection connection) throws SQLException;
 
+    QuerySplit getNextQuerySplit(Connection connection) throws SQLException;
+
     QuerySplit getNextQuerySplit(Connection connection, StatementCallback<S> callback) throws SQLException;
 }

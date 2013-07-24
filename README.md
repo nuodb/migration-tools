@@ -11,7 +11,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
 3. Dump data from an existing database
 4. Load data to a target NuoDB database
 
-*These functions are tested on MySQL, SQL Server, Oracle, PostgreSQL, IBM DB2, Sybase Adaptive Server Enterprise and should work with any JDBC-compliant database.*
+*These functions tested on MySQL, MSSQL Server, Oracle, PostgreSQL, IBM DB2, Sybase Adaptive Server Enterprise and supposed to work with any JDBC-compliant database.*
 
 ## Building from Source ##
 
@@ -54,6 +54,8 @@ This tool is designed to assist you in migrating data from supported SQL databas
         [select statements, optional]                               
             [--query=query]                                 Select statement
         [--time.zone (-t)=time zone]                        Time zone enables date columns to be dumped and reloaded between servers in different time zones
+        [--threads (-t)=[threads]]                          Number of worker threads (experimental), defaulted to a number of available processors
+        [--query.limit=[query limit]]                       Query limit (experimental) is used to split table into chunks with LIMIT {limit} OFFSET {offset} syntax, by default queries are not limited
 
 ### Load data to a target NuoDB database ###
 

@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.backup.catalog.Chunk;
 import com.nuodb.migrator.backup.catalog.QueryRowSet;
 import com.nuodb.migrator.backup.catalog.RowSet;
@@ -36,12 +35,14 @@ import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.session.WorkBase;
 import com.nuodb.migrator.jdbc.split.QuerySplit;
 import com.nuodb.migrator.utils.ObjectUtils;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 
 import static com.google.common.base.Predicates.equalTo;
@@ -87,28 +88,27 @@ public class DumpQuery extends WorkBase {
 
     @Override
     public void init() throws Exception {
-        DumpWriterContext dumpWriterContext = getDumpWriterContext();
+        final Dialect dialect = getSession().getDialect();
+        resultSet = getQuerySplit().getResultSet(getSession().getConnection(), new StatementCallback() {
+            @Override
+            public void process(Statement statement) throws SQLException {
+                dialect.setStreamResults(statement, queryInfo.getColumns() != null);
+            }
+        });
 
-        Connection connection = getSession().getConnection();
-        Dialect dialect = getSession().getDialect();
-        setResultSet(getQuerySplit().getResultSet(connection));
-
-
-        setValueHandleList(newBuilder(getResultSet()).
+        valueHandleList = newBuilder(resultSet).
                 withDialect(dialect).
-                withColumns(createColumnList(getResultSet())).
+                withColumns(queryInfo.getColumns() != null ? queryInfo.getColumns() : createColumnList(resultSet)).
                 withTimeZone(dumpWriterContext.getTimeZone()).
-                withValueFormatRegistry(dumpWriterContext.getValueFormatRegistry()).build());
+                withValueFormatRegistry(dumpWriterContext.getValueFormatRegistry()).build();
 
-        OutputFormat outputFormat = dumpWriterContext.getFormatFactory().createOutputFormat(
+        outputFormat = dumpWriterContext.getFormatFactory().createOutputFormat(
                 dumpWriterContext.getFormat(), dumpWriterContext.getFormatAttributes());
-        outputFormat.setValueHandleList(getValueHandleList());
+        outputFormat.setValueHandleList(valueHandleList);
 
-        setOutputFormat(outputFormat);
-
-        setChunks(Lists.<Chunk>newArrayList());
-        if (getRowSet().getName() == null) {
-            getRowSet().setName(getRowSetName());
+        chunks = newArrayList();
+        if (rowSet.getName() == null) {
+            rowSet.setName(getRowSetName());
         }
     }
 

@@ -31,20 +31,56 @@ import com.nuodb.migrator.jdbc.dialect.RowCountHandler;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Sergey Bushik
  */
-public class RowCountHandlerStrategy implements RowCountStrategy {
+public class RowCountStrategies {
 
-    private RowCountHandler rowCountHandler;
-
-    public RowCountHandlerStrategy(RowCountHandler rowCountHandler) {
-        this.rowCountHandler = rowCountHandler;
+    public static RowCountStrategy newCachingStrategy(final RowCountStrategy rowCountStrategy) {
+        return newCachingStrategy(rowCountStrategy, new ReentrantLock());
     }
 
-    @Override
-    public long getRowCount(Connection connection) throws SQLException {
-        return rowCountHandler.getRowCount(connection);
+    public static RowCountStrategy newCachingStrategy(final RowCountStrategy rowCountStrategy, final Lock lock) {
+        return new RowCountStrategy() {
+            private volatile Long rowCount;
+
+            @Override
+            public long getRowCount(Connection connection) throws SQLException {
+                if (rowCount == null) {
+                    try {
+                        lock.lock();
+                        if (rowCount == null) {
+                            rowCount = rowCountStrategy.getRowCount(connection);
+                        }
+                    } finally {
+                        lock.unlock();
+                    }
+                }
+                return rowCount;
+            }
+        };
+    }
+
+    public static RowCountStrategy newProvidedStrategy(final long rowCount) {
+        return new RowCountStrategy() {
+
+            @Override
+            public long getRowCount(Connection connection) throws SQLException {
+                return rowCount;
+            }
+        };
+    }
+
+    public static RowCountStrategy newHandlerStrategy(final RowCountHandler rowCountHandler) {
+        return new RowCountStrategy() {
+
+            @Override
+            public long getRowCount(Connection connection) throws SQLException {
+                return rowCountHandler.getRowCount(connection);
+            }
+        };
     }
 }

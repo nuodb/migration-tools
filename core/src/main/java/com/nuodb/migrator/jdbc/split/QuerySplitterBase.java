@@ -39,6 +39,7 @@ import java.sql.Statement;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public abstract class QuerySplitterBase<S extends Statement> implements QuerySplitter<S> {
 
     private Query query;
@@ -69,6 +70,11 @@ public abstract class QuerySplitterBase<S extends Statement> implements QuerySpl
     }
 
     protected abstract boolean hasNextQuerySplit(Connection connection, int splitIndex) throws SQLException;
+
+    @Override
+    public QuerySplit getNextQuerySplit(Connection connection) throws SQLException {
+        return getNextQuerySplit(connection, null);
+    }
 
     @Override
     public QuerySplit getNextQuerySplit(Connection connection, StatementCallback<S> callback) throws SQLException {
@@ -114,7 +120,13 @@ public abstract class QuerySplitterBase<S extends Statement> implements QuerySpl
                 return getResultSet(connection);
             }
 
+            @Override
             public ResultSet getResultSet(Connection connection) throws SQLException {
+                return getResultSet(connection, callback);
+            }
+
+            @Override
+            public ResultSet getResultSet(Connection connection, StatementCallback callback) throws SQLException {
                 final S statement = isParameterized() ? prepareStatement(connection, queryLimit,
                         splitIndex) : createStatement(connection, queryLimit, splitIndex);
                 if (callback != null) {

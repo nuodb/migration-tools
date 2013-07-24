@@ -28,19 +28,29 @@
 package com.nuodb.migrator.dump;
 
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;
+import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.query.Query;
+
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
 class QueryInfo {
 
-    private final Query query;
-    private final QueryLimit queryLimit;
+    private Query query;
+    private QueryLimit queryLimit;
+    private Collection<? extends Column> columns;
 
     public QueryInfo(Query query, QueryLimit queryLimit) {
         this.query = query;
         this.queryLimit = queryLimit;
+    }
+
+    public QueryInfo(Query query, QueryLimit queryLimit, Collection<? extends Column> columns) {
+        this.query = query;
+        this.queryLimit = queryLimit;
+        this.columns = columns;
     }
 
     public Query getQuery() {
@@ -49,6 +59,10 @@ class QueryInfo {
 
     public QueryLimit getQueryLimit() {
         return queryLimit;
+    }
+
+    public Collection<? extends Column> getColumns() {
+        return columns;
     }
 
     @Override

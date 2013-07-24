@@ -37,7 +37,6 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.jdbc.session.Work;
@@ -48,13 +47,11 @@ import org.slf4j.Logger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
@@ -66,8 +63,8 @@ import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZon
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationObserver;
 import static com.nuodb.migrator.jdbc.split.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.split.QuerySplitters.*;
-import static com.nuodb.migrator.jdbc.split.RowCountHandlerStrategies.newCachingStrategy;
-import static com.nuodb.migrator.jdbc.split.RowCountHandlerStrategies.newHandlerStrategy;
+import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newCachingStrategy;
+import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newHandlerStrategy;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
@@ -181,12 +178,7 @@ public class DumpWriter implements DumpWriterContext {
     protected void write(final DumpQueryManager dumpQueryManager, QueryInfo queryInfo, QuerySplitter querySplitter,
                          RowSet rowSet) throws SQLException {
         while (querySplitter.hasNextQuerySplit(getConnection())) {
-            QuerySplit querySplit = querySplitter.getNextQuerySplit(getConnection(), new StatementCallback() {
-                @Override
-                public void process(Statement statement) throws SQLException {
-                    getDialect().setStreamResults(statement, true);
-                }
-            });
+            QuerySplit querySplit = querySplitter.getNextQuerySplit(getConnection());
             write(dumpQueryManager, new DumpQuery(this, dumpQueryManager, queryInfo, querySplit,
                     querySplitter.hasNextQuerySplit(getConnection()), rowSet));
         }
@@ -253,10 +245,9 @@ public class DumpWriter implements DumpWriterContext {
         QuerySplitter querySplitter;
         Query query = newQuery(table, columns, filter);
         if (queryLimit != null && supportsLimitSplitter(getDialect(), table, filter)) {
-            querySplitter = newLimitSplitter(getDialect(),
-                    newCachingStrategy(new ReentrantLock(),
-                            newHandlerStrategy(
-                                    getDialect().createRowCountHandler(table, null, filter, EXACT))), query, queryLimit);
+            querySplitter = newLimitSplitter(getDialect(), newCachingStrategy(newHandlerStrategy(
+                    getDialect().createRowCountHandler(table, null, filter, EXACT))
+            ), query, queryLimit);
         } else {
             querySplitter = newNoLimitSplitter(query);
         }
