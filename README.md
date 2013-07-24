@@ -54,8 +54,8 @@ This tool is designed to assist you in migrating data from supported SQL databas
         [select statements, optional]                               
             [--query=query]                                 Select statement
         [--time.zone (-t)=time zone]                        Time zone enables date columns to be dumped and reloaded between servers in different time zones
-        [--threads (-t)=[threads]]                          Number of worker threads (experimental), defaulted to a number of available processors
-        [--query.limit=[query limit]]                       Query limit (experimental) is used to split table into chunks with LIMIT {limit} OFFSET {offset} syntax, by default queries are not limited
+        [--threads (-t)=[threads]]                          Number of worker threads (experimental), defaulted to the number of available processors
+        [--query.limit=[query limit]]                       Query limit (experimental) is used to split table into chunks with LIMIT {limit} OFFSET {offset}, by default queries are not limited
 
 ### Load data to a target NuoDB database ###
 
@@ -69,7 +69,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
         [input specification, required]
             --input.path=[input path]             Path on the file system
             [--input.*=[attribute value]]         Input format attributes
-        [--time.zone (-t)=time zone]            Time zone enables date columns to be dumped and reloaded between servers in different time zones
+        [--time.zone (-t)=time zone]              Time zone enables date columns to be dumped and reloaded between servers in different time zones
 
 ### Generate a schema for a target NuoDB database ###
 
