@@ -34,6 +34,7 @@ import java.util.Map;
 
 import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.PROTOCOL;
 import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.SEPARATOR;
+import static org.apache.commons.lang3.StringUtils.split;
 import static org.apache.commons.lang3.StringUtils.substring;
 
 /**
@@ -63,7 +64,7 @@ public abstract class JdbcUrlBase implements JdbcUrl {
     }
 
     public static void parseParameters(Map<String, Object> parameters, String url, String separator) {
-        String[] pairs = url.split(separator);
+        String[] pairs = split(url, separator);
         for (String pair : pairs) {
             String[] values = pair.split("=");
             parameters.put(values[0], values.length > 1 ? values[1] : null);

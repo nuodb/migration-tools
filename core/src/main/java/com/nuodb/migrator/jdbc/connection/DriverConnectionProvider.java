@@ -54,16 +54,16 @@ public class DriverConnectionProvider extends ConnectionProxyProviderBase<Driver
     @Override
     protected Connection createTargetConnection() throws SQLException {
         if (basicDataSource == null) {
-            DriverConnectionSpec driverConnectionSpec = getConnectionSpec();
+            DriverConnectionSpec connectionSpec = getConnectionSpec();
 
             BasicDataSource basicDataSource = new BasicDataSource();
-            basicDataSource.setDriverClassName(driverConnectionSpec.getDriver());
+            basicDataSource.setDriverClassName(connectionSpec.getDriver());
             basicDataSource.setDriverClassLoader(getClassLoader());
-            basicDataSource.setUrl(driverConnectionSpec.getUrl());
-            basicDataSource.setUsername(driverConnectionSpec.getUsername());
-            basicDataSource.setPassword(driverConnectionSpec.getPassword());
-            addParameters(basicDataSource, driverConnectionSpec.getJdbcUrl().getParameters());
-            addParameters(basicDataSource, driverConnectionSpec.getProperties());
+            basicDataSource.setUrl(connectionSpec.getUrl());
+            basicDataSource.setUsername(connectionSpec.getUsername());
+            basicDataSource.setPassword(connectionSpec.getPassword());
+            addParameters(basicDataSource, connectionSpec.getJdbcUrl().getParameters());
+            addParameters(basicDataSource, connectionSpec.getProperties());
             basicDataSource.setAccessToUnderlyingConnectionAllowed(true);
 
             this.basicDataSource = basicDataSource;

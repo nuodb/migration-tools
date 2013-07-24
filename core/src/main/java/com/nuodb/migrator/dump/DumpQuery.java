@@ -192,7 +192,7 @@ public class DumpQuery extends WorkBase {
                     instanceOf(QueryRowSet.class)), equalTo(getRowSet()));
             rowSetName = join(asList(QUERY, rowSetIndex + 1), "-");
         }
-        return rowSetName;
+        return lowerCase(rowSetName);
     }
 
     public DumpWriterContext getDumpWriterContext() {

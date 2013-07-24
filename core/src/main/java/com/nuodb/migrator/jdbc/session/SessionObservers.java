@@ -86,18 +86,22 @@ public class SessionObservers {
                 Dialect dialect = session.getDialect();
                 if (dialect.supportsSessionTimeZone()) {
                     if (logger.isTraceEnabled()) {
-                        logger.trace(format("Session %s time zone set to %s", session, getTimeZone(timeZone)));
+                        logger.trace(format("Session %s time zone set to %s", session, getTimeZoneName(timeZone)));
                     }
                     dialect.setSessionTimeZone(session.getConnection(), timeZone);
                 } else {
                     if (logger.isDebugEnabled()) {
-                        logger.trace(format("Session time zone is not supported by %s", dialect));
+                        logger.trace(format("Session time zone is not supported by %s", getDialectName(dialect)));
                     }
                 }
             }
 
-            protected String getTimeZone(TimeZone timeZone) {
+            private String getTimeZoneName(TimeZone timeZone) {
                 return timeZone != null ? timeZone.getID() : DEFAULT_TIME_ZONE;
+            }
+
+            private Object getDialectName(Dialect dialect) {
+                return dialect.getClass().getName();
             }
         };
     }

@@ -138,7 +138,7 @@ class DumpQueryManager implements DumpQueryObserver, WorkManager {
     @Override
     public void error(Work work, Exception exception) throws Exception {
         if (logger.isDebugEnabled()) {
-            logger.debug("Dump writer error", exception);
+            logger.debug("Dump query error reported: %s", exception.getMessage());
         }
         errors.put(work, exception);
     }
