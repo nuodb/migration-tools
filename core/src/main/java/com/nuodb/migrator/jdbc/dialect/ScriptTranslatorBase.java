@@ -66,15 +66,15 @@ public abstract class ScriptTranslatorBase implements ScriptTranslator {
     }
 
     @Override
-    public boolean canTranslateScript(Script script, DatabaseInfo targetDatabaseInfo) {
-        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isInherited(script.getDatabaseInfo())
-                && (this.targetDatabaseInfo == null || this.targetDatabaseInfo.isInherited(targetDatabaseInfo)));
+    public boolean canTranslateScript(Script script, DatabaseInfo databaseInfo) {
+        return (this.sourceDatabaseInfo == null || this.sourceDatabaseInfo.isInherited(script.getDatabaseInfo())
+                && (this.targetDatabaseInfo == null || this.targetDatabaseInfo.isInherited(databaseInfo)));
     }
 
     @Override
-    public Script translateScript(Script script, DatabaseInfo targetDatabaseInfo) {
-        if (canTranslateScript(script, targetDatabaseInfo)) {
-            return getScriptTranslation(script, targetDatabaseInfo);
+    public Script translateScript(Script script, DatabaseInfo databaseInfo) {
+        if (canTranslateScript(script, databaseInfo)) {
+            return getScriptTranslation(script, databaseInfo);
         } else {
             return null;
         }
@@ -89,8 +89,10 @@ public abstract class ScriptTranslatorBase implements ScriptTranslator {
         }
     }
 
-    protected abstract String getScriptTranslation(String script, DatabaseInfo sourceDatabaseInfo,
-                                                   DatabaseInfo targetDatabaseInfo);
+    protected String getScriptTranslation(String script, DatabaseInfo sourceDatabaseInfo,
+                                          DatabaseInfo targetDatabaseInfo) {
+        return script;
+    }
 
     @Override
     public boolean equals(Object o) {

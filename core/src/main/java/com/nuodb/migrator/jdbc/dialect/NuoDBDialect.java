@@ -128,6 +128,7 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     protected void initScriptTranslations() {
+        addScriptTranslator(new MySQLBitLiteralScriptTranslator());
         addScriptTranslation(MYSQL, newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()",
                 "LOCALTIME", "LOCALTIME()", "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW");
 

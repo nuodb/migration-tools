@@ -89,7 +89,7 @@ public class DumpQuery extends WorkBase {
     @Override
     public void init() throws Exception {
         final Dialect dialect = getSession().getDialect();
-        resultSet = getQuerySplit().getResultSet(getSession().getConnection(), new StatementCallback() {
+        resultSet = querySplit.getResultSet(getSession().getConnection(), new StatementCallback() {
             @Override
             public void process(Statement statement) throws SQLException {
                 dialect.setStreamResults(statement, queryInfo.getColumns() != null);

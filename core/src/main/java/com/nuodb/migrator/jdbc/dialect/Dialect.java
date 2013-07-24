@@ -32,11 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
-import com.nuodb.migrator.jdbc.type.JdbcTypeRegistry;
-import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
-import com.nuodb.migrator.jdbc.type.JdbcValueAccessProvider;
+import com.nuodb.migrator.jdbc.type.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -108,7 +104,7 @@ public interface Dialect {
 
     String getIdentityColumn(String sequence);
 
-    String getDefaultValue(int typeCode, String defaultValue, Dialect dialect);
+    String getDefaultValue(Column column, Dialect dialect);
 
     String getDeleteAction(ReferenceAction deleteAction);
 
@@ -154,9 +150,9 @@ public interface Dialect {
 
     JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName);
 
-    String translateScript(String script, DatabaseInfo databaseInfo);
-
     Script translateScript(Script script);
+
+    Script translateScript(String script, DatabaseInfo databaseInfo);
 
     SQLKeywords getSQLKeywords();
 
@@ -180,10 +176,6 @@ public interface Dialect {
 
     ScriptEscapeUtils getScriptEscapeUtils();
 
-    void setScriptEscapeUtils(ScriptEscapeUtils scriptEscapeUtils);
-
     ScriptTranslationManager getScriptTranslationManager();
-
-    void setScriptTranslationManager(ScriptTranslationManager scriptTranslationManager);
 }
 

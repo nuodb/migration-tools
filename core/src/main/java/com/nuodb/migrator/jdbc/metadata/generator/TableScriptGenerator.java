@@ -48,6 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
 
     public TableScriptGenerator() {
@@ -62,7 +63,6 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         Collection<Column> columns = table.getColumns();
         final Collection<Index> indexes = table.getIndexes();
         Collection<MetaDataType> objectTypes = scriptGeneratorContext.getObjectTypes();
-        Dialect sourceDialect = table.getDatabase().getDialect();
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();
             buffer.append(scriptGeneratorContext.getName(column));
@@ -82,8 +82,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             }
             String defaultValue = null;
             if (column.getDefaultValue() != null) {
-                defaultValue = dialect.getDefaultValue(
-                        column.getTypeCode(), column.getDefaultValue().getValue(), sourceDialect);
+                defaultValue = dialect.getDefaultValue(column, table.getDatabase().getDialect());
             }
             if (defaultValue != null) {
                 buffer.append(" DEFAULT ").append(defaultValue);

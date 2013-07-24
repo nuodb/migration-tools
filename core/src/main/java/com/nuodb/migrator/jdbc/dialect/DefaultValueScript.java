@@ -27,14 +27,22 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 /**
  * @author Sergey Bushik
  */
-public interface ScriptTranslator {
+public class DefaultValueScript extends SimpleScript {
 
-    boolean canTranslateScript(Script script, DatabaseInfo databaseInfo);
+    private final Column column;
 
-    Script translateScript(Script script, DatabaseInfo databaseInfo);
+    public DefaultValueScript(Column column, String script, DatabaseInfo databaseInfo) {
+        super(script, databaseInfo);
+        this.column = column;
+    }
+
+    public Column getColumn() {
+        return column;
+    }
 }

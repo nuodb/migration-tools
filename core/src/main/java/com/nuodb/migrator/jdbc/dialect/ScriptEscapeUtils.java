@@ -28,20 +28,17 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import org.apache.commons.lang3.text.translate.CharSequenceTranslator;
-import org.apache.commons.lang3.text.translate.LookupTranslator;
 
 /**
  * @author Sergey Bushik
  */
 public class ScriptEscapeUtils {
 
-    private static CharSequenceTranslator defaultValueTranslator =
-            new LookupTranslator(new String[][]{
-                    {"\0", "\\0"},
-                    {"'", "\\'"},
-                    {"\"", "\\\""},
-                    {"\\", "\\\\"}
-            });
+    private final CharSequenceTranslator defaultValueTranslator;
+
+    public ScriptEscapeUtils(CharSequenceTranslator defaultValueTranslator) {
+        this.defaultValueTranslator = defaultValueTranslator;
+    }
 
     public String escapeDefaultValue(String input) {
         return defaultValueTranslator.translate(input);

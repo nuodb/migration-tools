@@ -27,14 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
-import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolverAware;
 import com.nuodb.migrator.jdbc.type.*;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
+import org.apache.commons.lang3.text.translate.LookupTranslator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +56,13 @@ import static java.sql.Connection.*;
 public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implements Dialect {
 
     private static final Pattern ALLOWED_IDENTIFIER_PATTERN = Pattern.compile("[a-zA-Z0-9_]*");
+    private static final ScriptEscapeUtils SCRIPT_ESCAPE_UTILS = new ScriptEscapeUtils(
+            new LookupTranslator(new String[][]{
+                    {"\0", "\\0"},
+                    {"'", "''"},
+                    {"\"", "\\\""},
+                    {"\\", "\\\\"}
+            }));
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -66,7 +71,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     private Map<DatabaseInfo, JdbcTypeNameMap> jdbcTypeNameMaps = new HashMap<DatabaseInfo, JdbcTypeNameMap>();
     private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
     private ScriptTranslationManager scriptTranslationManager = new ScriptTranslationManager();
-    private ScriptEscapeUtils scriptEscapeUtils = new ScriptEscapeUtils();
+    private ScriptEscapeUtils scriptEscapeUtils = SCRIPT_ESCAPE_UTILS;
     private DatabaseInfo databaseInfo;
 
     public SimpleDialect(DatabaseInfo databaseInfo) {
@@ -190,14 +195,14 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String translateScript(String sourceScript, DatabaseInfo sourceDatabaseInfo) {
-        Script targetScript = translateScript(new SimpleScript(sourceScript, sourceDatabaseInfo));
-        return targetScript != null ? targetScript.getScript() : sourceScript;
+    public Script translateScript(String script, DatabaseInfo databaseInfo) {
+        return getScriptTranslationManager().translateScript(new SimpleScript(script,
+                databaseInfo), getDatabaseInfo());
     }
 
     @Override
-    public Script translateScript(Script sourceScript) {
-        return getScriptTranslationManager().translateScript(sourceScript, getDatabaseInfo());
+    public Script translateScript(Script script) {
+        return getScriptTranslationManager().translateScript(script, getDatabaseInfo());
     }
 
     @Override
@@ -328,18 +333,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public void setScriptTranslationManager(ScriptTranslationManager scriptTranslationManager) {
-        this.scriptTranslationManager = scriptTranslationManager;
-    }
-
-    @Override
     public ScriptEscapeUtils getScriptEscapeUtils() {
         return scriptEscapeUtils;
-    }
-
-    @Override
-    public void setScriptEscapeUtils(ScriptEscapeUtils scriptEscapeUtils) {
-        this.scriptEscapeUtils = scriptEscapeUtils;
     }
 
     @Override
@@ -438,22 +433,29 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getDefaultValue(int typeCode, String defaultValue, Dialect dialect) {
-        if (defaultValue == null) {
+    public String getDefaultValue(Column column, Dialect dialect) {
+        String value;
+        DefaultValue defaultValue = column.getDefaultValue();
+        if (defaultValue == null || (value = defaultValue.getValue()) == null) {
             return null;
         }
-        defaultValue = translateScript(defaultValue, dialect.getDatabaseInfo());
-        String defaultValueUnquoted = defaultValue;
+        DatabaseInfo databaseInfo = dialect.getDatabaseInfo();
+        Script script = translateScript(new DefaultValueScript(column, value, databaseInfo));
+        if (script == null) {
+            script = translateScript(value, databaseInfo);
+        }
+        String translated = script != null ? script.getScript() : value;
+        String unquoted = translated;
         boolean opening = false;
-        if (defaultValue.startsWith("'")) {
-            defaultValueUnquoted = defaultValue.substring(1);
+        if (translated.startsWith("'")) {
+            unquoted = translated.substring(1);
             opening = true;
         }
-        if (opening && defaultValueUnquoted.endsWith("'")) {
-            defaultValueUnquoted = defaultValueUnquoted.substring(0, defaultValueUnquoted.length() - 1);
+        if (opening && unquoted.endsWith("'")) {
+            unquoted = unquoted.substring(0, unquoted.length() - 1);
         }
-        defaultValueUnquoted = getScriptEscapeUtils().escapeDefaultValue(defaultValueUnquoted);
-        return "'" + defaultValueUnquoted + "'";
+        unquoted = getScriptEscapeUtils().escapeDefaultValue(unquoted);
+        return "'" + unquoted + "'";
     }
 
     protected String getScriptQuoted(String script) {
