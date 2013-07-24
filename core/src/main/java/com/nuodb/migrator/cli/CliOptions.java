@@ -61,7 +61,7 @@ public interface CliOptions {
     final String SOURCE_AUTO_COMMIT_OPTION = "source.auto.commit";
 
     final String TIME_ZONE_OPTION = "time.zone";
-    final String TIME_ZONE_SHORT_OPTION = "t";
+    final String TIME_ZONE_SHORT_OPTION = "z";
     final String OUTPUT_OPTION = "output.*";
     final String OUTPUT_TYPE_OPTION = "output.type";
     final String OUTPUT_PATH_OPTION = "output.path";
