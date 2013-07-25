@@ -95,7 +95,7 @@ public class DumpWriter implements DumpWriterContext {
     private Map<String, Object> formatAttributes = newHashMap();
     private QueryLimit queryLimit;
 
-    private Collection<DumpWriterEntry> dumpQueryEntries = newArrayList();
+    private Collection<DumpWriterEntry> dumpWriterEntries = newArrayList();
 
     public void addTable(Table table) {
         addTable(table, table.getColumns());
@@ -131,7 +131,7 @@ public class DumpWriter implements DumpWriterContext {
     }
 
     protected void addQuery(QueryInfo queryInfo, QuerySplitter querySplitter, RowSet rowSet) {
-        dumpQueryEntries.add(new DumpWriterEntry(queryInfo, querySplitter, rowSet));
+        dumpWriterEntries.add(new DumpWriterEntry(queryInfo, querySplitter, rowSet));
     }
 
     public Catalog write() throws Exception {
@@ -146,7 +146,7 @@ public class DumpWriter implements DumpWriterContext {
     protected void write(DumpQueryManager dumpQueryManager) throws Exception {
         ExecutorService executorService = dumpQueryManager.getExecutorService();
         try {
-            for (DumpWriterEntry dumpWriterEntry : getDumpQueryEntries()) {
+            for (DumpWriterEntry dumpWriterEntry : getDumpWriterEntries()) {
                 QuerySplitter querySplitter = dumpWriterEntry.getQuerySplitter();
                 while (querySplitter.hasNextQuerySplit(getConnection())) {
                     QuerySplit querySplit = querySplitter.getNextQuerySplit(getConnection());
@@ -204,7 +204,7 @@ public class DumpWriter implements DumpWriterContext {
         Catalog catalog = new Catalog();
         catalog.setFormat(getFormat());
         catalog.setDatabaseInfo(getDatabase().getDatabaseInfo());
-        for (DumpWriterEntry dumpWriterEntry : getDumpQueryEntries()) {
+        for (DumpWriterEntry dumpWriterEntry : getDumpWriterEntries()) {
             catalog.addRowSet(dumpWriterEntry.getRowSet());
         }
         return catalog;
@@ -356,7 +356,7 @@ public class DumpWriter implements DumpWriterContext {
         this.queryLimit = queryLimit;
     }
 
-    public Collection<DumpWriterEntry> getDumpQueryEntries() {
-        return dumpQueryEntries;
+    public Collection<DumpWriterEntry> getDumpWriterEntries() {
+        return dumpWriterEntries;
     }
 }
