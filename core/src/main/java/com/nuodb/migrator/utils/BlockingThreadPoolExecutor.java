@@ -27,10 +27,9 @@
  */
 package com.nuodb.migrator.utils;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 
+import static java.lang.Math.max;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -38,34 +37,71 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  */
 public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
 
-    private Semaphore semaphore;
 
-    public BlockingThreadPoolExecutor(int threads) {
-        super(threads, threads, 0L, MILLISECONDS, new LinkedBlockingQueue<Runnable>());
-        this.semaphore = new Semaphore(threads);
+    public BlockingThreadPoolExecutor(int poolSize, long blockTime, TimeUnit blockTimeUnit) {
+        this(poolSize, blockTime, blockTimeUnit, null);
+    }
+
+    public BlockingThreadPoolExecutor(int poolSize, long blockTime, TimeUnit blockTimeUnit,
+                                      Callable<Boolean> blockTimeCallback) {
+        this(poolSize, poolSize, 0L, MILLISECONDS, blockTime, blockTimeUnit, blockTimeCallback);
+    }
+
+    public BlockingThreadPoolExecutor(int poolSize, int queueSize, long keepAliveTime, TimeUnit keepAliveTimeUnit,
+                                      long blockTime, TimeUnit blockTimeUnit,
+                                      Callable<Boolean> blockTimeCallback) {
+        super(poolSize, poolSize, keepAliveTime, keepAliveTimeUnit,
+                new ArrayBlockingQueue<Runnable>(max(poolSize, queueSize)),
+                new BlockingPolicy(blockTime, blockTimeUnit, blockTimeCallback));
     }
 
     @Override
-    public void execute(Runnable task) {
-        boolean acquired = false;
-        do {
-            try {
-                semaphore.acquire();
-                acquired = true;
-            } catch (InterruptedException e) {
-                // handle interrupted exception
-            }
-        } while (!acquired);
-        try {
-            super.execute(task);
-        } catch (Error error) {
-            semaphore.release();
-            throw error;
+    public void setRejectedExecutionHandler(RejectedExecutionHandler rejectedExecutionHandler) {
+        throw new NotSupportedException("Setting rejected execution handler is unsupported");
+    }
+
+    static class BlockingPolicy implements RejectedExecutionHandler {
+
+        private long blockTimeout;
+        private TimeUnit blockTimeoutUnit;
+        private Callable<Boolean> blockTimeoutCallback;
+
+        private BlockingPolicy(long blockTimeout, TimeUnit blockTimeoutUnit, Callable<Boolean> blockTimeoutCallback) {
+            this.blockTimeout = blockTimeout;
+            this.blockTimeoutUnit = blockTimeoutUnit;
+            this.blockTimeoutCallback = blockTimeoutCallback;
         }
-    }
 
-    @Override
-    protected void afterExecute(Runnable r, Throwable t) {
-        semaphore.release();
+        @Override
+        public void rejectedExecution(Runnable task, ThreadPoolExecutor executor) {
+            BlockingQueue<Runnable> queue = executor.getQueue();
+            boolean offered = false;
+            while (!offered) {
+                if (executor.isShutdown()) {
+                    throw new RejectedExecutionException("Executor was shutdown while attempting to offer a new task");
+                }
+                try {
+                    // offer the task to the queue, for a blocking-timeout
+                    if (queue.offer(task, blockTimeout, blockTimeoutUnit)) {
+                        offered = true;
+                    } else {
+                        // task was not accepted - call the user's Callback
+                        boolean result;
+                        try {
+                            result = blockTimeoutCallback != null ? blockTimeoutCallback.call() : true;
+                        } catch (Exception exception) {
+                            // wrap the Callback exception and re-throw
+                            throw new RejectedExecutionException(exception);
+                        }
+                        // check the callback result
+                        if (!result) {
+                            throw new RejectedExecutionException("Task rejected for submission");
+                        }
+                    }
+                } catch (InterruptedException exception) {
+                    // go back to the offer call
+                }
+            }
+        }
     }
 }

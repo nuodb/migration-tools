@@ -135,52 +135,38 @@ public class DumpWriter implements DumpWriterContext {
     }
 
     public Catalog write() throws Exception {
-        DumpQueryManager dumpQueryManager = new DumpQueryManager();
-        dumpQueryManager.setCatalog(createCatalog());
-        dumpQueryManager.setExecutorService(createExecutorService());
-        dumpQueryManager.setSessionFactory(createSessionFactory());
-        write(dumpQueryManager);
-        return dumpQueryManager.getCatalog();
-    }
-
-    protected void write(DumpQueryManager dumpQueryManager) throws Exception {
-        ExecutorService executorService = dumpQueryManager.getExecutorService();
+        DumpWriterManager dumpWriterManager = getDumpWriterManager();
         try {
+            ExecutorService executorService = dumpWriterManager.getExecutorService();
             for (DumpWriterEntry dumpWriterEntry : getDumpWriterEntries()) {
                 QuerySplitter querySplitter = dumpWriterEntry.getQuerySplitter();
                 while (querySplitter.hasNextQuerySplit(getConnection())) {
                     QuerySplit querySplit = querySplitter.getNextQuerySplit(getConnection());
-                    write(dumpQueryManager, new DumpQuery(this, dumpQueryManager, dumpWriterEntry.getQueryInfo(),
+                    write(dumpWriterManager, new DumpQuery(this, dumpWriterManager, dumpWriterEntry.getQueryInfo(),
                             querySplit, querySplitter.hasNextQuerySplit(getConnection()), dumpWriterEntry.getRowSet()));
                 }
             }
-            executorService.shutdown();
+            dumpWriterManager.getExecutorService().shutdown();
             while (!executorService.isTerminated()) {
                 executorService.awaitTermination(100L, MILLISECONDS);
             }
         } catch (Exception exception) {
-            executorService.shutdownNow();
+            dumpWriterManager.getExecutorService().shutdownNow();
             throw exception;
         } finally {
-            errors(dumpQueryManager);
+            closeDumpWriterManager(dumpWriterManager);
         }
-        getCatalogManager().writeCatalog(dumpQueryManager.getCatalog());
+        getCatalogManager().writeCatalog(dumpWriterManager.getCatalog());
+        return dumpWriterManager.getCatalog();
     }
 
-    protected void errors(DumpQueryManager dumpQueryManager) throws Exception {
-        Map<Work, Exception> errors = dumpQueryManager.getErrors();
-        if (!isEmpty(errors)) {
-            throw get(errors.values(), 0);
-        }
+    protected void write(DumpWriterManager dumpWriterManager, DumpQuery dumpQuery) {
+        write(dumpWriterManager.getExecutorService(), dumpWriterManager.getSessionFactory(),
+                dumpWriterManager, dumpQuery);
     }
 
-    protected void write(DumpQueryManager dumpQueryManager, DumpQuery dumpQuery) {
-        execute(dumpQueryManager.getExecutorService(), dumpQueryManager.getSessionFactory(),
-                dumpQueryManager, dumpQuery);
-    }
-
-    protected void execute(final ExecutorService executorService, final SessionFactory sessionFactory,
-                           final WorkManager workManager, final Work work) {
+    protected void write(final ExecutorService executorService, final SessionFactory sessionFactory,
+                         final WorkManager workManager, final Work work) {
         executorService.submit(new Callable() {
             @Override
             public Object call() throws Exception {
@@ -200,6 +186,21 @@ public class DumpWriter implements DumpWriterContext {
         });
     }
 
+    protected DumpWriterManager getDumpWriterManager() {
+        DumpWriterManager dumpWriterManager = new DumpWriterManager();
+        dumpWriterManager.setCatalog(createCatalog());
+        dumpWriterManager.setExecutorService(createExecutorService());
+        dumpWriterManager.setSessionFactory(createSessionFactory());
+        return dumpWriterManager;
+    }
+
+    protected void closeDumpWriterManager(DumpWriterManager dumpWriterManager) throws Exception {
+        Map<Work, Exception> errors = dumpWriterManager.getErrors();
+        if (!isEmpty(errors)) {
+            throw get(errors.values(), 0);
+        }
+    }
+
     protected Catalog createCatalog() {
         Catalog catalog = new Catalog();
         catalog.setFormat(getFormat());
@@ -210,6 +211,13 @@ public class DumpWriter implements DumpWriterContext {
         return catalog;
     }
 
+    protected ExecutorService createExecutorService() {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Constructing blocking thread pool with %d thread(s) to write dump", getThreads()));
+        }
+        return new BlockingThreadPoolExecutor(getThreads(), 100L, MILLISECONDS);
+    }
+
     protected SessionFactory createSessionFactory() {
         SessionFactory sessionFactory = newSessionFactory(getConnectionProvider(), getDialect());
         sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
@@ -217,13 +225,6 @@ public class DumpWriter implements DumpWriterContext {
                 TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
         }));
         return sessionFactory;
-    }
-
-    protected ExecutorService createExecutorService() {
-        if (logger.isTraceEnabled()) {
-            logger.trace(format("Constructing blocking thread pool with %d thread(s) to write dump", getThreads()));
-        }
-        return new BlockingThreadPoolExecutor(getThreads());
     }
 
     protected QuerySplitter createQuerySplitter(String query) {
@@ -244,13 +245,12 @@ public class DumpWriter implements DumpWriterContext {
         return querySplitter;
     }
 
-    protected QueryInfo createQueryInfo(Table table, Collection<Column> columns, String filter,
-                                        QueryLimit queryLimit) {
-        return new TableQueryInfo(table, columns, filter, queryLimit);
-    }
-
     protected QueryInfo createQueryInfo(String query, QueryLimit queryLimit) {
         return new QueryInfo(newQuery(query), queryLimit);
+    }
+
+    protected QueryInfo createQueryInfo(Table table, Collection<Column> columns, String filter, QueryLimit queryLimit) {
+        return new TableQueryInfo(table, columns, filter, queryLimit);
     }
 
     @Override
