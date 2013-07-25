@@ -43,10 +43,10 @@ import com.nuodb.migrator.jdbc.session.Work;
 import com.nuodb.migrator.jdbc.session.WorkManager;
 import com.nuodb.migrator.jdbc.split.QuerySplit;
 import com.nuodb.migrator.jdbc.split.QuerySplitter;
+import com.nuodb.migrator.utils.BlockingThreadPoolExecutor;
 import org.slf4j.Logger;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
@@ -59,8 +59,8 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.backup.format.csv.CsvAttributes.FORMAT;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
-import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneObserver;
-import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationObserver;
+import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
+import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationSetter;
 import static com.nuodb.migrator.jdbc.split.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.split.QuerySplitters.*;
 import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newCachingStrategy;
@@ -70,7 +70,6 @@ import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
-import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -96,7 +95,7 @@ public class DumpWriter implements DumpWriterContext {
     private Map<String, Object> formatAttributes = newHashMap();
     private QueryLimit queryLimit;
 
-    private Collection<DumpQueryEntry> dumpQueryEntries = newArrayList();
+    private Collection<DumpWriterEntry> dumpQueryEntries = newArrayList();
 
     public void addTable(Table table) {
         addTable(table, table.getColumns());
@@ -132,7 +131,7 @@ public class DumpWriter implements DumpWriterContext {
     }
 
     protected void addQuery(QueryInfo queryInfo, QuerySplitter querySplitter, RowSet rowSet) {
-        dumpQueryEntries.add(new DumpQueryEntry(queryInfo, querySplitter, rowSet));
+        dumpQueryEntries.add(new DumpWriterEntry(queryInfo, querySplitter, rowSet));
     }
 
     public Catalog write() throws Exception {
@@ -147,8 +146,13 @@ public class DumpWriter implements DumpWriterContext {
     protected void write(DumpQueryManager dumpQueryManager) throws Exception {
         ExecutorService executorService = dumpQueryManager.getExecutorService();
         try {
-            for (DumpQueryEntry dumpQueryEntry : dumpQueryEntries) {
-                write(dumpQueryManager, dumpQueryEntry);
+            for (DumpWriterEntry dumpWriterEntry : getDumpQueryEntries()) {
+                QuerySplitter querySplitter = dumpWriterEntry.getQuerySplitter();
+                while (querySplitter.hasNextQuerySplit(getConnection())) {
+                    QuerySplit querySplit = querySplitter.getNextQuerySplit(getConnection());
+                    write(dumpQueryManager, new DumpQuery(this, dumpQueryManager, dumpWriterEntry.getQueryInfo(),
+                            querySplit, querySplitter.hasNextQuerySplit(getConnection()), dumpWriterEntry.getRowSet()));
+                }
             }
             executorService.shutdown();
             while (!executorService.isTerminated()) {
@@ -167,20 +171,6 @@ public class DumpWriter implements DumpWriterContext {
         Map<Work, Exception> errors = dumpQueryManager.getErrors();
         if (!isEmpty(errors)) {
             throw get(errors.values(), 0);
-        }
-    }
-
-    protected void write(DumpQueryManager dumpQueryManager, DumpQueryEntry dumpQueryEntry) throws SQLException {
-        write(dumpQueryManager, dumpQueryEntry.getQueryInfo(), dumpQueryEntry.getQuerySplitter(),
-                dumpQueryEntry.getRowSet());
-    }
-
-    protected void write(final DumpQueryManager dumpQueryManager, QueryInfo queryInfo, QuerySplitter querySplitter,
-                         RowSet rowSet) throws SQLException {
-        while (querySplitter.hasNextQuerySplit(getConnection())) {
-            QuerySplit querySplit = querySplitter.getNextQuerySplit(getConnection());
-            write(dumpQueryManager, new DumpQuery(this, dumpQueryManager, queryInfo, querySplit,
-                    querySplitter.hasNextQuerySplit(getConnection()), rowSet));
         }
     }
 
@@ -214,26 +204,26 @@ public class DumpWriter implements DumpWriterContext {
         Catalog catalog = new Catalog();
         catalog.setFormat(getFormat());
         catalog.setDatabaseInfo(getDatabase().getDatabaseInfo());
-        for (DumpQueryEntry dumpQueryEntry : dumpQueryEntries) {
-            catalog.addRowSet(dumpQueryEntry.getRowSet());
+        for (DumpWriterEntry dumpWriterEntry : getDumpQueryEntries()) {
+            catalog.addRowSet(dumpWriterEntry.getRowSet());
         }
         return catalog;
     }
 
     protected SessionFactory createSessionFactory() {
         SessionFactory sessionFactory = newSessionFactory(getConnectionProvider(), getDialect());
-        sessionFactory.addSessionObserver(newTransactionIsolationObserver(new int[]{
+        sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
+        sessionFactory.addSessionObserver(newTransactionIsolationSetter(new int[]{
                 TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
         }));
-        sessionFactory.addSessionObserver(newSessionTimeZoneObserver(getTimeZone()));
         return sessionFactory;
     }
 
     protected ExecutorService createExecutorService() {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Constructing fixed thread pool with %d thread(s) to write dump", getThreads()));
+            logger.trace(format("Constructing blocking thread pool with %d thread(s) to write dump", getThreads()));
         }
-        return newFixedThreadPool(getThreads());
+        return new BlockingThreadPoolExecutor(getThreads());
     }
 
     protected QuerySplitter createQuerySplitter(String query) {
@@ -364,5 +354,9 @@ public class DumpWriter implements DumpWriterContext {
 
     public void setQueryLimit(QueryLimit queryLimit) {
         this.queryLimit = queryLimit;
+    }
+
+    public Collection<DumpWriterEntry> getDumpQueryEntries() {
+        return dumpQueryEntries;
     }
 }

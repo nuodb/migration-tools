@@ -49,7 +49,7 @@ public class SessionObservers {
      * @param levels to use for setting transaction isolation.
      * @return session observer.
      */
-    public static SessionObserver newTransactionIsolationObserver(final int[] levels) {
+    public static SessionObserver newTransactionIsolationSetter(final int[] levels) {
         return new SessionObserver() {
             @Override
             public void afterOpen(Session session) throws SQLException {
@@ -68,7 +68,7 @@ public class SessionObservers {
      * @param timeZone to use in set statement.
      * @return session observer.
      */
-    public static SessionObserver newSessionTimeZoneObserver(final TimeZone timeZone) {
+    public static SessionObserver newSessionTimeZoneSetter(final TimeZone timeZone) {
         return new SessionObserver() {
             private final transient Logger logger = getLogger(getClass());
 
