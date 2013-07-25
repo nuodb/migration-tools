@@ -70,7 +70,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     private IdentifierQuoting identifierQuoting = ALWAYS;
     private Map<DatabaseInfo, JdbcTypeNameMap> jdbcTypeNameMaps = new HashMap<DatabaseInfo, JdbcTypeNameMap>();
     private JdbcTypeRegistry jdbcTypeRegistry = new Jdbc4TypeRegistry();
-    private ScriptTranslationManager scriptTranslationManager = new ScriptTranslationManager();
+    private TranslationManager translationManager = new TranslationManager();
     private ScriptEscapeUtils scriptEscapeUtils = SCRIPT_ESCAPE_UTILS;
     private DatabaseInfo databaseInfo;
 
@@ -79,7 +79,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
         initJdbcTypes();
         initJdbcTypeNames();
-        initScriptTranslations();
+        initTranslations();
     }
 
     protected void initJdbcTypes() {
@@ -116,34 +116,30 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         addJdbcTypeName(Types.NCLOB, "NCLOB");
     }
 
-    protected void initScriptTranslations() {
+    protected void initTranslations() {
     }
 
-    protected void addScriptTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript, String targetScript) {
-        getScriptTranslationManager().addScriptTranslation(sourceDatabaseInfo, sourceScript, getDatabaseInfo(),
+    protected void addTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript, String targetScript) {
+        getTranslationManager().addTranslation(sourceDatabaseInfo, sourceScript, getDatabaseInfo(),
                 targetScript);
     }
 
-    protected void addScriptTranslation(DatabaseInfo sourceDatabaseInfo, Collection<String> sourceScripts,
-                                        String targetScript) {
-        getScriptTranslationManager().addScriptTranslations(sourceDatabaseInfo, sourceScripts, getDatabaseInfo(),
+    protected void addTranslation(DatabaseInfo sourceDatabaseInfo, Collection<String> sourceScripts,
+                                  String targetScript) {
+        getTranslationManager().addTranslations(sourceDatabaseInfo, sourceScripts, getDatabaseInfo(), targetScript);
+    }
+
+    protected void addTranslationRegex(DatabaseInfo sourceDatabaseInfo, String sourceScript, String targetScript) {
+        getTranslationManager().addTranslationRegex(sourceDatabaseInfo, sourceScript, getDatabaseInfo(), targetScript);
+    }
+
+    protected void addTranslationPattern(DatabaseInfo sourceDatabaseInfo, Pattern sourceScript, String targetScript) {
+        getTranslationManager().addTranslationPattern(sourceDatabaseInfo, sourceScript, getDatabaseInfo(),
                 targetScript);
     }
 
-    protected void addScriptTranslationRegex(DatabaseInfo sourceDatabaseInfo, String sourceScript,
-                                             String targetScript) {
-        getScriptTranslationManager().addScriptTranslationRegex(
-                sourceDatabaseInfo, sourceScript, getDatabaseInfo(), targetScript);
-    }
-
-    protected void addScriptTranslationPattern(DatabaseInfo sourceDatabaseInfo, Pattern sourceScript,
-                                               String targetScript) {
-        getScriptTranslationManager().addScriptTranslationPattern(sourceDatabaseInfo, sourceScript, getDatabaseInfo(),
-                targetScript);
-    }
-
-    protected void addScriptTranslator(ScriptTranslator scriptTranslator) {
-        getScriptTranslationManager().addScriptTranslator(scriptTranslator);
+    protected void addTranslator(Translator translator) {
+        getTranslationManager().addTranslator(translator);
     }
 
     @Override
@@ -195,14 +191,14 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public Script translateScript(String script, DatabaseInfo databaseInfo) {
-        return getScriptTranslationManager().translateScript(new SimpleScript(script,
+    public Script translate(String script, DatabaseInfo databaseInfo) {
+        return getTranslationManager().translate(new SimpleScript(script,
                 databaseInfo), getDatabaseInfo());
     }
 
     @Override
-    public Script translateScript(Script script) {
-        return getScriptTranslationManager().translateScript(script, getDatabaseInfo());
+    public Script translate(Script script) {
+        return getTranslationManager().translate(script, getDatabaseInfo());
     }
 
     @Override
@@ -328,8 +324,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public ScriptTranslationManager getScriptTranslationManager() {
-        return scriptTranslationManager;
+    public TranslationManager getTranslationManager() {
+        return translationManager;
     }
 
     @Override
@@ -440,15 +436,12 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
             return null;
         }
         DatabaseInfo databaseInfo = dialect.getDatabaseInfo();
-        Script script = translateScript(new DefaultValueScript(column, value, databaseInfo));
-        if (script == null) {
-            script = translateScript(value, databaseInfo);
-        }
-        String translated = script != null ? script.getScript() : value;
-        String unquoted = translated;
+        Script script = translate(new DefaultValueScript(column, value, databaseInfo));
+        String translation = script != null ? script.getScript() : value;
+        String unquoted = translation;
         boolean opening = false;
-        if (translated.startsWith("'")) {
-            unquoted = translated.substring(1);
+        if (translation.startsWith("'")) {
+            unquoted = translation.substring(1);
             opening = true;
         }
         if (opening && unquoted.endsWith("'")) {

@@ -41,52 +41,52 @@ import static java.util.regex.Pattern.quote;
 /**
  * @author Sergey Bushik
  */
-public class PatternScriptTranslator extends ScriptTranslatorBase {
+public class PatternTranslator extends TranslatorBase {
 
-    private final Map<Pattern, String> scriptTranslations = Maps.newHashMap();
+    private final Map<Pattern, String> translations = Maps.newHashMap();
 
-    public PatternScriptTranslator() {
+    public PatternTranslator() {
     }
 
-    public PatternScriptTranslator(DatabaseInfo sourceDatabaseInfo) {
+    public PatternTranslator(DatabaseInfo sourceDatabaseInfo) {
         super(sourceDatabaseInfo);
     }
 
-    public PatternScriptTranslator(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
+    public PatternTranslator(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
         super(sourceDatabaseInfo, targetDatabaseInfo);
     }
 
-    public void addScriptTranslation(String sourceScript, String targetScript) {
-        addScriptTranslationRegex("^(?i)" + quote(sourceScript) + "$", targetScript);
+    public void addTranslation(String sourceScript, String targetScript) {
+        addTranslationRegex("^(?i)" + quote(sourceScript) + "$", targetScript);
     }
 
-    public void addScriptTranslations(Collection<String> sourceScripts, String targetScript) {
+    public void addTranslations(Collection<String> sourceScripts, String targetScript) {
         for (String sourceScript : sourceScripts) {
-            addScriptTranslation(sourceScript, targetScript);
+            addTranslation(sourceScript, targetScript);
         }
     }
 
-    public void addScriptTranslationRegex(String sourceScriptRegex, String targetScript) {
-        addScriptTranslationPattern(compile(sourceScriptRegex), targetScript);
+    public void addTranslationRegex(String sourceScriptRegex, String targetScript) {
+        addTranslationPattern(compile(sourceScriptRegex), targetScript);
     }
 
-    public void addScriptTranslationPattern(Pattern sourceScriptPattern, String targetScript) {
-        scriptTranslations.put(sourceScriptPattern, targetScript);
+    public void addTranslationPattern(Pattern sourceScriptPattern, String targetScript) {
+        translations.put(sourceScriptPattern, targetScript);
     }
 
     @Override
-    protected String getScriptTranslation(String script, DatabaseInfo sourceDatabaseInfo,
-                                          DatabaseInfo targetDatabaseInfo) {
-        for (Map.Entry<Pattern, String> scriptTranslation : scriptTranslations.entrySet()) {
-            Matcher matcher = scriptTranslation.getKey().matcher(script);
+    protected String translate(String script, DatabaseInfo sourceDatabaseInfo,
+                               DatabaseInfo targetDatabaseInfo) {
+        for (Map.Entry<Pattern, String> translation : translations.entrySet()) {
+            Matcher matcher = translation.getKey().matcher(script);
             if (matcher.find()) {
-                return getScriptTranslation(matcher, scriptTranslation.getValue());
+                return translate(matcher, translation.getValue());
             }
         }
         return null;
     }
 
-    protected String getScriptTranslation(Matcher matcher, String targetScript) {
+    protected String translate(Matcher matcher, String targetScript) {
         StringBuffer translation = new StringBuffer();
         do {
             matcher.appendReplacement(translation, targetScript);
@@ -98,13 +98,13 @@ public class PatternScriptTranslator extends ScriptTranslatorBase {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PatternScriptTranslator)) return false;
+        if (!(o instanceof PatternTranslator)) return false;
         if (!super.equals(o)) return false;
 
-        PatternScriptTranslator that = (PatternScriptTranslator) o;
+        PatternTranslator that = (PatternTranslator) o;
 
-        if (scriptTranslations != null ? !scriptTranslations.equals(
-                that.scriptTranslations) : that.scriptTranslations != null) return false;
+        if (translations != null ? !translations.equals(
+                that.translations) : that.translations != null) return false;
 
         return true;
     }
@@ -112,7 +112,9 @@ public class PatternScriptTranslator extends ScriptTranslatorBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (scriptTranslations != null ? scriptTranslations.hashCode() : 0);
+        result = 31 * result + (translations != null ? translations.hashCode() : 0);
         return result;
     }
+
+
 }

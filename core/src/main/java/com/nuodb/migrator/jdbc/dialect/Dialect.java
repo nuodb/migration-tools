@@ -150,9 +150,9 @@ public interface Dialect {
 
     JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName);
 
-    Script translateScript(Script script);
+    Script translate(Script script);
 
-    Script translateScript(String script, DatabaseInfo databaseInfo);
+    Script translate(String script, DatabaseInfo databaseInfo);
 
     SQLKeywords getSQLKeywords();
 
@@ -176,6 +176,6 @@ public interface Dialect {
 
     ScriptEscapeUtils getScriptEscapeUtils();
 
-    ScriptTranslationManager getScriptTranslationManager();
+    TranslationManager getTranslationManager();
 }
 

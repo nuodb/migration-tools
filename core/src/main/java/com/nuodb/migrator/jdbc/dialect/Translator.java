@@ -32,9 +32,9 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 /**
  * @author Sergey Bushik
  */
-public interface ScriptTranslator {
+public interface Translator {
 
-    boolean canTranslateScript(Script script, DatabaseInfo databaseInfo);
+    boolean canTranslate(Script script, DatabaseInfo databaseInfo);
 
-    Script translateScript(Script script, DatabaseInfo databaseInfo);
+    Script translate(Script script, DatabaseInfo databaseInfo);
 }

@@ -30,12 +30,12 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
-import java.sql.Types;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
 import static java.lang.Integer.parseInt;
+import static java.sql.Types.BIT;
 
 /**
  * Translates MySQL BIT literals http://dev.mysql.com/doc/refman/5.0/en/bit-field-literals.html to NuoDB BOOLEAN
@@ -43,44 +43,46 @@ import static java.lang.Integer.parseInt;
  *
  * @author Sergey Bushik
  */
-public class MySQLBitLiteralScriptTranslator extends ScriptTranslatorBase {
+public class MySQLBitLiteralTranslator extends TranslatorBase {
 
     private static final Pattern PATTERN = Pattern.compile("(?i:b)'([01]*)'");
-    private static final String FALSE = "FALSE";
-    private static final String TRUE = "TRUE";
 
-    public MySQLBitLiteralScriptTranslator() {
+    private static final String TRUE = "TRUE";
+    private static final String FALSE = "FALSE";
+
+    public MySQLBitLiteralTranslator() {
         super(MYSQL);
     }
 
     @Override
-    protected Script getScriptTranslation(Script script, DatabaseInfo databaseInfo) {
-        Matcher matcher = PATTERN.matcher(script.getScript());
-        String translation = null;
-        if (matcher.matches()) {
-            String literal = matcher.group(1);
-            switch (parseInt(literal, 2)) {
-                case 0:
-                    translation = FALSE;
-                    break;
-                case 1:
-                    translation = TRUE;
-                    break;
-                default:
-                    translation = literal;
-            }
-        }
-        return new SimpleScript(translation, databaseInfo);
+    public boolean canTranslate(Script script, DatabaseInfo databaseInfo) {
+        Column column = getColumn(script);
+        return column != null && column.getTypeCode() == BIT && PATTERN.matcher(script.getScript()).matches() &&
+                super.canTranslate(script, databaseInfo);
     }
 
     @Override
-    public boolean canTranslateScript(Script script, DatabaseInfo databaseInfo) {
-        Column column = getColumn(script);
-        return column != null && column.getTypeCode() == Types.BIT && PATTERN.matcher(script.getScript()).matches() &&
-                super.canTranslateScript(script, databaseInfo);
+    public Script translate(Script script, DatabaseInfo databaseInfo) {
+        Matcher matcher = PATTERN.matcher(script.getScript());
+        return matcher.matches() ? new SimpleScript(translate(matcher.group(1)), databaseInfo) : null;
     }
 
-    private Column getColumn(Script script) {
+    protected String translate(String literal) {
+        String translation;
+        switch (parseInt(literal, 2)) {
+            case 0:
+                translation = FALSE;
+                break;
+            case 1:
+                translation = TRUE;
+                break;
+            default:
+                translation = literal;
+        }
+        return translation;
+    }
+
+    protected Column getColumn(Script script) {
         return script instanceof DefaultValueScript ? ((DefaultValueScript) script).getColumn() : null;
     }
 }

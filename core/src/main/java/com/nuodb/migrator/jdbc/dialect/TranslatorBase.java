@@ -32,19 +32,19 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 /**
  * @author Sergey Bushik
  */
-public abstract class ScriptTranslatorBase implements ScriptTranslator {
+public abstract class TranslatorBase implements Translator {
 
     private DatabaseInfo sourceDatabaseInfo;
     private DatabaseInfo targetDatabaseInfo;
 
-    protected ScriptTranslatorBase() {
+    protected TranslatorBase() {
     }
 
-    protected ScriptTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
+    protected TranslatorBase(DatabaseInfo sourceDatabaseInfo) {
         this.sourceDatabaseInfo = sourceDatabaseInfo;
     }
 
-    protected ScriptTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
+    protected TranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
         this.sourceDatabaseInfo = sourceDatabaseInfo;
         this.targetDatabaseInfo = targetDatabaseInfo;
     }
@@ -66,32 +66,19 @@ public abstract class ScriptTranslatorBase implements ScriptTranslator {
     }
 
     @Override
-    public boolean canTranslateScript(Script script, DatabaseInfo databaseInfo) {
+    public boolean canTranslate(Script script, DatabaseInfo databaseInfo) {
         return (this.sourceDatabaseInfo == null || this.sourceDatabaseInfo.isInherited(script.getDatabaseInfo())
                 && (this.targetDatabaseInfo == null || this.targetDatabaseInfo.isInherited(databaseInfo)));
     }
 
     @Override
-    public Script translateScript(Script script, DatabaseInfo databaseInfo) {
-        if (canTranslateScript(script, databaseInfo)) {
-            return getScriptTranslation(script, databaseInfo);
-        } else {
-            return null;
-        }
+    public Script translate(Script script, DatabaseInfo databaseInfo) {
+        String translation = translate(script.getScript(), script.getDatabaseInfo(), databaseInfo);
+        return translation != null ? new SimpleScript(translation, databaseInfo) : null;
     }
 
-    protected Script getScriptTranslation(Script script, DatabaseInfo databaseInfo) {
-        String translation = getScriptTranslation(script.getScript(), script.getDatabaseInfo(), databaseInfo);
-        if (translation != null) {
-            return new SimpleScript(translation, databaseInfo);
-        } else {
-            return null;
-        }
-    }
-
-    protected String getScriptTranslation(String script, DatabaseInfo sourceDatabaseInfo,
-                                          DatabaseInfo targetDatabaseInfo) {
-        return script;
+    protected String translate(String script, DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
+        return null;
     }
 
     @Override
@@ -99,7 +86,7 @@ public abstract class ScriptTranslatorBase implements ScriptTranslator {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ScriptTranslatorBase that = (ScriptTranslatorBase) o;
+        TranslatorBase that = (TranslatorBase) o;
 
         if (sourceDatabaseInfo != null ? !sourceDatabaseInfo.equals(
                 that.sourceDatabaseInfo) : that.sourceDatabaseInfo != null) {
