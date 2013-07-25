@@ -115,6 +115,4 @@ public class PatternTranslator extends TranslatorBase {
         result = 31 * result + (translations != null ? translations.hashCode() : 0);
         return result;
     }
-
-
 }
