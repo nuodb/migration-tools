@@ -135,7 +135,7 @@ public class DumpWriter implements DumpWriterContext {
     }
 
     public Catalog write() throws Exception {
-        DumpWriterManager dumpWriterManager = getDumpWriterManager();
+        DumpWriterManager dumpWriterManager = createDumpWriterManager();
         try {
             ExecutorService executorService = dumpWriterManager.getExecutorService();
             for (DumpWriterEntry dumpWriterEntry : getDumpWriterEntries()) {
@@ -186,19 +186,12 @@ public class DumpWriter implements DumpWriterContext {
         });
     }
 
-    protected DumpWriterManager getDumpWriterManager() {
+    protected DumpWriterManager createDumpWriterManager() {
         DumpWriterManager dumpWriterManager = new DumpWriterManager();
         dumpWriterManager.setCatalog(createCatalog());
         dumpWriterManager.setExecutorService(createExecutorService());
         dumpWriterManager.setSessionFactory(createSessionFactory());
         return dumpWriterManager;
-    }
-
-    protected void closeDumpWriterManager(DumpWriterManager dumpWriterManager) throws Exception {
-        Map<Work, Exception> errors = dumpWriterManager.getErrors();
-        if (!isEmpty(errors)) {
-            throw get(errors.values(), 0);
-        }
     }
 
     protected Catalog createCatalog() {
@@ -225,6 +218,13 @@ public class DumpWriter implements DumpWriterContext {
                 TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
         }));
         return sessionFactory;
+    }
+
+    protected void closeDumpWriterManager(DumpWriterManager dumpWriterManager) throws Exception {
+        Map<Work, Exception> errors = dumpWriterManager.getErrors();
+        if (!isEmpty(errors)) {
+            throw get(errors.values(), 0);
+        }
     }
 
     protected QuerySplitter createQuerySplitter(String query) {
