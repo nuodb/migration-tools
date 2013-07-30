@@ -34,15 +34,15 @@ import com.nuodb.migrator.utils.ObjectUtils;
  */
 public class DefaultValue {
 
-    private String value;
+    private String script;
     private boolean processed;
 
-    private DefaultValue(String value) {
-        this.value = value;
+    private DefaultValue(String script) {
+        this.script = script;
     }
 
-    public DefaultValue(String value, boolean processed) {
-        this.value = value;
+    public DefaultValue(String script, boolean processed) {
+        this.script = script;
         this.processed = processed;
     }
 
@@ -54,12 +54,12 @@ public class DefaultValue {
         return value != null ? new DefaultValue(value, processed) : null;
     }
 
-    public String getValue() {
-        return value;
+    public String getScript() {
+        return script;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setScript(String script) {
+        this.script = script;
     }
 
     public boolean isProcessed() {
@@ -77,7 +77,7 @@ public class DefaultValue {
 
         DefaultValue that = (DefaultValue) o;
 
-        if (value != null ? !value.equals(that.value) : that.value != null) return false;
+        if (script != null ? !script.equals(that.script) : that.script != null) return false;
         if (processed != that.processed) return false;
 
         return true;
@@ -85,7 +85,7 @@ public class DefaultValue {
 
     @Override
     public int hashCode() {
-        int result = value != null ? value.hashCode() : 0;
+        int result = script != null ? script.hashCode() : 0;
         result = 31 * result + (processed ? 1 : 0);
         return result;
     }

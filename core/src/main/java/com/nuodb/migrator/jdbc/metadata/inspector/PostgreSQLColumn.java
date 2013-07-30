@@ -52,7 +52,7 @@ public class PostgreSQLColumn {
         DefaultValue defaultValue = column.getDefaultValue();
         if (defaultValue != null && !defaultValue.isProcessed()) {
             Matcher matcher;
-            String value = defaultValue.getValue();
+            String value = defaultValue.getScript();
             if ((matcher = NEXT_VAL_PATTERN.matcher(value)).matches()) {
                 Sequence sequence = new Sequence();
                 sequence.setName(stripQuotes(inspectionContext.getDialect(), matcher.group(1)));

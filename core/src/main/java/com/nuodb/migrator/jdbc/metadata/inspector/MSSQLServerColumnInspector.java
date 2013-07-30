@@ -47,7 +47,7 @@ public class MSSQLServerColumnInspector extends SimpleColumnInspector {
                                            ResultSet columns) throws SQLException {
         DefaultValue defaultValue = super.getDefaultValue(inspectionContext, column, columns);
         if (defaultValue != null && !defaultValue.isProcessed()) {
-            String value = defaultValue.getValue();
+            String value = defaultValue.getScript();
             while (startsWith(value, "(") && endsWith(value, ")")) {
                 value = value.substring(1, value.length() - 1);
             }

@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DefaultValue;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 /**
@@ -37,12 +38,17 @@ public class DefaultValueScript extends SimpleScript {
 
     private final Column column;
 
-    public DefaultValueScript(Column column, String script, DatabaseInfo databaseInfo) {
-        super(script, databaseInfo);
+    public DefaultValueScript(Column column, DatabaseInfo databaseInfo) {
+        super(getDefaultValueScript(column), databaseInfo);
         this.column = column;
     }
 
     public Column getColumn() {
         return column;
+    }
+
+    private static String getDefaultValueScript(Column column) {
+        DefaultValue defaultValue = column.getDefaultValue();
+        return defaultValue != null ? defaultValue.getScript() : null;
     }
 }

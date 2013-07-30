@@ -432,11 +432,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     public String getDefaultValue(Column column, Dialect dialect) {
         String value;
         DefaultValue defaultValue = column.getDefaultValue();
-        if (defaultValue == null || (value = defaultValue.getValue()) == null) {
+        if (defaultValue == null || (value = defaultValue.getScript()) == null) {
             return null;
         }
         DatabaseInfo databaseInfo = dialect.getDatabaseInfo();
-        Script script = translate(new DefaultValueScript(column, value, databaseInfo));
+        Script script = translate(new DefaultValueScript(column, databaseInfo));
         String translation = script != null ? script.getScript() : value;
         String unquoted = translation;
         boolean opening = false;
