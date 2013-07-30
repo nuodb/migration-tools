@@ -43,11 +43,7 @@ import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.job.JobBase;
 import com.nuodb.migrator.job.JobExecution;
-import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.DumpSpec;
-import com.nuodb.migrator.spec.QuerySpec;
-import com.nuodb.migrator.spec.ResourceSpec;
-import com.nuodb.migrator.spec.TableSpec;
+import com.nuodb.migrator.spec.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +53,7 @@ import java.util.Collection;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.dump.DumpWriter.THREADS;
+import static com.nuodb.migrator.dump.DumpContext.THREADS;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;

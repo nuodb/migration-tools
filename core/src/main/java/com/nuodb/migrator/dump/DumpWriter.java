@@ -27,14 +27,12 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.backup.catalog.*;
-import com.nuodb.migrator.backup.format.FormatFactory;
-import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
-import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
-import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.backup.catalog.Catalog;
+import com.nuodb.migrator.backup.catalog.QueryRowSet;
+import com.nuodb.migrator.backup.catalog.RowSet;
+import com.nuodb.migrator.backup.catalog.TableRowSet;
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.session.Session;
@@ -46,17 +44,13 @@ import com.nuodb.migrator.jdbc.split.QuerySplitter;
 import com.nuodb.migrator.utils.BlockingThreadPoolExecutor;
 import org.slf4j.Logger;
 
-import java.sql.Connection;
 import java.util.Collection;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.nuodb.migrator.backup.format.csv.CsvAttributes.FORMAT;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
@@ -66,7 +60,6 @@ import static com.nuodb.migrator.jdbc.split.QuerySplitters.*;
 import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newCachingStrategy;
 import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newHandlerStrategy;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
-import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
@@ -77,22 +70,10 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings({"unchecked", "ThrowableResultOfMethodCallIgnored"})
-public class DumpWriter implements DumpWriterContext {
+public class DumpWriter extends DumpContext {
 
     private final transient Logger logger = getLogger(getClass());
-    public static final int THREADS = getRuntime().availableProcessors();
 
-    private String format = FORMAT;
-    private int threads = THREADS;
-    private Dialect dialect;
-    private Database database;
-    private TimeZone timeZone;
-    private CatalogManager catalogManager;
-    private Connection connection;
-    private ConnectionProvider connectionProvider;
-    private FormatFactory formatFactory;
-    private ValueFormatRegistry valueFormatRegistry;
-    private Map<String, Object> formatAttributes = newHashMap();
     private QueryLimit queryLimit;
 
     private Collection<DumpWriterEntry> dumpWriterEntries = newArrayList();
@@ -253,101 +234,6 @@ public class DumpWriter implements DumpWriterContext {
         return new TableQueryInfo(table, columns, filter, queryLimit);
     }
 
-    @Override
-    public String getFormat() {
-        return format;
-    }
-
-    public void setFormat(String format) {
-        this.format = format;
-    }
-
-    public int getThreads() {
-        return threads;
-    }
-
-    public void setThreads(int threads) {
-        this.threads = threads;
-    }
-
-    public Dialect getDialect() {
-        return dialect;
-    }
-
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
-    }
-
-    @Override
-    public Database getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
-
-    @Override
-    public TimeZone getTimeZone() {
-        return timeZone;
-    }
-
-    public void setTimeZone(TimeZone timeZone) {
-        this.timeZone = timeZone;
-    }
-
-    @Override
-    public CatalogManager getCatalogManager() {
-        return catalogManager;
-    }
-
-    public void setCatalogManager(CatalogManager catalogManager) {
-        this.catalogManager = catalogManager;
-    }
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
-
-    public ConnectionProvider getConnectionProvider() {
-        return connectionProvider;
-    }
-
-    public void setConnectionProvider(ConnectionProvider connectionProvider) {
-        this.connectionProvider = connectionProvider;
-    }
-
-    @Override
-    public FormatFactory getFormatFactory() {
-        return formatFactory;
-    }
-
-    public void setFormatFactory(FormatFactory formatFactory) {
-        this.formatFactory = formatFactory;
-    }
-
-    @Override
-    public ValueFormatRegistry getValueFormatRegistry() {
-        return valueFormatRegistry;
-    }
-
-    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
-        this.valueFormatRegistry = valueFormatRegistry;
-    }
-
-    @Override
-    public Map<String, Object> getFormatAttributes() {
-        return formatAttributes;
-    }
-
-    public void setFormatAttributes(Map<String, Object> formatAttributes) {
-        this.formatAttributes = formatAttributes;
-    }
-
     public QueryLimit getQueryLimit() {
         return queryLimit;
     }
@@ -356,7 +242,7 @@ public class DumpWriter implements DumpWriterContext {
         this.queryLimit = queryLimit;
     }
 
-    public Collection<DumpWriterEntry> getDumpWriterEntries() {
+    protected Collection<DumpWriterEntry> getDumpWriterEntries() {
         return dumpWriterEntries;
     }
 }

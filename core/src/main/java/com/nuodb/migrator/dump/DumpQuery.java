@@ -64,7 +64,7 @@ public class DumpQuery extends WorkBase {
 
     private static final String QUERY = "query";
 
-    private final DumpWriterContext dumpWriterContext;
+    private final DumpContext dumpContext;
     private final DumpQueryObserver dumpQueryObserver;
     private final QueryInfo queryInfo;
     private final QuerySplit querySplit;
@@ -76,9 +76,9 @@ public class DumpQuery extends WorkBase {
     private OutputFormat outputFormat;
     private Collection<Chunk> chunks;
 
-    public DumpQuery(DumpWriterContext dumpWriterContext, DumpQueryObserver dumpQueryObserver,
+    public DumpQuery(DumpContext dumpContext, DumpQueryObserver dumpQueryObserver,
                      QueryInfo queryInfo, QuerySplit querySplit, boolean hasNextQuerySplit, RowSet rowSet) {
-        this.dumpWriterContext = dumpWriterContext;
+        this.dumpContext = dumpContext;
         this.dumpQueryObserver = dumpQueryObserver;
         this.queryInfo = queryInfo;
         this.querySplit = querySplit;
@@ -99,11 +99,11 @@ public class DumpQuery extends WorkBase {
         valueHandleList = newBuilder(resultSet).
                 withDialect(dialect).
                 withColumns(queryInfo.getColumns() != null ? queryInfo.getColumns() : createColumnList(resultSet)).
-                withTimeZone(dumpWriterContext.getTimeZone()).
-                withValueFormatRegistry(dumpWriterContext.getValueFormatRegistry()).build();
+                withTimeZone(dumpContext.getTimeZone()).
+                withValueFormatRegistry(dumpContext.getValueFormatRegistry()).build();
 
-        outputFormat = dumpWriterContext.getFormatFactory().createOutputFormat(
-                dumpWriterContext.getFormat(), dumpWriterContext.getFormatAttributes());
+        outputFormat = dumpContext.getFormatFactory().createOutputFormat(
+                dumpContext.getFormat(), dumpContext.getFormatAttributes());
         outputFormat.setValueHandleList(valueHandleList);
 
         chunks = newArrayList();
@@ -144,7 +144,7 @@ public class DumpQuery extends WorkBase {
     }
 
     protected void writeStart(Chunk chunk) throws Exception {
-        outputFormat.setOutputStream(dumpWriterContext.getCatalogManager().openOutputStream(chunk.getName()));
+        outputFormat.setOutputStream(dumpContext.getCatalogManager().openOutputStream(chunk.getName()));
         outputFormat.open();
         outputFormat.writeStart();
 
@@ -178,7 +178,7 @@ public class DumpQuery extends WorkBase {
         if (chunkIndex > 0) {
             parts.add(chunkIndex + 1);
         }
-        parts.add(dumpWriterContext.getFormat());
+        parts.add(dumpContext.getFormat());
         return lowerCase(join(parts, "."));
     }
 
@@ -195,8 +195,8 @@ public class DumpQuery extends WorkBase {
         return lowerCase(rowSetName);
     }
 
-    public DumpWriterContext getDumpWriterContext() {
-        return dumpWriterContext;
+    public DumpContext getDumpContext() {
+        return dumpContext;
     }
 
     public DumpQueryObserver getDumpQueryObserver() {
