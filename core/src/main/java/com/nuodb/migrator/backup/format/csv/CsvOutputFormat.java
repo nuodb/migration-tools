@@ -29,8 +29,8 @@ package com.nuodb.migrator.backup.format.csv;
 
 import com.nuodb.migrator.backup.format.OutputFormatBase;
 import com.nuodb.migrator.backup.format.OutputFormatException;
-import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.backup.format.value.Value;
+import com.nuodb.migrator.backup.format.value.ValueHandle;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 

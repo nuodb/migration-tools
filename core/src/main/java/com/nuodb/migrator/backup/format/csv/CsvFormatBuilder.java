@@ -36,12 +36,13 @@ import java.util.TreeMap;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
-import static org.apache.commons.csv.CSVFormat.CSVFormatBuilder;
+import static org.apache.commons.csv.CSVFormat.newFormat;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("ConstantConditions")
 class CsvFormatBuilder implements CsvAttributes {
 
     private static Map<String, Character> DELIMITERS;
@@ -71,21 +72,17 @@ class CsvFormatBuilder implements CsvAttributes {
     }
 
     public CSVFormat build() {
+        CSVFormat format = newFormat(delimiter = createDelimiter());
+        format = format.withEscape(escape = createEscape());
+        format = format.withCommentStart(commentStart = createCommentStart());
+        format = format.withRecordSeparator(lineSeparator = createLineSeparator());
         quote = createQuote();
-        escape = createEscape();
         quoting = createQuoting();
-        delimiter = createDelimiter();
-        commentStart = createCommentStart();
-        lineSeparator = createLineSeparator();
-        CSVFormatBuilder builder = CSVFormat.newBuilder(delimiter);
-        if (quoting && quote != null) {
-            builder.withQuotePolicy(Quote.MINIMAL);
-            builder.withQuoteChar(quote);
+        if (quoting) {
+            format = format.withQuotePolicy(Quote.MINIMAL);
+            format = format.withQuoteChar(quote);
         }
-        builder.withCommentStart(commentStart);
-        builder.withRecordSeparator(lineSeparator);
-        builder.withEscape(escape);
-        return builder.build();
+        return format;
     }
 
     protected Character createEscape() {
