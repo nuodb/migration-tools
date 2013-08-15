@@ -74,7 +74,7 @@ public abstract class CatalogManagerBase implements CatalogManager {
     }
 
     public CatalogManagerBase(String directory, String catalog) {
-        this.directory = directory;
+        this.directory = directory == null ? "." : directory;
         this.catalog = catalog;
         if (logger.isTraceEnabled()) {
             logger.trace(format("Using %s directory for catalog output", directory));
