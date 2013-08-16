@@ -58,7 +58,7 @@ public class ContinuityTest extends MigrationTestBase {
 				rows = stmt1.executeUpdate(sqlStr);
 			} catch (SQLException e) {
 				Assert.assertTrue(e.getMessage().toUpperCase()
-						.contains("DATATYPES1_UNIQUE"));
+						.contains("DATATYPES1..PRIMARY_KEY"));
 			}
 		} finally {
 			nuodbConnection.rollback();
