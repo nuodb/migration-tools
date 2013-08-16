@@ -51,13 +51,14 @@ import static com.nuodb.migrator.cli.validation.ConnectionGroupValidators.addCon
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.String.format;
+import static java.util.TimeZone.getTimeZone;
 
 /**
  * @author Sergey Bushik
  */
 public class CliRunSupport extends CliSupport {
 
-    public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone("UTC");
+    public static final TimeZone DEFAULT_TIME_ZONE = getTimeZone("UTC");
 
     private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
 
@@ -251,7 +252,7 @@ public class CliRunSupport extends CliSupport {
             TimeZone systemTimeZone = TimeZone.getDefault();
             try {
                 TimeZone.setDefault(getDefaultTimeZone());
-                return TimeZone.getTimeZone(timeZone);
+                return getTimeZone(timeZone);
             } finally {
                 TimeZone.setDefault(systemTimeZone);
             }

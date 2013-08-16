@@ -93,7 +93,7 @@ public abstract class CatalogManagerBase implements CatalogManager {
     @Override
     public InputStream openInputStream(String name) {
         try {
-            File file = getFile(directory == null ? "." : directory, name);
+            File file = getFile(directory, name);
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Opening file for reading %s", file.getPath()));
             }
@@ -106,7 +106,7 @@ public abstract class CatalogManagerBase implements CatalogManager {
     @Override
     public OutputStream openOutputStream(String name) {
         try {
-            File file = getFile(directory == null ? "." : directory, name);
+            File file = getFile(directory, name);
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Opening file for writing %s", file.getPath()));
             }

@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -36,8 +37,13 @@ import com.nuodb.migrator.jdbc.dialect.Dialect;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.tryFind;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.split;
@@ -138,12 +144,12 @@ public class Database extends IndentedBase implements HasSchemas {
                                 }
                             }), tableName));
         }
-        return tables.iterator().next();
+        return get(tables, 0);
     }
 
     public Collection<Table> findTables(String tableName) {
-        String[] parts = split(tableName, "");
-        Collection<Table> tables = Lists.newArrayList();
+        String[] parts = split(tableName, ".");
+        Collection<Table> tables = newArrayList();
         if (parts.length == 1) {
             tables.addAll(getTables(parts[0]));
         } else if (parts.length == 2) {
@@ -160,7 +166,7 @@ public class Database extends IndentedBase implements HasSchemas {
     }
 
     public Collection<Schema> getSchemas() {
-        Collection<Schema> schemas = Lists.newArrayList();
+        Collection<Schema> schemas = newArrayList();
         for (Catalog catalog : getCatalogs()) {
             schemas.addAll(catalog.getSchemas());
         }
@@ -169,7 +175,7 @@ public class Database extends IndentedBase implements HasSchemas {
 
     public Collection<Table> getTables() {
         Collection<Schema> schemas = getSchemas();
-        Collection<Table> tables = Lists.newArrayList();
+        Collection<Table> tables = newArrayList();
         for (Schema schema : schemas) {
             tables.addAll(schema.getTables());
         }
@@ -178,7 +184,7 @@ public class Database extends IndentedBase implements HasSchemas {
 
     public Collection<Table> getTables(String tableName) {
         final Identifier tableId = valueOf(tableName);
-        return Lists.newArrayList(Iterables.filter(getTables(), new Predicate<Table>() {
+        return newArrayList(filter(getTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table input) {
                 return ObjectUtils.equals(input.getIdentifier(), tableId);
@@ -189,7 +195,7 @@ public class Database extends IndentedBase implements HasSchemas {
     public Collection<Table> getTables(String schemaName, String tableName) {
         final Identifier schemaId = valueOf(schemaName);
         final Identifier tableId = valueOf(tableName);
-        return Lists.newArrayList(Iterables.find(getTables(), new Predicate<Table>() {
+        return newArrayList(filter(getTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table input) {
                 return ObjectUtils.equals(input.getSchema().getIdentifier(), schemaId) &&
@@ -202,7 +208,7 @@ public class Database extends IndentedBase implements HasSchemas {
         final Identifier catalogId = valueOf(catalogName);
         final Identifier schemaId = valueOf(schemaName);
         final Identifier tableId = valueOf(tableName);
-        return Lists.newArrayList(Iterables.find(getTables(), new Predicate<Table>() {
+        return newArrayList(filter(getTables(), new Predicate<Table>() {
             @Override
             public boolean apply(Table input) {
                 return ObjectUtils.equals(input.getCatalog().getIdentifier(), catalogId) &&
