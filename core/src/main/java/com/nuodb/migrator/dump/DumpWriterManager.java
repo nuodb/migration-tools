@@ -54,6 +54,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.google.common.collect.Multimaps.newSetMultimap;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.backup.format.value.ValueType.toAlias;
+import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -68,9 +69,9 @@ class DumpWriterManager implements DumpQueryObserver, WorkManager {
     private SessionFactory sessionFactory;
     private ExecutorService executorService;
 
-    private final Map<Work, Exception> errors = newConcurrentMap();
-    private final Map<QueryInfo, Boolean> queryInfoInitFlags = newConcurrentMap();
-    private Multimap<QueryInfo, DumpQuery> queryInfoDumpQueries = newSetMultimap(
+    private final Map<Work, Exception> errorMap = newConcurrentMap();
+    private final Map<QueryInfo, Boolean> initFlagMap = newConcurrentMap();
+    private Multimap<QueryInfo, DumpQuery> dumpQueryMap = newSetMultimap(
             Maps.<QueryInfo, Collection<DumpQuery>>newHashMap(), new Supplier<Set<DumpQuery>>() {
         @Override
         public Set<DumpQuery> get() {
@@ -85,20 +86,20 @@ class DumpWriterManager implements DumpQueryObserver, WorkManager {
 
     @Override
     public void writeStart(DumpQuery dumpQuery) {
-        Boolean queryInfoInitFlag = queryInfoInitFlags.get(dumpQuery.getQueryInfo());
-        if (queryInfoInitFlag == null || !queryInfoInitFlag) {
+        Boolean initFlag = initFlagMap.get(dumpQuery.getQueryInfo());
+        if (initFlag == null || !initFlag) {
             Collection<Column> columns = newArrayList();
             for (ValueHandle valueHandle : dumpQuery.getValueHandleList()) {
                 columns.add(new Column(valueHandle.getName(), toAlias(valueHandle.getValueType())));
             }
             dumpQuery.getRowSet().setColumns(columns);
-            queryInfoInitFlags.put(dumpQuery.getQueryInfo(), true);
+            initFlagMap.put(dumpQuery.getQueryInfo(), true);
         }
     }
 
     @Override
     public boolean canWrite(DumpQuery dumpQuery) {
-        return errors.isEmpty();
+        return errorMap.isEmpty();
     }
 
     @Override
@@ -122,9 +123,9 @@ class DumpWriterManager implements DumpQueryObserver, WorkManager {
     public void writeEnd(DumpQuery dumpQuery) {
         final RowSet rowSet = dumpQuery.getRowSet();
         synchronized (rowSet) {
-            queryInfoDumpQueries.put(dumpQuery.getQueryInfo(), dumpQuery);
+            dumpQueryMap.put(dumpQuery.getQueryInfo(), dumpQuery);
             final Collection<Chunk> chunks = newArrayList();
-            all(queryInfoDumpQueries.get(dumpQuery.getQueryInfo()), new Predicate<DumpQuery>() {
+            all(dumpQueryMap.get(dumpQuery.getQueryInfo()), new Predicate<DumpQuery>() {
                 @Override
                 public boolean apply(DumpQuery dumpQuery) {
                     chunks.addAll(dumpQuery.getChunks());
@@ -138,13 +139,13 @@ class DumpWriterManager implements DumpQueryObserver, WorkManager {
     @Override
     public void error(Work work, Exception exception) throws Exception {
         if (logger.isDebugEnabled()) {
-            logger.debug("Dump query error reported: %s", exception.getMessage());
+            logger.debug(format("Dump query error reported: %s", exception.getMessage()));
         }
-        errors.put(work, exception);
+        errorMap.put(work, exception);
     }
 
-    public Map<Work, Exception> getErrors() {
-        return errors;
+    public Map<Work, Exception> getErrorMap() {
+        return errorMap;
     }
 
     public Catalog getCatalog() {

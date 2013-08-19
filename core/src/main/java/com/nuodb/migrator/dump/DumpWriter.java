@@ -194,15 +194,15 @@ public class DumpWriter extends DumpContext {
 
     protected SessionFactory createSessionFactory() {
         SessionFactory sessionFactory = newSessionFactory(getConnectionProvider(), getDialect());
-        sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
         sessionFactory.addSessionObserver(newTransactionIsolationSetter(new int[]{
                 TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
         }));
+        sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
         return sessionFactory;
     }
 
     protected void closeDumpWriterManager(DumpWriterManager dumpWriterManager) throws Exception {
-        Map<Work, Exception> errors = dumpWriterManager.getErrors();
+        Map<Work, Exception> errors = dumpWriterManager.getErrorMap();
         if (!isEmpty(errors)) {
             throw get(errors.values(), 0);
         }
