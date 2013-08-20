@@ -47,7 +47,7 @@ public interface ServiceResolver<T> {
 
     T resolve(Connection connection) throws SQLException;
 
-    T resolve(DatabaseInfo databaseInfo) throws SQLException;
-
     T resolve(DatabaseMetaData databaseMetaData) throws SQLException;
+
+    T resolve(DatabaseInfo databaseInfo);
 }

@@ -53,6 +53,7 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
 
     private String doubleQuote;
     private Iterator<CSVRecord> iterator;
+    private CSVParser parser;
 
     @Override
     public String getFormat() {
@@ -76,7 +77,8 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
 
         doubleQuote = valueOf(quote) + valueOf(quote);
         try {
-            iterator = new CSVParser(reader, format).iterator();
+            parser = new CSVParser(reader, format);
+            iterator = parser.iterator();
         } catch (IOException exception) {
             throw new InputFormatException(exception);
         }
@@ -123,5 +125,16 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
 
     @Override
     public void readEnd() {
+    }
+
+    @Override
+    public void close() {
+        if (parser != null) {
+            try {
+                parser.close();
+            } catch (IOException exception) {
+                throw new InputFormatException(exception);
+            }
+        }
     }
 }

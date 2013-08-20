@@ -51,8 +51,10 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.context.ContextUtils.getService;
 import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT;
+import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -128,7 +130,7 @@ public class SchemaJob extends JobBase {
         scriptGeneratorContext.setObjectTypes(getObjectTypes());
         scriptGeneratorContext.setScriptTypes(getScriptTypes());
 
-        Dialect dialect = new NuoDBDialect();
+        Dialect dialect = getService(DialectResolver.class).resolve(NUODB);
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         for (JdbcTypeSpec jdbcTypeSpec : getJdbcTypeSpecs()) {
             jdbcTypeNameMap.addJdbcTypeName(

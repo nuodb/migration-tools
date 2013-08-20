@@ -88,7 +88,7 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
     }
 
     @Override
-    protected Value[] readValues() {
+    public Value[] readValues() {
         Value[] values = null;
         if (isNextElement(ELEMENT_ROW)) {
             String nullsValue = getAttributeValue(NULL_NS_URI, ATTRIBUTE_NULLS);

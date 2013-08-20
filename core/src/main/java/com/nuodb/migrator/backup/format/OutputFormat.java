@@ -41,9 +41,9 @@ public interface OutputFormat extends Format {
 
     void writeStart();
 
-    boolean canWriteValues();
+    boolean canWrite();
 
-    void writeValues();
+    void write();
 
     void writeValues(Value[] values);
 

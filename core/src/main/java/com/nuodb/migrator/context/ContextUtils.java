@@ -27,20 +27,24 @@
  */
 package com.nuodb.migrator.context;
 
+import com.nuodb.migrator.i18n.Messages;
+
+import static com.nuodb.migrator.context.ContextHolder.getContext;
+
 /**
  * @author Sergey Bushik
  */
-public class ContextSupport {
+public class ContextUtils {
 
-    public <T> T getService(Class<T> serviceType) {
+    public static <T> T getService(Class<T> serviceType) {
         return getContext().getService(serviceType);
     }
 
-    public String getMessage(String key, Object... values) {
-        return getContext().getMessages().getMessage(key, values);
+    public static Messages getMessages() {
+        return getContext().getMessages();
     }
 
-    public Context getContext() {
-        return ContextHolder.getContext();
+    public static String getMessage(String key, Object... values) {
+        return getContext().getMessages().getMessage(key, values);
     }
 }

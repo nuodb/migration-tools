@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.context.ContextSupport;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
@@ -39,6 +38,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.nuodb.migrator.context.ContextUtils.getService;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataHandlerUtils.findMetaDataHandler;
 import static java.lang.String.format;
 
@@ -46,7 +46,7 @@ import static java.lang.String.format;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class SimpleInspectionContext extends ContextSupport implements InspectionContext {
+public class SimpleInspectionContext implements InspectionContext {
 
     protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 

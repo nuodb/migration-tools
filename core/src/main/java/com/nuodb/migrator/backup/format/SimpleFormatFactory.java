@@ -33,6 +33,8 @@ import com.nuodb.migrator.backup.format.bson.BsonOutputFormat;
 import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.backup.format.csv.CsvInputFormat;
 import com.nuodb.migrator.backup.format.csv.CsvOutputFormat;
+import com.nuodb.migrator.backup.format.sql.SqlAttributes;
+import com.nuodb.migrator.backup.format.sql.SqlOutputFormat;
 import com.nuodb.migrator.backup.format.xml.XmlAttributes;
 import com.nuodb.migrator.backup.format.xml.XmlInputFormat;
 import com.nuodb.migrator.backup.format.xml.XmlOutputFormat;
@@ -65,12 +67,12 @@ public class SimpleFormatFactory implements FormatFactory {
         addFormat(CsvAttributes.FORMAT, CsvInputFormat.class);
         addFormat(XmlAttributes.FORMAT, XmlInputFormat.class);
         addFormat(BsonAttributes.FORMAT, BsonInputFormat.class);
-        // addFormat(SqlAttributes.FORMAT, SqlFormatReader.class);
+        // addFormat(SqlAttributes.FORMAT, SqlInputFormat.class);
 
         addFormat(CsvAttributes.FORMAT, CsvOutputFormat.class);
         addFormat(XmlAttributes.FORMAT, XmlOutputFormat.class);
         addFormat(BsonAttributes.FORMAT, BsonOutputFormat.class);
-        // addFormat(SqlAttributes.FORMAT, SqlFormatWriter.class);
+        addFormat(SqlAttributes.FORMAT, SqlOutputFormat.class);
     }
 
     public void addFormat(String format, Class<? extends Format> formatClass) {
@@ -106,7 +108,7 @@ public class SimpleFormatFactory implements FormatFactory {
                 }
             }
             if (formatClass == null) {
-                throw new InputFormatException(format("Format %s is not recognized", type));
+                throw new InputFormatException(format("Format %s is not supported", type));
             }
         }
         Format format = newInstance(formatClass);

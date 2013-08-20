@@ -188,10 +188,10 @@ public class LoadJob extends JobBase {
     }
 
     protected void load(RowSet rowSet, Table table, PreparedStatement statement) throws SQLException {
+        InputFormat inputFormat = getFormatFactory().createInputFormat(
+                rowSet.getCatalog().getFormat(), loadContext.getFormatAttributes());
         ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
         for (Chunk chunk : rowSet.getChunks()) {
-            InputFormat inputFormat = getFormatFactory().createInputFormat(
-                    rowSet.getCatalog().getFormat(), loadContext.getFormatAttributes());
             inputFormat.setValueHandleList(valueHandleList);
             inputFormat.setInputStream(loadContext.getCatalogManager().openInputStream(chunk.getName()));
             inputFormat.open();
@@ -201,7 +201,7 @@ public class LoadJob extends JobBase {
             }
             inputFormat.readStart();
             long row = 0;
-            while (inputFormat.setValues()) {
+            while (inputFormat.read()) {
                 try {
                     statement.execute();
                 } catch (Exception exception) {

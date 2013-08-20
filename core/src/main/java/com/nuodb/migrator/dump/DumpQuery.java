@@ -125,12 +125,12 @@ public class DumpQuery extends WorkBase {
             if (chunk == null) {
                 writeStart(chunk = addChunk());
             }
-            if (!outputFormat.canWriteValues()) {
+            if (!outputFormat.canWrite()) {
                 writeEnd(chunk);
                 writeStart(chunk = addChunk());
             }
-            outputFormat.writeValues();
-            dumpQueryObserver.writeValues(this, chunk);
+            outputFormat.write();
+            dumpQueryObserver.write(this, chunk);
         }
         if (chunk != null) {
             writeEnd(chunk);

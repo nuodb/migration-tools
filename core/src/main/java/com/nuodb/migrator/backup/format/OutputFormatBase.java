@@ -80,9 +80,9 @@ public abstract class OutputFormatBase extends FormatBase implements OutputForma
     @Override
     public void open() {
         if (hasWriter()) {
-            open(createWriter());
+            open(openWriter());
         } else if (hasOutputStream()) {
-            open(createOutputStream());
+            open(openOutputStream());
         } else {
             throw new OutputFormatException("Writer or stream is required to write backup");
         }
@@ -90,11 +90,13 @@ public abstract class OutputFormatBase extends FormatBase implements OutputForma
 
     protected abstract void open(Writer writer);
 
+    protected abstract void open(OutputStream outputStream);
+
     protected boolean hasWriter() {
         return writer != null;
     }
 
-    protected Writer createWriter() {
+    protected Writer openWriter() {
         return wrapWriter(writer);
     }
 
@@ -104,13 +106,11 @@ public abstract class OutputFormatBase extends FormatBase implements OutputForma
         return writer;
     }
 
-    protected abstract void open(OutputStream outputStream);
-
     protected boolean hasOutputStream() {
         return outputStream != null;
     }
 
-    protected OutputStream createOutputStream() {
+    protected OutputStream openOutputStream() {
         return wrapOutputStream(outputStream);
     }
 
@@ -121,7 +121,7 @@ public abstract class OutputFormatBase extends FormatBase implements OutputForma
     }
 
     @Override
-    public boolean canWriteValues() {
+    public boolean canWrite() {
         return fitMaxSize();
     }
 
@@ -129,12 +129,8 @@ public abstract class OutputFormatBase extends FormatBase implements OutputForma
         return !(getMaxSize() != null && counting != null) || counting.getCount() < getMaxSize();
     }
 
-    public Counting getCounting() {
-        return counting;
-    }
-
     @Override
-    public void writeValues() {
+    public void write() {
         int index = 0;
         ValueHandleList valueHandleList = getValueHandleList();
         Value[] values = new Value[valueHandleList.size()];

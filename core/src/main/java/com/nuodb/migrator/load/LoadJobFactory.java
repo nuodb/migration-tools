@@ -29,19 +29,19 @@ package com.nuodb.migrator.load;
 
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
-import com.nuodb.migrator.context.ContextSupport;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.job.JobFactory;
 import com.nuodb.migrator.spec.LoadSpec;
 
+import static com.nuodb.migrator.context.ContextUtils.getService;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadJobFactory extends ContextSupport implements JobFactory<LoadJob> {
+public class LoadJobFactory implements JobFactory<LoadJob> {
 
     private LoadSpec loadSpec;
 

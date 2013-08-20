@@ -36,7 +36,7 @@ import java.util.Collection;
 /**
  * @author Sergey Bushik
  */
-class QueryInfo {
+public class QueryInfo {
 
     private Query query;
     private QueryLimit queryLimit;

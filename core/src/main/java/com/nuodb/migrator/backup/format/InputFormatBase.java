@@ -71,19 +71,23 @@ public abstract class InputFormatBase extends FormatBase implements InputFormat 
     @Override
     public void open() {
         if (hasReader()) {
-            open(createReader());
+            open(openReader());
         } else if (hasInputStream()) {
-            open(createInputStream());
+            open(openInputStream());
         } else {
             throw new InputFormatException("Reader or stream is required to read backup");
         }
     }
 
+    protected abstract void open(Reader reader);
+
+    protected abstract void open(InputStream inputStream);
+
     protected boolean hasReader() {
         return reader != null;
     }
 
-    protected Reader createReader() {
+    protected Reader openReader() {
         return wrapReader(reader);
     }
 
@@ -95,7 +99,7 @@ public abstract class InputFormatBase extends FormatBase implements InputFormat 
         return inputStream != null;
     }
 
-    protected InputStream createInputStream() {
+    protected InputStream openInputStream() {
         return wrapInputStream(inputStream);
     }
 
@@ -103,36 +107,33 @@ public abstract class InputFormatBase extends FormatBase implements InputFormat 
         return isBuffering() ? new BufferedInputStream(inputStream, getBufferSize()) : inputStream;
     }
 
-    protected abstract void open(Reader reader);
-
-    protected abstract void open(InputStream inputStream);
-
     @Override
-    public boolean setValues() {
+    public boolean read() {
         Value[] values = readValues();
         if (values != null) {
-            setValues(values);
+            int index = 0;
+            for (ValueHandle valueHandle : getValueHandleList()) {
+                valueHandle.getValueFormat().setValue(values[index++],
+                        valueHandle.getJdbcValueAccess(), valueHandle.getJdbcValueAccessOptions());
+            }
         }
         return values != null;
-    }
-
-    protected abstract Value[] readValues();
-
-    @Override
-    public void setValues(Value[] values) {
-        int index = 0;
-        for (ValueHandle valueHandle : getValueHandleList()) {
-            valueHandle.getValueFormat().setValue(values[index++],
-                    valueHandle.getJdbcValueAccess(), valueHandle.getJdbcValueAccessOptions());
-        }
     }
 
     @Override
     public void close() {
         if (hasReader()) {
-            closeQuietly(getReader());
+            close(getReader());
         } else if (hasInputStream()) {
-            closeQuietly(getInputStream());
+            close(getInputStream());
         }
+    }
+
+    protected void close(Reader reader) {
+        closeQuietly(reader);
+    }
+
+    protected void close(InputStream inputStream) {
+        closeQuietly(inputStream);
     }
 }

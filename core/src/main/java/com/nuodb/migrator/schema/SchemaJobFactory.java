@@ -27,19 +27,19 @@
  */
 package com.nuodb.migrator.schema;
 
-import com.nuodb.migrator.context.ContextSupport;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.job.JobFactory;
 import com.nuodb.migrator.spec.SchemaSpec;
 
+import static com.nuodb.migrator.context.ContextUtils.getService;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
 /**
  * @author Sergey Bushik
  */
-public class SchemaJobFactory extends ContextSupport implements JobFactory<SchemaJob> {
+public class SchemaJobFactory implements JobFactory<SchemaJob> {
 
     private SchemaSpec schemaSpec;
 

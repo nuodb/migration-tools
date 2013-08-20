@@ -36,6 +36,7 @@ import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.cli.run.CliRun;
 import com.nuodb.migrator.cli.run.CliRunJob;
 import com.nuodb.migrator.cli.run.CliRunLookup;
+import com.nuodb.migrator.context.ContextUtils;
 import com.nuodb.migrator.job.JobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ import java.io.PrintStream;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static java.lang.String.format;
 import static java.lang.System.exit;
 import static org.apache.commons.lang3.StringUtils.split;
@@ -104,17 +106,18 @@ public class CliHandler extends CliSupport implements Bootable {
                 withAlias(LIST_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(LIST_OPTION_DESCRIPTION)).build();
 
-//        BasicOption config = newBasicOptionBuilder().
-//                withId(CONFIG_OPTION_ID).
-//                withName(CONFIG_OPTION).
-//                withAlias(CONFIG_SHORT_OPTION, OptionFormat.SHORT).
-//                withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
-//                withArgument(
-//                        newArgumentBuilder().
-//                                withName(getMessage(CONFIG_ARGUMENT_NAME)).
-//                                withMinimum(1).
-//                                withMaximum(1).build()
-//                ).build();
+        // TODO: implement config option
+        // BasicOption config = newBasicOptionBuilder().
+        //  withId(CONFIG_OPTION_ID).
+        //  withName(CONFIG_OPTION).
+        //  withAlias(CONFIG_SHORT_OPTION, OptionFormat.SHORT).
+        //  withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
+        //  withArgument(
+        //          newArgumentBuilder().
+        //                  withName(getMessage(CONFIG_ARGUMENT_NAME)).
+        //                  withMinimum(1).
+        //                  withMaximum(1).build()
+        //  ).build();
 
         CliCommand command = new CliCommand();
         command.setId(COMMAND_OPTION_ID);

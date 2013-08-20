@@ -29,7 +29,7 @@ package com.nuodb.migrator.dump;
 
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
-import com.nuodb.migrator.context.ContextSupport;
+import com.nuodb.migrator.context.ContextUtils;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
@@ -42,7 +42,7 @@ import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DumpJobFactory extends ContextSupport implements JobFactory<DumpJob> {
+public class DumpJobFactory extends ContextUtils implements JobFactory<DumpJob> {
 
     private DumpSpec dumpSpec;
 

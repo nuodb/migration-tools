@@ -90,7 +90,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public T resolve(DatabaseInfo databaseInfo) throws SQLException {
+    public T resolve(DatabaseInfo databaseInfo) {
         if (databaseInfo == null) {
             return null;
         }

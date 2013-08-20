@@ -28,12 +28,11 @@
 package com.nuodb.migrator.cli;
 
 import com.nuodb.migrator.cli.parse.option.*;
-import com.nuodb.migrator.context.ContextSupport;
 
 /**
  * @author Sergey Bushik
  */
-public class CliSupport extends ContextSupport implements CliResources, CliOptions {
+public class CliSupport implements CliResources, CliOptions {
 
     private OptionToolkit optionToolkit;
 

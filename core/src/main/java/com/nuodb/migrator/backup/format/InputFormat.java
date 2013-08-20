@@ -41,9 +41,9 @@ public interface InputFormat extends Format {
 
     void readStart();
 
-    boolean setValues();
+    boolean read();
 
-    void setValues(Value[] values);
+    Value[] readValues();
 
     void readEnd();
 

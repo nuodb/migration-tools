@@ -171,8 +171,9 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         return getJdbcTypeRegistry().getJdbcTypeAlias(typeCode, typeName);
     }
 
-    protected String quote(String identifier) {
-        return openQuote() + identifier + closeQuote();
+    @Override
+    public String quote(String value) {
+        return openQuote() + value + closeQuote();
     }
 
     @Override

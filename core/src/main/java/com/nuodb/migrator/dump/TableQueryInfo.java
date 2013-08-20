@@ -38,7 +38,7 @@ import static com.nuodb.migrator.jdbc.split.Queries.newQuery;
 /**
  * @author Sergey Bushik
  */
-class TableQueryInfo extends QueryInfo {
+public class TableQueryInfo extends QueryInfo {
 
     private final Table table;
     private final String filter;

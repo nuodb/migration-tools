@@ -107,7 +107,7 @@ class DumpQueryContext implements DumpQueryObserver, WorkManager {
     }
 
     @Override
-    public void writeValues(DumpQuery dumpQuery, Chunk chunk) {
+    public void write(DumpQuery dumpQuery, Chunk chunk) {
         chunk.incrementRowCount();
     }
 

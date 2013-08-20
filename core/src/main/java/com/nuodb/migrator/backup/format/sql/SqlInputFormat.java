@@ -43,23 +43,28 @@ public class SqlInputFormat extends InputFormatBase implements SqlAttributes {
     }
 
     @Override
-    protected void open(Reader reader) {
+    protected void open(InputStream inputStream) {
+        // TODO: implement
     }
 
     @Override
-    protected void open(InputStream inputStream) {
+    protected void open(Reader reader) {
+        // TODO: implement
     }
 
     @Override
     public void readStart() {
+        // TODO: implement
     }
 
     @Override
-    protected Value[] readValues() {
+    public Value[] readValues() {
+        // TODO: implement
         return new Value[0];
     }
 
     @Override
     public void readEnd() {
+        // TODO: implement
     }
 }

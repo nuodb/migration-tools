@@ -40,7 +40,7 @@ public interface DumpQueryObserver {
 
     void writeStart(DumpQuery dumpQuery, Chunk chunk);
 
-    void writeValues(DumpQuery dumpQuery, Chunk chunk);
+    void write(DumpQuery dumpQuery, Chunk chunk);
 
     void writeEnd(DumpQuery dumpQuery, Chunk chunk);
 

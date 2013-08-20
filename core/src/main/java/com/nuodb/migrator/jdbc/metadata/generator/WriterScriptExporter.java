@@ -44,7 +44,7 @@ public class WriterScriptExporter extends ScriptExporterBase {
 
     private transient final Writer writer;
     private final boolean close;
-    private String endOfLine = SEMICOLON;
+    private String lineEnding = SEMICOLON;
     private String lineSeparator = getProperty("line.separator");
 
     public WriterScriptExporter(OutputStream outputStream) {
@@ -71,8 +71,8 @@ public class WriterScriptExporter extends ScriptExporterBase {
     @Override
     protected void doExportScript(String script) throws Exception {
         writer.write(script);
-        if (!script.endsWith(endOfLine)) {
-            writer.write(endOfLine);
+        if (!script.endsWith(lineEnding)) {
+            writer.write(lineEnding);
         }
         writer.write(lineSeparator);
     }
@@ -85,12 +85,12 @@ public class WriterScriptExporter extends ScriptExporterBase {
         }
     }
 
-    public String getEndOfLine() {
-        return endOfLine;
+    public String getLineEnding() {
+        return lineEnding;
     }
 
-    public void setEndOfLine(String endOfLine) {
-        this.endOfLine = endOfLine;
+    public void setLineEnding(String lineEnding) {
+        this.lineEnding = lineEnding;
     }
 
     public String getLineSeparator() {

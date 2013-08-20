@@ -134,6 +134,8 @@ public interface Dialect {
 
     void setTransactionIsolation(Connection connection, int[] levels) throws SQLException;
 
+    String quote(String value);
+
     String openQuote();
 
     String closeQuote();

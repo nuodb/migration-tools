@@ -32,12 +32,14 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
+import com.nuodb.migrator.context.ContextUtils;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.load.LoadJobFactory;
 import com.nuodb.migrator.spec.LoadSpec;
 
 import java.util.Map;
 
+import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.utils.Priority.LOW;
 
 /**
