@@ -35,5 +35,5 @@ import com.nuodb.migrator.jdbc.metadata.Table;
  */
 public interface RowSetMapper {
 
-    Table getTable(LoadContext loadContext, RowSet rowSet);
+    Table getTable(RowSet rowSet);
 }

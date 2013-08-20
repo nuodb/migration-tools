@@ -45,7 +45,6 @@ import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaSpec;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -56,13 +55,14 @@ import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerato
 import static com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class SchemaJob extends JobBase {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = getLogger(getClass());
 
     public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
 
@@ -85,10 +85,10 @@ public class SchemaJob extends JobBase {
         isNotNull(getInspectionManager(), "Inspection manager is required");
         isNotNull(getConnectionProviderFactory(), "Connection provider factory is required");
 
-        initSchemaContext();
+        init();
     }
 
-    protected void initSchemaContext() throws SQLException {
+    protected void init() throws SQLException {
         if (logger.isDebugEnabled()) {
             logger.debug("Initializing schema job context");
         }
@@ -97,6 +97,29 @@ public class SchemaJob extends JobBase {
         schemaContext.setConnection(connection);
         schemaContext.setScriptExporter(createScriptExporter());
         schemaContext.setScriptGeneratorContext(createScriptGeneratorContext());
+    }
+
+    protected ScriptExporter createScriptExporter() {
+        Collection<ScriptExporter> exporters = newArrayList();
+        ConnectionSpec connectionSpec = getTargetConnectionSpec();
+        if (connectionSpec != null) {
+            try {
+                ConnectionProvider connectionProvider = getConnectionProviderFactory().createConnectionProvider(
+                        connectionSpec);
+                exporters.add(new ConnectionScriptExporter(connectionProvider.getConnection()));
+            } catch (SQLException exception) {
+                throw new SchemaException("Failed creating connection script exporter", exception);
+            }
+        }
+        ResourceSpec outputSpec = getOutputSpec();
+        if (outputSpec != null) {
+            exporters.add(new FileScriptExporter(outputSpec.getPath(), outputSpec.getEncoding()));
+        }
+        // Fallback to system out if neither database connection nor target file were provided
+        if (exporters.isEmpty()) {
+            exporters.add(SYSTEM_OUT);
+        }
+        return new CompositeScriptExporter(exporters);
     }
 
     protected ScriptGeneratorContext createScriptGeneratorContext() {
@@ -130,31 +153,12 @@ public class SchemaJob extends JobBase {
         return scriptGeneratorContext;
     }
 
-    protected ScriptExporter createScriptExporter() {
-        Collection<ScriptExporter> exporters = newArrayList();
-        ConnectionSpec connectionSpec = getTargetConnectionSpec();
-        if (connectionSpec != null) {
-            try {
-                ConnectionProvider connectionProvider = getConnectionProviderFactory().createConnectionProvider(
-                        connectionSpec);
-                exporters.add(new ConnectionScriptExporter(connectionProvider.getConnection()));
-            } catch (SQLException exception) {
-                throw new SchemaException("Failed creating connection script exporter", exception);
-            }
-        }
-        ResourceSpec outputSpec = getOutputSpec();
-        if (outputSpec != null) {
-            exporters.add(new FileScriptExporter(outputSpec.getPath(), outputSpec.getEncoding()));
-        }
-        // Fallback to system out if neither database connection nor target file were provided
-        if (exporters.isEmpty()) {
-            exporters.add(SYSTEM_OUT);
-        }
-        return new CompositeScriptExporter(exporters);
-    }
-
     @Override
     public void execute(JobExecution execution) throws Exception {
+        schema();
+    }
+
+    protected void schema() throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("Inspecting target database");
         }
@@ -175,10 +179,10 @@ public class SchemaJob extends JobBase {
 
     @Override
     public void release(JobExecution execution) throws Exception {
-        releaseSchemaContext();
+        release();
     }
 
-    protected void releaseSchemaContext() throws Exception {
+    protected void release() throws Exception {
         ScriptExporter scriptExporter = schemaContext.getScriptExporter();
         if (scriptExporter != null) {
             scriptExporter.close();

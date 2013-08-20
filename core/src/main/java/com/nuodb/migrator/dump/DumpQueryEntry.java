@@ -33,13 +33,13 @@ import com.nuodb.migrator.jdbc.split.QuerySplitter;
 /**
  * @author Sergey Bushik
  */
-class DumpWriterEntry {
+class DumpQueryEntry {
 
     private QueryInfo queryInfo;
     private QuerySplitter querySplitter;
     private RowSet rowSet;
 
-    public DumpWriterEntry(QueryInfo queryInfo, QuerySplitter querySplitter, RowSet rowSet) {
+    public DumpQueryEntry(QueryInfo queryInfo, QuerySplitter querySplitter, RowSet rowSet) {
         this.queryInfo = queryInfo;
         this.querySplitter = querySplitter;
         this.rowSet = rowSet;

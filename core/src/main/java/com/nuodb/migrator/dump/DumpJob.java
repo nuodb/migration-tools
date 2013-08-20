@@ -45,7 +45,6 @@ import com.nuodb.migrator.job.JobBase;
 import com.nuodb.migrator.job.JobExecution;
 import com.nuodb.migrator.spec.*;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -60,6 +59,7 @@ import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
@@ -70,7 +70,7 @@ public class DumpJob extends JobBase {
     private static final MetaDataType[] META_DATA_TYPES = new MetaDataType[]{
             DATABASE, CATALOG, SCHEMA, TABLE, COLUMN, INDEX, PRIMARY_KEY
     };
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = getLogger(getClass());
 
     private DumpSpec dumpSpec;
     private FormatFactory formatFactory;
@@ -145,10 +145,10 @@ public class DumpJob extends JobBase {
      */
     @Override
     public void execute(JobExecution execution) throws Exception {
-        write();
+        dump();
     }
 
-    protected void write() throws Exception {
+    protected void dump() throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("Adding tables & queries to dump writer");
         }

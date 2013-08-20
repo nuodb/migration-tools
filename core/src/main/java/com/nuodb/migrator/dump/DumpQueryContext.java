@@ -61,7 +61,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "SynchronizationOnLocalVariableOrMethodParameter"})
-class DumpWriterManager implements DumpQueryObserver, WorkManager {
+class DumpQueryContext implements DumpQueryObserver, WorkManager {
 
     private final transient Logger logger = getLogger(getClass());
 
@@ -144,7 +144,7 @@ class DumpWriterManager implements DumpQueryObserver, WorkManager {
         errorMap.put(work, exception);
     }
 
-    public Map<Work, Exception> getErrorMap() {
+    public Map<Work, Exception> getErrors() {
         return errorMap;
     }
 

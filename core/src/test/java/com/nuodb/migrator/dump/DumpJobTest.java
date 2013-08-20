@@ -103,7 +103,7 @@ public class DumpJobTest {
         given(connection.getMetaData()).willReturn(databaseMetaData);
 
         willDoNothing().given(dumpJob).init();
-        willDoNothing().given(dumpJob).write();
+        willDoNothing().given(dumpJob).dump();
 
         jobContext = newHashMap();
         jobExecutor = createJobExecutor(dumpJob);

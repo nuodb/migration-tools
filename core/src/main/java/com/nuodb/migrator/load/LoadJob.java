@@ -51,7 +51,6 @@ import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.LoadSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -68,13 +67,14 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class LoadJob extends JobBase {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = getLogger(getClass());
 
     private LoadSpec loadSpec;
     private FormatFactory formatFactory;
@@ -83,8 +83,8 @@ public class LoadJob extends JobBase {
     private ConnectionProviderFactory connectionProviderFactory;
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
 
-    private LoadContext loadContext = new LoadContext();
-    private RowSetMapper rowSetMapper = new LoadRowSetMapper();
+    private LoadContext loadContext;
+    private RowSetMapper rowSetMapper;
 
     public LoadJob(LoadSpec loadSpec) {
         this.loadSpec = loadSpec;
@@ -97,14 +97,15 @@ public class LoadJob extends JobBase {
         isNotNull(getDialectResolver(), "Dialect resolver is required");
         isNotNull(getConnectionProviderFactory(), "Connection provider factory is required");
         isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
-        initLoadContext();
+
+        init();
     }
 
-    protected void initLoadContext() throws SQLException {
+    protected void init() throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("Initializing load job context");
         }
-        final LoadContext loadContext = getLoadContext();
+        loadContext = new LoadContext();
         final ResourceSpec inputSpec = getInputSpec();
         loadContext.setFormatAttributes(inputSpec.getAttributes());
         loadContext.setCatalogManager(new XmlCatalogManager(inputSpec.getPath()));
@@ -115,11 +116,16 @@ public class LoadJob extends JobBase {
         loadContext.setFormatFactory(getFormatFactory());
         loadContext.setDialect(getDialectResolver().resolve(connection));
         loadContext.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
+
+        rowSetMapper = new LoadRowSetMapper(loadContext);
     }
 
     @Override
     public void execute(JobExecution execution) throws Exception {
-        final LoadContext loadContext = getLoadContext();
+        load();
+    }
+
+    protected void load() throws SQLException {
         final Connection connection = loadContext.getConnection();
         final Dialect dialect = loadContext.getDialect();
         try {
@@ -155,10 +161,10 @@ public class LoadJob extends JobBase {
 
     protected void load(final RowSet rowSet) throws SQLException {
         if (!isEmpty(rowSet.getChunks())) {
-            final Table table = getRowSetMapper().getTable(getLoadContext(), rowSet);
+            final Table table = rowSetMapper.getTable(rowSet);
             if (table != null) {
                 final InsertQuery query = createInsertQuery(table, rowSet.getColumns());
-                final StatementTemplate template = new StatementTemplate(getLoadContext().getConnection());
+                final StatementTemplate template = new StatementTemplate(loadContext.getConnection());
                 template.execute(
                         new StatementFactory<PreparedStatement>() {
                             @Override
@@ -185,9 +191,9 @@ public class LoadJob extends JobBase {
         ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
         for (Chunk chunk : rowSet.getChunks()) {
             InputFormat inputFormat = getFormatFactory().createInputFormat(
-                    rowSet.getCatalog().getFormat(), getLoadContext().getFormatAttributes());
+                    rowSet.getCatalog().getFormat(), loadContext.getFormatAttributes());
             inputFormat.setValueHandleList(valueHandleList);
-            inputFormat.setInputStream(getLoadContext().getCatalogManager().openInputStream(chunk.getName()));
+            inputFormat.setInputStream(loadContext.getCatalogManager().openInputStream(chunk.getName()));
             inputFormat.open();
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Loading %d rows from %s chunk to %s table",
@@ -228,9 +234,9 @@ public class LoadJob extends JobBase {
                 });
         return newBuilder(statement).
                 withColumns(newArrayList(columns)).
-                withDialect(getLoadContext().getDialect()).
+                withDialect(loadContext.getDialect()).
                 withTimeZone(getTimeZone()).
-                withValueFormatRegistry(getLoadContext().getValueFormatRegistry()).build();
+                withValueFormatRegistry(loadContext.getValueFormatRegistry()).build();
     }
 
     protected InsertQuery createInsertQuery(Table table, Collection<Column> columns) {
@@ -267,10 +273,6 @@ public class LoadJob extends JobBase {
 
     public LoadSpec getLoadSpec() {
         return loadSpec;
-    }
-
-    public LoadContext getLoadContext() {
-        return loadContext;
     }
 
     public FormatFactory getFormatFactory() {

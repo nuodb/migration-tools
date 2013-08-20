@@ -32,19 +32,25 @@ import com.nuodb.migrator.backup.catalog.RowSet;
 import com.nuodb.migrator.backup.catalog.TableRowSet;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 class LoadRowSetMapper implements RowSetMapper {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = getLogger(getClass());
+
+    private final LoadContext loadContext;
+
+    public LoadRowSetMapper(LoadContext loadContext) {
+        this.loadContext = loadContext;
+    }
 
     @Override
-    public Table getTable(LoadContext loadContext, RowSet rowSet) {
+    public Table getTable(RowSet rowSet) {
         Table table = null;
         if (rowSet instanceof TableRowSet) {
             TableRowSet tableRowSet = (TableRowSet) rowSet;

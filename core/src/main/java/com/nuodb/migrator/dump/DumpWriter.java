@@ -76,7 +76,7 @@ public class DumpWriter extends DumpContext {
 
     private QueryLimit queryLimit;
 
-    private Collection<DumpWriterEntry> dumpWriterEntries = newArrayList();
+    private Collection<DumpQueryEntry> dumpWriterEntries = newArrayList();
 
     public void addTable(Table table) {
         addTable(table, table.getColumns());
@@ -112,38 +112,45 @@ public class DumpWriter extends DumpContext {
     }
 
     protected void addQuery(QueryInfo queryInfo, QuerySplitter querySplitter, RowSet rowSet) {
-        dumpWriterEntries.add(new DumpWriterEntry(queryInfo, querySplitter, rowSet));
+        dumpWriterEntries.add(new DumpQueryEntry(queryInfo, querySplitter, rowSet));
     }
 
     public Catalog write() throws Exception {
-        DumpWriterManager dumpWriterManager = createDumpWriterManager();
+        DumpQueryContext dumpQueryContext = createDumpQueryContext();
         try {
-            ExecutorService executorService = dumpWriterManager.getExecutorService();
-            for (DumpWriterEntry dumpWriterEntry : getDumpWriterEntries()) {
-                QuerySplitter querySplitter = dumpWriterEntry.getQuerySplitter();
+            write(dumpQueryContext);
+        } finally {
+            closeDumpQueryContext(dumpQueryContext);
+        }
+        return dumpQueryContext.getCatalog();
+    }
+
+    protected void write(DumpQueryContext dumpQueryContext) throws Exception {
+        ExecutorService executorService = dumpQueryContext.getExecutorService();
+        try {
+            for (DumpQueryEntry dumpQueryEntry : getDumpQueryEntries()) {
+                QuerySplitter querySplitter = dumpQueryEntry.getQuerySplitter();
                 while (querySplitter.hasNextQuerySplit(getConnection())) {
                     QuerySplit querySplit = querySplitter.getNextQuerySplit(getConnection());
-                    write(dumpWriterManager, new DumpQuery(this, dumpWriterManager, dumpWriterEntry.getQueryInfo(),
-                            querySplit, querySplitter.hasNextQuerySplit(getConnection()), dumpWriterEntry.getRowSet()));
+                    write(dumpQueryContext, new DumpQuery(this, dumpQueryContext, dumpQueryEntry.getQueryInfo(),
+                            querySplit, querySplitter.hasNextQuerySplit(getConnection()), dumpQueryEntry.getRowSet()));
                 }
             }
-            dumpWriterManager.getExecutorService().shutdown();
+            executorService.shutdown();
             while (!executorService.isTerminated()) {
                 executorService.awaitTermination(100L, MILLISECONDS);
             }
+
         } catch (Exception exception) {
-            dumpWriterManager.getExecutorService().shutdownNow();
+            executorService.shutdownNow();
             throw exception;
-        } finally {
-            closeDumpWriterManager(dumpWriterManager);
         }
-        getCatalogManager().writeCatalog(dumpWriterManager.getCatalog());
-        return dumpWriterManager.getCatalog();
+        getCatalogManager().writeCatalog(dumpQueryContext.getCatalog());
     }
 
-    protected void write(DumpWriterManager dumpWriterManager, DumpQuery dumpQuery) {
-        write(dumpWriterManager.getExecutorService(), dumpWriterManager.getSessionFactory(),
-                dumpWriterManager, dumpQuery);
+    protected void write(DumpQueryContext dumpQueryContext, DumpQuery dumpQuery) {
+        write(dumpQueryContext.getExecutorService(), dumpQueryContext.getSessionFactory(),
+                dumpQueryContext, dumpQuery);
     }
 
     protected void write(final ExecutorService executorService, final SessionFactory sessionFactory,
@@ -167,20 +174,20 @@ public class DumpWriter extends DumpContext {
         });
     }
 
-    protected DumpWriterManager createDumpWriterManager() {
-        DumpWriterManager dumpWriterManager = new DumpWriterManager();
-        dumpWriterManager.setCatalog(createCatalog());
-        dumpWriterManager.setExecutorService(createExecutorService());
-        dumpWriterManager.setSessionFactory(createSessionFactory());
-        return dumpWriterManager;
+    protected DumpQueryContext createDumpQueryContext() {
+        DumpQueryContext dumpQueryContext = new DumpQueryContext();
+        dumpQueryContext.setCatalog(createCatalog());
+        dumpQueryContext.setExecutorService(createExecutorService());
+        dumpQueryContext.setSessionFactory(createSessionFactory());
+        return dumpQueryContext;
     }
 
     protected Catalog createCatalog() {
         Catalog catalog = new Catalog();
         catalog.setFormat(getFormat());
         catalog.setDatabaseInfo(getDatabase().getDatabaseInfo());
-        for (DumpWriterEntry dumpWriterEntry : getDumpWriterEntries()) {
-            catalog.addRowSet(dumpWriterEntry.getRowSet());
+        for (DumpQueryEntry dumpQueryEntry : getDumpQueryEntries()) {
+            catalog.addRowSet(dumpQueryEntry.getRowSet());
         }
         return catalog;
     }
@@ -201,8 +208,8 @@ public class DumpWriter extends DumpContext {
         return sessionFactory;
     }
 
-    protected void closeDumpWriterManager(DumpWriterManager dumpWriterManager) throws Exception {
-        Map<Work, Exception> errors = dumpWriterManager.getErrorMap();
+    protected void closeDumpQueryContext(DumpQueryContext dumpQueryContext) throws Exception {
+        Map<Work, Exception> errors = dumpQueryContext.getErrors();
         if (!isEmpty(errors)) {
             throw get(errors.values(), 0);
         }
@@ -242,7 +249,7 @@ public class DumpWriter extends DumpContext {
         this.queryLimit = queryLimit;
     }
 
-    protected Collection<DumpWriterEntry> getDumpWriterEntries() {
+    protected Collection<DumpQueryEntry> getDumpQueryEntries() {
         return dumpWriterEntries;
     }
 }
