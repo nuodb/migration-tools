@@ -29,6 +29,7 @@ package com.nuodb.migrator.load;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.backup.catalog.*;
@@ -218,18 +219,13 @@ public class LoadJob extends JobBase {
         }
     }
 
-    protected ValueHandleList createValueHandleList(final RowSet rowSet, Table table,
+    protected ValueHandleList createValueHandleList(final RowSet rowSet, final Table table,
                                                     PreparedStatement statement) throws SQLException {
-        Iterable<com.nuodb.migrator.jdbc.metadata.Column> columns = filter(table.getColumns(),
-                new Predicate<com.nuodb.migrator.jdbc.metadata.Column>() {
+        Iterable<com.nuodb.migrator.jdbc.metadata.Column> columns = transform(rowSet.getColumns(),
+                new Function<Column, com.nuodb.migrator.jdbc.metadata.Column>() {
                     @Override
-                    public boolean apply(final com.nuodb.migrator.jdbc.metadata.Column column) {
-                        return any(rowSet.getColumns(), new Predicate<Column>() {
-                            @Override
-                            public boolean apply(Column rowSetColumn) {
-                                return column.getName().equalsIgnoreCase(rowSetColumn.getName());
-                            }
-                        });
+                    public com.nuodb.migrator.jdbc.metadata.Column apply(Column column) {
+                        return table.getColumn(column.getName());
                     }
                 });
         return newBuilder(statement).
