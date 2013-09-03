@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
+import com.nuodb.migrator.jdbc.url.JdbcUrl;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.utils.ReflectionUtils;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -62,7 +63,10 @@ public class DriverConnectionProvider extends ConnectionProxyProviderBase<Driver
             basicDataSource.setUrl(connectionSpec.getUrl());
             basicDataSource.setUsername(connectionSpec.getUsername());
             basicDataSource.setPassword(connectionSpec.getPassword());
-            addParameters(basicDataSource, connectionSpec.getJdbcUrl().getParameters());
+            JdbcUrl jdbcUrl = connectionSpec.getJdbcUrl();
+            if (jdbcUrl != null) {
+                addParameters(basicDataSource, jdbcUrl.getParameters());
+            }
             addParameters(basicDataSource, connectionSpec.getProperties());
             basicDataSource.setAccessToUnderlyingConnectionAllowed(true);
 
