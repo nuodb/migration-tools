@@ -481,10 +481,10 @@ public class CliSchemaJob extends CliRunJob {
         private void pad(CommandLine commandLine, String option, int count) {
             List<String> optionValues = newArrayList(commandLine.<String>getValues(option));
             List<Object> lastVisitedOptionValues = lastVisitedValues.replaceValues(option, optionValues);
-            optionValues.removeAll(lastVisitedOptionValues);
+            List<String> deltaOptionValues = optionValues.subList(lastVisitedOptionValues.size(), optionValues.size());
 
             List<Object> paddedOptionValues = values.get(option);
-            paddedOptionValues.addAll(optionValues);
+            paddedOptionValues.addAll(deltaOptionValues);
             for (int i = paddedOptionValues.size(); i < count; i++) {
                 paddedOptionValues.add(i, null);
             }
