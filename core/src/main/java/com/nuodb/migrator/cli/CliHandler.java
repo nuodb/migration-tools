@@ -33,10 +33,10 @@ import com.nuodb.migrator.cli.parse.*;
 import com.nuodb.migrator.cli.parse.help.HelpFormatter;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
+import com.nuodb.migrator.cli.processor.ConfigOptionProcessor;
 import com.nuodb.migrator.cli.run.CliRun;
 import com.nuodb.migrator.cli.run.CliRunJob;
 import com.nuodb.migrator.cli.run.CliRunLookup;
-import com.nuodb.migrator.context.ContextUtils;
 import com.nuodb.migrator.job.JobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +46,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
+import static java.lang.Integer.MAX_VALUE;
 import static java.lang.String.format;
 import static java.lang.System.exit;
 import static org.apache.commons.lang3.StringUtils.split;
@@ -90,7 +91,7 @@ public class CliHandler extends CliSupport implements Bootable {
     }
 
     protected Group createOption() {
-        BasicOption help = newBasicOptionBuilder().
+        Option help = newBasicOptionBuilder().
                 withId(HELP_OPTION_ID).
                 withName(HELP_OPTION).
                 withAlias(HELP_SHORT_OPTION, OptionFormat.SHORT).
@@ -100,46 +101,47 @@ public class CliHandler extends CliSupport implements Bootable {
                                 withName(getMessage(HELP_ARGUMENT_NAME)).build()
                 ).build();
 
-        BasicOption list = newBasicOptionBuilder().
+        Option list = newBasicOptionBuilder().
                 withId(LIST_OPTION_ID).
                 withName(LIST_OPTION).
                 withAlias(LIST_SHORT_OPTION, OptionFormat.SHORT).
                 withDescription(getMessage(LIST_OPTION_DESCRIPTION)).build();
 
-        // TODO: implement config option
-        // BasicOption config = newBasicOptionBuilder().
-        //  withId(CONFIG_OPTION_ID).
-        //  withName(CONFIG_OPTION).
-        //  withAlias(CONFIG_SHORT_OPTION, OptionFormat.SHORT).
-        //  withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
-        //  withArgument(
-        //          newArgumentBuilder().
-        //                  withName(getMessage(CONFIG_ARGUMENT_NAME)).
-        //                  withMinimum(1).
-        //                  withMaximum(1).build()
-        //  ).build();
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
 
-        CliCommand command = new CliCommand();
+        Option config = newBasicOptionBuilder().
+                withId(CONFIG_OPTION_ID).
+                withName(CONFIG_OPTION).
+                withAlias(CONFIG_SHORT_OPTION, OptionFormat.SHORT).
+                withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(CONFIG_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withOptionProcessor(new ConfigOptionProcessor()).
+                                withMinimum(1).
+                                withMaximum(MAX_VALUE).build()
+                ).build();
+
+        Command command = new CliRunCommand(cliRunLookup);
         command.setId(COMMAND_OPTION_ID);
         command.setName(COMMAND_OPTION);
         command.setDescription(getMessage(COMMAND_OPTION_DESCRIPTION));
         command.setHelpValues(newArrayList(split(getMessage(COMMAND_OPTION_HELP_VALUES))));
         command.setRequired(false);
-        command.setCliRunLookup(cliRunLookup);
         command.setOptionFormat(getOptionFormat());
 
         return newGroupBuilder().
                 withName(getMessage(ROOT_GROUP_NAME)).
                 withOption(help).
                 withOption(list).
+                withOption(config).
                 withOption(command).
                 withRequired(true).build();
     }
 
     protected void handleOptionSet(OptionSet options, Option root) {
-        if (logger.isTraceEnabled()) {
-            logger.trace("Options successfully parsed");
-        }
         if (options.getOptions().isEmpty()) {
             handleHelp(options, root);
         } else if (options.hasOption(HELP_OPTION)) {
@@ -165,7 +167,7 @@ public class CliHandler extends CliSupport implements Bootable {
                 formatter.setOption(cliRun);
                 formatter.setExecutable(getExecutable() + " " + command);
             } else {
-                throw new OptionException(options.getOption(HELP_OPTION), format("Unknown command %s", command));
+                throw new OptionException(format("Unknown command %s", command), options.getOption(HELP_OPTION));
             }
         } else {
             formatter.setOption(root);
@@ -188,7 +190,7 @@ public class CliHandler extends CliSupport implements Bootable {
 
     protected void handleConfig(OptionSet options) {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Handling --config %s option", options.getValue("config")));
+            logger.trace(format("Handling --config %s option", options.getValue(CONFIG_OPTION)));
         }
     }
 

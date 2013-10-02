@@ -28,30 +28,36 @@
 package com.nuodb.migrator.cli.run;
 
 import com.google.common.base.Function;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.Group;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
-import com.nuodb.migrator.context.ContextUtils;
+import com.nuodb.migrator.cli.processor.JdbcTypeOptionProcessor;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeCodes;
 import com.nuodb.migrator.schema.SchemaJobFactory;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaSpec;
 import com.nuodb.migrator.utils.ReflectionUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Multimaps.newListMultimap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
@@ -61,10 +67,12 @@ import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Boolean.parseBoolean;
+import static java.lang.Integer.parseInt;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.replace;
 
 /**
@@ -112,55 +120,63 @@ public class CliSchemaJob extends CliRunJob {
     }
 
     protected void createSchemaOptions(GroupBuilder group) {
-        GroupBuilder typeGroup = newGroupBuilder().withName(getMessage(JDBC_TYPE_GROUP_NAME));
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
+
+        GroupBuilder typeGroup = newGroupBuilder().withName(getMessage(TYPE_GROUP_NAME));
         Option typeName = newBasicOptionBuilder().
                 withName(JDBC_TYPE_NAME_OPTION).
-                withDescription(getMessage(JDBC_TYPE_NAME_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TYPE_NAME_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME)).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME))).
+                                withName(getMessage(TYPE_NAME_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(TYPE_NAME_ARGUMENT_NAME))).
                                 withOptionProcessor(jdbcTypeOptionProcessor).
                                 withMinimum(1).withMaximum(Integer.MAX_VALUE).withRequired(true).build()
                 ).build();
         typeGroup.withOption(typeName);
         Option typeCode = newBasicOptionBuilder().
                 withName(JDBC_TYPE_CODE_OPTION).
-                withDescription(getMessage(JDBC_TYPE_CODE_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TYPE_CODE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME)).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME))).
+                                withName(getMessage(TYPE_CODE_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(TYPE_CODE_ARGUMENT_NAME))).
                                 withMinimum(1).withMaximum(Integer.MAX_VALUE).withRequired(true).build()
                 ).build();
         typeGroup.withOption(typeCode);
         Option typeSize = newBasicOptionBuilder().
                 withName(JDBC_TYPE_SIZE_OPTION).
-                withDescription(getMessage(JDBC_TYPE_SIZE_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TYPE_SIZE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME)).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME))).
+                                withName(getMessage(TYPE_SIZE_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(TYPE_SIZE_ARGUMENT_NAME))).
                                 withMaximum(Integer.MAX_VALUE).build()
                 ).build();
         typeGroup.withOption(typeSize);
         Option typePrecision = newBasicOptionBuilder().
                 withName(JDBC_TYPE_PRECISION_OPTION).
-                withDescription(getMessage(JDBC_TYPE_PRECISION_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TYPE_PRECISION_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME)).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME))).
+                                withName(getMessage(TYPE_PRECISION_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(TYPE_PRECISION_ARGUMENT_NAME))).
                                 withMaximum(Integer.MAX_VALUE).build()
                 ).build();
         typeGroup.withOption(typePrecision);
         Option typeScale = newBasicOptionBuilder().
                 withName(JDBC_TYPE_SCALE_OPTION).
-                withDescription(getMessage(JDBC_TYPE_SCALE_OPTION_DESCRIPTION)).
+                withDescription(getMessage(TYPE_SCALE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME)).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME))).
+                                withName(getMessage(TYPE_SCALE_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(TYPE_SCALE_ARGUMENT_NAME))).
                                 withMaximum(Integer.MAX_VALUE).build()
                 ).build();
         typeGroup.withOption(typeScale);
@@ -173,12 +189,10 @@ public class CliSchemaJob extends CliRunJob {
                 withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
                                 withMaximum(Integer.MAX_VALUE).build()
                 ).build();
         group.withOption(tableType);
-
-        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
-        optionFormat.setValuesSeparator(null);
 
         Option generate = newRegexOptionBuilder().
                 withName(SCHEMA_META_DATA_OPTION).
@@ -187,7 +201,8 @@ public class CliSchemaJob extends CliRunJob {
                 withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(SCHEMA_META_DATA_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).withMinimum(1).withMaximum(Integer.MAX_VALUE).build()
+                                withOptionFormat(optionFormat).
+                                withMinimum(1).withMaximum(Integer.MAX_VALUE).build()
                 )
                 .build();
         group.withOption(generate);
@@ -275,9 +290,9 @@ public class CliSchemaJob extends CliRunJob {
         if (groupScriptsByCondition != null) {
             groupScriptsBy = groupScriptsByConditionMap.get(groupScriptsByCondition);
             if (groupScriptsBy == null) {
-                throw new OptionException(option,
-                        format("Unexpected value for %s option, valid values are %s",
-                                SCHEMA_GROUP_SCRIPTS_BY_OPTION, groupScriptsByConditionMap.keySet()));
+                throw new OptionException(format("Unexpected value for %s option, valid values are %s",
+                        SCHEMA_GROUP_SCRIPTS_BY_OPTION, groupScriptsByConditionMap.keySet()), option
+                );
             }
         } else {
             groupScriptsBy = GroupScriptsBy.TABLE;
@@ -312,6 +327,7 @@ public class CliSchemaJob extends CliRunJob {
         ListMultimap<String, Object> values = jdbcTypeOptionProcessor.getValues();
         int count = values.get(JDBC_TYPE_NAME_OPTION).size();
         Collection<JdbcTypeSpec> jdbcTypeSpecs = Lists.newArrayList();
+        JdbcTypeCodes jdbcTypeCodes = JdbcTypeCodes.getInstance();
         for (int i = 0; i < count; i++) {
             String typeName = (String) values.get(JDBC_TYPE_NAME_OPTION).get(i);
             String typeCode = (String) values.get(JDBC_TYPE_CODE_OPTION).get(i);
@@ -320,11 +336,11 @@ public class CliSchemaJob extends CliRunJob {
             String scale = (String) values.get(JDBC_TYPE_SCALE_OPTION).get(i);
             JdbcTypeSpec jdbcTypeSpec = new JdbcTypeSpec();
             jdbcTypeSpec.setTypeName(typeName);
-            jdbcTypeSpec.setTypeCode(Integer.parseInt(typeCode));
-            jdbcTypeSpec.setTypeCode(Integer.parseInt(typeCode));
-            jdbcTypeSpec.setSize(size != null ? Integer.parseInt(size) : null);
-            jdbcTypeSpec.setPrecision(precision != null ? Integer.parseInt(precision) : null);
-            jdbcTypeSpec.setScale(scale != null ? Integer.parseInt(scale) : null);
+            Integer typeCodeInt = jdbcTypeCodes.getTypeCode(typeCode);
+            jdbcTypeSpec.setTypeCode(typeCodeInt != null ? typeCodeInt : parseInt(typeCode));
+            jdbcTypeSpec.setSize(!isEmpty(size) ? parseInt(size) : null);
+            jdbcTypeSpec.setPrecision(!isEmpty(precision) ? parseInt(precision) : null);
+            jdbcTypeSpec.setScale(!isEmpty(scale) ? parseInt(scale) : null);
             jdbcTypeSpecs.add(jdbcTypeSpec);
         }
         schemaSpec.setJdbcTypeSpecs(jdbcTypeSpecs);
@@ -442,65 +458,5 @@ public class CliSchemaJob extends CliRunJob {
                 ).build();
         group.withOption(autoCommit);
         return group.build();
-    }
-
-    class JdbcTypeOptionProcessor implements OptionProcessor {
-
-        private ListMultimap<String, Object> lastVisitedValues = newListMultimap(
-                Maps.<String, Collection<Object>>newLinkedHashMap(),
-                new Supplier<List<Object>>() {
-                    @Override
-                    public List<Object> get() {
-                        return newArrayList();
-                    }
-                });
-        private ListMultimap<String, Object> values = newListMultimap(
-                Maps.<String, Collection<Object>>newLinkedHashMap(),
-                new Supplier<List<Object>>() {
-                    @Override
-                    public List<Object> get() {
-                        return newArrayList();
-                    }
-                });
-        private int count;
-
-        @Override
-        public void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-            pad(commandLine);
-            count++;
-        }
-
-        private void pad(CommandLine commandLine) {
-            pad(commandLine, JDBC_TYPE_NAME_OPTION, count);
-            pad(commandLine, JDBC_TYPE_CODE_OPTION, count);
-            pad(commandLine, JDBC_TYPE_SIZE_OPTION, count);
-            pad(commandLine, JDBC_TYPE_PRECISION_OPTION, count);
-            pad(commandLine, JDBC_TYPE_SCALE_OPTION, count);
-        }
-
-        private void pad(CommandLine commandLine, String option, int count) {
-            List<String> optionValues = newArrayList(commandLine.<String>getValues(option));
-            List<Object> lastVisitedOptionValues = lastVisitedValues.replaceValues(option, optionValues);
-            List<String> deltaOptionValues = optionValues.subList(lastVisitedOptionValues.size(), optionValues.size());
-
-            List<Object> paddedOptionValues = values.get(option);
-            paddedOptionValues.addAll(deltaOptionValues);
-            for (int i = paddedOptionValues.size(); i < count; i++) {
-                paddedOptionValues.add(i, null);
-            }
-        }
-
-        @Override
-        public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-        }
-
-        @Override
-        public void postProcess(CommandLine commandLine, Option option) {
-            pad(commandLine);
-        }
-
-        public ListMultimap<String, Object> getValues() {
-            return values;
-        }
     }
 }

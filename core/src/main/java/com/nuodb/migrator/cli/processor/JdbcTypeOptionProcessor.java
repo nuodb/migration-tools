@@ -25,35 +25,70 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.parse.option;
+package com.nuodb.migrator.cli.processor;
 
-import com.nuodb.migrator.cli.parse.*;
+import com.google.common.base.Supplier;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Option;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.ListIterator;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Multimaps.newListMultimap;
+import static com.nuodb.migrator.cli.CliOptions.*;
+
 /**
- * Updates maximum value of container's argument option. Used with RegexOption when part of option name matching regular
- * expression is stored in the option items and option's argument.
- *
  * @author Sergey Bushik
  */
-public class RegexOptionProcessor implements OptionProcessor {
+public class JdbcTypeOptionProcessor extends ValuesOptionProcessor {
 
-    private int count = 0;
+    private ListMultimap<String, Object> values = newListMultimap(
+            Maps.<String, Collection<Object>>newLinkedHashMap(),
+            new Supplier<List<Object>>() {
+                @Override
+                public List<Object> get() {
+                    return newArrayList();
+                }
+            });
+    private int count;
 
     @Override
     public void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-        Argument argument = (Argument) option;
-        if (argument != null) {
-            argument.setMaximum(++count * 2);
-        }
     }
 
     @Override
     public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
+        pad(commandLine);
+        count++;
     }
 
     @Override
     public void postProcess(CommandLine commandLine, Option option) {
+        pad(commandLine);
+    }
+
+    private void pad(CommandLine commandLine) {
+        pad(commandLine, JDBC_TYPE_NAME_OPTION, count);
+        pad(commandLine, JDBC_TYPE_CODE_OPTION, count);
+        pad(commandLine, JDBC_TYPE_SIZE_OPTION, count);
+        pad(commandLine, JDBC_TYPE_PRECISION_OPTION, count);
+        pad(commandLine, JDBC_TYPE_SCALE_OPTION, count);
+    }
+
+    private void pad(CommandLine commandLine, String option, int count) {
+        Collection<String> values = getValues(commandLine, option);
+        List<Object> paddedValues = this.values.get(option);
+        paddedValues.addAll(values);
+        for (int i = paddedValues.size(); i < count; i++) {
+            paddedValues.add(i, null);
+        }
+    }
+
+    public ListMultimap<String, Object> getValues() {
+        return values;
     }
 }

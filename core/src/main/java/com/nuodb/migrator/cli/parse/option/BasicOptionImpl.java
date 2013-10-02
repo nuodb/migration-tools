@@ -35,7 +35,7 @@ import com.nuodb.migrator.utils.SimplePriorityList;
 import java.util.*;
 
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
-import static com.nuodb.migrator.cli.parse.option.OptionValidations.optionUnexpected;
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
 /**

@@ -41,7 +41,7 @@ import static org.mockito.Mockito.*;
 /**
  * @author Sergey Bushik
  */
-public class OptionUtils {
+public class OptionFactory {
 
     public static BasicOption createBasicOptionSpy() {
         return spy(new BasicOptionImpl());

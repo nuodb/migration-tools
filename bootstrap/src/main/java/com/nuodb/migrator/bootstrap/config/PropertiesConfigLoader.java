@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.Properties;
 
 import static com.nuodb.migrator.bootstrap.config.Config.*;
+import static java.lang.String.format;
 import static java.lang.System.getProperty;
 
 @SuppressWarnings("unchecked")
@@ -40,23 +41,23 @@ public class PropertiesConfigLoader {
     }
 
     public Config loadConfig() {
-        InputStream is = getConfigFromProperty();
-        if (is == null) {
-            is = getConfigFromHome();
+        InputStream input = getConfigFromProperty();
+        if (input == null) {
+            input = getConfigFromHome();
         }
-        if (is == null) {
-            is = getDefaultConfig();
+        if (input == null) {
+            input = getDefaultConfig();
         }
         Throwable error = null;
         Properties properties = new Properties();
-        if (is != null)
+        if (input != null)
             try {
-                properties.load(is);
-                is.close();
+                properties.load(input);
+                input.close();
             } catch (Throwable throwable) {
                 error = throwable;
             }
-        if (is == null || error != null) {
+        if (input == null || error != null) {
             if (log.isWarnEnabled()) {
                 log.warn("Failed to load bootstrap config", error);
             }
@@ -70,12 +71,12 @@ public class PropertiesConfigLoader {
             String config = getProperty(CONFIG);
             if (config != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug(String.format("Attempting to load properties from %s", config));
+                    log.debug(format("Attempting to load properties from %s", config));
                 }
                 stream = (new URL(config)).openStream();
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug(String.format("No config file specified as an argument of system property %s",
+                    log.debug(format("No config file specified as an argument of system property %s",
                             CONFIG));
                 }
             }
@@ -96,11 +97,11 @@ public class PropertiesConfigLoader {
         }
         if (stream != null) {
             if (log.isDebugEnabled()) {
-                log.debug(String.format("Bootstrap config loaded from %s", properties.getAbsolutePath()));
+                log.debug(format("Bootstrap config loaded from %s", properties.getAbsolutePath()));
             }
         } else if (properties != null) {
             if (log.isInfoEnabled()) {
-                log.info(String.format("Bootstrap config can't be loaded from %s", properties.getAbsolutePath()));
+                log.info(format("Bootstrap config can't be loaded from %s", properties.getAbsolutePath()));
             }
         }
         return stream;
@@ -113,11 +114,11 @@ public class PropertiesConfigLoader {
             stream = PropertiesConfigLoader.class.getResourceAsStream(config);
             if (stream != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug(String.format("Default bootstrap config found at %s", config));
+                    log.debug(format("Default bootstrap config found at %s", config));
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug(String.format("Default bootstrap config can't be found at %s", config));
+                    log.debug(format("Default bootstrap config can't be found at %s", config));
                 }
             }
         } catch (Throwable throwable) {

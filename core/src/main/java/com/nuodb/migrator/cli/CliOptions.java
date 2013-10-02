@@ -47,8 +47,6 @@ public interface CliOptions {
     final String LIST_SHORT_OPTION = "l";
     final String CONFIG_OPTION = "config";
     final String CONFIG_SHORT_OPTION = "c";
-    final String PROPERTIES_OPTION = "properties";
-    final String PROPERTIES_SHORT_OPTION = "p";
     final String COMMAND_OPTION = "command";
 
     final String SOURCE_DRIVER_OPTION = "source.driver";

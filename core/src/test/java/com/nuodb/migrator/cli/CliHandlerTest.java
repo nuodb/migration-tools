@@ -25,38 +25,41 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.validation;
+package com.nuodb.migrator.cli;
 
-import com.nuodb.migrator.cli.parse.CommandLine;
-import com.nuodb.migrator.cli.parse.Option;
-import com.nuodb.migrator.cli.parse.OptionException;
-import org.apache.commons.lang3.StringUtils;
+import com.nuodb.migrator.bootstrap.config.Config;
+import com.nuodb.migrator.cli.parse.OptionSet;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import java.io.FileOutputStream;
+
+import static com.nuodb.migrator.cli.CliHandler.EXECUTABLE;
+import static java.io.File.createTempFile;
+import static org.apache.commons.io.IOUtils.write;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sergey Bushik
  */
-public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
+public class CliHandlerTest {
 
-    public DB2ConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
-        super(connectionGroupInfo);
+    private Config config;
+    private CliHandler cliHandler;
+
+    @BeforeMethod
+    public void setUp() {
+        config = mock(Config.class);
+        when(config.getProperty(Config.EXECUTABLE, EXECUTABLE)).thenReturn(EXECUTABLE);
+        cliHandler = spy(new CliHandler());
     }
 
-    @Override
-    public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.startsWith(getUrlValue(commandLine), "jdbc:db2");
-    }
-
-    @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalogValue(commandLine);
-        if (!isEmpty(catalog)) {
-            throw new OptionException(format("Unexpected option %s. DB2 doesn't supports catalogs", getCatalogOption()),
-                    option
-            );
-        }
+    @Test
+    public void testConfig() throws Exception {
+        String path = createTempFile("nuodb-migrator", "config").getPath();
+        write("--list", new FileOutputStream(path));
+        cliHandler.boot(config, new String[]{"--config=" + path});
+        verify(cliHandler).handleConfig(any(OptionSet.class));
     }
 }
-

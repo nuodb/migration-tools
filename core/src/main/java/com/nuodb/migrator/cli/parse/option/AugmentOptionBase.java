@@ -35,6 +35,9 @@ import com.nuodb.migrator.utils.SimplePriorityList;
 
 import java.util.*;
 
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.quote;
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.unquote;
+
 /**
  * Base subclass for the options augmented with an argument {@link Argument} and a child group {@link Group}.
  *
@@ -135,18 +138,14 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
         }
     }
 
-    public static String quote(String argument) {
-        return "\"" + argument + "\"";
-    }
-
     @Override
     public void process(CommandLine commandLine, ListIterator<String> arguments) {
         processOption(commandLine, arguments);
+        processAugment(commandLine, arguments);
+        processGroup(commandLine, arguments);
         for (OptionProcessor optionProcessor : getOptionProcessors()) {
             optionProcessor.process(commandLine, this, arguments);
         }
-        processAugment(commandLine, arguments);
-        processGroup(commandLine, arguments);
     }
 
     protected void processAugment(CommandLine commandLine, ListIterator<String> arguments) {
@@ -169,22 +168,15 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
         }
     }
 
-    public static String unquote(String argument) {
-        if (!argument.startsWith("\"") || !argument.endsWith("\"")) {
-            return argument;
-        }
-        return argument.substring(1, argument.length() - 1);
-    }
-
     @Override
     public void postProcess(CommandLine commandLine) throws OptionException {
-        for (OptionProcessor optionProcessor : getOptionProcessors()) {
-            optionProcessor.postProcess(commandLine, this);
-        }
         postProcessOption(commandLine);
         if (commandLine.hasOption(this)) {
             postProcessArgument(commandLine);
             postProcessGroup(commandLine);
+        }
+        for (OptionProcessor optionProcessor : getOptionProcessors()) {
+            optionProcessor.postProcess(commandLine, this);
         }
     }
 

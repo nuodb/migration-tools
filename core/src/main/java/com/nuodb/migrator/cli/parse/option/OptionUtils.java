@@ -32,34 +32,49 @@ import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 
+import java.util.ListIterator;
+
 import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
  */
-public class OptionValidations {
+public class OptionUtils {
+
+    public static String quote(String argument) {
+        return "\"" + argument + "\"";
+    }
+
+    public static String unquote(String argument) {
+        if (!argument.startsWith("\"") || !argument.endsWith("\"")) {
+            return argument;
+        }
+        return argument.substring(1, argument.length() - 1);
+    }
 
     public static void groupMinimum(Group group) {
-        throw new OptionException(group, "Missing option");
+        throw new OptionException("Missing option", group);
     }
 
     public static void groupMaximum(Group group, Option option) {
-        throw new OptionException(group, format("Unexpected option %s", option.getName()));
+        throw new OptionException(format("Unexpected option %s", option.getName()), group);
     }
 
     public static void optionRequired(Option option) {
-        throw new OptionException(option, format("Missing required option %s", option.getName()));
+        throw new OptionException(format("Missing required option %s", option.getName()), option);
     }
 
     public static void optionUnexpected(Option option, String argument) {
-        throw new OptionException(option, format("Unexpected token %s", argument));
+        throw new OptionException(format("Unexpected token %s", argument), option);
     }
 
-    public static void argumentMinimum(Argument argument) {
-        throw new OptionException(argument, format("Missing value for %s argument", argument.getName()));
+    public static void argumentMinimum(Option option, Argument argument) {
+        throw new OptionException(format("Missing %s argument for %s option",
+                argument.getName(), option.getName()), option);
     }
 
-    public static void argumentMaximum(Argument argument) {
-        throw new OptionException(argument, format("Too many values for %s argument", argument.getName()));
+    public static void argumentMaximum(Option option, Argument argument) {
+        throw new OptionException(format("Too many %s arguments for %s option",
+                argument.getName(), option.getName()), option);
     }
 }

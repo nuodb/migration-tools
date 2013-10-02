@@ -42,7 +42,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
-import static com.nuodb.migrator.cli.parse.option.OptionValidations.optionUnexpected;
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
 
 /**
  * @author Sergey Bushik
@@ -56,8 +56,12 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
     private RegexCompiler regexCompiler = AntRegexCompiler.INSTANCE;
     private Map<RegexTrigger, Integer> triggersGroups = Maps.newHashMap();
 
-    public RegexOptionImpl() {
-        addOptionProcessor(new RegexOptionProcessor());
+    @Override
+    public void setArgument(Argument argument) {
+        super.setArgument(argument);
+        if (argument != null) {
+            argument.addOptionProcessor(new RegexOptionProcessor());
+        }
     }
 
     @Override
@@ -95,7 +99,7 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
         String argument = arguments.next();
         Trigger trigger = findTrigger(getTriggers(), argument);
         if (canProcess(commandLine, argument)) {
-            processTrigger(commandLine, trigger, argument);
+            processOption(commandLine, trigger, argument);
         } else {
             processUnexpected(argument);
         }
@@ -105,14 +109,14 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
         optionUnexpected(this, argument);
     }
 
-    protected void processTrigger(CommandLine commandLine, Trigger trigger, String argument) {
+    protected void processOption(CommandLine commandLine, Trigger trigger, String argument) {
         commandLine.addOption(this);
         if (trigger instanceof RegexTrigger) {
-            processTrigger(commandLine, (RegexTrigger) trigger, argument);
+            processRegexOption(commandLine, (RegexTrigger) trigger, argument);
         }
     }
 
-    protected void processTrigger(CommandLine commandLine, RegexTrigger trigger, String argument) {
+    protected void processRegexOption(CommandLine commandLine, RegexTrigger trigger, String argument) {
         Match match = trigger.getRegex().exec(argument);
         Integer group = getTriggersGroups().get(trigger);
         String[] matches = match.matches();

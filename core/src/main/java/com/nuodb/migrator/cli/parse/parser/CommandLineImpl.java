@@ -19,6 +19,7 @@ package com.nuodb.migrator.cli.parse.parser;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import com.nuodb.migrator.cli.parse.Command;
 import com.nuodb.migrator.cli.parse.CommandLine;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.Trigger;
@@ -202,6 +203,11 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isCommand(String argument) {
+        return current.isCommand(argument);
     }
 
     @Override

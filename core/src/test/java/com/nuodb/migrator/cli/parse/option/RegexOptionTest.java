@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.cli.parse.option.OptionUtils.createArguments;
-import static com.nuodb.migrator.cli.parse.option.OptionUtils.createRegexOptionSpy;
+import static com.nuodb.migrator.cli.parse.option.OptionFactory.createArguments;
+import static com.nuodb.migrator.cli.parse.option.OptionFactory.createRegexOptionSpy;
 import static com.nuodb.migrator.utils.Priority.NORMAL;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -90,7 +90,7 @@ public class RegexOptionTest {
     public void testCanProcess(String regex, String argument) {
         regexOption.addRegex(regex, 1, NORMAL);
 
-        CommandLine commandLine = OptionUtils.createCommandLineMock();
+        CommandLine commandLine = OptionFactory.createCommandLineMock();
         assertTrue(regexOption.canProcess(commandLine, createArguments(argument)),
                 "Regex option is expected to be able to process the argument");
     }
@@ -109,7 +109,7 @@ public class RegexOptionTest {
         regexOption.setArgument(new ArgumentImpl());
         regexOption.addRegex(regex, 1, NORMAL);
 
-        CommandLine commandLine = OptionUtils.createCommandLineMock();
+        CommandLine commandLine = OptionFactory.createCommandLineMock();
 
         ListIterator<String> iterator = arguments.listIterator();
         while (regexOption.canProcess(commandLine, iterator)) {

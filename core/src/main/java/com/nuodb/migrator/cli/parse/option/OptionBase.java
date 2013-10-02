@@ -26,7 +26,7 @@ import java.util.*;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.cli.parse.OptionValidators.toOptionProcessor;
-import static com.nuodb.migrator.cli.parse.option.OptionValidations.optionRequired;
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionRequired;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
 /**
@@ -179,6 +179,11 @@ public abstract class OptionBase implements Option {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public boolean isCommand(String argument) {
+        return false;
     }
 
     @Override
