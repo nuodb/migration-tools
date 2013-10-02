@@ -29,7 +29,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
         --help |
         --help=<[dump] | [load] | [schema]> |
         --list |
-        --config=<file>
+        --config=<path>
         <[dump] | [load] | [schema]>
 
 ### Dump data from an existing database ###

@@ -75,7 +75,7 @@ public class ConfigOptionProcessor extends ValuesOptionProcessor {
      * Loads list of config parameters from the specified path, ignores line starting with comment symbol #
      *
      * @param option which defines target config option
-     * @param path   path to the config, which can be a class resources, a url or a file
+     * @param path   path to the config, which can be a class path resources, a url or a file
      * @return list of loaded parameters, commented lines are ignored
      * @throws OptionException if the config can't be loaded
      */
