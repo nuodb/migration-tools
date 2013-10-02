@@ -90,7 +90,8 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--target.schema=[schema]]                         Default database schema name to use
         [script output, optional]                                      
             --output.path=output path                          Saves script to a file specified by path
-        [custom type declarations, optional]                           
+        [custom type declarations, optional]
+            [--use.nuodb.types]                                Instructs the migrator to transform source database types to the best matching NuoDB types, where CHAR, VARCHAR and CLOB source types will be rendered as STRING columns, nuodb-types.properties file is a source of type overrides
             [--type.name=type name]                            SQL type name template, i.e. decimal({p},{s}) or varchar({n}), where {p} is a placeholder for a precision, {s} is a scale and {n} is a maximum size
             [--type.code=type code]                            Integer code of declared SQL type
             [--type.size=[type size]]                          Maximum size of custom data type

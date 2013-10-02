@@ -49,7 +49,6 @@ import static org.apache.commons.lang3.StringUtils.join;
  */
 public class ConfigOptionProcessor extends ValuesOptionProcessor {
 
-
     @Override
     public void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments) {
     }
@@ -57,14 +56,18 @@ public class ConfigOptionProcessor extends ValuesOptionProcessor {
     @Override
     public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
         for (String path : getValues(commandLine, CONFIG_OPTION)) {
-            int count = 0;
-            for (String config : parseConfig(option, path)) {
-                arguments.add(config);
-                count++;
-            }
-            for (int i = count; i > 0; i--) {
-                arguments.previous();
-            }
+            addConfig(option, arguments, path);
+        }
+    }
+
+    protected void addConfig(Option option, ListIterator<String> arguments, String path) {
+        int delta = 0;
+        for (String argument : parseConfig(option, path)) {
+            arguments.add(argument);
+            delta++;
+        }
+        for (int i = delta; i > 0; i--) {
+            arguments.previous();
         }
     }
 

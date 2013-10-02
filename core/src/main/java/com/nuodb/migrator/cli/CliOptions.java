@@ -96,6 +96,7 @@ public interface CliOptions {
     final String SCHEMA_IDENTIFIER_QUOTING = "identifier.quoting";
     final String SCHEMA_IDENTIFIER_NORMALIZER = "identifier.normalizer";
 
+    final String USE_NUODB_TYPES_SWITCH = "use.nuodb.types";
     final String JDBC_TYPE_NAME_OPTION = "type.name";
     final String JDBC_TYPE_CODE_OPTION = "type.code";
     final String JDBC_TYPE_SIZE_OPTION = "type.size";

@@ -38,6 +38,7 @@ import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.processor.JdbcTypeOptionProcessor;
+import com.nuodb.migrator.cli.processor.UseNuoDBTypesSwitchProcessor;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
@@ -51,12 +52,7 @@ import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaSpec;
 import com.nuodb.migrator.utils.ReflectionUtils;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
@@ -123,60 +119,66 @@ public class CliSchemaJob extends CliRunJob {
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        GroupBuilder typeGroup = newGroupBuilder().withName(getMessage(TYPE_GROUP_NAME));
+        GroupBuilder typeGroup = newGroupBuilder().withName(getMessage(JDBC_TYPE_GROUP_NAME));
+        Option useNuoDBTypes = newBasicOptionBuilder().
+                withName(USE_NUODB_TYPES_SWITCH).
+                withDescription(getMessage(USE_NUODB_TYPES_SWITCH_DESCRIPTION)).
+                withRequired(false).
+                withOptionProcessor(new UseNuoDBTypesSwitchProcessor()).build();
+        typeGroup.withOption(useNuoDBTypes);
         Option typeName = newBasicOptionBuilder().
                 withName(JDBC_TYPE_NAME_OPTION).
-                withDescription(getMessage(TYPE_NAME_OPTION_DESCRIPTION)).
+                withDescription(getMessage(JDBC_TYPE_NAME_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TYPE_NAME_ARGUMENT_NAME)).
+                                withName(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME)).
                                 withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(TYPE_NAME_ARGUMENT_NAME))).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME))).
                                 withOptionProcessor(jdbcTypeOptionProcessor).
                                 withMinimum(1).withMaximum(Integer.MAX_VALUE).withRequired(true).build()
                 ).build();
         typeGroup.withOption(typeName);
         Option typeCode = newBasicOptionBuilder().
                 withName(JDBC_TYPE_CODE_OPTION).
-                withDescription(getMessage(TYPE_CODE_OPTION_DESCRIPTION)).
+                withDescription(getMessage(JDBC_TYPE_CODE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TYPE_CODE_ARGUMENT_NAME)).
+                                withName(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME)).
                                 withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(TYPE_CODE_ARGUMENT_NAME))).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME))).
                                 withMinimum(1).withMaximum(Integer.MAX_VALUE).withRequired(true).build()
                 ).build();
         typeGroup.withOption(typeCode);
         Option typeSize = newBasicOptionBuilder().
                 withName(JDBC_TYPE_SIZE_OPTION).
-                withDescription(getMessage(TYPE_SIZE_OPTION_DESCRIPTION)).
+                withDescription(getMessage(JDBC_TYPE_SIZE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TYPE_SIZE_ARGUMENT_NAME)).
+                                withName(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME)).
                                 withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(TYPE_SIZE_ARGUMENT_NAME))).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME))).
                                 withMaximum(Integer.MAX_VALUE).build()
                 ).build();
         typeGroup.withOption(typeSize);
         Option typePrecision = newBasicOptionBuilder().
                 withName(JDBC_TYPE_PRECISION_OPTION).
-                withDescription(getMessage(TYPE_PRECISION_OPTION_DESCRIPTION)).
+                withDescription(getMessage(JDBC_TYPE_PRECISION_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TYPE_PRECISION_ARGUMENT_NAME)).
+                                withName(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME)).
                                 withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(TYPE_PRECISION_ARGUMENT_NAME))).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME))).
                                 withMaximum(Integer.MAX_VALUE).build()
                 ).build();
         typeGroup.withOption(typePrecision);
         Option typeScale = newBasicOptionBuilder().
                 withName(JDBC_TYPE_SCALE_OPTION).
-                withDescription(getMessage(TYPE_SCALE_OPTION_DESCRIPTION)).
+                withDescription(getMessage(JDBC_TYPE_SCALE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TYPE_SCALE_ARGUMENT_NAME)).
+                                withName(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME)).
                                 withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(TYPE_SCALE_ARGUMENT_NAME))).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME))).
                                 withMaximum(Integer.MAX_VALUE).build()
                 ).build();
         typeGroup.withOption(typeScale);

@@ -26,6 +26,7 @@ import java.util.ListIterator;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.StringUtils.join;
 
 public class ParserImpl implements Parser {
 
@@ -40,7 +41,7 @@ public class ParserImpl implements Parser {
      */
     public OptionSet parse(String[] arguments, Option option) throws OptionException {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Parsing options %s", asList(arguments)));
+            logger.trace(format("Parsing options %s", join(asList(arguments), " ")));
         }
         List<String> list = Lists.newArrayList(arguments);
 

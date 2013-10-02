@@ -178,7 +178,7 @@ public class CliHandler extends CliSupport implements Bootable {
 
     protected void handleList() {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Handling --list option"));
+            logger.trace(format("Handled --list option"));
         }
         Collection<String> commands = cliRunLookup.getCommands();
         PrintStream writer = System.out;
@@ -190,7 +190,7 @@ public class CliHandler extends CliSupport implements Bootable {
 
     protected void handleConfig(OptionSet options) {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Handling --config %s option", options.getValue(CONFIG_OPTION)));
+            logger.trace(format("Handled --config %s option", options.getValue(CONFIG_OPTION)));
         }
     }
 

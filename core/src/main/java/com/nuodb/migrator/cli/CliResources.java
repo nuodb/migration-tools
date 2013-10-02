@@ -134,17 +134,18 @@ public interface CliResources {
     final String SCHEMA_IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION = "com.nuodb.migrator.schema.identifier.normalize.option.description";
     final String SCHEMA_IDENTIFIER_NORMALIZER_ARGUMENT_NAME = "com.nuodb.migrator.schema.identifier.normalizer.argument.name";
 
-    final String TYPE_GROUP_NAME = "com.nuodb.migrator.type.group.name";
-    final String TYPE_CODE_OPTION_DESCRIPTION = "com.nuodb.migrator.type.code.option.description";
-    final String TYPE_CODE_ARGUMENT_NAME = "com.nuodb.migrator.type.code.argument.name";
-    final String TYPE_NAME_OPTION_DESCRIPTION = "com.nuodb.migrator.type.name.option.description";
-    final String TYPE_NAME_ARGUMENT_NAME = "com.nuodb.migrator.type.name.argument.name";
-    final String TYPE_SIZE_OPTION_DESCRIPTION = "com.nuodb.migrator.type.size.option.description";
-    final String TYPE_SIZE_ARGUMENT_NAME = "com.nuodb.migrator.type.size.argument.name";
-    final String TYPE_PRECISION_OPTION_DESCRIPTION = "com.nuodb.migrator.type.precision.option.description";
-    final String TYPE_PRECISION_ARGUMENT_NAME = "com.nuodb.migrator.type.precision.argument.name";
-    final String TYPE_SCALE_OPTION_DESCRIPTION = "com.nuodb.migrator.type.scale.option.description";
-    final String TYPE_SCALE_ARGUMENT_NAME = "com.nuodb.migrator.type.scale.argument.name";
+    final String JDBC_TYPE_GROUP_NAME = "com.nuodb.migrator.jdbc.type.group.name";
+    final String JDBC_TYPE_CODE_OPTION_DESCRIPTION = "com.nuodb.migrator.jdbc.type.code.option.description";
+    final String JDBC_TYPE_CODE_ARGUMENT_NAME = "com.nuodb.migrator.jdbc.type.code.argument.name";
+    final String JDBC_TYPE_NAME_OPTION_DESCRIPTION = "com.nuodb.migrator.jdbc.type.name.option.description";
+    final String JDBC_TYPE_NAME_ARGUMENT_NAME = "com.nuodb.migrator.jdbc.type.name.argument.name";
+    final String JDBC_TYPE_SIZE_OPTION_DESCRIPTION = "com.nuodb.migrator.jdbc.type.size.option.description";
+    final String JDBC_TYPE_SIZE_ARGUMENT_NAME = "com.nuodb.migrator.jdbc.type.size.argument.name";
+    final String JDBC_TYPE_PRECISION_OPTION_DESCRIPTION = "com.nuodb.migrator.jdbc.type.precision.option.description";
+    final String JDBC_TYPE_PRECISION_ARGUMENT_NAME = "com.nuodb.migrator.jdbc.type.precision.argument.name";
+    final String JDBC_TYPE_SCALE_OPTION_DESCRIPTION = "com.nuodb.migrator.jdbc.type.scale.option.description";
+    final String JDBC_TYPE_SCALE_ARGUMENT_NAME = "com.nuodb.migrator.jdbc.type.scale.argument.name";
+    final String USE_NUODB_TYPES_SWITCH_DESCRIPTION = "com.nuodb.migrator.nuodb.types.switch.description";
 
     final String INSERT_TYPE_GROUP_NAME = "com.nuodb.migrator.insert.type.group.name";
     final String TABLE_REPLACE_OPTION_DESCRIPTION = "com.nuodb.migrator.table.replace.option.description";
