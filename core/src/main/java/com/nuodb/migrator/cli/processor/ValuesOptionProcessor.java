@@ -25,38 +25,43 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.validation;
+package com.nuodb.migrator.cli.processor;
 
+import com.google.common.base.Supplier;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
 import com.nuodb.migrator.cli.parse.CommandLine;
-import com.nuodb.migrator.cli.parse.Option;
-import com.nuodb.migrator.cli.parse.OptionException;
-import org.apache.commons.lang3.StringUtils;
+import com.nuodb.migrator.cli.parse.OptionProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import java.util.Collection;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Multimaps.newListMultimap;
 
 /**
+ * Remembers values for the option between invocations and returns set of delta values
+ *
  * @author Sergey Bushik
  */
-public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
+public abstract class ValuesOptionProcessor implements OptionProcessor {
 
-    public DB2ConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
-        super(connectionGroupInfo);
-    }
+    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Override
-    public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.startsWith(getUrlValue(commandLine), "jdbc:db2");
-    }
+    private ListMultimap<String, Object> lastOptionValues = newListMultimap(
+            Maps.<String, Collection<Object>>newLinkedHashMap(),
+            new Supplier<List<Object>>() {
+                @Override
+                public List<Object> get() {
+                    return newArrayList();
+                }
+            });
 
-    @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalogValue(commandLine);
-        if (!isEmpty(catalog)) {
-            throw new OptionException(format("Unexpected option %s. DB2 doesn't supports catalogs", getCatalogOption()),
-                    option
-            );
-        }
+    protected Collection<String> getValues(CommandLine commandLine, String trigger) {
+        List<String> optionValues = newArrayList(commandLine.<String>getValues(trigger));
+        List<Object> values = lastOptionValues.replaceValues(trigger, optionValues);
+        return optionValues.subList(values.size(), optionValues.size());
     }
 }
-

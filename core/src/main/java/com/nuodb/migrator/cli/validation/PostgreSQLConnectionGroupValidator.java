@@ -54,9 +54,9 @@ public class PostgreSQLConnectionGroupValidator extends ConnectionGroupValidator
     public void validate(CommandLine commandLine, Option option) {
         String catalog = getCatalogValue(commandLine);
         if (!isEmpty(catalog)) {
-            throw new OptionException(option,
-                    format("Unexpected option %s. PostgreSQL catalogs store meta data and built-in objects, " +
-                            "use %s option to access user data", getCatalogOption(), getSchemaOption()));
+            throw new OptionException(format("Unexpected option %s. PostgreSQL catalogs store meta data and built-in objects, " +
+                    "use %s option to access user data", getCatalogOption(), getSchemaOption()), option
+            );
         }
     }
 }

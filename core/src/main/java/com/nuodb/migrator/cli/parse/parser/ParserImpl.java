@@ -18,13 +18,19 @@ package com.nuodb.migrator.cli.parse.parser;
 
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.cli.parse.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.ListIterator;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.StringUtils.join;
 
 public class ParserImpl implements Parser {
+
+    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * Parse the withConnection.arguments according to the specified options and properties.
@@ -34,6 +40,9 @@ public class ParserImpl implements Parser {
      * @return the option setValue object.
      */
     public OptionSet parse(String[] arguments, Option option) throws OptionException {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Parsing options %s", join(asList(arguments), " ")));
+        }
         List<String> list = Lists.newArrayList(arguments);
 
         CommandLine commandLine = new CommandLineImpl(option, list);
@@ -46,7 +55,7 @@ public class ParserImpl implements Parser {
             // peek at the next item and backtrack
             String current = iterator.next();
             iterator.previous();
-            // if we have just tried to withConnection this instance
+            // if we have just tried to process this instance
             if (current == previous) {
                 // abort
                 break;
@@ -56,7 +65,7 @@ public class ParserImpl implements Parser {
             option.process(commandLine, iterator);
         }
         if (iterator.hasNext()) {
-            throw new OptionException(option, format("Unexpected argument %s", iterator.next()));
+            throw new OptionException(format("Unexpected argument %s", iterator.next()), option);
         }
         option.postProcess(commandLine);
         return commandLine;

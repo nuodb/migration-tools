@@ -25,8 +25,13 @@ public class OptionException extends MigratorException {
 
     private Option option;
 
-    public OptionException(Option option, String message) {
+    public OptionException(String message, Option option) {
         super(message);
+        this.option = option;
+    }
+
+    public OptionException(String message, Throwable cause, Option option) {
+        super(message, cause);
         this.option = option;
     }
 

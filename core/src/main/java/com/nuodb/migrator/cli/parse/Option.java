@@ -184,6 +184,14 @@ public interface Option {
     void defaults(CommandLine commandLine);
 
     /**
+     * Checks if the argument is command line command.
+     *
+     * @param argument to be checked
+     * @return true is this argument is a command
+     */
+    boolean isCommand(String argument);
+
+    /**
      * Indicates whether this Option will be able to withConnection the particular argument.
      *
      * @param commandLine executable line to check

@@ -149,6 +149,11 @@ public abstract class CliRunAdapter extends CliRunSupport implements CliRun {
     }
 
     @Override
+    public boolean isCommand(String argument) {
+        return getOption().isCommand(argument);
+    }
+
+    @Override
     public boolean canProcess(CommandLine commandLine, String argument) {
         return getOption().canProcess(commandLine, argument);
     }

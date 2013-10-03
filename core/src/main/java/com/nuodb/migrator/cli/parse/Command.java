@@ -25,38 +25,20 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.validation;
+package com.nuodb.migrator.cli.parse;
 
-import com.nuodb.migrator.cli.parse.CommandLine;
-import com.nuodb.migrator.cli.parse.Option;
-import com.nuodb.migrator.cli.parse.OptionException;
-import org.apache.commons.lang3.StringUtils;
-
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
+public interface Command extends Option {
 
-    public DB2ConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
-        super(connectionGroupInfo);
-    }
+    Collection<String> getCommands();
 
-    @Override
-    public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.startsWith(getUrlValue(commandLine), "jdbc:db2");
-    }
+    void setCommands(Collection<String> commands);
 
-    @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalogValue(commandLine);
-        if (!isEmpty(catalog)) {
-            throw new OptionException(format("Unexpected option %s. DB2 doesn't supports catalogs", getCatalogOption()),
-                    option
-            );
-        }
-    }
+    Collection<String> getHelpValues();
+
+    void setHelpValues(Collection<String> helpValues);
 }
-

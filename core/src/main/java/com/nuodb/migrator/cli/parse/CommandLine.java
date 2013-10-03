@@ -42,4 +42,6 @@ public interface CommandLine extends OptionSet {
     List<Object> getValues(Option option);
 
     boolean isOption(String argument);
+
+    boolean isCommand(String argument);
 }

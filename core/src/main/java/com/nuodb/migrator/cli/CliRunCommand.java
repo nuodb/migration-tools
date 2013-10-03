@@ -27,45 +27,56 @@
  */
 package com.nuodb.migrator.cli;
 
-import com.nuodb.migrator.cli.parse.*;
-import com.nuodb.migrator.cli.parse.option.ArgumentImpl;
-import com.nuodb.migrator.cli.parse.option.TriggerImpl;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.OptionException;
+import com.nuodb.migrator.cli.parse.option.CommandBase;
 import com.nuodb.migrator.cli.run.CliRun;
 import com.nuodb.migrator.cli.run.CliRunLookup;
-import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
 import java.util.ListIterator;
 
 /**
  * @author Sergey Bushik
  */
-public class CliCommand extends ArgumentImpl {
+public class CliRunCommand extends CommandBase {
 
     private CliRunLookup cliRunLookup;
 
+    public CliRunCommand(CliRunLookup cliRunLookup) {
+        this.cliRunLookup = cliRunLookup;
+    }
+
     @Override
-    public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
-        for (String command : getCliRunLookup().getCommands()) {
-            triggers.add(new TriggerImpl(command));
-        }
-        return triggers;
+    public Collection<String> getCommands() {
+        return cliRunLookup.getCommands();
     }
 
     @Override
     public boolean canProcess(CommandLine commandLine, String argument) {
-        return getCliRunLookup().lookup(argument) != null;
+        CliRun cliRun = (CliRun) commandLine.getValue(this);
+        return (cliRun != null && cliRun.canProcess(commandLine, argument)) || super.canProcess(commandLine, argument);
     }
 
     @Override
-    public void process(CommandLine commandLine, ListIterator<String> arguments) {
-        CliRun cliRun = getCliRunLookup().lookup(arguments.next());
+    protected void preProcessOption(CommandLine commandLine, ListIterator<String> arguments) {
+        CliRun cliRun = getCliRun(commandLine, arguments);
+        cliRun.preProcess(commandLine, arguments);
+    }
+
+    @Override
+    protected void process(CommandLine commandLine, ListIterator<String> arguments, String argument) {
+        CliRun cliRun = getCliRun(commandLine, arguments);
         cliRun.process(commandLine, arguments);
-        commandLine.addValue(this, cliRun);
+    }
+
+    protected CliRun getCliRun(CommandLine commandLine, ListIterator<String> arguments) {
+        CliRun cliRun = (CliRun) commandLine.getValue(this);
+        if (cliRun == null) {
+            String command = arguments.next();
+            commandLine.addValue(this, cliRun = cliRunLookup.lookup(command));
+        }
+        return cliRun;
     }
 
     @Override
@@ -77,25 +88,7 @@ public class CliCommand extends ArgumentImpl {
                 cliRun.postProcess(commandLine);
             }
         } catch (OptionException exception) {
-            throw new OptionException(cliRun, exception.getMessage());
+            throw new OptionException(exception.getMessage(), cliRun);
         }
-    }
-
-    @Override
-    public void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator) {
-        super.help(buffer, hints, comparator);
-    }
-
-    @Override
-    public List<Help> help(int indent, Collection<HelpHint> hints, Comparator<Option> comparator) {
-        return super.help(indent, hints, comparator);
-    }
-
-    public CliRunLookup getCliRunLookup() {
-        return cliRunLookup;
-    }
-
-    public void setCliRunLookup(CliRunLookup cliRunLookup) {
-        this.cliRunLookup = cliRunLookup;
     }
 }

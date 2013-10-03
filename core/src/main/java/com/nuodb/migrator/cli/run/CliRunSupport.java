@@ -35,7 +35,6 @@ import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.validation.ConnectionGroupInfo;
-import com.nuodb.migrator.context.ContextUtils;
 import com.nuodb.migrator.jdbc.JdbcConstants;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
@@ -277,13 +276,13 @@ public class CliRunSupport extends CliSupport {
             try {
                 url = URLDecoder.decode(url, "UTF-8");
             } catch (UnsupportedEncodingException exception) {
-                throw new OptionException(option, exception.getMessage());
+                throw new OptionException(exception.getMessage(), option);
             }
             String[] params = url.split("&");
             for (String param : params) {
                 String[] pair = param.split("=");
                 if (pair.length != 2) {
-                    throw new OptionException(option, format("Malformed name-value pair %s", pair));
+                    throw new OptionException(format("Malformed name-value pair %s", pair), option);
                 }
                 properties.put(pair[0], pair[1]);
             }

@@ -25,38 +25,56 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.validation;
+package com.nuodb.migrator.cli.parse.option;
 
-import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Argument;
+import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
-import org.apache.commons.lang3.StringUtils;
+
+import java.util.ListIterator;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class DB2ConnectionGroupValidator extends ConnectionGroupValidator {
+public class OptionUtils {
 
-    public DB2ConnectionGroupValidator(ConnectionGroupInfo connectionGroupInfo) {
-        super(connectionGroupInfo);
+    public static String quote(String argument) {
+        return "\"" + argument + "\"";
     }
 
-    @Override
-    public boolean canValidate(CommandLine commandLine, Option option) {
-        return StringUtils.startsWith(getUrlValue(commandLine), "jdbc:db2");
-    }
-
-    @Override
-    public void validate(CommandLine commandLine, Option option) {
-        String catalog = getCatalogValue(commandLine);
-        if (!isEmpty(catalog)) {
-            throw new OptionException(format("Unexpected option %s. DB2 doesn't supports catalogs", getCatalogOption()),
-                    option
-            );
+    public static String unquote(String argument) {
+        if (!argument.startsWith("\"") || !argument.endsWith("\"")) {
+            return argument;
         }
+        return argument.substring(1, argument.length() - 1);
+    }
+
+    public static void groupMinimum(Group group) {
+        throw new OptionException("Missing option", group);
+    }
+
+    public static void groupMaximum(Group group, Option option) {
+        throw new OptionException(format("Unexpected option %s", option.getName()), group);
+    }
+
+    public static void optionRequired(Option option) {
+        throw new OptionException(format("Missing required option %s", option.getName()), option);
+    }
+
+    public static void optionUnexpected(Option option, String argument) {
+        throw new OptionException(format("Unexpected token %s", argument), option);
+    }
+
+    public static void argumentMinimum(Option option, Argument argument) {
+        throw new OptionException(format("Missing %s argument for %s option",
+                argument.getName(), option.getName()), option);
+    }
+
+    public static void argumentMaximum(Option option, Argument argument) {
+        throw new OptionException(format("Too many %s arguments for %s option",
+                argument.getName(), option.getName()), option);
     }
 }
-

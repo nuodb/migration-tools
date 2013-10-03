@@ -42,7 +42,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
 import static com.nuodb.migrator.cli.parse.option.OptionFormat.SHORT;
-import static com.nuodb.migrator.cli.parse.option.OptionUtils.*;
+import static com.nuodb.migrator.cli.parse.option.OptionFactory.*;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 

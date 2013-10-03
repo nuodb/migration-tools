@@ -21,7 +21,7 @@ import com.nuodb.migrator.cli.parse.*;
 
 import java.util.*;
 
-import static com.nuodb.migrator.cli.parse.option.OptionValidations.*;
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.*;
 import static java.util.Collections.singletonList;
 
 /**
@@ -125,12 +125,12 @@ public class ArgumentImpl extends OptionBase implements Argument {
         int count = commandLine.getValues(option).size();
         while (arguments.hasNext() && (count < maximum)) {
             String value = arguments.next();
-            if (commandLine.isOption(value)) {
+            if (isOption(commandLine, value)) {
                 arguments.previous();
                 break;
             }
             String separator = getArgumentValuesSeparator();
-            if (separator != null) {
+            if (separator != null && value.length() > 0) {
                 StringTokenizer values = new StringTokenizer(value, separator);
                 arguments.remove();
                 while (values.hasMoreTokens() && (count < maximum)) {
@@ -144,9 +144,17 @@ public class ArgumentImpl extends OptionBase implements Argument {
                 }
             } else {
                 count++;
-                commandLine.addValue(option, value);
+                commandLine.addValue(option, value.length() == 0 ? null : value);
             }
         }
+    }
+
+    protected boolean isCommand(CommandLine commandLine, String value) {
+        return commandLine.isCommand(value);
+    }
+
+    protected boolean isOption(CommandLine commandLine, String value) {
+        return commandLine.isOption(value);
     }
 
     protected void postProcessUnexpected(String argument) {
@@ -175,11 +183,11 @@ public class ArgumentImpl extends OptionBase implements Argument {
         List<Object> values = commandLine.getValues(option);
         int minimum = getMinimum();
         if (values.size() < minimum) {
-            argumentMinimum(this);
+            argumentMinimum(option, this);
         }
         int maximum = getMaximum();
         if (values.size() > maximum) {
-            argumentMaximum(this);
+            argumentMaximum(option, this);
         }
     }
 

@@ -24,7 +24,7 @@ import java.util.*;
 
 import static com.nuodb.migrator.cli.parse.HelpHint.ARGUMENT_BRACKETED;
 import static com.nuodb.migrator.cli.parse.HelpHint.PROPERTY;
-import static com.nuodb.migrator.cli.parse.option.OptionValidations.optionUnexpected;
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 

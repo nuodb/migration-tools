@@ -25,8 +25,8 @@ import java.util.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
-import static com.nuodb.migrator.cli.parse.option.OptionValidations.groupMinimum;
-import static com.nuodb.migrator.cli.parse.option.OptionValidations.groupMaximum;
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.groupMinimum;
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.groupMaximum;
 
 /**
  * An implementation of the group of options.
@@ -96,6 +96,16 @@ public class GroupImpl extends OptionBase implements Group {
         }
     }
 
+    @Override
+    public boolean isCommand(String argument) {
+        for (Option option : options) {
+            if (option.isCommand(argument)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected boolean isOption(CommandLine commandLine, String argument) {
         if (argument == null) {
             return false;
@@ -162,10 +172,15 @@ public class GroupImpl extends OptionBase implements Group {
     @Override
     protected void preProcessOption(CommandLine commandLine, ListIterator<String> arguments) {
         for (Option option : this.options) {
-            option.preProcess(commandLine, arguments);
+            if (option.canProcess(commandLine,arguments)) {
+                option.preProcess(commandLine, arguments);
+                break;
+            }
         }
         for (Argument argument : this.arguments) {
-            argument.preProcess(commandLine, arguments);
+            if (argument.canProcess(commandLine, arguments)) {
+                argument.preProcess(commandLine, arguments);
+            }
         }
     }
 
@@ -177,12 +192,11 @@ public class GroupImpl extends OptionBase implements Group {
             // grab the next argument
             String argument = arguments.next();
             arguments.previous();
-            // if we have just tried to withConnection this instance
             if (argument == previous) {
                 // rollback and abort
                 break;
             }
-            if (isOption(commandLine, argument)) {
+            if (isOption(commandLine, argument) || isCommand(argument)) {
                 processOption(commandLine, arguments, argument);
             } else {
                 processArgument(commandLine, arguments, argument);
@@ -262,7 +276,8 @@ public class GroupImpl extends OptionBase implements Group {
     }
 
     @Override
-    public void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator, String separator) {
+    public void help(StringBuilder buffer, Collection<HelpHint> hints, Comparator<Option> comparator,
+                     String separator) {
         hints = newHashSet(hints);
         boolean optional = !isRequired() && (hints.contains(OPTIONAL) || hints.contains(OPTIONAL_CHILD_GROUP));
         boolean expanded = (getName() == null) || hints.contains(GROUP_OPTIONS);
