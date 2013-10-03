@@ -29,6 +29,7 @@ package com.nuodb.migrator.integration.mysql;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +39,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.nuodb.migrator.integration.MigrationTestBase;
+import com.nuodb.migrator.integration.precision.MySqlDataPrecision1;
+import com.nuodb.migrator.integration.precision.MySqlDataPrecision2;
+import com.nuodb.migrator.integration.precision.PrecisionConstantMySql;
 import com.nuodb.migrator.integration.types.MySQLTypes;
 
 /**
@@ -508,4 +512,57 @@ public class StructureTest extends MigrationTestBase {
 	public void testTriggers() throws Exception {
 		// MYSQL Triggers are not migrated yet.
 	}
+	
+	/*
+	 * test the precisions and scale are migrated properly
+	 */
+	public void testPrecisions() throws Exception {
+		//String sqlStr2 = "select p1.c1,p1.c2,p1.c3,p1.c4,p1.c5,p2.c1,p2.c2,p2.c3,p2.c4,p2.c5,p2.c6,p2.c7 from precision1 as p1,precision2 as p2";
+		//String sqlStr2 = "select count(*) from \"datatypes1\"";
+		String sqlStr1 = "select * from precision1";
+		String sqlStr2 = "select * from precision2";
+		PreparedStatement stmt1 = null, stmt2 = null;
+		ResultSet rs1 = null, rs2 = null;
+		try { 
+			try	{
+					stmt2 = nuodbConnection.prepareStatement(sqlStr1);
+					rs2 = stmt2.executeQuery();
+					boolean found = false;
+					ArrayList<MySqlDataPrecision1> expList=new ArrayList<MySqlDataPrecision1>();
+					ArrayList<MySqlDataPrecision1> actList=new ArrayList<MySqlDataPrecision1>();
+					while (rs2.next()) {
+						found = true;
+						MySqlDataPrecision1 obj=new MySqlDataPrecision1(rs2.getInt(1),rs2.getInt(2), rs2.getLong(3), rs2.getLong(4), rs2.getLong(5));
+						expList.add(obj);
+					}
+					Assert.assertTrue(found);
+					actList =PrecisionConstantMySql.getMySqlDataPrecision1();
+					Assert.assertEquals(actList, expList);
+					rs2.close();
+					stmt2.close();
+					
+				} catch (SQLException e){
+					
+				}				
+				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
+				rs2 = stmt2.executeQuery();
+				boolean found = false;
+				ArrayList<MySqlDataPrecision2> expList=new ArrayList<MySqlDataPrecision2>();
+				ArrayList<MySqlDataPrecision2> actList=new ArrayList<MySqlDataPrecision2>();
+				while (rs2.next()) {
+					found = true;
+					MySqlDataPrecision2 obj=new MySqlDataPrecision2(rs2.getString(1),rs2.getString(2),rs2.getDouble(3), rs2.getDouble(4), rs2.getDouble(5), rs2.getString(6), rs2.getString(7));
+					expList.add(obj);
+				}
+				Assert.assertTrue(found);
+				actList =PrecisionConstantMySql.getMySqlDataPrecision2();
+				Assert.assertEquals(actList, expList);
+				rs2.close();
+				stmt2.close();
+			}
+		 finally {
+			closeAll(rs2, stmt2);
+		}
+	}
+
 }

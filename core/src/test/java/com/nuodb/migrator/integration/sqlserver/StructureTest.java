@@ -29,6 +29,7 @@ package com.nuodb.migrator.integration.sqlserver;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +39,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.nuodb.migrator.integration.MigrationTestBase;
+import com.nuodb.migrator.integration.precision.MySqlDataPrecision1;
+import com.nuodb.migrator.integration.precision.MySqlDataPrecision2;
+import com.nuodb.migrator.integration.precision.PrecisionConstantMySql;
+import com.nuodb.migrator.integration.precision.PrecisionConstantSqlServer;
+import com.nuodb.migrator.integration.precision.SqlServerDataPrecision1;
+import com.nuodb.migrator.integration.precision.SqlServerDataPrecision2;
 import com.nuodb.migrator.integration.types.SQLServerTypes;
 
 /**
@@ -503,5 +510,59 @@ public class StructureTest extends MigrationTestBase {
 	@Test(groups = { "disabled" })
 	public void testTriggers() throws Exception {
 		// MYSQL Triggers are not migrated yet.
+	}
+	
+	
+	/*
+	 * test the precisions and scale are migrated properly
+	 */
+	
+	public void testPrecisions() throws Exception {
+		//String sqlStr2 = "select p1.c1,p1.c2,p1.c3,p1.c4,p1.c5,p2.c1,p2.c2,p2.c3,p2.c4,p2.c5,p2.c6,p2.c7 from precision1 as p1,precision2 as p2";
+		//String sqlStr2 = "select count(*) from \"datatypes1\"";
+		String sqlStr1 = "select * from precision1";
+		String sqlStr2 = "select * from precision2";
+		PreparedStatement stmt1 = null, stmt2 = null;
+		ResultSet rs1 = null, rs2 = null;
+		try { 
+			try	{
+					stmt2 = nuodbConnection.prepareStatement(sqlStr1);
+					rs2 = stmt2.executeQuery();
+					boolean found = false;
+					ArrayList<SqlServerDataPrecision1> expList=new ArrayList<SqlServerDataPrecision1>();
+					ArrayList<SqlServerDataPrecision1> actList=new ArrayList<SqlServerDataPrecision1>();
+					while (rs2.next()) {
+						found = true;
+						SqlServerDataPrecision1 obj=new SqlServerDataPrecision1(rs2.getInt(1),rs2.getLong(2), rs2.getInt(3), rs2.getInt(4));
+						expList.add(obj);
+					}
+					Assert.assertTrue(found);
+					actList =PrecisionConstantSqlServer.getSqlServerDataPrecision1();
+					Assert.assertEquals(actList, expList);
+					rs2.close();
+					stmt2.close();
+					
+				} catch (SQLException e){
+					
+				}				
+				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
+				rs2 = stmt2.executeQuery();
+				boolean found = false;
+				ArrayList<SqlServerDataPrecision2> expList=new ArrayList<SqlServerDataPrecision2>();
+				ArrayList<SqlServerDataPrecision2> actList=new ArrayList<SqlServerDataPrecision2>();
+				while (rs2.next()) {
+					found = true;
+					SqlServerDataPrecision2 obj=new SqlServerDataPrecision2(rs2.getString(1),rs2.getString(2),rs2.getDouble(3), rs2.getString(4),rs2.getInt(5), rs2.getDouble(6), rs2.getDouble(7), rs2.getString(8));
+					expList.add(obj);
+				}
+				Assert.assertTrue(found);
+				actList =PrecisionConstantSqlServer.getSqlServerDataPrecision2();
+				Assert.assertEquals(actList, expList);
+				rs2.close();
+				stmt2.close();
+			}
+		 finally {
+			closeAll(rs2, stmt2);
+		}
 	}
 }
