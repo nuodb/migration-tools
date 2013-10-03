@@ -25,30 +25,42 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.cli.processor;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.DefaultValue;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Option;
+
+import java.util.ListIterator;
 
 /**
+ * Loads NuoDB types definitions from <code>nuodb-types.config</code> file
+ *
  * @author Sergey Bushik
  */
-public class DefaultValueScript extends SimpleScript {
+public class NuoDBTypesSwitchProcessor extends ConfigOptionProcessor {
 
-    private final Column column;
+    private static final String CONFIG_PATH = "nuodb-types.config";
 
-    public DefaultValueScript(Column column, DatabaseInfo databaseInfo) {
-        super(getDefaultValueScript(column), databaseInfo);
-        this.column = column;
+    private String configPath = CONFIG_PATH;
+
+    @Override
+    public void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments) {
     }
 
-    public Column getColumn() {
-        return column;
+    @Override
+    public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
+        addConfig(option, arguments, configPath);
     }
 
-    private static String getDefaultValueScript(Column column) {
-        DefaultValue defaultValue = column.getDefaultValue();
-        return defaultValue != null ? defaultValue.getScript() : null;
+    @Override
+    public void postProcess(CommandLine commandLine, Option option) {
+    }
+
+    public String getConfigPath() {
+        return configPath;
+    }
+
+    public void setConfigPath(String configPath) {
+        this.configPath = configPath;
     }
 }

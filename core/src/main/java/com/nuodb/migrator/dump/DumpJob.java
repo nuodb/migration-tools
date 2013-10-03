@@ -30,7 +30,6 @@ package com.nuodb.migrator.dump;
 import com.nuodb.migrator.backup.catalog.XmlCatalogManager;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
-import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;
@@ -41,23 +40,29 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
+import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.job.JobBase;
 import com.nuodb.migrator.job.JobExecution;
 import com.nuodb.migrator.spec.*;
 import org.slf4j.Logger;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.dump.DumpContext.THREADS;
+import static com.nuodb.migrator.dump.DumpWriter.THREADS;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
+import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
+import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationSetter;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -79,7 +84,6 @@ public class DumpJob extends JobBase {
     private ConnectionProviderFactory connectionProviderFactory;
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
 
-    private Connection connection;
     private Database database;
     private DumpWriter dumpWriter;
 
@@ -113,16 +117,18 @@ public class DumpJob extends JobBase {
         dumpWriter.setFormatFactory(getFormatFactory());
         dumpWriter.setCatalogManager(new XmlCatalogManager(outputSpec.getPath()));
 
-        ConnectionProvider connectionProvider = getConnectionProviderFactory().
-                createConnectionProvider(getConnectionSpec());
-        dumpWriter.setConnectionProvider(connectionProvider);
-        dumpWriter.setConnection(connection = connectionProvider.getConnection());
+        SessionFactory sessionFactory = newSessionFactory(
+                getConnectionProviderFactory().createConnectionProvider(
+                        getConnectionSpec()), getDialectResolver());
+        sessionFactory.addSessionObserver(newTransactionIsolationSetter(new int[]{
+                TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
+        }));
+        sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
+        Session session = sessionFactory.openSession();
 
-        DialectResolver dialectResolver = getDialectResolver();
-        dumpWriter.setDialect(dialectResolver.resolve(connection));
-
-        ValueFormatRegistryResolver valueFormatRegistryResolver = getValueFormatRegistryResolver();
-        dumpWriter.setValueFormatRegistry(valueFormatRegistryResolver.resolve(connection));
+        dumpWriter.setSession(session);
+        dumpWriter.setSessionFactory(sessionFactory);
+        dumpWriter.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(session.getConnection()));
         dumpWriter.setDatabase(database = inspect());
     }
 
@@ -132,7 +138,8 @@ public class DumpJob extends JobBase {
         }
         InspectionScope inspectionScope = new TableInspectionScope(
                 getConnectionSpec().getCatalog(), getConnectionSpec().getSchema(), getTableTypes());
-        return getInspectionManager().inspect(connection, inspectionScope, META_DATA_TYPES).getObject(DATABASE);
+        return getInspectionManager().inspect(dumpWriter.getSession().getConnection(),
+                inspectionScope, META_DATA_TYPES).getObject(DATABASE);
     }
 
     /**
@@ -192,7 +199,7 @@ public class DumpJob extends JobBase {
 
     @Override
     public void release(JobExecution execution) throws Exception {
-        close(connection);
+        close(dumpWriter.getSession());
     }
 
     public DumpSpec getDumpSpec() {

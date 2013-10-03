@@ -54,7 +54,7 @@ import java.sql.Types;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY_IDENTIFIER;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY;
 import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Matchers.any;
@@ -151,7 +151,7 @@ public class DumpJobTest {
         Database database = new Database();
         database.setDialect(new NuoDBDialect(new DatabaseInfo("NuoDB")));
 
-        Table table = database.addCatalog(EMPTY_IDENTIFIER).addSchema("schema").addTable("table");
+        Table table = database.addCatalog(EMPTY).addSchema("schema").addTable("table");
         Column column1 = table.addColumn("column1");
         column1.setTypeCode(Types.BIGINT);
         Column column2 = table.addColumn("column2");

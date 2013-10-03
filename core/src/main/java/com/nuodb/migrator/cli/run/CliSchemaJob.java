@@ -38,7 +38,7 @@ import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.processor.JdbcTypeOptionProcessor;
-import com.nuodb.migrator.cli.processor.UseNuoDBTypesSwitchProcessor;
+import com.nuodb.migrator.cli.processor.NuoDBTypesSwitchProcessor;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
@@ -124,8 +124,9 @@ public class CliSchemaJob extends CliRunJob {
                 withName(USE_NUODB_TYPES_SWITCH).
                 withDescription(getMessage(USE_NUODB_TYPES_SWITCH_DESCRIPTION)).
                 withRequired(false).
-                withOptionProcessor(new UseNuoDBTypesSwitchProcessor()).build();
+                withOptionProcessor(new NuoDBTypesSwitchProcessor()).build();
         typeGroup.withOption(useNuoDBTypes);
+
         Option typeName = newBasicOptionBuilder().
                 withName(JDBC_TYPE_NAME_OPTION).
                 withDescription(getMessage(JDBC_TYPE_NAME_OPTION_DESCRIPTION)).
@@ -138,6 +139,7 @@ public class CliSchemaJob extends CliRunJob {
                                 withMinimum(1).withMaximum(Integer.MAX_VALUE).withRequired(true).build()
                 ).build();
         typeGroup.withOption(typeName);
+
         Option typeCode = newBasicOptionBuilder().
                 withName(JDBC_TYPE_CODE_OPTION).
                 withDescription(getMessage(JDBC_TYPE_CODE_OPTION_DESCRIPTION)).
@@ -149,6 +151,7 @@ public class CliSchemaJob extends CliRunJob {
                                 withMinimum(1).withMaximum(Integer.MAX_VALUE).withRequired(true).build()
                 ).build();
         typeGroup.withOption(typeCode);
+
         Option typeSize = newBasicOptionBuilder().
                 withName(JDBC_TYPE_SIZE_OPTION).
                 withDescription(getMessage(JDBC_TYPE_SIZE_OPTION_DESCRIPTION)).
@@ -160,6 +163,7 @@ public class CliSchemaJob extends CliRunJob {
                                 withMaximum(Integer.MAX_VALUE).build()
                 ).build();
         typeGroup.withOption(typeSize);
+
         Option typePrecision = newBasicOptionBuilder().
                 withName(JDBC_TYPE_PRECISION_OPTION).
                 withDescription(getMessage(JDBC_TYPE_PRECISION_OPTION_DESCRIPTION)).
@@ -171,6 +175,7 @@ public class CliSchemaJob extends CliRunJob {
                                 withMaximum(Integer.MAX_VALUE).build()
                 ).build();
         typeGroup.withOption(typePrecision);
+
         Option typeScale = newBasicOptionBuilder().
                 withName(JDBC_TYPE_SCALE_OPTION).
                 withDescription(getMessage(JDBC_TYPE_SCALE_OPTION_DESCRIPTION)).

@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.utils.Priority;
 import com.nuodb.migrator.utils.PriorityList;
 import com.nuodb.migrator.utils.SimplePriorityList;
@@ -51,10 +52,11 @@ public class ScriptGeneratorContext {
 
     private String sourceCatalog;
     private String sourceSchema;
+    private Session sourceSession;
+
     private String targetCatalog;
     private String targetSchema;
-
-    private Dialect dialect;
+    private Dialect targetDialect;
 
     private Map<String, Object> attributes = newHashMap();
     private PriorityList<NamingStrategy<? extends MetaData>> namingStrategies =
@@ -83,10 +85,10 @@ public class ScriptGeneratorContext {
     public ScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
         sourceCatalog = scriptGeneratorContext.getSourceCatalog();
         sourceSchema = scriptGeneratorContext.getSourceSchema();
+        sourceSession = scriptGeneratorContext.getSourceSession();
         targetCatalog = scriptGeneratorContext.getTargetCatalog();
         targetSchema = scriptGeneratorContext.getTargetSchema();
-
-        dialect = scriptGeneratorContext.getDialect();
+        targetDialect = scriptGeneratorContext.getTargetDialect();
 
         attributes = newHashMap(scriptGeneratorContext.getAttributes());
         scriptTypes = newHashSet(scriptGeneratorContext.getScriptTypes());
@@ -189,12 +191,20 @@ public class ScriptGeneratorContext {
         this.targetSchema = targetSchema;
     }
 
-    public Dialect getDialect() {
-        return dialect;
+    public Dialect getTargetDialect() {
+        return targetDialect;
     }
 
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
+    public void setTargetDialect(Dialect targetDialect) {
+        this.targetDialect = targetDialect;
+    }
+
+    public Session getSourceSession() {
+        return sourceSession;
+    }
+
+    public void setSourceSession(Session sourceSession) {
+        this.sourceSession = sourceSession;
     }
 
     public Collection<ScriptType> getScriptTypes() {

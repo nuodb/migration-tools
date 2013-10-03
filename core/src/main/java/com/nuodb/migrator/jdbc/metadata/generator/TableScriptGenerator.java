@@ -57,7 +57,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
 
     @Override
     public Collection<String> getCreateScripts(Table table, ScriptGeneratorContext scriptGeneratorContext) {
-        Dialect dialect = scriptGeneratorContext.getDialect();
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
         StringBuilder buffer = new StringBuilder("CREATE TABLE");
         buffer.append(' ').append(scriptGeneratorContext.getQualifiedName(table)).append(" (");
         Collection<Column> columns = table.getColumns();
@@ -82,7 +82,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             }
             String defaultValue = null;
             if (column.getDefaultValue() != null) {
-                defaultValue = dialect.getDefaultValue(column, table.getDatabase().getDialect());
+                defaultValue = dialect.getDefaultValue(column, scriptGeneratorContext.getSourceSession());
             }
             if (defaultValue != null) {
                 buffer.append(" DEFAULT ").append(defaultValue);
@@ -169,7 +169,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
 
     @Override
     public Collection<String> getDropScripts(Table table, ScriptGeneratorContext scriptGeneratorContext) {
-        Dialect dialect = scriptGeneratorContext.getDialect();
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
         StringBuilder buffer = new StringBuilder("DROP TABLE");
         buffer.append(' ');
         boolean ifExistsBeforeTable;
@@ -191,7 +191,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     protected String getColumnTypeName(Column column, ScriptGeneratorContext scriptGeneratorContext) {
-        Dialect dialect = scriptGeneratorContext.getDialect();
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
         int scale = column.getScale();
         if (scale < 0 && !dialect.supportsNegativeScale()) {
             scale = 0;

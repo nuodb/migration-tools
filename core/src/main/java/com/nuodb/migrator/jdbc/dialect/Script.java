@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.session.Session;
 
 /**
  * @author Sergey Bushik
@@ -35,6 +36,10 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 public interface Script extends Comparable<Script> {
 
     String getScript();
+
+    Session getSession();
+
+    Dialect getDialect();
 
     DatabaseInfo getDatabaseInfo();
 }

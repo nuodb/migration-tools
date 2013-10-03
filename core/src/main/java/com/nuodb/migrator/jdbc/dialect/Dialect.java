@@ -32,6 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.*;
 
 import java.sql.Connection;
@@ -104,7 +105,7 @@ public interface Dialect {
 
     String getIdentityColumn(String sequence);
 
-    String getDefaultValue(Column column, Dialect dialect);
+    String getDefaultValue(Column column, Session session);
 
     String getDeleteAction(ReferenceAction deleteAction);
 
@@ -154,7 +155,7 @@ public interface Dialect {
 
     Script translate(Script script);
 
-    Script translate(String script, DatabaseInfo databaseInfo);
+    Script translate(String script, Session session);
 
     SQLKeywords getSQLKeywords();
 

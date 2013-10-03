@@ -27,41 +27,22 @@
  */
 package com.nuodb.migrator.schema;
 
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorContext;
-
-import java.sql.Connection;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class SchemaContext {
+public class SchemaJobException extends MigratorException {
 
-    private Connection connection;
-    private ScriptExporter scriptExporter;
-    private ScriptGeneratorContext scriptGeneratorContext;
-
-    public Connection getConnection() {
-        return connection;
+    public SchemaJobException(String message) {
+        super(message);
     }
 
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public SchemaJobException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public ScriptExporter getScriptExporter() {
-        return scriptExporter;
-    }
-
-    public void setScriptExporter(ScriptExporter scriptExporter) {
-        this.scriptExporter = scriptExporter;
-    }
-
-    public ScriptGeneratorContext getScriptGeneratorContext() {
-        return scriptGeneratorContext;
-    }
-
-    public void setScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
-        this.scriptGeneratorContext = scriptGeneratorContext;
+    public SchemaJobException(Throwable cause) {
+        super(cause);
     }
 }

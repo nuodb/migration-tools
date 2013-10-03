@@ -35,7 +35,7 @@ import java.sql.ResultSet;
 import java.util.Collection;
 
 import static com.google.common.collect.Iterables.get;
-import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY_IDENTIFIER;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.FOREIGN_KEY;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createTable;
 import static java.sql.DatabaseMetaData.*;
@@ -104,7 +104,7 @@ public class NuoDBForeignKeyInspectorTest extends InspectorTestBase {
         Table fkTable = createTable(catalogName, fkSchemaName, fkTableName);
         Column fkColumn = fkTable.addColumn(fkColumnName);
 
-        ForeignKey foreignKey = new ForeignKey(EMPTY_IDENTIFIER);
+        ForeignKey foreignKey = new ForeignKey(EMPTY);
         foreignKey.setPrimaryTable(pkTable);
         foreignKey.setForeignTable(fkTable);
         foreignKey.addReference(pkColumn, fkColumn, position);

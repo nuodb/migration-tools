@@ -43,7 +43,7 @@ import static java.sql.Types.BIT;
  *
  * @author Sergey Bushik
  */
-public class MySQLBitLiteralTranslator extends TranslatorBase {
+public class MySQLBitLiteralTranslator extends ColumnTranslatorBase {
 
     private static final Pattern PATTERN = Pattern.compile("(?i:b)'([01]*)'");
 
@@ -55,34 +55,29 @@ public class MySQLBitLiteralTranslator extends TranslatorBase {
     }
 
     @Override
-    public boolean canTranslate(Script script, DatabaseInfo databaseInfo) {
-        Column column = getColumn(script);
-        return column != null && column.getTypeCode() == BIT && PATTERN.matcher(script.getScript()).matches() &&
-                super.canTranslate(script, databaseInfo);
+    protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
+        return column.getTypeCode() == BIT && PATTERN.matcher(script.getScript()).matches();
     }
 
     @Override
-    public Script translate(Script script, DatabaseInfo databaseInfo) {
+    protected Script translate(Script script, Column column, DatabaseInfo databaseInfo) {
         Matcher matcher = PATTERN.matcher(script.getScript());
-        return matcher.matches() ? new SimpleScript(translate(matcher.group(1)), databaseInfo) : null;
-    }
-
-    protected String translate(String literal) {
         String translation;
-        switch (parseInt(literal, 2)) {
-            case 0:
-                translation = FALSE;
-                break;
-            case 1:
-                translation = TRUE;
-                break;
-            default:
-                translation = literal;
+        if (matcher.matches()) {
+            String literal = matcher.group(1);
+            switch (parseInt(literal, 2)) {
+                case 0:
+                    translation = FALSE;
+                    break;
+                case 1:
+                    translation = TRUE;
+                    break;
+                default:
+                    translation = literal;
+            }
+        } else {
+            translation = null;
         }
-        return translation;
-    }
-
-    protected Column getColumn(Script script) {
-        return script instanceof DefaultValueScript ? ((DefaultValueScript) script).getColumn() : null;
+        return translation != null ? new SimpleScript(translation, databaseInfo) : null;
     }
 }

@@ -157,7 +157,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
     protected void addCreateScripts(ScriptGeneratorContext context, Collection<String> scripts,
                                     Collection<Table> tables) {
         Collection<MetaDataType> objectTypes = context.getObjectTypes();
-        Dialect dialect = context.getDialect();
+        Dialect dialect = context.getTargetDialect();
         if (objectTypes.contains(IDENTITY)) {
             for (Table table : tables) {
                 if (!addScriptForTable(context, table)) {
@@ -245,7 +245,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
     protected void addDropScripts(ScriptGeneratorContext context, Collection<String> scripts,
                                   Collection<Table> tables) {
         Collection<MetaDataType> objectTypes = context.getObjectTypes();
-        Dialect dialect = context.getDialect();
+        Dialect dialect = context.getTargetDialect();
         if (objectTypes.contains(FOREIGN_KEY) && dialect.supportsDropConstraints()) {
             for (Table table : tables) {
                 if (!addScriptForTable(context, table)) {

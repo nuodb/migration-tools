@@ -42,7 +42,7 @@ public class IdentifiableBase extends IndentedBase implements Identifiable {
     private MetaDataType objectType;
 
     public IdentifiableBase(MetaDataType objectType) {
-        this(objectType, Identifier.EMPTY_IDENTIFIER);
+        this(objectType, Identifier.EMPTY);
     }
 
     public IdentifiableBase(MetaDataType objectType, boolean qualified) {

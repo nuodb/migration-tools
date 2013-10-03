@@ -25,73 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata;
+package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.utils.ObjectUtils;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class DefaultValue {
+public class DumpJobException extends MigratorException {
 
-    private String script;
-    private boolean processed;
-
-    public DefaultValue(String script) {
-        this.script = script;
+    public DumpJobException(String message) {
+        super(message);
     }
 
-    public DefaultValue(String script, boolean processed) {
-        this.script = script;
-        this.processed = processed;
+    public DumpJobException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public static DefaultValue valueOf(String value) {
-        return valueOf(value, false);
-    }
-
-    public static DefaultValue valueOf(String value, boolean processed) {
-        return value != null ? new DefaultValue(value, processed) : null;
-    }
-
-    public String getScript() {
-        return script;
-    }
-
-    public void setScript(String script) {
-        this.script = script;
-    }
-
-    public boolean isProcessed() {
-        return processed;
-    }
-
-    public void setProcessed(boolean processed) {
-        this.processed = processed;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DefaultValue)) return false;
-
-        DefaultValue that = (DefaultValue) o;
-
-        if (script != null ? !script.equals(that.script) : that.script != null) return false;
-        if (processed != that.processed) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = script != null ? script.hashCode() : 0;
-        result = 31 * result + (processed ? 1 : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return ObjectUtils.toString(this);
+    public DumpJobException(Throwable cause) {
+        super(cause);
     }
 }

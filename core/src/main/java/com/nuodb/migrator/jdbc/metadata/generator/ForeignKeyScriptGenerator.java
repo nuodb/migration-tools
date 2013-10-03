@@ -80,7 +80,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
     public Collection<String> getDropScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        Dialect dialect = scriptGeneratorContext.getDialect();
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
         buffer.append(scriptGeneratorContext.getQualifiedName(foreignKey.getForeignTable()));
         buffer.append(' ');
         buffer.append(dialect.getDropForeignKey());
@@ -101,7 +101,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
 
     @Override
     public String getConstraintScript(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
-        Dialect dialect = scriptGeneratorContext.getDialect();
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("FOREIGN KEY (");
         for (Iterator<Column> iterator = foreignKey.getForeignColumns().iterator(); iterator.hasNext(); ) {

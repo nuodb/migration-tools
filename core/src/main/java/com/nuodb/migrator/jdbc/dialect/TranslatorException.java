@@ -25,24 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.load;
+package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadException extends MigratorException {
+public class TranslatorException extends MigratorException {
 
-    public LoadException(String message) {
+    public TranslatorException(String message) {
         super(message);
     }
 
-    public LoadException(String message, Throwable cause) {
+    public TranslatorException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public LoadException(Throwable cause) {
+    public TranslatorException(Throwable cause) {
         super(cause);
     }
 }

@@ -25,24 +25,42 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
+package com.nuodb.migrator.schema;
 
-import com.nuodb.migrator.MigratorException;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorContext;
+import com.nuodb.migrator.jdbc.session.Session;
 
 /**
  * @author Sergey Bushik
  */
-public class DumpException extends MigratorException {
+public class SchemaJobContext {
 
-    public DumpException(String message) {
-        super(message);
+    private Session session;
+    private ScriptExporter scriptExporter;
+    private ScriptGeneratorContext scriptGeneratorContext;
+
+    public Session getSession() {
+        return session;
     }
 
-    public DumpException(String message, Throwable cause) {
-        super(message, cause);
+    public void setSession(Session session) {
+        this.session = session;
     }
 
-    public DumpException(Throwable cause) {
-        super(cause);
+    public ScriptExporter getScriptExporter() {
+        return scriptExporter;
+    }
+
+    public void setScriptExporter(ScriptExporter scriptExporter) {
+        this.scriptExporter = scriptExporter;
+    }
+
+    public ScriptGeneratorContext getScriptGeneratorContext() {
+        return scriptGeneratorContext;
+    }
+
+    public void setScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {
+        this.scriptGeneratorContext = scriptGeneratorContext;
     }
 }

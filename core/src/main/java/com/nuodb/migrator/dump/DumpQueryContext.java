@@ -27,133 +27,68 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Supplier;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.primitives.Ints;
-import com.nuodb.migrator.backup.catalog.Catalog;
-import com.nuodb.migrator.backup.catalog.Chunk;
-import com.nuodb.migrator.backup.catalog.Column;
-import com.nuodb.migrator.backup.catalog.RowSet;
-import com.nuodb.migrator.backup.format.value.ValueHandle;
+import com.nuodb.migrator.backup.catalog.CatalogManager;
+import com.nuodb.migrator.backup.format.FormatFactory;
+import com.nuodb.migrator.backup.format.csv.CsvAttributes;
+import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
-import com.nuodb.migrator.jdbc.session.Work;
-import com.nuodb.migrator.jdbc.session.WorkManager;
-import org.slf4j.Logger;
 
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
+import java.util.TimeZone;
 
-import static com.google.common.collect.Iterables.all;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newConcurrentMap;
-import static com.google.common.collect.Multimaps.newSetMultimap;
-import static com.google.common.collect.Sets.newTreeSet;
-import static com.nuodb.migrator.backup.format.value.ValueType.toAlias;
-import static java.lang.String.format;
-import static org.slf4j.LoggerFactory.getLogger;
+import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.Runtime.getRuntime;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "SynchronizationOnLocalVariableOrMethodParameter"})
-class DumpQueryContext implements DumpQueryObserver, WorkManager {
+public class DumpQueryContext {
 
-    private final transient Logger logger = getLogger(getClass());
+    public static final int THREADS = getRuntime().availableProcessors();
 
-    private Catalog catalog;
+    private int threads = THREADS;
+    private Database database;
+    private TimeZone timeZone;
+    private Session session;
     private SessionFactory sessionFactory;
-    private ExecutorService executorService;
+    private CatalogManager catalogManager;
+    private String format = CsvAttributes.FORMAT;
+    private Map<String, Object> formatAttributes = newHashMap();
+    private FormatFactory formatFactory;
+    private ValueFormatRegistry valueFormatRegistry;
 
-    private final Map<Work, Exception> errorMap = newConcurrentMap();
-    private final Map<QueryInfo, Boolean> initFlagMap = newConcurrentMap();
-    private Multimap<QueryInfo, DumpQuery> dumpQueryMap = newSetMultimap(
-            Maps.<QueryInfo, Collection<DumpQuery>>newHashMap(), new Supplier<Set<DumpQuery>>() {
-        @Override
-        public Set<DumpQuery> get() {
-            return newTreeSet(new Comparator<DumpQuery>() {
-                @Override
-                public int compare(DumpQuery o1, DumpQuery o2) {
-                    return Ints.compare(o1.getQuerySplit().getSplitIndex(), o2.getQuerySplit().getSplitIndex());
-                }
-            });
-        }
-    });
-
-    @Override
-    public void writeStart(DumpQuery dumpQuery) {
-        Boolean initFlag = initFlagMap.get(dumpQuery.getQueryInfo());
-        if (initFlag == null || !initFlag) {
-            Collection<Column> columns = newArrayList();
-            for (ValueHandle valueHandle : dumpQuery.getValueHandleList()) {
-                columns.add(new Column(valueHandle.getName(), toAlias(valueHandle.getValueType())));
-            }
-            dumpQuery.getRowSet().setColumns(columns);
-            initFlagMap.put(dumpQuery.getQueryInfo(), true);
-        }
+    public int getThreads() {
+        return threads;
     }
 
-    @Override
-    public boolean canWrite(DumpQuery dumpQuery) {
-        return errorMap.isEmpty();
+    public void setThreads(int threads) {
+        this.threads = threads;
     }
 
-    @Override
-    public void writeStart(DumpQuery dumpQuery, Chunk chunk) {
+    public Database getDatabase() {
+        return database;
     }
 
-    @Override
-    public void write(DumpQuery dumpQuery, Chunk chunk) {
-        chunk.incrementRowCount();
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 
-    @Override
-    public void writeEnd(DumpQuery dumpQuery, Chunk chunk) {
-        final RowSet rowSet = dumpQuery.getRowSet();
-        synchronized (rowSet) {
-            rowSet.setRowCount(rowSet.getRowCount() + chunk.getRowCount());
-        }
+    public TimeZone getTimeZone() {
+        return timeZone;
     }
 
-    @Override
-    public void writeEnd(DumpQuery dumpQuery) {
-        final RowSet rowSet = dumpQuery.getRowSet();
-        synchronized (rowSet) {
-            dumpQueryMap.put(dumpQuery.getQueryInfo(), dumpQuery);
-            final Collection<Chunk> chunks = newArrayList();
-            all(dumpQueryMap.get(dumpQuery.getQueryInfo()), new Predicate<DumpQuery>() {
-                @Override
-                public boolean apply(DumpQuery dumpQuery) {
-                    chunks.addAll(dumpQuery.getChunks());
-                    return true;
-                }
-            });
-            rowSet.setChunks(chunks);
-        }
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
     }
 
-    @Override
-    public void error(Work work, Exception exception) throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug(format("Dump query error reported: %s", exception.getMessage()));
-        }
-        errorMap.put(work, exception);
+    public Session getSession() {
+        return session;
     }
 
-    public Map<Work, Exception> getErrors() {
-        return errorMap;
-    }
-
-    public Catalog getCatalog() {
-        return catalog;
-    }
-
-    public void setCatalog(Catalog catalog) {
-        this.catalog = catalog;
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     public SessionFactory getSessionFactory() {
@@ -164,11 +99,43 @@ class DumpQueryContext implements DumpQueryObserver, WorkManager {
         this.sessionFactory = sessionFactory;
     }
 
-    public ExecutorService getExecutorService() {
-        return executorService;
+    public CatalogManager getCatalogManager() {
+        return catalogManager;
     }
 
-    public void setExecutorService(ExecutorService executorService) {
-        this.executorService = executorService;
+    public void setCatalogManager(CatalogManager catalogManager) {
+        this.catalogManager = catalogManager;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
+    public Map<String, Object> getFormatAttributes() {
+        return formatAttributes;
+    }
+
+    public void setFormatAttributes(Map<String, Object> formatAttributes) {
+        this.formatAttributes = formatAttributes;
+    }
+
+    public FormatFactory getFormatFactory() {
+        return formatFactory;
+    }
+
+    public void setFormatFactory(FormatFactory formatFactory) {
+        this.formatFactory = formatFactory;
+    }
+
+    public ValueFormatRegistry getValueFormatRegistry() {
+        return valueFormatRegistry;
+    }
+
+    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
+        this.valueFormatRegistry = valueFormatRegistry;
     }
 }

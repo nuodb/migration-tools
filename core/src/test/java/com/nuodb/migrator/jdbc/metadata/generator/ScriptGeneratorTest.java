@@ -59,7 +59,7 @@ public class ScriptGeneratorTest {
         database.setDialect(dialect);
 
         scriptGeneratorContext = new ScriptGeneratorContext();
-        scriptGeneratorContext.setDialect(dialect);
+        scriptGeneratorContext.setTargetDialect(dialect);
     }
 
     @DataProvider(name = "getScripts")

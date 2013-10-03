@@ -93,7 +93,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
             buffer.append("DROP INDEX ");
             buffer.append(scriptGeneratorContext.getName(index));
 
-            Dialect dialect = scriptGeneratorContext.getDialect();
+            Dialect dialect = scriptGeneratorContext.getTargetDialect();
             if (dialect.supportsDropIndexOnTable()) {
                 buffer.append(" ON ");
                 buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
@@ -109,7 +109,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
     }
 
     public String getConstraintScript(Index index, ScriptGeneratorContext scriptGeneratorContext) {
-        Dialect dialect = scriptGeneratorContext.getDialect();
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         if (index.isUnique()) {
             buffer.append("UNIQUE");

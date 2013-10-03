@@ -55,7 +55,7 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
         buffer.append("SEQUENCE");
         buffer.append(' ');
         buffer.append(scriptGeneratorContext.getQualifiedName(sequence));
-        Dialect dialect = scriptGeneratorContext.getDialect();
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
 
         String currentValue = dialect.getSequenceStartWith(sequence.getLastValue());
         if (currentValue != null) {
@@ -105,7 +105,7 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
     public Collection<String> getDropScripts(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP SEQUENCE");
-        if (scriptGeneratorContext.getDialect().supportsDropSequenceIfExists()) {
+        if (scriptGeneratorContext.getTargetDialect().supportsDropSequenceIfExists()) {
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }

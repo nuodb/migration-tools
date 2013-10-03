@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc;
 
+import com.nuodb.migrator.jdbc.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +78,18 @@ public class JdbcUtils {
         } catch (SQLException exception) {
             if (logger.isWarnEnabled()) {
                 logger.warn("Failed closing connection", exception);
+            }
+        }
+    }
+
+    public static void close(Session session) {
+        try {
+            if (session != null) {
+                session.close();
+            }
+        } catch (SQLException exception) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed closing session", exception);
             }
         }
     }

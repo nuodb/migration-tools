@@ -38,6 +38,9 @@ public class MySQLJdbcUrlParser extends JdbcUrlParserBase {
 
     public static final String ZERO_DATE_TIME_BEHAVIOR = "zeroDateTimeBehavior";
     public static final String CONVERT_TO_NULL = "convertToNull";
+    public static final String ROUND = "round";
+    public static final String EXCEPTION = "exception";
+    public static final String DEFAULT_BEHAVIOR = CONVERT_TO_NULL;
 
     public MySQLJdbcUrlParser() {
         super(MYSQL_SUB_PROTOCOL);
@@ -58,7 +61,7 @@ public class MySQLJdbcUrlParser extends JdbcUrlParserBase {
 
         @Override
         protected void addParameters() {
-            addParameter(ZERO_DATE_TIME_BEHAVIOR, CONVERT_TO_NULL);
+            addParameter(ZERO_DATE_TIME_BEHAVIOR, DEFAULT_BEHAVIOR);
         }
 
         @Override

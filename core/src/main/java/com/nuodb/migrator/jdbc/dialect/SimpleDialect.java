@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolverAware;
+import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.*;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
@@ -192,9 +193,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public Script translate(String script, DatabaseInfo databaseInfo) {
-        return getTranslationManager().translate(new SimpleScript(script,
-                databaseInfo), getDatabaseInfo());
+    public Script translate(String script, Session session) {
+        return getTranslationManager().translate(new SimpleScript(script, session), getDatabaseInfo());
     }
 
     @Override
@@ -430,14 +430,13 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getDefaultValue(Column column, Dialect dialect) {
+    public String getDefaultValue(Column column, Session session) {
         String value;
-        DefaultValue defaultValue = column.getDefaultValue();
+        DefaultValue defaultValue = column != null ? column.getDefaultValue() : null;
         if (defaultValue == null || (value = defaultValue.getScript()) == null) {
             return null;
         }
-        DatabaseInfo databaseInfo = dialect.getDatabaseInfo();
-        Script script = translate(new DefaultValueScript(column, databaseInfo));
+        Script script = translate(new ColumnScript(column, session));
         String translation = script != null ? script.getScript() : value;
         String unquoted = translation;
         boolean opening = false;

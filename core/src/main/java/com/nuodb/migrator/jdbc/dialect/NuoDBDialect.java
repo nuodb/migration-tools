@@ -131,6 +131,7 @@ public class NuoDBDialect extends SimpleDialect {
         addTranslation(MYSQL, newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()",
                 "LOCALTIME", "LOCALTIME()", "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW");
         addTranslator(new MySQLBitLiteralTranslator());
+        addTranslator(new MySQLZeroDateTimeTranslator());
 
         addTranslation(MSSQL_SERVER, newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW");
         addTranslationRegex(MSSQL_SERVER, "N'(.*)'", "$1");

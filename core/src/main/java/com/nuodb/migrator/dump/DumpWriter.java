@@ -31,6 +31,7 @@ import com.nuodb.migrator.backup.catalog.Catalog;
 import com.nuodb.migrator.backup.catalog.QueryRowSet;
 import com.nuodb.migrator.backup.catalog.RowSet;
 import com.nuodb.migrator.backup.catalog.TableRowSet;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -44,6 +45,7 @@ import com.nuodb.migrator.jdbc.split.QuerySplitter;
 import com.nuodb.migrator.utils.BlockingThreadPoolExecutor;
 import org.slf4j.Logger;
 
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -51,18 +53,14 @@ import java.util.concurrent.ExecutorService;
 
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
-import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
-import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
-import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationSetter;
 import static com.nuodb.migrator.jdbc.split.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.split.QuerySplitters.*;
 import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newCachingStrategy;
 import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newHandlerStrategy;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
 import static java.lang.String.format;
-import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
-import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -70,12 +68,11 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings({"unchecked", "ThrowableResultOfMethodCallIgnored"})
-public class DumpWriter extends DumpContext {
+public class DumpWriter extends DumpQueryContext {
 
     private final transient Logger logger = getLogger(getClass());
 
     private QueryLimit queryLimit;
-
     private Collection<DumpQueryEntry> dumpWriterEntries = newArrayList();
 
     public void addTable(Table table) {
@@ -116,24 +113,25 @@ public class DumpWriter extends DumpContext {
     }
 
     public Catalog write() throws Exception {
-        DumpQueryContext dumpQueryContext = createDumpQueryContext();
+        DumpQueryManager dumpQueryManager = createDumpQueryContext();
         try {
-            write(dumpQueryContext);
+            write(dumpQueryManager);
         } finally {
-            closeDumpQueryContext(dumpQueryContext);
+            closeDumpQueryContext(dumpQueryManager);
         }
-        return dumpQueryContext.getCatalog();
+        return dumpQueryManager.getCatalog();
     }
 
-    protected void write(DumpQueryContext dumpQueryContext) throws Exception {
-        ExecutorService executorService = dumpQueryContext.getExecutorService();
+    protected void write(DumpQueryManager dumpQueryManager) throws Exception {
+        ExecutorService executorService = dumpQueryManager.getExecutorService();
         try {
+            Connection connection = getSession().getConnection();
             for (DumpQueryEntry dumpQueryEntry : getDumpQueryEntries()) {
                 QuerySplitter querySplitter = dumpQueryEntry.getQuerySplitter();
-                while (querySplitter.hasNextQuerySplit(getConnection())) {
-                    QuerySplit querySplit = querySplitter.getNextQuerySplit(getConnection());
-                    write(dumpQueryContext, new DumpQuery(this, dumpQueryContext, dumpQueryEntry.getQueryInfo(),
-                            querySplit, querySplitter.hasNextQuerySplit(getConnection()), dumpQueryEntry.getRowSet()));
+                while (querySplitter.hasNextQuerySplit(connection)) {
+                    QuerySplit querySplit = querySplitter.getNextQuerySplit(connection);
+                    write(dumpQueryManager, new DumpQuery(this, dumpQueryManager, dumpQueryEntry.getQueryInfo(),
+                            querySplit, querySplitter.hasNextQuerySplit(connection), dumpQueryEntry.getRowSet()));
                 }
             }
             executorService.shutdown();
@@ -145,12 +143,12 @@ public class DumpWriter extends DumpContext {
             executorService.shutdownNow();
             throw exception;
         }
-        getCatalogManager().writeCatalog(dumpQueryContext.getCatalog());
+        getCatalogManager().writeCatalog(dumpQueryManager.getCatalog());
     }
 
-    protected void write(DumpQueryContext dumpQueryContext, DumpQuery dumpQuery) {
-        write(dumpQueryContext.getExecutorService(), dumpQueryContext.getSessionFactory(),
-                dumpQueryContext, dumpQuery);
+    protected void write(DumpQueryManager dumpQueryManager, DumpQuery dumpQuery) {
+        write(dumpQueryManager.getExecutorService(), dumpQueryManager.getSessionFactory(),
+                dumpQueryManager, dumpQuery);
     }
 
     protected void write(final ExecutorService executorService, final SessionFactory sessionFactory,
@@ -165,21 +163,19 @@ public class DumpWriter extends DumpContext {
                 } catch (Exception exception) {
                     workManager.error(work, exception);
                 } finally {
-                    if (session != null) {
-                        session.close();
-                    }
+                    close(session);
                 }
                 return null;
             }
         });
     }
 
-    protected DumpQueryContext createDumpQueryContext() {
-        DumpQueryContext dumpQueryContext = new DumpQueryContext();
-        dumpQueryContext.setCatalog(createCatalog());
-        dumpQueryContext.setExecutorService(createExecutorService());
-        dumpQueryContext.setSessionFactory(createSessionFactory());
-        return dumpQueryContext;
+    protected DumpQueryManager createDumpQueryContext() {
+        DumpQueryManager dumpQueryManager = new DumpQueryManager();
+        dumpQueryManager.setCatalog(createCatalog());
+        dumpQueryManager.setExecutorService(createExecutorService());
+        dumpQueryManager.setSessionFactory(getSessionFactory());
+        return dumpQueryManager;
     }
 
     protected Catalog createCatalog() {
@@ -199,17 +195,8 @@ public class DumpWriter extends DumpContext {
         return new BlockingThreadPoolExecutor(getThreads(), 100L, MILLISECONDS);
     }
 
-    protected SessionFactory createSessionFactory() {
-        SessionFactory sessionFactory = newSessionFactory(getConnectionProvider(), getDialect());
-        sessionFactory.addSessionObserver(newTransactionIsolationSetter(new int[]{
-                TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
-        }));
-        sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
-        return sessionFactory;
-    }
-
-    protected void closeDumpQueryContext(DumpQueryContext dumpQueryContext) throws Exception {
-        Map<Work, Exception> errors = dumpQueryContext.getErrors();
+    protected void closeDumpQueryContext(DumpQueryManager dumpQueryManager) throws Exception {
+        Map<Work, Exception> errors = dumpQueryManager.getErrors();
         if (!isEmpty(errors)) {
             throw get(errors.values(), 0);
         }
@@ -223,9 +210,10 @@ public class DumpWriter extends DumpContext {
                                                 QueryLimit queryLimit) {
         QuerySplitter querySplitter;
         Query query = newQuery(table, columns, filter);
-        if (queryLimit != null && supportsLimitSplitter(getDialect(), table, filter)) {
-            querySplitter = newLimitSplitter(getDialect(), newCachingStrategy(newHandlerStrategy(
-                    getDialect().createRowCountHandler(table, null, filter, EXACT))
+        Dialect dialect = getSession().getDialect();
+        if (queryLimit != null && supportsLimitSplitter(dialect, table, filter)) {
+            querySplitter = newLimitSplitter(dialect, newCachingStrategy(newHandlerStrategy(
+                    dialect.createRowCountHandler(table, null, filter, EXACT))
             ), query, queryLimit);
         } else {
             querySplitter = newNoLimitSplitter(query);

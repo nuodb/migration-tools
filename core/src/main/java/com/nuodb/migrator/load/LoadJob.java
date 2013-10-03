@@ -28,8 +28,6 @@
 package com.nuodb.migrator.load;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.backup.catalog.*;
@@ -152,7 +150,7 @@ public class LoadJob extends JobBase {
             throw exception;
         } catch (Exception exception) {
             connection.rollback();
-            throw new LoadException(exception);
+            throw new LoadJobException(exception);
         } finally {
             if (dialect.supportsSessionTimeZone()) {
                 dialect.setSessionTimeZone(connection, null);
@@ -206,7 +204,7 @@ public class LoadJob extends JobBase {
                 try {
                     statement.execute();
                 } catch (Exception exception) {
-                    throw new LoadException(format("Error loading row %d from %s chunk to %s table",
+                    throw new LoadJobException(format("Error loading row %d from %s chunk to %s table",
                             row + 1, chunk.getName(), table.getQualifiedName(null)), exception);
                 }
                 row++;

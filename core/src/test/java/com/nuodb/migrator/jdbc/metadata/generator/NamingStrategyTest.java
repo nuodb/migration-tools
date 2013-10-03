@@ -52,7 +52,7 @@ public class NamingStrategyTest {
         database.setDialect(dialect);
 
         scriptGeneratorContext = new ScriptGeneratorContext();
-        scriptGeneratorContext.setDialect(dialect);
+        scriptGeneratorContext.setTargetDialect(dialect);
         scriptGeneratorContext.setTargetCatalog(null);
         scriptGeneratorContext.setTargetSchema("target");
     }

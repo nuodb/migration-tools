@@ -47,7 +47,7 @@ public class IdentifiableNamingStrategy<T extends Identifiable> extends MetaData
 
     @Override
     public String getName(T object, ScriptGeneratorContext context, boolean normalize) {
-        Dialect dialect = normalize ? context.getDialect() : null;
+        Dialect dialect = normalize ? context.getTargetDialect() : null;
         String name = getIdentifiableName(object, context);
         return IdentifiableBase.getName(dialect, name, object);
     }
@@ -55,7 +55,7 @@ public class IdentifiableNamingStrategy<T extends Identifiable> extends MetaData
     @Override
     public String getQualifiedName(T object, ScriptGeneratorContext context, String catalog, String schema,
                                    boolean normalize) {
-        Dialect dialect = normalize ? context.getDialect() : null;
+        Dialect dialect = normalize ? context.getTargetDialect() : null;
         String name = getIdentifiableName(object, context);
         return IdentifiableBase.getQualifiedName(dialect, catalog, schema, name, object);
     }

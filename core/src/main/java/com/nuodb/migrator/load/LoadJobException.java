@@ -25,24 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.schema;
+package com.nuodb.migrator.load;
 
 import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class SchemaException extends MigratorException {
+public class LoadJobException extends MigratorException {
 
-    public SchemaException(String message) {
+    public LoadJobException(String message) {
         super(message);
     }
 
-    public SchemaException(String message, Throwable cause) {
+    public LoadJobException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public SchemaException(Throwable cause) {
+    public LoadJobException(Throwable cause) {
         super(cause);
     }
 }

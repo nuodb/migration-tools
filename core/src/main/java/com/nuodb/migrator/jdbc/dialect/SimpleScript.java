@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.dialect;
 
 
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.session.Session;
 
 /**
  * @author Sergey Bushik
@@ -36,16 +37,47 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 public class SimpleScript implements Script, Comparable<Script> {
 
     private String script;
+    private Session session;
+    private Dialect dialect;
     private DatabaseInfo databaseInfo;
 
+    /**
+     * Constructs script detached from any database session
+     *
+     * @param script       source of the script
+     * @param databaseInfo target database info
+     */
     public SimpleScript(String script, DatabaseInfo databaseInfo) {
         this.script = script;
         this.databaseInfo = databaseInfo;
     }
 
+    /**
+     * Constructs script attached to the specified session
+     *
+     * @param script  source of the script
+     * @param session source database session
+     */
+    public SimpleScript(String script, Session session) {
+        this.script = script;
+        this.session = session;
+        this.dialect = session.getDialect();
+        this.databaseInfo = session.getDialect().getDatabaseInfo();
+    }
+
     @Override
     public String getScript() {
         return script;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
+    }
+
+    @Override
+    public Dialect getDialect() {
+        return dialect;
     }
 
     @Override
@@ -60,7 +92,8 @@ public class SimpleScript implements Script, Comparable<Script> {
 
         SimpleScript that = (SimpleScript) o;
 
-        if (databaseInfo != null ? !databaseInfo.equals(that.databaseInfo) : that.databaseInfo != null) return false;
+        if (databaseInfo != null ? !databaseInfo.equals(that.getDatabaseInfo()) : that.getDatabaseInfo() != null)
+            return false;
         if (script != null ? !script.equals(that.script) : that.script != null) return false;
 
         return true;

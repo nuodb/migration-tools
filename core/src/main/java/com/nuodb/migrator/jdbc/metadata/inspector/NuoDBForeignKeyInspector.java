@@ -118,7 +118,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
             final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
 
             if (position == 1) {
-                foreignTable.addForeignKey(foreignKey = new ForeignKey(Identifier.EMPTY_IDENTIFIER));
+                foreignTable.addForeignKey(foreignKey = new ForeignKey(Identifier.EMPTY));
                 foreignKey.setPrimaryTable(primaryTable);
                 foreignKey.setForeignTable(foreignTable);
                 foreignKey.setUpdateAction(getReferentialAction(foreignKeys.getInt("UPDATE_RULE")));

@@ -25,42 +25,30 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.cli.processor;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.cli.parse.CommandLine;
-import com.nuodb.migrator.cli.parse.Option;
-
-import java.util.ListIterator;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DefaultValue;
+import com.nuodb.migrator.jdbc.session.Session;
 
 /**
- * Loads NuoDB types definitions from <code>nuodb-types.config</code> file
- *
  * @author Sergey Bushik
  */
-public class UseNuoDBTypesSwitchProcessor extends ConfigOptionProcessor {
+public class ColumnScript extends SimpleScript {
 
-    private static final String CONFIG_PATH = "nuodb-types.config";
+    private final Column column;
 
-    private String configPath = CONFIG_PATH;
-
-    @Override
-    public void preProcess(CommandLine commandLine, Option option, ListIterator<String> arguments) {
+    public ColumnScript(Column column, Session session) {
+        super(getDefaultValueScript(column), session);
+        this.column = column;
     }
 
-    @Override
-    public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-        addConfig(option, arguments, configPath);
+    public Column getColumn() {
+        return column;
     }
 
-    @Override
-    public void postProcess(CommandLine commandLine, Option option) {
-    }
-
-    public String getConfigPath() {
-        return configPath;
-    }
-
-    public void setConfigPath(String configPath) {
-        this.configPath = configPath;
+    private static String getDefaultValueScript(Column column) {
+        DefaultValue defaultValue = column.getDefaultValue();
+        return defaultValue != null ? defaultValue.getScript() : null;
     }
 }
