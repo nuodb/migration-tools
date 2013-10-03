@@ -17,6 +17,7 @@ notifications:
 before_install:
   - mysql -u$SOURCE_USERNAME -e 'create database nuodbtest;'
   - mysql -u$SOURCE_USERNAME nuodbtest < core/src/test/resources/mysql/nuodbtest.sql
+  - mysql -u$SOURCE_USERNAME nuodbtest < core/src/test/resources/mysql/precision.sql
   - wget -q http://www.nuodb.com/latest/nuodb-1.2.linux.x64.deb --output-document=/var/tmp/nuodb.deb
   - sudo dpkg -i /var/tmp/nuodb.deb
   - sleep 2
