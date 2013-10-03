@@ -50,7 +50,7 @@ import static java.lang.String.format;
  *
  * @author Sergey Bushik
  */
-public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
+public class MySQLZeroDateTimeTranslatorI extends ColumnTranslatorBase {
 
     private static final String ZERO_TIME = "00:00:00";
     private static final String ZERO_DATE = "0000-00-00";
@@ -60,7 +60,7 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
     private static final String ROUND_TIMESTAMP = "0001-01-01 00:00:00";
     private static final String NULL = "NULL";
 
-    public MySQLZeroDateTimeTranslator() {
+    public MySQLZeroDateTimeTranslatorI() {
         super(MYSQL);
     }
 
