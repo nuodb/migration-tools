@@ -49,7 +49,7 @@ public class ColumnTranslatorBase extends TranslatorBase {
     @Override
     public boolean canTranslate(Script script, DatabaseInfo databaseInfo) {
         Column column = getColumn(script);
-        return super.canTranslate(script, databaseInfo) ||
+        return super.canTranslate(script, databaseInfo) &&
                 (column != null && canTranslate(script, column, databaseInfo));
     }
 

@@ -42,10 +42,10 @@ import static java.lang.String.format;
 /**
  * Mimics MySQL's zeroDateTimeBehavior and converts zero'd date time values following these rules:
  * <ul>
- *     <li>convertToNull outputs NULL</li>
- *     <li>round outputs '00:00:00' for TIME, '0001-01-01' for DATE & YEAR,
- *     '0001-01-01 00:00:00' for DATETIME & TIMESTAMP types</li>
- *     <li>exception causes runtime exception on the first encountered zero'd date type value</li>
+ * <li>convertToNull outputs NULL</li>
+ * <li>round outputs '00:00:00' for TIME, '0001-01-01' for DATE & YEAR, '0001-01-01 00:00:00' for DATETIME &
+ * TIMESTAMP types</li>
+ * <li>exception causes runtime exception on the first encountered zero'd date type value</li>
  * </ul>
  *
  * @author Sergey Bushik
@@ -65,17 +65,17 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
     }
 
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        String literal = column.getDefaultValue().getScript();
+        String source = column.getDefaultValue().getScript();
         boolean canTranslate;
         switch (column.getTypeCode()) {
             case Types.TIME:
-                canTranslate = ZERO_TIME.equals(literal);
+                canTranslate = ZERO_TIME.equals(source);
                 break;
             case Types.DATE:
-                canTranslate = ZERO_DATE.equals(literal);
+                canTranslate = ZERO_DATE.equals(source);
                 break;
             case Types.TIMESTAMP:
-                canTranslate = ZERO_TIMESTAMP.equals(literal);
+                canTranslate = ZERO_TIMESTAMP.equals(source);
                 break;
             default:
                 canTranslate = false;
@@ -90,30 +90,30 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
         if (behavior == null) {
             behavior = DEFAULT_BEHAVIOR;
         }
-        String translation;
+        String target;
         if (ROUND.equals(behavior)) {
             switch (column.getTypeCode()) {
                 case Types.TIME:
-                    translation = ROUND_TIME;
+                    target = ROUND_TIME;
                     break;
                 case Types.DATE:
-                    translation = ROUND_DATE;
+                    target = ROUND_DATE;
                     break;
                 case Types.TIMESTAMP:
-                    translation = ROUND_TIMESTAMP;
+                    target = ROUND_TIMESTAMP;
                     break;
                 default:
-                    translation = null;
+                    target = null;
             }
         } else if (CONVERT_TO_NULL.equals(behavior)) {
-            translation = NULL;
+            target = NULL;
         } else if (EXCEPTION.equals(behavior)) {
             throw new TranslatorException(
                     format("Encountered zero date time value, whereas %s is %s", ZERO_DATE_TIME_BEHAVIOR, EXCEPTION));
         } else {
-            translation = null;
+            target = null;
         }
-        return translation != null ? new SimpleScript(translation, databaseInfo) : null;
+        return target != null ? new SimpleScript(target, databaseInfo) : null;
     }
 
     protected JdbcUrl getJdbcUrl(Script script) {

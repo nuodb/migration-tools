@@ -62,22 +62,22 @@ public class MySQLBitLiteralTranslator extends ColumnTranslatorBase {
     @Override
     protected Script translate(Script script, Column column, DatabaseInfo databaseInfo) {
         Matcher matcher = PATTERN.matcher(script.getScript());
-        String translation;
+        String target;
         if (matcher.matches()) {
             String literal = matcher.group(1);
             switch (parseInt(literal, 2)) {
                 case 0:
-                    translation = FALSE;
+                    target = FALSE;
                     break;
                 case 1:
-                    translation = TRUE;
+                    target = TRUE;
                     break;
                 default:
-                    translation = literal;
+                    target = literal;
             }
         } else {
-            translation = null;
+            target = null;
         }
-        return translation != null ? new SimpleScript(translation, databaseInfo) : null;
+        return target != null ? new SimpleScript(target, databaseInfo) : null;
     }
 }
