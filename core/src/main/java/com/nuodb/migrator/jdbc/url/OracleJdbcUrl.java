@@ -47,7 +47,7 @@ public class OracleJdbcUrl extends JdbcUrlBase {
 
     private String qualifier;
 
-    public OracleJdbcUrl(String url) {
+    protected OracleJdbcUrl(String url) {
         super(url, ORACLE_SUB_PROTOCOL);
     }
 

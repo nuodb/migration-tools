@@ -44,7 +44,7 @@ public class NuoDBJdbcUrl extends JdbcUrlBase {
         };
     }
 
-    public NuoDBJdbcUrl(String url) {
+    protected NuoDBJdbcUrl(String url) {
         super(url, NUODB_SUB_PROTOCOL);
     }
 

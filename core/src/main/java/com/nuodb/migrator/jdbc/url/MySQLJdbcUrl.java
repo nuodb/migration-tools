@@ -53,7 +53,7 @@ public class MySQLJdbcUrl extends JdbcUrlBase {
 
     private String catalog;
 
-    public MySQLJdbcUrl(String url) {
+    protected MySQLJdbcUrl(String url) {
         super(url, MYSQL_SUB_PROTOCOL);
     }
 

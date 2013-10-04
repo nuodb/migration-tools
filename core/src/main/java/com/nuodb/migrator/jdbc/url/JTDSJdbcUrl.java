@@ -47,7 +47,7 @@ public class JTDSJdbcUrl extends JdbcUrlBase {
 
     private String qualifier;
 
-    public JTDSJdbcUrl(String url) {
+    protected JTDSJdbcUrl(String url) {
         super(url, JTDS_SUB_PROTOCOL);
     }
 

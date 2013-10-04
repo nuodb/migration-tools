@@ -45,7 +45,7 @@ public class PostgreSQLJdbcUrl extends JdbcUrlBase {
         };
     }
 
-    public PostgreSQLJdbcUrl(String url) {
+    protected PostgreSQLJdbcUrl(String url) {
         super(url, POSTGRESQL_PROTOCOL);
     }
 

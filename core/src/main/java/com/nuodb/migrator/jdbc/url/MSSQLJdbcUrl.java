@@ -44,7 +44,7 @@ public class MSSQLJdbcUrl extends JdbcUrlBase {
         };
     }
 
-    public MSSQLJdbcUrl(String url) {
+    protected MSSQLJdbcUrl(String url) {
         super(url, MSSQL_SUB_PROTOCOL);
     }
 
