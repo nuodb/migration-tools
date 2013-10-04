@@ -32,7 +32,7 @@ package com.nuodb.migrator.jdbc.dialect;
  */
 public interface ImplicitDefaultsTranslator extends Translator {
 
-    final boolean IMPLICIT_DEFAULTS = true;
+    final boolean IMPLICIT_DEFAULTS = false;
 
     boolean isImplicitDefaults();
 

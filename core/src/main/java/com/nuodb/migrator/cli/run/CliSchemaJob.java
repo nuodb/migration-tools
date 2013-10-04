@@ -60,6 +60,7 @@ import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
+import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.IMPLICIT_DEFAULTS;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Boolean.parseBoolean;
@@ -85,7 +86,6 @@ public class CliSchemaJob extends CliRunJob {
     public static final String IDENTIFIER_NORMALIZER_LOWERCASE = "lowercase";
 
     public static final String IDENTIFIER_NORMALIZER_UPPERCASE = "uppercase";
-    public static final boolean USE_IMPLICIT_DEFAULTS_SWITCH_DEFAULT = true;
 
     private JdbcTypeOptionProcessor jdbcTypeOptionProcessor = new JdbcTypeOptionProcessor();
 
@@ -291,7 +291,7 @@ public class CliSchemaJob extends CliRunJob {
         }
         Object implicitDefaultsSwitch = optionSet.getValue(USE_IMPLICIT_DEFAULTS_SWITCH);
         schemaSpec.setImplicitDefaults(implicitDefaultsSwitch != null ?
-                parseBoolean(String.valueOf(implicitDefaultsSwitch)) : USE_IMPLICIT_DEFAULTS_SWITCH_DEFAULT);
+                parseBoolean(String.valueOf(implicitDefaultsSwitch)) : IMPLICIT_DEFAULTS);
         List<String> scriptTypeValues = optionSet.getValues(SCHEMA_SCRIPT_TYPE_OPTION);
         Collection<ScriptType> scriptTypes = newHashSet();
         for (String scriptTypeValue : scriptTypeValues) {

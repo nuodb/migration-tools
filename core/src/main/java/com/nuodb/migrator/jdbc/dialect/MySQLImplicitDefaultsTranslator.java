@@ -78,8 +78,8 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
 
     @Override
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        return script.getScript() == null &&
-                !column.isNullable() && !column.isAutoIncrement() && isImplicitDefaults(script);
+        return script.getScript() == null && !column.isNullable() && !column.isAutoIncrement() &&
+                !column.getTable().getPrimaryKey().getColumns().contains(column) && isImplicitDefaults(script);
     }
 
     /**
