@@ -27,58 +27,36 @@
  */
 package com.nuodb.migrator.integration.precision;
 
-/**
- * Test to make sure all the Tables, Constraints, Views, Triggers etc have been
- * migrated.
- * 
- * @author Krishnamoorthy Dhandapani
- */
+import java.util.ArrayList;
+import java.util.Collection;
 
-public class SqlServerDataPrecision1 {
-	 int t1;
-	 long t2;
-	 int t3;
-	 int t4;
-	public SqlServerDataPrecision1(int t1,long t2,int t3,int t4) {
-		this.t1=t1;
-		this.t2=t2;
-		this.t3=t3;
-		this.t4=t4;
-	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + t1;
-		result = prime * result + (int) (t2 ^ (t2 >>> 32));
-		result = prime * result + t3;
-		result = prime * result + t4;
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SqlServerDataPrecision1 other = (SqlServerDataPrecision1) obj;
-		if (t1 != other.t1)
-			return false;
-		if (t2 != other.t2)
-			return false;
-		if (t3 != other.t3)
-			return false;
-		if (t4 != other.t4)
-			return false;
-		return true;
-	}
-	@Override
-	public String toString() {
-		return "SqlServerDataPrecision1 [t1=" + t1 + ", t2=" + t2 + ", t3="
-				+ t3 + ", t4=" + t4 + "]";
-	}
-	
-	
+public class MySQLPrecisions {
+
+    public static Collection<MySQLPrecision1> getMySQLPrecision1() {
+        /*
+        long l1= -9223372036854775807L;
+		long l2= -2147483648L;
+		long l3= -8388608L;
+		*/
+        long l1 = 0L;
+        long l2 = 0L;
+        long l3 = 0L;
+        Collection<MySQLPrecision1> t1List = new ArrayList<MySQLPrecision1>();
+        t1List.add(new MySQLPrecision1(66, 2687, 678246, 49, 3720368547758L));
+        t1List.add(new MySQLPrecision1(127, 32767, 8388607, 2147483647, 9223372036854775807L));
+        t1List.add(new MySQLPrecision1(-128, -32768, l3, l2, l1));
+        return t1List;
+    }
+
+    public static Collection<MySQLPrecision2> getMySQLPrecision2() {
+        /* Original values are changed to avoid float data type issue */
+        Collection<MySQLPrecision2> values = new ArrayList<MySQLPrecision2>();
+        values.add(new MySQLPrecision2("sample text", "sample data", 23.0, 4.599999904632568, 416.7,
+                "true", "1234567890"));
+        values.add(new MySQLPrecision2("sample text length20", "total word lenght 20", 1.2345678E7,
+                9.8765432E7, 34567891.17, "false", "12345678900123456789"));
+        values.add(new MySQLPrecision2("", "sample data", 23.0, 4.599999904632568, 416.7, "true",
+                "5291"));
+        return values;
+    }
 }

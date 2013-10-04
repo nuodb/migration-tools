@@ -53,6 +53,10 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
      */
     private String typeName;
     /**
+     * Column dependent type name
+     */
+    private String columnType;
+    /**
      * Holds value size.
      */
     private int size;
@@ -118,6 +122,14 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
     @Override
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    public String getColumnType() {
+        return columnType;
+    }
+
+    public void setColumnType(String columnType) {
+        this.columnType = columnType;
     }
 
     @Override

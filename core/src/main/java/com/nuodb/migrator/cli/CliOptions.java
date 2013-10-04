@@ -95,6 +95,7 @@ public interface CliOptions {
     final String SCHEMA_GROUP_SCRIPTS_BY_OPTION = "group.scripts.by";
     final String SCHEMA_IDENTIFIER_QUOTING = "identifier.quoting";
     final String SCHEMA_IDENTIFIER_NORMALIZER = "identifier.normalizer";
+    final String USE_IMPLICIT_DEFAULTS_SWITCH = "use.implicit.defaults";
 
     final String USE_NUODB_TYPES_SWITCH = "use.nuodb.types";
     final String JDBC_TYPE_NAME_OPTION = "type.name";

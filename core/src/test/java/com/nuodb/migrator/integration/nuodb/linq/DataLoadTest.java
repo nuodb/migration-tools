@@ -39,29 +39,29 @@ import com.nuodb.migrator.integration.MigrationTestBase;
 /*
  * Assert required data is loaded
  */
-@Test(groups = { "linqdataloadperformed" })
+@Test(groups = {"linqdataloadperformed"})
 public class DataLoadTest extends MigrationTestBase {
-	PreparedStatement pstmt = null;
-	ResultSet rs = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
 
-	public void testDataLoaded() throws Exception {
-		String sqlStr1 = "select count(*) from products";
-		Statement stmt1 = null, stmt2 = null;
-		ResultSet rs1 = null, rs2 = null;
-		try {
-			stmt1 = nuodbConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr1);
+    public void testDataLoaded() throws Exception {
+        String sqlStr1 = "select count(*) from products";
+        Statement stmt1 = null, stmt2 = null;
+        ResultSet rs1 = null, rs2 = null;
+        try {
+            stmt1 = nuodbConnection.createStatement();
+            rs1 = stmt1.executeQuery(sqlStr1);
 
-			Assert.assertNotNull(rs1,
-					"Please check if data required for linq tests are loaded");
-			Assert.assertTrue(rs1.next(),
-					"Please check if data required for linq tests are loaded");
-			Assert.assertTrue(
-					rs1.getInt(1) > 0,
-					"No rows in products table. Please check if data required for linq tests are loaded");
+            Assert.assertNotNull(rs1,
+                    "Please check if data required for linq tests are loaded");
+            Assert.assertTrue(rs1.next(),
+                    "Please check if data required for linq tests are loaded");
+            Assert.assertTrue(
+                    rs1.getInt(1) > 0,
+                    "No rows in products table. Please check if data required for linq tests are loaded");
 
-		} finally {
-			closeAll(rs1, stmt1, rs2, stmt2);
-		}
-	}
+        } finally {
+            closeAll(rs1, stmt1, rs2, stmt2);
+        }
+    }
 }

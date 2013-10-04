@@ -85,6 +85,7 @@ public class CliSchemaJob extends CliRunJob {
     public static final String IDENTIFIER_NORMALIZER_LOWERCASE = "lowercase";
 
     public static final String IDENTIFIER_NORMALIZER_UPPERCASE = "uppercase";
+    public static final boolean USE_IMPLICIT_DEFAULTS_SWITCH_DEFAULT = true;
 
     private JdbcTypeOptionProcessor jdbcTypeOptionProcessor = new JdbcTypeOptionProcessor();
 
@@ -126,6 +127,16 @@ public class CliSchemaJob extends CliRunJob {
                 withRequired(false).
                 withOptionProcessor(new NuoDBTypesSwitchProcessor()).build();
         typeGroup.withOption(useNuoDBTypes);
+
+        Option useImplicitDefaults = newBasicOptionBuilder().
+                withName(USE_IMPLICIT_DEFAULTS_SWITCH).
+                withDescription(getMessage(USE_IMPLICIT_DEFAULTS_SWITCH_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(USE_IMPLICIT_DEFAULTS_SWITCH_ARGUMENT_NAME)).
+                                withDefaultValue(USE_IMPLICIT_DEFAULTS_SWITCH_DEFAULT).build()
+                ).build();
+        typeGroup.withOption(useImplicitDefaults);
 
         Option typeName = newBasicOptionBuilder().
                 withName(JDBC_TYPE_NAME_OPTION).
@@ -278,6 +289,9 @@ public class CliSchemaJob extends CliRunJob {
             }
             schemaSpec.setObjectTypes(objectTypes);
         }
+        Object implicitDefaultsSwitch = optionSet.getValue(USE_IMPLICIT_DEFAULTS_SWITCH);
+        schemaSpec.setImplicitDefaults(implicitDefaultsSwitch != null ?
+                parseBoolean(String.valueOf(implicitDefaultsSwitch)) : USE_IMPLICIT_DEFAULTS_SWITCH_DEFAULT);
         List<String> scriptTypeValues = optionSet.getValues(SCHEMA_SCRIPT_TYPE_OPTION);
         Collection<ScriptType> scriptTypes = newHashSet();
         for (String scriptTypeValue : scriptTypeValues) {

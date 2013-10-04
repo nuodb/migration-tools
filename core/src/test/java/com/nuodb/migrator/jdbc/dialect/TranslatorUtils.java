@@ -27,15 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.DefaultValue;
 import com.nuodb.migrator.jdbc.session.Session;
-import com.nuodb.migrator.spec.DriverConnectionSpec;
 
+import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
 
 /**
  * Utilities for use by test classes
@@ -68,26 +65,6 @@ public class TranslatorUtils {
     }
 
     /**
-     * Creates mock session using the provided dialect & connection url
-     *
-     * @param dialect of a source database
-     * @param url     connection url to a source database
-     * @return mock object using the provided dialect & connection url
-     */
-    public static Session createSession(Dialect dialect, String url) {
-        Session session = mock(Session.class);
-        when(session.getDialect()).thenReturn(dialect);
-
-        ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
-        when(session.getConnection()).thenReturn(connectionProxy);
-
-        DriverConnectionSpec driverConnectionSpec = new DriverConnectionSpec();
-        driverConnectionSpec.setUrl(url);
-        when(connectionProxy.getConnectionSpec()).thenReturn(driverConnectionSpec);
-        return session;
-    }
-
-    /**
      * Creates column script initialized with a given default value, type code, type name & a session
      *
      * @param defaultValue column default value
@@ -100,7 +77,7 @@ public class TranslatorUtils {
         Column column = new Column(EMPTY);
         column.setTypeCode(typeCode);
         column.setTypeName(typeName);
-        column.setDefaultValue(new DefaultValue(defaultValue));
+        column.setDefaultValue(valueOf(defaultValue));
         return new ColumnScript(column, session);
     }
 }

@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2012, NuoDB, Inc.
  * All rights reserved.
@@ -28,47 +27,27 @@
  */
 package com.nuodb.migrator.integration.precision;
 
-
-import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
 
-public class PrecisionConstantMySql {
+public class MSSQLServerPrecisions {
 
-	public static final String NUODB_JDBC_JAR = "nuodbjdbc.jar";
+    public static Collection<MSSQLServerPrecision1> getMSSQLServerPrecision1() {
+        Collection<MSSQLServerPrecision1> values = new ArrayList<MSSQLServerPrecision1>();
+        values.add(new MSSQLServerPrecision1(2147483647, 9223372036854775807L, 32767, 255));
+        values.add(new MSSQLServerPrecision1(-2147483648, -9223372036854775807L, -32768, 0));
+        return values;
+    }
 
-	protected Connection sourceConnection;
-	
-	public static ArrayList<MySqlDataPrecision1> getMySqlDataPrecision1()
-	{
-		/*
-	  long l1= -9223372036854775807L;
-		long l2= -2147483648L;
-		long l3= -8388608L;
-		*/
-		long l1= 0L;
-    long l2= 0L;
-    long l3= 0L;
-    
-    
-		MySqlDataPrecision1 m1=new MySqlDataPrecision1(66,2687,678246,49,3720368547758L);
-		MySqlDataPrecision1 m2=new MySqlDataPrecision1(127,32767,8388607,2147483647,9223372036854775807L);
-		MySqlDataPrecision1 m3=new MySqlDataPrecision1(-128,-32768,l3,l2,l1);
-		ArrayList<MySqlDataPrecision1> t1List=new ArrayList<MySqlDataPrecision1>();
-		t1List.add(m1);
-		t1List.add(m2);
-		t1List.add(m3);
-		return t1List;
-	}
-	public static ArrayList<MySqlDataPrecision2> getMySqlDataPrecision2()
-	{
-		/* Original values are changed to avoid float data type issue */ 
-		MySqlDataPrecision2 m4=new MySqlDataPrecision2("sample text","sample data",23.0,4.599999904632568,416.7,"true","1234567890");
-		MySqlDataPrecision2 m5=new MySqlDataPrecision2("sample text length20","total word lenght 20",1.2345678E7,9.8765432E7,34567891.17,"false","12345678900123456789");
-		MySqlDataPrecision2 m6=new MySqlDataPrecision2("","sample data",23.0,4.599999904632568,416.7,"true","5291");
-		ArrayList<MySqlDataPrecision2> t2List=new ArrayList<MySqlDataPrecision2>();
-		t2List.add(m4);
-		t2List.add(m5);
-		t2List.add(m6);
-		return t2List;
-	}
+    public static Collection<MSSQLServerPrecision2> getMSSQLServerPrecision2() {
+        /* Original values are changed to avoid numeric(7,2), decimal(7,2) data type issue */
+        Collection<MSSQLServerPrecision2> values = new ArrayList<MSSQLServerPrecision2>();
+        values.add(new MSSQLServerPrecision2(
+                "total word", "text length", 25.0, "F", 0, 76.0, 15.25, "M"));
+        values.add(new MSSQLServerPrecision2(
+                "total word lenght 20", "sample text length20", 54325.0, "F", 0, 98765.0, 56.65, "M"));
+        values.add(new MSSQLServerPrecision2(
+                "lenght", "sample", 525.0, "F", 0, 145.0, 96.65, "M"));
+        return values;
+    }
 }

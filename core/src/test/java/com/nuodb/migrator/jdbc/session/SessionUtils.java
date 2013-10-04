@@ -25,36 +25,41 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.integration.precision;
+package com.nuodb.migrator.jdbc.session;
 
-import java.sql.Connection;
-import java.util.ArrayList;
+import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
 
-public class PrecisionConstantSqlServer {
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-	public static final String NUODB_JDBC_JAR = "nuodbjdbc.jar";
+/**
+ * @author Sergey Bushik
+ */
+public class SessionUtils {
 
-	protected Connection sourceConnection;
-	
-	public static ArrayList<SqlServerDataPrecision1> getSqlServerDataPrecision1()
-	{
-		SqlServerDataPrecision1 m1=new SqlServerDataPrecision1(2147483647,9223372036854775807L,32767,255);
-		SqlServerDataPrecision1 m2=new SqlServerDataPrecision1(-2147483648,-9223372036854775807L,-32768,0);
-		ArrayList<SqlServerDataPrecision1> t1List=new ArrayList<SqlServerDataPrecision1>();
-		t1List.add(m1);
-		t1List.add(m2);
-		return t1List;
-	}
-	public static ArrayList<SqlServerDataPrecision2> getSqlServerDataPrecision2()
-	{
-		/* Original values are changed to avoid numeric(7,2),decimal(7,2) data type issue */ 
-		SqlServerDataPrecision2 m4=new SqlServerDataPrecision2("total word","text length",25.0,"F",0,76.0,15.25,"M");
-		SqlServerDataPrecision2 m5=new SqlServerDataPrecision2("total word lenght 20","sample text length20",54325.0,"F",0,98765.0,56.65,"M");
-		SqlServerDataPrecision2 m6=new SqlServerDataPrecision2("lenght","sample",525.0,"F",0,145.0,96.65,"M");
-		ArrayList<SqlServerDataPrecision2> t2List=new ArrayList<SqlServerDataPrecision2>();
-		t2List.add(m4);
-		t2List.add(m5);
-		t2List.add(m6);
-		return t2List;
-	}
+    public static Session createSession(Dialect dialect) {
+        return createSession(dialect, null);
+    }
+
+    /**
+     * Creates mock session using the provided dialect & connection url
+     *
+     * @param dialect of a source database
+     * @param url     connection url to a source database
+     * @return mock object using the provided dialect & connection url
+     */
+    public static Session createSession(Dialect dialect, String url) {
+        Session session = mock(Session.class);
+        when(session.getDialect()).thenReturn(dialect);
+
+        ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
+        when(session.getConnection()).thenReturn(connectionProxy);
+
+        DriverConnectionSpec driverConnectionSpec = new DriverConnectionSpec();
+        driverConnectionSpec.setUrl(url);
+        when(connectionProxy.getConnectionSpec()).thenReturn(driverConnectionSpec);
+        return session;
+    }
 }

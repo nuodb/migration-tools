@@ -431,24 +431,24 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public String getDefaultValue(Column column, Session session) {
-        String value;
         DefaultValue defaultValue = column != null ? column.getDefaultValue() : null;
-        if (defaultValue == null || (value = defaultValue.getScript()) == null) {
-            return null;
-        }
+        String value = defaultValue != null ? defaultValue.getScript() : null;
         Script script = translate(new ColumnScript(column, session));
-        String translation = script != null ? script.getScript() : value;
-        String unquoted = translation;
-        boolean opening = false;
-        if (translation.startsWith("'")) {
-            unquoted = translation.substring(1);
-            opening = true;
+        String result = script != null ? script.getScript() : value;
+        if (result != null) {
+            String unquoted = result;
+            boolean opening = false;
+            if (result.startsWith("'")) {
+                unquoted = result.substring(1);
+                opening = true;
+            }
+            if (opening && unquoted.endsWith("'")) {
+                unquoted = unquoted.substring(0, unquoted.length() - 1);
+            }
+            unquoted = getScriptEscapeUtils().escapeDefaultValue(unquoted);
+            result = "'" + unquoted + "'";
         }
-        if (opening && unquoted.endsWith("'")) {
-            unquoted = unquoted.substring(0, unquoted.length() - 1);
-        }
-        unquoted = getScriptEscapeUtils().escapeDefaultValue(unquoted);
-        return "'" + unquoted + "'";
+        return result;
     }
 
     protected String getScriptQuoted(String script) {

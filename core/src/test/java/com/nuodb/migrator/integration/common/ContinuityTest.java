@@ -40,118 +40,118 @@ import com.nuodb.migrator.integration.MigrationTestBase;
 /**
  * @author Krishnamoorthy Dhandapani
  */
-@Test(groups = { "integrationtest", "dataloadperformed" })
+@Test(groups = {"integrationtest", "dataloadperformed"})
 public class ContinuityTest extends MigrationTestBase {
 
-	/*
-	 * Verify Primary Key constraints are working
-	 */
-	public void testPrimaryKeyViolation() throws Exception {
-		String sqlStr = "insert into \"datatypes1\" (\"c6\") values ('1')";
-		Statement stmt1 = null;
-		try {
-			stmt1 = nuodbConnection.createStatement();
-			int rows = stmt1.executeUpdate(sqlStr);
-			Assert.assertEquals(rows, 1);
-			// second time should fail
-			try {
-				rows = stmt1.executeUpdate(sqlStr);
-			} catch (SQLException e) {
-				Assert.assertTrue(e.getMessage().toUpperCase()
-						.contains("DATATYPES1..PRIMARY_KEY"));
-			}
-		} finally {
-			nuodbConnection.rollback();
-			stmt1.close();
-		}
-	}
+    /*
+     * Verify Primary Key constraints are working
+     */
+    public void testPrimaryKeyViolation() throws Exception {
+        String sqlStr = "insert into \"datatypes1\" (\"c6\") values ('1')";
+        Statement stmt1 = null;
+        try {
+            stmt1 = nuodbConnection.createStatement();
+            int rows = stmt1.executeUpdate(sqlStr);
+            Assert.assertEquals(rows, 1);
+            // second time should fail
+            try {
+                rows = stmt1.executeUpdate(sqlStr);
+            } catch (SQLException e) {
+                Assert.assertTrue(e.getMessage().toUpperCase()
+                        .contains("DATATYPES1..PRIMARY_KEY"));
+            }
+        } finally {
+            nuodbConnection.rollback();
+            stmt1.close();
+        }
+    }
 
-	/*
-	 * Verify Unique Key constraints are working
-	 */
-	public void testUniqueKeyViolation() throws Exception {
-		String sqlStr = "insert into \"datatypes1\" (\"c2\",\"c6\") values ('1',20)";
-		Statement stmt1 = null;
-		try {
-			stmt1 = nuodbConnection.createStatement();
-			int rows = stmt1.executeUpdate(sqlStr);
-			Assert.assertEquals(rows, 1);
-			// second time should fail
-			try {
-				rows = stmt1.executeUpdate(sqlStr);
-			} catch (SQLException e) {
-				Assert.assertTrue(e.getMessage().toUpperCase()
-						.contains("DATATYPES1_UNIQUE"));
-			}
-		} finally {
-			nuodbConnection.rollback();
-			stmt1.close();
-		}
-	}
+    /*
+     * Verify Unique Key constraints are working
+     */
+    public void testUniqueKeyViolation() throws Exception {
+        String sqlStr = "insert into \"datatypes1\" (\"c2\",\"c6\") values ('1',20)";
+        Statement stmt1 = null;
+        try {
+            stmt1 = nuodbConnection.createStatement();
+            int rows = stmt1.executeUpdate(sqlStr);
+            Assert.assertEquals(rows, 1);
+            // second time should fail
+            try {
+                rows = stmt1.executeUpdate(sqlStr);
+            } catch (SQLException e) {
+                Assert.assertTrue(e.getMessage().toUpperCase()
+                        .contains("DATATYPES1_UNIQUE"));
+            }
+        } finally {
+            nuodbConnection.rollback();
+            stmt1.close();
+        }
+    }
 
-	/*
-	 * Verify Foreign Key constraints are working - NOT WORKING YET
-	 */
-	@Test(groups = { "disabled" })
-	public void testForeignKeyViolation() throws Exception {
-	}
+    /*
+     * Verify Foreign Key constraints are working - NOT WORKING YET
+     */
+    @Test(groups = {"disabled"})
+    public void testForeignKeyViolation() throws Exception {
+    }
 
-	/*
-	 * Verify Auto increments are working. We don't know what value the auto inc
-	 * is going to start because it depend on the number of times and test is
-	 * run. So we are going to execute it twice and make sure the id is
-	 * incremented by 1 between those runs.
-	 */
-	@Test(groups = { "disabled" })
-	public void testAutoIncrement() throws Exception {
-		String sqlStr = "insert into \"datatypes2\" (\"c5\") values (?)";
-		String sqlStr2 = "select \"k1\" from \"datatypes2\" where \"c5\"=?";
-		PreparedStatement stmt1 = null, stmt2 = null;
-		ResultSet rs2 = null;
-		int firstId = -1;
-		try {
-			String testId = "testAI1";
-			{
-				stmt1 = nuodbConnection.prepareStatement(sqlStr);
-				stmt1.setString(1, testId);
-				int rows = stmt1.executeUpdate();
-				Assert.assertEquals(rows, 1);
+    /*
+     * Verify Auto increments are working. We don't know what value the auto inc
+     * is going to start because it depend on the number of times and test is
+     * run. So we are going to execute it twice and make sure the id is
+     * incremented by 1 between those runs.
+     */
+    @Test(groups = {"disabled"})
+    public void testAutoIncrement() throws Exception {
+        String sqlStr = "insert into \"datatypes2\" (\"c5\") values (?)";
+        String sqlStr2 = "select \"k1\" from \"datatypes2\" where \"c5\"=?";
+        PreparedStatement stmt1 = null, stmt2 = null;
+        ResultSet rs2 = null;
+        int firstId = -1;
+        try {
+            String testId = "testAI1";
+            {
+                stmt1 = nuodbConnection.prepareStatement(sqlStr);
+                stmt1.setString(1, testId);
+                int rows = stmt1.executeUpdate();
+                Assert.assertEquals(rows, 1);
 
-				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
-				stmt2.setString(1, testId);
-				rs2 = stmt2.executeQuery();
-				boolean found = false;
-				while (rs2.next()) {
-					found = true;
-					firstId = rs2.getInt(1);
-					Assert.assertTrue(firstId > 0);
-				}
-				Assert.assertTrue(found);
+                stmt2 = nuodbConnection.prepareStatement(sqlStr2);
+                stmt2.setString(1, testId);
+                rs2 = stmt2.executeQuery();
+                boolean found = false;
+                while (rs2.next()) {
+                    found = true;
+                    firstId = rs2.getInt(1);
+                    Assert.assertTrue(firstId > 0);
+                }
+                Assert.assertTrue(found);
 
-				closeAll(null, stmt1, rs2, stmt2);
-			}
-			// Now insert second row
-			testId = "testAI2";
-			{
-				stmt1 = nuodbConnection.prepareStatement(sqlStr);
-				stmt1.setString(1, testId);
-				int rows = stmt1.executeUpdate();
-				Assert.assertEquals(rows, 1);
+                closeAll(null, stmt1, rs2, stmt2);
+            }
+            // Now insert second row
+            testId = "testAI2";
+            {
+                stmt1 = nuodbConnection.prepareStatement(sqlStr);
+                stmt1.setString(1, testId);
+                int rows = stmt1.executeUpdate();
+                Assert.assertEquals(rows, 1);
 
-				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
-				stmt2.setString(1, testId);
-				rs2 = stmt2.executeQuery();
-				boolean found = false;
-				while (rs2.next()) {
-					found = true;
-					Assert.assertEquals(rs2.getInt(1), firstId + 1);
-				}
-				Assert.assertTrue(found);
-			}
-		} finally {
-			nuodbConnection.rollback();
-			closeAll(null, stmt1, rs2, stmt2);
-		}
-	}
+                stmt2 = nuodbConnection.prepareStatement(sqlStr2);
+                stmt2.setString(1, testId);
+                rs2 = stmt2.executeQuery();
+                boolean found = false;
+                while (rs2.next()) {
+                    found = true;
+                    Assert.assertEquals(rs2.getInt(1), firstId + 1);
+                }
+                Assert.assertTrue(found);
+            }
+        } finally {
+            nuodbConnection.rollback();
+            closeAll(null, stmt1, rs2, stmt2);
+        }
+    }
 
 }

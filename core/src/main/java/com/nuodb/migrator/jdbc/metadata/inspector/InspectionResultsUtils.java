@@ -29,6 +29,8 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.*;
 
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+
 /**
  * @author Sergey Bushik
  */
@@ -45,7 +47,7 @@ public class InspectionResultsUtils {
     public static Catalog addCatalog(InspectionResults results, String catalogName) {
         Database database = addDatabase(results);
         Catalog catalog;
-        Identifier catalogId = Identifier.valueOf(catalogName);
+        Identifier catalogId = valueOf(catalogName);
         if (database.hasCatalog(catalogId)) {
             catalog = database.getCatalog(catalogId);
         } else {
@@ -58,7 +60,7 @@ public class InspectionResultsUtils {
     public static Schema addSchema(InspectionResults results, String catalogName, String schemaName) {
         Catalog catalog = addCatalog(results, catalogName);
         Schema schema;
-        Identifier schemaId = Identifier.valueOf(schemaName);
+        Identifier schemaId = valueOf(schemaName);
         if (catalog.hasSchema(schemaId)) {
             schema = catalog.getSchema(schemaId);
         } else {
@@ -71,7 +73,7 @@ public class InspectionResultsUtils {
     public static Table addTable(InspectionResults results, String catalogName, String schemaName, String tableName) {
         Schema schema = addSchema(results, catalogName, schemaName);
         Table table;
-        Identifier tableId = Identifier.valueOf(tableName);
+        Identifier tableId = valueOf(tableName);
         if (schema.hasTable(tableId)) {
             table = schema.getTable(tableId);
         } else {

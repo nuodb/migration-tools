@@ -30,7 +30,6 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,15 +38,17 @@ import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.valueOf;
 import static java.sql.Types.*;
+import static java.util.Arrays.asList;
+import static java.util.regex.Pattern.compile;
 
 /**
  * @author Sergey Bushik
  */
 public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
 
-    private Collection<Integer> HEX_TYPES = Arrays.asList(
+    private Collection<Integer> TYPES = asList(
             TINYINT, SMALLINT, INTEGER, BIGINT, FLOAT, REAL, DOUBLE, NUMERIC, DECIMAL);
-    private static final Pattern PATTERN = Pattern.compile("(?i:x)'([0-9a-f]*)'");
+    private static final Pattern PATTERN = compile("(?i:x)'([0-9a-f]*)'");
 
     public MySQLHexLiteralTranslator() {
         super(MYSQL);
@@ -55,7 +56,8 @@ public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
 
     @Override
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        return HEX_TYPES.contains(column.getTypeCode()) && PATTERN.matcher(script.getScript()).matches();
+        return column.getDefaultValue() != null && TYPES.contains(column.getTypeCode()) && PATTERN.matcher(script
+                .getScript()).matches();
     }
 
     @Override

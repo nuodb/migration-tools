@@ -27,133 +27,132 @@
  */
 package com.nuodb.migrator.integration.common;
 
-import java.sql.ResultSet;
-import java.sql.Statement;
-
+import com.nuodb.migrator.integration.MigrationTestBase;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.nuodb.migrator.integration.MigrationTestBase;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  * @author Krishnamoorthy Dhandapani
  */
-@Test(groups = { "integrationtest" })
+@Test(groups = {"integrationtest"})
 public class BasicMigrationTest extends MigrationTestBase {
 
-	/*
-	 * Assert Load is run and database is not empty
-	 */
-	@Test(groups = { "dataloadperformed" })
-	public void testDataLoaded() throws Exception {
-		String sqlStr1 = "select count(*) from datatypes1";
-		String sqlStr2 = "select count(*) from \"datatypes1\"";
-		Statement stmt1 = null, stmt2 = null;
-		ResultSet rs1 = null, rs2 = null;
-		try {
-			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr1);
+    /*
+     * Assert Load is run and database is not empty
+     */
+    @Test(groups = {"dataloadperformed"})
+    public void testDataLoaded() throws Exception {
+        String sqlStr1 = "select count(*) from datatypes1";
+        String sqlStr2 = "select count(*) from \"datatypes1\"";
+        Statement stmt1 = null, stmt2 = null;
+        ResultSet rs1 = null, rs2 = null;
+        try {
+            stmt1 = sourceConnection.createStatement();
+            rs1 = stmt1.executeQuery(sqlStr1);
 
-			Assert.assertNotNull(rs1);
+            Assert.assertNotNull(rs1);
 
-			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr2);
+            stmt2 = nuodbConnection.createStatement();
+            rs2 = stmt2.executeQuery(sqlStr2);
 
-			Assert.assertNotNull(rs2);
+            Assert.assertNotNull(rs2);
 
-			Assert.assertTrue(rs1.next());
-			Assert.assertTrue(rs2.next());
-			Assert.assertEquals(rs2.getInt(1), rs1.getInt(1),
-					"Please check if data is loaded.");
+            Assert.assertTrue(rs1.next());
+            Assert.assertTrue(rs2.next());
+            Assert.assertEquals(rs2.getInt(1), rs1.getInt(1),
+                    "Please check if data is loaded.");
 
-		} finally {
-			closeAll(rs1, stmt1, rs2, stmt2);
-		}
-	}
+        } finally {
+            closeAll(rs1, stmt1, rs2, stmt2);
+        }
+    }
 
-	/*
-	 * The data type tests compares the result set values against all datatypes
-	 * set into multiple tables. See the table definition for specific data
-	 * types.
-	 * 
-	 * The test executes the same select all statement against the source
-	 * database and the target database and compares the result values.
-	 */
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testDataTypes1() throws Exception {
-		String sqlStr1 = "select * from datatypes1";
-		String sqlStr2 = "select * from \"datatypes1\"";
-		Statement stmt1 = null, stmt2 = null;
-		ResultSet rs1 = null, rs2 = null;
-		try {
-			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr1);
+    /*
+     * The data type tests compares the result set values against all datatypes
+     * set into multiple tables. See the table definition for specific data
+     * types.
+     *
+     * The test executes the same select all statement against the source
+     * database and the target database and compares the result values.
+     */
+    @Test(dependsOnGroups = {"dataloadperformed"})
+    public void testDataTypes1() throws Exception {
+        String sqlStr1 = "select * from datatypes1";
+        String sqlStr2 = "select * from \"datatypes1\"";
+        Statement stmt1 = null, stmt2 = null;
+        ResultSet rs1 = null, rs2 = null;
+        try {
+            stmt1 = sourceConnection.createStatement();
+            rs1 = stmt1.executeQuery(sqlStr1);
 
-			Assert.assertNotNull(rs1);
+            Assert.assertNotNull(rs1);
 
-			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr2);
+            stmt2 = nuodbConnection.createStatement();
+            rs2 = stmt2.executeQuery(sqlStr2);
 
-			Assert.assertNotNull(rs2);
+            Assert.assertNotNull(rs2);
 
-			rsUtil.assertIsEqual(rs1, rs2, true, true);
+            rsUtil.assertIsEqual(rs1, rs2, true, true);
 
-		} finally {
-			closeAll(rs1, stmt1, rs2, stmt2);
-		}
-	}
+        } finally {
+            closeAll(rs1, stmt1, rs2, stmt2);
+        }
+    }
 
-	/*
-	 * See documentation for testDataTypes1
-	 */
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testDataTypes2() throws Exception {
-		String sqlStr1 = "select * from datatypes2";
-		String sqlStr2 = "select * from \"datatypes2\"";
-		Statement stmt1 = null, stmt2 = null;
-		ResultSet rs1 = null, rs2 = null;
-		try {
-			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr1);
+    /*
+     * See documentation for testDataTypes1
+     */
+    @Test(dependsOnGroups = {"dataloadperformed"})
+    public void testDataTypes2() throws Exception {
+        String sqlStr1 = "select * from datatypes2";
+        String sqlStr2 = "select * from \"datatypes2\"";
+        Statement stmt1 = null, stmt2 = null;
+        ResultSet rs1 = null, rs2 = null;
+        try {
+            stmt1 = sourceConnection.createStatement();
+            rs1 = stmt1.executeQuery(sqlStr1);
 
-			Assert.assertNotNull(rs1);
+            Assert.assertNotNull(rs1);
 
-			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr2);
+            stmt2 = nuodbConnection.createStatement();
+            rs2 = stmt2.executeQuery(sqlStr2);
 
-			Assert.assertNotNull(rs2);
+            Assert.assertNotNull(rs2);
 
-			rsUtil.assertIsEqual(rs1, rs2, true, true);
+            rsUtil.assertIsEqual(rs1, rs2, true, true);
 
-		} finally {
-			closeAll(rs1, stmt1, rs2, stmt2);
-		}
-	}
+        } finally {
+            closeAll(rs1, stmt1, rs2, stmt2);
+        }
+    }
 
-	/*
-	 * See documentation for testDataTypes1
-	 */
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testDataTypes3() throws Exception {
-		String sqlStr1 = "select * from datatypes3";
-		String sqlStr2 = "select * from \"datatypes3\"";
-		Statement stmt1 = null, stmt2 = null;
-		ResultSet rs1 = null, rs2 = null;
-		try {
-			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr1);
+    /*
+     * See documentation for testDataTypes1
+     */
+    @Test(dependsOnGroups = {"dataloadperformed"})
+    public void testDataTypes3() throws Exception {
+        String sqlStr1 = "select * from datatypes3";
+        String sqlStr2 = "select * from \"datatypes3\"";
+        Statement stmt1 = null, stmt2 = null;
+        ResultSet rs1 = null, rs2 = null;
+        try {
+            stmt1 = sourceConnection.createStatement();
+            rs1 = stmt1.executeQuery(sqlStr1);
 
-			Assert.assertNotNull(rs1);
+            Assert.assertNotNull(rs1);
 
-			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr2);
+            stmt2 = nuodbConnection.createStatement();
+            rs2 = stmt2.executeQuery(sqlStr2);
 
-			Assert.assertNotNull(rs2);
+            Assert.assertNotNull(rs2);
 
-			rsUtil.assertIsEqual(rs1, rs2, true, true);
+            rsUtil.assertIsEqual(rs1, rs2, true, true);
 
-		} finally {
-			closeAll(rs1, stmt1, rs2, stmt2);
-		}
-	}
+        } finally {
+            closeAll(rs1, stmt1, rs2, stmt2);
+        }
+    }
 }

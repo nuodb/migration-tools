@@ -121,7 +121,7 @@ public class JdbcTypeAdapterTest {
                                 new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE}, blob},
                         {JdbcBlobTypeAdapter.INSTANCE,
                                 new ByteArrayInputStream(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE}
-                        ), blob}
+                                ), blob}
                 }
         ));
 

@@ -43,116 +43,116 @@ import com.nuodb.migrator.integration.MigrationTestBase;
 import com.nuodb.migrator.integration.nuodb.linq.util.DatabaseUtil;
 import com.nuodb.migrator.integration.nuodb.linq.util.Product;
 
-@Test(groups = { "nuodblinqtest" }, dependsOnGroups = { "linqdataloadperformed" })
+@Test(groups = {"nuodblinqtest"}, dependsOnGroups = {"linqdataloadperformed"})
 public class JoinTest extends MigrationTestBase {
-	PreparedStatement pstmt = null;
+    PreparedStatement pstmt = null;
 
-	public void crossJoin() throws Exception {
-		List<String> list = DatabaseUtil.getJoinArray(nuodbConnection, pstmt);
-		String[] categories = list.toArray(new String[list.size()]);
-		List<Product> products = DatabaseUtil
-				.getProductList(
-						"select * from products cross join array5 where cate_name=category",
-						nuodbConnection, pstmt);
-		Assert.assertTrue(products.size() >= 1, "The product list is empty");
-		HashMap<String, String> actMap = new HashMap<String, String>();
-		HashMap<String, String> expMap = new HashMap<String, String>();
-		List<String> strObj = new ArrayList<String>();
-		Assert.assertNotNull(list);
-		Assert.assertNotNull(products);
-		for (String str : categories) {
-			strObj.add(str);
-		}
-		for (Product p : products) {
-			if (strObj.contains(p.getCategory())) {
-				actMap.put(p.getPname(), p.getCategory());
-			}
-		}
-		expMap.put("Alice Mutton", "Beverages");
-		expMap.put("Outback Lager", "Beverages");
-		expMap.put("Chef Anton", "Condiments");
-		Assert.assertEquals(actMap, expMap);
-	}
+    public void crossJoin() throws Exception {
+        List<String> list = DatabaseUtil.getJoinArray(nuodbConnection, pstmt);
+        String[] categories = list.toArray(new String[list.size()]);
+        List<Product> products = DatabaseUtil
+                .getProductList(
+                        "select * from products cross join array5 where cate_name=category",
+                        nuodbConnection, pstmt);
+        Assert.assertTrue(products.size() >= 1, "The product list is empty");
+        HashMap<String, String> actMap = new HashMap<String, String>();
+        HashMap<String, String> expMap = new HashMap<String, String>();
+        List<String> strObj = new ArrayList<String>();
+        Assert.assertNotNull(list);
+        Assert.assertNotNull(products);
+        for (String str : categories) {
+            strObj.add(str);
+        }
+        for (Product p : products) {
+            if (strObj.contains(p.getCategory())) {
+                actMap.put(p.getPname(), p.getCategory());
+            }
+        }
+        expMap.put("Alice Mutton", "Beverages");
+        expMap.put("Outback Lager", "Beverages");
+        expMap.put("Chef Anton", "Condiments");
+        Assert.assertEquals(actMap, expMap);
+    }
 
-	public void groupJoin() throws Exception {
-		List<String> list = DatabaseUtil.getJoinArray(nuodbConnection, pstmt);
-		String[] categories = list.toArray(new String[list.size()]);
-		List<Product> products = DatabaseUtil.getProductList(
-				"select * from products join array5 where cate_name=category",
-				nuodbConnection, pstmt);
-		Assert.assertTrue(products.size() >= 1, "The product list is empty");
-		HashMap<String, ArrayList<String>> actmap = new HashMap<String, ArrayList<String>>();
-		for (Product p : products) {
-			if (DatabaseUtil.contains(p.getCategory(), categories)) {
-				if (!actmap.containsKey(p.getCategory())) {
-					ArrayList<String> list1 = new ArrayList<String>();
-					list1.add(p.getPname());
-					Collections.sort(list1);
-					actmap.put(p.getCategory(), list1);
-				} else {
-					ArrayList<String> list1 = (ArrayList<String>) actmap.get(p
-							.getCategory());
-					list1.add(p.getPname());
-					Collections.sort(list1);
-					actmap.put(p.getCategory(), list1);
-				}
-			}
-		}
-		ArrayList<String> catelist1 = new ArrayList<String>();
-		ArrayList<String> catelist2 = new ArrayList<String>();
-		HashMap<String, ArrayList<String>> expmap = new HashMap<String, ArrayList<String>>();
-		catelist1.add("Chef Anton");
-		Collections.sort(catelist1);
-		expmap.put("Condiments", catelist1);
-		catelist2.add("Alice Mutton");
-		catelist2.add("Outback Lager");
-		Collections.sort(catelist2);
-		expmap.put("Beverages", catelist2);
-		Assert.assertEquals(actmap, expmap);
-	}
+    public void groupJoin() throws Exception {
+        List<String> list = DatabaseUtil.getJoinArray(nuodbConnection, pstmt);
+        String[] categories = list.toArray(new String[list.size()]);
+        List<Product> products = DatabaseUtil.getProductList(
+                "select * from products join array5 where cate_name=category",
+                nuodbConnection, pstmt);
+        Assert.assertTrue(products.size() >= 1, "The product list is empty");
+        HashMap<String, ArrayList<String>> actmap = new HashMap<String, ArrayList<String>>();
+        for (Product p : products) {
+            if (DatabaseUtil.contains(p.getCategory(), categories)) {
+                if (!actmap.containsKey(p.getCategory())) {
+                    ArrayList<String> list1 = new ArrayList<String>();
+                    list1.add(p.getPname());
+                    Collections.sort(list1);
+                    actmap.put(p.getCategory(), list1);
+                } else {
+                    ArrayList<String> list1 = (ArrayList<String>) actmap.get(p
+                            .getCategory());
+                    list1.add(p.getPname());
+                    Collections.sort(list1);
+                    actmap.put(p.getCategory(), list1);
+                }
+            }
+        }
+        ArrayList<String> catelist1 = new ArrayList<String>();
+        ArrayList<String> catelist2 = new ArrayList<String>();
+        HashMap<String, ArrayList<String>> expmap = new HashMap<String, ArrayList<String>>();
+        catelist1.add("Chef Anton");
+        Collections.sort(catelist1);
+        expmap.put("Condiments", catelist1);
+        catelist2.add("Alice Mutton");
+        catelist2.add("Outback Lager");
+        Collections.sort(catelist2);
+        expmap.put("Beverages", catelist2);
+        Assert.assertEquals(actmap, expmap);
+    }
 
-	public void crossAndGroupJoin() throws Exception {
-		List<String> list = DatabaseUtil.getJoinArray(nuodbConnection, pstmt);
-		String[] categories = list.toArray(new String[list.size()]);
-		List<Product> products = DatabaseUtil.getProductList(
-				"select * from products  join array5 where cate_name=category",
-				nuodbConnection, pstmt);
-		List<String> strObj = new ArrayList<String>();
-		Assert.assertTrue(products.size() >= 1, "The product list is empty");
-		HashMap<String, String> actMap = new HashMap<String, String>();
-		HashMap<String, String> expMap = new HashMap<String, String>();
-		for (String str : categories) {
-			strObj.add(str);
-		}
-		for (Product p : products) {
-			if (strObj.contains(p.getCategory())) {
-				actMap.put(p.getPname(), p.getCategory());
-			}
-		}
-		expMap.put("Alice Mutton", "Beverages");
-		expMap.put("Outback Lager", "Beverages");
-		expMap.put("Chef Anton", "Condiments");
-		Assert.assertEquals(actMap, expMap);
-	}
+    public void crossAndGroupJoin() throws Exception {
+        List<String> list = DatabaseUtil.getJoinArray(nuodbConnection, pstmt);
+        String[] categories = list.toArray(new String[list.size()]);
+        List<Product> products = DatabaseUtil.getProductList(
+                "select * from products  join array5 where cate_name=category",
+                nuodbConnection, pstmt);
+        List<String> strObj = new ArrayList<String>();
+        Assert.assertTrue(products.size() >= 1, "The product list is empty");
+        HashMap<String, String> actMap = new HashMap<String, String>();
+        HashMap<String, String> expMap = new HashMap<String, String>();
+        for (String str : categories) {
+            strObj.add(str);
+        }
+        for (Product p : products) {
+            if (strObj.contains(p.getCategory())) {
+                actMap.put(p.getPname(), p.getCategory());
+            }
+        }
+        expMap.put("Alice Mutton", "Beverages");
+        expMap.put("Outback Lager", "Beverages");
+        expMap.put("Chef Anton", "Condiments");
+        Assert.assertEquals(actMap, expMap);
+    }
 
-	public void leftOuterJoin() throws Exception {
-		TreeMap<String, String> map = DatabaseUtil.getJoinProductList(
-				nuodbConnection, pstmt);
-		Iterator<Map.Entry<String, String>> it = map.entrySet().iterator();
-		HashMap<String, String> actMap = new HashMap<String, String>();
-		HashMap<String, String> expMap = new HashMap<String, String>();
-		Assert.assertTrue(map.size() >= 1, "The map list is empty");
-		while (it.hasNext()) {
-			Map.Entry<String, String> pairs = (Map.Entry<String, String>) it
-					.next();
-			String key = (String) pairs.getKey();
-			String value = (String) pairs.getValue();
-			actMap.put(key, value);
-		}
-		expMap.put("Alice Mutton", "Beverages");
-		expMap.put("Outback Lager", "Beverages");
-		expMap.put("Chef Anton", "Condiments");
-		expMap.put("", "Vegetables");
-		Assert.assertEquals(actMap, expMap);
-	}
+    public void leftOuterJoin() throws Exception {
+        TreeMap<String, String> map = DatabaseUtil.getJoinProductList(
+                nuodbConnection, pstmt);
+        Iterator<Map.Entry<String, String>> it = map.entrySet().iterator();
+        HashMap<String, String> actMap = new HashMap<String, String>();
+        HashMap<String, String> expMap = new HashMap<String, String>();
+        Assert.assertTrue(map.size() >= 1, "The map list is empty");
+        while (it.hasNext()) {
+            Map.Entry<String, String> pairs = (Map.Entry<String, String>) it
+                    .next();
+            String key = (String) pairs.getKey();
+            String value = (String) pairs.getValue();
+            actMap.put(key, value);
+        }
+        expMap.put("Alice Mutton", "Beverages");
+        expMap.put("Outback Lager", "Beverages");
+        expMap.put("Chef Anton", "Condiments");
+        expMap.put("", "Vegetables");
+        Assert.assertEquals(actMap, expMap);
+    }
 }

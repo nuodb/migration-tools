@@ -145,7 +145,9 @@ public interface CliResources {
     final String JDBC_TYPE_PRECISION_ARGUMENT_NAME = "com.nuodb.migrator.jdbc.type.precision.argument.name";
     final String JDBC_TYPE_SCALE_OPTION_DESCRIPTION = "com.nuodb.migrator.jdbc.type.scale.option.description";
     final String JDBC_TYPE_SCALE_ARGUMENT_NAME = "com.nuodb.migrator.jdbc.type.scale.argument.name";
-    final String USE_NUODB_TYPES_SWITCH_DESCRIPTION = "com.nuodb.migrator.nuodb.types.switch.description";
+    final String USE_NUODB_TYPES_SWITCH_DESCRIPTION = "com.nuodb.migrator.use.nuodb.types.switch.description";
+    final String USE_IMPLICIT_DEFAULTS_SWITCH_DESCRIPTION = "com.nuodb.migrator.use.implicit.defaults.switch.description";
+    final String USE_IMPLICIT_DEFAULTS_SWITCH_ARGUMENT_NAME = "com.nuodb.migrator.use.implicit.defaults.switch.argument.name";
 
     final String INSERT_TYPE_GROUP_NAME = "com.nuodb.migrator.insert.type.group.name";
     final String TABLE_REPLACE_OPTION_DESCRIPTION = "com.nuodb.migrator.table.replace.option.description";

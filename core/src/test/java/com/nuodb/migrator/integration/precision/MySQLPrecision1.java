@@ -25,69 +25,69 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata;
+package com.nuodb.migrator.integration.precision;
 
-import com.nuodb.migrator.utils.ObjectUtils;
 
 /**
- * @author Sergey Bushik
+ * Test to make sure all the Tables, Constraints, Views, Triggers etc have been migrated.
+ *
+ * @author Krishnamoorthy Dhandapani
  */
-public class DefaultValue {
 
-    private String script;
-    private boolean processed;
+public class MySQLPrecision1 {
+    int t1;
+    int t2;
+    long t3;
+    long t4;
+    long t5;
 
-    private DefaultValue(String script, boolean processed) {
-        this.script = script;
-        this.processed = processed;
-    }
-
-    public static DefaultValue valueOf(String value) {
-        return valueOf(value, false);
-    }
-
-    public static DefaultValue valueOf(String value, boolean processed) {
-        return value != null ? new DefaultValue(value, processed) : null;
-    }
-
-    public String getScript() {
-        return script;
-    }
-
-    public void setScript(String script) {
-        this.script = script;
-    }
-
-    public boolean isProcessed() {
-        return processed;
-    }
-
-    public void setProcessed(boolean processed) {
-        this.processed = processed;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DefaultValue)) return false;
-
-        DefaultValue that = (DefaultValue) o;
-
-        if (script != null ? !script.equals(that.script) : that.script != null) return false;
-        if (processed != that.processed) return false;
-
-        return true;
+    public MySQLPrecision1(int t1, int t2, long t3, long t4, long t5) {
+        this.t1 = t1;
+        this.t2 = t2;
+        this.t3 = t3;
+        this.t4 = t4;
+        this.t5 = t5;
     }
 
     @Override
     public int hashCode() {
-        int result = script != null ? script.hashCode() : 0;
-        result = 31 * result + (processed ? 1 : 0);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + t1;
+        result = prime * result + t2;
+        result = prime * result + (int) (t3 ^ (t3 >>> 32));
+        result = prime * result + (int) (t4 ^ (t4 >>> 32));
+        result = prime * result + (int) (t5 ^ (t5 >>> 32));
         return result;
     }
 
     @Override
-    public String toString() {
-        return ObjectUtils.toString(this);
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MySQLPrecision1 other = (MySQLPrecision1) obj;
+        if (t1 != other.t1)
+            return false;
+        if (t2 != other.t2)
+            return false;
+        if (t3 != other.t3)
+            return false;
+        if (t4 != other.t4)
+            return false;
+        if (t5 != other.t5)
+            return false;
+        return true;
     }
+
+    @Override
+    public String toString() {
+        return "MySqlDataPrecision1 [t1=" + t1 + ", t2=" + t2 + ", t3=" + t3
+                + ", t4=" + t4 + ", t5=" + t5 + "]";
+    }
+
+
 }

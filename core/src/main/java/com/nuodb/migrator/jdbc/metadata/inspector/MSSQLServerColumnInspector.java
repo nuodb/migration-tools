@@ -43,16 +43,15 @@ import static org.apache.commons.lang3.StringUtils.startsWith;
 public class MSSQLServerColumnInspector extends SimpleColumnInspector {
 
     @Override
-    protected DefaultValue getDefaultValue(InspectionContext inspectionContext, Column column,
-                                           ResultSet columns) throws SQLException {
-        DefaultValue defaultValue = super.getDefaultValue(inspectionContext, column, columns);
+    protected void inspect(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
+        super.inspect(inspectionContext, columns, column);
+        DefaultValue defaultValue = column.getDefaultValue();
         if (defaultValue != null && !defaultValue.isProcessed()) {
             String value = defaultValue.getScript();
             while (startsWith(value, "(") && endsWith(value, ")")) {
                 value = value.substring(1, value.length() - 1);
             }
-            defaultValue = valueOf(value);
+            column.setDefaultValue(valueOf(value));
         }
-        return defaultValue;
     }
 }

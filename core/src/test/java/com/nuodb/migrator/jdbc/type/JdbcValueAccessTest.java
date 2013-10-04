@@ -66,6 +66,7 @@ public class JdbcValueAccessTest {
     private PreparedStatement preparedStatement;
 
     private JdbcValueAccessProvider jdbcValueAccessProvider;
+
     /**
      * Initializes mocks on this test instance & adds single TIMESTAMP type & TIMESTAMP type adapter to the {@link
      * com.nuodb.migrator.jdbc.type.SimpleJdbcValueAccessProvider}

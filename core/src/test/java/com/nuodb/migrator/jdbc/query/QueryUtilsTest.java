@@ -49,8 +49,10 @@ public class QueryUtilsTest {
                         AND, "SELECT \"column1\", \"column2\" FROM \"table\""},
                 {"SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\" > \"column2\""),
                         AND, "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\" > \"column2\""},
-                {"SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\" > \"column2\"", "\"column1\" > 0"),
-                        OR, "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\" > \"column2\" OR \"column1\" > 0"}
+                {"SELECT \"column1\", \"column2\" FROM \"table\"", newArrayList("\"column1\" > \"column2\"",
+                        "\"column1\" > 0"),
+                        OR, "SELECT \"column1\", \"column2\" FROM \"table\" WHERE \"column1\" > \"column2\" OR " +
+                        "\"column1\" > 0"}
         };
     }
 

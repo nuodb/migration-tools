@@ -45,6 +45,7 @@ import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
  */
 public class SchemaSpec extends JobSpecBase {
 
+    private boolean implicitDefaults;
     private String[] tableTypes = new String[]{TABLE, ALIAS};
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;
@@ -55,6 +56,14 @@ public class SchemaSpec extends JobSpecBase {
     private Collection<JdbcTypeSpec> jdbcTypeSpecs = newHashSet();
     private IdentifierQuoting identifierQuoting;
     private IdentifierNormalizer identifierNormalizer;
+
+    public boolean isImplicitDefaults() {
+        return implicitDefaults;
+    }
+
+    public void setImplicitDefaults(boolean implicitDefaults) {
+        this.implicitDefaults = implicitDefaults;
+    }
 
     public String[] getTableTypes() {
         return tableTypes;
@@ -144,23 +153,23 @@ public class SchemaSpec extends JobSpecBase {
 
         SchemaSpec that = (SchemaSpec) o;
 
-        if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
-        if (identifierNormalizer != null ? !identifierNormalizer.equals(
-                that.identifierNormalizer) : that.identifierNormalizer != null) return false;
-        if (identifierQuoting != null ? !identifierQuoting.equals(
-                that.identifierQuoting) : that.identifierQuoting != null)
+        if (implicitDefaults != that.implicitDefaults) return false;
+        if (groupScriptsBy != that.groupScriptsBy) return false;
+        if (identifierNormalizer != null ? !identifierNormalizer.equals(that.identifierNormalizer) :
+                that.identifierNormalizer != null) return false;
+        if (identifierQuoting != null ? !identifierQuoting.equals(that.identifierQuoting) :
+                that.identifierQuoting != null)
             return false;
         if (jdbcTypeSpecs != null ? !jdbcTypeSpecs.equals(that.jdbcTypeSpecs) : that.jdbcTypeSpecs != null)
             return false;
-        if (objectTypes != null ? !objectTypes.equals(that.objectTypes) : that.objectTypes != null)
-            return false;
-        if (groupScriptsBy != that.groupScriptsBy) return false;
+        if (objectTypes != null ? !objectTypes.equals(that.objectTypes) : that.objectTypes != null) return false;
         if (outputSpec != null ? !outputSpec.equals(that.outputSpec) : that.outputSpec != null) return false;
         if (scriptTypes != null ? !scriptTypes.equals(that.scriptTypes) : that.scriptTypes != null) return false;
-        if (sourceConnectionSpec != null ? !sourceConnectionSpec.equals(
-                that.sourceConnectionSpec) : that.sourceConnectionSpec != null) return false;
-        if (targetConnectionSpec != null ? !targetConnectionSpec.equals(
-                that.targetConnectionSpec) : that.targetConnectionSpec != null) return false;
+        if (sourceConnectionSpec != null ? !sourceConnectionSpec.equals(that.sourceConnectionSpec) :
+                that.sourceConnectionSpec != null) return false;
+        if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
+        if (targetConnectionSpec != null ? !targetConnectionSpec.equals(that.targetConnectionSpec) :
+                that.targetConnectionSpec != null) return false;
 
         return true;
     }
@@ -168,6 +177,7 @@ public class SchemaSpec extends JobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + (implicitDefaults ? 1 : 0);
         result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
         result = 31 * result + (sourceConnectionSpec != null ? sourceConnectionSpec.hashCode() : 0);
         result = 31 * result + (targetConnectionSpec != null ? targetConnectionSpec.hashCode() : 0);

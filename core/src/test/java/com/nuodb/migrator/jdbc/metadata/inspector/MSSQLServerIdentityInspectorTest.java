@@ -80,7 +80,8 @@ public class MSSQLServerIdentityInspectorTest extends InspectorTestBase {
         given(resultSet.getString("COLUMN_NAME")).willReturn(columnName);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
-        InspectionResults inspectionResults = getInspectionManager().inspect(getConnection(), inspectionScope, IDENTITY);
+        InspectionResults inspectionResults = getInspectionManager()
+                .inspect(getConnection(), inspectionScope, IDENTITY);
 
         verifyInspectScope(getInspector(), inspectionScope);
         Collection<Sequence> sequences = inspectionResults.getObjects(IDENTITY);

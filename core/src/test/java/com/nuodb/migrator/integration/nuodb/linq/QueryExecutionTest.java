@@ -36,22 +36,22 @@ import org.testng.annotations.Test;
 import com.nuodb.migrator.integration.MigrationTestBase;
 import com.nuodb.migrator.integration.nuodb.linq.util.DatabaseUtil;
 
-@Test(groups = { "nuodblinqtest" }, dependsOnGroups = { "linqdataloadperformed" })
+@Test(groups = {"nuodblinqtest"}, dependsOnGroups = {"linqdataloadperformed"})
 public class QueryExecutionTest extends MigrationTestBase {
-	PreparedStatement pstmt = null;
+    PreparedStatement pstmt = null;
 
-	public void queryReuse() throws Exception {
-		List<Integer> list = DatabaseUtil
-				.getNumArray("select num  from array where num < =3",
-						nuodbConnection, pstmt);
-		Assert.assertTrue(list.size() >= 1, "The list is empty");
-		Integer[] numbers = list.toArray(new Integer[list.size()]);
-		int count = 0;
-		for (int num : numbers) {
-			count++;
-			Assert.assertTrue(num <= 3, "Number " + num + " greater than 3");
-		}
-		Assert.assertEquals(count, 4, "Count mismatching");
-	}
+    public void queryReuse() throws Exception {
+        List<Integer> list = DatabaseUtil
+                .getNumArray("select num  from array where num < =3",
+                        nuodbConnection, pstmt);
+        Assert.assertTrue(list.size() >= 1, "The list is empty");
+        Integer[] numbers = list.toArray(new Integer[list.size()]);
+        int count = 0;
+        for (int num : numbers) {
+            count++;
+            Assert.assertTrue(num <= 3, "Number " + num + " greater than 3");
+        }
+        Assert.assertEquals(count, 4, "Count mismatching");
+    }
 
 }

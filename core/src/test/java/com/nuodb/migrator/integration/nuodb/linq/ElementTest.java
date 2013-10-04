@@ -37,14 +37,14 @@ import com.nuodb.migrator.integration.MigrationTestBase;
 import com.nuodb.migrator.integration.nuodb.linq.util.DatabaseUtil;
 import com.nuodb.migrator.integration.nuodb.linq.util.Product;
 
-@Test(groups = { "nuodblinqtest" }, dependsOnGroups = { "linqdataloadperformed" })
+@Test(groups = {"nuodblinqtest"}, dependsOnGroups = {"linqdataloadperformed"})
 public class ElementTest extends MigrationTestBase {
-	PreparedStatement pstmt = null;
+    PreparedStatement pstmt = null;
 
-	public void firstOrDefaultRecord() throws Exception {
-		List<Product> products = DatabaseUtil.getProductList(
-				"select * from products where pid=8 ", nuodbConnection, pstmt);
-		int val = products.size();
-		Assert.assertEquals(val, 0, "The product list condains record");
-	}
+    public void firstOrDefaultRecord() throws Exception {
+        List<Product> products = DatabaseUtil.getProductList(
+                "select * from products where pid=8 ", nuodbConnection, pstmt);
+        int val = products.size();
+        Assert.assertEquals(val, 0, "The product list condains record");
+    }
 }

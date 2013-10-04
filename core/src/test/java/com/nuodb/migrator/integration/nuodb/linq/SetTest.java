@@ -38,44 +38,44 @@ import org.testng.annotations.Test;
 import com.nuodb.migrator.integration.MigrationTestBase;
 import com.nuodb.migrator.integration.nuodb.linq.util.DatabaseUtil;
 
-@Test(groups = { "nuodblinqtest" }, dependsOnGroups = { "linqdataloadperformed" })
+@Test(groups = {"nuodblinqtest"}, dependsOnGroups = {"linqdataloadperformed"})
 public class SetTest extends MigrationTestBase {
-	PreparedStatement pstmt = null;
+    PreparedStatement pstmt = null;
 
-	public void primeFactors() throws Exception {
-		List<Integer> list = DatabaseUtil.getRepeatNumArray(
-				"select distinct mod(repeatnum,300) as repeatnum from array3",
-				nuodbConnection, pstmt);
-		Assert.assertTrue(list.size() >= 1, "The list is empty");
-		Integer[] factorsOf300 = list.toArray(new Integer[list.size()]);
-		Integer[] factorsOf300Result = { 2, 3, 5 };
-		Assert.assertEquals(factorsOf300, factorsOf300Result,
-				"Elements are not an prime factors of 300");
-	}
+    public void primeFactors() throws Exception {
+        List<Integer> list = DatabaseUtil.getRepeatNumArray(
+                "select distinct mod(repeatnum,300) as repeatnum from array3",
+                nuodbConnection, pstmt);
+        Assert.assertTrue(list.size() >= 1, "The list is empty");
+        Integer[] factorsOf300 = list.toArray(new Integer[list.size()]);
+        Integer[] factorsOf300Result = {2, 3, 5};
+        Assert.assertEquals(factorsOf300, factorsOf300Result,
+                "Elements are not an prime factors of 300");
+    }
 
-	public void uniqueCategory() throws Exception {
-		List<String> catList = DatabaseUtil.getDistinctProductList(
-				"select distinct category from products", nuodbConnection,
-				pstmt);
-		Assert.assertTrue(catList.size() >= 1, "The Category list is empty");
-		ArrayList<String> explist = new ArrayList<String>();
-		explist.add("Beverages");
-		explist.add("Condiments");
-		explist.add("Produce");
-		explist.add("Seafood");
-		Collections.sort(explist);
-		Collections.sort(catList);
-		Assert.assertEquals(catList, explist, "Category names are not matching");
-	}
+    public void uniqueCategory() throws Exception {
+        List<String> catList = DatabaseUtil.getDistinctProductList(
+                "select distinct category from products", nuodbConnection,
+                pstmt);
+        Assert.assertTrue(catList.size() >= 1, "The Category list is empty");
+        ArrayList<String> explist = new ArrayList<String>();
+        explist.add("Beverages");
+        explist.add("Condiments");
+        explist.add("Produce");
+        explist.add("Seafood");
+        Collections.sort(explist);
+        Collections.sort(catList);
+        Assert.assertEquals(catList, explist, "Category names are not matching");
+    }
 
-	public void uniqueNumbers() throws Exception {
-		List<Integer> list1 = DatabaseUtil
-				.getUnion(
-						"select distinct numa from (select numa from array2 union select numb from array3)",
-						nuodbConnection, pstmt);
-		Assert.assertTrue(list1.size() >= 1, "The list1 is empty");
-		Integer[] actarr = list1.toArray(new Integer[list1.size()]);
-		Integer[] exparr = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-		Assert.assertEqualsNoOrder(actarr, exparr);
-	}
+    public void uniqueNumbers() throws Exception {
+        List<Integer> list1 = DatabaseUtil
+                .getUnion(
+                        "select distinct numa from (select numa from array2 union select numb from array3)",
+                        nuodbConnection, pstmt);
+        Assert.assertTrue(list1.size() >= 1, "The list1 is empty");
+        Integer[] actarr = list1.toArray(new Integer[list1.size()]);
+        Integer[] exparr = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        Assert.assertEqualsNoOrder(actarr, exparr);
+    }
 }

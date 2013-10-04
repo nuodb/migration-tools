@@ -30,10 +30,7 @@ package com.nuodb.migrator.schema;
 import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
-import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
-import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
+import com.nuodb.migrator.jdbc.dialect.*;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.*;
@@ -139,6 +136,15 @@ public class SchemaJob extends JobBase {
         scriptGeneratorContext.setSourceSession(session);
 
         Dialect dialect = getService(DialectResolver.class).resolve(NUODB);
+        TranslationManager translationManager = dialect.getTranslationManager();
+
+        Collection<Translator> translators = translationManager.getTranslators();
+        for (Translator translator : translators) {
+            if (translator instanceof ImplicitDefaultsTranslator) {
+                ((ImplicitDefaultsTranslator)translator).setImplicitDefaults(schemaSpec.isImplicitDefaults());
+            }
+        }
+
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         for (JdbcTypeSpec jdbcTypeSpec : getJdbcTypeSpecs()) {
             jdbcTypeNameMap.addJdbcTypeName(

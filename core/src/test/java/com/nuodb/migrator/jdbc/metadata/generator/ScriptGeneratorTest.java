@@ -41,6 +41,8 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -60,6 +62,7 @@ public class ScriptGeneratorTest {
 
         scriptGeneratorContext = new ScriptGeneratorContext();
         scriptGeneratorContext.setTargetDialect(dialect);
+        scriptGeneratorContext.setSourceSession(createSession(new MySQLDialect(MYSQL)));
     }
 
     @DataProvider(name = "getScripts")
@@ -92,8 +95,8 @@ public class ScriptGeneratorTest {
                 newArrayList("DROP TABLE IF EXISTS \"users\" CASCADE")});
         data.add(new Object[]{table, newArrayList(ScriptType.CREATE),
                 newArrayList(
-                "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, " +
-                        "\"login\" VARCHAR(32) NOT NULL, PRIMARY KEY (\"id\"))")});
+                        "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, " +
+                                "\"login\" VARCHAR(32) NOT NULL, PRIMARY KEY (\"id\"))")});
         return data.toArray(new Object[][]{});
     }
 

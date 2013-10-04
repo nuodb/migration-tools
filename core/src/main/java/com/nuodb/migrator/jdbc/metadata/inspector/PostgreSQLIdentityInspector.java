@@ -44,7 +44,6 @@ import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
-import static com.nuodb.migrator.jdbc.metadata.inspector.PostgreSQLColumn.initColumn;
 
 /**
  * @author Sergey Bushik
@@ -61,7 +60,7 @@ public class PostgreSQLIdentityInspector extends InspectorBase<Table, TableInspe
         Dialect dialect = inspectionContext.getDialect();
         for (Table table : tables) {
             for (final Column column : table.getColumns()) {
-                initColumn(inspectionContext, column);
+                PostgreSQLColumn.inspect(inspectionContext, column);
                 Sequence sequence = column.getSequence();
                 if (sequence == null) {
                     continue;

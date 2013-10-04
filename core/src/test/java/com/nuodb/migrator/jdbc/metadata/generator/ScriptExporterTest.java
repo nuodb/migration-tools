@@ -73,7 +73,7 @@ public class ScriptExporterTest {
         Statement statement = mock(Statement.class);
         when(connection.createStatement()).thenReturn(statement);
 
-        return new Object[][] {
+        return new Object[][]{
                 {new FileScriptExporter(file)},
                 {new ConnectionScriptExporter(connectionProvider.getConnection())},
                 {new WriterScriptExporter(new NullOutputStream())}

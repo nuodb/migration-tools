@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DefaultValue;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
@@ -40,13 +41,10 @@ import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.*;
 import static java.lang.String.format;
 
 /**
- * Mimics MySQL's zeroDateTimeBehavior and converts zero'd date time values following these rules:
- * <ul>
- * <li>convertToNull outputs NULL</li>
- * <li>round outputs '00:00:00' for TIME, '0001-01-01' for DATE & YEAR, '0001-01-01 00:00:00' for DATETIME &
- * TIMESTAMP types</li>
- * <li>exception causes runtime exception on the first encountered zero'd date type value</li>
- * </ul>
+ * Mimics MySQL's zeroDateTimeBehavior and converts zero'd date time values following these rules: <ul>
+ * <li>convertToNull outputs NULL</li> <li>round outputs '00:00:00' for TIME, '0001-01-01' for DATE & YEAR, '0001-01-01
+ * 00:00:00' for DATETIME & TIMESTAMP types</li> <li>exception causes runtime exception on the first encountered zero'd
+ * date type value</li> </ul>
  *
  * @author Sergey Bushik
  */
@@ -65,20 +63,23 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
     }
 
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        String source = column.getDefaultValue().getScript();
-        boolean canTranslate;
-        switch (column.getTypeCode()) {
-            case Types.TIME:
-                canTranslate = ZERO_TIME.equals(source);
-                break;
-            case Types.DATE:
-                canTranslate = ZERO_DATE.equals(source);
-                break;
-            case Types.TIMESTAMP:
-                canTranslate = ZERO_TIMESTAMP.equals(source);
-                break;
-            default:
-                canTranslate = false;
+        boolean canTranslate = false;
+        DefaultValue defaultValue = column.getDefaultValue();
+        if (defaultValue != null) {
+            String source = defaultValue.getScript();
+            switch (column.getTypeCode()) {
+                case Types.TIME:
+                    canTranslate = ZERO_TIME.equals(source);
+                    break;
+                case Types.DATE:
+                    canTranslate = ZERO_DATE.equals(source);
+                    break;
+                case Types.TIMESTAMP:
+                    canTranslate = ZERO_TIMESTAMP.equals(source);
+                    break;
+                default:
+                    canTranslate = false;
+            }
         }
         return canTranslate;
     }
@@ -118,6 +119,6 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
 
     protected JdbcUrl getJdbcUrl(Script script) {
         ConnectionProxy connection = (ConnectionProxy) script.getSession().getConnection();
-        return ((DriverConnectionSpec)connection.getConnectionSpec()).getJdbcUrl();
+        return ((DriverConnectionSpec) connection.getConnectionSpec()).getJdbcUrl();
     }
 }

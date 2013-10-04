@@ -31,7 +31,6 @@ import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils;
 import com.nuodb.migrator.utils.SimplePriorityList;
 
 import java.sql.Connection;
@@ -80,6 +79,7 @@ public class InspectionManager {
         addInspector(foreignKeyInspector);
 
         InspectorResolver columnInspector = new InspectorResolver(COLUMN, new SimpleColumnInspector());
+        columnInspector.register(MYSQL, new MySQLColumnInspector());
         columnInspector.register(NUODB, new NuoDBColumnInspector());
         columnInspector.register(POSTGRE_SQL, new PostgreSQLColumnInspector());
         columnInspector.register(MSSQL_SERVER, new MSSQLServerColumnInspector());

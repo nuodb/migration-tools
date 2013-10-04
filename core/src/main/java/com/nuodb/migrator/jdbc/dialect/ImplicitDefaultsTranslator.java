@@ -25,9 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.integration.types;
+package com.nuodb.migrator.jdbc.dialect;
 
-public enum JDBCGetMethod {
-    BOOLEAN, STRING, BIGDECIMAL, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, BYTES, DATE, TIME, TIMESTAMP, CLOB, BLOB,
-    ARRAY, REF, STRUCT
+/**
+ * @author Sergey Bushik
+ */
+public interface ImplicitDefaultsTranslator extends Translator {
+
+    final boolean IMPLICIT_DEFAULTS = false;
+
+    boolean isImplicitDefaults();
+
+    void setImplicitDefaults(boolean implicitDefaults);
 }

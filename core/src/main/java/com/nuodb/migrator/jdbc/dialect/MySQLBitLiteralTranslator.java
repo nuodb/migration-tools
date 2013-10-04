@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
 import static java.lang.Integer.parseInt;
 import static java.sql.Types.BIT;
+import static java.util.regex.Pattern.compile;
 
 /**
  * Translates MySQL BIT literals http://dev.mysql.com/doc/refman/5.0/en/bit-field-literals.html to NuoDB BOOLEAN
@@ -45,7 +46,7 @@ import static java.sql.Types.BIT;
  */
 public class MySQLBitLiteralTranslator extends ColumnTranslatorBase {
 
-    private static final Pattern PATTERN = Pattern.compile("(?i:b)'([01]*)'");
+    private static final Pattern PATTERN = compile("(?i:b)'([01]*)'");
 
     private static final String TRUE = "TRUE";
     private static final String FALSE = "FALSE";
@@ -56,7 +57,8 @@ public class MySQLBitLiteralTranslator extends ColumnTranslatorBase {
 
     @Override
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        return column.getTypeCode() == BIT && PATTERN.matcher(script.getScript()).matches();
+        return column.getDefaultValue() != null && column.getTypeCode() == BIT &&
+                PATTERN.matcher(script.getScript()).matches();
     }
 
     @Override
