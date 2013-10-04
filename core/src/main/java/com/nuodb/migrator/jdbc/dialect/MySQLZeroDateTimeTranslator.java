@@ -36,7 +36,7 @@ import com.nuodb.migrator.spec.DriverConnectionSpec;
 import java.sql.Types;
 
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
-import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrlParser.*;
+import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.*;
 import static java.lang.String.format;
 
 /**

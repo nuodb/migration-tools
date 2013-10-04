@@ -33,41 +33,38 @@ import static org.apache.commons.lang3.StringUtils.substringAfter;
 /**
  * @author Sergey Bushik
  */
-public class MSSQLJdbcUrlParser extends JdbcUrlParserBase {
+public class MSSQLJdbcUrl extends JdbcUrlBase {
 
-    public MSSQLJdbcUrlParser() {
-        super(MSSQL_SUB_PROTOCOL);
+    public static JdbcUrlParser getParser() {
+        return new JdbcUrlParserBase(MSSQL_SUB_PROTOCOL) {
+            @Override
+            protected JdbcUrl createJdbcUrl(String url) {
+                return new MSSQLJdbcUrl(url);
+            }
+        };
+    }
+
+    public MSSQLJdbcUrl(String url) {
+        super(url, MSSQL_SUB_PROTOCOL);
     }
 
     @Override
-    protected JdbcUrl createJdbcUrl(String url) {
-        return new MSSQLJdbcUrl(url);
+    protected void parseSubName(String subName) {
+        parseParameters(getParameters(), substringAfter(subName, ";"), ";");
     }
 
-    class MSSQLJdbcUrl extends JdbcUrlBase {
+    @Override
+    public String getCatalog() {
+        return null;
+    }
 
-        protected MSSQLJdbcUrl(String url) {
-            super(url, MSSQL_SUB_PROTOCOL);
-        }
+    @Override
+    public String getSchema() {
+        return null;
+    }
 
-        @Override
-        protected void parseSubName(String subName) {
-            parseParameters(getParameters(), substringAfter(subName, ";"), ";");
-        }
-
-        @Override
-        public String getCatalog() {
-            return null;
-        }
-
-        @Override
-        public String getSchema() {
-            return null;
-        }
-
-        @Override
-        public String getQualifier() {
-            return null;
-        }
+    @Override
+    public String getQualifier() {
+        return null;
     }
 }

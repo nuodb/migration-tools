@@ -27,51 +27,46 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.JTDS_SUB_PROTOCOL;
-import static org.apache.commons.lang3.StringUtils.substringAfter;
+
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.ORACLE_SUB_PROTOCOL;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 /**
  * @author Sergey Bushik
  */
-public class JTDSJdbcUrlParser extends JdbcUrlParserBase {
+public class OracleJdbcUrl extends JdbcUrlBase {
 
-    public JTDSJdbcUrlParser() {
-        super(JTDS_SUB_PROTOCOL);
+    public static JdbcUrlParser getParser() {
+        return new JdbcUrlParserBase(ORACLE_SUB_PROTOCOL) {
+            @Override
+            protected JdbcUrl createJdbcUrl(String url) {
+                return new OracleJdbcUrl(url);
+            }
+        };
+    }
+
+    private String qualifier;
+
+    public OracleJdbcUrl(String url) {
+        super(url, ORACLE_SUB_PROTOCOL);
     }
 
     @Override
-    protected JdbcUrl createJdbcUrl(String url) {
-        return new JTDSJdbcUrl(url);
+    protected void parseSubName(String subName) {
+        qualifier = substringBefore(subName, ":");
     }
 
-    class JTDSJdbcUrl extends JdbcUrlBase {
+    public String getQualifier() {
+        return qualifier;
+    }
 
-        private String qualifier;
+    @Override
+    public String getCatalog() {
+        return null;
+    }
 
-        public JTDSJdbcUrl(String url) {
-            super(url, JTDS_SUB_PROTOCOL);
-        }
-
-        @Override
-        protected void parseSubName(String subName) {
-            qualifier = substringBefore(subName, ":");
-            parseParameters(getParameters(), substringAfter(subName, ";"), ";");
-        }
-
-        @Override
-        public String getQualifier() {
-            return qualifier;
-        }
-
-        @Override
-        public String getCatalog() {
-            return null;
-        }
-
-        @Override
-        public String getSchema() {
-            return (String) getParameters().get("schema");
-        }
+    @Override
+    public String getSchema() {
+        return null;
     }
 }

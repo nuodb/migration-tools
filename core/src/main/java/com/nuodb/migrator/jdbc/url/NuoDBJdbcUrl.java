@@ -27,48 +27,48 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.ORACLE_SUB_PROTOCOL;
-import static org.apache.commons.lang3.StringUtils.substringBefore;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.NUODB_SUB_PROTOCOL;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 /**
  * @author Sergey Bushik
  */
-public class OracleJdbcUrlParser extends JdbcUrlParserBase {
+public class NuoDBJdbcUrl extends JdbcUrlBase {
 
-    public OracleJdbcUrlParser() {
-        super(ORACLE_SUB_PROTOCOL);
+    public static JdbcUrlParser getParser() {
+        return new JdbcUrlParserBase(NUODB_SUB_PROTOCOL) {
+            @Override
+            protected JdbcUrl createJdbcUrl(String url) {
+                return new NuoDBJdbcUrl(url);
+            }
+        };
+    }
+
+    public NuoDBJdbcUrl(String url) {
+        super(url, NUODB_SUB_PROTOCOL);
     }
 
     @Override
-    protected JdbcUrl createJdbcUrl(String url) {
-        return new OracleJdbcUrl(url);
+    protected void parseSubName(String subName) {
+        int prefix = subName.indexOf("//");
+        int parameters;
+        if (prefix >= 0 && (parameters = subName.indexOf('?', prefix + 3)) > 0) {
+            parseParameters(getParameters(), substring(subName, parameters + 1), "&");
+        }
     }
 
-    class OracleJdbcUrl extends JdbcUrlBase {
+    @Override
+    public String getCatalog() {
+        return null;
+    }
 
-        private String qualifier;
+    @Override
+    public String getSchema() {
+        return (String) getParameters().get("schema");
+    }
 
-        protected OracleJdbcUrl(String url) {
-            super(url, ORACLE_SUB_PROTOCOL);
-        }
-
-        @Override
-        protected void parseSubName(String subName) {
-            qualifier = substringBefore(subName, ":");
-        }
-
-        public String getQualifier() {
-            return qualifier;
-        }
-
-        @Override
-        public String getCatalog() {
-            return null;
-        }
-
-        @Override
-        public String getSchema() {
-            return null;
-        }
+    @Override
+    public String getQualifier() {
+        return null;
     }
 }

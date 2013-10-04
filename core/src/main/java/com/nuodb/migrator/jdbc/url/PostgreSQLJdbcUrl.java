@@ -27,64 +27,46 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-
-import static com.google.common.collect.Sets.newLinkedHashSet;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.POSTGRESQL_PROTOCOL;
+import static org.apache.commons.lang3.StringUtils.contains;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcUrlParsers {
+public class PostgreSQLJdbcUrl extends JdbcUrlBase {
 
-    private static JdbcUrlParsers INSTANCE;
-
-    public static JdbcUrlParsers getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new JdbcUrlParsers();
-        }
-        return INSTANCE;
-    }
-
-    private Collection<JdbcUrlParser> parsers = newLinkedHashSet();
-
-    private JdbcUrlParsers() {
-        addParser(JTDSJdbcUrl.getParser());
-        addParser(MSSQLJdbcUrl.getParser());
-        addParser(MySQLJdbcUrl.getParser());
-        addParser(NuoDBJdbcUrl.getParser());
-        addParser(OracleJdbcUrl.getParser());
-        addParser(PostgreSQLJdbcUrl.getParser());
-    }
-
-    public JdbcUrl parse(String url) {
-        return parse(url, Collections.<String, Object>emptyMap());
-    }
-
-    public JdbcUrl parse(String url, Map<String, Object> overrides) {
-        for (JdbcUrlParser parser : getParsers()) {
-            if (parser.canParse(url)) {
-                return parser.parse(url, overrides);
+    public static JdbcUrlParser getParser() {
+        return new JdbcUrlParserBase(POSTGRESQL_PROTOCOL) {
+            @Override
+            protected JdbcUrl createJdbcUrl(String url) {
+                return new PostgreSQLJdbcUrl(url);
             }
-        }
+        };
+    }
+
+    public PostgreSQLJdbcUrl(String url) {
+        super(url, POSTGRESQL_PROTOCOL);
+    }
+
+    @Override
+    protected void parseSubName(String subName) {
+        parseParameters(getParameters(), substringAfter(subName, "?"), "&");
+    }
+
+    @Override
+    public String getQualifier() {
         return null;
     }
 
-    public void addParser(JdbcUrlParser jdbcUrlParser) {
-        getParsers().add(jdbcUrlParser);
-    }
-
-    public JdbcUrlParser getParser(String url) {
-        for (JdbcUrlParser parser : getParsers()) {
-            if (parser.canParse(url)) {
-                return parser;
-            }
-        }
+    @Override
+    public String getCatalog() {
         return null;
     }
 
-    public Collection<JdbcUrlParser> getParsers() {
-        return parsers;
+    @Override
+    public String getSchema() {
+        String searchPath = (String) getParameters().get("searchpath");
+        return contains(searchPath, ",") ? null : searchPath;
     }
 }

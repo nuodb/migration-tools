@@ -27,49 +27,48 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.POSTGRESQL_PROTOCOL;
-import static org.apache.commons.lang3.StringUtils.contains;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.JTDS_SUB_PROTOCOL;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 /**
  * @author Sergey Bushik
  */
-public class PostgreSQLJdbcUrlParser extends JdbcUrlParserBase {
+public class JTDSJdbcUrl extends JdbcUrlBase {
 
-    public PostgreSQLJdbcUrlParser() {
-        super(POSTGRESQL_PROTOCOL);
+    public static JdbcUrlParser getParser() {
+        return new JdbcUrlParserBase(JTDS_SUB_PROTOCOL) {
+            @Override
+            protected JdbcUrl createJdbcUrl(String url) {
+                return new JTDSJdbcUrl(url);
+            }
+        };
+    }
+
+    private String qualifier;
+
+    public JTDSJdbcUrl(String url) {
+        super(url, JTDS_SUB_PROTOCOL);
     }
 
     @Override
-    protected JdbcUrl createJdbcUrl(String url) {
-        return new PostgreSQLJdbcUrl(url);
+    protected void parseSubName(String subName) {
+        qualifier = substringBefore(subName, ":");
+        parseParameters(getParameters(), substringAfter(subName, ";"), ";");
     }
 
-    class PostgreSQLJdbcUrl extends JdbcUrlBase {
+    @Override
+    public String getQualifier() {
+        return qualifier;
+    }
 
-        public PostgreSQLJdbcUrl(String url) {
-            super(url, POSTGRESQL_PROTOCOL);
-        }
+    @Override
+    public String getCatalog() {
+        return null;
+    }
 
-        @Override
-        protected void parseSubName(String subName) {
-            parseParameters(getParameters(), substringAfter(subName, "?"), "&");
-        }
-
-        @Override
-        public String getQualifier() {
-            return null;
-        }
-
-        @Override
-        public String getCatalog() {
-            return null;
-        }
-
-        @Override
-        public String getSchema() {
-            String searchPath = (String) getParameters().get("searchpath");
-            return contains(searchPath, ",") ? null : searchPath;
-        }
+    @Override
+    public String getSchema() {
+        return (String) getParameters().get("schema");
     }
 }

@@ -27,51 +27,64 @@
  */
 package com.nuodb.migrator.jdbc.url;
 
-import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.NUODB_SUB_PROTOCOL;
+import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.MYSQL_SUB_PROTOCOL;
 import static org.apache.commons.lang3.StringUtils.substring;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBJdbcUrlParser extends JdbcUrlParserBase {
+public class MySQLJdbcUrl extends JdbcUrlBase {
 
-    public NuoDBJdbcUrlParser() {
-        super(NUODB_SUB_PROTOCOL);
+    public static final String ZERO_DATE_TIME_BEHAVIOR = "zeroDateTimeBehavior";
+    public static final String CONVERT_TO_NULL = "convertToNull";
+    public static final String ROUND = "round";
+    public static final String EXCEPTION = "exception";
+    public static final String DEFAULT_BEHAVIOR = CONVERT_TO_NULL;
+
+    public static JdbcUrlParser getParser() {
+        return new JdbcUrlParserBase(MYSQL_SUB_PROTOCOL) {
+            @Override
+            protected JdbcUrl createJdbcUrl(String url) {
+                return new MySQLJdbcUrl(url);
+            }
+        };
+    }
+
+    private String catalog;
+
+    public MySQLJdbcUrl(String url) {
+        super(url, MYSQL_SUB_PROTOCOL);
     }
 
     @Override
-    protected JdbcUrl createJdbcUrl(String url) {
-        return new NuoDBJdbcUrl(url);
+    protected void addParameters() {
+        addParameter(ZERO_DATE_TIME_BEHAVIOR, DEFAULT_BEHAVIOR);
     }
 
-    class NuoDBJdbcUrl extends JdbcUrlBase {
-
-        public NuoDBJdbcUrl(String url) {
-            super(url, NUODB_SUB_PROTOCOL);
+    @Override
+    protected void parseSubName(String subName) {
+        int prefix = subName.indexOf("//");
+        int parameters = 0;
+        if (prefix >= 0 && (parameters = subName.indexOf('?', prefix + 3)) > 0) {
+            parseParameters(getParameters(), substring(subName, parameters + 1), "&");
         }
+        String base = parameters > 0 ? subName.substring(0, parameters) : subName;
+        catalog = substringAfterLast(base, "/");
+    }
 
-        @Override
-        protected void parseSubName(String subName) {
-            int prefix = subName.indexOf("//");
-            int parameters;
-            if (prefix >= 0 && (parameters = subName.indexOf('?', prefix + 3)) > 0) {
-                parseParameters(getParameters(), substring(subName, parameters + 1), "&");
-            }
-        }
+    @Override
+    public String getCatalog() {
+        return catalog;
+    }
 
-        @Override
-        public String getCatalog() {
-            return null;
-        }
+    @Override
+    public String getSchema() {
+        return null;
+    }
 
-        @Override
-        public String getSchema() {
-            return (String) getParameters().get("schema");
-        }
-
-        @Override
-        public String getQualifier() {
-            return null;
-        }
+    @Override
+    public String getQualifier() {
+        return null;
     }
 }

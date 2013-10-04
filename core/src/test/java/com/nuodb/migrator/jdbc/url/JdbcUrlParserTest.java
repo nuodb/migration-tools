@@ -34,8 +34,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.nuodb.migrator.jdbc.url.JdbcUrlConstants.PROTOCOL;
-import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrlParser.CONVERT_TO_NULL;
-import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrlParser.ZERO_DATE_TIME_BEHAVIOR;
+import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.CONVERT_TO_NULL;
+import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.ZERO_DATE_TIME_BEHAVIOR;
 import static org.testng.Assert.*;
 
 /**
