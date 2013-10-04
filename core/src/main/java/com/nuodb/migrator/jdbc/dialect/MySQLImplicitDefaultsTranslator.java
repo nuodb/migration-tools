@@ -52,6 +52,9 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.split;
 
 /**
+ * Allow for MySQL implicit defaults to move over to the NuoDB schema explicitly
+ * <a hre="http://dev.mysql.com/doc/refman/5.5/en/data-type-defaults.html">MySQL Data Type Defaults</a>
+ *
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
