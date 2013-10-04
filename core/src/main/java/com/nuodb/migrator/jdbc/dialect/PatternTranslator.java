@@ -75,8 +75,12 @@ public class PatternTranslator extends TranslatorBase {
     }
 
     @Override
-    protected String translate(String script, DatabaseInfo sourceDatabaseInfo,
-                               DatabaseInfo targetDatabaseInfo) {
+    public boolean canTranslate(Script script, DatabaseInfo databaseInfo) {
+        return script.getScript() != null && super.canTranslate(script, databaseInfo);
+    }
+
+    @Override
+    protected String translate(String script, DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
         for (Map.Entry<Pattern, String> translation : translations.entrySet()) {
             Matcher matcher = translation.getKey().matcher(script);
             if (matcher.find()) {

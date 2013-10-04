@@ -33,20 +33,20 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import java.sql.Types;
 import java.util.Collection;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newTreeSet;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 /**
  * @author Sergey Bushik
  */
 public class CurrentTimestampTranslator extends ColumnTranslatorBase {
 
-    private Collection<String> currentTimestampAliases = newArrayList();
+    private Collection<String> aliases = newTreeSet(CASE_INSENSITIVE_ORDER);
     private String translation;
 
-    public CurrentTimestampTranslator(DatabaseInfo databaseInfo,
-                                      Collection<String> currentTimestampAliases, String translation) {
+    public CurrentTimestampTranslator(DatabaseInfo databaseInfo, Collection<String> aliases, String translation) {
         super(databaseInfo);
-        this.currentTimestampAliases = currentTimestampAliases;
+        this.aliases.addAll(aliases);
         this.translation = translation;
     }
 
@@ -63,7 +63,7 @@ public class CurrentTimestampTranslator extends ColumnTranslatorBase {
                 canTranslate = false;
                 break;
         }
-        return canTranslate && currentTimestampAliases.contains(column.getDefaultValue().getScript());
+        return canTranslate && script.getScript() != null && aliases.contains(script.getScript());
     }
 
     @Override

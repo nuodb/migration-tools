@@ -56,7 +56,7 @@ public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
 
     @Override
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        return column.getDefaultValue() != null && TYPES.contains(column.getTypeCode()) && PATTERN.matcher(script
+        return script.getScript() != null && TYPES.contains(column.getTypeCode()) && PATTERN.matcher(script
                 .getScript()).matches();
     }
 

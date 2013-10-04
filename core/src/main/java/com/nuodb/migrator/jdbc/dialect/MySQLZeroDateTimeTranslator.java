@@ -29,7 +29,6 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.DefaultValue;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
@@ -64,9 +63,8 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
 
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
         boolean canTranslate = false;
-        DefaultValue defaultValue = column.getDefaultValue();
-        if (defaultValue != null) {
-            String source = defaultValue.getScript();
+        if (script.getScript() != null) {
+            String source = script.getScript();
             switch (column.getTypeCode()) {
                 case Types.TIME:
                     canTranslate = ZERO_TIME.equals(source);

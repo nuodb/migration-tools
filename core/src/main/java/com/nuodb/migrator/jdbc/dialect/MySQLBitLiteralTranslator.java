@@ -57,7 +57,7 @@ public class MySQLBitLiteralTranslator extends ColumnTranslatorBase {
 
     @Override
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        return column.getDefaultValue() != null && column.getTypeCode() == BIT &&
+        return script.getScript() != null && column.getTypeCode() == BIT &&
                 PATTERN.matcher(script.getScript()).matches();
     }
 
