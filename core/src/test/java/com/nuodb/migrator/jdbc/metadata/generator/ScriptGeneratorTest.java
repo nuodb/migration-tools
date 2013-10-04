@@ -95,8 +95,8 @@ public class ScriptGeneratorTest {
                 newArrayList("DROP TABLE IF EXISTS \"users\" CASCADE")});
         data.add(new Object[]{table, newArrayList(ScriptType.CREATE),
                 newArrayList(
-                        "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, " +
-                                "\"login\" VARCHAR(32) NOT NULL, PRIMARY KEY (\"id\"))")});
+                        "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL DEFAULT '0', " +
+                                "\"login\" VARCHAR(32) NOT NULL DEFAULT '', PRIMARY KEY (\"id\"))")});
         return data.toArray(new Object[][]{});
     }
 
@@ -107,6 +107,6 @@ public class ScriptGeneratorTest {
 
         Collection<String> scripts = scriptGeneratorContext.getScripts(object);
         assertNotNull(scripts);
-        assertEquals(newArrayList(scripts), newArrayList(expected));
+        assertEquals(newArrayList(expected), newArrayList(scripts));
     }
 }

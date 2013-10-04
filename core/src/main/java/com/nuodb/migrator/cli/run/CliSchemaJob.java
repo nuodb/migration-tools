@@ -131,10 +131,10 @@ public class CliSchemaJob extends CliRunJob {
         Option useImplicitDefaults = newBasicOptionBuilder().
                 withName(USE_IMPLICIT_DEFAULTS_SWITCH).
                 withDescription(getMessage(USE_IMPLICIT_DEFAULTS_SWITCH_DESCRIPTION)).
+                withRequired(false).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(USE_IMPLICIT_DEFAULTS_SWITCH_ARGUMENT_NAME)).
-                                withDefaultValue(USE_IMPLICIT_DEFAULTS_SWITCH_DEFAULT).build()
+                                withName(getMessage(USE_IMPLICIT_DEFAULTS_SWITCH_ARGUMENT_NAME)).build()
                 ).build();
         typeGroup.withOption(useImplicitDefaults);
 
