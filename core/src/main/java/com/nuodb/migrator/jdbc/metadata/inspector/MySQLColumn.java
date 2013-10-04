@@ -41,7 +41,7 @@ public class MySQLColumn {
     private static String ENUM = "ENUM";
     private static String SET = "SET";
 
-    public static Collection<String> getEnum(Column column) {
+    public static Collection<String> getEnumValues(Column column) {
         Collection<String> values;
         if (ENUM.equals(column.getTypeName())) {
             String columnType = column.getColumnType();
@@ -52,7 +52,7 @@ public class MySQLColumn {
         return values;
     }
 
-    public static Collection<String> getSet(Column column) {
+    public static Collection<String> getSetValues(Column column) {
         Collection<String> values;
         if (SET.equals(column.getTypeName())) {
             String columnType = column.getColumnType();

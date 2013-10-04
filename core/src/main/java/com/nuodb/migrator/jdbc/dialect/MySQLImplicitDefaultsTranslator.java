@@ -43,7 +43,7 @@ import java.util.Collection;
 import static com.google.common.collect.Iterables.contains;
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.inspector.MySQLColumn.getEnum;
+import static com.nuodb.migrator.jdbc.metadata.inspector.MySQLColumn.getEnumValues;
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
 import static java.lang.String.valueOf;
 import static java.sql.Types.*;
@@ -78,7 +78,8 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
 
     @Override
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        return script.getScript() == null && !column.isNullable() && isImplicitDefaults(script);
+        return script.getScript() == null &&
+                !column.isNullable() && !column.isAutoIncrement() && isImplicitDefaults(script);
     }
 
     /**
@@ -165,7 +166,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
             case VARBINARY:
             case BLOB:
             case CLOB:
-                Collection<String> values = getEnum(column);
+                Collection<String> values = getEnumValues(column);
                 if (!values.isEmpty()) {
                     result = get(values, 0);
                 } else {
