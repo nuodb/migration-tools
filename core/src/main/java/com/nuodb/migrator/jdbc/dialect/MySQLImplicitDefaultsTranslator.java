@@ -69,7 +69,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
     public static final String SQL_MODE_QUERY = "SELECT @@GLOBAL.SQL_MODE";
 
     private boolean checkStrictMode = CHECK_STRICT_MODE;
-    private boolean implicitDefaults = IMPLICIT_DEFAULTS;
+    private boolean explicitDefaults = EXPLICIT_DEFAULTS;
     private String sqlModeQuery = SQL_MODE_QUERY;
 
     public MySQLImplicitDefaultsTranslator() {
@@ -79,7 +79,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
     @Override
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
         return script.getScript() == null && !column.isNullable() && !column.isAutoIncrement() &&
-                isImplicitDefaults(script);
+                isExplicitDefaults(script);
     }
 
     /**
@@ -88,12 +88,12 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
      * @param script and associated session
      * @return true if any of the strict modes is on
      */
-    protected boolean isImplicitDefaults(Script script) {
+    protected boolean isExplicitDefaults(Script script) {
         if (isCheckStrictMode()) {
             Collection<String> sqlMode = getSqlMode(script.getSession(), false);
             return contains(sqlMode, STRICT_ALL_TABLES) || contains(sqlMode, STRICT_TRANS_TABLES);
         } else {
-            return isImplicitDefaults();
+            return isExplicitDefaults();
         }
     }
 
@@ -181,13 +181,13 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
     }
 
     @Override
-    public boolean isImplicitDefaults() {
-        return implicitDefaults;
+    public boolean isExplicitDefaults() {
+        return explicitDefaults;
     }
 
     @Override
-    public void setImplicitDefaults(boolean implicitDefaults) {
-        this.implicitDefaults = implicitDefaults;
+    public void setExplicitDefaults(boolean explicitDefaults) {
+        this.explicitDefaults = explicitDefaults;
     }
 
     public boolean isCheckStrictMode() {

@@ -78,7 +78,7 @@ public class CliSchemaJobTest {
 
                 "--output.path=/tmp/schema.sql",
 
-                "--use.implicit.defaults=false",
+                "--use.explicit.defaults=false",
                 "--meta.data.check=false",
                 "--meta.data.identity=false",
                 "--script.type=drop,create",

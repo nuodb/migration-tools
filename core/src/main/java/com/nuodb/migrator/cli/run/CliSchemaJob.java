@@ -60,7 +60,7 @@ import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
-import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.IMPLICIT_DEFAULTS;
+import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.EXPLICIT_DEFAULTS;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Boolean.parseBoolean;
@@ -129,12 +129,12 @@ public class CliSchemaJob extends CliRunJob {
         typeGroup.withOption(useNuoDBTypes);
 
         Option useImplicitDefaults = newBasicOptionBuilder().
-                withName(USE_IMPLICIT_DEFAULTS_SWITCH).
-                withDescription(getMessage(USE_IMPLICIT_DEFAULTS_SWITCH_DESCRIPTION)).
+                withName(USE_EXPLICIT_DEFAULTS_SWITCH).
+                withDescription(getMessage(USE_EXPLICIT_DEFAULTS_SWITCH_DESCRIPTION)).
                 withRequired(false).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(USE_IMPLICIT_DEFAULTS_SWITCH_ARGUMENT_NAME)).build()
+                                withName(getMessage(USE_EXPLICIT_DEFAULTS_SWITCH_ARGUMENT_NAME)).build()
                 ).build();
         typeGroup.withOption(useImplicitDefaults);
 
@@ -289,9 +289,9 @@ public class CliSchemaJob extends CliRunJob {
             }
             schemaSpec.setObjectTypes(objectTypes);
         }
-        Object implicitDefaultsSwitch = optionSet.getValue(USE_IMPLICIT_DEFAULTS_SWITCH);
-        schemaSpec.setImplicitDefaults(implicitDefaultsSwitch != null ?
-                parseBoolean(String.valueOf(implicitDefaultsSwitch)) : IMPLICIT_DEFAULTS);
+        Object explicitDefaultsValue = optionSet.getValue(USE_EXPLICIT_DEFAULTS_SWITCH);
+        schemaSpec.setExplicitDefaults(explicitDefaultsValue != null ?
+                parseBoolean(String.valueOf(explicitDefaultsValue)) : EXPLICIT_DEFAULTS);
         List<String> scriptTypeValues = optionSet.getValues(SCHEMA_SCRIPT_TYPE_OPTION);
         Collection<ScriptType> scriptTypes = newHashSet();
         for (String scriptTypeValue : scriptTypeValues) {
