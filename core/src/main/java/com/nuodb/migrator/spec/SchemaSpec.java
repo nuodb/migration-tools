@@ -45,7 +45,7 @@ import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
  */
 public class SchemaSpec extends JobSpecBase {
 
-    private boolean explicitDefaults;
+    private boolean useExplicitDefaults;
     private String[] tableTypes = new String[]{TABLE, ALIAS};
     private ConnectionSpec sourceConnectionSpec;
     private ConnectionSpec targetConnectionSpec;
@@ -57,12 +57,12 @@ public class SchemaSpec extends JobSpecBase {
     private IdentifierQuoting identifierQuoting;
     private IdentifierNormalizer identifierNormalizer;
 
-    public boolean isExplicitDefaults() {
-        return explicitDefaults;
+    public boolean isUseExplicitDefaults() {
+        return useExplicitDefaults;
     }
 
-    public void setExplicitDefaults(boolean explicitDefaults) {
-        this.explicitDefaults = explicitDefaults;
+    public void setUseExplicitDefaults(boolean useExplicitDefaults) {
+        this.useExplicitDefaults = useExplicitDefaults;
     }
 
     public String[] getTableTypes() {
@@ -153,7 +153,7 @@ public class SchemaSpec extends JobSpecBase {
 
         SchemaSpec that = (SchemaSpec) o;
 
-        if (explicitDefaults != that.explicitDefaults) return false;
+        if (useExplicitDefaults != that.useExplicitDefaults) return false;
         if (groupScriptsBy != that.groupScriptsBy) return false;
         if (identifierNormalizer != null ? !identifierNormalizer.equals(that.identifierNormalizer) :
                 that.identifierNormalizer != null) return false;
@@ -177,7 +177,7 @@ public class SchemaSpec extends JobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (explicitDefaults ? 1 : 0);
+        result = 31 * result + (useExplicitDefaults ? 1 : 0);
         result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
         result = 31 * result + (sourceConnectionSpec != null ? sourceConnectionSpec.hashCode() : 0);
         result = 31 * result + (targetConnectionSpec != null ? targetConnectionSpec.hashCode() : 0);

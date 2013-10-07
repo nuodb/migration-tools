@@ -52,8 +52,8 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.split;
 
 /**
- * Allow for MySQL implicit defaults to move over to the NuoDB schema explicitly
- * <a hre="http://dev.mysql.com/doc/refman/5.5/en/data-type-defaults.html">MySQL Data Type Defaults</a>
+ * Allow for MySQL implicit defaults to move over to the NuoDB schema explicitly <a
+ * hre="http://dev.mysql.com/doc/refman/5.5/en/data-type-defaults.html">MySQL Data Type Defaults</a>
  *
  * @author Sergey Bushik
  */
@@ -62,14 +62,20 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
     /**
      * Does not check if strict mode is set, as it's always set by MySQL JDBC driver for the
      */
-    public static final boolean CHECK_STRICT_MODE = false;
+    public static final boolean CHECK_SQL_MODE = false;
+    /**
+     * Session key for the sql mode collection
+     */
     public static final String SQL_MODE = "SQL_MODE";
     public static final String STRICT_ALL_TABLES = "STRICT_ALL_TABLES";
     public static final String STRICT_TRANS_TABLES = "STRICT_TRANS_TABLES";
+    /**
+     * Default query to retrieve global sql mode
+     */
     public static final String SQL_MODE_QUERY = "SELECT @@GLOBAL.SQL_MODE";
 
-    private boolean checkStrictMode = CHECK_STRICT_MODE;
-    private boolean explicitDefaults = EXPLICIT_DEFAULTS;
+    private boolean checkSqlMode = CHECK_SQL_MODE;
+    private boolean useExplicitDefaults = USE_EXPLICIT_DEFAULTS;
     private String sqlModeQuery = SQL_MODE_QUERY;
 
     public MySQLImplicitDefaultsTranslator() {
@@ -78,8 +84,19 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
 
     @Override
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        return script.getScript() == null && !column.isNullable() && !column.isAutoIncrement() &&
-                isExplicitDefaults(script);
+        return canTranslate(script, column) && isUseExplicitDefaults(script);
+    }
+
+    /**
+     * Validates that the script matches requirements for implicit defaults, such as script is null, column is not
+     * nullable and column is not an identity column
+     *
+     * @param script to be checked for requirements
+     * @param column corresponding column containing default value
+     * @return true is all requirements are honoured
+     */
+    protected boolean canTranslate(Script script, Column column) {
+        return script.getScript() == null && !column.isNullable() && !column.isAutoIncrement();
     }
 
     /**
@@ -88,13 +105,13 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
      * @param script and associated session
      * @return true if any of the strict modes is on
      */
-    protected boolean isExplicitDefaults(Script script) {
-        if (isCheckStrictMode()) {
-            Collection<String> sqlMode = getSqlMode(script.getSession(), false);
-            return contains(sqlMode, STRICT_ALL_TABLES) || contains(sqlMode, STRICT_TRANS_TABLES);
-        } else {
-            return isExplicitDefaults();
-        }
+    protected boolean isUseExplicitDefaults(Script script) {
+        return isCheckSqlMode() ? checkSqlMode(script) : isUseExplicitDefaults();
+    }
+
+    protected boolean checkSqlMode(Script script) {
+        Collection<String> sqlMode = getSqlMode(script.getSession(), false);
+        return contains(sqlMode, STRICT_ALL_TABLES) || contains(sqlMode, STRICT_TRANS_TABLES);
     }
 
     protected Collection<String> getSqlMode(Session session, boolean read) {
@@ -180,22 +197,12 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
         return result != null ? new SimpleScript(result, databaseInfo) : null;
     }
 
-    @Override
-    public boolean isExplicitDefaults() {
-        return explicitDefaults;
+    public boolean isCheckSqlMode() {
+        return checkSqlMode;
     }
 
-    @Override
-    public void setExplicitDefaults(boolean explicitDefaults) {
-        this.explicitDefaults = explicitDefaults;
-    }
-
-    public boolean isCheckStrictMode() {
-        return checkStrictMode;
-    }
-
-    public void setCheckStrictMode(boolean checkStrictMode) {
-        this.checkStrictMode = checkStrictMode;
+    public void setCheckSqlMode(boolean checkSqlMode) {
+        this.checkSqlMode = checkSqlMode;
     }
 
     public String getSqlModeQuery() {
@@ -204,5 +211,15 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
 
     public void setSqlModeQuery(String sqlModeQuery) {
         this.sqlModeQuery = sqlModeQuery;
+    }
+
+    @Override
+    public boolean isUseExplicitDefaults() {
+        return useExplicitDefaults;
+    }
+
+    @Override
+    public void setUseExplicitDefaults(boolean useExplicitDefaults) {
+        this.useExplicitDefaults = useExplicitDefaults;
     }
 }

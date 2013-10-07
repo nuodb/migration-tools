@@ -141,7 +141,7 @@ public class SchemaJob extends JobBase {
         Collection<Translator> translators = translationManager.getTranslators();
         for (Translator translator : translators) {
             if (translator instanceof ImplicitDefaultsTranslator) {
-                ((ImplicitDefaultsTranslator)translator).setExplicitDefaults(schemaSpec.isExplicitDefaults());
+                ((ImplicitDefaultsTranslator)translator).setUseExplicitDefaults(schemaSpec.isUseExplicitDefaults());
             }
         }
 

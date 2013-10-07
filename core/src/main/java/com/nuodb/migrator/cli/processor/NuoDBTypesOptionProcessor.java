@@ -37,7 +37,7 @@ import java.util.ListIterator;
  *
  * @author Sergey Bushik
  */
-public class NuoDBTypesSwitchProcessor extends ConfigOptionProcessor {
+public class NuoDBTypesOptionProcessor extends ConfigOptionProcessor {
 
     private static final String CONFIG_PATH = "nuodb-types.config";
 

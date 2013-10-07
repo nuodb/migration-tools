@@ -38,7 +38,7 @@ import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.processor.JdbcTypeOptionProcessor;
-import com.nuodb.migrator.cli.processor.NuoDBTypesSwitchProcessor;
+import com.nuodb.migrator.cli.processor.NuoDBTypesOptionProcessor;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
@@ -60,7 +60,7 @@ import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
-import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.EXPLICIT_DEFAULTS;
+import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Boolean.parseBoolean;
@@ -122,14 +122,14 @@ public class CliSchemaJob extends CliRunJob {
 
         GroupBuilder typeGroup = newGroupBuilder().withName(getMessage(JDBC_TYPE_GROUP_NAME));
         Option useNuoDBTypes = newBasicOptionBuilder().
-                withName(USE_NUODB_TYPES_SWITCH).
-                withDescription(getMessage(USE_NUODB_TYPES_SWITCH_DESCRIPTION)).
+                withName(USE_NUODB_TYPES_OPTION).
+                withDescription(getMessage(USE_NUODB_TYPES_OPTION_DESCRIPTION)).
                 withRequired(false).
-                withOptionProcessor(new NuoDBTypesSwitchProcessor()).build();
+                withOptionProcessor(new NuoDBTypesOptionProcessor()).build();
         typeGroup.withOption(useNuoDBTypes);
 
         Option useImplicitDefaults = newBasicOptionBuilder().
-                withName(USE_EXPLICIT_DEFAULTS_SWITCH).
+                withName(USE_EXPLICIT_DEFAULTS_OPTION).
                 withDescription(getMessage(USE_EXPLICIT_DEFAULTS_SWITCH_DESCRIPTION)).
                 withRequired(false).
                 withArgument(
@@ -289,9 +289,9 @@ public class CliSchemaJob extends CliRunJob {
             }
             schemaSpec.setObjectTypes(objectTypes);
         }
-        Object explicitDefaultsValue = optionSet.getValue(USE_EXPLICIT_DEFAULTS_SWITCH);
-        schemaSpec.setExplicitDefaults(explicitDefaultsValue != null ?
-                parseBoolean(String.valueOf(explicitDefaultsValue)) : EXPLICIT_DEFAULTS);
+        Object useExplicitDefaults = optionSet.getValue(USE_EXPLICIT_DEFAULTS_OPTION);
+        schemaSpec.setUseExplicitDefaults(useExplicitDefaults != null ?
+                parseBoolean(String.valueOf(useExplicitDefaults)) : USE_EXPLICIT_DEFAULTS);
         List<String> scriptTypeValues = optionSet.getValues(SCHEMA_SCRIPT_TYPE_OPTION);
         Collection<ScriptType> scriptTypes = newHashSet();
         for (String scriptTypeValue : scriptTypeValues) {
