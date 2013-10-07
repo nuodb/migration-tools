@@ -84,7 +84,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
 
     @Override
     protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        return canTranslate(script, column) && isUseExplicitDefaults(script);
+        return hasExplicitDefaults(script, column) && isUseExplicitDefaults(script);
     }
 
     /**
@@ -95,7 +95,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
      * @param column corresponding column containing default value
      * @return true is all requirements are honoured
      */
-    protected boolean canTranslate(Script script, Column column) {
+    protected boolean hasExplicitDefaults(Script script, Column column) {
         return script.getScript() == null && !column.isNullable() && !column.isAutoIncrement();
     }
 
@@ -106,7 +106,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
      * @return true if any of the strict modes is on
      */
     protected boolean isUseExplicitDefaults(Script script) {
-        return isCheckSqlMode() ? checkSqlMode(script) : isUseExplicitDefaults();
+        return isUseExplicitDefaults() && (!isCheckSqlMode() || checkSqlMode(script));
     }
 
     protected boolean checkSqlMode(Script script) {
