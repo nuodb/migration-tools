@@ -124,6 +124,11 @@ public class SessionBase implements Session {
     }
 
     @Override
+    public SessionFactory getSessionFactory() {
+        return sessionFactoryBase;
+    }
+
+    @Override
     public Connection getConnection() {
         return connection;
     }

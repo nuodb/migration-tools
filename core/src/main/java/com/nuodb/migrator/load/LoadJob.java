@@ -36,7 +36,6 @@ import com.nuodb.migrator.backup.format.InputFormat;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
-import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -44,6 +43,8 @@ import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.query.*;
+import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.job.JobBase;
 import com.nuodb.migrator.job.JobExecution;
 import com.nuodb.migrator.spec.ConnectionSpec;
@@ -58,11 +59,13 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static com.google.common.collect.Iterables.*;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
+import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
@@ -82,7 +85,7 @@ public class LoadJob extends JobBase {
     private ConnectionProviderFactory connectionProviderFactory;
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
 
-    private LoadContext loadContext;
+    private LoadJobContext loadJobContext;
     private RowSetMapper rowSetMapper;
 
     public LoadJob(LoadSpec loadSpec) {
@@ -104,19 +107,24 @@ public class LoadJob extends JobBase {
         if (logger.isDebugEnabled()) {
             logger.debug("Initializing load job context");
         }
-        loadContext = new LoadContext();
-        final ResourceSpec inputSpec = getInputSpec();
-        loadContext.setFormatAttributes(inputSpec.getAttributes());
-        loadContext.setCatalogManager(new XmlCatalogManager(inputSpec.getPath()));
+        loadJobContext = new LoadJobContext();
 
-        final Connection connection = getConnectionProviderFactory().createConnectionProvider(
-                getConnectionSpec()).getConnection();
-        loadContext.setConnection(connection);
-        loadContext.setFormatFactory(getFormatFactory());
-        loadContext.setDialect(getDialectResolver().resolve(connection));
-        loadContext.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(connection));
+        rowSetMapper = new LoadRowSetMapper(loadJobContext);
 
-        rowSetMapper = new LoadRowSetMapper(loadContext);
+        ResourceSpec inputSpec = getInputSpec();
+        loadJobContext.setFormatAttributes(inputSpec.getAttributes());
+        loadJobContext.setCatalogManager(new XmlCatalogManager(inputSpec.getPath()));
+
+        SessionFactory sessionFactory = newSessionFactory(
+                getConnectionProviderFactory().createConnectionProvider(
+                        getConnectionSpec()), getDialectResolver());
+        sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
+        Session session = sessionFactory.openSession();
+
+        loadJobContext.setSession(session);
+        loadJobContext.setDatabase(inspect());
+        loadJobContext.setFormatFactory(getFormatFactory());
+        loadJobContext.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(session));
     }
 
     @Override
@@ -125,22 +133,9 @@ public class LoadJob extends JobBase {
     }
 
     protected void load() throws SQLException {
-        final Connection connection = loadContext.getConnection();
-        final Dialect dialect = loadContext.getDialect();
+        Connection connection = loadJobContext.getSession().getConnection();
         try {
-            if (dialect.supportsSessionTimeZone()) {
-                dialect.setSessionTimeZone(connection, getTimeZone());
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("Inspecting target database");
-            }
-            InspectionScope inspectionScope = new TableInspectionScope(
-                    getConnectionSpec().getCatalog(), getConnectionSpec().getSchema());
-            Database database = getInspectionManager().inspect(connection, inspectionScope,
-                    DATABASE, CATALOG, SCHEMA, TABLE, COLUMN).getObject(DATABASE);
-            loadContext.setDatabase(database);
-
-            Catalog catalog = loadContext.getCatalogManager().readCatalog();
+            Catalog catalog = loadJobContext.getCatalogManager().readCatalog();
             for (RowSet rowSet : catalog.getRowSets()) {
                 load(rowSet);
             }
@@ -151,11 +146,17 @@ public class LoadJob extends JobBase {
         } catch (Exception exception) {
             connection.rollback();
             throw new LoadJobException(exception);
-        } finally {
-            if (dialect.supportsSessionTimeZone()) {
-                dialect.setSessionTimeZone(connection, null);
-            }
         }
+    }
+
+    protected Database inspect() throws SQLException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Inspecting target database");
+        }
+        InspectionScope inspectionScope = new TableInspectionScope(
+                getConnectionSpec().getCatalog(), getConnectionSpec().getSchema());
+        return getInspectionManager().inspect(loadJobContext.getSession().getConnection(), inspectionScope,
+                DATABASE, CATALOG, SCHEMA, TABLE, COLUMN).getObject(DATABASE);
     }
 
     protected void load(final RowSet rowSet) throws SQLException {
@@ -163,7 +164,7 @@ public class LoadJob extends JobBase {
             final Table table = rowSetMapper.getTable(rowSet);
             if (table != null) {
                 final InsertQuery query = createInsertQuery(table, rowSet.getColumns());
-                final StatementTemplate template = new StatementTemplate(loadContext.getConnection());
+                final StatementTemplate template = new StatementTemplate(loadJobContext.getSession().getConnection());
                 template.execute(
                         new StatementFactory<PreparedStatement>() {
                             @Override
@@ -188,11 +189,11 @@ public class LoadJob extends JobBase {
 
     protected void load(RowSet rowSet, Table table, PreparedStatement statement) throws SQLException {
         InputFormat inputFormat = getFormatFactory().createInputFormat(
-                rowSet.getCatalog().getFormat(), loadContext.getFormatAttributes());
+                rowSet.getCatalog().getFormat(), loadJobContext.getFormatAttributes());
         ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
         for (Chunk chunk : rowSet.getChunks()) {
             inputFormat.setValueHandleList(valueHandleList);
-            inputFormat.setInputStream(loadContext.getCatalogManager().openInputStream(chunk.getName()));
+            inputFormat.setInputStream(loadJobContext.getCatalogManager().openInputStream(chunk.getName()));
             inputFormat.open();
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Loading %d rows from %s chunk to %s table",
@@ -228,9 +229,9 @@ public class LoadJob extends JobBase {
                 });
         return newBuilder(statement).
                 withColumns(newArrayList(columns)).
-                withDialect(loadContext.getDialect()).
+                withDialect(loadJobContext.getSession().getDialect()).
                 withTimeZone(getTimeZone()).
-                withValueFormatRegistry(loadContext.getValueFormatRegistry()).build();
+                withValueFormatRegistry(loadJobContext.getValueFormatRegistry()).build();
     }
 
     protected InsertQuery createInsertQuery(Table table, Collection<Column> columns) {
@@ -262,7 +263,7 @@ public class LoadJob extends JobBase {
 
     @Override
     public void release(JobExecution execution) throws Exception {
-        close(loadContext.getConnection());
+        close(loadJobContext.getSession());
     }
 
     public LoadSpec getLoadSpec() {

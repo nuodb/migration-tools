@@ -30,10 +30,9 @@ package com.nuodb.migrator.load;
 import com.nuodb.migrator.backup.catalog.CatalogManager;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
-import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.session.Session;
 
-import java.sql.Connection;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -42,39 +41,22 @@ import static com.google.common.collect.Maps.newHashMap;
 /**
  * @author Sergey Bushik
  */
-public class LoadContext {
+public class LoadJobContext {
 
-    private Dialect dialect;
-    private Database database;
+    private Session session;
     private TimeZone timeZone;
-    private Connection connection;
+    private Database database;
     private FormatFactory formatFactory;
     private CatalogManager catalogManager;
     private ValueFormatRegistry valueFormatRegistry;
     private Map<String, Object> formatAttributes = newHashMap();
 
-    public Map<String, Object> getFormatAttributes() {
-        return formatAttributes;
+    public Session getSession() {
+        return session;
     }
 
-    public void setFormatAttributes(Map<String, Object> formatAttributes) {
-        this.formatAttributes = formatAttributes;
-    }
-
-    public Dialect getDialect() {
-        return dialect;
-    }
-
-    public void setDialect(Dialect dialect) {
-        this.dialect = dialect;
-    }
-
-    public Database getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(Database database) {
-        this.database = database;
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     public TimeZone getTimeZone() {
@@ -85,12 +67,12 @@ public class LoadContext {
         this.timeZone = timeZone;
     }
 
-    public Connection getConnection() {
-        return connection;
+    public Database getDatabase() {
+        return database;
     }
 
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 
     public FormatFactory getFormatFactory() {
@@ -115,5 +97,13 @@ public class LoadContext {
 
     public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
         this.valueFormatRegistry = valueFormatRegistry;
+    }
+
+    public Map<String, Object> getFormatAttributes() {
+        return formatAttributes;
+    }
+
+    public void setFormatAttributes(Map<String, Object> formatAttributes) {
+        this.formatAttributes = formatAttributes;
     }
 }

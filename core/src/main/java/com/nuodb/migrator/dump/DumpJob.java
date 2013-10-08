@@ -128,7 +128,7 @@ public class DumpJob extends JobBase {
 
         dumpWriter.setSession(session);
         dumpWriter.setSessionFactory(sessionFactory);
-        dumpWriter.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(session.getConnection()));
+        dumpWriter.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(session));
         dumpWriter.setDatabase(database = inspect());
     }
 

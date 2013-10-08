@@ -38,6 +38,8 @@ import java.util.Map;
  */
 public interface Session extends Map {
 
+    SessionFactory getSessionFactory();
+
     Connection getConnection();
 
     Dialect getDialect();

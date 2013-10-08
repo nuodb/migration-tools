@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.resolve;
 
+import com.nuodb.migrator.jdbc.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +82,11 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
     @Override
     public void register(DatabaseInfo databaseInfo, Class<? extends T> serviceClass) {
         databaseInfoServiceClassMap.put(databaseInfo, serviceClass);
+    }
+
+    @Override
+    public T resolve(Session session) throws SQLException {
+        return resolve(session.getConnection());
     }
 
     @Override

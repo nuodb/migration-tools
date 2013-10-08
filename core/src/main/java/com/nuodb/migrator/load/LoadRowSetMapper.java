@@ -43,10 +43,10 @@ class LoadRowSetMapper implements RowSetMapper {
 
     private final Logger logger = getLogger(getClass());
 
-    private final LoadContext loadContext;
+    private final LoadJobContext loadJobContext;
 
-    public LoadRowSetMapper(LoadContext loadContext) {
-        this.loadContext = loadContext;
+    public LoadRowSetMapper(LoadJobContext loadJobContext) {
+        this.loadJobContext = loadJobContext;
     }
 
     @Override
@@ -54,7 +54,7 @@ class LoadRowSetMapper implements RowSetMapper {
         Table table = null;
         if (rowSet instanceof TableRowSet) {
             TableRowSet tableRowSet = (TableRowSet) rowSet;
-            table = loadContext.getDatabase().findTable(tableRowSet.getTableName());
+            table = loadJobContext.getDatabase().findTable(tableRowSet.getTableName());
         } else if (rowSet instanceof QueryRowSet) {
             QueryRowSet queryRowSet = (QueryRowSet) rowSet;
             if (logger.isWarnEnabled()) {

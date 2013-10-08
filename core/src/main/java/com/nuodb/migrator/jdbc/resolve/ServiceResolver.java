@@ -27,10 +27,11 @@
  */
 package com.nuodb.migrator.jdbc.resolve;
 
+import com.nuodb.migrator.jdbc.session.Session;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.Collection;
 
 /**
  * @author Sergey Bushik
@@ -44,6 +45,8 @@ public interface ServiceResolver<T> {
     void register(String productName, Class<? extends T> serviceClass);
 
     void register(DatabaseInfo databaseInfo, Class<? extends T> serviceClass);
+
+    T resolve(Session session) throws SQLException;
 
     T resolve(Connection connection) throws SQLException;
 
