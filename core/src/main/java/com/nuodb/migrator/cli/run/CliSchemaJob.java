@@ -75,6 +75,7 @@ import static org.apache.commons.lang3.StringUtils.replace;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("PointlessBooleanExpression")
 public class CliSchemaJob extends CliRunJob {
 
     public static final String COMMAND = "schema";
@@ -125,16 +126,20 @@ public class CliSchemaJob extends CliRunJob {
                 withName(USE_NUODB_TYPES_OPTION).
                 withDescription(getMessage(USE_NUODB_TYPES_OPTION_DESCRIPTION)).
                 withRequired(false).
-                withOptionProcessor(new NuoDBTypesOptionProcessor()).build();
+                withOptionProcessor(new NuoDBTypesOptionProcessor()).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(USE_NUODB_TYPES_OPTION_ARGUMENT_NAME)).build()
+                ).build();;
         typeGroup.withOption(useNuoDBTypes);
 
         Option useImplicitDefaults = newBasicOptionBuilder().
                 withName(USE_EXPLICIT_DEFAULTS_OPTION).
-                withDescription(getMessage(USE_EXPLICIT_DEFAULTS_SWITCH_DESCRIPTION)).
+                withDescription(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_DESCRIPTION)).
                 withRequired(false).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(USE_EXPLICIT_DEFAULTS_SWITCH_ARGUMENT_NAME)).build()
+                                withName(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_ARGUMENT_NAME)).build()
                 ).build();
         typeGroup.withOption(useImplicitDefaults);
 
@@ -291,7 +296,8 @@ public class CliSchemaJob extends CliRunJob {
         }
         Object useExplicitDefaults = optionSet.getValue(USE_EXPLICIT_DEFAULTS_OPTION);
         schemaSpec.setUseExplicitDefaults(useExplicitDefaults != null ?
-                parseBoolean(String.valueOf(useExplicitDefaults)) : USE_EXPLICIT_DEFAULTS);
+                parseBoolean(String.valueOf(useExplicitDefaults)) :
+                (optionSet.hasOption(USE_EXPLICIT_DEFAULTS_OPTION) || USE_EXPLICIT_DEFAULTS));
         List<String> scriptTypeValues = optionSet.getValues(SCHEMA_SCRIPT_TYPE_OPTION);
         Collection<ScriptType> scriptTypes = newHashSet();
         for (String scriptTypeValue : scriptTypeValues) {

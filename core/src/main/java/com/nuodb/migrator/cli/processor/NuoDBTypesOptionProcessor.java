@@ -32,6 +32,9 @@ import com.nuodb.migrator.cli.parse.Option;
 
 import java.util.ListIterator;
 
+import static com.nuodb.migrator.cli.CliOptions.USE_NUODB_TYPES_OPTION;
+import static java.lang.Boolean.parseBoolean;
+
 /**
  * Loads NuoDB types definitions from <code>nuodb-types.config</code> file
  *
@@ -49,7 +52,10 @@ public class NuoDBTypesOptionProcessor extends ConfigOptionProcessor {
 
     @Override
     public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-        addConfig(option, arguments, configPath);
+        Object value = commandLine.getValue(USE_NUODB_TYPES_OPTION);
+        if (value != null ? parseBoolean(value.toString()) : commandLine.hasOption(USE_NUODB_TYPES_OPTION)) {
+            addConfig(option, arguments, configPath);
+        }
     }
 
     @Override
