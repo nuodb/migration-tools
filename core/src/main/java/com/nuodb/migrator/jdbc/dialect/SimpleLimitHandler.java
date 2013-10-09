@@ -51,10 +51,10 @@ public class SimpleLimitHandler extends QueryHelper implements LimitHandler {
         String limitQuery;
         if (hasOffset()) {
             limitQuery = parameterized ? createParameterizedLimitOffsetQuery(query) :
-                    createLimitOffsetQuery(query, getLimit(), getOffset());
+                    createLimitOffsetQuery(query, getCount(), getOffset());
         } else {
             limitQuery = parameterized ? createParameterizedLimitQuery(query) :
-                    createLimitQuery(query, getLimit());
+                    createLimitQuery(query, getCount());
         }
         return limitQuery;
     }
@@ -63,7 +63,7 @@ public class SimpleLimitHandler extends QueryHelper implements LimitHandler {
         return getOffset() > 0;
     }
 
-    protected String createLimitQuery(String query, long limit) {
+    protected String createLimitQuery(String query, long count) {
         throw new DialectException("Limit query syntax is not supported");
     }
 
@@ -71,7 +71,7 @@ public class SimpleLimitHandler extends QueryHelper implements LimitHandler {
         throw new DialectException("Limit query syntax with parameters is not supported");
     }
 
-    protected String createLimitOffsetQuery(String query, long limit, long offset) {
+    protected String createLimitOffsetQuery(String query, long count, long offset) {
         throw new DialectException("Limit offset query syntax is not supported");
     }
 
@@ -79,8 +79,8 @@ public class SimpleLimitHandler extends QueryHelper implements LimitHandler {
         throw new DialectException("Limit offset query syntax with parameters is not supported");
     }
 
-    protected long getLimit() {
-        return QueryLimitUtils.getLimit(queryLimit);
+    protected long getCount() {
+        return QueryLimitUtils.getCount(queryLimit);
     }
 
     protected long getOffset() {
@@ -128,11 +128,11 @@ public class SimpleLimitHandler extends QueryHelper implements LimitHandler {
     }
 
     protected void bindLimit(PreparedStatement statement, int index) throws SQLException {
-        statement.setLong(index, getLimit());
+        statement.setLong(index, getCount());
     }
 
     protected void bindLimitOffset(PreparedStatement statement, int index) throws SQLException {
-        statement.setLong(index, getLimit());
+        statement.setLong(index, getCount());
         statement.setLong(index + 1, getOffset());
     }
 }

@@ -32,32 +32,32 @@ package com.nuodb.migrator.jdbc.dialect;
  */
 public class QueryLimit {
 
-    private Long limit;
+    private Long count;
     private Long offset;
 
     public QueryLimit() {
     }
 
-    public QueryLimit(Long limit) {
-        this.limit = limit;
+    public QueryLimit(Long count) {
+        this.count = count;
     }
 
-    public QueryLimit(Long limit, Long offset) {
-        this.limit = limit;
+    public QueryLimit(Long count, Long offset) {
+        this.count = count;
         this.offset = offset;
     }
 
     public QueryLimit(QueryLimit queryLimit) {
-        this.limit = queryLimit.getLimit();
+        this.count = queryLimit.getCount();
         this.offset = queryLimit.getOffset();
     }
 
-    public Long getLimit() {
-        return limit;
+    public Long getCount() {
+        return count;
     }
 
-    public void setLimit(Long limit) {
-        this.limit = limit;
+    public void setCount(Long count) {
+        this.count = count;
     }
 
     public Long getOffset() {
@@ -75,7 +75,7 @@ public class QueryLimit {
 
         QueryLimit that = (QueryLimit) o;
 
-        if (limit != null ? !limit.equals(that.limit) : that.limit != null) return false;
+        if (count != null ? !count.equals(that.count) : that.count != null) return false;
         if (offset != null ? !offset.equals(that.offset) : that.offset != null) return false;
 
         return true;
@@ -83,7 +83,7 @@ public class QueryLimit {
 
     @Override
     public int hashCode() {
-        int result = limit != null ? limit.hashCode() : 0;
+        int result = count != null ? count.hashCode() : 0;
         result = 31 * result + (offset != null ? offset.hashCode() : 0);
         return result;
     }

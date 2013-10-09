@@ -46,8 +46,8 @@ public class OracleLimitHandler extends SimpleLimitHandler {
     }
 
     @Override
-    protected String createLimitQuery(String query, long limit) {
-        return createLimitQuery(query, asList("ROWNUM_ <= " + limit));
+    protected String createLimitQuery(String query, long count) {
+        return createLimitQuery(query, asList("ROWNUM_ <= " + count));
     }
 
     @Override
@@ -56,8 +56,8 @@ public class OracleLimitHandler extends SimpleLimitHandler {
     }
 
     @Override
-    protected String createLimitOffsetQuery(String query, long limit, long offset) {
-        return createLimitQuery(query, asList("ROWNUM_ > " + offset, "ROWNUM_ <= " + (limit + offset)));
+    protected String createLimitOffsetQuery(String query, long count, long offset) {
+        return createLimitQuery(query, asList("ROWNUM_ > " + offset, "ROWNUM_ <= " + (count + offset)));
     }
 
     @Override
@@ -86,12 +86,12 @@ public class OracleLimitHandler extends SimpleLimitHandler {
 
     @Override
     protected void bindLimit(PreparedStatement statement, int index) throws SQLException {
-        statement.setLong(index, getLimit());
+        statement.setLong(index, getCount());
     }
 
     @Override
     protected void bindLimitOffset(PreparedStatement statement, int index) throws SQLException {
         statement.setLong(index, getOffset());
-        statement.setLong(index + 1, getLimit() + getOffset());
+        statement.setLong(index + 1, getCount() + getOffset());
     }
 }

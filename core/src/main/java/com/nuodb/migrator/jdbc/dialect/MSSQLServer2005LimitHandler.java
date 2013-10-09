@@ -47,8 +47,8 @@ public class MSSQLServer2005LimitHandler extends MSSQLServerLimitHandler {
     }
 
     @Override
-    protected String createLimitOffsetQuery(String query, long limit, long offset) {
-        return createLimitOffsetQuery(query, valueOf(offset), valueOf(offset + limit));
+    protected String createLimitOffsetQuery(String query, long count, long offset) {
+        return createLimitOffsetQuery(query, valueOf(offset), valueOf(offset + count));
     }
 
     protected String createLimitOffsetQuery(String query, String rowStart, String rowEnd) {
@@ -67,6 +67,6 @@ public class MSSQLServer2005LimitHandler extends MSSQLServerLimitHandler {
     @Override
     protected void bindLimitOffset(PreparedStatement statement, int index) throws SQLException {
         statement.setLong(index, getOffset());
-        statement.setLong(index + 1, getLimit() + getOffset());
+        statement.setLong(index + 1, getCount() + getOffset());
     }
 }

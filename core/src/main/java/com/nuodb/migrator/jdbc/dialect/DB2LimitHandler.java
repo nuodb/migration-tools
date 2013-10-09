@@ -37,21 +37,21 @@ public class DB2LimitHandler extends SimpleLimitHandler {
     }
 
     @Override
-    protected String createLimitQuery(String query, long limit) {
+    protected String createLimitQuery(String query, long count) {
         StringBuilder limitQuery = new StringBuilder(query.length());
         limitQuery.append(query);
-        if (limit > 0) {
-            limitQuery.append(" FETCH FIRST ").append(limit).append(" ROWS ONLY");
+        if (count > 0) {
+            limitQuery.append(" FETCH FIRST ").append(count).append(" ROWS ONLY");
         }
         return limitQuery.toString();
     }
 
     @Override
-    protected String createLimitOffsetQuery(String query, long limit, long offset) {
+    protected String createLimitOffsetQuery(String query, long count, long offset) {
         StringBuilder limitQuery = new StringBuilder(query.length());
         limitQuery.append("SELECT ").append(getColumns(query)).append(" FROM (");
         limitQuery.append("SELECT QUERY2__.*, ROWNUMBER() OVER (ORDER BY ORDER OF QUERY2__) AS ROW_NUM__ FROM (");
-        limitQuery.append(createLimitQuery(query, offset + limit)).append(") AS QUERY2__)");
+        limitQuery.append(createLimitQuery(query, offset + count)).append(") AS QUERY2__)");
         limitQuery.append(" AS QUERY1__ WHERE ROW_NUM__ > ").append(offset).append(" ORDER BY ROW_NUM__");
         return limitQuery.toString();
     }

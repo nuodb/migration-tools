@@ -45,8 +45,8 @@ public class MSSQLServerLimitHandler extends SimpleLimitHandler {
     }
 
     @Override
-    protected String createLimitQuery(String query, long limit) {
-        return createLimitQuery(query, valueOf(limit));
+    protected String createLimitQuery(String query, long count) {
+        return createLimitQuery(query, valueOf(count));
     }
 
     protected String createLimitQuery(String query, String limit) {

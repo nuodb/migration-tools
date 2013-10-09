@@ -54,8 +54,8 @@ This tool is designed to assist you in migrating data from supported SQL databas
         [select statements, optional]                               
             [--query=query]                                 Select statement
         [--time.zone (-z)=time zone]                        Time zone enables date columns to be dumped and reloaded between servers in different time zones
-        [--threads (-t)=[threads]]                          Number of worker threads (experimental), defaulted to the number of available processors
-        [--query.limit=[query limit]]                       Query limit (experimental) is used to split table into chunks with LIMIT {limit} OFFSET {offset}, by default queries are not limited
+        [--threads (-t)=[threads]]                          Number of worker threads to dump data, defaulted to a number of available processors
+        [--query.limit=[query limit]]                       Query limit is a maximum number of rows to split a table into chunks with LIMIT {limit} OFFSET {offset} syntax in a database specific way, where each chunk is written to a separate file. If a query limit is not given or is not supported by the migrator for a particular database queries are not split
 
 ### Load data to a target NuoDB database ###
 

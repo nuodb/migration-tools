@@ -34,7 +34,7 @@ import com.nuodb.migrator.jdbc.query.Query;
 
 import java.sql.*;
 
-import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getLimit;
+import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getCount;
 import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getOffset;
 import static java.lang.Math.min;
 
@@ -56,15 +56,15 @@ public class LimitQuerySplitter extends QuerySplitterBase<Statement> {
     @Override
     protected boolean hasNextQuerySplit(Connection connection, int splitIndex) throws SQLException {
         QueryLimit queryLimit = getQueryLimit();
-        return splitIndex == 0 || splitIndex * getLimit(queryLimit) + getOffset(queryLimit) < getRowCount(connection);
+        return splitIndex == 0 || splitIndex * getCount(queryLimit) + getOffset(queryLimit) < getRowCount(connection);
     }
 
     @Override
     protected QueryLimit createQueryLimit(Connection connection, int splitIndex) throws SQLException {
         QueryLimit queryLimit = getQueryLimit();
-        long offset = splitIndex * getLimit(queryLimit) + getOffset(queryLimit);
+        long offset = splitIndex * getCount(queryLimit) + getOffset(queryLimit);
         // long limit = getLimit(queryLimit);
-        long limit = min(getLimit(queryLimit), getRowCount(connection) - offset);
+        long limit = min(getCount(queryLimit), getRowCount(connection) - offset);
         return new QueryLimit(limit, offset);
     }
 

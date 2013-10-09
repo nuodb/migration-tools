@@ -39,8 +39,8 @@ public class MySQLLimitHandler extends SimpleLimitHandler {
     }
 
     @Override
-    protected String createLimitQuery(String query, long limit) {
-        return query + " LIMIT " + valueOf(limit);
+    protected String createLimitQuery(String query, long count) {
+        return query + " LIMIT " + valueOf(count);
     }
 
     @Override
@@ -49,8 +49,8 @@ public class MySQLLimitHandler extends SimpleLimitHandler {
     }
 
     @Override
-    protected String createLimitOffsetQuery(String query, long limit, long offset) {
-        return query + " LIMIT " + limit + " OFFSET " + offset;
+    protected String createLimitOffsetQuery(String query, long count, long offset) {
+        return query + " LIMIT " + count + " OFFSET " + offset;
     }
 
     @Override

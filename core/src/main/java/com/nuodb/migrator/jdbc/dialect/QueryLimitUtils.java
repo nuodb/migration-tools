@@ -43,11 +43,11 @@ public class QueryLimitUtils {
         return hasOffset(queryLimit) ? queryLimit.getOffset() : 0;
     }
 
-    public static boolean hasLimit(QueryLimit queryLimit) {
-        return queryLimit != null && queryLimit.getLimit() != null;
+    public static boolean hasCount(QueryLimit queryLimit) {
+        return queryLimit != null && queryLimit.getCount() != null;
     }
 
-    public static long getLimit(QueryLimit queryLimit) {
-        return hasLimit(queryLimit) ? queryLimit.getLimit() : 0;
+    public static long getCount(QueryLimit queryLimit) {
+        return hasCount(queryLimit) ? queryLimit.getCount() : 0;
     }
 }
