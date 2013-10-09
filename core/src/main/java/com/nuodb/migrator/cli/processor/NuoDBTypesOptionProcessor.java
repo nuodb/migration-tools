@@ -54,7 +54,7 @@ public class NuoDBTypesOptionProcessor extends ConfigOptionProcessor {
     public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
         Object value = commandLine.getValue(USE_NUODB_TYPES_OPTION);
         if (value != null ? parseBoolean(value.toString()) : commandLine.hasOption(USE_NUODB_TYPES_OPTION)) {
-            addConfig(option, arguments, configPath);
+            addConfig(option, arguments, getConfigPath());
         }
     }
 
