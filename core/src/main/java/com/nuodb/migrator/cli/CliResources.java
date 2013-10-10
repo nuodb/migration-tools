@@ -119,6 +119,12 @@ public interface CliResources {
     final String INPUT_OPTION_DESCRIPTION = "com.nuodb.migrator.input.option.description";
     final String INPUT_OPTION_ARGUMENT_NAME = "com.nuodb.migrator.input.argument.description";
 
+    final String COMMIT_STRATEGY_GROUP_NAME = "com.nuodb.migrator.commit.strategy.group.name";
+    final String COMMIT_STRATEGY_OPTION_DESCRIPTION = "com.nuodb.migrator.commit.strategy.option.description";
+    final String COMMIT_STRATEGY_ARGUMENT_NAME = "com.nuodb.migrator.commit.strategy.argument.name";
+    final String COMMIT_STRATEGY_ATTRIBUTES_OPTION_DESCRIPTION = "com.nuodb.migrator.commit.strategy.attributes.option.description";
+    final String COMMIT_STRATEGY_ATTRIBUTES_ARGUMENT_NAME = "com.nuodb.migrator.commit.strategy.attributes.argument.name";
+
     final String SCHEMA_GROUP_NAME = "com.nuodb.migrator.schema.group.name";
     final String SCHEMA_OUTPUT_GROUP_NAME = "com.nuodb.migrator.schema.output.group.name";
     final String SCHEMA_META_DATA_OPTION_DESCRIPTION = "com.nuodb.migrator.schema.meta.data.option.description";

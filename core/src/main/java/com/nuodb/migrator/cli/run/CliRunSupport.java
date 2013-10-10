@@ -36,21 +36,23 @@ import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.validation.ConnectionGroupInfo;
 import com.nuodb.migrator.jdbc.JdbcConstants;
+import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
+import com.nuodb.migrator.jdbc.commit.CommitStrategy;
+import com.nuodb.migrator.jdbc.commit.SingleCommitStrategy;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.cli.validation.ConnectionGroupValidators.addConnectionGroupValidators;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.utils.Priority.LOW;
+import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.Integer.MAX_VALUE;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
 import static java.util.TimeZone.getTimeZone;
 
@@ -62,6 +64,9 @@ public class CliRunSupport extends CliSupport {
     public static final TimeZone DEFAULT_TIME_ZONE = getTimeZone("UTC");
 
     private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
+
+    public static final String COMMIT_STRATEGY_SINGLE = "single";
+    public static final String COMMIT_STRATEGY_BATCH = "batch";
 
     /**
      * Builds the source group of options for the source database connection.
@@ -202,6 +207,33 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
+    protected Group createCommitGroup() {
+        Option commitStrategy = newBasicOptionBuilder().
+                withName(COMMIT_STRATEGY_OPTION).
+                withDescription(getMessage(COMMIT_STRATEGY_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(COMMIT_STRATEGY_ARGUMENT_NAME)).build()
+                ).build();
+
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
+
+        Option commitStrategyAttributes = newRegexOptionBuilder().
+                withName(COMMIT_STRATEGY_ATTRIBUTES_OPTION).
+                withDescription(getMessage(COMMIT_STRATEGY_ATTRIBUTES_OPTION_DESCRIPTION)).
+                withRegex(COMMIT_STRATEGY_ATTRIBUTES_OPTION, 1, LOW).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(COMMIT_STRATEGY_ATTRIBUTES_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build()
+                ).build();
+        return newGroupBuilder().
+                withName(getMessage(COMMIT_STRATEGY_GROUP_NAME)).
+                withOption(commitStrategy).
+                withOption(commitStrategyAttributes).build();
+    }
+
     protected DriverConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
         DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setDriver((String) optionSet.getValue(SOURCE_DRIVER_OPTION));
@@ -260,6 +292,26 @@ public class CliRunSupport extends CliSupport {
         } else {
             return getDefaultTimeZone();
         }
+    }
+
+    protected Map<String, CommitStrategy> createCommitStrategyMapping() {
+        Map<String, CommitStrategy> commitStrategyMapping = new TreeMap<String, CommitStrategy>(CASE_INSENSITIVE_ORDER);
+        commitStrategyMapping.put(COMMIT_STRATEGY_SINGLE, SingleCommitStrategy.INSTANCE);
+        commitStrategyMapping.put(COMMIT_STRATEGY_BATCH, new BatchCommitStrategy());
+        return commitStrategyMapping;
+    }
+
+    protected CommitStrategy parseCommitGroup(OptionSet optionSet, Option option) {
+        Map<String, CommitStrategy> commitStrategyMapping = createCommitStrategyMapping();
+        String commitStrategyValue = (String) optionSet.getValue(COMMIT_STRATEGY_OPTION, COMMIT_STRATEGY_BATCH);
+        CommitStrategy commitStrategy = commitStrategyMapping.get(commitStrategyValue);
+        if (commitStrategy == null) {
+            commitStrategy = newInstance(commitStrategyValue);
+        }
+        commitStrategy.setAttributes(parseAttributes(
+                optionSet.<String>getValues(COMMIT_STRATEGY_ATTRIBUTES_OPTION),
+                optionSet.getOption(COMMIT_STRATEGY_ATTRIBUTES_OPTION)));
+        return commitStrategy;
     }
 
     /**

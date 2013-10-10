@@ -30,6 +30,7 @@ package com.nuodb.migrator.cli.run;
 import com.google.common.collect.Maps;
 import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
+import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.load.LoadJobFactory;
 import com.nuodb.migrator.backup.format.csv.CsvAttributes;
@@ -111,6 +112,7 @@ public class CliLoadJobTest {
         tableInsertTypes.put("deployments_nodes", InsertType.REPLACE);
         loadSpec.setTableInsertTypes(tableInsertTypes);
         loadSpec.setTimeZone(TimeZone.getTimeZone("GMT+2"));
+        loadSpec.setCommitStrategy(new BatchCommitStrategy());
         return loadSpec;
     }
 }

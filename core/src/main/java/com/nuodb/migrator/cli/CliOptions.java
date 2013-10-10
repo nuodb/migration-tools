@@ -87,6 +87,9 @@ public interface CliOptions {
     final String REPLACE_OPTION = "replace";
     final String REPLACE_SHORT_OPTION = "r";
 
+    final String COMMIT_STRATEGY_OPTION = "commit.strategy";
+    final String COMMIT_STRATEGY_ATTRIBUTES_OPTION = "commit.*";
+
     final String INPUT_OPTION = "input.*";
     final String INPUT_PATH_OPTION = "input.path";
 

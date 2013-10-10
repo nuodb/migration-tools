@@ -35,6 +35,7 @@ import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.InputFormat;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
+import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
@@ -135,6 +136,9 @@ public class LoadJob extends JobBase {
     protected void load() throws SQLException {
         Connection connection = loadJobContext.getSession().getConnection();
         try {
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Loading data using %s", loadSpec.getCommitStrategy()));
+            }
             Catalog catalog = loadJobContext.getCatalogManager().readCatalog();
             for (RowSet rowSet : catalog.getRowSets()) {
                 load(rowSet);
@@ -175,7 +179,7 @@ public class LoadJob extends JobBase {
                         new StatementCallback<PreparedStatement>() {
                             @Override
                             public void process(PreparedStatement statement) throws SQLException {
-                                load(rowSet, table, statement);
+                                load(rowSet, table, statement, query);
                             }
                         }
                 );
@@ -187,10 +191,11 @@ public class LoadJob extends JobBase {
         }
     }
 
-    protected void load(RowSet rowSet, Table table, PreparedStatement statement) throws SQLException {
+    protected void load(RowSet rowSet, Table table, PreparedStatement statement, Query query) throws SQLException {
         InputFormat inputFormat = getFormatFactory().createInputFormat(
                 rowSet.getCatalog().getFormat(), loadJobContext.getFormatAttributes());
         ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
+        CommitStrategy commitStrategy = loadSpec.getCommitStrategy();
         for (Chunk chunk : rowSet.getChunks()) {
             inputFormat.setValueHandleList(valueHandleList);
             inputFormat.setInputStream(loadJobContext.getCatalogManager().openInputStream(chunk.getName()));
@@ -204,6 +209,9 @@ public class LoadJob extends JobBase {
             while (inputFormat.read()) {
                 try {
                     statement.execute();
+                    if (commitStrategy != null) {
+                        commitStrategy.onUpdate(statement, query);
+                    }
                 } catch (Exception exception) {
                     throw new LoadJobException(format("Error loading row %d from %s chunk to %s table",
                             row + 1, chunk.getName(), table.getQualifiedName(null)), exception);

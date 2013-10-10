@@ -32,7 +32,6 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
-import com.nuodb.migrator.context.ContextUtils;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.load.LoadJobFactory;
 import com.nuodb.migrator.spec.LoadSpec;
@@ -59,6 +58,7 @@ public class CliLoadJob extends CliRunJob {
                 .withName(getMessage(LOAD_GROUP_NAME))
                 .withOption(createTargetGroup())
                 .withOption(createInputGroup())
+                .withOption(createCommitGroup())
                 .withOption(createInsertTypeGroup())
                 .withOption(createTimeZoneOption())
                 .withRequired(true).build();
@@ -69,6 +69,7 @@ public class CliLoadJob extends CliRunJob {
         LoadSpec loadSpec = new LoadSpec();
         loadSpec.setConnectionSpec(parseTargetGroup(optionSet, this));
         loadSpec.setInputSpec(parseInputGroup(optionSet, this));
+        loadSpec.setCommitStrategy(parseCommitGroup(optionSet, this));
         loadSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
         parseInsertTypeGroup(optionSet, loadSpec);
 

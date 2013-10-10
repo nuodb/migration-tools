@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.query.InsertType;
 
 import java.util.Map;
@@ -43,6 +44,7 @@ public class LoadSpec extends JobSpecBase {
     private TimeZone timeZone;
     private ResourceSpec inputSpec;
     private InsertType insertType;
+    private CommitStrategy commitStrategy;
     private Map<String, InsertType> tableInsertTypes = newHashMap();
 
     public ConnectionSpec getConnectionSpec() {
@@ -67,6 +69,14 @@ public class LoadSpec extends JobSpecBase {
 
     public void setInsertType(InsertType insertType) {
         this.insertType = insertType;
+    }
+
+    public CommitStrategy getCommitStrategy() {
+        return commitStrategy;
+    }
+
+    public void setCommitStrategy(CommitStrategy commitStrategy) {
+        this.commitStrategy = commitStrategy;
     }
 
     public ResourceSpec getInputSpec() {
@@ -97,6 +107,7 @@ public class LoadSpec extends JobSpecBase {
             return false;
         if (inputSpec != null ? !inputSpec.equals(loadSpec.inputSpec) : loadSpec.inputSpec != null) return false;
         if (insertType != loadSpec.insertType) return false;
+        if (commitStrategy != null ? !commitStrategy.equals(loadSpec.commitStrategy) : loadSpec.commitStrategy != null) return false;
         if (tableInsertTypes != null ? !tableInsertTypes.equals(
                 loadSpec.tableInsertTypes) : loadSpec.tableInsertTypes != null) return false;
         if (timeZone != null ? !timeZone.equals(loadSpec.timeZone) : loadSpec.timeZone != null) return false;
@@ -111,6 +122,7 @@ public class LoadSpec extends JobSpecBase {
         result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
         result = 31 * result + (inputSpec != null ? inputSpec.hashCode() : 0);
         result = 31 * result + (insertType != null ? insertType.hashCode() : 0);
+        result = 31 * result + (commitStrategy != null ? commitStrategy.hashCode() : 0);
         result = 31 * result + (tableInsertTypes != null ? tableInsertTypes.hashCode() : 0);
         return result;
     }
