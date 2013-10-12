@@ -34,5 +34,5 @@ import java.sql.Statement;
  */
 public interface QueryFormatFactory {
 
-    QueryFormat createQueryFormatter(Statement statement, String query);
+    QueryFormat createQueryFormat(Statement statement, String query);
 }

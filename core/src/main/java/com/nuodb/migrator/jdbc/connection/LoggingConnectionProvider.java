@@ -190,7 +190,7 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
     protected void initPreparedStatementProxy(final AopProxy connection, final AopProxy statement, final String query) {
         initStatementProxy(connection, statement);
 
-        final QueryFormat queryFormat = createQueryFormatter((Statement) statement, query);
+        final QueryFormat queryFormat = createQueryFormat((Statement) statement, query);
         // statement.setXXX() capture parameters
         statement.addAdvisor(newMethodAdvisor(
                 new MethodInterceptor() {
@@ -232,12 +232,12 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
         ));
     }
 
-    protected QueryFormat createQueryFormatter(Statement statement, String query) {
-        return queryFormatFactory.createQueryFormatter(statement, query);
+    protected QueryFormat createQueryFormat(Statement statement, String query) {
+        return queryFormatFactory.createQueryFormat(statement, query);
     }
 
     protected void log(Statement statement, String query) {
-        log(createQueryFormatter(statement, query).format());
+        log(createQueryFormat(statement, query).format());
     }
 
     protected void log(String statement) {

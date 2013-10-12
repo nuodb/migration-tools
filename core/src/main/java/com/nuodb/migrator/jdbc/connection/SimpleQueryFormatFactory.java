@@ -35,7 +35,7 @@ import java.sql.Statement;
 public class SimpleQueryFormatFactory implements QueryFormatFactory {
 
     @Override
-    public QueryFormat createQueryFormatter(Statement statement, String query) {
+    public QueryFormat createQueryFormat(Statement statement, String query) {
         return new SimpleQueryFormat(query);
     }
 }
