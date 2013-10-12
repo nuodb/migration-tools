@@ -34,8 +34,6 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import static java.lang.String.format;
-
 /**
  * @author Sergey Bushik
  */
@@ -59,15 +57,10 @@ public abstract class ConnectionProviderBase<C extends ConnectionSpec> implement
 
     @Override
     public Connection getConnection() throws SQLException {
-        if (logger.isDebugEnabled()) {
-            logger.debug(format("Creating connection using %s", getConnectionSpec()));
-        }
-        Connection connection = createConnection();
+        Connection connection = openConnection();
         initConnection(connection);
         return connection;
     }
-
-    protected abstract Connection createConnection() throws SQLException;
 
     protected void initConnection(Connection connection) throws SQLException {
         Integer transactionIsolation = getConnectionSpec().getTransactionIsolation();
@@ -79,6 +72,12 @@ public abstract class ConnectionProviderBase<C extends ConnectionSpec> implement
             connection.setAutoCommit(autoCommit);
         }
     }
+
+    protected Connection openConnection() throws SQLException {
+        return createConnection();
+    }
+
+    protected abstract Connection createConnection() throws SQLException;
 
     @Override
     public void closeConnection(Connection connection) throws SQLException {

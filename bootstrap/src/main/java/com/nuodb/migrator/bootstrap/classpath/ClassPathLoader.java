@@ -27,20 +27,20 @@
  */
 package com.nuodb.migrator.bootstrap.classpath;
 
-import com.nuodb.migrator.bootstrap.log.Log;
-import com.nuodb.migrator.bootstrap.log.LogFactory;
+import org.slf4j.Logger;
 
 import java.net.URL;
 import java.net.URLClassLoader;
 
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class ClassPathLoader extends URLClassLoader {
 
-    private final Log log = LogFactory.getLog(ClassPathLoader.class);
+    private static final Logger logger = getLogger(ClassPathLoader.class);
 
     public ClassPathLoader() {
         super(new URL[]{});
@@ -87,8 +87,8 @@ public class ClassPathLoader extends URLClassLoader {
     }
 
     public void addClassPath(ClassPath classPath) {
-        if (log.isDebugEnabled()) {
-            log.debug(format("Adding class path %s", classPath));
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Adding class path %s", classPath));
         }
         classPath.exposeClassPath(this);
     }

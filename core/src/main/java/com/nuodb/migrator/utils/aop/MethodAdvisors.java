@@ -25,16 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.utils.aop;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
+import org.aopalliance.aop.Advice;
 
-import java.sql.Connection;
+import static com.nuodb.migrator.utils.aop.MethodMatchers.MATCHES_ALL;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionProxy<C extends ConnectionSpec> extends HasConnectionSpec<C> {
+public class MethodAdvisors {
 
-    Connection getConnection();
+    public static MethodAdvisor newMethodAdvisor(Advice advice) {
+        return newMethodAdvisor(advice, MATCHES_ALL);
+    }
+
+    public static MethodAdvisor newMethodAdvisor(final Advice advice, final MethodMatcher methodMatcher) {
+        return new MethodAdvisor() {
+            @Override
+            public Advice getAdvice() {
+                return advice;
+            }
+
+            @Override
+            public MethodMatcher getMethodMatcher() {
+                return methodMatcher;
+            }
+        };
+    }
 }

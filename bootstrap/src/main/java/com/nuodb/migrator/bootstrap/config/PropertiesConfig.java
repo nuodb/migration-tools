@@ -29,7 +29,6 @@ package com.nuodb.migrator.bootstrap.config;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * @author Sergey Bushik
@@ -45,11 +44,6 @@ public class PropertiesConfig implements Config {
     }
 
     @Override
-    public Set<String> getPropertyNames() {
-        return properties.stringPropertyNames();
-    }
-
-    @Override
     public String getProperty(String property) {
         return replacer.replace(properties.getProperty(property));
     }
@@ -60,7 +54,7 @@ public class PropertiesConfig implements Config {
     }
 
     @Override
-    public Properties getProperties(Properties properties) {
+    public Properties getProperties() {
         Properties target = new Properties();
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             target.setProperty((String) entry.getKey(), replacer.replace((String) entry.getValue()));

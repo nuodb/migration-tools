@@ -25,43 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.load;
+package com.nuodb.migrator.utils.aop;
 
-import com.nuodb.migrator.backup.catalog.QueryRowSet;
-import com.nuodb.migrator.backup.catalog.RowSet;
-import com.nuodb.migrator.backup.catalog.TableRowSet;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import org.slf4j.Logger;
-
-import static java.lang.String.format;
-import static org.slf4j.LoggerFactory.getLogger;
+import java.lang.reflect.Method;
 
 /**
  * @author Sergey Bushik
  */
-class LoadRowSetMapper implements RowSetMapper {
+public interface MethodMatcher {
 
-    private final Logger logger = getLogger(getClass());
-
-    private final LoadJobContext loadJobContext;
-
-    public LoadRowSetMapper(LoadJobContext loadJobContext) {
-        this.loadJobContext = loadJobContext;
-    }
-
-    @Override
-    public Table getTable(RowSet rowSet) {
-        Table table = null;
-        if (rowSet instanceof TableRowSet) {
-            TableRowSet tableRowSet = (TableRowSet) rowSet;
-            table = loadJobContext.getDatabase().findTable(tableRowSet.getTableName());
-        } else if (rowSet instanceof QueryRowSet) {
-            QueryRowSet queryRowSet = (QueryRowSet) rowSet;
-            if (logger.isWarnEnabled()) {
-                logger.warn(format("Can't map %s row set query %s to a table, explicit mapping is required",
-                        queryRowSet.getName(), queryRowSet.getQuery()));
-            }
-        }
-        return table;
-    }
+    boolean matches(Method method, Class<?> targetClass, Object[] arguments);
 }

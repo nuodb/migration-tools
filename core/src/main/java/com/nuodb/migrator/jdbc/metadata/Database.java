@@ -28,21 +28,17 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.get;
-import static com.google.common.collect.Iterables.tryFind;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
@@ -186,8 +182,8 @@ public class Database extends IndentedBase implements HasSchemas {
         final Identifier tableId = valueOf(tableName);
         return newArrayList(filter(getTables(), new Predicate<Table>() {
             @Override
-            public boolean apply(Table input) {
-                return ObjectUtils.equals(input.getIdentifier(), tableId);
+            public boolean apply(Table table) {
+                return ObjectUtils.equals(table.getIdentifier(), tableId);
             }
         }));
     }
@@ -197,9 +193,9 @@ public class Database extends IndentedBase implements HasSchemas {
         final Identifier tableId = valueOf(tableName);
         return newArrayList(filter(getTables(), new Predicate<Table>() {
             @Override
-            public boolean apply(Table input) {
-                return ObjectUtils.equals(input.getSchema().getIdentifier(), schemaId) &&
-                        ObjectUtils.equals(input.getIdentifier(), tableId);
+            public boolean apply(Table table) {
+                return ObjectUtils.equals(table.getSchema().getIdentifier(), schemaId) &&
+                        ObjectUtils.equals(table.getIdentifier(), tableId);
             }
         }));
     }
@@ -210,10 +206,10 @@ public class Database extends IndentedBase implements HasSchemas {
         final Identifier tableId = valueOf(tableName);
         return newArrayList(filter(getTables(), new Predicate<Table>() {
             @Override
-            public boolean apply(Table input) {
-                return ObjectUtils.equals(input.getCatalog().getIdentifier(), catalogId) &&
-                        ObjectUtils.equals(input.getSchema().getIdentifier(), schemaId) &&
-                        ObjectUtils.equals(input.getIdentifier(), tableId);
+            public boolean apply(Table table) {
+                return ObjectUtils.equals(table.getCatalog().getIdentifier(), catalogId) &&
+                        ObjectUtils.equals(table.getSchema().getIdentifier(), schemaId) &&
+                        ObjectUtils.equals(table.getIdentifier(), tableId);
             }
         }));
     }

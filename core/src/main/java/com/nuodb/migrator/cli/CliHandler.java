@@ -64,14 +64,18 @@ public class CliHandler extends CliSupport implements Bootable {
 
     public static final String EXECUTABLE = "bin/nuodb-migrator";
 
-    private String executable = EXECUTABLE;
+    private Config config;
     private Parser parser = new ParserImpl();
     private CliRunLookup cliRunLookup = new CliRunLookup();
 
     @Override
     public void boot(Config config, String[] arguments) throws Exception {
+        setConfig(config);
+        parse(arguments);
+    }
+
+    public void parse(String[] arguments) throws Exception {
         try {
-            boot(config);
             Option option = createOption();
             OptionSet optionSet = getParser().parse(arguments, option);
             handleOptionSet(optionSet, option);
@@ -81,16 +85,14 @@ public class CliHandler extends CliSupport implements Bootable {
         }
     }
 
-    @SuppressWarnings("UnusedParameters")
-    protected void boot(Config config) {
-        setExecutable(config.getProperty(Config.EXECUTABLE, EXECUTABLE));
-    }
-
     public Parser getParser() {
         return parser;
     }
 
     protected Group createOption() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Creating options to bind command line arguments to");
+        }
         Option help = newBasicOptionBuilder().
                 withId(HELP_OPTION_ID).
                 withName(HELP_OPTION).
@@ -226,11 +228,15 @@ public class CliHandler extends CliSupport implements Bootable {
         formatter.format(System.out);
     }
 
-    public String getExecutable() {
-        return executable;
+    public Config getConfig() {
+        return config;
     }
 
-    public void setExecutable(String executable) {
-        this.executable = executable;
+    public void setConfig(Config config) {
+        this.config = config;
+    }
+
+    protected String getExecutable() {
+        return config.getProperty(Config.EXECUTABLE, CliHandler.EXECUTABLE);
     }
 }

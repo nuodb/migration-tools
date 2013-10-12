@@ -53,24 +53,26 @@ public class DriverConnectionProvider extends ConnectionProxyProviderBase<Driver
     }
 
     @Override
-    protected Connection createTargetConnection() throws SQLException {
-        if (basicDataSource == null) {
-            DriverConnectionSpec connectionSpec = getConnectionSpec();
+    protected Connection createConnection() throws SQLException {
+        synchronized (this) {
+            if (basicDataSource == null) {
+                DriverConnectionSpec connectionSpec = getConnectionSpec();
 
-            BasicDataSource basicDataSource = new BasicDataSource();
-            basicDataSource.setDriverClassName(connectionSpec.getDriver());
-            basicDataSource.setDriverClassLoader(getClassLoader());
-            basicDataSource.setUrl(connectionSpec.getUrl());
-            basicDataSource.setUsername(connectionSpec.getUsername());
-            basicDataSource.setPassword(connectionSpec.getPassword());
-            JdbcUrl jdbcUrl = connectionSpec.getJdbcUrl();
-            if (jdbcUrl != null) {
-                addParameters(basicDataSource, jdbcUrl.getParameters());
+                BasicDataSource basicDataSource = new BasicDataSource();
+                basicDataSource.setDriverClassName(connectionSpec.getDriver());
+                basicDataSource.setDriverClassLoader(getClassLoader());
+                basicDataSource.setUrl(connectionSpec.getUrl());
+                basicDataSource.setUsername(connectionSpec.getUsername());
+                basicDataSource.setPassword(connectionSpec.getPassword());
+                JdbcUrl jdbcUrl = connectionSpec.getJdbcUrl();
+                if (jdbcUrl != null) {
+                    addParameters(basicDataSource, jdbcUrl.getParameters());
+                }
+                addParameters(basicDataSource, connectionSpec.getProperties());
+                basicDataSource.setAccessToUnderlyingConnectionAllowed(true);
+
+                this.basicDataSource = basicDataSource;
             }
-            addParameters(basicDataSource, connectionSpec.getProperties());
-            basicDataSource.setAccessToUnderlyingConnectionAllowed(true);
-
-            this.basicDataSource = basicDataSource;
         }
         return basicDataSource.getConnection();
     }
@@ -84,7 +86,7 @@ public class DriverConnectionProvider extends ConnectionProxyProviderBase<Driver
     }
 
     @Override
-    public Connection getTargetConnection(Connection connection) {
+    public Connection getConnection(Connection connection) {
         if (connection == null) {
             return null;
         }

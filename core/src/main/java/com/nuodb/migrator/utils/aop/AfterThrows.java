@@ -25,16 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.utils.aop;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
+import org.aopalliance.aop.Advice;
 
-import java.sql.Connection;
+import java.lang.reflect.Method;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionProxy<C extends ConnectionSpec> extends HasConnectionSpec<C> {
+public interface AfterThrows extends Advice {
 
-    Connection getConnection();
+    void afterThrows(Method method, Object[] arguments, Object target, Throwable exception) throws Throwable;
 }

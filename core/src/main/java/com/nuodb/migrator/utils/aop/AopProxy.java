@@ -25,16 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.utils.aop;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
-
-import java.sql.Connection;
+import org.aopalliance.aop.Advice;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionProxy<C extends ConnectionSpec> extends HasConnectionSpec<C> {
+public interface AopProxy {
 
-    Connection getConnection();
+    Object getTarget();
+
+    Class getTargetClass();
+
+    Class[] getInterfaces();
+
+    Advisor[] getAdvisors();
+
+    void addAdvice(Advice advice);
+
+    void addAdvice(int index, Advice advice);
+
+    void addAdvisor(Advisor advisor);
+
+    void addAdvisor(int index, Advisor advisor);
+
+    boolean removeAdvice(Advice advice);
+
+    boolean removeAdvisor(Advisor advisor);
 }

@@ -27,8 +27,7 @@
  */
 package com.nuodb.migrator.bootstrap.classpath;
 
-import com.nuodb.migrator.bootstrap.log.Log;
-import com.nuodb.migrator.bootstrap.log.LogFactory;
+import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -36,13 +35,14 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class ClassPathLoaderUtils {
 
-    private static final Log log = LogFactory.getLog(ClassPathLoaderUtils.class);
+    private static final Logger logger = getLogger(ClassPathLoaderUtils.class);
 
     public static final String PATH_SEPARATOR = ",";
 
@@ -61,8 +61,8 @@ public class ClassPathLoaderUtils {
                     classPathLoader.addJarDir(path) || classPathLoader.addDir(path))) {
                 // alright, the path was recognized
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug(format("Path is neither one of the recognized class path types %s", path));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(format("Path is neither one of the recognized class path types %s", path));
                 }
             }
         }

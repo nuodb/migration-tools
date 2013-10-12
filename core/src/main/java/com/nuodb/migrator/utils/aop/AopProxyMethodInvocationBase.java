@@ -25,17 +25,48 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.utils.aop;
 
-import java.sql.Statement;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Method;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleQueryFormatterFactory implements QueryFormatterFactory {
+public abstract class AopProxyMethodInvocationBase implements AopProxyMethodInvocation {
+
+    private AopProxy aopProxy;
+    private Method method;
+    private Object[] arguments;
+
+    protected AopProxyMethodInvocationBase(AopProxy aopProxy, Method method, Object[] arguments) {
+        this.aopProxy = aopProxy;
+        this.method = method;
+        this.arguments = arguments;
+    }
 
     @Override
-    public QueryFormatter createQueryFormatter(Statement statement, String query) {
-        return new SimpleQueryFormatter(query);
+    public AopProxy getAopProxy() {
+        return aopProxy;
+    }
+
+    @Override
+    public Method getMethod() {
+        return method;
+    }
+
+    @Override
+    public Object[] getArguments() {
+        return arguments;
+    }
+
+    @Override
+    public Object getThis() {
+        return aopProxy.getTarget();
+    }
+
+    @Override
+    public AccessibleObject getStaticPart() {
+        return method;
     }
 }

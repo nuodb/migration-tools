@@ -25,38 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.utils;
+package com.nuodb.migrator.utils.aop;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-
-import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class ReflectionInvocationHandler<T> implements InvocationHandler {
+public class AopProxyException extends MigratorException {
 
-    private final T target;
-
-    public ReflectionInvocationHandler(T target) {
-        this.target = target;
+    public AopProxyException(String message) {
+        super(message);
     }
 
-    public T getTarget() {
-        return target;
+    public AopProxyException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        return invokeTarget(method, args);
-    }
-
-    protected <R> R invokeTarget(Method method, Object[] args) throws Throwable {
-        try {
-            return invokeMethod(getTarget(), method, args);
-        } catch (ReflectionException exception) {
-            throw exception.getCause();
-        }
+    public AopProxyException(Throwable cause) {
+        super(cause);
     }
 }

@@ -27,14 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.connection;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
-
-import java.sql.Connection;
+import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionProxy<C extends ConnectionSpec> extends HasConnectionSpec<C> {
+public interface QueryFormatFactory {
 
-    Connection getConnection();
+    QueryFormat createQueryFormatter(Statement statement, String query);
 }

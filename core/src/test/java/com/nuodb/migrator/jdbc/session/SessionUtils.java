@@ -30,7 +30,12 @@ package com.nuodb.migrator.jdbc.session;
 import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
+import com.nuodb.migrator.utils.aop.AopProxy;
 
+import java.sql.Connection;
+
+import static com.nuodb.migrator.utils.aop.AopProxyUtils.createAopProxy;
+import static com.nuodb.migrator.utils.aop.MethodInterceptors.newIntroduceInterfacesInterceptor;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -54,12 +59,23 @@ public class SessionUtils {
         Session session = mock(Session.class);
         when(session.getDialect()).thenReturn(dialect);
 
-        ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
-        when(session.getConnection()).thenReturn(connectionProxy);
-
-        DriverConnectionSpec driverConnectionSpec = new DriverConnectionSpec();
+        final Connection connection = mock(Connection.class);
+        final AopProxy aopProxy = createAopProxy(connection, ConnectionProxy.class, Connection.class);
+        final DriverConnectionSpec driverConnectionSpec = new DriverConnectionSpec();
         driverConnectionSpec.setUrl(url);
-        when(connectionProxy.getConnectionSpec()).thenReturn(driverConnectionSpec);
+        aopProxy.addAdvice(newIntroduceInterfacesInterceptor(new ConnectionProxy<DriverConnectionSpec>() {
+            @Override
+            public Connection getConnection() {
+                return connection;
+            }
+
+            @Override
+            public DriverConnectionSpec getConnectionSpec() {
+                return driverConnectionSpec;
+            }
+        }, ConnectionProxy.class));
+
+        when(session.getConnection()).thenReturn((Connection) aopProxy);
         return session;
     }
 }

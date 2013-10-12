@@ -31,16 +31,19 @@ import com.nuodb.migrator.bootstrap.config.Config;
 import com.nuodb.migrator.bootstrap.config.PropertiesConfigLoader;
 import com.nuodb.migrator.bootstrap.config.PropertiesReplacement;
 import com.nuodb.migrator.bootstrap.config.Replacer;
-import com.nuodb.migrator.bootstrap.log.Log;
-import com.nuodb.migrator.bootstrap.log.LogFactory;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.Map;
+import java.util.Properties;
 
 import static com.nuodb.migrator.bootstrap.classpath.ClassPathLoaderUtils.createClassPathLoader;
 import static com.nuodb.migrator.bootstrap.config.Config.*;
+import static java.lang.String.format;
 import static java.lang.System.setProperty;
 import static java.lang.Thread.currentThread;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
@@ -48,7 +51,7 @@ import static java.lang.Thread.currentThread;
 @SuppressWarnings("unchecked")
 public class Bootstrap {
 
-    private static final Log log = LogFactory.getLog(Bootstrap.class);
+    private static final Logger logger = getLogger(Bootstrap.class);
 
     private ClassLoader classLoader;
 
@@ -57,27 +60,18 @@ public class Bootstrap {
     private Config config;
 
     public void boot(String[] arguments) throws Exception {
-        if (log.isDebugEnabled()) {
-            log.debug("Loading config");
-        }
         config = loadConfig();
 
-        if (log.isDebugEnabled()) {
-            log.debug("Exposing migrator config to a system properties");
+        Properties properties = config.getProperties();
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Exposing bootstrap config as system properties %s", properties));
         }
-        for (String property : config.getPropertyNames()) {
-            setProperty(property, config.getProperty(property));
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Creating class classpath");
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            setProperty((String) entry.getKey(), (String) entry.getValue());
         }
         classLoader = createClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
 
-        if (log.isDebugEnabled()) {
-            log.debug("Creating bootable");
-        }
         Bootable bootable = createBootable();
         bootable.boot(config, arguments);
     }
@@ -89,6 +83,9 @@ public class Bootstrap {
     }
 
     protected ClassLoader createClassLoader() throws IOException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Creating class loader");
+        }
         String classPath = getConfig().getProperty(CLASSPATH);
         if (classPath == null || classPath.equals("")) {
             return getClass().getClassLoader();
@@ -98,6 +95,9 @@ public class Bootstrap {
 
     protected Bootable createBootable() throws Exception {
         String bootableName = getConfig().getProperty(BOOTABLE_CLASS, DEFAULT_BOOTABLE_CLASS);
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Booting %s", bootableName));
+        }
         Class<? extends Bootable> bootableType = (Class<? extends Bootable>) getClassLoader().loadClass(bootableName);
         Constructor<? extends Bootable> constructor = bootableType.getConstructor();
         return constructor.newInstance();
@@ -116,8 +116,8 @@ public class Bootstrap {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.boot(arguments);
         } catch (Throwable error) {
-            if (log.isErrorEnabled()) {
-                log.error("Execution failed", error);
+            if (logger.isErrorEnabled()) {
+                logger.error("Execution failed", error);
             }
             System.exit(BOOT_ERROR);
         }

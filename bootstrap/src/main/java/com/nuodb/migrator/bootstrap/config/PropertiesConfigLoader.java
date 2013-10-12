@@ -1,7 +1,6 @@
 package com.nuodb.migrator.bootstrap.config;
 
-import com.nuodb.migrator.bootstrap.log.Log;
-import com.nuodb.migrator.bootstrap.log.LogFactory;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,11 +12,12 @@ import java.util.Properties;
 import static com.nuodb.migrator.bootstrap.config.Config.*;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @SuppressWarnings("unchecked")
 public class PropertiesConfigLoader {
 
-    private static final Log log = LogFactory.getLog(PropertiesConfigLoader.class);
+    private static final Logger logger = getLogger(PropertiesConfigLoader.class);
 
     private Replacer replacer;
 
@@ -50,79 +50,90 @@ public class PropertiesConfigLoader {
         }
         Throwable error = null;
         Properties properties = new Properties();
-        if (input != null)
+        if (input != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Loading config");
+            }
             try {
                 properties.load(input);
                 input.close();
             } catch (Throwable throwable) {
                 error = throwable;
             }
+        }
         if (input == null || error != null) {
-            if (log.isWarnEnabled()) {
-                log.warn("Failed to load bootstrap config", error);
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed to load bootstrap config", error);
             }
         }
         return new PropertiesConfig(properties, replacer);
     }
 
     private static InputStream getConfigFromProperty() {
-        InputStream stream = null;
+        InputStream stream;
         try {
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Looking for custom config path under %s property", CONFIG));
+            }
             String config = getProperty(CONFIG);
             if (config != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug(format("Attempting to load properties from %s", config));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(format("Opening custom config at %s", config));
                 }
                 stream = (new URL(config)).openStream();
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug(format("No config file specified as an argument of system property %s",
-                            CONFIG));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(format("Custom config path under %s property is not set", CONFIG));
                 }
+                stream = null;
             }
         } catch (Throwable throwable) {
-            // ignored
+            stream = null;
         }
         return stream;
     }
 
     private static InputStream getConfigFromHome() {
-        InputStream stream = null;
-        File properties = null;
+        File path = new File(new File(getHome(), CONFIG_FOLDER), DEFAULT_CONFIG);
+        InputStream stream;
         try {
-            properties = new File(new File(getHome(), CONFIG_FOLDER), DEFAULT_CONFIG);
-            stream = new FileInputStream(properties);
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Looking for config at %s", path));
+            }
+            stream = new FileInputStream(path);
         } catch (Throwable t) {
-            // ignored
+            stream = null;
         }
         if (stream != null) {
-            if (log.isDebugEnabled()) {
-                log.debug(format("Bootstrap config loaded from %s", properties.getAbsolutePath()));
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Config found at %s", path));
             }
-        } else if (properties != null) {
-            if (log.isInfoEnabled()) {
-                log.info(format("Bootstrap config can't be loaded from %s", properties.getAbsolutePath()));
+        } else {
+            if (logger.isInfoEnabled()) {
+                logger.info(format("Config can't be found at %s", path));
             }
         }
         return stream;
     }
 
     private static InputStream getDefaultConfig() {
-        InputStream stream = null;
+        InputStream stream;
         try {
-            String config = DEFAULT_CONFIG;
-            stream = PropertiesConfigLoader.class.getResourceAsStream(config);
-            if (stream != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug(format("Default bootstrap config found at %s", config));
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug(format("Default bootstrap config can't be found at %s", config));
-                }
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Looking for default config at %s", DEFAULT_CONFIG));
             }
+            stream = PropertiesConfigLoader.class.getResourceAsStream(DEFAULT_CONFIG);
         } catch (Throwable throwable) {
-            // ignored
+            stream = null;
+        }
+        if (stream != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Default config found at %s", DEFAULT_CONFIG));
+            }
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Default config can't be found at %s", DEFAULT_CONFIG));
+            }
         }
         return stream;
     }

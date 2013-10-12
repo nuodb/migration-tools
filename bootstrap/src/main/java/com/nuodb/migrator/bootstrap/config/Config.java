@@ -28,7 +28,6 @@
 package com.nuodb.migrator.bootstrap.config;
 
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * @author Sergey Bushik
@@ -55,11 +54,9 @@ public interface Config {
 
     final String CONFIG_FOLDER = "conf";
 
-    Set<String> getPropertyNames();
-
     String getProperty(String property);
 
     String getProperty(String property, String defaultValue);
 
-    Properties getProperties(Properties properties);
+    Properties getProperties();
 }

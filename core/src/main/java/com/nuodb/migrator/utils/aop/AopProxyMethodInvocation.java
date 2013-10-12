@@ -25,16 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.utils.aop;
+
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author Sergey Bushik
  */
-public interface QueryFormatter {
+public interface AopProxyMethodInvocation extends MethodInvocation {
 
-    String format();
-
-    Object getParameter(int index);
-
-    void setParameter(int index, Object value);
+    AopProxy getAopProxy();
 }

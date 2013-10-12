@@ -25,14 +25,46 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.utils.aop;
 
-import java.sql.Statement;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import static com.nuodb.migrator.utils.aop.MethodAdvisors.newMethodAdvisor;
+import static java.lang.String.format;
+import static java.lang.System.out;
+import static java.util.Arrays.asList;
 
 /**
  * @author Sergey Bushik
  */
-public interface QueryFormatterFactory {
+public class AopProxyUtils {
 
-    QueryFormatter createQueryFormatter(Statement statement, String query);
+    public static AopProxy getAopProxy(Object target, Class... interfaces) {
+        if (target instanceof AopProxy &&
+                asList(((AopProxy) target).getInterfaces()).containsAll(asList(interfaces))) {
+            return (AopProxy) target;
+        } else {
+            return createAopProxy(target, interfaces);
+        }
+    }
+
+    public static AopProxy createAopProxy(Object target, Class... interfaces) {
+        return new ReflectionProxyFactory(target, interfaces).createAopProxy();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void main(String[] args) {
+        AopProxy aopProxy = AopProxyUtils.getAopProxy(new ArrayList(), Collection.class);
+        aopProxy.addAdvisor(newMethodAdvisor(new BeforeMethod() {
+            @Override
+            public void beforeMethod(Method method, Object[] arguments, Object target) throws Throwable {
+                out.println(format("Before method %s, arguments %s, target %s", method, asList(arguments), target));
+            }
+        }));
+
+        Collection<Object> list = (Collection<Object>) aopProxy;
+        list.add("argument");
+    }
 }

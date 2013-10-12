@@ -32,6 +32,12 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.String.format;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.util.Arrays.asList;
 
 @SuppressWarnings("unchecked")
 public class ReflectionUtils {
@@ -102,17 +108,46 @@ public class ReflectionUtils {
         }
     }
 
-    public static <T> T invokeMethod(Object object, Method method, Object... args) {
+    public static <T> T invokeMethod(Object object, Method method, Object... arguments) {
         try {
-            if (args == null) {
-                args = ArrayUtils.EMPTY_OBJECT_ARRAY;
+            if (arguments == null) {
+                arguments = ArrayUtils.EMPTY_OBJECT_ARRAY;
             }
             method.setAccessible(true);
-            return (T) method.invoke(object, args);
+            return (T) method.invoke(object, arguments);
+        } catch (IllegalArgumentException exception) {
+            throw newInvokeMethodException(object, method, exception);
         } catch (IllegalAccessException exception) {
-            throw new ReflectionException(exception);
+            throw newInvokeMethodException(object, method, exception);
         } catch (InvocationTargetException exception) {
-            throw new ReflectionException(exception.getTargetException());
+            throw newInvokeMethodException(object, method, exception.getTargetException());
         }
+    }
+
+    private static ReflectionException newInvokeMethodException(Object object, Method method, Throwable cause) {
+        return isStatic(method.getModifiers()) ?
+                new ReflectionException(format("Failed to invoke static %s method", method), cause) :
+                new ReflectionException(format("Failed to invoke %s method on object of %s class", method,
+                        object.getClass().getName()), cause);
+    }
+
+    public static Method getMethod(Class type, String name, Class[] argumentTypes) {
+        try {
+            return type.getMethod(name, argumentTypes);
+        } catch (NoSuchMethodException exception) {
+            throw new ReflectionException(exception);
+        }
+    }
+
+    public static Class[] getInterfaces(Class type) {
+        Collection<Class> interfaces = newArrayList();
+        while (type != null) {
+            if (type.isInterface()) {
+                interfaces.add(type);
+            }
+            interfaces.addAll(asList(type.getInterfaces()));
+            type = type.getSuperclass();
+        }
+        return interfaces.toArray(new Class[interfaces.size()]);
     }
 }

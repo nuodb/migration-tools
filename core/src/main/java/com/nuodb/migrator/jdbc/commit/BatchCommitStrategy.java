@@ -46,15 +46,15 @@ public class BatchCommitStrategy implements CommitStrategy {
 
     public static final long BATCH_SIZE = 1000;
 
-    private transient long batchCount;
+    private transient long updateCount;
     private long batchSize = BATCH_SIZE;
 
     @Override
     public void onUpdate(Statement statement, Query query) throws SQLException {
-        batchCount++;
-        if (batchCount > batchSize) {
+        updateCount++;
+        if (updateCount > getBatchSize()) {
             statement.getConnection().commit();
-            batchCount = 0;
+            updateCount = 0;
         }
     }
 
@@ -62,7 +62,7 @@ public class BatchCommitStrategy implements CommitStrategy {
     public void setAttributes(Map<String, Object> attributes) {
         Object batchSizeValue = attributes.get(ATTRIBUTE_BATCH_SIZE);
         if (batchSizeValue instanceof String && !isEmpty((String) batchSizeValue)) {
-            batchSize = parseLong((String) batchSizeValue);
+            setBatchSize(parseLong((String) batchSizeValue));
         }
     }
 

@@ -46,7 +46,14 @@ else
     JAVA=`which java`
 fi
 
-JAVA_OPTS="-Xmx$MAX_HEAP_SIZE -Dnuodb.root=$NUODB_ROOT -Dnuodb.migrator.root=$NUODB_MIGRATOR_ROOT"
-CLASSPATH=$NUODB_MIGRATOR_ROOT/jar/nuodb-migrator-bootstrap-${project.version}.jar:$CLASSPATH
+JAVA_OPTS="$JAVA_OPTS -Xmx$MAX_HEAP_SIZE"
+JAVA_OPTS="$JAVA_OPTS -Dnuodb.root=$NUODB_ROOT"
+JAVA_OPTS="$JAVA_OPTS -Dnuodb.migrator.root=$NUODB_MIGRATOR_ROOT"
+
+CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_ROOT/conf"
+CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_ROOT/jar/slf4j-api-${slf4j.version}.jar"
+CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_ROOT/jar/slf4j-log4j12-${slf4j.version}.jar"
+CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_ROOT/jar/log4j-${log4j.version}.jar"
+CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_ROOT/jar/nuodb-migrator-bootstrap-${project.version}.jar"
 
 $JAVA $JAVA_OPTS -cp $CLASSPATH com.nuodb.migrator.bootstrap.Bootstrap "$@"

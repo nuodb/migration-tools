@@ -25,16 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.utils.aop;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
+import java.lang.reflect.Method;
 
-import java.sql.Connection;
+import static com.nuodb.migrator.utils.ReflectionUtils.getMethod;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionProxy<C extends ConnectionSpec> extends HasConnectionSpec<C> {
+public class MethodMatchers {
 
-    Connection getConnection();
+    public static final MethodMatcher MATCHES_ALL = new MethodMatcher() {
+        @Override
+        public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
+            return true;
+        }
+    };
+
+    public static MethodMatcher newMethodMatcher(Object target, String name, Class... parameterTypes) {
+        return newMethodMatcher(target.getClass(), name, parameterTypes);
+    }
+
+    public static MethodMatcher newMethodMatcher(Class type, String name, Class... parameterTypes) {
+        return newMethodMatcher(getMethod(type, name, parameterTypes));
+    }
+
+    public static MethodMatcher newMethodMatcher(final Method target) {
+        return new MethodMatcher() {
+            @Override
+            public boolean matches(Method method, Class<?> targetClass, Object[] arguments) {
+                return target != null && target.equals(method);
+            }
+        };
+    }
 }

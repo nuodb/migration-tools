@@ -58,9 +58,16 @@ ECHO Set NUODB_MIGRATOR_ROOT appropriately.
 GOTO FAIL
 
 :OK_NUODB_MIGRATOR_ROOT
-SET CLASSPATH=%NUODB_MIGRATOR_ROOT%\jar\nuodb-migrator-bootstrap-${project.version}.jar;%CLASSPATH%
 
-SET JAVA_OPTS=-Xmx%MAX_HEAP_SIZE% "-Dnuodb.root=%NUODB_ROOT%" "-Dnuodb.migrator.root=%NUODB_MIGRATOR_ROOT%"
+SET JAVA_OPTS="%JAVA_OPTS% -Xmx%MAX_HEAP_SIZE%"
+SET JAVA_OPTS="%JAVA_OPTS% -Dnuodb.root=%NUODB_ROOT%"
+SET JAVA_OPTS="%JAVA_OPTS% -Dnuodb.migrator.root=$%NUODB_MIGRATOR_ROOT%"
+
+SET CLASSPATH="%CLASSPATH%;%NUODB_MIGRATOR_ROOT%\conf"
+SET CLASSPATH="%CLASSPATH%;%NUODB_MIGRATOR_ROOT%\jar\slf4j-api-${slf4j.version}.jar"
+SET CLASSPATH="%CLASSPATH%;%NUODB_MIGRATOR_ROOT%\jar\slf4j-log4j12-${slf4j.version}.jar"
+SET CLASSPATH="%CLASSPATH%;%NUODB_MIGRATOR_ROOT%\jar\log4j-${log4j.version}.jar"
+SET CLASSPATH="%CLASSPATH%;%NUODB_MIGRATOR_ROOT%\jar\nuodb-migrator-bootstrap-${project.version}.jar"
 
 "%JAVA_HOME%\bin\java" %JAVA_OPTS% -cp "%CLASSPATH%" com.nuodb.migrator.bootstrap.Bootstrap %*
 

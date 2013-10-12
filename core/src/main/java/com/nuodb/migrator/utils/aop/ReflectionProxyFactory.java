@@ -25,16 +25,43 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.connection;
+package com.nuodb.migrator.utils.aop;
 
-import com.nuodb.migrator.spec.ConnectionSpec;
+import java.util.Collection;
 
-import java.sql.Connection;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
+import static com.nuodb.migrator.utils.ReflectionUtils.getInterfaces;
+import static java.lang.reflect.Proxy.newProxyInstance;
 
 /**
  * @author Sergey Bushik
  */
-public interface ConnectionProxy<C extends ConnectionSpec> extends HasConnectionSpec<C> {
+public class ReflectionProxyFactory implements AopProxyFactory {
 
-    Connection getConnection();
+    private Object target;
+    private ClassLoader classLoader;
+    private Class[] interfaces;
+
+    public ReflectionProxyFactory(Object target) {
+        this(target, getInterfaces(target.getClass()));
+    }
+
+    public ReflectionProxyFactory(Object target, Class... interfaces) {
+        this(target, getClassLoader(), interfaces);
+    }
+
+    public ReflectionProxyFactory(Object target, ClassLoader classLoader, Class... interfaces) {
+        this.target = target;
+        this.classLoader = classLoader;
+        this.interfaces = interfaces;
+    }
+
+    @Override
+    public AopProxy createAopProxy() {
+        Collection<Class> interfaces = newArrayList(this.interfaces);
+        interfaces.add(AopProxy.class);
+        return (AopProxy) newProxyInstance(classLoader,
+                interfaces.toArray(new Class[interfaces.size()]), new ReflectionProxy(target));
+    }
 }

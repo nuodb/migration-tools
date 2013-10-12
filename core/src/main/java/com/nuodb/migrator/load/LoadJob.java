@@ -75,7 +75,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-public class LoadJob extends JobBase {
+public class LoadJob extends JobBase implements RowSetMapper {
 
     protected final Logger logger = getLogger(getClass());
 
@@ -87,7 +87,7 @@ public class LoadJob extends JobBase {
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
 
     private LoadJobContext loadJobContext;
-    private RowSetMapper rowSetMapper;
+    private RowSetMapper rowSetMapper = this;
 
     public LoadJob(LoadSpec loadSpec) {
         this.loadSpec = loadSpec;
@@ -110,8 +110,6 @@ public class LoadJob extends JobBase {
         }
         loadJobContext = new LoadJobContext();
 
-        rowSetMapper = new LoadRowSetMapper(loadJobContext);
-
         ResourceSpec inputSpec = getInputSpec();
         loadJobContext.setFormatAttributes(inputSpec.getAttributes());
         loadJobContext.setCatalogManager(new XmlCatalogManager(inputSpec.getPath()));
@@ -131,6 +129,29 @@ public class LoadJob extends JobBase {
     @Override
     public void execute(JobExecution execution) throws Exception {
         load();
+    }
+
+    @Override
+    public Table getTable(RowSet rowSet) {
+        Table table = null;
+        if (rowSet instanceof TableRowSet) {
+            table = getTable((TableRowSet) rowSet);
+        } else if (rowSet instanceof QueryRowSet) {
+            table = getTable((QueryRowSet) rowSet);
+        }
+        return table;
+    }
+
+    protected Table getTable(TableRowSet tableRowSet) {
+        return loadJobContext.getDatabase().findTable(tableRowSet.getTableName());
+    }
+
+    protected Table getTable(QueryRowSet queryRowSet) {
+        if (logger.isWarnEnabled()) {
+            logger.warn(format("Can't map %s row set query %s to a table, explicit mapping is required",
+                    queryRowSet.getName(), queryRowSet.getQuery()));
+        }
+        return null;
     }
 
     protected void load() throws SQLException {
@@ -165,7 +186,7 @@ public class LoadJob extends JobBase {
 
     protected void load(final RowSet rowSet) throws SQLException {
         if (!isEmpty(rowSet.getChunks())) {
-            final Table table = rowSetMapper.getTable(rowSet);
+            final Table table = getRowSetMapper().getTable(rowSet);
             if (table != null) {
                 final InsertQuery query = createInsertQuery(table, rowSet.getColumns());
                 final StatementTemplate template = new StatementTemplate(loadJobContext.getSession().getConnection());

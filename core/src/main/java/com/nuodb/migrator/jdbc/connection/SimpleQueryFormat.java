@@ -43,7 +43,7 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 /**
  * @author Sergey Bushik
  */
-public class SimpleQueryFormatter implements QueryFormatter {
+public class SimpleQueryFormat implements QueryFormat {
 
     private static final String PARAMETER = "?";
     public static final Pattern PARAMETER_PATTERN = compile(quote(PARAMETER));
@@ -51,7 +51,7 @@ public class SimpleQueryFormatter implements QueryFormatter {
     private final String query;
     private final List<Object> parameters;
 
-    public SimpleQueryFormatter(String query) {
+    public SimpleQueryFormat(String query) {
         this.query = query;
         this.parameters = newArrayList(new Object[countMatches(query, PARAMETER)]);
     }

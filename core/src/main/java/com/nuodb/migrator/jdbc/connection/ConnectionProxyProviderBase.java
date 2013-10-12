@@ -28,15 +28,13 @@
 package com.nuodb.migrator.jdbc.connection;
 
 import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.utils.ReflectionInvocationHandler;
+import com.nuodb.migrator.utils.aop.AopProxy;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
-import static java.lang.reflect.Proxy.*;
+import static com.nuodb.migrator.utils.aop.AopProxyUtils.createAopProxy;
+import static com.nuodb.migrator.utils.aop.MethodInterceptors.newIntroduceInterfacesInterceptor;
 
 /**
  * @author Sergey Bushik
@@ -51,47 +49,32 @@ public abstract class ConnectionProxyProviderBase<C extends ConnectionSpec> exte
     }
 
     @Override
-    protected Connection createConnection() throws SQLException {
-        return createConnectionProxy(createTargetConnection());
+    protected Connection openConnection() throws SQLException {
+        final AopProxy aopProxy = createConnectionProxy(createConnection());
+        initConnectionProxy(aopProxy);
+        return (Connection) aopProxy;
     }
 
-    protected ConnectionProxy createConnectionProxy(Connection connection) throws SQLException {
-        return (ConnectionProxy) newProxyInstance(getClassLoader(),
-                new Class<?>[]{ConnectionProxy.class}, new ConnectionInvocationHandler(connection));
+    protected AopProxy createConnectionProxy(Connection connection) {
+        return createAopProxy(connection, Connection.class, ConnectionProxy.class);
     }
 
-    protected abstract Connection createTargetConnection() throws SQLException;
+    protected void initConnectionProxy(final AopProxy connection) {
+        connection.addAdvice(newIntroduceInterfacesInterceptor(new ConnectionProxy<C>() {
+            @Override
+            public Connection getConnection() {
+                return ConnectionProxyProviderBase.this.getConnection((Connection) connection.getTarget());
+            }
+
+            @Override
+            public C getConnectionSpec() {
+                return ConnectionProxyProviderBase.this.getConnectionSpec();
+            }
+        }, ConnectionProxy.class));
+    }
 
     @SuppressWarnings("unchecked")
-    protected Connection getTargetConnection(Connection connection) {
-        if (!isProxyClass(connection.getClass())) {
-            return connection;
-        }
-        InvocationHandler invocationHandler = getInvocationHandler(connection);
-        if (invocationHandler instanceof ReflectionInvocationHandler) {
-            return (Connection) ((ReflectionInvocationHandler) invocationHandler).getTarget();
-        }
+    protected Connection getConnection(Connection connection) {
         return connection;
-    }
-
-    protected class ConnectionInvocationHandler extends ReflectionInvocationHandler<Connection> {
-
-        private static final String GET_CONNECTION_METHOD = "getConnection";
-        private static final String GET_CONNECTION_SPEC_METHOD = "getConnectionSpec";
-
-        public ConnectionInvocationHandler(Connection connection) {
-            super(connection);
-        }
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (GET_CONNECTION_METHOD.equals(method.getName())) {
-                return getTargetConnection(getTarget());
-            } else if (GET_CONNECTION_SPEC_METHOD.equals(method.getName())) {
-                return getConnectionSpec();
-            } else {
-                return super.invoke(proxy, method, args);
-            }
-        }
     }
 }
