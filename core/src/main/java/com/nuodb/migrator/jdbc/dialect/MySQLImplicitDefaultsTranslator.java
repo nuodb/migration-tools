@@ -153,7 +153,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
      * <li>For numeric types, the default is 0</li> <li>Integer or floating-point types declared with the AUTO_INCREMENT
      * attribute, the default is the next value in the sequence. This is handled by sequences</li> <li>For string types
      * other than ENUM, the default value is the empty string</li> <li>For ENUM, the default is the first enumeration
-     * value</li> <li>For date and time types other than TIMESTAMP, the default is the appropriate “zero” value for the
+     * value</li> <li>For date and time types other than TIMESTAMP, the default is the appropriate "zero" value for the
      * type, we skip this</li> <li>For the first TIMESTAMP column in a table, the default value is the current date and
      * time. This is converted to an explicit thing by MySQL, so we are OK</li> </ul>
      *
