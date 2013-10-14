@@ -96,8 +96,8 @@ public class LoggingConnectionProvider extends ConnectionProxyProviderBase {
 
     @Override
     protected void initConnection(Connection connection) throws SQLException {
-        if (connectionProvider instanceof ConnectionProxyProviderBase) {
-            ((ConnectionProxyProviderBase) connectionProvider).initConnection(connection);
+        if (connectionProvider instanceof ConnectionProviderBase) {
+            ((ConnectionProviderBase) connectionProvider).initConnection(connection);
         }
     }
 

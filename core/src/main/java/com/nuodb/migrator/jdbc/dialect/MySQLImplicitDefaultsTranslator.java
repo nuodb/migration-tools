@@ -166,6 +166,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
     protected Script translate(Script script, Column column, DatabaseInfo databaseInfo) {
         String result;
         switch (column.getTypeCode()) {
+            case BIT:
             case TINYINT:
             case SMALLINT:
             case INTEGER:

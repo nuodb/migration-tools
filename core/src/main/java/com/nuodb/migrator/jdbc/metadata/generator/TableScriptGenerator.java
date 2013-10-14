@@ -196,8 +196,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         DatabaseInfo databaseInfo = column.getTable().getDatabase().getDialect().getDatabaseInfo();
         JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(column.getTypeCode(), column.getTypeName());
         JdbcTypeSpecifiers jdbcTypeSpecifiers = newSpecifiers(column.getSize(), column.getPrecision(), scale);
-        String columnTypeName = dialect.getJdbcTypeName(databaseInfo, jdbcTypeDesc, jdbcTypeSpecifiers);
-        if (columnTypeName == null) {
+        String typeName = dialect.getJdbcTypeName(databaseInfo, jdbcTypeDesc, jdbcTypeSpecifiers);
+        if (typeName == null) {
             String tableName = scriptGeneratorContext.getQualifiedName(column.getTable(),
                     column.getTable().getSchema().getName(), column.getTable().getCatalog().getName(), false);
             String columnName = scriptGeneratorContext.getName(column, false);
@@ -205,6 +205,6 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                     format("Unsupported type %s with type code %d, %d length found on %s table %s column",
                             column.getTypeName(), column.getTypeCode(), column.getSize(), tableName, columnName));
         }
-        return columnTypeName;
+        return typeName;
     }
 }

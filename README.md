@@ -61,18 +61,18 @@ This tool is designed to assist you in migrating data from supported SQL databas
 
     $ bin/nuodb-migrator load
         [target database connection, required]
-            --target.url=url                            Target database connection URL in the format jdbc:com.nuodb://{broker}:{port}/{database}
-            [--target.username=[username]]              Target database username
-            [--target.password=[password]]              Target database password
-            [--target.properties=[properties]]          Additional connection properties encoded as URL query string "property1=value1&property2=value2"
-            [--target.schema=[schema]]                  Default database schema name to use
+            --target.url=url                                Target database connection URL in the format jdbc:com.nuodb://{broker1}:{port1},{broker2}:{port2},..,{brokerN}:{portN}/{database}?{params}
+            [--target.username=[username]]                  Target database username
+            [--target.password=[password]]                  Target database password
+            [--target.properties=[properties]]              Additional connection properties encoded as URL query string "property1=value1&property2=value2"
+            [--target.schema=[schema]]                      Default database schema name to use
         [input specification, required]
-            --input.path=[input path]                   Path on the file system
-            [--input.*=[attribute value]]               Input format attributes
+            --input.path=[input path]                       Path on the file system
+            [--input.*=[attribute value]]                   Input format attributes
         [commit strategy specification, optional]
-            [--commit.strategy=[commit strategy]]        Commit strategy name, either single or batch or fully classified class name of a custom strategy to load data from dump, default is batch
-            [--commit.batch.size=[commit batch size]]    Number of records to batch for commit point used with batch commit strategy, default is 1000
-        [--time.zone (-z)=time zone]              Time zone enables date columns to be dumped and reloaded between servers in different time zones
+            [--commit.strategy=[single | batch | custom]]   Commit strategy name, either single or batch or fully classified class name of a custom strategy implementing com.nuodb.migrator.jdbc.commit.CommitStrategy, default is batch
+            [--commit.batch.size=[commit batch size]]       Number of records to batch for commit point used with batch commit strategy, default is 1000
+        [--time.zone (-z)=time zone]                        Time zone enables date columns to be dumped and reloaded between servers in different time zones
 
 ### Generate a schema for a target NuoDB database ###
 
