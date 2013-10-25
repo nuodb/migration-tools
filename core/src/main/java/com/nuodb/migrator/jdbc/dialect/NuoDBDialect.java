@@ -33,7 +33,7 @@ import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifier;
+import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifiers;
 
 import java.sql.Types;
 import java.util.regex.Pattern;
@@ -119,7 +119,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
         addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"),
-                new JdbcTypeNameChangeSpecifier("NUMERIC({N})", 1));
+                new JdbcTypeNameChangeSpecifiers("NUMERIC({N})", 1));
 
         addJdbcTypeName(DB2, new JdbcTypeDesc(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
         addJdbcTypeName(DB2, new JdbcTypeDesc(Types.OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
@@ -217,6 +217,21 @@ public class NuoDBDialect extends SimpleDialect {
     public boolean supportsStatementWithTimezone() {
         return false;
     }
+
+//    @Override
+//    public boolean supportsSessionTimeZone() {
+//        return true;
+//    }
+//
+//    @Override
+//    public void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException {
+//        timeZone = timeZone == null ? getDefault() : timeZone;
+//        RemConnection remConnection = (RemConnection) (connection instanceof ConnectionProxy ?
+//                ((ConnectionProxy)connection).getConnection() : connection);
+//        SQLContext sqlContext = remConnection.getSqlContext();
+//        sqlContext.setTimeZone(timeZone);
+//        sqlContext.setTimeZoneId(timeZone.getID());
+//    }
 
     @Override
     public boolean supportsDropConstraints() {

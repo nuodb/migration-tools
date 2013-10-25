@@ -61,7 +61,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
 
     $ bin/nuodb-migrator load
         [target database connection, required]
-            --target.url=url                            Target database connection URL in the format jdbc:com.nuodb://{broker}:{port}/{database}
+            --target.url=url                            Target database connection URL in the format jdbc:com.nuodb://{broker1}:{port1},{broker2}:{port2},..,{brokerN}:{portN}/{database}?{params}
             [--target.username=[username]]              Target database username
             [--target.password=[password]]              Target database password
             [--target.properties=[properties]]          Additional connection properties encoded as URL query string "property1=value1&property2=value2"

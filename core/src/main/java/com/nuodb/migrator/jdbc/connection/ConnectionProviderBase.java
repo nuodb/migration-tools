@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
@@ -57,6 +59,9 @@ public abstract class ConnectionProviderBase<C extends ConnectionSpec> implement
 
     @Override
     public Connection getConnection() throws SQLException {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Opening connection using %s", getConnectionSpec()));
+        }
         Connection connection = openConnection();
         initConnection(connection);
         return connection;

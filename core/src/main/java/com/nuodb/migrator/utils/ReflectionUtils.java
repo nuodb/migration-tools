@@ -131,8 +131,11 @@ public class ReflectionUtils {
                         object.getClass().getName()), cause);
     }
 
-    public static Method getMethod(Class type, String name, Class[] argumentTypes) {
+    public static Method getMethod(Class type, String name, Class... argumentTypes) {
         try {
+            if (argumentTypes == null) {
+                argumentTypes = ArrayUtils.EMPTY_CLASS_ARRAY;
+            }
             return type.getMethod(name, argumentTypes);
         } catch (NoSuchMethodException exception) {
             throw new ReflectionException(exception);
