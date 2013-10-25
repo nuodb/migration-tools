@@ -9,7 +9,7 @@ CREATE TABLE `precision1` (
 );
 insert into `precision1` values (66,2687,678246,49,3720368547758);
 insert into `precision1` values (127,32767,8388607,2147483647,9223372036854775807);
-insert into `precision1` values ('-128','-32768','�8388608','�2147483648','�9223372036854775807');
+insert into `precision1` values ('-128','-32768','-8388608','-2147483648','-9223372036854775807');
 
 DROP TABLE IF EXISTS `precision2`;
 
