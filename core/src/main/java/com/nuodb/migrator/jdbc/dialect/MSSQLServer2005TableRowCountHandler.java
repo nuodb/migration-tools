@@ -44,7 +44,8 @@ public class MSSQLServer2005TableRowCountHandler extends MSSQLServerTableRowCoun
     }
 
     /**
-     * Row counts using SYS.DM_DB_PARTITION_STATS dynamic management view. http://www.sqlservercentral.com/articles/T-SQL/67624/
+     * Row counts using SYS.DM_DB_PARTITION_STATS <a href="http://www.sqlservercentral
+     * .com/articles/T-SQL/67624/">dynamic management view</a>
      *
      * @return query used to estimate row count number.
      */
