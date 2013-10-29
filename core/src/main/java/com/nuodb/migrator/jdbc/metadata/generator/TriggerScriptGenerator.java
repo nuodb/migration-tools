@@ -52,7 +52,7 @@ public class TriggerScriptGenerator extends ScriptGeneratorBase<Trigger> {
     @Override
     public Collection<String> getCreateScripts(Trigger trigger,
             ScriptGeneratorContext scriptGeneratorContext) {
-        System.out.println("Starting trigger generation");
+        //System.out.println("Starting trigger generation");
         if (logger.isDebugEnabled()) {
             logger.debug("Generating Trigger");
         }
@@ -65,7 +65,7 @@ public class TriggerScriptGenerator extends ScriptGeneratorBase<Trigger> {
             buffer.append("NEW." + column.getName() + "= 'NOW';");
         }
         buffer.append("END TRIGGER");
-        System.out.println(">>>>:" + buffer.toString());
+        //System.out.println(">>>>:" + buffer.toString());
        
         return singleton(buffer.toString());
     }
