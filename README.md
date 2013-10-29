@@ -135,15 +135,15 @@ This is manipulated by *tinyInt1isBit* parameter, found more details at [Configu
 
 If you connect as *--source.url=jdbc:mysql://localhost/test?tinyInt1isBit=true* (which is equivalent to omitting *tinyInt1isBit=true*) and since TINYINT(1) is converted by MySQL J/Connector to BIT and NuoDBDialect transforms BIT to BOOLEAN the below table:
 ```sql
-    CREATE TABLE `t1`(`f1` TINYINT(1));
+CREATE TABLE `t1`(`f1` TINYINT(1));
 ```
 will be rendered as:
 ```sql
-    CREATE TABLE "t1" ("f1" BOOLEAN);
+CREATE TABLE "t1" ("f1" BOOLEAN);
 ```
 You can provide overrides on the command line to transform it to SMALLINT. The combination *--source.url=jdbc:mysql://localhost/test?tinyInt1isBit=true --type.code=java.sql.Types.BIT --type.size=0 --type.name=SMALLINT* will render:
 ```sql
-    CREATE TABLE "t1" ("f1" SMALLINT);
+CREATE TABLE "t1" ("f1" SMALLINT);
 ```
 If you have *tinyInt1isBit=false* set in the url, use *--source.url=jdbc:mysql://localhost/test?tinyInt1isBit=false --type.code=java.sql.Types.TINYINT --type.size=3 --type.name=SMALLINT* to produce SMALLINT. MySQL always reports TINYINT(1) size as 3, notice bug open http://bugs.mysql.com/bug.php?id=38171:
 ```sql
