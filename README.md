@@ -106,6 +106,50 @@ This tool is designed to assist you in migrating data from supported SQL databas
         [--group.scripts.by=[table | meta.data]]               Group generated DDL scripts, table by default
         [--identifier.quoting=[identifier quoting]]            Identifier quoting policy name, minimal, always or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierQuoting, default is always
         [--identifier.normalizer=[identifier normalizer]]      Identifier transformer to use, available normalizers are noop, standard, lower.case, upper.case or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer, default is noop
+
+#### Override database types ####
+
+The migrator allows to override any default database types from the command line or using config file. To override how source column types appear in a generated schema use *--type.name*, *--type.code*, *--type.size*, *--type.precision*, *--type.scale* command line parameters.
+
+*--type.name* is a parameter for type name template with optional placeholders for precision, scale and size variables. For each overridden type *--type.name* template will be used for rendering resulting type name:
+* --type.name=CLOB causes to generate CLOB
+* --type.name=VARCHAR({N}) results in VARCHAR type where {N} placeholder is substituted by a source column size value
+* --type.name=NUMERIC({P},{S}) produces NUMERIC where {P} placeholder stands for precision & {S} is a scale of a source database type
+
+*--type.code* is a parameter, which declares a source database type and it should come in pairs with *--type.name* parameter, to have type template name for each type code. It accepts the following expressions for the type code:
+* a fully qualified type name java.sql.Types.CLOB
+* short type name, such as CLOB
+* integer constant for a required type, such as 2005 for CLOB type
+* vendor specific int constant for a required type
+
+*--type.size*, *--type.precision*, *--type.scale* are optional parameters which define (if used) maximum (right) bound of size, precision, scale for a source type and allow to render different target type names depending on source type runtime attributes.
+
+#### Use NuoDB types ####
+
+*--use.nuodb.types* option loads set of type overrides from [conf/nuodb-types.config](https://github.com/nuodb/migration-tools/blob/master/assembly/src/main/assembly/conf/nuodb-types.config) and instructs the migrator to remap source CHAR, VARCHAR & CLOB column types to STRING for every matching source column from a source database during schema generation.
+
+#### Override MySQL TINYINT type ####
+
+MySQL JDBC Driver treats the TINYINT(1) as the BIT type by default, which sometimes is unwanted behaviour.
+This is manipulated by *tinyInt1isBit* parameter, found more details at [Configuration Properties for Connector/J](http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-configuration-properties.html).
+
+If you connect as *--source.url=jdbc:mysql://localhost/test?tinyInt1isBit=true* (which is equivalent to omitting *tinyInt1isBit=true*) and since TINYINT(1) is converted by MySQL J/Connector to BIT and NuoDBDialect transforms BIT to BOOLEAN the below table:
+```sql
+    CREATE TABLE `t1`(`f1` TINYINT(1));
+```
+will be rendered as:
+```sql
+    CREATE TABLE "t1" ("f1" BOOLEAN);
+```
+You can provide overrides on the command line to transform it to SMALLINT. The combination *--source.url=jdbc:mysql://localhost/test?tinyInt1isBit=true --type.code=java.sql.Types.BIT --type.size=0 --type.name=SMALLINT* will render:
+```sql
+    CREATE TABLE "t1" ("f1" SMALLINT);
+```
+If you have *tinyInt1isBit=false* set in the url, use *--source.url=jdbc:mysql://localhost/test?tinyInt1isBit=false --type.code=java.sql.Types.TINYINT --type.size=3 --type.name=SMALLINT* to produce SMALLINT. MySQL always reports TINYINT(1) size as 3, notice bug open http://bugs.mysql.com/bug.php?id=38171:
+```sql
+CREATE TABLE "t1" ("f1" SMALLINT);
+```
+
 ## Connect to Third-party Databases ##
 
 To interface with third-party databases through JDBC-compliant drivers you should download & install appropriate JAR files.
@@ -197,4 +241,3 @@ Example 5: Migrate schema from Microsoft SQL Server "test" database to a NuoDB d
         --identifier.normalizer=standard
 
 [![githalytics.com alpha](https://cruel-carlota.pagodabox.com/6b3314b32dd6c95ab4e2cde9bb3c6f74 "githalytics.com")](http://githalytics.com/nuodb/migration-tools)
-
