@@ -75,11 +75,13 @@ public class ScriptGeneratorContext {
         addScriptGenerator(new PrimaryScriptGenerator());
         addScriptGenerator(new IndexScriptGenerator());
         addScriptGenerator(new ForeignKeyScriptGenerator());
+        addScriptGenerator(new TriggerScriptGenerator());
 
         addNamingStrategy(new IndexNamingStrategy());
         addNamingStrategy(new SequenceNamingStrategy());
         addNamingStrategy(new ForeignKeyNamingStrategy());
         addNamingStrategy(new IdentifiableNamingStrategy(), Priority.LOW);
+        addNamingStrategy(new TriggerNamingStrategy());
     }
 
     public ScriptGeneratorContext(ScriptGeneratorContext scriptGeneratorContext) {

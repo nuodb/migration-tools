@@ -99,6 +99,11 @@ public class InspectionManager {
         identityInspector.register(MSSQL_SERVER, new MSSQLServerIdentityInspector());
         identityInspector.register(DB2, new DB2IdentityInspector());
         addInspector(identityInspector);
+        
+        InspectorResolver triggerInspector = new InspectorResolver(TRIGGER);
+        triggerInspector.register(MYSQL, new MySQLTriggerInspector());
+        addInspector(triggerInspector);
+        
     }
 
     public InspectionResults inspect(Connection connection) throws SQLException {
