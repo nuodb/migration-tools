@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -40,14 +39,16 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.google.common.io.Closeables.closeQuietly;
 import static java.lang.String.format;
+import static java.util.Collections.EMPTY_SET;
 import static java.util.Collections.unmodifiableSet;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public class SQLKeywords implements Set<String> {
 
-    public static final SQLKeywords NONE_KEYWORDS = new SQLKeywords(Collections.EMPTY_SET, false);
+    public static final SQLKeywords NONE_KEYWORDS = new SQLKeywords(EMPTY_SET, false);
 
     public static final SQLKeywords SQL_92_KEYWORDS = new SQLKeywords("sql92.keywords");
 
