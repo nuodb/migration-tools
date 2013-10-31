@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -37,15 +38,17 @@ import static com.google.common.collect.Sets.newHashSet;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public class TranslationManager {
 
     private Collection<Translator> translators = newHashSet();
 
-    public Script translate(Script script, DatabaseInfo databaseInfo) {
+    public Script translate(Script script, DatabaseInfo databaseInfo, Map<Object, Object> context) {
         Script translation = null;
+        TranslationContext translationContext = new SimpleTranslationContext(databaseInfo, this, context);
         for (Translator translator : getTranslators()) {
-            if (translator.canTranslate(script, databaseInfo)) {
-                translation = translator.translate(script, databaseInfo);
+            if (translator.supports(script, translationContext)) {
+                translation = translator.translate(script, translationContext);
             }
             if (translation != null) {
                 break;
@@ -54,30 +57,30 @@ public class TranslationManager {
         return translation;
     }
 
-    public void addTranslation(DatabaseInfo sourceDatabaseInfo, String sourceScript,
-                               DatabaseInfo targetDatabaseInfo, String targetScript) {
-        PatternTranslator translator = new PatternTranslator(sourceDatabaseInfo, targetDatabaseInfo);
+    public void addTranslation(DatabaseInfo source, String sourceScript,
+                               DatabaseInfo target, String targetScript) {
+        PatternTranslator translator = new PatternTranslator(source, target);
         translator.addTranslation(sourceScript, targetScript);
         addTranslator(translator);
     }
 
-    public void addTranslations(DatabaseInfo sourceDatabaseInfo, Collection<String> sourceScripts,
-                                DatabaseInfo targetDatabaseInfo, String targetScript) {
-        PatternTranslator translator = new PatternTranslator(sourceDatabaseInfo, targetDatabaseInfo);
+    public void addTranslations(DatabaseInfo source, Collection<String> sourceScripts,
+                                DatabaseInfo target, String targetScript) {
+        PatternTranslator translator = new PatternTranslator(source, target);
         translator.addTranslations(sourceScripts, targetScript);
         addTranslator(translator);
     }
 
-    public void addTranslationRegex(DatabaseInfo sourceDatabaseInfo, String sourceScript,
-                                    DatabaseInfo targetDatabaseInfo, String targetScript) {
-        PatternTranslator translator = new PatternTranslator(sourceDatabaseInfo, targetDatabaseInfo);
+    public void addTranslationRegex(DatabaseInfo source, String sourceScript,
+                                    DatabaseInfo target, String targetScript) {
+        PatternTranslator translator = new PatternTranslator(source, target);
         translator.addTranslationRegex(sourceScript, targetScript);
         addTranslator(translator);
     }
 
-    public void addTranslationPattern(DatabaseInfo sourceDatabaseInfo, Pattern sourceScript,
-                                      DatabaseInfo targetDatabaseInfo, String targetScript) {
-        PatternTranslator translator = new PatternTranslator(sourceDatabaseInfo, targetDatabaseInfo);
+    public void addTranslationPattern(DatabaseInfo source, Pattern sourceScript,
+                                      DatabaseInfo target, String targetScript) {
+        PatternTranslator translator = new PatternTranslator(source, target);
         translator.addTranslationPattern(sourceScript, targetScript);
         addTranslator(translator);
     }

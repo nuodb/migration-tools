@@ -53,6 +53,7 @@ public class MetaDataType implements Comparable<MetaDataType> {
     public static final MetaDataType IDENTITY = new MetaDataType(Sequence.class);
     public static final MetaDataType CHECK = new MetaDataType(Check.class);
     public static final MetaDataType TRIGGER = new MetaDataType(Trigger.class);
+    public static final MetaDataType COLUMN_TRIGGER = new MetaDataType(ColumnTrigger.class);
 
     private Class<? extends MetaData> objectType;
 

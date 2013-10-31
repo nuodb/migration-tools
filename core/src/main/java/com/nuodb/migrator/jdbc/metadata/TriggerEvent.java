@@ -25,40 +25,23 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.jdbc.metadata;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.utils.EnumAlias;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class ColumnTranslatorBase<S extends ColumnScript> extends TranslatorBase<S> {
+public enum TriggerEvent {
+    INSERT, DELETE, UPDATE;
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
-        super(sourceDatabaseInfo, ColumnScript.class);
+    private static final EnumAlias<TriggerEvent> TRIGGER_EVENTS = new EnumAlias<TriggerEvent>(TriggerEvent.class);
+
+    public static String toAlias(TriggerEvent valueType) {
+        return TRIGGER_EVENTS.toAlias(valueType);
     }
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, ColumnScript.class);
-    }
-
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, scriptClass);
-    }
-
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
-    }
-
-    @Override
-    protected boolean supportsScript(S script, TranslationContext translationContext) {
-        return false;
-    }
-
-    @Override
-    public Script translate(S script, TranslationContext translationContext) {
-        return null;
+    public static TriggerEvent fromAlias(String alias) {
+        return TRIGGER_EVENTS.fromAlias(alias);
     }
 }

@@ -103,9 +103,10 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
 
     @Override
     public Collection<String> getDropScripts(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext) {
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP SEQUENCE");
-        if (scriptGeneratorContext.getTargetDialect().supportsDropSequenceIfExists()) {
+        if (dialect.supportsDropSequenceIfExists()) {
             buffer.append(' ');
             buffer.append("IF EXISTS");
         }

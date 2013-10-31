@@ -27,56 +27,74 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import static java.util.Collections.singleton;
-import static org.slf4j.LoggerFactory.getLogger;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.metadata.Trigger;
 
 import java.util.Collection;
 
-import org.slf4j.Logger;
-
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Trigger;
+import static java.util.Collections.singleton;
 
 /**
- * @author Jayesh J
+ * @author Sergey Bushik
  */
-public class TriggerScriptGenerator extends ScriptGeneratorBase<Trigger> {
+public class TriggerScriptGenerator<H extends Trigger> extends ScriptGeneratorBase<H> {
 
-    protected final Logger logger = getLogger(getClass());
-    
     public TriggerScriptGenerator() {
         super(Trigger.class);
     }
 
-
     @Override
-    public Collection<String> getCreateScripts(Trigger trigger,
-            ScriptGeneratorContext scriptGeneratorContext) {
-        //System.out.println("Starting trigger generation");
-        if (logger.isDebugEnabled()) {
-            logger.debug("Generating Trigger");
-        }
+    protected Collection<String> getCreateScripts(H trigger, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("CREATE TRIGGER TR_");
-        buffer.append(trigger.getName());
-        buffer.append(" ACTIVE BEFORE UPDATE ");
-        buffer.append(" AS ");
-        for (Column column : trigger.getColumns()) {
-            buffer.append("NEW." + column.getName() + "= 'NOW';");
-        }
-        buffer.append("END TRIGGER");
-        //System.out.println(">>>>:" + buffer.toString());
-       
+        buffer.append("CREATE TRIGGER ");
+        buffer.append(scriptGeneratorContext.getQualifiedName(trigger));
+        getCreateOn(trigger, scriptGeneratorContext, buffer);
+        getCreateAttributes(trigger, scriptGeneratorContext, buffer);
+        getCreateBody(trigger, scriptGeneratorContext, buffer);
         return singleton(buffer.toString());
     }
 
+    protected void getCreateOn(H trigger, ScriptGeneratorContext scriptGeneratorContext, StringBuilder buffer) {
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
+        buffer.append(' ');
+        buffer.append(dialect.getTriggerOn(trigger.getTable()));
+        buffer.append(' ');
+        buffer.append(scriptGeneratorContext.getQualifiedName(trigger.getTable()));
+    }
+
+    protected void getCreateAttributes(H trigger, ScriptGeneratorContext context, StringBuilder buffer) {
+        Dialect dialect = context.getTargetDialect();
+        String active = dialect.getTriggerActive(trigger.isActive());
+        if (active != null) {
+            buffer.append(' ');
+            buffer.append(active);
+        }
+        buffer.append(' ');
+        buffer.append(dialect.getTriggerTime(trigger.getTriggerTime()));
+        buffer.append(' ');
+        buffer.append(dialect.getTriggerEvent(trigger.getTriggerEvent()));
+    }
+
+    protected void getCreateBody(H trigger, ScriptGeneratorContext scriptGeneratorContext, StringBuilder buffer) {
+        buffer.append(' ');
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
+        buffer.append(dialect.getTriggerBegin(trigger));
+        buffer.append(' ');
+        buffer.append(dialect.getTriggerBody(trigger, scriptGeneratorContext.getSourceSession()));
+        buffer.append(' ');
+        buffer.append(dialect.getTriggerEnd(trigger));
+    }
+
     @Override
-    public Collection<String> getDropScripts(Trigger trigger,
-            ScriptGeneratorContext scriptGeneratorContext) {
+    protected Collection<String> getDropScripts(H trigger, ScriptGeneratorContext scriptGeneratorContext) {
+        Dialect dialect = scriptGeneratorContext.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP TRIGGER ");
-        buffer.append(scriptGeneratorContext.getName(trigger));
-        buffer.append(";");
+        buffer.append(scriptGeneratorContext.getQualifiedName(trigger));
+        if (dialect.supportsDropTriggerIfExists()) {
+            buffer.append(' ');
+            buffer.append("IF EXISTS");
+        }
         return singleton(buffer.toString());
     }
 }

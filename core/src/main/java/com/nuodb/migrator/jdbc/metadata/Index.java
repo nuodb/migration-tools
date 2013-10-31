@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -46,7 +47,7 @@ public class Index extends ConstraintBase {
     private String expression;
 
     public Index(Identifier identifier) {
-        super(MetaDataType.INDEX, identifier);
+        super(INDEX, identifier);
     }
 
     public boolean isUnique() {

@@ -55,6 +55,7 @@ public class Table extends IdentifiableBase {
     private Map<Identifier, Index> indexes = Maps.newLinkedHashMap();
     private Collection<ForeignKey> foreignKeys = Sets.newLinkedHashSet();
 
+    private Collection<Trigger> triggers = Sets.newHashSet();
     private PrimaryKey primaryKey;
     private Collection<Check> checks = Sets.newHashSet();
 
@@ -155,6 +156,20 @@ public class Table extends IdentifiableBase {
 
     public Column getColumn(String name) {
         return getColumn(valueOf(name));
+    }
+
+    public Trigger addTrigger(Trigger trigger) {
+        trigger.setTable(this);
+        triggers.add(trigger);
+        return trigger;
+    }
+
+    public Collection<Trigger> getTriggers() {
+        return triggers;
+    }
+
+    public void setTriggers(Collection<Trigger> triggers) {
+        this.triggers = triggers;
     }
 
     private Column getColumn(Identifier identifier) {

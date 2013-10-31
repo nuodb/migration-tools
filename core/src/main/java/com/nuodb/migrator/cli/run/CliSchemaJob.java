@@ -130,7 +130,7 @@ public class CliSchemaJob extends CliRunJob {
                 withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(USE_NUODB_TYPES_OPTION_ARGUMENT_NAME)).build()
-                ).build();;
+                ).build();
         typeGroup.withOption(useNuoDBTypes);
 
         Option useImplicitDefaults = newBasicOptionBuilder().

@@ -27,14 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-
 /**
  * @author Sergey Bushik
  */
-public interface Translator {
+public interface Translator<S extends Script> {
 
-    boolean canTranslate(Script script, DatabaseInfo databaseInfo);
+    boolean supports(Script script, TranslationContext translationContext);
 
-    Script translate(Script script, DatabaseInfo databaseInfo);
+    Script translate(S script, TranslationContext translationContext);
 }

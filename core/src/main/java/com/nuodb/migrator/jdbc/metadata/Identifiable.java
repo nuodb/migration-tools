@@ -36,6 +36,8 @@ public interface Identifiable extends MetaData, Comparable<Identifiable> {
 
     String getName(Dialect dialect);
 
+    String getQualifiedName();
+
     String getQualifiedName(Dialect dialect);
 
     String getQualifiedName(String catalog, String schema);

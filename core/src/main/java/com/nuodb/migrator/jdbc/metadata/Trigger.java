@@ -27,103 +27,101 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
-
 import java.util.Collection;
-import java.util.Map;
+import java.util.Collections;
 
-import com.google.common.collect.Maps;
-import com.nuodb.migrator.jdbc.dialect.Dialect;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TRIGGER;
 
-public class Trigger extends IdentifiableBase implements Constraint {
+/**
+ * @author Sergey Bushik
+ */
+@SuppressWarnings("unchecked")
+public class Trigger extends ConstraintBase {
 
-    public static final String TRIGGER = "TRIGGER";
+    public static final boolean ACTIVE = true;
+    private boolean active = ACTIVE;
+    private String triggerBody;
+    private TriggerTime triggerTime;
+    private TriggerEvent triggerEvent;
 
-    private Column column;
-    private Database database;
-    private Catalog catalog;
-    private Schema schema;
-    private Table table;
-    
-    private String comment;
+    public Trigger() {
+        super(TRIGGER, true);
+    }
 
-    private Map<Integer, Column> columns = Maps.newTreeMap();
-    
     public Trigger(String name) {
-        this(valueOf(name));
+        super(TRIGGER, name, true);
     }
 
     public Trigger(Identifier identifier) {
-        super(MetaDataType.TRIGGER, identifier, true);
-    }
-    
-    @Override
-    public Table getTable() {
-        return table;
+        super(TRIGGER, identifier, true);
     }
 
-    public void setTable(Table table) {
-        this.table = table;
+    protected Trigger(MetaDataType objectType, boolean qualified) {
+        super(objectType, qualified);
     }
 
+    protected Trigger(MetaDataType objectType, Identifier identifier, boolean qualified) {
+        super(objectType, identifier, qualified);
+    }
+
+    protected Trigger(MetaDataType objectType, String name, boolean qualified) {
+        super(objectType, name, qualified);
+    }
 
     @Override
     public Collection<Column> getColumns() {
-        return newArrayList(columns.values());
+        return Collections.EMPTY_SET;
     }
 
-    public void addColumn(Column column, int position) {
-        columns.put(position, column);
-    }
-    
-    public void addColumn(Column column) {
-        columns.put(columns.size(),column);
-    }
-    
-    @Override
-    public String getQualifiedName(Dialect dialect) {
-        return getQualifiedName(dialect, getCatalog() != null ? getCatalog().getName() : null,
-                getSchema() != null ? getSchema().getName() : null);
+    public boolean isActive() {
+        return active;
     }
 
-
-    public Database getDatabase() {
-        return database;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
-    public void setDatabase(Database database) {
-        this.database = database;
+    public String getTriggerBody() {
+        return triggerBody;
     }
 
-    public Catalog getCatalog() {
-        return catalog;
+    public void setTriggerBody(String triggerBody) {
+        this.triggerBody = triggerBody;
     }
 
-    public void setCatalog(Catalog catalog) {
-        this.catalog = catalog;
+    public TriggerTime getTriggerTime() {
+        return triggerTime;
     }
 
-    public Schema getSchema() {
-        return schema;
+    public void setTriggerTime(TriggerTime triggerTime) {
+        this.triggerTime = triggerTime;
     }
 
-    public void setSchema(Schema schema) {
-        this.schema = schema;
+    public TriggerEvent getTriggerEvent() {
+        return triggerEvent;
     }
 
-    public String getComment() {
-        return comment;
+    public void setTriggerEvent(TriggerEvent triggerEvent) {
+        this.triggerEvent = triggerEvent;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    
     @Override
     public void output(int indent, StringBuilder buffer) {
         super.output(indent, buffer);
+        TriggerTime triggerTime = getTriggerTime();
+        if (triggerTime != null) {
+            buffer.append(triggerTime);
+            buffer.append(' ');
+        }
+        TriggerEvent triggerEvent = getTriggerEvent();
+        if (triggerEvent != null) {
+            buffer.append(triggerEvent);
+        }
+        String body = getTriggerBody();
+        if (body != null) {
+            buffer.append(' ');
+            buffer.append(body);
+        }
     }
 
     @Override
@@ -132,11 +130,12 @@ public class Trigger extends IdentifiableBase implements Constraint {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        Trigger table = (Trigger) o;
+        Trigger trigger = (Trigger) o;
 
-        if (database != null ? !database.equals(table.database) : table.database != null) return false;
-        if (catalog != null ? !catalog.equals(table.catalog) : table.catalog != null) return false;
-        if (schema != null ? !schema.equals(table.schema) : table.schema != null) return false;
+        if (active != trigger.active) return false;
+        if (triggerBody != null ? !triggerBody.equals(trigger.triggerBody) : trigger.triggerBody != null) return false;
+        if (triggerEvent != trigger.triggerEvent) return false;
+        if (triggerTime != null ? !triggerTime.equals(trigger.triggerTime) : trigger.triggerTime != null) return false;
 
         return true;
     }
@@ -144,23 +143,10 @@ public class Trigger extends IdentifiableBase implements Constraint {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (database != null ? database.hashCode() : 0);
-        result = 31 * result + (catalog != null ? catalog.hashCode() : 0);
-        result = 31 * result + (schema != null ? schema.hashCode() : 0);
+        result = 31 * result + (active ? 1 : 0);
+        result = 31 * result + (triggerBody != null ? triggerBody.hashCode() : 0);
+        result = 31 * result + (triggerTime != null ? triggerTime.hashCode() : 0);
+        result = 31 * result + (triggerEvent != null ? triggerEvent.hashCode() : 0);
         return result;
-    }
-
-    /**
-     * @return the column
-     */
-    public Column getColumn() {
-        return column;
-    }
-
-    /**
-     * @param column the column to set
-     */
-    public void setColumn(Column column) {
-        this.column = column;
     }
 }

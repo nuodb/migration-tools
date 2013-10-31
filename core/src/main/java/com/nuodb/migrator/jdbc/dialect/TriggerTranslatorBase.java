@@ -32,33 +32,31 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 /**
  * @author Sergey Bushik
  */
-public abstract class ColumnTranslatorBase<S extends ColumnScript> extends TranslatorBase<S> {
+public class TriggerTranslatorBase<S extends TriggerScript> extends TranslatorBase<S> {
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
-        super(sourceDatabaseInfo, ColumnScript.class);
+    protected TriggerTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
+        super(sourceDatabaseInfo, TriggerScript.class);
     }
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, ColumnScript.class);
+    protected TriggerTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
+        super(sourceDatabaseInfo, targetDatabaseInfo, TriggerScript.class);
     }
 
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
+    public TriggerTranslatorBase(DatabaseInfo sourceDatabaseInfo,
+                                 Class<? extends S> scriptClass) {
         super(sourceDatabaseInfo, scriptClass);
     }
 
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
+    public TriggerTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
+                                 Class<? extends S> scriptClass) {
         super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
     }
 
-    @Override
-    protected boolean supportsScript(S script, TranslationContext translationContext) {
+    protected boolean supportsScript(TriggerScript script, TranslationContext translationContext) {
         return false;
     }
 
-    @Override
-    public Script translate(S script, TranslationContext translationContext) {
+    public Script translate(TriggerScript script, TranslationContext translationContext) {
         return null;
     }
 }

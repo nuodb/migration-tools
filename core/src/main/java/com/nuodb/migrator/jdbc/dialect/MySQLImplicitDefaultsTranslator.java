@@ -31,7 +31,6 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.session.Session;
 
 import java.sql.Connection;
@@ -83,8 +82,8 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
     }
 
     @Override
-    protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        return hasExplicitDefaults(script, column) && isUseExplicitDefaults(script);
+    protected boolean supportsScript(ColumnScript script, TranslationContext translationContext) {
+        return hasExplicitDefaults(script, script.getColumn()) && isUseExplicitDefaults(script);
     }
 
     /**
@@ -157,14 +156,14 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
      * type, we skip this</li> <li>For the first TIMESTAMP column in a table, the default value is the current date and
      * time. This is converted to an explicit thing by MySQL, so we are OK</li> </ul>
      *
-     * @param script       default source script to translate
-     * @param column       column for which the default value is translated
-     * @param databaseInfo target database info
+     * @param script             default source script to translate
+     * @param translationContext translation context
      * @return string translated according to implicit rules
      */
     @Override
-    protected Script translate(Script script, Column column, DatabaseInfo databaseInfo) {
+    public Script translate(ColumnScript script, TranslationContext translationContext) {
         String result;
+        Column column = script.getColumn();
         switch (column.getTypeCode()) {
             case BIT:
             case TINYINT:
@@ -195,7 +194,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
                 result = script.getScript();
         }
         // case ENUM, and SET
-        return result != null ? new SimpleScript(result, databaseInfo) : null;
+        return result != null ? new SimpleScript(result, translationContext.getDatabaseInfo()) : null;
     }
 
     public boolean isCheckSqlMode() {

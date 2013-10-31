@@ -193,13 +193,23 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public Script translate(String script, Session session) {
-        return getTranslationManager().translate(new SimpleScript(script, session), getDatabaseInfo());
+    public Script translate(Script script) {
+        return translate(script, null);
     }
 
     @Override
-    public Script translate(Script script) {
-        return getTranslationManager().translate(script, getDatabaseInfo());
+    public Script translate(Script script, Map<Object, Object> context) {
+        return getTranslationManager().translate(script, getDatabaseInfo(), context);
+    }
+
+    @Override
+    public Script translate(String script, Session session) {
+        return translate(script, session, null);
+    }
+
+    @Override
+    public Script translate(String script, Session session, Map<Object, Object> context) {
+        return getTranslationManager().translate(new SimpleScript(script, session), getDatabaseInfo(), context);
     }
 
     @Override
@@ -430,6 +440,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public String getTriggerActive(boolean active) {
+        return null;
+    }
+
+    @Override
     public String getDefaultValue(Column column, Session session) {
         DefaultValue defaultValue = column != null ? column.getDefaultValue() : null;
         String value = defaultValue != null ? defaultValue.getScript() : null;
@@ -488,6 +503,37 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     @Override
     public String getUpdateAction(ReferenceAction updateAction) {
         return null;
+    }
+
+    @Override
+    public String getTriggerOn(Table table) {
+        return "ON";
+    }
+
+    @Override
+    public String getTriggerTime(TriggerTime triggerTime) {
+        return triggerTime != null ? triggerTime.toString() : null;
+    }
+
+    @Override
+    public String getTriggerEvent(TriggerEvent triggerEvent) {
+        return triggerEvent != null ? triggerEvent.toString() : null;
+    }
+
+    @Override
+    public String getTriggerBegin(Trigger trigger) {
+        return "BEGIN";
+    }
+
+    @Override
+    public String getTriggerBody(Trigger trigger, Session session) {
+        Script script = translate(new TriggerScript(trigger, session));
+        return script != null ? script.getScript() : trigger.getTriggerBody();
+    }
+
+    @Override
+    public String getTriggerEnd(Trigger trigger) {
+        return "END";
     }
 
     @Override
@@ -567,6 +613,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     @Override
     public boolean supportsDropConstraints() {
         return true;
+    }
+
+    @Override
+    public boolean supportsDropTriggerIfExists() {
+        return false;
     }
 
     @Override

@@ -48,25 +48,25 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
 
     protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Class<? extends InspectionScope> inspectionScopeClass;
     private MetaDataType parentObjectType;
+    private Class<? extends InspectionScope> scopeClass;
 
     protected InspectorBase(Class<? extends MetaData> objectClass,
-                            Class<? extends InspectionScope> inspectionScopeClass) {
+                            Class<? extends InspectionScope> scopeClass) {
         super(objectClass);
-        this.inspectionScopeClass = inspectionScopeClass;
+        this.scopeClass = scopeClass;
     }
 
     protected InspectorBase(MetaDataType objectType,
-                            Class<? extends InspectionScope> inspectionScopeClass) {
+                            Class<? extends InspectionScope> scopeClass) {
         super(objectType);
-        this.inspectionScopeClass = inspectionScopeClass;
+        this.scopeClass = scopeClass;
     }
 
     protected InspectorBase(MetaDataType objectType, MetaDataType parentObjectType,
-                            Class<? extends InspectionScope> inspectionScopeClass) {
+                            Class<? extends InspectionScope> scopeClass) {
         super(objectType);
-        this.inspectionScopeClass = inspectionScopeClass;
+        this.scopeClass = scopeClass;
         this.parentObjectType = parentObjectType;
     }
 
@@ -93,7 +93,7 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) {
-        return inspectionScope != null && inspectionScopeClass.isAssignableFrom(inspectionScope.getClass());
+        return inspectionScope != null && scopeClass.isAssignableFrom(inspectionScope.getClass());
     }
 
     public MetaDataType getParentObjectType() {

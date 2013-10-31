@@ -38,12 +38,24 @@ public abstract class ConstraintBase extends IdentifiableBase implements Constra
         super(objectType);
     }
 
+    protected ConstraintBase(MetaDataType objectType, boolean qualified) {
+        super(objectType, qualified);
+    }
+
     protected ConstraintBase(MetaDataType objectType, String name) {
         super(objectType, name);
     }
 
+    protected ConstraintBase(MetaDataType objectType, String name, boolean qualified) {
+        super(objectType, name, qualified);
+    }
+
     protected ConstraintBase(MetaDataType objectType, Identifier identifier) {
         super(objectType, identifier);
+    }
+
+    protected ConstraintBase(MetaDataType objectType, Identifier identifier, boolean qualified) {
+        super(objectType, identifier, qualified);
     }
 
     @Override

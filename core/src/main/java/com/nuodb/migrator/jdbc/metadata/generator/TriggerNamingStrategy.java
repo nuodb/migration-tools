@@ -27,10 +27,10 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.ForeignKey;
-import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.Trigger;
+
+import static com.google.common.base.Predicates.equalTo;
+import static com.google.common.collect.Iterables.indexOf;
 
 /**
  * @author Sergey Bushik
@@ -43,15 +43,13 @@ public class TriggerNamingStrategy extends IdentifiableNamingStrategy<Trigger> {
 
     @Override
     protected String getIdentifiableName(Trigger trigger, ScriptGeneratorContext scriptGeneratorContext) {
-        
-//        StringBuilder qualifier = new StringBuilder();
-//        Table table = trigger.getTable();
-//        qualifier.append(scriptGeneratorContext.getName(table, false));
-        
         StringBuilder buffer = new StringBuilder();
         buffer.append("TRG");
         buffer.append('_');
-        buffer.append(trigger.getTable().getName());
+        buffer.append(scriptGeneratorContext.getName(trigger.getTable(), false));
+        buffer.append('_');
+        int index = indexOf(trigger.getTable().getTriggers(), equalTo(trigger));
+        buffer.append(index);
         return buffer.toString();
     }
 }

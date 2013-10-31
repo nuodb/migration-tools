@@ -32,10 +32,12 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 /**
  * @author Sergey Bushik
  */
-public abstract class TranslatorBase implements Translator {
+@SuppressWarnings("unchecked")
+public abstract class TranslatorBase<S extends Script> implements Translator<S> {
 
     private DatabaseInfo sourceDatabaseInfo;
     private DatabaseInfo targetDatabaseInfo;
+    private Class<? extends Script> scriptClass;
 
     protected TranslatorBase() {
     }
@@ -47,6 +49,18 @@ public abstract class TranslatorBase implements Translator {
     protected TranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
         this.sourceDatabaseInfo = sourceDatabaseInfo;
         this.targetDatabaseInfo = targetDatabaseInfo;
+    }
+
+    protected TranslatorBase(DatabaseInfo sourceDatabaseInfo, Class<? extends Script> scriptClass) {
+        this.sourceDatabaseInfo = sourceDatabaseInfo;
+        this.scriptClass = scriptClass;
+    }
+
+    protected TranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
+                             Class<? extends Script> scriptClass) {
+        this.sourceDatabaseInfo = sourceDatabaseInfo;
+        this.targetDatabaseInfo = targetDatabaseInfo;
+        this.scriptClass = scriptClass;
     }
 
     public DatabaseInfo getSourceDatabaseInfo() {
@@ -65,21 +79,30 @@ public abstract class TranslatorBase implements Translator {
         this.targetDatabaseInfo = targetDatabaseInfo;
     }
 
-    @Override
-    public boolean canTranslate(Script script, DatabaseInfo databaseInfo) {
-        return (this.sourceDatabaseInfo == null || this.sourceDatabaseInfo.isInherited(script.getDatabaseInfo())
-                && (this.targetDatabaseInfo == null || this.targetDatabaseInfo.isInherited(databaseInfo)));
+    public Class<? extends Script> getScriptClass() {
+        return scriptClass;
+    }
+
+    public void setScriptClass(Class<? extends Script> scriptClass) {
+        this.scriptClass = scriptClass;
     }
 
     @Override
-    public Script translate(Script script, DatabaseInfo databaseInfo) {
-        String translation = translate(script.getScript(), script.getDatabaseInfo(), databaseInfo);
-        return translation != null ? new SimpleScript(translation, databaseInfo) : null;
+    public boolean supports(Script script, TranslationContext translationContext) {
+        return supportsDatabase(script, translationContext) && supportsScriptClass(script,
+                translationContext) && supportsScript((S) script, translationContext);
     }
 
-    protected String translate(String script, DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
-        return null;
+    protected boolean supportsDatabase(Script script, TranslationContext translationContext) {
+        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isInherited(script.getDatabaseInfo())) &&
+                (targetDatabaseInfo == null || targetDatabaseInfo.isInherited(translationContext.getDatabaseInfo()));
     }
+
+    protected boolean supportsScriptClass(Script script, TranslationContext translationContext) {
+        return script != null && (scriptClass == null || scriptClass.isAssignableFrom(script.getClass()));
+    }
+
+    protected abstract boolean supportsScript(S script, TranslationContext translationContext);
 
     @Override
     public boolean equals(Object o) {
@@ -88,22 +111,19 @@ public abstract class TranslatorBase implements Translator {
 
         TranslatorBase that = (TranslatorBase) o;
 
-        if (sourceDatabaseInfo != null ? !sourceDatabaseInfo.equals(
-                that.sourceDatabaseInfo) : that.sourceDatabaseInfo != null) {
-            return false;
-        }
-        if (targetDatabaseInfo != null ? !targetDatabaseInfo.equals(
-                that.targetDatabaseInfo) : that.targetDatabaseInfo != null) {
-            return false;
-        }
+        if (sourceDatabaseInfo != null ? !sourceDatabaseInfo.equals(that.sourceDatabaseInfo) :
+                that.sourceDatabaseInfo != null) return false;
+        if (targetDatabaseInfo != null ? !targetDatabaseInfo.equals(that.targetDatabaseInfo) :
+                that.targetDatabaseInfo != null) return false;
+        if (scriptClass != null ? !scriptClass.equals(that.scriptClass) : that.scriptClass != null) return false;
         return true;
     }
-
 
     @Override
     public int hashCode() {
         int result = sourceDatabaseInfo != null ? sourceDatabaseInfo.hashCode() : 0;
         result = 31 * result + (targetDatabaseInfo != null ? targetDatabaseInfo.hashCode() : 0);
+        result = 31 * result + (scriptClass != null ? scriptClass.hashCode() : 0);
         return result;
     }
 }

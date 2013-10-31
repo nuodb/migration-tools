@@ -84,6 +84,11 @@ public class IdentifiableBase extends IndentedBase implements Identifiable {
     }
 
     @Override
+    public String getQualifiedName() {
+        return getQualifiedName(null);
+    }
+
+    @Override
     public String getQualifiedName(Dialect dialect) {
         return getQualifiedName(dialect, null, null, getName(), this);
     }

@@ -25,40 +25,11 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
-
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+package com.nuodb.migrator.jdbc.metadata;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class ColumnTranslatorBase<S extends ColumnScript> extends TranslatorBase<S> {
-
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
-        super(sourceDatabaseInfo, ColumnScript.class);
-    }
-
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, ColumnScript.class);
-    }
-
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, scriptClass);
-    }
-
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
-    }
-
-    @Override
-    protected boolean supportsScript(S script, TranslationContext translationContext) {
-        return false;
-    }
-
-    @Override
-    public Script translate(S script, TranslationContext translationContext) {
-        return null;
-    }
+public enum TriggerTime {
+    BEFORE, AFTER
 }

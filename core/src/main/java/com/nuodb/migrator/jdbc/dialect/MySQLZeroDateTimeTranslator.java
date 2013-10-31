@@ -29,7 +29,6 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 
@@ -61,29 +60,31 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
         super(MYSQL);
     }
 
-    protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        boolean canTranslate = false;
+    @Override
+    protected boolean supportsScript(ColumnScript script, TranslationContext translationContext) {
+        boolean supportsScript = false;
         if (script.getScript() != null) {
+            Column column = script.getColumn();
             String source = script.getScript();
             switch (column.getTypeCode()) {
                 case Types.TIME:
-                    canTranslate = ZERO_TIME.equals(source);
+                    supportsScript = ZERO_TIME.equals(source);
                     break;
                 case Types.DATE:
-                    canTranslate = ZERO_DATE.equals(source);
+                    supportsScript = ZERO_DATE.equals(source);
                     break;
                 case Types.TIMESTAMP:
-                    canTranslate = ZERO_TIMESTAMP.equals(source);
+                    supportsScript = ZERO_TIMESTAMP.equals(source);
                     break;
                 default:
-                    canTranslate = false;
+                    supportsScript = false;
             }
         }
-        return canTranslate;
+        return supportsScript;
     }
 
     @Override
-    protected Script translate(Script script, Column column, DatabaseInfo databaseInfo) {
+    public Script translate(ColumnScript script, TranslationContext translationContext) {
         JdbcUrl jdbcUrl = getJdbcUrl(script);
         String behavior = (String) jdbcUrl.getParameters().get(ZERO_DATE_TIME_BEHAVIOR);
         if (behavior == null) {
@@ -91,6 +92,7 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
         }
         String target;
         if (ROUND.equals(behavior)) {
+            Column column = script.getColumn();
             switch (column.getTypeCode()) {
                 case Types.TIME:
                     target = ROUND_TIME;
@@ -112,7 +114,7 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
         } else {
             target = null;
         }
-        return target != null ? new SimpleScript(target, databaseInfo) : null;
+        return target != null ? new SimpleScript(target, translationContext.getDatabaseInfo()) : null;
     }
 
     protected JdbcUrl getJdbcUrl(Script script) {

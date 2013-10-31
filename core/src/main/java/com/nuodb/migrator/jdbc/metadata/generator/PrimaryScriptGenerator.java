@@ -45,11 +45,11 @@ public class PrimaryScriptGenerator extends ScriptGeneratorBase<PrimaryKey> impl
     }
 
     @Override
-    public String getConstraintScript(PrimaryKey primaryKey, ScriptGeneratorContext context) {
+    public String getConstraintScript(PrimaryKey primaryKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder("PRIMARY KEY (");
         for (Iterator<Column> iterator = primaryKey.getColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            buffer.append(context.getName(column));
+            buffer.append(scriptGeneratorContext.getName(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }

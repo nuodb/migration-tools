@@ -27,10 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
-import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifiers;
@@ -135,6 +132,7 @@ public class NuoDBDialect extends SimpleDialect {
         addTranslator(new MySQLHexLiteralTranslator());
         addTranslator(new MySQLZeroDateTimeTranslator());
         addTranslator(new MySQLImplicitDefaultsTranslator());
+        addTranslator(new MySQLOnUpdateTriggerTranslator());
 
         addTranslator(new CurrentTimestampTranslator(MSSQL_SERVER,
                 newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW"));
@@ -239,6 +237,11 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
+    public boolean supportsDropTriggerIfExists() {
+        return true;
+    }
+
+    @Override
     public boolean supportsDropIndexOnTable() {
         return true;
     }
@@ -298,6 +301,26 @@ public class NuoDBDialect extends SimpleDialect {
             buffer.append(')');
         }
         return buffer.toString();
+    }
+
+    @Override
+    public String getTriggerActive(boolean active) {
+        return active ? "ACTIVE" : "INACTIVE";
+    }
+
+    @Override
+    public String getTriggerOn(Table table) {
+        return "FOR";
+    }
+
+    @Override
+    public String getTriggerBegin(Trigger trigger) {
+        return "AS";
+    }
+
+    @Override
+    public String getTriggerEnd(Trigger trigger) {
+        return "END_TRIGGER";
     }
 
     @Override

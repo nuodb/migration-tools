@@ -40,6 +40,9 @@ import org.apache.commons.lang3.ObjectUtils;
 import java.util.Collection;
 import java.util.Set;
 
+import static com.google.common.collect.Multimaps.newSetMultimap;
+import static com.google.common.collect.Sets.newLinkedHashSet;
+
 
 /**
  * @author Sergey Bushik
@@ -47,11 +50,11 @@ import java.util.Set;
 @SuppressWarnings("unchecked")
 public class SimpleInspectionResults implements InspectionResults {
 
-    private SetMultimap<MetaDataType, MetaData> objects = Multimaps.newSetMultimap(
+    private SetMultimap<MetaDataType, MetaData> objects = newSetMultimap(
             Maps.<MetaDataType, Collection<MetaData>>newHashMap(),
             new Supplier<Set<MetaData>>() {
                 public Set<MetaData> get() {
-                    return Sets.newLinkedHashSet();
+                    return newLinkedHashSet();
                 }
             });
 

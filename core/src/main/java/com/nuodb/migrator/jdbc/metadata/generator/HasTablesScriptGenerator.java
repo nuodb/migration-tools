@@ -63,18 +63,18 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
     }
 
     @Override
-    public Collection<String> getCreateScripts(H tables, ScriptGeneratorContext context) {
-        return getHasTablesCreateScripts(getTables(context, tables), context);
+    public Collection<String> getCreateScripts(H tables, ScriptGeneratorContext scriptGeneratorContext) {
+        return getHasTablesCreateScripts(getTables(scriptGeneratorContext, tables), scriptGeneratorContext);
     }
 
     @Override
-    public Collection<String> getDropScripts(H tables, ScriptGeneratorContext context) {
-        return getHasTablesDropScripts(getTables(context, tables), context);
+    public Collection<String> getDropScripts(H tables, ScriptGeneratorContext scriptGeneratorContext) {
+        return getHasTablesDropScripts(getTables(scriptGeneratorContext, tables), scriptGeneratorContext);
     }
 
     @Override
-    public Collection<String> getDropCreateScripts(H tables, ScriptGeneratorContext context) {
-        return getHasTablesDropCreateScripts(getTables(context, tables), context);
+    public Collection<String> getDropCreateScripts(H tables, ScriptGeneratorContext scriptGeneratorContext) {
+        return getHasTablesDropCreateScripts(getTables(scriptGeneratorContext, tables), scriptGeneratorContext);
     }
 
     protected HasTables getTables(ScriptGeneratorContext scriptGeneratorContext, H tables) {
@@ -200,6 +200,24 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             }
             scripts.addAll(indexes);
         }
+        boolean createTriggers = objectTypes.contains(TRIGGER);
+        boolean createColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
+        if (createTriggers || createColumnTriggers) {
+            Collection<String> triggers = newLinkedHashSet();
+            for (Table table : tables) {
+                if (!addScriptForTable(context, table)) {
+                    continue;
+                }
+                for (Trigger trigger : table.getTriggers()) {
+                    if (trigger.getObjectType() == TRIGGER && createTriggers) {
+                        triggers.addAll(context.getCreateScripts(trigger));
+                    } else if (trigger.getObjectType() == COLUMN_TRIGGER && createColumnTriggers) {
+                        triggers.addAll(context.getCreateScripts(trigger));
+                    }
+                }
+            }
+            scripts.addAll(triggers);
+        }
         if (objectTypes.contains(FOREIGN_KEY)) {
             Collection<Table> generatedTables = (Collection<Table>) context.getAttributes().get(TABLES);
             Multimap<Table, ForeignKey> pendingForeignKeys =
@@ -255,6 +273,24 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                     scripts.addAll(context.getDropScripts(foreignKey));
                 }
             }
+        }
+        boolean dropTriggers = objectTypes.contains(TRIGGER);
+        boolean dropColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
+        if (dropTriggers || dropColumnTriggers) {
+            Collection<String> triggers = newLinkedHashSet();
+            for (Table table : tables) {
+                if (!addScriptForTable(context, table)) {
+                    continue;
+                }
+                for (Trigger trigger : table.getTriggers()) {
+                    if (trigger.getObjectType() == TRIGGER && dropTriggers) {
+                        triggers.addAll(context.getDropScripts(trigger));
+                    } else if (trigger.getObjectType() == COLUMN_TRIGGER && dropColumnTriggers) {
+                        triggers.addAll(context.getDropScripts(trigger));
+                    }
+                }
+            }
+            scripts.addAll(triggers);
         }
         if (objectTypes.contains(TABLE)) {
             for (Table table : tables) {

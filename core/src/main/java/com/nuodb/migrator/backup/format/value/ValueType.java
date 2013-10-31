@@ -27,11 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import java.util.Map;
-import java.util.TreeMap;
-
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
-import static java.util.Collections.unmodifiableMap;
+import com.nuodb.migrator.utils.EnumAlias;
 
 /**
  * @author Sergey Bushik
@@ -40,21 +36,13 @@ public enum ValueType {
 
     STRING, BINARY;
 
-    private static final Map<String, ValueType> ALIASES;
+    private static final EnumAlias<ValueType> VALUE_TYPES = new EnumAlias<ValueType>(ValueType.class);
 
     public static String toAlias(ValueType valueType) {
-        return valueType.name().toLowerCase();
+        return VALUE_TYPES.toAlias(valueType);
     }
 
     public static ValueType fromAlias(String alias) {
-        return ALIASES.get(alias);
-    }
-
-    static {
-        Map<String, ValueType> aliases = new TreeMap<String, ValueType>(CASE_INSENSITIVE_ORDER);
-        for (ValueType type : values()) {
-            aliases.put(type.name(), type);
-        }
-        ALIASES = unmodifiableMap(aliases);
+        return VALUE_TYPES.fromAlias(alias);
     }
 }

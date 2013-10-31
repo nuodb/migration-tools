@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.util.Collection;
 import java.util.regex.Matcher;
@@ -55,13 +54,14 @@ public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
     }
 
     @Override
-    protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
+    protected boolean supportsScript(ColumnScript script, TranslationContext translationContext) {
+        Column column = script.getColumn();
         return script.getScript() != null && TYPES.contains(column.getTypeCode()) && PATTERN.matcher(script
                 .getScript()).matches();
     }
 
     @Override
-    protected Script translate(Script script, Column column, DatabaseInfo databaseInfo) {
+    public Script translate(ColumnScript script, TranslationContext translationContext) {
         Matcher matcher = PATTERN.matcher(script.getScript());
         Integer target;
         if (matcher.matches()) {
@@ -70,7 +70,7 @@ public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
         } else {
             target = null;
         }
-        return target != null ? new SimpleScript(valueOf(target), databaseInfo) : null;
+        return target != null ? new SimpleScript(valueOf(target), translationContext.getDatabaseInfo()) : null;
     }
 }
 

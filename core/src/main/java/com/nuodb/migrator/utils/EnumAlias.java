@@ -25,40 +25,42 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.utils;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static com.nuodb.migrator.utils.ReflectionUtils.getMethod;
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class ColumnTranslatorBase<S extends ColumnScript> extends TranslatorBase<S> {
+public class EnumAlias<T extends Enum<T>> {
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
-        super(sourceDatabaseInfo, ColumnScript.class);
+    protected Map<String, T> aliases = new TreeMap<String, T>(CASE_INSENSITIVE_ORDER);
+
+    public EnumAlias(Class<? extends Enum<T>> type) {
+        T[] values = invokeMethod(null, getMethod(type, "values"));
+        for (T value : values) {
+            addAlias(value);
+        }
     }
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, ColumnScript.class);
+    public void addAlias(T value) {
+        addAlias(value.name(), value);
     }
 
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, scriptClass);
+    public void addAlias(String alias, T value) {
+        aliases.put(alias, value);
     }
 
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
+    public String toAlias(T type) {
+        return type.name().toLowerCase();
     }
 
-    @Override
-    protected boolean supportsScript(S script, TranslationContext translationContext) {
-        return false;
-    }
-
-    @Override
-    public Script translate(S script, TranslationContext translationContext) {
-        return null;
+    public T fromAlias(String alias) {
+        return aliases.get(alias);
     }
 }

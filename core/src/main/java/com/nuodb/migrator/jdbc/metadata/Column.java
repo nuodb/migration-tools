@@ -27,10 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.google.common.collect.Sets;
-
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.upperCase;
@@ -90,9 +89,13 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
      */
     private Sequence sequence;
     /**
-     * Check constraint.
+     * Check constraints
      */
-    private Set<Check> checks = Sets.newLinkedHashSet();
+    private Set<Check> checks = newLinkedHashSet();
+    /**
+     * Column trigger
+     */
+    private Trigger trigger;
 
     private DefaultValue defaultValue;
 
@@ -244,6 +247,14 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
         this.checks = checks;
     }
 
+    public Trigger getTrigger() {
+        return trigger;
+    }
+
+    public void setTrigger(Trigger trigger) {
+        this.trigger = trigger;
+    }
+
     @Override
     public com.nuodb.migrator.jdbc.model.Column asColumn() {
         return this;
@@ -316,6 +327,11 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
         buffer.append(format(", size=%d", size));
         buffer.append(format(", precision=%d", precision));
         buffer.append(format(", scale=%d", scale));
+
+        Trigger trigger = getTrigger();
+        if (trigger != null) {
+            buffer.append(format(", trigger=%s", trigger));
+        }
     }
 }
 

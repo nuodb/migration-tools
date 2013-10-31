@@ -54,11 +54,11 @@ public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHa
     @Override
     public Collection<String> getScripts(T object, ScriptGeneratorContext scriptGeneratorContext) {
         Collection<String> scripts;
-        if (isGenerateScript(scriptGeneratorContext, DROP) && isGenerateScript(scriptGeneratorContext, CREATE)) {
+        if (isGenerateScript(DROP, scriptGeneratorContext) && isGenerateScript(CREATE, scriptGeneratorContext)) {
             scripts = getDropCreateScripts(object, scriptGeneratorContext);
-        } else if (isGenerateScript(scriptGeneratorContext, DROP)) {
+        } else if (isGenerateScript(DROP, scriptGeneratorContext)) {
             scripts = getDropScripts(object, scriptGeneratorContext);
-        } else if (isGenerateScript(scriptGeneratorContext, CREATE)) {
+        } else if (isGenerateScript(CREATE, scriptGeneratorContext)) {
             scripts = getCreateScripts(object, scriptGeneratorContext);
         } else {
             scripts = emptySet();
@@ -77,7 +77,7 @@ public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHa
         return scripts;
     }
 
-    protected boolean isGenerateScript(ScriptGeneratorContext scriptGeneratorContext, ScriptType scriptType) {
+    protected boolean isGenerateScript(ScriptType scriptType, ScriptGeneratorContext scriptGeneratorContext) {
         Collection<ScriptType> scriptTypes = scriptGeneratorContext.getScriptTypes();
         return scriptTypes != null && scriptTypes.contains(scriptType);
     }

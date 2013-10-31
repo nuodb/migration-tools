@@ -25,40 +25,63 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.jdbc.metadata;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import java.util.Collection;
+
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN_TRIGGER;
+import static java.util.Collections.singleton;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class ColumnTranslatorBase<S extends ColumnScript> extends TranslatorBase<S> {
+public class ColumnTrigger extends Trigger {
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
-        super(sourceDatabaseInfo, ColumnScript.class);
+    private Column column;
+
+    public ColumnTrigger() {
+        super(COLUMN_TRIGGER, false);
     }
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, ColumnScript.class);
+    public ColumnTrigger(String name) {
+        super(COLUMN_TRIGGER, name, false);
     }
 
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, scriptClass);
+    public ColumnTrigger(Identifier identifier) {
+        super(COLUMN_TRIGGER, identifier, false);
     }
 
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
+    public Column getColumn() {
+        return column;
+    }
+
+    public void setColumn(Column column) {
+        column.setTrigger(this);
+        this.column = column;
     }
 
     @Override
-    protected boolean supportsScript(S script, TranslationContext translationContext) {
-        return false;
+    public Collection<Column> getColumns() {
+        return singleton(getColumn());
     }
 
     @Override
-    public Script translate(S script, TranslationContext translationContext) {
-        return null;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        ColumnTrigger that = (ColumnTrigger) o;
+
+        if (column != null ? !column.equals(that.column) : that.column != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (column != null ? column.hashCode() : 0);
+        return result;
     }
 }

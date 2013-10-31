@@ -27,10 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
-import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.*;
@@ -38,6 +35,7 @@ import com.nuodb.migrator.jdbc.type.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -70,6 +68,8 @@ public interface Dialect {
     boolean supportsDropIndexOnTable();
 
     boolean supportsDropConstraints();
+
+    boolean supportsDropTriggerIfExists();
 
     boolean supportsStatementWithTimezone();
 
@@ -110,6 +110,20 @@ public interface Dialect {
     String getDeleteAction(ReferenceAction deleteAction);
 
     String getUpdateAction(ReferenceAction updateAction);
+
+    String getTriggerOn(Table table);
+
+    String getTriggerActive(boolean active);
+
+    String getTriggerTime(TriggerTime triggerTime);
+
+    String getTriggerEvent(TriggerEvent triggerEvent);
+
+    String getTriggerBegin(Trigger trigger);
+
+    String getTriggerBody(Trigger trigger, Session session);
+
+    String getTriggerEnd(Trigger trigger);
 
     String getSequenceStartWith(Long startWith);
 
@@ -155,7 +169,11 @@ public interface Dialect {
 
     Script translate(Script script);
 
+    Script translate(Script script, Map<Object, Object> context);
+
     Script translate(String script, Session session);
+
+    Script translate(String script, Session session, Map<Object, Object> context);
 
     SQLKeywords getSQLKeywords();
 

@@ -27,38 +27,46 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.ColumnTrigger;
+import com.nuodb.migrator.jdbc.metadata.Trigger;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+
+import java.util.Collection;
+
+import static com.nuodb.migrator.context.ContextUtils.getService;
+import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static java.sql.Types.*;
+import static java.util.Arrays.asList;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class ColumnTranslatorBase<S extends ColumnScript> extends TranslatorBase<S> {
+public class MySQLOnUpdateTriggerTranslator extends TriggerTranslatorBase {
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
-        super(sourceDatabaseInfo, ColumnScript.class);
-    }
+    private Collection<Integer> TYPES = asList(TIME, DATE, TIMESTAMP);
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, ColumnScript.class);
-    }
-
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, scriptClass);
-    }
-
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
+    public MySQLOnUpdateTriggerTranslator() {
+        super(MYSQL);
     }
 
     @Override
-    protected boolean supportsScript(S script, TranslationContext translationContext) {
-        return false;
+    protected boolean supportsScript(TriggerScript script, TranslationContext translationContext) {
+        Column column = getColumn(script.getTrigger());
+        return column != null && TYPES.contains(column.getTypeCode()) &&
+                translationContext.getTranslationManager().translate(new ColumnScript(column, script.getSession()),
+                        translationContext.getDatabaseInfo(), translationContext) != null;
+    }
+
+    protected Column getColumn(Trigger trigger) {
+        return trigger instanceof ColumnTrigger ? ((ColumnTrigger) trigger).getColumn() : null;
     }
 
     @Override
-    public Script translate(S script, TranslationContext translationContext) {
-        return null;
+    public Script translate(TriggerScript script, TranslationContext translationContext) {
+        Column column = getColumn(script.getTrigger());
+        DatabaseInfo databaseInfo = translationContext.getDatabaseInfo();
+        Dialect dialect = getService(DialectResolver.class).resolve(databaseInfo);
+        return new SimpleScript("NEW." + dialect.getIdentifier(column.getName(), column) + " = 'NOW';", databaseInfo);
     }
 }

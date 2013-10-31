@@ -58,8 +58,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
      * @return
      */
     @Override
-    public Collection<String> getCreateScripts(ForeignKey foreignKey,
-                                               ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
         buffer.append(scriptGeneratorContext.getQualifiedName(foreignKey.getForeignTable()));

@@ -27,38 +27,22 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.Trigger;
+import com.nuodb.migrator.jdbc.session.Session;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class ColumnTranslatorBase<S extends ColumnScript> extends TranslatorBase<S> {
+public class TriggerScript extends SimpleScript {
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
-        super(sourceDatabaseInfo, ColumnScript.class);
+    private final Trigger trigger;
+
+    public TriggerScript(Trigger trigger, Session session) {
+        super(trigger.getTriggerBody(), session);
+        this.trigger = trigger;
     }
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, ColumnScript.class);
-    }
-
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, scriptClass);
-    }
-
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
-    }
-
-    @Override
-    protected boolean supportsScript(S script, TranslationContext translationContext) {
-        return false;
-    }
-
-    @Override
-    public Script translate(S script, TranslationContext translationContext) {
-        return null;
+    public Trigger getTrigger() {
+        return trigger;
     }
 }

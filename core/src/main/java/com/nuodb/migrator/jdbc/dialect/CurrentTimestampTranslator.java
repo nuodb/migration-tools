@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Types;
@@ -39,7 +38,7 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
 /**
  * @author Sergey Bushik
  */
-public class CurrentTimestampTranslator extends ColumnTranslatorBase {
+public class CurrentTimestampTranslator extends ColumnTranslatorBase<ColumnScript> {
 
     private Collection<String> aliases = newTreeSet(CASE_INSENSITIVE_ORDER);
     private String translation;
@@ -51,23 +50,23 @@ public class CurrentTimestampTranslator extends ColumnTranslatorBase {
     }
 
     @Override
-    protected boolean canTranslate(Script script, Column column, DatabaseInfo databaseInfo) {
-        boolean canTranslate;
-        switch (column.getTypeCode()) {
+    protected boolean supportsScript(ColumnScript script, TranslationContext translationContext) {
+        boolean supports;
+        switch (script.getColumn().getTypeCode()) {
             case Types.TIME:
             case Types.DATE:
             case Types.TIMESTAMP:
-                canTranslate = true;
+                supports = true;
                 break;
             default:
-                canTranslate = false;
+                supports = false;
                 break;
         }
-        return canTranslate && script.getScript() != null && aliases.contains(script.getScript());
+        return supports && script.getScript() != null && aliases.contains(script.getScript());
     }
 
     @Override
-    protected Script translate(Script script, Column column, DatabaseInfo databaseInfo) {
-        return new SimpleScript(translation, databaseInfo);
+    public Script translate(ColumnScript script, TranslationContext translationContext) {
+        return new SimpleScript(translation, translationContext.getDatabaseInfo());
     }
 }

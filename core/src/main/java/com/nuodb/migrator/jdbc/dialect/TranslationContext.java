@@ -29,36 +29,14 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
+import java.util.Map;
+
 /**
  * @author Sergey Bushik
  */
-public abstract class ColumnTranslatorBase<S extends ColumnScript> extends TranslatorBase<S> {
+public interface TranslationContext extends Map<Object, Object> {
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
-        super(sourceDatabaseInfo, ColumnScript.class);
-    }
+    DatabaseInfo getDatabaseInfo();
 
-    public ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, ColumnScript.class);
-    }
-
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, scriptClass);
-    }
-
-    protected ColumnTranslatorBase(DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo,
-                                   Class<? extends S> scriptClass) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
-    }
-
-    @Override
-    protected boolean supportsScript(S script, TranslationContext translationContext) {
-        return false;
-    }
-
-    @Override
-    public Script translate(S script, TranslationContext translationContext) {
-        return null;
-    }
+    TranslationManager getTranslationManager();
 }

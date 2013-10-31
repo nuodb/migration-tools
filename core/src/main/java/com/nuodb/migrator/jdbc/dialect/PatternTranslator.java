@@ -45,9 +45,6 @@ public class PatternTranslator extends TranslatorBase {
 
     private final Map<Pattern, String> translations = Maps.newHashMap();
 
-    public PatternTranslator() {
-    }
-
     public PatternTranslator(DatabaseInfo sourceDatabaseInfo) {
         super(sourceDatabaseInfo);
     }
@@ -75,16 +72,17 @@ public class PatternTranslator extends TranslatorBase {
     }
 
     @Override
-    public boolean canTranslate(Script script, DatabaseInfo databaseInfo) {
-        return script.getScript() != null && super.canTranslate(script, databaseInfo);
+    public boolean supportsScript(Script script, TranslationContext translationContext) {
+        return script.getScript() != null;
     }
 
     @Override
-    protected String translate(String script, DatabaseInfo sourceDatabaseInfo, DatabaseInfo targetDatabaseInfo) {
+    public Script translate(Script script, TranslationContext translationContext) {
         for (Map.Entry<Pattern, String> translation : translations.entrySet()) {
-            Matcher matcher = translation.getKey().matcher(script);
+            Matcher matcher = translation.getKey().matcher(script.getScript());
             if (matcher.find()) {
-                return translate(matcher, translation.getValue());
+                return new SimpleScript(translate(matcher, translation.getValue()),
+                        translationContext.getDatabaseInfo());
             }
         }
         return null;
