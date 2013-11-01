@@ -127,7 +127,7 @@ public class NuoDBDialect extends SimpleDialect {
     protected void initTranslations() {
         addTranslator(new CurrentTimestampTranslator(MYSQL,
                 newArrayList("CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP()", "NOW()", "LOCALTIME", "LOCALTIME()",
-                        "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "CURRENT_TIMESTAMP"));
+                        "LOCALTIMESTAMP", "LOCALTIMESTAMP()"), "NOW"));
         addTranslator(new MySQLBitLiteralTranslator());
         addTranslator(new MySQLHexLiteralTranslator());
         addTranslator(new MySQLZeroDateTimeTranslator());
@@ -135,18 +135,18 @@ public class NuoDBDialect extends SimpleDialect {
         addTranslator(new MySQLOnUpdateTriggerTranslator());
 
         addTranslator(new CurrentTimestampTranslator(MSSQL_SERVER,
-                newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "CURRENT_TIMESTAMP"));
+                newArrayList("GETDATE()", "CURRENT_TIMESTAMP", "NOW()"), "NOW"));
         addTranslationRegex(MSSQL_SERVER, "N'(.*)'", "$1");
 
         addTranslator(new CurrentTimestampTranslator(POSTGRE_SQL,
-                newArrayList("CURRENT_TIMESTAMP", "NOW()"), "CURRENT_TIMESTAMP"));
+                newArrayList("CURRENT_TIMESTAMP", "NOW()"), "NOW"));
         addTranslationRegex(POSTGRE_SQL, "'(.*)'::.*", "$1");
 
         addTranslator(new CurrentTimestampTranslator(ORACLE,
-                newArrayList("CURRENT_DATE", "SYSDATE"), "CURRENT_TIMESTAMP"));
+                newArrayList("CURRENT_DATE", "SYSDATE"), "NOW"));
 
         addTranslator(new CurrentTimestampTranslator(DB2,
-                newArrayList("CURRENT DATE", "CURRENT TIME", "CURRENT TIMESTAMP"), "CURRENT_TIMESTAMP"));
+                newArrayList("CURRENT DATE", "CURRENT TIME", "CURRENT TIMESTAMP"), "NOW"));
     }
 
     @Override

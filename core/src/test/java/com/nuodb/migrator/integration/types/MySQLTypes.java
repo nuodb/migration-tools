@@ -237,7 +237,7 @@ public class MySQLTypes implements DatabaseTypes {
                 || "INT".equalsIgnoreCase(type)) {
             return defaultValue == null ? null : "'" + defaultValue + "'";
         } else if ("TIMESTAMP".equalsIgnoreCase(type)) {
-            return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'CURRENT_TIMESTAMP'"
+            return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'NOW'"
                     : defaultValue;
         }
         return defaultValue;
