@@ -247,7 +247,7 @@ public class SQLServerTypes implements DatabaseTypes {
                 || "int".equalsIgnoreCase(type)) {
             return defaultValue == null ? null : "'" + defaultValue + "'";
         } else if ("timestamp".equalsIgnoreCase(type)) {
-            return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'NOW'"
+            return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'CURRENT_TIMESTAMP'"
                     : defaultValue;
         }
         return defaultValue;
