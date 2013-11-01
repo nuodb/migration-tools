@@ -67,6 +67,14 @@ public class MySQLOnUpdateTriggerTranslator extends TriggerTranslatorBase {
         Column column = getColumn(script.getTrigger());
         DatabaseInfo databaseInfo = translationContext.getDatabaseInfo();
         Dialect dialect = getService(DialectResolver.class).resolve(databaseInfo);
-        return new SimpleScript("NEW." + dialect.getIdentifier(column.getName(), column) + " = 'NOW';", databaseInfo);
+        StringBuilder translation = new StringBuilder();
+        translation.append("NEW.");
+        translation.append(dialect.getIdentifier(column.getName(), column));
+        translation.append(" = '");
+        translation.append(translationContext.getTranslationManager().translate(
+                new ColumnScript(column, script.getSession()), translationContext.getDatabaseInfo(),
+                translationContext).getScript());
+        translation.append("';");
+        return new SimpleScript(translation.toString(), databaseInfo);
     }
 }

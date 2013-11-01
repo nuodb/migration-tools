@@ -264,6 +264,18 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                                   Collection<Table> tables) {
         Collection<MetaDataType> objectTypes = context.getObjectTypes();
         Dialect dialect = context.getTargetDialect();
+        if (objectTypes.contains(IDENTITY) && dialect.supportsSequence()) {
+            for (Table table : tables) {
+                if (!addScriptForTable(context, table)) {
+                    continue;
+                }
+                for (Column column : table.getColumns()) {
+                    if (column.getSequence() != null) {
+                        scripts.addAll(context.getDropScripts(column.getSequence()));
+                    }
+                }
+            }
+        }
         if (objectTypes.contains(FOREIGN_KEY) && dialect.supportsDropConstraints()) {
             for (Table table : tables) {
                 if (!addScriptForTable(context, table)) {
@@ -298,18 +310,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                     continue;
                 }
                 scripts.addAll(context.getDropScripts(table));
-            }
-        }
-        if (objectTypes.contains(IDENTITY) && dialect.supportsSequence()) {
-            for (Table table : tables) {
-                if (!addScriptForTable(context, table)) {
-                    continue;
-                }
-                for (Column column : table.getColumns()) {
-                    if (column.getSequence() != null) {
-                        scripts.addAll(context.getDropScripts(column.getSequence()));
-                    }
-                }
             }
         }
     }
