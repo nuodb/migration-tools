@@ -56,6 +56,8 @@ public class SQLKeywords implements Set<String> {
 
     public static final SQLKeywords SQL_2003_KEYWORDS = new SQLKeywords("sql2003.keywords");
 
+    public static final SQLKeywords NUODB_KEYWORDS = new SQLKeywords("nuodb.keywords");
+
     private Set<String> keywords = newTreeSet(String.CASE_INSENSITIVE_ORDER);
 
     private static Collection<String> load(String resource) {

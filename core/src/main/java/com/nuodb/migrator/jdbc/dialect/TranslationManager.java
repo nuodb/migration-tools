@@ -28,6 +28,8 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.utils.PriorityList;
+import com.nuodb.migrator.utils.SimplePriorityList;
 
 import java.util.Collection;
 import java.util.Map;
@@ -41,7 +43,7 @@ import static com.google.common.collect.Sets.newHashSet;
 @SuppressWarnings("unchecked")
 public class TranslationManager {
 
-    private Collection<Translator> translators = newHashSet();
+    private PriorityList<Translator> translators = new SimplePriorityList<Translator>();
 
     public Script translate(Script script, DatabaseInfo databaseInfo, Map<Object, Object> context) {
         Script translation = null;
@@ -89,11 +91,15 @@ public class TranslationManager {
         translators.add(translator);
     }
 
-    public Collection<Translator> getTranslators() {
+    public void addTranslator(Translator translator, int priority) {
+        translators.add(translator, priority);
+    }
+
+    public PriorityList<Translator> getTranslators() {
         return translators;
     }
 
-    public void setTranslators(Collection<Translator> translators) {
+    public void setTranslators(PriorityList<Translator> translators) {
         this.translators = translators;
     }
 

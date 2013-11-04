@@ -160,6 +160,11 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
+    public SQLKeywords getSQLKeywords() {
+        return SQLKeywords.NUODB_KEYWORDS;
+    }
+
+    @Override
     public boolean isSQLKeyword(String identifier, Identifiable identifiable) {
         return !(identifiable != null && identifiable instanceof Table) && getSQLKeywords().contains(identifier);
     }
