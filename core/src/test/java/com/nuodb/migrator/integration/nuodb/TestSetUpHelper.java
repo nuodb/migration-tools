@@ -32,7 +32,7 @@ public class TestSetUpHelper {
     public TestSetUpHelper() throws Exception {
         String sourceJdbcJar = System.getProperty("source.jdbcjar");
         String nuodbJdbcJar = System.getProperty("nuodb.jdbcjar");
-        String nuodbRoot = System.getProperty("nuodb.root");
+        String nuodbHome = System.getProperty("nuodb.home");
         String sourceDriver = System.getProperty("source.driver");
         String sourceUsername = System.getProperty("source.username");
         String sourcePassword = System.getProperty("source.password");
@@ -49,8 +49,8 @@ public class TestSetUpHelper {
 
         String nuodbJdbcJarLoc = nuodbJdbcJar;
         if (nuodbJdbcJarLoc == null || nuodbJdbcJarLoc.trim().length() == 0) {
-            // Take it from the nuodb.root
-            nuodbJdbcJarLoc = nuodbRoot + File.separator + "jar"
+            // Take it from the nuodb.home
+            nuodbJdbcJarLoc = nuodbHome + File.separator + "jar"
                     + File.separator + NUODB_JDBC_JAR;
         }
         if (nuodbJdbcJarLoc != null || nuodbJdbcJarLoc.trim().length() > 0) {

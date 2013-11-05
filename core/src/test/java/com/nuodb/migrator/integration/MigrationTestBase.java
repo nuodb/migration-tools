@@ -58,7 +58,7 @@ public class MigrationTestBase {
     protected ResultSetUtil rsUtil;
 
     @Parameters({"source.driver", "source.url", "source.username",
-            "source.password", "source.schema", "source.jdbcjar", "nuodb.root",
+            "source.password", "source.schema", "source.jdbcjar", "nuodb.home",
             "nuodb.driver", "nuodb.url", "nuodb.username", "nuodb.password",
             "nuodb.schema", "nuodb.jdbcjar"})
     @BeforeClass(alwaysRun = true)
@@ -84,7 +84,7 @@ public class MigrationTestBase {
 
         String nuodbJdbcJarLoc = nuodbJdbcJar;
         if (nuodbJdbcJarLoc == null || nuodbJdbcJarLoc.trim().length() == 0) {
-            // Take it from the nuodb.root
+            // Take it from the nuodb.home
             nuodbJdbcJarLoc = nuodbRoot + File.separator + "jar"
                     + File.separator + NUODB_JDBC_JAR;
         }

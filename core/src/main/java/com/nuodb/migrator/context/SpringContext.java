@@ -58,15 +58,15 @@ public class SpringContext extends ContextBase {
 
     @Override
     public <T> T getService(Class<T> serviceType) {
-        T foundService;
+        T service;
         try {
-            foundService = applicationContext.getBean(serviceType);
+            service = applicationContext.getBean(serviceType);
         } catch (BeansException exception) {
-            foundService = super.getService(serviceType);
+            service = super.getService(serviceType);
         }
-        if (foundService == null) {
+        if (service == null) {
             throw new ContextException(format("Service of %s type is not registered in this context", serviceType));
         }
-        return foundService;
+        return service;
     }
 }

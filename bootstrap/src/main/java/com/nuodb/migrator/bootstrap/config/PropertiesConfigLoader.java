@@ -26,18 +26,18 @@ public class PropertiesConfigLoader {
     }
 
     private static void setHome() {
-        if (getProperty(ROOT) != null) {
+        if (getProperty(HOME) != null) {
             return;
         }
         try {
-            System.setProperty(ROOT, new File(getProperty("user.dir"), "..").getCanonicalPath());
+            System.setProperty(HOME, new File(getProperty("user.dir"), "..").getCanonicalPath());
         } catch (IOException e) {
-            System.setProperty(ROOT, getProperty("user.dir"));
+            System.setProperty(HOME, getProperty("user.dir"));
         }
     }
 
     private static String getHome() {
-        return getProperty(ROOT);
+        return getProperty(HOME);
     }
 
     public Config loadConfig() {
