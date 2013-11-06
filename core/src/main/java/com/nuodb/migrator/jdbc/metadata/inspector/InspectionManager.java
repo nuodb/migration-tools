@@ -83,6 +83,7 @@ public class InspectionManager {
         columnInspector.register(NUODB, new NuoDBColumnInspector());
         columnInspector.register(POSTGRE_SQL, new PostgreSQLColumnInspector());
         columnInspector.register(MSSQL_SERVER, new MSSQLServerColumnInspector());
+        columnInspector.register(ORACLE, new OracleColumnInspector());
         addInspector(columnInspector);
 
         InspectorResolver checkInspector = new InspectorResolver(CHECK);

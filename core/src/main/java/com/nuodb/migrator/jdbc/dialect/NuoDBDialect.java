@@ -31,6 +31,7 @@ import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifiers;
+import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.Types;
 import java.util.regex.Pattern;
@@ -39,6 +40,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newScale;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSize;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static java.util.regex.Pattern.compile;
@@ -112,6 +114,8 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(Types.NVARCHAR, "NVARCHAR({N})");
         addJdbcTypeName(Types.NCLOB, "NCLOB");
         addJdbcTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
+
+        addJdbcTypeName(ORACLE, Types.DECIMAL, "DECIMAL", newSpecifiers(0, 0, 0));
 
         addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
