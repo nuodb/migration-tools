@@ -27,11 +27,7 @@
 
 @REM JAVA_HOME can optionally be set here
 
-IF EXIST "%JAVA_HOME%" GOTO OK_JAVA_HOME
-ECHO The JAVA_HOME variable must be set to a Java installation!
-GOTO FAIL
-
-:OK_JAVA_HOME
+IF EXIST "%JAVA_HOME%" SET "JAVA_EXEC=%JAVA_HOME%\bin\java" ELSE JAVA_EXEC=java
 
 @REM NUODB_HOME is set here
 IF EXIST "%NUODB_HOME%" GOTO OK_NUODB_HOME
@@ -75,7 +71,7 @@ SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\slf4j-log4j12-1.7.5.jar"
 SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\log4j-1.2.17.jar"
 SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\nuodb-migrator-bootstrap-2.0.jar"
 
-"%JAVA_HOME%\bin\java" %JAVA_OPTS% -cp "%CLASSPATH%" com.nuodb.migrator.bootstrap.Bootstrap %*
+"%JAVA_EXEC%" %JAVA_OPTS% -cp "%CLASSPATH%" com.nuodb.migrator.bootstrap.Bootstrap %*
 
 EXIT /b 0
 
