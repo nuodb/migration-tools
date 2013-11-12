@@ -115,7 +115,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(Types.NCLOB, "NCLOB");
         addJdbcTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
 
-        addJdbcTypeName(ORACLE, Types.DECIMAL, "DECIMAL", newSpecifiers(0, 0, 0));
+        addJdbcTypeName(ORACLE, Types.DECIMAL, "NUMBER", newSpecifiers(0, 0, 0));
 
         addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
