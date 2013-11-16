@@ -46,6 +46,7 @@ import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaSpec;
+import com.nuodb.migrator.utils.PriorityList;
 import org.slf4j.Logger;
 
 import java.sql.SQLException;
@@ -138,7 +139,7 @@ public class SchemaJob extends JobBase {
         Dialect dialect = getService(DialectResolver.class).resolve(NUODB);
         TranslationManager translationManager = dialect.getTranslationManager();
 
-        Collection<Translator> translators = translationManager.getTranslators();
+        PriorityList<Translator> translators = translationManager.getTranslators();
         for (Translator translator : translators) {
             if (translator instanceof ImplicitDefaultsTranslator) {
                 ((ImplicitDefaultsTranslator)translator).setUseExplicitDefaults(schemaSpec.isUseExplicitDefaults());
