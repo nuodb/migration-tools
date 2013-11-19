@@ -27,7 +27,7 @@
 
 @REM JAVA_HOME can optionally be set here
 
-IF EXIST "%JAVA_HOME%" SET "JAVA_EXEC=%JAVA_HOME%\bin\java" ELSE JAVA_EXEC=java
+IF EXIST "%JAVA_HOME%" (SET "JAVA_EXEC=%JAVA_HOME%\bin\java") ELSE (SET "JAVA_EXEC=java")
 
 @REM NUODB_HOME is set here
 IF EXIST "%NUODB_HOME%" GOTO OK_NUODB_HOME
