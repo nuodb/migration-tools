@@ -212,7 +212,6 @@ public class CliSchemaJob extends CliRunJob {
                 withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
                                 withMaximum(Integer.MAX_VALUE).build()
                 ).build();
         group.withOption(tableType);

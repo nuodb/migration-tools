@@ -72,8 +72,7 @@ SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\log4j-1.2.17.jar"
 SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\nuodb-migrator-bootstrap-2.0.jar"
 
 "%JAVA_EXEC%" %JAVA_OPTS% -cp "%CLASSPATH%" com.nuodb.migrator.bootstrap.Bootstrap %*
-
-EXIT /b 0
+EXIT /b %ERRORLEVEL%
 
 :FAIL
 PAUSE
