@@ -52,7 +52,7 @@ public class EnumAlias<T extends Enum<T>> {
     }
 
     public void addAlias(T value) {
-        addAlias(value.name(), value);
+        addAlias(value.name().toLowerCase(), value);
     }
 
     public void addAlias(String alias, T value) {
