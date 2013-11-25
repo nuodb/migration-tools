@@ -517,16 +517,13 @@ public class StructureTest extends MigrationTestBase {
         try {
             stmt1 = nuodbConnection.prepareStatement(sqlStr1);
             rs1 = stmt1.executeQuery();
-            boolean found = false;
             Collection<MySQLPrecision1> expList = new ArrayList<MySQLPrecision1>();
             Collection<MySQLPrecision1> actList = MySQLPrecisions.getMySQLPrecision1();
             while (rs1.next()) {
-                found = true;
                 MySQLPrecision1 obj = new MySQLPrecision1(rs1.getInt(1),
                         rs1.getInt(2), rs1.getLong(3), rs1.getLong(4), rs1.getLong(5));
                 expList.add(obj);
             }
-            Assert.assertTrue(found);
             Assert.assertEquals(actList, expList,
                     "Precision test 2 failed as the list(" + actList + ") does not match with orginal list(" +
                             expList + ")");
@@ -537,17 +534,14 @@ public class StructureTest extends MigrationTestBase {
         try {
             stmt2 = nuodbConnection.prepareStatement(sqlStr2);
             rs2 = stmt2.executeQuery();
-            boolean found = false;
             Collection<MySQLPrecision2> expList = new ArrayList<MySQLPrecision2>();
             Collection<MySQLPrecision2> actList = MySQLPrecisions.getMySQLPrecision2();
             while (rs2.next()) {
-                found = true;
                 MySQLPrecision2 obj = new MySQLPrecision2(rs2.getString(1),
                         rs2.getString(2), rs2.getDouble(3), rs2.getDouble(4),
                         rs2.getDouble(5), rs2.getString(6), rs2.getString(7));
                 expList.add(obj);
             }
-            Assert.assertTrue(found);
             Assert.assertEquals(actList, expList,
                     "Precision test 2 failed as the list(" + actList + ") does not match with orginal list(" +
                             expList + ")");
