@@ -89,4 +89,18 @@ public class DialectTest {
         dialect.translate(script);
         fail("Should fail for zeroDateTimeBehavior=exception");
     }
+
+    @DataProvider(name = "getCheckClause")
+    public Object[][] createGetCheckClauseData() {
+        return new Object[][]{
+                {null, null},
+                {"F1 > 5", "(F1 > 5)"},
+                {"F1 in (0,1)", "(F1 in (0,1))"},
+        };
+    }
+
+    @Test(dataProvider = "getCheckClause")
+    public void testGetCheckClause(String sourceCheckClause, String checkClause) {
+        assertEquals(dialect.getCheckClause(sourceCheckClause), checkClause);
+    }
 }
