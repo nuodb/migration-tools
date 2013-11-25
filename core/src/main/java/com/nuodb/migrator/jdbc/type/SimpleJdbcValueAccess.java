@@ -27,8 +27,10 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.model.Column;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,23 +45,34 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
     private JdbcValueSetter jdbcValueSetter;
     private ResultSet resultSet;
     private PreparedStatement preparedStatement;
+    private Connection connection;
     private int columnIndex;
     private Column column;
 
-    public SimpleJdbcValueAccess(JdbcValueGetter<T> jdbcValueGetter, ResultSet resultSet, int columnIndex,
-                                 Column column) {
+    public SimpleJdbcValueAccess(JdbcValueGetter<T> jdbcValueGetter, ResultSet resultSet,
+                                 int columnIndex, Column column) throws SQLException {
         this.jdbcValueGetter = jdbcValueGetter;
         this.resultSet = resultSet;
+        this.connection = getConnection(resultSet.getStatement().getConnection());
         this.columnIndex = columnIndex;
         this.column = column;
     }
 
-    public SimpleJdbcValueAccess(JdbcValueSetter jdbcValueSetter, PreparedStatement preparedStatement, int columnIndex,
-                                 Column column) {
+    public SimpleJdbcValueAccess(JdbcValueSetter jdbcValueSetter, PreparedStatement preparedStatement,
+                                 int columnIndex, Column column) throws SQLException {
         this.jdbcValueSetter = jdbcValueSetter;
         this.preparedStatement = preparedStatement;
+        this.connection = getConnection(preparedStatement.getConnection());
         this.columnIndex = columnIndex;
         this.column = column;
+    }
+
+    protected Connection getConnection(Connection connection) {
+        if (connection instanceof ConnectionProxy) {
+            return ((ConnectionProxy) connection).getConnection();
+        } else {
+            return connection;
+        }
     }
 
     @Override
@@ -77,7 +90,7 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
         if (jdbcValueGetter == null) {
             throw new JdbcValueAccessException("Get value is not supported");
         }
-        return jdbcValueGetter.getValue(resultSet, columnIndex, column, options);
+        return jdbcValueGetter.getValue(resultSet, connection, columnIndex, column, options);
     }
 
     @Override
@@ -85,7 +98,7 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
         if (jdbcValueGetter == null) {
             throw new JdbcValueAccessException("Get value is not supported");
         }
-        return jdbcValueGetter.getValue(resultSet, columnIndex, column, valueClass, options);
+        return jdbcValueGetter.getValue(resultSet, connection, columnIndex, column, valueClass, options);
     }
 
     @Override
@@ -93,7 +106,7 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
         if (jdbcValueSetter == null) {
             throw new JdbcValueAccessException("Set value is not supported");
         }
-        jdbcValueSetter.setValue(preparedStatement, columnIndex, column, value, options);
+        jdbcValueSetter.setValue(preparedStatement, connection, columnIndex, column, value, options);
     }
 
 }

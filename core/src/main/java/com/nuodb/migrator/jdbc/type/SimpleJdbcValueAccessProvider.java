@@ -91,33 +91,41 @@ public class SimpleJdbcValueAccessProvider implements JdbcValueAccessProvider {
     }
 
     @Override
-    public <T> JdbcValueAccess<T> getJdbcValueGetter(ResultSet resultSet, int index, Column columnModel) {
-        return new SimpleJdbcValueAccess<T>(
-                (JdbcValueGetter<T>) getJdbcValueGetter(columnModel.getTypeCode(), columnModel.getTypeName()),
-                resultSet, index, columnModel);
-    }
-
-    @Override
-    public <T> JdbcValueAccess<T> getJdbcValueGetter(PreparedStatement preparedStatement, int index,
-                                                     Column columnModel) {
-        return new SimpleJdbcValueAccess<T>(getJdbcValueSetter(columnModel.getTypeCode(), columnModel.getTypeName()),
-                preparedStatement, index, columnModel);
-    }
-
-    @Override
-    public <T> JdbcValueAccess<T> getJdbcValueGetter(ResultSet resultSet, int index) {
+    public <T> JdbcValueAccess<T> getJdbcValueGetter(ResultSet resultSet, int columnIndex, Column column) {
         try {
-            return getJdbcValueGetter(resultSet, index, ColumnFactory.createColumn(resultSet, index));
+            return new SimpleJdbcValueAccess<T>(
+                    (JdbcValueGetter<T>) getJdbcValueGetter(column.getTypeCode(), column.getTypeName()),
+                    resultSet, columnIndex, column);
         } catch (SQLException exception) {
             throw new JdbcValueAccessException(exception);
         }
     }
 
     @Override
-    public <T> JdbcValueAccess<T> getJdbcValueGetter(PreparedStatement preparedStatement, int index) {
+    public <T> JdbcValueAccess<T> getJdbcValueGetter(PreparedStatement preparedStatement, int columnIndex, Column column) {
         try {
-            return getJdbcValueGetter(preparedStatement, index,
-                    createColumn(preparedStatement.getMetaData(), index));
+            return new SimpleJdbcValueAccess<T>(
+                    getJdbcValueSetter(column.getTypeCode(), column.getTypeName()),
+                    preparedStatement, columnIndex, column);
+        } catch (SQLException exception) {
+            throw new JdbcValueAccessException(exception);
+        }
+    }
+
+    @Override
+    public <T> JdbcValueAccess<T> getJdbcValueGetter(ResultSet resultSet, int columnIndex) {
+        try {
+            return getJdbcValueGetter(resultSet, columnIndex, ColumnFactory.createColumn(resultSet, columnIndex));
+        } catch (SQLException exception) {
+            throw new JdbcValueAccessException(exception);
+        }
+    }
+
+    @Override
+    public <T> JdbcValueAccess<T> getJdbcValueGetter(PreparedStatement preparedStatement, int columnIndex) {
+        try {
+            return getJdbcValueGetter(preparedStatement, columnIndex,
+                    createColumn(preparedStatement.getMetaData(), columnIndex));
         } catch (SQLException exception) {
             throw new JdbcValueAccessException(exception);
         }

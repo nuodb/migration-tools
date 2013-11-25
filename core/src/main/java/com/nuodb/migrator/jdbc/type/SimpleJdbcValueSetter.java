@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.model.Column;
 
 import java.sql.Connection;
@@ -50,22 +49,13 @@ public class SimpleJdbcValueSetter implements JdbcValueSetter {
     }
 
     @Override
-    public <X> void setValue(PreparedStatement statement, int columnIndex, Column columnModel, X value,
-                             Map<String, Object> options) throws SQLException {
+    public <X> void setValue(PreparedStatement statement, Connection connection, int columnIndex, Column columnModel,
+                             X value, Map<String, Object> options) throws SQLException {
         JdbcTypeAdapter<X> adapter = jdbcTypeRegistry.getJdbcTypeAdapter(value != null ? value.getClass() : null,
                 jdbcType.getValueClass());
         if (adapter != null) {
-            Connection connection = statement.getConnection();
-            value = adapter.wrap(value, getConnection(connection));
+            value = adapter.wrap(value, connection);
         }
         jdbcType.setValue(statement, columnIndex, columnModel, value, options);
-    }
-
-    protected Connection getConnection(Connection connection) {
-        if (connection instanceof ConnectionProxy) {
-            return ((ConnectionProxy) connection).getConnection();
-        } else {
-            return connection;
-        }
     }
 }

@@ -27,13 +27,11 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.model.Column;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Map;
 
 /**
@@ -51,29 +49,19 @@ public class SimpleJdbcValueGetter<T> implements JdbcValueGetter<T> {
     }
 
     @Override
-    public T getValue(ResultSet resultSet, int columnIndex,
+    public T getValue(ResultSet resultSet, Connection connection, int columnIndex,
                       Column column, Map<String, Object> options) throws SQLException {
         return jdbcType.getValue(resultSet, columnIndex, column, options);
     }
 
     @Override
-    public <X> X getValue(ResultSet resultSet, int columnIndex, Column column, Class<X> valueClass,
-                          Map<String, Object> options) throws SQLException {
+    public <X> X getValue(ResultSet resultSet, Connection connection, int columnIndex, Column column,
+                          Class<X> valueClass, Map<String, Object> options) throws SQLException {
         X value = (X) jdbcType.getValue(resultSet, columnIndex, column, options);
         JdbcTypeAdapter<X> adapter = jdbcTypeRegistry.getJdbcTypeAdapter(valueClass, jdbcType.getValueClass());
         if (adapter != null) {
-            Statement statement = resultSet.getStatement();
-            Connection connection = statement.getConnection();
-            value = adapter.unwrap(value, valueClass, getConnection(connection));
+            value = adapter.unwrap(value, valueClass, connection);
         }
         return value;
-    }
-
-    protected Connection getConnection(Connection connection) {
-        if (connection instanceof ConnectionProxy) {
-            return ((ConnectionProxy) connection).getConnection();
-        } else {
-            return connection;
-        }
     }
 }

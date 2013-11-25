@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.type;
 
 import com.nuodb.migrator.jdbc.model.Column;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
@@ -38,6 +39,6 @@ import java.util.Map;
  */
 public interface JdbcValueSetter {
 
-    <X> void setValue(PreparedStatement statement, int columnIndex, Column columnModel, X value,
+    <X> void setValue(PreparedStatement statement, Connection connection, int columnIndex, Column columnModel, X value,
                       Map<String, Object> options) throws SQLException;
 }
