@@ -30,6 +30,7 @@ package com.nuodb.migrator.backup.format.xml;
 import com.nuodb.migrator.backup.format.OutputFormatBase;
 import com.nuodb.migrator.backup.format.OutputFormatException;
 import com.nuodb.migrator.backup.format.value.Value;
+import com.nuodb.migrator.backup.format.value.ValueType;
 
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamException;
@@ -40,6 +41,8 @@ import java.util.BitSet;
 
 import static com.nuodb.migrator.backup.format.utils.BinaryEncoder.BASE64;
 import static com.nuodb.migrator.backup.format.utils.BitSetUtils.toHexString;
+import static com.nuodb.migrator.backup.format.value.ValueType.BINARY;
+import static com.nuodb.migrator.backup.format.xml.XmlUtils.isValid;
 import static javax.xml.stream.XMLOutputFactory.newInstance;
 
 /**
@@ -97,15 +100,16 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
             int i = 0;
             for (Value value : values) {
                 if (!value.isNull()) {
+                    ValueType valueType = getValueHandleList().get(i).getValueType();
                     xmlWriter.writeStartElement(ELEMENT_COLUMN);
-                    String content = null;
-                    switch (getValueHandleList().get(i).getValueType()) {
-                        case BINARY:
-                            content = BASE64.encode(value.asBytes());
-                            break;
-                        case STRING:
-                            content = value.asString();
-                            break;
+                    String content;
+                    if (valueType == BINARY) {
+                        content = BASE64.encode(value.asBytes());
+                    } else if (!isValid(value.asString())) {
+                        xmlWriter.writeAttribute(ATTRIBUTE_VALUE_TYPE, VALUE_TYPES.toAlias(BINARY));
+                        content = BASE64.encode(value.asBytes());
+                    } else {
+                        content = value.asString();
                     }
                     xmlWriter.writeCharacters(content);
                     xmlWriter.writeEndElement();

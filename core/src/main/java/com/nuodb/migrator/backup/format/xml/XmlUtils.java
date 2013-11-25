@@ -27,36 +27,28 @@
  */
 package com.nuodb.migrator.backup.format.xml;
 
-import com.nuodb.migrator.backup.format.value.ValueType;
-import com.nuodb.migrator.utils.EnumAlias;
-
-import static com.nuodb.migrator.backup.format.value.ValueType.BINARY;
-import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
-
 /**
  * @author Sergey Bushik
  */
-public interface XmlAttributes {
-    final String FORMAT = "xml";
+public class XmlUtils {
 
-    final String ATTRIBUTE_ENCODING = "xml.encoding";
-    final String ATTRIBUTE_VERSION = "xml.version";
+    public static boolean isValid(char value) {
+        return (value == 0x9) || (value == 0xA) || (value == 0xD) ||
+                ((value >= 0x20) && (value <= 0xD7FF)) ||
+                ((value >= 0xE000) && (value <= 0xFFFD)) ||
+                ((value >= 0x10000) && (value <= 0x10FFFF));
+    }
 
-    final String ENCODING = "utf-8";
-    final String VERSION = "1.0";
-
-    final String ELEMENT_ROWS = "rs";
-    final String ELEMENT_COLUMN = "c";
-    final String ELEMENT_ROW = "r";
-    final String ATTRIBUTE_NULLS = "ns";
-    final String ATTRIBUTE_VALUE_TYPE = "vt";
-    final String ATTRIBUTE_VALUE_TYPE_STRING = "s";
-    final String ATTRIBUTE_VALUE_TYPE_BINARY = "b";
-
-    final EnumAlias<ValueType> VALUE_TYPES = new EnumAlias<ValueType>() {
-        {
-            addAlias(ATTRIBUTE_VALUE_TYPE_STRING, STRING);
-            addAlias(ATTRIBUTE_VALUE_TYPE_BINARY, BINARY);
+    public static boolean isValid(String value) {
+        if (value == null) {
+            return true;
         }
-    };
+        final int length = value.length();
+        for (int i = 0; i < length; i++) {
+            if (!isValid(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

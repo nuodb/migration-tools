@@ -41,6 +41,9 @@ public class EnumAlias<T extends Enum<T>> {
 
     protected Map<String, T> aliases = new TreeMap<String, T>(CASE_INSENSITIVE_ORDER);
 
+    public EnumAlias() {
+    }
+
     public EnumAlias(Class<? extends Enum<T>> type) {
         T[] values = invokeMethod(null, getMethod(type, "values"));
         for (T value : values) {
@@ -57,10 +60,15 @@ public class EnumAlias<T extends Enum<T>> {
     }
 
     public String toAlias(T type) {
+        for (Map.Entry<String, T> entry : aliases.entrySet()) {
+            if (entry.getValue() == type) {
+                return entry.getKey();
+            }
+        }
         return type.name().toLowerCase();
     }
 
     public T fromAlias(String alias) {
-        return aliases.get(alias);
+        return alias != null ? aliases.get(alias) : null;
     }
 }

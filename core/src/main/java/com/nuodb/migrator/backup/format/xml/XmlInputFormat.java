@@ -91,22 +91,25 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
     public Value[] readValues() {
         Value[] values = null;
         if (isNextElement(ELEMENT_ROW)) {
-            String nullsValue = getAttributeValue(NULL_NS_URI, ATTRIBUTE_NULLS);
-            BitSet nulls = nullsValue != null ? fromHexString(nullsValue) : EMPTY;
+            String nullsAttribute = getAttributeValue(NULL_NS_URI, ATTRIBUTE_NULLS);
+            BitSet nulls = nullsAttribute != null ? fromHexString(nullsAttribute) : EMPTY;
             ColumnList<ValueHandle> model = getValueHandleList();
             int length = model.size();
             values = new Value[length];
             int index = 0;
             while (index < length) {
                 String value = null;
+                ValueType valueType = model.get(index).getValueType();
                 if (!nulls.get(index) && isNextElement(ELEMENT_COLUMN)) {
                     try {
+                        ValueType valueLevelType = VALUE_TYPES.fromAlias(
+                                getAttributeValue(NULL_NS_URI, ATTRIBUTE_VALUE_TYPE));
+                        valueType = valueLevelType != null ? valueLevelType : valueType;
                         value = xmlReader.getElementText();
                     } catch (XMLStreamException exception) {
                         throw new InputFormatException(exception);
                     }
                 }
-                ValueType valueType = model.get(index).getValueType();
                 valueType = valueType != null ? valueType : STRING;
                 switch (valueType) {
                     case BINARY:
