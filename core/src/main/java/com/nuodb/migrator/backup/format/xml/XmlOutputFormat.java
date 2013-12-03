@@ -58,7 +58,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
     }
 
     @Override
-    protected void open(OutputStream outputStream) {
+    protected void init(OutputStream outputStream) {
         try {
             xmlWriter = newInstance().createXMLStreamWriter(outputStream, getEncoding());
         } catch (XMLStreamException exception) {
@@ -67,7 +67,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
     }
 
     @Override
-    protected void open(Writer writer) {
+    protected void init(Writer writer) {
         try {
             xmlWriter = newInstance().createXMLStreamWriter(writer);
         } catch (XMLStreamException exception) {
@@ -100,7 +100,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
             int i = 0;
             for (Value value : values) {
                 if (!value.isNull()) {
-                    ValueType valueType = getValueHandleList().get(i).getValueType();
+                    ValueType valueType = getValueTypes().get(i);
                     xmlWriter.writeStartElement(ELEMENT_COLUMN);
                     String content;
                     if (valueType == BINARY) {

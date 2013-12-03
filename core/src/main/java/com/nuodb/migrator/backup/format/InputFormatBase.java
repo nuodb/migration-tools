@@ -27,8 +27,11 @@
  */
 package com.nuodb.migrator.backup.format;
 
+import com.google.common.collect.Lists;
+import com.nuodb.migrator.backup.catalog.Column;
 import com.nuodb.migrator.backup.format.value.Value;
 import com.nuodb.migrator.backup.format.value.ValueHandle;
+import com.nuodb.migrator.backup.format.value.ValueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +39,9 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.io.Closeables.closeQuietly;
 
 /**
@@ -49,6 +54,7 @@ public abstract class InputFormatBase extends FormatBase implements InputFormat 
 
     private Reader reader;
     private InputStream inputStream;
+    private List<ValueType> valueTypes;
 
     public Reader getReader() {
         return reader;
@@ -69,19 +75,32 @@ public abstract class InputFormatBase extends FormatBase implements InputFormat 
     }
 
     @Override
-    public void open() {
+    public void init() {
         if (hasReader()) {
-            open(openReader());
+            init(openReader());
         } else if (hasInputStream()) {
-            open(openInputStream());
+            init(openInputStream());
         } else {
             throw new InputFormatException("Reader or stream is required to read backup");
         }
+        initValueTypes();
     }
 
-    protected abstract void open(Reader reader);
+    protected abstract void init(Reader reader);
 
-    protected abstract void open(InputStream inputStream);
+    protected abstract void init(InputStream inputStream);
+
+    public List<ValueType> getValueTypes() {
+        return valueTypes;
+    }
+
+    protected void initValueTypes() {
+        List<ValueType> valueTypes = newArrayList();
+        for (Column column : getRowSet().getColumns()) {
+            valueTypes.add(ValueType.fromAlias(column.getValueType()));
+        }
+        this.valueTypes = valueTypes;
+    }
 
     protected boolean hasReader() {
         return reader != null;

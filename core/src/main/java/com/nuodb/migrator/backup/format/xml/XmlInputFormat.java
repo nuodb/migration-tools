@@ -41,6 +41,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.BitSet;
+import java.util.List;
 
 import static com.nuodb.migrator.backup.format.utils.BinaryEncoder.BASE64;
 import static com.nuodb.migrator.backup.format.utils.BitSetUtils.EMPTY;
@@ -64,7 +65,7 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
     }
 
     @Override
-    protected void open(Reader reader) {
+    protected void init(Reader reader) {
         try {
             xmlReader = newInstance().createXMLStreamReader(reader);
         } catch (XMLStreamException exception) {
@@ -73,7 +74,7 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
     }
 
     @Override
-    protected void open(InputStream inputStream) {
+    protected void init(InputStream inputStream) {
         try {
             xmlReader = newInstance().createXMLStreamReader(
                     getInputStream(), (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING));
@@ -93,18 +94,18 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
         if (isNextElement(ELEMENT_ROW)) {
             String nullsAttribute = getAttributeValue(NULL_NS_URI, ATTRIBUTE_NULLS);
             BitSet nulls = nullsAttribute != null ? fromHexString(nullsAttribute) : EMPTY;
-            ColumnList<ValueHandle> model = getValueHandleList();
-            int length = model.size();
+            List<ValueType> valueTypes = getValueTypes();
+            int length = valueTypes.size();
             values = new Value[length];
             int index = 0;
             while (index < length) {
                 String value = null;
-                ValueType valueType = model.get(index).getValueType();
+                ValueType valueType = valueTypes.get(index);
                 if (!nulls.get(index) && isNextElement(ELEMENT_COLUMN)) {
                     try {
-                        ValueType valueLevelType = VALUE_TYPES.fromAlias(
+                        ValueType valueLevel = VALUE_TYPES.fromAlias(
                                 getAttributeValue(NULL_NS_URI, ATTRIBUTE_VALUE_TYPE));
-                        valueType = valueLevelType != null ? valueLevelType : valueType;
+                        valueType = valueLevel != null ? valueLevel : valueType;
                         value = xmlReader.getElementText();
                     } catch (XMLStreamException exception) {
                         throw new InputFormatException(exception);

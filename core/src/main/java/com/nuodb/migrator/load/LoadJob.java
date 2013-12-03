@@ -218,9 +218,10 @@ public class LoadJob extends JobBase implements RowSetMapper {
         ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
         CommitStrategy commitStrategy = loadSpec.getCommitStrategy();
         for (Chunk chunk : rowSet.getChunks()) {
+            inputFormat.setRowSet(rowSet);
             inputFormat.setValueHandleList(valueHandleList);
             inputFormat.setInputStream(loadJobContext.getCatalogManager().openInputStream(chunk.getName()));
-            inputFormat.open();
+            inputFormat.init();
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Loading %d rows from %s chunk to %s table",
                         chunk.getRowCount(), chunk.getName(), table.getQualifiedName(null)));

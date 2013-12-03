@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.backup.format;
 
+import com.nuodb.migrator.backup.catalog.RowSet;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 
 import java.util.Map;
@@ -35,6 +36,10 @@ import java.util.Map;
  * @author Sergey Bushik
  */
 public interface Format {
+
+    void init();
+
+    void close();
 
     String getFormat();
 
@@ -53,6 +58,10 @@ public interface Format {
     Map<String, Object> getAttributes();
 
     void setAttributes(Map<String, Object> attributes);
+
+    RowSet getRowSet();
+
+    void setRowSet(RowSet rowSet);
 
     ValueHandleList getValueHandleList();
 

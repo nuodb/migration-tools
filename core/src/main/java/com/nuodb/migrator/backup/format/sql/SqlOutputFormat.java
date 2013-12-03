@@ -65,12 +65,12 @@ public class SqlOutputFormat extends OutputFormatBase implements SqlAttributes {
     }
 
     @Override
-    protected void open(OutputStream outputStream) {
-        open(new OutputStreamWriter(outputStream));
+    protected void init(OutputStream outputStream) {
+        init(new OutputStreamWriter(outputStream));
     }
 
     @Override
-    protected void open(Writer writer) {
+    protected void init(Writer writer) {
         output = wrapWriter(writer);
     }
 

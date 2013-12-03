@@ -27,9 +27,8 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.model.ColumnList;
-
 import java.util.Arrays;
+import java.util.List;
 
 import static com.nuodb.migrator.backup.format.value.ValueType.BINARY;
 import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
@@ -42,21 +41,11 @@ public class ValueUtils {
     public static final Value BINARY_NULL = new BinaryValue(null);
     public static final Value STRING_NULL = new StringValue(null);
 
-    public static void fill(Value[] values, ColumnList<ValueHandle> list, int offset) {
-        if (offset < list.size()) {
-            ValueType[] types = new ValueType[list.size()];
-            for (int i = 0; i < list.size(); i++) {
-                types[i] = list.get(i).getValueType();
-            }
-            fill(values, types, offset);
-        }
-    }
-
-    public static void fill(Value[] values, ValueType[] types, int offset) {
+    public static void fill(Value[] values, List<ValueType> valueTypes, int offset) {
         for (; offset < values.length; offset++) {
-            ValueType type = types[offset];
-            type = type != null ? type : STRING;
-            switch (type) {
+            ValueType valueType = valueTypes.get(offset);
+            valueType = valueType != null ? valueType : STRING;
+            switch (valueType) {
                 case BINARY:
                     values[offset] = ValueUtils.BINARY_NULL;
                     break;

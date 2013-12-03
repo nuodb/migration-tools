@@ -37,8 +37,6 @@ import java.io.Reader;
  */
 public interface InputFormat extends Format {
 
-    void open();
-
     void readStart();
 
     boolean read();
@@ -46,8 +44,6 @@ public interface InputFormat extends Format {
     Value[] readValues();
 
     void readEnd();
-
-    void close();
 
     void setReader(Reader reader);
 

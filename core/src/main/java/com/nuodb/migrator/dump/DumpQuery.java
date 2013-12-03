@@ -104,6 +104,7 @@ public class DumpQuery extends WorkBase {
 
         outputFormat = dumpQueryContext.getFormatFactory().createOutputFormat(
                 dumpQueryContext.getFormat(), dumpQueryContext.getFormatAttributes());
+        outputFormat.setRowSet(rowSet);
         outputFormat.setValueHandleList(valueHandleList);
 
         chunks = newArrayList();
@@ -145,7 +146,7 @@ public class DumpQuery extends WorkBase {
 
     protected void writeStart(Chunk chunk) throws Exception {
         outputFormat.setOutputStream(dumpQueryContext.getCatalogManager().openOutputStream(chunk.getName()));
-        outputFormat.open();
+        outputFormat.init();
         outputFormat.writeStart();
 
         dumpQueryObserver.writeStart(this, chunk);

@@ -58,7 +58,7 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
     }
 
     @Override
-    protected void open(OutputStream outputStream) {
+    protected void init(OutputStream outputStream) {
         try {
             bsonWriter = createBsonFactory().createJsonGenerator(outputStream);
         } catch (IOException exception) {
@@ -67,7 +67,7 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
     }
 
     @Override
-    protected void open(Writer writer) {
+    protected void init(Writer writer) {
         try {
             bsonWriter = createBsonFactory().createJsonGenerator(writer);
         } catch (IOException exception) {
@@ -107,7 +107,7 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
             for (int i = 0; i < values.length; i++) {
                 Value value = values[i];
                 if (!value.isNull()) {
-                    switch (getValueHandleList().get(i).getValueType()) {
+                    switch (getValueTypes().get(i)) {
                         case BINARY:
                             bsonWriter.writeBinary(value.asBytes());
                             break;
