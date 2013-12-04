@@ -440,6 +440,16 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public String getUseCatalog(String catalog) {
+        return "USE " + catalog;
+    }
+
+    @Override
+    public String getUseSchema(String schema) {
+        return "USE " + schema;
+    }
+
+    @Override
     public String getTriggerActive(boolean active) {
         return null;
     }

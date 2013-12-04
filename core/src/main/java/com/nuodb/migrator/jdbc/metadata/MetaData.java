@@ -27,10 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import java.io.Serializable;
+
 /**
  * @author Sergey Bushik
  */
-public interface MetaData {
+public interface MetaData extends Serializable {
 
     MetaDataType getObjectType();
 }

@@ -27,7 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-public class Identifier implements Comparable<Identifier> {
+import java.io.Serializable;
+
+public class Identifier implements Comparable<Identifier>, Serializable {
 
     public static final Identifier EMPTY = Identifier.valueOf(null);
 

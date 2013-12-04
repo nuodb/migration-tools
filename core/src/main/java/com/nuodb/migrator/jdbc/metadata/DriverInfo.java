@@ -27,9 +27,11 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import java.io.Serializable;
+
 import static java.lang.String.format;
 
-public class DriverInfo {
+public class DriverInfo implements Serializable {
     private String name;
     private String version;
     private int minorVersion;

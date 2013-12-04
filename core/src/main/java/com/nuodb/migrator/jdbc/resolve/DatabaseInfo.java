@@ -32,6 +32,7 @@ import com.google.common.collect.Ordering;
 import com.nuodb.migrator.utils.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Comparator;
@@ -43,7 +44,7 @@ import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 /**
  * @author Sergey Bushik
  */
-public class DatabaseInfo implements Comparable<DatabaseInfo> {
+public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
 
     private String productName;
     private String productVersion;

@@ -141,6 +141,10 @@ public interface Dialect {
 
     String getCheckClause(String clause);
 
+    String getUseCatalog(String catalog);
+
+    String getUseSchema(String schema);
+
     String getIdentifier(String identifier, Identifiable identifiable);
 
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;

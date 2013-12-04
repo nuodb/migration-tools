@@ -29,10 +29,12 @@ package com.nuodb.migrator.jdbc.metadata;
 
 import com.nuodb.migrator.utils.ObjectUtils;
 
+import java.io.Serializable;
+
 /**
  * @author Sergey Bushik
  */
-public class DefaultValue {
+public class DefaultValue implements Serializable {
 
     private String script;
     private boolean processed;

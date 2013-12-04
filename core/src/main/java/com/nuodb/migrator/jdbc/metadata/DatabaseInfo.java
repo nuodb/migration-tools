@@ -27,9 +27,11 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import java.io.Serializable;
+
 import static java.lang.String.format;
 
-public class DatabaseInfo {
+public class DatabaseInfo implements Serializable {
     private String productName;
     private String productVersion;
     private int majorVersion;
