@@ -56,7 +56,7 @@ public class SessionUtils {
      * @return mock object using the provided dialect & connection url
      */
     public static Session createSession(Dialect dialect, String url) {
-        Session session = mock(Session.class);
+        final Session session = mock(Session.class);
         when(session.getDialect()).thenReturn(dialect);
 
         final Connection connection = mock(Connection.class);
