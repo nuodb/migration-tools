@@ -27,22 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
-import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.session.Session;
-import com.nuodb.migrator.spec.DriverConnectionSpec;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.sql.Connection;
-
+import static com.nuodb.migrator.jdbc.dialect.TranslatorUtils.createScript;
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
-import static java.sql.Types.DATE;
-import static java.sql.Types.TIME;
-import static java.sql.Types.TIMESTAMP;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
+import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
+import static java.sql.Types.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -55,26 +47,8 @@ public class TranslatorTest {
 
     @DataProvider(name = "translate")
     public Object[][] createTranslateData() {
-
-        Session session = mock(Session.class);
-        when(session.getDialect()).thenReturn(new MySQLDialect(MYSQL));
-
-        ConnectionProxy connectionProxy = mock(ConnectionProxy.class, withSettings().extraInterfaces(Connection.class));
-        when(session.getConnection()).thenReturn((Connection) connectionProxy);
-
-        // tests creation of implicit defaults for date, time & timestamp types
-        DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
-        connectionSpec.setUrl("jdbc:mysql://localhost/test?zeroDateTimeBehavior=round");
-        when(connectionProxy.getConnectionSpec()).thenReturn(connectionSpec);
-
-        Column date = new Column("f1");
-        date.setTypeCode(DATE);
-
-        Column time = new Column("f1");
-        time.setTypeCode(TIME);
-
-        Column timestamp = new Column("f1");
-        timestamp.setTypeCode(TIMESTAMP);
+        Session session = createSession(new MySQLDialect(MYSQL),
+                "jdbc:mysql://localhost/test?zeroDateTimeBehavior=round");
 
         TranslationManager translationManager = new TranslationManager();
         translationManager.addTranslator(new MySQLZeroDateTimeTranslator());
@@ -83,19 +57,19 @@ public class TranslatorTest {
         return new Object[][]{
                 {
                         translator,
-                        new ColumnScript(date, session),
+                        createScript(null, DATE, "DATE", session),
                         new SimpleTranslationContext(MYSQL, translationManager),
                         "0001-01-01"
                 },
                 {
                         translator,
-                        new ColumnScript(time, session),
+                        createScript(null, TIME, "TIME", session),
                         new SimpleTranslationContext(MYSQL, translationManager),
                         "00:00:00"
                 },
                 {
                         translator,
-                        new ColumnScript(timestamp, session),
+                        createScript(null, TIMESTAMP, "TIMESTAMP", session),
                         new SimpleTranslationContext(MYSQL, translationManager),
                         "0001-01-01 00:00:00"
                 }
