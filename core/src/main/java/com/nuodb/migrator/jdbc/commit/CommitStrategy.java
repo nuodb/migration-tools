@@ -40,5 +40,5 @@ public interface CommitStrategy {
 
     void setAttributes(Map<String, Object> attributes);
 
-    void onUpdate(Statement statement, Query query) throws SQLException;
+    void onExecute(Statement statement, Query query) throws SQLException;
 }

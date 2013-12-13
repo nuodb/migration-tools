@@ -43,7 +43,13 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
-import com.nuodb.migrator.jdbc.query.*;
+import com.nuodb.migrator.jdbc.query.InsertQuery;
+import com.nuodb.migrator.jdbc.query.InsertQueryBuilder;
+import com.nuodb.migrator.jdbc.query.InsertType;
+import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.query.StatementCallback;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.job.JobBase;
@@ -132,7 +138,7 @@ public class LoadJob extends JobBase implements RowSetMapper {
     }
 
     @Override
-    public Table getTable(RowSet rowSet) {
+    public Table map(RowSet rowSet) {
         Table table = null;
         if (rowSet instanceof TableRowSet) {
             table = getTable((TableRowSet) rowSet);
@@ -186,7 +192,7 @@ public class LoadJob extends JobBase implements RowSetMapper {
 
     protected void load(final RowSet rowSet) throws SQLException {
         if (!isEmpty(rowSet.getChunks())) {
-            final Table table = getRowSetMapper().getTable(rowSet);
+            final Table table = getRowSetMapper().map(rowSet);
             if (table != null) {
                 final InsertQuery query = createInsertQuery(table, rowSet.getColumns());
                 final StatementTemplate template = new StatementTemplate(loadJobContext.getSession().getConnection());
@@ -232,7 +238,7 @@ public class LoadJob extends JobBase implements RowSetMapper {
                 try {
                     statement.execute();
                     if (commitStrategy != null) {
-                        commitStrategy.onUpdate(statement, query);
+                        commitStrategy.onExecute(statement, query);
                     }
                 } catch (Exception exception) {
                     throw new LoadJobException(format("Error loading row %d from %s chunk to %s table",

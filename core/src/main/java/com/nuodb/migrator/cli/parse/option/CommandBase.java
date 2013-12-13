@@ -28,12 +28,22 @@
 package com.nuodb.migrator.cli.parse.option;
 
 import com.google.common.collect.Lists;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.Command;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Help;
+import com.nuodb.migrator.cli.parse.HelpHint;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.Trigger;
 import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 
+import static com.nuodb.migrator.utils.Collections.newPriorityList;
 import static java.util.Collections.singletonList;
 
 /**
@@ -74,7 +84,7 @@ public abstract class CommandBase extends OptionBase implements Command {
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
+        PriorityList<Trigger> triggers = newPriorityList();
         for (String command : getCommands()) {
             triggers.add(new TriggerImpl(command));
         }

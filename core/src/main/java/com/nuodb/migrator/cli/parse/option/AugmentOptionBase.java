@@ -29,14 +29,27 @@ package com.nuodb.migrator.cli.parse.option;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.Argument;
+import com.nuodb.migrator.cli.parse.AugmentOption;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Group;
+import com.nuodb.migrator.cli.parse.Help;
+import com.nuodb.migrator.cli.parse.HelpHint;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import com.nuodb.migrator.cli.parse.OptionProcessor;
+import com.nuodb.migrator.cli.parse.Trigger;
 import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.quote;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.unquote;
+import static com.nuodb.migrator.utils.Collections.newPriorityList;
 
 /**
  * Base subclass for the options augmented with an argument {@link Argument} and a child group {@link Group}.
@@ -80,7 +93,7 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>(super.getTriggers());
+        PriorityList<Trigger> triggers = newPriorityList(super.getTriggers());
         if (getGroup() != null) {
             triggers.addAll(getGroup().getTriggers());
         }

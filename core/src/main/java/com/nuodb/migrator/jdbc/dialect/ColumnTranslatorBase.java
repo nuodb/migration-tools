@@ -53,12 +53,12 @@ public abstract class ColumnTranslatorBase<S extends ColumnScript> extends Trans
     }
 
     @Override
-    protected boolean supportsScript(S script, TranslationContext translationContext) {
+    protected boolean supportsScript(S script, TranslationContext context) {
         return false;
     }
 
     @Override
-    public Script translate(S script, TranslationContext translationContext) {
+    public Script translate(S script, TranslationContext context) {
         return null;
     }
 }

@@ -27,10 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
-import com.nuodb.migrator.spec.DriverConnectionSpec;
 
 import java.sql.Types;
 
@@ -48,20 +46,20 @@ import static java.lang.String.format;
  */
 public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
 
-    private static final String ZERO_TIME = "00:00:00";
-    private static final String ZERO_DATE = "0000-00-00";
-    private static final String ZERO_TIMESTAMP = "0000-00-00 00:00:00";
-    private static final String ROUND_TIME = "00:00:00";
-    private static final String ROUND_DATE = "0001-01-01";
-    private static final String ROUND_TIMESTAMP = "0001-01-01 00:00:00";
-    private static final String NULL = "NULL";
+    public static final String ZERO_TIME = "00:00:00";
+    public static final String ZERO_DATE = "0000-00-00";
+    public static final String ZERO_TIMESTAMP = "0000-00-00 00:00:00";
+    public static final String ROUND_TIME = "00:00:00";
+    public static final String ROUND_DATE = "0001-01-01";
+    public static final String ROUND_TIMESTAMP = "0001-01-01 00:00:00";
+    public static final String NULL = "NULL";
 
     public MySQLZeroDateTimeTranslator() {
         super(MYSQL);
     }
 
     @Override
-    protected boolean supportsScript(ColumnScript script, TranslationContext translationContext) {
+    protected boolean supportsScript(ColumnScript script, TranslationContext context) {
         boolean supportsScript = false;
         if (script.getScript() != null) {
             Column column = script.getColumn();
@@ -84,7 +82,7 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
     }
 
     @Override
-    public Script translate(ColumnScript script, TranslationContext translationContext) {
+    public Script translate(ColumnScript script, TranslationContext context) {
         JdbcUrl jdbcUrl = getJdbcUrl(script);
         String behavior = (String) jdbcUrl.getParameters().get(ZERO_DATE_TIME_BEHAVIOR);
         if (behavior == null) {
@@ -114,11 +112,6 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
         } else {
             target = null;
         }
-        return target != null ? new SimpleScript(target, translationContext.getDatabaseInfo()) : null;
-    }
-
-    protected JdbcUrl getJdbcUrl(Script script) {
-        ConnectionProxy connection = (ConnectionProxy) script.getSession().getConnection();
-        return ((DriverConnectionSpec) connection.getConnectionSpec()).getJdbcUrl();
+        return target != null ? new SimpleScript(target, context.getDatabaseInfo()) : null;
     }
 }

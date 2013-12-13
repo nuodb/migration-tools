@@ -28,14 +28,25 @@
 package com.nuodb.migrator.cli.parse.option;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.Argument;
+import com.nuodb.migrator.cli.parse.BasicOption;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Group;
+import com.nuodb.migrator.cli.parse.HelpHint;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.Trigger;
 import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
+import static com.nuodb.migrator.utils.Collections.newPriorityList;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
 /**
@@ -70,7 +81,7 @@ public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
 
     @Override
     public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>(super.getTriggers());
+        PriorityList<Trigger> triggers = newPriorityList(super.getTriggers());
         Set<String> prefixes = getPrefixes();
         String name = getName();
         if (name != null) {
@@ -115,7 +126,7 @@ public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
             help.append('[');
         }
         Set<String> prefixes = getPrefixes();
-        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
+        PriorityList<Trigger> triggers = newPriorityList();
         createTriggers(triggers, prefixes, getName());
         join(help, triggers);
         Map<String, OptionFormat> aliases = getAliases();

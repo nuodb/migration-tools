@@ -39,7 +39,11 @@ public class ColumnScript extends SimpleScript {
     private final Column column;
 
     public ColumnScript(Column column, Session session) {
-        super(getDefaultValueScript(column), session);
+        this(column, getDefaultValueScript(column), session);
+    }
+
+    public ColumnScript(Column column, String script, Session session) {
+        super(script, session);
         this.column = column;
     }
 

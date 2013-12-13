@@ -72,17 +72,17 @@ public class PatternTranslator extends TranslatorBase {
     }
 
     @Override
-    public boolean supportsScript(Script script, TranslationContext translationContext) {
+    public boolean supportsScript(Script script, TranslationContext context) {
         return script.getScript() != null;
     }
 
     @Override
-    public Script translate(Script script, TranslationContext translationContext) {
+    public Script translate(Script script, TranslationContext context) {
         for (Map.Entry<Pattern, String> translation : translations.entrySet()) {
             Matcher matcher = translation.getKey().matcher(script.getScript());
             if (matcher.find()) {
                 return new SimpleScript(translate(matcher, translation.getValue()),
-                        translationContext.getDatabaseInfo());
+                        context.getDatabaseInfo());
             }
         }
         return null;

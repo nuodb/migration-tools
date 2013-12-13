@@ -29,13 +29,12 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.utils.Collections.newPriorityList;
 
 /**
  * @author Sergey Bushik
@@ -43,7 +42,7 @@ import static com.google.common.collect.Sets.newHashSet;
 @SuppressWarnings("unchecked")
 public class TranslationManager {
 
-    private PriorityList<Translator> translators = new SimplePriorityList<Translator>();
+    private PriorityList<Translator> translators = newPriorityList();
 
     public Script translate(Script script, DatabaseInfo databaseInfo, Map<Object, Object> context) {
         Script translation = null;

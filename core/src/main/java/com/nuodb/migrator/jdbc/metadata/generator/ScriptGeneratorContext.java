@@ -33,7 +33,6 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.utils.Priority;
 import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
 
 import java.util.Collection;
 import java.util.Map;
@@ -43,6 +42,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataHandlerUtils.findMetaDataHandler;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.CREATE;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.DROP;
+import static com.nuodb.migrator.utils.Collections.newPriorityList;
 
 /**
  * @author Sergey Bushik
@@ -59,10 +59,8 @@ public class ScriptGeneratorContext {
     private Dialect targetDialect;
 
     private Map<String, Object> attributes = newHashMap();
-    private PriorityList<NamingStrategy<? extends MetaData>> namingStrategies =
-            new SimplePriorityList<NamingStrategy<? extends MetaData>>();
-    private PriorityList<ScriptGenerator<? extends MetaData>> scriptGenerators =
-            new SimplePriorityList<ScriptGenerator<? extends MetaData>>();
+    private PriorityList<NamingStrategy<? extends MetaData>> namingStrategies = newPriorityList();
+    private PriorityList<ScriptGenerator<? extends MetaData>> scriptGenerators = newPriorityList();
 
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private Collection<MetaDataType> objectTypes = newHashSet(MetaDataType.TYPES);

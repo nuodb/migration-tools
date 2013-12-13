@@ -32,6 +32,7 @@ import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.url.JdbcUrl;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -42,8 +43,10 @@ import java.util.Collection;
 import static com.google.common.collect.Iterables.contains;
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.dialect.MySQLZeroDateTimeTranslator.*;
 import static com.nuodb.migrator.jdbc.metadata.inspector.MySQLColumn.getEnumValues;
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.*;
 import static java.lang.String.valueOf;
 import static java.sql.Types.*;
 import static java.util.Arrays.asList;
@@ -82,7 +85,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
     }
 
     @Override
-    protected boolean supportsScript(ColumnScript script, TranslationContext translationContext) {
+    protected boolean supportsScript(ColumnScript script, TranslationContext context) {
         return hasExplicitDefaults(script, script.getColumn()) && isUseExplicitDefaults(script);
     }
 
@@ -156,14 +159,19 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
      * type, we skip this</li> <li>For the first TIMESTAMP column in a table, the default value is the current date and
      * time. This is converted to an explicit thing by MySQL, so we are OK</li> </ul>
      *
-     * @param script             default source script to translate
-     * @param translationContext translation context
+     * @param script  default source script to translate
+     * @param context translation context
      * @return string translated according to implicit rules
      */
     @Override
-    public Script translate(ColumnScript script, TranslationContext translationContext) {
+    public Script translate(ColumnScript script, TranslationContext context) {
         String result;
         Column column = script.getColumn();
+        JdbcUrl jdbcUrl = getJdbcUrl(script);
+        String behavior = (String) jdbcUrl.getParameters().get(ZERO_DATE_TIME_BEHAVIOR);
+        if (behavior == null) {
+            behavior = DEFAULT_BEHAVIOR;
+        }
         switch (column.getTypeCode()) {
             case BIT:
             case TINYINT:
@@ -190,11 +198,32 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
                     result = EMPTY;
                 }
                 break;
+            case DATE:
+                if (!behavior.equals(CONVERT_TO_NULL)) {
+                    result = context.translate(new ColumnScript(column, ZERO_DATE, script.getSession())).getScript();
+                } else {
+                    result = script.getScript();
+                }
+                break;
+            case TIME:
+                if (!behavior.equals(CONVERT_TO_NULL)) {
+                    result = context.translate(new ColumnScript(column, ZERO_TIME, script.getSession())).getScript();
+                } else {
+                    result = script.getScript();
+                }
+                break;
+            case TIMESTAMP:
+                if (!behavior.equals(CONVERT_TO_NULL)) {
+                    result = context.translate(new ColumnScript(column, ZERO_TIMESTAMP, script.getSession())).getScript();
+                } else {
+                    result = script.getScript();
+                }
+                break;
             default:
                 result = script.getScript();
         }
         // case ENUM, and SET
-        return result != null ? new SimpleScript(result, translationContext.getDatabaseInfo()) : null;
+        return result != null ? new SimpleScript(result, context.getDatabaseInfo()) : null;
     }
 
     public boolean isCheckSqlMode() {

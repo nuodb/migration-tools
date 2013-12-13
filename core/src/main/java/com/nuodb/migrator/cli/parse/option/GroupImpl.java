@@ -16,17 +16,29 @@
  */
 package com.nuodb.migrator.cli.parse.option;
 
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.Argument;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Group;
+import com.nuodb.migrator.cli.parse.Help;
+import com.nuodb.migrator.cli.parse.HelpHint;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.Trigger;
 import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
-import static com.nuodb.migrator.cli.parse.option.OptionUtils.groupMinimum;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.groupMaximum;
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.groupMinimum;
+import static com.nuodb.migrator.utils.Collections.newPriorityList;
 
 /**
  * An implementation of the group of options.
@@ -41,7 +53,7 @@ public class GroupImpl extends OptionBase implements Group {
     private List<Option> options = newArrayList();
     private Set<String> prefixes = newHashSet();
     private List<Argument> arguments = newArrayList();
-    private PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
+    private PriorityList<Trigger> triggers = newPriorityList();
 
     public GroupImpl() {
     }

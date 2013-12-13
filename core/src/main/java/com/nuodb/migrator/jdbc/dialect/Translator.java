@@ -32,7 +32,7 @@ package com.nuodb.migrator.jdbc.dialect;
  */
 public interface Translator<S extends Script> {
 
-    boolean supports(Script script, TranslationContext translationContext);
+    boolean supports(Script script, TranslationContext context);
 
-    Script translate(S script, TranslationContext translationContext);
+    Script translate(S script, TranslationContext context);
 }

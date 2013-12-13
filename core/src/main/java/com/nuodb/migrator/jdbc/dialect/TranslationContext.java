@@ -29,12 +29,16 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
+import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
 public interface TranslationContext extends Map<Object, Object> {
+
+    Script translate(Script script);
 
     DatabaseInfo getDatabaseInfo();
 

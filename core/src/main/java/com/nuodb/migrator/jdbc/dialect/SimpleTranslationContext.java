@@ -56,6 +56,21 @@ public class SimpleTranslationContext implements TranslationContext {
     }
 
     @Override
+    public Script translate(Script script) {
+        return getTranslationManager().translate(script, getDatabaseInfo(), this);
+    }
+
+    @Override
+    public DatabaseInfo getDatabaseInfo() {
+        return databaseInfo;
+    }
+
+    @Override
+    public TranslationManager getTranslationManager() {
+        return translationManager;
+    }
+
+    @Override
     public int size() {
         return context.size();
     }
@@ -113,16 +128,6 @@ public class SimpleTranslationContext implements TranslationContext {
     @Override
     public Set<Entry<Object, Object>> entrySet() {
         return context.entrySet();
-    }
-
-    @Override
-    public DatabaseInfo getDatabaseInfo() {
-        return databaseInfo;
-    }
-
-    @Override
-    public TranslationManager getTranslationManager() {
-        return translationManager;
     }
 
     @Override

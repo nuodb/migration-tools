@@ -49,7 +49,7 @@ public class SingleCommitStrategy implements CommitStrategy {
     }
 
     @Override
-    public void onUpdate(Statement statement, Query query) throws SQLException {
+    public void onExecute(Statement statement, Query query) throws SQLException {
     }
 
     public String toString() {

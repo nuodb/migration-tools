@@ -25,48 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
-
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-
-import java.sql.Types;
-import java.util.Collection;
-
-import static com.google.common.collect.Sets.newTreeSet;
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
+package com.nuodb.migrator.utils;
 
 /**
  * @author Sergey Bushik
  */
-public class CurrentTimestampTranslator extends ColumnTranslatorBase<ColumnScript> {
+public class Collections {
 
-    private Collection<String> aliases = newTreeSet(CASE_INSENSITIVE_ORDER);
-    private String translation;
-
-    public CurrentTimestampTranslator(DatabaseInfo databaseInfo, Collection<String> aliases, String translation) {
-        super(databaseInfo);
-        this.aliases.addAll(aliases);
-        this.translation = translation;
+    public static <T> PriorityList<T> newPriorityList() {
+        return new SimplePriorityList<T>();
     }
 
-    @Override
-    protected boolean supportsScript(ColumnScript script, TranslationContext context) {
-        boolean supports;
-        switch (script.getColumn().getTypeCode()) {
-            case Types.TIME:
-            case Types.DATE:
-            case Types.TIMESTAMP:
-                supports = true;
-                break;
-            default:
-                supports = false;
-                break;
-        }
-        return supports && script.getScript() != null && aliases.contains(script.getScript());
-    }
-
-    @Override
-    public Script translate(ColumnScript script, TranslationContext context) {
-        return new SimpleScript(translation, context.getDatabaseInfo());
+    public static <T> PriorityList<T> newPriorityList(PriorityList<T> priorityList) {
+        return new SimplePriorityList<T>(priorityList);
     }
 }

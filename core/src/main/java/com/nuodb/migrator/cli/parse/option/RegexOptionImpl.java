@@ -28,13 +28,18 @@
 package com.nuodb.migrator.cli.parse.option;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.Argument;
+import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Group;
+import com.nuodb.migrator.cli.parse.HelpHint;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.RegexOption;
+import com.nuodb.migrator.cli.parse.Trigger;
 import com.nuodb.migrator.match.AntRegexCompiler;
 import com.nuodb.migrator.match.Match;
 import com.nuodb.migrator.match.Regex;
 import com.nuodb.migrator.match.RegexCompiler;
 import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -43,6 +48,7 @@ import java.util.Map;
 
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
+import static com.nuodb.migrator.utils.Collections.newPriorityList;
 
 /**
  * @author Sergey Bushik
@@ -135,7 +141,7 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
         if (optional) {
             help.append('[');
         }
-        PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
+        PriorityList<Trigger> triggers = newPriorityList();
         createTriggers(triggers, getPrefixes(), getName());
         join(help, triggers);
 
