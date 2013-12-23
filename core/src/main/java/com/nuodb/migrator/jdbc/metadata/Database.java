@@ -30,8 +30,8 @@ package com.nuodb.migrator.jdbc.metadata;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.spec.ConnectionSpec;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
@@ -40,16 +40,19 @@ import java.util.Map;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.split;
 
 public class Database extends IndentedBase implements HasSchemas {
 
-    private final Map<Identifier, Catalog> catalogs = Maps.newLinkedHashMap();
+    private final Map<Identifier, Catalog> catalogs = newLinkedHashMap();
+
+    private Dialect dialect;
     private DriverInfo driverInfo;
     private DatabaseInfo databaseInfo;
-    private Dialect dialect;
+    private ConnectionSpec connectionSpec;
 
     @Override
     public MetaDataType getObjectType() {
@@ -78,6 +81,14 @@ public class Database extends IndentedBase implements HasSchemas {
 
     public void setDialect(Dialect dialect) {
         this.dialect = dialect;
+    }
+
+    public ConnectionSpec getConnectionSpec() {
+        return connectionSpec;
+    }
+
+    public void setConnectionSpec(ConnectionSpec connectionSpec) {
+        this.connectionSpec = connectionSpec;
     }
 
     public boolean hasCatalog(String catalogName) {
@@ -232,6 +243,8 @@ public class Database extends IndentedBase implements HasSchemas {
 
         Database database = (Database) o;
 
+        if (connectionSpec != null ? !connectionSpec.equals(database.connectionSpec) : database.connectionSpec != null)
+            return false;
         if (databaseInfo != null ? !databaseInfo.equals(database.databaseInfo) : database.databaseInfo != null)
             return false;
         if (driverInfo != null ? !driverInfo.equals(database.driverInfo) : database.driverInfo != null) return false;
@@ -243,6 +256,7 @@ public class Database extends IndentedBase implements HasSchemas {
     public int hashCode() {
         int result = driverInfo != null ? driverInfo.hashCode() : 0;
         result = 31 * result + (databaseInfo != null ? databaseInfo.hashCode() : 0);
+        result = 31 * result + (connectionSpec != null ? connectionSpec.hashCode() : 0);
         return result;
     }
 }

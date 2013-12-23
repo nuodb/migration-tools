@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.DriverInfo;
@@ -34,6 +35,7 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -55,7 +57,8 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
     @Override
     public void inspect(InspectionContext inspectionContext) throws SQLException {
         Database database = addDatabase(inspectionContext.getInspectionResults());
-        DatabaseMetaData metaData = inspectionContext.getConnection().getMetaData();
+        Connection connection = inspectionContext.getConnection();
+        DatabaseMetaData metaData = connection.getMetaData();
 
         DriverInfo driverInfo = new DriverInfo();
         driverInfo.setName(metaData.getDriverName());
@@ -76,8 +79,8 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
             logger.debug(format("DatabaseInfo: %s", databaseInfo));
         }
         database.setDatabaseInfo(databaseInfo);
-
         database.setDialect(inspectionContext.getDialect());
+        database.setConnectionSpec(((ConnectionProxy) connection).getConnectionSpec());
     }
 
     @Override
