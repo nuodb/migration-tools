@@ -35,6 +35,10 @@ import java.util.Map;
  */
 public abstract class CollectionUtils {
 
+    public static <T> boolean addIgnoreNull(Collection<T> collection, T value) {
+        return value != null && collection.add(value);
+    }
+
     public static boolean isEmpty(Collection collection) {
         return collection == null || collection.isEmpty();
     }

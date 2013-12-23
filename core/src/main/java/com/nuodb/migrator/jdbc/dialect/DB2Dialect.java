@@ -73,6 +73,16 @@ public class DB2Dialect extends SimpleDialect {
     }
 
     @Override
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsSchemas() {
+        return true;
+    }
+
+    @Override
     public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
         return new DB2LimitHandler(this, query, queryLimit);
     }

@@ -161,6 +161,11 @@ public class MySQLDialect extends SimpleDialect {
     }
 
     @Override
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
+    @Override
     public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
         return new MySQLLimitHandler(this, query, queryLimit);
     }

@@ -85,6 +85,10 @@ public interface Dialect {
 
     boolean supportsLimitParameters();
 
+    boolean supportsCatalogs();
+
+    boolean supportsSchemas();
+
     LimitHandler createLimitHandler(String query, QueryLimit queryLimit);
 
     boolean supportsRowCount(Table table, Column column, String filter, RowCountType rowCountType);

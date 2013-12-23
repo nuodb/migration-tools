@@ -410,6 +410,16 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public boolean supportsCatalogs() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsSchemas() {
+        return false;
+    }
+
+    @Override
     public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
         return new SimpleLimitHandler(this, query, queryLimit);
     }

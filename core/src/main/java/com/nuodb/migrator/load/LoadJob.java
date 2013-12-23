@@ -30,13 +30,20 @@ package com.nuodb.migrator.load;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.backup.catalog.*;
+import com.nuodb.migrator.backup.catalog.Catalog;
+import com.nuodb.migrator.backup.catalog.Chunk;
+import com.nuodb.migrator.backup.catalog.Column;
+import com.nuodb.migrator.backup.catalog.QueryRowSet;
+import com.nuodb.migrator.backup.catalog.RowSet;
+import com.nuodb.migrator.backup.catalog.TableRowSet;
+import com.nuodb.migrator.backup.catalog.XmlCatalogManager;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.InputFormat;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -63,6 +70,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -70,11 +78,14 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.IdentifiableBase.getQualifiedName;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
+import static com.nuodb.migrator.utils.CollectionUtils.addIgnoreNull;
 import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
+import static java.lang.Math.min;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -149,12 +160,39 @@ public class LoadJob extends JobBase implements RowSetMapper {
     }
 
     protected Table getTable(TableRowSet tableRowSet) {
-        return loadJobContext.getDatabase().findTable(tableRowSet.getTableName());
+        Database database = loadJobContext.getDatabase();
+        Dialect dialect = database.getDialect();
+        ConnectionSpec connectionSpec = loadSpec.getConnectionSpec();
+        List<String> allQualifiers = newArrayList();
+        int maximum = 0;
+        if (dialect.supportsCatalogs()) {
+            maximum++;
+        }
+        if (dialect.supportsSchemas()) {
+            maximum++;
+        }
+        if (connectionSpec.getCatalog() != null || connectionSpec.getSchema() != null) {
+            addIgnoreNull(allQualifiers, connectionSpec.getCatalog());
+            addIgnoreNull(allQualifiers, connectionSpec.getSchema());
+        } else {
+            addIgnoreNull(allQualifiers, tableRowSet.getCatalogName());
+            addIgnoreNull(allQualifiers, tableRowSet.getSchemaName());
+        }
+        int actual = min(allQualifiers.size(), maximum);
+        List<String> qualifiers = allQualifiers.subList(allQualifiers.size() - actual, allQualifiers.size());
+        final String sourceTable = getQualifiedName(null,
+                tableRowSet.getCatalogName(), tableRowSet.getSchemaName(), tableRowSet.getTableName(),null);
+        final String targetTable = getQualifiedName(null,
+                qualifiers, tableRowSet.getTableName(), null);
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Mapping source %s row set to %s table", sourceTable, targetTable));
+        }
+        return database.findTable(targetTable);
     }
 
     protected Table getTable(QueryRowSet queryRowSet) {
         if (logger.isWarnEnabled()) {
-            logger.warn(format("Can't map %s row set query %s to a table, explicit mapping is required",
+            logger.warn(format("Can't map %s query row set %s to a table, explicit mapping is required",
                     queryRowSet.getName(), queryRowSet.getQuery()));
         }
         return null;

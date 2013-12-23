@@ -343,6 +343,11 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
+    public boolean supportsSchemas() {
+        return true;
+    }
+
+    @Override
     public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
         return new NuoDBLimitHandler(this, query, queryLimit);
     }
