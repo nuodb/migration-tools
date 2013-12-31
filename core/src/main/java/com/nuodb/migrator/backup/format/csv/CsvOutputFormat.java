@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.Iterator;
 
 import static com.nuodb.migrator.backup.format.utils.BinaryEncoder.BASE64;
 import static java.lang.String.valueOf;

@@ -27,68 +27,48 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.nuodb.migrator.jdbc.model.Column;
-import com.nuodb.migrator.jdbc.model.ColumnFactory;
-import com.nuodb.migrator.jdbc.model.ColumnList;
 import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.ColumnList;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
-import static java.util.Collections.singleton;
+import static com.nuodb.migrator.jdbc.model.ColumnFactory.createColumnList;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleSchemaInspector extends InspectorBase<Catalog, SchemaInspectionScope> {
+public class SimpleSchemaInspector extends ManagedInspectorBase<Catalog, SchemaInspectionScope> {
 
     public SimpleSchemaInspector() {
         super(SCHEMA, SchemaInspectionScope.class);
     }
 
     @Override
-    public void inspectScope(InspectionContext inspectionContext,
-                             SchemaInspectionScope inspectionScope) throws SQLException {
-        inspectScopes(inspectionContext, singleton(inspectionScope));
+    protected SchemaInspectionScope createInspectionScope(Catalog catalog) {
+        return new SchemaInspectionScope(catalog.getName(), null);
     }
 
     @Override
-    public void inspectObjects(InspectionContext inspectionContext,
-                               Collection<? extends Catalog> catalogs) throws SQLException {
-        inspectScopes(inspectionContext,
-                Lists.newArrayList(Iterables.transform(catalogs, new Function<Catalog, SchemaInspectionScope>() {
-                    @Override
-                    public SchemaInspectionScope apply(Catalog catalog) {
-                        return new SchemaInspectionScope(catalog.getName(), null);
-                    }
-                })));
+    protected ResultSet createResultSet(InspectionContext inspectionContext, SchemaInspectionScope schemaInspectionScope)
+            throws SQLException {
+        DatabaseMetaData metaData = inspectionContext.getConnection().getMetaData();
+        return schemaInspectionScope.getCatalog() != null ?
+                metaData.getSchemas(schemaInspectionScope.getCatalog(), null) : metaData.getSchemas();
     }
 
-    protected void inspectScopes(InspectionContext inspectionContext,
-                                 Collection<SchemaInspectionScope> inspectionScopes) throws SQLException {
-        for (SchemaInspectionScope inspectionScope : inspectionScopes) {
-            InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-            DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
-            ResultSet schemas = inspectionScope.getCatalog() != null ?
-                    databaseMetaData.getSchemas(inspectionScope.getCatalog(), null) : databaseMetaData.getSchemas();
-            ColumnList<Column> columnModels = ColumnFactory.createColumnList(schemas);
-            try {
-                while (schemas.next()) {
-                    addSchema(inspectionResults,
-                            columnModels.get("TABLE_CATALOG") != null ? schemas.getString("TABLE_CATALOG") : null,
-                            schemas.getString("TABLE_SCHEM"));
-                }
-            } finally {
-                close(schemas);
-            }
+    @Override
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet schemas) throws SQLException {
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        ColumnList<Column> columnModels = createColumnList(schemas);
+        while (schemas.next()) {
+            addSchema(inspectionResults,
+                    columnModels.get("TABLE_CATALOG") != null ? schemas.getString("TABLE_CATALOG") : null,
+                    schemas.getString("TABLE_SCHEM"));
         }
     }
 }

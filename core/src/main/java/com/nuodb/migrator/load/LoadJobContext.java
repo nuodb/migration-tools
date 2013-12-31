@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.load;
 
-import com.nuodb.migrator.backup.catalog.CatalogManager;
+import com.nuodb.migrator.backup.BackupManager;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.jdbc.metadata.Database;
@@ -47,7 +47,7 @@ public class LoadJobContext {
     private TimeZone timeZone;
     private Database database;
     private FormatFactory formatFactory;
-    private CatalogManager catalogManager;
+    private BackupManager backupManager;
     private ValueFormatRegistry valueFormatRegistry;
     private Map<String, Object> formatAttributes = newHashMap();
 
@@ -83,12 +83,12 @@ public class LoadJobContext {
         this.formatFactory = formatFactory;
     }
 
-    public CatalogManager getCatalogManager() {
-        return catalogManager;
+    public BackupManager getBackupManager() {
+        return backupManager;
     }
 
-    public void setCatalogManager(CatalogManager catalogManager) {
-        this.catalogManager = catalogManager;
+    public void setBackupManager(BackupManager backupManager) {
+        this.backupManager = backupManager;
     }
 
     public ValueFormatRegistry getValueFormatRegistry() {

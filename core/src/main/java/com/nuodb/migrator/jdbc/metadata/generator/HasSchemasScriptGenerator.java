@@ -50,7 +50,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
     }
 
     @Override
-    public Collection<String> getCreateScripts(HasSchemas hasSchemas, ScriptGeneratorContext context) {
+    public Collection<String> getCreateScripts(HasSchemas hasSchemas, ScriptGeneratorManager context) {
         Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
         for (Schema schema : getSchemas(hasSchemas, context)) {
             Collection<String> scripts = getHasTablesCreateScripts(schema, context);
@@ -62,7 +62,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
     }
 
     @Override
-    public Collection<String> getDropScripts(HasSchemas hasSchemas, ScriptGeneratorContext context) {
+    public Collection<String> getDropScripts(HasSchemas hasSchemas, ScriptGeneratorManager context) {
         Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
         for (Schema schema : getSchemas(hasSchemas, context)) {
             Collection<String> scripts = getHasTablesDropScripts(schema, context);
@@ -74,7 +74,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
     }
 
     @Override
-    public Collection<String> getDropCreateScripts(HasSchemas hasSchemas, ScriptGeneratorContext context) {
+    public Collection<String> getDropCreateScripts(HasSchemas hasSchemas, ScriptGeneratorManager context) {
         Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
         for (Schema schema : getSchemas(hasSchemas, context)) {
             Collection<String> scripts = getHasTablesDropCreateScripts(schema, context);
@@ -86,7 +86,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
     }
 
     protected Collection<String> getScripts(Map<Schema, Collection<String>> schemaScripts,
-                                            ScriptGeneratorContext context) {
+                                            ScriptGeneratorManager context) {
         Collection<String> scripts = newArrayList();
         Dialect dialect = context.getTargetDialect();
         if (schemaScripts.size() == 1) {
@@ -118,7 +118,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
         return scripts;
     }
 
-    protected Collection<Schema> getSchemas(HasSchemas hasSchemas, ScriptGeneratorContext context) {
+    protected Collection<Schema> getSchemas(HasSchemas hasSchemas, ScriptGeneratorManager context) {
         Collection<Schema> schemas = newArrayList();
         for (Schema schema : hasSchemas.getSchemas()) {
             if (addSchemaScripts(schema, context)) {
@@ -128,7 +128,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
         return schemas;
     }
 
-    protected boolean addSchemaScripts(Schema schema, ScriptGeneratorContext context) {
+    protected boolean addSchemaScripts(Schema schema, ScriptGeneratorManager context) {
         boolean generate = true;
         Identifier catalogId = valueOf(context.getSourceCatalog());
         if (catalogId != null) {

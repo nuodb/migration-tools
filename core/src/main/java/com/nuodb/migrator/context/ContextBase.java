@@ -48,32 +48,32 @@ public abstract class ContextBase implements Context {
     private Collection<Class<?>> serviceTypes = newLinkedHashSet();
 
     @Override
-    public <T> T getService(Class<T> serviceType) {
-        T foundService;
-        Collection<T> foundServices = newArrayList();
+    public <T> T createService(Class<T> serviceType) {
+        T candidate;
+        Collection<T> candidates = newArrayList();
         for (Object service : services) {
             if (serviceType.isAssignableFrom(service.getClass())) {
-                foundServices.add((T) service);
+                candidates.add((T) service);
             }
         }
-        foundService = getService(serviceType, foundServices);
-        if (foundService == null) {
-            Collection<Class<? extends T>> foundServiceTypes = newArrayList();
-            for (Class<?> service : serviceTypes) {
+        candidate = getService(serviceType, candidates);
+        if (candidate == null) {
+            Collection<Class<? extends T>> serviceTypes = newArrayList();
+            for (Class<?> service : this.serviceTypes) {
                 if (serviceType.isAssignableFrom(service)) {
-                    foundServiceTypes.add((Class<? extends T>) service);
+                    serviceTypes.add((Class<? extends T>) service);
                 }
             }
-            foundService = createService(serviceType, foundServiceTypes);
+            candidate = createService(serviceType, serviceTypes);
         }
-        if (foundService == null) {
-            foundService = initiateService(serviceType);
+        if (candidate == null) {
+            candidate = initiateService(serviceType);
         }
-        if (foundService == null) {
+        if (candidate == null) {
             throw new ContextException(
                     format("Service of %s type is not registered in this context", serviceType));
         }
-        return foundService;
+        return candidate;
     }
 
     protected <T> T initiateService(Class<T> serviceType) {

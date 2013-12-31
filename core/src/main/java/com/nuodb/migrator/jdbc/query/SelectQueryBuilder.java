@@ -35,7 +35,7 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 
 import java.util.Collection;
 
-import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 
 /**
  * @author Sergey Bushik

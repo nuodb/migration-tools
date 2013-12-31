@@ -28,9 +28,9 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 
@@ -131,15 +131,17 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
     protected Collection<String> getSqlMode(Connection connection) throws SQLException {
         final Collection<String> sqlMode = newArrayList();
         StatementTemplate template = new StatementTemplate(connection);
-        template.execute(
+        template.executeStatement(
                 new StatementFactory<Statement>() {
                     @Override
-                    public Statement create(Connection connection) throws SQLException {
+                    public Statement createStatement(Connection connection)
+                            throws SQLException {
                         return connection.createStatement();
                     }
                 }, new StatementCallback<Statement>() {
                     @Override
-                    public void process(Statement statement) throws SQLException {
+                    public void executeStatement(Statement statement)
+                            throws SQLException {
                         ResultSet resultSet = statement.executeQuery(getSqlModeQuery());
                         while (resultSet.next()) {
                             sqlMode.addAll(asList(split(resultSet.getString(1), ',')));

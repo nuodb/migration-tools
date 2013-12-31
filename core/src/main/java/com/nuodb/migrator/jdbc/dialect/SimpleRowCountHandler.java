@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.sql.Connection;
@@ -83,15 +83,17 @@ public class SimpleRowCountHandler implements RowCountHandler {
 
     protected long getRowCount(Connection connection, final RowCountQuery rowCountQuery) throws SQLException {
         final MutableObject<Long> rowCount = new MutableObject<Long>();
-        new StatementTemplate(connection).execute(
+        new StatementTemplate(connection).executeStatement(
                 new StatementFactory<Statement>() {
                     @Override
-                    public Statement create(Connection connection) throws SQLException {
+                    public Statement createStatement(Connection connection)
+                            throws SQLException {
                         return createStatement(connection);
                     }
                 }, new StatementCallback<Statement>() {
                     @Override
-                    public void process(Statement statement) throws SQLException {
+                    public void executeStatement(Statement statement)
+                            throws SQLException {
                         rowCount.setValue(getRowCount(statement, rowCountQuery));
                     }
                 }

@@ -30,24 +30,18 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import org.apache.commons.lang3.StringUtils;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -61,68 +55,33 @@ public class DB2IdentityInspector extends TableInspectorBase<Table, TableInspect
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        SelectQuery query = new SelectQuery();
+        query.column(
+                "T.TABSCHEMA", "T.TABNAME", "C.COLNAME", "S.SEQNAME", "S.INCREMENT", "S.START", "S.MINVALUE",
+                "S.MAXVALUE",
+                "S.CYCLE", "S.CACHE", "S.ORDER");
+        query.from("SYSCAT.SEQUENCES S");
+        query.innerJoin("SYSCAT.TABLES T", "S.SEQSCHEMA=T.TABSCHEMA AND S.CREATE_TIME=T.CREATE_TIME");
+        query.innerJoin("SYSCAT.COLUMNS C", "T.TABSCHEMA=C.TABSCHEMA AND T.TABNAME=C.TABNAME");
+        query.where("S.SEQNAME LIKE 'SQL%'");
+        query.where("C.IDENTITY='Y'");
+        Collection<Object> parameters = newArrayList();
+        String schema = tableInspectionScope.getSchema();
+        if (!isEmpty(schema)) {
+            query.where("T.TABSCHEMA=?");
+            parameters.add(tableInspectionScope.getSchema());
+        }
+        String table = tableInspectionScope.getTable();
+        if (!isEmpty(table)) {
+            query.where("T.TABNAME=?");
+            parameters.add(table);
+        }
+        return new ParameterizedQuery(query, parameters);
     }
 
     @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            final Collection<String> parameters = newArrayList();
-            final SelectQuery selectQuery = createSelectQuery(inspectionScope, parameters);
-            template.execute(
-                    new StatementFactory<PreparedStatement>() {
-                        @Override
-                        public PreparedStatement create(Connection connection) throws SQLException {
-                            return connection.prepareStatement(selectQuery.toString(),
-                                    TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                        }
-                    },
-                    new StatementCallback<PreparedStatement>() {
-                        @Override
-                        public void process(PreparedStatement statement) throws SQLException {
-                            int index = 1;
-                            for (String parameter : parameters) {
-                                statement.setString(index++, parameter);
-                            }
-                            ResultSet identities = null;
-                            try {
-                                identities = statement.executeQuery();
-                                inspect(inspectionContext, identities);
-                            } finally {
-                                close(identities);
-                            }
-                        }
-                    }
-            );
-        }
-
-    }
-
-    protected SelectQuery createSelectQuery(TableInspectionScope inspectionScope, Collection<String> parameters) {
-        SelectQuery selectQuery = new SelectQuery();
-        selectQuery.column(
-                "T.TABSCHEMA", "T.TABNAME", "C.COLNAME", "S.SEQNAME", "S.INCREMENT", "S.START", "S.MINVALUE", "S.MAXVALUE",
-                "S.CYCLE", "S.CACHE", "S.ORDER");
-        selectQuery.from("SYSCAT.SEQUENCES S");
-        selectQuery.innerJoin("SYSCAT.TABLES T", "S.SEQSCHEMA=T.TABSCHEMA AND S.CREATE_TIME=T.CREATE_TIME");
-        selectQuery.innerJoin("SYSCAT.COLUMNS C", "T.TABSCHEMA=C.TABSCHEMA AND T.TABNAME=C.TABNAME");
-        selectQuery.where("S.SEQNAME LIKE 'SQL%'");
-        selectQuery.where("C.IDENTITY='Y'");
-        if (!isEmpty(inspectionScope.getSchema())) {
-            selectQuery.where("T.TABSCHEMA=?");
-            parameters.add(inspectionScope.getSchema());
-        }
-        if (!isEmpty(inspectionScope.getTable())) {
-            selectQuery.where("T.TABNAME=?");
-            parameters.add(inspectionScope.getTable());
-        }
-        return selectQuery;
-    }
-
-    protected void inspect(InspectionContext inspectionContext, ResultSet identities) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet identities) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (identities.next()) {
             Table table = addTable(inspectionResults, null, trim(identities.getString("TABSCHEMA")),

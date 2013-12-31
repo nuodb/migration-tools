@@ -34,13 +34,14 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public abstract class ScriptExporterBase implements ScriptExporter {
 
-    protected final transient Logger logger = LoggerFactory.getLogger(getClass());
+    protected final transient Logger logger = getLogger(getClass());
 
     @Override
     public final void open() throws Exception {

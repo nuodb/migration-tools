@@ -40,7 +40,7 @@ public class IndexNamingStrategy extends IdentifiableNamingStrategy<Index> {
     }
 
     @Override
-    protected String getIdentifiableName(Index index, ScriptGeneratorContext scriptGeneratorContext) {
+    protected String getIdentifiableName(Index index, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("IDX");
         buffer.append("_");
@@ -48,10 +48,10 @@ public class IndexNamingStrategy extends IdentifiableNamingStrategy<Index> {
             buffer.append("UNIQUE");
             buffer.append("_");
         }
-        buffer.append(scriptGeneratorContext.getName(index.getTable(), false));
+        buffer.append(scriptGeneratorManager.getName(index.getTable(), false));
         for (Column column : index.getColumns()) {
             buffer.append("_");
-            buffer.append(scriptGeneratorContext.getName(column, false));
+            buffer.append(scriptGeneratorManager.getName(column, false));
         }
         return buffer.toString();
     }

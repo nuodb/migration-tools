@@ -37,17 +37,24 @@ package com.nuodb.migrator.cli;
 public interface CliOptions {
 
     final int HELP_OPTION_ID = 1;
-    final int LIST_OPTION_ID = 2;
-    final int CONFIG_OPTION_ID = 3;
-    final int COMMAND_OPTION_ID = 4;
+    final int VERSION_OPTION_ID = 2;
+    final int LIST_OPTION_ID = 3;
+    final int CONFIG_OPTION_ID = 4;
+    final int COMMAND_OPTION_ID = 5;
 
     final String HELP_OPTION = "help";
     final String HELP_SHORT_OPTION = "h";
     final String LIST_OPTION = "list";
     final String LIST_SHORT_OPTION = "l";
     final String CONFIG_OPTION = "config";
+    final String VERSION_SHORT_OPTION = "v";
+    final String VERSION_OPTION = "version";
     final String CONFIG_SHORT_OPTION = "c";
     final String COMMAND_OPTION = "command";
+
+    final String DUMP_COMMAND = "dump";
+    final String LOAD_COMMAND = "load";
+    final String SCHEMA_COMMAND = "schema";
 
     final String SOURCE_DRIVER_OPTION = "source.driver";
     final String SOURCE_URL_OPTION = "source.url";
@@ -63,6 +70,9 @@ public interface CliOptions {
     final String OUTPUT_OPTION = "output.*";
     final String OUTPUT_TYPE_OPTION = "output.type";
     final String OUTPUT_PATH_OPTION = "output.path";
+
+    final String MIGRATION_MODE_DATA_OPTION = "data";
+    final String MIGRATION_MODE_SCHEMA_OPTION = "schema";
 
     final String TABLE_OPTION = "table";
     final String TABLE_TYPE_OPTION = "table.type";
@@ -93,11 +103,11 @@ public interface CliOptions {
     final String INPUT_OPTION = "input.*";
     final String INPUT_PATH_OPTION = "input.path";
 
-    final String SCHEMA_META_DATA_OPTION = "meta.data.*";
-    final String SCHEMA_SCRIPT_TYPE_OPTION = "script.type";
-    final String SCHEMA_GROUP_SCRIPTS_BY_OPTION = "group.scripts.by";
-    final String SCHEMA_IDENTIFIER_QUOTING = "identifier.quoting";
-    final String SCHEMA_IDENTIFIER_NORMALIZER = "identifier.normalizer";
+    final String META_DATA_OPTION = "meta.data.*";
+    final String SCRIPT_TYPE_OPTION = "script.type";
+    final String GROUP_SCRIPTS_BY_OPTION = "group.scripts.by";
+    final String IDENTIFIER_QUOTING = "identifier.quoting";
+    final String IDENTIFIER_NORMALIZER = "identifier.normalizer";
 
     final String USE_NUODB_TYPES_OPTION = "use.nuodb.types";
     final String USE_EXPLICIT_DEFAULTS_OPTION = "use.explicit.defaults";

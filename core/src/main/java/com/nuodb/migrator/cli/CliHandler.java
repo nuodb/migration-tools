@@ -35,9 +35,8 @@ import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.cli.processor.ConfigOptionProcessor;
 import com.nuodb.migrator.cli.run.CliRun;
-import com.nuodb.migrator.cli.run.CliRunJob;
+import com.nuodb.migrator.cli.run.CliRunCommand;
 import com.nuodb.migrator.cli.run.CliRunLookup;
-import com.nuodb.migrator.job.JobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +44,7 @@ import java.io.PrintStream;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.Migrator.getVersion;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.String.format;
@@ -103,6 +103,13 @@ public class CliHandler extends CliSupport implements Bootable {
                                 withName(getMessage(HELP_ARGUMENT_NAME)).build()
                 ).build();
 
+        Option version = newBasicOptionBuilder().
+                withId(VERSION_OPTION_ID).
+                withName(VERSION_OPTION).
+                withAlias(VERSION_SHORT_OPTION, OptionFormat.SHORT).
+                withDescription(getMessage(VERSION_OPTION_DESCRIPTION)).build();
+
+
         Option list = newBasicOptionBuilder().
                 withId(LIST_OPTION_ID).
                 withName(LIST_OPTION).
@@ -137,6 +144,7 @@ public class CliHandler extends CliSupport implements Bootable {
         return newGroupBuilder().
                 withName(getMessage(ROOT_GROUP_NAME)).
                 withOption(help).
+                withOption(version).
                 withOption(list).
                 withOption(config).
                 withOption(command).
@@ -148,11 +156,13 @@ public class CliHandler extends CliSupport implements Bootable {
             handleHelp(options, root);
         } else if (options.hasOption(HELP_OPTION)) {
             if (logger.isTraceEnabled()) {
-                logger.trace("Handling --help option");
+                logger.trace("Handling help option");
             }
             handleHelp(options, root);
+        } else if (options.hasOption(VERSION_OPTION)) {
+            handleVersion();
         } else if (options.hasOption(COMMAND_OPTION)) {
-            handleRun(options);
+            handleCommand(options);
         } else if (options.hasOption(CONFIG_OPTION)) {
             handleConfig(options);
         } else if (options.hasOption(LIST_OPTION)) {
@@ -164,7 +174,7 @@ public class CliHandler extends CliSupport implements Bootable {
         String command = (String) options.getValue(HELP_OPTION);
         HelpFormatter formatter = new HelpFormatter();
         if (command != null) {
-            CliRun cliRun = cliRunLookup.lookup(command);
+            CliRun cliRun = cliRunLookup.get(command);
             if (cliRun != null) {
                 formatter.setOption(cliRun);
                 formatter.setExecutable(getExecutable() + " " + command);
@@ -180,7 +190,7 @@ public class CliHandler extends CliSupport implements Bootable {
 
     protected void handleList() {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Handled --list option"));
+            logger.trace(format("Handling list option"));
         }
         Collection<String> commands = cliRunLookup.getCommands();
         PrintStream writer = System.out;
@@ -190,27 +200,26 @@ public class CliHandler extends CliSupport implements Bootable {
         }
     }
 
+    protected void handleVersion() {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Handling version option"));
+        }
+        PrintStream writer = System.out;
+        writer.print(getVersion());
+    }
+
     protected void handleConfig(OptionSet options) {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Handled --config %s option", options.getValue(CONFIG_OPTION)));
+            logger.trace(format("Handling config %s option", options.getValue(CONFIG_OPTION)));
         }
     }
 
-    protected void handleRun(OptionSet options) {
+    protected void handleCommand(OptionSet options) {
         CliRun cliRun = (CliRun) options.getValue(COMMAND_OPTION);
         if (logger.isTraceEnabled()) {
             logger.trace(format("Running %s command", cliRun.getCommand()));
         }
-        if (cliRun instanceof CliRunJob) {
-            configure(((CliRunJob) cliRun).getJobFactory());
-        }
-        cliRun.run();
-    }
-
-    protected void configure(JobFactory jobFactory) {
-        if (logger.isTraceEnabled()) {
-            logger.trace(format("Configuring %s job factory", jobFactory.getClass()));
-        }
+        cliRun.execute();
     }
 
     protected void handleOptionException(OptionException exception) {

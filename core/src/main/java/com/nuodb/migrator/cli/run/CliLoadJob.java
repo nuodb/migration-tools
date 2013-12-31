@@ -33,8 +33,9 @@ import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.jdbc.query.InsertType;
-import com.nuodb.migrator.load.LoadJobFactory;
-import com.nuodb.migrator.spec.LoadSpec;
+import com.nuodb.migrator.job.HasJobSpec;
+import com.nuodb.migrator.load.LoadJob;
+import com.nuodb.migrator.spec.LoadJobSpec;
 
 import java.util.Map;
 
@@ -44,36 +45,37 @@ import static com.nuodb.migrator.utils.Priority.LOW;
 /**
  * @author Sergey Bushik
  */
-public class CliLoadJob extends CliRunJob {
-
-    public static final String COMMAND = "load";
+public class CliLoadJob extends CliJob<LoadJobSpec> {
 
     public CliLoadJob() {
-        super(COMMAND);
+        super(LOAD_COMMAND);
     }
 
     @Override
     protected Option createOption() {
-        return newGroupBuilder()
-                .withName(getMessage(LOAD_GROUP_NAME))
-                .withOption(createTargetGroup())
-                .withOption(createInputGroup())
-                .withOption(createCommitGroup())
-                .withOption(createInsertTypeGroup())
-                .withOption(createTimeZoneOption())
-                .withRequired(true).build();
+        GroupBuilder group = newGroupBuilder().withName(getMessage(LOAD_GROUP_NAME)).withRequired(true);
+        group.withOption(createTargetGroup());
+        group.withOption(createInputGroup());
+        group.withOption(createCommitGroup());
+        group.withOption(createInsertTypeGroup());
+        group.withOption(createTimeZoneOption());
+        return group.build();
     }
 
     @Override
     protected void bind(OptionSet optionSet) {
-        LoadSpec loadSpec = new LoadSpec();
-        loadSpec.setConnectionSpec(parseTargetGroup(optionSet, this));
-        loadSpec.setInputSpec(parseInputGroup(optionSet, this));
-        loadSpec.setCommitStrategy(parseCommitGroup(optionSet, this));
-        loadSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
-        parseInsertTypeGroup(optionSet, loadSpec);
+        LoadJobSpec loadJobSpec = new LoadJobSpec();
+        loadJobSpec.setTargetSpec(parseTargetGroup(optionSet, this));
+        loadJobSpec.setInputSpec(parseInputGroup(optionSet, this));
+        loadJobSpec.setCommitStrategy(parseCommitGroup(optionSet, this));
+        loadJobSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
+        parseInsertTypeGroup(optionSet, loadJobSpec);
+        setJobSpec(loadJobSpec);
+    }
 
-        setJobFactory(new LoadJobFactory(loadSpec));
+    @Override
+    protected HasJobSpec<LoadJobSpec> createJob() {
+        return new LoadJob();
     }
 
     protected Option createInsertTypeGroup() {
@@ -100,8 +102,8 @@ public class CliLoadJob extends CliRunJob {
         return group.build();
     }
 
-    protected void parseInsertTypeGroup(OptionSet optionSet, LoadSpec loadSpec) {
-        loadSpec.setInsertType(optionSet.hasOption(REPLACE_OPTION) ? InsertType.REPLACE : InsertType.INSERT);
+    protected void parseInsertTypeGroup(OptionSet optionSet, LoadJobSpec loadJobSpec) {
+        loadJobSpec.setInsertType(optionSet.hasOption(REPLACE_OPTION) ? InsertType.REPLACE : InsertType.INSERT);
         Map<String, InsertType> tableInsertTypes = Maps.newHashMap();
         for (String table : optionSet.<String>getValues(TABLE_INSERT_OPTION)) {
             tableInsertTypes.put(table, InsertType.INSERT);
@@ -109,6 +111,6 @@ public class CliLoadJob extends CliRunJob {
         for (String table : optionSet.<String>getValues(TABLE_REPLACE_OPTION)) {
             tableInsertTypes.put(table, InsertType.REPLACE);
         }
-        loadSpec.setTableInsertTypes(tableInsertTypes);
+        loadJobSpec.setTableInsertTypes(tableInsertTypes);
     }
 }

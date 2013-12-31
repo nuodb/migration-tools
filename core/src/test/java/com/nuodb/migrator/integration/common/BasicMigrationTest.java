@@ -41,7 +41,7 @@ import java.sql.Statement;
 public class BasicMigrationTest extends MigrationTestBase {
 
     /*
-     * Assert Load is run and database is not empty
+     * Assert Load is execute and database is not empty
      */
     @Test(groups = {"dataloadperformed"})
     public void testDataLoaded() throws Exception {

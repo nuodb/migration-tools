@@ -31,14 +31,19 @@ import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import org.slf4j.Logger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
 import static com.nuodb.migrator.utils.Collections.newPriorityList;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Reads database meta data and creates meta model from it. Root meta model object is {@link Database} containing set of
@@ -48,6 +53,7 @@ import static com.nuodb.migrator.utils.Collections.newPriorityList;
  */
 public class InspectionManager {
 
+    private final transient Logger logger = getLogger(getClass());
     private DialectResolver dialectResolver;
     private Collection<Inspector> inspectors = newPriorityList();
 
@@ -142,6 +148,9 @@ public class InspectionManager {
                         MetaDataType... objectTypes) throws SQLException {
         InspectionContext inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
         try {
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Inspecting objects %s", asList(objectTypes)));
+            }
             inspectionContext.inspect(inspectionScope, objectTypes);
         } finally {
             closeInspectionContext(inspectionContext);
@@ -152,6 +161,9 @@ public class InspectionManager {
                         MetaDataType... objectTypes) throws SQLException {
         InspectionContext inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
         try {
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Inspecting objects %s", asList(objectTypes)));
+            }
             inspectionContext.inspect(object, objectTypes);
         } finally {
             closeInspectionContext(inspectionContext);
@@ -162,6 +174,9 @@ public class InspectionManager {
                         MetaDataType... objectTypes) throws SQLException {
         InspectionContext inspectionContext = createInspectionContext(connection, inspectionResults, objectTypes);
         try {
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Inspecting objects %s", asList(objectTypes)));
+            }
             inspectionContext.inspect(objects, objectTypes);
         } finally {
             closeInspectionContext(inspectionContext);

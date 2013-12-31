@@ -42,7 +42,7 @@ import java.util.Collection;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class InspectorResolver extends MetaDataHandlerBase implements Inspector {
+public class InspectorResolver extends MetaDataHandlerBase implements Inspector<MetaData, InspectionScope> {
 
     private ServiceResolver<Inspector> inspectorResolver;
 
@@ -92,9 +92,18 @@ public class InspectorResolver extends MetaDataHandlerBase implements Inspector 
     }
 
     @Override
-    public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException {
+    public void inspectScopes(InspectionContext inspectionContext,
+                              Collection<? extends InspectionScope> inspectionScopes) throws SQLException {
         Inspector inspector = resolve(inspectionContext);
-        return inspector != null && inspector.supports(inspectionContext, inspectionScope);
+        if (inspector != null) {
+            inspector.inspectScopes(inspectionContext, inspectionScopes);
+        }
+    }
+
+    @Override
+    public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException {
+        Inspector inspector = resolve(inspectionContext);
+        return inspector != null && inspector.supportsScope(inspectionContext, inspectionScope);
     }
 
     public void register(String productName, Inspector inspector) {

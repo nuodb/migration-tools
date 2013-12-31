@@ -42,7 +42,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import static com.nuodb.migrator.context.ContextUtils.getService;
+import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
 import static java.lang.System.getProperty;
 import static java.sql.Types.*;
@@ -56,7 +56,7 @@ public class SqlOutputFormat extends OutputFormatBase implements SqlAttributes {
 
     private String lineEnding = SEMICOLON;
     private String lineSeparator = getProperty("line.separator");
-    private Dialect dialect = getService(DialectResolver.class).resolve(NUODB);
+    private Dialect dialect = createService(DialectResolver.class).resolve(NUODB);
     private Writer output;
 
     @Override

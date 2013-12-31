@@ -44,14 +44,18 @@ public class StatementTemplate {
         this.connection = connection;
     }
 
-    public <S extends Statement> void execute(StatementFactory<S> factory,
-                                              StatementCallback<S> callback) throws SQLException {
-        S statement = factory.create(connection);
+    public <S extends Statement> void executeStatement(StatementFactory<S> statementFactory,
+                                                       StatementCallback<S> statementCallback) throws SQLException {
+        S statement = statementFactory.createStatement(connection);
         try {
-            callback.process(statement);
+            statementCallback.executeStatement(statement);
         } finally {
             close(statement != null ? statement.getResultSet() : null);
             close(statement);
         }
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }

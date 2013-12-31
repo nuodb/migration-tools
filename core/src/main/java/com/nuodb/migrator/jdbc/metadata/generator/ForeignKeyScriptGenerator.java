@@ -54,16 +54,16 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
      * <pre>ALTER TABLE "table1" ADD CONSTRAINT "fk1" FOREIGN KEY ("column1") REFERENCES "table2" ("column2");</pre>
      *
      * @param foreignKey
-     * @param scriptGeneratorContext
+     * @param scriptGeneratorManager
      * @return
      */
     @Override
-    public Collection<String> getCreateScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        buffer.append(scriptGeneratorContext.getQualifiedName(foreignKey.getForeignTable()));
+        buffer.append(scriptGeneratorManager.getQualifiedName(foreignKey.getForeignTable()));
         buffer.append(" ADD ");
-        buffer.append(getConstraintScript(foreignKey, scriptGeneratorContext));
+        buffer.append(getConstraintScript(foreignKey, scriptGeneratorManager));
         return singleton(buffer.toString());
     }
 
@@ -72,52 +72,52 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
      * <pre>ALTER TABLE "table1" DROP FOREIGN KEY ("column1") REFERENCES "table2";</pre>
      *
      * @param foreignKey
-     * @param scriptGeneratorContext
+     * @param scriptGeneratorManager
      * @return
      */
     @Override
-    public Collection<String> getDropScripts(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getDropScripts(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        Dialect dialect = scriptGeneratorContext.getTargetDialect();
-        buffer.append(scriptGeneratorContext.getQualifiedName(foreignKey.getForeignTable()));
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        buffer.append(scriptGeneratorManager.getQualifiedName(foreignKey.getForeignTable()));
         buffer.append(' ');
         buffer.append(dialect.getDropForeignKey());
         buffer.append(' ');
         for (Iterator<Column> iterator = foreignKey.getForeignColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            buffer.append(scriptGeneratorContext.getName(column));
+            buffer.append(scriptGeneratorManager.getName(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }
         }
         buffer.append(")");
         buffer.append(" REFERENCES ");
-        buffer.append(getForeignScriptGeneratorContext(foreignKey, scriptGeneratorContext).getQualifiedName(
+        buffer.append(getForeignScriptGeneratorManager(foreignKey, scriptGeneratorManager).getQualifiedName(
                 foreignKey.getPrimaryTable()));
         return singleton(buffer.toString());
     }
 
     @Override
-    public String getConstraintScript(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
-        Dialect dialect = scriptGeneratorContext.getTargetDialect();
+    public String getConstraintScript(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("FOREIGN KEY (");
         for (Iterator<Column> iterator = foreignKey.getForeignColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            buffer.append(scriptGeneratorContext.getName(column));
+            buffer.append(scriptGeneratorManager.getName(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }
         }
         buffer.append(")");
         buffer.append(" REFERENCES ");
-        buffer.append(getForeignScriptGeneratorContext(foreignKey, scriptGeneratorContext).getQualifiedName(
+        buffer.append(getForeignScriptGeneratorManager(foreignKey, scriptGeneratorManager).getQualifiedName(
                 foreignKey.getPrimaryTable()));
         buffer.append(" (");
         for (Iterator<Column> iterator = foreignKey.getPrimaryColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            buffer.append(scriptGeneratorContext.getName(column));
+            buffer.append(scriptGeneratorManager.getName(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }
@@ -140,21 +140,21 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey> i
      * Fixes cross database foreign keys generation https://github.com/nuodb/migrator-tools/issues/3
      *
      * @param foreignKey             to create foreign script generator context
-     * @param scriptGeneratorContext current script generator context used for the session
+     * @param scriptGeneratorManager current script generator context used for the session
      * @return source context if primary and foreign schemas are equals or changes target schema & catalog name to
      *         foreign table schema & catalog.
      */
-    protected ScriptGeneratorContext getForeignScriptGeneratorContext(ForeignKey foreignKey,
-                                                                      ScriptGeneratorContext scriptGeneratorContext) {
+    protected ScriptGeneratorManager getForeignScriptGeneratorManager(ForeignKey foreignKey,
+                                                                      ScriptGeneratorManager scriptGeneratorManager) {
         Schema primarySchema = foreignKey.getPrimaryTable().getSchema();
         Schema foreignSchema = foreignKey.getForeignTable().getSchema();
         if (ObjectUtils.equals(primarySchema, foreignSchema)) {
-            return scriptGeneratorContext;
+            return scriptGeneratorManager;
         } else {
-            ScriptGeneratorContext foreignScriptGeneratorContext = new ScriptGeneratorContext(scriptGeneratorContext);
-            foreignScriptGeneratorContext.setTargetCatalog(foreignSchema.getCatalog().getName());
-            foreignScriptGeneratorContext.setTargetSchema(foreignSchema.getName());
-            return foreignScriptGeneratorContext;
+            ScriptGeneratorManager foreignScriptGeneratorManager = new ScriptGeneratorManager(scriptGeneratorManager);
+            foreignScriptGeneratorManager.setTargetCatalog(foreignSchema.getCatalog().getName());
+            foreignScriptGeneratorManager.setTargetSchema(foreignSchema.getName());
+            return foreignScriptGeneratorManager;
         }
     }
 }

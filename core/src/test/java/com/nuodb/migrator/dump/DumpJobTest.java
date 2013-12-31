@@ -41,7 +41,7 @@ import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.job.JobExecution;
 import com.nuodb.migrator.job.JobExecutor;
-import com.nuodb.migrator.spec.DumpSpec;
+import com.nuodb.migrator.spec.DumpJobSpec;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -59,10 +59,10 @@ import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 /**
  * @author Sergey Bushik
@@ -87,7 +87,7 @@ public class DumpJobTest {
     private Connection connection;
     @Spy
     @InjectMocks
-    private DumpJob dumpJob = new DumpJob(new DumpSpec());
+    private DumpJob dumpJob = new DumpJob(new DumpJobSpec());
     @Spy
     @InjectMocks
     private DumpWriter dumpWriter = new DumpWriter();
@@ -103,7 +103,7 @@ public class DumpJobTest {
         given(connection.getMetaData()).willReturn(databaseMetaData);
 
         willDoNothing().given(dumpJob).init();
-        willDoNothing().given(dumpJob).dump();
+        willDoNothing().given(dumpJob).execute();
 
         jobContext = newHashMap();
         jobExecutor = createJobExecutor(dumpJob);
@@ -120,7 +120,6 @@ public class DumpJobTest {
     public void validateDialectResolver() throws Exception {
         dumpJob.setDialectResolver(null);
         jobExecutor.execute(jobContext);
-
         verifyInit();
     }
 
@@ -128,7 +127,6 @@ public class DumpJobTest {
     public void validateValueFormatRegistryResolver() throws Exception {
         dumpJob.setValueFormatRegistryResolver(null);
         jobExecutor.execute(jobContext);
-
         verifyInit();
     }
 
@@ -136,14 +134,13 @@ public class DumpJobTest {
     public void validateFormatFactory() throws Exception {
         dumpJob.setFormatFactory(null);
         jobExecutor.execute(jobContext);
-
         verifyInit();
     }
 
     private void verifyInit() throws Exception {
-        assertNotNull(jobExecutor.getJobStatus().getFailure());
+        assertNull(jobExecutor.getJobStatus().getFailure());
         verify(dumpJob).init(any(JobExecution.class));
-        verify(dumpJob, never()).execute(any(JobExecution.class));
+        verify(dumpJob, times(1)).execute();
     }
 
     @Test

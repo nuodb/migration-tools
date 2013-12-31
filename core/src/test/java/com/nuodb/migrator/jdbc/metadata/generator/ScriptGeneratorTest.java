@@ -52,7 +52,7 @@ import static junit.framework.Assert.assertNotNull;
  */
 public class ScriptGeneratorTest {
 
-    private ScriptGeneratorContext scriptGeneratorContext;
+    private ScriptGeneratorManager scriptGeneratorManager;
 
     @BeforeMethod
     public void setUp() {
@@ -61,9 +61,9 @@ public class ScriptGeneratorTest {
         Database database = new Database();
         database.setDialect(dialect);
 
-        scriptGeneratorContext = new ScriptGeneratorContext();
-        scriptGeneratorContext.setTargetDialect(dialect);
-        scriptGeneratorContext.setSourceSession(createSession(new MySQLDialect(MYSQL)));
+        scriptGeneratorManager = new ScriptGeneratorManager();
+        scriptGeneratorManager.setTargetDialect(dialect);
+        scriptGeneratorManager.setSourceSession(createSession(new MySQLDialect(MYSQL)));
     }
 
     @DataProvider(name = "getScripts")
@@ -133,9 +133,9 @@ public class ScriptGeneratorTest {
     @Test(dataProvider = "getScripts")
     public void testGetScripts(MetaData object, Collection<ScriptType> scriptTypes,
                                Collection<String> expected) throws Exception {
-        scriptGeneratorContext.setScriptTypes(scriptTypes);
+        scriptGeneratorManager.setScriptTypes(scriptTypes);
 
-        Collection<String> scripts = scriptGeneratorContext.getScripts(object);
+        Collection<String> scripts = scriptGeneratorManager.getScripts(object);
         assertNotNull(scripts);
         assertEquals(newArrayList(expected), newArrayList(scripts));
     }

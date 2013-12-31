@@ -63,7 +63,7 @@ public class MySQLColumn {
         return values;
     }
 
-    private static Collection<String> getValues(String source) {
+    public static Collection<String> getValues(String source) {
         Collection<String> values = newArrayList();
         int start = 0;
         int end;

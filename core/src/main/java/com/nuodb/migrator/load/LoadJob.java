@@ -30,32 +30,22 @@ package com.nuodb.migrator.load;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.backup.catalog.Catalog;
-import com.nuodb.migrator.backup.catalog.Chunk;
-import com.nuodb.migrator.backup.catalog.Column;
-import com.nuodb.migrator.backup.catalog.RowSet;
-import com.nuodb.migrator.backup.catalog.XmlCatalogManager;
-import com.nuodb.migrator.backup.format.FormatFactory;
+import com.nuodb.migrator.backup.*;
 import com.nuodb.migrator.backup.format.InputFormat;
-import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
-import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
-import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.query.*;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
-import com.nuodb.migrator.job.JobBase;
-import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.HasServicesJobBase;
 import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.LoadSpec;
+import com.nuodb.migrator.spec.LoadJobSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
-import org.slf4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,79 +61,64 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
-import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
-import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static java.lang.String.format;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadJob extends JobBase {
-
-    protected final Logger logger = getLogger(getClass());
-
-    private LoadSpec loadSpec;
-    private FormatFactory formatFactory;
-    private DialectResolver dialectResolver;
-    private InspectionManager inspectionManager;
-    private ConnectionProviderFactory connectionProviderFactory;
-    private ValueFormatRegistryResolver valueFormatRegistryResolver;
+public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
 
     private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
-    private LoadJobContext loadJobContext;
 
-    public LoadJob(LoadSpec loadSpec) {
-        this.loadSpec = loadSpec;
+    private Session targetSession;
+    private BackupManager backupManager;
+    private Map<String, Object> formatAttributes;
+    private ValueFormatRegistry valueFormatRegistry;
+
+    public LoadJob() {
+    }
+
+    public LoadJob(LoadJobSpec jobSpec) {
+        super(jobSpec);
     }
 
     @Override
-    public void init(JobExecution execution) throws Exception {
-        isNotNull(getLoadSpec(), "Load spec is required");
-        isNotNull(getFormatFactory(), "Backup format factory is required");
-        isNotNull(getDialectResolver(), "Dialect resolver is required");
-        isNotNull(getConnectionProviderFactory(), "Connection provider factory is required");
-        isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
-
-        init();
-    }
-
     protected void init() throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Initializing load job context");
-        }
-        loadJobContext = new LoadJobContext();
+        super.init();
 
         ResourceSpec inputSpec = getInputSpec();
-        loadJobContext.setFormatAttributes(inputSpec.getAttributes());
-        loadJobContext.setCatalogManager(new XmlCatalogManager(inputSpec.getPath()));
+        setFormatAttributes(inputSpec.getAttributes());
+        setBackupManager(createBackupManager(inputSpec));
+        
+        Session targetSession = createSessionFactory().openSession();
+        setTargetSession(targetSession);
+        setFormatFactory(createFormatFactory());
+        setValueFormatRegistry(createValueFormatRegistryResolver().resolve(targetSession.getConnection()));
+    }
 
-        SessionFactory sessionFactory = newSessionFactory(
-                getConnectionProviderFactory().createConnectionProvider(
-                        getConnectionSpec()), getDialectResolver());
+    protected BackupManager createBackupManager(ResourceSpec inputSpec) {
+        return new XmlBackupManager(inputSpec.getPath());
+    }
+
+    protected SessionFactory createSessionFactory() {
+        SessionFactory sessionFactory = newSessionFactory(createConnectionProviderFactory().
+                createConnectionProvider(getTargetSpec()), createDialectResolver());
         sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
-        Session session = sessionFactory.openSession();
-
-        loadJobContext.setSession(session);
-        loadJobContext.setDatabase(inspect());
-        loadJobContext.setFormatFactory(getFormatFactory());
-        loadJobContext.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(session));
+        return sessionFactory;
     }
 
     @Override
-    public void execute(JobExecution execution) throws Exception {
-        load();
-    }
-
-    protected void load() throws SQLException {
-        Connection connection = loadJobContext.getSession().getConnection();
+    public void execute() throws Exception {
+        Database database = inspect();
+        Connection connection = getTargetSession().getConnection();
         try {
             if (logger.isDebugEnabled()) {
-                logger.debug(format("Loading data using %s", loadSpec.getCommitStrategy()));
+                logger.debug(format("Commit using %s", getJobSpec().getCommitStrategy()));
             }
-            Catalog catalog = loadJobContext.getCatalogManager().readCatalog();
-            for (RowSet rowSet : catalog.getRowSets()) {
-                load(rowSet);
+            Backup backup = getBackupManager().readBackup();
+            for (RowSet rowSet : backup.getRowSets()) {
+                load(rowSet, database);
             }
             connection.commit();
         } catch (MigratorException exception) {
@@ -151,37 +126,40 @@ public class LoadJob extends JobBase {
             throw exception;
         } catch (Exception exception) {
             connection.rollback();
-            throw new LoadJobException(exception);
+            throw new LoadException(exception);
         }
+    }
+
+    @Override
+    public void release() throws Exception {
+        close(getTargetSession());
     }
 
     protected Database inspect() throws SQLException {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Inspecting target database");
-        }
         InspectionScope inspectionScope = new TableInspectionScope(
-                getConnectionSpec().getCatalog(), getConnectionSpec().getSchema());
-        return getInspectionManager().inspect(loadJobContext.getSession().getConnection(), inspectionScope,
+                getTargetSpec().getCatalog(), getTargetSpec().getSchema());
+        return createInspectionManager().inspect(getTargetSession().getConnection(), inspectionScope,
                 DATABASE, CATALOG, SCHEMA, TABLE, COLUMN).getObject(DATABASE);
     }
 
-    protected void load(final RowSet rowSet) throws SQLException {
+    protected void load(final RowSet rowSet, Database database) throws SQLException {
         if (!isEmpty(rowSet.getChunks())) {
-            final Connection connection = loadJobContext.getSession().getConnection();
-            final Table table = getRowSetMapper().map(rowSet, loadJobContext.getDatabase());
+            final Connection connection = getTargetSession().getConnection();
+            final Table table = getRowSetMapper().map(rowSet, database);
             if (table != null) {
                 final InsertQuery query = createInsertQuery(table, rowSet.getColumns());
                 final StatementTemplate template = new StatementTemplate(connection);
-                template.execute(
+                template.executeStatement(
                         new StatementFactory<PreparedStatement>() {
                             @Override
-                            public PreparedStatement create(Connection connection) throws SQLException {
+                            public PreparedStatement createStatement(Connection connection) throws SQLException {
                                 return connection.prepareStatement(query.toString());
                             }
                         },
                         new StatementCallback<PreparedStatement>() {
                             @Override
-                            public void process(PreparedStatement statement) throws SQLException {
+                            public void executeStatement(PreparedStatement statement)
+                                    throws SQLException {
                                 load(rowSet, table, statement, query);
                             }
                         }
@@ -196,13 +174,13 @@ public class LoadJob extends JobBase {
 
     protected void load(RowSet rowSet, Table table, PreparedStatement statement, Query query) throws SQLException {
         InputFormat inputFormat = getFormatFactory().createInputFormat(
-                rowSet.getCatalog().getFormat(), loadJobContext.getFormatAttributes());
+                rowSet.getBackup().getFormat(), getFormatAttributes());
         ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
-        CommitStrategy commitStrategy = loadSpec.getCommitStrategy();
+        CommitStrategy commitStrategy = getJobSpec().getCommitStrategy();
         for (Chunk chunk : rowSet.getChunks()) {
             inputFormat.setRowSet(rowSet);
             inputFormat.setValueHandleList(valueHandleList);
-            inputFormat.setInputStream(loadJobContext.getCatalogManager().openInputStream(chunk.getName()));
+            inputFormat.setInputStream(getBackupManager().openInput(chunk.getName()));
             inputFormat.init();
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Loading %d rows from %s chunk to %s table",
@@ -217,7 +195,7 @@ public class LoadJob extends JobBase {
                         commitStrategy.onExecute(statement, query);
                     }
                 } catch (Exception exception) {
-                    throw new LoadJobException(format("Error loading row %d from %s chunk to %s table",
+                    throw new LoadException(format("Error loading row %d from %s chunk to %s table",
                             row + 1, chunk.getName(), table.getQualifiedName(null)), exception);
                 }
                 row++;
@@ -241,9 +219,9 @@ public class LoadJob extends JobBase {
                 });
         return newBuilder(statement).
                 withColumns(newArrayList(columns)).
-                withDialect(loadJobContext.getSession().getDialect()).
+                withDialect(getTargetSession().getDialect()).
                 withTimeZone(getTimeZone()).
-                withValueFormatRegistry(loadJobContext.getValueFormatRegistry()).build();
+                withValueFormatRegistry(getValueFormatRegistry()).build();
     }
 
     protected InsertQuery createInsertQuery(Table table, Collection<Column> columns) {
@@ -273,37 +251,36 @@ public class LoadJob extends JobBase {
         return insertType;
     }
 
-    @Override
-    public void release(JobExecution execution) throws Exception {
-        close(loadJobContext.getSession());
+    public Session getTargetSession() {
+        return targetSession;
     }
 
-    public LoadSpec getLoadSpec() {
-        return loadSpec;
+    public void setTargetSession(Session targetSession) {
+        this.targetSession = targetSession;
     }
 
-    public FormatFactory getFormatFactory() {
-        return formatFactory;
+    public BackupManager getBackupManager() {
+        return backupManager;
     }
 
-    public void setFormatFactory(FormatFactory formatFactory) {
-        this.formatFactory = formatFactory;
+    public void setBackupManager(BackupManager backupManager) {
+        this.backupManager = backupManager;
     }
 
-    public DialectResolver getDialectResolver() {
-        return dialectResolver;
+    public Map<String, Object> getFormatAttributes() {
+        return formatAttributes;
     }
 
-    public void setDialectResolver(DialectResolver dialectResolver) {
-        this.dialectResolver = dialectResolver;
+    public void setFormatAttributes(Map<String, Object> formatAttributes) {
+        this.formatAttributes = formatAttributes;
     }
 
-    public InspectionManager getInspectionManager() {
-        return inspectionManager;
+    public ValueFormatRegistry getValueFormatRegistry() {
+        return valueFormatRegistry;
     }
 
-    public void setInspectionManager(InspectionManager inspectionManager) {
-        this.inspectionManager = inspectionManager;
+    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
+        this.valueFormatRegistry = valueFormatRegistry;
     }
 
     public RowSetMapper getRowSetMapper() {
@@ -314,39 +291,23 @@ public class LoadJob extends JobBase {
         this.rowSetMapper = rowSetMapper;
     }
 
-    public ConnectionProviderFactory getConnectionProviderFactory() {
-        return connectionProviderFactory;
-    }
-
-    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
-        this.connectionProviderFactory = connectionProviderFactory;
-    }
-
-    public ValueFormatRegistryResolver getValueFormatRegistryResolver() {
-        return valueFormatRegistryResolver;
-    }
-
-    public void setValueFormatRegistryResolver(ValueFormatRegistryResolver valueFormatRegistryResolver) {
-        this.valueFormatRegistryResolver = valueFormatRegistryResolver;
-    }
-
     protected Map<String, InsertType> getTableInsertTypes() {
-        return loadSpec.getTableInsertTypes();
+        return getJobSpec().getTableInsertTypes();
     }
 
     protected ResourceSpec getInputSpec() {
-        return loadSpec.getInputSpec();
+        return getJobSpec().getInputSpec();
     }
 
     protected InsertType getInsertType() {
-        return loadSpec.getInsertType();
+        return getJobSpec().getInsertType();
     }
 
     protected TimeZone getTimeZone() {
-        return loadSpec.getTimeZone();
+        return getJobSpec().getTimeZone();
     }
 
-    protected ConnectionSpec getConnectionSpec() {
-        return loadSpec.getConnectionSpec();
+    protected ConnectionSpec getTargetSpec() {
+        return getJobSpec().getTargetSpec();
     }
 }

@@ -31,67 +31,102 @@ import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
+import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.AND;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 
 /**
  * @author Sergey Bushik
  */
-public class PostgreSQLIdentityInspector extends InspectorBase<Table, TableInspectionScope> {
+public class PostgreSQLIdentityInspector extends TableInspectorBase<Table, TableInspectionScope> {
+
+    private static final String QUERY =
+            "WITH SEQUENCES AS\n" +
+            "(SELECT N.NSPNAME AS SCHEMA_NAME, C.RELNAME AS TABLE_NAME, A.ATTNAME AS COLUMN_NAME,\n" +
+            "SUBSTRING(PG_GET_EXPR(DEF.ADBIN, DEF.ADRELID) FROM 'nextval\\(''(.*)''::.*\\)') AS SEQUENCE_NAME\n" +
+            "FROM PG_CATALOG.PG_NAMESPACE N\n" +
+            "JOIN PG_CATALOG.PG_CLASS C ON (C.RELNAMESPACE = N.OID)\n" +
+            "JOIN PG_CATALOG.PG_ATTRIBUTE A ON (A.ATTRELID=C.OID)\n" +
+            "LEFT JOIN PG_CATALOG.PG_ATTRDEF DEF ON (A.ATTRELID=DEF.ADRELID AND A.ATTNUM = DEF.ADNUM)\n" +
+            "WHERE A.ATTNUM>0 AND NOT A.ATTISDROPPED AND ADSRC IS NOT NULL AND SUBSTRING(ADSRC FROM 0 FOR 9)" +
+            "='nextval(') SELECT * FROM SEQUENCES";
 
     public PostgreSQLIdentityInspector() {
         super(IDENTITY, TABLE, TableInspectionScope.class);
     }
 
     @Override
-    public void inspectObjects(final InspectionContext inspectionContext,
-                               final Collection<? extends Table> tables) throws SQLException {
-        Dialect dialect = inspectionContext.getDialect();
-        for (Table table : tables) {
-            for (final Column column : table.getColumns()) {
-                PostgreSQLColumn.inspect(inspectionContext, column);
-                Sequence sequence = column.getSequence();
-                if (sequence == null) {
-                    continue;
-                }
-                final SelectQuery selectQuery = new SelectQuery();
-                selectQuery.column("*");
-                String schemaName = dialect.getIdentifier(table.getSchema().getName(), null);
-                String sequenceName = dialect.getIdentifier(sequence.getName(), null);
-                selectQuery.from(schemaName + "." + sequenceName);
-
-                StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-                template.execute(
-                        new StatementFactory<PreparedStatement>() {
-                            @Override
-                            public PreparedStatement create(Connection connection) throws SQLException {
-                                return connection.prepareStatement(selectQuery.toString());
-                            }
-                        },
-                        new StatementCallback<PreparedStatement>() {
-                            @Override
-                            public void process(PreparedStatement statement) throws SQLException {
-                                inspect(inspectionContext, column, statement.executeQuery());
-                            }
-                        }
-                );
-            }
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        Collection<String> filters = newArrayList();
+        Collection<Object> parameters = newArrayList();
+        if (tableInspectionScope.getSchema() != null) {
+            filters.add("SCHEMA_NAME=?");
+            parameters.add(tableInspectionScope.getSchema());
         }
+        if (tableInspectionScope.getTable() != null) {
+            filters.add("TABLE_NAME=?");
+            parameters.add(tableInspectionScope.getTable());
+        }
+        return new ParameterizedQuery(newQuery(where(QUERY, filters, AND)), parameters);
     }
 
-    protected void inspect(InspectionContext inspectionContext, Column column,
-                           ResultSet identities) throws SQLException {
+    @Override
+    protected void processResultSet(final InspectionContext inspectionContext, final ResultSet identities) throws SQLException {
+        StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
+        template.executeStatement(
+                new StatementFactory<Statement>() {
+                    @Override
+                    public Statement createStatement(Connection connection) throws SQLException {
+                        return connection.createStatement();
+                    }
+                }, new StatementCallback<Statement>() {
+                    @Override
+                    public void executeStatement(Statement statement) throws SQLException {
+                        while (identities.next()) {
+                            String schemaName = identities.getString("SCHEMA_NAME");
+                            String tableName = identities.getString("TABLE_NAME");
+                            String sequenceName = identities.getString("SEQUENCE_NAME");
+                            Table table = addTable(inspectionContext.getInspectionResults(), null, schemaName, tableName);
+
+                            String columnName = identities.getString("COLUMN_NAME");
+                            Column column = table.addColumn(columnName);
+
+                            processIdentity(inspectionContext, column, statement.executeQuery(
+                                    createQuery(inspectionContext, schemaName, sequenceName).toString()));
+                        }
+                    }
+                }
+        );
+    }
+
+    protected Query createQuery(InspectionContext inspectionContext, String schemaName, String sequenceName)
+            throws SQLException {
+        SelectQuery query = new SelectQuery();
+        query.column("*");
+        Dialect dialect = inspectionContext.getDialect();
+        query.from(dialect.getIdentifier(schemaName, null) + "." + dialect.getIdentifier(sequenceName, null));
+        return query;
+    }
+
+    protected void processIdentity(InspectionContext inspectionContext, Column column, ResultSet identities)
+            throws SQLException {
         if (identities.next()) {
             Sequence sequence = new Sequence();
             sequence.setName(identities.getString("SEQUENCE_NAME"));
@@ -105,17 +140,5 @@ public class PostgreSQLIdentityInspector extends InspectorBase<Table, TableInspe
             column.setSequence(sequence);
             inspectionContext.getInspectionResults().addObject(sequence);
         }
-    }
-
-
-    @Override
-    public void inspectScope(InspectionContext inspectionContext,
-                             TableInspectionScope inspectionScope) throws SQLException {
-        throw new InspectorException("Not implemented yet");
-    }
-
-    @Override
-    public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) {
-        return false;
     }
 }

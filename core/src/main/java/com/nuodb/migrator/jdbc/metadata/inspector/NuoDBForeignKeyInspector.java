@@ -31,20 +31,16 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
-import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validate;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 
 /**
  * @author Sergey Bushik
@@ -66,45 +62,20 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
             "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA\n" +
             "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME\n" +
             "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID\n" +
-            "WHERE FOREIGNTABLE.SCHEMA=? AND FOREIGNTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
+            "WHERE FOREIGNTABLE.SCHEMA=? AND FOREIGNTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, " +
+            "KEY_SEQ ASC";
+
 
     @Override
-    public void inspectScope(InspectionContext inspectionContext,
-                             TableInspectionScope inspectionScope) throws SQLException {
-        validate(inspectionScope);
-        super.inspectScope(inspectionContext, inspectionScope);
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        Collection<Object> parameters = newArrayList();
+        parameters.add(tableInspectionScope.getSchema());
+        parameters.add(tableInspectionScope.getTable());
+        return new ParameterizedQuery(newQuery(QUERY), parameters);
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
-    }
-
-    @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
-                new StatementFactory<PreparedStatement>() {
-                    @Override
-                    public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                    }
-                },
-                new StatementCallback<PreparedStatement>() {
-                    @Override
-                    public void process(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
-                            statement.setString(1, inspectionScope.getSchema());
-                            statement.setString(2, inspectionScope.getTable());
-                            inspect(inspectionContext, statement.executeQuery());
-                        }
-                    }
-                }
-        );
-    }
-
-    private void inspect(InspectionContext inspectionContext, ResultSet foreignKeys) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet foreignKeys) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         ForeignKey foreignKey = null;
         while (foreignKeys.next()) {
@@ -133,7 +104,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
     }
 
     @Override
-    protected boolean supports(TableInspectionScope inspectionScope) {
-        return inspectionScope.getSchema() != null && inspectionScope.getTable() != null;
+    protected boolean supportsScope(TableInspectionScope tableInspectionScope) {
+        return tableInspectionScope.getSchema() != null && tableInspectionScope.getTable() != null;
     }
 }

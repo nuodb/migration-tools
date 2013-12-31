@@ -35,7 +35,9 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataHandler;
  */
 public interface NamingStrategy<M extends MetaData> extends MetaDataHandler {
 
-    String getName(M object, ScriptGeneratorContext context, boolean normalize);
+    String getName(M object, ScriptGeneratorManager scriptGeneratorManager,
+                   boolean normalize);
 
-    String getQualifiedName(M object, ScriptGeneratorContext context, String catalog, String schema, boolean normalize);
+    String getQualifiedName(M object, ScriptGeneratorManager scriptGeneratorManager,
+                            String catalog, String schema, boolean normalize);
 }

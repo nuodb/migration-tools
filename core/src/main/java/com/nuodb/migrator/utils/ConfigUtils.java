@@ -93,7 +93,7 @@ public class ConfigUtils {
     /**
      * Reads config line by line, ignores lines starting with comment symbol #
      *
-     * @param input to read config lines from
+     * @param input to readBackup config lines from
      * @return a list of parameters
      * @throws IOException if any input/output error during reading input occurs
      */

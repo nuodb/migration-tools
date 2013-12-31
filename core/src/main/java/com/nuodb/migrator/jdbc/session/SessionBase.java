@@ -147,7 +147,7 @@ public class SessionBase implements Session {
             work.init(this);
             work.execute();
         } catch (Exception exception) {
-            workManager.error(work, exception);
+            workManager.failure(work, exception);
         } finally {
             work.close();
         }

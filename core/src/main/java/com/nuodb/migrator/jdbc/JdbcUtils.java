@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc;
 
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +37,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * @author Sergey Bushik
  */
 public class JdbcUtils {
 
-    private static transient final Logger logger = LoggerFactory.getLogger(JdbcUtils.class);
+    private static transient final Logger logger = getLogger(JdbcUtils.class);
 
     private JdbcUtils() {
     }
@@ -90,6 +93,18 @@ public class JdbcUtils {
         } catch (SQLException exception) {
             if (logger.isWarnEnabled()) {
                 logger.warn("Failed closing session", exception);
+            }
+        }
+    }
+
+    public static void close(ScriptExporter scriptExporter) {
+        try {
+            if (scriptExporter != null) {
+                scriptExporter.close();
+            }
+        } catch (Exception exception) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed closing script exported", exception);
             }
         }
     }

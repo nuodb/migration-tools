@@ -27,14 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.SortOrder;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
@@ -50,54 +50,44 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
+    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+            throws SQLException {
+        return inspectionContext.getConnection().getMetaData().getIndexInfo(
+                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(),
+                tableInspectionScope.getTable(), false, true);
     }
 
     @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            ResultSet indexes = databaseMetaData.getIndexInfo(
-                    inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable(), false, true);
-            try {
-                while (indexes.next()) {
-                    inspect(inspectionContext, indexes);
-                }
-            } finally {
-                close(indexes);
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet indexes) throws SQLException {
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        while (indexes.next()) {
+            if (indexes.getShort("TYPE") == tableIndexStatistic) {
+                return;
+            }
+            Table table = addTable(inspectionResults, indexes.getString("TABLE_CAT"),
+                    indexes.getString("TABLE_SCHEM"), indexes.getString("TABLE_NAME"));
+
+            Identifier identifier = valueOf(indexes.getString("INDEX_NAME"));
+            Index index = table.getIndex(identifier);
+            if (index == null) {
+                index = new Index(identifier);
+                table.addIndex(index);
+                index.setUnique(!indexes.getBoolean("NON_UNIQUE"));
+                index.setFilterCondition(indexes.getString("FILTER_CONDITION"));
+                index.setSortOrder(getSortOrder(indexes.getString("ASC_OR_DESC")));
+                inspectionResults.addObject(index);
+            }
+            String expression = indexes.getString("COLUMN_NAME");
+            if (isExpression(inspectionContext, index, expression)) {
+                index.setExpression(expression);
+            } else {
+                index.addColumn(table.addColumn(expression), indexes.getInt("ORDINAL_POSITION"));
             }
         }
     }
 
-    protected void inspect(InspectionContext inspectionContext, ResultSet indexes) throws SQLException {
-        if (indexes.getShort("TYPE") == tableIndexStatistic) {
-            return;
-        }
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        Table table = addTable(inspectionResults, indexes.getString("TABLE_CAT"),
-                indexes.getString("TABLE_SCHEM"), indexes.getString("TABLE_NAME"));
-
-        Identifier identifier = valueOf(indexes.getString("INDEX_NAME"));
-        Index index = table.getIndex(identifier);
-        if (index == null) {
-            index = new Index(identifier);
-            table.addIndex(index);
-            index.setUnique(!indexes.getBoolean("NON_UNIQUE"));
-            index.setFilterCondition(indexes.getString("FILTER_CONDITION"));
-            index.setSortOrder(getSortOrder(indexes.getString("ASC_OR_DESC")));
-            inspectionResults.addObject(index);
-        }
-        String expression = indexes.getString("COLUMN_NAME");
-        if (isExpression(inspectionContext, index, expression)) {
-            index.setExpression(expression);
-        } else {
-            index.addColumn(table.addColumn(expression), indexes.getInt("ORDINAL_POSITION"));
-        }
-    }
-
-    protected boolean isExpression(InspectionContext inspectionContext, Index index, String expression) throws SQLException {
+    protected boolean isExpression(InspectionContext inspectionContext, Index index, String expression)
+            throws SQLException {
         return false;
     }
 
@@ -110,7 +100,7 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
     }
 
     @Override
-    protected boolean supports(TableInspectionScope inspectionScope) {
-        return inspectionScope.getTable() != null;
+    protected boolean supportsScope(TableInspectionScope tableInspectionScope) {
+        return tableInspectionScope.getTable() != null;
     }
 }

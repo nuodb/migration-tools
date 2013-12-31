@@ -27,148 +27,24 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Supplier;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.primitives.Ints;
-import com.nuodb.migrator.backup.catalog.Catalog;
-import com.nuodb.migrator.backup.catalog.Chunk;
-import com.nuodb.migrator.backup.catalog.Column;
-import com.nuodb.migrator.backup.catalog.RowSet;
-import com.nuodb.migrator.backup.format.value.ValueHandle;
-import com.nuodb.migrator.jdbc.session.SessionFactory;
+import com.nuodb.migrator.backup.Chunk;
 import com.nuodb.migrator.jdbc.session.Work;
 import com.nuodb.migrator.jdbc.session.WorkManager;
-import org.slf4j.Logger;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-
-import static com.google.common.collect.Iterables.all;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newConcurrentMap;
-import static com.google.common.collect.Multimaps.newSetMultimap;
-import static com.google.common.collect.Sets.newTreeSet;
-import static com.nuodb.migrator.backup.format.value.ValueType.toAlias;
-import static java.lang.String.format;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "SynchronizationOnLocalVariableOrMethodParameter"})
-class DumpQueryManager implements DumpQueryObserver, WorkManager {
+public interface DumpQueryManager extends WorkManager {
 
-    private final transient Logger logger = getLogger(getClass());
+    void writeStart(DumpQuery dumpQuery, Work work);
 
-    private Catalog catalog;
-    private SessionFactory sessionFactory;
-    private ExecutorService executorService;
+    boolean canWrite(DumpQuery dumpQuery, Work work);
 
-    private final Map<Work, Exception> errorMap = newConcurrentMap();
-    private final Map<QueryInfo, Boolean> initFlagMap = newConcurrentMap();
-    private Multimap<QueryInfo, DumpQuery> dumpQueryMap = newSetMultimap(
-            Maps.<QueryInfo, Collection<DumpQuery>>newHashMap(), new Supplier<Set<DumpQuery>>() {
-        @Override
-        public Set<DumpQuery> get() {
-            return newTreeSet(new Comparator<DumpQuery>() {
-                @Override
-                public int compare(DumpQuery o1, DumpQuery o2) {
-                    return Ints.compare(o1.getQuerySplit().getSplitIndex(), o2.getQuerySplit().getSplitIndex());
-                }
-            });
-        }
-    });
+    void writeStart(DumpQuery dumpQuery, Work work, Chunk chunk);
 
-    @Override
-    public void writeStart(DumpQuery dumpQuery) {
-        Boolean initFlag = initFlagMap.get(dumpQuery.getQueryInfo());
-        if (initFlag == null || !initFlag) {
-            Collection<Column> columns = newArrayList();
-            for (ValueHandle valueHandle : dumpQuery.getValueHandleList()) {
-                columns.add(new Column(valueHandle.getName(), toAlias(valueHandle.getValueType())));
-            }
-            dumpQuery.getRowSet().setColumns(columns);
-            initFlagMap.put(dumpQuery.getQueryInfo(), true);
-        }
-    }
+    void write(DumpQuery dumpQuery, Work work, Chunk chunk);
 
-    @Override
-    public boolean canWrite(DumpQuery dumpQuery) {
-        return errorMap.isEmpty();
-    }
+    void writeEnd(DumpQuery dumpQuery, Work work, Chunk chunk);
 
-    @Override
-    public void writeStart(DumpQuery dumpQuery, Chunk chunk) {
-    }
-
-    @Override
-    public void write(DumpQuery dumpQuery, Chunk chunk) {
-        chunk.incrementRowCount();
-    }
-
-    @Override
-    public void writeEnd(DumpQuery dumpQuery, Chunk chunk) {
-        final RowSet rowSet = dumpQuery.getRowSet();
-        synchronized (rowSet) {
-            rowSet.setRowCount(rowSet.getRowCount() + chunk.getRowCount());
-        }
-    }
-
-    @Override
-    public void writeEnd(DumpQuery dumpQuery) {
-        final RowSet rowSet = dumpQuery.getRowSet();
-        synchronized (rowSet) {
-            dumpQueryMap.put(dumpQuery.getQueryInfo(), dumpQuery);
-            final Collection<Chunk> chunks = newArrayList();
-            all(dumpQueryMap.get(dumpQuery.getQueryInfo()), new Predicate<DumpQuery>() {
-                @Override
-                public boolean apply(DumpQuery dumpQuery) {
-                    chunks.addAll(dumpQuery.getChunks());
-                    return true;
-                }
-            });
-            rowSet.setChunks(chunks);
-        }
-    }
-
-    @Override
-    public void error(Work work, Exception exception) throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug(format("Dump query error reported: %s", exception.getMessage()));
-        }
-        errorMap.put(work, exception);
-    }
-
-    public Map<Work, Exception> getErrors() {
-        return errorMap;
-    }
-
-    public Catalog getCatalog() {
-        return catalog;
-    }
-
-    public void setCatalog(Catalog catalog) {
-        this.catalog = catalog;
-    }
-
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
-    }
-
-    public void setSessionFactory(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
-
-    public ExecutorService getExecutorService() {
-        return executorService;
-    }
-
-    public void setExecutorService(ExecutorService executorService) {
-        this.executorService = executorService;
-    }
+    void writeEnd(DumpQuery dumpQuery, Work work);
 }

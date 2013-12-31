@@ -27,53 +27,60 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.backup.catalog.Catalog;
-import com.nuodb.migrator.backup.catalog.QueryRowSet;
-import com.nuodb.migrator.backup.catalog.RowSet;
-import com.nuodb.migrator.backup.catalog.TableRowSet;
+import com.nuodb.migrator.MigratorException;
+import com.nuodb.migrator.backup.Backup;
+import com.nuodb.migrator.backup.BackupManager;
+import com.nuodb.migrator.backup.QueryRowSet;
+import com.nuodb.migrator.backup.TableRowSet;
+import com.nuodb.migrator.backup.format.FormatFactory;
+import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.jdbc.session.Work;
 import com.nuodb.migrator.jdbc.session.WorkManager;
-import com.nuodb.migrator.jdbc.split.QuerySplit;
 import com.nuodb.migrator.jdbc.split.QuerySplitter;
-import com.nuodb.migrator.utils.BlockingThreadPoolExecutor;
 import org.slf4j.Logger;
 
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.Callable;
+import java.util.TimeZone;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static com.google.common.collect.Iterables.get;
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
-import static com.nuodb.migrator.jdbc.split.Queries.newQuery;
+import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.split.QuerySplitters.*;
 import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newCachingStrategy;
 import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newHandlerStrategy;
-import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
-import static java.lang.String.format;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
+import static java.lang.Long.MAX_VALUE;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings({"unchecked", "ThrowableResultOfMethodCallIgnored"})
-public class DumpWriter extends DumpQueryContext {
+public class DumpWriter implements DumpQueryContext {
 
-    private final transient Logger logger = getLogger(getClass());
-
+    protected final transient Logger logger = getLogger(getClass());
     private QueryLimit queryLimit;
-    private Collection<DumpQueryEntry> dumpWriterEntries = newArrayList();
+    private Collection<DumpQuery> dumpQueries = newLinkedHashSet();
+    private DumpQueryContext dumpQueryContext = new SimpleDumpQueryContext();
+
+    public void addQuery(String query) {
+        addDumpQuery(createDumpQuery(query));
+    }
 
     public void addTable(Table table) {
         addTable(table, table.getColumns());
@@ -84,7 +91,7 @@ public class DumpWriter extends DumpQueryContext {
     }
 
     public void addTable(Table table, Collection<Column> columns, String filter) {
-        addTable(table, columns, filter, queryLimit);
+        addTable(table, columns, filter, getQueryLimit());
     }
 
     /**
@@ -97,113 +104,109 @@ public class DumpWriter extends DumpQueryContext {
      *                   be constructed.
      */
     public void addTable(Table table, Collection<Column> columns, String filter, QueryLimit queryLimit) {
-        QueryInfo queryInfo = createQueryInfo(table, columns, filter, queryLimit);
-        QuerySplitter querySplitter = createQuerySplitter(table, columns, filter, queryLimit);
-        addQuery(queryInfo, querySplitter, new TableRowSet(table));
+        addDumpQuery(createDumpQuery(table, columns, filter, queryLimit));
     }
 
-    public void addQuery(String query) {
-        QueryInfo queryInfo = createQueryInfo(query, getQueryLimit());
-        QuerySplitter querySplitter = createQuerySplitter(query);
-        addQuery(queryInfo, querySplitter, new QueryRowSet(query));
+    protected void addDumpQuery(DumpQuery dumpQuery) {
+        dumpQueries.add(dumpQuery);
     }
 
-    protected void addQuery(QueryInfo queryInfo, QuerySplitter querySplitter, RowSet rowSet) {
-        dumpWriterEntries.add(new DumpQueryEntry(queryInfo, querySplitter, rowSet));
+    public Backup write() throws Exception {
+        return write(createBackup());
     }
 
-    public Catalog write() throws Exception {
-        DumpQueryManager dumpQueryManager = createDumpQueryContext();
+    public Backup write(Backup backup) throws Exception {
+        return write(backup, createDumpQueryManager());
+    }
+
+    public Backup write(Backup backup, DumpQueryManager dumpQueryManager) throws Exception {
+        boolean awaitTermination = true;
         try {
-            write(dumpQueryManager);
-        } finally {
-            closeDumpQueryContext(dumpQueryManager);
-        }
-        return dumpQueryManager.getCatalog();
-    }
-
-    protected void write(DumpQueryManager dumpQueryManager) throws Exception {
-        ExecutorService executorService = dumpQueryManager.getExecutorService();
-        try {
+            backup.setFormat(getFormat());
+            backup.setDatabaseInfo(getDatabase().getDatabaseInfo());
             Connection connection = getSession().getConnection();
-            for (DumpQueryEntry dumpQueryEntry : getDumpQueryEntries()) {
-                QuerySplitter querySplitter = dumpQueryEntry.getQuerySplitter();
-                while (querySplitter.hasNextQuerySplit(connection)) {
-                    QuerySplit querySplit = querySplitter.getNextQuerySplit(connection);
-                    write(dumpQueryManager, new DumpQuery(this, dumpQueryManager, dumpQueryEntry.getQueryInfo(),
-                            querySplit, querySplitter.hasNextQuerySplit(connection), dumpQueryEntry.getRowSet()));
+            for (DumpQuery dumpQuery : getDumpQueries()) {
+                backup.addRowSet(dumpQuery.getRowSet());
+                while (dumpQuery.getQuerySplitter().hasNextQuerySplit(connection)) {
+                    executeWork(dumpQueryManager, createWork(dumpQueryManager, dumpQuery));
                 }
             }
-            executorService.shutdown();
-            while (!executorService.isTerminated()) {
-                executorService.awaitTermination(100L, MILLISECONDS);
-            }
-
-        } catch (Exception exception) {
-            executorService.shutdownNow();
-            throw exception;
+        } catch (Throwable failure) {
+            awaitTermination = false;
+            throw failure instanceof MigratorException ? (MigratorException) failure : new DumpException(failure);
+        } finally {
+            closeDumpQueryManager(dumpQueryManager, awaitTermination);
         }
-        getCatalogManager().writeCatalog(dumpQueryManager.getCatalog());
+        return backup;
     }
 
-    protected void write(DumpQueryManager dumpQueryManager, DumpQuery dumpQuery) {
-        write(dumpQueryManager.getExecutorService(), dumpQueryManager.getSessionFactory(),
-                dumpQueryManager, dumpQuery);
+    protected Backup createBackup() {
+        return new Backup();
     }
 
-    protected void write(final ExecutorService executorService, final SessionFactory sessionFactory,
-                         final WorkManager workManager, final Work work) {
-        executorService.submit(new Callable() {
+    protected DumpQueryManager createDumpQueryManager() {
+        return new SimpleDumpQueryManager();
+    }
+
+    protected Work createWork(DumpQueryManager dumpQueryManager, DumpQuery dumpQuery) throws Exception {
+        DumpQueryContext dumpQueryContext = getDumpQueryContext();
+        Connection connection = dumpQueryContext.getSession().getConnection();
+        QuerySplitter querySplitter = dumpQuery.getQuerySplitter();
+        return new DumpQueryWork(dumpQueryContext, dumpQueryManager, dumpQuery,
+                querySplitter.getNextQuerySplit(connection), querySplitter.hasNextQuerySplit(connection));
+    }
+
+    protected void executeWork(final WorkManager workManager, final Work work) {
+        Executor executor = dumpQueryContext.getExecutor();
+        executor.execute(new Runnable() {
             @Override
-            public Object call() throws Exception {
+            public void run() {
                 Session session = null;
                 try {
-                    session = sessionFactory.openSession();
+                    session = dumpQueryContext.getSessionFactory().openSession();
                     session.execute(work, workManager);
                 } catch (Exception exception) {
-                    workManager.error(work, exception);
+                    workManager.failure(work, exception);
                 } finally {
                     close(session);
                 }
-                return null;
             }
         });
     }
 
-    protected DumpQueryManager createDumpQueryContext() {
-        DumpQueryManager dumpQueryManager = new DumpQueryManager();
-        dumpQueryManager.setCatalog(createCatalog());
-        dumpQueryManager.setExecutorService(createExecutorService());
-        dumpQueryManager.setSessionFactory(getSessionFactory());
-        return dumpQueryManager;
+    protected void closeDumpQueryManager(DumpQueryManager dumpQueryManager, boolean awaitTermination) {
+        Executor executor = getExecutor();
+        if (executor instanceof ExecutorService) {
+            ExecutorService executorService = (ExecutorService) executor;
+            executorService.shutdown();
+            try {
+                if (awaitTermination) {
+                    executorService.awaitTermination(MAX_VALUE, SECONDS);
+                }
+            } catch (InterruptedException exception) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Awaiting executor's termination was interrupted", exception);
+                }
+            }
+        }
+        Map<Work, Throwable> failures = dumpQueryManager.getFailures();
+        if (!isEmpty(failures)) {
+            final Throwable failure = get(failures.values(), 0);
+            throw failure instanceof MigratorException ? (MigratorException) failure : new DumpException(failure);
+        }
     }
 
-    protected Catalog createCatalog() {
-        Catalog catalog = new Catalog();
-        catalog.setFormat(getFormat());
-        catalog.setDatabaseInfo(getDatabase().getDatabaseInfo());
-        for (DumpQueryEntry dumpQueryEntry : getDumpQueryEntries()) {
-            catalog.addRowSet(dumpQueryEntry.getRowSet());
-        }
-        return catalog;
-    }
-
-    protected ExecutorService createExecutorService() {
-        if (logger.isTraceEnabled()) {
-            logger.trace(format("Constructing blocking thread pool with %d thread(s) to write dump", getThreads()));
-        }
-        return new BlockingThreadPoolExecutor(getThreads(), 100L, MILLISECONDS);
-    }
-
-    protected void closeDumpQueryContext(DumpQueryManager dumpQueryManager) throws Exception {
-        Map<Work, Exception> errors = dumpQueryManager.getErrors();
-        if (!isEmpty(errors)) {
-            throw get(errors.values(), 0);
-        }
+    protected DumpQuery createDumpQuery(String query) {
+        return new DumpQuery(createQuerySplitter(query), new QueryRowSet(query));
     }
 
     protected QuerySplitter createQuerySplitter(String query) {
         return newNoLimitSplitter(newQuery(query));
+    }
+
+    protected DumpQuery createDumpQuery(Table table, Collection<Column> columns, String filter, QueryLimit queryLimit) {
+        return new DumpTable(table, columns, filter, createQuerySplitter(table, columns, filter, queryLimit),
+                new TableRowSet(table));
     }
 
     protected QuerySplitter createQuerySplitter(Table table, Collection<Column> columns, String filter,
@@ -213,20 +216,11 @@ public class DumpWriter extends DumpQueryContext {
         Dialect dialect = getSession().getDialect();
         if (queryLimit != null && supportsLimitSplitter(dialect, table, filter)) {
             querySplitter = newLimitSplitter(dialect, newCachingStrategy(newHandlerStrategy(
-                    dialect.createRowCountHandler(table, null, filter, EXACT))
-            ), query, queryLimit);
+                    dialect.createRowCountHandler(table, null, filter, EXACT))), query, queryLimit);
         } else {
             querySplitter = newNoLimitSplitter(query);
         }
         return querySplitter;
-    }
-
-    protected QueryInfo createQueryInfo(String query, QueryLimit queryLimit) {
-        return new QueryInfo(newQuery(query), queryLimit);
-    }
-
-    protected QueryInfo createQueryInfo(Table table, Collection<Column> columns, String filter, QueryLimit queryLimit) {
-        return new TableQueryInfo(table, columns, filter, queryLimit);
     }
 
     public QueryLimit getQueryLimit() {
@@ -237,7 +231,129 @@ public class DumpWriter extends DumpQueryContext {
         this.queryLimit = queryLimit;
     }
 
-    protected Collection<DumpQueryEntry> getDumpQueryEntries() {
-        return dumpWriterEntries;
+    public Collection<DumpQuery> getDumpQueries() {
+        return dumpQueries;
+    }
+
+    public void setDumpQueries(Collection<DumpQuery> dumpQueries) {
+        this.dumpQueries = dumpQueries;
+    }
+
+    public DumpQueryContext getDumpQueryContext() {
+        return dumpQueryContext;
+    }
+
+    public void setDumpQueryContext(DumpQueryContext dumpQueryContext) {
+        this.dumpQueryContext = dumpQueryContext;
+    }
+
+    @Override
+    public int getThreads() {
+        return dumpQueryContext.getThreads();
+    }
+
+    @Override
+    public void setThreads(int threads) {
+        dumpQueryContext.setThreads(threads);
+    }
+
+    @Override
+    public Database getDatabase() {
+        return dumpQueryContext.getDatabase();
+    }
+
+    @Override
+    public void setDatabase(Database database) {
+        dumpQueryContext.setDatabase(database);
+    }
+
+    @Override
+    public Executor getExecutor() {
+        return dumpQueryContext.getExecutor();
+    }
+
+    @Override
+    public void setExecutor(Executor executor) {
+        dumpQueryContext.setExecutor(executor);
+    }
+
+    @Override
+    public TimeZone getTimeZone() {
+        return dumpQueryContext.getTimeZone();
+    }
+
+    @Override
+    public void setTimeZone(TimeZone timeZone) {
+        dumpQueryContext.setTimeZone(timeZone);
+    }
+
+    @Override
+    public Session getSession() {
+        return dumpQueryContext.getSession();
+    }
+
+    @Override
+    public void setSession(Session session) {
+        dumpQueryContext.setSession(session);
+    }
+
+    @Override
+    public SessionFactory getSessionFactory() {
+        return dumpQueryContext.getSessionFactory();
+    }
+
+    @Override
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        dumpQueryContext.setSessionFactory(sessionFactory);
+    }
+
+    @Override
+    public BackupManager getBackupManager() {
+        return dumpQueryContext.getBackupManager();
+    }
+
+    @Override
+    public void setBackupManager(BackupManager backupManager) {
+        dumpQueryContext.setBackupManager(backupManager);
+    }
+
+    @Override
+    public String getFormat() {
+        return dumpQueryContext.getFormat();
+    }
+
+    @Override
+    public void setFormat(String format) {
+        dumpQueryContext.setFormat(format);
+    }
+
+    @Override
+    public Map<String, Object> getFormatAttributes() {
+        return dumpQueryContext.getFormatAttributes();
+    }
+
+    @Override
+    public void setFormatAttributes(Map<String, Object> formatAttributes) {
+        dumpQueryContext.setFormatAttributes(formatAttributes);
+    }
+
+    @Override
+    public FormatFactory getFormatFactory() {
+        return dumpQueryContext.getFormatFactory();
+    }
+
+    @Override
+    public void setFormatFactory(FormatFactory formatFactory) {
+        dumpQueryContext.setFormatFactory(formatFactory);
+    }
+
+    @Override
+    public ValueFormatRegistry getValueFormatRegistry() {
+        return dumpQueryContext.getValueFormatRegistry();
+    }
+
+    @Override
+    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
+        dumpQueryContext.setValueFormatRegistry(valueFormatRegistry);
     }
 }

@@ -36,9 +36,9 @@ import java.util.Map;
  */
 public interface CliRun extends Option {
 
-    void run();
+    void execute();
 
-    void run(Map<Object, Object> context);
+    void execute(Map<Object, Object> context);
 
     String getCommand();
 }

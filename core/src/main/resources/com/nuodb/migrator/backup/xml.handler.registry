@@ -1,0 +1,9 @@
+com.nuodb.migrator.utils.xml.XmlTransformerHandler
+com.nuodb.migrator.backup.XmlBackupHandler
+com.nuodb.migrator.backup.XmlDatabaseInfoHandler
+com.nuodb.migrator.backup.XmlSchemaHandler
+com.nuodb.migrator.backup.XmlChunkHandler
+com.nuodb.migrator.backup.XmlColumnHandler
+com.nuodb.migrator.backup.XmlQueryRowSetHandler
+com.nuodb.migrator.backup.XmlTableRowSetHandler
+com.nuodb.migrator.backup.XmlRowSetMapper,-1

@@ -27,22 +27,29 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.query.QueryUtils;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 
@@ -51,83 +58,61 @@ import static org.apache.commons.lang3.StringUtils.containsAny;
  */
 public class MySQLIdentityInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    public static final String QUERY_TABLE = "SELECT TABLE_SCHEMA, TABLE_NAME, AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES";
-    public static final String QUERY_COLUMN = "SHOW COLUMNS FROM `%s`.`%s` WHERE EXTRA='AUTO_INCREMENT'";
+    private static final String QUERY_TABLE = "SELECT TABLE_SCHEMA, TABLE_NAME, AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES";
+    private static final String QUERY_COLUMN = "SHOW COLUMNS FROM `%s`.`%s` WHERE EXTRA='AUTO_INCREMENT'";
 
     public MySQLIdentityInspector() {
         super(IDENTITY, TableInspectionScope.class);
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        StringBuilder query = new StringBuilder(QUERY_TABLE);
+        Collection<String> filters = newArrayList();
+        Collection<Object> parameters = newArrayList();
+        String catalog = tableInspectionScope.getCatalog();
+        if (catalog != null) {
+            filters.add(containsAny(tableInspectionScope.getCatalog(), "%") ? "TABLE_SCHEMA LIKE ?" : "TABLE_SCHEMA=?");
+            parameters.add(catalog);
+        } else {
+            filters.add("TABLE_SCHEMA=DATABASE()");
+        }
+        String table = tableInspectionScope.getTable();
+        if (table != null) {
+            filters.add(containsAny(tableInspectionScope.getCatalog(), "%") ? "TABLE_NAME LIKE ?" : "TABLE_NAME=?");
+            parameters.add(table);
+        }
+        filters.add("AUTO_INCREMENT IS NOT NULL");
+        where(query, filters, "AND");
+        return new ParameterizedQuery(newQuery(query.toString()), parameters);
     }
 
     @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            final StringBuilder query = new StringBuilder(QUERY_TABLE);
-            Collection<String> filters = Lists.newArrayList();
-            final Collection<String> parameters = Lists.newArrayList();
-            String catalogName = inspectionScope.getCatalog();
-            if (catalogName != null) {
-                filters.add(containsAny(inspectionScope.getCatalog(), "%") ? "TABLE_SCHEMA LIKE ?" : "TABLE_SCHEMA=?");
-                parameters.add(catalogName);
-            } else {
-                filters.add("TABLE_SCHEMA=DATABASE()");
-            }
-            String tableName = inspectionScope.getTable();
-            if (tableName != null) {
-                filters.add(containsAny(inspectionScope.getCatalog(), "%") ? "TABLE_NAME LIKE ?" : "TABLE_NAME=?");
-                parameters.add(tableName);
-            }
-            filters.add("AUTO_INCREMENT IS NOT NULL");
-            QueryUtils.where(query, filters, "AND");
-            StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-            template.execute(
-                    new StatementFactory<PreparedStatement>() {
-                        @Override
-                        public PreparedStatement create(Connection connection) throws SQLException {
-                            return connection.prepareStatement(query.toString());
-                        }
-                    },
-                    new StatementCallback<PreparedStatement>() {
-                        @Override
-                        public void process(PreparedStatement statement) throws SQLException {
-                            int parameter = 1;
-                            for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
-                                statement.setString(parameter++, iterator.next());
-                            }
-                            inspect(inspectionContext, statement.executeQuery());
-                        }
-                    }
-            );
-        }
-    }
-
-    private void inspect(final InspectionContext inspectionContext, ResultSet tables) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet tables) throws SQLException {
         final InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        final Map<Table, Sequence> sequenceMap = Maps.newHashMap();
+        final Map<Table, Sequence> sequences = newHashMap();
         while (tables.next()) {
-            Table table = addTable(inspectionResults, tables.getString("TABLE_SCHEMA"), null, tables.getString("TABLE_NAME"));
+            Table table = addTable(inspectionResults, tables.getString("TABLE_SCHEMA"), null,
+                    tables.getString("TABLE_NAME"));
             Sequence sequence = new Sequence();
             sequence.setLastValue(tables.getLong("AUTO_INCREMENT"));
-            sequenceMap.put(table, sequence);
+            sequences.put(table, sequence);
         }
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
+        template.executeStatement(
                 new StatementFactory<Statement>() {
                     @Override
-                    public Statement create(Connection connection) throws SQLException {
+                    public Statement createStatement(Connection connection)
+                            throws SQLException {
                         return connection.createStatement();
                     }
                 },
                 new StatementCallback<Statement>() {
 
                     @Override
-                    public void process(Statement statement) throws SQLException {
-                        for (Map.Entry<Table, Sequence> sequenceEntry : sequenceMap.entrySet()) {
+                    public void executeStatement(Statement statement)
+                            throws SQLException {
+                        for (Map.Entry<Table, Sequence> sequenceEntry : sequences.entrySet()) {
                             Table table = sequenceEntry.getKey();
                             Sequence sequence = sequenceEntry.getValue();
                             ResultSet columns = statement.executeQuery(

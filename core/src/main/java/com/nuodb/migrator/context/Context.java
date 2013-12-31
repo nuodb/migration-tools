@@ -36,7 +36,7 @@ public interface Context {
 
     Messages getMessages();
 
-    <T> T getService(Class<T> serviceType);
+    <T> T createService(Class<T> serviceType);
 
     void addService(Object service);
 

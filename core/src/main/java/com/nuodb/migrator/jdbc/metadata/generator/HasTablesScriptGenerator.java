@@ -67,25 +67,25 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
     }
 
     @Override
-    public Collection<String> getCreateScripts(H tables, ScriptGeneratorContext scriptGeneratorContext) {
-        return getHasTablesCreateScripts(getTables(tables, scriptGeneratorContext), scriptGeneratorContext);
+    public Collection<String> getCreateScripts(H tables, ScriptGeneratorManager scriptGeneratorManager) {
+        return getHasTablesCreateScripts(getTables(tables, scriptGeneratorManager), scriptGeneratorManager);
     }
 
     @Override
-    public Collection<String> getDropScripts(H tables, ScriptGeneratorContext scriptGeneratorContext) {
-        return getHasTablesDropScripts(getTables(tables, scriptGeneratorContext), scriptGeneratorContext);
+    public Collection<String> getDropScripts(H tables, ScriptGeneratorManager scriptGeneratorManager) {
+        return getHasTablesDropScripts(getTables(tables, scriptGeneratorManager), scriptGeneratorManager);
     }
 
     @Override
-    public Collection<String> getDropCreateScripts(H tables, ScriptGeneratorContext scriptGeneratorContext) {
-        return getHasTablesDropCreateScripts(getTables(tables, scriptGeneratorContext), scriptGeneratorContext);
+    public Collection<String> getDropCreateScripts(H tables, ScriptGeneratorManager scriptGeneratorManager) {
+        return getHasTablesDropCreateScripts(getTables(tables, scriptGeneratorManager), scriptGeneratorManager);
     }
 
-    protected HasTables getTables(H tables, ScriptGeneratorContext scriptGeneratorContext) {
+    protected HasTables getTables(H tables, ScriptGeneratorManager scriptGeneratorManager) {
         return tables;
     }
 
-    protected Collection<String> getHasTablesCreateScripts(HasTables tables, ScriptGeneratorContext context) {
+    protected Collection<String> getHasTablesCreateScripts(HasTables tables, ScriptGeneratorManager context) {
         initScriptGeneratorContext(context);
         try {
             Collection<String> scripts = newArrayList();
@@ -107,7 +107,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
     }
 
-    protected Collection<String> getHasTablesDropScripts(HasTables tables, ScriptGeneratorContext context) {
+    protected Collection<String> getHasTablesDropScripts(HasTables tables, ScriptGeneratorManager context) {
         initScriptGeneratorContext(context);
         try {
             Collection<String> scripts = newArrayList();
@@ -128,7 +128,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
     }
 
-    protected Collection<String> getHasTablesDropCreateScripts(HasTables tables, ScriptGeneratorContext context) {
+    protected Collection<String> getHasTablesDropCreateScripts(HasTables tables, ScriptGeneratorManager context) {
         initScriptGeneratorContext(context);
         try {
             Collection<String> scripts = newArrayList();
@@ -152,13 +152,13 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
     }
 
-    protected GroupScriptsBy getGroupScriptsBy(ScriptGeneratorContext context) {
+    protected GroupScriptsBy getGroupScriptsBy(ScriptGeneratorManager context) {
         GroupScriptsBy groupScriptsBy = (GroupScriptsBy) context.getAttributes().get(GROUP_SCRIPTS_BY);
         return groupScriptsBy != null ? groupScriptsBy : GroupScriptsBy.TABLE;
     }
 
     protected void addCreateScripts(Collection<Table> tables, Collection<String> scripts,
-                                    ScriptGeneratorContext context) {
+                                    ScriptGeneratorManager context) {
         Collection<MetaDataType> objectTypes = context.getObjectTypes();
         Dialect dialect = context.getTargetDialect();
         if (objectTypes.contains(IDENTITY)) {
@@ -174,15 +174,15 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             }
         }
         if (objectTypes.contains(TABLE)) {
-            ScriptGeneratorContext tableScriptGeneratorContext = new ScriptGeneratorContext(context);
+            ScriptGeneratorManager tableScriptGeneratorManager = new ScriptGeneratorManager(context);
             Collection<Table> tableFromContext = (Collection<Table>)
-                    tableScriptGeneratorContext.getAttributes().get(TABLES);
-            tableScriptGeneratorContext.getObjectTypes().remove(FOREIGN_KEY);
+                    tableScriptGeneratorManager.getAttributes().get(TABLES);
+            tableScriptGeneratorManager.getObjectTypes().remove(FOREIGN_KEY);
             for (Table table : tables) {
                 if (!addTableScripts(table, context)) {
                     continue;
                 }
-                scripts.addAll(tableScriptGeneratorContext.getCreateScripts(table));
+                scripts.addAll(tableScriptGeneratorManager.getCreateScripts(table));
                 tableFromContext.add(table);
             }
         }
@@ -243,7 +243,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         addForeignKeysScripts(scripts, false, context);
     }
 
-    protected void addForeignKeysScripts(Collection<String> scripts, boolean force, ScriptGeneratorContext context) {
+    protected void addForeignKeysScripts(Collection<String> scripts, boolean force, ScriptGeneratorManager context) {
         Collection<MetaDataType> objectTypes = context.getObjectTypes();
         if (objectTypes.contains(FOREIGN_KEY)) {
             Collection<Table> generatedTables = (Collection<Table>) context.getAttributes().get(TABLES);
@@ -264,21 +264,9 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
     }
 
     protected void addDropScripts(Collection<Table> tables, Collection<String> scripts,
-                                  ScriptGeneratorContext context) {
+                                  ScriptGeneratorManager context) {
         Collection<MetaDataType> objectTypes = context.getObjectTypes();
         Dialect dialect = context.getTargetDialect();
-        if (objectTypes.contains(IDENTITY) && dialect.supportsSequence()) {
-            for (Table table : tables) {
-                if (!addTableScripts(table, context)) {
-                    continue;
-                }
-                for (Column column : table.getColumns()) {
-                    if (column.getSequence() != null) {
-                        scripts.addAll(context.getDropScripts(column.getSequence()));
-                    }
-                }
-            }
-        }
         if (objectTypes.contains(FOREIGN_KEY) && dialect.supportsDropConstraints()) {
             for (Table table : tables) {
                 if (!addTableScripts(table, context)) {
@@ -315,14 +303,26 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                 scripts.addAll(context.getDropScripts(table));
             }
         }
+        if (objectTypes.contains(IDENTITY) && dialect.supportsSequence()) {
+            for (Table table : tables) {
+                if (!addTableScripts(table, context)) {
+                    continue;
+                }
+                for (Column column : table.getColumns()) {
+                    if (column.getSequence() != null) {
+                        scripts.addAll(context.getDropScripts(column.getSequence()));
+                    }
+                }
+            }
+        }
     }
 
-    protected boolean addTableScripts(Table table, ScriptGeneratorContext context) {
+    protected boolean addTableScripts(Table table, ScriptGeneratorManager context) {
         Collection<String> tableTypes = (Collection<String>) context.getAttributes().get(TABLE_TYPES);
         return tableTypes != null ? tableTypes.contains(table.getType()) : Table.TABLE.equals(table.getType());
     }
 
-    protected void initScriptGeneratorContext(ScriptGeneratorContext context) {
+    protected void initScriptGeneratorContext(ScriptGeneratorManager context) {
         Map<String, Object> attributes = context.getAttributes();
         attributes.put(TABLES, newLinkedHashSet());
         attributes.put(FOREIGN_KEYS,
@@ -336,7 +336,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         );
     }
 
-    protected void releaseScriptGeneratorContext(ScriptGeneratorContext context) {
+    protected void releaseScriptGeneratorContext(ScriptGeneratorManager context) {
         Map<String, Object> attributes = context.getAttributes();
         attributes.remove(TABLES);
         attributes.remove(FOREIGN_KEYS);

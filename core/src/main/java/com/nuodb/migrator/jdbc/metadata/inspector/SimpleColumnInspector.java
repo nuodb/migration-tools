@@ -34,7 +34,6 @@ import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
@@ -51,42 +50,26 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
+    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+            throws SQLException {
+        return inspectionContext.getConnection().getMetaData().getColumns(
+                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(),
+                tableInspectionScope.getTable(), null);
     }
 
     @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes)
-            throws SQLException {
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            inspect(inspectionContext, inspectionScope);
-        }
-    }
-
-    protected void inspect(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
-            throws SQLException {
-        ResultSet columns = inspectionContext.getConnection().getMetaData().getColumns(
-                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(), tableInspectionScope.getTable(), null);
-        try {
-            inspect(inspectionContext, columns);
-        } finally {
-            close(columns);
-        }
-    }
-
-    protected void inspect(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (columns.next()) {
             Table table = addTable(inspectionResults, columns.getString("TABLE_CAT"),
                     columns.getString("TABLE_SCHEM"), columns.getString("TABLE_NAME"));
             Column column = table.addColumn(columns.getString("COLUMN_NAME"));
-            inspect(inspectionContext, columns, column);
+            processColumn(inspectionContext, columns, column);
             inspectionResults.addObject(column);
         }
     }
 
-    protected void inspect(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
+    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
         JdbcTypeDesc typeDescAlias = inspectionContext.getDialect().getJdbcTypeAlias(
                 columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
         column.setTypeCode(typeDescAlias.getTypeCode());
@@ -108,7 +91,7 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
     }
 
     @Override
-    protected boolean supports(TableInspectionScope inspectionScope) {
-        return inspectionScope.getTable() != null;
+    protected boolean supportsScope(TableInspectionScope tableInspectionScope) {
+        return tableInspectionScope.getTable() != null;
     }
 }

@@ -29,31 +29,25 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Catalog;
 import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
-import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validate;
+import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.*;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBSchemaInspector extends InspectorBase<Catalog, SchemaInspectionScope> {
+public class NuoDBSchemaInspector extends ManagedInspectorBase<Catalog, SchemaInspectionScope> {
 
     private static final String QUERY = "SELECT DISTINCT SCHEMA FROM SYSTEM.TABLES";
 
@@ -62,16 +56,9 @@ public class NuoDBSchemaInspector extends InspectorBase<Catalog, SchemaInspectio
     }
 
     @Override
-    public void inspectObjects(InspectionContext inspectionContext, Collection<? extends Catalog> catalogs) throws SQLException {
-        inspectScope(inspectionContext, new SchemaInspectionScope());
-    }
-
-    @Override
-    public void inspectScope(final InspectionContext inspectionContext, final SchemaInspectionScope inspectionScope) throws SQLException {
-        validate(inspectionScope);
-
+    protected Query createQuery(InspectionContext inspectionContext, SchemaInspectionScope inspectionScope) {
         final Collection<String> filters = newArrayList();
-        final Collection<String> parameters = newArrayList();
+        final Collection<Object> parameters = newArrayList();
         String schemaName = inspectionScope.getSchema();
         if (schemaName != null) {
             filters.add(containsAny(schemaName, "%_") ? "SCHEMA LIKE ?" : "SCHEMA=?");
@@ -80,33 +67,20 @@ public class NuoDBSchemaInspector extends InspectorBase<Catalog, SchemaInspectio
         final StringBuilder query = new StringBuilder(QUERY);
         where(query, filters, "AND");
         orderBy(query, singleton("SCHEMA"), ASC);
-
-        StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
-                new StatementFactory<PreparedStatement>() {
-                    @Override
-                    public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(query.toString(), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                    }
-                },
-                new StatementCallback<PreparedStatement>() {
-                    @Override
-                    public void process(PreparedStatement statement) throws SQLException {
-                        int parameter = 1;
-                        for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
-                            statement.setString(parameter++, iterator.next());
-                        }
-                        inspect(inspectionContext, statement.executeQuery());
-                    }
-                }
-        );
+        return new ParameterizedQuery(newQuery(query.toString()), parameters);
     }
 
-    private void inspect(InspectionContext inspectionContext, ResultSet schemas) throws SQLException {
+    @Override
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet schemas) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (schemas.next()) {
             Schema schema = addSchema(inspectionResults, null, schemas.getString("SCHEMA"));
             inspectionResults.addObject(schema);
         }
+    }
+
+    @Override
+    protected SchemaInspectionScope createInspectionScope(Catalog catalog) {
+        return new SchemaInspectionScope();
     }
 }

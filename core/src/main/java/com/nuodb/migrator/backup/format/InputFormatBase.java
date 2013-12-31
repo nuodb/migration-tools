@@ -27,13 +27,10 @@
  */
 package com.nuodb.migrator.backup.format;
 
-import com.google.common.collect.Lists;
-import com.nuodb.migrator.backup.catalog.Column;
+import com.nuodb.migrator.backup.Column;
 import com.nuodb.migrator.backup.format.value.Value;
 import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.backup.format.value.ValueType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -49,8 +46,6 @@ import static com.google.common.io.Closeables.closeQuietly;
  */
 @SuppressWarnings("unchecked")
 public abstract class InputFormatBase extends FormatBase implements InputFormat {
-
-    private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     private Reader reader;
     private InputStream inputStream;

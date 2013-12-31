@@ -32,9 +32,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.nuodb.migrator.backup.format.InputFormatBase;
 import com.nuodb.migrator.backup.format.InputFormatException;
 import com.nuodb.migrator.backup.format.value.Value;
-import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.backup.format.value.ValueType;
-import com.nuodb.migrator.jdbc.model.ColumnList;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;

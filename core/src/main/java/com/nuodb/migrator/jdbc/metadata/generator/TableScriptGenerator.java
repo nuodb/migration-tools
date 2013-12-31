@@ -56,23 +56,23 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     @Override
-    public Collection<String> getCreateScripts(Table table, ScriptGeneratorContext scriptGeneratorContext) {
-        Dialect dialect = scriptGeneratorContext.getTargetDialect();
+    public Collection<String> getCreateScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder("CREATE TABLE");
-        buffer.append(' ').append(scriptGeneratorContext.getQualifiedName(table)).append(" (");
+        buffer.append(' ').append(scriptGeneratorManager.getQualifiedName(table)).append(" (");
         Collection<Column> columns = table.getColumns();
         final Collection<Index> indexes = table.getIndexes();
-        Collection<MetaDataType> objectTypes = scriptGeneratorContext.getObjectTypes();
+        Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();
-            buffer.append(scriptGeneratorContext.getName(column));
+            buffer.append(scriptGeneratorManager.getName(column));
             buffer.append(' ');
-            buffer.append(getColumnTypeName(column, scriptGeneratorContext));
+            buffer.append(getColumnTypeName(column, scriptGeneratorManager));
             if (column.isIdentity() && objectTypes.contains(IDENTITY)) {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
                         column.getSequence() != null ?
-                                scriptGeneratorContext.getName(column.getSequence()) : null));
+                                scriptGeneratorManager.getName(column.getSequence()) : null));
             }
             if (column.isNullable()) {
                 buffer.append(dialect.getNullColumnString());
@@ -80,7 +80,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(' ');
                 buffer.append("NOT NULL");
             }
-            String defaultValue = dialect.getDefaultValue(column, scriptGeneratorContext.getSourceSession());
+            String defaultValue = dialect.getDefaultValue(column, scriptGeneratorManager.getSourceSession());
             if (defaultValue != null) {
                 buffer.append(" DEFAULT ").append(defaultValue);
             }
@@ -120,8 +120,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             PrimaryKey primaryKey = table.getPrimaryKey();
             if (primaryKey != null) {
                 ConstraintScriptGenerator<PrimaryKey> generator = (ConstraintScriptGenerator<PrimaryKey>)
-                        scriptGeneratorContext.getScriptGenerator(primaryKey);
-                buffer.append(", ").append(generator.getConstraintScript(primaryKey, scriptGeneratorContext));
+                        scriptGeneratorManager.getScriptGenerator(primaryKey);
+                buffer.append(", ").append(generator.getConstraintScript(primaryKey, scriptGeneratorManager));
             }
         }
         if (objectTypes.contains(INDEX) && dialect.supportsIndexInCreateTable()) {
@@ -132,8 +132,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                     continue;
                 }
                 ConstraintScriptGenerator<Index> generator = (ConstraintScriptGenerator<Index>)
-                        scriptGeneratorContext.getScriptGenerator(index);
-                String constraint = generator.getConstraintScript(index, scriptGeneratorContext);
+                        scriptGeneratorManager.getScriptGenerator(index);
+                String constraint = generator.getConstraintScript(index, scriptGeneratorManager);
                 if (constraint != null) {
                     buffer.append(", ").append(constraint);
                 }
@@ -143,8 +143,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         if (objectTypes.contains(FOREIGN_KEY)) {
             for (ForeignKey foreignKey : table.getForeignKeys()) {
                 ConstraintScriptGenerator<ForeignKey> generator = (ConstraintScriptGenerator<ForeignKey>)
-                        scriptGeneratorContext.getScriptGenerator(foreignKey);
-                String constraint = generator.getConstraintScript(foreignKey, scriptGeneratorContext);
+                        scriptGeneratorManager.getScriptGenerator(foreignKey);
+                String constraint = generator.getConstraintScript(foreignKey, scriptGeneratorManager);
                 if (constraint != null) {
                     buffer.append(", ").append(constraint);
                 }
@@ -165,8 +165,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     }
 
     @Override
-    public Collection<String> getDropScripts(Table table, ScriptGeneratorContext scriptGeneratorContext) {
-        Dialect dialect = scriptGeneratorContext.getTargetDialect();
+    public Collection<String> getDropScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder("DROP TABLE");
         buffer.append(' ');
         boolean ifExistsBeforeTable;
@@ -174,7 +174,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             buffer.append("IF EXISTS");
             buffer.append(' ');
         }
-        buffer.append(scriptGeneratorContext.getQualifiedName(table));
+        buffer.append(scriptGeneratorManager.getQualifiedName(table));
         String cascadeConstraints = dialect.getCascadeConstraints();
         if (cascadeConstraints != null) {
             buffer.append(' ');
@@ -187,7 +187,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         return singleton(buffer.toString());
     }
 
-    protected String getColumnTypeName(Column column, ScriptGeneratorContext context) {
+    protected String getColumnTypeName(Column column, ScriptGeneratorManager context) {
         Dialect dialect = context.getTargetDialect();
         int scale = column.getScale();
         if (scale < 0 && !dialect.supportsNegativeScale()) {

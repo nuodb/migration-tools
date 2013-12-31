@@ -36,8 +36,12 @@ import static com.nuodb.migrator.context.ContextHolder.getContext;
  */
 public class ContextUtils {
 
-    public static <T> T getService(Class<T> serviceType) {
-        return getContext().getService(serviceType);
+    public static <T> T createService(T service, Class<T> serviceType) {
+        return service != null ? service : getContext().createService(serviceType);
+    }
+
+    public static <T> T createService(Class<T> serviceType) {
+        return getContext().createService(serviceType);
     }
 
     public static Messages getMessages() {

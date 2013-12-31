@@ -39,6 +39,7 @@ import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createSequence;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
@@ -55,8 +56,8 @@ public class MySQLIdentityInspectorTest extends InspectorTestBase {
 
     @Test
     public void testInspect() throws Exception {
-        PreparedStatement queryTable = mock(PreparedStatement.class);
-        given(getConnection().prepareStatement(anyString())).willReturn(queryTable);
+        PreparedStatement statement = mock(PreparedStatement.class);
+        given(getConnection().prepareStatement(anyString(), anyInt(), anyInt())).willReturn(statement);
 
         String catalogName = "catalog";
         String schemaName = null;
@@ -66,7 +67,7 @@ public class MySQLIdentityInspectorTest extends InspectorTestBase {
 
         ResultSet tables = mock(ResultSet.class);
         given(tables.next()).willReturn(true, false);
-        given(queryTable.executeQuery()).willReturn(tables);
+        given(statement.executeQuery()).willReturn(tables);
         given(tables.getString("TABLE_SCHEMA")).willReturn(catalogName);
         given(tables.getString("TABLE_NAME")).willReturn(tableName);
         given(tables.getLong("AUTO_INCREMENT")).willReturn(lastValue);

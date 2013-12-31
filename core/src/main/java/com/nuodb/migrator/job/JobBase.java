@@ -27,14 +27,34 @@
  */
 package com.nuodb.migrator.job;
 
+import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
 public abstract class JobBase implements Job {
 
+    protected final transient Logger logger = getLogger(getClass());
+
+    private JobExecution jobExecution;
+
+    @Override
+    public void init(JobExecution jobExecution) throws Exception {
+        this.jobExecution = jobExecution;
+        init();
+    }
+
+    protected abstract void init() throws Exception;
+
     @Override
     public String getName() {
         return getClass().getName();
+    }
+
+    public JobExecution getJobExecution() {
+        return jobExecution;
     }
 }

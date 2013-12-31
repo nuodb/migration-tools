@@ -37,6 +37,7 @@ public interface CliResources {
      */
     final String ROOT_GROUP_NAME = "com.nuodb.migrator.root.group.name";
 
+    final String VERSION_OPTION_DESCRIPTION = "com.nuodb.migrator.version.option.description";
     final String HELP_OPTION_DESCRIPTION = "com.nuodb.migrator.help.option.description";
     final String HELP_ARGUMENT_NAME = "com.nuodb.migrator.help.argument.name";
     final String LIST_OPTION_DESCRIPTION = "com.nuodb.migrator.list.option.description";
@@ -46,9 +47,12 @@ public interface CliResources {
     final String CONFIG_OPTION_DESCRIPTION = "com.nuodb.migrator.config.option.description";
     final String CONFIG_ARGUMENT_NAME = "com.nuodb.migrator.config.argument.name";
 
-    /**
-     * Dump plugin resources
-     */
+    final String MIGRATION_MODE_GROUP_NAME = "com.nuodb.migrator.migration.mode.group.name";
+    final String MIGRATION_MODE_DATA_OPTION_DESCRIPTION = "com.nuodb.migrator.migration.mode.data.option.description";
+    final String MIGRATION_MODE_DATA_ARGUMENT_NAME = "com.nuodb.migrator.migration.mode.data.argument.name";
+    final String MIGRATION_MODE_SCHEMA_OPTION_DESCRIPTION = "com.nuodb.migrator.migration.mode.schema.option.description";
+    final String MIGRATION_MODE_SCHEMA_ARGUMENT_NAME = "com.nuodb.migrator.migration.mode.schema.argument.name";
+
     final String DUMP_GROUP_NAME = "com.nuodb.migrator.dump.group.name";
     final String SOURCE_GROUP_NAME = "com.nuodb.migrator.source.group.name";
     final String SOURCE_DRIVER_OPTION_DESCRIPTION = "com.nuodb.migrator.source.driver.option.description";
@@ -76,6 +80,7 @@ public interface CliResources {
     final String OUTPUT_OPTION_DESCRIPTION = "com.nuodb.migrator.output.option.description";
     final String OUTPUT_OPTION_ARGUMENT_NAME = "com.nuodb.migrator.output.argument.description";
 
+    final String DUMP_WRITER_GROUP_NAME = "com.nuodb.migrator.dump.writer.group.name";
     final String TIME_ZONE_OPTION_DESCRIPTION = "com.nuodb.migrator.time.zone.option.description";
     final String TIME_ZONE_ARGUMENT_NAME = "com.nuodb.migrator.time.zone.argument.name";
 
@@ -127,19 +132,20 @@ public interface CliResources {
 
     final String SCHEMA_GROUP_NAME = "com.nuodb.migrator.schema.group.name";
     final String SCHEMA_OUTPUT_GROUP_NAME = "com.nuodb.migrator.schema.output.group.name";
-    final String SCHEMA_META_DATA_OPTION_DESCRIPTION = "com.nuodb.migrator.schema.meta.data.option.description";
-    final String SCHEMA_META_DATA_ARGUMENT_NAME = "com.nuodb.migrator.schema.meta.data.argument.name";
+    final String META_DATA_OPTION_DESCRIPTION = "com.nuodb.migrator.meta.data.option.description";
+    final String META_DATA_ARGUMENT_NAME = "com.nuodb.migrator.meta.data.argument.name";
 
-    final String SCHEMA_SCRIPT_TYPE_OPTION_DESCRIPTION = "com.nuodb.migrator.schema.script.type.option.description";
-    final String SCHEMA_SCRIPT_TYPE_ARGUMENT_NAME = "com.nuodb.migrator.schema.script.type.argument.name";
+    final String SCRIPT_TYPE_OPTION_DESCRIPTION = "com.nuodb.migrator.script.type.option.description";
+    final String SCRIPT_TYPE_ARGUMENT_NAME = "com.nuodb.migrator.script.type.argument.name";
 
-    final String SCHEMA_GROUP_SCRIPTS_BY_OPTION_DESCRIPTION = "com.nuodb.migrator.schema.group.scripts.by.option.description";
-    final String SCHEMA_GROUP_SCRIPTS_BY_ARGUMENT_NAME = "com.nuodb.migrator.schema.group.scripts.by.argument.name";
-    final String SCHEMA_IDENTIFIER_QUOTING_OPTION_DESCRIPTION = "com.nuodb.migrator.schema.identifier.quoting.option.description";
-    final String SCHEMA_IDENTIFIER_QUOTING_ARGUMENT_NAME = "com.nuodb.migrator.schema.identifier.quoting.argument.name";
-    final String SCHEMA_IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION = "com.nuodb.migrator.schema.identifier.normalize.option.description";
-    final String SCHEMA_IDENTIFIER_NORMALIZER_ARGUMENT_NAME = "com.nuodb.migrator.schema.identifier.normalizer.argument.name";
+    final String GROUP_SCRIPTS_BY_OPTION_DESCRIPTION = "com.nuodb.migrator.group.scripts.by.option.description";
+    final String GROUP_SCRIPTS_BY_ARGUMENT_NAME = "com.nuodb.migrator.group.scripts.by.argument.name";
+    final String IDENTIFIER_QUOTING_OPTION_DESCRIPTION = "com.nuodb.migrator.identifier.quoting.option.description";
+    final String IDENTIFIER_QUOTING_ARGUMENT_NAME = "com.nuodb.migrator.identifier.quoting.argument.name";
+    final String IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION = "com.nuodb.migrator.identifier.normalize.option.description";
+    final String IDENTIFIER_NORMALIZER_ARGUMENT_NAME = "com.nuodb.migrator.identifier.normalizer.argument.name";
 
+    final String SCRIPT_GENERATOR_GROUP_NAME = "com.nuodb.migrator.script.generator.group.name";
     final String JDBC_TYPE_GROUP_NAME = "com.nuodb.migrator.jdbc.type.group.name";
     final String JDBC_TYPE_CODE_OPTION_DESCRIPTION = "com.nuodb.migrator.jdbc.type.code.option.description";
     final String JDBC_TYPE_CODE_ARGUMENT_NAME = "com.nuodb.migrator.jdbc.type.code.argument.name";

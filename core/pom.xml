@@ -19,6 +19,26 @@
         </repository>
     </repositories>
 
+    <properties>
+        <com.nuodb.migrator.version>${project.version}</com.nuodb.migrator.version>
+    </properties>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>com/nuodb/migrator/migrator.properties</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>aopalliance</groupId>

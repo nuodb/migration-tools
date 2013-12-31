@@ -34,9 +34,9 @@ public interface Job {
 
     String getName();
 
-    void init(JobExecution execution) throws Exception;
+    void init(JobExecution jobExecution) throws Exception;
 
-    void execute(JobExecution execution) throws Exception;
+    void execute() throws Exception;
 
-    void release(JobExecution execution) throws Exception;
+    void release() throws Exception;
 }

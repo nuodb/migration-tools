@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.split;
 
+import com.nuodb.migrator.jdbc.query.ParametersBinder;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.LimitHandler;
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;

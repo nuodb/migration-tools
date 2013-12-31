@@ -30,9 +30,7 @@ package com.nuodb.migrator.backup.format.xml;
 import com.nuodb.migrator.backup.format.InputFormatBase;
 import com.nuodb.migrator.backup.format.InputFormatException;
 import com.nuodb.migrator.backup.format.value.Value;
-import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.backup.format.value.ValueType;
-import com.nuodb.migrator.jdbc.model.ColumnList;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;

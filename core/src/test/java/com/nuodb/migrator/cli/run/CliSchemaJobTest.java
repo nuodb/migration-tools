@@ -35,10 +35,9 @@ import com.nuodb.migrator.jdbc.dialect.IdentifierQuotings;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
-import com.nuodb.migrator.schema.SchemaJobFactory;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
-import com.nuodb.migrator.spec.SchemaSpec;
+import com.nuodb.migrator.spec.SchemaJobSpec;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -88,12 +87,11 @@ public class CliSchemaJobTest {
         };
         parser.parse(arguments, cliSchemaJob);
 
-        SchemaJobFactory schemaJobFactory = (SchemaJobFactory) cliSchemaJob.getJobFactory();
-        assertEquals(schemaJobFactory.getSchemaSpec(), createSchemaSpec());
+        assertEquals(cliSchemaJob.getJobSpec(), createSchemaSpec());
     }
 
-    private SchemaSpec createSchemaSpec() {
-        SchemaSpec schemaSpec = new SchemaSpec();
+    private SchemaJobSpec createSchemaSpec() {
+        SchemaJobSpec schemaSpec = new SchemaJobSpec();
 
         DriverConnectionSpec sourceConnectionSpec = new DriverConnectionSpec();
         sourceConnectionSpec.setDriver("oracle.jdbc.driver.OracleDriver");
@@ -101,7 +99,7 @@ public class CliSchemaJobTest {
         sourceConnectionSpec.setUsername("test");
         sourceConnectionSpec.setPassword("12345");
         sourceConnectionSpec.setSchema("test");
-        schemaSpec.setSourceConnectionSpec(sourceConnectionSpec);
+        schemaSpec.setSourceSpec(sourceConnectionSpec);
 
         DriverConnectionSpec targetConnectionSpec = new DriverConnectionSpec();
         targetConnectionSpec.setDriver(NUODB_DRIVER);
@@ -109,7 +107,7 @@ public class CliSchemaJobTest {
         targetConnectionSpec.setUsername("dba");
         targetConnectionSpec.setPassword("goalie");
         targetConnectionSpec.setSchema("test");
-        schemaSpec.setTargetConnectionSpec(targetConnectionSpec);
+        schemaSpec.setTargetSpec(targetConnectionSpec);
 
         ResourceSpec outputSpec = new ResourceSpec();
         outputSpec.setPath("/tmp/schema.sql");

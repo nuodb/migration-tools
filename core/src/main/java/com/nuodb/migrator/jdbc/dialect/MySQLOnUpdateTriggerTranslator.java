@@ -34,7 +34,7 @@ import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.util.Collection;
 
-import static com.nuodb.migrator.context.ContextUtils.getService;
+import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
 import static java.sql.Types.*;
 import static java.util.Arrays.asList;
@@ -65,7 +65,7 @@ public class MySQLOnUpdateTriggerTranslator extends TriggerTranslatorBase {
     public Script translate(TriggerScript script, TranslationContext context) {
         Column column = getColumn(script.getTrigger());
         DatabaseInfo databaseInfo = context.getDatabaseInfo();
-        Dialect dialect = getService(DialectResolver.class).resolve(databaseInfo);
+        Dialect dialect = createService(DialectResolver.class).resolve(databaseInfo);
         StringBuilder translation = new StringBuilder();
         translation.append("NEW.");
         translation.append(dialect.getIdentifier(column.getName(), column));

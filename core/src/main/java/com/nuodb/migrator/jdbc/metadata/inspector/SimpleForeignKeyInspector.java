@@ -29,15 +29,16 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.ForeignKey;
+import com.nuodb.migrator.jdbc.metadata.ForeignKeyReference;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.google.common.collect.Iterables.tryFind;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 
@@ -47,74 +48,66 @@ import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.
 public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
+    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+            throws SQLException {
+        return inspectionContext.getConnection().getMetaData().getImportedKeys(
+                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(), tableInspectionScope.getTable());
     }
 
     @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet foreignKeys) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            ResultSet foreignKeys = databaseMetaData.getImportedKeys(
-                    inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable());
-            try {
-                boolean fixPosition = false;
-                while (foreignKeys.next()) {
-                    final Table primaryTable = addTable(inspectionResults, foreignKeys.getString("PKTABLE_CAT"),
-                            foreignKeys.getString("PKTABLE_SCHEM"), foreignKeys.getString("PKTABLE_NAME"));
-                    final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
+        boolean fixPosition = false;
+        while (foreignKeys.next()) {
+            final Table primaryTable = addTable(inspectionResults, foreignKeys.getString("PKTABLE_CAT"),
+                    foreignKeys.getString("PKTABLE_SCHEM"), foreignKeys.getString("PKTABLE_NAME"));
+            final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
 
-                    final Table foreignTable = addTable(inspectionResults, foreignKeys.getString("FKTABLE_CAT"),
-                            foreignKeys.getString("FKTABLE_SCHEM"), foreignKeys.getString("FKTABLE_NAME"));
-                    final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
-                    int position = foreignKeys.getInt("KEY_SEQ");
-                    if (fixPosition || position == 0) {
-                        fixPosition = true;
-                    }
-                    if (fixPosition) {
-                        position += 1;
-                    }
-                    final Identifier identifier = valueOf(foreignKeys.getString("FK_NAME"));
-                    Optional<ForeignKey> optional = Iterables.tryFind(foreignTable.getForeignKeys(),
-                            new Predicate<ForeignKey>() {
-                                @Override
-                                public boolean apply(ForeignKey foreignKey) {
-                                    if (identifier != null) {
-                                        return identifier.equals(foreignKey.getIdentifier());
-                                    }
-                                    for (ForeignKeyReference foreignKeyReference : foreignKey.getReferences()) {
-                                        if (primaryTable.equals(foreignKeyReference.getPrimaryTable())) {
-                                            return true;
-                                        }
-                                    }
-                                    return false;
-                                }
-                            });
-                    ForeignKey foreignKey;
-                    if (optional.isPresent()) {
-                        foreignKey = optional.get();
-                    } else {
-                        foreignTable.addForeignKey(foreignKey = new ForeignKey(identifier));
-                        foreignKey.setPrimaryTable(primaryTable);
-                        foreignKey.setForeignTable(foreignTable);
-                        foreignKey.setUpdateAction(getReferentialAction(foreignKeys.getInt("UPDATE_RULE")));
-                        foreignKey.setDeleteAction(getReferentialAction(foreignKeys.getInt("DELETE_RULE")));
-                        foreignKey.setDeferrability(getDeferrability(foreignKeys.getInt("DEFERRABILITY")));
-
-                        inspectionResults.addObject(foreignKey);
-                    }
-                    foreignKey.addReference(foreignColumn, primaryColumn, position);
-                }
-            } finally {
-                close(foreignKeys);
+            final Table foreignTable = addTable(inspectionResults, foreignKeys.getString("FKTABLE_CAT"),
+                    foreignKeys.getString("FKTABLE_SCHEM"), foreignKeys.getString("FKTABLE_NAME"));
+            final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
+            int position = foreignKeys.getInt("KEY_SEQ");
+            if (fixPosition || position == 0) {
+                fixPosition = true;
             }
+            if (fixPosition) {
+                position += 1;
+            }
+            final Identifier identifier = valueOf(foreignKeys.getString("FK_NAME"));
+            Optional<ForeignKey> optional = tryFind(foreignTable.getForeignKeys(),
+                    new Predicate<ForeignKey>() {
+                        @Override
+                        public boolean apply(ForeignKey foreignKey) {
+                            if (identifier != null) {
+                                return identifier.equals(foreignKey.getIdentifier());
+                            }
+                            for (ForeignKeyReference foreignKeyReference : foreignKey.getReferences()) {
+                                if (primaryTable.equals(foreignKeyReference.getPrimaryTable())) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+                    });
+            ForeignKey foreignKey;
+            if (optional.isPresent()) {
+                foreignKey = optional.get();
+            } else {
+                foreignTable.addForeignKey(foreignKey = new ForeignKey(identifier));
+                foreignKey.setPrimaryTable(primaryTable);
+                foreignKey.setForeignTable(foreignTable);
+                foreignKey.setUpdateAction(getReferentialAction(foreignKeys.getInt("UPDATE_RULE")));
+                foreignKey.setDeleteAction(getReferentialAction(foreignKeys.getInt("DELETE_RULE")));
+                foreignKey.setDeferrability(getDeferrability(foreignKeys.getInt("DEFERRABILITY")));
+
+                inspectionResults.addObject(foreignKey);
+            }
+            foreignKey.addReference(foreignColumn, primaryColumn, position);
         }
     }
 
     @Override
-    protected boolean supports(TableInspectionScope inspectionScope) {
-        return inspectionScope.getTable() != null;
+    protected boolean supportsScope(TableInspectionScope tableInspectionScope) {
+        return tableInspectionScope.getTable() != null;
     }
 }

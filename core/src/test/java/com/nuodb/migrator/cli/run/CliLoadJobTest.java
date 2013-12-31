@@ -32,10 +32,9 @@ import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.query.InsertType;
-import com.nuodb.migrator.load.LoadJobFactory;
 import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
-import com.nuodb.migrator.spec.LoadSpec;
+import com.nuodb.migrator.spec.LoadJobSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -81,19 +80,18 @@ public class CliLoadJobTest {
         };
         parser.parse(arguments, cliLoadJob);
 
-        LoadJobFactory loadJobFactory = (LoadJobFactory) cliLoadJob.getJobFactory();
-        assertEquals(loadJobFactory.getLoadSpec(), createLoadSpec());
+        assertEquals(cliLoadJob.getJobSpec(), createLoadSpec());
     }
 
-    private LoadSpec createLoadSpec() {
-        LoadSpec loadSpec = new LoadSpec();
+    private LoadJobSpec createLoadSpec() {
+        LoadJobSpec loadJobSpec = new LoadJobSpec();
 
         DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setDriver(NUODB_DRIVER);
         connectionSpec.setUrl("jdbc:com.nuodb://localhost/test?schema=hockey");
         connectionSpec.setUsername("dba");
         connectionSpec.setPassword("goalie");
-        loadSpec.setConnectionSpec(connectionSpec);
+        loadJobSpec.setTargetSpec(connectionSpec);
 
         ResourceSpec inputSpec = new ResourceSpec();
         inputSpec.setPath("/tmp/dump.cat");
@@ -104,15 +102,15 @@ public class CliLoadJobTest {
         attributes.put(CsvAttributes.ATTRIBUTE_QUOTING, "true");
         attributes.put(CsvAttributes.ATTRIBUTE_ESCAPE, "|");
         inputSpec.setAttributes(attributes);
-        loadSpec.setInputSpec(inputSpec);
-        loadSpec.setInsertType(InsertType.INSERT);
+        loadJobSpec.setInputSpec(inputSpec);
+        loadJobSpec.setInsertType(InsertType.INSERT);
 
         Map<String, InsertType> tableInsertTypes = Maps.newHashMap();
         tableInsertTypes.put("deployments", InsertType.INSERT);
         tableInsertTypes.put("deployments_nodes", InsertType.REPLACE);
-        loadSpec.setTableInsertTypes(tableInsertTypes);
-        loadSpec.setTimeZone(TimeZone.getTimeZone("GMT+2"));
-        loadSpec.setCommitStrategy(new BatchCommitStrategy());
-        return loadSpec;
+        loadJobSpec.setTableInsertTypes(tableInsertTypes);
+        loadJobSpec.setTimeZone(TimeZone.getTimeZone("GMT+2"));
+        loadJobSpec.setCommitStrategy(new BatchCommitStrategy());
+        return loadJobSpec;
     }
 }

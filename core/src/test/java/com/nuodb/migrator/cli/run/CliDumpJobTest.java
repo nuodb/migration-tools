@@ -29,7 +29,6 @@ package com.nuodb.migrator.cli.run;
 
 import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
-import com.nuodb.migrator.dump.DumpJobFactory;
 import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.spec.*;
 import org.testng.annotations.BeforeMethod;
@@ -86,12 +85,11 @@ public class CliDumpJobTest {
         };
         parser.parse(arguments, cliDumpJob);
 
-        DumpJobFactory dumpJobFactory = (DumpJobFactory) cliDumpJob.getJobFactory();
-        assertEquals(dumpJobFactory.getDumpSpec(), createDumpSpec());
+        assertEquals(cliDumpJob.getJobSpec(), createDumpSpec());
     }
 
-    private DumpSpec createDumpSpec() {
-        DumpSpec dumpSpec = new DumpSpec();
+    private DumpJobSpec createDumpSpec() {
+        DumpJobSpec dumpSpec = new DumpJobSpec();
 
         DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setDriver("com.mysql.jdbc.Driver");
@@ -103,7 +101,7 @@ public class CliDumpJobTest {
         properties.put("profileSQL", "true");
         connectionSpec.setProperties(properties);
 
-        dumpSpec.setConnectionSpec(connectionSpec);
+        dumpSpec.setSourceSpec(connectionSpec);
 
         ResourceSpec outputSpec = new ResourceSpec();
         outputSpec.setType("xml");

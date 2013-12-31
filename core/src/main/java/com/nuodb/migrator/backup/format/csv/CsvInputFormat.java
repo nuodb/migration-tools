@@ -30,7 +30,6 @@ package com.nuodb.migrator.backup.format.csv;
 import com.nuodb.migrator.backup.format.InputFormatBase;
 import com.nuodb.migrator.backup.format.InputFormatException;
 import com.nuodb.migrator.backup.format.value.Value;
-import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.backup.format.value.ValueType;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;

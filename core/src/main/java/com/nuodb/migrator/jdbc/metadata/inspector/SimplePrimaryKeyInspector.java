@@ -31,12 +31,9 @@ import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Table;
 
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.PRIMARY_KEY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 
@@ -50,40 +47,32 @@ public class SimplePrimaryKeyInspector extends TableInspectorBase<Table, TableIn
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
+    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+            throws SQLException {
+        return inspectionContext.getConnection().getMetaData().getPrimaryKeys(
+                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(), tableInspectionScope.getTable());
     }
 
     @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet primaryKeys) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        DatabaseMetaData metaData = inspectionContext.getConnection().getMetaData();
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            ResultSet primaryKeys = metaData.getPrimaryKeys(
-                    inspectionScope.getCatalog(), inspectionScope.getSchema(), inspectionScope.getTable());
-            try {
-                while (primaryKeys.next()) {
-                    Table table = addTable(inspectionResults, primaryKeys.getString("TABLE_CAT"),
-                            primaryKeys.getString("TABLE_SCHEM"), primaryKeys.getString("TABLE_NAME"));
+        while (primaryKeys.next()) {
+            Table table = addTable(inspectionResults, primaryKeys.getString("TABLE_CAT"),
+                    primaryKeys.getString("TABLE_SCHEM"), primaryKeys.getString("TABLE_NAME"));
 
-                    final Identifier identifier = Identifier.valueOf(primaryKeys.getString("PK_NAME"));
-                    PrimaryKey primaryKey = table.getPrimaryKey();
-                    if (primaryKey == null) {
-                        table.setPrimaryKey(primaryKey = new PrimaryKey(identifier));
-                        inspectionResults.addObject(primaryKey);
-                    }
-                    primaryKey.addColumn(table.addColumn(primaryKeys.getString("COLUMN_NAME")),
-                            primaryKeys.getInt("KEY_SEQ"));
-                }
-            } finally {
-                close(primaryKeys);
+            final Identifier identifier = Identifier.valueOf(primaryKeys.getString("PK_NAME"));
+            PrimaryKey primaryKey = table.getPrimaryKey();
+            if (primaryKey == null) {
+                table.setPrimaryKey(primaryKey = new PrimaryKey(identifier));
+                inspectionResults.addObject(primaryKey);
             }
+            primaryKey.addColumn(table.addColumn(primaryKeys.getString("COLUMN_NAME")),
+                    primaryKeys.getInt("KEY_SEQ"));
         }
     }
 
     @Override
-    protected boolean supports(TableInspectionScope inspectionScope) {
-        return inspectionScope.getTable() != null;
+    protected boolean supportsScope(TableInspectionScope tableInspectionScope) {
+        return tableInspectionScope.getTable() != null;
     }
 }

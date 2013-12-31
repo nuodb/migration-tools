@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format;
 
-import com.nuodb.migrator.backup.catalog.RowSet;
+import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 
 import java.util.Map;

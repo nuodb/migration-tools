@@ -40,19 +40,19 @@ public class ForeignKeyNamingStrategy extends IdentifiableNamingStrategy<Foreign
     }
 
     @Override
-    protected String getIdentifiableName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
+    protected String getIdentifiableName(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder qualifier = new StringBuilder();
-        qualifier.append(scriptGeneratorContext.getQualifiedName(foreignKey.getPrimaryTable(), false));
+        qualifier.append(scriptGeneratorManager.getQualifiedName(foreignKey.getPrimaryTable(), false));
         for (Column column : foreignKey.getPrimaryColumns()) {
             qualifier.append("_");
-            qualifier.append(scriptGeneratorContext.getName(column, false));
+            qualifier.append(scriptGeneratorManager.getName(column, false));
         }
         qualifier.append("_");
 
-        qualifier.append(scriptGeneratorContext.getQualifiedName(foreignKey.getForeignTable(), false));
+        qualifier.append(scriptGeneratorManager.getQualifiedName(foreignKey.getForeignTable(), false));
         for (Column column : foreignKey.getPrimaryColumns()) {
             qualifier.append("_");
-            qualifier.append(scriptGeneratorContext.getName(column, false));
+            qualifier.append(scriptGeneratorManager.getName(column, false));
         }
 
         StringBuilder buffer = new StringBuilder();

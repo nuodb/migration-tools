@@ -27,8 +27,43 @@
  */
 package com.nuodb.migrator;
 
+import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
+import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * @author Sergey Bushik
  */
 public class Migrator {
+
+    private static final transient Logger logger = getLogger(Migrator.class);
+
+    private static final String PROPERTIES = "com/nuodb/migrator/migrator.properties";
+    private static final String VERSION_PROPERTY = "com.nuodb.migrator.version";
+    private static String VERSION;
+
+    static {
+        Properties properties = new Properties();
+        try {
+            InputStream input = getClassLoader().getResourceAsStream(PROPERTIES);
+            if (input != null) {
+                properties.load(input);
+            }
+        } catch (IOException exception) {
+            if (logger.isWarnEnabled()) {
+                logger.warn(format("Can't read %s", PROPERTIES), exception);
+            }
+        }
+        VERSION = properties.getProperty(VERSION_PROPERTY);
+    }
+
+    public static String getVersion() {
+        return VERSION;
+    }
 }

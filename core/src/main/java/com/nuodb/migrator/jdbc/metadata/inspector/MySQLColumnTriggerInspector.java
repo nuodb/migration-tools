@@ -27,23 +27,24 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.ColumnTrigger;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.TriggerEvent;
+import com.nuodb.migrator.jdbc.metadata.TriggerTime;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN_TRIGGER;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.compile;
@@ -57,74 +58,46 @@ public class MySQLColumnTriggerInspector extends TableInspectorBase<Table, Table
     private static final String COLUMN_TRIGGER_REGEX = "ON (\\w+) (.*)";
     private static final Pattern COLUMN_TRIGGER_PATTERN = compile(COLUMN_TRIGGER_REGEX, CASE_INSENSITIVE);
 
-    public static final String QUERY_COLUMN_TRIGGERS = "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, " +
-            "EXTRA FROM INFORMATION_SCHEMA.COLUMNS";
+    public static final String QUERY_COLUMN_TRIGGERS = "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, EXTRA FROM INFORMATION_SCHEMA.COLUMNS";
 
     public MySQLColumnTriggerInspector() {
         super(COLUMN_TRIGGER, TableInspectionScope.class);
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        StringBuilder query = new StringBuilder(QUERY_COLUMN_TRIGGERS);
+        Collection<String> filters = newArrayList();
+        Collection<Object> parameters = newArrayList();
+
+        String catalog = tableInspectionScope.getCatalog();
+        if (catalog != null) {
+            filters.add(containsAny(tableInspectionScope.getCatalog(), "%") ? "TABLE_SCHEMA LIKE ?" : "TABLE_SCHEMA=?");
+            parameters.add(catalog);
+        } else {
+            filters.add("TABLE_SCHEMA=DATABASE()");
+        }
+
+        String table = tableInspectionScope.getTable();
+        if (table != null) {
+            filters.add(containsAny(tableInspectionScope.getCatalog(), "%") ? "TABLE_NAME LIKE ?" : "TABLE_NAME=?");
+            parameters.add(table);
+        }
+
+        filters.add("EXTRA LIKE 'ON %'");
+        where(query, filters, "AND");
+        return new ParameterizedQuery(newQuery(query.toString()), parameters);
     }
 
     @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes)
-            throws SQLException {
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            final StringBuilder query = new StringBuilder(QUERY_COLUMN_TRIGGERS);
-            final Collection<String> filters = newArrayList();
-            final Collection<String> parameters = newArrayList();
-
-            String catalogName = inspectionScope.getCatalog();
-            if (catalogName != null) {
-                filters.add(containsAny(inspectionScope.getCatalog(), "%") ? "TABLE_SCHEMA LIKE ?" : "TABLE_SCHEMA=?");
-                parameters.add(catalogName);
-            } else {
-                filters.add("TABLE_SCHEMA=DATABASE()");
-            }
-
-            String tableName = inspectionScope.getTable();
-            if (tableName != null) {
-                filters.add(containsAny(inspectionScope.getCatalog(), "%") ? "TABLE_NAME LIKE ?" : "TABLE_NAME=?");
-                parameters.add(tableName);
-            }
-
-            filters.add("EXTRA LIKE 'ON %'");
-            where(query, filters, "AND");
-            StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-            template.execute(
-                    new StatementFactory<PreparedStatement>() {
-                        @Override
-                        public PreparedStatement create(Connection connection) throws SQLException {
-                            return connection.prepareStatement(query.toString());
-                        }
-                    },
-                    new StatementCallback<PreparedStatement>() {
-                        @Override
-                        public void process(PreparedStatement statement) throws SQLException {
-                            int parameter = 1;
-                            for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
-                                statement.setString(parameter++, iterator.next());
-                            }
-                            inspect(inspectionContext, statement.executeQuery());
-                        }
-                    }
-            );
-        }
-    }
-
-    private void inspect(InspectionContext context, ResultSet triggers) throws SQLException {
-        InspectionResults inspectionResults = context.getInspectionResults();
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet triggers) throws SQLException {
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (triggers.next()) {
             Matcher matcher = COLUMN_TRIGGER_PATTERN.matcher(triggers.getString("EXTRA"));
             if (matcher.matches()) {
                 Table table = addTable(inspectionResults, triggers.getString("TABLE_SCHEMA"), null,
                         triggers.getString("TABLE_NAME"));
                 ColumnTrigger columnTrigger = new ColumnTrigger();
-
                 Column column = table.addColumn(triggers.getString("COLUMN_NAME"));
                 columnTrigger.setColumn(column);
 

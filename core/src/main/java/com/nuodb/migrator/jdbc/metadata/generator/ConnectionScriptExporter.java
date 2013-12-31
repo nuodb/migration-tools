@@ -34,6 +34,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
+import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static java.lang.String.format;
 
 /**

@@ -45,11 +45,11 @@ public class PrimaryScriptGenerator extends ScriptGeneratorBase<PrimaryKey> impl
     }
 
     @Override
-    public String getConstraintScript(PrimaryKey primaryKey, ScriptGeneratorContext scriptGeneratorContext) {
+    public String getConstraintScript(PrimaryKey primaryKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder("PRIMARY KEY (");
         for (Iterator<Column> iterator = primaryKey.getColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
-            buffer.append(scriptGeneratorContext.getName(column));
+            buffer.append(scriptGeneratorManager.getName(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }
@@ -58,20 +58,20 @@ public class PrimaryScriptGenerator extends ScriptGeneratorBase<PrimaryKey> impl
     }
 
     @Override
-    public Collection<String> getCreateScripts(PrimaryKey primaryKey, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(PrimaryKey primaryKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        buffer.append(scriptGeneratorContext.getName(primaryKey.getTable()));
+        buffer.append(scriptGeneratorManager.getName(primaryKey.getTable()));
         buffer.append(" ADD ");
-        buffer.append(getConstraintScript(primaryKey, scriptGeneratorContext));
+        buffer.append(getConstraintScript(primaryKey, scriptGeneratorManager));
         return singleton(buffer.toString());
     }
 
     @Override
-    public Collection<String> getDropScripts(PrimaryKey primaryKey, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getDropScripts(PrimaryKey primaryKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER TABLE ");
-        buffer.append(scriptGeneratorContext.getName(primaryKey.getTable()));
+        buffer.append(scriptGeneratorManager.getName(primaryKey.getTable()));
         buffer.append(" DROP PRIMARY KEY");
         return singleton(buffer.toString());
     }

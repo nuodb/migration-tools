@@ -27,9 +27,13 @@
  */
 package com.nuodb.migrator.utils;
 
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public class Collections {
 
     public static <T> PriorityList<T> newPriorityList() {
@@ -38,5 +42,25 @@ public class Collections {
 
     public static <T> PriorityList<T> newPriorityList(PriorityList<T> priorityList) {
         return new SimplePriorityList<T>(priorityList);
+    }
+
+    public static <T> boolean contains(Collection<T> collection, T value) {
+        return collection != null && collection.contains(value);
+    }
+
+    public static <T> boolean addIgnoreNull(Collection<T> collection, T value) {
+        return value != null && collection.add(value);
+    }
+
+    public static boolean isEmpty(Collection collection) {
+        return collection == null || collection.isEmpty();
+    }
+
+    public static boolean isEmpty(Map map) {
+        return map == null || map.isEmpty();
+    }
+
+    public static boolean isEmpty(Object[] values) {
+        return values == null || values.length == 0;
     }
 }

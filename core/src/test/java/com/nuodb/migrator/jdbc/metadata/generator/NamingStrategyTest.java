@@ -42,7 +42,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class NamingStrategyTest {
 
-    private ScriptGeneratorContext scriptGeneratorContext;
+    private ScriptGeneratorManager scriptGeneratorManager;
 
     @BeforeMethod
     public void setUp() {
@@ -51,10 +51,10 @@ public class NamingStrategyTest {
         Database database = new Database();
         database.setDialect(dialect);
 
-        scriptGeneratorContext = new ScriptGeneratorContext();
-        scriptGeneratorContext.setTargetDialect(dialect);
-        scriptGeneratorContext.setTargetCatalog(null);
-        scriptGeneratorContext.setTargetSchema("target");
+        scriptGeneratorManager = new ScriptGeneratorManager();
+        scriptGeneratorManager.setTargetDialect(dialect);
+        scriptGeneratorManager.setTargetCatalog(null);
+        scriptGeneratorManager.setTargetSchema("target");
     }
 
     @DataProvider(name = "getName")
@@ -83,11 +83,11 @@ public class NamingStrategyTest {
 
     @Test(dataProvider = "getName")
     public void testGetName(MetaData object, boolean normalize, String name) {
-        assertEquals(scriptGeneratorContext.getName(object, normalize), name);
+        assertEquals(scriptGeneratorManager.getName(object, normalize), name);
     }
 
     @Test(dataProvider = "getQualifiedName")
     public void testGetQualifiedName(MetaData object, boolean normalize, String qualifiedName) {
-        assertEquals(scriptGeneratorContext.getQualifiedName(object, normalize), qualifiedName);
+        assertEquals(scriptGeneratorManager.getQualifiedName(object, normalize), qualifiedName);
     }
 }

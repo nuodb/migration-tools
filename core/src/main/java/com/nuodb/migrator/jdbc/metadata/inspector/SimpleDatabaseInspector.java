@@ -33,7 +33,6 @@ import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.DriverInfo;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -42,13 +41,14 @@ import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addDatabase;
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Inspector<Database, InspectionScope> {
 
-    private transient final Logger logger = LoggerFactory.getLogger(getClass());
+    private transient final Logger logger = getLogger(getClass());
 
     public SimpleDatabaseInspector() {
         super(Database.class);
@@ -66,7 +66,7 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
         driverInfo.setMinorVersion(metaData.getDriverMinorVersion());
         driverInfo.setMajorVersion(metaData.getDriverMajorVersion());
         if (logger.isDebugEnabled()) {
-            logger.debug(format("DriverInfo: %s", driverInfo));
+            logger.debug(format("Driver info %s", driverInfo));
         }
         database.setDriverInfo(driverInfo);
 
@@ -76,11 +76,13 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
         databaseInfo.setMinorVersion(metaData.getDatabaseMinorVersion());
         databaseInfo.setMajorVersion(metaData.getDatabaseMajorVersion());
         if (logger.isDebugEnabled()) {
-            logger.debug(format("DatabaseInfo: %s", databaseInfo));
+            logger.debug(format("Database info %s", databaseInfo));
         }
         database.setDatabaseInfo(databaseInfo);
         database.setDialect(inspectionContext.getDialect());
-        database.setConnectionSpec(((ConnectionProxy) connection).getConnectionSpec());
+        if (connection instanceof ConnectionProxy) {
+            database.setConnectionSpec(((ConnectionProxy) connection).getConnectionSpec());
+        }
     }
 
     @Override
@@ -100,7 +102,13 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
     }
 
     @Override
-    public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException {
+    public void inspectScopes(InspectionContext inspectionContext,
+                              Collection<? extends InspectionScope> inspectionScopes) throws SQLException {
+        inspect(inspectionContext);
+    }
+
+    @Override
+    public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException {
         return true;
     }
 }

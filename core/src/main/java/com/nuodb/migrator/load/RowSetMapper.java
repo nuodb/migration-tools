@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.load;
 
-import com.nuodb.migrator.backup.catalog.RowSet;
+import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
 

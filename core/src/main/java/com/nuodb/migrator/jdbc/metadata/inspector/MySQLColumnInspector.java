@@ -29,9 +29,9 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,43 +50,42 @@ import static org.apache.commons.lang3.StringUtils.containsAny;
 public class MySQLColumnInspector extends SimpleColumnInspector {
 
     @Override
-    protected void inspect(final InspectionContext inspectionContext, TableInspectionScope inspectionScope)
-            throws SQLException {
-        super.inspect(inspectionContext, inspectionScope);
-
+    protected void processResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope,
+                                    ResultSet resultSet) throws SQLException {
+        super.processResultSet(inspectionContext, tableInspectionScope, resultSet);
         final InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         final StringBuilder query = new StringBuilder(
-                "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, " +
-                        "COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS");
+                "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS");
         final Collection<String> filters = newArrayList();
         final Collection<String> parameters = newArrayList();
-        String catalogName = inspectionScope.getCatalog();
-        if (catalogName != null) {
-            filters.add(containsAny(inspectionScope.getCatalog(), "%") ? "TABLE_SCHEMA LIKE ?" :
+        String catalog = tableInspectionScope.getCatalog();
+        if (catalog != null) {
+            filters.add(containsAny(tableInspectionScope.getCatalog(), "%") ? "TABLE_SCHEMA LIKE ?" :
                     "TABLE_SCHEMA=?");
-            parameters.add(catalogName);
+            parameters.add(catalog);
         } else {
             filters.add("TABLE_SCHEMA=DATABASE()");
         }
-        String tableName = inspectionScope.getTable();
-        if (tableName != null) {
-            filters.add(containsAny(inspectionScope.getCatalog(), "%") ? "TABLE_NAME LIKE ?" : "TABLE_NAME=?");
-            parameters.add(tableName);
+        String table = tableInspectionScope.getTable();
+        if (table != null) {
+            filters.add(containsAny(tableInspectionScope.getCatalog(), "%") ? "TABLE_NAME LIKE ?" : "TABLE_NAME=?");
+            parameters.add(table);
         }
         // finally append filters to the query and join then with "AND"
         where(query, filters, "AND");
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
+        template.executeStatement(
                 new StatementFactory<PreparedStatement>() {
                     @Override
-                    public PreparedStatement create(Connection connection) throws SQLException {
+                    public PreparedStatement createStatement(Connection connection) throws SQLException {
                         // let's prepare statement from the query
                         return connection.prepareStatement(query.toString());
                     }
                 },
                 new StatementCallback<PreparedStatement>() {
                     @Override
-                    public void process(PreparedStatement statement) throws SQLException {
+                    public void executeStatement(PreparedStatement statement)
+                            throws SQLException {
                         int index = 1;
                         for (String parameter : parameters) {
                             statement.setString(index++, parameter);

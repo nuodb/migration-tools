@@ -27,6 +27,9 @@
  */
 package com.nuodb.migrator.cli.run;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.nuodb.migrator.cli.CliSupport;
 import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
@@ -34,39 +37,69 @@ import com.nuodb.migrator.cli.parse.OptionException;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
+import com.nuodb.migrator.cli.processor.JdbcTypeOptionProcessor;
+import com.nuodb.migrator.cli.processor.NuoDBTypesOptionProcessor;
 import com.nuodb.migrator.cli.validation.ConnectionGroupInfo;
 import com.nuodb.migrator.jdbc.JdbcConstants;
 import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.commit.SingleCommitStrategy;
-import com.nuodb.migrator.spec.DriverConnectionSpec;
-import com.nuodb.migrator.spec.ResourceSpec;
+import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
+import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeCodes;
+import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.utils.ReflectionUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.cli.validation.ConnectionGroupValidators.addConnectionGroupValidators;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
+import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
+import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
+import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
+import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS;
+import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
+import static java.lang.Boolean.parseBoolean;
 import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.parseInt;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.TimeZone.getTimeZone;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.replace;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings({"PointlessBooleanExpression", "ConstantConditions"})
 public class CliRunSupport extends CliSupport {
 
     public static final TimeZone DEFAULT_TIME_ZONE = getTimeZone("UTC");
+    public static final String IDENTIFIER_QUOTING_MINIMAL = "minimal";
+    public static final String IDENTIFIER_QUOTING_ALWAYS = "always";
+    public static final String IDENTIFIER_NORMALIZER_NOOP = "noop";
+    public static final String IDENTIFIER_NORMALIZER_STANDARD = "standard";
+    public static final String IDENTIFIER_NORMALIZER_LOWERCASE = "lower.case";
+    public static final String IDENTIFIER_NORMALIZER_UPPERCASE = "upper.case";
 
     private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
 
     public static final String COMMIT_STRATEGY_SINGLE = "single";
     public static final String COMMIT_STRATEGY_BATCH = "batch";
+    private JdbcTypeOptionProcessor jdbcTypeOptionProcessor = new JdbcTypeOptionProcessor();
 
     /**
      * Builds the source group of options for the source database connection.
@@ -454,6 +487,292 @@ public class CliRunSupport extends CliSupport {
         resource.setAttributes(parseAttributes(
                 optionSet.<String>getValues(INPUT_OPTION), optionSet.getOption(INPUT_OPTION)));
         return resource;
+    }
+
+    protected Group createSchemaGeneratorGroup() {
+        GroupBuilder group = newGroupBuilder().withName(getMessage(SCRIPT_GENERATOR_GROUP_NAME));
+
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
+
+        GroupBuilder typeGroup = newGroupBuilder().withName(getMessage(JDBC_TYPE_GROUP_NAME));
+        Option useNuoDBTypes = newBasicOptionBuilder().
+                withName(USE_NUODB_TYPES_OPTION).
+                withDescription(getMessage(USE_NUODB_TYPES_OPTION_DESCRIPTION)).
+                withRequired(false).
+                withOptionProcessor(new NuoDBTypesOptionProcessor()).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(USE_NUODB_TYPES_OPTION_ARGUMENT_NAME)).build()
+                ).build();
+        typeGroup.withOption(useNuoDBTypes);
+
+        Option useImplicitDefaults = newBasicOptionBuilder().
+                withName(USE_EXPLICIT_DEFAULTS_OPTION).
+                withDescription(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_DESCRIPTION)).
+                withRequired(false).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_ARGUMENT_NAME)).build()
+                ).build();
+        typeGroup.withOption(useImplicitDefaults);
+
+        Option typeName = newBasicOptionBuilder().
+                withName(JDBC_TYPE_NAME_OPTION).
+                withDescription(getMessage(JDBC_TYPE_NAME_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME))).
+                                withOptionProcessor(jdbcTypeOptionProcessor).
+                                withMinimum(1).withMaximum(MAX_VALUE).withRequired(true).build()
+                ).build();
+        typeGroup.withOption(typeName);
+
+        Option typeCode = newBasicOptionBuilder().
+                withName(JDBC_TYPE_CODE_OPTION).
+                withDescription(getMessage(JDBC_TYPE_CODE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME))).
+                                withMinimum(1).withMaximum(MAX_VALUE).withRequired(true).build()
+                ).build();
+        typeGroup.withOption(typeCode);
+
+        Option typeSize = newBasicOptionBuilder().
+                withName(JDBC_TYPE_SIZE_OPTION).
+                withDescription(getMessage(JDBC_TYPE_SIZE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME))).
+                                withMaximum(MAX_VALUE).build()
+                ).build();
+        typeGroup.withOption(typeSize);
+
+        Option typePrecision = newBasicOptionBuilder().
+                withName(JDBC_TYPE_PRECISION_OPTION).
+                withDescription(getMessage(JDBC_TYPE_PRECISION_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME))).
+                                withMaximum(MAX_VALUE).build()
+                ).build();
+        typeGroup.withOption(typePrecision);
+
+        Option typeScale = newBasicOptionBuilder().
+                withName(JDBC_TYPE_SCALE_OPTION).
+                withDescription(getMessage(JDBC_TYPE_SCALE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME))).
+                                withMaximum(MAX_VALUE).build()
+                ).build();
+        typeGroup.withOption(typeScale);
+        typeGroup.withMaximum(MAX_VALUE);
+        group.withOption(typeGroup.build());
+
+        Option tableType = newBasicOptionBuilder().
+                withName(TABLE_TYPE_OPTION).
+                withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).
+                                withMaximum(MAX_VALUE).build()
+                ).build();
+        group.withOption(tableType);
+
+        Option metaData = newRegexOptionBuilder().
+                withName(META_DATA_OPTION).
+                withDescription(getMessage(META_DATA_OPTION_DESCRIPTION)).
+                withRegex(META_DATA_OPTION, 1, LOW).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(META_DATA_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withMinimum(1).withMaximum(MAX_VALUE).build()
+                )
+                .build();
+        group.withOption(metaData);
+
+        Collection<String> scriptTypeHelpValues = Lists.transform(asList(ScriptType.values()),
+                new Function<ScriptType, String>() {
+                    @Override
+                    public String apply(ScriptType scriptType) {
+                        return scriptType.name().toLowerCase();
+                    }
+                });
+        Option scriptType = newBasicOptionBuilder().
+                withName(SCRIPT_TYPE_OPTION).
+                withDescription(getMessage(SCRIPT_TYPE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(SCRIPT_TYPE_ARGUMENT_NAME)).
+                                withMinimum(1).
+                                withMaximum(ScriptType.values().length).
+                                withHelpValues(scriptTypeHelpValues).build()
+                ).build();
+        group.withOption(scriptType);
+
+        Option groupScriptsBy = newBasicOptionBuilder().
+                withName(GROUP_SCRIPTS_BY_OPTION).
+                withDescription(getMessage(GROUP_SCRIPTS_BY_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(GROUP_SCRIPTS_BY_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(groupScriptsBy);
+
+        Option identifierQuoting = newBasicOptionBuilder().
+                withName(IDENTIFIER_QUOTING).
+                withDescription(getMessage(IDENTIFIER_QUOTING_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(IDENTIFIER_QUOTING_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(identifierQuoting);
+
+        Option identifierNormalizer = newBasicOptionBuilder().
+                withName(IDENTIFIER_NORMALIZER).
+                withDescription(getMessage(IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(IDENTIFIER_NORMALIZER_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(identifierNormalizer);
+
+        return group.build();
+    }
+
+    protected void parseSchemaGeneratorGroup(SchemaGeneratorJobSpecBase schemaGeneratorJobSpec,
+                                             OptionSet optionSet, Option option) {
+        if (optionSet.hasOption(META_DATA_OPTION)) {
+            Collection<String> values = optionSet.getValues(META_DATA_OPTION);
+            Set<MetaDataType> objectTypes = newHashSet(MetaDataType.TYPES);
+            Map<String, MetaDataType> objectTypeMap = new TreeMap<String, MetaDataType>(String.CASE_INSENSITIVE_ORDER);
+            objectTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
+            for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
+                MetaDataType objectType = objectTypeMap.get(replace(iterator.next(), ".", "_"));
+                String booleanValue = iterator.next();
+                if (booleanValue == null || parseBoolean(booleanValue)) {
+                    objectTypes.add(objectType);
+                } else {
+                    objectTypes.remove(objectType);
+                }
+            }
+            schemaGeneratorJobSpec.setObjectTypes(objectTypes);
+        }
+        Object useExplicitDefaults = optionSet.getValue(USE_EXPLICIT_DEFAULTS_OPTION);
+        schemaGeneratorJobSpec.setUseExplicitDefaults(useExplicitDefaults != null ?
+                parseBoolean(String.valueOf(useExplicitDefaults)) :
+                (optionSet.hasOption(USE_EXPLICIT_DEFAULTS_OPTION) || USE_EXPLICIT_DEFAULTS));
+        List<String> scriptTypeValues = optionSet.getValues(SCRIPT_TYPE_OPTION);
+        Collection<ScriptType> scriptTypes = newHashSet();
+        for (String scriptTypeValue : scriptTypeValues) {
+            scriptTypes.add(valueOf(scriptTypeValue.toUpperCase()));
+        }
+        if (scriptTypes.isEmpty()) {
+            scriptTypes = newHashSet(ScriptType.values());
+        }
+        schemaGeneratorJobSpec.setScriptTypes(scriptTypes);
+
+        Map<String, GroupScriptsBy> groupScriptsByConditionMap = newHashMap();
+        for (GroupScriptsBy groupScriptsBy : GroupScriptsBy.values()) {
+            groupScriptsByConditionMap.put(groupScriptsBy.getCondition(), groupScriptsBy);
+        }
+        String groupScriptsByCondition = (String) optionSet.getValue(GROUP_SCRIPTS_BY_OPTION);
+        GroupScriptsBy groupScriptsBy;
+        if (groupScriptsByCondition != null) {
+            groupScriptsBy = groupScriptsByConditionMap.get(groupScriptsByCondition);
+            if (groupScriptsBy == null) {
+                throw new OptionException(format("Unexpected value for %s option, valid values are %s",
+                        GROUP_SCRIPTS_BY_OPTION, groupScriptsByConditionMap.keySet()), option
+                );
+            }
+        } else {
+            groupScriptsBy = GroupScriptsBy.TABLE;
+        }
+        schemaGeneratorJobSpec.setGroupScriptsBy(groupScriptsBy);
+
+        String identifierQuotingValue = (String) optionSet.getValue(IDENTIFIER_QUOTING);
+        IdentifierQuoting identifierQuoting = null;
+        if (identifierQuotingValue != null) {
+            identifierQuoting = getIdentifierQuotings().get(identifierQuotingValue);
+            if (identifierQuoting == null) {
+                Class<IdentifierQuoting> identifierQuotingClass = ReflectionUtils.loadClass(identifierQuotingValue);
+                identifierQuoting = newInstance(identifierQuotingClass);
+            }
+        }
+        schemaGeneratorJobSpec.setIdentifierQuoting(identifierQuoting != null ? identifierQuoting : ALWAYS);
+
+        String identifierNormalizerValue = (String) optionSet.getValue(IDENTIFIER_NORMALIZER);
+        IdentifierNormalizer identifierNormalizer = null;
+        if (identifierNormalizerValue != null) {
+            identifierNormalizer = getIdentifierNormalizers().get(identifierNormalizerValue);
+            if (identifierNormalizer == null) {
+                Class<IdentifierNormalizer> identifierNormalizerClass =
+                        ReflectionUtils.loadClass(identifierNormalizerValue);
+                identifierNormalizer =
+                        newInstance(identifierNormalizerClass);
+            }
+        }
+        schemaGeneratorJobSpec.setIdentifierNormalizer(
+                identifierNormalizer != null ? identifierNormalizer : NOOP);
+
+        ListMultimap<String, Object> values = jdbcTypeOptionProcessor.getValues();
+        int count = values.get(JDBC_TYPE_NAME_OPTION).size();
+        Collection<JdbcTypeSpec> jdbcTypeSpecs = Lists.newArrayList();
+        JdbcTypeCodes jdbcTypeCodes = JdbcTypeCodes.getInstance();
+        for (int i = 0; i < count; i++) {
+            String typeName = (String) values.get(JDBC_TYPE_NAME_OPTION).get(i);
+            String typeCode = (String) values.get(JDBC_TYPE_CODE_OPTION).get(i);
+            String size = (String) values.get(JDBC_TYPE_SIZE_OPTION).get(i);
+            String precision = (String) values.get(JDBC_TYPE_PRECISION_OPTION).get(i);
+            String scale = (String) values.get(JDBC_TYPE_SCALE_OPTION).get(i);
+            JdbcTypeSpec jdbcTypeSpec = new JdbcTypeSpec();
+            jdbcTypeSpec.setTypeName(typeName);
+            Integer typeCodeInt = jdbcTypeCodes.getTypeCode(typeCode);
+            jdbcTypeSpec.setTypeCode(typeCodeInt != null ? typeCodeInt : parseInt(typeCode));
+            jdbcTypeSpec.setSize(!isEmpty(size) ? parseInt(size) : null);
+            jdbcTypeSpec.setPrecision(!isEmpty(precision) ? parseInt(precision) : null);
+            jdbcTypeSpec.setScale(!isEmpty(scale) ? parseInt(scale) : null);
+            jdbcTypeSpecs.add(jdbcTypeSpec);
+        }
+        schemaGeneratorJobSpec.setJdbcTypeSpecs(jdbcTypeSpecs);
+
+        Collection<String> tableTypes = newLinkedHashSet();
+        tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
+        if (tableTypes.isEmpty()) {
+            tableTypes.add(Table.TABLE);
+            tableTypes.add(Table.ALIAS);
+        }
+        schemaGeneratorJobSpec.setTableTypes(tableTypes.toArray(new String[tableTypes.size()]));
+    }
+
+    protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {
+        Map<String, IdentifierNormalizer> identifierNormalizers =
+                new TreeMap<String, IdentifierNormalizer>(CASE_INSENSITIVE_ORDER);
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_NOOP, NOOP);
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_STANDARD, STANDARD);
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_LOWERCASE, LOWER_CASE);
+        identifierNormalizers.put(IDENTIFIER_NORMALIZER_UPPERCASE, UPPER_CASE);
+        return identifierNormalizers;
+    }
+
+    protected Map<String, IdentifierQuoting> getIdentifierQuotings() {
+        Map<String, IdentifierQuoting> identifierQuotings =
+                new TreeMap<String, IdentifierQuoting>(CASE_INSENSITIVE_ORDER);
+        identifierQuotings.put(IDENTIFIER_QUOTING_MINIMAL, MINIMAL);
+        identifierQuotings.put(IDENTIFIER_QUOTING_ALWAYS, ALWAYS);
+        return identifierQuotings;
     }
 
     public TimeZone getDefaultTimeZone() {

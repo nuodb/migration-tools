@@ -32,15 +32,15 @@ import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static com.nuodb.migrator.context.ContextUtils.getService;
+import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataHandlerUtils.findMetaDataHandler;
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
@@ -48,7 +48,7 @@ import static java.lang.String.format;
 @SuppressWarnings("unchecked")
 public class SimpleInspectionContext implements InspectionContext {
 
-    protected final transient Logger logger = LoggerFactory.getLogger(getClass());
+    protected final transient Logger logger = getLogger(getClass());
 
     private InspectionManager inspectionManager;
     private Connection connection;
@@ -56,8 +56,7 @@ public class SimpleInspectionContext implements InspectionContext {
     private MetaDataType[] objectTypes;
 
     public SimpleInspectionContext(InspectionManager inspectionManager, Connection connection,
-                                   InspectionResults inspectionResults,
-                                   MetaDataType... objectTypes) {
+                                   InspectionResults inspectionResults, MetaDataType... objectTypes) {
         this.inspectionManager = inspectionManager;
         this.connection = connection;
         this.inspectionResults = inspectionResults;
@@ -66,10 +65,7 @@ public class SimpleInspectionContext implements InspectionContext {
 
     @Override
     public Dialect getDialect() throws SQLException {
-        DialectResolver dialectResolver = inspectionManager.getDialectResolver();
-        if (dialectResolver == null) {
-            dialectResolver = getService(DialectResolver.class);
-        }
+        DialectResolver dialectResolver = createService(inspectionManager.getDialectResolver(), DialectResolver.class);
         return dialectResolver.resolve(getConnection());
     }
 
@@ -97,6 +93,9 @@ public class SimpleInspectionContext implements InspectionContext {
     public void inspect(MetaData object, MetaDataType... objectTypes) throws SQLException {
         for (MetaDataType objectType : objectTypes) {
             Inspector inspector = findInspector(objectType);
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Inspecting %s meta data", objectType));
+            }
             inspector.inspectObject(this, object);
         }
     }
@@ -105,6 +104,9 @@ public class SimpleInspectionContext implements InspectionContext {
     public void inspect(Collection<MetaData> objects, MetaDataType... objectTypes) throws SQLException {
         for (MetaDataType objectType : objectTypes) {
             Inspector inspector = findInspector(objectType);
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Inspecting %s meta data", objectType));
+            }
             inspector.inspectObjects(this, objects);
         }
     }
@@ -113,7 +115,10 @@ public class SimpleInspectionContext implements InspectionContext {
     public void inspect(InspectionScope scope, MetaDataType... objectTypes) throws SQLException {
         for (MetaDataType objectType : objectTypes) {
             Inspector inspector = findInspector(objectType);
-            if (inspector.supports(this, scope)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(format("Inspecting %s", objectType));
+            }
+            if (inspector.supportsScope(this, scope)) {
                 inspector.inspectScope(this, scope);
             } else {
                 inspector.inspect(this);
@@ -130,9 +135,6 @@ public class SimpleInspectionContext implements InspectionContext {
     }
 
     protected Inspector findInspector(MetaDataType objectType) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(format("Inspecting %s", objectType));
-        }
         return findMetaDataHandler(inspectionManager.getInspectors(), objectType);
     }
 }

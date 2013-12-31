@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import com.nuodb.migrator.utils.ObjectUtils;
+
 import java.io.Serializable;
 
 import static java.lang.String.format;
@@ -70,12 +72,6 @@ public class DatabaseInfo implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return format("product name=%s, product version=%s, major version=%d, minor version=%d",
-                productName, productVersion, majorVersion, minorVersion);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -98,5 +94,10 @@ public class DatabaseInfo implements Serializable {
         result = 31 * result + minorVersion;
         result = 31 * result + majorVersion;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

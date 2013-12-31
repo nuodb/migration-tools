@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.load;
 
-import com.nuodb.migrator.backup.catalog.QueryRowSet;
-import com.nuodb.migrator.backup.catalog.RowSet;
-import com.nuodb.migrator.backup.catalog.TableRowSet;
+import com.nuodb.migrator.backup.QueryRowSet;
+import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.backup.TableRowSet;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -40,7 +40,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.IdentifiableBase.getQualifiedName;
-import static com.nuodb.migrator.utils.CollectionUtils.addIgnoreNull;
+import static com.nuodb.migrator.utils.Collections.addIgnoreNull;
 import static java.lang.Math.min;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -65,7 +65,7 @@ public class SimpleRowSetMapper implements RowSetMapper {
 
     private Table map(TableRowSet tableRowSet, Database database) {
         Dialect dialect = database.getDialect();
-        List<String> allQualifiers = newArrayList();
+        List<String> qualifiers = newArrayList();
         int maximum = 0;
         if (dialect.supportsCatalogs()) {
             maximum++;
@@ -75,14 +75,14 @@ public class SimpleRowSetMapper implements RowSetMapper {
         }
         ConnectionSpec connectionSpec = database.getConnectionSpec();
         if (connectionSpec.getCatalog() != null || connectionSpec.getSchema() != null) {
-            addIgnoreNull(allQualifiers, connectionSpec.getCatalog());
-            addIgnoreNull(allQualifiers, connectionSpec.getSchema());
+            addIgnoreNull(qualifiers, connectionSpec.getCatalog());
+            addIgnoreNull(qualifiers, connectionSpec.getSchema());
         } else {
-            addIgnoreNull(allQualifiers, tableRowSet.getCatalogName());
-            addIgnoreNull(allQualifiers, tableRowSet.getSchemaName());
+            addIgnoreNull(qualifiers, tableRowSet.getCatalogName());
+            addIgnoreNull(qualifiers, tableRowSet.getSchemaName());
         }
-        int actual = min(allQualifiers.size(), maximum);
-        List<String> qualifiers = allQualifiers.subList(allQualifiers.size() - actual, allQualifiers.size());
+        int actual = min(qualifiers.size(), maximum);
+        qualifiers = qualifiers.subList(qualifiers.size() - actual, qualifiers.size());
         final String sourceTable = getQualifiedName(null,
                 tableRowSet.getCatalogName(), tableRowSet.getSchemaName(), tableRowSet.getTableName(), null);
         final String targetTable = getQualifiedName(null,

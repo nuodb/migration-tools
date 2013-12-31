@@ -27,6 +27,10 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.utils.ObjectUtils;
+
+import static org.apache.commons.lang3.builder.ToStringStyle.DEFAULT_STYLE;
+
 public class ConnectionSpecBase extends SpecBase implements ConnectionSpec {
 
     public static final Boolean DEFAULT_AUTO_COMMIT = false;

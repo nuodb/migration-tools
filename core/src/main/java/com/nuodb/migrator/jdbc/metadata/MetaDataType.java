@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,7 @@ import java.util.Map;
 
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
+import static org.apache.commons.lang3.ClassUtils.getShortClassName;
 
 public class MetaDataType implements Comparable<MetaDataType>, Serializable {
 
@@ -88,6 +90,14 @@ public class MetaDataType implements Comparable<MetaDataType>, Serializable {
         return objectType;
     }
 
+    public String getShortName() {
+        return getShortClassName(objectType);
+    }
+
+    public String getName() {
+        return objectType.getName();
+    }
+
     public boolean isAssignableFrom(MetaDataType metaDataType) {
         return objectType.isAssignableFrom(metaDataType.getObjectType());
     }
@@ -116,6 +126,6 @@ public class MetaDataType implements Comparable<MetaDataType>, Serializable {
 
     @Override
     public String toString() {
-        return getObjectType().getName();
+        return getName();
     }
 }

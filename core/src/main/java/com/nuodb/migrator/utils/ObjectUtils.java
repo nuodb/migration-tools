@@ -34,7 +34,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 /**
@@ -42,10 +42,18 @@ import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
  */
 public class ObjectUtils {
 
-    private static final ToStringStyle TO_STRING_STYLE = MULTI_LINE_STYLE;
+    public static final ToStringStyle TO_STRING_STYLE = MULTI_LINE_STYLE;
+
+    public static boolean equals(Object object1, Object object2) {
+        return object1 == object2 || !(object1 == null || object2 == null) && object1.equals(object2);
+    }
 
     public static String toString(Object object) {
-        return toString(object, null);
+        return toString(object, null, null, null);
+    }
+
+    public static String toString(Object object, ToStringStyle toStringStyle) {
+        return toString(object, null, null, toStringStyle);
     }
 
     public static String toString(Object object, Collection<String> includedFields) {
@@ -53,8 +61,13 @@ public class ObjectUtils {
     }
 
     public static String toString(Object object, Collection<String> includedFields, Collection<String> excludedFields) {
+        return toString(object, includedFields, excludedFields, null);
+    }
+
+    public static String toString(Object object, Collection<String> includedFields, Collection<String> excludedFields,
+                                  ToStringStyle toStringStyle) {
         FilterFieldsToStringBuilder filterFieldsToStringBuilder =
-                new FilterFieldsToStringBuilder(object, TO_STRING_STYLE);
+                new FilterFieldsToStringBuilder(object, toStringStyle != null ? toStringStyle : TO_STRING_STYLE);
         if (!isEmpty(includedFields)) {
             filterFieldsToStringBuilder.addIncludeFields(includedFields);
         }

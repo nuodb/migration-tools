@@ -43,15 +43,15 @@ import static org.apache.commons.lang3.StringUtils.startsWith;
 public class MSSQLServerColumnInspector extends SimpleColumnInspector {
 
     @Override
-    protected void inspect(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
-        super.inspect(inspectionContext, columns, column);
+    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
+        super.processColumn(inspectionContext, columns, column);
         DefaultValue defaultValue = column.getDefaultValue();
         if (defaultValue != null && !defaultValue.isProcessed()) {
             String value = defaultValue.getScript();
             while (startsWith(value, "(") && endsWith(value, ")")) {
                 value = value.substring(1, value.length() - 1);
             }
-            column.setDefaultValue(valueOf(value));
+            column.setDefaultValue(valueOf(value, true));
         }
     }
 }

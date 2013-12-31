@@ -27,25 +27,19 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -59,63 +53,27 @@ public class DB2CheckInspector extends TableInspectorBase<Table, TableInspection
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        SelectQuery query = new SelectQuery();
+        query.column("TABSCHEMA", "TABNAME", "CONSTNAME", "TEXT");
+        query.from("SYSCAT.CHECKS");
+        query.where("TYPE = 'C'");
+        Collection<Object> parameters = Lists.newArrayList();
+        String schema = tableInspectionScope.getSchema();
+        if (!isEmpty(schema)) {
+            query.where("TABSCHEMA=?");
+            parameters.add(schema);
+        }
+        String table = tableInspectionScope.getTable();
+        if (!isEmpty(table)) {
+            query.where("TABNAME=?");
+            parameters.add(table);
+        }
+        return new ParameterizedQuery(query, parameters);
     }
 
     @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            final Collection<String> parameters = newArrayList();
-            final SelectQuery selectQuery = createSelectQuery(inspectionScope, parameters);
-            template.execute(
-                    new StatementFactory<PreparedStatement>() {
-                        @Override
-                        public PreparedStatement create(Connection connection) throws SQLException {
-                            return connection.prepareStatement(selectQuery.toString(),
-                                    TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                        }
-                    },
-                    new StatementCallback<PreparedStatement>() {
-                        @Override
-                        public void process(PreparedStatement statement) throws SQLException {
-                            int index = 1;
-                            for (String parameter : parameters) {
-                                statement.setString(index++, parameter);
-                            }
-                            ResultSet checks = null;
-                            try {
-                                checks = statement.executeQuery();
-                                inspect(inspectionContext, checks);
-                            } finally {
-                                close(checks);
-                            }
-                        }
-                    }
-            );
-        }
-
-    }
-
-    protected SelectQuery createSelectQuery(TableInspectionScope inspectionScope, Collection<String> parameters) {
-        SelectQuery selectQuery = new SelectQuery();
-        selectQuery.column("TABSCHEMA", "TABNAME", "CONSTNAME", "TEXT");
-        selectQuery.from("SYSCAT.CHECKS");
-        selectQuery.where("TYPE = 'C'");
-        if (!isEmpty(inspectionScope.getSchema())) {
-            selectQuery.where("TABSCHEMA=?");
-            parameters.add(inspectionScope.getSchema());
-        }
-        if (!isEmpty(inspectionScope.getTable())) {
-            selectQuery.where("TABNAME=?");
-            parameters.add(inspectionScope.getTable());
-        }
-        return selectQuery;
-    }
-
-    protected void inspect(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (checks.next()) {
             Table table = addTable(inspectionResults, null, trim(checks.getString("TABSCHEMA")),

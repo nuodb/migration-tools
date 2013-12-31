@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.split;
 
+import com.nuodb.migrator.jdbc.query.ParametersBinder;
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
@@ -130,7 +131,7 @@ public abstract class QuerySplitterBase<S extends Statement> implements QuerySpl
                 final S statement = isParameterized() ? prepareStatement(connection, queryLimit,
                         splitIndex) : createStatement(connection, queryLimit, splitIndex);
                 if (callback != null) {
-                    callback.process(statement);
+                    callback.executeStatement(statement);
                 }
                 return executeStatement(statement, queryLimit, splitIndex);
             }

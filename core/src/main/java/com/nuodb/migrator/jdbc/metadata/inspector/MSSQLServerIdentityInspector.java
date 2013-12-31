@@ -30,23 +30,17 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -59,69 +53,31 @@ public class MSSQLServerIdentityInspector extends TableInspectorBase<Table, Tabl
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
-    }
-
-    @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            final Collection<String> parameters = newArrayList();
-            final SelectQuery selectQuery = createSelectQuery(inspectionScope, parameters);
-            template.execute(
-                    new StatementFactory<PreparedStatement>() {
-                        @Override
-                        public PreparedStatement create(Connection connection) throws SQLException {
-                            return connection.prepareStatement(selectQuery.toString(),
-                                    TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                        }
-                    },
-                    new StatementCallback<PreparedStatement>() {
-                        @Override
-                        public void process(PreparedStatement statement) throws SQLException {
-                            int index = 1;
-                            for (String parameter : parameters) {
-                                statement.setString(index++, parameter);
-                            }
-                            ResultSet identities = null;
-                            try {
-                                identities = statement.executeQuery();
-                                inspect(inspectionContext, identities);
-                            } finally {
-                                close(identities);
-                            }
-                        }
-                    }
-            );
-        }
-    }
-
-    protected SelectQuery createSelectQuery(TableInspectionScope inspectionScope, Collection<String> parameters) {
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        Collection<Object> parameters = newArrayList();
         SelectQuery selectColumn = new SelectQuery();
-        if (isEmpty(inspectionScope.getCatalog())) {
+        if (isEmpty(tableInspectionScope.getCatalog())) {
             selectColumn.column("DB_NAME() AS TABLE_CATALOG");
         } else {
             selectColumn.column("? AS TABLE_CATALOG");
-            parameters.add(inspectionScope.getCatalog());
+            parameters.add(tableInspectionScope.getCatalog());
         }
         selectColumn.column("SCHEMAS.NAME AS TABLE_SCHEMA");
         selectColumn.column("TABLES.NAME AS TABLE_NAME");
         selectColumn.column("COLUMNS.NAME AS COLUMN_NAME");
 
-        String catalog = isEmpty(inspectionScope.getCatalog()) ? "" : (inspectionScope.getCatalog() + ".");
+        String catalog = isEmpty(tableInspectionScope.getCatalog()) ? "" : (tableInspectionScope.getCatalog() + ".");
         selectColumn.from(catalog + "SYS.SCHEMAS");
         selectColumn.innerJoin(catalog + "SYS.TABLES", "SCHEMAS.SCHEMA_ID=TABLES.SCHEMA_ID");
         selectColumn.innerJoin(catalog + "SYS.COLUMNS", "COLUMNS.OBJECT_ID=TABLES.OBJECT_ID");
 
-        if (!isEmpty(inspectionScope.getSchema())) {
+        if (!isEmpty(tableInspectionScope.getSchema())) {
             selectColumn.where("SCHEMAS.NAME=?");
-            parameters.add(inspectionScope.getSchema());
+            parameters.add(tableInspectionScope.getSchema());
         }
-        if (!isEmpty(inspectionScope.getTable())) {
+        if (!isEmpty(tableInspectionScope.getTable())) {
             selectColumn.where("TABLES.NAME=?");
-            parameters.add(inspectionScope.getTable());
+            parameters.add(tableInspectionScope.getTable());
         }
         selectColumn.where("IS_IDENTITY=1");
 
@@ -137,11 +93,12 @@ public class MSSQLServerIdentityInspector extends TableInspectorBase<Table, Tabl
         selectIdentity.column("IDENT_CURRENT(TABLE_QUALIFIED_NAME) AS LAST_VALUE");
         selectIdentity.column("IDENT_INCR(TABLE_QUALIFIED_NAME) AS INCREMENT_BY");
         selectIdentity.from("(" + selectTable + ") C");
-        return selectIdentity;
+        return new ParameterizedQuery(selectIdentity, parameters);
     }
 
-    private void inspect(InspectionContext context, ResultSet identities) throws SQLException {
-        InspectionResults inspectionResults = context.getInspectionResults();
+    @Override
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet identities) throws SQLException {
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         if (identities.next()) {
             Table table = addTable(inspectionResults,
                     identities.getString("TABLE_CATALOG"),

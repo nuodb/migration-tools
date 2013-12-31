@@ -52,7 +52,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
     }
 
     @Override
-    public Collection<String> getCreateScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
         if (index.getExpression() != null) {
             if (logger.isWarnEnabled()) {
                 logger.warn(format("Index expressions are not supported %s", index));
@@ -65,13 +65,13 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
                 buffer.append(" UNIQUE");
             }
             buffer.append(" INDEX ");
-            buffer.append(scriptGeneratorContext.getName(index));
+            buffer.append(scriptGeneratorManager.getName(index));
             buffer.append(" ON ");
-            buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
+            buffer.append(scriptGeneratorManager.getQualifiedName(index.getTable()));
             buffer.append(" (");
             for (Iterator<Column> iterator = index.getColumns().iterator(); iterator.hasNext(); ) {
                 Column column = iterator.next();
-                buffer.append(scriptGeneratorContext.getName(column));
+                buffer.append(scriptGeneratorManager.getName(column));
                 if (iterator.hasNext()) {
                     buffer.append(", ");
                 }
@@ -82,7 +82,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
     }
 
     @Override
-    public Collection<String> getDropScripts(Index index, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getDropScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
         if (index.getExpression() != null) {
             if (logger.isWarnEnabled()) {
                 logger.warn(format("Index expressions are not supported %s", index));
@@ -91,12 +91,12 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
         } else {
             StringBuilder buffer = new StringBuilder();
             buffer.append("DROP INDEX ");
-            buffer.append(scriptGeneratorContext.getName(index));
+            buffer.append(scriptGeneratorManager.getName(index));
 
-            Dialect dialect = scriptGeneratorContext.getTargetDialect();
+            Dialect dialect = scriptGeneratorManager.getTargetDialect();
             if (dialect.supportsDropIndexOnTable()) {
                 buffer.append(" ON ");
-                buffer.append(scriptGeneratorContext.getQualifiedName(index.getTable()));
+                buffer.append(scriptGeneratorManager.getQualifiedName(index.getTable()));
                 buffer.append(' ');
             }
 
@@ -108,8 +108,8 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
         }
     }
 
-    public String getConstraintScript(Index index, ScriptGeneratorContext scriptGeneratorContext) {
-        Dialect dialect = scriptGeneratorContext.getTargetDialect();
+    public String getConstraintScript(Index index, ScriptGeneratorManager scriptGeneratorManager) {
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         if (index.isUnique()) {
             buffer.append("UNIQUE");

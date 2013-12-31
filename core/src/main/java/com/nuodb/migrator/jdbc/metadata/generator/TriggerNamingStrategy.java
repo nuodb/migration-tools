@@ -42,11 +42,11 @@ public class TriggerNamingStrategy extends IdentifiableNamingStrategy<Trigger> {
     }
 
     @Override
-    protected String getIdentifiableName(Trigger trigger, ScriptGeneratorContext scriptGeneratorContext) {
+    protected String getIdentifiableName(Trigger trigger, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("TRG");
         buffer.append('_');
-        buffer.append(scriptGeneratorContext.getName(trigger.getTable(), false));
+        buffer.append(scriptGeneratorManager.getName(trigger.getTable(), false));
         buffer.append('_');
         int index = indexOf(trigger.getTable().getTriggers(), equalTo(trigger));
         buffer.append(index);

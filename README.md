@@ -35,27 +35,47 @@ This tool is designed to assist you in migrating data from supported SQL databas
 ### Dump data from an existing database ###
 
     $ bin/nuodb-migrator dump                                                
-        [source database connection, required]                       
-            --source.driver=driver                          JDBC driver class name
-            --source.url=url                                Source database connection URL in the standard syntax jdbc:<subprotocol>:<subname>
-            [--source.username=[username]]                  Source database username
-            [--source.password=[password]]                  Source database password
-            [--source.properties=[properties]]              Additional connection properties encoded as URL query string "property1=value1&property2=value2"
-            [--source.catalog=[catalog]]                    Default database catalog name to use
-            [--source.schema=[schema]]                      Default database schema name to use
-        [output specification, required]                              
-            --output.type=output type                       Output type (CVS, XML, BSON)
-            [--output.path=[output path]]                   Path on the file system
-            [--output.*=[attribute value]]                  Output format attributes
-        [table names, types & query filters, optional]              
-            [--table=table [table ...]]                     Table name
-            [--table.type=[table type [table type ...]]]    Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE is included into dump
-            [--table.*.filter=[query filter]]               Filters table records using specified filter by appending it to the SELECT statement after WHERE clause
-        [select statements, optional]                               
-            [--query=query]                                 Select statement
-        [--time.zone (-z)=time zone]                        Time zone enables date columns to be dumped and reloaded between servers in different time zones
-        [--threads (-t)=[threads]]                          Number of worker threads to dump data, defaulted to a number of available processors
-        [--query.limit=[query limit]]                       Query limit is a maximum number of rows to split a table into chunks with LIMIT {limit} OFFSET {offset} syntax in a database specific way, where each chunk is written to a separate file. If a query limit is not given or is not supported by the migrator for a particular database queries are not split
+        [source database connection, required]
+            --source.driver=driver                               JDBC driver class name
+            --source.url=url                                     Source database connection URL in the standard syntax jdbc:<subprotocol>:<subname>
+            [--source.username=[username]]                       Source database username
+            [--source.password=[password]]                       Source database password
+            [--source.properties=[properties]]                   Additional connection properties encoded as URL query string "property1=value1&property2=value2"
+            [--source.catalog=[catalog]]                         Default database catalog name to use
+            [--source.schema=[schema]]                           Default database schema name to use
+            [--source.auto.commit=[true | false]]                If set to true each individual statement is treated as a transaction and is automatically committed after it is executed, false by default
+        [output specification, required]
+            --output.type=output type                            Output type (CVS, XML, BSON)
+            [--output.path=[output path]]                        Path on the file system
+            [--output.*=[attribute value]]                       Output format attributes
+        [migration modes]
+            [--data=[true | false]]                              Enables or disables table dump, true by default
+            [--schema=[true | false]]                            Enables or disables schema dump, false by default
+        [table dump options]
+            [table names, types & query filters]
+                [--table=table [table ...]]                      Table name
+                [--table.type=[table type [table type ...]]]     Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE type is processed
+                [--table.*.filter=[query filter]]                Filters table records using specified filter by appending it to the SELECT statement after WHERE clause
+            [select statements]
+            [--query=query [query ...]]                          Select statement
+            [--time.zone (-z)=time zone]                         Time zone enables date columns to be dumped and reloaded between servers in different time zones
+            [--threads (-t)=[threads]]                           Number of worker threads to dump data, defaulted to a number of available processors
+            [--query.limit=[query limit]]                        Query limit is a maximum number of rows to split a table into chunks with LIMIT {limit} OFFSET {offset} syntax in a database specific way, where each chunk is written to a separate file. If a query limit is not given or is not supported by the migrator for a particular database queries are not split
+        [schema dump options]
+            [type declarations & translations]
+                [--use.nuodb.types=[true | false]]               Instructs the migrator to transform source database types to the best matching NuoDB types, where CHAR, VARCHAR and CLOB source types will be rendered as STRING columns, nuodb-types.properties file is a source of type overrides, the option is false by default
+                [--use.explicit.defaults=[true | false]]         Transforms source column implicit default values to NuoDB explicit defaults, the option is false by default
+                [--type.name=type name]                          SQL type name template, i.e. decimal({p},{s}) or varchar({n}), where {p} is a placeholder for a precision, {s} is a scale and {n} is a maximum size
+                [--type.code=type code]                          Integer code of declared SQL type
+                [--type.size=[type size]]                        Maximum size of custom data type
+                [--type.precision=[type precision]]              The maximum total number of decimal digits that can be stored, both to the left and to the right of the decimal point. Typically, type precision is in the range of 1 through the maximum precision of 38.
+                [--type.scale=[type scale]]                      The number of fractional digits for numeric data types
+                [--table.type=[table type [table type ...]]]     Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE type is processed
+            [--meta.data.*=[true | false]]                       Includes or excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check, identity, column.trigger) from the generated output, by default all objects are generated
+            [--script.type=drop [create]]                        Comma separated types of statements to be generated, default is drop & create
+            [--group.scripts.by=[table | meta.data]]             Group generated DDL scripts, table by default
+            [--identifier.quoting=[identifier quoting]]          Identifier quoting policy name, minimal, always or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierQuoting, default is always
+            [--identifier.normalizer=[identifier normalizer]]    Identifier transformer to use, available normalizers are noop, standard, lower.case, upper.case or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer, default is noop
 
 ### Load data to a target NuoDB database ###
 
