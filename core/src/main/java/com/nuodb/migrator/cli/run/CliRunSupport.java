@@ -94,8 +94,8 @@ public class CliRunSupport extends CliSupport {
     public static final String IDENTIFIER_QUOTING_ALWAYS = "always";
     public static final String IDENTIFIER_NORMALIZER_NOOP = "noop";
     public static final String IDENTIFIER_NORMALIZER_STANDARD = "standard";
-    public static final String IDENTIFIER_NORMALIZER_LOWERCASE = "lower.case";
-    public static final String IDENTIFIER_NORMALIZER_UPPERCASE = "upper.case";
+    public static final String IDENTIFIER_NORMALIZER_LOWERCASE = "lowercase";
+    public static final String IDENTIFIER_NORMALIZER_UPPERCASE = "uppercase";
 
     private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
 
