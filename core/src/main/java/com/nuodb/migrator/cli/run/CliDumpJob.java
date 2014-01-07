@@ -34,7 +34,6 @@ import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.dump.DumpJob;
 import com.nuodb.migrator.jdbc.dialect.QueryLimit;
-import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.job.HasJobSpec;
 import com.nuodb.migrator.spec.DumpJobSpec;
 import com.nuodb.migrator.spec.MigrationMode;
@@ -49,7 +48,6 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.spec.DumpJobSpec.MIGRATION_MODES;
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
@@ -153,17 +151,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
                 ).build();
         group.withOption(table);
 
-        Option tableType = newBasicOptionBuilder().
-                withName(TABLE_TYPE_OPTION).
-                withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).
-                                withMaximum(Integer.MAX_VALUE).build()
-                ).build();
-        group.withOption(tableType);
-
-        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+                OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
         Option tableFilter = newRegexOptionBuilder().
@@ -249,13 +237,6 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
     }
 
     protected void parseTableGroup(OptionSet optionSet, DumpJobSpec dumpJobSpec) {
-        Collection<String> tableTypes = newLinkedHashSet();
-        tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
-        if (tableTypes.isEmpty()) {
-            tableTypes.add(Table.TABLE);
-        }
-        dumpJobSpec.setTableTypes(tableTypes.toArray(new String[tableTypes.size()]));
-
         Map<String, TableSpec> tableQueryMapping = newHashMap();
         for (String table : optionSet.<String>getValues(TABLE_OPTION)) {
             tableQueryMapping.put(table, new TableSpec(table));
