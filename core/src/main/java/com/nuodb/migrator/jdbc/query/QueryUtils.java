@@ -45,6 +45,9 @@ public class QueryUtils {
     public static final String DESC = "DESC";
     public static final String ASC = "ASC";
 
+    private QueryUtils() {
+    }
+
     public static String where(String query, Collection<String> filters, String operator) {
         return where(new StringBuilder(query), filters, operator).toString();
     }

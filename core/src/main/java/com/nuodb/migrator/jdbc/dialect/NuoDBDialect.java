@@ -28,10 +28,10 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifiers;
-import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
 import java.sql.Types;
 import java.util.regex.Pattern;

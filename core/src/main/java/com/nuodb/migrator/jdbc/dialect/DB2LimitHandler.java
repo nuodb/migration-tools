@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.query.QueryLimit;
+
 /**
  * @author Sergey Bushik
  */

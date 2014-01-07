@@ -25,66 +25,29 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.jdbc.query;
 
 /**
  * @author Sergey Bushik
  */
-public class QueryLimit {
+public class QueryLimitUtils {
 
-    private Long count;
-    private Long offset;
-
-    public QueryLimit() {
+    private QueryLimitUtils() {
     }
 
-    public QueryLimit(Long count) {
-        this.count = count;
+    public static boolean hasOffset(QueryLimit queryLimit) {
+        return queryLimit != null && queryLimit.getOffset() != null;
     }
 
-    public QueryLimit(Long count, Long offset) {
-        this.count = count;
-        this.offset = offset;
+    public static long getOffset(QueryLimit queryLimit) {
+        return hasOffset(queryLimit) ? queryLimit.getOffset() : 0;
     }
 
-    public QueryLimit(QueryLimit queryLimit) {
-        this.count = queryLimit.getCount();
-        this.offset = queryLimit.getOffset();
+    public static boolean hasCount(QueryLimit queryLimit) {
+        return queryLimit != null && queryLimit.getCount() != null;
     }
 
-    public Long getCount() {
-        return count;
-    }
-
-    public void setCount(Long count) {
-        this.count = count;
-    }
-
-    public Long getOffset() {
-        return offset;
-    }
-
-    public void setOffset(Long offset) {
-        this.offset = offset;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof QueryLimit)) return false;
-
-        QueryLimit that = (QueryLimit) o;
-
-        if (count != null ? !count.equals(that.count) : that.count != null) return false;
-        if (offset != null ? !offset.equals(that.offset) : that.offset != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = count != null ? count.hashCode() : 0;
-        result = 31 * result + (offset != null ? offset.hashCode() : 0);
-        return result;
+    public static long getCount(QueryLimit queryLimit) {
+        return hasCount(queryLimit) ? queryLimit.getCount() : 0;
     }
 }

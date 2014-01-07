@@ -27,13 +27,14 @@
  */
 package com.nuodb.migrator.spec;
 
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 
 import java.util.Collection;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static java.util.Collections.unmodifiableSet;
 
 /**
@@ -41,13 +42,21 @@ import static java.util.Collections.unmodifiableSet;
  */
 public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
 
-    public static final Collection<MigrationMode> MIGRATION_MODES = unmodifiableSet(newHashSet(MigrationMode.DATA));
+    public static final Collection<MigrationMode> MIGRATION_MODES = unmodifiableSet(newHashSet(DATA));
+    private Collection<MigrationMode> migrationModes = MIGRATION_MODES;
     private Integer threads;
     private TimeZone timeZone;
     private Collection<TableSpec> tableSpecs = newArrayList();
     private Collection<QuerySpec> querySpecs = newArrayList();
     private QueryLimit queryLimit;
-    private Collection<MigrationMode> migrationModes = MIGRATION_MODES;
+
+    public Collection<MigrationMode> getMigrationModes() {
+        return migrationModes;
+    }
+
+    public void setMigrationModes(Collection<MigrationMode> migrationModes) {
+        this.migrationModes = migrationModes;
+    }
 
     public Integer getThreads() {
         return threads;
@@ -70,7 +79,7 @@ public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
     }
 
     public void setTableSpecs(Collection<TableSpec> tableSpecs) {
-        this.tableSpecs = newArrayList(tableSpecs);
+        this.tableSpecs = tableSpecs;
     }
 
     public Collection<QuerySpec> getQuerySpecs() {
@@ -78,7 +87,7 @@ public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
     }
 
     public void setQuerySpecs(Collection<QuerySpec> querySpecs) {
-        this.querySpecs = newArrayList(querySpecs);
+        this.querySpecs = querySpecs;
     }
 
     public QueryLimit getQueryLimit() {
@@ -87,14 +96,6 @@ public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
 
     public void setQueryLimit(QueryLimit queryLimit) {
         this.queryLimit = queryLimit;
-    }
-
-    public Collection<MigrationMode> getMigrationModes() {
-        return migrationModes;
-    }
-
-    public void setMigrationModes(Collection<MigrationMode> migrationModes) {
-        this.migrationModes = migrationModes;
     }
 
     @Override

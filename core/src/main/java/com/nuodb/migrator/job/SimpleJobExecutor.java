@@ -141,7 +141,7 @@ public class SimpleJobExecutor implements JobExecutor {
 
     protected void fire(JobExecutionEvent event) {
         for (JobExecutionListener listener : listeners) {
-            listener.onJobExecuted(event);
+            listener.onJobExecution(event);
         }
     }
 

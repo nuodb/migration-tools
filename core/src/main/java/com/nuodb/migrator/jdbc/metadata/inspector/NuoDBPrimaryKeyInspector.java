@@ -39,6 +39,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.PRIMARY_KEY;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
@@ -69,7 +70,7 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
             Table table = addTable(inspectionResults, null, primaryKeys.getString("SCHEMA"),
                     primaryKeys.getString("TABLENAME"));
 
-            final Identifier identifier = Identifier.valueOf(primaryKeys.getString("INDEXNAME"));
+            Identifier identifier = valueOf(primaryKeys.getString("INDEXNAME"));
             PrimaryKey primaryKey = table.getPrimaryKey();
             if (primaryKey == null) {
                 table.setPrimaryKey(primaryKey = new PrimaryKey(identifier));

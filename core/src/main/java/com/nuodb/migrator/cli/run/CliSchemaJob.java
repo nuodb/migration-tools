@@ -31,18 +31,12 @@ import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
-import com.nuodb.migrator.job.HasJobSpec;
-import com.nuodb.migrator.schema.SchemaJob;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaJobSpec;
 
-import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.collect.Sets.newLinkedHashSet;
+import java.util.Map;
+
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
-import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
-import static java.lang.Integer.parseInt;
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.replace;
 
 /**
  * @author Sergey Bushik
@@ -77,8 +71,8 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
     }
 
     @Override
-    protected HasJobSpec<SchemaJobSpec> createJob() {
-        return new SchemaJob();
+    public void execute(Map<Object, Object> context) {
+        getMigrator().execute(getJobSpec(), context);
     }
 
     @Override

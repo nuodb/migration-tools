@@ -32,9 +32,7 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
-import com.nuodb.migrator.dump.DumpJob;
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
-import com.nuodb.migrator.job.HasJobSpec;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.spec.DumpJobSpec;
 import com.nuodb.migrator.spec.MigrationMode;
 import com.nuodb.migrator.spec.QuerySpec;
@@ -85,11 +83,6 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
     }
 
     @Override
-    protected HasJobSpec<DumpJobSpec> createJob() {
-        return new DumpJob();
-    }
-
-    @Override
     protected void bind(OptionSet optionSet) {
         DumpJobSpec dumpJobSpec = new DumpJobSpec();
         dumpJobSpec.setSourceSpec(parseSourceGroup(optionSet, this));
@@ -98,6 +91,11 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         parseDumpWriterGroup(optionSet, dumpJobSpec);
         parseSchemaGeneratorGroup(dumpJobSpec, optionSet, this);
         setJobSpec(dumpJobSpec);
+    }
+
+    @Override
+    public void execute(Map<Object, Object> context) {
+        getMigrator().execute(getJobSpec(), context);
     }
 
     protected Option createMigrationModeGroup() {
@@ -250,7 +248,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
             }
             tableSpec.setFilter(iterator.next());
         }
-        dumpJobSpec.setTableSpecs(tableQueryMapping.values());
+        dumpJobSpec.setTableSpecs(newArrayList(tableQueryMapping.values()));
     }
 
     protected Collection<QuerySpec> parseQueryGroup(OptionSet optionSet) {

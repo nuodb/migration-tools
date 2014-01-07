@@ -59,6 +59,13 @@ public class SchemaJob extends SchemaGeneratorJobBase<SchemaJobSpec> {
     private ScriptExporter scriptExporter;
     private ScriptGeneratorManager scriptGeneratorManager;
 
+    public SchemaJob() {
+    }
+
+    public SchemaJob(SchemaJobSpec jobSpec) {
+        super(jobSpec);
+    }
+
     @Override
     protected void init() throws Exception {
         super.init();

@@ -33,8 +33,6 @@ import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.jdbc.query.InsertType;
-import com.nuodb.migrator.job.HasJobSpec;
-import com.nuodb.migrator.load.LoadJob;
 import com.nuodb.migrator.spec.LoadJobSpec;
 
 import java.util.Map;
@@ -74,8 +72,8 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
     }
 
     @Override
-    protected HasJobSpec<LoadJobSpec> createJob() {
-        return new LoadJob();
+    public void execute(Map<Object, Object> context) {
+        getMigrator().execute(getJobSpec(), context);
     }
 
     protected Option createInsertTypeGroup() {

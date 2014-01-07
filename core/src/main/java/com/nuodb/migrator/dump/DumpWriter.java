@@ -35,7 +35,7 @@ import com.nuodb.migrator.backup.TableRowSet;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;

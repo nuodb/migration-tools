@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.cli.run;
 
+import com.nuodb.migrator.Migrator;
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.job.HasJobSpec;
 import com.nuodb.migrator.job.Job;
@@ -43,34 +44,12 @@ import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
  */
 public abstract class CliJob<S extends JobSpec> extends CliRunAdapter {
 
+    private Migrator migrator = new Migrator();
     private S jobSpec;
 
     public CliJob(String command) {
         super(command);
     }
-
-    @Override
-    public void execute(Map<Object, Object> context) {
-        HasJobSpec<S> job = createJob();
-        job.setJobSpec(getJobSpec());
-        execute(job, context);
-    }
-
-    public void execute(Job job, Map<Object, Object> context) {
-        final JobExecutor jobExecutor = createJobExecutor(job);
-        jobExecutor.addJobExecutionListener(new TraceJobExecutionListener());
-        jobExecutor.execute(context);
-        Throwable failure = jobExecutor.getJobStatus().getFailure();
-        if (failure != null) {
-            if (failure instanceof MigratorException) {
-                throw (MigratorException)failure;
-            } else {
-                throw new MigratorException(failure);
-            }
-        }
-    }
-
-    protected abstract HasJobSpec<S> createJob();
 
     public S getJobSpec() {
         return jobSpec;
@@ -78,5 +57,13 @@ public abstract class CliJob<S extends JobSpec> extends CliRunAdapter {
 
     public void setJobSpec(S jobSpec) {
         this.jobSpec = jobSpec;
+    }
+
+    public Migrator getMigrator() {
+        return migrator;
+    }
+
+    public void setMigrator(Migrator migrator) {
+        this.migrator = migrator;
     }
 }

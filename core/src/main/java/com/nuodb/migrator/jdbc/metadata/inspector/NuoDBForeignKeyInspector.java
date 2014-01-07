@@ -65,7 +65,6 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
             "WHERE FOREIGNTABLE.SCHEMA=? AND FOREIGNTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, " +
             "KEY_SEQ ASC";
 
-
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         Collection<Object> parameters = newArrayList();

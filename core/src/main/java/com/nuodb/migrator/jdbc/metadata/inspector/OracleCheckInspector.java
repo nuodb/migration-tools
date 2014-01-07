@@ -46,9 +46,6 @@ import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
  */
 public class OracleCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    private static final String CONSTRAINT_TYPE_CHECK = "C";
-    private static final String STATUS_ENABLED = "ENABLED";
-
     private static final String QUERY =
             "SELECT ALL_CONSTRAINTS.CONSTRAINT_NAME, ALL_CONS_COLUMNS.COLUMN_NAME, " +
             "ALL_CONSTRAINTS.SEARCH_CONDITION, ALL_CONSTRAINTS.TABLE_NAME, ALL_CONSTRAINTS.OWNER " +
@@ -57,6 +54,9 @@ public class OracleCheckInspector extends TableInspectorBase<Table, TableInspect
             "AND ALL_CONS_COLUMNS.CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME\n" +
             "WHERE ALL_CONSTRAINTS.CONSTRAINT_TYPE=? AND ALL_CONSTRAINTS.STATUS=? AND " +
             "ALL_CONSTRAINTS.OWNER=? AND ALL_CONSTRAINTS.TABLE_NAME=?";
+
+    private static final String CONSTRAINT_TYPE_CHECK = "C";
+    private static final String STATUS_ENABLED = "ENABLED";
 
     public OracleCheckInspector() {
         super(CHECK, TableInspectionScope.class);

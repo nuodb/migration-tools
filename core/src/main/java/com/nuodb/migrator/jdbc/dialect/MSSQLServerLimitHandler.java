@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.query.QueryLimit;
+
 import static com.nuodb.migrator.utils.StringUtils.indexOf;
 import static java.lang.String.valueOf;
 

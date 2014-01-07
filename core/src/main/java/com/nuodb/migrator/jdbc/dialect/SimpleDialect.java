@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolverAware;
 import com.nuodb.migrator.jdbc.session.Session;

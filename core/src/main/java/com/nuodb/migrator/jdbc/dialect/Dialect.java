@@ -27,7 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.Trigger;
+import com.nuodb.migrator.jdbc.metadata.TriggerEvent;
+import com.nuodb.migrator.jdbc.metadata.TriggerTime;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.*;

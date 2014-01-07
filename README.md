@@ -6,10 +6,10 @@
 
 This tool is designed to assist you in migrating data from supported SQL databases to a NuoDB database. Use *nuodb-migrator dump*, *nuodb-migrator load*, *nuodb-migrator schema* to copy, normalize, and load data from an existing database (NuoDB or 3rd party) to a NuoDB database.  With the command-line interface, domain administrators will be able to perform the following database backup and migration tasks:
 
-1. Migrate (generate) a schema to a target NuoDB database
-2. Copy data from an existing database to a target NuoDB database
-3. Dump data from an existing database
-4. Load data to a target NuoDB database
+1. Dump data & schema from an existing database to the file system
+2. Load data & schema from the file system to a target NuoDB database
+3. Generate a NuoDB schema from a source database
+4. Copy data & migrate schema from an existing database to a target NuoDB database in one step, dump & load on the fly, [under development]
 
 *These functions tested on MySQL, MSSQL Server, Oracle, PostgreSQL, IBM DB2, Sybase Adaptive Server Enterprise and supposed to work with any JDBC-compliant database.*
 
@@ -32,7 +32,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
         --config=<path>
         <[dump] | [load] | [schema]>
 
-### Dump data from an existing database ###
+### Dump data & schema from an existing database ###
 
     $ bin/nuodb-migrator dump                                                
         [source database connection, required]

@@ -58,7 +58,7 @@ public class MySQLColumnTriggerInspector extends TableInspectorBase<Table, Table
     private static final String COLUMN_TRIGGER_REGEX = "ON (\\w+) (.*)";
     private static final Pattern COLUMN_TRIGGER_PATTERN = compile(COLUMN_TRIGGER_REGEX, CASE_INSENSITIVE);
 
-    public static final String QUERY_COLUMN_TRIGGERS = "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, EXTRA FROM INFORMATION_SCHEMA.COLUMNS";
+    private static final String QUERY = "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, EXTRA FROM INFORMATION_SCHEMA.COLUMNS";
 
     public MySQLColumnTriggerInspector() {
         super(COLUMN_TRIGGER, TableInspectionScope.class);
@@ -66,7 +66,7 @@ public class MySQLColumnTriggerInspector extends TableInspectorBase<Table, Table
 
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
-        StringBuilder query = new StringBuilder(QUERY_COLUMN_TRIGGERS);
+        StringBuilder query = new StringBuilder(QUERY);
         Collection<String> filters = newArrayList();
         Collection<Object> parameters = newArrayList();
 

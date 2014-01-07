@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.sql.Connection;

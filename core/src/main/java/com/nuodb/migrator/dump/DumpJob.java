@@ -31,7 +31,7 @@ import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupManager;
 import com.nuodb.migrator.backup.Schema;
 import com.nuodb.migrator.backup.XmlBackupManager;
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;

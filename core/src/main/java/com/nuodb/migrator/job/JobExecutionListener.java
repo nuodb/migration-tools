@@ -34,5 +34,5 @@ import java.util.EventListener;
  */
 public interface JobExecutionListener extends EventListener {
 
-    void onJobExecuted(JobExecutionEvent event);
+    void onJobExecution(JobExecutionEvent event);
 }

@@ -33,16 +33,17 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class TraceJobExecutionListener implements JobExecutionListener {
 
-    private transient final Logger logger = LoggerFactory.getLogger(getClass());
+    private transient final Logger logger = getLogger(getClass());
 
     @Override
-    public void onJobExecuted(JobExecutionEvent event) {
+    public void onJobExecution(JobExecutionEvent event) {
         JobExecution execution = event.getJobExecution();
         JobStatus jobStatus = execution.getJobStatus();
         if (logger.isInfoEnabled()) {
