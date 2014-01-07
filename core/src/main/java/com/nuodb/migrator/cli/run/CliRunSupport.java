@@ -30,6 +30,7 @@ package com.nuodb.migrator.cli.run;
 import com.google.common.base.Function;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.cli.CliSupport;
 import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
@@ -61,6 +62,7 @@ import java.util.*;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
+import static com.nuodb.migrator.backup.format.csv.CsvAttributes.FORMAT;
 import static com.nuodb.migrator.cli.validation.ConnectionGroupValidators.addConnectionGroupValidators;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
@@ -198,18 +200,14 @@ public class CliRunSupport extends CliSupport {
 
     protected Group createOutputGroup() {
         GroupBuilder group = newGroupBuilder().
-                withName(getMessage(OUTPUT_GROUP_NAME)).
-                withRequired(true).
-                withMinimum(1);
+                withName(getMessage(OUTPUT_GROUP_NAME));
 
         Option type = newBasicOptionBuilder().
                 withName(OUTPUT_TYPE_OPTION).
                 withDescription(getMessage(OUTPUT_TYPE_OPTION_DESCRIPTION)).
-                withRequired(true).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(OUTPUT_TYPE_ARGUMENT_NAME)).
-                                withRequired(true).withMinimum(1).build()
+                                withName(getMessage(OUTPUT_TYPE_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(type);
 
@@ -284,7 +282,7 @@ public class CliRunSupport extends CliSupport {
 
     protected ResourceSpec parseOutputGroup(OptionSet optionSet, Option option) {
         ResourceSpec resource = new ResourceSpec();
-        resource.setType((String) optionSet.getValue(OUTPUT_TYPE_OPTION));
+        resource.setType((String) optionSet.getValue(OUTPUT_TYPE_OPTION, FORMAT));
         resource.setPath((String) optionSet.getValue(OUTPUT_PATH_OPTION));
         resource.setAttributes(parseAttributes(
                 optionSet.<String>getValues(OUTPUT_OPTION), optionSet.getOption(OUTPUT_OPTION)));

@@ -44,14 +44,14 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--source.catalog=[catalog]]                         Default database catalog name to use
             [--source.schema=[schema]]                           Default database schema name to use
             [--source.auto.commit=[true | false]]                If set to true each individual statement is treated as a transaction and is automatically committed after it is executed, false by default
-        [output specification, required]
-            --output.type=output type                            Output type (CVS, XML, BSON)
+        [output specification, optional]
+            [--output.type=[output type]]                        Output type (csv, xml, bson), default is csv
             [--output.path=[output path]]                        Path on the file system
             [--output.*=[attribute value]]                       Output format attributes
         [migration modes, optional]
             [--data=[true | false]]                              Enables or disables table dump, true by default
             [--schema=[true | false]]                            Enables or disables schema dump, false by default
-        [table dump options, optional]
+        [table dump, optional]
             [table names, types & query filters, optional]
                 [--table=table [table ...]]                      Table name
                 [--table.*.filter=[query filter]]                Filters table records using specified filter by appending it to the SELECT statement after WHERE clause
@@ -60,7 +60,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--time.zone (-z)=time zone]                         Time zone enables date columns to be dumped and reloaded between servers in different time zones
             [--threads (-t)=[threads]]                           Number of worker threads to dump data, defaulted to a number of available processors
             [--query.limit=[query limit]]                        Query limit is a maximum number of rows to split a table into chunks with LIMIT {limit} OFFSET {offset} syntax in a database specific way, where each chunk is written to a separate file. If a query limit is not given or is not supported by the migrator for a particular database queries are not split
-        [schema dump options, optional]
+        [schema dump, optional]
             [type declarations & translations, optional]
                 [--use.nuodb.types=[true | false]]               Instructs the migrator to transform source database types to the best matching NuoDB types, where CHAR, VARCHAR and CLOB source types will be rendered as STRING columns, nuodb-types.properties file is a source of type overrides, the option is false by default
                 [--use.explicit.defaults=[true | false]]         Transforms source column implicit default values to NuoDB explicit defaults, the option is false by default
