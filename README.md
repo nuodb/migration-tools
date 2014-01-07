@@ -57,7 +57,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
                 [--table.type=[table type [table type ...]]]     Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE type is processed
                 [--table.*.filter=[query filter]]                Filters table records using specified filter by appending it to the SELECT statement after WHERE clause
             [select statements]
-            [--query=query [query ...]]                          Select statement
+                [--query=query [query ...]]                      Select statement
             [--time.zone (-z)=time zone]                         Time zone enables date columns to be dumped and reloaded between servers in different time zones
             [--threads (-t)=[threads]]                           Number of worker threads to dump data, defaulted to a number of available processors
             [--query.limit=[query limit]]                        Query limit is a maximum number of rows to split a table into chunks with LIMIT {limit} OFFSET {offset} syntax in a database specific way, where each chunk is written to a separate file. If a query limit is not given or is not supported by the migrator for a particular database queries are not split
@@ -70,7 +70,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
                 [--type.size=[type size]]                        Maximum size of custom data type
                 [--type.precision=[type precision]]              The maximum total number of decimal digits that can be stored, both to the left and to the right of the decimal point. Typically, type precision is in the range of 1 through the maximum precision of 38.
                 [--type.scale=[type scale]]                      The number of fractional digits for numeric data types
-                [--table.type=[table type [table type ...]]]     Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE type is processed
+            [--table.type=[table type [table type ...]]]         Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE type is processed
             [--meta.data.*=[true | false]]                       Includes or excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check, identity, column.trigger) from the generated output, by default all objects are generated
             [--script.type=drop [create]]                        Comma separated types of statements to be generated, default is drop & create
             [--group.scripts.by=[table | meta.data]]             Group generated DDL scripts, table by default
