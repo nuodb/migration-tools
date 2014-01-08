@@ -48,7 +48,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-public class SimpleRowSetMapper implements RowSetMapper {
+public class UseSchemaRowSetMapper implements RowSetMapper {
 
     private final transient Logger logger = getLogger(getClass());
 
@@ -63,7 +63,7 @@ public class SimpleRowSetMapper implements RowSetMapper {
         return table;
     }
 
-    private Table map(TableRowSet tableRowSet, Database database) {
+    protected Table map(TableRowSet rowSet, Database database) {
         Dialect dialect = database.getDialect();
         List<String> qualifiers = newArrayList();
         int maximum = 0;
@@ -78,25 +78,25 @@ public class SimpleRowSetMapper implements RowSetMapper {
             addIgnoreNull(qualifiers, connectionSpec.getCatalog());
             addIgnoreNull(qualifiers, connectionSpec.getSchema());
         } else {
-            addIgnoreNull(qualifiers, tableRowSet.getCatalogName());
-            addIgnoreNull(qualifiers, tableRowSet.getSchemaName());
+            addIgnoreNull(qualifiers, rowSet.getCatalogName());
+            addIgnoreNull(qualifiers, rowSet.getSchemaName());
         }
         int actual = min(qualifiers.size(), maximum);
         qualifiers = qualifiers.subList(qualifiers.size() - actual, qualifiers.size());
-        final String sourceTable = getQualifiedName(null,
-                tableRowSet.getCatalogName(), tableRowSet.getSchemaName(), tableRowSet.getTableName(), null);
-        final String targetTable = getQualifiedName(null,
-                qualifiers, tableRowSet.getTableName(), null);
+        final String source = getQualifiedName(null,
+                rowSet.getCatalogName(), rowSet.getSchemaName(), rowSet.getTableName(), null);
+        final String target = getQualifiedName(null,
+                qualifiers, rowSet.getTableName(), null);
         if (logger.isDebugEnabled()) {
-            logger.debug(format("Mapping source %s row set to %s table", sourceTable, targetTable));
+            logger.debug(format("Mapping source %s row set to %s table", source, target));
         }
-        return database.findTable(targetTable);
+        return database.findTable(target);
     }
 
-    private Table map(QueryRowSet queryRowSet, Database database) {
+    protected Table map(QueryRowSet rowSet, Database database) {
         if (logger.isWarnEnabled()) {
             logger.warn(format("Can't map %s query row set %s to a table, explicit mapping is required",
-                    queryRowSet.getName(), queryRowSet.getQuery()));
+                    rowSet.getName(), rowSet.getQuery()));
         }
         return null;
     }

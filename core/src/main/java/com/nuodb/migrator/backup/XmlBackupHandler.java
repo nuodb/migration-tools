@@ -42,7 +42,7 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
     private static final String VERSION_ATTRIBUTE = "version";
     private static final String FORMAT_ATTRIBUTE = "format";
     private static final String DATABASE_INFO_ELEMENT = "database-info";
-    private static final String SCHEMA_ELEMENT = "schema";
+    private static final String SCRIPT_ELEMENT = "script";
 
     public XmlBackupHandler() {
         super(Backup.class);
@@ -58,8 +58,8 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
     protected void readElement(InputNode input, Backup backup, XmlReadContext context) throws Exception {
         if (DATABASE_INFO_ELEMENT.equals(input.getName())) {
             backup.setDatabaseInfo(context.read(input, DatabaseInfo.class));
-        } else if (SCHEMA_ELEMENT.equals(input.getName())) {
-            backup.setSchema(context.read(input, Schema.class));
+        } else if (SCRIPT_ELEMENT.equals(input.getName())) {
+            backup.addScript(context.read(input, Script.class));
         } else if (ROW_SET.equals(input.getName())) {
             backup.addRowSet(context.read(input, RowSet.class));
         }
@@ -76,8 +76,10 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
         if (backup.getDatabaseInfo() != null) {
             context.writeElement(output, DATABASE_INFO_ELEMENT, backup.getDatabaseInfo());
         }
-        if (backup.getSchema() != null) {
-            context.writeElement(output, SCHEMA_ELEMENT, backup.getSchema());
+        if (backup.getScripts() != null) {
+            for (Script script : backup.getScripts()) {
+                context.writeElement(output, SCRIPT_ELEMENT, script);
+            }
         }
         for (RowSet rowSet : backup.getRowSets()) {
             context.writeElement(output, ROW_SET, rowSet);

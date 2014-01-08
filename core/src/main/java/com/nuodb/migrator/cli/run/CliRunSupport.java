@@ -28,9 +28,10 @@
 package com.nuodb.migrator.cli.run;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.cli.CliSupport;
 import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
@@ -59,6 +60,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
@@ -70,6 +72,8 @@ import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
 import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
+import static com.nuodb.migrator.spec.MigrationMode.DATA;
+import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.Boolean.parseBoolean;
@@ -238,6 +242,31 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
+    protected Option createMigrationModeGroup() {
+        GroupBuilder group = newGroupBuilder().withName(getMessage(MIGRATION_MODE_GROUP_NAME));
+        Option data = newBasicOptionBuilder().
+                withId(MIGRATION_MODE_DATA_OPTION_ID).
+                withName(MIGRATION_MODE_DATA_OPTION).
+                withDescription(getMessage(MIGRATION_MODE_DATA_OPTION_DESCRIPTION)).
+                withRequired(false).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(MIGRATION_MODE_DATA_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(data);
+        Option schema = newBasicOptionBuilder().
+                withId(MIGRATION_MODE_SCHEMA_OPTION_ID).
+                withName(MIGRATION_MODE_SCHEMA_OPTION).
+                withDescription(getMessage(MIGRATION_MODE_SCHEMA_OPTION_DESCRIPTION)).
+                withRequired(false).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(MIGRATION_MODE_SCHEMA_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(schema);
+        return group.build();
+    }
+
     protected Group createCommitGroup() {
         Option commitStrategy = newBasicOptionBuilder().
                 withName(COMMIT_STRATEGY_OPTION).
@@ -265,36 +294,11 @@ public class CliRunSupport extends CliSupport {
                 withOption(commitStrategyAttributes).build();
     }
 
-    protected DriverConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
-        DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
-        connectionSpec.setDriver((String) optionSet.getValue(SOURCE_DRIVER_OPTION));
-        connectionSpec.setUrl((String) optionSet.getValue(SOURCE_URL_OPTION));
-        connectionSpec.setUsername((String) optionSet.getValue(SOURCE_USERNAME_OPTION));
-        connectionSpec.setPassword((String) optionSet.getValue(SOURCE_PASSWORD_OPTION));
-        connectionSpec.setProperties(parseProperties(optionSet, SOURCE_PROPERTIES_OPTION, option));
-        connectionSpec.setCatalog((String) optionSet.getValue(SOURCE_CATALOG_OPTION));
-        connectionSpec.setSchema((String) optionSet.getValue(SOURCE_SCHEMA_OPTION));
-        if (optionSet.hasOption(SOURCE_AUTO_COMMIT_OPTION)) {
-            connectionSpec.setAutoCommit(Boolean.parseBoolean((String) optionSet.getValue(SOURCE_AUTO_COMMIT_OPTION)));
-        }
-        return connectionSpec;
-    }
-
-    protected ResourceSpec parseOutputGroup(OptionSet optionSet, Option option) {
-        ResourceSpec resource = new ResourceSpec();
-        resource.setType((String) optionSet.getValue(OUTPUT_TYPE_OPTION, FORMAT));
-        resource.setPath((String) optionSet.getValue(OUTPUT_PATH_OPTION));
-        resource.setAttributes(parseAttributes(
-                optionSet.<String>getValues(OUTPUT_OPTION), optionSet.getOption(OUTPUT_OPTION)));
-        return resource;
-    }
-
-    protected Map<String, Object> parseAttributes(List<String> values, Option option) {
-        Map<String, Object> attributes = newHashMap();
-        for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
-            attributes.put(iterator.next(), iterator.next());
-        }
-        return attributes;
+    protected Map<String, CommitStrategy> createCommitStrategyMapping() {
+        Map<String, CommitStrategy> commitStrategyMapping = new TreeMap<String, CommitStrategy>(CASE_INSENSITIVE_ORDER);
+        commitStrategyMapping.put(COMMIT_STRATEGY_SINGLE, SingleCommitStrategy.INSTANCE);
+        commitStrategyMapping.put(COMMIT_STRATEGY_BATCH, new BatchCommitStrategy());
+        return commitStrategyMapping;
     }
 
     protected Option createTimeZoneOption() {
@@ -308,69 +312,6 @@ public class CliRunSupport extends CliSupport {
                                 withMinimum(1).
                                 withRequired(true).build()
                 ).build();
-    }
-
-    protected TimeZone parseTimeZoneOption(OptionSet optionSet, Option option) {
-        String timeZone = (String) optionSet.getValue(TIME_ZONE_OPTION);
-        if (timeZone != null) {
-            TimeZone systemTimeZone = TimeZone.getDefault();
-            try {
-                TimeZone.setDefault(getDefaultTimeZone());
-                return getTimeZone(timeZone);
-            } finally {
-                TimeZone.setDefault(systemTimeZone);
-            }
-        } else {
-            return getDefaultTimeZone();
-        }
-    }
-
-    protected Map<String, CommitStrategy> createCommitStrategyMapping() {
-        Map<String, CommitStrategy> commitStrategyMapping = new TreeMap<String, CommitStrategy>(CASE_INSENSITIVE_ORDER);
-        commitStrategyMapping.put(COMMIT_STRATEGY_SINGLE, SingleCommitStrategy.INSTANCE);
-        commitStrategyMapping.put(COMMIT_STRATEGY_BATCH, new BatchCommitStrategy());
-        return commitStrategyMapping;
-    }
-
-    protected CommitStrategy parseCommitGroup(OptionSet optionSet, Option option) {
-        Map<String, CommitStrategy> commitStrategyMapping = createCommitStrategyMapping();
-        String commitStrategyValue = (String) optionSet.getValue(COMMIT_STRATEGY_OPTION, COMMIT_STRATEGY_BATCH);
-        CommitStrategy commitStrategy = commitStrategyMapping.get(commitStrategyValue);
-        if (commitStrategy == null) {
-            commitStrategy = newInstance(commitStrategyValue);
-        }
-        commitStrategy.setAttributes(parseAttributes(
-                optionSet.<String>getValues(COMMIT_STRATEGY_ATTRIBUTES_OPTION),
-                optionSet.getOption(COMMIT_STRATEGY_ATTRIBUTES_OPTION)));
-        return commitStrategy;
-    }
-
-    /**
-     * Parses URL encoded properties name1=value1&name2=value2
-     *
-     * @param optionSet holding command line options
-     * @param trigger   key to key value pairs
-     * @param option    the option which contains parsed url
-     */
-    protected Map<String, Object> parseProperties(OptionSet optionSet, String trigger, Option option) {
-        Map<String, Object> properties = newHashMap();
-        String url = (String) optionSet.getValue(trigger);
-        if (url != null) {
-            try {
-                url = URLDecoder.decode(url, "UTF-8");
-            } catch (UnsupportedEncodingException exception) {
-                throw new OptionException(exception.getMessage(), option);
-            }
-            String[] params = url.split("&");
-            for (String param : params) {
-                String[] pair = param.split("=");
-                if (pair.length != 2) {
-                    throw new OptionException(format("Malformed name-value pair %s", pair), option);
-                }
-                properties.put(pair[0], pair[1]);
-            }
-        }
-        return properties;
     }
 
     protected Group createTargetGroup() {
@@ -464,31 +405,8 @@ public class CliRunSupport extends CliSupport {
                 withOption(attributes).build();
     }
 
-    protected DriverConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
-        if (optionSet.hasOption(TARGET_URL_OPTION)) {
-            DriverConnectionSpec connection = new DriverConnectionSpec();
-            connection.setDriver(JdbcConstants.NUODB_DRIVER);
-            connection.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
-            connection.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
-            connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
-            connection.setSchema((String) optionSet.getValue(TARGET_SCHEMA_OPTION));
-            connection.setProperties(parseProperties(optionSet, TARGET_PROPERTIES_OPTION, option));
-            return connection;
-        } else {
-            return null;
-        }
-    }
-
-    protected ResourceSpec parseInputGroup(OptionSet optionSet, Option option) {
-        ResourceSpec resource = new ResourceSpec();
-        resource.setPath((String) optionSet.getValue(INPUT_PATH_OPTION));
-        resource.setAttributes(parseAttributes(
-                optionSet.<String>getValues(INPUT_OPTION), optionSet.getOption(INPUT_OPTION)));
-        return resource;
-    }
-
-    protected Group createSchemaGeneratorGroup() {
-        GroupBuilder group = newGroupBuilder().withName(getMessage(SCRIPT_GENERATOR_GROUP_NAME));
+    protected Group createSchemaMigrationGroup() {
+        GroupBuilder group = newGroupBuilder().withName(getMessage(SCHEMA_MIGRATION_GROUP_NAME));
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
@@ -650,7 +568,140 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
-    protected void parseSchemaGeneratorGroup(SchemaGeneratorJobSpecBase schemaGeneratorJobSpec,
+    protected DriverConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
+        DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
+        connectionSpec.setDriver((String) optionSet.getValue(SOURCE_DRIVER_OPTION));
+        connectionSpec.setUrl((String) optionSet.getValue(SOURCE_URL_OPTION));
+        connectionSpec.setUsername((String) optionSet.getValue(SOURCE_USERNAME_OPTION));
+        connectionSpec.setPassword((String) optionSet.getValue(SOURCE_PASSWORD_OPTION));
+        connectionSpec.setProperties(parseProperties(optionSet, SOURCE_PROPERTIES_OPTION, option));
+        connectionSpec.setCatalog((String) optionSet.getValue(SOURCE_CATALOG_OPTION));
+        connectionSpec.setSchema((String) optionSet.getValue(SOURCE_SCHEMA_OPTION));
+        if (optionSet.hasOption(SOURCE_AUTO_COMMIT_OPTION)) {
+            connectionSpec.setAutoCommit(Boolean.parseBoolean((String) optionSet.getValue(SOURCE_AUTO_COMMIT_OPTION)));
+        }
+        return connectionSpec;
+    }
+
+    protected ResourceSpec parseOutputGroup(OptionSet optionSet, Option option) {
+        ResourceSpec resource = new ResourceSpec();
+        resource.setType((String) optionSet.getValue(OUTPUT_TYPE_OPTION, FORMAT));
+        resource.setPath((String) optionSet.getValue(OUTPUT_PATH_OPTION));
+        resource.setAttributes(parseAttributes(
+                optionSet.<String>getValues(OUTPUT_OPTION), optionSet.getOption(OUTPUT_OPTION)));
+        return resource;
+    }
+
+    protected Collection<MigrationMode> parseMigrationModeGroup(OptionSet optionSet, Option option) {
+        return parseMigrationModeGroup(optionSet, option, newHashSet(MigrationMode.values()));
+    }
+
+    protected Collection<MigrationMode> parseMigrationModeGroup(OptionSet optionSet, Option option,
+                                                                Collection<MigrationMode> defaultMigrationModes) {
+        Collection<MigrationMode> migrationModes = newHashSet();
+        Option dataOption = optionSet.getOption(MIGRATION_MODE_DATA_OPTION_ID);
+        Object dataValue = optionSet.getValue(dataOption);
+        if (dataValue != null ? parseBoolean(String.valueOf(dataValue)) :
+                (optionSet.hasOption(dataOption) || defaultMigrationModes.contains(DATA))) {
+            migrationModes.add(DATA);
+        }
+        Option schemaOption = optionSet.getOption(MIGRATION_MODE_SCHEMA_OPTION_ID);
+        Object schemaValue = optionSet.getValue(schemaOption);
+        if (schemaValue != null ? parseBoolean(String.valueOf(schemaValue)) :
+                (optionSet.hasOption(MIGRATION_MODE_SCHEMA_OPTION) || defaultMigrationModes.contains(SCHEMA))) {
+            migrationModes.add(SCHEMA);
+        }
+        return migrationModes;
+    }
+
+    protected Map<String, Object> parseAttributes(List<String> values, Option option) {
+        Map<String, Object> attributes = newHashMap();
+        for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
+            attributes.put(iterator.next(), iterator.next());
+        }
+        return attributes;
+    }
+
+    protected TimeZone parseTimeZoneOption(OptionSet optionSet, Option option) {
+        String timeZone = (String) optionSet.getValue(TIME_ZONE_OPTION);
+        if (timeZone != null) {
+            TimeZone systemTimeZone = TimeZone.getDefault();
+            try {
+                TimeZone.setDefault(getDefaultTimeZone());
+                return getTimeZone(timeZone);
+            } finally {
+                TimeZone.setDefault(systemTimeZone);
+            }
+        } else {
+            return getDefaultTimeZone();
+        }
+    }
+
+    protected CommitStrategy parseCommitGroup(OptionSet optionSet, Option option) {
+        Map<String, CommitStrategy> commitStrategyMapping = createCommitStrategyMapping();
+        String commitStrategyValue = (String) optionSet.getValue(COMMIT_STRATEGY_OPTION, COMMIT_STRATEGY_BATCH);
+        CommitStrategy commitStrategy = commitStrategyMapping.get(commitStrategyValue);
+        if (commitStrategy == null) {
+            commitStrategy = newInstance(commitStrategyValue);
+        }
+        commitStrategy.setAttributes(parseAttributes(
+                optionSet.<String>getValues(COMMIT_STRATEGY_ATTRIBUTES_OPTION),
+                optionSet.getOption(COMMIT_STRATEGY_ATTRIBUTES_OPTION)));
+        return commitStrategy;
+    }
+
+    /**
+     * Parses URL encoded properties name1=value1&name2=value2
+     *
+     * @param optionSet holding command line options
+     * @param trigger   key to key value pairs
+     * @param option    the option which contains parsed url
+     */
+    protected Map<String, Object> parseProperties(OptionSet optionSet, String trigger, Option option) {
+        Map<String, Object> properties = newHashMap();
+        String url = (String) optionSet.getValue(trigger);
+        if (url != null) {
+            try {
+                url = URLDecoder.decode(url, "UTF-8");
+            } catch (UnsupportedEncodingException exception) {
+                throw new OptionException(exception.getMessage(), option);
+            }
+            String[] params = url.split("&");
+            for (String param : params) {
+                String[] pair = param.split("=");
+                if (pair.length != 2) {
+                    throw new OptionException(format("Malformed name-value pair %s", pair), option);
+                }
+                properties.put(pair[0], pair[1]);
+            }
+        }
+        return properties;
+    }
+
+    protected DriverConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
+        if (optionSet.hasOption(TARGET_URL_OPTION)) {
+            DriverConnectionSpec connection = new DriverConnectionSpec();
+            connection.setDriver(JdbcConstants.NUODB_DRIVER);
+            connection.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
+            connection.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
+            connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
+            connection.setSchema((String) optionSet.getValue(TARGET_SCHEMA_OPTION));
+            connection.setProperties(parseProperties(optionSet, TARGET_PROPERTIES_OPTION, option));
+            return connection;
+        } else {
+            return null;
+        }
+    }
+
+    protected ResourceSpec parseInputGroup(OptionSet optionSet, Option option) {
+        ResourceSpec resource = new ResourceSpec();
+        resource.setPath((String) optionSet.getValue(INPUT_PATH_OPTION));
+        resource.setAttributes(parseAttributes(
+                optionSet.<String>getValues(INPUT_OPTION), optionSet.getOption(INPUT_OPTION)));
+        return resource;
+    }
+
+    protected void parseSchemaMigrationGroup(SchemaGeneratorJobSpecBase schemaGeneratorJobSpec,
                                              OptionSet optionSet, Option option) {
         if (optionSet.hasOption(META_DATA_OPTION)) {
             Collection<String> values = optionSet.getValues(META_DATA_OPTION);
@@ -727,7 +778,7 @@ public class CliRunSupport extends CliSupport {
 
         ListMultimap<String, Object> values = jdbcTypeOptionProcessor.getValues();
         int count = values.get(JDBC_TYPE_NAME_OPTION).size();
-        Collection<JdbcTypeSpec> jdbcTypeSpecs = Lists.newArrayList();
+        Collection<JdbcTypeSpec> jdbcTypeSpecs = newArrayList();
         JdbcTypeCodes jdbcTypeCodes = JdbcTypeCodes.getInstance();
         for (int i = 0; i < count; i++) {
             String typeName = (String) values.get(JDBC_TYPE_NAME_OPTION).get(i);

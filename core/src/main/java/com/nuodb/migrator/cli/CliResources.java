@@ -80,7 +80,7 @@ public interface CliResources {
     final String OUTPUT_OPTION_DESCRIPTION = "com.nuodb.migrator.output.option.description";
     final String OUTPUT_OPTION_ARGUMENT_NAME = "com.nuodb.migrator.output.argument.description";
 
-    final String DUMP_WRITER_GROUP_NAME = "com.nuodb.migrator.dump.writer.group.name";
+    final String DATA_MIGRATION_GROUP_NAME = "com.nuodb.migrator.data.migration.group.name";
     final String TIME_ZONE_OPTION_DESCRIPTION = "com.nuodb.migrator.time.zone.option.description";
     final String TIME_ZONE_ARGUMENT_NAME = "com.nuodb.migrator.time.zone.argument.name";
 
@@ -145,7 +145,7 @@ public interface CliResources {
     final String IDENTIFIER_NORMALIZER_OPTION_DESCRIPTION = "com.nuodb.migrator.identifier.normalize.option.description";
     final String IDENTIFIER_NORMALIZER_ARGUMENT_NAME = "com.nuodb.migrator.identifier.normalizer.argument.name";
 
-    final String SCRIPT_GENERATOR_GROUP_NAME = "com.nuodb.migrator.script.generator.group.name";
+    final String SCHEMA_MIGRATION_GROUP_NAME = "com.nuodb.migrator.schema.migration.group.name";
     final String JDBC_TYPE_GROUP_NAME = "com.nuodb.migrator.jdbc.type.group.name";
     final String JDBC_TYPE_CODE_OPTION_DESCRIPTION = "com.nuodb.migrator.jdbc.type.code.option.description";
     final String JDBC_TYPE_CODE_ARGUMENT_NAME = "com.nuodb.migrator.jdbc.type.code.argument.name";

@@ -16,32 +16,33 @@
  */
 package com.nuodb.migrator.cli.parse.help;
 
-import com.google.common.collect.Sets;
 import com.nuodb.migrator.cli.parse.Help;
 import com.nuodb.migrator.cli.parse.HelpHint;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
+import static java.lang.System.getProperty;
+import static java.util.Collections.unmodifiableSet;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @SuppressWarnings("unchecked")
 public class HelpFormatter {
 
     public final static String GUTTER = "    ";
 
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private static final String LINE_SEPARATOR = getProperty("line.separator");
 
     public static Set<HelpHint> USAGE_OUTPUT_HINTS;
 
@@ -50,8 +51,8 @@ public class HelpFormatter {
     public static Set<HelpHint> OPTION_OUTPUT_HINTS;
 
     static {
-        USAGE_OUTPUT_HINTS = Collections.unmodifiableSet(
-                Sets.newHashSet(
+        USAGE_OUTPUT_HINTS = unmodifiableSet(
+                newHashSet(
                         ALIASES,
                         OPTIONAL,
                         PROPERTY,
@@ -63,15 +64,15 @@ public class HelpFormatter {
                         AUGMENT_ARGUMENT,
                         AUGMENT_GROUP
                 ));
-        HELP_OUTPUT_HINTS = Collections.unmodifiableSet(
-                Sets.newHashSet(
+        HELP_OUTPUT_HINTS = unmodifiableSet(
+                newHashSet(
                         ALIASES,
                         OPTIONAL,
                         GROUP,
                         AUGMENT_ARGUMENT
                 ));
-        OPTION_OUTPUT_HINTS = Collections.unmodifiableSet(
-                Sets.newHashSet(
+        OPTION_OUTPUT_HINTS = unmodifiableSet(
+                newHashSet(
                         ALIASES,
                         OPTIONAL,
                         OPTIONAL_CHILD_GROUP,
@@ -86,10 +87,10 @@ public class HelpFormatter {
                 ));
     }
 
-    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
-    protected Set<HelpHint> usageOutputHints = Sets.newHashSet(USAGE_OUTPUT_HINTS);
-    protected Set<HelpHint> helpOutputHints = Sets.newHashSet(HELP_OUTPUT_HINTS);
-    protected Set<HelpHint> optionOutputHints = Sets.newHashSet(OPTION_OUTPUT_HINTS);
+    protected transient final Logger logger = getLogger(getClass());
+    protected Set<HelpHint> usageOutputHints = newHashSet(USAGE_OUTPUT_HINTS);
+    protected Set<HelpHint> helpOutputHints = newHashSet(HELP_OUTPUT_HINTS);
+    protected Set<HelpHint> optionOutputHints = newHashSet(OPTION_OUTPUT_HINTS);
 
     protected String executable;
     protected String header;

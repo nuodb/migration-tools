@@ -54,26 +54,32 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         GroupBuilder group = newGroupBuilder().withName(getMessage(LOAD_GROUP_NAME)).withRequired(true);
         group.withOption(createTargetGroup());
         group.withOption(createInputGroup());
-        group.withOption(createCommitGroup());
-        group.withOption(createInsertTypeGroup());
-        group.withOption(createTimeZoneOption());
+        group.withOption(createMigrationModeGroup());
+        group.withOption(createDataMigrationGroup());
         return group.build();
     }
 
     @Override
     protected void bind(OptionSet optionSet) {
-        LoadJobSpec loadJobSpec = new LoadJobSpec();
-        loadJobSpec.setTargetSpec(parseTargetGroup(optionSet, this));
-        loadJobSpec.setInputSpec(parseInputGroup(optionSet, this));
-        loadJobSpec.setCommitStrategy(parseCommitGroup(optionSet, this));
-        loadJobSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
-        parseInsertTypeGroup(optionSet, loadJobSpec);
-        setJobSpec(loadJobSpec);
+        LoadJobSpec jobSpec = new LoadJobSpec();
+        jobSpec.setTargetSpec(parseTargetGroup(optionSet, this));
+        jobSpec.setInputSpec(parseInputGroup(optionSet, this));
+        jobSpec.setMigrationModes(parseMigrationModeGroup(optionSet, this));
+        parseDataMigrationGroup(optionSet, this, jobSpec);
+        setJobSpec(jobSpec);
     }
 
     @Override
     public void execute(Map<Object, Object> context) {
         getMigrator().execute(getJobSpec(), context);
+    }
+
+    protected Option createDataMigrationGroup() {
+        GroupBuilder group = newGroupBuilder().withName(getMessage(DATA_MIGRATION_GROUP_NAME));
+        group.withOption(createCommitGroup());
+        group.withOption(createInsertTypeGroup());
+        group.withOption(createTimeZoneOption());
+        return group.build();
     }
 
     protected Option createInsertTypeGroup() {
@@ -98,6 +104,12 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         group.withOption(insertType);
 
         return group.build();
+    }
+
+    protected void parseDataMigrationGroup(OptionSet optionSet, Option option, LoadJobSpec jobSpec) {
+        jobSpec.setCommitStrategy(parseCommitGroup(optionSet, this));
+        jobSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
+        parseInsertTypeGroup(optionSet, jobSpec);
     }
 
     protected void parseInsertTypeGroup(OptionSet optionSet, LoadJobSpec loadJobSpec) {

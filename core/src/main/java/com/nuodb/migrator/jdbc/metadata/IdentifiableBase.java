@@ -27,14 +27,16 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * @author Sergey Bushik
@@ -144,19 +146,19 @@ public class IdentifiableBase extends IndentedBase implements Identifiable {
         return getQualifiedName(dialect, newArrayList(catalog, schema), name, identifiable);
     }
 
-
-    public static String getQualifiedName(Dialect dialect, Collection<String> qualifiers, String name,
-                                          Identifiable identifiable) {
+    public static String getQualifiedName(Dialect dialect, Collection<String> qualifiers,
+                                          String name, Identifiable identifiable) {
         if (identifiable == null || identifiable.isQualified()) {
-            StringBuilder buffer = new StringBuilder();
+            Collection<String> parts = newArrayList();
             for (String qualifier : qualifiers) {
                 if (qualifier != null) {
-                    buffer.append(dialect != null ? dialect.getIdentifier(qualifier, null) : qualifier);
-                    buffer.append('.');
+                    parts.add(dialect != null ? dialect.getIdentifier(qualifier, null) : qualifier);
                 }
             }
-            buffer.append(dialect != null ? dialect.getIdentifier(name, identifiable) : name);
-            return buffer.toString();
+            if (name != null) {
+                parts.add(dialect != null ? dialect.getIdentifier(name, null) : name);
+            }
+            return join(parts, '.');
         } else {
             return getName(dialect, name, identifiable);
         }

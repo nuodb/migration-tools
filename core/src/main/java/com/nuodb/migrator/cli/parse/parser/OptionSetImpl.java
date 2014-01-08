@@ -16,11 +16,16 @@
  */
 package com.nuodb.migrator.cli.parse.parser;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 
 import java.util.Collections;
 import java.util.List;
+
+import static com.google.common.collect.Iterables.tryFind;
 
 /**
  * Instances of CommandLine represent a executable line that has been processed according to the spec supplied to the
@@ -31,6 +36,17 @@ public abstract class OptionSetImpl implements OptionSet {
     @Override
     public boolean hasOption(String trigger) {
         return getOption(trigger) != null;
+    }
+
+    @Override
+    public Option getOption(final int id) {
+        final Optional<Option> optional = tryFind(getOptions(), new Predicate<Option>() {
+            @Override
+            public boolean apply(Option option) {
+                return option.getId() == id;
+            }
+        });
+        return optional.isPresent() ? optional.get() : null;
     }
 
     @Override

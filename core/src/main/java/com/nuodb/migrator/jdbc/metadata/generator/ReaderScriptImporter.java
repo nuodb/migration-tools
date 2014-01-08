@@ -27,63 +27,61 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import java.io.*;
-
-import static java.lang.System.getProperty;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 /**
  * @author Sergey Bushik
  */
-public class WriterScriptExporter extends StreamScriptExporterBase {
+public class ReaderScriptImporter extends StreamScriptImporterBase {
 
-    public static final ScriptExporter SYSTEM_OUT = new WriterScriptExporter(System.out, false);
+    private Reader reader;
+    private InputStream inputStream;
 
-    private Writer writer;
-    private OutputStream outputStream;
-
-    public WriterScriptExporter(OutputStream outputStream) {
-        this(outputStream, CLOSE_STREAM);
+    public ReaderScriptImporter(InputStream inputStream) {
+        this(inputStream, CLOSE_STREAM);
     }
 
-    public WriterScriptExporter(OutputStream outputStream, boolean closeStream) {
-        setOutputStream(outputStream);
+    public ReaderScriptImporter(InputStream inputStream, boolean closeStream) {
+        setInputStream(inputStream);
         setCloseStream(closeStream);
     }
 
-    public WriterScriptExporter(Writer writer) {
-        this(writer, CLOSE_STREAM);
+    public ReaderScriptImporter(Reader reader) {
+        this(reader, CLOSE_STREAM);
     }
 
-    public WriterScriptExporter(Writer writer, boolean closeStream) {
-        setWriter(writer);
+    public ReaderScriptImporter(Reader reader, boolean closeStream) {
+        setReader(reader);
         setCloseStream(closeStream);
     }
 
     @Override
-    protected Writer openWriter() throws Exception {
-        Writer writer = getWriter();
-        OutputStream outputStream;
-        if (writer == null && (outputStream = getOutputStream()) != null) {
-            writer = new OutputStreamWriter(outputStream, getEncoding());
+    protected Reader openReader() throws Exception {
+        Reader reader = getReader();
+        InputStream inputStream;
+        if (reader == null && (inputStream = getInputStream()) != null) {
+            reader = new InputStreamReader(inputStream, getEncoding());
         } else {
-            throw new GeneratorException("Neither writer nor output stream provided");
+            throw new GeneratorException("Neither reader nor input stream provided");
         }
-        return writer;
+        return reader;
     }
 
-    public Writer getWriter() {
-        return writer;
+    public Reader getReader() {
+        return reader;
     }
 
-    public void setWriter(Writer writer) {
-        this.writer = writer;
+    public void setReader(Reader reader) {
+        this.reader = reader;
     }
 
-    public OutputStream getOutputStream() {
-        return outputStream;
+    public InputStream getInputStream() {
+        return inputStream;
     }
 
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
+    public void setInputStream(InputStream inputStream) {
+        this.inputStream = inputStream;
     }
 }

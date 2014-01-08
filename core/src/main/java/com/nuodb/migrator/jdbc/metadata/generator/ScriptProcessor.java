@@ -27,63 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import java.io.*;
-
-import static java.lang.System.getProperty;
-
 /**
  * @author Sergey Bushik
  */
-public class WriterScriptExporter extends StreamScriptExporterBase {
+public interface ScriptProcessor {
 
-    public static final ScriptExporter SYSTEM_OUT = new WriterScriptExporter(System.out, false);
+    void open() throws Exception;
 
-    private Writer writer;
-    private OutputStream outputStream;
-
-    public WriterScriptExporter(OutputStream outputStream) {
-        this(outputStream, CLOSE_STREAM);
-    }
-
-    public WriterScriptExporter(OutputStream outputStream, boolean closeStream) {
-        setOutputStream(outputStream);
-        setCloseStream(closeStream);
-    }
-
-    public WriterScriptExporter(Writer writer) {
-        this(writer, CLOSE_STREAM);
-    }
-
-    public WriterScriptExporter(Writer writer, boolean closeStream) {
-        setWriter(writer);
-        setCloseStream(closeStream);
-    }
-
-    @Override
-    protected Writer openWriter() throws Exception {
-        Writer writer = getWriter();
-        OutputStream outputStream;
-        if (writer == null && (outputStream = getOutputStream()) != null) {
-            writer = new OutputStreamWriter(outputStream, getEncoding());
-        } else {
-            throw new GeneratorException("Neither writer nor output stream provided");
-        }
-        return writer;
-    }
-
-    public Writer getWriter() {
-        return writer;
-    }
-
-    public void setWriter(Writer writer) {
-        this.writer = writer;
-    }
-
-    public OutputStream getOutputStream() {
-        return outputStream;
-    }
-
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
-    }
+    void close() throws Exception;
 }

@@ -25,65 +25,76 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata.generator;
+package com.nuodb.migrator.backup;
 
-import java.io.*;
-
-import static java.lang.System.getProperty;
+import com.nuodb.migrator.utils.ObjectUtils;
 
 /**
  * @author Sergey Bushik
  */
-public class WriterScriptExporter extends StreamScriptExporterBase {
+public class Script {
 
-    public static final ScriptExporter SYSTEM_OUT = new WriterScriptExporter(System.out, false);
+    public static final String NAME = "schema.sql";
 
-    private Writer writer;
-    private OutputStream outputStream;
+    private String catalogName;
+    private String schemaName;
+    private String name = NAME;
+    private long scriptCount;
 
-    public WriterScriptExporter(OutputStream outputStream) {
-        this(outputStream, CLOSE_STREAM);
+    public String getName() {
+        return name;
     }
 
-    public WriterScriptExporter(OutputStream outputStream, boolean closeStream) {
-        setOutputStream(outputStream);
-        setCloseStream(closeStream);
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public WriterScriptExporter(Writer writer) {
-        this(writer, CLOSE_STREAM);
+    public String getCatalogName() {
+        return catalogName;
     }
 
-    public WriterScriptExporter(Writer writer, boolean closeStream) {
-        setWriter(writer);
-        setCloseStream(closeStream);
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
+
+    public long getScriptCount() {
+        return scriptCount;
+    }
+
+    public void setScriptCount(long scriptCount) {
+        this.scriptCount = scriptCount;
     }
 
     @Override
-    protected Writer openWriter() throws Exception {
-        Writer writer = getWriter();
-        OutputStream outputStream;
-        if (writer == null && (outputStream = getOutputStream()) != null) {
-            writer = new OutputStreamWriter(outputStream, getEncoding());
-        } else {
-            throw new GeneratorException("Neither writer nor output stream provided");
-        }
-        return writer;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Script script = (Script) o;
+
+        if (scriptCount != script.scriptCount) return false;
+        if (name != null ? !name.equals(script.name) : script.name != null) return false;
+
+        return true;
     }
 
-    public Writer getWriter() {
-        return writer;
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (int) (scriptCount ^ (scriptCount >>> 32));
+        return result;
     }
 
-    public void setWriter(Writer writer) {
-        this.writer = writer;
-    }
-
-    public OutputStream getOutputStream() {
-        return outputStream;
-    }
-
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

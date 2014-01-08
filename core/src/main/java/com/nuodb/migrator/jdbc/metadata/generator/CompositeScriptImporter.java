@@ -27,63 +27,57 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import java.io.*;
+import java.util.Collection;
 
-import static java.lang.System.getProperty;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 
 /**
  * @author Sergey Bushik
  */
-public class WriterScriptExporter extends StreamScriptExporterBase {
+public class CompositeScriptImporter implements ScriptImporter {
 
-    public static final ScriptExporter SYSTEM_OUT = new WriterScriptExporter(System.out, false);
+    private Collection<ScriptImporter> scriptImporters = newLinkedHashSet();
 
-    private Writer writer;
-    private OutputStream outputStream;
-
-    public WriterScriptExporter(OutputStream outputStream) {
-        this(outputStream, CLOSE_STREAM);
+    public CompositeScriptImporter() {
     }
 
-    public WriterScriptExporter(OutputStream outputStream, boolean closeStream) {
-        setOutputStream(outputStream);
-        setCloseStream(closeStream);
+    public CompositeScriptImporter(ScriptImporter... scriptImporters) {
+        this(newArrayList(scriptImporters));
     }
 
-    public WriterScriptExporter(Writer writer) {
-        this(writer, CLOSE_STREAM);
-    }
-
-    public WriterScriptExporter(Writer writer, boolean closeStream) {
-        setWriter(writer);
-        setCloseStream(closeStream);
+    public CompositeScriptImporter(Collection<ScriptImporter> scriptImporters) {
+        this.scriptImporters = scriptImporters;
     }
 
     @Override
-    protected Writer openWriter() throws Exception {
-        Writer writer = getWriter();
-        OutputStream outputStream;
-        if (writer == null && (outputStream = getOutputStream()) != null) {
-            writer = new OutputStreamWriter(outputStream, getEncoding());
-        } else {
-            throw new GeneratorException("Neither writer nor output stream provided");
+    public void open() throws Exception {
+        for (ScriptImporter scriptImporter : getScriptImporters()) {
+            scriptImporter.open();
         }
-        return writer;
     }
 
-    public Writer getWriter() {
-        return writer;
+    @Override
+    public Collection<String> importScripts() throws Exception {
+        Collection<String> scripts = newArrayList();
+        for (ScriptImporter scriptImporter : getScriptImporters()) {
+            scripts.addAll(scriptImporter.importScripts());
+        }
+        return scripts;
     }
 
-    public void setWriter(Writer writer) {
-        this.writer = writer;
+    @Override
+    public void close() throws Exception {
+        for (ScriptImporter scriptImporter : getScriptImporters()) {
+            scriptImporter.close();
+        }
     }
 
-    public OutputStream getOutputStream() {
-        return outputStream;
+    public Collection<ScriptImporter> getScriptImporters() {
+        return scriptImporters;
     }
 
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
+    public void setScriptImporters(Collection<ScriptImporter> scriptImporters) {
+        this.scriptImporters = scriptImporters;
     }
 }

@@ -27,63 +27,34 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import java.io.*;
-
 import static java.lang.System.getProperty;
 
 /**
  * @author Sergey Bushik
  */
-public class WriterScriptExporter extends StreamScriptExporterBase {
+public interface StreamScriptProcessor extends ScriptProcessor {
 
-    public static final ScriptExporter SYSTEM_OUT = new WriterScriptExporter(System.out, false);
+    final String ENCODING = getProperty("file.encoding");
 
-    private Writer writer;
-    private OutputStream outputStream;
+    final String COMMENT_START = "--";
 
-    public WriterScriptExporter(OutputStream outputStream) {
-        this(outputStream, CLOSE_STREAM);
-    }
+    final String DELIMITER = ";";
 
-    public WriterScriptExporter(OutputStream outputStream, boolean closeStream) {
-        setOutputStream(outputStream);
-        setCloseStream(closeStream);
-    }
+    final boolean CLOSE_STREAM = true;
 
-    public WriterScriptExporter(Writer writer) {
-        this(writer, CLOSE_STREAM);
-    }
+    String getEncoding();
 
-    public WriterScriptExporter(Writer writer, boolean closeStream) {
-        setWriter(writer);
-        setCloseStream(closeStream);
-    }
+    void setEncoding(String encoding);
 
-    @Override
-    protected Writer openWriter() throws Exception {
-        Writer writer = getWriter();
-        OutputStream outputStream;
-        if (writer == null && (outputStream = getOutputStream()) != null) {
-            writer = new OutputStreamWriter(outputStream, getEncoding());
-        } else {
-            throw new GeneratorException("Neither writer nor output stream provided");
-        }
-        return writer;
-    }
+    String getCommentStart();
 
-    public Writer getWriter() {
-        return writer;
-    }
+    void setCommentStart(String commentStart);
 
-    public void setWriter(Writer writer) {
-        this.writer = writer;
-    }
+    String getDelimiter();
 
-    public OutputStream getOutputStream() {
-        return outputStream;
-    }
+    void setDelimiter(String delimiter);
 
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
-    }
+    boolean isCloseStream();
+
+    void setCloseStream(boolean closeStream);
 }

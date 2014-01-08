@@ -73,7 +73,7 @@ public class HelpImpl implements Help {
     public String help(Set<HelpHint> hints, Comparator<Option> comparator) {
         StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < indent; ++i) {
-            buffer.append("  ");
+            buffer.append("   ");
         }
         option.help(buffer, hints, comparator);
         return buffer.toString();

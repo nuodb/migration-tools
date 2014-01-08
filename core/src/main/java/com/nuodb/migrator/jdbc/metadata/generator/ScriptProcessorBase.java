@@ -25,32 +25,43 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup;
+package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.utils.xml.XmlReadContext;
-import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
-import com.nuodb.migrator.utils.xml.XmlWriteContext;
-import org.simpleframework.xml.stream.InputNode;
-import org.simpleframework.xml.stream.OutputNode;
+import com.nuodb.migrator.utils.ObjectUtils;
+import org.slf4j.Logger;
+
+import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
-public class XmlSchemaHandler extends XmlReadWriteHandlerBase<Schema> implements XmlConstants {
+public abstract class ScriptProcessorBase implements ScriptProcessor {
 
-    private static final String NAME_ATTRIBUTE = "name";
-
-    public XmlSchemaHandler() {
-        super(Schema.class);
-    }
+    protected final transient Logger logger = getLogger(getClass());
 
     @Override
-    protected void readAttributes(InputNode input, Schema schema, XmlReadContext context) throws Exception {
-        schema.setName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
+    public final void open() throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Opening script processor %s", this));
+        }
+        doOpen();
     }
 
+    protected abstract void doOpen() throws Exception;
+
     @Override
-    protected void writeAttributes(Schema schema, OutputNode output, XmlWriteContext context) throws Exception {
-        context.writeAttribute(output, NAME_ATTRIBUTE, schema.getName());
+    public final void close() throws Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug(format("Closing script processor %s", this));
+        }
+        doClose();
+    }
+
+    protected abstract void doClose() throws Exception;
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

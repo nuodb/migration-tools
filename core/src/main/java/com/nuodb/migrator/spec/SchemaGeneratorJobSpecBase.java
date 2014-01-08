@@ -43,6 +43,9 @@ import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS;
 import static com.nuodb.migrator.jdbc.metadata.Table.ALIAS;
 import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
+import static com.nuodb.migrator.spec.MigrationMode.DATA;
+import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
+import static java.util.Collections.unmodifiableSet;
 
 /**
  * @author Sergey Bushik

@@ -43,7 +43,7 @@ public class Backup {
     private String version = Migrator.getVersion();
     private String format;
     private DatabaseInfo databaseInfo;
-    private Schema schema;
+    private Collection<Script> scripts = newArrayList();
     private Collection<RowSet> rowSets = newArrayList();
 
     public Backup() {
@@ -78,17 +78,21 @@ public class Backup {
         this.databaseInfo = databaseInfo;
     }
 
-    public Schema getSchema() {
-        return schema;
+    public Collection<Script> getScripts() {
+        return scripts;
     }
 
-    public void setSchema(Schema schema) {
-        this.schema = schema;
+    public void setScripts(Collection<Script> scripts) {
+        this.scripts = scripts;
     }
 
     public void addRowSet(RowSet rowSet) {
         rowSet.setBackup(this);
         rowSets.add(rowSet);
+    }
+
+    public void addScript(Script script) {
+        scripts.add(script);
     }
 
     public Collection<RowSet> getRowSets() {
@@ -110,7 +114,7 @@ public class Backup {
             return false;
         if (format != null ? !format.equals(backup.format) : backup.format != null) return false;
         if (rowSets != null ? !rowSets.equals(backup.rowSets) : backup.rowSets != null) return false;
-        if (schema != null ? !schema.equals(backup.schema) : backup.schema != null) return false;
+        if (scripts != null ? !scripts.equals(backup.scripts) : backup.scripts != null) return false;
         if (version != null ? !version.equals(backup.version) : backup.version != null) return false;
 
         return true;
@@ -121,7 +125,7 @@ public class Backup {
         int result = version != null ? version.hashCode() : 0;
         result = 31 * result + (format != null ? format.hashCode() : 0);
         result = 31 * result + (databaseInfo != null ? databaseInfo.hashCode() : 0);
-        result = 31 * result + (schema != null ? schema.hashCode() : 0);
+        result = 31 * result + (scripts != null ? scripts.hashCode() : 0);
         result = 31 * result + (rowSets != null ? rowSets.hashCode() : 0);
         return result;
     }

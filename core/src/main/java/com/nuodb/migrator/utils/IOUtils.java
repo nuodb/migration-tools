@@ -25,47 +25,69 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup;
+package com.nuodb.migrator.utils;
 
-import com.nuodb.migrator.utils.ObjectUtils;
+import org.slf4j.Logger;
+
+import java.io.*;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
-public class Schema {
+public class IOUtils {
 
-    public static final String NAME = "schema.sql";
+    private static transient final Logger logger = getLogger(IOUtils.class);
 
-    private String name = NAME;
-
-    public String getName() {
-        return name;
+    private IOUtils() {
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public static void close(Reader reader) {
+        try {
+            if (reader != null) {
+                reader.close();
+            }
+        } catch (IOException exception) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed closing reader", exception);
+            }
+        }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Schema schema = (Schema) o;
-
-        if (name != null ? !name.equals(schema.name) : schema.name != null) return false;
-
-        return true;
+    public static void close(Writer writer) {
+        try {
+            if (writer != null) {
+                writer.close();
+            }
+        } catch (IOException exception) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed closing writer", exception);
+            }
+        }
     }
 
-    @Override
-    public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        return result;
+    public static void close(InputStream input) {
+        try {
+            if (input != null) {
+                input.close();
+            }
+        } catch (IOException exception) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed closing input stream", exception);
+            }
+        }
     }
 
-    @Override
-    public String toString() {
-        return ObjectUtils.toString(this);
+    public static void close(OutputStream output) {
+        try {
+            if (output != null) {
+                output.close();
+            }
+        } catch (IOException exception) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed closing output stream", exception);
+            }
+        }
     }
 }

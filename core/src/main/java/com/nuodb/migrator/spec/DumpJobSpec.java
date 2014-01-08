@@ -35,15 +35,14 @@ import java.util.TimeZone;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
-import static java.util.Collections.unmodifiableSet;
+import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 
 /**
  * @author Sergey Bushik
  */
 public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
 
-    public static final Collection<MigrationMode> MIGRATION_MODES = unmodifiableSet(newHashSet(DATA));
-    private Collection<MigrationMode> migrationModes = MIGRATION_MODES;
+    private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);
     private Integer threads;
     private TimeZone timeZone;
     private Collection<TableSpec> tableSpecs = newArrayList();
@@ -120,12 +119,12 @@ public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + (migrationModes != null ? migrationModes.hashCode() : 0);
         result = 31 * result + (threads != null ? threads.hashCode() : 0);
         result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
         result = 31 * result + (tableSpecs != null ? tableSpecs.hashCode() : 0);
         result = 31 * result + (querySpecs != null ? querySpecs.hashCode() : 0);
         result = 31 * result + (queryLimit != null ? queryLimit.hashCode() : 0);
-        result = 31 * result + (migrationModes != null ? migrationModes.hashCode() : 0);
         return result;
     }
 }

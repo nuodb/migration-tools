@@ -27,78 +27,85 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.jdbc.JdbcUtils;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-
-import static java.lang.String.format;
+import java.io.BufferedWriter;
+import java.io.Writer;
 
 /**
  * @author Sergey Bushik
  */
-public class ConnectionScriptExporter extends ScriptExporterBase {
+public abstract class StreamScriptExporterBase extends ScriptExporterBase implements StreamScriptProcessor {
 
-    private Statement statement;
-    private Connection connection;
-    private boolean closeConnection;
+    private String encoding = ENCODING;
+    private String commentStart = COMMENT_START;
+    private String delimiter = DELIMITER;
+    private boolean closeStream = CLOSE_STREAM;
 
-    public ConnectionScriptExporter(Connection connection) {
-        this(connection, true);
-    }
-
-    public ConnectionScriptExporter(Connection connection, boolean closeConnection) {
-        this.connection = connection;
-        this.closeConnection = closeConnection;
-    }
+    private transient BufferedWriter writer;
 
     @Override
     protected void doOpen() throws Exception {
-        statement = getConnection().createStatement();
+        writer = new BufferedWriter(openWriter());
     }
+
+    protected abstract Writer openWriter() throws Exception;
 
     @Override
-    public void doExportScript(String script) throws Exception {
-        if (statement == null) {
-            throw new GeneratorException("Connection is not opened");
+    protected void doExportScript(String script) throws Exception {
+        writer.write(script);
+        String delimiter = getDelimiter();
+        if (!script.endsWith(delimiter)) {
+            writer.write(delimiter);
         }
-        statement.executeUpdate(script);
-        processWarnings(statement.getWarnings());
-    }
-
-    protected void processWarnings(SQLWarning warning) throws SQLException {
-        while (warning != null) {
-            if (logger.isWarnEnabled()) {
-                logger.warn(format("Warning code: %d, state: %s", warning.getErrorCode(), warning.getSQLState()));
-            }
-            warning = warning.getNextWarning();
-        }
-        connection.clearWarnings();
+        writer.newLine();
     }
 
     @Override
     protected void doClose() throws Exception {
-        JdbcUtils.close(statement);
-        if (isCloseConnection()) {
-            JdbcUtils.close(getConnection());
+        if (writer != null) {
+            writer.flush();
+            if (isCloseStream()) {
+                writer.close();
+            }
         }
     }
 
-    public Connection getConnection() {
-        return connection;
+    @Override
+    public String getEncoding() {
+        return encoding;
     }
 
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    @Override
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
     }
 
-    public boolean isCloseConnection() {
-        return closeConnection;
+    @Override
+    public String getCommentStart() {
+        return commentStart;
     }
 
-    public void setCloseConnection(boolean closeConnection) {
-        this.closeConnection = closeConnection;
+    @Override
+    public void setCommentStart(String commentStart) {
+        this.commentStart = commentStart;
+    }
+
+    @Override
+    public String getDelimiter() {
+        return delimiter;
+    }
+
+    @Override
+    public void setDelimiter(String delimiter) {
+        this.delimiter = delimiter;
+    }
+
+    @Override
+    public boolean isCloseStream() {
+        return closeStream;
+    }
+
+    @Override
+    public void setCloseStream(boolean closeStream) {
+        this.closeStream = closeStream;
     }
 }

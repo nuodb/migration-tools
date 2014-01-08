@@ -27,10 +27,9 @@
  */
 package com.nuodb.migrator.jdbc;
 
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptProcessor;
 import com.nuodb.migrator.jdbc.session.Session;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -97,14 +96,14 @@ public class JdbcUtils {
         }
     }
 
-    public static void close(ScriptExporter scriptExporter) {
+    public static void close(ScriptProcessor scriptProcessor) {
         try {
-            if (scriptExporter != null) {
-                scriptExporter.close();
+            if (scriptProcessor != null) {
+                scriptProcessor.close();
             }
         } catch (Exception exception) {
             if (logger.isWarnEnabled()) {
-                logger.warn("Failed closing script exported", exception);
+                logger.warn("Failed closing script processor", exception);
             }
         }
     }

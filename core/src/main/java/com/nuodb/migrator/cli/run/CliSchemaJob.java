@@ -56,7 +56,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
         group.withOption(createSourceGroup());
         group.withOption(createTargetGroup());
         group.withOption(createOutputGroup());
-        group.withOption(createSchemaGeneratorGroup());
+        group.withOption(createSchemaMigrationGroup());
         return group.build();
     }
 
@@ -66,7 +66,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
         schemaJobSpec.setSourceSpec(parseSourceGroup(optionSet, this));
         schemaJobSpec.setTargetSpec(parseTargetGroup(optionSet, this));
         schemaJobSpec.setOutputSpec(parseOutputGroup(optionSet, this));
-        parseSchemaGeneratorGroup(schemaJobSpec, optionSet, this);
+        parseSchemaMigrationGroup(schemaJobSpec, optionSet, this);
         setJobSpec(schemaJobSpec);
     }
 

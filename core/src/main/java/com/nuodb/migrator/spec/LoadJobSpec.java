@@ -30,10 +30,14 @@ package com.nuodb.migrator.spec;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.query.InsertType;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.spec.MigrationMode.DATA;
+import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 
 /**
  * @author Sergey Bushik
@@ -41,11 +45,20 @@ import static com.google.common.collect.Maps.newHashMap;
 public class LoadJobSpec extends JobSpecBase {
 
     private ConnectionSpec targetSpec;
+    private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);
     private TimeZone timeZone;
     private ResourceSpec inputSpec;
     private InsertType insertType;
     private CommitStrategy commitStrategy;
     private Map<String, InsertType> tableInsertTypes = newHashMap();
+
+    public Collection<MigrationMode> getMigrationModes() {
+        return migrationModes;
+    }
+
+    public void setMigrationModes(Collection<MigrationMode> migrationModes) {
+        this.migrationModes = migrationModes;
+    }
 
     public ConnectionSpec getTargetSpec() {
         return targetSpec;
@@ -101,16 +114,18 @@ public class LoadJobSpec extends JobSpecBase {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        LoadJobSpec loadJobSpec = (LoadJobSpec) o;
+        LoadJobSpec that = (LoadJobSpec) o;
 
-        if (targetSpec != null ? !targetSpec.equals(loadJobSpec.targetSpec) : loadJobSpec.targetSpec != null)
+        if (commitStrategy != null ? !commitStrategy.equals(that.commitStrategy) : that.commitStrategy != null)
             return false;
-        if (inputSpec != null ? !inputSpec.equals(loadJobSpec.inputSpec) : loadJobSpec.inputSpec != null) return false;
-        if (insertType != loadJobSpec.insertType) return false;
-        if (commitStrategy != null ? !commitStrategy.equals(loadJobSpec.commitStrategy) : loadJobSpec.commitStrategy != null) return false;
-        if (tableInsertTypes != null ? !tableInsertTypes.equals(
-                loadJobSpec.tableInsertTypes) : loadJobSpec.tableInsertTypes != null) return false;
-        if (timeZone != null ? !timeZone.equals(loadJobSpec.timeZone) : loadJobSpec.timeZone != null) return false;
+        if (inputSpec != null ? !inputSpec.equals(that.inputSpec) : that.inputSpec != null) return false;
+        if (insertType != that.insertType) return false;
+        if (migrationModes != null ? !migrationModes.equals(that.migrationModes) : that.migrationModes != null)
+            return false;
+        if (tableInsertTypes != null ? !tableInsertTypes.equals(that.tableInsertTypes) : that.tableInsertTypes != null)
+            return false;
+        if (targetSpec != null ? !targetSpec.equals(that.targetSpec) : that.targetSpec != null) return false;
+        if (timeZone != null ? !timeZone.equals(that.timeZone) : that.timeZone != null) return false;
 
         return true;
     }
@@ -119,6 +134,7 @@ public class LoadJobSpec extends JobSpecBase {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (targetSpec != null ? targetSpec.hashCode() : 0);
+        result = 31 * result + (migrationModes != null ? migrationModes.hashCode() : 0);
         result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
         result = 31 * result + (inputSpec != null ? inputSpec.hashCode() : 0);
         result = 31 * result + (insertType != null ? insertType.hashCode() : 0);

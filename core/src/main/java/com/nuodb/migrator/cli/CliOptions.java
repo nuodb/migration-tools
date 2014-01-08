@@ -41,6 +41,8 @@ public interface CliOptions {
     final int LIST_OPTION_ID = 3;
     final int CONFIG_OPTION_ID = 4;
     final int COMMAND_OPTION_ID = 5;
+    final int MIGRATION_MODE_DATA_OPTION_ID = 6;
+    final int MIGRATION_MODE_SCHEMA_OPTION_ID = 7;
 
     final String HELP_OPTION = "help";
     final String HELP_SHORT_OPTION = "h";
