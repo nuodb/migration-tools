@@ -93,13 +93,13 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--schema=[true | false]]                           Enables or disables schema migration, true by default
         [data migration, optional]
             [commit strategy specification]
-                [--commit.strategy=[single | batch | custom]]    Commit strategy name, either single or batch or fully classified class name of a custom strategy implementing com.nuodb.migrator.jdbc.commit.CommitStrategy, default is batch
-                [--commit.*=[commit strategy attributes]]        Commit strategy attributes, such as commit.batch.size which is a number of updates to batch for commit point used with batch commit strategy, default is 1000
+                [--commit.strategy=[single | batch | custom]]   Commit strategy name, either single or batch or fully classified class name of a custom strategy implementing com.nuodb.migrator.jdbc.commit.CommitStrategy, default is batch
+                [--commit.*=[commit strategy attributes]]       Commit strategy attributes, such as commit.batch.size which is a number of updates to batch for commit point used with batch commit strategy, default is 1000
             [insert type specification]
-                [--replace (-r)]                                 Writes REPLACE statements rather than INSERT statements
-                [--table.*.replace]                              Writes REPLACE statement for the specified table
-                [--table.*.insert]                               Writes INSERT statement for the specified table
-            [--time.zone (-z)=time zone]                     Time zone enables date columns to be dumped and reloaded between servers in different time zones
+                [--replace (-r)]                                Writes REPLACE statements rather than INSERT statements
+                [--table.*.replace]                             Writes REPLACE statement for the specified table
+                [--table.*.insert]                              Writes INSERT statement for the specified table
+            [--time.zone (-z)=time zone]                        Time zone enables date columns to be dumped and reloaded between servers in different time zones
 
 ### Generate a schema for a target NuoDB database ###
 
