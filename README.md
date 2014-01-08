@@ -99,7 +99,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
                 [--replace (-r)]                                 Writes REPLACE statements rather than INSERT statements
                 [--table.*.replace]                              Writes REPLACE statement for the specified table
                 [--table.*.insert]                               Writes INSERT statement for the specified table
-                [--time.zone (-z)=time zone]                     Time zone enables date columns to be dumped and reloaded between servers in different time zones
+            [--time.zone (-z)=time zone]                     Time zone enables date columns to be dumped and reloaded between servers in different time zones
 
 ### Generate a schema for a target NuoDB database ###
 
