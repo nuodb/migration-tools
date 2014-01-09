@@ -41,7 +41,11 @@ import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.generator.*;
+import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptImporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ConnectionScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ReaderScriptImporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptImporter;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.query.InsertQuery;
@@ -62,13 +66,14 @@ import com.nuodb.migrator.spec.ResourceSpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TimeZone;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.IdentifiableBase.getQualifiedName;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
@@ -76,7 +81,6 @@ import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 import static com.nuodb.migrator.utils.Collections.contains;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
-import static java.lang.Math.min;
 import static java.lang.String.format;
 
 /**
@@ -381,6 +385,4 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
     protected ConnectionSpec getTargetSpec() {
         return getJobSpec().getTargetSpec();
     }
-
-
 }
