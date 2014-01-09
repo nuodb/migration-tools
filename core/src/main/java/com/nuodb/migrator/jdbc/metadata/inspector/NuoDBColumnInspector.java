@@ -50,7 +50,7 @@ import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
  */
 public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    public static final String QUERY =
+    private static final String QUERY =
             "SELECT * FROM SYSTEM.FIELDS AS F INNER JOIN SYSTEM.DATATYPES AS D ON F.DATATYPE = D.ID\n" +
             "WHERE F.SCHEMA=? AND F.TABLENAME=? ORDER BY F.FIELDPOSITION ASC";
 

@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 
 import java.sql.Types;
@@ -107,8 +108,11 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
         } else if (CONVERT_TO_NULL.equals(behavior)) {
             target = NULL;
         } else if (EXCEPTION.equals(behavior)) {
+            Column column = script.getColumn();
+            Table table = column.getTable();
             throw new TranslatorException(
-                    format("Encountered zero date time value, whereas %s is %s", ZERO_DATE_TIME_BEHAVIOR, EXCEPTION));
+                    format("Table %s column %s has zero date time value, whereas %s is %s",
+                            table.getQualifiedName(null), column.getName(), ZERO_DATE_TIME_BEHAVIOR, EXCEPTION));
         } else {
             target = null;
         }
