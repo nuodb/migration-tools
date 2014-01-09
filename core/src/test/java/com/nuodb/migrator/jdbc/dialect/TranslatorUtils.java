@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.session.Session;
 
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
@@ -78,6 +79,8 @@ public class TranslatorUtils {
         column.setTypeCode(typeCode);
         column.setTypeName(typeName);
         column.setDefaultValue(valueOf(defaultValue));
+        Table table = new Table(EMPTY);
+        table.addColumn(column);
         return new ColumnScript(column, session);
     }
 }
