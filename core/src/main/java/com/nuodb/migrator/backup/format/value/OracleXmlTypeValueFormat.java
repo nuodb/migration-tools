@@ -29,28 +29,49 @@ package com.nuodb.migrator.backup.format.value;
 
 import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
-import oracle.xdb.XMLType;
 
+import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.util.Map;
 
 import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
 import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
-import static oracle.xdb.XMLType.createXML;
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 
 /**
  * @author Sergey Bushik
  */
-public class OracleXmlTypeValueFormat extends ValueFormatBase<Object> {
+public class OracleXmlTypeValueFormat extends LazyInitValueFormatBase<Object> {
+
+    private static final String XML_TYPE_CLASS_NAME = "oracle.xdb.XMLType";
+    private static final String OPAQUE_CLASS_NAME = "oracle.sql.OPAQUE";
+
+    private Method stringValue;
+    private Method createXML;
+
     @Override
     protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
-        XMLType xmlType = (XMLType) access.getValue(options);
-        return string(xmlType != null ? xmlType.stringValue() : null);
+        Object value = access.getValue(options);
+        return string(value != null ? (String) invokeMethod(value, stringValue) : null);
     }
 
     @Override
     protected void doSetValue(Value value, JdbcValueAccess<Object> access, Map<String, Object> options)
             throws Exception {
-        access.setValue(createXML(access.getConnection(), value.asString()), options);
+        access.setValue(invokeMethod(null, createXML, access.getConnection(), value.asString()), options);
+    }
+
+    @Override
+    protected void doLazyInit() {
+        ClassLoader classLoader = getClass().getClassLoader();
+        try {
+            stringValue = classLoader.loadClass(OPAQUE_CLASS_NAME).getMethod("stringValue", EMPTY_CLASS_ARRAY);
+            createXML = classLoader.loadClass(XML_TYPE_CLASS_NAME).getMethod("createXML", Connection.class,
+                    String.class);
+        } catch (Exception exception) {
+            throw new ValueFormatException(exception);
+        }
     }
 
     @Override

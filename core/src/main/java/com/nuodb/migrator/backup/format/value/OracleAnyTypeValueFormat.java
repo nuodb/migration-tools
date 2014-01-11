@@ -29,28 +29,46 @@ package com.nuodb.migrator.backup.format.value;
 
 import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
-import oracle.sql.TypeDescriptor;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class OracleAnyTypeValueFormat extends ValueFormatBase<Object> {
+public class OracleAnyTypeValueFormat extends LazyInitValueFormatBase<Object> {
+
+    private static final String TYPE_DESCRIPTOR_CLASS_NAME = "oracle.sql.TypeDescriptor";
+
+    private Method getTypeName;
 
     @Override
     protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
-        TypeDescriptor anyType = (TypeDescriptor) access.getValue(options);
-        return string(anyType != null ? anyType.toXMLString() : null);
+        Object value = access.getValue(options);
+        return string(value != null ? (String) invokeMethod(value, getTypeName) : null);
     }
 
     @Override
-    protected void doSetValue(Value variant, JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+    protected void doSetValue(Value variant, JdbcValueAccess<Object> access, Map<String, Object> options)
+            throws Exception {
         String value = variant.asString();
         access.setValue(!isEmpty(value) ? value : null, options);
+    }
+
+    @Override
+    protected void doLazyInit() {
+        ClassLoader classLoader = getClassLoader();
+        try {
+            getTypeName = classLoader.loadClass(TYPE_DESCRIPTOR_CLASS_NAME).getMethod("getTypeName", EMPTY_CLASS_ARRAY);
+        } catch (Exception exception) {
+            throw new ValueFormatException(exception);
+        }
     }
 
     @Override

@@ -27,34 +27,35 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
-import oracle.sql.ANYDATA;
 
 import java.util.Map;
-
-import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class OracleAnyDataValueFormat extends ValueFormatBase<Object> {
+public abstract class LazyInitValueFormatBase<T> extends ValueFormatBase<T> {
+
+    private boolean lazyInit;
 
     @Override
-    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
-        ANYDATA anydata = (ANYDATA) access.getValue(options);
-        return string(anydata != null ? anydata.accessDatum().stringValue() : null);
+    public Value getValue(JdbcValueAccess<T> access, Map<String, Object> options) {
+        lazyInit();
+        return super.getValue(access, options);
     }
 
     @Override
-    protected void doSetValue(Value variant, JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
-        String value = variant.asString();
-        access.setValue(!isEmpty(value) ? value : null, options);
+    public void setValue(Value value, JdbcValueAccess<T> access, Map<String, Object> options) {
+        lazyInit();
+        super.setValue(value, access, options);
     }
 
-    @Override
-    public ValueType getValueType(Column column) {
-        return ValueType.STRING;
+    protected void lazyInit() {
+        if (!lazyInit) {
+            doLazyInit();
+            lazyInit = true;
+        }
     }
+
+    protected abstract void doLazyInit();
 }
