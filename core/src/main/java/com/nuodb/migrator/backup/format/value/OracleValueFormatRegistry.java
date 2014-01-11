@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
+import static com.nuodb.migrator.jdbc.dialect.OracleDialect.ANYDATA_DESC;
 import static com.nuodb.migrator.jdbc.dialect.OracleDialect.ANYTYPE_DESC;
 import static com.nuodb.migrator.jdbc.dialect.OracleDialect.XMLTYPE_DESC;
 
@@ -36,6 +37,7 @@ import static com.nuodb.migrator.jdbc.dialect.OracleDialect.XMLTYPE_DESC;
 public class OracleValueFormatRegistry extends SimpleValueFormatRegistry {
 
     public OracleValueFormatRegistry() {
+        addValueFormat(ANYDATA_DESC, new OracleAnyDataValueFormat());
         addValueFormat(ANYTYPE_DESC, new OracleAnyTypeValueFormat());
         addValueFormat(XMLTYPE_DESC, new OracleXmlTypeValueFormat());
     }
