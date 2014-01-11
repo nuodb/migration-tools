@@ -27,22 +27,34 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
+import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
+import oracle.xdb.XMLType;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.DB2;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.ORACLE;
+import java.util.Map;
+
+import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
+import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
+import static oracle.xdb.XMLType.createXML;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleValueFormatRegistryResolver extends SimpleServiceResolver<ValueFormatRegistry>
-        implements ValueFormatRegistryResolver {
+public class OracleXmlTypeValueFormat extends ValueFormatBase<Object> {
+    @Override
+    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+        XMLType xmlType = (XMLType) access.getValue(options);
+        return string(xmlType != null ? xmlType.stringValue() : null);
+    }
 
-    public SimpleValueFormatRegistryResolver() {
-        super(SimpleValueFormatRegistry.class);
-        register(DB2, new DB2ValueFormatRegistry());
-        register(NUODB, new NuoDBValueFormatRegistry());
-        register(ORACLE, new OracleValueFormatRegistry());
+    @Override
+    protected void doSetValue(Value value, JdbcValueAccess<Object> access, Map<String, Object> options)
+            throws Exception {
+        access.setValue(createXML(access.getConnection(), value.asString()), options);
+    }
+
+    @Override
+    public ValueType getValueType(Column column) {
+        return STRING;
     }
 }

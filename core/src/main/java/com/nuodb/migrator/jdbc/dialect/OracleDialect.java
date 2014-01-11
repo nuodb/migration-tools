@@ -31,10 +31,12 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -43,11 +45,18 @@ import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
+import static java.sql.Types.OTHER;
+import static java.sql.Types.SQLXML;
 
 /**
  * @author Sergey Bushik
  */
 public class OracleDialect extends SimpleDialect {
+
+    public static final JdbcTypeDesc ANYDATA_DESC = new JdbcTypeDesc(OTHER, "ANYDATA");
+    public static final JdbcTypeDesc ANYDATASET_DESC = new JdbcTypeDesc(OTHER, "ANYDATASET");
+    public static final JdbcTypeDesc ANYTYPE_DESC = new JdbcTypeDesc(OTHER, "ANYTYPE");
+    public static final JdbcTypeDesc XMLTYPE_DESC = new JdbcTypeDesc(SQLXML, "XMLTYPE");
 
     public OracleDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -56,6 +65,7 @@ public class OracleDialect extends SimpleDialect {
     @Override
     protected void initJdbcTypes() {
         super.initJdbcTypes();
+        addJdbcType(OracleXmlType.INSTANCE);
         addJdbcTypeAdapter(new OracleBlobTypeAdapter());
         addJdbcTypeAdapter(new OracleClobTypeAdapter());
     }

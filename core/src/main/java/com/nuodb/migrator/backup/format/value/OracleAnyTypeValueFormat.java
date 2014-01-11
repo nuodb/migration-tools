@@ -27,22 +27,34 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
+import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
+import oracle.sql.TypeDescriptor;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.DB2;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.ORACLE;
+import java.util.Map;
+
+import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleValueFormatRegistryResolver extends SimpleServiceResolver<ValueFormatRegistry>
-        implements ValueFormatRegistryResolver {
+public class OracleAnyTypeValueFormat extends ValueFormatBase<Object> {
 
-    public SimpleValueFormatRegistryResolver() {
-        super(SimpleValueFormatRegistry.class);
-        register(DB2, new DB2ValueFormatRegistry());
-        register(NUODB, new NuoDBValueFormatRegistry());
-        register(ORACLE, new OracleValueFormatRegistry());
+    @Override
+    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+        TypeDescriptor anyType = (TypeDescriptor) access.getValue(options);
+        return string(anyType != null ? anyType.toXMLString() : null);
+    }
+
+    @Override
+    protected void doSetValue(Value variant, JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+        String value = variant.asString();
+        access.setValue(!isEmpty(value) ? value : null, options);
+    }
+
+    @Override
+    public ValueType getValueType(Column column) {
+        return ValueType.STRING;
     }
 }

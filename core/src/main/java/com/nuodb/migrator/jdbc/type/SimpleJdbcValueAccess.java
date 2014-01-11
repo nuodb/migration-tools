@@ -76,6 +76,11 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
     }
 
     @Override
+    public Connection getConnection() {
+        return connection;
+    }
+
+    @Override
     public Column getColumn() {
         return column.asColumn();
     }

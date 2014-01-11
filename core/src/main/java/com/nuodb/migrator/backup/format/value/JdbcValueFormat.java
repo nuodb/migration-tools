@@ -133,10 +133,7 @@ public class JdbcValueFormat extends ValueFormatBase<Object> {
                 break;
             case Types.TINYINT:
             case Types.SMALLINT:
-                if (access.getColumn().getScale() > 0) {
-                }
-                access.setValue(!isEmpty(result) ? Short.parseShort(result) : null,
-                        options);
+                access.setValue(!isEmpty(result) ? Short.parseShort(result) : null, options);
                 break;
             case Types.INTEGER:
                 access.setValue(!isEmpty(result) ? Integer.parseInt(result) : null,
@@ -147,12 +144,10 @@ public class JdbcValueFormat extends ValueFormatBase<Object> {
                 break;
             case Types.FLOAT:
             case Types.REAL:
-                access.setValue(!isEmpty(result) ? Float.parseFloat(result) : null,
-                        options);
+                access.setValue(!isEmpty(result) ? Float.parseFloat(result) : null, options);
                 break;
             case Types.DOUBLE:
-                access.setValue(!isEmpty(result) ? Double.parseDouble(result) : null,
-                        options);
+                access.setValue(!isEmpty(result) ? Double.parseDouble(result) : null, options);
                 break;
             case Types.NUMERIC:
             case Types.DECIMAL:

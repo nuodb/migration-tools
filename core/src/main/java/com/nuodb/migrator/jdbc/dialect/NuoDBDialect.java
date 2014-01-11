@@ -37,12 +37,14 @@ import java.sql.Types;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.dialect.OracleDialect.*;
 import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newScale;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSize;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
+import static java.sql.Types.*;
 import static java.util.regex.Pattern.compile;
 import static org.apache.commons.lang3.StringUtils.isAllUpperCase;
 
@@ -74,57 +76,61 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     protected void initJdbcTypeNames() {
-        addJdbcTypeName(Types.BIT, newSize(0), "BOOLEAN");
-        addJdbcTypeName(Types.BIT, newSize(1), "BOOLEAN");
-        addJdbcTypeName(Types.TINYINT, "SMALLINT");
-        addJdbcTypeName(Types.SMALLINT, "SMALLINT");
+        addJdbcTypeName(BIT, newSize(0), "BOOLEAN");
+        addJdbcTypeName(BIT, newSize(1), "BOOLEAN");
+        addJdbcTypeName(TINYINT, "SMALLINT");
+        addJdbcTypeName(SMALLINT, "SMALLINT");
 
-        addJdbcTypeName(Types.INTEGER, "INTEGER");
+        addJdbcTypeName(INTEGER, "INTEGER");
 
-        addJdbcTypeName(Types.BIGINT, "BIGINT");
-        addJdbcTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
-        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+        addJdbcTypeName(BIGINT, "BIGINT");
+        addJdbcTypeName(NUMERIC, "NUMERIC({P},{S})");
+        addJdbcTypeName(DECIMAL, "DECIMAL({P},{S})");
 
-        addJdbcTypeName(Types.REAL, "REAL");
-        addJdbcTypeName(Types.FLOAT, "FLOAT");
-        addJdbcTypeName(Types.DOUBLE, "DOUBLE");
-        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+        addJdbcTypeName(REAL, "REAL");
+        addJdbcTypeName(FLOAT, "FLOAT");
+        addJdbcTypeName(DOUBLE, "DOUBLE");
+        addJdbcTypeName(DECIMAL, "DECIMAL({P},{S})");
 
-        addJdbcTypeName(Types.CHAR, "CHAR({N})");
+        addJdbcTypeName(CHAR, "CHAR({N})");
 
-        addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
-        addJdbcTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(VARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(LONGVARCHAR, "VARCHAR({N})");
 
-        addJdbcTypeName(Types.DATE, "DATE");
-        addJdbcTypeName(Types.TIME, newScale(0), "TIME");
-        addJdbcTypeName(Types.TIME, "TIME({S})");
-        addJdbcTypeName(Types.TIMESTAMP, newScale(0), "TIMESTAMP");
-        addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP({S})");
+        addJdbcTypeName(DATE, "DATE");
+        addJdbcTypeName(TIME, newScale(0), "TIME");
+        addJdbcTypeName(TIME, "TIME({S})");
+        addJdbcTypeName(TIMESTAMP, newScale(0), "TIMESTAMP");
+        addJdbcTypeName(TIMESTAMP, "TIMESTAMP({S})");
 
-        addJdbcTypeName(Types.BINARY, "BINARY({N})");
-        addJdbcTypeName(Types.VARBINARY, "VARBINARY({N})");
-        addJdbcTypeName(Types.LONGVARBINARY, "VARBINARY({N})");
+        addJdbcTypeName(BINARY, "BINARY({N})");
+        addJdbcTypeName(VARBINARY, "VARBINARY({N})");
+        addJdbcTypeName(LONGVARBINARY, "VARBINARY({N})");
 
-        addJdbcTypeName(Types.NULL, "NULL");
-        addJdbcTypeName(Types.BLOB, "BLOB");
-        addJdbcTypeName(Types.CLOB, "CLOB");
-        addJdbcTypeName(Types.BOOLEAN, "BOOLEAN");
+        addJdbcTypeName(NULL, "NULL");
+        addJdbcTypeName(BLOB, "BLOB");
+        addJdbcTypeName(CLOB, "CLOB");
+        addJdbcTypeName(BOOLEAN, "BOOLEAN");
 
-        addJdbcTypeName(Types.NCHAR, "NCHAR({N})");
-        addJdbcTypeName(Types.NVARCHAR, "NVARCHAR({N})");
-        addJdbcTypeName(Types.NCLOB, "NCLOB");
-        addJdbcTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
+        addJdbcTypeName(NCHAR, "NCHAR({N})");
+        addJdbcTypeName(NVARCHAR, "NVARCHAR({N})");
+        addJdbcTypeName(NCLOB, "NCLOB");
+        addJdbcTypeName(new JdbcTypeDesc(VARCHAR, "STRING"), "STRING");
 
-        addJdbcTypeName(ORACLE, Types.DECIMAL, "NUMBER", newSpecifiers(0, 0, 0));
+        addJdbcTypeName(ORACLE, DECIMAL, "NUMBER", newSpecifiers(0, 0, 0));
+        addJdbcTypeName(ORACLE, XMLTYPE_DESC, "STRING");
+        addJdbcTypeName(ORACLE, ANYDATA_DESC, "STRING");
+        addJdbcTypeName(ORACLE, ANYDATASET_DESC, "STRING");
+        addJdbcTypeName(ORACLE, ANYTYPE_DESC, "STRING");
 
-        addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
-        addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
-        addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"),
+        addJdbcTypeName(NUODB, new JdbcTypeDesc(SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
+        addJdbcTypeName(NUODB, new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "BIGINT");
+        addJdbcTypeName(NUODB, new JdbcTypeDesc(BIGINT, "BIGINT UNSIGNED"),
                 new JdbcTypeNameChangeSpecifiers("NUMERIC({N})", 1));
 
-        addJdbcTypeName(DB2, new JdbcTypeDesc(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
-        addJdbcTypeName(DB2, new JdbcTypeDesc(Types.OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
-        addJdbcTypeName(DB2, new JdbcTypeDesc(Types.OTHER, "XML"), "CLOB");
+        addJdbcTypeName(DB2, new JdbcTypeDesc(LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
+        addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
+        addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "XML"), "CLOB");
     }
 
     @Override

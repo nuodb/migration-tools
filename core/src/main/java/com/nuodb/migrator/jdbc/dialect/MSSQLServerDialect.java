@@ -37,13 +37,17 @@ import java.sql.Types;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.lang.String.valueOf;
+import static java.sql.Types.BLOB;
+import static java.sql.Types.CLOB;
+import static java.sql.Types.TIMESTAMP;
 
 /**
  * @author Sergey Bushik
  */
 public class MSSQLServerDialect extends SimpleDialect {
 
-    public static final int DATETIMEOFFSET = -155;
+    public static final int DATETIMEOFFSET_CODE = -155;
+    public static final String DATETIMEOFFSET_NAME = "DATETIMEOFFSET";
 
     public MSSQLServerDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -52,10 +56,10 @@ public class MSSQLServerDialect extends SimpleDialect {
     @Override
     protected void initJdbcTypes() {
         super.initJdbcTypes();
-        addJdbcTypeDescAlias(Types.LONGVARBINARY, "IMAGE", Types.BLOB);
-        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
-        addJdbcTypeDescAlias(Types.LONGNVARCHAR, "XML", Types.CLOB);
-        addJdbcTypeDescAlias(DATETIMEOFFSET, "DATETIMEOFFSET", Types.TIMESTAMP);
+        addJdbcTypeDescAlias(Types.LONGVARBINARY, "IMAGE", BLOB);
+        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", CLOB);
+        addJdbcTypeDescAlias(Types.LONGNVARCHAR, "XML", CLOB);
+        addJdbcTypeDescAlias(DATETIMEOFFSET_CODE, DATETIMEOFFSET_NAME, TIMESTAMP);
     }
 
     @Override

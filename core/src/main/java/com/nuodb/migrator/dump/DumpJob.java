@@ -156,24 +156,6 @@ public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
         backup.setFormat(getOutputSpec().getType());
         backup.setDatabaseInfo(database.getDatabaseInfo());
         Collection<MigrationMode> migrationModes = getMigrationModes();
-        if (contains(migrationModes, SCHEMA)) {
-            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
-            for (Schema schema : database.getSchemas()) {
-                Collection<String> scripts = scriptGeneratorManager.getScripts(schema);
-                if (isEmpty(scripts)) {
-                    continue;
-                }
-                Script script = createScript(schema, scripts);
-                ScriptExporter scriptExporter = createScriptExporter(script);
-                try {
-                    scriptExporter.open();
-                    scriptExporter.exportScripts(scripts);
-                } finally {
-                    close(scriptExporter);
-                }
-                backup.addScript(script);
-            }
-        }
         if (contains(migrationModes, DATA)) {
             DumpWriter dumpWriter = getDumpWriter();
             dumpWriter.setDatabase(database);
@@ -210,6 +192,24 @@ public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
                 dumpWriter.addQuery(querySpec.getQuery());
             }
             dumpWriter.write(backup);
+        }
+        if (contains(migrationModes, SCHEMA)) {
+            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
+            for (Schema schema : database.getSchemas()) {
+                Collection<String> scripts = scriptGeneratorManager.getScripts(schema);
+                if (isEmpty(scripts)) {
+                    continue;
+                }
+                Script script = createScript(schema, scripts);
+                ScriptExporter scriptExporter = createScriptExporter(script);
+                try {
+                    scriptExporter.open();
+                    scriptExporter.exportScripts(scripts);
+                } finally {
+                    close(scriptExporter);
+                }
+                backup.addScript(script);
+            }
         }
         getBackupManager().writeBackup(backup);
     }

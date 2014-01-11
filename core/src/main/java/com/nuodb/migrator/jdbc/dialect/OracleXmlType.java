@@ -25,24 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.value;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
+import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.DB2;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.ORACLE;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
+
+import static java.sql.Types.SQLXML;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleValueFormatRegistryResolver extends SimpleServiceResolver<ValueFormatRegistry>
-        implements ValueFormatRegistryResolver {
+public class OracleXmlType extends JdbcTypeBase<Object> {
 
-    public SimpleValueFormatRegistryResolver() {
-        super(SimpleValueFormatRegistry.class);
-        register(DB2, new DB2ValueFormatRegistry());
-        register(NUODB, new NuoDBValueFormatRegistry());
-        register(ORACLE, new OracleValueFormatRegistry());
+    public static final JdbcType INSTANCE = new OracleXmlType();
+
+    public OracleXmlType() {
+        super(SQLXML, "XMLTYPE", Object.class);
+    }
+
+    @Override
+    public Object getValue(ResultSet resultSet, int columnIndex, Column column, Map<String,
+            Object> options) throws SQLException {
+        return resultSet.getObject(columnIndex);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Object value, int columnIndex,
+                                    Column column, Map<String, Object> options) throws SQLException {
+        statement.setObject(columnIndex, value);
     }
 }

@@ -34,8 +34,9 @@ import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Map;
+
+import static java.sql.Types.INTEGER;
 
 /**
  * @author Sergey Bushik
@@ -45,7 +46,7 @@ public class MySQLIntUnsignedType extends JdbcTypeBase<Long> {
     public static JdbcType INSTANCE = new MySQLIntUnsignedType();
 
     public MySQLIntUnsignedType() {
-        super(Types.INTEGER, "INT UNSIGNED", Long.class);
+        super(INTEGER, "INT UNSIGNED", Long.class);
     }
 
     @Override
