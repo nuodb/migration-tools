@@ -35,6 +35,6 @@ import com.nuodb.migrator.jdbc.dialect.DB2XmlType;
 public class DB2ValueFormatRegistry extends SimpleValueFormatRegistry {
 
     public DB2ValueFormatRegistry() {
-        addValueFormat(DB2XmlType.INSTANCE, new DB2XmlValueFormat());
+        addValueFormat(DB2XmlType.INSTANCE, new DB2XmlTypeValueFormat());
     }
 }

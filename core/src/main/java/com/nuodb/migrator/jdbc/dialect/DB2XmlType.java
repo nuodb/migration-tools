@@ -34,30 +34,31 @@ import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Map;
+
+import static java.sql.Types.OTHER;
 
 /**
  * @author Sergey Bushik
  */
-public class DB2XmlType extends JdbcTypeBase<String> {
+public class DB2XmlType extends JdbcTypeBase<Object> {
 
     public static JdbcType INSTANCE = new DB2XmlType();
 
     public DB2XmlType() {
-        super(Types.OTHER, "XML", String.class);
+        super(OTHER, "XML", String.class);
     }
 
     @Override
-    public String getValue(ResultSet resultSet, int columnIndex,
+    public Object getValue(ResultSet resultSet, int columnIndex,
                            Column column, Map<String, Object> options) throws SQLException {
-        return resultSet.getString(columnIndex);
+        return resultSet.getObject(columnIndex);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, String value, int columnIndex,
+    protected void setNullSafeValue(PreparedStatement statement, Object value, int columnIndex,
                                     Column column, Map<String, Object> options) throws SQLException {
-        statement.setString(columnIndex, value);
+        statement.setObject(columnIndex, value, OTHER);
     }
 }
 

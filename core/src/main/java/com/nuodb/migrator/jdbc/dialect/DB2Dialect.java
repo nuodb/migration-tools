@@ -42,11 +42,6 @@ public class DB2Dialect extends SimpleDialect {
     }
 
     @Override
-    protected void initJdbcTypes() {
-        addJdbcType(DB2XmlType.INSTANCE);
-    }
-
-    @Override
     protected void initJdbcTypeNames() {
         addJdbcTypeName(Types.BIT, "SMALLINT");
         addJdbcTypeName(Types.BIGINT, "BIGINT");

@@ -30,30 +30,50 @@ package com.nuodb.migrator.backup.format.value;
 import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
+import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
 import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class DB2XmlValueFormat extends ValueFormatBase<String> {
+public class DB2XmlTypeValueFormat extends LazyInitValueFormatBase<Object> {
+
+    private static final String DB2XML_CLASS_NAME = "com.ibm.db2.jcc.DB2Xml";
+
+    private Method getDB2String;
 
     @Override
-    protected Value doGetValue(JdbcValueAccess<String> access, Map<String, Object> options) throws Exception {
-        return string(access.getValue(String.class, options));
+    protected void doLazyInit() {
+        ClassLoader classLoader = getClassLoader();
+        try {
+            getDB2String = classLoader.loadClass(DB2XML_CLASS_NAME).getMethod("getDB2String", EMPTY_CLASS_ARRAY);
+        } catch (Exception exception) {
+            throw new ValueFormatException(exception);
+        }
     }
 
     @Override
-    protected void doSetValue(Value variant, JdbcValueAccess<String> access, Map<String, Object> options) throws Exception {
+    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+        Object value = access.getValue(options);
+        return string(value != null ? (String) invokeMethod(value, getDB2String) : null);
+    }
+
+    @Override
+    protected void doSetValue(Value variant, JdbcValueAccess<Object> access, Map<String, Object> options)
+            throws Exception {
         String value = variant.asString();
         access.setValue(!isEmpty(value) ? value : null, options);
     }
 
     @Override
     public ValueType getValueType(Column column) {
-        return ValueType.STRING;
+        return STRING;
     }
-
 }
