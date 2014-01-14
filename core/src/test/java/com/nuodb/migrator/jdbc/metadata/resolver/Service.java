@@ -25,12 +25,10 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.resolve;
+package com.nuodb.migrator.jdbc.metadata.resolver;
 
 /**
  * @author Sergey Bushik
  */
-public interface DatabaseMatcher {
-
-    boolean matches(DatabaseInfo databaseInfo);
+public interface Service {
 }

@@ -45,7 +45,7 @@ import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.dialect.MySQLZeroDateTimeTranslator.*;
 import static com.nuodb.migrator.jdbc.metadata.inspector.MySQLColumn.getEnumValues;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.*;
 import static java.lang.String.valueOf;
 import static java.sql.Types.*;

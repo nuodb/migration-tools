@@ -33,7 +33,7 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.valueOf;
 import static java.sql.Types.*;

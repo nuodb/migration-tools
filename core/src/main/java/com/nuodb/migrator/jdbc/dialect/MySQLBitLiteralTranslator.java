@@ -30,7 +30,7 @@ package com.nuodb.migrator.jdbc.dialect;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static java.lang.Integer.parseInt;
 import static java.sql.Types.BIT;
 import static java.util.regex.Pattern.compile;

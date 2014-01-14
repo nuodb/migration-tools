@@ -89,7 +89,7 @@ import static java.lang.String.format;
 @SuppressWarnings("ConstantConditions")
 public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
 
-    private RowSetMapper rowSetMapper = new UseSchemaRowSetMapper();
+    private RowSetMapper rowSetMapper = new SchemaRowSetMapper();
 
     private Session targetSession;
     private BackupManager backupManager;
@@ -196,7 +196,7 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
             schemaName = script.getSchemaName();
         }
         return new CompositeScriptImporter(
-                new UseSchemaScriptImporter(targetSession.getDialect(), catalogName, schemaName),
+                new SchemaScriptImporter(targetSession.getDialect(), catalogName, schemaName),
                 new ReaderScriptImporter(getBackupManager().openInput(script.getName()))
         );
     }
@@ -207,8 +207,7 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
     }
 
     protected Database inspect() throws SQLException {
-        InspectionScope inspectionScope = new TableInspectionScope(
-                getTargetSpec().getCatalog(), getTargetSpec().getSchema());
+        InspectionScope inspectionScope = new TableInspectionScope();
         return createInspectionManager().inspect(getTargetSession().getConnection(), inspectionScope,
                 DATABASE, CATALOG, MetaDataType.SCHEMA, TABLE, COLUMN).getObject(DATABASE);
     }

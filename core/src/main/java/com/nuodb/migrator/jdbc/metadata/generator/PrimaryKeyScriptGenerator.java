@@ -38,9 +38,9 @@ import static java.util.Collections.singleton;
 /**
  * @author Sergey Bushik
  */
-public class PrimaryScriptGenerator extends ScriptGeneratorBase<PrimaryKey> implements ConstraintScriptGenerator<PrimaryKey> {
+public class PrimaryKeyScriptGenerator extends ScriptGeneratorBase<PrimaryKey> implements ConstraintScriptGenerator<PrimaryKey> {
 
-    public PrimaryScriptGenerator() {
+    public PrimaryKeyScriptGenerator() {
         super(PrimaryKey.class);
     }
 

@@ -29,13 +29,13 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.ColumnTrigger;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Trigger;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.util.Collection;
 
 import static com.nuodb.migrator.context.ContextUtils.createService;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static java.sql.Types.*;
 import static java.util.Arrays.asList;
 

@@ -32,7 +32,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 

@@ -45,13 +45,13 @@ import static java.util.Collections.singleton;
  *
  * @author Sergey Bushik
  */
-public class UseSchemaScriptImporter implements ScriptImporter {
+public class SchemaScriptImporter implements ScriptImporter {
 
     private Dialect dialect;
     private String catalogName;
     private String schemaName;
 
-    public UseSchemaScriptImporter(Dialect dialect, String catalogName, String schemaName) {
+    public SchemaScriptImporter(Dialect dialect, String catalogName, String schemaName) {
         this.dialect = dialect;
         this.catalogName = catalogName;
         this.schemaName = schemaName;
@@ -64,14 +64,14 @@ public class UseSchemaScriptImporter implements ScriptImporter {
     @Override
     public Collection<String> importScripts() throws Exception {
         Dialect dialect = getDialect();
-        String space = getQualifiedName(dialect, getQualifiers(), null, null);
-        String useSpace = null;
+        String schema = getQualifiedName(dialect, getQualifiers(), null, null);
+        String useSchema = null;
         if (dialect.supportsCatalogs()) {
-            useSpace = dialect.getUseCatalog(space);
+            useSchema = dialect.getUseCatalog(schema);
         } else if (dialect.supportsSchemas()) {
-            useSpace = dialect.getUseSchema(space);
+            useSchema = dialect.getUseSchema(schema);
         }
-        return useSpace != null ? singleton(useSpace) : Collections.<String>emptySet();
+        return useSchema != null ? singleton(useSchema) : Collections.<String>emptySet();
     }
 
     protected Collection<String> getQualifiers() {

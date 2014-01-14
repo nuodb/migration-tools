@@ -27,11 +27,11 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.resolver.SimpleServiceResolver;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.DB2;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.ORACLE;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.DB2;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.ORACLE;
 
 /**
  * @author Sergey Bushik

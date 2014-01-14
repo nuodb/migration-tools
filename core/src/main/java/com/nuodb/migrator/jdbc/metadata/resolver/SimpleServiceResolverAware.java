@@ -25,32 +25,22 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.resolve;
-
-import com.nuodb.migrator.jdbc.session.Session;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+package com.nuodb.migrator.jdbc.metadata.resolver;
 
 /**
  * @author Sergey Bushik
  */
-public interface ServiceResolver<T> {
+public class SimpleServiceResolverAware<T> implements ServiceResolverAware<T> {
 
-    void register(String productName, T service);
+    private ServiceResolver<T> serviceResolver;
 
-    void register(DatabaseInfo databaseInfo, T service);
+    @Override
+    public ServiceResolver<T> getServiceResolver() {
+        return serviceResolver;
+    }
 
-    void register(String productName, Class<? extends T> serviceClass);
-
-    void register(DatabaseInfo databaseInfo, Class<? extends T> serviceClass);
-
-    T resolve(Session session) throws SQLException;
-
-    T resolve(Connection connection) throws SQLException;
-
-    T resolve(DatabaseMetaData databaseMetaData) throws SQLException;
-
-    T resolve(DatabaseInfo databaseInfo);
+    @Override
+    public void setServiceResolver(ServiceResolver<T> serviceResolver) {
+        this.serviceResolver = serviceResolver;
+    }
 }

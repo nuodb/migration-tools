@@ -25,14 +25,37 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.resolve;
+package com.nuodb.migrator.jdbc.metadata.resolver;
 
 /**
  * @author Sergey Bushik
  */
-public interface ServiceResolverAware<T> {
+public class ServiceInstance implements Service {
 
-    ServiceResolver<T> getServiceResolver();
+    private final String name;
 
-    void setServiceResolver(ServiceResolver<T> serviceResolver);
+    public ServiceInstance(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ServiceInstance that = (ServiceInstance) o;
+
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceInstance{name='" + name + "'}";
+    }
 }

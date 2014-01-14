@@ -32,7 +32,6 @@ import com.nuodb.migrator.jdbc.dialect.DB2Dialect;
 import com.nuodb.migrator.jdbc.dialect.MySQLDialect;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -42,7 +41,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;

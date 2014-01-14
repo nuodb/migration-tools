@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.jdbc.resolve.ServiceResolver;
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.resolver.ServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.resolver.SimpleServiceResolver;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;

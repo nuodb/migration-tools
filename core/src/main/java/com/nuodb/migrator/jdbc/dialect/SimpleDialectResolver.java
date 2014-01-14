@@ -27,10 +27,10 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.resolver.SimpleServiceResolver;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 
 /**

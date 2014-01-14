@@ -53,7 +53,7 @@ import static java.util.Collections.unmodifiableSet;
 public class SchemaGeneratorJobSpecBase extends JobSpecBase {
 
     private boolean useExplicitDefaults = USE_EXPLICIT_DEFAULTS;
-    private String[] tableTypes = new String[]{TABLE, ALIAS};
+    private String[] tableTypes = new String[]{TABLE};
     private ConnectionSpec sourceSpec;
     private ConnectionSpec targetSpec;
     private ResourceSpec outputSpec;

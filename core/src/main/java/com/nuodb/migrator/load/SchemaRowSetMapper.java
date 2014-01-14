@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.load;
 
+import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.QueryRowSet;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.TableRowSet;
@@ -48,7 +49,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-public class UseSchemaRowSetMapper implements RowSetMapper {
+public class SchemaRowSetMapper implements RowSetMapper {
 
     private final transient Logger logger = getLogger(getClass());
 
@@ -73,8 +74,10 @@ public class UseSchemaRowSetMapper implements RowSetMapper {
         if (dialect.supportsSchemas()) {
             maximum++;
         }
+        Backup backup = rowSet.getBackup();
         ConnectionSpec connectionSpec = database.getConnectionSpec();
-        if (connectionSpec.getCatalog() != null || connectionSpec.getSchema() != null) {
+        if ((connectionSpec.getCatalog() != null || connectionSpec.getSchema() != null) &&
+                backup.getScripts().size() == 1) {
             addIgnoreNull(qualifiers, connectionSpec.getCatalog());
             addIgnoreNull(qualifiers, connectionSpec.getSchema());
         } else {
@@ -88,7 +91,7 @@ public class UseSchemaRowSetMapper implements RowSetMapper {
         final String target = getQualifiedName(null,
                 qualifiers, rowSet.getTableName(), null);
         if (logger.isDebugEnabled()) {
-            logger.debug(format("Mapping source %s row set to %s table", source, target));
+            logger.debug(format("Mapping %s row set to %s table", source, target));
         }
         return database.findTable(target);
     }

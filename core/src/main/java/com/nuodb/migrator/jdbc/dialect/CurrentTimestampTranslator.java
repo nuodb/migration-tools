@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 
 import java.sql.Types;
 import java.util.Collection;

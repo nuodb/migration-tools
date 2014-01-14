@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.ServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.resolver.ServiceResolver;
 
 /**
  * @author Sergey Bushik

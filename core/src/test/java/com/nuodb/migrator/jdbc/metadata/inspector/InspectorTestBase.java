@@ -29,7 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.utils.ReflectionUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

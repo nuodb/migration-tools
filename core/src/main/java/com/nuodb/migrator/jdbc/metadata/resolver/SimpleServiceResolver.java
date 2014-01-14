@@ -25,8 +25,9 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.resolve;
+package com.nuodb.migrator.jdbc.metadata.resolver;
 
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -33,7 +33,7 @@ import com.nuodb.migrator.jdbc.url.JdbcUrl;
 
 import java.sql.Types;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.*;
 import static java.lang.String.format;
 

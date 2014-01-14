@@ -43,7 +43,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import static com.nuodb.migrator.context.ContextUtils.createService;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static java.lang.System.getProperty;
 import static java.sql.Types.*;
 

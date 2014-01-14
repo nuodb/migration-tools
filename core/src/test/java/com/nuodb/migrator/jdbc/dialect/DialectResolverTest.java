@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

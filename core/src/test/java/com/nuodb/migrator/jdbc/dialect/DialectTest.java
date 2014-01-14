@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
 import java.sql.Types;
 
 import static com.nuodb.migrator.jdbc.dialect.TranslatorUtils.createScript;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;

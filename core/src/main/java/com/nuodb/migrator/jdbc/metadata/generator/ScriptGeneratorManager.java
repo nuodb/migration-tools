@@ -69,7 +69,7 @@ public class ScriptGeneratorManager {
         addScriptGenerator(new HasSchemasScriptGenerator());
         addScriptGenerator(new TableScriptGenerator());
         addScriptGenerator(new SequenceScriptGenerator());
-        addScriptGenerator(new PrimaryScriptGenerator());
+        addScriptGenerator(new PrimaryKeyScriptGenerator());
         addScriptGenerator(new IndexScriptGenerator());
         addScriptGenerator(new ForeignKeyScriptGenerator());
         addScriptGenerator(new TriggerScriptGenerator());

@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
 import static com.nuodb.migrator.utils.Collections.newPriorityList;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;

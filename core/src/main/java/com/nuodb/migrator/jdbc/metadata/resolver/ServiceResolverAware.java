@@ -25,39 +25,14 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.resolve;
-
-import com.google.common.collect.ComparisonChain;
-
-import java.util.Comparator;
+package com.nuodb.migrator.jdbc.metadata.resolver;
 
 /**
  * @author Sergey Bushik
  */
-public interface DatabaseInfoUtils {
+public interface ServiceResolverAware<T> {
 
-    final DatabaseInfo MYSQL = new DatabaseInfo("MySQL");
+    ServiceResolver<T> getServiceResolver();
 
-    final DatabaseInfo NUODB = new DatabaseInfo("NuoDB");
-
-    final DatabaseInfo ORACLE = new DatabaseInfo("Oracle");
-
-    final DatabaseInfo DB2 = new DatabaseInfo("DB2/") {
-        @Override
-        protected ComparisonChain isProductNameInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
-            return comparator.compare(getProductName(), databaseInfo.getProductName(),
-                    new Comparator<String>() {
-                        @Override
-                        public int compare(String productName1, String productName2) {
-                            return productName2.startsWith(productName1) ? 0 : -1;
-                        }
-                    });
-        }
-    };
-
-    final DatabaseInfo POSTGRE_SQL = new DatabaseInfo("PostgreSQL");
-
-    final DatabaseInfo MSSQL_SERVER = new DatabaseInfo("Microsoft SQL Server");
-
-    final DatabaseInfo MSSQL_SERVER_2005 = new DatabaseInfo("Microsoft SQL Server", null, 9);
+    void setServiceResolver(ServiceResolver<T> serviceResolver);
 }

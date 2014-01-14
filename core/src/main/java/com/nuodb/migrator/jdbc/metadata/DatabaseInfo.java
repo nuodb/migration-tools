@@ -27,17 +27,58 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 import com.nuodb.migrator.utils.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.util.Comparator;
 
+import static com.google.common.collect.ComparisonChain.start;
+import static com.google.common.collect.Ordering.natural;
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
-public class DatabaseInfo implements Serializable {
+public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
+
     private String productName;
     private String productVersion;
-    private int majorVersion;
-    private int minorVersion;
+    private Integer majorVersion;
+    private Integer minorVersion;
+
+    public DatabaseInfo() {
+    }
+
+    public DatabaseInfo(String productName) {
+        this.productName = productName;
+    }
+
+    public DatabaseInfo(String productName, String productVersion) {
+        this.productName = productName;
+        this.productVersion = productVersion;
+    }
+
+
+    public DatabaseInfo(String productName, String productVersion, Integer majorVersion) {
+        this.productName = productName;
+        this.productVersion = productVersion;
+        this.majorVersion = majorVersion;
+    }
+
+    public DatabaseInfo(String productName, String productVersion, Integer majorVersion, Integer minorVersion) {
+        this.productName = productName;
+        this.productVersion = productVersion;
+        this.minorVersion = minorVersion;
+        this.majorVersion = majorVersion;
+    }
+
+    public DatabaseInfo(DatabaseMetaData metaData) throws SQLException {
+        this(metaData.getDatabaseProductName(), metaData.getDatabaseProductVersion(),
+                metaData.getDatabaseMajorVersion(), metaData.getDatabaseMinorVersion());
+    }
 
     public String getProductName() {
         return productName;
@@ -55,20 +96,61 @@ public class DatabaseInfo implements Serializable {
         this.productVersion = productVersion;
     }
 
-    public int getMajorVersion() {
+    public Integer getMajorVersion() {
         return majorVersion;
     }
 
-    public void setMajorVersion(int majorVersion) {
+    public void setMajorVersion(Integer majorVersion) {
         this.majorVersion = majorVersion;
     }
 
-    public int getMinorVersion() {
+    public Integer getMinorVersion() {
         return minorVersion;
     }
 
-    public void setMinorVersion(int minorVersion) {
+    public void setMinorVersion(Integer minorVersion) {
         this.minorVersion = minorVersion;
+    }
+
+    public boolean isInherited(DatabaseInfo databaseInfo) {
+        ComparisonChain comparator = start();
+        comparator = isProductNameInherited(databaseInfo, comparator);
+        comparator = isProductVersionInherited(databaseInfo, comparator);
+        comparator = isMajorVersionInherited(databaseInfo, comparator);
+        comparator = isMinorVersionInherited(databaseInfo, comparator);
+        return comparator.result() >= 0;
+    }
+
+    protected ComparisonChain isProductNameInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getProductName(), databaseInfo.getProductName(),
+                new Comparator<String>() {
+                    @Override
+                    public int compare(String productName1, String productName2) {
+                        return StringUtils.equals(productName1, productName2) ? 0 : -1;
+                    }
+                });
+    }
+
+    protected ComparisonChain isProductVersionInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getProductVersion(), databaseInfo.getProductVersion(), natural().nullsLast());
+    }
+
+    protected ComparisonChain isMajorVersionInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getMajorVersion(), databaseInfo.getMajorVersion(), natural().nullsLast());
+    }
+
+    protected ComparisonChain isMinorVersionInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getMinorVersion(), databaseInfo.getMinorVersion(), natural().nullsLast());
+    }
+
+    @Override
+    public int compareTo(DatabaseInfo databaseInfo) {
+        Ordering<Comparable> ordering = natural().nullsFirst();
+        return start().
+                compare(getProductName(), databaseInfo.getProductName(), ordering).
+                compare(getProductVersion(), databaseInfo.getProductVersion(), ordering).
+                compare(getMajorVersion(), databaseInfo.getMajorVersion(), ordering).
+                compare(getMinorVersion(), databaseInfo.getMinorVersion(), ordering).result();
     }
 
     @Override
@@ -78,12 +160,12 @@ public class DatabaseInfo implements Serializable {
 
         DatabaseInfo that = (DatabaseInfo) o;
 
-        if (majorVersion != that.majorVersion) return false;
-        if (minorVersion != that.minorVersion) return false;
-        if (productName != null ? !productName.equals(that.productName) : that.productName != null) return false;
-        if (productVersion != null ? !productVersion.equals(that.productVersion) : that.productVersion != null)
-            return false;
-
+        if (productName != null ? !startsWithIgnoreCase(productName,
+                that.productName) : that.productName != null) return false;
+        if (productVersion != null ? !StringUtils.equals(productVersion,
+                that.productVersion) : that.productVersion != null) return false;
+        if (majorVersion != null ? !majorVersion.equals(that.majorVersion) : that.majorVersion != null) return false;
+        if (minorVersion != null ? !minorVersion.equals(that.minorVersion) : that.minorVersion != null) return false;
         return true;
     }
 
@@ -91,8 +173,8 @@ public class DatabaseInfo implements Serializable {
     public int hashCode() {
         int result = productName != null ? productName.hashCode() : 0;
         result = 31 * result + (productVersion != null ? productVersion.hashCode() : 0);
-        result = 31 * result + minorVersion;
-        result = 31 * result + majorVersion;
+        result = 31 * result + (majorVersion != null ? majorVersion.hashCode() : 0);
+        result = 31 * result + (minorVersion != null ? minorVersion.hashCode() : 0);
         return result;
     }
 

@@ -28,7 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 
 import java.util.Collection;
 import java.util.Map;

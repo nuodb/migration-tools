@@ -49,7 +49,7 @@ import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
 
 /**

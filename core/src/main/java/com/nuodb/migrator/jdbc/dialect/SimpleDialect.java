@@ -27,10 +27,17 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DefaultValue;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.Trigger;
+import com.nuodb.migrator.jdbc.metadata.TriggerEvent;
+import com.nuodb.migrator.jdbc.metadata.TriggerTime;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolverAware;
+import com.nuodb.migrator.jdbc.metadata.resolver.SimpleServiceResolverAware;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.*;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
@@ -42,7 +49,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;

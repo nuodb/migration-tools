@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.resolve.ServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.resolver.ServiceResolver;
 
 /**
  * @author Sergey Bushik

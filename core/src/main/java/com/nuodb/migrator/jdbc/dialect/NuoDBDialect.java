@@ -29,16 +29,14 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifiers;
 
-import java.sql.Types;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.dialect.OracleDialect.*;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newScale;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSize;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;

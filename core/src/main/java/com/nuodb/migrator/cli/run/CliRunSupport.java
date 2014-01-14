@@ -801,7 +801,6 @@ public class CliRunSupport extends CliSupport {
         tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
         if (tableTypes.isEmpty()) {
             tableTypes.add(Table.TABLE);
-            tableTypes.add(Table.ALIAS);
         }
         schemaGeneratorJobSpec.setTableTypes(tableTypes.toArray(new String[tableTypes.size()]));
     }
