@@ -45,6 +45,7 @@ import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static java.sql.Types.OTHER;
+import static java.sql.Types.ROWID;
 import static java.sql.Types.SQLXML;
 
 /**
@@ -67,6 +68,12 @@ public class OracleDialect extends SimpleDialect {
         addJdbcType(OracleXmlType.INSTANCE);
         addJdbcTypeAdapter(new OracleBlobTypeAdapter());
         addJdbcTypeAdapter(new OracleClobTypeAdapter());
+    }
+
+    @Override
+    protected void initJdbcTypeNames() {
+        super.initJdbcTypeNames();
+        addJdbcTypeDescAlias(OTHER, "ROWID", ROWID);
     }
 
     @Override
