@@ -25,40 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.type;
+package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcValueAccessProvider {
+public class OracleBFileType extends JdbcTypeBase<Object> {
 
-    JdbcValueSetter getJdbcValueSetter(int typeCode);
+    public static final JdbcType INSTANCE = new OracleBFileType();
 
-    JdbcValueSetter getJdbcValueSetter(int typeCode, String typeName);
+    public OracleBFileType() {
+        super(new JdbcTypeDesc(-13, "BFILE"), Object.class);
+    }
 
-    JdbcValueSetter getJdbcValueSetter(JdbcTypeDesc jdbcTypeDesc);
+    @Override
+    public Object getValue(ResultSet resultSet, int columnIndex, Column column, Map<String,
+            Object> options) throws SQLException {
+        return resultSet.getObject(columnIndex);
+    }
 
-    JdbcValueSetter getJdbcValueSetter(JdbcType jdbcType);
-
-    <T> JdbcValueGetter<T> getJdbcValueGetter(int typeCode);
-
-    <T> JdbcValueGetter<T> getJdbcValueGetter(int typeCode, String typeName);
-
-    <T> JdbcValueGetter<T> getJdbcValueGetter(JdbcTypeDesc jdbcTypeDesc);
-
-    <T> JdbcValueGetter<T> getJdbcValueGetter(JdbcType<T> jdbcType);
-
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet, int index);
-
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet, int index, Column column);
-
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement, int index);
-
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement, int index, Column column);
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, Object value, int columnIndex,
+                                    Column column, Map<String, Object> options) throws SQLException {
+        statement.setObject(columnIndex, value);
+    }
 }

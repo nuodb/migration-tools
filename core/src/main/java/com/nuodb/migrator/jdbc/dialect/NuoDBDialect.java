@@ -111,6 +111,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(BOOLEAN, "BOOLEAN");
 
         addJdbcTypeName(NCHAR, "NCHAR({N})");
+        addJdbcTypeName(NCHAR, newSize(0), "NCHAR");
         addJdbcTypeName(NVARCHAR, "NVARCHAR({N})");
         addJdbcTypeName(NCLOB, "NCLOB");
         addJdbcTypeName(ROWID, "STRING");
@@ -121,6 +122,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(ORACLE, ANYDATA_DESC, "STRING");
         addJdbcTypeName(ORACLE, ANYDATASET_DESC, "STRING");
         addJdbcTypeName(ORACLE, ANYTYPE_DESC, "STRING");
+        addJdbcTypeName(ORACLE, BFILE_DESC, "BLOB");
 
         addJdbcTypeName(NUODB, new JdbcTypeDesc(SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(NUODB, new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "BIGINT");

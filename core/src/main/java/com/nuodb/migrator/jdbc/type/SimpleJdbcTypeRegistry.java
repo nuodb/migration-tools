@@ -139,12 +139,17 @@ public class SimpleJdbcTypeRegistry implements JdbcTypeRegistry {
 
     @Override
     public void addJdbcTypeAlias(int typeCode, int typeAlias) {
-        addJdbcTypeAlias(new JdbcTypeDesc(typeCode, null), new JdbcTypeDesc(typeAlias, null));
+        addJdbcTypeAlias(new JdbcTypeDesc(typeCode), new JdbcTypeDesc(typeAlias));
     }
 
     @Override
     public void addJdbcTypeAlias(int typeCode, String typeName, int typeAlias) {
         addJdbcTypeAlias(new JdbcTypeDesc(typeCode, typeName), new JdbcTypeDesc(typeAlias, typeName));
+    }
+
+    @Override
+    public void addJdbcTypeAlias(JdbcTypeDesc jdbcTypeDesc, int typeAlias) {
+        addJdbcTypeAlias(jdbcTypeDesc, new JdbcTypeDesc(typeAlias));
     }
 
     @Override

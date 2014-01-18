@@ -670,6 +670,10 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         getJdbcTypeRegistry().addJdbcTypeAdapter(typeAdapter);
     }
 
+    protected void addJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc, int typeCodeAlias) {
+        getJdbcTypeRegistry().addJdbcTypeAlias(jdbcTypeDesc, typeCodeAlias);
+    }
+
     protected void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias) {
         getJdbcTypeRegistry().addJdbcTypeAlias(typeCode, typeName, typeCodeAlias);
     }

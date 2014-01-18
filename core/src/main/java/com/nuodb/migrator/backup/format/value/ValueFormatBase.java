@@ -27,11 +27,13 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
+import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.model.Column;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
+import java.sql.Connection;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -88,6 +90,14 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
         } else {
             return columnModel.getName();
         }
+    }
+
+    protected Connection getConnection(JdbcValueAccess<Object> access) {
+        Connection connection = access.getConnection();
+        if (connection instanceof ConnectionProxy) {
+            connection = ((ConnectionProxy)connection).getConnection();
+        }
+        return connection;
     }
 }
 

@@ -287,7 +287,7 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
                         return table.getColumn(column.getName());
                     }
                 });
-        return newBuilder(statement).
+        return newBuilder(getTargetSession().getConnection(), statement).
                 withColumns(newArrayList(columns)).
                 withDialect(getTargetSession().getDialect()).
                 withTimeZone(getTimeZone()).

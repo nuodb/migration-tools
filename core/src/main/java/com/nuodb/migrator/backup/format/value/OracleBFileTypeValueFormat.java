@@ -25,40 +25,53 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.type;
+package com.nuodb.migrator.backup.format.value;
 
 import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.lang.reflect.Method;
+import java.util.Map;
+
+import static com.nuodb.migrator.backup.format.value.ValueType.BINARY;
+import static com.nuodb.migrator.backup.format.value.ValueUtils.binary;
+import static com.nuodb.migrator.utils.ReflectionUtils.*;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcValueAccessProvider {
+public class OracleBFileTypeValueFormat extends LazyInitValueFormatBase<Object> {
 
-    JdbcValueSetter getJdbcValueSetter(int typeCode);
+    private static final String BFILE_CLASS_NAME = "oracle.sql.BFILE";
+    private Class<?> bfileClass;
+    private Method getBytes;
 
-    JdbcValueSetter getJdbcValueSetter(int typeCode, String typeName);
+    @Override
+    protected void doLazyInit() {
+        ClassLoader classLoader = getClassLoader();
+        try {
+            bfileClass = classLoader.loadClass(BFILE_CLASS_NAME);
+            getBytes = bfileClass.getMethod("getBytes", EMPTY_CLASS_ARRAY);
+        } catch (Exception exception) {
+            throw new ValueFormatException(exception);
+        }
+    }
 
-    JdbcValueSetter getJdbcValueSetter(JdbcTypeDesc jdbcTypeDesc);
+    @Override
+    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+        Object value = access.getValue(options);
+        return binary(value != null ? (byte[]) invokeMethod(value, getBytes) : null);
+    }
 
-    JdbcValueSetter getJdbcValueSetter(JdbcType jdbcType);
+    @Override
+    protected void doSetValue(Value value, JdbcValueAccess<Object> access, Map<String, Object> options)
+            throws Exception {
+        access.setValue(newInstance(bfileClass, new Object[]{getConnection(access), value.asBytes()}), options);
+    }
 
-    <T> JdbcValueGetter<T> getJdbcValueGetter(int typeCode);
-
-    <T> JdbcValueGetter<T> getJdbcValueGetter(int typeCode, String typeName);
-
-    <T> JdbcValueGetter<T> getJdbcValueGetter(JdbcTypeDesc jdbcTypeDesc);
-
-    <T> JdbcValueGetter<T> getJdbcValueGetter(JdbcType<T> jdbcType);
-
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet, int index);
-
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet, int index, Column column);
-
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement, int index);
-
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement, int index, Column column);
+    @Override
+    public ValueType getValueType(Column column) {
+        return BINARY;
+    }
 }

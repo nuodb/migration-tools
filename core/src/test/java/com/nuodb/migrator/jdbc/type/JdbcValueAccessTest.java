@@ -129,7 +129,7 @@ public class JdbcValueAccessTest {
         given(resultSet.getTimestamp(COLUMN)).willReturn(timestamp);
 
         JdbcValueAccess<Timestamp> resultSetAccess =
-                jdbcValueAccessProvider.getJdbcValueGetter(resultSet, COLUMN);
+                jdbcValueAccessProvider.getJdbcValueGetter(connection, resultSet, COLUMN);
 
         Map<String, Object> options = new HashMap<String, Object>();
         assertEquals(resultSetAccess.getValue(options), timestamp);
@@ -144,7 +144,7 @@ public class JdbcValueAccessTest {
         given(resultSet.getTimestamp(COLUMN)).willReturn(timestamp);
 
         JdbcValueAccess<Object> preparedStatementAccess =
-                jdbcValueAccessProvider.getJdbcValueGetter(preparedStatement, COLUMN);
+                jdbcValueAccessProvider.getJdbcValueGetter(connection, preparedStatement, COLUMN);
 
         Map<String, Object> options = new HashMap<String, Object>();
         preparedStatementAccess.setValue(calendar.getTimeInMillis(), options);

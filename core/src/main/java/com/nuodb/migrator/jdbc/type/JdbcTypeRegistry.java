@@ -71,8 +71,9 @@ public interface JdbcTypeRegistry {
 
     void addJdbcTypeAlias(int typeCode, String typeName, int typeAlias);
 
+    void addJdbcTypeAlias(JdbcTypeDesc jdbcTypeDesc, int typeAlias);
+
     void addJdbcTypeAlias(JdbcTypeDesc jdbcTypeDesc, JdbcTypeDesc jdbcTypeAlias);
 
     Map<JdbcTypeDesc, JdbcTypeDesc> getJdbcTypeAliases();
-
 }

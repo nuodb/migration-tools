@@ -27,29 +27,26 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupManager;
 import com.nuodb.migrator.backup.Script;
 import com.nuodb.migrator.backup.XmlBackupManager;
-import com.nuodb.migrator.backup.format.sql.SqlAttributes;
-import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter;
-import com.nuodb.migrator.jdbc.query.QueryLimit;
+import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
+import com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.job.SchemaGeneratorJobBase;
-import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.DumpJobSpec;
-import com.nuodb.migrator.spec.MigrationMode;
-import com.nuodb.migrator.spec.QuerySpec;
-import com.nuodb.migrator.spec.ResourceSpec;
-import com.nuodb.migrator.spec.TableSpec;
-import com.nuodb.migrator.utils.Collections;
+import com.nuodb.migrator.spec.*;
 
 import java.sql.SQLException;
 import java.util.Collection;

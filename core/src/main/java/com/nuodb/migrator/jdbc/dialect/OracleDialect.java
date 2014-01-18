@@ -32,6 +32,9 @@ import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.jdbc.type.jdbc2.JdbcTimestampType;
+import com.nuodb.migrator.match.AntRegexCompiler;
+import com.nuodb.migrator.match.Regex;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -42,21 +45,32 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
+import static com.nuodb.migrator.match.AntRegexCompiler.INSTANCE;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
-import static java.sql.Types.OTHER;
-import static java.sql.Types.ROWID;
-import static java.sql.Types.SQLXML;
+import static java.sql.Types.*;
 
 /**
  * @author Sergey Bushik
  */
 public class OracleDialect extends SimpleDialect {
 
+    public static final JdbcTypeDesc BFILE_DESC = new JdbcTypeDesc(-13, "BFILE");
     public static final JdbcTypeDesc ANYDATA_DESC = new JdbcTypeDesc(OTHER, "ANYDATA");
     public static final JdbcTypeDesc ANYDATASET_DESC = new JdbcTypeDesc(OTHER, "ANYDATASET");
     public static final JdbcTypeDesc ANYTYPE_DESC = new JdbcTypeDesc(OTHER, "ANYTYPE");
     public static final JdbcTypeDesc XMLTYPE_DESC = new JdbcTypeDesc(SQLXML, "XMLTYPE");
+    public static final JdbcTypeDesc BINARY_FLOAT_DESC = new JdbcTypeDesc(100, "BINARY_FLOAT");
+    public static final JdbcTypeDesc BINARY_DOUBLE_DESC = new JdbcTypeDesc(101, "BINARY_DOUBLE");
+    public static final JdbcTypeDesc TIMESTAMP_WITH_TIME_ZONE_DESC = new JdbcTypeDesc(-101);
+    public static final JdbcTypeDesc TIMESTAMP_WITH_LOCAL_TIME_ZONE_DESC = new JdbcTypeDesc(-102);
+    public static final JdbcTypeDesc INTERVAL_YEAR_TO_MONTH_DESC = new JdbcTypeDesc(-103);
+    public static final JdbcTypeDesc INTERVAL_DAY_TO_SECOND_DESC = new JdbcTypeDesc(-104);
+
+    public static final Regex TIMESTAMP_WITH_TIME_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH TIME ZONE");
+    public static final Regex TIMESTAMP_WITH_TIME_LOCAL_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH LOCAL TIME ZONE");
+    public static final Regex INTERVAL_YEAR_TO_MATCH_REGEX = INSTANCE.compile("INTERVAL YEAR(*) TO MONTH");
+    public static final Regex INTERVAL_DAY_TO_SECOND_REGEX = INSTANCE.compile("INTERVAL DAY(*) TO SECOND");
 
     public OracleDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -66,6 +80,7 @@ public class OracleDialect extends SimpleDialect {
     protected void initJdbcTypes() {
         super.initJdbcTypes();
         addJdbcType(OracleXmlType.INSTANCE);
+        addJdbcType(OracleBFileType.INSTANCE);
         addJdbcTypeAdapter(new OracleBlobTypeAdapter());
         addJdbcTypeAdapter(new OracleClobTypeAdapter());
     }
@@ -74,6 +89,36 @@ public class OracleDialect extends SimpleDialect {
     protected void initJdbcTypeNames() {
         super.initJdbcTypeNames();
         addJdbcTypeDescAlias(OTHER, "ROWID", ROWID);
+        addJdbcTypeDescAlias(OTHER, "UROWID", ROWID);
+        addJdbcTypeDescAlias(OTHER, "NCHAR", NCHAR);
+        addJdbcTypeDescAlias(OTHER, "NVARCHAR2", NVARCHAR);
+        addJdbcTypeDescAlias(OTHER, "NCLOB", NCLOB);
+        addJdbcTypeDescAlias(BINARY_FLOAT_DESC, FLOAT);
+        addJdbcTypeDescAlias(BINARY_DOUBLE_DESC, DOUBLE);
+        addJdbcTypeDescAlias(TIMESTAMP_WITH_TIME_ZONE_DESC, TIMESTAMP);
+        addJdbcTypeDescAlias(TIMESTAMP_WITH_LOCAL_TIME_ZONE_DESC, TIMESTAMP);
+        addJdbcTypeDescAlias(INTERVAL_YEAR_TO_MONTH_DESC, VARCHAR);
+        addJdbcTypeDescAlias(INTERVAL_DAY_TO_SECOND_DESC, VARCHAR);
+    }
+
+    @Override
+    public JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName) {
+        JdbcTypeDesc jdbcTypeAlias = null;
+        if (typeCode == OTHER) {
+            if (TIMESTAMP_WITH_TIME_ZONE_REGEX.test(typeName)) {
+                jdbcTypeAlias = new JdbcTypeDesc(TIMESTAMP);
+            } else if (TIMESTAMP_WITH_TIME_LOCAL_ZONE_REGEX.test(typeName)) {
+                jdbcTypeAlias = new JdbcTypeDesc(TIMESTAMP);
+            } else if (INTERVAL_YEAR_TO_MATCH_REGEX.test(typeName)) {
+                jdbcTypeAlias = new JdbcTypeDesc(VARCHAR);
+            } else if (INTERVAL_DAY_TO_SECOND_REGEX.test(typeName)) {
+                jdbcTypeAlias = new JdbcTypeDesc(VARCHAR);
+            }
+        }
+        if (jdbcTypeAlias == null) {
+            jdbcTypeAlias = super.getJdbcTypeAlias(typeCode, typeName);
+        }
+        return jdbcTypeAlias;
     }
 
     @Override

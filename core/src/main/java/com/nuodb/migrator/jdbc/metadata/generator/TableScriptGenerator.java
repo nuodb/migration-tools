@@ -66,7 +66,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             final Column column = iterator.next();
             buffer.append(scriptGeneratorManager.getName(column));
             buffer.append(' ');
-            buffer.append(getColumnTypeName(column, scriptGeneratorManager));
+            buffer.append(getTypeName(column, scriptGeneratorManager));
             if (column.isIdentity() && objectTypes.contains(IDENTITY)) {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
@@ -186,8 +186,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         return singleton(buffer.toString());
     }
 
-    protected String getColumnTypeName(Column column, ScriptGeneratorManager context) {
-        Dialect dialect = context.getTargetDialect();
+    protected String getTypeName(Column column, ScriptGeneratorManager scriptGeneratorManager) {
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
         int scale = column.getScale();
         if (scale < 0 && !dialect.supportsNegativeScale()) {
             scale = 0;
@@ -197,9 +197,9 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         JdbcTypeSpecifiers jdbcTypeSpecifiers = newSpecifiers(column.getSize(), column.getPrecision(), scale);
         String typeName = dialect.getJdbcTypeName(databaseInfo, jdbcTypeDesc, jdbcTypeSpecifiers);
         if (typeName == null) {
-            String tableName = context.getQualifiedName(column.getTable(),
+            String tableName = scriptGeneratorManager.getQualifiedName(column.getTable(),
                     column.getTable().getSchema().getName(), column.getTable().getCatalog().getName(), false);
-            String columnName = context.getName(column, false);
+            String columnName = scriptGeneratorManager.getName(column, false);
             throw new GeneratorException(
                     format("Unsupported type %s with type code %d, %d length found on %s table %s column",
                             column.getTypeName(), column.getTypeCode(), column.getSize(), tableName, columnName));

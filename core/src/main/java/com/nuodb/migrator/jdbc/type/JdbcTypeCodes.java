@@ -36,9 +36,11 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.nuodb.migrator.utils.ReflectionUtils.loadClass;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isStatic;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
@@ -48,7 +50,7 @@ public class JdbcTypeCodes {
     private static transient JdbcTypeCodes INSTANCE;
     private static final String TYPES_CLASS_NAME = "java.sql.Types";
 
-    private transient Logger logger = LoggerFactory.getLogger(getClass());
+    private transient Logger logger = getLogger(getClass());
     private Map<String, Integer> typeCodes = new TreeMap<String, Integer>(CASE_INSENSITIVE_ORDER);
 
     public static JdbcTypeCodes getInstance() {
@@ -63,7 +65,7 @@ public class JdbcTypeCodes {
     }
 
     private void addTypeCodes() {
-        Class<?> types = ReflectionUtils.loadClass(TYPES_CLASS_NAME);
+        Class<?> types = loadClass(TYPES_CLASS_NAME);
         for (Field field : types.getDeclaredFields()) {
             int modifiers = field.getModifiers();
             if (isStatic(modifiers) && isFinal(modifiers)) {
@@ -89,6 +91,10 @@ public class JdbcTypeCodes {
 
     public Integer getTypeCode(String typeName) {
         return typeCodes.get(typeName);
+    }
+
+    public Map<String, Integer> getTypeCodes() {
+        return typeCodes;
     }
 
     @Override

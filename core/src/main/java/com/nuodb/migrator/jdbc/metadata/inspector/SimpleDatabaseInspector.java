@@ -108,7 +108,8 @@ public class SimpleDatabaseInspector extends MetaDataHandlerBase implements Insp
     }
 
     @Override
-    public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException {
+    public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope)
+            throws SQLException {
         return true;
     }
 }

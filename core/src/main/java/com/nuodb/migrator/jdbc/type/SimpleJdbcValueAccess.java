@@ -44,35 +44,27 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
     private JdbcValueGetter<T> jdbcValueGetter;
     private JdbcValueSetter jdbcValueSetter;
     private ResultSet resultSet;
-    private PreparedStatement preparedStatement;
+    private PreparedStatement statement;
     private Connection connection;
     private int columnIndex;
     private Column column;
 
-    public SimpleJdbcValueAccess(JdbcValueGetter<T> jdbcValueGetter, ResultSet resultSet,
+    public SimpleJdbcValueAccess(JdbcValueGetter<T> jdbcValueGetter, Connection connection, ResultSet resultSet,
                                  int columnIndex, Column column) throws SQLException {
         this.jdbcValueGetter = jdbcValueGetter;
+        this.connection = connection;
         this.resultSet = resultSet;
-        this.connection = getConnection(resultSet.getStatement().getConnection());
         this.columnIndex = columnIndex;
         this.column = column;
     }
 
-    public SimpleJdbcValueAccess(JdbcValueSetter jdbcValueSetter, PreparedStatement preparedStatement,
-                                 int columnIndex, Column column) throws SQLException {
+    public SimpleJdbcValueAccess(JdbcValueSetter jdbcValueSetter, Connection connection,
+                                 PreparedStatement statement, int columnIndex, Column column) throws SQLException {
         this.jdbcValueSetter = jdbcValueSetter;
-        this.preparedStatement = preparedStatement;
-        this.connection = getConnection(preparedStatement.getConnection());
+        this.connection = connection;
+        this.statement = statement;
         this.columnIndex = columnIndex;
         this.column = column;
-    }
-
-    protected Connection getConnection(Connection connection) {
-        if (connection instanceof ConnectionProxy) {
-            return ((ConnectionProxy) connection).getConnection();
-        } else {
-            return connection;
-        }
     }
 
     @Override
@@ -111,7 +103,7 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
         if (jdbcValueSetter == null) {
             throw new JdbcValueAccessException("Set value is not supported");
         }
-        jdbcValueSetter.setValue(preparedStatement, connection, columnIndex, column, value, options);
+        jdbcValueSetter.setValue(statement, connection, columnIndex, column, value, options);
     }
 
 }

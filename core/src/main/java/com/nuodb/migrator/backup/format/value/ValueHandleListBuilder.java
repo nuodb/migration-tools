@@ -35,6 +35,7 @@ import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 import com.nuodb.migrator.jdbc.type.jdbc2.JdbcDateTypeBase;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
@@ -57,26 +58,26 @@ public abstract class ValueHandleListBuilder {
 
     private ValueFormatRegistry valueFormatRegistry;
 
-    public static ValueHandleListBuilder newBuilder(final ResultSet resultSet) {
+    public static ValueHandleListBuilder newBuilder(final Connection connection, final ResultSet resultSet) {
         return new ValueHandleListBuilder() {
             private int column = 1;
 
             @Override
             protected JdbcValueAccess buildJdbcValueAccess(ValueHandle valueHandle) {
                 return getDialect().getJdbcValueAccessProvider().getJdbcValueGetter(
-                        resultSet, column++, valueHandle);
+                        connection, resultSet, column++, valueHandle);
             }
         };
     }
 
-    public static ValueHandleListBuilder newBuilder(final PreparedStatement statement) {
+    public static ValueHandleListBuilder newBuilder(final Connection connection, final PreparedStatement statement) {
         return new ValueHandleListBuilder() {
             private int column = 1;
 
             @Override
             protected JdbcValueAccess buildJdbcValueAccess(ValueHandle valueHandle) {
                 return getDialect().getJdbcValueAccessProvider().getJdbcValueGetter(
-                        statement, column++, valueHandle);
+                        connection, statement, column++, valueHandle);
             }
         };
     }
