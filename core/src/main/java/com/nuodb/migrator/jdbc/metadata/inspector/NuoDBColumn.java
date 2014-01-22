@@ -27,10 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.type.JdbcEnumType;
 import com.nuodb.migrator.jdbc.type.JdbcType;
-import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.util.Collection;
 
@@ -60,8 +58,8 @@ public class NuoDBColumn {
      * ENUM type decoding rules: <ul><li>^ delimiter character</li><li>\ escape symbol</li><li>\^ turns into
      * ^</li><li>\\ is changed to \</li></ul>
      *
-     * @param type
-     * @return
+     * @param type serialized set of enum values
+     * @return decoded set of enum values
      */
     public static Collection<String> getEnum(String type) {
         boolean start = false;
@@ -95,9 +93,5 @@ public class NuoDBColumn {
             }
         }
         return values;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(getJdbcType(new JdbcType(new JdbcTypeDesc(12, "VARCHAR")), "^v1^v2^v3^"));
     }
 }
