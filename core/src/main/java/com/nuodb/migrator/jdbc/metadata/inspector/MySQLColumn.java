@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.type.JdbcEnumType;
+import com.nuodb.migrator.jdbc.type.JdbcSetType;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 
 import java.util.Collection;
@@ -47,7 +48,7 @@ public class MySQLColumn {
         if (ENUM.equals(baseType.getTypeName())) {
             jdbcType = new JdbcEnumType(baseType, getEnum(baseType, type));
         } else if (SET.equals(baseType.getTypeName())) {
-            jdbcType = new JdbcEnumType(baseType, getSet(baseType, type));
+            jdbcType = new JdbcSetType(baseType, getSet(baseType, type));
         } else {
             jdbcType = baseType;
         }

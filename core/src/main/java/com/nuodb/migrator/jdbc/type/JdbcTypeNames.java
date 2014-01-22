@@ -45,6 +45,10 @@ public class JdbcTypeNames {
         return createTypeNameTemplate(new JdbcType(jdbcTypeDesc, null), template, deltaOptions);
     }
 
+    public static JdbcTypeName createTypeNameTemplate(String template, JdbcTypeOptions deltaOptions) {
+        return new JdbcTypeNameTemplateDeltaOptions(template, deltaOptions);
+    }
+
     public static JdbcTypeName createTypeNameTemplate(JdbcType jdbcType, String template,
                                                       JdbcTypeOptions deltaOptions) {
         return new JdbcTypeNameTemplateDeltaOptions(jdbcType, template, deltaOptions);

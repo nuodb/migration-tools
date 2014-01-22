@@ -25,53 +25,31 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
-
-import com.nuodb.migrator.jdbc.type.JdbcEnumType;
-import com.nuodb.migrator.jdbc.type.JdbcType;
-import com.nuodb.migrator.jdbc.type.JdbcTypeName;
+package com.nuodb.migrator.jdbc.type;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
- * Generates enum type
- *
  * @author Sergey Bushik
  */
-public class NuoDBEnumTypeName implements JdbcTypeName {
+public class JdbcSetType extends JdbcEnumType {
 
-    @Override
-    public String getTypeName(JdbcType jdbcType) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("ENUM(");
-        Collection<String> values = ((JdbcEnumType) jdbcType).getValues();
-        for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
-            buffer.append("'");
-            getValue(buffer, iterator.next());
-            buffer.append("'");
-            if (iterator.hasNext()) {
-                buffer.append(",");
-            }
-        }
-        buffer.append(")");
-        return buffer.toString();
+    public JdbcSetType() {
     }
 
-    protected void getValue(StringBuilder buffer, String value) {
-        char[] symbols = value.toCharArray();
-        for (char symbol : symbols) {
-            switch (symbol) {
-                case '\'':
-                    buffer.append('\'');
-                    break;
-            }
-            buffer.append(symbol);
-        }
+    public JdbcSetType(JdbcTypeDesc jdbcTypeDesc) {
+        super(jdbcTypeDesc);
     }
 
-    @Override
-    public int getScore(JdbcType jdbcType) {
-        return jdbcType.getClass().equals(JdbcEnumType.class) ? 0 : -1;
+    public JdbcSetType(JdbcTypeOptions jdbcTypeOptions) {
+        super(jdbcTypeOptions);
+    }
+
+    public JdbcSetType(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions) {
+        super(jdbcTypeDesc, jdbcTypeOptions);
+    }
+
+    public JdbcSetType(JdbcType jdbcType, Collection<String> values) {
+        super(jdbcType, values);
     }
 }
