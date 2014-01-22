@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
 import java.util.Map;
@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public interface ValueHandle extends Column {
+public interface ValueHandle extends Field {
 
     ValueType getValueType();
 

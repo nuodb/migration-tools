@@ -29,8 +29,9 @@ package com.nuodb.migrator.backup.format.value;
 
 import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
 import java.sql.Connection;
@@ -58,7 +59,7 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
 
     protected Value onGetValueError(JdbcValueAccess access, Exception exception) {
         throw new ValueFormatException(format("Can't get %s %s column value",
-                getColumnName(access.getColumn()), access.getColumn().getTypeName()), exception);
+                getColumnName(access.getField()), access.getField().getTypeName()), exception);
     }
 
     @Override
@@ -78,17 +79,17 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
 
     protected void onSetValueError(JdbcValueAccess access, Exception exception) {
         throw new ValueFormatException(format("Can't set %s %s column value",
-                getColumnName(access.getColumn()), access.getColumn().getTypeName()), exception);
+                getColumnName(access.getField()), access.getField().getTypeName()), exception);
     }
 
-    protected String getColumnName(Column columnModel) {
-        if (columnModel instanceof com.nuodb.migrator.jdbc.metadata.Column) {
-            com.nuodb.migrator.jdbc.metadata.Column column = (com.nuodb.migrator.jdbc.metadata.Column) columnModel;
+    protected String getColumnName(Field field) {
+        if (field instanceof Column) {
+            Column column = (Column) field;
             Table table = column.getTable();
             Dialect dialect = table.getDatabase().getDialect();
             return format("table %s %s", table.getQualifiedName(dialect), column.getName(dialect));
         } else {
-            return columnModel.getName();
+            return field.getName();
         }
     }
 

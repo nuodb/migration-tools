@@ -27,14 +27,15 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.model.FieldFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static com.nuodb.migrator.jdbc.model.ColumnFactory.createColumn;
+import static com.nuodb.migrator.jdbc.model.FieldFactory.newField;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
 /**
@@ -66,8 +67,8 @@ public class SimpleJdbcValueAccessProvider implements JdbcValueAccessProvider {
     }
 
     @Override
-    public <T> JdbcValueGetter<T> getJdbcValueGetter(JdbcType<T> jdbcType) {
-        return new SimpleJdbcValueGetter<T>(jdbcTypeRegistry, jdbcType);
+    public <T> JdbcValueGetter<T> getJdbcValueGetter(JdbcTypeValue<T> jdbcTypeValue) {
+        return new SimpleJdbcValueGetter<T>(jdbcTypeRegistry, jdbcTypeValue);
     }
 
     @Override
@@ -86,17 +87,17 @@ public class SimpleJdbcValueAccessProvider implements JdbcValueAccessProvider {
     }
 
     @Override
-    public JdbcValueSetter getJdbcValueSetter(JdbcType jdbcType) {
-        return new SimpleJdbcValueSetter(jdbcTypeRegistry, jdbcType);
+    public JdbcValueSetter getJdbcValueSetter(JdbcTypeValue jdbcTypeValue) {
+        return new SimpleJdbcValueSetter(jdbcTypeRegistry, jdbcTypeValue);
     }
 
     @Override
     public <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet,
-                                                     int columnIndex, Column column) {
+                                                     int columnIndex, Field field) {
         try {
             return new SimpleJdbcValueAccess<T>(
-                    (JdbcValueGetter<T>) getJdbcValueGetter(column.getTypeCode(), column.getTypeName()),
-                    connection, resultSet, columnIndex, column);
+                    (JdbcValueGetter<T>) getJdbcValueGetter(field.getTypeCode(), field.getTypeName()),
+                    connection, resultSet, columnIndex, field);
         } catch (SQLException exception) {
             throw new JdbcValueAccessException(exception);
         }
@@ -104,11 +105,11 @@ public class SimpleJdbcValueAccessProvider implements JdbcValueAccessProvider {
 
     @Override
     public <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement,
-                                                     int columnIndex, Column column) {
+                                                     int columnIndex, Field field) {
         try {
             return new SimpleJdbcValueAccess<T>(
-                    getJdbcValueSetter(column.getTypeCode(), column.getTypeName()),
-                    connection, statement, columnIndex, column);
+                    getJdbcValueSetter(field.getTypeCode(), field.getTypeName()),
+                    connection, statement, columnIndex, field);
         } catch (SQLException exception) {
             throw new JdbcValueAccessException(exception);
         }
@@ -117,7 +118,7 @@ public class SimpleJdbcValueAccessProvider implements JdbcValueAccessProvider {
     @Override
     public <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet, int columnIndex) {
         try {
-            return getJdbcValueGetter(connection, resultSet, columnIndex, createColumn(resultSet, columnIndex));
+            return getJdbcValueGetter(connection, resultSet, columnIndex, FieldFactory.newField(resultSet, columnIndex));
         } catch (SQLException exception) {
             throw new JdbcValueAccessException(exception);
         }
@@ -128,7 +129,7 @@ public class SimpleJdbcValueAccessProvider implements JdbcValueAccessProvider {
                                                      int columnIndex) {
         try {
             return getJdbcValueGetter(connection, statement, columnIndex,
-                    createColumn(statement.getMetaData(), columnIndex));
+                    newField(statement.getMetaData(), columnIndex));
         } catch (SQLException exception) {
             throw new JdbcValueAccessException(exception);
         }

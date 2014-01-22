@@ -35,14 +35,15 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.Serializable;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.Comparator;
 
 import static com.google.common.collect.ComparisonChain.start;
 import static com.google.common.collect.Ordering.natural;
-import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
 public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
+
+    protected static final int ASSIGNABLE = 0;
+    protected static final int NOT_ASSIGNABLE = 1;
 
     private String productName;
     private String productVersion;
@@ -112,45 +113,57 @@ public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
         this.minorVersion = minorVersion;
     }
 
-    public boolean isInherited(DatabaseInfo databaseInfo) {
-        ComparisonChain comparator = start();
-        comparator = isProductNameInherited(databaseInfo, comparator);
-        comparator = isProductVersionInherited(databaseInfo, comparator);
-        comparator = isMajorVersionInherited(databaseInfo, comparator);
-        comparator = isMinorVersionInherited(databaseInfo, comparator);
-        return comparator.result() >= 0;
+    /**
+     * Checks if this is a base database info for the given database info
+     *
+     * @param databaseInfo to check if it's inherited from this database info
+     * @return true is this database into is a super class for the given info
+     */
+    public boolean isAssignable(DatabaseInfo databaseInfo) {
+        return isAssignable(databaseInfo, start()).result() <= 0;
     }
 
-    protected ComparisonChain isProductNameInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+    protected ComparisonChain isAssignable(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        comparator = isAssignableProductName(databaseInfo, comparator);
+        comparator = isAssignableProductVersion(databaseInfo, comparator);
+        comparator = isAssignableMajorVersion(databaseInfo, comparator);
+        comparator = isAssignableMinorVersion(databaseInfo, comparator);
+        return comparator;
+    }
+
+    protected ComparisonChain isAssignableProductName(DatabaseInfo databaseInfo, ComparisonChain comparator) {
         return comparator.compare(getProductName(), databaseInfo.getProductName(),
-                new Comparator<String>() {
+                new Ordering<String>() {
                     @Override
                     public int compare(String productName1, String productName2) {
-                        return StringUtils.equals(productName1, productName2) ? 0 : -1;
+                        return productName1 == null ? 0 :
+                                StringUtils.equals(productName1, productName2) ? ASSIGNABLE : NOT_ASSIGNABLE;
                     }
                 });
     }
 
-    protected ComparisonChain isProductVersionInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
-        return comparator.compare(getProductVersion(), databaseInfo.getProductVersion(), natural().nullsLast());
+    protected ComparisonChain isAssignableProductVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getProductVersion(), databaseInfo.getProductVersion(),
+                new Ordering<String>() {
+                    @Override
+                    public int compare(String productVersion1, String productVersion2) {
+                        return productVersion1 == null ? 0 :
+                                StringUtils.equals(productVersion1, productVersion2) ? ASSIGNABLE : NOT_ASSIGNABLE;
+                    }
+                });
     }
 
-    protected ComparisonChain isMajorVersionInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
-        return comparator.compare(getMajorVersion(), databaseInfo.getMajorVersion(), natural().nullsLast());
+    protected ComparisonChain isAssignableMajorVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getMajorVersion(), databaseInfo.getMajorVersion(), natural().nullsFirst());
     }
 
-    protected ComparisonChain isMinorVersionInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
-        return comparator.compare(getMinorVersion(), databaseInfo.getMinorVersion(), natural().nullsLast());
+    protected ComparisonChain isAssignableMinorVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getMinorVersion(), databaseInfo.getMinorVersion(), natural().nullsFirst());
     }
 
     @Override
     public int compareTo(DatabaseInfo databaseInfo) {
-        Ordering<Comparable> ordering = natural().nullsFirst();
-        return start().
-                compare(getProductName(), databaseInfo.getProductName(), ordering).
-                compare(getProductVersion(), databaseInfo.getProductVersion(), ordering).
-                compare(getMajorVersion(), databaseInfo.getMajorVersion(), ordering).
-                compare(getMinorVersion(), databaseInfo.getMinorVersion(), ordering).result();
+        return isAssignable(databaseInfo, start()).result();
     }
 
     @Override

@@ -27,10 +27,10 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.dialect.NuoDBBigIntType;
-import com.nuodb.migrator.jdbc.dialect.NuoDBIntegerType;
-import com.nuodb.migrator.jdbc.dialect.NuoDBSmallIntType;
-import com.nuodb.migrator.jdbc.dialect.NuoDBTimeType;
+import com.nuodb.migrator.jdbc.dialect.NuoDBBigIntValue;
+import com.nuodb.migrator.jdbc.dialect.NuoDBIntegerValue;
+import com.nuodb.migrator.jdbc.dialect.NuoDBSmallIntValue;
+import com.nuodb.migrator.jdbc.dialect.NuoDBTimeValue;
 
 /**
  * @author Sergey Bushik
@@ -38,9 +38,9 @@ import com.nuodb.migrator.jdbc.dialect.NuoDBTimeType;
 public class NuoDBValueFormatRegistry extends SimpleValueFormatRegistry {
 
     public NuoDBValueFormatRegistry() {
-        addValueFormat(NuoDBSmallIntType.INSTANCE, new NuoDBSmallIntValueFormat());
-        addValueFormat(NuoDBIntegerType.INSTANCE, new NuoDBIntegerValueFormat());
-        addValueFormat(NuoDBBigIntType.INSTANCE, new NuoDBBigIntValueFormat());
-        addValueFormat(NuoDBTimeType.INSTANCE, new NuoDBTimeValueFormat());
+        addValueFormat(NuoDBSmallIntValue.INSTANCE, new NuoDBSmallIntValueFormat());
+        addValueFormat(NuoDBIntegerValue.INSTANCE, new NuoDBIntegerValueFormat());
+        addValueFormat(NuoDBBigIntValue.INSTANCE, new NuoDBBigIntValueFormat());
+        addValueFormat(NuoDBTimeValue.INSTANCE, new NuoDBTimeValueFormat());
     }
 }

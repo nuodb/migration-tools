@@ -28,7 +28,7 @@
 package com.nuodb.migrator.jdbc.type;
 
 import com.nuodb.migrator.jdbc.type.adapter.JdbcTimestampTypeAdapter;
-import com.nuodb.migrator.jdbc.type.jdbc2.JdbcTimestampType;
+import com.nuodb.migrator.jdbc.type.jdbc2.JdbcTimestampValue;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.testng.annotations.BeforeMethod;
@@ -77,7 +77,7 @@ public class JdbcValueAccessTest {
     public void setUp() throws Exception {
         initMocks(this);
         jdbcValueAccessProvider = spy(new SimpleJdbcValueAccessProvider(jdbcTypeRegistry));
-        jdbcTypeRegistry.addJdbcType(JdbcTimestampType.INSTANCE);
+        jdbcTypeRegistry.addJdbcType(JdbcTimestampValue.INSTANCE);
         jdbcTypeRegistry.addJdbcTypeAdapter(JdbcTimestampTypeAdapter.INSTANCE);
 
         given(metaData.getColumnType(COLUMN)).willReturn(Types.TIMESTAMP);
@@ -92,7 +92,7 @@ public class JdbcValueAccessTest {
         return new Object[][]{
                 {new JdbcTypeDesc(Types.TIMESTAMP)},
                 {new JdbcTypeDesc(Types.TIMESTAMP, "TIMESTAMP")},
-                {JdbcTimestampType.INSTANCE.getJdbcTypeDesc()},
+                {JdbcTimestampValue.INSTANCE.getJdbcTypeDesc()},
         };
     }
 
@@ -113,7 +113,7 @@ public class JdbcValueAccessTest {
 
     /**
      * Verifiers that the provider throws {@link com.nuodb.migrator.jdbc.type.JdbcTypeException} for the type
-     * descriptors which has now associated {@link com.nuodb.migrator.jdbc.type.JdbcType} classes.
+     * descriptors which has now associated {@link JdbcTypeValue} classes.
      *
      * @param jdbcTypeDesc to be verified
      */

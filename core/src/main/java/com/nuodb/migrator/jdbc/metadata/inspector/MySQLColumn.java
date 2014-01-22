@@ -27,7 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.type.JdbcEnumType;
+import com.nuodb.migrator.jdbc.type.JdbcType;
 
 import java.util.Collection;
 
@@ -38,50 +39,50 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 public class MySQLColumn {
 
-    private static String ENUM = "ENUM";
-    private static String SET = "SET";
+    public static String ENUM = "ENUM";
+    public static String SET = "SET";
 
-    public static Collection<String> getEnumValues(Column column) {
-        Collection<String> values;
-        if (ENUM.equals(column.getTypeName())) {
-            String columnType = column.getColumnType();
-            values = getValues(columnType.substring(5, columnType.length() - 1));
+    public static JdbcType getJdbcType(JdbcType baseType, String type) {
+        JdbcType jdbcType;
+        if (ENUM.equals(baseType.getTypeName())) {
+            jdbcType = new JdbcEnumType(baseType, getEnum(baseType, type));
+        } else if (SET.equals(baseType.getTypeName())) {
+            jdbcType = new JdbcEnumType(baseType, getSet(baseType, type));
         } else {
-            values = newArrayList();
+            jdbcType = baseType;
         }
-        return values;
+        return jdbcType;
     }
 
-    public static Collection<String> getSetValues(Column column) {
-        Collection<String> values;
-        if (SET.equals(column.getTypeName())) {
-            String columnType = column.getColumnType();
-            values = getValues(columnType.substring(4, columnType.length() - 1));
-        } else {
-            values = newArrayList();
-        }
-        return values;
+    public static Collection<String> getEnum(JdbcType baseType, String type) {
+        return ENUM.equals(baseType.getTypeName()) ?
+                getValues(type.substring(5, type.length() - 1)) : null;
     }
 
-    public static Collection<String> getValues(String source) {
+    public static Collection<String> getSet(JdbcType baseType, String type) {
+        return SET.equals(baseType.getTypeName()) ?
+                getValues(type.substring(4, type.length() - 1)) : null;
+    }
+
+    public static Collection<String> getValues(String type) {
         Collection<String> values = newArrayList();
         int start = 0;
         int end;
         int index = 0;
         StringBuilder value = new StringBuilder();
-        while ((end = source.indexOf("'", index)) != -1) {
+        while ((end = type.indexOf("'", index)) != -1) {
             if (end == start) {
                 index++;
                 continue;
             }
-            if (source.indexOf("'", end + 1) == end + 1) {
-                value.append(source.substring(index, end));
+            if (type.indexOf("'", end + 1) == end + 1) {
+                value.append(type.substring(index, end));
                 index = end + 1;
                 value.append("'");
                 index++;
                 continue;
             }
-            value.append(source.substring(index, end));
+            value.append(type.substring(index, end));
             end++;
             values.add(value.toString());
             value.setLength(0);

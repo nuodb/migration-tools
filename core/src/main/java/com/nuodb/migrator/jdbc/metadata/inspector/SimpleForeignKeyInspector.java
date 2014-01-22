@@ -29,11 +29,8 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.ForeignKey;
-import com.nuodb.migrator.jdbc.metadata.ForeignKeyReference;
-import com.nuodb.migrator.jdbc.metadata.Identifier;
-import com.nuodb.migrator.jdbc.metadata.Table;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

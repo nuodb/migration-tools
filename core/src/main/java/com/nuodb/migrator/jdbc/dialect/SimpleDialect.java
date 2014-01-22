@@ -27,20 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
-import com.nuodb.migrator.jdbc.metadata.DefaultValue;
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
-import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.Trigger;
-import com.nuodb.migrator.jdbc.metadata.TriggerEvent;
-import com.nuodb.migrator.jdbc.metadata.TriggerTime;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.resolver.SimpleServiceResolverAware;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.*;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
+import com.nuodb.migrator.jdbc.type.JdbcTypeName;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -309,7 +303,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         if (jdbcTypeNameMap == null) {
             DatabaseInfo targetDatabaseInfo = null;
             for (Map.Entry<DatabaseInfo, JdbcTypeNameMap> entry : jdbcTypeNameMaps.entrySet()) {
-                if (!entry.getKey().isInherited(databaseInfo)) {
+                if (!entry.getKey().isAssignable(databaseInfo)) {
                     continue;
                 }
                 if (targetDatabaseInfo == null) {
@@ -653,16 +647,15 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc typeDesc,
-                                  JdbcTypeSpecifiers typeSpecifiers) {
-        String jdbcTypeName = getJdbcTypeName(getJdbcTypeNameMap(databaseInfo), typeDesc, typeSpecifiers);
-        if (jdbcTypeName == null) {
-            jdbcTypeName = getJdbcTypeName(getJdbcTypeNameMap(), typeDesc, typeSpecifiers);
+    public String getTypeName(DatabaseInfo databaseInfo, JdbcType jdbcType) {
+        String typeName = getTypeName(getJdbcTypeNameMap(databaseInfo), jdbcType);
+        if (typeName == null) {
+            typeName = getTypeName(getJdbcTypeNameMap(), jdbcType);
         }
-        return jdbcTypeName;
+        return typeName;
     }
 
-    protected void addJdbcType(JdbcType type) {
+    protected void addJdbcType(JdbcTypeValue type) {
         getJdbcTypeRegistry().addJdbcType(type);
     }
 
@@ -682,21 +675,24 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         getJdbcTypeNameMap().addJdbcTypeName(typeCode, typeName);
     }
 
-    protected void addJdbcTypeName(int typeCode, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
-        getJdbcTypeNameMap().addJdbcTypeName(typeCode, jdbcTypeSpecifiers, typeName);
+    protected void addJdbcTypeName(int typeCode, JdbcTypeOptions jdbcTypeOptions, String typeName) {
+        getJdbcTypeNameMap().addJdbcTypeName(typeCode, jdbcTypeOptions, typeName);
     }
 
-    protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc,
-                                   JdbcTypeNameBuilder jdbcTypeNameBuilder) {
-        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, jdbcTypeNameBuilder);
+    public void addJdbcTypeName(JdbcTypeName jdbcTypeName, int priority) {
+        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeName, priority);
+    }
+
+    public void addJdbcTypeName(JdbcTypeName jdbcTypeName) {
+        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeName);
     }
 
     protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, String typeName) {
         getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, typeName);
     }
 
-    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
-        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers, typeName);
+    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions, String typeName) {
+        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, jdbcTypeOptions, typeName);
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, int typeCode, String typeName) {
@@ -704,8 +700,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, int typeCode, String typeName,
-                                   JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, jdbcTypeSpecifiers, typeName);
+                                   JdbcTypeOptions jdbcTypeOptions) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, jdbcTypeOptions, typeName);
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName) {
@@ -713,18 +709,24 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName,
-                                   JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers, typeName);
+                                   JdbcTypeOptions jdbcTypeOptions) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, jdbcTypeOptions, typeName);
     }
 
-    protected String getJdbcTypeName(JdbcTypeNameMap typeNameMap, JdbcTypeDesc typeDesc,
-                                     JdbcTypeSpecifiers typeSpecifiers) {
-        String jdbcTypeName = typeNameMap.getJdbcTypeName(typeDesc, typeSpecifiers);
-        if (jdbcTypeName == null) {
-            jdbcTypeName = typeNameMap.getJdbcTypeName(
-                    new JdbcTypeDesc(typeDesc.getTypeCode()), typeSpecifiers);
+    public void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeName jdbcTypeName) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeName);
+    }
+
+    public void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeName jdbcTypeName, int priority) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeName, priority);
+    }
+
+    protected String getTypeName(JdbcTypeNameMap jdbcTypeNameMap, JdbcType jdbcType) {
+        String typeName = jdbcTypeNameMap.getTypeName(jdbcType);
+        if (typeName == null) {
+            typeName = jdbcTypeNameMap.getTypeName(jdbcType.withTypeName(null));
         }
-        return jdbcTypeName;
+        return typeName;
     }
 
     protected void removeJdbcTypeName(int typeCode) {

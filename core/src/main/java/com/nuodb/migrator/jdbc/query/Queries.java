@@ -29,9 +29,6 @@ package com.nuodb.migrator.jdbc.query;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.BasicQueryBuilder;
-import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.query.SelectQueryBuilder;
 
 import java.util.Collection;
 

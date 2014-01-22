@@ -35,6 +35,7 @@ import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.model.FieldFactory;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.session.WorkBase;
 import com.nuodb.migrator.jdbc.split.QuerySplit;
@@ -51,7 +52,7 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
-import static com.nuodb.migrator.jdbc.model.ColumnFactory.createColumnList;
+import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
@@ -96,7 +97,8 @@ public class DumpQueryWork extends WorkBase {
 
         valueHandleList = newBuilder(getSession().getConnection(), resultSet).
                 withDialect(dialect).
-                withColumns(dumpQuery.getColumns() != null ? dumpQuery.getColumns() : createColumnList(resultSet)).
+                withColumns(dumpQuery.getColumns() != null ? dumpQuery.getColumns() : FieldFactory
+                        .newFieldList(resultSet)).
                 withTimeZone(dumpQueryContext.getTimeZone()).
                 withValueFormatRegistry(dumpQueryContext.getValueFormatRegistry()).build();
 

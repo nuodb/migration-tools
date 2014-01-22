@@ -28,7 +28,11 @@
 package com.nuodb.migrator.schema;
 
 import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.generator.*;
+import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ConnectionScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.FileScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.session.Session;
@@ -70,25 +74,32 @@ public class SchemaJob extends SchemaGeneratorJobBase<SchemaJobSpec> {
     protected void init() throws Exception {
         super.init();
 
-        SessionFactory sessionFactory = newSessionFactory(
+        ConnectionSpec sourceSpec = getSourceSpec();
+        SessionFactory sourceSessionFactory = newSessionFactory(
                 createConnectionProviderFactory().createConnectionProvider(
-                        getSourceSpec()), createDialectResolver());
-        Session session = sessionFactory.openSession();
-        setSourceSession(session);
+                        sourceSpec), createDialectResolver());
+        Session sourceSession = sourceSessionFactory.openSession();
+        setSourceSession(sourceSession);
+
+        Session targetSession = null;
+        ConnectionSpec targetSpec = getTargetSpec();
+        if (targetSpec != null) {
+            SessionFactory targetSessionFactory = newSessionFactory(
+                    createConnectionProviderFactory().createConnectionProvider(
+                            targetSpec), createDialectResolver());
+            targetSession = targetSessionFactory.openSession();
+        }
+        setTargetSession(targetSession);
+
         setScriptExporter(createScriptExporter());
         setScriptGeneratorManager(createScriptGeneratorManager());
     }
 
     protected ScriptExporter createScriptExporter() {
         Collection<ScriptExporter> exporters = newArrayList();
-        ConnectionSpec targetSpec = getTargetSpec();
-        if (targetSpec != null) {
-            try {
-                exporters.add(new ConnectionScriptExporter(createConnectionProviderFactory().
-                        createConnectionProvider(targetSpec).getConnection()));
-            } catch (SQLException exception) {
-                throw new SchemaException("Failed creating connection script exporter", exception);
-            }
+        Session targetSession = getTargetSession();
+        if (targetSession != null) {
+            exporters.add(new ConnectionScriptExporter(targetSession.getConnection()));
         }
         ResourceSpec outputSpec = getOutputSpec();
         if (outputSpec != null) {

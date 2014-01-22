@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.resolver.ServiceResolver;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.*;
@@ -171,7 +172,7 @@ public interface Dialect {
 
     boolean isSQLKeyword(String identifier, Identifiable identifiable);
 
-    String getJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc typeDesc, JdbcTypeSpecifiers typeSpecifiers);
+    String getTypeName(DatabaseInfo databaseInfo, JdbcType jdbcType);
 
     JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName);
 

@@ -28,7 +28,7 @@
 package com.nuodb.migrator.dump;
 
 import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.split.QuerySplitter;
 
 import java.util.Collection;
@@ -41,7 +41,7 @@ import java.util.Collection;
 public class DumpQuery {
 
     private QuerySplitter querySplitter;
-    private Collection<? extends Column> columns;
+    private Collection<? extends Field> columns;
     private RowSet rowSet;
 
     public DumpQuery(QuerySplitter querySplitter, RowSet rowSet) {
@@ -49,7 +49,7 @@ public class DumpQuery {
         this.rowSet = rowSet;
     }
 
-    public DumpQuery(QuerySplitter querySplitter, Collection<? extends Column> columns, RowSet rowSet) {
+    public DumpQuery(QuerySplitter querySplitter, Collection<? extends Field> columns, RowSet rowSet) {
         this.querySplitter = querySplitter;
         this.columns = columns;
         this.rowSet = rowSet;
@@ -59,7 +59,7 @@ public class DumpQuery {
         return querySplitter;
     }
 
-    public Collection<? extends Column> getColumns() {
+    public Collection<? extends Field> getColumns() {
         return columns;
     }
 

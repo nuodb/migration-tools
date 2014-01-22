@@ -39,7 +39,8 @@ import com.nuodb.migrator.match.AntRegexCompiler;
 import com.nuodb.migrator.match.Match;
 import com.nuodb.migrator.match.Regex;
 import com.nuodb.migrator.match.RegexCompiler;
-import com.nuodb.migrator.utils.PriorityList;
+import com.nuodb.migrator.utils.Collections;
+import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -48,7 +49,6 @@ import java.util.Map;
 
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
-import static com.nuodb.migrator.utils.Collections.newPriorityList;
 
 /**
  * @author Sergey Bushik
@@ -141,7 +141,7 @@ public class RegexOptionImpl extends AugmentOptionBase implements RegexOption {
         if (optional) {
             help.append('[');
         }
-        PriorityList<Trigger> triggers = newPriorityList();
+        PrioritySet<Trigger> triggers = Collections.newPrioritySet();
         createTriggers(triggers, getPrefixes(), getName());
         join(help, triggers);
 

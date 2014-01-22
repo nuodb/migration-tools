@@ -28,13 +28,14 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.model.FieldFactory;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
-import static com.nuodb.migrator.jdbc.model.ColumnFactory.createColumnList;
+import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
 import static org.apache.commons.lang3.StringUtils.*;
 
 /**
@@ -72,7 +73,7 @@ public class OracleColumnInspector extends SimpleColumnInspector {
         column.setComment(columns.getString("REMARKS"));
         column.setPosition(columns.getInt("ORDINAL_POSITION"));
         String autoIncrement =
-                createColumnList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
+                FieldFactory.newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
                         columns.getString("IS_AUTOINCREMENT") : null;
         column.setAutoIncrement("YES".equals(autoIncrement));
         column.setNullable("YES".equals(columns.getString("IS_NULLABLE")));

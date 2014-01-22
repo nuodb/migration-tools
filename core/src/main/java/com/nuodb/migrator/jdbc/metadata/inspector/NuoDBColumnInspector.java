@@ -33,6 +33,7 @@ import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.sql.ResultSet;
@@ -43,6 +44,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBColumn.getJdbcType;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 
 /**
@@ -52,7 +54,7 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
 
     private static final String QUERY =
             "SELECT * FROM SYSTEM.FIELDS AS F INNER JOIN SYSTEM.DATATYPES AS D ON F.DATATYPE = D.ID\n" +
-            "WHERE F.SCHEMA=? AND F.TABLENAME=? ORDER BY F.FIELDPOSITION ASC";
+                    "WHERE F.SCHEMA=? AND F.TABLENAME=? ORDER BY F.FIELDPOSITION ASC";
 
     public NuoDBColumnInspector() {
         super(COLUMN, TableInspectionScope.class);
@@ -71,19 +73,23 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         Dialect dialect = inspectionContext.getDialect();
         while (columns.next()) {
-            Table table = addTable(inspectionResults, null, columns.getString("SCHEMA"), columns.getString("TABLENAME"));
+            Table table = addTable(inspectionResults, null, columns.getString("SCHEMA"),
+                    columns.getString("TABLENAME"));
 
             Column column = table.addColumn(columns.getString("FIELD"));
+            JdbcType jdbcType = new JdbcType();
             JdbcTypeDesc typeDescAlias = dialect.getJdbcTypeAlias(
                     columns.getInt("JDBCTYPE"), columns.getString("NAME"));
-            column.setTypeCode(typeDescAlias.getTypeCode());
-            column.setTypeName(typeDescAlias.getTypeName());
+            jdbcType.setTypeCode(typeDescAlias.getTypeCode());
+            jdbcType.setTypeName(typeDescAlias.getTypeName());
 
             int columnSize = columns.getInt("LENGTH");
-            column.setSize(columnSize);
-            column.setPrecision(columnSize);
+            jdbcType.setSize(columnSize);
+            jdbcType.setPrecision(columnSize);
+            jdbcType.setScale(columns.getInt("SCALE"));
+            column.setJdbcType(getJdbcType(jdbcType, columns.getString("ENUMERATION")));
+
             column.setDefaultValue(valueOf(columns.getString("DEFAULTVALUE")));
-            column.setScale(columns.getInt("SCALE"));
             column.setComment(columns.getString("REMARKS"));
             column.setPosition(columns.getInt("FIELDPOSITION"));
             column.setNullable(columns.getInt("FLAGS") == 0);

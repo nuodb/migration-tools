@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -39,9 +39,9 @@ import java.util.Map;
  */
 public interface JdbcValueGetter<T> {
 
-    T getValue(ResultSet resultSet, Connection connection, int columnIndex, Column column, Map<String,
+    T getValue(ResultSet resultSet, Connection connection, int columnIndex, Field field, Map<String,
             Object> options) throws SQLException;
 
-    <X> X getValue(ResultSet resultSet, Connection connection, int columnIndex, Column column, Class<X> valueClass,
+    <X> X getValue(ResultSet resultSet, Connection connection, int columnIndex, Field field, Class<X> valueClass,
                    Map<String, Object> options) throws SQLException;
 }

@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
 import java.lang.reflect.Method;
@@ -74,7 +74,7 @@ public class OracleAnyDataValueFormat extends LazyInitValueFormatBase<Object> {
     }
 
     @Override
-    public ValueType getValueType(Column column) {
+    public ValueType getValueType(Field field) {
         return ValueType.STRING;
     }
 }

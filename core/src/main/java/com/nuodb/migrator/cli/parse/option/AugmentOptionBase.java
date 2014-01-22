@@ -39,7 +39,7 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 import com.nuodb.migrator.cli.parse.OptionProcessor;
 import com.nuodb.migrator.cli.parse.Trigger;
-import com.nuodb.migrator.utils.PriorityList;
+import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -49,7 +49,7 @@ import java.util.Set;
 
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.quote;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.unquote;
-import static com.nuodb.migrator.utils.Collections.newPriorityList;
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 
 /**
  * Base subclass for the options augmented with an argument {@link Argument} and a child group {@link Group}.
@@ -92,8 +92,8 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
     }
 
     @Override
-    public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = newPriorityList(super.getTriggers());
+    public PrioritySet<Trigger> getTriggers() {
+        PrioritySet<Trigger> triggers = newPrioritySet(super.getTriggers());
         if (getGroup() != null) {
             triggers.addAll(getGroup().getTriggers());
         }
@@ -102,7 +102,7 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
 
     @Override
     public boolean canProcess(CommandLine commandLine, String argument) {
-        PriorityList<Trigger> triggers = getTriggers();
+        PrioritySet<Trigger> triggers = getTriggers();
         if (getArgument() != null) {
             String argumentSeparator = getArgumentSeparator();
             if (argumentSeparator != null) {
@@ -115,7 +115,7 @@ public abstract class AugmentOptionBase extends OptionBase implements AugmentOpt
         return findTrigger(triggers, argument) != null;
     }
 
-    protected Trigger findTrigger(PriorityList<Trigger> triggers, String argument) {
+    protected Trigger findTrigger(PrioritySet<Trigger> triggers, String argument) {
         for (Trigger trigger : triggers) {
             if (trigger.fire(argument)) {
                 return trigger;

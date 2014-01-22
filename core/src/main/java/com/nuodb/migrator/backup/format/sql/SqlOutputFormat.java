@@ -106,7 +106,7 @@ public class SqlOutputFormat extends OutputFormatBase implements SqlAttributes {
     }
 
     protected Column getColumn(ValueHandle valueHandle) {
-        return (Column) valueHandle.asColumn();
+        return (Column) valueHandle.asField();
     }
 
     protected String asString(Value value, ValueHandle valueHandle) {

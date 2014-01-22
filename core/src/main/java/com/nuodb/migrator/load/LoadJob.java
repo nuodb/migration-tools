@@ -38,9 +38,7 @@ import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
-import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptImporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ConnectionScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ReaderScriptImporter;
@@ -281,9 +279,9 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
     protected ValueHandleList createValueHandleList(final RowSet rowSet, final Table table,
                                                     PreparedStatement statement) throws SQLException {
         Iterable<com.nuodb.migrator.jdbc.metadata.Column> columns = transform(rowSet.getColumns(),
-                new Function<Column, com.nuodb.migrator.jdbc.metadata.Column>() {
+                new Function<com.nuodb.migrator.backup.Column, com.nuodb.migrator.jdbc.metadata.Column>() {
                     @Override
-                    public com.nuodb.migrator.jdbc.metadata.Column apply(Column column) {
+                    public com.nuodb.migrator.jdbc.metadata.Column apply(com.nuodb.migrator.backup.Column column) {
                         return table.getColumn(column.getName());
                     }
                 });
@@ -294,11 +292,11 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
                 withValueFormatRegistry(getValueFormatRegistry()).build();
     }
 
-    protected InsertQuery createInsertQuery(Table table, Collection<Column> columns) {
+    protected InsertQuery createInsertQuery(Table table, Collection<com.nuodb.migrator.backup.Column> columns) {
         InsertQueryBuilder builder = new InsertQueryBuilder().insertType(getInsertType(table)).into(table);
-        builder.columns(Lists.<String>newArrayList(transform(columns, new Function<Column, String>() {
+        builder.columns(Lists.<String>newArrayList(transform(columns, new Function<com.nuodb.migrator.backup.Column, String>() {
             @Override
-            public String apply(Column column) {
+            public String apply(com.nuodb.migrator.backup.Column column) {
                 return column.getName();
             }
         })));

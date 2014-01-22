@@ -41,12 +41,12 @@ public class Jdbc4TypeRegistry extends Jdbc3TypeRegistry {
 
     public Jdbc4TypeRegistry() {
         super();
-        addJdbcType(JdbcNCharType.INSTANCE);
-        addJdbcType(JdbcNVarCharType.INSTANCE);
-        addJdbcType(JdbcNLongVarCharType.INSTANCE);
-        addJdbcType(JdbcNClobType.INSTANCE);
-        addJdbcType(JdbcRowIdType.INSTANCE);
-        addJdbcType(JdbcSqlXmlType.INSTANCE);
+        addJdbcType(JdbcNCharValue.INSTANCE);
+        addJdbcType(JdbcNVarCharValue.INSTANCE);
+        addJdbcType(JdbcNLongVarCharValue.INSTANCE);
+        addJdbcType(JdbcNClobValue.INSTANCE);
+        addJdbcType(JdbcRowIdValue.INSTANCE);
+        addJdbcType(JdbcSqlXmlValue.INSTANCE);
         addJdbcTypeAdapter(JdbcNClobTypeAdapter.INSTANCE);
         addJdbcTypeAdapter(JdbcSqlXmlTypeAdapter.INSTANCE);
     }

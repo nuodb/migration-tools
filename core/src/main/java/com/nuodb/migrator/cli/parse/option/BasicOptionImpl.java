@@ -35,7 +35,8 @@ import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.HelpHint;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.Trigger;
-import com.nuodb.migrator.utils.PriorityList;
+import com.nuodb.migrator.utils.Collections;
+import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -46,7 +47,7 @@ import java.util.Set;
 
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
-import static com.nuodb.migrator.utils.Collections.newPriorityList;
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 
 /**
@@ -80,8 +81,8 @@ public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
     }
 
     @Override
-    public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = newPriorityList(super.getTriggers());
+    public PrioritySet<Trigger> getTriggers() {
+        PrioritySet<Trigger> triggers = newPrioritySet(super.getTriggers());
         Set<String> prefixes = getPrefixes();
         String name = getName();
         if (name != null) {
@@ -126,7 +127,7 @@ public class BasicOptionImpl extends AugmentOptionBase implements BasicOption {
             help.append('[');
         }
         Set<String> prefixes = getPrefixes();
-        PriorityList<Trigger> triggers = newPriorityList();
+        PrioritySet<Trigger> triggers = Collections.newPrioritySet();
         createTriggers(triggers, prefixes, getName());
         join(help, triggers);
         Map<String, OptionFormat> aliases = getAliases();

@@ -27,12 +27,7 @@
  */
 package com.nuodb.migrator.job;
 
-import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
-import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
-import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
-import com.nuodb.migrator.jdbc.dialect.TranslationManager;
-import com.nuodb.migrator.jdbc.dialect.Translator;
+import com.nuodb.migrator.jdbc.dialect.*;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
@@ -43,14 +38,15 @@ import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaGeneratorJobSpecBase;
-import com.nuodb.migrator.utils.PriorityList;
+import com.nuodb.migrator.utils.PrioritySet;
 
+import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 
 /**
  * @author Sergey Bushik
@@ -67,7 +63,7 @@ public abstract class SchemaGeneratorJobBase<S extends SchemaGeneratorJobSpecBas
         super(jobSpec);
     }
 
-    protected ScriptGeneratorManager createScriptGeneratorManager() {
+    protected ScriptGeneratorManager createScriptGeneratorManager() throws SQLException {
         ScriptGeneratorManager scriptGeneratorManager = new ScriptGeneratorManager();
         scriptGeneratorManager.getAttributes().put(GROUP_SCRIPTS_BY, getGroupScriptsBy());
         scriptGeneratorManager.setObjectTypes(getObjectTypes());
@@ -82,9 +78,11 @@ public abstract class SchemaGeneratorJobBase<S extends SchemaGeneratorJobSpecBas
             scriptGeneratorManager.setTargetSchema(targetSpec.getSchema());
         }
 
-        Dialect dialect = createDialectResolver().resolve(NUODB);
+        DialectResolver dialectResolver = createDialectResolver();
+        Dialect dialect = getTargetSession() != null ? dialectResolver.resolve(
+                getTargetSession().getConnection()) : dialectResolver.resolve(NUODB);
         TranslationManager translationManager = dialect.getTranslationManager();
-        PriorityList<Translator> translators = translationManager.getTranslators();
+        PrioritySet<Translator> translators = translationManager.getTranslators();
         for (Translator translator : translators) {
             if (translator instanceof ImplicitDefaultsTranslator) {
                 ((ImplicitDefaultsTranslator)translator).setUseExplicitDefaults(isUseExplicitDefaults());
@@ -93,7 +91,7 @@ public abstract class SchemaGeneratorJobBase<S extends SchemaGeneratorJobSpecBas
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         for (JdbcTypeSpec jdbcTypeSpec : getJdbcTypeSpecs()) {
             jdbcTypeNameMap.addJdbcTypeName(
-                    jdbcTypeSpec.getTypeCode(), newSpecifiers(
+                    jdbcTypeSpec.getTypeCode(), newOptions(
                     jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()),
                     jdbcTypeSpec.getTypeName()
             );

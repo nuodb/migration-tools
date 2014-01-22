@@ -40,19 +40,19 @@ import java.util.Map;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
-    private final transient Logger logger = LoggerFactory.getLogger(getClass());
+    private final transient Logger logger = getLogger(getClass());
 
     private T defaultService;
+    private Map<DatabaseInfo, T> serviceMap = newConcurrentMap();
     private Class<? extends T> defaultServiceClass;
-    private Map<DatabaseInfo, T> databaseInfoServiceMap = newConcurrentMap();
-    private Map<DatabaseInfo, T> databaseInfoServiceCacheMap = newConcurrentMap();
-    private Map<DatabaseInfo, Class<? extends T>> databaseInfoServiceClassMap = newConcurrentMap();
+    private Map<DatabaseInfo, Class<? extends T>> serviceClassMap = newConcurrentMap();
 
     public SimpleServiceResolver() {
     }
@@ -72,7 +72,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     @Override
     public void register(DatabaseInfo databaseInfo, T service) {
-        databaseInfoServiceMap.put(databaseInfo, service);
+        serviceMap.put(databaseInfo, service);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     @Override
     public void register(DatabaseInfo databaseInfo, Class<? extends T> serviceClass) {
-        databaseInfoServiceClassMap.put(databaseInfo, serviceClass);
+        serviceClassMap.put(databaseInfo, serviceClass);
     }
 
     @Override
@@ -101,10 +101,7 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         if (databaseInfo == null) {
             return null;
         }
-        T service = databaseInfoServiceCacheMap.get(databaseInfo);
-        if (service != null) {
-            return service;
-        }
+        T service;
         if ((service = resolveService(databaseInfo)) == null) {
             Class<? extends T> serviceClass = resolveServiceClass(databaseInfo);
             service = serviceClass != null ? createService(serviceClass, databaseInfo) : null;
@@ -112,22 +109,19 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
         if (service instanceof ServiceResolverAware) {
             ((ServiceResolverAware) service).setServiceResolver(this);
         }
-        if (service != null) {
-            databaseInfoServiceCacheMap.put(databaseInfo, service);
-        }
         return service;
     }
 
     protected T resolveService(DatabaseInfo databaseInfo) {
         T service = null;
         DatabaseInfo serviceDatabaseInfo = null;
-        for (Map.Entry<DatabaseInfo, T> databaseInfoServiceEntry : databaseInfoServiceMap.entrySet()) {
-            DatabaseInfo currentServiceDatabaseInfo = databaseInfoServiceEntry.getKey();
-            if (currentServiceDatabaseInfo.isInherited(databaseInfo) &&
-                    (serviceDatabaseInfo == null ||
-                            currentServiceDatabaseInfo.compareTo(serviceDatabaseInfo) >= 0)) {
-                service = databaseInfoServiceEntry.getValue();
-                serviceDatabaseInfo = currentServiceDatabaseInfo;
+        for (Map.Entry<DatabaseInfo, T> serviceEntry : serviceMap.entrySet()) {
+            DatabaseInfo entryDatabaseInfo = serviceEntry.getKey();
+            final T entryService = serviceEntry.getValue();
+            if (entryDatabaseInfo.isAssignable(databaseInfo) && (serviceDatabaseInfo == null ||
+                    serviceDatabaseInfo.isAssignable(entryDatabaseInfo))) {
+                service = entryService;
+                serviceDatabaseInfo = entryDatabaseInfo;
             }
         }
         if (service != null) {
@@ -145,14 +139,14 @@ public class SimpleServiceResolver<T> implements ServiceResolver<T> {
 
     protected Class<? extends T> resolveServiceClass(DatabaseInfo databaseInfo) {
         Class<? extends T> serviceClass = null;
-        DatabaseInfo serviceClassDatabaseInfo = null;
-        for (Map.Entry<DatabaseInfo, Class<? extends T>> databaseInfoServiceClassEntry : databaseInfoServiceClassMap.entrySet()) {
-            DatabaseInfo currentServiceClassDatabaseInfo = databaseInfoServiceClassEntry.getKey();
-            if (currentServiceClassDatabaseInfo.isInherited(databaseInfo) &&
-                    (serviceClassDatabaseInfo == null ||
-                            currentServiceClassDatabaseInfo.compareTo(serviceClassDatabaseInfo) >= 0)) {
-                serviceClass = databaseInfoServiceClassEntry.getValue();
-                serviceClassDatabaseInfo = currentServiceClassDatabaseInfo;
+        DatabaseInfo serviceDatabaseInfo = null;
+        for (Map.Entry<DatabaseInfo, Class<? extends T>> serviceClassEntry : serviceClassMap.entrySet()) {
+            DatabaseInfo entryDatabaseInfo = serviceClassEntry.getKey();
+            Class<? extends T> entryServiceClass = serviceClassEntry.getValue();
+            if (entryDatabaseInfo.isAssignable(databaseInfo) && (serviceDatabaseInfo == null ||
+                    serviceDatabaseInfo.isAssignable(entryDatabaseInfo))) {
+                serviceClass = entryServiceClass;
+                serviceDatabaseInfo = entryDatabaseInfo;
             }
         }
         if (serviceClass != null) {

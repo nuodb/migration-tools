@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,7 +44,7 @@ public interface JdbcValueAccessProvider {
 
     JdbcValueSetter getJdbcValueSetter(JdbcTypeDesc jdbcTypeDesc);
 
-    JdbcValueSetter getJdbcValueSetter(JdbcType jdbcType);
+    JdbcValueSetter getJdbcValueSetter(JdbcTypeValue jdbcTypeValue);
 
     <T> JdbcValueGetter<T> getJdbcValueGetter(int typeCode);
 
@@ -52,13 +52,13 @@ public interface JdbcValueAccessProvider {
 
     <T> JdbcValueGetter<T> getJdbcValueGetter(JdbcTypeDesc jdbcTypeDesc);
 
-    <T> JdbcValueGetter<T> getJdbcValueGetter(JdbcType<T> jdbcType);
+    <T> JdbcValueGetter<T> getJdbcValueGetter(JdbcTypeValue<T> jdbcTypeValue);
 
     <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet, int index);
 
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet, int index, Column column);
+    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, ResultSet resultSet, int index, Field field);
 
     <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement, int index);
 
-    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement, int index, Column column);
+    <T> JdbcValueAccess<T> getJdbcValueGetter(Connection connection, PreparedStatement statement, int index, Field field);
 }

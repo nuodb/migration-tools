@@ -41,6 +41,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.jdbc.metadata.inspector.MySQLColumn.getJdbcType;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 
@@ -96,7 +97,7 @@ public class MySQLColumnInspector extends SimpleColumnInspector {
                             Table table = addTable(inspectionResults, columns.getString("TABLE_SCHEMA"), null,
                                     columns.getString("TABLE_NAME"));
                             Column column = table.addColumn(columns.getString("COLUMN_NAME"));
-                            column.setColumnType(columns.getString("COLUMN_TYPE"));
+                            column.setJdbcType(getJdbcType(column.getJdbcType(), columns.getString("COLUMN_TYPE")));
                         }
                     }
                 }

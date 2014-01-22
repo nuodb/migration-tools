@@ -21,7 +21,7 @@ import com.nuodb.migrator.cli.parse.Help;
 import com.nuodb.migrator.cli.parse.HelpHint;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.Trigger;
-import com.nuodb.migrator.utils.PriorityList;
+import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +33,6 @@ import java.util.Set;
 import static com.nuodb.migrator.cli.parse.HelpHint.ARGUMENT_BRACKETED;
 import static com.nuodb.migrator.cli.parse.HelpHint.PROPERTY;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
-import static com.nuodb.migrator.utils.Collections.newPriorityList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -72,8 +71,8 @@ public class Property extends OptionBase {
     }
 
     @Override
-    public PriorityList<Trigger> getTriggers() {
-        PriorityList<Trigger> triggers = newPriorityList();
+    public PrioritySet<Trigger> getTriggers() {
+        PrioritySet<Trigger> triggers = com.nuodb.migrator.utils.Collections.newPrioritySet();
         triggers.add(new TriggerImpl(prefix));
         return triggers;
     }

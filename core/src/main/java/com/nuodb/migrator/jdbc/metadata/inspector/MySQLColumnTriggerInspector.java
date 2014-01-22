@@ -27,11 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.ColumnTrigger;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.TriggerEvent;
-import com.nuodb.migrator.jdbc.metadata.TriggerTime;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 

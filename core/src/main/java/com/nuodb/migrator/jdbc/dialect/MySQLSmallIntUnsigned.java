@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.model.Column;
-import com.nuodb.migrator.jdbc.type.JdbcType;
-import com.nuodb.migrator.jdbc.type.JdbcTypeBase;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValueBase;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,25 +40,25 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class MySQLSmallIntUnsigned extends JdbcTypeBase<Integer> {
+public class MySQLSmallIntUnsigned extends JdbcTypeValueBase<Integer> {
 
-    public static JdbcType INSTANCE = new MySQLSmallIntUnsigned();
+    public static JdbcTypeValue INSTANCE = new MySQLSmallIntUnsigned();
 
     public MySQLSmallIntUnsigned() {
         super(Types.SMALLINT, "SMALLINT UNSIGNED", Integer.class);
     }
 
     @Override
-    public Integer getValue(ResultSet resultSet, int columnIndex,
-                            Column column, Map<String, Object> options) throws SQLException {
-        Integer value = resultSet.getInt(columnIndex);
+    public Integer getValue(ResultSet resultSet, int index,
+                            Field field, Map<String, Object> options) throws SQLException {
+        Integer value = resultSet.getInt(index);
         return resultSet.wasNull() ? null : value;
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, Integer value, int columnIndex,
-                                    Column column, Map<String, Object> options) throws SQLException {
-        statement.setInt(columnIndex, value);
+    protected void setNullSafeValue(PreparedStatement statement, Integer value, int index,
+                                    Field field, Map<String, Object> options) throws SQLException {
+        statement.setInt(index, value);
     }
 }
 

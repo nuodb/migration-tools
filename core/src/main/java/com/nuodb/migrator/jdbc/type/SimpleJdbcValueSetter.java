@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -41,21 +41,21 @@ import java.util.Map;
 public class SimpleJdbcValueSetter implements JdbcValueSetter {
 
     private final JdbcTypeRegistry jdbcTypeRegistry;
-    private final JdbcType jdbcType;
+    private final JdbcTypeValue jdbcTypeValue;
 
-    public SimpleJdbcValueSetter(JdbcTypeRegistry jdbcTypeRegistry, JdbcType jdbcType) {
+    public SimpleJdbcValueSetter(JdbcTypeRegistry jdbcTypeRegistry, JdbcTypeValue jdbcTypeValue) {
         this.jdbcTypeRegistry = jdbcTypeRegistry;
-        this.jdbcType = jdbcType;
+        this.jdbcTypeValue = jdbcTypeValue;
     }
 
     @Override
-    public <X> void setValue(PreparedStatement statement, Connection connection, int columnIndex, Column columnModel,
+    public <X> void setValue(PreparedStatement statement, Connection connection, int columnIndex, Field field,
                              X value, Map<String, Object> options) throws SQLException {
         JdbcTypeAdapter<X> adapter = jdbcTypeRegistry.getJdbcTypeAdapter(value != null ? value.getClass() : null,
-                jdbcType.getValueClass());
+                jdbcTypeValue.getValueClass());
         if (adapter != null) {
             value = adapter.wrap(value, connection);
         }
-        jdbcType.setValue(statement, columnIndex, columnModel, value, options);
+        jdbcTypeValue.setValue(statement, columnIndex, field, value, options);
     }
 }

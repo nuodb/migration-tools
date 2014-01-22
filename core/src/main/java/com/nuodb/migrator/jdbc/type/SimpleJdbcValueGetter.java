@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -41,24 +41,24 @@ import java.util.Map;
 public class SimpleJdbcValueGetter<T> implements JdbcValueGetter<T> {
 
     private final JdbcTypeRegistry jdbcTypeRegistry;
-    private final JdbcType<T> jdbcType;
+    private final JdbcTypeValue<T> jdbcTypeValue;
 
-    public SimpleJdbcValueGetter(JdbcTypeRegistry jdbcTypeRegistry, JdbcType<T> jdbcType) {
+    public SimpleJdbcValueGetter(JdbcTypeRegistry jdbcTypeRegistry, JdbcTypeValue<T> jdbcTypeValue) {
         this.jdbcTypeRegistry = jdbcTypeRegistry;
-        this.jdbcType = jdbcType;
+        this.jdbcTypeValue = jdbcTypeValue;
     }
 
     @Override
     public T getValue(ResultSet resultSet, Connection connection, int columnIndex,
-                      Column column, Map<String, Object> options) throws SQLException {
-        return jdbcType.getValue(resultSet, columnIndex, column, options);
+                      Field field, Map<String, Object> options) throws SQLException {
+        return jdbcTypeValue.getValue(resultSet, columnIndex, field, options);
     }
 
     @Override
-    public <X> X getValue(ResultSet resultSet, Connection connection, int columnIndex, Column column,
+    public <X> X getValue(ResultSet resultSet, Connection connection, int columnIndex, Field field,
                           Class<X> valueClass, Map<String, Object> options) throws SQLException {
-        X value = (X) jdbcType.getValue(resultSet, columnIndex, column, options);
-        JdbcTypeAdapter<X> adapter = jdbcTypeRegistry.getJdbcTypeAdapter(valueClass, jdbcType.getValueClass());
+        X value = (X) jdbcTypeValue.getValue(resultSet, columnIndex, field, options);
+        JdbcTypeAdapter<X> adapter = jdbcTypeRegistry.getJdbcTypeAdapter(valueClass, jdbcTypeValue.getValueClass());
         if (adapter != null) {
             value = adapter.unwrap(value, valueClass, connection);
         }

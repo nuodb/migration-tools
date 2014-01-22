@@ -28,12 +28,12 @@
 package com.nuodb.migrator.backup.format.value;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.model.Column;
-import com.nuodb.migrator.jdbc.model.SimpleColumn;
-import com.nuodb.migrator.jdbc.model.SimpleColumnList;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.model.SimpleField;
+import com.nuodb.migrator.jdbc.model.SimpleFieldList;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
-import com.nuodb.migrator.jdbc.type.jdbc2.JdbcDateTypeBase;
+import com.nuodb.migrator.jdbc.type.jdbc2.JdbcDateValueBase;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -54,7 +54,7 @@ public abstract class ValueHandleListBuilder {
 
     private TimeZone timeZone;
 
-    private Collection<? extends Column> columns;
+    private Collection<? extends Field> columns;
 
     private ValueFormatRegistry valueFormatRegistry;
 
@@ -84,8 +84,8 @@ public abstract class ValueHandleListBuilder {
 
     public ValueHandleList build() {
         ValueHandleList valueHandleList = createValueHandleList();
-        for (Column column : getColumns()) {
-            ValueHandle valueHandle = createValueHandle(column);
+        for (Field field : getColumns()) {
+            ValueHandle valueHandle = createValueHandle(field);
             initValueHandle(valueHandle);
             valueHandleList.add(valueHandle);
         }
@@ -96,10 +96,10 @@ public abstract class ValueHandleListBuilder {
         return new SimpleValueHandleList();
     }
 
-    protected ValueHandle createValueHandle(Column column) {
-        ValueHandle valueHandle = new SimpleValueHandle(column);
+    protected ValueHandle createValueHandle(Field field) {
+        ValueHandle valueHandle = new SimpleValueHandle(field);
         JdbcTypeDesc jdbcTypeDesc = getDialect().getJdbcTypeRegistry().getJdbcTypeAlias(
-                column.getTypeCode(), column.getTypeName());
+                field.getTypeCode(), field.getTypeName());
         valueHandle.setTypeCode(jdbcTypeDesc.getTypeCode());
         valueHandle.setTypeName(jdbcTypeDesc.getTypeName());
         return valueHandle;
@@ -143,7 +143,7 @@ public abstract class ValueHandleListBuilder {
             case Types.TIMESTAMP:
                 if (dialect.supportsStatementWithTimezone()) {
                     jdbcValueAccessOptions = newHashMap();
-                    jdbcValueAccessOptions.put(JdbcDateTypeBase.TIMEZONE, getTimeZone());
+                    jdbcValueAccessOptions.put(JdbcDateValueBase.TIMEZONE, getTimeZone());
                 }
                 break;
             default:
@@ -169,11 +169,11 @@ public abstract class ValueHandleListBuilder {
         return this;
     }
 
-    public Collection<? extends Column> getColumns() {
+    public Collection<? extends Field> getColumns() {
         return columns;
     }
 
-    public ValueHandleListBuilder withColumns(Collection<? extends Column> columns) {
+    public ValueHandleListBuilder withColumns(Collection<? extends Field> columns) {
         this.columns = columns;
         return this;
     }
@@ -187,7 +187,7 @@ public abstract class ValueHandleListBuilder {
         return this;
     }
 
-    static class SimpleValueHandle extends SimpleColumn implements ValueHandle {
+    static class SimpleValueHandle extends SimpleField implements ValueHandle {
 
         private ValueType valueType;
         private ValueFormat valueFormat;
@@ -197,8 +197,8 @@ public abstract class ValueHandleListBuilder {
         public SimpleValueHandle() {
         }
 
-        public SimpleValueHandle(Column column) {
-            super(column);
+        public SimpleValueHandle(Field field) {
+            super(field);
         }
 
         @Override
@@ -242,6 +242,6 @@ public abstract class ValueHandleListBuilder {
         }
     }
 
-    static class SimpleValueHandleList extends SimpleColumnList<ValueHandle> implements ValueHandleList {
+    static class SimpleValueHandleList extends SimpleFieldList<ValueHandle> implements ValueHandleList {
     }
 }

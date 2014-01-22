@@ -27,17 +27,23 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
+import com.google.common.collect.ComparisonChain;
 import com.nuodb.migrator.utils.ObjectUtils;
 
+import static com.google.common.collect.ComparisonChain.start;
+import static com.google.common.collect.Ordering.natural;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeDesc {
+public class JdbcTypeDesc implements Cloneable {
 
     private int typeCode;
     private String typeName;
+
+    public JdbcTypeDesc() {
+    }
 
     public JdbcTypeDesc(int typeCode) {
         this.typeCode = typeCode;
@@ -57,8 +63,16 @@ public class JdbcTypeDesc {
         return typeCode;
     }
 
+    public void setTypeCode(int typeCode) {
+        this.typeCode = typeCode;
+    }
+
     public String getTypeName() {
         return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     public static boolean equals(String typeName1, String typeName2) {

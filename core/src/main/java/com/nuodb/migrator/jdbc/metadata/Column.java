@@ -27,55 +27,37 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.jdbc.type.JdbcTypeOptions;
+
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.upperCase;
 
-public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.model.Column {
+public class Column extends IdentifiableBase implements Field {
 
-    /**
-     * Default precision is maximum value
-     */
+    public static final int DEFAULT_SIZE = 0;
     public static final int DEFAULT_PRECISION = 38;
     public static final int DEFAULT_SCALE = 0;
 
     private Table table;
-    /**
-     * SQL type from java.sql.Types
-     */
-    private int typeCode;
-    /**
-     * Data source dependent type name
-     */
-    private String typeName;
-    /**
-     * Column dependent type name
-     */
-    private String columnType;
-    /**
-     * Holds value size.
-     */
-    private int size;
-    /**
-     * The maximum total number of decimal digits that can be stored, both to the left and to the right of the decimal
-     * point. The precision is in the range of 1 through the maximum precision of 38.
-     */
-    private int precision = DEFAULT_PRECISION;
-    /**
-     * The number of fractional digits for numeric data types.
-     */
-    private int scale = DEFAULT_SCALE;
-    /**
-     * Contains value remarks, may be null.
-     */
-    private String comment;
+
+    private JdbcType jdbcType = new JdbcType(newOptions(DEFAULT_SIZE, DEFAULT_PRECISION, DEFAULT_SCALE));
+
     /**
      * Ordinal position of value in table, starting at 1.
      */
     private int position;
+    /**
+     * Contains value remarks, may be null.
+     */
+    private String comment;
     /**
      * Determines the nullability for a value.
      */
@@ -109,58 +91,88 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
 
     @Override
     public int getTypeCode() {
-        return typeCode;
+        return jdbcType.getTypeCode();
     }
 
     @Override
     public void setTypeCode(int typeCode) {
-        this.typeCode = typeCode;
+        jdbcType.setTypeCode(typeCode);
     }
 
     @Override
     public String getTypeName() {
-        return typeName;
+        return jdbcType.getTypeName();
     }
 
     @Override
     public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
-
-    public String getColumnType() {
-        return columnType;
-    }
-
-    public void setColumnType(String columnType) {
-        this.columnType = columnType;
+        jdbcType.setTypeName(typeName);
     }
 
     @Override
-    public int getPrecision() {
-        return precision;
+    public Integer getSize() {
+        return jdbcType.getSize();
     }
 
     @Override
-    public void setPrecision(int precision) {
-        this.precision = precision;
+    public void setSize(Integer size) {
+        jdbcType.setSize(size);
     }
 
     @Override
-    public int getScale() {
-        return scale;
+    public Integer getPrecision() {
+        return jdbcType.getPrecision();
     }
 
     @Override
-    public void setScale(int scale) {
-        this.scale = scale;
+    public void setPrecision(Integer precision) {
+        jdbcType.setPrecision(precision);
     }
 
     @Override
+    public Integer getScale() {
+        return jdbcType.getScale();
+    }
+
+    @Override
+    public void setScale(Integer scale) {
+        jdbcType.setScale(scale);
+    }
+
+    @Override
+    public JdbcType getJdbcType() {
+        return jdbcType;
+    }
+
+    @Override
+    public void setJdbcType(JdbcType jdbcType) {
+        this.jdbcType = jdbcType;
+    }
+
+    @Override
+    public JdbcTypeDesc getJdbcTypeDesc() {
+        return jdbcType.getJdbcTypeDesc();
+    }
+
+    @Override
+    public void setJdbcTypeDesc(JdbcTypeDesc jdbcTypeDesc) {
+        jdbcType.setJdbcTypeDesc(jdbcTypeDesc);
+    }
+
+    @Override
+    public JdbcTypeOptions getJdbcTypeOptions() {
+        return jdbcType.getJdbcTypeOptions();
+    }
+
+    @Override
+    public void setJdbcTypeOptions(JdbcTypeOptions jdbcTypeOptions) {
+        jdbcType.setJdbcTypeOptions(jdbcTypeOptions);
+    }
+
     public int getPosition() {
         return position;
     }
 
-    @Override
     public void setPosition(int position) {
         this.position = position;
     }
@@ -174,14 +186,6 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
             this.table.getColumns().remove(this);
         }
         this.table = table;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
     }
 
     public String getComment() {
@@ -256,17 +260,17 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
     }
 
     @Override
-    public com.nuodb.migrator.jdbc.model.Column asColumn() {
+    public Field asField() {
         return this;
     }
 
     @Override
-    public void fromColumn(com.nuodb.migrator.jdbc.model.Column column) {
-        setName(column.getName());
-        setTypeName(column.getTypeName());
-        setTypeCode(column.getTypeCode());
-        setPrecision(column.getPrecision());
-        setScale(column.getScale());
+    public void fromField(Field field) {
+        setName(field.getName());
+        setTypeName(field.getTypeName());
+        setTypeCode(field.getTypeCode());
+        setPrecision(field.getPrecision());
+        setScale(field.getScale());
     }
 
     @Override
@@ -277,18 +281,15 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
 
         Column column = (Column) o;
 
+        if (table != null ? !table.equals(column.table) : column.table != null) return false;
         if (autoIncrement != column.autoIncrement) return false;
         if (nullable != column.nullable) return false;
         if (position != column.position) return false;
-        if (precision != column.precision) return false;
-        if (scale != column.scale) return false;
-        if (size != column.size) return false;
-        if (typeCode != column.typeCode) return false;
         if (comment != null ? !comment.equals(column.comment) : column.comment != null) return false;
+        if (jdbcType != null ? !jdbcType.equals(column.jdbcType) : column.jdbcType != null) return false;
         if (defaultValue != null ? !defaultValue.equals(column.defaultValue) : column.defaultValue != null)
             return false;
-        if (table != null ? !table.equals(column.table) : column.table != null) return false;
-        if (typeName != null ? !typeName.equals(column.typeName) : column.typeName != null) return false;
+
 
         return true;
     }
@@ -297,11 +298,7 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (table != null ? table.hashCode() : 0);
-        result = 31 * result + typeCode;
-        result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
-        result = 31 * result + size;
-        result = 31 * result + precision;
-        result = 31 * result + scale;
+        result = 31 * result + (jdbcType != null ? jdbcType.hashCode() : 0);
         result = 31 * result + (comment != null ? comment.hashCode() : 0);
         result = 31 * result + position;
         result = 31 * result + (nullable ? 1 : 0);
@@ -315,7 +312,7 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
         super.output(indent, buffer);
 
         buffer.append(' ');
-        buffer.append(format("type=%d, %s", getTypeCode(), upperCase(getTypeName())));
+        buffer.append(format("type=%s", getJdbcType()));
         if (!isNullable()) {
             buffer.append(", not null");
         }
@@ -324,9 +321,6 @@ public class Column extends IdentifiableBase implements com.nuodb.migrator.jdbc.
             buffer.append(format(", auto increment=%d", lastValue != null ? lastValue : 0));
         }
         buffer.append(format(", position=%d", position));
-        buffer.append(format(", size=%d", size));
-        buffer.append(format(", precision=%d", precision));
-        buffer.append(format(", scale=%d", scale));
 
         Trigger trigger = getTrigger();
         if (trigger != null) {

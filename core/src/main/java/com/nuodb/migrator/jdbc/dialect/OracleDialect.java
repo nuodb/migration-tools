@@ -32,8 +32,6 @@ import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.jdbc2.JdbcTimestampType;
-import com.nuodb.migrator.match.AntRegexCompiler;
 import com.nuodb.migrator.match.Regex;
 
 import java.sql.Connection;
@@ -79,8 +77,8 @@ public class OracleDialect extends SimpleDialect {
     @Override
     protected void initJdbcTypes() {
         super.initJdbcTypes();
-        addJdbcType(OracleXmlType.INSTANCE);
-        addJdbcType(OracleBFileType.INSTANCE);
+        addJdbcType(OracleXmlTypeValue.INSTANCE);
+        addJdbcType(OracleBFileValue.INSTANCE);
         addJdbcTypeAdapter(new OracleBlobTypeAdapter());
         addJdbcTypeAdapter(new OracleClobTypeAdapter());
     }

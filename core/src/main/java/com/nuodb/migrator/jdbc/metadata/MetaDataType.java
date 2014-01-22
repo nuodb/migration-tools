@@ -28,12 +28,10 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
@@ -66,8 +64,8 @@ public class MetaDataType implements Comparable<MetaDataType>, Serializable {
 
     private static Map<String, MetaDataType> getNameTypeMap() {
         Map<String, MetaDataType> nameTypeMap = Maps.newLinkedHashMap();
-        Field[] fields = MetaDataType.class.getFields();
-        for (Field field : fields) {
+        java.lang.reflect.Field[] fields = MetaDataType.class.getFields();
+        for (java.lang.reflect.Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getType() == MetaDataType.class) {
                 try {
                     nameTypeMap.put(field.getName(), (MetaDataType) field.get(null));

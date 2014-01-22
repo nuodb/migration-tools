@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
 import java.util.Map;
@@ -52,7 +52,7 @@ public class NuoDBIntegerValueFormat extends ValueFormatBase<String> {
     }
 
     @Override
-    public ValueType getValueType(Column column) {
+    public ValueType getValueType(Field field) {
         return ValueType.STRING;
     }
 }

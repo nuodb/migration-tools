@@ -29,7 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.model.ColumnFactory;
+import com.nuodb.migrator.jdbc.model.FieldFactory;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.sql.ResultSet;
@@ -83,7 +83,7 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
         column.setComment(columns.getString("REMARKS"));
         column.setPosition(columns.getInt("ORDINAL_POSITION"));
         String autoIncrement =
-                ColumnFactory.createColumnList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
+                FieldFactory.newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
                         columns.getString("IS_AUTOINCREMENT") : null;
         column.setAutoIncrement("YES".equals(autoIncrement));
         column.setNullable("YES".equals(columns.getString("IS_NULLABLE")));

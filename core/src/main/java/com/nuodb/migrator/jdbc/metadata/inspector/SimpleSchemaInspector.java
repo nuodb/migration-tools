@@ -28,8 +28,9 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Catalog;
-import com.nuodb.migrator.jdbc.model.Column;
-import com.nuodb.migrator.jdbc.model.ColumnList;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.model.FieldFactory;
+import com.nuodb.migrator.jdbc.model.FieldList;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -37,7 +38,7 @@ import java.sql.SQLException;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
-import static com.nuodb.migrator.jdbc.model.ColumnFactory.createColumnList;
+import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
 
 /**
  * @author Sergey Bushik
@@ -64,10 +65,10 @@ public class SimpleSchemaInspector extends ManagedInspectorBase<Catalog, SchemaI
     @Override
     protected void processResultSet(InspectionContext inspectionContext, ResultSet schemas) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        ColumnList<Column> columnModels = createColumnList(schemas);
+        FieldList<Field> fields = FieldFactory.newFieldList(schemas);
         while (schemas.next()) {
             addSchema(inspectionResults,
-                    columnModels.get("TABLE_CATALOG") != null ? schemas.getString("TABLE_CATALOG") : null,
+                    fields.get("TABLE_CATALOG") != null ? schemas.getString("TABLE_CATALOG") : null,
                     schemas.getString("TABLE_SCHEM"));
         }
     }

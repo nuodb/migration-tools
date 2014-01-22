@@ -32,6 +32,8 @@ import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.type.JdbcEnumType;
+import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 
 import java.sql.Connection;
@@ -44,7 +46,6 @@ import static com.google.common.collect.Iterables.contains;
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.dialect.MySQLZeroDateTimeTranslator.*;
-import static com.nuodb.migrator.jdbc.metadata.inspector.MySQLColumn.getEnumValues;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.*;
 import static java.lang.String.valueOf;
@@ -193,9 +194,9 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
             case VARBINARY:
             case BLOB:
             case CLOB:
-                Collection<String> values = getEnumValues(column);
-                if (!values.isEmpty()) {
-                    result = get(values, 0);
+                JdbcType jdbcType = column.getJdbcType();
+                if (jdbcType instanceof JdbcEnumType) {
+                    result = get(((JdbcEnumType) jdbcType).getValues(), 0);
                 } else {
                     result = EMPTY;
                 }

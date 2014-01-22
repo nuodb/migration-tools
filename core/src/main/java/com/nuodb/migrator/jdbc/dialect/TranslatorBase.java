@@ -84,8 +84,8 @@ public abstract class TranslatorBase<S extends Script> implements Translator<S> 
     }
 
     protected boolean supportsDatabase(Script script, TranslationContext context) {
-        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isInherited(script.getDatabaseInfo())) &&
-                (targetDatabaseInfo == null || targetDatabaseInfo.isInherited(context.getDatabaseInfo()));
+        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isAssignable(script.getDatabaseInfo())) &&
+                (targetDatabaseInfo == null || targetDatabaseInfo.isAssignable(context.getDatabaseInfo()));
     }
 
     protected boolean supportsScriptClass(Script script, TranslationContext context) {

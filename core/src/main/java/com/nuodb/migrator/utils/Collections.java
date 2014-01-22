@@ -36,12 +36,12 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class Collections {
 
-    public static <T> PriorityList<T> newPriorityList() {
-        return new SimplePriorityList<T>();
+    public static <T> PrioritySet<T> newPrioritySet() {
+        return new SimplePrioritySet<T>();
     }
 
-    public static <T> PriorityList<T> newPriorityList(PriorityList<T> priorityList) {
-        return new SimplePriorityList<T>(priorityList);
+    public static <T> PrioritySet<T> newPrioritySet(PrioritySet<T> prioritySet) {
+        return new SimplePrioritySet<T>(prioritySet);
     }
 
     public static <T> boolean contains(Collection<T> collection, T value) {

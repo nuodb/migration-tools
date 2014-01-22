@@ -17,7 +17,7 @@
 package com.nuodb.migrator.cli.parse;
 
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
-import com.nuodb.migrator.utils.PriorityList;
+import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.*;
 
@@ -156,7 +156,7 @@ public interface Option {
      *
      * @return The setValue of triggers for this option
      */
-    PriorityList<Trigger> getTriggers();
+    PrioritySet<Trigger> getTriggers();
 
     /**
      * Recursively searches for an option with the supplied trigger.

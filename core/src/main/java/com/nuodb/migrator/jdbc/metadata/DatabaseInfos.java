@@ -28,8 +28,8 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.collect.ComparisonChain;
-
-import java.util.Comparator;
+import com.google.common.collect.Ordering;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Sergey Bushik
@@ -37,20 +37,22 @@ import java.util.Comparator;
 public interface DatabaseInfos {
     final DatabaseInfo MYSQL = new DatabaseInfo("MySQL");
     final DatabaseInfo NUODB = new DatabaseInfo("NuoDB");
+    final DatabaseInfo NUODB203 = new DatabaseInfo("NuoDB", null, 1, 29);
     final DatabaseInfo ORACLE = new DatabaseInfo("Oracle");
     final DatabaseInfo DB2 = new DatabaseInfo("DB2/") {
         @Override
-        protected ComparisonChain isProductNameInherited(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        protected ComparisonChain isAssignableProductName(DatabaseInfo databaseInfo, ComparisonChain comparator) {
             return comparator.compare(getProductName(), databaseInfo.getProductName(),
-                    new Comparator<String>() {
+                    new Ordering<String>() {
                         @Override
                         public int compare(String productName1, String productName2) {
-                            return productName2.startsWith(productName1) ? 0 : -1;
+                            return productName1 == null ? 0 :
+                                    StringUtils.startsWith(productName2, productName1) ? ASSIGNABLE : NOT_ASSIGNABLE;
                         }
                     });
         }
     };
     final DatabaseInfo POSTGRE_SQL = new DatabaseInfo("PostgreSQL");
     final DatabaseInfo MSSQL_SERVER = new DatabaseInfo("Microsoft SQL Server");
-    final DatabaseInfo MSSQL_SERVER_2005 = new DatabaseInfo("Microsoft SQL Server", null, 9);
+    final DatabaseInfo MSSQL_SERVER_2005 = new DatabaseInfo("Microsoft SQL Server", null, 0, 9);
 }

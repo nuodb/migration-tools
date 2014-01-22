@@ -73,9 +73,9 @@ public class ServiceResolverTest {
     public Object[][] createResolveServiceData() {
         return new Object[][]{
                 {"NuoDB", "1.0.1-129", 18, 2, new ServiceInstance("service-1")},
-                {"NuoDB", "1.0.1-128", 18, 2, new ServiceInstance("service-2")},
-                {"NuoDB", "1.0.1-128", 17, 2, new ServiceInstance("service-3")},
-                {"NuoDB", "1.0.1-128", 17, 1, new ServiceInstance("service-4")},
+                {"NuoDB", "1.0.1-128", 16, 0, new ServiceInstance("service-2")},
+                {"NuoDB", "1.0.1-128", 17, 0, new ServiceInstance("service-3")},
+                {"NuoDB", "1.0.1-128", 17, 2, new ServiceInstance("service-4")},
         };
     }
 
@@ -96,8 +96,8 @@ public class ServiceResolverTest {
     public Object[][] createResolveServiceClassData() {
         return new Object[][]{
                 {"PostgreSQL", "9.2.4", 3, 10, Service1.class},
-                {"PostgreSQL", "9.2.3", 3, 10, Service2.class},
-                {"PostgreSQL", "9.2.3", 2, 10, Service3.class},
+                {"PostgreSQL", "9.2.3", 1, 10, Service2.class},
+                {"PostgreSQL", "9.2.3", 2, 0, Service3.class},
                 {"PostgreSQL", "9.2.3", 2, 9, Service4.class},
         };
     }

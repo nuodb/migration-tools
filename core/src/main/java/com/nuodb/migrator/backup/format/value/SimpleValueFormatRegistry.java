@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.type.jdbc2.JdbcDateType;
-import com.nuodb.migrator.jdbc.type.jdbc2.JdbcTimeType;
-import com.nuodb.migrator.jdbc.type.jdbc2.JdbcTimestampType;
+import com.nuodb.migrator.jdbc.type.jdbc2.JdbcDateValue;
+import com.nuodb.migrator.jdbc.type.jdbc2.JdbcTimeValue;
+import com.nuodb.migrator.jdbc.type.jdbc2.JdbcTimestampValue;
 
 /**
  * @author Sergey Bushik
@@ -38,9 +38,9 @@ public class SimpleValueFormatRegistry extends ValueFormatRegistryBase {
 
     public SimpleValueFormatRegistry() {
         super(new JdbcValueFormat());
-        addValueFormat(JdbcTimestampType.INSTANCE, new JdbcTimestampValueFormat());
-        addValueFormat(JdbcTimeType.INSTANCE, new JdbcTimeValueFormat());
-        addValueFormat(JdbcDateType.INSTANCE, new JdbcDateValueFormat());
+        addValueFormat(JdbcTimestampValue.INSTANCE, new JdbcTimestampValueFormat());
+        addValueFormat(JdbcTimeValue.INSTANCE, new JdbcTimeValueFormat());
+        addValueFormat(JdbcDateValue.INSTANCE, new JdbcDateValueFormat());
     }
 }
 

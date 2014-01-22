@@ -32,14 +32,15 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
+import com.nuodb.migrator.jdbc.type.JdbcTypeOptions;
 
 import java.util.Collection;
 import java.util.Iterator;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -189,13 +190,12 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     protected String getTypeName(Column column, ScriptGeneratorManager scriptGeneratorManager) {
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         int scale = column.getScale();
+        JdbcType jdbcType = column.getJdbcType();
         if (scale < 0 && !dialect.supportsNegativeScale()) {
-            scale = 0;
+            jdbcType = jdbcType.withScale(0);
         }
-        DatabaseInfo databaseInfo = column.getTable().getDatabase().getDialect().getDatabaseInfo();
-        JdbcTypeDesc jdbcTypeDesc = new JdbcTypeDesc(column.getTypeCode(), column.getTypeName());
-        JdbcTypeSpecifiers jdbcTypeSpecifiers = newSpecifiers(column.getSize(), column.getPrecision(), scale);
-        String typeName = dialect.getJdbcTypeName(databaseInfo, jdbcTypeDesc, jdbcTypeSpecifiers);
+        DatabaseInfo databaseInfo = scriptGeneratorManager.getSourceSession().getDialect().getDatabaseInfo();
+        String typeName = dialect.getTypeName(databaseInfo, jdbcType);
         if (typeName == null) {
             String tableName = scriptGeneratorManager.getQualifiedName(column.getTable(),
                     column.getTable().getSchema().getName(), column.getTable().getCatalog().getName(), false);

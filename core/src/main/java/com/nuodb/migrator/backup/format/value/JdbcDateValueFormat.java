@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
@@ -57,7 +57,7 @@ public class JdbcDateValueFormat extends ValueFormatBase<Date> {
         Date date = access.getValue(options);
         if (date == null) {
             return STRING_NULL;
-        } else if (JdbcTypeDesc.equals(access.getColumn().getTypeName(), YEAR_TYPE)) {
+        } else if (JdbcTypeDesc.equals(access.getField().getTypeName(), YEAR_TYPE)) {
             return string(YEAR_FORMAT.format(date));
         } else {
             return string(date.toString());
@@ -95,7 +95,7 @@ public class JdbcDateValueFormat extends ValueFormatBase<Date> {
     }
 
     @Override
-    public ValueType getValueType(Column column) {
+    public ValueType getValueType(Field field) {
         return ValueType.STRING;
     }
 }

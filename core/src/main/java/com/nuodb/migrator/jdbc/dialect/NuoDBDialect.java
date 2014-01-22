@@ -30,16 +30,16 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifiers;
 
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.dialect.OracleDialect.*;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newScale;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSize;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeNames.createEnumTypeNameTemplate;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeNames.createTypeNameTemplate;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.*;
+import static com.nuodb.migrator.utils.Priority.NORMAL;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static java.sql.Types.*;
@@ -66,10 +66,10 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     protected void initJdbcTypes() {
-        addJdbcType(NuoDBSmallIntType.INSTANCE);
-        addJdbcType(NuoDBIntegerType.INSTANCE);
-        addJdbcType(NuoDBBigIntType.INSTANCE);
-        addJdbcType(NuoDBTimeType.INSTANCE);
+        addJdbcType(NuoDBSmallIntValue.INSTANCE);
+        addJdbcType(NuoDBIntegerValue.INSTANCE);
+        addJdbcType(NuoDBBigIntValue.INSTANCE);
+        addJdbcType(NuoDBTimeValue.INSTANCE);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(ROWID, "STRING");
         addJdbcTypeName(new JdbcTypeDesc(VARCHAR, "STRING"), "STRING");
 
-        addJdbcTypeName(ORACLE, DECIMAL, "NUMBER", newSpecifiers(0, 0, 0));
+        addJdbcTypeName(ORACLE, DECIMAL, "NUMBER", newOptions(0, 0, 0));
         addJdbcTypeName(ORACLE, XMLTYPE_DESC, "STRING");
         addJdbcTypeName(ORACLE, ANYDATA_DESC, "STRING");
         addJdbcTypeName(ORACLE, ANYDATASET_DESC, "STRING");
@@ -126,12 +126,14 @@ public class NuoDBDialect extends SimpleDialect {
 
         addJdbcTypeName(NUODB, new JdbcTypeDesc(SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(NUODB, new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "BIGINT");
-        addJdbcTypeName(NUODB, new JdbcTypeDesc(BIGINT, "BIGINT UNSIGNED"),
-                new JdbcTypeNameChangeSpecifiers("NUMERIC({N})", 1));
+        addJdbcTypeName(NUODB, createTypeNameTemplate(
+                new JdbcTypeDesc(BIGINT, "BIGINT UNSIGNED"), "NUMERIC({N})", newSize(1)));
 
         addJdbcTypeName(DB2, new JdbcTypeDesc(LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
         addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
-        addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "XML"), "CLOB");
+        addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "XML"), "STRING");
+
+        addJdbcTypeName(createEnumTypeNameTemplate("VARCHAR({N})"));
     }
 
     @Override
