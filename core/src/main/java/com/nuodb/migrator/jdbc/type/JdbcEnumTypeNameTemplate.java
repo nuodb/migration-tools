@@ -30,27 +30,14 @@ package com.nuodb.migrator.jdbc.type;
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeNames {
+public class JdbcEnumTypeNameTemplate extends JdbcTypeNameTemplate {
 
-    public static JdbcTypeName createTypeNameTemplate(JdbcTypeDesc jdbcTypeDesc, String template) {
-        return createTypeNameTemplate(new JdbcType(jdbcTypeDesc, null), template);
+    public JdbcEnumTypeNameTemplate(String template) {
+        super(template);
     }
 
-    public static JdbcTypeName createTypeNameTemplate(JdbcType jdbcType, String template) {
-        return new JdbcTypeNameTemplate(jdbcType, template);
-    }
-
-    public static JdbcTypeName createTypeNameTemplate(JdbcTypeDesc jdbcTypeDesc, String template,
-                                                      JdbcTypeOptions deltaOptions) {
-        return createTypeNameTemplate(new JdbcType(jdbcTypeDesc, null), template, deltaOptions);
-    }
-
-    public static JdbcTypeName createTypeNameTemplate(JdbcType jdbcType, String template,
-                                                      JdbcTypeOptions deltaOptions) {
-        return new JdbcTypeNameTemplateDeltaOptions(jdbcType, template, deltaOptions);
-    }
-
-    public static JdbcTypeName createEnumTypeNameTemplate(String template) {
-        return new JdbcEnumTypeNameTemplate(template);
+    @Override
+    public int getScore(JdbcType jdbcType) {
+        return jdbcType instanceof JdbcEnumType ? 0 : -1;
     }
 }

@@ -124,16 +124,16 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(ORACLE, ANYTYPE_DESC, "STRING");
         addJdbcTypeName(ORACLE, BFILE_DESC, "BLOB");
 
-        addJdbcTypeName(NUODB, new JdbcTypeDesc(SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
-        addJdbcTypeName(NUODB, new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "BIGINT");
-        addJdbcTypeName(NUODB, createTypeNameTemplate(
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "BIGINT");
+        addJdbcTypeName(MYSQL, createTypeNameTemplate(
                 new JdbcTypeDesc(BIGINT, "BIGINT UNSIGNED"), "NUMERIC({N})", newSize(1)));
 
         addJdbcTypeName(DB2, new JdbcTypeDesc(LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
         addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
         addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "XML"), "STRING");
 
-        addJdbcTypeName(createEnumTypeNameTemplate("VARCHAR({N})"));
+        addJdbcTypeName(createEnumTypeNameTemplate("CHAR({N})"));
     }
 
     @Override
