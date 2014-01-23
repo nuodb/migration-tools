@@ -71,6 +71,8 @@ public interface CliResources {
     final String SOURCE_SCHEMA_ARGUMENT_NAME = "com.nuodb.migrator.source.schema.argument.name";
     final String SOURCE_AUTO_COMMIT_OPTION_DESCRIPTION = "com.nuodb.migrator.source.auto.commit.option.description";
     final String SOURCE_AUTO_COMMIT_ARGUMENT_NAME = "com.nuodb.migrator.source.auto.commit.argument.name";
+    final String SOURCE_TRANSACTION_ISOLATION_OPTION_DESCRIPTION = "com.nuodb.migrator.source.transaction.isolation.option.description";
+    final String SOURCE_TRANSACTION_ISOLATION_ARGUMENT_NAME = "com.nuodb.migrator.source.transaction.isolation.argument.name";
 
     final String OUTPUT_GROUP_NAME = "com.nuodb.migrator.output.group";
     final String OUTPUT_TYPE_OPTION_DESCRIPTION = "com.nuodb.migrator.output.type.option.description";

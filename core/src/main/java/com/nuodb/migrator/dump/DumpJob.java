@@ -63,6 +63,7 @@ import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static java.lang.String.format;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
+import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
@@ -135,9 +136,11 @@ public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
         SessionFactory sessionFactory = newSessionFactory(
                 createConnectionProviderFactory().
                         createConnectionProvider(getSourceSpec()), createDialectResolver());
-        sessionFactory.addSessionObserver(newTransactionIsolationSetter(new int[]{
-                TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
-        }));
+        if (getSourceSpec().getTransactionIsolation() == null) {
+            sessionFactory.addSessionObserver(newTransactionIsolationSetter(new int[]{
+                    TRANSACTION_SERIALIZABLE, TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
+            }));
+        }
         sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
         return sessionFactory;
     }

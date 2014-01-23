@@ -27,10 +27,16 @@
  */
 package com.nuodb.migrator.cli.parse.option;
 
-import com.google.common.collect.Lists;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.Argument;
+import com.nuodb.migrator.cli.parse.Group;
+import com.nuodb.migrator.cli.parse.OptionProcessor;
+import com.nuodb.migrator.cli.parse.OptionValidator;
+import com.nuodb.migrator.cli.parse.RegexOption;
+import com.nuodb.migrator.cli.parse.Trigger;
 
 import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
@@ -38,7 +44,7 @@ import java.util.List;
 public class RegexOptionBuilderImpl<O extends RegexOption>
         extends AugmentOptionBuilderBase<O> implements RegexOptionBuilder<O> {
 
-    private List<RegexGroupPriority> regexGroupPriorityList = Lists.newArrayList();
+    private List<RegexGroupPriority> regexGroupPriorityList = newArrayList();
 
     public RegexOptionBuilderImpl(OptionFormat optionFormat) {
         super((Class<? extends O>) RegexOptionImpl.class, optionFormat);

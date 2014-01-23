@@ -32,6 +32,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.mysql.jdbc.Connection;
 import com.nuodb.migrator.cli.CliSupport;
 import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
@@ -81,6 +82,7 @@ import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
+import static java.sql.Connection.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.TimeZone.getTimeZone;
@@ -100,6 +102,12 @@ public class CliRunSupport extends CliSupport {
     public static final String IDENTIFIER_NORMALIZER_STANDARD = "standard";
     public static final String IDENTIFIER_NORMALIZER_LOWERCASE = "lower.case";
     public static final String IDENTIFIER_NORMALIZER_UPPERCASE = "upper.case";
+
+    public static final String TRANSACTION_ISOLATION_NONE = "none";
+    public static final String TRANSACTION_ISOLATION_READ_UNCOMMITTED = "read.uncommitted";
+    public static final String TRANSACTION_ISOLATION_READ_COMMITTED = "read.committed";
+    public static final String TRANSACTION_ISOLATION_REPEATABLE_READ = "repeatable.read";
+    public static final String TRANSACTION_ISOLATION_SERIALIZABLE = "serializable";
 
     private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
 
@@ -195,6 +203,15 @@ public class CliRunSupport extends CliSupport {
                                 withName(getMessage(SOURCE_AUTO_COMMIT_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(autoCommit);
+
+        Option transactionIsolation = newBasicOptionBuilder().
+                withName(SOURCE_TRANSACTION_ISOLATION_OPTION).
+                withDescription(getMessage(SOURCE_TRANSACTION_ISOLATION_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(SOURCE_TRANSACTION_ISOLATION_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(transactionIsolation);
 
         addConnectionGroupValidators(group, new ConnectionGroupInfo(
                 SOURCE_DRIVER_OPTION, SOURCE_URL_OPTION, SOURCE_USERNAME_OPTION, SOURCE_PASSWORD_OPTION,
@@ -580,6 +597,19 @@ public class CliRunSupport extends CliSupport {
         if (optionSet.hasOption(SOURCE_AUTO_COMMIT_OPTION)) {
             connectionSpec.setAutoCommit(Boolean.parseBoolean((String) optionSet.getValue(SOURCE_AUTO_COMMIT_OPTION)));
         }
+        String transactionIsolationValue = (String) optionSet.getValue(SOURCE_TRANSACTION_ISOLATION_OPTION);
+        Integer transactionIsolation = null;
+        if (transactionIsolationValue != null) {
+            transactionIsolation = getTransactionIsolations().get(transactionIsolationValue);
+            if (transactionIsolation == null) {
+                try {
+                    transactionIsolation = parseInt(transactionIsolationValue);
+                } catch (NumberFormatException exception) {
+                    throw new OptionException(exception.getMessage(), exception, option);
+                }
+            }
+        }
+        connectionSpec.setTransactionIsolation(transactionIsolation);
         return connectionSpec;
     }
 
@@ -820,6 +850,17 @@ public class CliRunSupport extends CliSupport {
                 new TreeMap<String, IdentifierQuoting>(CASE_INSENSITIVE_ORDER);
         identifierQuotings.put(IDENTIFIER_QUOTING_MINIMAL, MINIMAL);
         identifierQuotings.put(IDENTIFIER_QUOTING_ALWAYS, ALWAYS);
+        return identifierQuotings;
+    }
+
+    protected Map<String, Integer> getTransactionIsolations() {
+        Map<String, Integer> identifierQuotings =
+                new TreeMap<String, Integer>(CASE_INSENSITIVE_ORDER);
+        identifierQuotings.put(TRANSACTION_ISOLATION_NONE, TRANSACTION_NONE);
+        identifierQuotings.put(TRANSACTION_ISOLATION_READ_UNCOMMITTED, TRANSACTION_READ_UNCOMMITTED);
+        identifierQuotings.put(TRANSACTION_ISOLATION_READ_COMMITTED, TRANSACTION_READ_COMMITTED);
+        identifierQuotings.put(TRANSACTION_ISOLATION_REPEATABLE_READ, TRANSACTION_REPEATABLE_READ);
+        identifierQuotings.put(TRANSACTION_ISOLATION_SERIALIZABLE, TRANSACTION_SERIALIZABLE);
         return identifierQuotings;
     }
 

@@ -66,6 +66,7 @@ public interface CliOptions {
     final String SOURCE_CATALOG_OPTION = "source.catalog";
     final String SOURCE_SCHEMA_OPTION = "source.schema";
     final String SOURCE_AUTO_COMMIT_OPTION = "source.auto.commit";
+    final String SOURCE_TRANSACTION_ISOLATION_OPTION = "source.transaction.isolation";
 
     final String TIME_ZONE_OPTION = "time.zone";
     final String TIME_ZONE_SHORT_OPTION = "z";
