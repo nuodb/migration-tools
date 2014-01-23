@@ -28,11 +28,8 @@
 package com.nuodb.migrator.cli.run;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-import com.mysql.jdbc.Connection;
 import com.nuodb.migrator.cli.CliSupport;
 import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
@@ -54,12 +51,22 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeCodes;
-import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
+import com.nuodb.migrator.spec.JdbcTypeSpec;
+import com.nuodb.migrator.spec.MigrationMode;
+import com.nuodb.migrator.spec.ResourceSpec;
+import com.nuodb.migrator.spec.SchemaGeneratorJobSpecBase;
 import com.nuodb.migrator.utils.ReflectionUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.TreeMap;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
