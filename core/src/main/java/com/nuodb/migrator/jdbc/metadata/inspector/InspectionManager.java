@@ -115,7 +115,7 @@ public class InspectionManager {
     }
 
     public InspectionResults inspect(Connection connection) throws SQLException {
-        return inspect(connection, MetaDataType.TYPES);
+        return inspect(connection, TYPES);
     }
 
     public InspectionResults inspect(Connection connection, MetaDataType... objectTypes) throws SQLException {

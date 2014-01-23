@@ -62,6 +62,7 @@ import static com.nuodb.migrator.backup.format.sql.SqlAttributes.FORMAT;
 import static com.nuodb.migrator.dump.DumpWriter.THREADS;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TYPES;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationSetter;
@@ -80,11 +81,6 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
  */
 @SuppressWarnings("unchecked")
 public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
-
-    private static final Collection<MetaDataType> OBJECT_TYPES = newArrayList(
-            MetaDataType.DATABASE, MetaDataType.CATALOG, MetaDataType.SCHEMA, MetaDataType.TABLE,
-            MetaDataType.COLUMN, MetaDataType.INDEX, MetaDataType.PRIMARY_KEY
-    );
 
     private BackupManager backupManager;
     private DumpWriter dumpWriter;
@@ -220,10 +216,8 @@ public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
     protected Database inspect() throws SQLException {
         InspectionScope inspectionScope = new TableInspectionScope(
                 getSourceSpec().getCatalog(), getSourceSpec().getSchema(), getTableTypes());
-        Collection<MetaDataType> objectTypes = getMigrationModes().contains(SCHEMA) ?
-                getObjectTypes() : OBJECT_TYPES;
         return createInspectionManager().inspect(getSourceSession().getConnection(), inspectionScope,
-                objectTypes.toArray(new MetaDataType[objectTypes.size()])).getObject(DATABASE);
+                TYPES).getObject(DATABASE);
     }
 
     protected Script createScript(Schema schema, Collection<String> scripts) {
