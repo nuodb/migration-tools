@@ -437,7 +437,7 @@ public class StructureTest extends MigrationTestBase {
                     if (seqName.endsWith("$IDENTITY_SEQUENCE")) {
                         continue;
                     }
-                    assertEquals(seqName.substring(0, 4), "SEQ_");
+                    assertEquals(seqName.substring(0, 4).toLowerCase(), "seq_");
                     // TODO: Need to check start value - Don't know how yet
                 }
                 Assert.assertTrue(found);
@@ -487,7 +487,7 @@ public class StructureTest extends MigrationTestBase {
                     found = true;
                     String idxName = rs2.getString("INDEXNAME");
                     Assert.assertNotNull(idxName);
-                    assertEquals(idxName.substring(0, 4), "IDX_");
+                    assertEquals(idxName.substring(0, 4).toLowerCase(), "idx_");
                 }
                 Assert.assertTrue(found);
                 rs2.close();

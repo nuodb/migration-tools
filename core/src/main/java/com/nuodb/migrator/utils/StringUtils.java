@@ -54,7 +54,7 @@ public class StringUtils {
         int sz = source.length();
         for (int i = 0; i < sz; i++) {
             char ch = source.charAt(i);
-            if (!(!Character.isAlphabetic(ch) || Character.isLowerCase(ch))) {
+            if (!(!Character.isLetter(ch) || Character.isLowerCase(ch))) {
                 return false;
             }
         }
@@ -72,7 +72,7 @@ public class StringUtils {
         int sz = source.length();
         for (int i = 0; i < sz; i++) {
             char ch = source.charAt(i);
-            if (!(!Character.isAlphabetic(ch) || Character.isUpperCase(ch))) {
+            if (!(!Character.isLetter(ch) || Character.isUpperCase(ch))) {
                 return false;
             }
         }
@@ -99,7 +99,6 @@ public class StringUtils {
         return false;
     }
 
-
     public static String lowerCase(CharSequence source) {
         return source == null ? null : source.toString().toLowerCase();
     }
@@ -109,7 +108,7 @@ public class StringUtils {
     }
 
     public static String capitalizedCase(CharSequence source) {
-        return capitalizedCase(source.toString(), null);
+        return capitalizedCase(source, null);
     }
 
     public static String capitalizedCase(CharSequence source, char... delimiters) {
@@ -117,7 +116,7 @@ public class StringUtils {
         if (isEmpty(source) || delimitersCount == 0) {
             return source.toString();
         }
-        char[] buffer = source.toString().toCharArray();
+        char[] buffer = source.toString().toLowerCase().toCharArray();
         boolean capitalizeNext = true;
         for (int i = 0; i < buffer.length; i++) {
             char ch = buffer[i];
