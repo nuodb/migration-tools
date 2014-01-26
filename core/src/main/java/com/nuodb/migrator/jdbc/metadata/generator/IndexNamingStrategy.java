@@ -30,10 +30,17 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Index;
 
+import static com.nuodb.migrator.utils.StringUtils.*;
+import static com.nuodb.migrator.utils.StringUtils.upperCase;
+
 /**
  * @author Sergey Bushik
  */
 public class IndexNamingStrategy extends IdentifiableNamingStrategy<Index> {
+
+    private static final String PREFIX = "IDX";
+    private static final String UNIQUE = "UNIQUE";
+    private static final char DELIMITER = '_';
 
     public IndexNamingStrategy() {
         super(Index.class);
@@ -41,18 +48,28 @@ public class IndexNamingStrategy extends IdentifiableNamingStrategy<Index> {
 
     @Override
     protected String getIdentifiableName(Index index, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("IDX");
-        buffer.append("_");
+        StringBuilder prefix = new StringBuilder();
+        prefix.append(PREFIX);
         if (index.isUnique()) {
-            buffer.append("UNIQUE");
-            buffer.append("_");
+            prefix.append("_");
+            prefix.append(UNIQUE);
         }
-        buffer.append(scriptGeneratorManager.getName(index.getTable(), false));
+        StringBuilder qualifier = new StringBuilder();
+        qualifier.append(scriptGeneratorManager.getName(index.getTable(), false));
         for (Column column : index.getColumns()) {
-            buffer.append("_");
-            buffer.append(scriptGeneratorManager.getName(column, false));
+            qualifier.append("_");
+            qualifier.append(scriptGeneratorManager.getName(column, false));
         }
+        StringBuilder buffer = new StringBuilder();
+        if (isLowerCase(qualifier, DELIMITER)) {
+            buffer.append(lowerCase(prefix));
+        } else if (isCapitalizedCase(qualifier, DELIMITER)) {
+            buffer.append(capitalizedCase(prefix, '_'));
+        } else {
+            buffer.append(upperCase(prefix));
+        }
+        buffer.append('_');
+        buffer.append(qualifier);
         return buffer.toString();
     }
 }

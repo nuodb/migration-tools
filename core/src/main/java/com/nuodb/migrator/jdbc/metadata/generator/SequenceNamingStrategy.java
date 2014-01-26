@@ -30,10 +30,15 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 
+import static com.nuodb.migrator.utils.StringUtils.*;
+
 /**
  * @author Sergey Bushik
  */
 public class SequenceNamingStrategy extends IdentifiableNamingStrategy<Sequence> {
+
+    private static final String PREFIX = "SEQ";
+    private static final char DELIMITER = '_';
 
     public SequenceNamingStrategy() {
         super(Sequence.class);
@@ -48,10 +53,15 @@ public class SequenceNamingStrategy extends IdentifiableNamingStrategy<Sequence>
         qualifier.append(scriptGeneratorManager.getName(column, false));
 
         StringBuilder buffer = new StringBuilder();
-        buffer.append("SEQ");
+        if (isLowerCase(qualifier, DELIMITER)) {
+            buffer.append(lowerCase(PREFIX));
+        } else if (isCapitalizedCase(qualifier, DELIMITER)) {
+            buffer.append(capitalizedCase(PREFIX, '_'));
+        } else {
+            buffer.append(upperCase(PREFIX));
+        }
         buffer.append('_');
-        buffer.append(qualifier.toString());
-
+        buffer.append(qualifier);
         return buffer.toString();
     }
 }
