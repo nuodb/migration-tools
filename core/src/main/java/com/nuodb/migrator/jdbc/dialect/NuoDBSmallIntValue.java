@@ -31,7 +31,6 @@ import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
 import com.nuodb.migrator.jdbc.type.JdbcTypeValueBase;
 
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,23 +40,23 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class NuoDBSmallIntValue extends JdbcTypeValueBase<BigDecimal> {
+public class NuoDBSmallIntValue extends JdbcTypeValueBase<String> {
 
     public static final JdbcTypeValue INSTANCE = new NuoDBSmallIntValue();
 
     public NuoDBSmallIntValue() {
-        super(Types.SMALLINT, BigDecimal.class);
+        super(Types.SMALLINT, String.class);
     }
 
     @Override
-    public BigDecimal getValue(ResultSet resultSet, int index,
-                               Field field, Map<String, Object> options) throws SQLException {
-        return resultSet.getBigDecimal(index);
+    public String getValue(ResultSet resultSet, int index,
+                           Field field, Map<String, Object> options) throws SQLException {
+        return resultSet.getString(index);
     }
 
     @Override
-    protected void setNullSafeValue(PreparedStatement statement, BigDecimal value, int index,
+    protected void setNullSafeValue(PreparedStatement statement, String value, int index,
                                     Field field, Map<String, Object> options) throws SQLException {
-        statement.setBigDecimal(index, value);
+        statement.setString(index, value);
     }
 }

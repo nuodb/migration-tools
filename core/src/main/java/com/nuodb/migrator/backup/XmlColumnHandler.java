@@ -27,35 +27,127 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.google.common.collect.Iterables;
+import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.type.JdbcEnumType;
+import com.nuodb.migrator.jdbc.type.JdbcSetType;
+import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
-import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
+import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
+import static com.google.common.base.Predicates.equalTo;
+import static com.google.common.collect.Iterables.indexOf;
+import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
+
 /**
  * @author Sergey Bushik
  */
-public class XmlColumnHandler extends XmlReadWriteHandlerBase<Column> implements XmlConstants {
+public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
 
-    private static final String NAME_ATTRIBUTE = "name";
-    private static final String VALUE_TYPE_ATTRIBUTE = "value-type";
+    private static final String NULLABLE_ATTRIBUTE = "nullable";
+    private static final String AUTO_INCREMENT_ATTRIBUTE = "auto-increment";
+    private static final String COMMENT_ELEMENT = "comment";
+    private static final String TYPE_ELEMENT = "type";
+    private static final String SET_ELEMENT = "set";
+    private static final String ENUM_ELEMENT = "enum";
+    private static final String DEFAULT_VALUE_ATTRIBUTE = "default-value";
+    private static final String TRIGGER_ELEMENT = "trigger";
+    private static final String CHECK_ELEMENT = "check";
+    private static final String SEQUENCE_ELEMENT = "sequence";
+    private static final String REF_INDEX_ATTRIBUTE = "ref-index";
 
     public XmlColumnHandler() {
         super(Column.class);
     }
 
     @Override
-    protected void readAttributes(InputNode input, Column column, XmlReadContext context) throws Exception {
-        column.setName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
-        column.setValueType(context.readAttribute(input, VALUE_TYPE_ATTRIBUTE, String.class));
+    protected Column createTarget(InputNode input, Class<? extends Column> type) {
+        return null;
     }
 
     @Override
-    protected void writeAttributes(Column column, OutputNode output,
+    protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Column> context) throws Exception {
+        String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
+        Table table = getParentTarget(context);
+        Column column = table.hasColumn(name) ? table.getColumn(name) : table.addColumn(name);
+        column.setNullable(context.readAttribute(input, NULLABLE_ATTRIBUTE, Boolean.class, false));
+        column.setAutoIncrement(context.readAttribute(input, AUTO_INCREMENT_ATTRIBUTE, Boolean.class, false));
+        column.setDefaultValue(valueOf(context.readAttribute(input, DEFAULT_VALUE_ATTRIBUTE, String.class)));
+        column.setPosition(table.getColumns().size());
+        context.setTarget(column);
+    }
+
+    @Override
+    protected void writeAttributes(OutputNode output, Column column,
                                    XmlWriteContext context) throws Exception {
-        context.writeAttribute(output, NAME_ATTRIBUTE, column.getName());
-        context.writeAttribute(output, VALUE_TYPE_ATTRIBUTE, column.getValueType());
+        super.writeAttributes(output, column, context);
+        boolean nullable = column.isNullable();
+        if (nullable) {
+            context.writeAttribute(output, NULLABLE_ATTRIBUTE, nullable);
+        }
+        boolean autoIncrement = column.isAutoIncrement();
+        if (autoIncrement) {
+            context.writeAttribute(output, AUTO_INCREMENT_ATTRIBUTE, autoIncrement);
+        }
+        DefaultValue defaultValue = column.getDefaultValue();
+        if (defaultValue != null && defaultValue.getScript() != null) {
+            context.writeAttribute(output, DEFAULT_VALUE_ATTRIBUTE, defaultValue.getScript());
+        }
+    }
+
+    @Override
+    protected void readElement(InputNode input, Column column, XmlReadContext context) throws Exception {
+        final String element = input.getName();
+        if (COMMENT_ELEMENT.equals(element)) {
+            column.setComment(context.read(input, String.class));
+        } else if (TYPE_ELEMENT.equals(element)) {
+            column.setJdbcType(context.read(input, JdbcType.class));
+        } else if (ENUM_ELEMENT.equals(element)) {
+            column.setJdbcType(context.read(input, JdbcEnumType.class));
+        } else if (SET_ELEMENT.equals(element)) {
+            column.setJdbcType(context.read(input, JdbcSetType.class));
+        } else if (TRIGGER_ELEMENT.equals(element)) {
+            context.read(input, ColumnTrigger.class).setColumn(column);
+        } else if (CHECK_ELEMENT.equals(element)) {
+            column.addCheck(context.read(input, Check.class));
+        } else if (SEQUENCE_ELEMENT.equals(element)) {
+            Integer index = context.readAttribute(input, REF_INDEX_ATTRIBUTE, Integer.class);
+            Sequence sequence = index != null ?
+                    Iterables.get(((Schema)getTarget(context, 2)).getSequences(), index) :
+                    context.read(input, Sequence.class);
+            column.setSequence(sequence);
+        }
+    }
+
+    @Override
+    protected void writeElements(OutputNode output, Column column, XmlWriteContext context) throws Exception {
+        JdbcType jdbcType = column.getJdbcType();
+        Class<? extends JdbcType> typeClass = jdbcType.getClass();
+        if (typeClass.equals(JdbcEnumType.class)) {
+            context.writeElement(output, ENUM_ELEMENT, jdbcType);
+        } else if (typeClass.equals(JdbcSetType.class)) {
+            context.writeElement(output, SET_ELEMENT, jdbcType);
+        } else {
+            context.writeElement(output, TYPE_ELEMENT, jdbcType);
+        }
+        if (column.getComment() != null) {
+            context.writeElement(output, COMMENT_ELEMENT, column.getComment());
+        }
+        if (column.getTrigger() != null) {
+            context.writeElement(output, TRIGGER_ELEMENT, column.getTrigger());
+        }
+        for (Check check : column.getChecks()) {
+            context.writeElement(output, CHECK_ELEMENT, check);
+        }
+        Sequence sequence = column.getSequence();
+        if (sequence != null) {
+            OutputNode element = output.getChild(SEQUENCE_ELEMENT);
+            context.writeAttribute(element, REF_INDEX_ATTRIBUTE,
+                    indexOf(sequence.getSchema().getSequences(), equalTo(sequence)));
+        }
     }
 }
-

@@ -31,12 +31,14 @@ import com.google.common.collect.Lists;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Sets.newLinkedHashSet;
+
 /**
  * @author Sergey Bushik
  */
 public class JdbcEnumType extends JdbcType {
 
-    private Collection<String> values;
+    private Collection<String> values = newLinkedHashSet();
 
     public JdbcEnumType() {
     }
@@ -56,6 +58,10 @@ public class JdbcEnumType extends JdbcType {
     public JdbcEnumType(JdbcType jdbcType, Collection<String> values) {
         super(jdbcType);
         this.values = values;
+    }
+
+    public void addValue(String value) {
+        values.add(value);
     }
 
     public Collection<String> getValues() {

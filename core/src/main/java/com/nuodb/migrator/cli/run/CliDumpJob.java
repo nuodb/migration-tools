@@ -32,6 +32,7 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.spec.DumpJobSpec;
 import com.nuodb.migrator.spec.QuerySpec;
@@ -44,6 +45,7 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static java.lang.Integer.MAX_VALUE;
@@ -82,7 +84,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         dumpJobSpec.setOutputSpec(parseOutputGroup(optionSet, this));
         dumpJobSpec.setMigrationModes(parseMigrationModeGroup(optionSet, this));
         parseDataMigrationGroup(optionSet, dumpJobSpec);
-        parseSchemaMigrationGroup(dumpJobSpec, optionSet, this);
+        parseSchemaMigrationGroup(optionSet, dumpJobSpec);
         setJobSpec(dumpJobSpec);
     }
 
@@ -119,7 +121,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
                 ).build();
         group.withOption(table);
 
-                OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
         Option tableFilter = newRegexOptionBuilder().
@@ -222,5 +224,44 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
     protected QueryLimit parseQueryLimitOption(OptionSet optionSet, Option option) {
         String queryLimitValue = (String) optionSet.getValue(QUERY_LIMIT_OPTION);
         return !isEmpty(queryLimitValue) ? new QueryLimit(parseLong(queryLimitValue)) : null;
+    }
+
+    @Override
+    protected Group createSchemaMigrationGroup() {
+        GroupBuilder group = newGroupBuilder().withName(getMessage(SCHEMA_MIGRATION_GROUP_NAME));
+
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
+
+        Option tableType = newBasicOptionBuilder().
+                withName(TABLE_TYPE_OPTION).
+                withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).
+                                withMaximum(MAX_VALUE).build()
+                ).build();
+        group.withOption(tableType);
+
+        Option metaData = newRegexOptionBuilder().
+                withName(META_DATA_OPTION).
+                withDescription(getMessage(META_DATA_OPTION_DESCRIPTION)).
+                withRegex(META_DATA_OPTION, 1, LOW).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(META_DATA_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withMinimum(1).withMaximum(MAX_VALUE).build()
+                )
+                .build();
+        group.withOption(metaData);
+        return group.build();
+    }
+
+    protected void parseSchemaMigrationGroup(OptionSet optionSet, DumpJobSpec jobSpec) {
+        if (optionSet.hasOption(META_DATA_OPTION)) {
+            jobSpec.setObjectTypes(parseObjectTypes(optionSet));
+        }
+        jobSpec.setTableTypes(parseTableTypes(optionSet));
     }
 }

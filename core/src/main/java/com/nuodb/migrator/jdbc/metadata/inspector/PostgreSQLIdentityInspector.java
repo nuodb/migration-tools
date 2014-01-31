@@ -138,6 +138,7 @@ public class PostgreSQLIdentityInspector extends TableInspectorBase<Table, Table
             sequence.setCache(identities.getInt("CACHE_VALUE"));
             sequence.setCycle("T".equalsIgnoreCase(identities.getString("IS_CYCLED")));
             column.setSequence(sequence);
+            column.getTable().getSchema().addSequence(sequence);
             inspectionContext.getInspectionResults().addObject(sequence);
         }
     }

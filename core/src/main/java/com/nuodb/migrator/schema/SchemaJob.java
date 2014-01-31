@@ -137,6 +137,10 @@ public class SchemaJob extends SchemaGeneratorJobBase<SchemaJobSpec> {
         close(getScriptExporter());
     }
 
+    protected ResourceSpec getOutputSpec() {
+        return getJobSpec().getOutputSpec();
+    }
+
     public boolean isFailOnEmptyScripts() {
         return failOnEmptyScripts;
     }

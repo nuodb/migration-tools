@@ -53,7 +53,7 @@ public class XmlHandlerStrategy implements Strategy {
 
     @Override
     public Value read(Type type, NodeMap<InputNode> node, Map map) throws Exception {
-        XmlReadContext context = getReaderContext(map);
+        XmlReadContext context = getReadContext(map);
         Value value = null;
         if (strategy != null) {
             value = strategy.read(type, node, context);
@@ -61,8 +61,8 @@ public class XmlHandlerStrategy implements Strategy {
         return isReference(value) ? value : read(type, node.getNode(), value, context);
     }
 
-    protected XmlReadContext getReaderContext(Map map) {
-        return map instanceof XmlReadContext ? (XmlReadContext) map : new XmlReadContextImpl(this, map);
+    protected XmlReadContext getReadContext(Map map) {
+        return map instanceof XmlReadContext ? (XmlReadContext) map : new XmlReadStrategyContext(map, this);
     }
 
     protected Value read(Type type, InputNode input, Value value, XmlReadContext context) throws Exception {
@@ -93,7 +93,7 @@ public class XmlHandlerStrategy implements Strategy {
     }
 
     protected XmlWriteContext getWriteContext(Map map) {
-        return map instanceof XmlWriteContext ? (XmlWriteContext) map : new XmlWriteContextImpl(this, map);
+        return map instanceof XmlWriteContext ? (XmlWriteContext) map : new XmlWriteStrategyContext(map, this);
     }
 
     protected boolean write(Type type, Object value, OutputNode output, XmlWriteContext context) throws Exception {
@@ -102,7 +102,7 @@ public class XmlHandlerStrategy implements Strategy {
             valueType = value.getClass();
         }
         XmlWriteHandler writer = lookupWriter(value, valueType, output, context);
-        return writer.write(value, type.getType(), output, context);
+        return writer != null && writer.write(value, type.getType(), output, context);
     }
 
     protected XmlReadHandler lookupReader(InputNode input, Class type, XmlReadContext context) throws Exception {

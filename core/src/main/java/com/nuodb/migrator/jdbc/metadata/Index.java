@@ -46,6 +46,10 @@ public class Index extends ConstraintBase {
     private Map<Integer, Column> columns = Maps.newTreeMap();
     private String expression;
 
+    public Index() {
+        super(INDEX);
+    }
+
     public Index(Identifier identifier) {
         super(INDEX, identifier);
     }

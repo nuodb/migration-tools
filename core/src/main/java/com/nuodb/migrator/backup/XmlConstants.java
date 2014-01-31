@@ -39,4 +39,6 @@ public interface XmlConstants {
     final String QUERY_TYPE = "query";
 
     final String TABLE_TYPE = "table";
+
+    final String DRIVER_TYPE = "driver";
 }

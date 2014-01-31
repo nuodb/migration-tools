@@ -27,26 +27,34 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static java.lang.String.format;
 
 public class Schema extends IdentifiableBase implements HasTables {
 
     private Database database;
     private Catalog catalog;
-    private final Map<Identifier, Table> tables = Maps.newLinkedHashMap();
+    private final Collection<Sequence> sequences = newLinkedHashSet();
+    private final Map<Identifier, Table> tables = newLinkedHashMap();
+
+    public Schema() {
+        super(SCHEMA);
+    }
 
     public Schema(String name) {
         this(valueOf(name));
     }
 
     public Schema(Identifier identifier) {
-        super(MetaDataType.SCHEMA, identifier);
+        super(SCHEMA, identifier);
     }
 
     public Database getDatabase() {
@@ -72,20 +80,29 @@ public class Schema extends IdentifiableBase implements HasTables {
         this.catalog = catalog;
     }
 
-    public Table getTable(String tableName) {
-        return addTable(valueOf(tableName), false);
+    public void addSequence(Sequence sequence) {
+        sequence.setSchema(this);
+        sequences.add(sequence);
     }
 
-    public Table getTable(Identifier tableId) {
-        return addTable(tableId, false);
+    public Collection<Sequence> getSequences() {
+        return sequences;
     }
 
-    public Table addTable(String tableName) {
-        return addTable(valueOf(tableName), true);
+    public Table getTable(String name) {
+        return addTable(valueOf(name), false);
     }
 
-    public Table addTable(Identifier tableId) {
-        return addTable(tableId, true);
+    public Table getTable(Identifier identifier) {
+        return addTable(identifier, false);
+    }
+
+    public Table addTable(String name) {
+        return addTable(valueOf(name), true);
+    }
+
+    public Table addTable(Identifier identifier) {
+        return addTable(identifier, true);
     }
 
     public void addTable(Table table) {
@@ -95,21 +112,21 @@ public class Schema extends IdentifiableBase implements HasTables {
         tables.put(table.getIdentifier(), table);
     }
 
-    public boolean hasTable(String tableName) {
-        return hasTable(valueOf(tableName));
+    public boolean hasTable(String name) {
+        return hasTable(valueOf(name));
     }
 
-    public boolean hasTable(Identifier tableId) {
-        return tables.containsKey(tableId);
+    public boolean hasTable(Identifier identifier) {
+        return tables.containsKey(identifier);
     }
 
-    protected Table addTable(Identifier tableId, boolean create) {
-        Table table = tables.get(tableId);
+    protected Table addTable(Identifier identifier, boolean create) {
+        Table table = tables.get(identifier);
         if (table == null) {
             if (create) {
-                addTable(table = new Table(tableId));
+                addTable(table = new Table(identifier));
             } else {
-                throw new MetaDataException(format("Table %s doesn't exist", tableId));
+                throw new MetaDataException(format("Table %s doesn't exist", identifier));
             }
         }
         return table;

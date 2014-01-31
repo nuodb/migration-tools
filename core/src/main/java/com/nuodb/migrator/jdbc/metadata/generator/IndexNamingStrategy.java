@@ -61,7 +61,7 @@ public class IndexNamingStrategy extends IdentifiableNamingStrategy<Index> {
             qualifier.append(scriptGeneratorManager.getName(column, false));
         }
         StringBuilder buffer = new StringBuilder();
-        if (isLowerCase(qualifier, DELIMITER)) {
+        if (isLowerCase(qualifier)) {
             buffer.append(lowerCase(prefix));
         } else if (isCapitalizedCase(qualifier, DELIMITER)) {
             buffer.append(capitalizedCase(prefix, '_'));

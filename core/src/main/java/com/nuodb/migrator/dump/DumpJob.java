@@ -29,36 +29,23 @@ package com.nuodb.migrator.dump;
 
 import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupManager;
-import com.nuodb.migrator.backup.Script;
 import com.nuodb.migrator.backup.XmlBackupManager;
-import com.nuodb.migrator.jdbc.metadata.Catalog;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
-import com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
-import com.nuodb.migrator.job.SchemaGeneratorJobBase;
-import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.DumpJobSpec;
-import com.nuodb.migrator.spec.MigrationMode;
-import com.nuodb.migrator.spec.QuerySpec;
-import com.nuodb.migrator.spec.ResourceSpec;
-import com.nuodb.migrator.spec.TableSpec;
+import com.nuodb.migrator.job.HasServicesJobBase;
+import com.nuodb.migrator.spec.*;
 
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.backup.format.sql.SqlAttributes.FORMAT;
 import static com.nuodb.migrator.dump.DumpWriter.THREADS;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
@@ -73,18 +60,16 @@ import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static java.lang.String.format;
 import static java.sql.Connection.*;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.apache.commons.lang3.StringUtils.lowerCase;
 
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
+public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     private BackupManager backupManager;
     private DumpWriter dumpWriter;
-    private ScriptGeneratorManager scriptGeneratorManager;
+    private Session sourceSession;
 
     public DumpJob() {
     }
@@ -106,12 +91,6 @@ public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
         setBackupManager(backupManager);
 
         Collection<MigrationMode> migrationModes = getMigrationModes();
-        ScriptGeneratorManager scriptGeneratorManager = null;
-        if (contains(migrationModes, SCHEMA)) {
-            scriptGeneratorManager = createScriptGeneratorManager();
-        }
-        setScriptGeneratorManager(scriptGeneratorManager);
-
         DumpWriter dumpWriter = null;
         if (contains(migrationModes, DATA)) {
             dumpWriter = new DumpWriter();
@@ -151,9 +130,7 @@ public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
     @Override
     public void execute() throws Exception {
         Database database = inspect();
-        Backup backup = new Backup();
-        backup.setFormat(getOutputSpec().getType());
-        backup.setDatabaseInfo(database.getDatabaseInfo());
+        Backup backup = new Backup(getOutputSpec().getType());
         Collection<MigrationMode> migrationModes = getMigrationModes();
         if (contains(migrationModes, DATA)) {
             DumpWriter dumpWriter = getDumpWriter();
@@ -193,24 +170,14 @@ public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
             dumpWriter.write(backup);
         }
         if (contains(migrationModes, SCHEMA)) {
-            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
-            for (Schema schema : database.getSchemas()) {
-                Collection<String> scripts = scriptGeneratorManager.getScripts(schema);
-                if (isEmpty(scripts)) {
-                    continue;
-                }
-                Script script = createScript(schema, scripts);
-                ScriptExporter scriptExporter = createScriptExporter(script);
-                try {
-                    scriptExporter.open();
-                    scriptExporter.exportScripts(scripts);
-                } finally {
-                    close(scriptExporter);
-                }
-                backup.addScript(script);
-            }
+            backup.setDatabase(database);
         }
         getBackupManager().writeBackup(backup);
+    }
+
+    @Override
+    public void release() throws Exception {
+        close(sourceSession);
     }
 
     protected Database inspect() throws SQLException {
@@ -218,28 +185,6 @@ public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
                 getSourceSpec().getCatalog(), getSourceSpec().getSchema(), getTableTypes());
         return createInspectionManager().inspect(getSourceSession().getConnection(), inspectionScope,
                 TYPES).getObject(DATABASE);
-    }
-
-    protected Script createScript(Schema schema, Collection<String> scripts) {
-        Script script = new Script();
-        Collection<String> parts = newArrayList();
-        Catalog catalog = schema.getCatalog();
-        if (catalog.getName() != null) {
-            parts.add(catalog.getName());
-            script.setCatalogName(catalog.getName());
-        }
-        if (schema.getName() != null) {
-            parts.add(schema.getName());
-            script.setSchemaName(schema.getName());
-        }
-        parts.add(FORMAT);
-        script.setName(lowerCase(join(parts, ".")));
-        script.setScriptCount(scripts.size());
-        return script;
-    }
-
-    protected ScriptExporter createScriptExporter(Script script) {
-        return new WriterScriptExporter(getBackupManager().openOutput(script.getName()));
     }
 
     public DumpWriter getDumpWriter() {
@@ -250,20 +195,20 @@ public class DumpJob extends SchemaGeneratorJobBase<DumpJobSpec> {
         this.dumpWriter = dumpWriter;
     }
 
+    public Session getSourceSession() {
+        return sourceSession;
+    }
+
+    public void setSourceSession(Session sourceSession) {
+        this.sourceSession = sourceSession;
+    }
+
     public BackupManager getBackupManager() {
         return backupManager;
     }
 
     public void setBackupManager(BackupManager backupManager) {
         this.backupManager = backupManager;
-    }
-
-    public ScriptGeneratorManager getScriptGeneratorManager() {
-        return scriptGeneratorManager;
-    }
-
-    public void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager) {
-        this.scriptGeneratorManager = scriptGeneratorManager;
     }
 
     protected Collection<MigrationMode> getMigrationModes() {

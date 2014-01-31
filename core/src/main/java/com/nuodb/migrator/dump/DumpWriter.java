@@ -123,7 +123,6 @@ public class DumpWriter implements DumpQueryContext {
         boolean awaitTermination = true;
         try {
             backup.setFormat(getFormat());
-            backup.setDatabaseInfo(getDatabase().getDatabaseInfo());
             Connection connection = getSession().getConnection();
             for (DumpQuery dumpQuery : getDumpQueries()) {
                 backup.addRowSet(dumpQuery.getRowSet());

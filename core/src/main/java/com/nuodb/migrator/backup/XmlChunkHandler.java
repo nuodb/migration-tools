@@ -38,8 +38,8 @@ import org.simpleframework.xml.stream.OutputNode;
  */
 public class XmlChunkHandler extends XmlReadWriteHandlerBase<Chunk> implements XmlConstants {
 
-    private static final String NAME_ATTRIBUTE = "name";
-    private static final String ROW_COUNT_ATTRIBUTE = "row-count";
+    private static final String NAME = "name";
+    private static final String ROW_COUNT = "row-count";
 
     public XmlChunkHandler() {
         super(Chunk.class);
@@ -47,13 +47,13 @@ public class XmlChunkHandler extends XmlReadWriteHandlerBase<Chunk> implements X
 
     @Override
     protected void readAttributes(InputNode input, Chunk chunk, XmlReadContext context) throws Exception {
-        chunk.setName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
-        chunk.setRowCount(context.readAttribute(input, ROW_COUNT_ATTRIBUTE, Long.class));
+        chunk.setName(context.readAttribute(input, NAME, String.class));
+        chunk.setRowCount(context.readAttribute(input, ROW_COUNT, Long.class));
     }
 
     @Override
-    protected void writeAttributes(Chunk chunk, OutputNode output, XmlWriteContext context) throws Exception {
-        context.writeAttribute(output, NAME_ATTRIBUTE, chunk.getName());
-        context.writeAttribute(output, ROW_COUNT_ATTRIBUTE, chunk.getRowCount());
+    protected void writeAttributes(OutputNode output, Chunk chunk, XmlWriteContext context) throws Exception {
+        context.writeAttribute(output, NAME, chunk.getName());
+        context.writeAttribute(output, ROW_COUNT, chunk.getRowCount());
     }
 }

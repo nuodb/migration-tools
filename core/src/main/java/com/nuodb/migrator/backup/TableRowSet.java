@@ -34,41 +34,41 @@ import com.nuodb.migrator.jdbc.metadata.Table;
  */
 public class TableRowSet extends RowSet {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
+    private String catalog;
+    private String schema;
+    private String table;
 
     public TableRowSet() {
     }
 
     public TableRowSet(Table table) {
-        setCatalogName(table.getCatalog().getName());
-        setSchemaName(table.getSchema().getName());
-        setTableName(table.getName());
+        setCatalog(table.getCatalog().getName());
+        setSchema(table.getSchema().getName());
+        setTable(table.getName());
     }
 
-    public String getCatalogName() {
-        return catalogName;
+    public String getCatalog() {
+        return catalog;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
+    public void setCatalog(String catalog) {
+        this.catalog = catalog;
     }
 
-    public String getSchemaName() {
-        return schemaName;
+    public String getSchema() {
+        return schema;
     }
 
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+    public void setSchema(String schema) {
+        this.schema = schema;
     }
 
-    public String getTableName() {
-        return tableName;
+    public String getTable() {
+        return table;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setTable(String table) {
+        this.table = table;
     }
 
     @Override
@@ -79,9 +79,9 @@ public class TableRowSet extends RowSet {
 
         TableRowSet that = (TableRowSet) o;
 
-        if (catalogName != null ? !catalogName.equals(that.catalogName) : that.catalogName != null) return false;
-        if (schemaName != null ? !schemaName.equals(that.schemaName) : that.schemaName != null) return false;
-        if (tableName != null ? !tableName.equals(that.tableName) : that.tableName != null) return false;
+        if (catalog != null ? !catalog.equals(that.catalog) : that.catalog != null) return false;
+        if (schema != null ? !schema.equals(that.schema) : that.schema != null) return false;
+        if (table != null ? !table.equals(that.table) : that.table != null) return false;
 
         return true;
     }
@@ -89,9 +89,9 @@ public class TableRowSet extends RowSet {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (catalogName != null ? catalogName.hashCode() : 0);
-        result = 31 * result + (schemaName != null ? schemaName.hashCode() : 0);
-        result = 31 * result + (tableName != null ? tableName.hashCode() : 0);
+        result = 31 * result + (catalog != null ? catalog.hashCode() : 0);
+        result = 31 * result + (schema != null ? schema.hashCode() : 0);
+        result = 31 * result + (table != null ? table.hashCode() : 0);
         return result;
     }
 }

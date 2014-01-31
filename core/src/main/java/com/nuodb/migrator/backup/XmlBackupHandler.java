@@ -27,12 +27,17 @@
  */
 package com.nuodb.migrator.backup;
 
-import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.utils.Collections;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
+
+import java.util.Collection;
+
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 
 /**
  * @author Sergey Bushik
@@ -41,8 +46,7 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
 
     private static final String VERSION_ATTRIBUTE = "version";
     private static final String FORMAT_ATTRIBUTE = "format";
-    private static final String DATABASE_INFO_ELEMENT = "database-info";
-    private static final String SCRIPT_ELEMENT = "script";
+    private static final String DATABASE_ELEMENT = "database";
 
     public XmlBackupHandler() {
         super(Backup.class);
@@ -56,33 +60,30 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
 
     @Override
     protected void readElement(InputNode input, Backup backup, XmlReadContext context) throws Exception {
-        if (DATABASE_INFO_ELEMENT.equals(input.getName())) {
-            backup.setDatabaseInfo(context.read(input, DatabaseInfo.class));
-        } else if (SCRIPT_ELEMENT.equals(input.getName())) {
-            backup.addScript(context.read(input, Script.class));
-        } else if (ROW_SET.equals(input.getName())) {
+        String element = input.getName();
+        if (DATABASE_ELEMENT.equals(element)) {
+            backup.setDatabase(context.read(input, Database.class));
+        } else if (ROW_SET.equals(element)) {
             backup.addRowSet(context.read(input, RowSet.class));
         }
     }
 
     @Override
-    protected void writeAttributes(Backup backup, OutputNode output, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(OutputNode output, Backup backup, XmlWriteContext context) throws Exception {
         context.writeAttribute(output, VERSION_ATTRIBUTE, backup.getVersion());
         context.writeAttribute(output, FORMAT_ATTRIBUTE, backup.getFormat());
     }
 
     @Override
-    protected void writeElements(Backup backup, OutputNode output, XmlWriteContext context) throws Exception {
-        if (backup.getDatabaseInfo() != null) {
-            context.writeElement(output, DATABASE_INFO_ELEMENT, backup.getDatabaseInfo());
+    protected void writeElements(OutputNode output, Backup backup, XmlWriteContext context) throws Exception {
+        if (backup.getDatabase() != null) {
+            context.writeElement(output, DATABASE_ELEMENT, backup.getDatabase());
         }
-        if (backup.getScripts() != null) {
-            for (Script script : backup.getScripts()) {
-                context.writeElement(output, SCRIPT_ELEMENT, script);
+        Collection<RowSet> rowSets = backup.getRowSets();
+        if (!isEmpty(rowSets)) {
+            for (RowSet rowSet : rowSets) {
+                context.writeElement(output, ROW_SET, rowSet);
             }
-        }
-        for (RowSet rowSet : backup.getRowSets()) {
-            context.writeElement(output, ROW_SET, rowSet);
         }
     }
 }

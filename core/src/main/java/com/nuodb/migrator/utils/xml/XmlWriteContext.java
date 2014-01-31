@@ -37,6 +37,8 @@ public interface XmlWriteContext extends Map {
 
     void write(OutputNode output, Object value, Class type);
 
+    void write(OutputNode output, Object value, Class type, XmlWriteContext delegate);
+
     OutputNode writeAttribute(OutputNode output, String attribute, Object value);
 
     OutputNode writeAttribute(OutputNode output, String namespace, String attribute, Object value);
@@ -44,4 +46,12 @@ public interface XmlWriteContext extends Map {
     OutputNode writeElement(OutputNode output, String attribute, Object element);
 
     OutputNode writeElement(OutputNode output, String namespace, String element, Object value);
+
+    Map getMap();
+
+    void setMap(Map map);
+
+    XmlWriteContext getContext();
+
+    void setContext(XmlWriteContext context);
 }

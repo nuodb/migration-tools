@@ -94,8 +94,8 @@ public class DB2IdentityInspector extends TableInspectorBase<Table, TableInspect
             sequence.setMaxValue(identities.getLong("MAXVALUE"));
             sequence.setCache(identities.getInt("CACHE"));
             sequence.setOrder(StringUtils.equals("Y", identities.getString("ORDER")));
-
             column.setSequence(sequence);
+            column.getTable().getSchema().addSequence(sequence);
             inspectionResults.addObject(sequence);
         }
     }

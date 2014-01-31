@@ -27,44 +27,63 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
+
 /**
  * @author Sergey Bushik
  */
-public class XmlScriptHandler extends XmlReadWriteHandlerBase<Script> implements XmlConstants {
+public class XmlJdbcTypeHandler<T extends JdbcType> extends XmlReadWriteHandlerBase<T> {
 
-    private static final String CATALOG_NAME = "catalog-name";
-    private static final String SCHEMA_NAME = "schema-name";
+    private static final String CODE_ATTRIBUTE = "code";
     private static final String NAME_ATTRIBUTE = "name";
-    private static final String SCRIPT_COUNT_ATTRIBUTE = "script-count";
+    private static final String SIZE_ATTRIBUTE = "size";
+    private static final String PRECISION_ATTRIBUTE = "precision";
+    private static final String SCALE_ATTRIBUTE = "scale";
 
-    public XmlScriptHandler() {
-        super(Script.class);
+    public XmlJdbcTypeHandler() {
+        super(JdbcType.class);
+    }
+
+    public XmlJdbcTypeHandler(Class<? extends T> type) {
+        super(type);
     }
 
     @Override
-    protected void readAttributes(InputNode input, Script script, XmlReadContext context) throws Exception {
-        script.setCatalogName(context.readAttribute(input, CATALOG_NAME, String.class));
-        script.setSchemaName(context.readAttribute(input, SCHEMA_NAME, String.class));
-        script.setName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
-        Long scriptCount = context.readAttribute(input, SCRIPT_COUNT_ATTRIBUTE, Long.class);
-        script.setScriptCount(scriptCount != null ? scriptCount : 0);
+    protected void readAttributes(InputNode input, T target, XmlReadContext context) throws Exception {
+        target.setJdbcTypeDesc(new JdbcTypeDesc(
+                context.readAttribute(input, CODE_ATTRIBUTE, Integer.class),
+                context.readAttribute(input, NAME_ATTRIBUTE, String.class)
+        ));
+        target.setJdbcTypeOptions(newOptions(
+                context.readAttribute(input, SIZE_ATTRIBUTE, Integer.class),
+                context.readAttribute(input, PRECISION_ATTRIBUTE, Integer.class),
+                context.readAttribute(input, SCALE_ATTRIBUTE, Integer.class)
+        ));
     }
 
     @Override
-    protected void writeAttributes(Script script, OutputNode output, XmlWriteContext context) throws Exception {
-        if (script.getCatalogName() != null) {
-            context.writeAttribute(output, CATALOG_NAME, script.getCatalogName());
+    protected void writeAttributes(OutputNode output, T jdbcType, XmlWriteContext context) throws Exception {
+        context.writeAttribute(output, CODE_ATTRIBUTE, jdbcType.getTypeCode());
+        context.writeAttribute(output, NAME_ATTRIBUTE, jdbcType.getTypeName());
+        final Integer size = jdbcType.getSize();
+        if (size != null) {
+            context.writeAttribute(output, SIZE_ATTRIBUTE, size);
         }
-        if (script.getSchemaName() != null) {
-            context.writeAttribute(output, SCHEMA_NAME, script.getSchemaName());
+        final Integer precision = jdbcType.getPrecision();
+        if (precision != null) {
+            context.writeAttribute(output, PRECISION_ATTRIBUTE, precision);
         }
-        context.writeAttribute(output, NAME_ATTRIBUTE, script.getName());
-        context.writeAttribute(output, SCRIPT_COUNT_ATTRIBUTE, script.getScriptCount());
+        final Integer scale = jdbcType.getScale();
+        if (scale != null) {
+            context.writeAttribute(output, SCALE_ATTRIBUTE, scale);
+        }
     }
 }

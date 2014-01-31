@@ -42,34 +42,67 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     @Override
-    public T read(InputNode input, Class<? extends T> type, XmlReadContext context) {
-        T target = newInstance(type);
+    public T read(InputNode input, Class<? extends T> type, XmlReadContext delegate) {
+        XmlReadTargetAwareContext<T> context = createContext(input, type, delegate);
         try {
-            read(input, target, context);
+            read(input, context);
         } catch (XmlPersisterException exception) {
             throw exception;
         } catch (Exception exception) {
             throw new XmlPersisterException(exception);
         }
-        return target;
+        return context.getTarget();
     }
 
-    protected void read(InputNode input, T value, XmlReadContext context) throws Exception {
-        readAttributes(input, value, context);
-        readElements(input, value, context);
+    protected XmlReadTargetAwareContext<T> createContext(InputNode input, Class<? extends T> type,
+                                                         XmlReadContext context) {
+        return new XmlReadTargetAwareContext<T>(createTarget(input, type), context);
     }
 
-    protected void readAttributes(InputNode input, T value, XmlReadContext context) throws Exception {
+    protected T createTarget(InputNode input, Class<? extends T> type) {
+        return newInstance(type);
     }
 
-    protected void readElements(InputNode input, T value, XmlReadContext context) throws Exception {
+    protected <T> T getParentTarget(XmlReadContext context) {
+        return getTarget(context, 1);
+    }
+
+    protected <T> T getTarget(XmlReadContext context, int parent) {
+        for (int index = 0; index < parent; index++) {
+            context = context.getContext();
+        }
+        return context instanceof XmlReadTargetAwareContext ?
+                (T) ((XmlReadTargetAwareContext) context).getTarget() : null;
+    }
+
+    protected void read(InputNode input, XmlReadTargetAwareContext<T> context) throws Exception {
+        readAttributes(input, context);
+        readElements(input, context);
+    }
+
+    protected void readAttributes(InputNode input, XmlReadTargetAwareContext<T> context) throws Exception {
+        readAttributes(input, context.getTarget(), context);
+    }
+
+    protected void readAttributes(InputNode input, T target, XmlReadContext context) throws Exception {
+    }
+
+    protected void readElements(InputNode input, XmlReadTargetAwareContext<T> context) throws Exception {
+        readElements(input, context.getTarget(), context);
+    }
+
+    protected void readElements(InputNode input, T target, XmlReadContext context) throws Exception {
         InputNode node;
         while ((node = input.getNext()) != null) {
-            readElement(node, value, context);
+            readElement(node, target, context);
         }
     }
 
-    protected void readElement(InputNode input, T value, XmlReadContext context) throws Exception {
+    protected void readElement(InputNode input, XmlReadTargetAwareContext<T> context) throws Exception {
+        readElement(input, context.getTarget(), context);
+    }
+
+    protected void readElement(InputNode input, T target, XmlReadContext context) throws Exception {
     }
 
     @Override
@@ -78,9 +111,9 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     @Override
-    public boolean write(T value, Class<? extends T> type, OutputNode output, XmlWriteContext context) {
+    public boolean write(T source, Class<? extends T> type, OutputNode output, XmlWriteContext context) {
         try {
-            return write(value, output, context);
+            return write(output, createContext(source, output, context));
         } catch (XmlPersisterException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -88,20 +121,44 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
         }
     }
 
-    protected boolean write(T value, OutputNode output, XmlWriteContext context) throws Exception {
-        writeAttributes(value, output, context);
-        writeElements(value, output, context);
+    protected XmlWriteSourceAwareContext<T> createContext(T source, OutputNode output, XmlWriteContext context) {
+        return new XmlWriteSourceAwareContext(source, context);
+    }
+
+    protected <T> T getParentSource(XmlWriteContext context) {
+        return getSource(context, 1);
+    }
+
+    protected <T> T getSource(XmlWriteContext context, int parent) {
+        for (int index = 0; index < parent; index++) {
+            context = context.getContext();
+        }
+        return context instanceof XmlReadTargetAwareContext ?
+                (T) ((XmlReadTargetAwareContext) context).getTarget() : null;
+    }
+
+    protected boolean write(OutputNode output, XmlWriteSourceAwareContext context) throws Exception {
+        writeAttributes(output, context);
+        writeElements(output, context);
         return true;
     }
 
-    protected void writeAttributes(T value, OutputNode output, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(OutputNode output, XmlWriteSourceAwareContext<T> context) throws Exception {
+        writeAttributes(output, context.getSource(), context);
     }
 
-    protected void writeElements(T value, OutputNode output, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(OutputNode output, T source, XmlWriteContext context) throws Exception {
+    }
+
+    protected void writeElements(OutputNode output, XmlWriteSourceAwareContext<T> context) throws Exception {
+        writeElements(output, context.getSource(), context);
+    }
+
+    protected void writeElements(OutputNode output, T source, XmlWriteContext context) throws Exception {
     }
 
     @Override
-    public boolean canWrite(Object value, Class type, OutputNode output, XmlWriteContext context) {
+    public boolean canWrite(Object source, Class type, OutputNode output, XmlWriteContext context) {
         return this.type.equals(type);
     }
 }

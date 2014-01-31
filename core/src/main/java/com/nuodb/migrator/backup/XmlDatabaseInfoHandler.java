@@ -50,19 +50,20 @@ public class XmlDatabaseInfoHandler extends XmlReadWriteHandlerBase<DatabaseInfo
 
     @Override
     protected void readElement(InputNode input, DatabaseInfo databaseInfo, XmlReadContext context) throws Exception {
-        if (PRODUCT_NAME_ELEMENT.equals(input.getName())) {
+        final String element = input.getName();
+        if (PRODUCT_NAME_ELEMENT.equals(element)) {
             databaseInfo.setProductName(context.read(input, String.class));
-        } else if (PRODUCT_VERSION_ELEMENT.equals(input.getName())) {
+        } else if (PRODUCT_VERSION_ELEMENT.equals(element)) {
             databaseInfo.setProductVersion(context.read(input, String.class));
-        } else if (MAJOR_VERSION_ELEMENT.equals(input.getName())) {
+        } else if (MAJOR_VERSION_ELEMENT.equals(element)) {
             databaseInfo.setMajorVersion(context.read(input, int.class));
-        } else if (MINOR_VERSION_ELEMENT.equals(input.getName())) {
+        } else if (MINOR_VERSION_ELEMENT.equals(element)) {
             databaseInfo.setMinorVersion(context.read(input, int.class));
         }
     }
 
     @Override
-    protected void writeElements(DatabaseInfo databaseInfo, OutputNode output,
+    protected void writeElements(OutputNode output, DatabaseInfo databaseInfo,
                                  XmlWriteContext context) throws Exception {
         context.writeElement(output, PRODUCT_NAME_ELEMENT, databaseInfo.getProductName());
         context.writeElement(output, PRODUCT_VERSION_ELEMENT, databaseInfo.getProductVersion());

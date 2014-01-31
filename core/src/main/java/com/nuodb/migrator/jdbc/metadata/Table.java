@@ -27,8 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 
@@ -36,8 +34,10 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 
-import static com.google.common.collect.Sets.newTreeSet;
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static com.google.common.collect.Sets.*;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 
@@ -51,16 +51,20 @@ public class Table extends IdentifiableBase {
     private Catalog catalog;
     private Schema schema;
 
-    private Map<Identifier, Column> columns = Maps.newLinkedHashMap();
-    private Map<Identifier, Index> indexes = Maps.newLinkedHashMap();
-    private Collection<ForeignKey> foreignKeys = Sets.newLinkedHashSet();
+    private Map<Identifier, Column> columns = newLinkedHashMap();
+    private Map<Identifier, Index> indexes = newLinkedHashMap();
+    private Collection<ForeignKey> foreignKeys = newLinkedHashSet();
 
-    private Collection<Trigger> triggers = Sets.newHashSet();
+    private Collection<Trigger> triggers = newHashSet();
     private PrimaryKey primaryKey;
-    private Collection<Check> checks = Sets.newHashSet();
+    private Collection<Check> checks = newHashSet();
 
     private String type = TABLE;
     private String comment;
+
+    public Table() {
+        super(MetaDataType.TABLE);
+    }
 
     public Table(String name) {
         this(valueOf(name));
@@ -172,8 +176,16 @@ public class Table extends IdentifiableBase {
         this.triggers = triggers;
     }
 
-    private Column getColumn(Identifier identifier) {
+    public Column getColumn(Identifier identifier) {
         return addColumn(identifier, false);
+    }
+
+    public boolean hasColumn(String name) {
+        return hasColumn(valueOf(name));
+    }
+
+    public boolean hasColumn(Identifier identifier) {
+        return columns.containsKey(identifier);
     }
 
     public Column addColumn(String name) {

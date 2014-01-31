@@ -40,6 +40,24 @@ import java.util.Map;
  */
 public class SessionFactories {
 
+    public static SessionFactory newSessionFactory(final Dialect dialect) {
+        return new SessionFactoryBase() {
+            @Override
+            protected Session open(Map<Object, Object> context) throws SQLException {
+                return new SessionBase(this, null, dialect, context) {
+                    @Override
+                    public Connection getConnection() {
+                        throw new SessionException("Connection less session");
+                    }
+                };
+            }
+
+            @Override
+            protected void close(Session session) throws SQLException {
+            }
+        };
+    }
+
     public static SessionFactory newSessionFactory(final ConnectionProvider connectionProvider,
                                                    final Dialect dialect) {
         return new SessionFactoryBase() {

@@ -73,7 +73,7 @@ public class OracleColumnInspector extends SimpleColumnInspector {
         column.setComment(columns.getString("REMARKS"));
         column.setPosition(columns.getInt("ORDINAL_POSITION"));
         String autoIncrement =
-                FieldFactory.newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
+                newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
                         columns.getString("IS_AUTOINCREMENT") : null;
         column.setAutoIncrement("YES".equals(autoIncrement));
         column.setNullable("YES".equals(columns.getString("IS_NULLABLE")));

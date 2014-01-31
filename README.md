@@ -62,20 +62,8 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--threads (-t)=[threads]]                                  Number of worker threads to dump data, defaulted to a number of available processors
             [--query.limit=[query limit]]                               Query limit is a maximum number of rows to split a table into chunks with LIMIT {limit} OFFSET {offset} syntax in a database specific way, where each chunk is written to a separate file. If a query limit is not given or is not supported by the migrator for a particular database queries are not split
         [schema migration, optional]
-            [type declarations & translations, optional]
-                [--use.nuodb.types=[true | false]]                      Instructs the migrator to transform source database types to the best matching NuoDB types, where CHAR, VARCHAR and CLOB source types will be rendered as STRING columns, nuodb-types.properties file is a source of type overrides, the option is false by default
-                [--use.explicit.defaults=[true | false]]                Transforms source column implicit default values to NuoDB explicit defaults, the option is false by default
-                [--type.name=type name]                                 SQL type name template, i.e. decimal({p},{s}) or varchar({n}), where {p} is a placeholder for a precision, {s} is a scale and {n} is a maximum size
-                [--type.code=type code]                                 Integer code of declared SQL type
-                [--type.size=[type size]]                               Maximum size of custom data type
-                [--type.precision=[type precision]]                     The maximum total number of decimal digits that can be stored, both to the left and to the right of the decimal point. Typically, type precision is in the range of 1 through the maximum precision of 38.
-                [--type.scale=[type scale]]                             The number of fractional digits for numeric data types
             [--table.type=[table type [table type ...]]]                Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE type is processed
-            [--meta.data.*=[true | false]]                              Includes or excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check, identity, column.trigger) from the generated output, by default all objects are generated
-            [--script.type=drop [create]]                               Comma separated types of statements to be generated, default is drop & create
-            [--group.scripts.by=[table | meta.data]]                    Group generated DDL scripts, table by default
-            [--identifier.quoting=[identifier quoting]]                 Identifier quoting policy name, minimal, always or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierQuoting, default is always
-            [--identifier.normalizer=[identifier normalizer]]           Identifier transformer to use, available normalizers are noop, standard, lower.case, upper.case or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer, default is noop
+            [--meta.data.*=[true | false]]                              Includes or excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check, identity, column.trigger) from processing, by default all objects are included
 
 ### Load schema & data to a target NuoDB database ###
 
@@ -101,6 +89,21 @@ This tool is designed to assist you in migrating data from supported SQL databas
                 [--table.*.replace]                                     Writes REPLACE statement for the specified table
                 [--table.*.insert]                                      Writes INSERT statement for the specified table
             [--time.zone (-z)=time zone]                                Time zone enables date columns to be dumped and reloaded between servers in different time zones
+        [schema migration, optional]
+            [type declarations & translations, optional]
+                [--use.nuodb.types=[true | false]]                      Instructs the migrator to transform source database types to the best matching NuoDB types, where CHAR, VARCHAR and CLOB source types will be rendered as STRING columns, nuodb-types.properties file is a source of type overrides, the option is false by default
+                [--use.explicit.defaults=[true | false]]                Transforms source column implicit default values to NuoDB explicit defaults, the option is false by default
+                [--type.name=type name]                                 SQL type name template, i.e. decimal({p},{s}) or varchar({n}), where {p} is a placeholder for a precision, {s} is a scale and {n} is a maximum size
+                [--type.code=type code]                                 Integer code of declared SQL type
+                [--type.size=[type size]]                               Maximum size of custom data type
+                [--type.precision=[type precision]]                     The maximum total number of decimal digits that can be stored, both to the left and to the right of the decimal point. Typically, type precision is in the range of 1 through the maximum precision of 38.
+                [--type.scale=[type scale]]                             The number of fractional digits for numeric data types
+            [--table.type=[table type [table type ...]]]                Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE type is processed
+            [--meta.data.*=[true | false]]                              Includes or excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check, identity, column.trigger) from processing, by default all objects are included
+            [--script.type=drop [create]]                               Comma separated types of statements to be generated, default is drop & create
+            [--group.scripts.by=[table | meta.data]]                    Group generated DDL scripts, table by default
+            [--identifier.quoting=[identifier quoting]]                 Identifier quoting policy name, minimal, always or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierQuoting, default is always
+            [--identifier.normalizer=[identifier normalizer]]           Identifier transformer to use, available normalizers are noop, standard, lower.case, upper.case or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer, default is noop
 
 ### Generate a schema for a target NuoDB database ###
 
@@ -131,7 +134,8 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--type.size=[type size]]                                   Maximum size of custom data type
             [--type.precision=[type precision]]                         The maximum total number of decimal digits that can be stored, both to the left and to the right of the decimal point. Typically, type precision is in the range of 1 through the maximum precision of 38.
             [--type.scale=[type scale]]                                 The number of fractional digits for numeric data types
-        [--meta.data.*=[true | false]]                                  Includes of excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check.constraint, auto.increment) from the generated output, by default all objects are generated
+        [--table.type=[table type [table type ...]]]                    Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE type is processed
+        [--meta.data.*=[true | false]]                                  Includes or excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check, identity, column.trigger) from processing, by default all objects are included
         [--script.type=drop [create]]                                   Comma separated types of statements to be generated, default is drop & create
         [--group.scripts.by=[table | meta.data]]                        Group generated DDL scripts, table by default
         [--identifier.quoting=[identifier quoting]]                     Identifier quoting policy name, minimal, always or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierQuoting, default is always

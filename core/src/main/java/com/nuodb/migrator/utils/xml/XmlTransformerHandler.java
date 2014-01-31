@@ -41,7 +41,7 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
 
     public XmlTransformerHandler() {
         RegistryMatcher matcher = new RegistryMatcher();
-        matcher.bind(Boolean.class, DoubleTransform.class);
+        matcher.bind(Boolean.class, BooleanTransform.class);
         matcher.bind(Byte.class, ByteTransform.class);
         matcher.bind(Character.class, CharacterTransform.class);
         matcher.bind(Integer.class, IntegerTransform.class);
@@ -77,9 +77,9 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
     }
 
     @Override
-    public boolean write(Object value, Class type, OutputNode output, XmlWriteContext context) {
+    public boolean write(Object source, Class type, OutputNode output, XmlWriteContext context) {
         try {
-            output.setValue(transformer.write(value, type));
+            output.setValue(transformer.write(source, type));
             return true;
         } catch (Exception e) {
             throw new XmlPersisterException(e);
@@ -87,7 +87,7 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
     }
 
     @Override
-    public boolean canWrite(Object value, Class type, OutputNode output, XmlWriteContext context) {
+    public boolean canWrite(Object source, Class type, OutputNode output, XmlWriteContext context) {
         return canConvert(type);
     }
 

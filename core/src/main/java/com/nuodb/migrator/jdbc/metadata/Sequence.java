@@ -30,8 +30,10 @@ package com.nuodb.migrator.jdbc.metadata;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
@@ -39,7 +41,8 @@ import static org.apache.commons.lang3.StringUtils.join;
  */
 public class Sequence extends IdentifiableBase {
 
-    private Column column;
+    private Schema schema;
+    private Collection<Column> columns = newLinkedHashSet();
     private Long startWith;
     private Long lastValue;
     private Long incrementBy;
@@ -62,12 +65,28 @@ public class Sequence extends IdentifiableBase {
         super(IDENTITY, identifier, true);
     }
 
-    public Column getColumn() {
-        return column;
+    public Schema getSchema() {
+        return schema;
+    }
+
+    public void setSchema(Schema schema) {
+        this.schema = schema;
+    }
+
+    public void addColumn(Column column) {
+        columns.add(column);
     }
 
     public void setColumn(Column column) {
-        this.column = column;
+        setColumns(singleton(column));
+    }
+
+    public Collection<Column> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(Collection<Column> columns) {
+        this.columns = columns;
     }
 
     public Long getStartWith() {
@@ -154,7 +173,6 @@ public class Sequence extends IdentifiableBase {
         if (order != sequence.order) return false;
         if (temporary != sequence.temporary) return false;
         if (cache != null ? !cache.equals(sequence.cache) : sequence.cache != null) return false;
-        if (column != null ? !column.equals(sequence.column) : sequence.column != null) return false;
         if (lastValue != null ? !lastValue.equals(sequence.lastValue) : sequence.lastValue != null)
             return false;
         if (incrementBy != null ? !incrementBy.equals(sequence.incrementBy) : sequence.incrementBy != null)

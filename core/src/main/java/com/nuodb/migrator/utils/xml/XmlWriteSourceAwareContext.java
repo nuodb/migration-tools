@@ -27,143 +27,148 @@
  */
 package com.nuodb.migrator.utils.xml;
 
-import org.simpleframework.xml.strategy.Strategy;
-import org.simpleframework.xml.stream.NodeMap;
 import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-
+/**
+ * @author Sergey Bushik
+ */
 @SuppressWarnings("unchecked")
-public class XmlWriteContextImpl implements XmlWriteContext {
+public class XmlWriteSourceAwareContext<T> implements XmlWriteContext {
 
-    private Strategy strategy;
-    private Map map;
+    private T source;
+    private XmlWriteContext context;
 
-    public XmlWriteContextImpl(Strategy strategy, Map map) {
-        this.strategy = strategy;
-        this.map = map;
+    public XmlWriteSourceAwareContext(T source, XmlWriteContext context) {
+        this.source = source;
+        this.context = context;
     }
 
     @Override
     public void write(OutputNode output, Object value) {
-        if (value != null) {
-            write(output, value, value.getClass());
-        }
+        context.write(output, value);
     }
 
     @Override
     public void write(OutputNode output, Object value, Class type) {
-        boolean complete;
-        try {
-            complete = strategy.write(new ClassType(type), value, output.getAttributes(), this);
-        } catch (XmlPersisterException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new XmlPersisterException(exception);
-        }
-        if (!complete) {
-            throw new XmlPersisterException(format("Appropriate handler required to serialize %s to %s", type, output));
-        }
+        context.write(output, value, type, this);
+    }
+
+    @Override
+    public void write(OutputNode output, Object value, Class type,
+                      XmlWriteContext delegate) {
+        context.write(output, value, type, delegate);
     }
 
     @Override
     public OutputNode writeAttribute(OutputNode output, String attribute, Object value) {
-        return writeAttribute(output, null, attribute, value);
+        return context.writeAttribute(output, attribute, value);
     }
 
     @Override
     public OutputNode writeAttribute(OutputNode output, String namespace, String attribute, Object value) {
-        NodeMap<OutputNode> attributes = output.getAttributes();
-        OutputNode node = attributes.get(attribute);
-        if (node == null) {
-            node = attributes.put(attribute, EMPTY);
-        }
-        node.setReference(namespace == null ? EMPTY : namespace);
-        write(node, value);
-        return node;
+        return context.writeAttribute(output, namespace, attribute, value);
     }
 
     @Override
-    public OutputNode writeElement(OutputNode output, String element, Object value) {
-        return writeElement(output, null, element, value);
+    public OutputNode writeElement(OutputNode output, String attribute, Object element) {
+        return context.writeElement(output, attribute, element);
     }
 
     @Override
     public OutputNode writeElement(OutputNode output, String namespace, String element, Object value) {
-        OutputNode node;
-        try {
-            node = output.getChild(element);
-        } catch (Exception exception) {
-            throw new XmlPersisterException(exception);
-        }
-        node.setReference(namespace == null ? EMPTY : namespace);
-        write(node, value);
-        return node;
+        return context.writeElement(output, namespace, element, value);
+    }
+
+    public T getSource() {
+        return source;
+    }
+
+    public void setSource(T source) {
+        this.source = source;
+    }
+
+    @Override
+    public XmlWriteContext getContext() {
+        return context;
+    }
+
+    @Override
+    public void setContext(XmlWriteContext context) {
+        this.context = context;
+    }
+
+    @Override
+    public Map getMap() {
+        return context.getMap();
+    }
+
+    @Override
+    public void setMap(Map map) {
+        context.setMap(map);
     }
 
     @Override
     public int size() {
-        return map.size();
+        return context.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return map.isEmpty();
+        return context.isEmpty();
     }
 
     @Override
     public boolean containsKey(Object key) {
-        return map.containsKey(key);
+        return context.containsKey(key);
     }
 
     @Override
     public boolean containsValue(Object value) {
-        return map.containsValue(value);
+        return context.containsValue(value);
     }
 
     @Override
     public Object get(Object key) {
-        return map.get(key);
+        return context.get(key);
     }
 
     @Override
     public Object put(Object key, Object value) {
-        return map.put(key, value);
+        return context.put(key, value);
     }
 
     @Override
     public Object remove(Object key) {
-        return map.remove(key);
+        return context.remove(key);
     }
 
     @Override
     public void putAll(Map m) {
-        map.putAll(m);
+        context.putAll(m);
     }
 
     @Override
     public void clear() {
-        map.clear();
+        context.clear();
     }
 
     @Override
     public Set keySet() {
-        return map.keySet();
+        return context.keySet();
     }
 
     @Override
     public Collection values() {
-        return map.values();
+        return context.values();
     }
 
     @Override
-    public Set entrySet() {
-        return map.entrySet();
+    public Set<Entry> entrySet() {
+        return context.entrySet();
     }
 
     @Override
@@ -171,18 +176,18 @@ public class XmlWriteContextImpl implements XmlWriteContext {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        XmlWriteContextImpl that = (XmlWriteContextImpl) o;
+        XmlWriteSourceAwareContext that = (XmlWriteSourceAwareContext) o;
 
-        if (map != null ? !map.equals(that.map) : that.map != null) return false;
-        if (strategy != null ? !strategy.equals(that.strategy) : that.strategy != null) return false;
+        if (context != null ? !context.equals(that.context) : that.context != null) return false;
+        if (source != null ? !source.equals(that.source) : that.source != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = strategy != null ? strategy.hashCode() : 0;
-        result = 31 * result + (map != null ? map.hashCode() : 0);
+        int result = source != null ? source.hashCode() : 0;
+        result = 31 * result + (context != null ? context.hashCode() : 0);
         return result;
     }
 }

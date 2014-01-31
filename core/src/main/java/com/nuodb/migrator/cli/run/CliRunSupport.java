@@ -741,20 +741,7 @@ public class CliRunSupport extends CliSupport {
     protected void parseSchemaMigrationGroup(SchemaGeneratorJobSpecBase schemaGeneratorJobSpec,
                                              OptionSet optionSet, Option option) {
         if (optionSet.hasOption(META_DATA_OPTION)) {
-            Collection<String> values = optionSet.getValues(META_DATA_OPTION);
-            Set<MetaDataType> objectTypes = newHashSet(MetaDataType.TYPES);
-            Map<String, MetaDataType> objectTypeMap = new TreeMap<String, MetaDataType>(String.CASE_INSENSITIVE_ORDER);
-            objectTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
-            for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
-                MetaDataType objectType = objectTypeMap.get(replace(iterator.next(), ".", "_"));
-                String booleanValue = iterator.next();
-                if (booleanValue == null || parseBoolean(booleanValue)) {
-                    objectTypes.add(objectType);
-                } else {
-                    objectTypes.remove(objectType);
-                }
-            }
-            schemaGeneratorJobSpec.setObjectTypes(objectTypes);
+            schemaGeneratorJobSpec.setObjectTypes(parseObjectTypes(optionSet));
         }
         Object useExplicitDefaults = optionSet.getValue(USE_EXPLICIT_DEFAULTS_OPTION);
         schemaGeneratorJobSpec.setUseExplicitDefaults(useExplicitDefaults != null ?
@@ -834,12 +821,33 @@ public class CliRunSupport extends CliSupport {
         }
         schemaGeneratorJobSpec.setJdbcTypeSpecs(jdbcTypeSpecs);
 
+        schemaGeneratorJobSpec.setTableTypes(parseTableTypes(optionSet));
+    }
+
+    protected String[] parseTableTypes(OptionSet optionSet) {
         Collection<String> tableTypes = newLinkedHashSet();
         tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
         if (tableTypes.isEmpty()) {
             tableTypes.add(Table.TABLE);
         }
-        schemaGeneratorJobSpec.setTableTypes(tableTypes.toArray(new String[tableTypes.size()]));
+        return tableTypes.toArray(new String[tableTypes.size()]);
+    }
+
+    protected Set<MetaDataType> parseObjectTypes(OptionSet optionSet) {
+        Collection<String> values = optionSet.getValues(META_DATA_OPTION);
+        Set<MetaDataType> objectTypes = newHashSet(MetaDataType.TYPES);
+        Map<String, MetaDataType> objectTypeMap = new TreeMap<String, MetaDataType>(String.CASE_INSENSITIVE_ORDER);
+        objectTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
+        for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
+            MetaDataType objectType = objectTypeMap.get(replace(iterator.next(), ".", "_"));
+            String booleanValue = iterator.next();
+            if (booleanValue == null || parseBoolean(booleanValue)) {
+                objectTypes.add(objectType);
+            } else {
+                objectTypes.remove(objectType);
+            }
+        }
+        return objectTypes;
     }
 
     protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {

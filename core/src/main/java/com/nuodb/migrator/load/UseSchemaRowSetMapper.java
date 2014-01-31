@@ -49,7 +49,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-public class SchemaRowSetMapper implements RowSetMapper {
+public class UseSchemaRowSetMapper implements RowSetMapper {
 
     private final transient Logger logger = getLogger(getClass());
 
@@ -77,19 +77,19 @@ public class SchemaRowSetMapper implements RowSetMapper {
         Backup backup = rowSet.getBackup();
         ConnectionSpec connectionSpec = database.getConnectionSpec();
         if ((connectionSpec.getCatalog() != null || connectionSpec.getSchema() != null) &&
-                backup.getScripts().size() == 1) {
+                backup.getDatabase() != null && backup.getDatabase().getSchemas().size() == 1) {
             addIgnoreNull(qualifiers, connectionSpec.getCatalog());
             addIgnoreNull(qualifiers, connectionSpec.getSchema());
         } else {
-            addIgnoreNull(qualifiers, rowSet.getCatalogName());
-            addIgnoreNull(qualifiers, rowSet.getSchemaName());
+            addIgnoreNull(qualifiers, rowSet.getCatalog());
+            addIgnoreNull(qualifiers, rowSet.getSchema());
         }
         int actual = min(qualifiers.size(), maximum);
         qualifiers = qualifiers.subList(qualifiers.size() - actual, qualifiers.size());
         final String source = getQualifiedName(null,
-                rowSet.getCatalogName(), rowSet.getSchemaName(), rowSet.getTableName(), null);
+                rowSet.getCatalog(), rowSet.getSchema(), rowSet.getTable(), null);
         final String target = getQualifiedName(null,
-                qualifiers, rowSet.getTableName(), null);
+                qualifiers, rowSet.getTable(), null);
         if (logger.isDebugEnabled()) {
             logger.debug(format("Mapping %s row set to %s table", source, target));
         }

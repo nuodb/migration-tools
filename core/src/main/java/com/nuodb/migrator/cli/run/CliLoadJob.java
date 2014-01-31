@@ -56,6 +56,7 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         group.withOption(createInputGroup());
         group.withOption(createMigrationModeGroup());
         group.withOption(createDataMigrationGroup());
+        group.withOption(createSchemaMigrationGroup());
         return group.build();
     }
 
@@ -66,6 +67,7 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         jobSpec.setInputSpec(parseInputGroup(optionSet, this));
         jobSpec.setMigrationModes(parseMigrationModeGroup(optionSet, this));
         parseDataMigrationGroup(optionSet, this, jobSpec);
+        parseSchemaMigrationGroup(jobSpec, optionSet, this);
         setJobSpec(jobSpec);
     }
 

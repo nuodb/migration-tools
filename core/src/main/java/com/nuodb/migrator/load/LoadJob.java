@@ -30,32 +30,30 @@ package com.nuodb.migrator.load;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.backup.*;
+import com.nuodb.migrator.backup.Backup;
+import com.nuodb.migrator.backup.BackupManager;
+import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.backup.XmlBackupManager;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.InputFormat;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
-import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
-import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptImporter;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.ConnectionScriptExporter;
-import com.nuodb.migrator.jdbc.metadata.generator.ReaderScriptImporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptImporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
-import com.nuodb.migrator.jdbc.query.InsertQuery;
-import com.nuodb.migrator.jdbc.query.InsertQueryBuilder;
-import com.nuodb.migrator.jdbc.query.InsertType;
-import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.query.*;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
-import com.nuodb.migrator.job.HasServicesJobBase;
+import com.nuodb.migrator.job.SchemaGeneratorJobBase;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.LoadJobSpec;
 import com.nuodb.migrator.spec.MigrationMode;
@@ -85,11 +83,10 @@ import static java.lang.String.format;
  * @author Sergey Bushik
  */
 @SuppressWarnings("ConstantConditions")
-public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
+public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
 
-    private RowSetMapper rowSetMapper = new SchemaRowSetMapper();
+    private RowSetMapper rowSetMapper = new UseSchemaRowSetMapper();
 
-    private Session targetSession;
     private BackupManager backupManager;
     private Map<String, Object> formatAttributes;
     private ValueFormatRegistry valueFormatRegistry;
@@ -109,13 +106,10 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
         setFormatAttributes(inputSpec.getAttributes());
         setBackupManager(createBackupManager(inputSpec));
 
-        Collection<MigrationMode> migrationModes = getMigrationModes();
-        Session targetSession = null;
-        if (!isEmpty(migrationModes)) {
-            targetSession = createSessionFactory().openSession();
-        }
-        setTargetSession(targetSession);
+        Session targetSession;
+        setTargetSession(targetSession = createTargetSessionFactory().openSession());
 
+        Collection<MigrationMode> migrationModes = getMigrationModes();
         FormatFactory formatFactory = null;
         ValueFormatRegistry valueFormatRegistry = null;
         if (contains(migrationModes, DATA)) {
@@ -126,44 +120,28 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
         setValueFormatRegistry(valueFormatRegistry);
     }
 
-    protected BackupManager createBackupManager(ResourceSpec inputSpec) {
-        return new XmlBackupManager(inputSpec.getPath());
-    }
-
-    protected SessionFactory createSessionFactory() {
-        SessionFactory sessionFactory = newSessionFactory(createConnectionProviderFactory().
-                createConnectionProvider(getTargetSpec()), createDialectResolver());
-        sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
-        return sessionFactory;
-    }
-
     @Override
     public void execute() throws Exception {
         Backup backup = getBackupManager().readBackup();
+        Database source = backup.getDatabase();
+        setSourceSpec(source.getConnectionSpec());
+        setSourceSession(createSourceSessionFactory(source.getDialect()).openSession());
+
+        Collection<MetaDataType> indexes = newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX);
         Collection<MigrationMode> migrationModes = getMigrationModes();
         if (contains(migrationModes, SCHEMA)) {
-            for (Script script : backup.getScripts()) {
-                ScriptImporter scriptImporter = null;
-                ScriptExporter scriptExporter = null;
-                try {
-                    scriptExporter = createScriptExporter(backup, script);
-                    scriptExporter.open();
-                    scriptImporter = createScriptImporter(backup, script);
-                    scriptImporter.open();
-                    Collection<String> scripts = scriptImporter.importScripts();
-                    scriptExporter.exportScripts(scripts);
-                } finally {
-                    JdbcUtils.close(scriptImporter);
-                    JdbcUtils.close(scriptExporter);
-                }
-            }
+            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
+            Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
+            objectTypes.removeAll(indexes);
+            scriptGeneratorManager.setObjectTypes(objectTypes);
+            exportScripts(scriptGeneratorManager.getScripts(source));
         }
         if (contains(migrationModes, DATA)) {
             Connection connection = getTargetSession().getConnection();
-            Database database = inspect();
+            Database target = inspect();
             try {
                 for (RowSet rowSet : backup.getRowSets()) {
-                    load(rowSet, database);
+                    load(rowSet, target);
                 }
                 connection.commit();
             } catch (MigratorException exception) {
@@ -174,29 +152,42 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
                 throw new LoadException(exception);
             }
         }
-    }
-
-    protected ScriptExporter createScriptExporter(Backup backup, Script script) {
-        return new ConnectionScriptExporter(getTargetSession().getConnection(), false);
-    }
-
-    protected ScriptImporter createScriptImporter(Backup backup, Script script) {
-        String catalogName;
-        String schemaName;
-        Session targetSession = getTargetSession();
-        ConnectionSpec connectionSpec = ((ConnectionProxy) targetSession.getConnection()).getConnectionSpec();
-        if ((connectionSpec.getCatalog() != null || connectionSpec.getSchema() != null) &&
-                (backup.getScripts().size() == 1)) {
-            catalogName = connectionSpec.getCatalog();
-            schemaName = connectionSpec.getSchema();
-        } else {
-            catalogName = script.getCatalogName();
-            schemaName = script.getSchemaName();
+        if (contains(migrationModes, SCHEMA)) {
+            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
+            Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
+            objectTypes.retainAll(indexes);
+            scriptGeneratorManager.setObjectTypes(objectTypes);
+            exportScripts(scriptGeneratorManager.getScripts(source));
         }
-        return new CompositeScriptImporter(
-                new SchemaScriptImporter(targetSession.getDialect(), catalogName, schemaName),
-                new ReaderScriptImporter(getBackupManager().openInput(script.getName()))
-        );
+    }
+
+    protected void exportScripts(Collection<String> scripts) throws Exception {
+        ScriptExporter scriptExporter = createScriptExporter();
+        try {
+            scriptExporter.open();
+            scriptExporter.exportScripts(scripts);
+        } finally {
+            JdbcUtils.close(scriptExporter);
+        }
+    }
+
+    protected BackupManager createBackupManager(ResourceSpec inputSpec) {
+        return new XmlBackupManager(inputSpec.getPath());
+    }
+
+    protected SessionFactory createSourceSessionFactory(Dialect dialect) {
+        return newSessionFactory(dialect);
+    }
+
+    protected SessionFactory createTargetSessionFactory() {
+        SessionFactory sessionFactory = newSessionFactory(createConnectionProviderFactory().
+                createConnectionProvider(getTargetSpec()), createDialectResolver());
+        sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
+        return sessionFactory;
+    }
+
+    protected ScriptExporter createScriptExporter() {
+        return new ConnectionScriptExporter(getTargetSession().getConnection(), false);
     }
 
     @Override
@@ -205,7 +196,7 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
     }
 
     protected Database inspect() throws SQLException {
-        InspectionScope inspectionScope = new TableInspectionScope();
+        InspectionScope inspectionScope = new TableInspectionScope(null, null, getTableTypes());
         return createInspectionManager().inspect(getTargetSession().getConnection(), inspectionScope,
                 DATABASE, CATALOG, MetaDataType.SCHEMA, TABLE, COLUMN).getObject(DATABASE);
     }
@@ -317,14 +308,6 @@ public class LoadJob extends HasServicesJobBase<LoadJobSpec> {
             }
         }
         return insertType;
-    }
-
-    public Session getTargetSession() {
-        return targetSession;
-    }
-
-    public void setTargetSession(Session targetSession) {
-        this.targetSession = targetSession;
     }
 
     public BackupManager getBackupManager() {

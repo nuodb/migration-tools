@@ -27,11 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;

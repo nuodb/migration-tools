@@ -27,23 +27,27 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.google.common.collect.Maps;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newTreeMap;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.PRIMARY_KEY;
 
 /**
  * @author Sergey Bushik
  */
 public class PrimaryKey extends ConstraintBase {
 
-    private Map<Integer, Column> columns = Maps.newTreeMap();
+    private Map<Integer, Column> columns = newTreeMap();
+
+    public PrimaryKey() {
+        super(PRIMARY_KEY);
+    }
 
     public PrimaryKey(Identifier identifier) {
-        super(MetaDataType.PRIMARY_KEY, identifier);
+        super(PRIMARY_KEY, identifier);
     }
 
     @Override

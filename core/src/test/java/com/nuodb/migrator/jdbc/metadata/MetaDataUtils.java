@@ -56,6 +56,7 @@ public class MetaDataUtils {
         Column column = createColumn(catalogName, schemaName, tableName, columnName);
         Sequence sequence = new Sequence();
         column.setSequence(sequence);
+        column.getTable().getSchema().addSequence(sequence);
         return sequence;
     }
 }

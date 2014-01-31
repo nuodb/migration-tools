@@ -27,10 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.google.common.collect.Sets;
-
 import java.util.Collection;
 
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
 
 /**
@@ -39,7 +38,7 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
 public class Check extends ConstraintBase {
 
     private String text;
-    private Collection columns = Sets.newHashSet();
+    private Collection<Column> columns = newLinkedHashSet();
 
     public Check() {
         super(CHECK);
@@ -71,12 +70,16 @@ public class Check extends ConstraintBase {
         this.text = text;
     }
 
+    public void addColumn(Column column) {
+        columns.add(column);
+    }
+
     @Override
-    public Collection getColumns() {
+    public Collection<Column> getColumns() {
         return columns;
     }
 
-    public void setColumns(Collection columns) {
+    public void setColumns(Collection<Column> columns) {
         this.columns = columns;
     }
 

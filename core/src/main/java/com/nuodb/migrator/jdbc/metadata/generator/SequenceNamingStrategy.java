@@ -27,9 +27,15 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 
+import java.util.Collection;
+
+import static com.google.common.base.Predicates.equalTo;
+import static com.google.common.collect.Iterables.indexOf;
 import static com.nuodb.migrator.utils.StringUtils.*;
 
 /**
@@ -47,13 +53,24 @@ public class SequenceNamingStrategy extends IdentifiableNamingStrategy<Sequence>
     @Override
     protected String getIdentifiableName(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder qualifier = new StringBuilder();
-        Column column = sequence.getColumn();
-        qualifier.append(scriptGeneratorManager.getName(column.getTable(), false));
-        qualifier.append('_');
-        qualifier.append(scriptGeneratorManager.getName(column, false));
-
+        Collection<Column> columns = sequence.getColumns();
+        if (columns.size() == 1) {
+            Column column = Iterables.get(columns, 0);
+            qualifier.append(scriptGeneratorManager.getName(column.getTable(), false));
+            qualifier.append('_');
+            qualifier.append(scriptGeneratorManager.getName(column, false));
+        } else {
+            Schema schema = sequence.getSchema();
+            if (scriptGeneratorManager.getName(schema) != null) {
+                qualifier.append(scriptGeneratorManager.getName(schema));
+            } else {
+                qualifier.append(scriptGeneratorManager.getName(schema.getCatalog()));
+            }
+            qualifier.append('_');
+            qualifier.append(indexOf(schema.getSequences(), equalTo(sequence)));
+        }
         StringBuilder buffer = new StringBuilder();
-        if (isLowerCase(qualifier, DELIMITER)) {
+        if (isLowerCase(qualifier)) {
             buffer.append(lowerCase(PREFIX));
         } else if (isCapitalizedCase(qualifier, DELIMITER)) {
             buffer.append(capitalizedCase(PREFIX, '_'));

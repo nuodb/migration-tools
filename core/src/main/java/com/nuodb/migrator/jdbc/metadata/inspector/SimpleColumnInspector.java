@@ -31,6 +31,7 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.model.FieldFactory;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.utils.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,6 +40,7 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.utils.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
@@ -80,7 +82,8 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
         column.setPrecision(columnSize);
         column.setScale(columns.getInt("DECIMAL_DIGITS"));
 
-        column.setComment(columns.getString("REMARKS"));
+        String comment = columns.getString("REMARKS");
+        column.setComment(isEmpty(comment) ? null : comment);
         column.setPosition(columns.getInt("ORDINAL_POSITION"));
         String autoIncrement =
                 FieldFactory.newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?

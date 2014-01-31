@@ -127,6 +127,7 @@ public class MySQLIdentityInspector extends TableInspectorBase<Table, TableInspe
                                 continue;
                             }
                             column.setSequence(sequence);
+                            column.getTable().getSchema().addSequence(sequence);
                             inspectionResults.addObject(sequence);
                         }
                     }

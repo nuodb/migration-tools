@@ -27,7 +27,11 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DeferrabilityMap;
+import com.nuodb.migrator.jdbc.metadata.ForeignKey;
+import com.nuodb.migrator.jdbc.metadata.ReferenceActionMap;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import org.testng.annotations.Test;
 
 import java.sql.PreparedStatement;
@@ -67,13 +71,13 @@ public class NuoDBForeignKeyInspectorTest extends InspectorTestBase {
         ResultSet resultSet = mock(ResultSet.class);
         given(query.executeQuery()).willReturn(resultSet);
 
-        String catalogName = null;
-        String pkSchemaName = "pk schema";
-        String pkTableName = "pk table";
-        String pkColumnName = "pk column";
-        String fkSchemaName = "fk schema";
-        String fkTableName = "fk table";
-        String fkColumnName = "fk column";
+        String catalog = null;
+        String primarySchema = "primary schema";
+        String primaryTable = "primary table";
+        String primaryColumn = "primary column";
+        String foreignSchema = "foreign schema";
+        String foreignTable = "foreign table";
+        String foreignColumn = "foreign column";
 
         int position = 1;
         int updateRule = importedKeySetNull;
@@ -81,18 +85,18 @@ public class NuoDBForeignKeyInspectorTest extends InspectorTestBase {
         int deferrability = importedKeyNotDeferrable;
 
         given(resultSet.next()).willReturn(true, false);
-        given(resultSet.getString("FKTABLE_SCHEM")).willReturn(pkSchemaName);
-        given(resultSet.getString("FKTABLE_NAME")).willReturn(pkTableName);
-        given(resultSet.getString("FKCOLUMN_NAME")).willReturn(pkColumnName);
-        given(resultSet.getString("PKTABLE_SCHEM")).willReturn(fkSchemaName);
-        given(resultSet.getString("PKTABLE_NAME")).willReturn(fkTableName);
-        given(resultSet.getString("PKCOLUMN_NAME")).willReturn(fkColumnName);
+        given(resultSet.getString("FKTABLE_SCHEM")).willReturn(primarySchema);
+        given(resultSet.getString("FKTABLE_NAME")).willReturn(primaryTable);
+        given(resultSet.getString("FKCOLUMN_NAME")).willReturn(primaryColumn);
+        given(resultSet.getString("PKTABLE_SCHEM")).willReturn(foreignSchema);
+        given(resultSet.getString("PKTABLE_NAME")).willReturn(foreignTable);
+        given(resultSet.getString("PKCOLUMN_NAME")).willReturn(foreignColumn);
         given(resultSet.getInt("KEY_SEQ")).willReturn(position);
         given(resultSet.getInt("UPDATE_RULE")).willReturn(updateRule);
         given(resultSet.getInt("DELETE_RULE")).willReturn(deleteRule);
         given(resultSet.getInt("DEFERRABILITY")).willReturn(deferrability);
 
-        TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, pkSchemaName, pkTableName);
+        TableInspectionScope inspectionScope = new TableInspectionScope(catalog, primarySchema, primaryTable);
         InspectionResults inspectionResults = getInspectionManager()
                 .inspect(getConnection(), inspectionScope, FOREIGN_KEY);
         verifyInspectScope(getInspector(), inspectionScope);
@@ -100,15 +104,15 @@ public class NuoDBForeignKeyInspectorTest extends InspectorTestBase {
         Collection<ForeignKey> foreignKeys = inspectionResults.getObjects(FOREIGN_KEY);
         assertEquals(foreignKeys.size(), 1);
 
-        Table pkTable = createTable(catalogName, pkSchemaName, pkTableName);
-        Column pkColumn = pkTable.addColumn(pkColumnName);
-        Table fkTable = createTable(catalogName, fkSchemaName, fkTableName);
-        Column fkColumn = fkTable.addColumn(fkColumnName);
+        Table pkTable = createTable(catalog, primarySchema, primaryTable);
+        Column pkColumn = pkTable.addColumn(primaryColumn);
+        Table fkTable = createTable(catalog, foreignSchema, foreignTable);
+        Column fkColumn = fkTable.addColumn(foreignColumn);
 
         ForeignKey foreignKey = new ForeignKey(EMPTY);
         foreignKey.setPrimaryTable(pkTable);
         foreignKey.setForeignTable(fkTable);
-        foreignKey.addReference(pkColumn, fkColumn, position);
+        foreignKey.addReference(fkColumn, pkColumn, position);
         foreignKey.setDeferrability(DEFERRABILITY_MAP.get(deferrability));
         foreignKey.setUpdateAction(REFERENCE_ACTION_MAP.get(updateRule));
         foreignKey.setDeleteAction(REFERENCE_ACTION_MAP.get(deleteRule));

@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.utils.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,6 +37,7 @@ import java.sql.SQLException;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.utils.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
@@ -65,7 +67,8 @@ public class SimpleTableInspector extends TableInspectorBase<Schema, TableInspec
         while (tables.next()) {
             Table table = addTable(inspectionResults,
                     tables.getString("TABLE_CAT"), tables.getString("TABLE_SCHEM"), tables.getString("TABLE_NAME"));
-            table.setComment(tables.getString("REMARKS"));
+            String comment = tables.getString("REMARKS");
+            table.setComment(isEmpty(comment) ? null : comment);
             table.setType(tables.getString("TABLE_TYPE"));
         }
     }

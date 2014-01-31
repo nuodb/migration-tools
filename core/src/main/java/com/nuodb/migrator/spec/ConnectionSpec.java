@@ -27,6 +27,9 @@
  */
 package com.nuodb.migrator.spec;
 
+/**
+ * @author Sergey Bushik
+ */
 public interface ConnectionSpec extends Spec {
 
     String getCatalog();

@@ -45,7 +45,7 @@ import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.split;
 
-public class Database extends IndentedBase implements HasSchemas {
+public class Database extends IdentifiableBase implements HasSchemas {
 
     private final Map<Identifier, Catalog> catalogs = newLinkedHashMap();
 
@@ -54,9 +54,8 @@ public class Database extends IndentedBase implements HasSchemas {
     private DatabaseInfo databaseInfo;
     private ConnectionSpec connectionSpec;
 
-    @Override
-    public MetaDataType getObjectType() {
-        return MetaDataType.DATABASE;
+    public Database() {
+        super(MetaDataType.DATABASE, false);
     }
 
     public DriverInfo getDriverInfo() {
@@ -91,28 +90,28 @@ public class Database extends IndentedBase implements HasSchemas {
         this.connectionSpec = connectionSpec;
     }
 
-    public boolean hasCatalog(String catalogName) {
-        return hasCatalog(valueOf(catalogName));
+    public boolean hasCatalog(String name) {
+        return hasCatalog(valueOf(name));
     }
 
-    public boolean hasCatalog(Identifier catalogId) {
-        return catalogs.containsKey(catalogId);
+    public boolean hasCatalog(Identifier identifier) {
+        return catalogs.containsKey(identifier);
     }
 
-    public Catalog getCatalog(String catalogName) {
-        return addCatalog(valueOf(catalogName), false);
+    public Catalog getCatalog(String name) {
+        return addCatalog(valueOf(name), false);
     }
 
-    public Catalog getCatalog(Identifier catalogId) {
-        return addCatalog(catalogId, false);
+    public Catalog getCatalog(Identifier identifier) {
+        return addCatalog(identifier, false);
     }
 
-    public Catalog addCatalog(String catalogName) {
-        return addCatalog(valueOf(catalogName), true);
+    public Catalog addCatalog(String name) {
+        return addCatalog(valueOf(name), true);
     }
 
-    public Catalog addCatalog(Identifier catalogId) {
-        return addCatalog(catalogId, true);
+    public Catalog addCatalog(Identifier identifier) {
+        return addCatalog(identifier, true);
     }
 
     public Catalog addCatalog(Catalog catalog) {
@@ -125,13 +124,13 @@ public class Database extends IndentedBase implements HasSchemas {
         catalogs.remove(catalog.getIdentifier());
     }
 
-    protected Catalog addCatalog(Identifier catalogId, boolean create) {
-        Catalog catalog = catalogs.get(catalogId);
+    protected Catalog addCatalog(Identifier identifier, boolean create) {
+        Catalog catalog = catalogs.get(identifier);
         if (catalog == null) {
             if (create) {
-                addCatalog(catalog = new Catalog(catalogId));
+                addCatalog(catalog = new Catalog(identifier));
             } else {
-                throw new MetaDataException(format("Catalog %s doesn't exist", catalogId));
+                throw new MetaDataException(format("Catalog %s doesn't exist", identifier));
             }
         }
         return catalog;

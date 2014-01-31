@@ -28,6 +28,7 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.Migrator;
+import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.utils.ObjectUtils;
 
@@ -42,16 +43,19 @@ public class Backup {
 
     private String version = Migrator.getVersion();
     private String format;
-    private DatabaseInfo databaseInfo;
-    private Collection<Script> scripts = newArrayList();
+    private Database database;
     private Collection<RowSet> rowSets = newArrayList();
 
     public Backup() {
     }
 
-    public Backup(String format, DatabaseInfo databaseInfo) {
+    public Backup(String format) {
         this.format = format;
-        this.databaseInfo = databaseInfo;
+    }
+
+    public Backup(String format, Database database) {
+        this.format = format;
+        this.database = database;
     }
 
     public String getVersion() {
@@ -70,29 +74,17 @@ public class Backup {
         this.format = format;
     }
 
-    public DatabaseInfo getDatabaseInfo() {
-        return databaseInfo;
+    public Database getDatabase() {
+        return database;
     }
 
-    public void setDatabaseInfo(DatabaseInfo databaseInfo) {
-        this.databaseInfo = databaseInfo;
-    }
-
-    public Collection<Script> getScripts() {
-        return scripts;
-    }
-
-    public void setScripts(Collection<Script> scripts) {
-        this.scripts = scripts;
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 
     public void addRowSet(RowSet rowSet) {
         rowSet.setBackup(this);
         rowSets.add(rowSet);
-    }
-
-    public void addScript(Script script) {
-        scripts.add(script);
     }
 
     public Collection<RowSet> getRowSets() {
@@ -110,11 +102,10 @@ public class Backup {
 
         Backup backup = (Backup) o;
 
-        if (databaseInfo != null ? !databaseInfo.equals(backup.databaseInfo) : backup.databaseInfo != null)
+        if (database != null ? !database.equals(backup.database) : backup.database != null)
             return false;
         if (format != null ? !format.equals(backup.format) : backup.format != null) return false;
         if (rowSets != null ? !rowSets.equals(backup.rowSets) : backup.rowSets != null) return false;
-        if (scripts != null ? !scripts.equals(backup.scripts) : backup.scripts != null) return false;
         if (version != null ? !version.equals(backup.version) : backup.version != null) return false;
 
         return true;
@@ -124,8 +115,7 @@ public class Backup {
     public int hashCode() {
         int result = version != null ? version.hashCode() : 0;
         result = 31 * result + (format != null ? format.hashCode() : 0);
-        result = 31 * result + (databaseInfo != null ? databaseInfo.hashCode() : 0);
-        result = 31 * result + (scripts != null ? scripts.hashCode() : 0);
+        result = 31 * result + (database != null ? database.hashCode() : 0);
         result = 31 * result + (rowSets != null ? rowSets.hashCode() : 0);
         return result;
     }

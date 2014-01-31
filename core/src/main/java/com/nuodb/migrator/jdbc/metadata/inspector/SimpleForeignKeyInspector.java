@@ -99,7 +99,7 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
 
                 inspectionResults.addObject(foreignKey);
             }
-            foreignKey.addReference(foreignColumn, primaryColumn, position);
+            foreignKey.addReference(primaryColumn, foreignColumn, position);
         }
     }
 

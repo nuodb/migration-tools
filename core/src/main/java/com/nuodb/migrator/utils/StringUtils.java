@@ -44,10 +44,6 @@ public class StringUtils {
     }
 
     public static boolean isLowerCase(CharSequence source) {
-        return isLowerCase(source, null);
-    }
-
-    public static boolean isLowerCase(CharSequence source, char... delimiters) {
         if (isEmpty(source)) {
             return false;
         }
@@ -62,10 +58,6 @@ public class StringUtils {
     }
 
     public static boolean isUpperCase(CharSequence source) {
-        return isUpperCase(source, null);
-    }
-
-    public static boolean isUpperCase(CharSequence source, char... delimiters) {
         if (isEmpty(source)) {
             return false;
         }

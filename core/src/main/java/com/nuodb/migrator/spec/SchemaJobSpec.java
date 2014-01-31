@@ -35,7 +35,26 @@ import static com.google.common.collect.Sets.newHashSet;
  * @author Sergey Bushik
  */
 public class SchemaJobSpec extends SchemaGeneratorJobSpecBase {
+
+    private ConnectionSpec sourceSpec;
+    private ResourceSpec outputSpec;
     private Collection<MigrationMode> migrationModes = newHashSet(MigrationMode.DATA);
+
+    public ConnectionSpec getSourceSpec() {
+        return sourceSpec;
+    }
+
+    public void setSourceSpec(ConnectionSpec sourceSpec) {
+        this.sourceSpec = sourceSpec;
+    }
+
+    public ResourceSpec getOutputSpec() {
+        return outputSpec;
+    }
+
+    public void setOutputSpec(ResourceSpec outputSpec) {
+        this.outputSpec = outputSpec;
+    }
 
     public Collection<MigrationMode> getMigrationModes() {
         return migrationModes;

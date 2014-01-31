@@ -61,7 +61,7 @@ public class ForeignKeyNamingStrategy extends IdentifiableNamingStrategy<Foreign
         }
 
         StringBuilder buffer = new StringBuilder();
-        if (isLowerCase(qualifier, DELIMITER)) {
+        if (isLowerCase(qualifier)) {
             buffer.append(lowerCase(PREFIX));
         } else if (isCapitalizedCase(qualifier, DELIMITER)) {
             buffer.append(capitalizedCase(PREFIX));

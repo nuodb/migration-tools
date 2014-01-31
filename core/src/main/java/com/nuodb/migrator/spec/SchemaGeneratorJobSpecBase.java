@@ -41,11 +41,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.NOOP;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS;
-import static com.nuodb.migrator.jdbc.metadata.Table.ALIAS;
 import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
-import static com.nuodb.migrator.spec.MigrationMode.DATA;
-import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
-import static java.util.Collections.unmodifiableSet;
 
 /**
  * @author Sergey Bushik
@@ -54,9 +50,7 @@ public class SchemaGeneratorJobSpecBase extends JobSpecBase {
 
     private boolean useExplicitDefaults = USE_EXPLICIT_DEFAULTS;
     private String[] tableTypes = new String[]{TABLE};
-    private ConnectionSpec sourceSpec;
     private ConnectionSpec targetSpec;
-    private ResourceSpec outputSpec;
     private Collection<MetaDataType> objectTypes = newArrayList(MetaDataType.TYPES);
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
@@ -80,28 +74,12 @@ public class SchemaGeneratorJobSpecBase extends JobSpecBase {
         this.tableTypes = tableTypes;
     }
 
-    public ConnectionSpec getSourceSpec() {
-        return sourceSpec;
-    }
-
-    public void setSourceSpec(ConnectionSpec sourceSpec) {
-        this.sourceSpec = sourceSpec;
-    }
-
     public ConnectionSpec getTargetSpec() {
         return targetSpec;
     }
 
     public void setTargetSpec(ConnectionSpec targetSpec) {
         this.targetSpec = targetSpec;
-    }
-
-    public ResourceSpec getOutputSpec() {
-        return outputSpec;
-    }
-
-    public void setOutputSpec(ResourceSpec outputSpec) {
-        this.outputSpec = outputSpec;
     }
 
     public Collection<MetaDataType> getObjectTypes() {
@@ -170,9 +148,7 @@ public class SchemaGeneratorJobSpecBase extends JobSpecBase {
         if (jdbcTypeSpecs != null ? !jdbcTypeSpecs.equals(that.jdbcTypeSpecs) : that.jdbcTypeSpecs != null)
             return false;
         if (objectTypes != null ? !objectTypes.equals(that.objectTypes) : that.objectTypes != null) return false;
-        if (outputSpec != null ? !outputSpec.equals(that.outputSpec) : that.outputSpec != null) return false;
         if (scriptTypes != null ? !scriptTypes.equals(that.scriptTypes) : that.scriptTypes != null) return false;
-        if (sourceSpec != null ? !sourceSpec.equals(that.sourceSpec) : that.sourceSpec != null) return false;
         if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
         if (targetSpec != null ? !targetSpec.equals(that.targetSpec) : that.targetSpec != null) return false;
 
@@ -184,9 +160,7 @@ public class SchemaGeneratorJobSpecBase extends JobSpecBase {
         int result = super.hashCode();
         result = 31 * result + (useExplicitDefaults ? 1 : 0);
         result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
-        result = 31 * result + (sourceSpec != null ? sourceSpec.hashCode() : 0);
         result = 31 * result + (targetSpec != null ? targetSpec.hashCode() : 0);
-        result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);
         result = 31 * result + (objectTypes != null ? objectTypes.hashCode() : 0);
         result = 31 * result + (scriptTypes != null ? scriptTypes.hashCode() : 0);
         result = 31 * result + (groupScriptsBy != null ? groupScriptsBy.hashCode() : 0);

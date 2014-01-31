@@ -27,46 +27,54 @@
  */
 package com.nuodb.migrator.utils.xml;
 
-import org.simpleframework.xml.strategy.Strategy;
-import org.simpleframework.xml.strategy.Value;
 import org.simpleframework.xml.stream.InputNode;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 
+/**
+ * @author Sergey Bushik
+ */
 @SuppressWarnings("unchecked")
-public class XmlReadContextImpl implements XmlReadContext {
+public abstract class XmlReadContextBase implements XmlReadContext {
 
-    private Strategy strategy;
     private Map map;
+    private XmlReadContext context;
 
-    public XmlReadContextImpl(Strategy strategy, Map map) {
-        this.strategy = strategy;
+    protected XmlReadContextBase() {
+        this(newHashMap());
+    }
+
+    protected XmlReadContextBase(Map map) {
         this.map = map;
     }
 
     @Override
     public <T> T read(InputNode input, Class<T> type) {
-        Value value;
-        try {
-            value = strategy.read(new ClassType(type), input.getAttributes(), this);
-        } catch (Exception exception) {
-            throw new XmlPersisterException(exception);
-        }
-        if (value != null && value.isReference()) {
-            return (T) value.getValue();
-        } else {
-            throw new XmlPersisterException(format("Failed reading %s from %s", type, input));
-        }
+        final XmlReadContext context = getContext();
+        return read(input, type, context != null ? context : this);
+    }
+
+    @Override
+    public <T> T read(InputNode node, Class<T> type, T defaultValue) {
+        T value = read(node, type);
+        return value != null ? value : defaultValue;
     }
 
     @Override
     public <T> T readAttribute(InputNode input, String attribute, Class<T> type) {
         InputNode node = input.getAttribute(attribute);
         return node != null ? read(node, type) : null;
+    }
+
+    @Override
+    public <T> T readAttribute(InputNode input, String attribute, Class<T> type, T defaultValue) {
+        T value = readAttribute(input, attribute, type);
+        return value != null ? value : defaultValue;
     }
 
     @Override
@@ -78,6 +86,34 @@ public class XmlReadContextImpl implements XmlReadContext {
             throw new XmlPersisterException(format("Failed reading %s element from %s", element, input), exception);
         }
         return node != null ? read(node, type) : null;
+    }
+
+    @Override
+    public <T> T readElement(InputNode input, String element, Class<T> type, T defaultValue) {
+        T value = readElement(input, element, type);
+        return value != null ? value : defaultValue;
+    }
+
+    public abstract <T> T read(InputNode input, Class<T> type, XmlReadContext delegate);
+
+    @Override
+    public Map getMap() {
+        return map;
+    }
+
+    @Override
+    public void setMap(Map map) {
+        this.map = map;
+    }
+
+    @Override
+    public XmlReadContext getContext() {
+        return context;
+    }
+
+    @Override
+    public void setContext(XmlReadContext context) {
+        this.context = context;
     }
 
     @Override
@@ -145,18 +181,15 @@ public class XmlReadContextImpl implements XmlReadContext {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        XmlReadContextImpl that = (XmlReadContextImpl) o;
+        XmlReadContextBase that = (XmlReadContextBase) o;
 
         if (map != null ? !map.equals(that.map) : that.map != null) return false;
-        if (strategy != null ? !strategy.equals(that.strategy) : that.strategy != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = strategy != null ? strategy.hashCode() : 0;
-        result = 31 * result + (map != null ? map.hashCode() : 0);
-        return result;
+        return map != null ? map.hashCode() : 0;
     }
 }

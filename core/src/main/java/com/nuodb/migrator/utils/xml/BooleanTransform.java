@@ -25,76 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup;
+package com.nuodb.migrator.utils.xml;
 
-import com.nuodb.migrator.utils.ObjectUtils;
+import org.simpleframework.xml.transform.Transform;
+
+import static java.lang.Boolean.parseBoolean;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class Script {
+public class BooleanTransform implements Transform<Boolean> {
 
-    public static final String NAME = "schema.sql";
-
-    private String catalogName;
-    private String schemaName;
-    private String name = NAME;
-    private long scriptCount;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public long getScriptCount() {
-        return scriptCount;
-    }
-
-    public void setScriptCount(long scriptCount) {
-        this.scriptCount = scriptCount;
+    @Override
+    public Boolean read(String value) throws Exception {
+        return isEmpty(value) ? null : parseBoolean(value);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Script script = (Script) o;
-
-        if (scriptCount != script.scriptCount) return false;
-        if (name != null ? !name.equals(script.name) : script.name != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (int) (scriptCount ^ (scriptCount >>> 32));
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return ObjectUtils.toString(this);
+    public String write(Boolean value) throws Exception {
+        return value != null ? value.toString() : EMPTY;
     }
 }

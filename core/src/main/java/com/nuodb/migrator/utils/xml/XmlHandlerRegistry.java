@@ -94,9 +94,9 @@ public class XmlHandlerRegistry {
         }
 
         @Override
-        public boolean write(Object value, Class type, OutputNode output, XmlWriteContext context) {
+        public boolean write(Object source, Class type, OutputNode output, XmlWriteContext context) {
             try {
-                converter.write(output, value);
+                converter.write(output, source);
                 return true;
             } catch (Exception e) {
                 throw new XmlPersisterException("Underlying converter failed to write", e);
@@ -109,7 +109,7 @@ public class XmlHandlerRegistry {
         }
 
         @Override
-        public boolean canWrite(Object value, Class type, OutputNode output, XmlWriteContext context) {
+        public boolean canWrite(Object source, Class type, OutputNode output, XmlWriteContext context) {
             return this.type.equals(type);
         }
     }

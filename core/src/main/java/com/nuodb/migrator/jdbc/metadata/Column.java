@@ -31,15 +31,19 @@ import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcTypeOptions;
+import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
+import static com.nuodb.migrator.utils.ObjectUtils.equals;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.upperCase;
 
+@SuppressWarnings("unchecked")
 public class Column extends IdentifiableBase implements Field {
 
     public static final int DEFAULT_SIZE = 0;
@@ -81,12 +85,16 @@ public class Column extends IdentifiableBase implements Field {
 
     private DefaultValue defaultValue;
 
+    public Column() {
+        super(COLUMN);
+    }
+
     public Column(String name) {
         this(valueOf(name));
     }
 
     public Column(Identifier identifier) {
-        super(MetaDataType.COLUMN, identifier);
+        super(COLUMN, identifier);
     }
 
     @Override
@@ -221,11 +229,13 @@ public class Column extends IdentifiableBase implements Field {
     }
 
     public void setSequence(Sequence sequence) {
-        if (sequence != null) {
-            sequence.setColumn(this);
+        if (!ObjectUtils.equals(this.sequence, sequence)) {
+            if (sequence != null) {
+                sequence.addColumn(this);
+            }
+            this.sequence = sequence;
+            this.autoIncrement = sequence != null;
         }
-        this.sequence = sequence;
-        this.autoIncrement = sequence != null;
     }
 
     public DefaultValue getDefaultValue() {

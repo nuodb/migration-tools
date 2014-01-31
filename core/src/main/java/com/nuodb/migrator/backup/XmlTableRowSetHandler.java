@@ -37,31 +37,31 @@ import org.simpleframework.xml.stream.OutputNode;
  */
 public class XmlTableRowSetHandler extends XmlRowSetHandler<TableRowSet> {
 
-    private static final String CATALOG_NAME = "catalog-name";
-    private static final String SCHEMA_NAME = "schema-name";
-    private static final String TABLE_NAME = "table-name";
+    private static final String CATALOG_ATTRIBUTE = "catalog";
+    private static final String SCHEMA_ATTRIBUTE = "schema";
+    private static final String TABLE_ATTRIBUTE = "table";
 
     public XmlTableRowSetHandler() {
         super(TableRowSet.class, TABLE_TYPE);
     }
 
     @Override
-    protected void readAttributes(InputNode input, TableRowSet rowSet, XmlReadContext context) throws Exception {
-        super.readAttributes(input, rowSet, context);
-        rowSet.setCatalogName(context.readAttribute(input, CATALOG_NAME, String.class));
-        rowSet.setSchemaName(context.readAttribute(input, SCHEMA_NAME, String.class));
-        rowSet.setTableName(context.readAttribute(input, TABLE_NAME, String.class));
+    protected void readAttributes(InputNode input, TableRowSet target, XmlReadContext context) throws Exception {
+        super.readAttributes(input, target, context);
+        target.setCatalog(context.readAttribute(input, CATALOG_ATTRIBUTE, String.class));
+        target.setSchema(context.readAttribute(input, SCHEMA_ATTRIBUTE, String.class));
+        target.setTable(context.readAttribute(input, TABLE_ATTRIBUTE, String.class));
     }
 
     @Override
-    protected void writeAttributes(TableRowSet rowSet, OutputNode output, XmlWriteContext context) throws Exception {
-        super.writeAttributes(rowSet, output, context);
-        if (rowSet.getCatalogName() != null) {
-            context.writeAttribute(output, CATALOG_NAME, rowSet.getCatalogName());
+    protected void writeAttributes(OutputNode output, TableRowSet rowSet, XmlWriteContext context) throws Exception {
+        super.writeAttributes(output, rowSet, context);
+        if (rowSet.getCatalog() != null) {
+            context.writeAttribute(output, CATALOG_ATTRIBUTE, rowSet.getCatalog());
         }
-        if (rowSet.getSchemaName() != null) {
-            context.writeAttribute(output, SCHEMA_NAME, rowSet.getSchemaName());
+        if (rowSet.getSchema() != null) {
+            context.writeAttribute(output, SCHEMA_ATTRIBUTE, rowSet.getSchema());
         }
-        context.writeAttribute(output, TABLE_NAME, rowSet.getTableName());
+        context.writeAttribute(output, TABLE_ATTRIBUTE, rowSet.getTable());
     }
 }

@@ -28,7 +28,6 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.match.Regex;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -38,9 +37,7 @@ import java.io.OutputStream;
 
 import static com.nuodb.migrator.match.AntRegexCompiler.INSTANCE;
 import static java.lang.String.format;
-import static org.apache.commons.io.FileUtils.forceMkdir;
-import static org.apache.commons.io.FileUtils.getFile;
-import static org.apache.commons.io.FileUtils.touch;
+import static org.apache.commons.io.FileUtils.*;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -104,7 +101,7 @@ public abstract class BackupManagerBase implements BackupManager {
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Opening file for reading %s", file.getPath()));
             }
-            return FileUtils.openInputStream(file);
+            return openInputStream(file);
         } catch (IOException exception) {
             throw new BackupException("Error opening file for reading", exception);
         }
@@ -117,7 +114,7 @@ public abstract class BackupManagerBase implements BackupManager {
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Opening file for writing %s", file.getPath()));
             }
-            return FileUtils.openOutputStream(file);
+            return openOutputStream(file);
         } catch (IOException exception) {
             throw new BackupException("Error opening file for writing", exception);
         }

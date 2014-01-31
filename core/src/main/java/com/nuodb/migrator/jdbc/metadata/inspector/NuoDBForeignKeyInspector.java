@@ -97,7 +97,7 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
                 inspectionResults.addObject(foreignKey);
             }
             if (foreignKey != null) {
-                foreignKey.addReference(foreignColumn, primaryColumn, position);
+                foreignKey.addReference(primaryColumn, foreignColumn, position);
             }
         }
     }

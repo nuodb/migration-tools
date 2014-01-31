@@ -38,7 +38,7 @@ import static com.nuodb.migrator.utils.xml.XmlAliasTypeMapper.TYPE_ATTRIBUTE;
 /**
  * @author Sergey Bushik
  */
-public class XmlRowSetHandler<T extends RowSet> extends XmlReadWriteHandlerBase<T> implements XmlConstants {
+public abstract class XmlRowSetHandler<T extends RowSet> extends XmlReadWriteHandlerBase<T> implements XmlConstants {
 
     private static final String NAME_ATTRIBUTE = "name";
     private static final String ROW_COUNT_ATTRIBUTE = "row-count";
@@ -47,33 +47,24 @@ public class XmlRowSetHandler<T extends RowSet> extends XmlReadWriteHandlerBase<
 
     private final String typeAttribute;
 
-    @SuppressWarnings("unchecked")
-    public XmlRowSetHandler() {
-        this((Class<? extends T>) RowSet.class, QUERY_TYPE);
-    }
-
     protected XmlRowSetHandler(Class<? extends T> type, String typeAttribute) {
         super(type);
         this.typeAttribute = typeAttribute;
     }
 
     @Override
-    protected void readAttributes(InputNode input, T rowSet, XmlReadContext context) throws Exception {
-        rowSet.setName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
-        rowSet.setRowCount(context.readAttribute(input, ROW_COUNT_ATTRIBUTE, Long.class));
+    protected void readAttributes(InputNode input, T target, XmlReadContext context) throws Exception {
+        target.setName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
+        target.setRowCount(context.readAttribute(input, ROW_COUNT_ATTRIBUTE, Long.class));
     }
 
     @Override
-    protected void writeAttributes(T rowSet, OutputNode output, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(OutputNode output, T rowSet, XmlWriteContext context) throws Exception {
         context.writeAttribute(output, TYPE_ATTRIBUTE, getTypeAttribute());
         if (rowSet.getName() != null) {
             context.writeAttribute(output, NAME_ATTRIBUTE, rowSet.getName());
         }
         context.writeAttribute(output, ROW_COUNT_ATTRIBUTE, rowSet.getRowCount());
-    }
-
-    protected String getTypeAttribute() {
-        return typeAttribute;
     }
 
     @Override
@@ -86,12 +77,16 @@ public class XmlRowSetHandler<T extends RowSet> extends XmlReadWriteHandlerBase<
     }
 
     @Override
-    protected void writeElements(T rowSet, OutputNode output, XmlWriteContext context) throws Exception {
+    protected void writeElements(OutputNode output, T rowSet, XmlWriteContext context) throws Exception {
         for (Column column : rowSet.getColumns()) {
             context.writeElement(output, COLUMN_ELEMENT, column);
         }
         for (Chunk chunk : rowSet.getChunks()) {
             context.writeElement(output, CHUNK_ELEMENT, chunk);
         }
+    }
+
+    protected String getTypeAttribute() {
+        return typeAttribute;
     }
 }

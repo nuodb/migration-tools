@@ -27,7 +27,13 @@
  */
 package com.nuodb.migrator.job;
 
-import com.nuodb.migrator.jdbc.dialect.*;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.dialect.DialectResolver;
+import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
+import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
+import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
+import com.nuodb.migrator.jdbc.dialect.TranslationManager;
+import com.nuodb.migrator.jdbc.dialect.Translator;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
@@ -36,7 +42,6 @@ import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
-import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaGeneratorJobSpecBase;
 import com.nuodb.migrator.utils.PrioritySet;
 
@@ -44,8 +49,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
+import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 
 /**
@@ -53,6 +58,7 @@ import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
  */
 public abstract class SchemaGeneratorJobBase<S extends SchemaGeneratorJobSpecBase> extends HasServicesJobBase<S> {
 
+    private ConnectionSpec sourceSpec;
     private Session sourceSession;
     private Session targetSession;
 
@@ -108,6 +114,14 @@ public abstract class SchemaGeneratorJobBase<S extends SchemaGeneratorJobSpecBas
         close(getTargetSession());
     }
 
+    public ConnectionSpec getSourceSpec() {
+        return sourceSpec;
+    }
+
+    public void setSourceSpec(ConnectionSpec sourceSpec) {
+        this.sourceSpec = sourceSpec;
+    }
+
     public Session getSourceSession() {
         return sourceSession;
     }
@@ -148,16 +162,8 @@ public abstract class SchemaGeneratorJobBase<S extends SchemaGeneratorJobSpecBas
         return getJobSpec().getObjectTypes();
     }
 
-    protected ResourceSpec getOutputSpec() {
-        return getJobSpec().getOutputSpec();
-    }
-
     protected Collection<ScriptType> getScriptTypes() {
         return getJobSpec().getScriptTypes();
-    }
-
-    protected ConnectionSpec getSourceSpec() {
-        return getJobSpec().getSourceSpec();
     }
 
     protected ConnectionSpec getTargetSpec() {

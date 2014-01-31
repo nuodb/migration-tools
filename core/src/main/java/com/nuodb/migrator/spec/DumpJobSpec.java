@@ -27,24 +27,31 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 
 /**
  * @author Sergey Bushik
  */
-public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
+public class DumpJobSpec extends JobSpecBase {
 
     private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);
+    private Collection<MetaDataType> objectTypes = newArrayList(MetaDataType.TYPES);
     private Integer threads;
     private TimeZone timeZone;
+    private ConnectionSpec sourceSpec;
+    private ResourceSpec outputSpec;
+    private String[] tableTypes = new String[]{TABLE};
     private Collection<TableSpec> tableSpecs = newArrayList();
     private Collection<QuerySpec> querySpecs = newArrayList();
     private QueryLimit queryLimit;
@@ -55,6 +62,14 @@ public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
 
     public void setMigrationModes(Collection<MigrationMode> migrationModes) {
         this.migrationModes = migrationModes;
+    }
+
+    public Collection<MetaDataType> getObjectTypes() {
+        return objectTypes;
+    }
+
+    public void setObjectTypes(Collection<MetaDataType> objectTypes) {
+        this.objectTypes = objectTypes;
     }
 
     public Integer getThreads() {
@@ -71,6 +86,30 @@ public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
 
     public void setTimeZone(TimeZone timeZone) {
         this.timeZone = timeZone;
+    }
+
+    public ConnectionSpec getSourceSpec() {
+        return sourceSpec;
+    }
+
+    public void setSourceSpec(ConnectionSpec sourceSpec) {
+        this.sourceSpec = sourceSpec;
+    }
+
+    public ResourceSpec getOutputSpec() {
+        return outputSpec;
+    }
+
+    public void setOutputSpec(ResourceSpec outputSpec) {
+        this.outputSpec = outputSpec;
+    }
+
+    public String[] getTableTypes() {
+        return tableTypes;
+    }
+
+    public void setTableTypes(String[] tableTypes) {
+        this.tableTypes = tableTypes;
     }
 
     public Collection<TableSpec> getTableSpecs() {
@@ -107,9 +146,13 @@ public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
 
         if (migrationModes != null ? !migrationModes.equals(that.migrationModes) : that.migrationModes != null)
             return false;
+        if (objectTypes != null ? !objectTypes.equals(that.objectTypes) : that.objectTypes != null) return false;
+        if (outputSpec != null ? !outputSpec.equals(that.outputSpec) : that.outputSpec != null) return false;
         if (queryLimit != null ? !queryLimit.equals(that.queryLimit) : that.queryLimit != null) return false;
         if (querySpecs != null ? !querySpecs.equals(that.querySpecs) : that.querySpecs != null) return false;
+        if (sourceSpec != null ? !sourceSpec.equals(that.sourceSpec) : that.sourceSpec != null) return false;
         if (tableSpecs != null ? !tableSpecs.equals(that.tableSpecs) : that.tableSpecs != null) return false;
+        if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
         if (threads != null ? !threads.equals(that.threads) : that.threads != null) return false;
         if (timeZone != null ? !timeZone.equals(that.timeZone) : that.timeZone != null) return false;
 
@@ -120,8 +163,12 @@ public class DumpJobSpec extends SchemaGeneratorJobSpecBase {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (migrationModes != null ? migrationModes.hashCode() : 0);
+        result = 31 * result + (objectTypes != null ? objectTypes.hashCode() : 0);
         result = 31 * result + (threads != null ? threads.hashCode() : 0);
         result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
+        result = 31 * result + (sourceSpec != null ? sourceSpec.hashCode() : 0);
+        result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);
+        result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
         result = 31 * result + (tableSpecs != null ? tableSpecs.hashCode() : 0);
         result = 31 * result + (querySpecs != null ? querySpecs.hashCode() : 0);
         result = 31 * result + (queryLimit != null ? queryLimit.hashCode() : 0);

@@ -110,6 +110,7 @@ public class MSSQLServerIdentityInspector extends TableInspectorBase<Table, Tabl
             sequence.setIncrementBy(identities.getLong("INCREMENT_BY"));
             Column column = table.addColumn(identities.getString("COLUMN_NAME"));
             column.setSequence(sequence);
+            column.getTable().getSchema().addSequence(sequence);
             inspectionResults.addObject(sequence);
         }
     }

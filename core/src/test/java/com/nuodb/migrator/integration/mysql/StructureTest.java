@@ -261,9 +261,11 @@ public class StructureTest extends MigrationTestBase {
                         + "and C.TABLE_SCHEMA = TC.CONSTRAINT_SCHEMA "
                         + "and TC.TABLE_NAME=C.TABLE_NAME AND C.COLUMN_KEY=SUBSTRING(TC.CONSTRAINT_TYPE,1,3) "
                         + "AND C.COLUMN_KEY IN ('UNI')";
-        String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES AS I INNER JOIN SYSTEM.INDEXFIELDS AS F ON "
-                + "I.SCHEMA=F.SCHEMA AND I.TABLENAME=F.TABLENAME AND "
-                + "I.INDEXNAME=F.INDEXNAME WHERE I.SCHEMA=? AND I.TABLENAME=? AND I.INDEXNAME LIKE '%UNIQUE%'";
+        String sqlStr2 = "SELECT F.FIELD, IFS.INDEXNAME FROM SYSTEM.INDEXES AS I "
+                + "INNER JOIN SYSTEM.INDEXFIELDS AS IFS ON "
+                + "I.SCHEMA=IFS.SCHEMA AND I.TABLENAME=IFS.TABLENAME AND I.INDEXNAME=IFS.INDEXNAME "
+                + "INNER JOIN SYSTEM.FIELDS F ON IFS.SCHEMA=F.SCHEMA AND IFS.TABLENAME=F.TABLENAME AND IFS.FIELD=F.FIELD "
+                + "WHERE I.SCHEMA=? AND I.TABLENAME=? ORDER BY F.FIELDPOSITION";
         PreparedStatement stmt1 = null, stmt2 = null;
         ResultSet rs1 = null, rs2 = null;
         HashMap map = new HashMap();
@@ -303,7 +305,9 @@ public class StructureTest extends MigrationTestBase {
                 boolean found = false;
                 while (rs2.next()) {
                     found = true;
-                    tarColList.add(rs2.getString(1));
+                    if (rs2.getString(2).toLowerCase().contains("unique")) {
+                        tarColList.add(rs2.getString(1));
+                    }
                 }
                 Assert.assertTrue(found);
                 assertEquals(srcColList, tarColList);
