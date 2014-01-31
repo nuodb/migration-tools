@@ -28,8 +28,13 @@
 package com.nuodb.migrator.backup;
 
 import com.google.common.collect.Iterables;
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.ColumnTrigger;
+import com.nuodb.migrator.jdbc.metadata.DefaultValue;
+import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.type.JdbcEnumType;
 import com.nuodb.migrator.jdbc.type.JdbcSetType;
 import com.nuodb.migrator.jdbc.type.JdbcType;

@@ -50,7 +50,13 @@ import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
-import com.nuodb.migrator.jdbc.query.*;
+import com.nuodb.migrator.jdbc.query.InsertQuery;
+import com.nuodb.migrator.jdbc.query.InsertQueryBuilder;
+import com.nuodb.migrator.jdbc.query.InsertType;
+import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.query.StatementCallback;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.job.SchemaGeneratorJobBase;
@@ -129,6 +135,7 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
 
         Collection<MetaDataType> indexes = newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX);
         Collection<MigrationMode> migrationModes = getMigrationModes();
+        // import scripts excluding indexes
         if (contains(migrationModes, SCHEMA)) {
             ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
             Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
@@ -136,6 +143,7 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
             scriptGeneratorManager.setObjectTypes(objectTypes);
             exportScripts(scriptGeneratorManager.getScripts(source));
         }
+        // import data
         if (contains(migrationModes, DATA)) {
             Connection connection = getTargetSession().getConnection();
             Database target = inspect();
@@ -152,6 +160,7 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
                 throw new LoadException(exception);
             }
         }
+        // import remaining scripts for indexes
         if (contains(migrationModes, SCHEMA)) {
             ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
             Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());

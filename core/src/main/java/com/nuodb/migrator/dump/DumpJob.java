@@ -39,7 +39,12 @@ import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.job.HasServicesJobBase;
-import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.DumpJobSpec;
+import com.nuodb.migrator.spec.MigrationMode;
+import com.nuodb.migrator.spec.QuerySpec;
+import com.nuodb.migrator.spec.ResourceSpec;
+import com.nuodb.migrator.spec.TableSpec;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -87,7 +92,7 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         setSourceSession(session);
 
         ResourceSpec outputSpec = getOutputSpec();
-        BackupManager backupManager = createBackupManager(outputSpec.getPath());
+        BackupManager backupManager = createBackupManager(outputSpec);
         setBackupManager(backupManager);
 
         Collection<MigrationMode> migrationModes = getMigrationModes();
@@ -110,8 +115,8 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         setDumpWriter(dumpWriter);
     }
 
-    protected BackupManager createBackupManager(String path) {
-        return new XmlBackupManager(path);
+    protected BackupManager createBackupManager(ResourceSpec outputSpec) {
+        return new XmlBackupManager(outputSpec.getPath());
     }
 
     protected SessionFactory createSessionFactory() {
