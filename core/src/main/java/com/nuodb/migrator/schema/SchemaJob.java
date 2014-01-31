@@ -137,6 +137,16 @@ public class SchemaJob extends SchemaGeneratorJobBase<SchemaJobSpec> {
         close(getScriptExporter());
     }
 
+    @Override
+    public void setSourceSpec(ConnectionSpec sourceSpec) {
+        getJobSpec().setSourceSpec(sourceSpec);
+    }
+
+    @Override
+    public ConnectionSpec getSourceSpec() {
+        return getJobSpec().getSourceSpec();
+    }
+
     protected ResourceSpec getOutputSpec() {
         return getJobSpec().getOutputSpec();
     }
