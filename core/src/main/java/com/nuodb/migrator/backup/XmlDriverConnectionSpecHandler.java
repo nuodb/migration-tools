@@ -41,12 +41,12 @@ import java.util.Map;
  */
 public class XmlDriverConnectionSpecHandler extends XmlConnectionSpecHandler<DriverConnectionSpec> {
 
-    public static final String DRIVER_ELEMENT = "driver";
-    public static final String URL_ELEMENT = "url";
-    public static final String USERNAME_ELEMENT = "username";
-    public static final String PROPERTY_ELEMENT = "property";
-    public static final String KEY_ATTRIBUTE = "key";
-    public static final String VALUE_ATTRIBUTE = "value";
+    private static final String DRIVER_ELEMENT = "driver";
+    private static final String URL_ELEMENT = "url";
+    private static final String USERNAME_ELEMENT = "username";
+    private static final String PROPERTY_ELEMENT = "property";
+    private static final String KEY_ATTRIBUTE = "key";
+    private static final String VALUE_ATTRIBUTE = "value";
 
     public XmlDriverConnectionSpecHandler() {
         super(DriverConnectionSpec.class, DRIVER_TYPE);

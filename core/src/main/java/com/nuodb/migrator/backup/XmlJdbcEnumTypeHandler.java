@@ -39,7 +39,7 @@ import org.simpleframework.xml.stream.OutputNode;
 @SuppressWarnings("unchecked")
 public class XmlJdbcEnumTypeHandler<T extends JdbcEnumType> extends XmlJdbcTypeHandler<T> {
 
-    public static final String VALUE_ELEMENT = "value";
+    private static final String VALUE_ELEMENT = "value";
 
     public XmlJdbcEnumTypeHandler() {
         this((Class<? extends T>) JdbcEnumType.class);
