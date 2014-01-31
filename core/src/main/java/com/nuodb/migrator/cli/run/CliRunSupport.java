@@ -833,9 +833,9 @@ public class CliRunSupport extends CliSupport {
         return tableTypes.toArray(new String[tableTypes.size()]);
     }
 
-    protected Set<MetaDataType> parseObjectTypes(OptionSet optionSet) {
+    protected Collection<MetaDataType> parseObjectTypes(OptionSet optionSet) {
         Collection<String> values = optionSet.getValues(META_DATA_OPTION);
-        Set<MetaDataType> objectTypes = newHashSet(MetaDataType.TYPES);
+        Collection<MetaDataType> objectTypes = newArrayList(MetaDataType.TYPES);
         Map<String, MetaDataType> objectTypeMap = new TreeMap<String, MetaDataType>(String.CASE_INSENSITIVE_ORDER);
         objectTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
         for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {

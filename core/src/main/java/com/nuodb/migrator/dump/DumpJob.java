@@ -32,6 +32,7 @@ import com.nuodb.migrator.backup.BackupManager;
 import com.nuodb.migrator.backup.XmlBackupManager;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
@@ -54,7 +55,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.dump.DumpWriter.THREADS;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TYPES;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationSetter;
@@ -69,7 +69,7 @@ import static org.apache.commons.lang3.ArrayUtils.indexOf;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "ToArrayCallWithZeroLengthArrayArgument"})
 public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     private BackupManager backupManager;
@@ -189,7 +189,7 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         InspectionScope inspectionScope = new TableInspectionScope(
                 getSourceSpec().getCatalog(), getSourceSpec().getSchema(), getTableTypes());
         return createInspectionManager().inspect(getSourceSession().getConnection(), inspectionScope,
-                TYPES).getObject(DATABASE);
+                getObjectTypes().toArray(new MetaDataType[0])).getObject(DATABASE);
     }
 
     public DumpWriter getDumpWriter() {
@@ -234,6 +234,10 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     protected Collection<TableSpec> getTableSpecs() {
         return getJobSpec().getTableSpecs();
+    }
+
+    protected Collection<MetaDataType> getObjectTypes() {
+        return getJobSpec().getObjectTypes();
     }
 
     protected String[] getTableTypes() {

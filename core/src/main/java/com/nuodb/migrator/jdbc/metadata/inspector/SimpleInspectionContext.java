@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.google.common.collect.Sets;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
@@ -35,11 +36,15 @@ import org.slf4j.Logger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.TreeSet;
 
+import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataHandlerUtils.findMetaDataHandler;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -113,7 +118,7 @@ public class SimpleInspectionContext implements InspectionContext {
 
     @Override
     public void inspect(InspectionScope scope, MetaDataType... objectTypes) throws SQLException {
-        for (MetaDataType objectType : objectTypes) {
+        for (MetaDataType objectType : newTreeSet(asList(objectTypes))) {
             Inspector inspector = findInspector(objectType);
             if (logger.isDebugEnabled()) {
                 logger.debug(format("Inspecting %s", objectType));

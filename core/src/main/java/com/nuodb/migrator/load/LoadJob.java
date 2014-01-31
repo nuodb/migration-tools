@@ -109,8 +109,8 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
         super.init();
 
         ResourceSpec inputSpec = getInputSpec();
-        setFormatAttributes(inputSpec.getAttributes());
         setBackupManager(createBackupManager(inputSpec));
+        setFormatAttributes(inputSpec.getAttributes());
 
         Session targetSession;
         setTargetSession(targetSession = createTargetSessionFactory().openSession());

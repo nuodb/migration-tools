@@ -114,11 +114,12 @@ public class MetaDataType implements Comparable<MetaDataType>, Serializable {
         return objectType.hashCode();
     }
 
+    @Override
     public int compareTo(MetaDataType that) {
         if (objectType.equals(that.getObjectType())) {
             return 0;
         } else {
-            return objectType.isAssignableFrom(that.getObjectType()) ? 1 : -1;
+            return objectType.isAssignableFrom(that.getObjectType()) ? -1 : 1;
         }
     }
 
