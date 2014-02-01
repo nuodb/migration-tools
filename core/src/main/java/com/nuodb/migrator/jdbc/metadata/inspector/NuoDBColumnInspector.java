@@ -94,11 +94,13 @@ public class NuoDBColumnInspector extends TableInspectorBase<Table, TableInspect
             column.setPosition(columns.getInt("FIELDPOSITION"));
             column.setNullable(columns.getInt("FLAGS") == 0);
 
-            String sequence = columns.getString("GENERATOR_SEQUENCE");
-            if (sequence != null) {
-                column.setSequence(new Sequence(sequence));
+            String identifier = columns.getString("GENERATOR_SEQUENCE");
+            if (identifier != null) {
+                Sequence sequence = new Sequence(identifier);
+                column.setSequence(sequence);
+                column.getTable().getSchema().addSequence(sequence);
             }
-            column.setAutoIncrement(sequence != null);
+            column.setAutoIncrement(identifier != null);
 
             inspectionResults.addObject(column);
         }

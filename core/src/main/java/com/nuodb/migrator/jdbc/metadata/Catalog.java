@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CATALOG;
@@ -118,12 +119,20 @@ public class Catalog extends IdentifiableBase implements HasSchemas {
 
     @Override
     public Collection<Table> getTables() {
-        Collection<Schema> schemas = getSchemas();
-        Collection<Table> tables = Lists.newArrayList();
-        for (Schema schema : schemas) {
+        Collection<Table> tables = newArrayList();
+        for (Schema schema : getSchemas()) {
             tables.addAll(schema.getTables());
         }
         return tables;
+    }
+
+    @Override
+    public Collection<Sequence> getSequences() {
+        Collection<Sequence> sequences = newArrayList();
+        for (Schema schema : getSchemas()) {
+            sequences.addAll(schema.getSequences());
+        }
+        return sequences;
     }
 
     @Override

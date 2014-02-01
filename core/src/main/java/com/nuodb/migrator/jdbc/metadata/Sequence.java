@@ -77,6 +77,10 @@ public class Sequence extends IdentifiableBase {
         columns.add(column);
     }
 
+    public void removeColumn(Column column) {
+        columns.remove(column);
+    }
+
     public void setColumn(Column column) {
         setColumns(singleton(column));
     }

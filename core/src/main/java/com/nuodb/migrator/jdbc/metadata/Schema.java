@@ -27,8 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.google.common.collect.Sets;
-
 import java.util.Collection;
 import java.util.Map;
 
@@ -81,10 +79,18 @@ public class Schema extends IdentifiableBase implements HasTables {
     }
 
     public void addSequence(Sequence sequence) {
-        sequence.setSchema(this);
-        sequences.add(sequence);
+        if (sequences.add(sequence)) {
+            sequence.setSchema(this);
+        }
     }
 
+    public void removeSequence(Sequence sequence) {
+        if (sequences.remove(sequence)) {
+            sequence.setSchema(null);
+        }
+    }
+
+    @Override
     public Collection<Sequence> getSequences() {
         return sequences;
     }
@@ -132,6 +138,7 @@ public class Schema extends IdentifiableBase implements HasTables {
         return table;
     }
 
+    @Override
     public Collection<Table> getTables() {
         return tables.values();
     }

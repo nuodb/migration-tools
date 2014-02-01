@@ -171,6 +171,7 @@ public class Database extends IdentifiableBase implements HasSchemas {
         return catalogs.values();
     }
 
+    @Override
     public Collection<Schema> getSchemas() {
         Collection<Schema> schemas = newArrayList();
         for (Catalog catalog : getCatalogs()) {
@@ -179,13 +180,22 @@ public class Database extends IdentifiableBase implements HasSchemas {
         return schemas;
     }
 
+    @Override
     public Collection<Table> getTables() {
-        Collection<Schema> schemas = getSchemas();
         Collection<Table> tables = newArrayList();
-        for (Schema schema : schemas) {
+        for (Schema schema : getSchemas()) {
             tables.addAll(schema.getTables());
         }
         return tables;
+    }
+
+    @Override
+    public Collection<Sequence> getSequences() {
+        Collection<Sequence> sequences = newArrayList();
+        for (Schema schema : getSchemas()) {
+            sequences.addAll(schema.getSequences());
+        }
+        return sequences;
     }
 
     public Collection<Table> getTables(String tableName) {

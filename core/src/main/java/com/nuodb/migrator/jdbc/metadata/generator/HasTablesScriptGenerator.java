@@ -33,11 +33,7 @@ import com.google.common.collect.Multimaps;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.*;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
@@ -85,20 +81,22 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         return tables;
     }
 
-    protected Collection<String> getHasTablesCreateScripts(HasTables tables, ScriptGeneratorManager scriptGeneratorManager) {
+    protected Collection<String> getHasTablesCreateScripts(HasTables tables,
+                                                           ScriptGeneratorManager scriptGeneratorManager) {
         initScriptGeneratorContext(scriptGeneratorManager);
         try {
             Collection<String> scripts = newArrayList();
+            addSequencesCreateScripts(tables.getSequences(), scripts, scriptGeneratorManager);
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:
                     for (Table table : tables.getTables()) {
-                        addCreateScripts(singleton(table), scripts, scriptGeneratorManager);
+                        addTablesCreateScripts(singleton(table), scripts, scriptGeneratorManager);
                     }
                     addForeignKeysScripts(scripts, true, scriptGeneratorManager);
                     break;
                 case META_DATA:
-                    addCreateScripts(tables.getTables(), scripts, scriptGeneratorManager);
+                    addTablesCreateScripts(tables.getTables(), scripts, scriptGeneratorManager);
                     break;
             }
             return scripts;
@@ -107,19 +105,31 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
     }
 
-    protected Collection<String> getHasTablesDropScripts(HasTables tables, ScriptGeneratorManager scriptGeneratorManager) {
+    protected void addSequencesCreateScripts(Collection<Sequence> sequences, Collection<String> scripts,
+                                             ScriptGeneratorManager scriptGeneratorManager) {
+        if (scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
+                scriptGeneratorManager.getTargetDialect().supportsSequence()) {
+            for (Sequence sequence : sequences) {
+                scripts.addAll(scriptGeneratorManager.getCreateScripts(sequence));
+            }
+        }
+    }
+
+    protected Collection<String> getHasTablesDropScripts(HasTables tables,
+                                                         ScriptGeneratorManager scriptGeneratorManager) {
         initScriptGeneratorContext(scriptGeneratorManager);
         try {
             Collection<String> scripts = newArrayList();
+            addSequencesDropScripts(tables.getSequences(), scripts, scriptGeneratorManager);
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:
                     for (Table table : tables.getTables()) {
-                        addDropScripts(singleton(table), scripts, scriptGeneratorManager);
+                        addTablesDropScripts(singleton(table), scripts, scriptGeneratorManager);
                     }
                     break;
                 case META_DATA:
-                    addCreateScripts(tables.getTables(), scripts, scriptGeneratorManager);
+                    addTablesCreateScripts(tables.getTables(), scripts, scriptGeneratorManager);
                     break;
             }
             return scripts;
@@ -128,27 +138,50 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
     }
 
-    protected Collection<String> getHasTablesDropCreateScripts(HasTables tables, ScriptGeneratorManager scriptGeneratorManager) {
+    protected void addSequencesDropScripts(Collection<Sequence> sequences, Collection<String> scripts,
+                                           ScriptGeneratorManager scriptGeneratorManager) {
+        if (scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
+                scriptGeneratorManager.getTargetDialect().supportsSequence()) {
+            for (Sequence sequence : sequences) {
+                scripts.addAll(scriptGeneratorManager.getDropScripts(sequence));
+            }
+        }
+    }
+
+    protected Collection<String> getHasTablesDropCreateScripts(HasTables tables,
+                                                               ScriptGeneratorManager scriptGeneratorManager) {
         initScriptGeneratorContext(scriptGeneratorManager);
         try {
             Collection<String> scripts = newArrayList();
-            GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorManager.getAttributes().get(GROUP_SCRIPTS_BY);
+            addSequencesDropCreateScripts(tables.getSequences(), scripts, scriptGeneratorManager);
+            GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorManager.getAttributes()
+                    .get(GROUP_SCRIPTS_BY);
             switch (groupScriptsBy) {
                 case TABLE:
                     for (Table table : tables.getTables()) {
-                        addDropScripts(singleton(table), scripts, scriptGeneratorManager);
-                        addCreateScripts(singleton(table), scripts, scriptGeneratorManager);
+                        addTablesDropScripts(singleton(table), scripts, scriptGeneratorManager);
+                        addTablesCreateScripts(singleton(table), scripts, scriptGeneratorManager);
                     }
                     addForeignKeysScripts(scripts, true, scriptGeneratorManager);
                     break;
                 case META_DATA:
-                    addDropScripts(tables.getTables(), scripts, scriptGeneratorManager);
-                    addCreateScripts(tables.getTables(), scripts, scriptGeneratorManager);
+                    addTablesDropScripts(tables.getTables(), scripts, scriptGeneratorManager);
+                    addTablesCreateScripts(tables.getTables(), scripts, scriptGeneratorManager);
                     break;
             }
             return scripts;
         } finally {
             releaseScriptGeneratorContext(scriptGeneratorManager);
+        }
+    }
+
+    protected void addSequencesDropCreateScripts(Collection<Sequence> sequences, Collection<String> scripts,
+                                               ScriptGeneratorManager scriptGeneratorManager) {
+        if (scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
+                scriptGeneratorManager.getTargetDialect().supportsSequence()) {
+            for (Sequence sequence : sequences) {
+                scripts.addAll(scriptGeneratorManager.getScripts(sequence));
+            }
         }
     }
 
@@ -157,29 +190,16 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         return groupScriptsBy != null ? groupScriptsBy : GroupScriptsBy.TABLE;
     }
 
-    protected void addCreateScripts(Collection<Table> tables, Collection<String> scripts,
-                                    ScriptGeneratorManager scriptGeneratorManager) {
+    protected void addTablesCreateScripts(Collection<Table> tables, Collection<String> scripts,
+                                          ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         boolean createTables = objectTypes.contains(TABLE);
         boolean createIndexes = objectTypes.contains(INDEX);
         boolean createPrimaryKeys = objectTypes.contains(PRIMARY_KEY);
-        boolean createIdentities = objectTypes.contains(SEQUENCE);
         boolean createForeignKeys = objectTypes.contains(FOREIGN_KEY);
         boolean createTriggers = objectTypes.contains(TRIGGER);
         boolean createColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
-        if (createIdentities) {
-            for (Table table : tables) {
-                if (!addTableScripts(table, scriptGeneratorManager)) {
-                    continue;
-                }
-                for (Column column : table.getColumns()) {
-                    if (column.getSequence() != null) {
-                        scripts.addAll(scriptGeneratorManager.getCreateScripts(column.getSequence()));
-                    }
-                }
-            }
-        }
         if (createTables) {
             ScriptGeneratorManager tableScriptGeneratorManager = new ScriptGeneratorManager(scriptGeneratorManager);
             Collection<Table> tableFromContext = (Collection<Table>)
@@ -231,7 +251,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             }
             scripts.addAll(triggers);
         }
-
         if (createForeignKeys) {
             Collection<Table> generatedTables = (Collection<Table>) scriptGeneratorManager.getAttributes().get(TABLES);
             Multimap<Table, ForeignKey> pendingForeignKeys =
@@ -254,7 +273,8 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         addForeignKeysScripts(scripts, false, scriptGeneratorManager);
     }
 
-    protected void addForeignKeysScripts(Collection<String> scripts, boolean force, ScriptGeneratorManager scriptGeneratorManager) {
+    protected void addForeignKeysScripts(Collection<String> scripts, boolean force,
+                                         ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         if (objectTypes.contains(FOREIGN_KEY)) {
             Collection<Table> generatedTables = (Collection<Table>) scriptGeneratorManager.getAttributes().get(TABLES);
@@ -274,8 +294,8 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
     }
 
-    protected void addDropScripts(Collection<Table> tables, Collection<String> scripts,
-                                  ScriptGeneratorManager scriptGeneratorManager) {
+    protected void addTablesDropScripts(Collection<Table> tables, Collection<String> scripts,
+                                        ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         if (objectTypes.contains(FOREIGN_KEY) && dialect.supportsDropConstraints()) {
@@ -312,18 +332,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                     continue;
                 }
                 scripts.addAll(scriptGeneratorManager.getDropScripts(table));
-            }
-        }
-        if (objectTypes.contains(SEQUENCE) && dialect.supportsSequence()) {
-            for (Table table : tables) {
-                if (!addTableScripts(table, scriptGeneratorManager)) {
-                    continue;
-                }
-                for (Column column : table.getColumns()) {
-                    if (column.getSequence() != null) {
-                        scripts.addAll(scriptGeneratorManager.getDropScripts(column.getSequence()));
-                    }
-                }
             }
         }
     }

@@ -35,4 +35,6 @@ import java.util.Collection;
 public interface HasTables extends MetaData {
 
     Collection<Table> getTables();
+
+    Collection<Sequence> getSequences();
 }
