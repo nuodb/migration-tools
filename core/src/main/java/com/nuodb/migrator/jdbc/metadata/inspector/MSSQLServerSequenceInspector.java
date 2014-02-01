@@ -39,17 +39,17 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public class MSSQLServerIdentityInspector extends TableInspectorBase<Table, TableInspectionScope> {
+public class MSSQLServerSequenceInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    public MSSQLServerIdentityInspector() {
-        super(IDENTITY, TableInspectionScope.class);
+    public MSSQLServerSequenceInspector() {
+        super(SEQUENCE, TableInspectionScope.class);
     }
 
     @Override
@@ -97,18 +97,18 @@ public class MSSQLServerIdentityInspector extends TableInspectorBase<Table, Tabl
     }
 
     @Override
-    protected void processResultSet(InspectionContext inspectionContext, ResultSet identities) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet sequences) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        if (identities.next()) {
+        if (sequences.next()) {
             Table table = addTable(inspectionResults,
-                    identities.getString("TABLE_CATALOG"),
-                    identities.getString("TABLE_SCHEMA"),
-                    identities.getString("TABLE_NAME"));
+                    sequences.getString("TABLE_CATALOG"),
+                    sequences.getString("TABLE_SCHEMA"),
+                    sequences.getString("TABLE_NAME"));
             Sequence sequence = new Sequence();
-            sequence.setStartWith(identities.getLong("START_WITH"));
-            sequence.setLastValue(identities.getLong("LAST_VALUE"));
-            sequence.setIncrementBy(identities.getLong("INCREMENT_BY"));
-            Column column = table.addColumn(identities.getString("COLUMN_NAME"));
+            sequence.setStartWith(sequences.getLong("START_WITH"));
+            sequence.setLastValue(sequences.getLong("LAST_VALUE"));
+            sequence.setIncrementBy(sequences.getLong("INCREMENT_BY"));
+            Column column = table.addColumn(sequences.getString("COLUMN_NAME"));
             column.setSequence(sequence);
             column.getTable().getSchema().addSequence(sequence);
             inspectionResults.addObject(sequence);

@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.cli.run;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers;
@@ -43,6 +42,7 @@ import org.testng.annotations.Test;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.assertEquals;
@@ -79,7 +79,7 @@ public class CliSchemaJobTest {
 
                 "--use.explicit.defaults=false",
                 "--meta.data.check=false",
-                "--meta.data.identity=false",
+                "--meta.data.sequence=false",
                 "--script.type=drop,create",
                 "--group.scripts.by=meta.data",
                 "--identifier.quoting=always",
@@ -113,12 +113,12 @@ public class CliSchemaJobTest {
         outputSpec.setPath("/tmp/schema.sql");
         schemaSpec.setOutputSpec(outputSpec);
 
-        Collection<MetaDataType> metaDataTypes = Lists.newArrayList(MetaDataType.TYPES);
+        Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.TYPES);
         metaDataTypes.remove(MetaDataType.CHECK);
-        metaDataTypes.remove(MetaDataType.IDENTITY);
+        metaDataTypes.remove(MetaDataType.SEQUENCE);
         schemaSpec.setObjectTypes(metaDataTypes);
 
-        schemaSpec.setScriptTypes(Lists.newArrayList(ScriptType.DROP, ScriptType.CREATE));
+        schemaSpec.setScriptTypes(newArrayList(ScriptType.DROP, ScriptType.CREATE));
         schemaSpec.setGroupScriptsBy(GroupScriptsBy.META_DATA);
         schemaSpec.setIdentifierQuoting(IdentifierQuotings.ALWAYS);
         schemaSpec.setIdentifierNormalizer(IdentifierNormalizers.STANDARD);

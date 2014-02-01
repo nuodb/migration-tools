@@ -40,6 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class Index extends ConstraintBase {
 
+    private boolean primary;
     private boolean unique;
     private String filterCondition;
     private SortOrder sortOrder;
@@ -68,7 +69,11 @@ public class Index extends ConstraintBase {
 
     public boolean isPrimary() {
         PrimaryKey primaryKey = getTable().getPrimaryKey();
-        return primaryKey != null && getColumns().equals(primaryKey.getColumns());
+        return primary || primaryKey != null && getColumns().equals(primaryKey.getColumns());
+    }
+
+    public void setPrimary(boolean primary) {
+        this.primary = primary;
     }
 
     @Override

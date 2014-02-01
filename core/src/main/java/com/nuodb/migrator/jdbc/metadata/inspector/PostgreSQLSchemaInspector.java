@@ -47,8 +47,8 @@ import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 public class PostgreSQLSchemaInspector extends ManagedInspectorBase<Catalog, SchemaInspectionScope> {
 
     private static final String QUERY =
-            "SELECT NSPNAME AS TABLE_SCHEM FROM PG_CATALOG.PG_NAMESPACE\n" +
-             "WHERE NSPNAME !~ '^PG_TOAST' AND NSPNAME !~ '^PG_TEMP' AND NSPNAME LIKE ? ORDER BY TABLE_SCHEM";
+            "SELECT NSPNAME AS TABLE_SCHEM FROM PG_CATALOG.PG_NAMESPACE " +
+            "WHERE NSPNAME !~ '^PG_TOAST' AND NSPNAME !~ '^PG_TEMP' AND NSPNAME LIKE ? ORDER BY TABLE_SCHEM";
 
     public PostgreSQLSchemaInspector() {
         super(SCHEMA, SchemaInspectionScope.class);

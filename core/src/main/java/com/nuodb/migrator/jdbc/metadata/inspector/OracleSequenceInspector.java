@@ -25,33 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.dialect;
+package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
-import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.Query;
 
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
-import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleDialectResolver extends SimpleCachingServiceResolver<Dialect> implements DialectResolver {
+public class OracleSequenceInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    public SimpleDialectResolver() {
-        super(SimpleDialect.class);
-        register(DB2, DB2Dialect.class);
-        register(MYSQL, MySQLDialect.class);
-        register(NUODB, NuoDBDialect.class);
-        register(NUODB_203, NuoDBDialect203.class);
-        register(POSTGRE_SQL, PostgreSQLDialect.class);
-        register(ORACLE, OracleDialect.class);
-        register(MSSQL_SERVER, MSSQLServerDialect.class);
-        register(MSSQL_SERVER_2005, MSSQLServer2005Dialect.class);
+    public OracleSequenceInspector() {
+        super(SEQUENCE, TABLE, TableInspectionScope.class);
     }
 
     @Override
-    protected Dialect createService(Class<? extends Dialect> serviceClass, DatabaseInfo databaseInfo) {
-        return newInstance(serviceClass, databaseInfo);
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope inspectionScope) {
+        // TODO: implement
+        return null;
+    }
+
+    @Override
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet sequences) throws SQLException {
+        // TODO: implement
     }
 }

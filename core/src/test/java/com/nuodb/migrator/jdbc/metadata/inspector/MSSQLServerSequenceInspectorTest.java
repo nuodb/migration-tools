@@ -35,7 +35,7 @@ import java.sql.ResultSet;
 import java.util.Collection;
 
 import static com.google.common.collect.Iterables.get;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataUtils.createSequence;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
@@ -48,10 +48,10 @@ import static org.testng.Assert.assertNotNull;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class MSSQLServerIdentityInspectorTest extends InspectorTestBase {
+public class MSSQLServerSequenceInspectorTest extends InspectorTestBase {
 
-    public MSSQLServerIdentityInspectorTest() {
-        super(MSSQLServerIdentityInspector.class);
+    public MSSQLServerSequenceInspectorTest() {
+        super(MSSQLServerSequenceInspector.class);
     }
 
     @Test
@@ -81,10 +81,10 @@ public class MSSQLServerIdentityInspectorTest extends InspectorTestBase {
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
         InspectionResults inspectionResults = getInspectionManager()
-                .inspect(getConnection(), inspectionScope, IDENTITY);
+                .inspect(getConnection(), inspectionScope, SEQUENCE);
 
         verifyInspectScope(getInspector(), inspectionScope);
-        Collection<Sequence> sequences = inspectionResults.getObjects(IDENTITY);
+        Collection<Sequence> sequences = inspectionResults.getObjects(SEQUENCE);
 
         assertNotNull(sequences);
         assertEquals(sequences.size(), 1);

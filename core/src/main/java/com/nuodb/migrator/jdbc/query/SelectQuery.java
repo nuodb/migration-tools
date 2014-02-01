@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.query;
 
+import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -85,6 +86,10 @@ public class SelectQuery extends QueryBase {
 
     public void where(String filter) {
         where.add(filter);
+    }
+
+    public void orderBy(String ... columns) {
+        orderBy(newArrayList(columns));
     }
 
     public void orderBy(Collection<String> columns) {

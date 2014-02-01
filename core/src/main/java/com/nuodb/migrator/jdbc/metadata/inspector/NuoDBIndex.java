@@ -37,10 +37,9 @@ import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
  */
 public class NuoDBIndex {
 
-    public static final String QUERY =
-            "SELECT * FROM SYSTEM.INDEXES AS I " +
-            "INNER JOIN SYSTEM.INDEXFIELDS AS F ON I.SCHEMA=F.SCHEMA " +
-            "AND I.TABLENAME=F.TABLENAME AND I.INDEXNAME=F.INDEXNAME";
+    private static final String QUERY =
+            "SELECT * FROM SYSTEM.INDEXES AS I INNER JOIN SYSTEM.INDEXFIELDS AS F " +
+            "ON I.SCHEMA=F.SCHEMA AND I.TABLENAME=F.TABLENAME AND I.INDEXNAME=F.INDEXNAME";
 
     public static final int PRIMARY_KEY = 0;
     public static final int UNIQUE = 1;

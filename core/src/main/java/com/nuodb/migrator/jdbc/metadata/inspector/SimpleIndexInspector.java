@@ -43,6 +43,7 @@ import static java.sql.DatabaseMetaData.tableIndexStatistic;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("UnusedParameters")
 public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     public SimpleIndexInspector() {
@@ -62,27 +63,32 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (indexes.next()) {
             if (indexes.getShort("TYPE") == tableIndexStatistic) {
-                return;
+                continue;
             }
             Table table = addTable(inspectionResults, indexes.getString("TABLE_CAT"),
                     indexes.getString("TABLE_SCHEM"), indexes.getString("TABLE_NAME"));
-
             Identifier identifier = valueOf(indexes.getString("INDEX_NAME"));
             Index index = table.getIndex(identifier);
             if (index == null) {
                 index = new Index(identifier);
                 table.addIndex(index);
-                index.setUnique(!indexes.getBoolean("NON_UNIQUE"));
-                index.setFilterCondition(indexes.getString("FILTER_CONDITION"));
-                index.setSortOrder(getSortOrder(indexes.getString("ASC_OR_DESC")));
                 inspectionResults.addObject(index);
             }
-            String expression = indexes.getString("COLUMN_NAME");
-            if (isExpression(inspectionContext, index, expression)) {
-                index.setExpression(expression);
-            } else {
-                index.addColumn(table.addColumn(expression), indexes.getInt("ORDINAL_POSITION"));
-            }
+            processIndex(inspectionContext, indexes, index);
+        }
+    }
+
+    protected void processIndex(InspectionContext inspectionContext, ResultSet indexes, Index index)
+            throws SQLException {
+        index.setUnique(!indexes.getBoolean("NON_UNIQUE"));
+        index.setFilterCondition(indexes.getString("FILTER_CONDITION"));
+        index.setSortOrder(getSortOrder(inspectionContext, index, indexes.getString("ASC_OR_DESC")));
+
+        String expression = indexes.getString("COLUMN_NAME");
+        if (isExpression(inspectionContext, index, expression)) {
+            index.setExpression(expression);
+        } else {
+            index.addColumn(index.getTable().addColumn(expression), indexes.getInt("ORDINAL_POSITION"));
         }
     }
 
@@ -91,9 +97,9 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
         return false;
     }
 
-    public static SortOrder getSortOrder(String ascOrDesc) {
-        if (ascOrDesc != null) {
-            return ascOrDesc.equals("A") ? SortOrder.ASC : SortOrder.DESC;
+    protected SortOrder getSortOrder(InspectionContext inspectionContext, Index index, String sortOrder) {
+        if (sortOrder != null) {
+            return sortOrder.equals("A") ? SortOrder.ASC : SortOrder.DESC;
         } else {
             return null;
         }

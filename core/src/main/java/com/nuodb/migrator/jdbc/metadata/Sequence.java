@@ -31,7 +31,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -54,15 +54,15 @@ public class Sequence extends IdentifiableBase {
     private Integer cache;
 
     public Sequence() {
-        super(IDENTITY, true);
+        super(SEQUENCE, true);
     }
 
     public Sequence(String name) {
-        super(IDENTITY, name, true);
+        super(SEQUENCE, name, true);
     }
 
     public Sequence(Identifier identifier) {
-        super(IDENTITY, identifier, true);
+        super(SEQUENCE, identifier, true);
     }
 
     public Schema getSchema() {

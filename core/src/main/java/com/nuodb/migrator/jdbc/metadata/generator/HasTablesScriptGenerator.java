@@ -164,7 +164,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         boolean createTables = objectTypes.contains(TABLE);
         boolean createIndexes = objectTypes.contains(INDEX);
         boolean createPrimaryKeys = objectTypes.contains(PRIMARY_KEY);
-        boolean createIdentities = objectTypes.contains(IDENTITY);
+        boolean createIdentities = objectTypes.contains(SEQUENCE);
         boolean createForeignKeys = objectTypes.contains(FOREIGN_KEY);
         boolean createTriggers = objectTypes.contains(TRIGGER);
         boolean createColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
@@ -314,7 +314,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                 scripts.addAll(scriptGeneratorManager.getDropScripts(table));
             }
         }
-        if (objectTypes.contains(IDENTITY) && dialect.supportsSequence()) {
+        if (objectTypes.contains(SEQUENCE) && dialect.supportsSequence()) {
             for (Table table : tables) {
                 if (!addTableScripts(table, scriptGeneratorManager)) {
                     continue;

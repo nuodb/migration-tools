@@ -62,14 +62,19 @@ public class SimpleManagedInspectionContext<M extends MetaData, I extends Inspec
     public Statement createStatement(I inspectionScope, Query query) throws SQLException {
         Statement statement;
         if (query instanceof ParameterizedQuery) {
-            Query innerQuery = ((ParameterizedQuery)query).getQuery();
-            statement = statements.get(innerQuery);
-            if (statement == null) {
-                statements.put(innerQuery,
-                        statement = managedInspector.createStatement(this, inspectionScope, query));
-            }
+            statement = createStatement(inspectionScope, (ParameterizedQuery)query);
         } else {
             statement = managedInspector.createStatement(this, inspectionScope, query);
+        }
+        return statement;
+    }
+
+    protected Statement createStatement(I inspectionScope, ParameterizedQuery parameterizedQuery) throws SQLException {
+        Query query = parameterizedQuery.getQuery();
+        Statement statement = statements.get(query);
+        if (statement == null) {
+            statements.put(query, statement = managedInspector.createStatement(
+                    this, inspectionScope, parameterizedQuery));
         }
         return statement;
     }

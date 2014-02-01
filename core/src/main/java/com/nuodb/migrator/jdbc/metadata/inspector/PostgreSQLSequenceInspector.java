@@ -45,7 +45,7 @@ import java.sql.Statement;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
@@ -55,21 +55,21 @@ import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 /**
  * @author Sergey Bushik
  */
-public class PostgreSQLIdentityInspector extends TableInspectorBase<Table, TableInspectionScope> {
+public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     private static final String QUERY =
-            "WITH SEQUENCES AS\n" +
-            "(SELECT N.NSPNAME AS SCHEMA_NAME, C.RELNAME AS TABLE_NAME, A.ATTNAME AS COLUMN_NAME,\n" +
-            "SUBSTRING(PG_GET_EXPR(DEF.ADBIN, DEF.ADRELID) FROM 'nextval\\(''(.*)''::.*\\)') AS SEQUENCE_NAME\n" +
-            "FROM PG_CATALOG.PG_NAMESPACE N\n" +
-            "JOIN PG_CATALOG.PG_CLASS C ON (C.RELNAMESPACE = N.OID)\n" +
-            "JOIN PG_CATALOG.PG_ATTRIBUTE A ON (A.ATTRELID=C.OID)\n" +
-            "LEFT JOIN PG_CATALOG.PG_ATTRDEF DEF ON (A.ATTRELID=DEF.ADRELID AND A.ATTNUM = DEF.ADNUM)\n" +
+            "WITH SEQUENCES AS " +
+            "(SELECT N.NSPNAME AS SCHEMA_NAME, C.RELNAME AS TABLE_NAME, A.ATTNAME AS COLUMN_NAME, " +
+            "SUBSTRING(PG_GET_EXPR(DEF.ADBIN, DEF.ADRELID) FROM 'nextval\\(''(.*)''::.*\\)') AS SEQUENCE_NAME " +
+            "FROM PG_CATALOG.PG_NAMESPACE N " +
+            "JOIN PG_CATALOG.PG_CLASS C ON (C.RELNAMESPACE = N.OID) " +
+            "JOIN PG_CATALOG.PG_ATTRIBUTE A ON (A.ATTRELID=C.OID) " +
+            "LEFT JOIN PG_CATALOG.PG_ATTRDEF DEF ON (A.ATTRELID=DEF.ADRELID AND A.ATTNUM = DEF.ADNUM) " +
             "WHERE A.ATTNUM>0 AND NOT A.ATTISDROPPED AND ADSRC IS NOT NULL AND SUBSTRING(ADSRC FROM 0 FOR 9)" +
             "='nextval(') SELECT * FROM SEQUENCES";
 
-    public PostgreSQLIdentityInspector() {
-        super(IDENTITY, TABLE, TableInspectionScope.class);
+    public PostgreSQLSequenceInspector() {
+        super(SEQUENCE, TABLE, TableInspectionScope.class);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class PostgreSQLIdentityInspector extends TableInspectorBase<Table, Table
     }
 
     @Override
-    protected void processResultSet(final InspectionContext inspectionContext, final ResultSet identities) throws SQLException {
+    protected void processResultSet(final InspectionContext inspectionContext, final ResultSet sequences) throws SQLException {
         StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
         template.executeStatement(
                 new StatementFactory<Statement>() {
@@ -99,44 +99,41 @@ public class PostgreSQLIdentityInspector extends TableInspectorBase<Table, Table
                 }, new StatementCallback<Statement>() {
                     @Override
                     public void executeStatement(Statement statement) throws SQLException {
-                        while (identities.next()) {
-                            String schemaName = identities.getString("SCHEMA_NAME");
-                            String tableName = identities.getString("TABLE_NAME");
-                            String sequenceName = identities.getString("SEQUENCE_NAME");
-                            Table table = addTable(inspectionContext.getInspectionResults(), null, schemaName, tableName);
-
-                            String columnName = identities.getString("COLUMN_NAME");
-                            Column column = table.addColumn(columnName);
-
-                            processIdentity(inspectionContext, column, statement.executeQuery(
-                                    createQuery(inspectionContext, schemaName, sequenceName).toString()));
+                        while (sequences.next()) {
+                            String schema = sequences.getString("SCHEMA_NAME");
+                            String table = sequences.getString("TABLE_NAME");
+                            String sequence = sequences.getString("SEQUENCE_NAME");
+                            Column column = addTable(inspectionContext.getInspectionResults(), null, schema, table).
+                                    addColumn(sequences.getString("COLUMN_NAME"));
+                            processSequence(inspectionContext, column, statement.executeQuery(
+                                    createQuery(inspectionContext, schema, sequence).toString()));
                         }
                     }
                 }
         );
     }
 
-    protected Query createQuery(InspectionContext inspectionContext, String schemaName, String sequenceName)
+    protected Query createQuery(InspectionContext inspectionContext, String schema, String sequence)
             throws SQLException {
         SelectQuery query = new SelectQuery();
         query.column("*");
         Dialect dialect = inspectionContext.getDialect();
-        query.from(dialect.getIdentifier(schemaName, null) + "." + dialect.getIdentifier(sequenceName, null));
+        query.from(dialect.getIdentifier(schema, null) + "." + dialect.getIdentifier(sequence, null));
         return query;
     }
 
-    protected void processIdentity(InspectionContext inspectionContext, Column column, ResultSet identities)
+    protected void processSequence(InspectionContext inspectionContext, Column column, ResultSet sequences)
             throws SQLException {
-        if (identities.next()) {
+        if (sequences.next()) {
             Sequence sequence = new Sequence();
-            sequence.setName(identities.getString("SEQUENCE_NAME"));
-            sequence.setLastValue(identities.getLong("LAST_VALUE"));
-            sequence.setStartWith(identities.getLong("START_VALUE"));
-            sequence.setMinValue(identities.getLong("MIN_VALUE"));
-            sequence.setMaxValue(identities.getLong("MAX_VALUE"));
-            sequence.setIncrementBy(identities.getLong("INCREMENT_BY"));
-            sequence.setCache(identities.getInt("CACHE_VALUE"));
-            sequence.setCycle("T".equalsIgnoreCase(identities.getString("IS_CYCLED")));
+            sequence.setName(sequences.getString("SEQUENCE_NAME"));
+            sequence.setLastValue(sequences.getLong("LAST_VALUE"));
+            sequence.setStartWith(sequences.getLong("START_VALUE"));
+            sequence.setMinValue(sequences.getLong("MIN_VALUE"));
+            sequence.setMaxValue(sequences.getLong("MAX_VALUE"));
+            sequence.setIncrementBy(sequences.getLong("INCREMENT_BY"));
+            sequence.setCache(sequences.getInt("CACHE_VALUE"));
+            sequence.setCycle("T".equalsIgnoreCase(sequences.getString("IS_CYCLED")));
             column.setSequence(sequence);
             column.getTable().getSchema().addSequence(sequence);
             inspectionContext.getInspectionResults().addObject(sequence);

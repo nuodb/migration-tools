@@ -31,15 +31,15 @@ import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.utils.Collections;
 import org.slf4j.Logger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -54,7 +54,7 @@ public class InspectionManager {
 
     private final transient Logger logger = getLogger(getClass());
     private DialectResolver dialectResolver;
-    private Collection<Inspector> inspectors = Collections.newPrioritySet();
+    private Collection<Inspector> inspectors = newPrioritySet();
 
     public InspectionManager() {
         addInspector(new SimpleDatabaseInspector());
@@ -71,8 +71,10 @@ public class InspectionManager {
         addInspector(tableInspector);
 
         InspectorResolver indexIndex = new InspectorResolver(INDEX, new SimpleIndexInspector());
+        indexIndex.register(MYSQL, new MySQLIndexInspector());
         indexIndex.register(NUODB, new NuoDBIndexInspector());
         indexIndex.register(POSTGRE_SQL, new PostgreSQLIndexInspector());
+        indexIndex.register(POSTGRE_SQL_83, new PostgreSQL83IndexInspector());
         addInspector(indexIndex);
 
         InspectorResolver primaryKeyInspector = new InspectorResolver(PRIMARY_KEY, new SimplePrimaryKeyInspector());
@@ -99,12 +101,13 @@ public class InspectionManager {
         checkInspector.register(DB2, new DB2CheckInspector());
         addInspector(checkInspector);
 
-        InspectorResolver identityInspector = new InspectorResolver(IDENTITY);
-        identityInspector.register(MYSQL, new MySQLIdentityInspector());
-        identityInspector.register(POSTGRE_SQL, new PostgreSQLIdentityInspector());
-        identityInspector.register(MSSQL_SERVER, new MSSQLServerIdentityInspector());
-        identityInspector.register(DB2, new DB2IdentityInspector());
-        addInspector(identityInspector);
+        InspectorResolver sequenceInspector = new InspectorResolver(SEQUENCE);
+        sequenceInspector.register(ORACLE, new OracleSequenceInspector());
+        sequenceInspector.register(MYSQL, new MySQLSequenceInspector());
+        sequenceInspector.register(POSTGRE_SQL, new PostgreSQLSequenceInspector());
+        sequenceInspector.register(MSSQL_SERVER, new MSSQLServerSequenceInspector());
+        sequenceInspector.register(DB2, new DB2SequenceInspector());
+        addInspector(sequenceInspector);
 
         InspectorResolver triggerResolver = new InspectorResolver(TRIGGER);
         addInspector(triggerResolver);

@@ -27,76 +27,63 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Sequence;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
-import org.apache.commons.lang3.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
-import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * @author Sergey Bushik
  */
-public class DB2IdentityInspector extends TableInspectorBase<Table, TableInspectionScope> {
-
-    public DB2IdentityInspector() {
-        super(IDENTITY, TableInspectionScope.class);
-    }
+public class PostgreSQL83IndexInspector extends PostgreSQLIndexInspector {
 
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         SelectQuery query = new SelectQuery();
-        query.column(
-                "T.TABSCHEMA", "T.TABNAME", "C.COLNAME", "S.SEQNAME", "S.INCREMENT", "S.START", "S.MINVALUE",
-                "S.MAXVALUE", "S.CYCLE", "S.CACHE", "S.ORDER");
-        query.from("SYSCAT.SEQUENCES S");
-        query.innerJoin("SYSCAT.TABLES T", "S.SEQSCHEMA=T.TABSCHEMA AND S.CREATE_TIME=T.CREATE_TIME");
-        query.innerJoin("SYSCAT.COLUMNS C", "T.TABSCHEMA=C.TABSCHEMA AND T.TABNAME=C.TABNAME");
-        query.where("S.SEQNAME LIKE 'SQL%'");
-        query.where("C.IDENTITY='Y'");
         Collection<Object> parameters = newArrayList();
+        query.column("NULL AS TABLE_CAT", "I.INDISPRIMARY AS PRIMARY");
+        query.column("N.NSPNAME AS TABLE_SCHEM", "CT.RELNAME AS TABLE_NAME");
+        query.column("NOT I.INDISUNIQUE AS NON_UNIQUE", "NULL AS INDEX_QUALIFIER");
+        query.column("CI.RELNAME AS INDEX_NAME");
+        query.column("CASE I.INDISCLUSTERED WHEN TRUE THEN 1 ELSE CASE AM.AMNAME WHEN 'HASH' THEN 2 ELSE 3 END END AS TYPE");
+        query.column("(I.KEYS).N AS ORDINAL_POSITION");
+        query.column("PG_CATALOG.PG_GET_INDEXDEF(CI.OID, (I.KEYS).N, FALSE) AS COLUMN_NAME");
+        query.column("CASE AM.AMCANORDER WHEN TRUE THEN " +
+                "CASE I.INDOPTION [(I.KEYS).N - 1] & 1 WHEN 1 THEN 'D' ELSE 'A' END ELSE NULL END AS ASC_OR_DESC");
+        query.column("CI.RELTUPLES AS CARDINALITY", "CI.RELPAGES AS PAGES");
+        query.column("PG_CATALOG.PG_GET_EXPR(I.INDPRED, I.INDRELID) AS FILTER_CONDITION");
+        query.from("PG_CATALOG.PG_CLASS CT");
+        query.innerJoin("PG_CATALOG.PG_NAMESPACE N", "CT.RELNAMESPACE = N.OID");
+        query.innerJoin("(SELECT I.INDEXRELID, I.INDRELID, I.INDOPTION, I.INDISPRIMARY, I.INDISUNIQUE, " +
+                "I.INDISCLUSTERED, I.INDPRED, I.INDEXPRS, INFORMATION_SCHEMA._PG_EXPANDARRAY(I.INDKEY) AS KEYS " +
+                "FROM PG_CATALOG.PG_INDEX I) I", "CT.OID = I.INDRELID");
+        query.innerJoin("PG_CATALOG.PG_CLASS CI", "CI.OID = I.INDEXRELID");
+        query.innerJoin("PG_CATALOG.PG_AM AM", "CI.RELAM = AM.OID");
         String schema = tableInspectionScope.getSchema();
         if (!isEmpty(schema)) {
-            query.where("T.TABSCHEMA=?");
-            parameters.add(tableInspectionScope.getSchema());
+            query.where("N.NSPNAME=?");
+            parameters.add(schema);
         }
         String table = tableInspectionScope.getTable();
         if (!isEmpty(table)) {
-            query.where("T.TABNAME=?");
+            query.where("CT.RELNAME=?");
             parameters.add(table);
         }
+        query.orderBy("NON_UNIQUE", "TYPE", "INDEX_NAME", "ORDINAL_POSITION");
         return new ParameterizedQuery(query, parameters);
     }
 
     @Override
-    protected void processResultSet(InspectionContext inspectionContext, ResultSet identities) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        while (identities.next()) {
-            Table table = addTable(inspectionResults, null, trim(identities.getString("TABSCHEMA")),
-                    trim(identities.getString("TABNAME")));
-            Column column = table.addColumn(identities.getString("COLNAME"));
-
-            Sequence sequence = new Sequence(identities.getString("SEQNAME"));
-            sequence.setStartWith(identities.getLong("START"));
-            sequence.setIncrementBy(identities.getLong("INCREMENT"));
-            sequence.setMinValue(identities.getLong("MINVALUE"));
-            sequence.setMaxValue(identities.getLong("MAXVALUE"));
-            sequence.setCache(identities.getInt("CACHE"));
-            sequence.setOrder(StringUtils.equals("Y", identities.getString("ORDER")));
-            column.setSequence(sequence);
-            column.getTable().getSchema().addSequence(sequence);
-            inspectionResults.addObject(sequence);
-        }
+    protected void processIndex(InspectionContext inspectionContext, ResultSet indexes,
+                                Index index) throws SQLException {
+        super.processIndex(inspectionContext, indexes, index);
+        index.setPrimary(indexes.getBoolean("PRIMARY"));
     }
 }

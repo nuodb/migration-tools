@@ -74,13 +74,8 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
 
     @Override
     protected void writeElements(OutputNode output, Schema schema, XmlWriteContext context) throws Exception {
-        for (Table table : schema.getTables()) {
-            for (Column column : table.getColumns()) {
-                Sequence sequence = column.getSequence();
-                if (sequence != null) {
-                    context.writeElement(output, SEQUENCE_ELEMENT, sequence);
-                }
-            }
+        for (Sequence sequence : schema.getSequences()) {
+            context.writeElement(output, SEQUENCE_ELEMENT, sequence);
         }
         for (Table table : schema.getTables()) {
             context.writeElement(output, TABLE_ELEMENT, table);

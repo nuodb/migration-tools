@@ -46,7 +46,7 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
@@ -56,13 +56,13 @@ import static org.apache.commons.lang3.StringUtils.containsAny;
 /**
  * @author Sergey Bushik
  */
-public class MySQLIdentityInspector extends TableInspectorBase<Table, TableInspectionScope> {
+public class MySQLSequenceInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     private static final String QUERY_TABLE = "SELECT TABLE_SCHEMA, TABLE_NAME, AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES";
     private static final String QUERY_COLUMN = "SHOW COLUMNS FROM `%s`.`%s` WHERE EXTRA='AUTO_INCREMENT'";
 
-    public MySQLIdentityInspector() {
-        super(IDENTITY, TableInspectionScope.class);
+    public MySQLSequenceInspector() {
+        super(SEQUENCE, TableInspectionScope.class);
     }
 
     @Override

@@ -47,13 +47,10 @@ import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 public class PostgreSQLCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     private static final String QUERY =
-            "SELECT *\n" +
-            "FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS CCU\n" +
-            "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON\n" +
-            "CCU.TABLE_CATALOG = CC.CONSTRAINT_CATALOG\n" +
-            "AND CCU.TABLE_SCHEMA = CC.CONSTRAINT_SCHEMA\n" +
-            "AND CCU.CONSTRAINT_NAME = CC.CONSTRAINT_NAME\n" +
-            "WHERE CCU.TABLE_SCHEMA = ? AND CCU.TABLE_NAME = ?";
+            "SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS CCU " +
+            "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON " +
+            "CCU.TABLE_CATALOG = CC.CONSTRAINT_CATALOG AND CCU.TABLE_SCHEMA = CC.CONSTRAINT_SCHEMA " +
+            "AND CCU.CONSTRAINT_NAME = CC.CONSTRAINT_NAME WHERE CCU.TABLE_SCHEMA=? AND CCU.TABLE_NAME=?";
 
     public PostgreSQLCheckInspector() {
         super(CHECK, TableInspectionScope.class);

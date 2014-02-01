@@ -29,7 +29,7 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB203;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB_203;
 import static com.nuodb.migrator.utils.Priority.HIGH;
 
 /**
@@ -38,7 +38,7 @@ import static com.nuodb.migrator.utils.Priority.HIGH;
 public class NuoDBDialect203 extends NuoDBDialect {
 
     public NuoDBDialect203() {
-        super(NUODB203);
+        super(NUODB_203);
     }
 
     public NuoDBDialect203(DatabaseInfo databaseInfo) {

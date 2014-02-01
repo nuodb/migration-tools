@@ -33,14 +33,11 @@ import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.type.JdbcType;
-import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeOptions;
 
 import java.util.Collection;
 import java.util.Iterator;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -68,7 +65,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             buffer.append(scriptGeneratorManager.getName(column));
             buffer.append(' ');
             buffer.append(getTypeName(column, scriptGeneratorManager));
-            if (column.isIdentity() && objectTypes.contains(IDENTITY)) {
+            if (column.isIdentity() && objectTypes.contains(SEQUENCE)) {
                 buffer.append(' ');
                 buffer.append(dialect.getIdentityColumn(
                         column.getSequence() != null ?

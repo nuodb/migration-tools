@@ -51,7 +51,7 @@ public class MetaDataType implements Comparable<MetaDataType>, Serializable {
     public static final MetaDataType PRIMARY_KEY = new MetaDataType(PrimaryKey.class);
     public static final MetaDataType FOREIGN_KEY = new MetaDataType(ForeignKey.class);
     public static final MetaDataType INDEX = new MetaDataType(Index.class);
-    public static final MetaDataType IDENTITY = new MetaDataType(Sequence.class);
+    public static final MetaDataType SEQUENCE = new MetaDataType(Sequence.class);
     public static final MetaDataType CHECK = new MetaDataType(Check.class);
     public static final MetaDataType TRIGGER = new MetaDataType(Trigger.class);
     public static final MetaDataType COLUMN_TRIGGER = new MetaDataType(ColumnTrigger.class);

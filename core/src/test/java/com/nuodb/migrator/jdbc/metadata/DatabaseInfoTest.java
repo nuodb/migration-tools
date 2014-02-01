@@ -67,7 +67,7 @@ public class DatabaseInfoTest {
 
                 {DB2, new DatabaseInfo("DB2/Darwin"), true},
                 {DB2, new DatabaseInfo("NuoDB", "2.0.1", 1, 27), false},
-                {NUODB, NUODB203, true},
+                {NUODB, NUODB_203, true},
                 {MSSQL_SERVER, MSSQL_SERVER_2005, true},
                 {ORACLE, POSTGRE_SQL, false},
                 {POSTGRE_SQL, ORACLE, false},

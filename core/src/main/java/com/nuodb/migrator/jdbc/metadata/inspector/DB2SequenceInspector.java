@@ -27,18 +27,20 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.Check;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -46,41 +48,55 @@ import static org.apache.commons.lang3.StringUtils.trim;
 /**
  * @author Sergey Bushik
  */
-public class DB2CheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
+public class DB2SequenceInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    public DB2CheckInspector() {
-        super(CHECK, TableInspectionScope.class);
+    public DB2SequenceInspector() {
+        super(SEQUENCE, TableInspectionScope.class);
     }
 
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         SelectQuery query = new SelectQuery();
-        query.column("TABSCHEMA", "TABNAME", "CONSTNAME", "TEXT");
-        query.from("SYSCAT.CHECKS");
-        query.where("TYPE = 'C'");
+        query.column(
+                "T.TABSCHEMA", "T.TABNAME", "C.COLNAME", "S.SEQNAME", "S.INCREMENT", "S.START", "S.MINVALUE",
+                "S.MAXVALUE", "S.CYCLE", "S.CACHE", "S.ORDER");
+        query.from("SYSCAT.SEQUENCES S");
+        query.innerJoin("SYSCAT.TABLES T", "S.SEQSCHEMA=T.TABSCHEMA AND S.CREATE_TIME=T.CREATE_TIME");
+        query.innerJoin("SYSCAT.COLUMNS C", "T.TABSCHEMA=C.TABSCHEMA AND T.TABNAME=C.TABNAME");
+        query.where("S.SEQNAME LIKE 'SQL%'");
+        query.where("C.IDENTITY='Y'");
         Collection<Object> parameters = newArrayList();
         String schema = tableInspectionScope.getSchema();
         if (!isEmpty(schema)) {
-            query.where("TABSCHEMA=?");
-            parameters.add(schema);
+            query.where("T.TABSCHEMA=?");
+            parameters.add(tableInspectionScope.getSchema());
         }
         String table = tableInspectionScope.getTable();
         if (!isEmpty(table)) {
-            query.where("TABNAME=?");
+            query.where("T.TABNAME=?");
             parameters.add(table);
         }
         return new ParameterizedQuery(query, parameters);
     }
 
     @Override
-    protected void processResultSet(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet sequences) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        while (checks.next()) {
-            Table table = addTable(inspectionResults, null, trim(checks.getString("TABSCHEMA")),
-                    trim(checks.getString("TABNAME")));
-            Check check = new Check(checks.getString("CONSTNAME"), checks.getString("TEXT"));
-            table.addCheck(check);
-            inspectionResults.addObject(check);
+        while (sequences.next()) {
+            Table table = addTable(inspectionResults, null, trim(sequences.getString("TABSCHEMA")),
+                    trim(sequences.getString("TABNAME")));
+            Column column = table.addColumn(sequences.getString("COLNAME"));
+
+            Sequence sequence = new Sequence(sequences.getString("SEQNAME"));
+            sequence.setStartWith(sequences.getLong("START"));
+            sequence.setIncrementBy(sequences.getLong("INCREMENT"));
+            sequence.setMinValue(sequences.getLong("MINVALUE"));
+            sequence.setMaxValue(sequences.getLong("MAXVALUE"));
+            sequence.setCache(sequences.getInt("CACHE"));
+            sequence.setOrder(StringUtils.equals("Y", sequences.getString("ORDER")));
+            column.setSequence(sequence);
+            column.getTable().getSchema().addSequence(sequence);
+            inspectionResults.addObject(sequence);
         }
     }
 }
