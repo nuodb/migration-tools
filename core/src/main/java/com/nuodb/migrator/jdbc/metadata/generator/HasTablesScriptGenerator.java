@@ -154,8 +154,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         try {
             Collection<String> scripts = newArrayList();
             addSequencesDropCreateScripts(tables.getSequences(), scripts, scriptGeneratorManager);
-            GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorManager.getAttributes()
-                    .get(GROUP_SCRIPTS_BY);
+            GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:
                     for (Table table : tables.getTables()) {
@@ -176,7 +175,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
     }
 
     protected void addSequencesDropCreateScripts(Collection<Sequence> sequences, Collection<String> scripts,
-                                               ScriptGeneratorManager scriptGeneratorManager) {
+                                                 ScriptGeneratorManager scriptGeneratorManager) {
         if (scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
                 scriptGeneratorManager.getTargetDialect().supportsSequence()) {
             for (Sequence sequence : sequences) {
