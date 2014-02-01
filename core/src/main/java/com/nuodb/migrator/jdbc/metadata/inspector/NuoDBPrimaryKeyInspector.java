@@ -31,25 +31,19 @@ import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.PRIMARY_KEY;
-import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 
 /**
  * @author Sergey Bushik
  */
 public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableInspectionScope> {
-
-    private static final String QUERY = NuoDBIndex.createQuery(PRIMARY_KEY);
 
     public NuoDBPrimaryKeyInspector() {
         super(MetaDataType.PRIMARY_KEY, TableInspectionScope.class);
@@ -57,10 +51,7 @@ public class NuoDBPrimaryKeyInspector extends TableInspectorBase<Table, TableIns
 
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
-        Collection<Object> parameters = newArrayList();
-        parameters.add(tableInspectionScope.getSchema());
-        parameters.add(tableInspectionScope.getTable());
-        return new ParameterizedQuery(newQuery(QUERY), parameters);
+        return NuoDBIndex.createQuery(tableInspectionScope, PRIMARY_KEY);
     }
 
     @Override

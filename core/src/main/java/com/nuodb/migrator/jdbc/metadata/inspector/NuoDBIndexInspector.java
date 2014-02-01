@@ -30,27 +30,21 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.KEY;
 import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.UNIQUE;
-import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 
 /**
  * @author Sergey Bushik
  */
 public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspectionScope> {
-
-    private static final String QUERY = NuoDBIndex.createQuery(UNIQUE, KEY);
 
     public NuoDBIndexInspector() {
         super(INDEX, TableInspectionScope.class);
@@ -58,10 +52,7 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
 
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
-        Collection<Object> parameters = newArrayList();
-        parameters.add(tableInspectionScope.getSchema());
-        parameters.add(tableInspectionScope.getTable());
-        return new ParameterizedQuery(newQuery(QUERY), parameters);
+        return NuoDBIndex.createQuery(tableInspectionScope, UNIQUE, KEY);
     }
 
     @Override

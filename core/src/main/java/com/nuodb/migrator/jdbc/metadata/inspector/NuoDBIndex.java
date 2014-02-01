@@ -27,10 +27,15 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
+
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
@@ -45,10 +50,21 @@ public class NuoDBIndex {
     public static final int UNIQUE = 1;
     public static final int KEY = 2;
 
-    public static String createQuery(int... indexTypes) {
-        final Collection<String> filters = newArrayList();
-        filters.add("I.SCHEMA=?");
-        filters.add("I.TABLENAME=?");
+    public static Query createQuery(TableInspectionScope tableInspectionScope, int... indexTypes) {
+        return createQuery(tableInspectionScope.getSchema(), tableInspectionScope.getTable(), indexTypes);
+    }
+
+    public static Query createQuery(String schema, String table, int... indexTypes) {
+        Collection<Object> parameters = newArrayList();
+        Collection<String> filters = newArrayList();
+        if (!isEmpty(schema)) {
+            parameters.add(schema);
+            filters.add("I.SCHEMA=?");
+        }
+        if (!isEmpty(table)) {
+            parameters.add(table);
+            filters.add("I.TABLENAME=?");
+        }
         if (indexTypes != null && indexTypes.length > 0) {
             if (indexTypes.length == 1) {
                 filters.add("I.INDEXTYPE=" + indexTypes[0]);
@@ -65,6 +81,7 @@ public class NuoDBIndex {
                 filters.add(filter.toString());
             }
         }
-        return where(QUERY, filters, "AND");
+        String query = where(QUERY, filters, "AND");
+        return new ParameterizedQuery(newQuery(query), parameters);
     }
 }
