@@ -25,31 +25,27 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.utils.xml;
+
+import org.simpleframework.xml.transform.Transform;
+
+import java.math.BigDecimal;
+
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class QueryBase implements Query {
+public class BigDecimalTransform implements Transform<BigDecimal> {
 
-    public static final boolean QUALIFY_NAMES = true;
-
-    private boolean qualifyNames = QUALIFY_NAMES;
-
-    public boolean isQualifyNames() {
-        return qualifyNames;
-    }
-
-    public void setQualifyNames(boolean qualifyNames) {
-        this.qualifyNames = qualifyNames;
+    @Override
+    public BigDecimal read(String value) throws Exception {
+        return isEmpty(value) ? null : new BigDecimal(value);
     }
 
     @Override
-    public String toString() {
-        StringBuilder query = new StringBuilder();
-        append(query);
-        return query.toString();
+    public String write(BigDecimal value) throws Exception {
+        return value != null ? value.toString() : EMPTY;
     }
-
-
 }

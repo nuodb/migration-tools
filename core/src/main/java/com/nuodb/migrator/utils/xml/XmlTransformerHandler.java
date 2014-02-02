@@ -33,6 +33,8 @@ import org.simpleframework.xml.transform.Matcher;
 import org.simpleframework.xml.transform.RegistryMatcher;
 import org.simpleframework.xml.transform.Transformer;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Date;
 
 public class XmlTransformerHandler implements XmlReadWriteHandler {
@@ -50,6 +52,8 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
         matcher.bind(Float.class, FloatTransform.class);
         matcher.bind(Double.class, DoubleTransform.class);
         matcher.bind(Date.class, DateTransform.class);
+        matcher.bind(BigInteger.class, BigIntegerTransform.class);
+        matcher.bind(BigDecimal.class, BigDecimalTransform.class);
 
         this.transformer = new Transformer(matcher);
     }
@@ -66,8 +70,8 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
     public Object read(InputNode input, Class type, XmlReadContext context) {
         try {
             return transformer.read(input.getValue(), type);
-        } catch (Exception e) {
-            throw new XmlPersisterException(e);
+        } catch (Exception exception) {
+            throw new XmlPersisterException(exception);
         }
     }
 
@@ -81,8 +85,8 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
         try {
             output.setValue(transformer.write(source, type));
             return true;
-        } catch (Exception e) {
-            throw new XmlPersisterException(e);
+        } catch (Exception exception) {
+            throw new XmlPersisterException(exception);
         }
     }
 

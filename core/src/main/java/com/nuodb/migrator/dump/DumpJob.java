@@ -49,6 +49,7 @@ import com.nuodb.migrator.spec.TableSpec;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -91,9 +92,7 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         Session session = sessionFactory.openSession();
         setSourceSession(session);
 
-        ResourceSpec outputSpec = getOutputSpec();
-        BackupManager backupManager = createBackupManager(outputSpec);
-        setBackupManager(backupManager);
+        setBackupManager(createBackupManager());
 
         Collection<MigrationMode> migrationModes = getMigrationModes();
         DumpWriter dumpWriter = null;
@@ -103,9 +102,9 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
             dumpWriter.setThreads(getThreads() != null ? getThreads() : THREADS);
             dumpWriter.setTimeZone(getTimeZone());
 
-            dumpWriter.setBackupManager(backupManager);
-            dumpWriter.setFormat(outputSpec.getType());
-            dumpWriter.setFormatAttributes(outputSpec.getAttributes());
+            dumpWriter.setBackupManager(getBackupManager());
+            dumpWriter.setFormat(getFormat());
+            dumpWriter.setFormatAttributes(getFormatAttributes());
             dumpWriter.setFormatFactory(createFormatFactory());
             dumpWriter.setSession(session);
             dumpWriter.setSessionFactory(sessionFactory);
@@ -115,8 +114,8 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         setDumpWriter(dumpWriter);
     }
 
-    protected BackupManager createBackupManager(ResourceSpec outputSpec) {
-        return new XmlBackupManager(outputSpec.getPath());
+    protected BackupManager createBackupManager() {
+        return new XmlBackupManager(getPath());
     }
 
     protected SessionFactory createSessionFactory() {
@@ -214,6 +213,18 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     public void setBackupManager(BackupManager backupManager) {
         this.backupManager = backupManager;
+    }
+
+    protected String getFormat() {
+        return getOutputSpec().getType();
+    }
+
+    protected Map<String, Object> getFormatAttributes() {
+        return getOutputSpec().getAttributes();
+    }
+
+    protected String getPath() {
+        return getOutputSpec().getPath();
     }
 
     protected Collection<MigrationMode> getMigrationModes() {

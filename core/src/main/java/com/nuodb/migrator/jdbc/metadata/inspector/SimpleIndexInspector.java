@@ -37,6 +37,7 @@ import java.sql.SQLException;
 
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.sql.DatabaseMetaData.tableIndexStatistic;
 
@@ -68,13 +69,10 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
             Table table = addTable(inspectionResults, indexes.getString("TABLE_CAT"),
                     indexes.getString("TABLE_SCHEM"), indexes.getString("TABLE_NAME"));
             Identifier identifier = valueOf(indexes.getString("INDEX_NAME"));
-            Index index = table.getIndex(identifier);
-            if (index == null) {
-                index = new Index(identifier);
-                table.addIndex(index);
-                inspectionResults.addObject(index);
-            }
+            Index index = table.hasIndex(identifier) ? table.getIndex(identifier) :
+                    table.addIndex(new Index(identifier));
             processIndex(inspectionContext, indexes, index);
+            inspectionResults.addObject(index);
         }
     }
 

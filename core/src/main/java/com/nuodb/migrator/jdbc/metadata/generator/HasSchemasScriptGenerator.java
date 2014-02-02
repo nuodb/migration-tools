@@ -28,7 +28,9 @@
 package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.HasSchemas;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
@@ -37,7 +39,6 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 
 /**
  * @author Sergey Bushik
@@ -85,31 +86,6 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
         return getScripts(schemaScripts, scriptGeneratorManager);
     }
 
-//    boolean createSequences = objectTypes.contains(SEQUENCE);
-//    if (createSequences) {
-//        for (Table table : tables) {
-//            if (!addTableScripts(table, scriptGeneratorManager)) {
-//                continue;
-//            }
-//            for (Column column : table.getColumns()) {
-//                if (column.getSequence() != null) {
-//                    scripts.addAll(scriptGeneratorManager.getCreateScripts(column.getSequence()));
-//                }
-//            }
-//        }
-//    }
-//    if (objectTypes.contains(SEQUENCE) && dialect.supportsSequence()) {
-//        for (Table table : tables) {
-//            if (!addTableScripts(table, scriptGeneratorManager)) {
-//                continue;
-//            }
-//            for (Column column : table.getColumns()) {
-//                if (column.getSequence() != null) {
-//                    scripts.addAll(scriptGeneratorManager.getDropScripts(column.getSequence()));
-//                }
-//            }
-//        }
-//    }
     protected Collection<String> getScripts(Map<Schema, Collection<String>> schemaScripts,
                                             ScriptGeneratorManager context) {
         Collection<String> scripts = newArrayList();
@@ -118,9 +94,9 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
             Map.Entry<Schema, Collection<String>> schemaScript = schemaScripts.entrySet().iterator().next();
             String useSpace = null;
             if (context.getTargetSchema() != null) {
-                useSpace = dialect.getUseSchema(context.getTargetSchema());
+                useSpace = dialect.getUseSchema(context.getTargetSchema(), true);
             } else if (context.getTargetCatalog() != null) {
-                useSpace = dialect.getUseCatalog(context.getTargetCatalog());
+                useSpace = dialect.getUseCatalog(context.getTargetCatalog(), true);
             }
             if (useSpace == null) {
                 Schema schema = schemaScript.getKey();

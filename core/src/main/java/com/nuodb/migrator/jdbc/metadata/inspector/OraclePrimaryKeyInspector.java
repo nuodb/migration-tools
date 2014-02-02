@@ -27,63 +27,43 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.jdbc.metadata.Sequence;
-import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
-import com.nuodb.migrator.utils.StringUtils;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
-import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
 import static com.nuodb.migrator.utils.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 
 /**
  * @author Sergey Bushik
  */
-public class OracleSequenceInspector extends TableInspectorBase<Table, TableInspectionScope> {
-
-    public OracleSequenceInspector() {
-        super(SEQUENCE, TableInspectionScope.class);
-    }
+public class OraclePrimaryKeyInspector extends SimplePrimaryKeyInspector {
 
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         SelectQuery query = new SelectQuery();
-        Collection<String> parameters = newArrayList();
-        query.columns("SEQUENCE_OWNER", "SEQUENCE_NAME", "MIN_VALUE", "MAX_VALUE", "INCREMENT_BY", "CYCLE_FLAG",
-                "ORDER_FLAG", "CACHE_SIZE", "LAST_NUMBER");
-        query.from("ALL_SEQUENCES");
+        Collection<Object> parameters = newArrayList();
+        query.columns("NULL AS TABLE_CAT", "C.OWNER AS TABLE_SCHEM", "C.TABLE_NAME", "C.COLUMN_NAME",
+                "C.POSITION AS KEY_SEQ", "C.CONSTRAINT_NAME AS PK_NAME");
+        query.from("ALL_CONS_COLUMNS C");
+        query.join("ALL_CONSTRAINTS K",
+                "C.OWNER = K.OWNER AND C.TABLE_NAME = K.TABLE_NAME AND C.CONSTRAINT_NAME = K.CONSTRAINT_NAME");
+        query.where("K.CONSTRAINT_TYPE = 'P'");
         String schema = tableInspectionScope.getSchema();
         if (!isEmpty(schema)) {
-            query.where(containsAny(schema, "%") ? "SEQUENCE_OWNER LIKE ? ESCAPE '/'" : "SEQUENCE_OWNER=?");
+            query.where(containsAny(schema, "%") ? "K.OWNER LIKE ? ESCAPE '/'" : "K.OWNER=?");
             parameters.add(schema);
+        }
+        String table = tableInspectionScope.getTable();
+        if (!isEmpty(table)) {
+            query.where("K.TABLE_NAME=?");
+            parameters.add(table);
         }
         return new ParameterizedQuery(query, parameters);
     }
-
-    @Override
-    protected void processResultSet(InspectionContext inspectionContext, ResultSet sequences) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        while (sequences.next()) {
-            Schema schema = addSchema(inspectionResults, null, sequences.getString("SEQUENCE_OWNER"));
-            Sequence sequence = new Sequence(sequences.getString("SEQUENCE_NAME"));
-            sequence.setMinValue(sequences.getBigDecimal("MIN_VALUE"));
-            sequence.setMaxValue(sequences.getBigDecimal("MAX_VALUE"));
-            sequence.setIncrementBy(sequences.getBigDecimal("INCREMENT_BY"));
-            sequence.setLastValue(sequences.getBigDecimal("LAST_NUMBER"));
-            sequence.setCache(sequences.getBigDecimal("CACHE_SIZE"));
-            sequence.setCycle(StringUtils.equals(sequences.getString("CYCLE_FLAG"), "Y"));
-            sequence.setOrder(StringUtils.equals(sequences.getString("ORDER_FLAG"), "Y"));
-            schema.addSequence(sequence);
-            inspectionResults.addObject(sequence);
-        }
-    }
 }
+
+

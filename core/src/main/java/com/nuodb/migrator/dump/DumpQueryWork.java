@@ -97,7 +97,7 @@ public class DumpQueryWork extends WorkBase {
 
         valueHandleList = newBuilder(getSession().getConnection(), resultSet).
                 withDialect(dialect).
-                withColumns(dumpQuery.getColumns() != null ? dumpQuery.getColumns() : FieldFactory
+                withFields(dumpQuery.getColumns() != null ? dumpQuery.getColumns() : FieldFactory
                         .newFieldList(resultSet)).
                 withTimeZone(dumpQueryContext.getTimeZone()).
                 withValueFormatRegistry(dumpQueryContext.getValueFormatRegistry()).build();

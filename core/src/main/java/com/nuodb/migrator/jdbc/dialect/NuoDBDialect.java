@@ -197,32 +197,32 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
-    public String getSequenceStartWith(Long startWith) {
+    public String getSequenceStartWith(Number startWith) {
         return startWith != null ? "START WITH " + startWith : null;
     }
 
     @Override
-    public String getSequenceIncrementBy(Long incrementBy) {
+    public String getSequenceIncrementBy(Number incrementBy) {
         return null;
     }
 
     @Override
-    public String getSequenceMinValue(Long minValue) {
+    public String getSequenceMinValue(Number minValue) {
         return null;
     }
 
     @Override
-    public String getSequenceMaxValue(Long maxValue) {
+    public String getSequenceMaxValue(Number maxValue) {
+        return null;
+    }
+
+    @Override
+    public String getSequenceCache(Number cache) {
         return null;
     }
 
     @Override
     public String getSequenceCycle(boolean cycle) {
-        return null;
-    }
-
-    @Override
-    public String getSequenceCache(Integer cache) {
         return null;
     }
 

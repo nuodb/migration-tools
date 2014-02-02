@@ -35,6 +35,11 @@ public class Join {
     private String table;
     private String condition;
 
+    public Join(String table, String condition) {
+        this.table = table;
+        this.condition = condition;
+    }
+
     public Join(String type, String table, String condition) {
         this.type = type;
         this.table = table;

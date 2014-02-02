@@ -30,6 +30,8 @@ package com.nuodb.migrator.jdbc.query;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static com.nuodb.migrator.utils.StringUtils.isEmpty;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
 /**
@@ -114,7 +116,9 @@ public class QueryUtils {
             query.append(' ');
             for (Iterator<Join> iterator = joins.iterator(); iterator.hasNext(); ) {
                 Join join = iterator.next();
-                query.append(join.getType());
+                if (!isEmpty(join.getType())) {
+                    query.append(join.getType());
+                }
                 query.append(" JOIN ");
                 query.append(join.getTable());
                 query.append(" ON ");
@@ -125,5 +129,54 @@ public class QueryUtils {
             }
         }
         return query;
+    }
+
+    public static SelectQuery union(SelectQuery... queries) {
+        SelectQuery union = null;
+        for (SelectQuery query : queries) {
+            if (query == null) {
+                continue;
+            }
+            if (union == null) {
+                union = query;
+            } else {
+                union.union(query);
+            }
+        }
+        return union;
+    }
+
+    public static StringBuilder eq(StringBuilder query, String column, Object value) {
+        return query.append(column).append("=").append(value);
+    }
+
+    public static StringBuilder in(StringBuilder query, String column, Collection<? extends Object> values) {
+        query.append(column);
+        query.append(" IN (");
+        for (Iterator<? extends Object> iterator = values.iterator(); iterator.hasNext(); ) {
+            Object value = iterator.next();
+            query.append(value);
+            if (iterator.hasNext()) {
+                query.append(",");
+            }
+        }
+        query.append(")");
+        return query;
+    }
+
+    public static String eqOrIn(String column, Object... values) {
+        return eqOrIn(new StringBuilder(), column, values).toString();
+    }
+
+    public static String eqOrIn(String column, Collection<? extends Object> values) {
+        return eqOrIn(new StringBuilder(), column, values).toString();
+    }
+
+    public static StringBuilder eqOrIn(StringBuilder query, String column, Object... values) {
+        return eqOrIn(query, column, asList(values));
+    }
+
+    public static StringBuilder eqOrIn(StringBuilder query, String column, Collection<? extends Object> values) {
+        return values.size() == 1 ? eq(query, column, values.iterator().next()) : in(query, column, values);
     }
 }

@@ -175,12 +175,12 @@ public class OracleDialect extends SimpleDialect {
     }
 
     @Override
-    public String getSequenceMinValue(Long minValue) {
+    public String getSequenceMinValue(Number minValue) {
         return minValue != null ? "MINVALUE " + minValue : "NOMINVALUE";
     }
 
     @Override
-    public String getSequenceMaxValue(Long maxValue) {
+    public String getSequenceMaxValue(Number maxValue) {
         return maxValue != null ? "MAXVALUE " + maxValue : "NOMAXVALUE";
     }
 

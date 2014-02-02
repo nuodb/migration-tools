@@ -28,17 +28,18 @@
 package com.nuodb.migrator.load;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupManager;
 import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.backup.Column;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.XmlBackupManager;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.InputFormat;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
+import com.nuodb.migrator.backup.format.value.ValueHandleListBuilder;
 import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
@@ -50,7 +51,7 @@ import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
-import com.nuodb.migrator.jdbc.query.InsertQuery;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.query.InsertQueryBuilder;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.jdbc.query.Query;
@@ -91,10 +92,9 @@ import static java.lang.String.format;
 @SuppressWarnings("ConstantConditions")
 public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
 
-    private RowSetMapper rowSetMapper = new UseSchemaRowSetMapper();
+    private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
 
     private BackupManager backupManager;
-    private Map<String, Object> formatAttributes;
     private ValueFormatRegistry valueFormatRegistry;
 
     public LoadJob() {
@@ -108,9 +108,7 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
     protected void init() throws Exception {
         super.init();
 
-        ResourceSpec inputSpec = getInputSpec();
-        setBackupManager(createBackupManager(inputSpec));
-        setFormatAttributes(inputSpec.getAttributes());
+        setBackupManager(createBackupManager());
 
         Session targetSession;
         setTargetSession(targetSession = createTargetSessionFactory().openSession());
@@ -180,8 +178,8 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
         }
     }
 
-    protected BackupManager createBackupManager(ResourceSpec inputSpec) {
-        return new XmlBackupManager(inputSpec.getPath());
+    protected BackupManager createBackupManager() {
+        return new XmlBackupManager(getPath());
     }
 
     protected SessionFactory createSourceSessionFactory(Dialect dialect) {
@@ -215,7 +213,7 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
             final Connection connection = getTargetSession().getConnection();
             final Table table = getRowSetMapper().map(rowSet, database);
             if (table != null) {
-                final InsertQuery query = createInsertQuery(table, rowSet.getColumns());
+                final Query query = createQuery(table, rowSet.getColumns());
                 final StatementTemplate template = new StatementTemplate(connection);
                 template.executeStatement(
                         new StatementFactory<PreparedStatement>() {
@@ -241,8 +239,7 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
     }
 
     protected void load(RowSet rowSet, Table table, PreparedStatement statement, Query query) throws SQLException {
-        InputFormat inputFormat = getFormatFactory().createInputFormat(
-                rowSet.getBackup().getFormat(), getFormatAttributes());
+        InputFormat inputFormat = getFormatFactory().createInputFormat(getFormat(), getFormatAttributes());
         ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
         CommitStrategy commitStrategy = getJobSpec().getCommitStrategy();
         for (Chunk chunk : rowSet.getChunks()) {
@@ -278,25 +275,26 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
 
     protected ValueHandleList createValueHandleList(final RowSet rowSet, final Table table,
                                                     PreparedStatement statement) throws SQLException {
-        Iterable<com.nuodb.migrator.jdbc.metadata.Column> columns = transform(rowSet.getColumns(),
-                new Function<com.nuodb.migrator.backup.Column, com.nuodb.migrator.jdbc.metadata.Column>() {
+        ValueHandleListBuilder builder = newBuilder(getTargetSession().getConnection(), statement);
+        builder.withDialect(getTargetSession().getDialect());
+        builder.withFields(newArrayList(transform(rowSet.getColumns(),
+                new Function<Column, Field>() {
                     @Override
-                    public com.nuodb.migrator.jdbc.metadata.Column apply(com.nuodb.migrator.backup.Column column) {
+                    public Field apply(Column column) {
                         return table.getColumn(column.getName());
                     }
-                });
-        return newBuilder(getTargetSession().getConnection(), statement).
-                withColumns(newArrayList(columns)).
-                withDialect(getTargetSession().getDialect()).
-                withTimeZone(getTimeZone()).
-                withValueFormatRegistry(getValueFormatRegistry()).build();
+                })));
+        builder.withTimeZone(getTimeZone());
+        builder.withValueFormatRegistry(getValueFormatRegistry());
+        return builder.build();
     }
 
-    protected InsertQuery createInsertQuery(Table table, Collection<com.nuodb.migrator.backup.Column> columns) {
-        InsertQueryBuilder builder = new InsertQueryBuilder().insertType(getInsertType(table)).into(table);
-        builder.columns(Lists.<String>newArrayList(transform(columns, new Function<com.nuodb.migrator.backup.Column, String>() {
+    protected Query createQuery(Table table, Collection<Column> columns) {
+        InsertQueryBuilder builder = new InsertQueryBuilder();
+        builder.insertType(getInsertType(table)).into(table);
+        builder.columns(newArrayList(transform(columns, new Function<Column, String>() {
             @Override
-            public String apply(com.nuodb.migrator.backup.Column column) {
+            public String apply(Column column) {
                 return column.getName();
             }
         })));
@@ -327,14 +325,6 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
         this.backupManager = backupManager;
     }
 
-    public Map<String, Object> getFormatAttributes() {
-        return formatAttributes;
-    }
-
-    public void setFormatAttributes(Map<String, Object> formatAttributes) {
-        this.formatAttributes = formatAttributes;
-    }
-
     public ValueFormatRegistry getValueFormatRegistry() {
         return valueFormatRegistry;
     }
@@ -349,6 +339,18 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
 
     public void setRowSetMapper(RowSetMapper rowSetMapper) {
         this.rowSetMapper = rowSetMapper;
+    }
+
+    protected String getFormat() {
+        return getInputSpec().getType();
+    }
+
+    protected Map<String, Object> getFormatAttributes() {
+        return getInputSpec().getAttributes();
+    }
+
+    protected String getPath() {
+        return getInputSpec().getPath();
     }
 
     protected Collection<MigrationMode> getMigrationModes() {

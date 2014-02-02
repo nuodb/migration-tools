@@ -61,10 +61,10 @@ public class SequenceNamingStrategy extends IdentifiableNamingStrategy<Sequence>
             qualifier.append(scriptGeneratorManager.getName(column, false));
         } else {
             Schema schema = sequence.getSchema();
-            if (scriptGeneratorManager.getName(schema) != null) {
-                qualifier.append(scriptGeneratorManager.getName(schema));
+            if (scriptGeneratorManager.getName(schema, false) != null) {
+                qualifier.append(scriptGeneratorManager.getName(schema, false));
             } else {
-                qualifier.append(scriptGeneratorManager.getName(schema.getCatalog()));
+                qualifier.append(scriptGeneratorManager.getName(schema.getCatalog(), false));
             }
             qualifier.append('_');
             qualifier.append(indexOf(schema.getSequences(), equalTo(sequence)));

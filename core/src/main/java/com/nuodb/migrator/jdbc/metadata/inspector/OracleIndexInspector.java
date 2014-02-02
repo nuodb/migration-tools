@@ -27,63 +27,63 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.jdbc.metadata.Sequence;
-import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
-import com.nuodb.migrator.utils.StringUtils;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
-import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.union;
 import static com.nuodb.migrator.utils.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 
 /**
  * @author Sergey Bushik
  */
-public class OracleSequenceInspector extends TableInspectorBase<Table, TableInspectionScope> {
-
-    public OracleSequenceInspector() {
-        super(SEQUENCE, TableInspectionScope.class);
-    }
+public class OracleIndexInspector extends SimpleIndexInspector {
 
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
-        SelectQuery query = new SelectQuery();
+        SelectQuery statisticsIndex = new SelectQuery();
         Collection<String> parameters = newArrayList();
-        query.columns("SEQUENCE_OWNER", "SEQUENCE_NAME", "MIN_VALUE", "MAX_VALUE", "INCREMENT_BY", "CYCLE_FLAG",
-                "ORDER_FLAG", "CACHE_SIZE", "LAST_NUMBER");
-        query.from("ALL_SEQUENCES");
+        statisticsIndex.columns("NULL AS TABLE_CAT", "OWNER AS TABLE_SCHEM", "TABLE_NAME", "0 AS NON_UNIQUE",
+                "NULL AS INDEX_QUALIFIER", "NULL AS INDEX_NAME", "0 AS TYPE", "0 AS ORDINAL_POSITION",
+                "NULL AS COLUMN_NAME", "NULL AS ASC_OR_DESC", "NUM_ROWS AS CARDINALITY", "BLOCKS AS PAGES",
+                "NULL AS FILTER_CONDITION");
+        statisticsIndex.from("ALL_TABLES");
         String schema = tableInspectionScope.getSchema();
         if (!isEmpty(schema)) {
-            query.where(containsAny(schema, "%") ? "SEQUENCE_OWNER LIKE ? ESCAPE '/'" : "SEQUENCE_OWNER=?");
+            statisticsIndex.where(containsAny(schema, "%") ? "OWNER LIKE ? ESCAPE '/'" : "OWNER=?");
             parameters.add(schema);
         }
-        return new ParameterizedQuery(query, parameters);
-    }
-
-    @Override
-    protected void processResultSet(InspectionContext inspectionContext, ResultSet sequences) throws SQLException {
-        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        while (sequences.next()) {
-            Schema schema = addSchema(inspectionResults, null, sequences.getString("SEQUENCE_OWNER"));
-            Sequence sequence = new Sequence(sequences.getString("SEQUENCE_NAME"));
-            sequence.setMinValue(sequences.getBigDecimal("MIN_VALUE"));
-            sequence.setMaxValue(sequences.getBigDecimal("MAX_VALUE"));
-            sequence.setIncrementBy(sequences.getBigDecimal("INCREMENT_BY"));
-            sequence.setLastValue(sequences.getBigDecimal("LAST_NUMBER"));
-            sequence.setCache(sequences.getBigDecimal("CACHE_SIZE"));
-            sequence.setCycle(StringUtils.equals(sequences.getString("CYCLE_FLAG"), "Y"));
-            sequence.setOrder(StringUtils.equals(sequences.getString("ORDER_FLAG"), "Y"));
-            schema.addSequence(sequence);
-            inspectionResults.addObject(sequence);
+        String table = tableInspectionScope.getTable();
+        if (!isEmpty(table)) {
+            statisticsIndex.where("TABLE_NAME=?");
+            parameters.add(table);
         }
+        SelectQuery clusteredIndex = new SelectQuery();
+        clusteredIndex.columns("NULL AS TABLE_CAT", "I.OWNER AS TABLE_SCHEM", "I.TABLE_NAME",
+                "DECODE(I.UNIQUENESS, 'UNIQUE', 0, 1)", "NULL AS INDEX_QUALIFIER", "I.INDEX_NAME", "1 AS TYPE",
+                "C.COLUMN_POSITION AS ORDINAL_POSITION", "C.COLUMN_NAME", "NULL AS ASC_OR_DESC",
+                "I.DISTINCT_KEYS AS CARDINALITY", "I.LEAF_BLOCKS AS PAGES", "NULL AS FILTER_CONDITION");
+        clusteredIndex.from("ALL_INDEXES I");
+        clusteredIndex.join("ALL_IND_COLUMNS C",
+                "C.INDEX_NAME = I.INDEX_NAME AND C.TABLE_OWNER = I.TABLE_OWNER AND " +
+                "I.TABLE_NAME = I.TABLE_NAME AND C.INDEX_OWNER = I.OWNER");
+        if (!isEmpty(schema)) {
+            clusteredIndex.where(containsAny(schema, "%") ? "I.OWNER LIKE ? ESCAPE '/'" : "I.OWNER=?");
+            parameters.add(schema);
+        }
+        if (!isEmpty(table)) {
+            clusteredIndex.where("I.TABLE_NAME=?");
+            parameters.add(table);
+        }
+        clusteredIndex.orderBy("NON_UNIQUE", "TYPE", "INDEX_NAME", "ORDINAL_POSITION");
+        return new ParameterizedQuery(union(statisticsIndex, clusteredIndex), parameters);
     }
 }
+
+
+
+

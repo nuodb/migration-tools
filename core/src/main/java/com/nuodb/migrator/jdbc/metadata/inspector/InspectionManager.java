@@ -68,17 +68,20 @@ public class InspectionManager {
 
         InspectorResolver tableInspector = new InspectorResolver(TABLE, new SimpleTableInspector());
         tableInspector.register(NUODB, new NuoDBTableInspector());
+        tableInspector.register(ORACLE, new OracleTableInspector());
         addInspector(tableInspector);
 
         InspectorResolver indexIndex = new InspectorResolver(INDEX, new SimpleIndexInspector());
         indexIndex.register(MYSQL, new MySQLIndexInspector());
         indexIndex.register(NUODB, new NuoDBIndexInspector());
+        indexIndex.register(ORACLE, new OracleIndexInspector());
         indexIndex.register(POSTGRE_SQL, new PostgreSQLIndexInspector());
         indexIndex.register(POSTGRE_SQL_83, new PostgreSQL83IndexInspector());
         addInspector(indexIndex);
 
         InspectorResolver primaryKeyInspector = new InspectorResolver(PRIMARY_KEY, new SimplePrimaryKeyInspector());
         primaryKeyInspector.register(NUODB, new NuoDBPrimaryKeyInspector());
+        primaryKeyInspector.register(ORACLE, new OraclePrimaryKeyInspector());
         addInspector(primaryKeyInspector);
 
         InspectorResolver foreignKeyInspector = new InspectorResolver(FOREIGN_KEY, new SimpleForeignKeyInspector());

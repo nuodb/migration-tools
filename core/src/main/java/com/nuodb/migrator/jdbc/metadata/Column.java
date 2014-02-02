@@ -327,8 +327,8 @@ public class Column extends IdentifiableBase implements Field {
             buffer.append(", not null");
         }
         if (isAutoIncrement()) {
-            Long lastValue = sequence != null ? sequence.getLastValue() : null;
-            buffer.append(format(", auto increment=%d", lastValue != null ? lastValue : 0));
+            Number lastValue = sequence != null ? sequence.getLastValue() : null;
+            buffer.append(format(", auto increment=%s", lastValue != null ? lastValue : 0));
         }
         buffer.append(format(", position=%d", position));
 

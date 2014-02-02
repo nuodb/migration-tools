@@ -69,7 +69,7 @@ public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, Table
             "='nextval(') SELECT * FROM SEQUENCES";
 
     public PostgreSQLSequenceInspector() {
-        super(SEQUENCE, TABLE, TableInspectionScope.class);
+        super(SEQUENCE, TableInspectionScope.class);
     }
 
     @Override

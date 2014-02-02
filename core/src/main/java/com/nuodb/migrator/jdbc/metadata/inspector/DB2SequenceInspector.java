@@ -57,7 +57,7 @@ public class DB2SequenceInspector extends TableInspectorBase<Table, TableInspect
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         SelectQuery query = new SelectQuery();
-        query.column(
+        query.columns(
                 "T.TABSCHEMA", "T.TABNAME", "C.COLNAME", "S.SEQNAME", "S.INCREMENT", "S.START", "S.MINVALUE",
                 "S.MAXVALUE", "S.CYCLE", "S.CACHE", "S.ORDER");
         query.from("SYSCAT.SEQUENCES S");

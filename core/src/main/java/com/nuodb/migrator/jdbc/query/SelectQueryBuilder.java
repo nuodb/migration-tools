@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.query;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
@@ -35,6 +34,7 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
 
 /**
@@ -47,15 +47,14 @@ public class SelectQueryBuilder implements QueryBuilder<SelectQuery> {
     private Dialect dialect;
     private Table from;
     private boolean qualifyNames = QUALIFY_NAMES;
-    private Collection<Object> columns = Lists.newArrayList();
-    private Collection<String> filters = Lists.newArrayList();
+    private Collection<Object> columns = newArrayList();
+    private Collection<String> filters = newArrayList();
 
     @Override
     public SelectQuery build() {
         SelectQuery query = new SelectQuery();
         query.setQualifyNames(qualifyNames);
         query.from(from);
-
         Database database = from.getDatabase();
         if (dialect != null) {
             query.setDialect(dialect);

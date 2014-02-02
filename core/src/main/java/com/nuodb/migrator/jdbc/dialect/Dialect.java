@@ -130,17 +130,17 @@ public interface Dialect {
 
     String getTriggerEnd(Trigger trigger);
 
-    String getSequenceStartWith(Long startWith);
+    String getSequenceStartWith(Number startWith);
 
-    String getSequenceIncrementBy(Long incrementBy);
+    String getSequenceIncrementBy(Number incrementBy);
 
-    String getSequenceMinValue(Long minValue);
+    String getSequenceMinValue(Number minValue);
 
-    String getSequenceMaxValue(Long maxValue);
+    String getSequenceMaxValue(Number maxValue);
 
     String getSequenceCycle(boolean cycle);
 
-    String getSequenceCache(Integer cache);
+    String getSequenceCache(Number cache);
 
     String getSequenceOrder(boolean order);
 
@@ -148,7 +148,11 @@ public interface Dialect {
 
     String getUseCatalog(String catalog);
 
+    String getUseCatalog(String catalog, boolean normalize);
+
     String getUseSchema(String schema);
+
+    String getUseSchema(String schema, boolean normalize);
 
     String getIdentifier(String identifier, Identifiable identifiable);
 

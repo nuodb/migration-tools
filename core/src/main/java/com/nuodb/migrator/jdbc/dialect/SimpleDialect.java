@@ -457,12 +457,22 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public String getUseCatalog(String catalog) {
-        return "USE " + catalog;
+        return getUseCatalog(catalog, false);
+    }
+
+    @Override
+    public String getUseCatalog(String catalog, boolean normalize) {
+        return "USE " + (normalize ? getIdentifier(catalog, null) : catalog);
     }
 
     @Override
     public String getUseSchema(String schema) {
-        return "USE " + schema;
+        return getUseSchema(schema, false);
+    }
+
+    @Override
+    public String getUseSchema(String schema, boolean normalize) {
+        return "USE " + (normalize ? getIdentifier(schema, null) : schema);
     }
 
     @Override
@@ -563,22 +573,22 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getSequenceStartWith(Long startWith) {
+    public String getSequenceStartWith(Number startWith) {
         return startWith != null ? "START WITH " + startWith : null;
     }
 
     @Override
-    public String getSequenceIncrementBy(Long incrementBy) {
+    public String getSequenceIncrementBy(Number incrementBy) {
         return incrementBy != null ? "INCREMENT BY " + incrementBy : null;
     }
 
     @Override
-    public String getSequenceMinValue(Long minValue) {
+    public String getSequenceMinValue(Number minValue) {
         return minValue != null ? "MINVALUE " + minValue : "NO MINVALUE";
     }
 
     @Override
-    public String getSequenceMaxValue(Long maxValue) {
+    public String getSequenceMaxValue(Number maxValue) {
         return maxValue != null ? "MAXVALUE " + maxValue : "NO MAXVALUE";
     }
 
@@ -588,7 +598,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getSequenceCache(Integer cache) {
+    public String getSequenceCache(Number cache) {
         return null;
     }
 

@@ -46,6 +46,7 @@ public class Table extends IdentifiableBase {
     public static final String TABLE = "TABLE";
     public static final String VIEW = "VIEW";
     public static final String ALIAS = "ALIAS";
+    public static final String SYNONYM = "SYNONYM";
 
     private Database database;
     private Catalog catalog;
@@ -102,6 +103,10 @@ public class Table extends IdentifiableBase {
         index.setTable(this);
         indexes.put(index.getIdentifier(), index);
         return index;
+    }
+
+    public boolean hasIndex(Identifier identifier) {
+        return indexes.containsKey(identifier);
     }
 
     public Index getIndex(Identifier identifier) {

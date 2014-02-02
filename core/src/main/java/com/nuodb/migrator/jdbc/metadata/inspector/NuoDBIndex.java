@@ -34,12 +34,14 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.eqOrIn;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("PrimitiveArrayArgumentToVariableArgMethod")
 public class NuoDBIndex {
 
     private static final String QUERY =
@@ -66,20 +68,7 @@ public class NuoDBIndex {
             filters.add("I.TABLENAME=?");
         }
         if (indexTypes != null && indexTypes.length > 0) {
-            if (indexTypes.length == 1) {
-                filters.add("I.INDEXTYPE=" + indexTypes[0]);
-            } else {
-                StringBuilder filter = new StringBuilder();
-                filter.append("I.INDEXTYPE IN (");
-                for (int i = 0; i < indexTypes.length; i++) {
-                    filter.append(indexTypes[i]);
-                    if (i + 1 < indexTypes.length) {
-                        filter.append(", ");
-                    }
-                }
-                filter.append(")");
-                filters.add(filter.toString());
-            }
+            filters.add(eqOrIn("I.INDEXTYPE", indexTypes));
         }
         String query = where(QUERY, filters, "AND");
         return new ParameterizedQuery(newQuery(query), parameters);

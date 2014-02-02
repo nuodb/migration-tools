@@ -35,9 +35,9 @@ import java.util.Collection;
 public class ParameterizedQuery implements Query {
 
     private Query query;
-    private Collection<Object> parameters;
+    private Collection<? extends Object> parameters;
 
-    public ParameterizedQuery(Query query, Collection<Object> parameters) {
+    public ParameterizedQuery(Query query, Collection<? extends Object> parameters) {
         this.query = query;
         this.parameters = parameters;
     }
@@ -65,11 +65,11 @@ public class ParameterizedQuery implements Query {
         this.query = query;
     }
 
-    public Collection<Object> getParameters() {
+    public Collection<? extends Object> getParameters() {
         return parameters;
     }
 
-    public void setParameters(Collection<Object> parameters) {
+    public void setParameters(Collection<? extends Object> parameters) {
         this.parameters = parameters;
     }
 

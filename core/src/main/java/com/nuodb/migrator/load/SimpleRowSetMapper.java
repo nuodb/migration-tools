@@ -49,7 +49,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-public class UseSchemaRowSetMapper implements RowSetMapper {
+public class SimpleRowSetMapper implements RowSetMapper {
 
     private final transient Logger logger = getLogger(getClass());
 

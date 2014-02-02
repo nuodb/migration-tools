@@ -130,6 +130,10 @@ public class ScriptGeneratorManager {
         return (NamingStrategy) findMetaDataHandler(namingStrategies, object);
     }
 
+    public NamingStrategy getNamingStrategy(MetaDataType objectType) {
+        return (NamingStrategy) findMetaDataHandler(namingStrategies, objectType);
+    }
+
     public void addScriptGenerator(ScriptGenerator<? extends MetaData> scriptGenerator) {
         scriptGenerators.add(scriptGenerator);
     }

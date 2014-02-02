@@ -31,6 +31,7 @@ import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.utils.Collections;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,8 +42,9 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
-import static com.nuodb.migrator.jdbc.query.QueryUtils.AND;
-import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.*;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.fill;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 
 /**
@@ -60,31 +62,22 @@ public class NuoDBTableInspector extends ManagedInspectorBase<Schema, TableInspe
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         final Collection<String> filters = newArrayList();
         final Collection<Object> parameters = newArrayList();
-        String schemaName = tableInspectionScope.getSchema();
-        if (schemaName != null) {
-            filters.add(containsAny(schemaName, "%_") ? "SCHEMA LIKE ?" : "SCHEMA=?");
-            parameters.add(schemaName);
+        String schema = tableInspectionScope.getSchema();
+        if (schema != null) {
+            filters.add(containsAny(schema, "%_") ? "SCHEMA LIKE ?" : "SCHEMA=?");
+            parameters.add(schema);
         }
-        String tableName = tableInspectionScope.getTable();
-        if (tableName != null) {
-            filters.add(containsAny(tableName, "%_") ? "TABLENAME LIKE ?" : "TABLENAME=?");
-            parameters.add(tableName);
+        String table = tableInspectionScope.getTable();
+        if (table != null) {
+            filters.add(containsAny(table, "%_") ? "TABLENAME LIKE ?" : "TABLENAME=?");
+            parameters.add(table);
         }
         String[] tableTypes = tableInspectionScope.getTableTypes();
-        if (tableTypes != null && tableTypes.length > 0) {
-            StringBuilder filter = new StringBuilder("TYPE IN");
-            filter.append(' ');
-            filter.append('(');
-            for (int i = 0, length = tableTypes.length; i < length; i++) {
-                String tableType = tableTypes[i];
-                filter.append('?');
-                if ((i + 1) != length) {
-                    filter.append(", ");
-                }
-                parameters.add(tableType);
-            }
-            filter.append(')');
-            filters.add(filter.toString());
+        if (!Collections.isEmpty(tableTypes)) {
+            String []types = new String[tableTypes.length];
+            fill(types, "?");
+            filters.add(eqOrIn("TYPE", types));
+            parameters.addAll(asList(tableTypes));
         }
         return new ParameterizedQuery(newQuery(where(QUERY, filters, AND)), parameters);
     }

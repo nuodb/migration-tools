@@ -54,7 +54,7 @@ public abstract class ValueHandleListBuilder {
 
     private TimeZone timeZone;
 
-    private Collection<? extends Field> columns;
+    private Collection<? extends Field> fields;
 
     private ValueFormatRegistry valueFormatRegistry;
 
@@ -84,7 +84,7 @@ public abstract class ValueHandleListBuilder {
 
     public ValueHandleList build() {
         ValueHandleList valueHandleList = createValueHandleList();
-        for (Field field : getColumns()) {
+        for (Field field : getFields()) {
             ValueHandle valueHandle = createValueHandle(field);
             initValueHandle(valueHandle);
             valueHandleList.add(valueHandle);
@@ -169,12 +169,12 @@ public abstract class ValueHandleListBuilder {
         return this;
     }
 
-    public Collection<? extends Field> getColumns() {
-        return columns;
+    public Collection<? extends Field> getFields() {
+        return fields;
     }
 
-    public ValueHandleListBuilder withColumns(Collection<? extends Field> columns) {
-        this.columns = columns;
+    public ValueHandleListBuilder withFields(Collection<? extends Field> fields) {
+        this.fields = fields;
         return this;
     }
 

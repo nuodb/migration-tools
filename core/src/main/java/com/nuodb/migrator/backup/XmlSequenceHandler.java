@@ -33,6 +33,8 @@ import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
+import java.math.BigDecimal;
+
 /**
  * @author Sergey Bushik
  */
@@ -55,15 +57,15 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
     @Override
     protected void readAttributes(InputNode input, Sequence sequence, XmlReadContext context) throws Exception {
         sequence.setName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
-        sequence.setStartWith(context.readAttribute(input, START_WITH_ATTRIBUTE, Long.class));
-        sequence.setLastValue(context.readAttribute(input, LAST_VALUE_ATTRIBUTE, Long.class));
-        sequence.setIncrementBy(context.readAttribute(input, INCREMENT_BY_ATTRIBUTE, Long.class));
-        sequence.setMinValue(context.readAttribute(input, MIN_VALUE_ATTRIBUTE, Long.class));
-        sequence.setMaxValue(context.readAttribute(input, MAX_VALUE_ATTRIBUTE, Long.class));
+        sequence.setStartWith(context.readAttribute(input, START_WITH_ATTRIBUTE, BigDecimal.class));
+        sequence.setLastValue(context.readAttribute(input, LAST_VALUE_ATTRIBUTE, BigDecimal.class));
+        sequence.setIncrementBy(context.readAttribute(input, INCREMENT_BY_ATTRIBUTE, BigDecimal.class));
+        sequence.setMinValue(context.readAttribute(input, MIN_VALUE_ATTRIBUTE, BigDecimal.class));
+        sequence.setMaxValue(context.readAttribute(input, MAX_VALUE_ATTRIBUTE, BigDecimal.class));
+        sequence.setCache(context.readAttribute(input, CACHE_ATTRIBUTE, BigDecimal.class));
         sequence.setCycle(context.readAttribute(input, CYCLE_ATTRIBUTE, Boolean.class, false));
         sequence.setOrder(context.readAttribute(input, ORDER_ATTRIBUTE, Boolean.class, false));
         sequence.setTemporary(context.readAttribute(input, TEMPORARY_ATTRIBUTE, Boolean.class, false));
-        sequence.setCache(context.readAttribute(input, CACHE_ATTRIBUTE, Integer.class));
     }
 
     @Override
@@ -71,23 +73,23 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
         if (sequence.getName() != null) {
             context.writeAttribute(output, NAME_ATTRIBUTE, sequence.getName());
         }
-        Long startWith = sequence.getStartWith();
+        Number startWith = sequence.getStartWith();
         if (startWith != null) {
             context.writeAttribute(output, START_WITH_ATTRIBUTE, startWith);
         }
-        Long lastValue = sequence.getLastValue();
+        Number lastValue = sequence.getLastValue();
         if (lastValue != null) {
             context.writeAttribute(output, LAST_VALUE_ATTRIBUTE, lastValue);
         }
-        Long incrementBy = sequence.getIncrementBy();
+        Number incrementBy = sequence.getIncrementBy();
         if (incrementBy != null) {
             context.writeAttribute(output, INCREMENT_BY_ATTRIBUTE, lastValue);
         }
-        Long minValue = sequence.getMinValue();
+        Number minValue = sequence.getMinValue();
         if (minValue != null) {
             context.writeAttribute(output, MIN_VALUE_ATTRIBUTE, minValue);
         }
-        Long maxValue = sequence.getMaxValue();
+        Number maxValue = sequence.getMaxValue();
         if (maxValue != null) {
             context.writeAttribute(output, MAX_VALUE_ATTRIBUTE, maxValue);
         }
@@ -103,7 +105,7 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
         if (temporary) {
             context.writeAttribute(output, TEMPORARY_ATTRIBUTE, temporary);
         }
-        Integer cache = sequence.getCache();
+        Number cache = sequence.getCache();
         if (cache != null) {
             context.writeAttribute(output, CACHE_ATTRIBUTE, cache);
         }

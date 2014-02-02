@@ -48,16 +48,16 @@ public class PostgreSQL83IndexInspector extends PostgreSQLIndexInspector {
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         SelectQuery query = new SelectQuery();
         Collection<Object> parameters = newArrayList();
-        query.column("NULL AS TABLE_CAT", "I.INDISPRIMARY AS PRIMARY");
-        query.column("N.NSPNAME AS TABLE_SCHEM", "CT.RELNAME AS TABLE_NAME");
-        query.column("NOT I.INDISUNIQUE AS NON_UNIQUE", "NULL AS INDEX_QUALIFIER");
+        query.columns("NULL AS TABLE_CAT", "I.INDISPRIMARY AS PRIMARY");
+        query.columns("N.NSPNAME AS TABLE_SCHEM", "CT.RELNAME AS TABLE_NAME");
+        query.columns("NOT I.INDISUNIQUE AS NON_UNIQUE", "NULL AS INDEX_QUALIFIER");
         query.column("CI.RELNAME AS INDEX_NAME");
         query.column("CASE I.INDISCLUSTERED WHEN TRUE THEN 1 ELSE CASE AM.AMNAME WHEN 'HASH' THEN 2 ELSE 3 END END AS TYPE");
         query.column("(I.KEYS).N AS ORDINAL_POSITION");
         query.column("PG_CATALOG.PG_GET_INDEXDEF(CI.OID, (I.KEYS).N, FALSE) AS COLUMN_NAME");
         query.column("CASE AM.AMCANORDER WHEN TRUE THEN " +
                 "CASE I.INDOPTION [(I.KEYS).N - 1] & 1 WHEN 1 THEN 'D' ELSE 'A' END ELSE NULL END AS ASC_OR_DESC");
-        query.column("CI.RELTUPLES AS CARDINALITY", "CI.RELPAGES AS PAGES");
+        query.columns("CI.RELTUPLES AS CARDINALITY", "CI.RELPAGES AS PAGES");
         query.column("PG_CATALOG.PG_GET_EXPR(I.INDPRED, I.INDRELID) AS FILTER_CONDITION");
         query.from("PG_CATALOG.PG_CLASS CT");
         query.innerJoin("PG_CATALOG.PG_NAMESPACE N", "CT.RELNAMESPACE = N.OID");

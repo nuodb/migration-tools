@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.query;
 
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -49,15 +48,16 @@ public class SelectQuery extends QueryBase {
     private Collection<String> where = newArrayList();
     private Collection<OrderBy> orderBy = newArrayList();
     private Collection<Join> join = newArrayList();
-
-    public void column(Object... columns) {
-        for (Object column : columns) {
-            column(column);
-        }
-    }
+    private Collection<SelectQuery> union = newArrayList();
 
     public void column(Object column) {
         columns.add(column);
+    }
+
+    public void columns(Object... columns) {
+        for (Object column : columns) {
+            column(column);
+        }
     }
 
     public void from(String table) {
@@ -66,6 +66,16 @@ public class SelectQuery extends QueryBase {
 
     public void from(Table table) {
         from.add(table);
+    }
+
+    public void from(Object... tables) {
+        for (Object table : tables) {
+            if (table instanceof Table) {
+                from((Table)table);
+            } else {
+                from((String)table);
+            }
+        }
     }
 
     public void innerJoin(String table, String condition) {
@@ -78,6 +88,10 @@ public class SelectQuery extends QueryBase {
 
     public void rightJoin(String table, String condition) {
         join(RIGHT, table, condition);
+    }
+
+    public void join(String table, String condition) {
+        join.add(new Join(table, condition));
     }
 
     public void join(String type, String table, String condition) {
@@ -100,6 +114,10 @@ public class SelectQuery extends QueryBase {
         orderBy.add(new OrderBy(columns, order));
     }
 
+    public void union(SelectQuery query) {
+        union.add(query);
+    }
+
     @Override
     public void append(StringBuilder query) {
         addSelect(query);
@@ -107,6 +125,7 @@ public class SelectQuery extends QueryBase {
         addJoins(query);
         addWhere(query);
         addOrderBy(query);
+        addUnion(query);
     }
 
     protected void addSelect(StringBuilder query) {
@@ -136,6 +155,13 @@ public class SelectQuery extends QueryBase {
             if (iterator.hasNext()) {
                 query.append(",");
             }
+        }
+    }
+
+    protected void addUnion(StringBuilder query) {
+        for (SelectQuery selectQuery : union) {
+            query.append(" UNION ");
+            selectQuery.append(query);
         }
     }
 
