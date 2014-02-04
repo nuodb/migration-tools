@@ -239,7 +239,8 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
     }
 
     protected void load(RowSet rowSet, Table table, PreparedStatement statement, Query query) throws SQLException {
-        InputFormat inputFormat = getFormatFactory().createInputFormat(getFormat(), getFormatAttributes());
+        String format = rowSet.getBackup().getFormat();
+        InputFormat inputFormat = getFormatFactory().createInputFormat(format, getFormatAttributes());
         ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
         CommitStrategy commitStrategy = getJobSpec().getCommitStrategy();
         for (Chunk chunk : rowSet.getChunks()) {
@@ -339,10 +340,6 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
 
     public void setRowSetMapper(RowSetMapper rowSetMapper) {
         this.rowSetMapper = rowSetMapper;
-    }
-
-    protected String getFormat() {
-        return getInputSpec().getType();
     }
 
     protected Map<String, Object> getFormatAttributes() {
