@@ -57,7 +57,7 @@ public class DB2CheckInspector extends TableInspectorBase<Table, TableInspection
         SelectQuery query = new SelectQuery();
         query.columns("TABSCHEMA", "TABNAME", "CONSTNAME", "TEXT");
         query.from("SYSCAT.CHECKS");
-        query.where("TYPE = 'C'");
+        query.where("TYPE='C'");
         Collection<Object> parameters = newArrayList();
         String schema = tableInspectionScope.getSchema();
         if (!isEmpty(schema)) {
