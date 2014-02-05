@@ -54,7 +54,7 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
         }
         buffer.append("SEQUENCE");
         buffer.append(' ');
-        buffer.append(scriptGeneratorManager.getQualifiedName(sequence));
+        buffer.append(scriptGeneratorManager.getName(sequence));
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
 
         String currentValue = dialect.getSequenceStartWith(sequence.getLastValue());
@@ -111,7 +111,7 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
             buffer.append("IF EXISTS");
         }
         buffer.append(' ');
-        buffer.append(scriptGeneratorManager.getQualifiedName(sequence));
+        buffer.append(scriptGeneratorManager.getName(sequence));
         return singleton(buffer.toString());
     }
 }

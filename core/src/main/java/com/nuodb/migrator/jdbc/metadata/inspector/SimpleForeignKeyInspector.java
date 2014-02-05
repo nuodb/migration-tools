@@ -90,13 +90,13 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
             if (optional.isPresent()) {
                 foreignKey = optional.get();
             } else {
-                foreignTable.addForeignKey(foreignKey = new ForeignKey(identifier));
+                foreignKey = new ForeignKey(identifier);
                 foreignKey.setPrimaryTable(primaryTable);
                 foreignKey.setForeignTable(foreignTable);
                 foreignKey.setUpdateAction(getReferentialAction(foreignKeys.getInt("UPDATE_RULE")));
                 foreignKey.setDeleteAction(getReferentialAction(foreignKeys.getInt("DELETE_RULE")));
                 foreignKey.setDeferrability(getDeferrability(foreignKeys.getInt("DEFERRABILITY")));
-
+                foreignTable.addForeignKey(foreignKey);
                 inspectionResults.addObject(foreignKey);
             }
             foreignKey.addReference(primaryColumn, foreignColumn, position);

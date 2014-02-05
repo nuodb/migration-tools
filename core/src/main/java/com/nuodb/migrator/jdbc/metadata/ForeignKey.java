@@ -29,10 +29,12 @@ package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newTreeMap;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.FOREIGN_KEY;
 
@@ -74,6 +76,7 @@ public class ForeignKey extends ConstraintBase {
     }
 
     public void setForeignTable(Table foreignTable) {
+        setTable(foreignTable);
         this.foreignTable = foreignTable;
     }
 
@@ -106,25 +109,25 @@ public class ForeignKey extends ConstraintBase {
     }
 
     public Collection<ForeignKeyReference> getReferences() {
-        return references.values();
+        return newArrayList(references.values());
     }
 
     public Collection<Column> getPrimaryColumns() {
-        return Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
+        return newArrayList(Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
             @Override
             public Column apply(ForeignKeyReference input) {
                 return input.getPrimaryColumn();
             }
-        });
+        }));
     }
 
     public Collection<Column> getForeignColumns() {
-        return Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
+        return newArrayList(Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
             @Override
             public Column apply(ForeignKeyReference input) {
                 return input.getForeignColumn();
             }
-        });
+        }));
     }
 
     @Override
@@ -137,7 +140,6 @@ public class ForeignKey extends ConstraintBase {
 
         if (deferrability != that.deferrability) return false;
         if (deleteAction != that.deleteAction) return false;
-        if (references != null ? !references.equals(that.references) : that.references != null) return false;
         if (updateAction != that.updateAction) return false;
 
         return true;
@@ -146,7 +148,6 @@ public class ForeignKey extends ConstraintBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (references != null ? references.hashCode() : 0);
         result = 31 * result + (updateAction != null ? updateAction.hashCode() : 0);
         result = 31 * result + (deleteAction != null ? deleteAction.hashCode() : 0);
         result = 31 * result + (deferrability != null ? deferrability.hashCode() : 0);

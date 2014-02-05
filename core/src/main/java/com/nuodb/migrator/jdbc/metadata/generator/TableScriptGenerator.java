@@ -56,9 +56,9 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
     public Collection<String> getCreateScripts(Table table, ScriptGeneratorManager scriptGeneratorManager) {
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder("CREATE TABLE");
-        buffer.append(' ').append(scriptGeneratorManager.getQualifiedName(table)).append(" (");
+        buffer.append(' ').append(scriptGeneratorManager.getName(table)).append(" (");
         Collection<Column> columns = table.getColumns();
-        final Collection<Index> indexes = table.getIndexes();
+        Collection<Index> indexes = table.getIndexes();
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();
@@ -171,7 +171,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             buffer.append("IF EXISTS");
             buffer.append(' ');
         }
-        buffer.append(scriptGeneratorManager.getQualifiedName(table));
+        buffer.append(scriptGeneratorManager.getName(table));
         String cascadeConstraints = dialect.getCascadeConstraints();
         if (cascadeConstraints != null) {
             buffer.append(' ');
