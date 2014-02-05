@@ -51,7 +51,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--output.*=[attribute value]]                              Output format attributes
         [migration modes, optional]
             [--data=[true | false]]                                     Enables or disables data migration, true by default
-            [--schema=[true | false]]                                   Enables or disables schema migration, false by default
+            [--schema=[true | false]]                                   Enables or disables schema migration, true by default
         [data migration, optional]
             [table names, types & query filters, optional]
                 [--table=table [table ...]]                             Table name
