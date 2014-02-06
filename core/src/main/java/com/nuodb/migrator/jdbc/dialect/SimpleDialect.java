@@ -299,8 +299,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public JdbcTypeNameMap getJdbcTypeNameMap(DatabaseInfo databaseInfo) {
-        JdbcTypeNameMap jdbcTypeNameMap = jdbcTypeNameMaps.get(databaseInfo);
-        if (jdbcTypeNameMap == null) {
+        JdbcTypeNameMap targetJdbcTypeNameMap = jdbcTypeNameMaps.get(databaseInfo);
+        if (targetJdbcTypeNameMap == null) {
             DatabaseInfo targetDatabaseInfo = null;
             for (Map.Entry<DatabaseInfo, JdbcTypeNameMap> entry : jdbcTypeNameMaps.entrySet()) {
                 if (!entry.getKey().isAssignable(databaseInfo)) {
@@ -308,16 +308,16 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
                 }
                 if (targetDatabaseInfo == null) {
                     targetDatabaseInfo = entry.getKey();
-                    jdbcTypeNameMap = entry.getValue();
+                    targetJdbcTypeNameMap = entry.getValue();
                 } else if (targetDatabaseInfo.compareTo(entry.getKey()) >= 0) {
-                    jdbcTypeNameMap = entry.getValue();
+                    targetJdbcTypeNameMap = entry.getValue();
                 }
             }
         }
-        if (jdbcTypeNameMap == null) {
-            jdbcTypeNameMaps.put(databaseInfo, jdbcTypeNameMap = new JdbcTypeNameMap());
+        if (targetJdbcTypeNameMap == null) {
+            jdbcTypeNameMaps.put(databaseInfo, targetJdbcTypeNameMap = new JdbcTypeNameMap());
         }
-        return jdbcTypeNameMap;
+        return targetJdbcTypeNameMap;
     }
 
     @Override

@@ -33,6 +33,7 @@ import com.nuodb.migrator.jdbc.query.Query;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.primitives.Ints.asList;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.eqOrIn;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
@@ -68,7 +69,7 @@ public class NuoDBIndex {
             filters.add("I.TABLENAME=?");
         }
         if (indexTypes != null && indexTypes.length > 0) {
-            filters.add(eqOrIn("I.INDEXTYPE", indexTypes));
+            filters.add(eqOrIn("I.INDEXTYPE", asList(indexTypes)));
         }
         String query = where(QUERY, filters, "AND");
         return new ParameterizedQuery(newQuery(query), parameters);

@@ -27,11 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.google.common.collect.ComparisonChain;
 import com.nuodb.migrator.utils.ObjectUtils;
 
-import static com.google.common.collect.ComparisonChain.start;
-import static com.google.common.collect.Ordering.natural;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 
 /**

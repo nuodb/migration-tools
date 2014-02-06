@@ -27,11 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.google.common.collect.ComparisonChain;
 import com.nuodb.migrator.utils.ObjectUtils;
 
-import static com.google.common.collect.ComparisonChain.start;
-import static com.google.common.collect.Ordering.natural;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 /**
@@ -84,7 +81,7 @@ public class JdbcTypeDesc implements Cloneable {
         if (this == o) return true;
         if (!(o instanceof JdbcTypeDesc)) return false;
         JdbcTypeDesc that = (JdbcTypeDesc) o;
-        return typeCode == that.getTypeCode() && equals(typeName, that.getTypeName());
+        return typeCode == that.getTypeCode() && equalsIgnoreCase(typeName, that.getTypeName());
     }
 
     @Override

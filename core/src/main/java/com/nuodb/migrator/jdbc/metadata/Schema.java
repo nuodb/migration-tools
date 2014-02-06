@@ -30,8 +30,8 @@ package com.nuodb.migrator.jdbc.metadata;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
-import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static java.lang.String.format;
@@ -40,7 +40,7 @@ public class Schema extends IdentifiableBase implements HasTables {
 
     private Database database;
     private Catalog catalog;
-    private final Collection<Sequence> sequences = newLinkedHashSet();
+    private final Collection<Sequence> sequences = newArrayList();
     private final Map<Identifier, Table> tables = newLinkedHashMap();
 
     public Schema() {

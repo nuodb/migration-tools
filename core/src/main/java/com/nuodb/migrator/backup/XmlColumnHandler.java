@@ -47,6 +47,7 @@ import org.simpleframework.xml.stream.OutputNode;
 import static com.google.common.base.Predicates.equalTo;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
+import static com.nuodb.migrator.utils.Predicates.is;
 
 /**
  * @author Sergey Bushik
@@ -152,7 +153,7 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
         if (sequence != null) {
             OutputNode element = output.getChild(SEQUENCE_ELEMENT);
             context.writeAttribute(element, REF_INDEX_ATTRIBUTE,
-                    indexOf(sequence.getSchema().getSequences(), equalTo(sequence)));
+                    indexOf(sequence.getSchema().getSequences(), is(sequence)));
         }
     }
 }

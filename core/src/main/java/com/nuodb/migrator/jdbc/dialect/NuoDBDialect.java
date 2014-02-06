@@ -39,7 +39,6 @@ import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeNames.createEnumTypeNameTemplate;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeNames.createTypeNameTemplate;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.*;
-import static com.nuodb.migrator.utils.Priority.NORMAL;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 import static java.sql.Types.*;
@@ -78,16 +77,19 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(BIT, newSize(1), "BOOLEAN");
         addJdbcTypeName(TINYINT, "SMALLINT");
         addJdbcTypeName(SMALLINT, "SMALLINT");
-
         addJdbcTypeName(INTEGER, "INTEGER");
-
         addJdbcTypeName(BIGINT, "BIGINT");
-        addJdbcTypeName(NUMERIC, "NUMERIC({P},{S})");
-        addJdbcTypeName(DECIMAL, "DECIMAL({P},{S})");
+
+        // fix for integer & bigint
+        addJdbcTypeName(new JdbcTypeDesc(INTEGER, "INTEGER"), newScale(0), "INTEGER");
+        addJdbcTypeName(new JdbcTypeDesc(INTEGER, "INTEGER"), "NUMERIC({P},{S})");
+        addJdbcTypeName(new JdbcTypeDesc(BIGINT, "BIGINT"), newScale(0), "BIGINT");
+        addJdbcTypeName(new JdbcTypeDesc(BIGINT, "BIGINT"), "NUMERIC({P},{S})");
 
         addJdbcTypeName(REAL, "REAL");
         addJdbcTypeName(FLOAT, "FLOAT");
         addJdbcTypeName(DOUBLE, "DOUBLE");
+        addJdbcTypeName(NUMERIC, "NUMERIC({P},{S})");
         addJdbcTypeName(DECIMAL, "DECIMAL({P},{S})");
 
         addJdbcTypeName(CHAR, newSize(0), "CHAR");
