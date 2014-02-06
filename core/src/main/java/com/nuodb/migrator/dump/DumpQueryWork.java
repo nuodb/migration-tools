@@ -46,13 +46,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 
-import static com.google.common.base.Predicates.equalTo;
-import static com.google.common.base.Predicates.instanceOf;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
-import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
+import static com.nuodb.migrator.utils.Predicates.equalTo;
+import static com.nuodb.migrator.utils.Predicates.instanceOf;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.StringUtils.lowerCase;

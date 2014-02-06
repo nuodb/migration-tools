@@ -44,9 +44,9 @@ import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
-import static com.google.common.base.Predicates.equalTo;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
+import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.nuodb.migrator.utils.Predicates.is;
 
 /**

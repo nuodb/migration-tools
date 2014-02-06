@@ -34,7 +34,7 @@ import com.nuodb.migrator.jdbc.metadata.Sequence;
 
 import java.util.Collection;
 
-import static com.google.common.base.Predicates.equalTo;
+import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.nuodb.migrator.utils.StringUtils.*;
 

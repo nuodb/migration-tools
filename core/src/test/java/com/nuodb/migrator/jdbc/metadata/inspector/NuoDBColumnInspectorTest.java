@@ -51,7 +51,7 @@ import static org.testng.Assert.assertNotNull;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "ConstantConditions"})
 public class NuoDBColumnInspectorTest extends InspectorTestBase {
 
     public NuoDBColumnInspectorTest() {
@@ -77,6 +77,7 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         Integer typeCode = Types.VARCHAR;
         String typeName = "string";
         Integer columnSize = 4;
+        Integer precision = 0;
         String defaultValue = null;
         Integer scale = 0;
         String comment = "remarks";
@@ -96,6 +97,7 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         given(resultSet.getString("DEFAULTVALUE")).willReturn(defaultValue);
         given(resultSet.getInt("SCALE")).willReturn(scale);
         given(resultSet.getString("REMARKS")).willReturn(comment);
+        given(resultSet.getInt("PRECISION")).willReturn(precision);
         given(resultSet.getInt("FIELDPOSITION")).willReturn(position);
         given(resultSet.getInt("FLAGS")).willReturn(nullable ? 0 : 1);
         given(resultSet.getString("GENERATOR_SEQUENCE")).willReturn(autoIncrement ? "sequence" : null);
@@ -112,7 +114,7 @@ public class NuoDBColumnInspectorTest extends InspectorTestBase {
         column.setTypeName(typeName);
         column.setTypeCode(typeCode);
         column.setSize(columnSize);
-        column.setPrecision(columnSize);
+        column.setPrecision(precision);
         column.setDefaultValue(valueOf(defaultValue));
         column.setScale(scale);
         column.setPosition(position);

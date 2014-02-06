@@ -29,8 +29,8 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.Trigger;
 
-import static com.google.common.base.Predicates.equalTo;
 import static com.google.common.collect.Iterables.indexOf;
+import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.nuodb.migrator.utils.StringUtils.*;
 import static com.nuodb.migrator.utils.StringUtils.upperCase;
 
