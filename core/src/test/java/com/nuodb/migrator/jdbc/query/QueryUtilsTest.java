@@ -43,7 +43,7 @@ import static org.testng.Assert.assertEquals;
 public class QueryUtilsTest {
 
     @DataProvider(name = "where")
-    public Object[][] getWhereData() {
+    public Object[][] createWhereData() {
         return new Object[][]{
                 {"SELECT \"column1\", \"column2\" FROM \"table\"", emptySet(),
                         AND, "SELECT \"column1\", \"column2\" FROM \"table\""},
@@ -62,7 +62,7 @@ public class QueryUtilsTest {
     }
 
     @DataProvider(name = "orderBy")
-    public Object[][] getOrderByData() {
+    public Object[][] createOrderByData() {
         return new Object[][]{
                 {"SELECT \"column1\", \"column2\" FROM \"table\"", null,
                         null, "SELECT \"column1\", \"column2\" FROM \"table\""},

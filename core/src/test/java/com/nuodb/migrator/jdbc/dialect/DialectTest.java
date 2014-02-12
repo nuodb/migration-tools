@@ -32,6 +32,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.sql.SQLException;
 import java.sql.Types;
 
 import static com.nuodb.migrator.jdbc.dialect.TranslatorUtils.createScript;
@@ -53,7 +54,7 @@ public class DialectTest {
     }
 
     @DataProvider(name = "zeroDateTimeBehavior")
-    public Object[][] createZeroDateTimeBehaviorData() {
+    public Object[][] createZeroDateTimeBehaviorData() throws SQLException {
         Session convertToNull = createSession(new MySQLDialect(MYSQL),
                 "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=convertToNull");
         Session round = createSession(new MySQLDialect(MYSQL),
@@ -69,7 +70,7 @@ public class DialectTest {
     }
 
     @DataProvider(name = "zeroDateTimeBehaviorException")
-    public Object[][] createZeroDateTimeBehaviorExceptionData() {
+    public Object[][] createZeroDateTimeBehaviorExceptionData() throws SQLException {
         Session exception = createSession(new MySQLDialect(MYSQL),
                 "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=exception");
         return new Object[][]{

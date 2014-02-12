@@ -27,24 +27,19 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
-import com.nuodb.migrator.utils.aop.AopProxy;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 
-import static com.nuodb.migrator.utils.aop.AopProxyUtils.createAopProxy;
-import static com.nuodb.migrator.utils.aop.MethodInterceptors.newIntroduceInterfacesInterceptor;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 
 /**
  * @author Sergey Bushik
  */
 public class SessionUtils {
 
-    public static Session createSession(Dialect dialect) {
+    public static Session createSession(Dialect dialect) throws SQLException {
         return createSession(dialect, null);
     }
 
@@ -55,27 +50,9 @@ public class SessionUtils {
      * @param url     connection url to a source database
      * @return mock object using the provided dialect & connection url
      */
-    public static Session createSession(Dialect dialect, String url) {
-        final Session session = mock(Session.class);
-        when(session.getDialect()).thenReturn(dialect);
-
-        final Connection connection = mock(Connection.class);
-        final AopProxy aopProxy = createAopProxy(connection, ConnectionProxy.class, Connection.class);
-        final DriverConnectionSpec driverConnectionSpec = new DriverConnectionSpec();
-        driverConnectionSpec.setUrl(url);
-        aopProxy.addAdvice(newIntroduceInterfacesInterceptor(new ConnectionProxy<DriverConnectionSpec>() {
-            @Override
-            public Connection getConnection() {
-                return connection;
-            }
-
-            @Override
-            public DriverConnectionSpec getConnectionSpec() {
-                return driverConnectionSpec;
-            }
-        }, ConnectionProxy.class));
-
-        when(session.getConnection()).thenReturn((Connection) aopProxy);
-        return session;
+    public static Session createSession(Dialect dialect, String url) throws SQLException {
+        DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
+        connectionSpec.setUrl(url);
+        return newSessionFactory(dialect, connectionSpec).openSession();
     }
 }

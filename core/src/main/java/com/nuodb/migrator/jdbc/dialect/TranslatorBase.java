@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.dialect;
 import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
+import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 
 import java.sql.Connection;
@@ -72,9 +73,12 @@ public abstract class TranslatorBase<S extends Script> implements Translator<S> 
         return script.getSession().getConnection();
     }
 
+    public static ConnectionSpec getConnectionSpec(Script script) {
+        return script.getSession().getConnectionSpec();
+    }
+
     public static JdbcUrl getJdbcUrl(Script script) {
-        final ConnectionProxy connection = (ConnectionProxy) getConnection(script);
-        return ((DriverConnectionSpec) connection.getConnectionSpec()).getJdbcUrl();
+        return ((DriverConnectionSpec) getConnectionSpec(script)).getJdbcUrl();
     }
 
     @Override

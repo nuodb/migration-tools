@@ -36,6 +36,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
 
@@ -54,7 +55,7 @@ public class ScriptGeneratorTest {
     private ScriptGeneratorManager scriptGeneratorManager;
 
     @BeforeMethod
-    public void setUp() {
+    public void setUp() throws SQLException {
         NuoDBDialect dialect = new NuoDBDialect();
 
         Database database = new Database();

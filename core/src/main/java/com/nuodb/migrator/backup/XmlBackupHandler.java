@@ -28,7 +28,6 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.utils.Collections;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;

@@ -127,9 +127,9 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
     @Override
     public void execute() throws Exception {
         Backup backup = getBackupManager().readBackup();
-        Database source = backup.getDatabase();
-        setSourceSpec(source.getConnectionSpec());
-        setSourceSession(createSourceSessionFactory(source.getDialect()).openSession());
+        Database database = backup.getDatabase();
+        setSourceSpec(database.getConnectionSpec());
+        setSourceSession(createSourceSessionFactory(database).openSession());
 
         Collection<MetaDataType> indexes = newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX);
         Collection<MigrationMode> migrationModes = getMigrationModes();
@@ -139,7 +139,7 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
             Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
             objectTypes.removeAll(indexes);
             scriptGeneratorManager.setObjectTypes(objectTypes);
-            exportScripts(scriptGeneratorManager.getScripts(source));
+            exportScripts(scriptGeneratorManager.getScripts(database));
         }
         // import data
         if (contains(migrationModes, DATA)) {
@@ -164,7 +164,7 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
             Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
             objectTypes.retainAll(indexes);
             scriptGeneratorManager.setObjectTypes(objectTypes);
-            exportScripts(scriptGeneratorManager.getScripts(source));
+            exportScripts(scriptGeneratorManager.getScripts(database));
         }
     }
 
@@ -182,8 +182,8 @@ public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
         return new XmlBackupManager(getPath());
     }
 
-    protected SessionFactory createSourceSessionFactory(Dialect dialect) {
-        return newSessionFactory(dialect);
+    protected SessionFactory createSourceSessionFactory(Database database) {
+        return newSessionFactory(database.getDialect(), database.getConnectionSpec());
     }
 
     protected SessionFactory createTargetSessionFactory() {

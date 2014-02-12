@@ -28,26 +28,40 @@
 package com.nuodb.migrator.jdbc.session;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.jdbc.dialect.MySQLDialect;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
+
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
+import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
+import static java.lang.String.format;
+import static org.testng.Assert.*;
 
 /**
  * @author Sergey Bushik
  */
-public interface Session extends Map {
+public class SessionFactoryTest {
 
-    SessionFactory getSessionFactory();
+    @DataProvider(name = "connectionLessSession")
+    public Object[][] createConnectionLessSessionData() throws Exception {
+        DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
+        connectionSpec.setUrl("jdbc:mysql://localhost/test");
+        return new Object[][]{
+                {new MySQLDialect(MYSQL), connectionSpec}
+        };
+    }
 
-    ConnectionSpec getConnectionSpec();
-
-    Connection getConnection();
-
-    Dialect getDialect();
-
-    void execute(Work work, WorkManager workManager) throws Exception;
-
-    void close() throws SQLException;
+    @Test(dataProvider = "connectionLessSession", expectedExceptions = {SessionException.class})
+    public void testConnectionLessSession(Dialect dialect, DriverConnectionSpec connectionSpec) throws SQLException {
+        Session session = newSessionFactory(dialect, connectionSpec).openSession();
+        assertEquals(session.getConnectionSpec(), connectionSpec);
+        assertEquals(session.getDialect(), dialect);
+        assertNotNull(((DriverConnectionSpec) session.getConnectionSpec()).getJdbcUrl());
+        Connection connection = session.getConnection();
+        fail(format("Connection less session should not return a connection %s", connection));
+    }
 }

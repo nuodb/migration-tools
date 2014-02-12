@@ -31,6 +31,8 @@ import com.nuodb.migrator.jdbc.session.Session;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.sql.SQLException;
+
 import static com.nuodb.migrator.jdbc.dialect.TranslatorUtils.createScript;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
@@ -44,9 +46,8 @@ import static org.testng.Assert.assertTrue;
 @SuppressWarnings("unchecked")
 public class TranslatorTest {
 
-
     @DataProvider(name = "translate")
-    public Object[][] createTranslateData() {
+    public Object[][] createTranslateData() throws SQLException {
         Session session = createSession(new MySQLDialect(MYSQL),
                 "jdbc:mysql://localhost/test?zeroDateTimeBehavior=round");
 

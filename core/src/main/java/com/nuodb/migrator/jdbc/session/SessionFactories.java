@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.session;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
+import com.nuodb.migrator.spec.ConnectionSpec;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -40,11 +41,16 @@ import java.util.Map;
  */
 public class SessionFactories {
 
-    public static SessionFactory newSessionFactory(final Dialect dialect) {
+    public static SessionFactory newSessionFactory(final Dialect dialect, final ConnectionSpec connectionSpec) {
         return new SessionFactoryBase() {
             @Override
             protected Session open(Map<Object, Object> context) throws SQLException {
                 return new SessionBase(this, null, dialect, context) {
+                    @Override
+                    public ConnectionSpec getConnectionSpec() {
+                        return connectionSpec;
+                    }
+
                     @Override
                     public Connection getConnection() {
                         throw new SessionException("Connection less session");
