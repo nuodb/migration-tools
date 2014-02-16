@@ -40,6 +40,10 @@ public class XmlTableRowSetHandler extends XmlRowSetHandler<TableRowSet> {
     private static final String CATALOG_ATTRIBUTE = "catalog";
     private static final String SCHEMA_ATTRIBUTE = "schema";
     private static final String TABLE_ATTRIBUTE = "table";
+    // old format attributes
+    private static final String CATALOG_NAME_ATTRIBUTE = "catalog-name";
+    private static final String SCHEMA_NAME_ATTRIBUTE = "schema-name";
+    private static final String TABLE_NAME_ATTRIBUTE = "table-name";
 
     public XmlTableRowSetHandler() {
         super(TableRowSet.class, TABLE_TYPE);
@@ -48,9 +52,12 @@ public class XmlTableRowSetHandler extends XmlRowSetHandler<TableRowSet> {
     @Override
     protected void readAttributes(InputNode input, TableRowSet target, XmlReadContext context) throws Exception {
         super.readAttributes(input, target, context);
-        target.setCatalog(context.readAttribute(input, CATALOG_ATTRIBUTE, String.class));
-        target.setSchema(context.readAttribute(input, SCHEMA_ATTRIBUTE, String.class));
-        target.setTable(context.readAttribute(input, TABLE_ATTRIBUTE, String.class));
+        target.setCatalog(context.readAttribute(input, CATALOG_ATTRIBUTE, String.class,
+                context.readAttribute(input, CATALOG_NAME_ATTRIBUTE, String.class)));
+        target.setSchema(context.readAttribute(input, SCHEMA_ATTRIBUTE, String.class,
+                context.readAttribute(input, SCHEMA_NAME_ATTRIBUTE, String.class)));
+        target.setTable(context.readAttribute(input, TABLE_ATTRIBUTE, String.class,
+                context.readAttribute(input, TABLE_NAME_ATTRIBUTE, String.class)));
     }
 
     @Override

@@ -74,8 +74,9 @@ public abstract class SchemaGeneratorJobBase<S extends SchemaGeneratorJobSpecBas
         scriptGeneratorManager.getAttributes().put(GROUP_SCRIPTS_BY, getGroupScriptsBy());
         scriptGeneratorManager.setObjectTypes(getObjectTypes());
         scriptGeneratorManager.setScriptTypes(getScriptTypes());
-        scriptGeneratorManager.setSourceCatalog(getSourceSpec().getCatalog());
-        scriptGeneratorManager.setSourceSchema(getSourceSpec().getSchema());
+        ConnectionSpec sourceSpec = getSourceSpec();
+        scriptGeneratorManager.setSourceCatalog(sourceSpec != null ? sourceSpec.getCatalog() : null);
+        scriptGeneratorManager.setSourceSchema(sourceSpec != null ? sourceSpec.getSchema() : null);
         scriptGeneratorManager.setSourceSession(getSourceSession());
 
         ConnectionSpec targetSpec = getTargetSpec();
