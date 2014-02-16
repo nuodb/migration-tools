@@ -54,6 +54,7 @@ public abstract class XmlRowSetHandler<T extends RowSet> extends XmlReadWriteHan
 
     @Override
     protected void readAttributes(InputNode input, T target, XmlReadContext context) throws Exception {
+        target.setType(context.readAttribute(input, TYPE_ATTRIBUTE, String.class));
         target.setName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
         target.setRowCount(context.readAttribute(input, ROW_COUNT_ATTRIBUTE, Long.class));
     }

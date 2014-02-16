@@ -28,6 +28,7 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
@@ -46,6 +47,7 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
     private static final String VERSION_ATTRIBUTE = "version";
     private static final String FORMAT_ATTRIBUTE = "format";
     private static final String DATABASE_ELEMENT = "database";
+    private static final String DATABASE_INFO_ELEMENT = "database-info";
 
     public XmlBackupHandler() {
         super(Backup.class);
@@ -64,6 +66,11 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
             backup.setDatabase(context.read(input, Database.class));
         } else if (ROW_SET.equals(element)) {
             backup.addRowSet(context.read(input, RowSet.class));
+        } else if (DATABASE_INFO_ELEMENT.equals(element)) {
+            // old format support
+            Database database = new Database();
+            database.setDatabaseInfo(context.read(input, DatabaseInfo.class));
+            backup.setDatabase(database);
         }
     }
 
