@@ -110,7 +110,7 @@ public interface Dialect {
 
     String getIdentityColumn(String sequence);
 
-    String getDefaultValue(Column column, Session session);
+    String getDefaultValue(Session session, Column column);
 
     String getDeleteAction(ReferenceAction deleteAction);
 
@@ -126,7 +126,7 @@ public interface Dialect {
 
     String getTriggerBegin(Trigger trigger);
 
-    String getTriggerBody(Trigger trigger, Session session);
+    String getTriggerBody(Session session, Trigger trigger);
 
     String getTriggerEnd(Trigger trigger);
 

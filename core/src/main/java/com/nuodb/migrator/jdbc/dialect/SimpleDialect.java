@@ -27,12 +27,28 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.Trigger;
+import com.nuodb.migrator.jdbc.metadata.TriggerEvent;
+import com.nuodb.migrator.jdbc.metadata.TriggerTime;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.resolver.SimpleServiceResolverAware;
 import com.nuodb.migrator.jdbc.session.Session;
-import com.nuodb.migrator.jdbc.type.*;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeAdapter;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.jdbc.type.JdbcTypeName;
+import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
+import com.nuodb.migrator.jdbc.type.JdbcTypeOptions;
+import com.nuodb.migrator.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
+import com.nuodb.migrator.jdbc.type.JdbcValueAccessProvider;
+import com.nuodb.migrator.jdbc.type.SimpleJdbcValueAccessProvider;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
 import com.nuodb.migrator.jdbc.type.JdbcTypeName;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
@@ -51,11 +67,13 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.dialect.DialectUtils.NULL;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.NOOP;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.lang.String.valueOf;
 import static java.sql.Connection.*;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 /**
  * @author Sergey Bushik
@@ -447,7 +465,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public String getCheckClause(String clause) {
-        clause = getScriptQuoted(clause);
+        clause = quoteScript(clause);
         if (clause != null && (!clause.startsWith("(") || !clause.endsWith(")"))) {
             return "(" + clause + ")";
         } else {
@@ -481,28 +499,44 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getDefaultValue(Column column, Session session) {
-        DefaultValue defaultValue = column != null ? column.getDefaultValue() : null;
-        String value = defaultValue != null ? defaultValue.getScript() : null;
-        Script script = translate(new ColumnScript(column, session));
-        String result = script != null ? script.getScript() : value;
-        if (result != null) {
-            String unquoted = result;
-            boolean opening = false;
-            if (result.startsWith("'")) {
-                unquoted = result.substring(1);
-                opening = true;
-            }
-            if (opening && unquoted.endsWith("'")) {
-                unquoted = unquoted.substring(0, unquoted.length() - 1);
-            }
-            unquoted = getScriptEscapeUtils().escapeDefaultValue(unquoted);
-            result = "'" + unquoted + "'";
-        }
-        return result;
+    public String getDefaultValue(Session session, Column column) {
+        return getDefaultValue(column, translate(new ColumnScript(column, session)));
     }
 
-    protected String getScriptQuoted(String script) {
+    protected String getDefaultValue(Column column, Script script) {
+        String defaultValue = script != null ? script.getScript() : Column.getDefaultValue(column);
+        boolean literal = script != null && script.isLiteral();
+        return getDefaultValue(column, defaultValue, literal);
+    }
+
+    private String getDefaultValue(Column column, String script, boolean literal) {
+        return isQuotingDefaultValue(column, script, literal) ? quoteDefaultValue(column,
+                script, literal) : script;
+    }
+
+    protected boolean isQuotingDefaultValue(Column column, String script, boolean literal) {
+        boolean defaultValueQuoted = script != null;
+        if (equalsIgnoreCase(script, NULL) && literal) {
+            defaultValueQuoted = false;
+        }
+        return defaultValueQuoted;
+    }
+
+    protected String quoteDefaultValue(Column column, String script, boolean literal) {
+        String defaultValue = script;
+        boolean opening = false;
+        if (script.startsWith("'")) {
+            defaultValue = script.substring(1);
+            opening = true;
+        }
+        if (opening && defaultValue.endsWith("'")) {
+            defaultValue = defaultValue.substring(0, defaultValue.length() - 1);
+        }
+        defaultValue = getScriptEscapeUtils().escapeDefaultValue(defaultValue);
+        return "'" + defaultValue + "'";
+    }
+
+    protected String quoteScript(String script) {
         if (script == null) {
             return null;
         }
@@ -562,7 +596,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getTriggerBody(Trigger trigger, Session session) {
+    public String getTriggerBody(Session session, Trigger trigger) {
         Script script = translate(new TriggerScript(trigger, session));
         return script != null ? script.getScript() : trigger.getTriggerBody();
     }

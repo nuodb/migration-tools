@@ -33,6 +33,7 @@ import com.nuodb.migrator.jdbc.url.JdbcUrl;
 
 import java.sql.Types;
 
+import static com.nuodb.migrator.jdbc.dialect.DialectUtils.NULL;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.*;
 import static java.lang.String.format;
@@ -53,7 +54,6 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
     public static final String ROUND_TIME = "00:00:00";
     public static final String ROUND_DATE = "0001-01-01";
     public static final String ROUND_TIMESTAMP = "0001-01-01 00:00:00";
-    public static final String NULL = "NULL";
 
     public MySQLZeroDateTimeTranslator() {
         super(MYSQL);
@@ -116,6 +116,6 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
         } else {
             target = null;
         }
-        return target != null ? new SimpleScript(target, context.getDatabaseInfo()) : null;
+        return target != null ? new SimpleScript(target, context.getDatabaseInfo(), true) : null;
     }
 }

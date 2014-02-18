@@ -97,6 +97,11 @@ public class Column extends IdentifiableBase implements Field {
         super(COLUMN, identifier);
     }
 
+    public static String getDefaultValue(Column column) {
+        DefaultValue defaultValue = column.getDefaultValue();
+        return defaultValue != null ? defaultValue.getScript() : null;
+    }
+
     @Override
     public int getTypeCode() {
         return jdbcType.getTypeCode();

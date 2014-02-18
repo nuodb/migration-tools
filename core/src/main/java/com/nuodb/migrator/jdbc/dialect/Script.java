@@ -35,6 +35,8 @@ import com.nuodb.migrator.jdbc.session.Session;
  */
 public interface Script extends Comparable<Script> {
 
+    boolean isLiteral();
+
     String getScript();
 
     Session getSession();

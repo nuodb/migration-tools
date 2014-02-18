@@ -70,7 +70,7 @@ public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
         } else {
             target = null;
         }
-        return target != null ? new SimpleScript(valueOf(target), context.getDatabaseInfo()) : null;
+        return target != null ? new SimpleScript(valueOf(target), context.getDatabaseInfo(), true) : null;
     }
 }
 

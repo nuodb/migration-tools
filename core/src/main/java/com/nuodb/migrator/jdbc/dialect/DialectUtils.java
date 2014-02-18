@@ -34,6 +34,8 @@ import static org.apache.commons.lang3.StringUtils.*;
  */
 public class DialectUtils {
 
+    public static final String NULL = "NULL";
+
     public static String stripQuotes(Dialect dialect, String name) {
         String openQuote = dialect.openQuote();
         String closeQuote = dialect.closeQuote();
