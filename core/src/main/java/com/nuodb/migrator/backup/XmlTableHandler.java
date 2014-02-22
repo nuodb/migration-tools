@@ -29,16 +29,25 @@ package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.spec.MetaDataSpec;
+import com.nuodb.migrator.spec.TableSpec;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
+
+import java.util.Collection;
+
+import static com.nuodb.migrator.spec.MetaDataSpec.TABLE_TYPES;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
+import static org.apache.commons.lang3.ArrayUtils.indexOf;
 
 /**
  * @author Sergey Bushik
@@ -64,10 +73,9 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
 
     @Override
     protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Table> context) throws Exception {
+        Schema schema = getParent(context);
         String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        Schema schema = getParentTarget(context);
         Table table = schema.hasTable(name) ? schema.getTable(name) : schema.addTable(name);
-        table.setName(name);
         table.setType(context.readAttribute(input, TYPE_ATTRIBUTE, String.class));
         context.setTarget(table);
     }
@@ -98,6 +106,7 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
 
     @Override
     protected void writeElements(OutputNode output, Table table, XmlWriteContext context) throws Exception {
+        MetaDataSpec metaDataSpec = getMetaDataSpec(context);
         if (table.getComment() != null) {
             context.writeElement(output, COMMENT_ELEMENT, table.getComment());
         }
@@ -105,19 +114,51 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
             context.writeElement(output, COLUMN_ELEMENT, column);
         }
         PrimaryKey primaryKey = table.getPrimaryKey();
-        if (primaryKey != null) {
+        if (primaryKey != null && !XmlMetaDataHandlerBase.skip(primaryKey, metaDataSpec)) {
             context.writeElement(output, PRIMARY_KEY_ELEMENT, primaryKey);
         }
         for (Index index : table.getIndexes()) {
-            if (!index.isPrimary()) {
+            if (!index.isPrimary() && !XmlMetaDataHandlerBase.skip(index, metaDataSpec)) {
                 context.writeElement(output, INDEX_ELEMENT, index);
             }
         }
         for (ForeignKey foreignKey : table.getForeignKeys()) {
-            context.writeElement(output, FOREIGN_KEY, foreignKey);
+            if (!XmlMetaDataHandlerBase.skip(foreignKey, metaDataSpec)) {
+                context.writeElement(output, FOREIGN_KEY, foreignKey);
+            }
         }
         for (Check check : table.getChecks()) {
-            context.writeElement(output, CHECK_ELEMENT, check);
+            if (!XmlMetaDataHandlerBase.skip(check, metaDataSpec)) {
+                context.writeElement(output, CHECK_ELEMENT, check);
+            }
         }
+    }
+
+    @Override
+    protected boolean skip(Table table, XmlWriteContext context) {
+        return skip(table, getMetaDataSpec(context));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public static boolean skip(Table table, MetaDataSpec metaDataSpec) {
+        boolean skip = XmlMetaDataHandlerBase.skip(table, metaDataSpec);
+        if (!skip) {
+            String[] tableTypes = metaDataSpec != null ? metaDataSpec.getTableTypes() : TABLE_TYPES;
+            skip = indexOf(tableTypes, table.getType()) == -1;
+        }
+        if (!skip) {
+            Collection<TableSpec> tableSpecs = metaDataSpec != null ? metaDataSpec.getTableSpecs() : null;
+            if (!isEmpty(tableSpecs)) {
+                skip = true;
+                Database database = table.getDatabase();
+                for (TableSpec tableSpec : tableSpecs) {
+                    if (database.findTable(tableSpec.getTable()).equals(table)) {
+                        skip = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return skip;
     }
 }

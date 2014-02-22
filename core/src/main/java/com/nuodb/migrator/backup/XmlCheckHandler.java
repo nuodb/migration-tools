@@ -51,7 +51,7 @@ public class XmlCheckHandler extends XmlIdentifiableHandlerBase<Check> {
     protected void readElement(InputNode input, Check check, XmlReadContext context) throws Exception {
         String element = input.getName();
         if (COLUMN_ELEMENT.equals(element)) {
-            Table table = getParentTarget(context);
+            Table table = getParent(context);
             check.addColumn(table.getColumn(context.readAttribute(input, NAME_ATTRIBUTE, String.class)));
         } else if (TEXT_ELEMENT.equals(element)) {
             check.setText(context.read(input, String.class));

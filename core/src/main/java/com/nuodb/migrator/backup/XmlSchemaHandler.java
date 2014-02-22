@@ -28,10 +28,10 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.jdbc.metadata.Catalog;
-import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
@@ -58,7 +58,7 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
     @Override
     protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Schema> context) throws Exception {
         String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        Catalog catalog = getParentTarget(context);
+        Catalog catalog = getParent(context);
         context.setTarget(catalog.hasSchema(name) ? catalog.getSchema(name) : catalog.addSchema(name));
     }
 
@@ -73,12 +73,17 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
     }
 
     @Override
-    protected void writeElements(OutputNode output, Schema schema, XmlWriteContext context) throws Exception {
+    protected void writeElements(OutputNode output, Schema schema, final XmlWriteContext context) throws Exception {
+        MetaDataSpec metaDataSpec = getMetaDataSpec(context);
         for (Sequence sequence : schema.getSequences()) {
-            context.writeElement(output, SEQUENCE_ELEMENT, sequence);
+            if (!XmlSequenceHandler.skip(sequence, metaDataSpec)) {
+                context.writeElement(output, SEQUENCE_ELEMENT, sequence);
+            }
         }
         for (Table table : schema.getTables()) {
-            context.writeElement(output, TABLE_ELEMENT, table);
+            if (!XmlTableHandler.skip(table, metaDataSpec)) {
+                context.writeElement(output, TABLE_ELEMENT, table);
+            }
         }
     }
 }

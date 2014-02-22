@@ -40,12 +40,8 @@ import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.job.HasServicesJobBase;
-import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.DumpJobSpec;
-import com.nuodb.migrator.spec.MigrationMode;
-import com.nuodb.migrator.spec.QuerySpec;
-import com.nuodb.migrator.spec.ResourceSpec;
-import com.nuodb.migrator.spec.TableSpec;
+import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.spec.MetaDataSpec;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -53,6 +49,8 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.META_DATA_SPEC;
 import static com.nuodb.migrator.dump.DumpWriter.THREADS;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
@@ -176,7 +174,9 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         if (contains(migrationModes, SCHEMA)) {
             backup.setDatabase(database);
         }
-        getBackupManager().writeBackup(backup);
+        Map context = newHashMap();
+        context.put(META_DATA_SPEC, getMetaDataSpec());
+        getBackupManager().writeBackup(backup, context);
     }
 
     @Override
@@ -241,6 +241,10 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     protected Collection<QuerySpec> getQuerySpecs() {
         return getJobSpec().getQuerySpecs();
+    }
+
+    protected MetaDataSpec getMetaDataSpec() {
+        return getJobSpec().getMetaDataSpec();
     }
 
     protected Collection<TableSpec> getTableSpecs() {

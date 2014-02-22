@@ -27,7 +27,9 @@
  */
 package com.nuodb.migrator.backup;
 
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
@@ -53,7 +55,7 @@ public class XmlCatalogHandler extends XmlIdentifiableHandlerBase<Catalog> imple
     @Override
     protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Catalog> context) throws Exception {
         String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        Database database = getParentTarget(context);
+        Database database = getParent(context);
         context.setTarget(database.hasCatalog(name) ? database.getCatalog(name) : database.addCatalog(name));
     }
 

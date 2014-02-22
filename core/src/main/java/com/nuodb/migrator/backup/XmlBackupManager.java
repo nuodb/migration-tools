@@ -36,6 +36,7 @@ import org.simpleframework.xml.strategy.TreeStrategy;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -55,13 +56,13 @@ public class XmlBackupManager extends BackupManagerBase implements XmlConstants 
     }
 
     @Override
-    public Backup readBackup(InputStream input) {
-        return createXmlPersister().read(Backup.class, input);
+    public Backup readBackup(InputStream input, Map context) {
+        return createXmlPersister().read(Backup.class, input, context);
     }
 
     @Override
-    public void writeBackup(Backup backup, OutputStream output) {
-        createXmlPersister().write(backup, output);
+    public void writeBackup(Backup backup, OutputStream output, Map context) {
+        createXmlPersister().write(backup, output, context);
     }
 
     protected XmlPersister createXmlPersister() {

@@ -27,43 +27,48 @@
  */
 package com.nuodb.migrator.backup;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
+import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
-import org.simpleframework.xml.stream.OutputNode;
+
+import java.util.Collection;
+import java.util.Map;
+
+import static com.nuodb.migrator.spec.MetaDataSpec.OBJECT_TYPES;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class XmlPrimaryKeyHandler extends XmlIdentifiableHandlerBase<PrimaryKey> {
+public class XmlMetaDataHandlerBase<I extends MetaData> extends XmlReadWriteHandlerBase<I> {
 
-    private static final String COLUMN_ELEMENT = "column";
+    public static final String META_DATA_SPEC = getClassName(MetaDataSpec.class);
 
-    public XmlPrimaryKeyHandler() {
-        super(PrimaryKey.class);
+    protected XmlMetaDataHandlerBase(Class type) {
+        super(type);
     }
 
     @Override
-    protected void readElement(InputNode input, PrimaryKey primaryKey, XmlReadContext context) throws Exception {
-        String element = input.getName();
-        Table table = getParent(context);
-        if (COLUMN_ELEMENT.equals(element)) {
-            primaryKey.addColumn(
-                    table.getColumn(context.readAttribute(input, NAME_ATTRIBUTE, String.class)),
-                    primaryKey.getColumns().size()
-            );
-        }
+    public I read(InputNode input, Class<? extends I> type, XmlReadContext context) {
+        return super.read(input, type, context);
     }
 
     @Override
-    protected void writeElements(OutputNode output, PrimaryKey primaryKey, XmlWriteContext context) throws Exception {
-        for (Column column : primaryKey.getColumns()) {
-            OutputNode element = output.getChild(COLUMN_ELEMENT);
-            context.writeAttribute(element, NAME_ATTRIBUTE, column.getName());
-        }
+    protected boolean skip(I source, XmlWriteContext context) {
+        return skip(source, getMetaDataSpec(context));
+    }
+
+    protected MetaDataSpec getMetaDataSpec(Map context) {
+        return (MetaDataSpec) context.get(META_DATA_SPEC);
+    }
+
+    public static boolean skip(MetaData object, MetaDataSpec metaDataSpec) {
+        Collection<MetaDataType> objectTypes = metaDataSpec != null ? metaDataSpec.getObjectTypes() : OBJECT_TYPES;
+        return object != null && !objectTypes.contains(object.getObjectType());
     }
 }

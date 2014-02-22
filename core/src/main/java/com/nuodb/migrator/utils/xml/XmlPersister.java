@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.utils.xml;
 
+import com.nuodb.migrator.utils.ReflectionUtils;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.strategy.Strategy;
 import org.simpleframework.xml.stream.Format;
@@ -34,16 +35,26 @@ import org.simpleframework.xml.stream.HyphenStyle;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Map;
+
+import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 
 public class XmlPersister {
 
     public static final int INDENT = 2;
     public static final String PROLOG = "<?xml version=\"1.0\"?>";
 
-    private Persister persister;
+    private Strategy strategy;
+    private Format format;
 
     public XmlPersister(XmlHandlerRegistry registry) {
         this(new XmlHandlerStrategy(registry));
+    }
+
+    public XmlPersister(XmlHandlerRegistry registry, Map context) {
+        this(new XmlHandlerStrategy(registry, context));
     }
 
     public XmlPersister(Strategy strategy) {
@@ -51,26 +62,42 @@ public class XmlPersister {
     }
 
     public XmlPersister(Strategy strategy, Format format) {
-        this.persister = new Persister(strategy, format);
+        this.strategy = strategy;
+        this.format = format;
     }
 
     public <T> T read(Class<T> type, InputStream input) {
+        return read(type, input, null);
+    }
+
+    public <T> T read(Class<T> type, InputStream input, Map context) {
         try {
-            return persister.read(type, input);
+            return createPersister(context).read(type, input);
         } catch (XmlPersisterException exception) {
             throw exception;
-        } catch (Exception e) {
-            throw new XmlPersisterException(e);
+        } catch (Exception exception) {
+            throw new XmlPersisterException(exception);
         }
     }
 
     public void write(Object source, OutputStream output) {
+        write(source, output, null);
+    }
+
+    public void write(Object source, OutputStream output, Map context) {
         try {
-            persister.write(source, output);
+            createPersister(context).write(source, output);
         } catch (XmlPersisterException exception) {
             throw exception;
-        } catch (Exception e) {
-            throw new XmlPersisterException(e);
+        } catch (Exception exception) {
+            throw new XmlPersisterException(exception);
         }
+    }
+
+    protected Persister createPersister(Map context) {
+        if (strategy instanceof XmlContextStrategy) {
+            ((XmlContextStrategy) strategy).setContext(context);
+        }
+        return new Persister(strategy, format);
     }
 }

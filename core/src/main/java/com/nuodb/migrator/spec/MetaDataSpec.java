@@ -27,41 +27,49 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+
+import java.util.Arrays;
 import java.util.Collection;
 
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TYPES;
+import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
 
 /**
  * @author Sergey Bushik
  */
-public class SchemaJobSpec extends ScriptGeneratorJobSpecBase {
+public class MetaDataSpec extends SpecBase {
 
-    private ConnectionSpec sourceSpec;
-    private ResourceSpec outputSpec;
-    private Collection<MigrationMode> migrationModes = newHashSet(MigrationMode.DATA);
+    public static final Collection<MetaDataType> OBJECT_TYPES = newArrayList(TYPES);
+    public static final String[] TABLE_TYPES = new String[]{TABLE};
 
-    public ConnectionSpec getSourceSpec() {
-        return sourceSpec;
+    private Collection<MetaDataType> objectTypes = OBJECT_TYPES;
+    private Collection<TableSpec> tableSpecs;
+    private String[] tableTypes = TABLE_TYPES;
+
+    public Collection<MetaDataType> getObjectTypes() {
+        return objectTypes;
     }
 
-    public void setSourceSpec(ConnectionSpec sourceSpec) {
-        this.sourceSpec = sourceSpec;
+    public void setObjectTypes(Collection<MetaDataType> objectTypes) {
+        this.objectTypes = objectTypes;
     }
 
-    public ResourceSpec getOutputSpec() {
-        return outputSpec;
+    public Collection<TableSpec> getTableSpecs() {
+        return tableSpecs;
     }
 
-    public void setOutputSpec(ResourceSpec outputSpec) {
-        this.outputSpec = outputSpec;
+    public void setTableSpecs(Collection<TableSpec> tableSpecs) {
+        this.tableSpecs = tableSpecs;
     }
 
-    public Collection<MigrationMode> getMigrationModes() {
-        return migrationModes;
+    public String[] getTableTypes() {
+        return tableTypes;
     }
 
-    public void setMigrationModes(Collection<MigrationMode> migrationModes) {
-        this.migrationModes = migrationModes;
+    public void setTableTypes(String[] tableTypes) {
+        this.tableTypes = tableTypes;
     }
 
     @Override
@@ -70,12 +78,11 @@ public class SchemaJobSpec extends ScriptGeneratorJobSpecBase {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        SchemaJobSpec that = (SchemaJobSpec) o;
+        MetaDataSpec that = (MetaDataSpec) o;
 
-        if (migrationModes != null ? !migrationModes.equals(that.migrationModes) : that.migrationModes != null)
-            return false;
-        if (outputSpec != null ? !outputSpec.equals(that.outputSpec) : that.outputSpec != null) return false;
-        if (sourceSpec != null ? !sourceSpec.equals(that.sourceSpec) : that.sourceSpec != null) return false;
+        if (objectTypes != null ? !objectTypes.equals(that.objectTypes) : that.objectTypes != null) return false;
+        if (tableSpecs != null ? !tableSpecs.equals(that.tableSpecs) : that.tableSpecs != null) return false;
+        if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
 
         return true;
     }
@@ -83,9 +90,9 @@ public class SchemaJobSpec extends ScriptGeneratorJobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (sourceSpec != null ? sourceSpec.hashCode() : 0);
-        result = 31 * result + (outputSpec != null ? outputSpec.hashCode() : 0);
-        result = 31 * result + (migrationModes != null ? migrationModes.hashCode() : 0);
+        result = 31 * result + (objectTypes != null ? objectTypes.hashCode() : 0);
+        result = 31 * result + (tableSpecs != null ? tableSpecs.hashCode() : 0);
+        result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
         return result;
     }
 }

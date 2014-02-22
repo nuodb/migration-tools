@@ -27,18 +27,19 @@
  */
 package com.nuodb.migrator.utils.xml;
 
-import com.nuodb.migrator.utils.Collections;
 import com.nuodb.migrator.utils.Priority;
 import com.nuodb.migrator.utils.PrioritySet;
 import org.simpleframework.xml.convert.Converter;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
+
 @SuppressWarnings("unchecked")
 public class XmlHandlerRegistry {
 
-    private PrioritySet<XmlReadHandler> readers = Collections.newPrioritySet();
-    private PrioritySet<XmlWriteHandler> writers = Collections.newPrioritySet();
+    private PrioritySet<XmlReadHandler> readers = newPrioritySet();
+    private PrioritySet<XmlWriteHandler> writers = newPrioritySet();
 
     public XmlHandlerRegistry registerHandler(XmlHandler handler) {
         return registerHandler(handler, Priority.NORMAL);

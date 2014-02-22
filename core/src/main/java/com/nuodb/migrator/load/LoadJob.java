@@ -42,7 +42,6 @@ import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.backup.format.value.ValueHandleListBuilder;
 import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
-import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -60,7 +59,7 @@ import com.nuodb.migrator.jdbc.query.StatementFactory;
 import com.nuodb.migrator.jdbc.query.StatementTemplate;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
-import com.nuodb.migrator.job.SchemaGeneratorJobBase;
+import com.nuodb.migrator.job.ScriptGeneratorJobBase;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.LoadJobSpec;
 import com.nuodb.migrator.spec.MigrationMode;
@@ -90,7 +89,7 @@ import static java.lang.String.format;
  * @author Sergey Bushik
  */
 @SuppressWarnings("ConstantConditions")
-public class LoadJob extends SchemaGeneratorJobBase<LoadJobSpec> {
+public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
     private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
 

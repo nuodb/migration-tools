@@ -87,7 +87,7 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
 
     @Override
     protected void readElement(InputNode input, Index index, XmlReadContext context) throws Exception {
-        Table table = getParentTarget(context);
+        Table table = getParent(context);
         String element = input.getName();
         if (COLUMN_ELEMENT.equals(element)) {
             index.addColumn(

@@ -37,7 +37,7 @@ import org.simpleframework.xml.stream.OutputNode;
 /**
  * @author Sergey Bushik
  */
-public class XmlIdentifiableHandlerBase<I extends Identifiable> extends XmlReadWriteHandlerBase<I> {
+public class XmlIdentifiableHandlerBase<I extends Identifiable> extends XmlMetaDataHandlerBase<I> {
 
     protected static final String NAME_ATTRIBUTE = "name";
 

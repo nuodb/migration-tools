@@ -37,7 +37,7 @@ import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
-import com.nuodb.migrator.job.SchemaGeneratorJobBase;
+import com.nuodb.migrator.job.ScriptGeneratorJobBase;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaJobSpec;
@@ -55,7 +55,7 @@ import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory
 /**
  * @author Sergey Bushik
  */
-public class SchemaJob extends SchemaGeneratorJobBase<SchemaJobSpec> {
+public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
     public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
 

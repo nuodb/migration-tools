@@ -25,45 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup;
+package com.nuodb.migrator.utils.xml;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.utils.xml.XmlReadContext;
-import com.nuodb.migrator.utils.xml.XmlWriteContext;
-import org.simpleframework.xml.stream.InputNode;
-import org.simpleframework.xml.stream.OutputNode;
+import org.simpleframework.xml.strategy.Strategy;
+
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
-public class XmlPrimaryKeyHandler extends XmlIdentifiableHandlerBase<PrimaryKey> {
+public interface XmlContextStrategy extends Strategy {
 
-    private static final String COLUMN_ELEMENT = "column";
+    Map getContext();
 
-    public XmlPrimaryKeyHandler() {
-        super(PrimaryKey.class);
-    }
-
-    @Override
-    protected void readElement(InputNode input, PrimaryKey primaryKey, XmlReadContext context) throws Exception {
-        String element = input.getName();
-        Table table = getParent(context);
-        if (COLUMN_ELEMENT.equals(element)) {
-            primaryKey.addColumn(
-                    table.getColumn(context.readAttribute(input, NAME_ATTRIBUTE, String.class)),
-                    primaryKey.getColumns().size()
-            );
-        }
-    }
-
-    @Override
-    protected void writeElements(OutputNode output, PrimaryKey primaryKey, XmlWriteContext context) throws Exception {
-        for (Column column : primaryKey.getColumns()) {
-            OutputNode element = output.getChild(COLUMN_ELEMENT);
-            context.writeAttribute(element, NAME_ATTRIBUTE, column.getName());
-        }
-    }
+    void setContext(Map context);
 }

@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 import static com.nuodb.migrator.match.AntRegexCompiler.INSTANCE;
 import static java.lang.String.format;
@@ -122,9 +123,14 @@ public abstract class BackupManagerBase implements BackupManager {
 
     @Override
     public Backup readBackup() {
+        return readBackup((Map) null);
+    }
+
+    @Override
+    public Backup readBackup(Map context) {
         InputStream input = openBackupInput();
         try {
-            return readBackup(input);
+            return readBackup(input, context);
         } finally {
             closeQuietly(input);
         }
@@ -134,13 +140,23 @@ public abstract class BackupManagerBase implements BackupManager {
         return openInput(getBackup());
     }
 
-    public abstract Backup readBackup(InputStream input);
+    @Override
+    public Backup readBackup(InputStream input) {
+        return readBackup(input, null);
+    }
+
+    public abstract Backup readBackup(InputStream input, Map context);
 
     @Override
     public void writeBackup(Backup backup) {
+        writeBackup(backup, (Map) null);
+    }
+
+    @Override
+    public void writeBackup(Backup backup, Map context) {
         OutputStream output = openBackupOutput();
         try {
-            writeBackup(backup, output);
+            writeBackup(backup, output, context);
         } finally {
             closeQuietly(output);
         }
@@ -159,4 +175,12 @@ public abstract class BackupManagerBase implements BackupManager {
         }
         return openOutput(getBackup());
     }
+
+    @Override
+    public void writeBackup(Backup backup, OutputStream output) {
+        writeBackup(backup, output, null);
+    }
+
+    @Override
+    public abstract void writeBackup(Backup backup, OutputStream output, Map context);
 }

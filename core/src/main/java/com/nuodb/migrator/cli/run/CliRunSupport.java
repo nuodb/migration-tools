@@ -51,11 +51,8 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.jdbc.type.JdbcTypeCodes;
-import com.nuodb.migrator.spec.DriverConnectionSpec;
-import com.nuodb.migrator.spec.JdbcTypeSpec;
-import com.nuodb.migrator.spec.MigrationMode;
-import com.nuodb.migrator.spec.ResourceSpec;
-import com.nuodb.migrator.spec.SchemaGeneratorJobSpecBase;
+import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.spec.ScriptGeneratorJobSpecBase;
 import com.nuodb.migrator.utils.ReflectionUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -64,7 +61,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
@@ -738,7 +734,7 @@ public class CliRunSupport extends CliSupport {
         return resource;
     }
 
-    protected void parseSchemaMigrationGroup(SchemaGeneratorJobSpecBase schemaGeneratorJobSpec,
+    protected void parseSchemaMigrationGroup(ScriptGeneratorJobSpecBase schemaGeneratorJobSpec,
                                              OptionSet optionSet, Option option) {
         if (optionSet.hasOption(META_DATA_OPTION)) {
             schemaGeneratorJobSpec.setObjectTypes(parseObjectTypes(optionSet));

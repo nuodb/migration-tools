@@ -36,11 +36,14 @@ import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Map;
 
+import static com.nuodb.migrator.utils.Collections.putAll;
+
 @SuppressWarnings("unchecked")
-public class XmlHandlerStrategy implements Strategy {
+public class XmlHandlerStrategy implements XmlContextStrategy {
 
     protected XmlHandlerRegistry registry;
     protected Strategy strategy;
+    protected Map context;
 
     public XmlHandlerStrategy(XmlHandlerRegistry registry) {
         this.registry = registry;
@@ -51,18 +54,30 @@ public class XmlHandlerStrategy implements Strategy {
         this.strategy = strategy;
     }
 
-    @Override
-    public Value read(Type type, NodeMap<InputNode> node, Map map) throws Exception {
-        XmlReadContext context = getReadContext(map);
-        Value value = null;
-        if (strategy != null) {
-            value = strategy.read(type, node, context);
-        }
-        return isReference(value) ? value : read(type, node.getNode(), value, context);
+    public XmlHandlerStrategy(XmlHandlerRegistry registry, Map context) {
+        this.registry = registry;
+        this.context = context;
     }
 
-    protected XmlReadContext getReadContext(Map map) {
-        return map instanceof XmlReadContext ? (XmlReadContext) map : new XmlReadStrategyContext(map, this);
+    public XmlHandlerStrategy(XmlHandlerRegistry registry, Strategy strategy, Map context) {
+        this.registry = registry;
+        this.strategy = strategy;
+        this.context = context;
+    }
+
+    @Override
+    public Value read(Type type, NodeMap<InputNode> node, Map map) throws Exception {
+        XmlReadContext readContext = createReadContext(map);
+        Value value = null;
+        if (strategy != null) {
+            value = strategy.read(type, node, readContext);
+        }
+        return isReference(value) ? value : read(type, node.getNode(), value, readContext);
+    }
+
+    protected XmlReadContext createReadContext(Map map) {
+        return map instanceof XmlReadContext ? (XmlReadContext) map :
+                new XmlReadStrategyContext(putAll(map, context), this);
     }
 
     protected Value read(Type type, InputNode input, Value value, XmlReadContext context) throws Exception {
@@ -82,18 +97,23 @@ public class XmlHandlerStrategy implements Strategy {
         return value;
     }
 
-    @Override
-    public boolean write(Type type, Object value, NodeMap<OutputNode> node, Map map) throws Exception {
-        XmlWriteContext context = getWriteContext(map);
-        boolean complete = false;
-        if (strategy != null) {
-            complete = strategy.write(type, value, node, context);
-        }
-        return complete || write(type, value, node.getNode(), context);
+    protected XmlReadHandler lookupReader(InputNode input, Class type, XmlReadContext context) throws Exception {
+        return registry.lookupReader(input, type, context);
     }
 
-    protected XmlWriteContext getWriteContext(Map map) {
-        return map instanceof XmlWriteContext ? (XmlWriteContext) map : new XmlWriteStrategyContext(map, this);
+    @Override
+    public boolean write(Type type, Object value, NodeMap<OutputNode> node, Map map) throws Exception {
+        XmlWriteContext writeContext = createWriteContext(map);
+        boolean complete = false;
+        if (strategy != null) {
+            complete = strategy.write(type, value, node, writeContext);
+        }
+        return complete || write(type, value, node.getNode(), writeContext);
+    }
+
+    protected XmlWriteContext createWriteContext(Map map) {
+        return map instanceof XmlWriteContext ? (XmlWriteContext)map :
+                new XmlWriteStrategyContext(putAll(map, context), this);
     }
 
     protected boolean write(Type type, Object value, OutputNode output, XmlWriteContext context) throws Exception {
@@ -105,10 +125,6 @@ public class XmlHandlerStrategy implements Strategy {
         return writer != null && writer.write(value, type.getType(), output, context);
     }
 
-    protected XmlReadHandler lookupReader(InputNode input, Class type, XmlReadContext context) throws Exception {
-        return registry.lookupReader(input, type, context);
-    }
-
     protected XmlWriteHandler lookupWriter(Object value, Class type, OutputNode output,
                                            XmlWriteContext context) throws Exception {
         return registry.lookupWriter(value, type, output, context);
@@ -116,6 +132,16 @@ public class XmlHandlerStrategy implements Strategy {
 
     protected boolean isReference(Value value) {
         return value != null && value.isReference();
+    }
+
+    @Override
+    public Map getContext() {
+        return context;
+    }
+
+    @Override
+    public void setContext(Map context) {
+        this.context = context;
     }
 
     class Reference implements Value {

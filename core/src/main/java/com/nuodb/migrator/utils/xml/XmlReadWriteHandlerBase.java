@@ -42,8 +42,8 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     @Override
-    public T read(InputNode input, Class<? extends T> type, XmlReadContext delegate) {
-        XmlReadTargetAwareContext<T> context = createContext(input, type, delegate);
+    public T read(InputNode input, Class<? extends T> type, XmlReadContext parent) {
+        XmlReadTargetAwareContext<T> context = createContext(input, type, parent);
         try {
             read(input, context);
         } catch (XmlPersisterException exception) {
@@ -63,12 +63,12 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
         return newInstance(type);
     }
 
-    protected <T> T getParentTarget(XmlReadContext context) {
-        return getTarget(context, 1);
+    protected <T> T getParent(XmlReadContext context) {
+        return getParent(context, 1);
     }
 
-    protected <T> T getTarget(XmlReadContext context, int parent) {
-        for (int index = 0; index < parent; index++) {
+    protected <T> T getParent(XmlReadContext context, int parent) {
+        for (int index = 0; context != null && index < parent; index++) {
             context = context.getContext();
         }
         return context instanceof XmlReadTargetAwareContext ?
@@ -111,9 +111,9 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     @Override
-    public boolean write(T source, Class<? extends T> type, OutputNode output, XmlWriteContext context) {
+    public boolean write(T source, Class<? extends T> type, OutputNode output, XmlWriteContext parent) {
         try {
-            return write(output, createContext(source, output, context));
+            return skip(source, parent) || write(output, createContext(source, output, parent));
         } catch (XmlPersisterException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -121,20 +121,24 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
         }
     }
 
+    protected boolean skip(T source, XmlWriteContext context) {
+        return false;
+    }
+
     protected XmlWriteSourceAwareContext<T> createContext(T source, OutputNode output, XmlWriteContext context) {
         return new XmlWriteSourceAwareContext(source, context);
     }
 
-    protected <T> T getParentSource(XmlWriteContext context) {
-        return getSource(context, 1);
+    protected <T> T getParent(XmlWriteContext context) {
+        return getParent(context, 1);
     }
 
-    protected <T> T getSource(XmlWriteContext context, int parent) {
-        for (int index = 0; index < parent; index++) {
+    protected <T> T getParent(XmlWriteContext context, int parent) {
+        for (int index = 0; context != null && index < parent; index++) {
             context = context.getContext();
         }
-        return context instanceof XmlReadTargetAwareContext ?
-                (T) ((XmlReadTargetAwareContext) context).getTarget() : null;
+        return context instanceof XmlWriteSourceAwareContext ?
+                (T) ((XmlWriteSourceAwareContext) context).getSource() : null;
     }
 
     protected boolean write(OutputNode output, XmlWriteSourceAwareContext context) throws Exception {

@@ -33,7 +33,6 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -41,22 +40,52 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.NOOP;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS;
-import static com.nuodb.migrator.jdbc.metadata.Table.TABLE;
 
 /**
  * @author Sergey Bushik
  */
-public class SchemaGeneratorJobSpecBase extends JobSpecBase {
+public class ScriptGeneratorJobSpecBase extends JobSpecBase {
 
+    private MetaDataSpec metaDataSpec = new MetaDataSpec();
     private boolean useExplicitDefaults = USE_EXPLICIT_DEFAULTS;
-    private String[] tableTypes = new String[]{TABLE};
     private ConnectionSpec targetSpec;
-    private Collection<MetaDataType> objectTypes = newArrayList(MetaDataType.TYPES);
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
-    private Collection<JdbcTypeSpec> jdbcTypeSpecs = newHashSet();
+    private Collection<JdbcTypeSpec> jdbcTypeSpecs = newArrayList();
     private IdentifierQuoting identifierQuoting = ALWAYS;
     private IdentifierNormalizer identifierNormalizer = NOOP;
+
+    public MetaDataSpec getMetaDataSpec() {
+        return metaDataSpec;
+    }
+
+    public void setMetaDataSpec(MetaDataSpec metaDataSpec) {
+        this.metaDataSpec = metaDataSpec;
+    }
+
+    public Collection<MetaDataType> getObjectTypes() {
+        return metaDataSpec.getObjectTypes();
+    }
+
+    public void setTableTypes(String[] tableTypes) {
+        metaDataSpec.setTableTypes(tableTypes);
+    }
+
+    public Collection<TableSpec> getTableSpecs() {
+        return metaDataSpec.getTableSpecs();
+    }
+
+    public String[] getTableTypes() {
+        return metaDataSpec.getTableTypes();
+    }
+
+    public void setTableSpecs(Collection<TableSpec> tableSpecs) {
+        metaDataSpec.setTableSpecs(tableSpecs);
+    }
+
+    public void setObjectTypes(Collection<MetaDataType> objectTypes) {
+        metaDataSpec.setObjectTypes(objectTypes);
+    }
 
     public boolean isUseExplicitDefaults() {
         return useExplicitDefaults;
@@ -64,14 +93,6 @@ public class SchemaGeneratorJobSpecBase extends JobSpecBase {
 
     public void setUseExplicitDefaults(boolean useExplicitDefaults) {
         this.useExplicitDefaults = useExplicitDefaults;
-    }
-
-    public String[] getTableTypes() {
-        return tableTypes;
-    }
-
-    public void setTableTypes(String[] tableTypes) {
-        this.tableTypes = tableTypes;
     }
 
     public ConnectionSpec getTargetSpec() {
@@ -82,20 +103,12 @@ public class SchemaGeneratorJobSpecBase extends JobSpecBase {
         this.targetSpec = targetSpec;
     }
 
-    public Collection<MetaDataType> getObjectTypes() {
-        return objectTypes;
-    }
-
-    public void setObjectTypes(Collection<MetaDataType> objectTypes) {
-        this.objectTypes = newHashSet(objectTypes);
-    }
-
     public Collection<ScriptType> getScriptTypes() {
         return scriptTypes;
     }
 
     public void setScriptTypes(Collection<ScriptType> scriptTypes) {
-        this.scriptTypes = newHashSet(scriptTypes);
+        this.scriptTypes = scriptTypes;
     }
 
     public GroupScriptsBy getGroupScriptsBy() {
@@ -111,7 +124,7 @@ public class SchemaGeneratorJobSpecBase extends JobSpecBase {
     }
 
     public void setJdbcTypeSpecs(Collection<JdbcTypeSpec> jdbcTypeSpecs) {
-        this.jdbcTypeSpecs = newHashSet(jdbcTypeSpecs);
+        this.jdbcTypeSpecs = jdbcTypeSpecs;
     }
 
     public IdentifierQuoting getIdentifierQuoting() {
@@ -136,7 +149,7 @@ public class SchemaGeneratorJobSpecBase extends JobSpecBase {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        SchemaGeneratorJobSpecBase that = (SchemaGeneratorJobSpecBase) o;
+        ScriptGeneratorJobSpecBase that = (ScriptGeneratorJobSpecBase) o;
 
         if (useExplicitDefaults != that.useExplicitDefaults) return false;
         if (groupScriptsBy != that.groupScriptsBy) return false;
@@ -147,9 +160,8 @@ public class SchemaGeneratorJobSpecBase extends JobSpecBase {
             return false;
         if (jdbcTypeSpecs != null ? !jdbcTypeSpecs.equals(that.jdbcTypeSpecs) : that.jdbcTypeSpecs != null)
             return false;
-        if (objectTypes != null ? !objectTypes.equals(that.objectTypes) : that.objectTypes != null) return false;
+        if (metaDataSpec != null ? !metaDataSpec.equals(that.metaDataSpec) : that.metaDataSpec != null) return false;
         if (scriptTypes != null ? !scriptTypes.equals(that.scriptTypes) : that.scriptTypes != null) return false;
-        if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
         if (targetSpec != null ? !targetSpec.equals(that.targetSpec) : that.targetSpec != null) return false;
 
         return true;
@@ -158,10 +170,9 @@ public class SchemaGeneratorJobSpecBase extends JobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + (metaDataSpec != null ? metaDataSpec.hashCode() : 0);
         result = 31 * result + (useExplicitDefaults ? 1 : 0);
-        result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
         result = 31 * result + (targetSpec != null ? targetSpec.hashCode() : 0);
-        result = 31 * result + (objectTypes != null ? objectTypes.hashCode() : 0);
         result = 31 * result + (scriptTypes != null ? scriptTypes.hashCode() : 0);
         result = 31 * result + (groupScriptsBy != null ? groupScriptsBy.hashCode() : 0);
         result = 31 * result + (jdbcTypeSpecs != null ? jdbcTypeSpecs.hashCode() : 0);

@@ -27,13 +27,20 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.google.common.base.Predicate;
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
+import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
 import java.math.BigDecimal;
+import java.util.Collection;
+
+import static com.google.common.collect.Iterables.all;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 
 /**
  * @author Sergey Bushik
@@ -109,5 +116,24 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
         if (cache != null) {
             context.writeAttribute(output, CACHE_ATTRIBUTE, cache);
         }
+    }
+
+    @Override
+    protected boolean skip(Sequence source, XmlWriteContext context) {
+        return skip(source, getMetaDataSpec(context));
+    }
+
+    public static boolean skip(Sequence sequence, final MetaDataSpec metaDataSpec) {
+        boolean skip = XmlMetaDataHandlerBase.skip(sequence, metaDataSpec);
+        if (!skip) {
+            Collection<Column> columns = sequence.getColumns();
+            skip = !isEmpty(columns) && all(columns, new Predicate<Column>() {
+                @Override
+                public boolean apply(Column column) {
+                    return XmlTableHandler.skip(column.getTable(), metaDataSpec);
+                }
+            });
+        }
+        return skip;
     }
 }

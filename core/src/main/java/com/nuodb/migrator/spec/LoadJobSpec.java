@@ -42,7 +42,7 @@ import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 /**
  * @author Sergey Bushik
  */
-public class LoadJobSpec extends SchemaGeneratorJobSpecBase {
+public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
     private ConnectionSpec targetSpec;
     private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);

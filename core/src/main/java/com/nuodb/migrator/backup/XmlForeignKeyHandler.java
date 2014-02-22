@@ -70,7 +70,7 @@ public class XmlForeignKeyHandler extends XmlIdentifiableHandlerBase<ForeignKey>
     protected void readAttributes(InputNode input, ForeignKey foreignKey, XmlReadContext context) throws Exception {
         super.readAttributes(input, foreignKey, context);
         // 4 levels up to reach out to database from foreign key -> table -> schema -> catalog -> database
-        Database database = getTarget(context, 4);
+        Database database = getParent(context, 4);
 
         Catalog primaryCatalog = database.addCatalog(
                 context.readAttribute(input, PRIMARY_CATALOG_ATTRIBUTE, String.class));

@@ -40,9 +40,7 @@ import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
-import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.JdbcTypeSpec;
-import com.nuodb.migrator.spec.SchemaGeneratorJobSpecBase;
+import com.nuodb.migrator.spec.*;
 import com.nuodb.migrator.utils.PrioritySet;
 
 import java.sql.SQLException;
@@ -56,16 +54,16 @@ import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 /**
  * @author Sergey Bushik
  */
-public abstract class SchemaGeneratorJobBase<S extends SchemaGeneratorJobSpecBase> extends HasServicesJobBase<S> {
+public abstract class ScriptGeneratorJobBase<S extends ScriptGeneratorJobSpecBase> extends HasServicesJobBase<S> {
 
     private ConnectionSpec sourceSpec;
     private Session sourceSession;
     private Session targetSession;
 
-    protected SchemaGeneratorJobBase() {
+    protected ScriptGeneratorJobBase() {
     }
 
-    protected SchemaGeneratorJobBase(S jobSpec) {
+    protected ScriptGeneratorJobBase(S jobSpec) {
         super(jobSpec);
     }
 
@@ -159,8 +157,20 @@ public abstract class SchemaGeneratorJobBase<S extends SchemaGeneratorJobSpecBas
         return getJobSpec().getIdentifierNormalizer();
     }
 
+    protected MetaDataSpec getMetaDataSpec() {
+        return getJobSpec().getMetaDataSpec();
+    }
+
     protected Collection<MetaDataType> getObjectTypes() {
         return getJobSpec().getObjectTypes();
+    }
+
+    protected Collection<TableSpec> getTableSpecs() {
+        return getJobSpec().getTableSpecs();
+    }
+
+    protected String[] getTableTypes() {
+        return getJobSpec().getTableTypes();
     }
 
     protected Collection<ScriptType> getScriptTypes() {
@@ -169,9 +179,5 @@ public abstract class SchemaGeneratorJobBase<S extends SchemaGeneratorJobSpecBas
 
     protected ConnectionSpec getTargetSpec() {
         return getJobSpec().getTargetSpec();
-    }
-
-    protected String[] getTableTypes() {
-        return getJobSpec().getTableTypes();
     }
 }

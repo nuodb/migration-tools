@@ -29,6 +29,7 @@ package com.nuodb.migrator.backup;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -47,9 +48,17 @@ public interface BackupManager {
 
     Backup readBackup();
 
+    Backup readBackup(Map context);
+
     Backup readBackup(InputStream input);
+
+    Backup readBackup(InputStream input, Map context);
 
     void writeBackup(Backup backup);
 
+    void writeBackup(Backup backup, Map context);
+
     void writeBackup(Backup backup, OutputStream output);
+
+    void writeBackup(Backup backup, OutputStream output, Map context);
 }

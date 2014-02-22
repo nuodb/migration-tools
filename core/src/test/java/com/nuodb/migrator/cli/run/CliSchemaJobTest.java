@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.cli.run;
 
+import com.google.common.collect.Sets;
 import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers;
@@ -43,6 +44,7 @@ import org.testng.annotations.Test;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.assertEquals;
@@ -118,7 +120,7 @@ public class CliSchemaJobTest {
         metaDataTypes.remove(MetaDataType.SEQUENCE);
         schemaSpec.setObjectTypes(metaDataTypes);
 
-        schemaSpec.setScriptTypes(newArrayList(ScriptType.DROP, ScriptType.CREATE));
+        schemaSpec.setScriptTypes(newHashSet(ScriptType.DROP, ScriptType.CREATE));
         schemaSpec.setGroupScriptsBy(GroupScriptsBy.META_DATA);
         schemaSpec.setIdentifierQuoting(IdentifierQuotings.ALWAYS);
         schemaSpec.setIdentifierNormalizer(IdentifierNormalizers.STANDARD);

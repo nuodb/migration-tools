@@ -35,9 +35,9 @@ import java.io.Serializable;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
+import static com.nuodb.migrator.utils.ReflectionUtils.getShortClassName;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
-import static org.apache.commons.lang3.ClassUtils.getShortClassName;
 
 public class MetaDataType implements Comparable<MetaDataType>, Serializable {
 

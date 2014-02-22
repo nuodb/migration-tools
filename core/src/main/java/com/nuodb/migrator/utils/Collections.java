@@ -63,4 +63,11 @@ public class Collections {
     public static boolean isEmpty(Object[] values) {
         return values == null || values.length == 0;
     }
+
+    public static <K, V> Map<K, V> putAll(Map<K, V> target, Map<K, V> source) {
+        if (source != null) {
+            target.putAll(source);
+        }
+        return target;
+    }
 }

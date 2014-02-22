@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Column;
@@ -38,12 +39,15 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.type.JdbcEnumType;
 import com.nuodb.migrator.jdbc.type.JdbcSetType;
 import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.spec.MetaDataSpec;
+import com.nuodb.migrator.utils.Collections;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
+import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.utils.Predicates.equalTo;
@@ -77,8 +81,8 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
 
     @Override
     protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Column> context) throws Exception {
+        Table table = getParent(context);
         String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        Table table = getParentTarget(context);
         Column column = table.hasColumn(name) ? table.getColumn(name) : table.addColumn(name);
         column.setNullable(context.readAttribute(input, NULLABLE_ATTRIBUTE, Boolean.class, false));
         column.setAutoIncrement(context.readAttribute(input, AUTO_INCREMENT_ATTRIBUTE, Boolean.class, false));
@@ -123,7 +127,7 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
         } else if (SEQUENCE_ELEMENT.equals(element)) {
             Integer index = context.readAttribute(input, REF_INDEX_ATTRIBUTE, Integer.class);
             Sequence sequence = index != null ?
-                    Iterables.get(((Schema)getTarget(context, 2)).getSequences(), index) :
+                    Iterables.get(((Schema) getParent(context, 2)).getSequences(), index) :
                     context.read(input, Sequence.class);
             column.setSequence(sequence);
         }
@@ -143,17 +147,26 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
         if (column.getComment() != null) {
             context.writeElement(output, COMMENT_ELEMENT, column.getComment());
         }
-        if (column.getTrigger() != null) {
+        final MetaDataSpec metaDataSpec = getMetaDataSpec(context);
+        if (column.getTrigger() != null && !XmlMetaDataHandlerBase.skip(column.getTrigger(), metaDataSpec)) {
             context.writeElement(output, TRIGGER_ELEMENT, column.getTrigger());
         }
         for (Check check : column.getChecks()) {
-            context.writeElement(output, CHECK_ELEMENT, check);
+            if (!XmlMetaDataHandlerBase.skip(check, metaDataSpec)) {
+                context.writeElement(output, CHECK_ELEMENT, check);
+            }
         }
         Sequence sequence = column.getSequence();
         if (sequence != null) {
             OutputNode element = output.getChild(SEQUENCE_ELEMENT);
-            context.writeAttribute(element, REF_INDEX_ATTRIBUTE,
-                    indexOf(sequence.getSchema().getSequences(), is(sequence)));
+            context.writeAttribute(element, REF_INDEX_ATTRIBUTE, indexOf(filter(
+                    sequence.getSchema().getSequences(),
+                    new Predicate<Sequence>() {
+                        @Override
+                        public boolean apply(Sequence sequence) {
+                            return !XmlSequenceHandler.skip(sequence, metaDataSpec);
+                        }
+                    }), is(sequence)));
         }
     }
 }
