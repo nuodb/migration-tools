@@ -82,12 +82,6 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     }
 
     @Override
-    protected void writeAttributes(Table table, OutputNode output, XmlWriteContext context) throws Exception {
-        context.writeAttribute(output, NAME_ATTRIBUTE, table.getName());
-        context.writeAttribute(output, TYPE_ATTRIBUTE, table.getType());
-    }
-
-    @Override
     protected void readElement(InputNode input, Table table, XmlReadContext context) throws Exception {
         String element = input.getName();
         if (COLUMN_ELEMENT.equals(element)) {
@@ -103,6 +97,35 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
         } else if (CHECK_ELEMENT.equals(element)) {
             table.addCheck(context.read(input, Check.class));
         }
+    }
+
+    @Override
+    protected boolean skip(Table table, MetaDataSpec metaDataSpec) {
+        boolean skip = super.skip(table, metaDataSpec);
+        if (!skip) {
+            String[] tableTypes = metaDataSpec != null ? metaDataSpec.getTableTypes() : TABLE_TYPES;
+            skip = indexOf(tableTypes, table.getType()) == -1;
+        }
+        if (!skip) {
+            Collection<TableSpec> tableSpecs = metaDataSpec != null ? metaDataSpec.getTableSpecs() : null;
+            if (!isEmpty(tableSpecs)) {
+                skip = true;
+                Database database = table.getDatabase();
+                for (TableSpec tableSpec : tableSpecs) {
+                    if (database.findTable(tableSpec.getTable()).equals(table)) {
+                        skip = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return skip;
+    }
+
+    @Override
+    protected void writeAttributes(Table table, OutputNode output, XmlWriteContext context) throws Exception {
+        context.writeAttribute(output, NAME_ATTRIBUTE, table.getName());
+        context.writeAttribute(output, TYPE_ATTRIBUTE, table.getType());
     }
 
     @Override
@@ -128,28 +151,5 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
         for (Check check : table.getChecks()) {
             context.writeElement(output, CHECK_ELEMENT, check);
         }
-    }
-
-    @Override
-    protected boolean skip(Table table, MetaDataSpec metaDataSpec) {
-        boolean skip = super.skip(table, metaDataSpec);
-        if (!skip) {
-            String[] tableTypes = metaDataSpec != null ? metaDataSpec.getTableTypes() : TABLE_TYPES;
-            skip = indexOf(tableTypes, table.getType()) == -1;
-        }
-        if (!skip) {
-            Collection<TableSpec> tableSpecs = metaDataSpec != null ? metaDataSpec.getTableSpecs() : null;
-            if (!isEmpty(tableSpecs)) {
-                skip = true;
-                Database database = table.getDatabase();
-                for (TableSpec tableSpec : tableSpecs) {
-                    if (database.findTable(tableSpec.getTable()).equals(table)) {
-                        skip = false;
-                        break;
-                    }
-                }
-            }
-        }
-        return skip;
     }
 }

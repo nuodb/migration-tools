@@ -62,9 +62,9 @@ public class XmlMetaDataHandlerBase<I extends MetaData> extends XmlReadWriteHand
         return skip(source, getMetaDataSpec(context));
     }
 
-    protected boolean skip(I object, MetaDataSpec metaDataSpec) {
+    protected boolean skip(I source, MetaDataSpec metaDataSpec) {
         Collection<MetaDataType> objectTypes = metaDataSpec != null ? metaDataSpec.getObjectTypes() : OBJECT_TYPES;
-        return object != null && !objectTypes.contains(object.getObjectType());
+        return source != null && !objectTypes.contains(source.getObjectType());
     }
 
     protected MetaDataSpec getMetaDataSpec(XmlWriteContext context) {

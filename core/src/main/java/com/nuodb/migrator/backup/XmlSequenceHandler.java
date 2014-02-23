@@ -75,6 +75,21 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
     }
 
     @Override
+    public boolean skip(Sequence sequence, final XmlWriteContext context) {
+        boolean skip = super.skip(sequence, context);
+        if (!skip) {
+            Collection<Column> columns = sequence.getColumns();
+            skip = !isEmpty(columns) && all(columns, new Predicate<Column>() {
+                @Override
+                public boolean apply(Column column) {
+                    return context.skip(null, column.getTable());
+                }
+            });
+        }
+        return skip;
+    }
+
+    @Override
     protected void writeAttributes(Sequence sequence, OutputNode output, XmlWriteContext context) throws Exception {
         if (sequence.getName() != null) {
             context.writeAttribute(output, NAME_ATTRIBUTE, sequence.getName());
@@ -115,20 +130,5 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
         if (cache != null) {
             context.writeAttribute(output, CACHE_ATTRIBUTE, cache);
         }
-    }
-
-    @Override
-    public boolean skip(Sequence sequence, final XmlWriteContext context) {
-        boolean skip = super.skip(sequence, context);
-        if (!skip) {
-            Collection<Column> columns = sequence.getColumns();
-            skip = !isEmpty(columns) && all(columns, new Predicate<Column>() {
-                @Override
-                public boolean apply(Column column) {
-                    return context.skip(null, column.getTable());
-                }
-            });
-        }
-        return skip;
     }
 }

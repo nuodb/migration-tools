@@ -90,23 +90,6 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
     }
 
     @Override
-    protected void writeAttributes(Column column, OutputNode output, XmlWriteContext context) throws Exception {
-        super.writeAttributes(column, output, context);
-        boolean nullable = column.isNullable();
-        if (nullable) {
-            context.writeAttribute(output, NULLABLE_ATTRIBUTE, nullable);
-        }
-        boolean autoIncrement = column.isAutoIncrement();
-        if (autoIncrement) {
-            context.writeAttribute(output, AUTO_INCREMENT_ATTRIBUTE, autoIncrement);
-        }
-        DefaultValue defaultValue = column.getDefaultValue();
-        if (defaultValue != null && defaultValue.getScript() != null) {
-            context.writeAttribute(output, DEFAULT_VALUE_ATTRIBUTE, defaultValue.getScript());
-        }
-    }
-
-    @Override
     protected void readElement(InputNode input, Column column, XmlReadContext context) throws Exception {
         final String element = input.getName();
         if (COMMENT_ELEMENT.equals(element)) {
@@ -127,6 +110,23 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
                     Iterables.get(((Schema) getParent(context, 2)).getSequences(), index) :
                     context.read(input, Sequence.class);
             column.setSequence(sequence);
+        }
+    }
+
+    @Override
+    protected void writeAttributes(Column column, OutputNode output, XmlWriteContext context) throws Exception {
+        super.writeAttributes(column, output, context);
+        boolean nullable = column.isNullable();
+        if (nullable) {
+            context.writeAttribute(output, NULLABLE_ATTRIBUTE, nullable);
+        }
+        boolean autoIncrement = column.isAutoIncrement();
+        if (autoIncrement) {
+            context.writeAttribute(output, AUTO_INCREMENT_ATTRIBUTE, autoIncrement);
+        }
+        DefaultValue defaultValue = column.getDefaultValue();
+        if (defaultValue != null && defaultValue.getScript() != null) {
+            context.writeAttribute(output, DEFAULT_VALUE_ATTRIBUTE, defaultValue.getScript());
         }
     }
 

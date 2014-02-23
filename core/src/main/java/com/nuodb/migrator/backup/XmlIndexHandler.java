@@ -68,6 +68,18 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
     }
 
     @Override
+    protected void readElement(InputNode input, Index index, XmlReadContext context) throws Exception {
+        Table table = getParent(context);
+        String element = input.getName();
+        if (COLUMN_ELEMENT.equals(element)) {
+            index.addColumn(
+                    table.getColumn(context.readAttribute(input, NAME_ATTRIBUTE, String.class)),
+                    index.getColumns().size()
+            );
+        }
+    }
+
+    @Override
     protected void writeAttributes(Index index, OutputNode output, XmlWriteContext context) throws Exception {
         super.writeAttributes(index, output, context);
         context.writeAttribute(output, UNIQUE_ATTRIBUTE, index.isUnique());
@@ -82,18 +94,6 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
         final String filterCondition = index.getFilterCondition();
         if (filterCondition != null) {
             context.writeAttribute(output, FILTER_CONDITION_ATTRIBUTE, filterCondition);
-        }
-    }
-
-    @Override
-    protected void readElement(InputNode input, Index index, XmlReadContext context) throws Exception {
-        Table table = getParent(context);
-        String element = input.getName();
-        if (COLUMN_ELEMENT.equals(element)) {
-            index.addColumn(
-                    table.getColumn(context.readAttribute(input, NAME_ATTRIBUTE, String.class)),
-                    index.getColumns().size()
-            );
         }
     }
 

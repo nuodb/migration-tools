@@ -53,8 +53,8 @@ public class XmlDriverConnectionSpecHandler extends XmlConnectionSpecHandler<Dri
     }
 
     @Override
-    protected void readElement(InputNode input, DriverConnectionSpec connectionSpec, XmlReadContext context)
-            throws Exception {
+    protected void readElement(InputNode input, DriverConnectionSpec connectionSpec,
+                               XmlReadContext context) throws Exception {
         String element = input.getName();
         if (DRIVER_ELEMENT.equals(element)) {
             connectionSpec.setDriver(context.read(input, String.class));
@@ -72,8 +72,7 @@ public class XmlDriverConnectionSpecHandler extends XmlConnectionSpecHandler<Dri
 
     @Override
     protected void writeElements(DriverConnectionSpec connectionSpec, OutputNode output,
-                                 XmlWriteContext context)
-            throws Exception {
+                                 XmlWriteContext context) throws Exception {
         super.writeElements(connectionSpec, output, context);
         context.writeElement(output, DRIVER_ELEMENT, connectionSpec.getDriver());
         context.writeElement(output, URL_ELEMENT, connectionSpec.getUrl());
