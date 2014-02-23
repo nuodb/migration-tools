@@ -36,7 +36,6 @@ import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 
 import java.util.Collection;
-import java.util.Map;
 
 import static com.nuodb.migrator.spec.MetaDataSpec.OBJECT_TYPES;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
@@ -63,12 +62,12 @@ public class XmlMetaDataHandlerBase<I extends MetaData> extends XmlReadWriteHand
         return skip(source, getMetaDataSpec(context));
     }
 
-    protected MetaDataSpec getMetaDataSpec(Map context) {
-        return (MetaDataSpec) context.get(META_DATA_SPEC);
-    }
-
-    public static boolean skip(MetaData object, MetaDataSpec metaDataSpec) {
+    protected boolean skip(I object, MetaDataSpec metaDataSpec) {
         Collection<MetaDataType> objectTypes = metaDataSpec != null ? metaDataSpec.getObjectTypes() : OBJECT_TYPES;
         return object != null && !objectTypes.contains(object.getObjectType());
+    }
+
+    protected MetaDataSpec getMetaDataSpec(XmlWriteContext context) {
+        return (MetaDataSpec) context.get(META_DATA_SPEC);
     }
 }

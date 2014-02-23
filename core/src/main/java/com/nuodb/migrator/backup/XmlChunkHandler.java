@@ -52,7 +52,7 @@ public class XmlChunkHandler extends XmlReadWriteHandlerBase<Chunk> implements X
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, Chunk chunk, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(Chunk chunk, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeAttribute(output, NAME, chunk.getName());
         context.writeAttribute(output, ROW_COUNT, chunk.getRowCount());
     }

@@ -120,8 +120,9 @@ public class XmlForeignKeyHandler extends XmlIdentifiableHandlerBase<ForeignKey>
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, ForeignKey foreignKey, XmlWriteContext context) throws Exception {
-        super.writeAttributes(output, foreignKey, context);
+    protected void writeAttributes(ForeignKey foreignKey, OutputNode output,
+                                   XmlWriteContext context) throws Exception {
+        super.writeAttributes(foreignKey, output, context);
         Table primaryTable = foreignKey.getPrimaryTable();
         Catalog primaryCatalog = primaryTable.getCatalog();
         if (primaryCatalog != null && primaryCatalog.getName() != null) {
@@ -157,7 +158,8 @@ public class XmlForeignKeyHandler extends XmlIdentifiableHandlerBase<ForeignKey>
     }
 
     @Override
-    protected void writeElements(OutputNode output, ForeignKey foreignKey, XmlWriteContext context) throws Exception {
+    protected void writeElements(ForeignKey foreignKey, OutputNode output,
+                                 XmlWriteContext context) throws Exception {
         for (ForeignKeyReference reference : foreignKey.getReferences()) {
             writeReference(reference, output.getChild(REFERENCE_ELEMENT), context);
         }

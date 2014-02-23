@@ -30,7 +30,6 @@ package com.nuodb.migrator.backup;
 import com.google.common.base.Predicate;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
-import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
@@ -76,7 +75,7 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, Sequence sequence, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(Sequence sequence, OutputNode output, XmlWriteContext context) throws Exception {
         if (sequence.getName() != null) {
             context.writeAttribute(output, NAME_ATTRIBUTE, sequence.getName());
         }
@@ -119,18 +118,14 @@ public class XmlSequenceHandler extends XmlIdentifiableHandlerBase<Sequence> {
     }
 
     @Override
-    protected boolean skip(Sequence source, XmlWriteContext context) {
-        return skip(source, getMetaDataSpec(context));
-    }
-
-    public static boolean skip(Sequence sequence, final MetaDataSpec metaDataSpec) {
-        boolean skip = XmlMetaDataHandlerBase.skip(sequence, metaDataSpec);
+    public boolean skip(Sequence sequence, final XmlWriteContext context) {
+        boolean skip = super.skip(sequence, context);
         if (!skip) {
             Collection<Column> columns = sequence.getColumns();
             skip = !isEmpty(columns) && all(columns, new Predicate<Column>() {
                 @Override
                 public boolean apply(Column column) {
-                    return XmlTableHandler.skip(column.getTable(), metaDataSpec);
+                    return context.skip(null, column.getTable());
                 }
             });
         }

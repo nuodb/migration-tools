@@ -81,6 +81,11 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
     }
 
     @Override
+    public boolean skip(Object source, Class type, OutputNode output, XmlWriteContext context) {
+        return false;
+    }
+
+    @Override
     public boolean write(Object source, Class type, OutputNode output, XmlWriteContext context) {
         try {
             output.setValue(transformer.write(source, type));

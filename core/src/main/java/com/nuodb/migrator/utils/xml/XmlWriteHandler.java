@@ -31,6 +31,8 @@ import org.simpleframework.xml.stream.OutputNode;
 
 public interface XmlWriteHandler<T> extends XmlHandler {
 
+    boolean skip(T source, Class<? extends T> type, OutputNode output, XmlWriteContext context);
+
     boolean write(T source, Class<? extends T> type, OutputNode output, XmlWriteContext context);
 
     boolean canWrite(Object source, Class type, OutputNode output, XmlWriteContext context);

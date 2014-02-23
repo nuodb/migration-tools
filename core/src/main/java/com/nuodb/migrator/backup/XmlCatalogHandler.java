@@ -68,7 +68,7 @@ public class XmlCatalogHandler extends XmlIdentifiableHandlerBase<Catalog> imple
     }
 
     @Override
-    protected void writeElements(OutputNode output, Catalog catalog, XmlWriteContext context) throws Exception {
+    protected void writeElements(Catalog catalog, OutputNode output, XmlWriteContext context) throws Exception {
         for (Schema schema : catalog.getSchemas()) {
             context.writeElement(output, SCHEMA_ELEMENT, schema);
         }

@@ -60,8 +60,8 @@ public class XmlJdbcEnumTypeHandler<T extends JdbcEnumType> extends XmlJdbcTypeH
     }
 
     @Override
-    protected void writeElements(OutputNode output, T jdbcType, XmlWriteContext context) throws Exception {
-        super.writeElements(output, jdbcType, context);
+    protected void writeElements(T jdbcType, OutputNode output, XmlWriteContext context) throws Exception {
+        super.writeElements(jdbcType, output, context);
         for (String value : jdbcType.getValues()) {
             context.writeElement(output, VALUE_ELEMENT, value);
         }

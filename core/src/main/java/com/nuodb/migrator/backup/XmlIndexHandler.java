@@ -68,8 +68,8 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, Index index, XmlWriteContext context) throws Exception {
-        super.writeAttributes(output, index, context);
+    protected void writeAttributes(Index index, OutputNode output, XmlWriteContext context) throws Exception {
+        super.writeAttributes(index, output, context);
         context.writeAttribute(output, UNIQUE_ATTRIBUTE, index.isUnique());
         SortOrder sortOrder = index.getSortOrder();
         if (sortOrder != null) {
@@ -98,7 +98,7 @@ public class XmlIndexHandler extends XmlIdentifiableHandlerBase<Index> {
     }
 
     @Override
-    protected void writeElements(OutputNode output, Index index, XmlWriteContext context) throws Exception {
+    protected void writeElements(Index index, OutputNode output, XmlWriteContext context) throws Exception {
         for (Column column : index.getColumns()) {
             OutputNode element = output.getChild(COLUMN_ELEMENT);
             context.writeAttribute(element, NAME_ATTRIBUTE, column.getName());

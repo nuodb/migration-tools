@@ -39,8 +39,6 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.type.JdbcEnumType;
 import com.nuodb.migrator.jdbc.type.JdbcSetType;
 import com.nuodb.migrator.jdbc.type.JdbcType;
-import com.nuodb.migrator.spec.MetaDataSpec;
-import com.nuodb.migrator.utils.Collections;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
@@ -92,9 +90,8 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, Column column,
-                                   XmlWriteContext context) throws Exception {
-        super.writeAttributes(output, column, context);
+    protected void writeAttributes(Column column, OutputNode output, XmlWriteContext context) throws Exception {
+        super.writeAttributes(column, output, context);
         boolean nullable = column.isNullable();
         if (nullable) {
             context.writeAttribute(output, NULLABLE_ATTRIBUTE, nullable);
@@ -134,7 +131,7 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
     }
 
     @Override
-    protected void writeElements(OutputNode output, Column column, XmlWriteContext context) throws Exception {
+    protected void writeElements(Column column, OutputNode output, final XmlWriteContext context) throws Exception {
         JdbcType jdbcType = column.getJdbcType();
         Class<? extends JdbcType> typeClass = jdbcType.getClass();
         if (typeClass.equals(JdbcEnumType.class)) {
@@ -147,16 +144,13 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
         if (column.getComment() != null) {
             context.writeElement(output, COMMENT_ELEMENT, column.getComment());
         }
-        final MetaDataSpec metaDataSpec = getMetaDataSpec(context);
-        if (column.getTrigger() != null && !XmlMetaDataHandlerBase.skip(column.getTrigger(), metaDataSpec)) {
+        if (column.getTrigger() != null) {
             context.writeElement(output, TRIGGER_ELEMENT, column.getTrigger());
         }
         for (Check check : column.getChecks()) {
-            if (!XmlMetaDataHandlerBase.skip(check, metaDataSpec)) {
-                context.writeElement(output, CHECK_ELEMENT, check);
-            }
+            context.writeElement(output, CHECK_ELEMENT, check);
         }
-        Sequence sequence = column.getSequence();
+        final Sequence sequence = column.getSequence();
         if (sequence != null) {
             OutputNode element = output.getChild(SEQUENCE_ELEMENT);
             context.writeAttribute(element, REF_INDEX_ATTRIBUTE, indexOf(filter(
@@ -164,7 +158,7 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
                     new Predicate<Sequence>() {
                         @Override
                         public boolean apply(Sequence sequence) {
-                            return !XmlSequenceHandler.skip(sequence, metaDataSpec);
+                            return !context.skip(null, sequence);
                         }
                     }), is(sequence)));
         }

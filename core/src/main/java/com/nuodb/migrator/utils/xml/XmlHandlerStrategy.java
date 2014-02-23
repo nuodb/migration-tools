@@ -38,7 +38,7 @@ import java.util.Map;
 
 import static com.nuodb.migrator.utils.Collections.putAll;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "ConstantConditions"})
 public class XmlHandlerStrategy implements XmlContextStrategy {
 
     protected XmlHandlerRegistry registry;
@@ -101,14 +101,24 @@ public class XmlHandlerStrategy implements XmlContextStrategy {
         return registry.lookupReader(input, type, context);
     }
 
+    public boolean skip(Type type, Object source, OutputNode output, Map map) throws Exception {
+        XmlWriteContext writeContext = createWriteContext(map);
+        Class valueType = type.getType();
+        if (source != null) {
+            valueType = source.getClass();
+        }
+        XmlWriteHandler writer = lookupWriter(source, valueType, output, writeContext);
+        return writer != null && writer.skip(source, valueType, output, writeContext);
+    }
+
     @Override
-    public boolean write(Type type, Object value, NodeMap<OutputNode> node, Map map) throws Exception {
+    public boolean write(Type type, Object source, NodeMap<OutputNode> node, Map map) throws Exception {
         XmlWriteContext writeContext = createWriteContext(map);
         boolean complete = false;
         if (strategy != null) {
-            complete = strategy.write(type, value, node, writeContext);
+            complete = strategy.write(type, source, node, writeContext);
         }
-        return complete || write(type, value, node.getNode(), writeContext);
+        return complete || write(type, source, node.getNode(), writeContext);
     }
 
     protected XmlWriteContext createWriteContext(Map map) {
@@ -116,18 +126,18 @@ public class XmlHandlerStrategy implements XmlContextStrategy {
                 new XmlWriteStrategyContext(putAll(map, context), this);
     }
 
-    protected boolean write(Type type, Object value, OutputNode output, XmlWriteContext context) throws Exception {
+    protected boolean write(Type type, Object source, OutputNode output, XmlWriteContext context) throws Exception {
         Class valueType = type.getType();
-        if (value != null) {
-            valueType = value.getClass();
+        if (source != null) {
+            valueType = source.getClass();
         }
-        XmlWriteHandler writer = lookupWriter(value, valueType, output, context);
-        return writer != null && writer.write(value, type.getType(), output, context);
+        XmlWriteHandler writer = lookupWriter(source, valueType, output, context);
+        return writer != null && writer.write(source, type.getType(), output, context);
     }
 
-    protected XmlWriteHandler lookupWriter(Object value, Class type, OutputNode output,
+    protected XmlWriteHandler lookupWriter(Object source, Class type, OutputNode output,
                                            XmlWriteContext context) throws Exception {
-        return registry.lookupWriter(value, type, output, context);
+        return registry.lookupWriter(source, type, output, context);
     }
 
     protected boolean isReference(Value value) {

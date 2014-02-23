@@ -75,13 +75,13 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, Backup backup, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(Backup backup, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeAttribute(output, VERSION_ATTRIBUTE, backup.getVersion());
         context.writeAttribute(output, FORMAT_ATTRIBUTE, backup.getFormat());
     }
 
     @Override
-    protected void writeElements(OutputNode output, Backup backup, XmlWriteContext context) throws Exception {
+    protected void writeElements(Backup backup, OutputNode output, XmlWriteContext context) throws Exception {
         if (backup.getDatabase() != null) {
             context.writeElement(output, DATABASE_ELEMENT, backup.getDatabase());
         }

@@ -52,7 +52,7 @@ public class XmlRowSetColumnHandler extends XmlReadWriteHandlerBase<Column> impl
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, Column column,
+    protected void writeAttributes(Column column, OutputNode output,
                                    XmlWriteContext context) throws Exception {
         context.writeAttribute(output, NAME_ATTRIBUTE, column.getName());
         context.writeAttribute(output, VALUE_TYPE_ATTRIBUTE, column.getValueType());

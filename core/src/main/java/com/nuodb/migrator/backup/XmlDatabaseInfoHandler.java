@@ -63,7 +63,7 @@ public class XmlDatabaseInfoHandler extends XmlReadWriteHandlerBase<DatabaseInfo
     }
 
     @Override
-    protected void writeElements(OutputNode output, DatabaseInfo databaseInfo,
+    protected void writeElements(DatabaseInfo databaseInfo, OutputNode output,
                                  XmlWriteContext context) throws Exception {
         context.writeElement(output, PRODUCT_NAME_ELEMENT, databaseInfo.getProductName());
         context.writeElement(output, PRODUCT_VERSION_ELEMENT, databaseInfo.getProductVersion());

@@ -61,8 +61,8 @@ public class XmlTableRowSetHandler extends XmlRowSetHandler<TableRowSet> {
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, TableRowSet rowSet, XmlWriteContext context) throws Exception {
-        super.writeAttributes(output, rowSet, context);
+    protected void writeAttributes(TableRowSet rowSet, OutputNode output, XmlWriteContext context) throws Exception {
+        super.writeAttributes(rowSet, output, context);
         if (rowSet.getCatalog() != null) {
             context.writeAttribute(output, CATALOG_ATTRIBUTE, rowSet.getCatalog());
         }

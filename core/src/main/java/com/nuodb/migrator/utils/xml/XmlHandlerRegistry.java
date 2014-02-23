@@ -95,6 +95,16 @@ public class XmlHandlerRegistry {
         }
 
         @Override
+        public boolean canRead(InputNode input, Class type, XmlReadContext context) {
+            return this.type.equals(type);
+        }
+
+        @Override
+        public boolean skip(Object source, Class type, OutputNode output, XmlWriteContext context) {
+            return false;
+        }
+
+        @Override
         public boolean write(Object source, Class type, OutputNode output, XmlWriteContext context) {
             try {
                 converter.write(output, source);
@@ -102,11 +112,6 @@ public class XmlHandlerRegistry {
             } catch (Exception e) {
                 throw new XmlPersisterException("Underlying converter failed to write", e);
             }
-        }
-
-        @Override
-        public boolean canRead(InputNode input, Class type, XmlReadContext context) {
-            return this.type.equals(type);
         }
 
         @Override

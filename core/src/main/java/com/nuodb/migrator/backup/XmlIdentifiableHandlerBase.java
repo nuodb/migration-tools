@@ -29,7 +29,6 @@ package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
-import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
@@ -51,8 +50,8 @@ public class XmlIdentifiableHandlerBase<I extends Identifiable> extends XmlMetaD
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, I target, XmlWriteContext context) throws Exception {
-        String name = target.getName();
+    protected void writeAttributes(I source, OutputNode output, XmlWriteContext context) throws Exception {
+        String name = source.getName();
         if (name != null) {
             context.writeAttribute(output, NAME_ATTRIBUTE, name);
         }

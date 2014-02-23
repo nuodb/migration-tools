@@ -60,7 +60,7 @@ public abstract class XmlRowSetHandler<T extends RowSet> extends XmlReadWriteHan
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, T rowSet, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(T rowSet, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeAttribute(output, TYPE_ATTRIBUTE, getTypeAttribute());
         if (rowSet.getName() != null) {
             context.writeAttribute(output, NAME_ATTRIBUTE, rowSet.getName());
@@ -78,7 +78,7 @@ public abstract class XmlRowSetHandler<T extends RowSet> extends XmlReadWriteHan
     }
 
     @Override
-    protected void writeElements(OutputNode output, T rowSet, XmlWriteContext context) throws Exception {
+    protected void writeElements(T rowSet, OutputNode output, XmlWriteContext context) throws Exception {
         for (Column column : rowSet.getColumns()) {
             context.writeElement(output, COLUMN_ELEMENT, column);
         }

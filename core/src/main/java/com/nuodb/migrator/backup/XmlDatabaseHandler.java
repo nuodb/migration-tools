@@ -71,7 +71,7 @@ public class XmlDatabaseHandler extends XmlIdentifiableHandlerBase<Database> imp
     }
 
     @Override
-    protected void writeElements(OutputNode output, Database database, XmlWriteContext context) throws Exception {
+    protected void writeElements(Database database, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeElement(output, DRIVER_INFO_ELEMENT, database.getDriverInfo());
         context.writeElement(output, DATABASE_INFO_ELEMENT, database.getDatabaseInfo());
         context.writeElement(output, CONNECTION_SPEC_ELEMENT, database.getConnectionSpec());

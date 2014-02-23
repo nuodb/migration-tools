@@ -70,7 +70,7 @@ public class XmlJdbcTypeHandler<T extends JdbcType> extends XmlReadWriteHandlerB
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, T jdbcType, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(T jdbcType, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeAttribute(output, CODE_ATTRIBUTE, jdbcType.getTypeCode());
         context.writeAttribute(output, NAME_ATTRIBUTE, jdbcType.getTypeName());
         final Integer size = jdbcType.getSize();

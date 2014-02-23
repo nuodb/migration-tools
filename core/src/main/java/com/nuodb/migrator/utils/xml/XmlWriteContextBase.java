@@ -55,32 +55,51 @@ public abstract class XmlWriteContextBase implements XmlWriteContext {
     }
 
     @Override
-    public void write(OutputNode output, Object value) {
-        if (value != null) {
-            write(output, value, value.getClass());
-        }
+    public boolean skip(OutputNode output, Object source) {
+        return skip(output, source, source != null ? source.getClass() : null);
     }
 
     @Override
-    public void write(OutputNode output, Object value, Class type) {
+    public boolean skip(OutputNode output, Object source, XmlWriteContext context) {
+        return skip(output, source, source != null ? source.getClass() : null, context);
+    }
+
+    @Override
+    public boolean skip(OutputNode output, Object source, Class type) {
         XmlWriteContext context = getContext();
-        write(output, value, type, context != null ? context : this);
+        return skip(output, source, type, context != null ? context : this);
     }
 
     @Override
-    public OutputNode writeAttribute(OutputNode output, String attribute, Object value) {
-        return writeAttribute(output, null, attribute, value);
-    }
-
-    @Override
-    public OutputNode writeAttribute(OutputNode output, String namespace, String attribute, Object value) {
-        NodeMap<OutputNode> attributes = output.getAttributes();
-        OutputNode node = attributes.get(attribute);
-        if (node == null) {
-            node = attributes.put(attribute, EMPTY);
+    public void write(OutputNode output, Object source) {
+        if (source != null) {
+            write(output, source, source.getClass());
         }
-        node.setReference(namespace == null ? EMPTY : namespace);
-        write(node, value);
+    }
+
+    @Override
+    public void write(OutputNode output, Object source, Class type) {
+        XmlWriteContext context = getContext();
+        write(output, source, type, context != null ? context : this);
+    }
+
+    @Override
+    public OutputNode writeAttribute(OutputNode output, String attribute, Object source) {
+        return writeAttribute(output, null, attribute, source);
+    }
+
+    @Override
+    public OutputNode writeAttribute(OutputNode output, String namespace, String attribute, Object source) {
+        OutputNode node = null;
+        if (!skip(null, source)) {
+            NodeMap<OutputNode> attributes = output.getAttributes();
+            node = attributes.get(attribute);
+            if (node == null) {
+                node = attributes.put(attribute, EMPTY);
+            }
+            node.setReference(namespace == null ? EMPTY : namespace);
+            write(node, source);
+        }
         return node;
     }
 
@@ -90,15 +109,17 @@ public abstract class XmlWriteContextBase implements XmlWriteContext {
     }
 
     @Override
-    public OutputNode writeElement(OutputNode output, String namespace, String element, Object value) {
-        OutputNode node;
-        try {
-            node = output.getChild(element);
-        } catch (Exception exception) {
-            throw new XmlPersisterException(exception);
+    public OutputNode writeElement(OutputNode output, String namespace, String element, Object source) {
+        OutputNode node = null;
+        if (!skip(null, source)) {
+            try {
+                node = output.getChild(element);
+            } catch (Exception exception) {
+                throw new XmlPersisterException(exception);
+            }
+            node.setReference(namespace == null ? EMPTY : namespace);
+            write(node, source);
         }
-        node.setReference(namespace == null ? EMPTY : namespace);
-        write(node, value);
         return node;
     }
 

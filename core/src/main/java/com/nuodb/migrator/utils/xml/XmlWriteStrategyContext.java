@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.utils.xml;
 
-import org.simpleframework.xml.strategy.Strategy;
 import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Map;
@@ -37,22 +36,33 @@ import static java.lang.String.format;
 @SuppressWarnings("unchecked")
 public class XmlWriteStrategyContext extends XmlWriteContextBase {
 
-    private Strategy strategy;
+    private XmlHandlerStrategy strategy;
 
-    public XmlWriteStrategyContext(Strategy strategy) {
+    public XmlWriteStrategyContext(XmlHandlerStrategy strategy) {
         this.strategy = strategy;
     }
 
-    public XmlWriteStrategyContext(Map map, Strategy strategy) {
+    public XmlWriteStrategyContext(Map map, XmlHandlerStrategy strategy) {
         super(map);
         this.strategy = strategy;
     }
 
     @Override
-    public void write(OutputNode output, Object value, Class type, XmlWriteContext delegate) {
+    public boolean skip(OutputNode output, Object source, Class type, XmlWriteContext context) {
+        try {
+            return strategy.skip(new ClassType(type), source, output, context);
+        } catch (XmlPersisterException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new XmlPersisterException(exception);
+        }
+    }
+
+    @Override
+    public void write(OutputNode output, Object source, Class type, XmlWriteContext delegate) {
         boolean complete;
         try {
-            complete = strategy.write(new ClassType(type), value, output.getAttributes(), delegate);
+            complete = strategy.write(new ClassType(type), source, output.getAttributes(), delegate);
         } catch (XmlPersisterException exception) {
             throw exception;
         } catch (Exception exception) {

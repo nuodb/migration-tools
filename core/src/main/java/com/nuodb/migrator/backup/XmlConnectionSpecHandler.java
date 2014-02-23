@@ -67,20 +67,20 @@ public abstract class XmlConnectionSpecHandler<T extends ConnectionSpec> extends
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, T connectionSpec, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(T target, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeAttribute(output, TYPE_ATTRIBUTE, getTypeAttribute());
-        if (connectionSpec.getCatalog() != null) {
-            context.writeAttribute(output, CATALOG_ATTRIBUTE, connectionSpec.getCatalog());
+        if (target.getCatalog() != null) {
+            context.writeAttribute(output, CATALOG_ATTRIBUTE, target.getCatalog());
         }
-        if (connectionSpec.getSchema() != null) {
-            context.writeAttribute(output, SCHEMA_ATTRIBUTE, connectionSpec.getSchema());
+        if (target.getSchema() != null) {
+            context.writeAttribute(output, SCHEMA_ATTRIBUTE, target.getSchema());
         }
-        Boolean autoCommit = connectionSpec.getAutoCommit();
+        Boolean autoCommit = target.getAutoCommit();
         if (autoCommit != null && autoCommit) {
             context.writeAttribute(output, AUTO_COMMIT_ATTRIBUTE, autoCommit);
         }
-        if (connectionSpec.getTransactionIsolation() != null) {
-            context.writeAttribute(output, TRANSACTION_ISOLATION_ATTRIBUTE, connectionSpec.getTransactionIsolation());
+        if (target.getTransactionIsolation() != null) {
+            context.writeAttribute(output, TRANSACTION_ISOLATION_ATTRIBUTE, target.getTransactionIsolation());
         }
     }
 

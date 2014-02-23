@@ -31,7 +31,6 @@ import com.nuodb.migrator.jdbc.metadata.Catalog;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
@@ -73,17 +72,12 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
     }
 
     @Override
-    protected void writeElements(OutputNode output, Schema schema, final XmlWriteContext context) throws Exception {
-        MetaDataSpec metaDataSpec = getMetaDataSpec(context);
+    protected void writeElements(Schema schema, OutputNode output, final XmlWriteContext context) throws Exception {
         for (Sequence sequence : schema.getSequences()) {
-            if (!XmlSequenceHandler.skip(sequence, metaDataSpec)) {
-                context.writeElement(output, SEQUENCE_ELEMENT, sequence);
-            }
+            context.writeElement(output, SEQUENCE_ELEMENT, sequence);
         }
         for (Table table : schema.getTables()) {
-            if (!XmlTableHandler.skip(table, metaDataSpec)) {
-                context.writeElement(output, TABLE_ELEMENT, table);
-            }
+            context.writeElement(output, TABLE_ELEMENT, table);
         }
     }
 }

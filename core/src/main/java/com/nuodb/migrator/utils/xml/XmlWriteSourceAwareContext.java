@@ -48,29 +48,49 @@ public class XmlWriteSourceAwareContext<T> implements XmlWriteContext {
     }
 
     @Override
-    public void write(OutputNode output, Object value) {
-        context.write(output, value);
+    public boolean skip(OutputNode output, Object source) {
+        return context.skip(output, source, this);
     }
 
     @Override
-    public void write(OutputNode output, Object value, Class type) {
-        context.write(output, value, type, this);
+    public boolean skip(OutputNode output, Object source, XmlWriteContext delegate) {
+        return context.skip(output, source, delegate);
     }
 
     @Override
-    public void write(OutputNode output, Object value, Class type,
+    public boolean skip(OutputNode output, Object source, Class type) {
+        return context.skip(output, source, type, this);
+    }
+
+    @Override
+    public boolean skip(OutputNode output, Object source, Class type, XmlWriteContext delegate) {
+        return context.skip(output, source, type, delegate);
+    }
+
+    @Override
+    public void write(OutputNode output, Object source) {
+        context.write(output, source);
+    }
+
+    @Override
+    public void write(OutputNode output, Object source, Class type) {
+        context.write(output, source, type, this);
+    }
+
+    @Override
+    public void write(OutputNode output, Object source, Class type,
                       XmlWriteContext delegate) {
-        context.write(output, value, type, delegate);
+        context.write(output, source, type, delegate);
     }
 
     @Override
-    public OutputNode writeAttribute(OutputNode output, String attribute, Object value) {
-        return context.writeAttribute(output, attribute, value);
+    public OutputNode writeAttribute(OutputNode output, String attribute, Object source) {
+        return context.writeAttribute(output, attribute, source);
     }
 
     @Override
-    public OutputNode writeAttribute(OutputNode output, String namespace, String attribute, Object value) {
-        return context.writeAttribute(output, namespace, attribute, value);
+    public OutputNode writeAttribute(OutputNode output, String namespace, String attribute, Object source) {
+        return context.writeAttribute(output, namespace, attribute, source);
     }
 
     @Override
@@ -79,8 +99,8 @@ public class XmlWriteSourceAwareContext<T> implements XmlWriteContext {
     }
 
     @Override
-    public OutputNode writeElement(OutputNode output, String namespace, String element, Object value) {
-        return context.writeElement(output, namespace, element, value);
+    public OutputNode writeElement(OutputNode output, String namespace, String element, Object source) {
+        return context.writeElement(output, namespace, element, source);
     }
 
     public T getSource() {

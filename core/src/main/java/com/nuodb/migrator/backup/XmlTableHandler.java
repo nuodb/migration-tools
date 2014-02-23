@@ -52,6 +52,7 @@ import static org.apache.commons.lang3.ArrayUtils.indexOf;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("ConstantConditions")
 public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
 
     private static final String TYPE_ATTRIBUTE = "type";
@@ -81,7 +82,7 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, Table table, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(Table table, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeAttribute(output, NAME_ATTRIBUTE, table.getName());
         context.writeAttribute(output, TYPE_ATTRIBUTE, table.getType());
     }
@@ -105,8 +106,7 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     }
 
     @Override
-    protected void writeElements(OutputNode output, Table table, XmlWriteContext context) throws Exception {
-        MetaDataSpec metaDataSpec = getMetaDataSpec(context);
+    protected void writeElements(Table table, OutputNode output, XmlWriteContext context) throws Exception {
         if (table.getComment() != null) {
             context.writeElement(output, COMMENT_ELEMENT, table.getComment());
         }
@@ -114,34 +114,25 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
             context.writeElement(output, COLUMN_ELEMENT, column);
         }
         PrimaryKey primaryKey = table.getPrimaryKey();
-        if (primaryKey != null && !XmlMetaDataHandlerBase.skip(primaryKey, metaDataSpec)) {
+        if (primaryKey != null) {
             context.writeElement(output, PRIMARY_KEY_ELEMENT, primaryKey);
         }
         for (Index index : table.getIndexes()) {
-            if (!index.isPrimary() && !XmlMetaDataHandlerBase.skip(index, metaDataSpec)) {
+            if (!index.isPrimary()) {
                 context.writeElement(output, INDEX_ELEMENT, index);
             }
         }
         for (ForeignKey foreignKey : table.getForeignKeys()) {
-            if (!XmlMetaDataHandlerBase.skip(foreignKey, metaDataSpec)) {
-                context.writeElement(output, FOREIGN_KEY, foreignKey);
-            }
+            context.writeElement(output, FOREIGN_KEY, foreignKey);
         }
         for (Check check : table.getChecks()) {
-            if (!XmlMetaDataHandlerBase.skip(check, metaDataSpec)) {
-                context.writeElement(output, CHECK_ELEMENT, check);
-            }
+            context.writeElement(output, CHECK_ELEMENT, check);
         }
     }
 
     @Override
-    protected boolean skip(Table table, XmlWriteContext context) {
-        return skip(table, getMetaDataSpec(context));
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    public static boolean skip(Table table, MetaDataSpec metaDataSpec) {
-        boolean skip = XmlMetaDataHandlerBase.skip(table, metaDataSpec);
+    protected boolean skip(Table table, MetaDataSpec metaDataSpec) {
+        boolean skip = super.skip(table, metaDataSpec);
         if (!skip) {
             String[] tableTypes = metaDataSpec != null ? metaDataSpec.getTableTypes() : TABLE_TYPES;
             skip = indexOf(tableTypes, table.getType()) == -1;

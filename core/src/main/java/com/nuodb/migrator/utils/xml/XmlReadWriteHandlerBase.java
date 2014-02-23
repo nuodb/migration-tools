@@ -111,18 +111,23 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     @Override
+    public boolean skip(T source, Class<? extends T> type, OutputNode output, XmlWriteContext context) {
+        return skip(source, context);
+    }
+
+    protected boolean skip(T source, XmlWriteContext context) {
+        return false;
+    }
+
+    @Override
     public boolean write(T source, Class<? extends T> type, OutputNode output, XmlWriteContext parent) {
         try {
-            return skip(source, parent) || write(output, createContext(source, output, parent));
+            return write(output, createContext(source, output, parent));
         } catch (XmlPersisterException exception) {
             throw exception;
         } catch (Exception exception) {
             throw new XmlPersisterException(exception);
         }
-    }
-
-    protected boolean skip(T source, XmlWriteContext context) {
-        return false;
     }
 
     protected XmlWriteSourceAwareContext<T> createContext(T source, OutputNode output, XmlWriteContext context) {
@@ -148,17 +153,17 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     protected void writeAttributes(OutputNode output, XmlWriteSourceAwareContext<T> context) throws Exception {
-        writeAttributes(output, context.getSource(), context);
+        writeAttributes(context.getSource(), output, context);
     }
 
-    protected void writeAttributes(OutputNode output, T source, XmlWriteContext context) throws Exception {
+    protected void writeAttributes(T source, OutputNode output, XmlWriteContext context) throws Exception {
     }
 
     protected void writeElements(OutputNode output, XmlWriteSourceAwareContext<T> context) throws Exception {
-        writeElements(output, context.getSource(), context);
+        writeElements(context.getSource(), output, context);
     }
 
-    protected void writeElements(OutputNode output, T source, XmlWriteContext context) throws Exception {
+    protected void writeElements(T source, OutputNode output, XmlWriteContext context) throws Exception {
     }
 
     @Override

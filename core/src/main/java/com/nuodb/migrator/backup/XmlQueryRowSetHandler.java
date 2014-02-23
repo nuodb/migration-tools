@@ -53,8 +53,8 @@ public class XmlQueryRowSetHandler extends XmlRowSetHandler<QueryRowSet> {
     }
 
     @Override
-    protected void writeElements(OutputNode output, QueryRowSet rowSet, XmlWriteContext context) throws Exception {
+    protected void writeElements(QueryRowSet rowSet, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeElement(output, QUERY_ELEMENT, rowSet.getQuery());
-        super.writeElements(output, rowSet, context);
+        super.writeElements(rowSet, output, context);
     }
 }

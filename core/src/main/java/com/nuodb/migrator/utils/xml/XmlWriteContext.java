@@ -33,19 +33,27 @@ import java.util.Map;
 
 public interface XmlWriteContext extends Map {
 
-    void write(OutputNode output, Object value);
+    boolean skip(OutputNode output, Object source);
 
-    void write(OutputNode output, Object value, Class type);
+    boolean skip(OutputNode output, Object source, XmlWriteContext context);
 
-    void write(OutputNode output, Object value, Class type, XmlWriteContext delegate);
+    boolean skip(OutputNode output, Object source, Class type);
 
-    OutputNode writeAttribute(OutputNode output, String attribute, Object value);
+    boolean skip(OutputNode output, Object source, Class type, XmlWriteContext context);
 
-    OutputNode writeAttribute(OutputNode output, String namespace, String attribute, Object value);
+    void write(OutputNode output, Object source);
+
+    void write(OutputNode output, Object source, Class type);
+
+    void write(OutputNode output, Object source, Class type, XmlWriteContext context);
+
+    OutputNode writeAttribute(OutputNode output, String attribute, Object source);
+
+    OutputNode writeAttribute(OutputNode output, String namespace, String attribute, Object source);
 
     OutputNode writeElement(OutputNode output, String attribute, Object element);
 
-    OutputNode writeElement(OutputNode output, String namespace, String element, Object value);
+    OutputNode writeElement(OutputNode output, String namespace, String element, Object source);
 
     Map getMap();
 

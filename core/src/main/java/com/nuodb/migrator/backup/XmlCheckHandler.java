@@ -59,7 +59,7 @@ public class XmlCheckHandler extends XmlIdentifiableHandlerBase<Check> {
     }
 
     @Override
-    protected void writeElements(OutputNode output, Check check, XmlWriteContext context) throws Exception {
+    protected void writeElements(Check check, OutputNode output, XmlWriteContext context) throws Exception {
         context.writeElement(output, TEXT_ELEMENT, check.getText());
         for (Column column : check.getColumns()) {
             OutputNode element = output.getChild(COLUMN_ELEMENT);

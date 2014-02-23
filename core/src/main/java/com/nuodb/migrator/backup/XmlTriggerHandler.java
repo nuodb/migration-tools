@@ -70,8 +70,8 @@ public class XmlTriggerHandler<T extends Trigger> extends XmlIdentifiableHandler
     }
 
     @Override
-    protected void writeAttributes(OutputNode output, T trigger, XmlWriteContext context) throws Exception {
-        super.writeAttributes(output, trigger, context);
+    protected void writeAttributes(T trigger, OutputNode output, XmlWriteContext context) throws Exception {
+        super.writeAttributes(trigger, output, context);
         context.writeAttribute(output, ACTIVE_ATTRIBUTE, trigger.isActive());
         TriggerTime triggerTime = trigger.getTriggerTime();
         if (triggerTime != null) {
@@ -89,7 +89,7 @@ public class XmlTriggerHandler<T extends Trigger> extends XmlIdentifiableHandler
     }
 
     @Override
-    protected void writeElements(OutputNode output, T trigger, XmlWriteContext context) throws Exception {
+    protected void writeElements(T trigger, OutputNode output, XmlWriteContext context) throws Exception {
         context.write(output, trigger.getTriggerBody());
     }
 }

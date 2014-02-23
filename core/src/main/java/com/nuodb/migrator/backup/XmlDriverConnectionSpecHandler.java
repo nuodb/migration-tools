@@ -71,10 +71,10 @@ public class XmlDriverConnectionSpecHandler extends XmlConnectionSpecHandler<Dri
     }
 
     @Override
-    protected void writeElements(OutputNode output, DriverConnectionSpec connectionSpec,
+    protected void writeElements(DriverConnectionSpec connectionSpec, OutputNode output,
                                  XmlWriteContext context)
             throws Exception {
-        super.writeElements(output, connectionSpec, context);
+        super.writeElements(connectionSpec, output, context);
         context.writeElement(output, DRIVER_ELEMENT, connectionSpec.getDriver());
         context.writeElement(output, URL_ELEMENT, connectionSpec.getUrl());
         context.writeElement(output, USERNAME_ELEMENT, connectionSpec.getUsername());

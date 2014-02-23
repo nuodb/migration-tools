@@ -60,7 +60,8 @@ public class XmlPrimaryKeyHandler extends XmlIdentifiableHandlerBase<PrimaryKey>
     }
 
     @Override
-    protected void writeElements(OutputNode output, PrimaryKey primaryKey, XmlWriteContext context) throws Exception {
+    protected void writeElements(PrimaryKey primaryKey, OutputNode output,
+                                 XmlWriteContext context) throws Exception {
         for (Column column : primaryKey.getColumns()) {
             OutputNode element = output.getChild(COLUMN_ELEMENT);
             context.writeAttribute(element, NAME_ATTRIBUTE, column.getName());
