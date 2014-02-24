@@ -19,14 +19,20 @@ package com.nuodb.migrator.cli.parse.parser;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.cli.parse.Command;
 import com.nuodb.migrator.cli.parse.CommandLine;
+import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.Trigger;
 import com.nuodb.migrator.cli.parse.option.Property;
 import com.nuodb.migrator.cli.parse.option.TriggerImpl;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
@@ -75,7 +81,14 @@ public class CommandLineImpl extends OptionSetImpl implements CommandLine {
 
     @Override
     public boolean hasOption(Option option) {
-        return options.contains(option);
+        boolean contains = options.contains(option);
+        if (!contains && option instanceof Group) {
+            for (Iterator<Option> iterator = ((Group) option).getOptions().iterator();
+                 !contains && iterator.hasNext();) {
+                contains = hasOption(iterator.next());
+            }
+        }
+        return contains;
     }
 
     @Override

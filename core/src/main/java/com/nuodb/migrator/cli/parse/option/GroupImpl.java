@@ -38,6 +38,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.cli.parse.HelpHint.*;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.groupMaximum;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.groupMinimum;
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 
 /**
  * An implementation of the group of options.
@@ -52,7 +53,7 @@ public class GroupImpl extends OptionBase implements Group {
     private List<Option> options = newArrayList();
     private Set<String> prefixes = newHashSet();
     private List<Argument> arguments = newArrayList();
-    private PrioritySet<Trigger> triggers = com.nuodb.migrator.utils.Collections.newPrioritySet();
+    private PrioritySet<Trigger> triggers = newPrioritySet();
 
     public GroupImpl() {
     }
@@ -105,6 +106,11 @@ public class GroupImpl extends OptionBase implements Group {
         for (Option option : options) {
             addOption(option);
         }
+    }
+
+    @Override
+    public Collection<Option> getOptions() {
+        return options;
     }
 
     @Override
