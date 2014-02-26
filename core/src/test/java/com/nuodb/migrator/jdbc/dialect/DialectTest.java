@@ -27,7 +27,10 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -37,7 +40,9 @@ import java.sql.Types;
 
 import static com.nuodb.migrator.jdbc.dialect.TranslatorUtils.createScript;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
+import static java.sql.Types.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -61,22 +66,22 @@ public class DialectTest {
                 "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=round");
         return new Object[][]{
                 {createScript("00:00:00", Types.TIME, "TIME", convertToNull), "NULL"},
-                {createScript("0000-00-00", Types.DATE, "DATE", convertToNull), "NULL"},
+                {createScript("0000-00-00", DATE, "DATE", convertToNull), "NULL"},
                 {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE", convertToNull), "NULL"},
                 {createScript("00:00:00", Types.TIME, "TIME", round), "00:00:00"},
-                {createScript("0000-00-00", Types.DATE, "DATE", round), "0001-01-01"},
+                {createScript("0000-00-00", DATE, "DATE", round), "0001-01-01"},
                 {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE", round), "0001-01-01 00:00:00"},
         };
     }
 
     @DataProvider(name = "zeroDateTimeBehaviorException")
     public Object[][] createZeroDateTimeBehaviorExceptionData() throws SQLException {
-        Session exception = createSession(new MySQLDialect(MYSQL),
+        Session session = createSession(new MySQLDialect(MYSQL),
                 "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=exception");
         return new Object[][]{
-                {createScript("00:00:00", Types.TIME, "TIME", exception)},
-                {createScript("0000-00-00", Types.DATE, "DATE", exception)},
-                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE", exception)}
+                {createScript("00:00:00", Types.TIME, "TIME", session)},
+                {createScript("0000-00-00", DATE, "DATE", session)},
+                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE", session)}
         };
     }
 
@@ -103,5 +108,30 @@ public class DialectTest {
     @Test(dataProvider = "getCheckClause")
     public void testGetCheckClause(String sourceCheckClause, String checkClause) {
         assertEquals(dialect.getCheckClause(sourceCheckClause), checkClause);
+    }
+
+    @DataProvider(name = "getDefaultValue")
+    public Object[][] createGetDefaultValueData() throws SQLException {
+        Session session = createSession(new MySQLDialect(MYSQL),
+                "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=convertToNull");
+        Column date = new Column();
+        date.setJdbcType(new JdbcType(new JdbcTypeDesc(DATE, "date")));
+        date.setDefaultValue(valueOf("0000-00-00"));
+        Column time = new Column();
+        time.setJdbcType(new JdbcType(new JdbcTypeDesc(TIME, "time")));
+        time.setDefaultValue(valueOf("00:00:00"));
+        Column timestamp = new Column();
+        timestamp.setJdbcType(new JdbcType(new JdbcTypeDesc(TIMESTAMP, "timestamp")));
+        timestamp.setDefaultValue(valueOf("0000-00-00 00:00:00"));
+        return new Object[][]{
+                {session, date, "NULL"},
+                {session, time, "NULL"},
+                {session, timestamp, "NULL"}
+        };
+    }
+
+    @Test(dataProvider = "getDefaultValue")
+    public void testGetDefaultValue(Session session, Column column, String defaultValue) {
+        assertEquals(dialect.getDefaultValue(session, column), defaultValue);
     }
 }
