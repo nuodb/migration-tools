@@ -57,41 +57,41 @@ public class MSSQLServerSequenceInspector extends TableInspectorBase<Table, Tabl
         Collection<Object> parameters = newArrayList();
         SelectQuery selectColumn = new SelectQuery();
         if (isEmpty(tableInspectionScope.getCatalog())) {
-            selectColumn.column("DB_NAME() AS TABLE_CATALOG");
+            selectColumn.column("db_name() as table_catalog");
         } else {
-            selectColumn.column("? AS TABLE_CATALOG");
+            selectColumn.column("? as table_catalog");
             parameters.add(tableInspectionScope.getCatalog());
         }
-        selectColumn.column("SCHEMAS.NAME AS TABLE_SCHEMA");
-        selectColumn.column("TABLES.NAME AS TABLE_NAME");
-        selectColumn.column("COLUMNS.NAME AS COLUMN_NAME");
+        selectColumn.column("schemas.name as table_schema");
+        selectColumn.column("tables.name as table_name");
+        selectColumn.column("columns.name as column_name");
 
         String catalog = isEmpty(tableInspectionScope.getCatalog()) ? "" : (tableInspectionScope.getCatalog() + ".");
-        selectColumn.from(catalog + "SYS.SCHEMAS");
-        selectColumn.innerJoin(catalog + "SYS.TABLES", "SCHEMAS.SCHEMA_ID=TABLES.SCHEMA_ID");
-        selectColumn.innerJoin(catalog + "SYS.COLUMNS", "COLUMNS.OBJECT_ID=TABLES.OBJECT_ID");
+        selectColumn.from(catalog + "sys.schemas");
+        selectColumn.innerJoin(catalog + "sys.tables", "schemas.schema_id=tables.schema_id");
+        selectColumn.innerJoin(catalog + "sys.columns", "columns.object_id=tables.object_id");
 
         if (!isEmpty(tableInspectionScope.getSchema())) {
-            selectColumn.where("SCHEMAS.NAME=?");
+            selectColumn.where("schemas.name=?");
             parameters.add(tableInspectionScope.getSchema());
         }
         if (!isEmpty(tableInspectionScope.getTable())) {
-            selectColumn.where("TABLES.NAME=?");
+            selectColumn.where("tables.name=?");
             parameters.add(tableInspectionScope.getTable());
         }
-        selectColumn.where("IS_IDENTITY=1");
+        selectColumn.where("is_identity=1");
 
         SelectQuery selectTable = new SelectQuery();
-        selectTable.column("C.*");
+        selectTable.column("c.*");
         selectTable.column(
-                "QUOTENAME(TABLE_CATALOG) + '.' + QUOTENAME(TABLE_SCHEMA) + '.' + QUOTENAME(TABLE_NAME) AS TABLE_QUALIFIED_NAME");
+                "quotename(table_catalog) + '.' + quotename(table_schema) + '.' + quotename(table_name) as table_qualified_name");
         selectTable.from("(" + selectColumn + ") C");
 
         SelectQuery selectIdentity = new SelectQuery();
-        selectIdentity.column("C.*");
-        selectIdentity.column("IDENT_SEED(TABLE_QUALIFIED_NAME) AS START_WITH");
-        selectIdentity.column("IDENT_CURRENT(TABLE_QUALIFIED_NAME) AS LAST_VALUE");
-        selectIdentity.column("IDENT_INCR(TABLE_QUALIFIED_NAME) AS INCREMENT_BY");
+        selectIdentity.column("c.*");
+        selectIdentity.column("ident_seed(table_qualified_name) as start_with");
+        selectIdentity.column("ident_current(table_qualified_name) as last_value");
+        selectIdentity.column("ident_incr(table_qualified_name) as increment_by");
         selectIdentity.from("(" + selectTable + ") C");
         return new ParameterizedQuery(selectIdentity, parameters);
     }
@@ -101,14 +101,14 @@ public class MSSQLServerSequenceInspector extends TableInspectorBase<Table, Tabl
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         if (sequences.next()) {
             Table table = addTable(inspectionResults,
-                    sequences.getString("TABLE_CATALOG"),
-                    sequences.getString("TABLE_SCHEMA"),
-                    sequences.getString("TABLE_NAME"));
+                    sequences.getString("table_catalog"),
+                    sequences.getString("table_schema"),
+                    sequences.getString("table_name"));
             Sequence sequence = new Sequence();
-            sequence.setStartWith(sequences.getLong("START_WITH"));
-            sequence.setLastValue(sequences.getLong("LAST_VALUE"));
-            sequence.setIncrementBy(sequences.getLong("INCREMENT_BY"));
-            Column column = table.addColumn(sequences.getString("COLUMN_NAME"));
+            sequence.setStartWith(sequences.getLong("start_with"));
+            sequence.setLastValue(sequences.getLong("last_value"));
+            sequence.setIncrementBy(sequences.getLong("increment_by"));
+            Column column = table.addColumn(sequences.getString("column_name"));
             column.setSequence(sequence);
             column.getTable().getSchema().addSequence(sequence);
             inspectionResults.addObject(sequence);

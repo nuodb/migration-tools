@@ -61,22 +61,22 @@ public class MSSQLServerSchemaInspector extends ManagedInspectorBase<Catalog, Sc
         Collection<Object> parameters = newArrayList();
         SelectQuery query = new SelectQuery();
         if (isEmpty(schemaInspectionScope.getCatalog())) {
-            query.column("DB_NAME() AS TABLE_CATALOG");
+            query.column("db_name() as table_catalog");
         } else {
-            query.column("? AS TABLE_CATALOG");
+            query.column("? as table_catalog");
             parameters.add(schemaInspectionScope.getCatalog());
         }
-        query.column("S.NAME AS TABLE_SCHEMA");
+        query.column("s.name as table_schema");
         String catalog = isEmpty(schemaInspectionScope.getCatalog()) ? EMPTY : schemaInspectionScope.getCatalog() + ".";
-        query.from(catalog + "SYS.SCHEMAS S");
-        query.leftJoin(catalog + "SYS.SYSUSERS U", "U.NAME=S.NAME");
+        query.from(catalog + "sys.schemas s");
+        query.leftJoin(catalog + "sys.sysusers u", "u.name=s.name");
 
-        query.where("(ISSQLROLE=0 OR ISSQLROLE IS NULL)");
+        query.where("(issqlrole=0 or issqlrole is null)");
         if (!isEmpty(schemaInspectionScope.getSchema())) {
-            query.where("S.NAME LIKE ?");
+            query.where("s.name like ?");
             parameters.add(schemaInspectionScope.getSchema());
         }
-        query.orderBy(newArrayList("TABLE_CATALOG", "TABLE_SCHEMA"));
+        query.orderBy(newArrayList("table_catalog", "table_schema"));
         return new ParameterizedQuery(query, parameters);
     }
 
@@ -84,7 +84,7 @@ public class MSSQLServerSchemaInspector extends ManagedInspectorBase<Catalog, Sc
     protected void processResultSet(InspectionContext inspectionContext, ResultSet schemas) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (schemas.next()) {
-            addSchema(inspectionResults, schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEMA"));
+            addSchema(inspectionResults, schemas.getString("table_catalog"), schemas.getString("table_schema"));
         }
     }
 }
