@@ -53,7 +53,6 @@ public class InspectionResultsUtilsTest {
     public void testAddCatalog() {
         InspectionResults inspectionResults = mock(InspectionResults.class);
         Catalog catalog = addCatalog(inspectionResults, "catalog");
-
         verify(inspectionResults).addObject(catalog);
         verify(inspectionResults).addObject(catalog.getDatabase());
     }
@@ -62,7 +61,6 @@ public class InspectionResultsUtilsTest {
     public void testAddSchema() {
         InspectionResults inspectionResults = mock(InspectionResults.class);
         Schema schema = addSchema(inspectionResults, "catalog", "schema");
-
         verify(inspectionResults).addObject(schema);
         verify(inspectionResults).addObject(schema.getCatalog());
         verify(inspectionResults).addObject(schema.getDatabase());
@@ -72,7 +70,6 @@ public class InspectionResultsUtilsTest {
     public void testAddTable() {
         InspectionResults inspectionResults = mock(InspectionResults.class);
         Table table = addTable(inspectionResults, "catalog", "schema", "table");
-
         verify(inspectionResults).addObject(table);
         verify(inspectionResults).addObject(table.getSchema());
         verify(inspectionResults).addObject(table.getCatalog());
