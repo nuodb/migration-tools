@@ -71,13 +71,13 @@ public class MSSQLServerSequenceInspectorTest extends InspectorTestBase {
         long incrementBy = 1L;
 
         given(resultSet.next()).willReturn(true, false);
-        given(resultSet.getString("TABLE_CATALOG")).willReturn(catalogName);
-        given(resultSet.getString("TABLE_SCHEMA")).willReturn(schemaName);
-        given(resultSet.getString("TABLE_NAME")).willReturn(tableName);
-        given(resultSet.getLong("START_WITH")).willReturn(startWith);
-        given(resultSet.getLong("LAST_VALUE")).willReturn(lastValue);
-        given(resultSet.getLong("INCREMENT_BY")).willReturn(incrementBy);
-        given(resultSet.getString("COLUMN_NAME")).willReturn(columnName);
+        given(resultSet.getString("table_catalog")).willReturn(catalogName);
+        given(resultSet.getString("table_schema")).willReturn(schemaName);
+        given(resultSet.getString("table_name")).willReturn(tableName);
+        given(resultSet.getLong("start_with")).willReturn(startWith);
+        given(resultSet.getLong("last_value")).willReturn(lastValue);
+        given(resultSet.getLong("increment_by")).willReturn(incrementBy);
+        given(resultSet.getString("column_name")).willReturn(columnName);
 
         TableInspectionScope inspectionScope = new TableInspectionScope(catalogName, schemaName, tableName);
         InspectionResults inspectionResults = getInspectionManager()
