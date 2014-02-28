@@ -85,14 +85,14 @@ public class MSSQLServerSequenceInspector extends TableInspectorBase<Table, Tabl
         selectTable.column("c.*");
         selectTable.column(
                 "quotename(table_catalog) + '.' + quotename(table_schema) + '.' + quotename(table_name) as table_qualified_name");
-        selectTable.from("(" + selectColumn + ") C");
+        selectTable.from("(" + selectColumn + ") c");
 
         SelectQuery selectIdentity = new SelectQuery();
         selectIdentity.column("c.*");
         selectIdentity.column("ident_seed(table_qualified_name) as start_with");
         selectIdentity.column("ident_current(table_qualified_name) as last_value");
         selectIdentity.column("ident_incr(table_qualified_name) as increment_by");
-        selectIdentity.from("(" + selectTable + ") C");
+        selectIdentity.from("(" + selectTable + ") c");
         return new ParameterizedQuery(selectIdentity, parameters);
     }
 
