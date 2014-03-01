@@ -465,7 +465,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public String getCheckClause(String clause) {
-        return "(" + quoteScript(clause) + ")";
+        return clause != null ? "(" + quoteScript(clause) + ")" : null;
     }
 
     @Override

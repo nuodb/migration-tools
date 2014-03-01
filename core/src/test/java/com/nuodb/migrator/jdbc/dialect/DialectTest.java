@@ -102,6 +102,7 @@ public class DialectTest {
                 {null, null},
                 {"F1 > 5", "(F1 > 5)"},
                 {"F1 in (0,1)", "(F1 in (0,1))"},
+                {"(F1 < 1) AND (F2 < 2)", "((F1 < 1) AND (F2 < 2))"},
         };
     }
 
