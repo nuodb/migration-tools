@@ -1,0 +1,14 @@
+set -a 
+NUODB_HOME=/opt/nuodb 
+NUODB_MIGRATOR_HOME=assembly/target/nuodb-migrator 
+SOURCE_JDBCJAR=/var/tmp/mysql-connector-java-5.1.23.jar 
+SOURCE_DRIVER=com.mysql.jdbc.Driver 
+SOURCE_URL=jdbc:mysql://localhost:3306/nuodbtest 
+SOURCE_USERNAME=root 
+NUODB_DRIVER=com.nuodb.jdbc.Driver 
+NUODB_URL=jdbc:com.nuodb://localhost/test 
+NUODB_USERNAME=dba 
+NUODB_PASSWORD=goalie 
+NUODB_SCHEMA=nuodbtest
+
+CLASSPATH=$SOURCE_JDBCJAR
