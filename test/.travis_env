@@ -1,3 +1,4 @@
+#!/bin/bash
 set -a 
 NUODB_HOME=/opt/nuodb 
 NUODB_MIGRATOR_HOME=assembly/target/nuodb-migrator 
@@ -5,10 +6,16 @@ SOURCE_JDBCJAR=/var/tmp/mysql-connector-java-5.1.23.jar
 SOURCE_DRIVER=com.mysql.jdbc.Driver 
 SOURCE_URL=jdbc:mysql://localhost:3306/nuodbtest 
 SOURCE_USERNAME=root 
-NUODB_DRIVER=com.nuodb.jdbc.Driver 
-NUODB_URL=jdbc:com.nuodb://localhost/test 
+NUODB_DRIVER=com.nuodb.jdbc.Driver
+NUODB_DB=test
+NUODB_URL=jdbc:com.nuodb://localhost/$NUODB_DB
 NUODB_USERNAME=dba 
 NUODB_PASSWORD=goalie 
 NUODB_SCHEMA=nuodbtest
 
 CLASSPATH=$SOURCE_JDBCJAR
+
+function nuodrop()
+{
+    echo "drop schema $1 cascade;" | ${NUODB_HOME}/bin/nuosql ${NUODB_DB}@localhost --user ${NUODB_USERNAME} --password ${NUODB_PASSWORD} --schema ${NUODB_SCHEMA}
+}
