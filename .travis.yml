@@ -5,9 +5,6 @@ jdk:
   - openjdk6
   - oraclejdk7
 
-env:
-  - CLASSPATH=/var/tmp/mysql-connector-java-5.1.23.jar NUODB_HOME=/opt/nuodb NUODB_MIGRATOR_HOME=assembly/target/nuodb-migrator SOURCE_JDBCJAR=/var/tmp/mysql-connector-java-5.1.23.jar SOURCE_DRIVER=com.mysql.jdbc.Driver SOURCE_URL=jdbc:mysql://localhost:3306/nuodbtest SOURCE_USERNAME=root SOURCE_PASSWORD= NUODB_DRIVER=com.nuodb.jdbc.Driver NUODB_URL=jdbc:com.nuodb://localhost/test NUODB_USERNAME=dba NUODB_PASSWORD=goalie NUODB_SCHEMA=nuodbtest
-
 notifications:
   recipients:
     - moorthy@asthra.com
@@ -15,24 +12,13 @@ notifications:
     - plothridge@nuodb.com
 
 before_install:
-  - mysql -u$SOURCE_USERNAME -e 'create database nuodbtest;'
-  - mysql -u$SOURCE_USERNAME nuodbtest < core/src/test/resources/mysql/nuodbtest.sql
-  - mysql -u$SOURCE_USERNAME nuodbtest < core/src/test/resources/mysql/precision.sql
-  - wget -q http://download.nuohub.org/nuodb-2.0.2.linux.x64.deb --output-document=/var/tmp/nuodb.deb
-  - sudo dpkg -i /var/tmp/nuodb.deb
-  - sleep 2
-  - ${NUODB_HOME}/bin/nuodb --chorus test --password bar --dba-user ${NUODB_USERNAME} --dba-password ${NUODB_PASSWORD} --verbose debug --archive /var/tmp/nuodb --initialize --force &
-  - sleep 2
-  - ${NUODB_HOME}/bin/nuodb --chorus test --password bar --dba-user ${NUODB_USERNAME} --dba-password ${NUODB_PASSWORD} &
-  - sleep 2
-  - wget -q http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.23/mysql-connector-java-5.1.23.jar --output-document=${SOURCE_JDBCJAR}
+  - ./test/mysql_setup.sh
+  - ./test/nuodb_setup.sh
 
 install: mvn -U clean install
 
 script:
-  - ${NUODB_MIGRATOR_HOME}/bin/nuodb-migrator dump --time.zone=EST --source.driver=${SOURCE_DRIVER} --source.url=${SOURCE_URL}  --source.catalog=nuodbtest --source.username=${SOURCE_USERNAME} --output.type=bson --output.path=/var/tmp/dump.cat
-  - ${NUODB_MIGRATOR_HOME}/bin/nuodb-migrator load --time.zone=EST --target.url=${NUODB_URL} --target.username=${NUODB_USERNAME} --target.password=${NUODB_PASSWORD} --input.path=/var/tmp/dump.cat
-  - mvn -Pmysql-integration-tests test
+  - ./test/mysql_basic.sh
 
 after_script:
   - mysql -u$SOURCE_USERNAME -e 'drop database nuodbtest;'
