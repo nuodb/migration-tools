@@ -27,7 +27,7 @@ before_install:
   - sleep 2
   - wget -q http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.23/mysql-connector-java-5.1.23.jar --output-document=${SOURCE_JDBCJAR}
 
-install: mvn clean install
+install: mvn -U clean install
 
 script:
   - ${NUODB_MIGRATOR_HOME}/bin/nuodb-migrator dump --time.zone=EST --source.driver=${SOURCE_DRIVER} --source.url=${SOURCE_URL}  --source.catalog=nuodbtest --source.username=${SOURCE_USERNAME} --output.type=bson --output.path=/var/tmp/dump.cat
