@@ -31,7 +31,7 @@ import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.Map;
 
 import static java.lang.Long.parseLong;
@@ -50,9 +50,20 @@ public class BatchCommitStrategy implements CommitStrategy {
     private long batchSize = BATCH_SIZE;
 
     @Override
-    public void onExecute(Statement statement, Query query) throws SQLException {
+    public void onExecute(PreparedStatement statement, Query query) throws SQLException {
         statements++;
+        statement.addBatch();
         if (statements > getBatchSize()) {
+            statement.executeBatch();
+            statement.getConnection().commit();
+            statements = 0;
+        }
+    }
+
+    @Override
+    public void finish(PreparedStatement statement, Query query) throws SQLException {
+        if (statements > 0) {
+            statement.executeBatch();
             statement.getConnection().commit();
             statements = 0;
         }
