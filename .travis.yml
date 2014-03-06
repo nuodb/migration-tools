@@ -21,5 +21,3 @@ script:
   - ./test/mysql_basic.sh
   - ./test/batch_test.sh
 
-after_script:
-  - mysql -u$SOURCE_USERNAME -e 'drop database nuodbtest;'
