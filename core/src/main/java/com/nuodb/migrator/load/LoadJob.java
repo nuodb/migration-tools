@@ -253,17 +253,15 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
             }
             inputFormat.readStart();
             long row = 0;
-            while (inputFormat.read()) {
-                try {
-                    statement.execute();
-                    if (commitStrategy != null) {
-                        commitStrategy.onExecute(statement, query);
-                    }
-                } catch (Exception exception) {
-                    throw new LoadException(format("Error loading row %d from %s chunk to %s table",
-                            row + 1, chunk.getName(), table.getQualifiedName(null)), exception);
+            try {
+                while (inputFormat.read()) {
+                    commitStrategy.onExecute(statement, query);
+                    row++;
                 }
-                row++;
+                commitStrategy.finish(statement, query);
+            } catch (Exception exception) {
+                throw new LoadException(format("Error loading row %d from %s chunk to %s table",
+                              row + 1, chunk.getName(), table.getQualifiedName(null)), exception);
             }
             inputFormat.readEnd();
             inputFormat.close();
