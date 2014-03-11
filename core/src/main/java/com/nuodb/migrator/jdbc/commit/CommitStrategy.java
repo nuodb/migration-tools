@@ -38,8 +38,9 @@ import java.util.Map;
  */
 public interface CommitStrategy {
 
-    void setAttributes(Map<String, Object> attributes);
+  void setAttributes(Map<String, Object> attributes);
 
-    void onExecute(PreparedStatement statement, Query query) throws SQLException;
-    void finish(PreparedStatement statement, Query query) throws SQLException;
+  void execute(PreparedStatement statement, Query query) throws SQLException;
+
+  void finish(PreparedStatement statement, Query query) throws SQLException;
 }

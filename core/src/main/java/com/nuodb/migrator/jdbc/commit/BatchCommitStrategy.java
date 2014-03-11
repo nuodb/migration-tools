@@ -46,27 +46,29 @@ public class BatchCommitStrategy implements CommitStrategy {
 
     public static final long BATCH_SIZE = 1000;
 
-    private transient long statements;
+    private transient long batches;
     private long batchSize = BATCH_SIZE;
 
     @Override
-    public void onExecute(PreparedStatement statement, Query query) throws SQLException {
-        statements++;
+    public void execute(PreparedStatement statement, Query query) throws SQLException {
         statement.addBatch();
-        if (statements > getBatchSize()) {
-            statement.executeBatch();
-            statement.getConnection().commit();
-            statements = 0;
+        batches++;
+        if (batches > getBatchSize()) {
+            executeBatch(statement);
         }
     }
 
     @Override
     public void finish(PreparedStatement statement, Query query) throws SQLException {
-        if (statements > 0) {
-            statement.executeBatch();
-            statement.getConnection().commit();
-            statements = 0;
+        if (batches > 0) {
+            executeBatch(statement);
         }
+    }
+
+    private void executeBatch(PreparedStatement statement) throws SQLException {
+        statement.executeBatch();
+        statement.getConnection().commit();
+        batches = 0;
     }
 
     @Override

@@ -255,7 +255,7 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
             long row = 0;
             try {
                 while (inputFormat.read()) {
-                    commitStrategy.onExecute(statement, query);
+                    commitStrategy.execute(statement, query);
                     row++;
                 }
                 commitStrategy.finish(statement, query);
