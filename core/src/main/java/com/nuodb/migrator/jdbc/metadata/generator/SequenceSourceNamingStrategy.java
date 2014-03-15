@@ -27,43 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.jdbc.metadata.Trigger;
-
-import static com.google.common.collect.Iterables.indexOf;
-import static com.nuodb.migrator.utils.Predicates.equalTo;
-import static com.nuodb.migrator.utils.StringUtils.*;
-import static com.nuodb.migrator.utils.StringUtils.upperCase;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 
 /**
  * @author Sergey Bushik
  */
-public class TriggerNamingStrategy extends IdentifiableNamingStrategy<Trigger> {
+public class SequenceSourceNamingStrategy extends SourceNamingStrategy<Sequence> {
 
-    private static final String PREFIX = "TRG";
-    private static final char DELIMITER = '_';
-
-    public TriggerNamingStrategy() {
-        super(Trigger.class);
-    }
-
-    @Override
-    protected String getIdentifiableName(Trigger trigger, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder qualifier = new StringBuilder();
-        qualifier.append(scriptGeneratorManager.getName(trigger.getTable(), false));
-        qualifier.append('_');
-        int index = indexOf(trigger.getTable().getTriggers(), equalTo(trigger));
-        qualifier.append(index);
-
-        StringBuilder buffer = new StringBuilder();
-        if (isLowerCase(qualifier)) {
-            buffer.append(lowerCase(PREFIX));
-        } else if (isCapitalizedCase(qualifier, DELIMITER)) {
-            buffer.append(capitalizedCase(PREFIX));
-        } else {
-            buffer.append(upperCase(PREFIX));
-        }
-        buffer.append('_');
-        buffer.append(qualifier);
-        return buffer.toString();
+    public SequenceSourceNamingStrategy() {
+        super(Sequence.class);
     }
 }

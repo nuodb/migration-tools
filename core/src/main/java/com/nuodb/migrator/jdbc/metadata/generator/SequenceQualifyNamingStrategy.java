@@ -28,48 +28,45 @@
 package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.ForeignKey;
+import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.Sequence;
 
-import static com.nuodb.migrator.utils.StringUtils.*;
-import static com.nuodb.migrator.utils.StringUtils.upperCase;
+import java.util.Collection;
+
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.indexOf;
+import static com.nuodb.migrator.utils.Predicates.equalTo;
 
 /**
  * @author Sergey Bushik
  */
-public class ForeignKeyNamingStrategy extends IdentifiableNamingStrategy<ForeignKey> {
+public class SequenceQualifyNamingStrategy extends IdentifiableNamingStrategy<Sequence> {
 
-    private static final String PREFIX = "FK";
-    private static final char DELIMITER = '_';
+    public static final String PREFIX = "SEQ";
 
-    public ForeignKeyNamingStrategy() {
-        super(ForeignKey.class);
+    public SequenceQualifyNamingStrategy() {
+        super(Sequence.class, PREFIX);
     }
 
     @Override
-    protected String getIdentifiableName(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder qualifier = new StringBuilder();
-        qualifier.append(scriptGeneratorManager.getQualifiedName(foreignKey.getPrimaryTable(), false));
-        for (Column column : foreignKey.getPrimaryColumns()) {
-            qualifier.append("_");
-            qualifier.append(scriptGeneratorManager.getName(column, false));
-        }
-        qualifier.append("_");
-        qualifier.append(scriptGeneratorManager.getQualifiedName(foreignKey.getForeignTable(), false));
-        for (Column column : foreignKey.getPrimaryColumns()) {
-            qualifier.append("_");
-            qualifier.append(scriptGeneratorManager.getName(column, false));
-        }
-
-        StringBuilder buffer = new StringBuilder();
-        if (isLowerCase(qualifier)) {
-            buffer.append(lowerCase(PREFIX));
-        } else if (isCapitalizedCase(qualifier, DELIMITER)) {
-            buffer.append(capitalizedCase(PREFIX));
+    protected String getNonPrefixedName(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
+        StringBuilder nonPrefixedName = new StringBuilder();
+        Collection<Column> columns = sequence.getColumns();
+        if (columns.size() == 1) {
+            Column column = get(columns, 0);
+            nonPrefixedName.append(scriptGeneratorManager.getName(column.getTable(), false));
+            nonPrefixedName.append(getDelimiter());
+            nonPrefixedName.append(scriptGeneratorManager.getName(column, false));
         } else {
-            buffer.append(upperCase(PREFIX));
+            Schema schema = sequence.getSchema();
+            if (scriptGeneratorManager.getName(schema, false) != null) {
+                nonPrefixedName.append(scriptGeneratorManager.getName(schema, false));
+            } else {
+                nonPrefixedName.append(scriptGeneratorManager.getName(schema.getCatalog(), false));
+            }
+            nonPrefixedName.append(getDelimiter());
+            nonPrefixedName.append(indexOf(schema.getSequences(), equalTo(sequence)));
         }
-        buffer.append('_');
-        buffer.append(qualifier);
-        return buffer.toString();
+        return nonPrefixedName.toString();
     }
 }

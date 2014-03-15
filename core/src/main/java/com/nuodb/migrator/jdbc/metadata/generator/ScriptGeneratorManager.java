@@ -74,11 +74,11 @@ public class ScriptGeneratorManager {
         addScriptGenerator(new ForeignKeyScriptGenerator());
         addScriptGenerator(new TriggerScriptGenerator());
 
-        addNamingStrategy(new IndexNamingStrategy());
-        addNamingStrategy(new SequenceNamingStrategy());
-        addNamingStrategy(new ForeignKeyNamingStrategy());
+        addNamingStrategy(new IndexAutoNamingStrategy());
+        addNamingStrategy(new SequenceAutoNamingStrategy());
+        addNamingStrategy(new ForeignKeyAutoNamingStrategy());
+        addNamingStrategy(new TriggerAutoNamingStrategy());
         addNamingStrategy(new IdentifiableNamingStrategy(), Priority.LOW);
-        addNamingStrategy(new TriggerNamingStrategy());
     }
 
     public ScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager) {

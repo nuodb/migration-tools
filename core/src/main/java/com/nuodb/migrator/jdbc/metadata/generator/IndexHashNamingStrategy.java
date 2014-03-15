@@ -27,49 +27,16 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Index;
 
-import static com.nuodb.migrator.utils.StringUtils.*;
-import static com.nuodb.migrator.utils.StringUtils.upperCase;
+import static java.lang.Integer.toHexString;
 
 /**
  * @author Sergey Bushik
  */
-public class IndexNamingStrategy extends IdentifiableNamingStrategy<Index> {
-
-    private static final String PREFIX = "IDX";
-    private static final String UNIQUE = "UNIQUE";
-    private static final char DELIMITER = '_';
-
-    public IndexNamingStrategy() {
-        super(Index.class);
-    }
-
+public class IndexHashNamingStrategy extends IndexQualifyNamingStrategy {
     @Override
-    protected String getIdentifiableName(Index index, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder prefix = new StringBuilder();
-        prefix.append(PREFIX);
-        if (index.isUnique()) {
-            prefix.append("_");
-            prefix.append(UNIQUE);
-        }
-        StringBuilder qualifier = new StringBuilder();
-        qualifier.append(scriptGeneratorManager.getName(index.getTable(), false));
-        for (Column column : index.getColumns()) {
-            qualifier.append("_");
-            qualifier.append(scriptGeneratorManager.getName(column, false));
-        }
-        StringBuilder buffer = new StringBuilder();
-        if (isLowerCase(qualifier)) {
-            buffer.append(lowerCase(prefix));
-        } else if (isCapitalizedCase(qualifier, DELIMITER)) {
-            buffer.append(capitalizedCase(prefix, '_'));
-        } else {
-            buffer.append(upperCase(prefix));
-        }
-        buffer.append('_');
-        buffer.append(qualifier);
-        return buffer.toString();
+    protected String getNonPrefixedName(Index index, ScriptGeneratorManager scriptGeneratorManager) {
+        return toHexString(super.getNonPrefixedName(index, scriptGeneratorManager).hashCode());
     }
 }
