@@ -28,55 +28,76 @@
 package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
+
 /**
- * Picks the first name which is smaller than specified length limit.
- *
  * @author Sergey Bushik
  */
-public class LengthLimitNamingStrategy<M extends MetaData> extends CompositeNamingStrategy<M> {
+public class CompositeNamingStrategy<M extends MetaData> extends MetaDataHandlerBase implements NamingStrategy<M> {
 
-    private Integer lengthLimit;
+    private Collection<NamingStrategy<M>> namingStrategies = newArrayList();
 
-    public LengthLimitNamingStrategy(MetaDataType objectType, Integer lengthLimit) {
-        super(objectType);
-        this.lengthLimit = lengthLimit;
+    public CompositeNamingStrategy(Class<? extends MetaData> objectClass) {
+        super(objectClass);
     }
 
-    public LengthLimitNamingStrategy(Class<? extends MetaData> objectClass, Integer lengthLimit) {
-        super(objectClass);
-        this.lengthLimit = lengthLimit;
+    public CompositeNamingStrategy(MetaDataType objectType) {
+        super(objectType);
     }
 
     @Override
+    public String getName(M object, ScriptGeneratorManager scriptGeneratorManager, boolean normalize) {
+        for (NamingStrategy<M> namingStrategy : namingStrategies) {
+            String name = getName(namingStrategy, object, scriptGeneratorManager, normalize);
+            if (name != null) {
+                return name;
+            }
+        }
+        return null;
+    }
+
     protected String getName(NamingStrategy<M> namingStrategy, M object,
                              ScriptGeneratorManager scriptGeneratorManager, boolean normalize) {
-        String name = namingStrategy.getName(object, scriptGeneratorManager, normalize);
-        if (name != null && (lengthLimit == null || name.length() < lengthLimit)) {
-            return name;
-        } else {
-            return null;
-        }
+        return namingStrategy.getName(object, scriptGeneratorManager, normalize);
     }
 
     @Override
+    public String getQualifiedName(M object, ScriptGeneratorManager scriptGeneratorManager, String catalog,
+                                   String schema, boolean normalize) {
+        for (NamingStrategy<M> namingStrategy : namingStrategies) {
+            String qualifiedName = getQualifiedName(namingStrategy, object, scriptGeneratorManager, catalog, schema,
+                    normalize);
+            if (qualifiedName != null) {
+                return qualifiedName;
+            }
+        }
+        return null;
+    }
+
     protected String getQualifiedName(NamingStrategy<M> namingStrategy, M object,
                                       ScriptGeneratorManager scriptGeneratorManager,
                                       String catalog, String schema, boolean normalize) {
-        String name = namingStrategy.getName(object, scriptGeneratorManager, normalize);
-        if (name != null && (lengthLimit == null || name.length() < lengthLimit)) {
-            return namingStrategy.getQualifiedName(object, scriptGeneratorManager, catalog, schema, normalize);
-        } else {
-            return null;
-        }
+        return namingStrategy.getQualifiedName(object, scriptGeneratorManager, catalog, schema, normalize);
     }
 
-    public Integer getLengthLimit() {
-        return lengthLimit;
+    public void addNamingStrategy(NamingStrategy<M> namingStrategy) {
+        namingStrategies.add(namingStrategy);
     }
 
-    public void setLengthLimit(Integer lengthLimit) {
-        this.lengthLimit = lengthLimit;
+    public void removeNamingStrategy(NamingStrategy<M> namingStrategy) {
+        namingStrategies.remove(namingStrategy);
+    }
+
+    public Collection<NamingStrategy<M>> getNamingStrategies() {
+        return namingStrategies;
+    }
+
+    public void setNamingStrategies(Collection<NamingStrategy<M>> namingStrategies) {
+        this.namingStrategies = namingStrategies;
     }
 }

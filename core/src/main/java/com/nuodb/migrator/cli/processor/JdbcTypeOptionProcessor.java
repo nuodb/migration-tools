@@ -72,11 +72,11 @@ public class JdbcTypeOptionProcessor extends ValuesOptionProcessor {
     }
 
     private void pad(CommandLine commandLine) {
-        pad(commandLine, JDBC_TYPE_NAME_OPTION, count);
-        pad(commandLine, JDBC_TYPE_CODE_OPTION, count);
-        pad(commandLine, JDBC_TYPE_SIZE_OPTION, count);
-        pad(commandLine, JDBC_TYPE_PRECISION_OPTION, count);
-        pad(commandLine, JDBC_TYPE_SCALE_OPTION, count);
+        pad(commandLine, JDBC_TYPE_NAME, count);
+        pad(commandLine, JDBC_TYPE_CODE, count);
+        pad(commandLine, JDBC_TYPE_SIZE, count);
+        pad(commandLine, JDBC_TYPE_PRECISION, count);
+        pad(commandLine, JDBC_TYPE_SCALE, count);
     }
 
     private void pad(CommandLine commandLine, String option, int count) {

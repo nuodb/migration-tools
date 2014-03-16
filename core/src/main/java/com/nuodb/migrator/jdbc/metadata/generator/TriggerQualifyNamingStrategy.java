@@ -37,7 +37,7 @@ import static com.nuodb.migrator.utils.Predicates.equalTo;
  */
 public class TriggerQualifyNamingStrategy extends IdentifiableNamingStrategy<Trigger> {
 
-    public static final String PREFIX = "TRG";
+    private static final String PREFIX = "TRG";
 
     public TriggerQualifyNamingStrategy() {
         super(Trigger.class, PREFIX);

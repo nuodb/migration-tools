@@ -34,6 +34,9 @@ import com.nuodb.migrator.jdbc.metadata.Identifiable;
  */
 public class SourceNamingStrategy<I extends Identifiable> extends IdentifiableNamingStrategy<I> {
 
+    public SourceNamingStrategy() {
+    }
+
     public SourceNamingStrategy(Class<? extends I> typeClass) {
         super(typeClass);
     }

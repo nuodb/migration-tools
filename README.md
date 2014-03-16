@@ -102,6 +102,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--meta.data.*=[true | false]]                              Includes or excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check, sequence, column.trigger) from processing, by default all objects are included
             [--script.type=drop [create]]                               Comma separated types of statements to be generated, default is drop & create
             [--group.scripts.by=[table | meta.data]]                    Group generated DDL scripts, table by default
+            [--naming.strategy=[naming strategy]]                       Naming strategy to use, either qualify, hash, auto or class name implementing com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy, default is auto
             [--identifier.quoting=[identifier quoting]]                 Identifier quoting policy name, minimal, always or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierQuoting, default is always
             [--identifier.normalizer=[identifier normalizer]]           Identifier transformer to use, available normalizers are noop, standard, lower.case, upper.case or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer, default is noop
 
@@ -138,6 +139,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
         [--meta.data.*=[true | false]]                                  Includes or excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check, sequence, column.trigger) from processing, by default all objects are included
         [--script.type=drop [create]]                                   Comma separated types of statements to be generated, default is drop & create
         [--group.scripts.by=[table | meta.data]]                        Group generated DDL scripts, table by default
+        [--naming.strategy=[naming strategy]]                           Naming strategy to use, either qualify, hash, auto or class name implementing com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy, default is auto
         [--identifier.quoting=[identifier quoting]]                     Identifier quoting policy name, minimal, always or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierQuoting, default is always
         [--identifier.normalizer=[identifier normalizer]]               Identifier transformer to use, available normalizers are noop, standard, lower.case, upper.case or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer, default is noop
 

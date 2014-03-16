@@ -46,7 +46,7 @@ import static com.nuodb.migrator.utils.Priority.LOW;
 public class CliLoadJob extends CliJob<LoadJobSpec> {
 
     public CliLoadJob() {
-        super(LOAD_COMMAND);
+        super(LOAD);
     }
 
     @Override
@@ -88,21 +88,21 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         GroupBuilder group = newGroupBuilder().withName(getMessage(INSERT_TYPE_GROUP_NAME));
 
         Option replace = newBasicOptionBuilder().
-                withName(REPLACE_OPTION).
-                withAlias(REPLACE_SHORT_OPTION, OptionFormat.SHORT).
+                withName(REPLACE).
+                withAlias(REPLACE_SHORT, OptionFormat.SHORT).
                 withDescription(getMessage(REPLACE_OPTION_DESCRIPTION)).build();
         group.withOption(replace);
 
         Option replaceType = newRegexOptionBuilder().
-                withName(TABLE_REPLACE_OPTION).
+                withName(TABLE_REPLACE).
                 withDescription(getMessage(TABLE_REPLACE_OPTION_DESCRIPTION)).
-                withRegex(TABLE_REPLACE_OPTION, 1, LOW).build();
+                withRegex(TABLE_REPLACE, 1, LOW).build();
         group.withOption(replaceType);
 
         Option insertType = newRegexOptionBuilder().
-                withName(TABLE_INSERT_OPTION).
+                withName(TABLE_INSERT).
                 withDescription(getMessage(TABLE_INSERT_OPTION_DESCRIPTION)).
-                withRegex(TABLE_INSERT_OPTION, 1, LOW).build();
+                withRegex(TABLE_INSERT, 1, LOW).build();
         group.withOption(insertType);
 
         return group.build();
@@ -115,12 +115,12 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
     }
 
     protected void parseInsertTypeGroup(OptionSet optionSet, LoadJobSpec loadJobSpec) {
-        loadJobSpec.setInsertType(optionSet.hasOption(REPLACE_OPTION) ? InsertType.REPLACE : InsertType.INSERT);
+        loadJobSpec.setInsertType(optionSet.hasOption(REPLACE) ? InsertType.REPLACE : InsertType.INSERT);
         Map<String, InsertType> tableInsertTypes = Maps.newHashMap();
-        for (String table : optionSet.<String>getValues(TABLE_INSERT_OPTION)) {
+        for (String table : optionSet.<String>getValues(TABLE_INSERT)) {
             tableInsertTypes.put(table, InsertType.INSERT);
         }
-        for (String table : optionSet.<String>getValues(TABLE_REPLACE_OPTION)) {
+        for (String table : optionSet.<String>getValues(TABLE_REPLACE)) {
             tableInsertTypes.put(table, InsertType.REPLACE);
         }
         loadJobSpec.setTableInsertTypes(tableInsertTypes);

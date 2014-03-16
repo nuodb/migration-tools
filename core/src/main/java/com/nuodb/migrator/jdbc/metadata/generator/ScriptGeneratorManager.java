@@ -31,8 +31,6 @@ import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.session.Session;
-import com.nuodb.migrator.utils.Collections;
-import com.nuodb.migrator.utils.Priority;
 import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.Collection;
@@ -40,9 +38,12 @@ import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataHandlerUtils.findMetaDataHandler;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataHandlerUtils.getHandler;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TYPES;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.CREATE;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.DROP;
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
+import static com.nuodb.migrator.utils.Priority.LOW;
 
 /**
  * @author Sergey Bushik
@@ -58,14 +59,14 @@ public class ScriptGeneratorManager {
     private Dialect targetDialect;
 
     private Map<String, Object> attributes = newHashMap();
-    private PrioritySet<NamingStrategy<? extends MetaData>> namingStrategies = Collections.newPrioritySet();
-    private PrioritySet<ScriptGenerator<? extends MetaData>> scriptGenerators = Collections.newPrioritySet();
+    private PrioritySet<NamingStrategy<? extends MetaData>> namingStrategies = newPrioritySet();
+    private PrioritySet<ScriptGenerator<? extends MetaData>> scriptGenerators = newPrioritySet();
 
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
-    private Collection<MetaDataType> objectTypes = newHashSet(MetaDataType.TYPES);
+    private Collection<MetaDataType> objectTypes = newHashSet(TYPES);
 
     public ScriptGeneratorManager() {
-        addScriptGenerator(new HasTablesScriptGenerator(), Priority.LOW);
+        addScriptGenerator(new HasTablesScriptGenerator(), LOW);
         addScriptGenerator(new HasSchemasScriptGenerator());
         addScriptGenerator(new TableScriptGenerator());
         addScriptGenerator(new SequenceScriptGenerator());
@@ -78,7 +79,7 @@ public class ScriptGeneratorManager {
         addNamingStrategy(new SequenceAutoNamingStrategy());
         addNamingStrategy(new ForeignKeyAutoNamingStrategy());
         addNamingStrategy(new TriggerAutoNamingStrategy());
-        addNamingStrategy(new IdentifiableNamingStrategy(), Priority.LOW);
+        addNamingStrategy(new SourceNamingStrategy(), LOW);
     }
 
     public ScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager) {
@@ -127,11 +128,11 @@ public class ScriptGeneratorManager {
     }
 
     public NamingStrategy getNamingStrategy(MetaData object) {
-        return (NamingStrategy) findMetaDataHandler(namingStrategies, object);
+        return (NamingStrategy) getHandler(namingStrategies, object);
     }
 
     public NamingStrategy getNamingStrategy(MetaDataType objectType) {
-        return (NamingStrategy) findMetaDataHandler(namingStrategies, objectType);
+        return (NamingStrategy) getHandler(namingStrategies, objectType);
     }
 
     public void addScriptGenerator(ScriptGenerator<? extends MetaData> scriptGenerator) {
@@ -143,7 +144,7 @@ public class ScriptGeneratorManager {
     }
 
     public ScriptGenerator getScriptGenerator(MetaData object) {
-        return (ScriptGenerator) findMetaDataHandler(scriptGenerators, object);
+        return (ScriptGenerator) getHandler(scriptGenerators, object);
     }
 
     public Collection<String> getScripts(MetaData object) {

@@ -37,7 +37,7 @@ import com.nuodb.migrator.jdbc.metadata.ForeignKey;
  */
 public class ForeignKeyQualifyNamingStrategy extends IdentifiableNamingStrategy<ForeignKey> {
 
-    public static final String PREFIX = "FK";
+    private static final String PREFIX = "FK";
 
     public ForeignKeyQualifyNamingStrategy() {
         super(ForeignKey.class, PREFIX);

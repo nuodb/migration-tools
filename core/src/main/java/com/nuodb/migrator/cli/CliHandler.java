@@ -94,9 +94,9 @@ public class CliHandler extends CliSupport implements Bootable {
             logger.debug("Creating options to bind command line arguments to");
         }
         Option help = newBasicOptionBuilder().
-                withId(HELP_OPTION_ID).
-                withName(HELP_OPTION).
-                withAlias(HELP_SHORT_OPTION, OptionFormat.SHORT).
+                withId(HELP_ID).
+                withName(HELP).
+                withAlias(HELP_SHORT, OptionFormat.SHORT).
                 withDescription(getMessage(HELP_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -104,25 +104,25 @@ public class CliHandler extends CliSupport implements Bootable {
                 ).build();
 
         Option version = newBasicOptionBuilder().
-                withId(VERSION_OPTION_ID).
-                withName(VERSION_OPTION).
-                withAlias(VERSION_SHORT_OPTION, OptionFormat.SHORT).
+                withId(VERSION_ID).
+                withName(VERSION).
+                withAlias(VERSION_SHORT, OptionFormat.SHORT).
                 withDescription(getMessage(VERSION_OPTION_DESCRIPTION)).build();
 
 
         Option list = newBasicOptionBuilder().
-                withId(LIST_OPTION_ID).
-                withName(LIST_OPTION).
-                withAlias(LIST_SHORT_OPTION, OptionFormat.SHORT).
+                withId(LIST_ID).
+                withName(LIST).
+                withAlias(LIST_SHORT, OptionFormat.SHORT).
                 withDescription(getMessage(LIST_OPTION_DESCRIPTION)).build();
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
         Option config = newBasicOptionBuilder().
-                withId(CONFIG_OPTION_ID).
-                withName(CONFIG_OPTION).
-                withAlias(CONFIG_SHORT_OPTION, OptionFormat.SHORT).
+                withId(CONFIG_ID).
+                withName(CONFIG).
+                withAlias(CONFIG_SHORT, OptionFormat.SHORT).
                 withDescription(getMessage(CONFIG_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -134,8 +134,8 @@ public class CliHandler extends CliSupport implements Bootable {
                 ).build();
 
         Command command = new CliRunCommand(cliRunLookup);
-        command.setId(COMMAND_OPTION_ID);
-        command.setName(COMMAND_OPTION);
+        command.setId(COMMAND_ID);
+        command.setName(COMMAND);
         command.setDescription(getMessage(COMMAND_OPTION_DESCRIPTION));
         command.setHelpValues(newArrayList(split(getMessage(COMMAND_OPTION_HELP_VALUES))));
         command.setRequired(false);
@@ -154,24 +154,24 @@ public class CliHandler extends CliSupport implements Bootable {
     protected void handleOptionSet(OptionSet options, Option root) {
         if (options.getOptions().isEmpty()) {
             handleHelp(options, root);
-        } else if (options.hasOption(HELP_OPTION)) {
+        } else if (options.hasOption(HELP)) {
             if (logger.isTraceEnabled()) {
                 logger.trace("Handling help option");
             }
             handleHelp(options, root);
-        } else if (options.hasOption(VERSION_OPTION)) {
+        } else if (options.hasOption(VERSION)) {
             handleVersion();
-        } else if (options.hasOption(COMMAND_OPTION)) {
+        } else if (options.hasOption(COMMAND)) {
             handleCommand(options);
-        } else if (options.hasOption(CONFIG_OPTION)) {
+        } else if (options.hasOption(CONFIG)) {
             handleConfig(options);
-        } else if (options.hasOption(LIST_OPTION)) {
+        } else if (options.hasOption(LIST)) {
             handleList();
         }
     }
 
     protected void handleHelp(OptionSet options, Option root) {
-        String command = (String) options.getValue(HELP_OPTION);
+        String command = (String) options.getValue(HELP);
         HelpFormatter formatter = new HelpFormatter();
         if (command != null) {
             CliRun cliRun = cliRunLookup.get(command);
@@ -179,7 +179,7 @@ public class CliHandler extends CliSupport implements Bootable {
                 formatter.setOption(cliRun);
                 formatter.setExecutable(getExecutable() + " " + command);
             } else {
-                throw new OptionException(format("Unknown command %s", command), options.getOption(HELP_OPTION));
+                throw new OptionException(format("Unknown command %s", command), options.getOption(HELP));
             }
         } else {
             formatter.setOption(root);
@@ -210,12 +210,12 @@ public class CliHandler extends CliSupport implements Bootable {
 
     protected void handleConfig(OptionSet options) {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Handling config %s option", options.getValue(CONFIG_OPTION)));
+            logger.trace(format("Handling config %s option", options.getValue(CONFIG)));
         }
     }
 
     protected void handleCommand(OptionSet options) {
-        CliRun cliRun = (CliRun) options.getValue(COMMAND_OPTION);
+        CliRun cliRun = (CliRun) options.getValue(COMMAND);
         if (logger.isTraceEnabled()) {
             logger.trace(format("Running %s command", cliRun.getCommand()));
         }

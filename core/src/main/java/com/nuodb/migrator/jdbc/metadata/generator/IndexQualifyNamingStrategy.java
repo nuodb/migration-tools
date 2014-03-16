@@ -37,8 +37,8 @@ import static com.nuodb.migrator.utils.StringUtils.autoCase;
  */
 public class IndexQualifyNamingStrategy extends IdentifiableNamingStrategy<Index> {
 
-    public static final String PREFIX = "IDX";
-    public static final String UNIQUE = "UNIQUE";
+    private static final String PREFIX = "IDX";
+    private static final String UNIQUE = "UNIQUE";
 
     public IndexQualifyNamingStrategy() {
         super(Index.class, PREFIX);

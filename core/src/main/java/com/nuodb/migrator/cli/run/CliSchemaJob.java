@@ -45,7 +45,7 @@ import static com.nuodb.migrator.context.ContextUtils.getMessage;
 public class CliSchemaJob extends CliJob<SchemaJobSpec> {
 
     public CliSchemaJob() {
-        super(SCHEMA_COMMAND);
+        super(SCHEMA);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
     protected Group createOutputGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(SCHEMA_OUTPUT_GROUP_NAME));
         Option path = newBasicOptionBuilder().
-                withName(OUTPUT_PATH_OPTION).
+                withName(OUTPUT_PATH).
                 withRequired(true).
                 withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
                 withArgument(
@@ -95,9 +95,9 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
     @Override
     protected ResourceSpec parseOutputGroup(OptionSet optionSet, Option option) {
         ResourceSpec resource = null;
-        if (optionSet.hasOption(OUTPUT_PATH_OPTION)) {
+        if (optionSet.hasOption(OUTPUT_PATH)) {
             resource = new ResourceSpec();
-            resource.setPath((String) optionSet.getValue(OUTPUT_PATH_OPTION));
+            resource.setPath((String) optionSet.getValue(OUTPUT_PATH));
         }
         return resource;
     }
@@ -107,7 +107,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
         GroupBuilder group = newGroupBuilder().withName(getMessage(TARGET_GROUP_NAME));
 
         Option url = newBasicOptionBuilder().
-                withName(TARGET_URL_OPTION).
+                withName(TARGET_URL).
                 withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -117,7 +117,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
         group.withOption(url);
 
         Option username = newBasicOptionBuilder().
-                withName(TARGET_USERNAME_OPTION).
+                withName(TARGET_USERNAME).
                 withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -126,7 +126,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
         group.withOption(username);
 
         Option password = newBasicOptionBuilder().
-                withName(TARGET_PASSWORD_OPTION).
+                withName(TARGET_PASSWORD).
                 withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -135,7 +135,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
         group.withOption(password);
 
         Option properties = newBasicOptionBuilder().
-                withName(TARGET_PROPERTIES_OPTION).
+                withName(TARGET_PROPERTIES).
                 withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -144,7 +144,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
         group.withOption(properties);
 
         Option schema = newBasicOptionBuilder().
-                withName(TARGET_SCHEMA_OPTION).
+                withName(TARGET_SCHEMA).
                 withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -153,7 +153,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
         group.withOption(schema);
 
         Option autoCommit = newBasicOptionBuilder().
-                withName(TARGET_AUTO_COMMIT_OPTION).
+                withName(TARGET_AUTO_COMMIT).
                 withDescription(getMessage(TARGET_AUTO_COMMIT_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().

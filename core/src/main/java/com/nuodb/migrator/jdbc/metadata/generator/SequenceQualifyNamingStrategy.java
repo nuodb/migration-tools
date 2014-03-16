@@ -42,7 +42,7 @@ import static com.nuodb.migrator.utils.Predicates.equalTo;
  */
 public class SequenceQualifyNamingStrategy extends IdentifiableNamingStrategy<Sequence> {
 
-    public static final String PREFIX = "SEQ";
+    private static final String PREFIX = "SEQ";
 
     public SequenceQualifyNamingStrategy() {
         super(Sequence.class, PREFIX);
