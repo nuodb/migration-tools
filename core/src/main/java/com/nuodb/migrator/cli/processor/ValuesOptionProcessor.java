@@ -33,13 +33,13 @@ import com.google.common.collect.Maps;
 import com.nuodb.migrator.cli.parse.CommandLine;
 import com.nuodb.migrator.cli.parse.OptionProcessor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.newListMultimap;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Remembers values for the option between invocations and returns set of delta values
@@ -48,7 +48,7 @@ import static com.google.common.collect.Multimaps.newListMultimap;
  */
 public abstract class ValuesOptionProcessor implements OptionProcessor {
 
-    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
+    protected transient final Logger logger = getLogger(getClass());
 
     private ListMultimap<String, Object> lastOptionValues = newListMultimap(
             Maps.<String, Collection<Object>>newLinkedHashMap(),

@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 
 import java.util.Map;
 
@@ -35,6 +35,8 @@ import java.util.Map;
  * @author Sergey Bushik
  */
 public interface TranslationContext extends Map<Object, Object> {
+
+    Script translate(Script script);
 
     DatabaseInfo getDatabaseInfo();
 

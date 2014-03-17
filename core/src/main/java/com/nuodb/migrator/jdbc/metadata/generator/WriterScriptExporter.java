@@ -27,77 +27,63 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 
 import static java.lang.System.getProperty;
 
 /**
  * @author Sergey Bushik
  */
-public class WriterScriptExporter extends ScriptExporterBase {
+public class WriterScriptExporter extends StreamScriptExporterBase {
 
     public static final ScriptExporter SYSTEM_OUT = new WriterScriptExporter(System.out, false);
 
-    private static final String SEMICOLON = ";";
-
-    private transient final Writer writer;
-    private final boolean close;
-    private String lineEnding = SEMICOLON;
-    private String lineSeparator = getProperty("line.separator");
+    private Writer writer;
+    private OutputStream outputStream;
 
     public WriterScriptExporter(OutputStream outputStream) {
-        this(outputStream, true);
+        this(outputStream, CLOSE_STREAM);
+    }
+
+    public WriterScriptExporter(OutputStream outputStream, boolean closeStream) {
+        setOutputStream(outputStream);
+        setCloseStream(closeStream);
     }
 
     public WriterScriptExporter(Writer writer) {
-        this(writer, true);
+        this(writer, CLOSE_STREAM);
     }
 
-    public WriterScriptExporter(OutputStream outputStream, boolean close) {
-        this(new OutputStreamWriter(outputStream), close);
+    public WriterScriptExporter(Writer writer, boolean closeStream) {
+        setWriter(writer);
+        setCloseStream(closeStream);
     }
 
-    public WriterScriptExporter(Writer writer, boolean close) {
+    @Override
+    protected Writer openWriter() throws Exception {
+        Writer writer = getWriter();
+        OutputStream outputStream;
+        if (writer == null && (outputStream = getOutputStream()) != null) {
+            writer = new OutputStreamWriter(outputStream, getEncoding());
+        } else {
+            throw new GeneratorException("Neither writer nor output stream provided");
+        }
+        return writer;
+    }
+
+    public Writer getWriter() {
+        return writer;
+    }
+
+    public void setWriter(Writer writer) {
         this.writer = writer;
-        this.close = close;
     }
 
-    @Override
-    protected void doOpen() throws Exception {
+    public OutputStream getOutputStream() {
+        return outputStream;
     }
 
-    @Override
-    protected void doExportScript(String script) throws Exception {
-        writer.write(script);
-        if (!script.endsWith(lineEnding)) {
-            writer.write(lineEnding);
-        }
-        writer.write(lineSeparator);
-    }
-
-    @Override
-    protected void doClose() throws Exception {
-        writer.flush();
-        if (close) {
-            writer.close();
-        }
-    }
-
-    public String getLineEnding() {
-        return lineEnding;
-    }
-
-    public void setLineEnding(String lineEnding) {
-        this.lineEnding = lineEnding;
-    }
-
-    public String getLineSeparator() {
-        return lineSeparator;
-    }
-
-    public void setLineSeparator(String lineSeparator) {
-        this.lineSeparator = lineSeparator;
+    public void setOutputStream(OutputStream outputStream) {
+        this.outputStream = outputStream;
     }
 }

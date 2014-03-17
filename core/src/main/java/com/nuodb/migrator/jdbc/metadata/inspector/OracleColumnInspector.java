@@ -28,13 +28,13 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.model.ColumnFactory;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
+import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
 import static org.apache.commons.lang3.StringUtils.*;
 
 /**
@@ -49,12 +49,12 @@ public class OracleColumnInspector extends SimpleColumnInspector {
      * order, there will be an error
      *
      * @param inspectionContext with inspection data
-     * @param columns           result set holding column attributes
-     * @param column            to populate from result set
+     * @param columns       result set holding column attributes
+     * @param column        to populate from result set
      * @throws SQLException
      */
     @Override
-    protected void inspect(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
+    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
         String defaultValue = trim(columns.getString("COLUMN_DEF"));
         if (startsWith(defaultValue, "'") && endsWith(defaultValue, "'")) {
             defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
@@ -72,7 +72,7 @@ public class OracleColumnInspector extends SimpleColumnInspector {
         column.setComment(columns.getString("REMARKS"));
         column.setPosition(columns.getInt("ORDINAL_POSITION"));
         String autoIncrement =
-                ColumnFactory.createColumnList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
+                newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
                         columns.getString("IS_AUTOINCREMENT") : null;
         column.setAutoIncrement("YES".equals(autoIncrement));
         column.setNullable("YES".equals(columns.getString("IS_NULLABLE")));

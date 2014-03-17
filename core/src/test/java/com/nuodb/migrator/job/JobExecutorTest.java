@@ -67,21 +67,21 @@ public class JobExecutorTest {
 
         assertTrue(jobExecutor.execute(context));
 
-        verify(job).execute(any(JobExecution.class));
+        verify(job).execute();
         assertEquals(jobStatus.getJobStatusType(), JobStatusType.FINISHED);
     }
 
     @Test
     public void testExecuteFailure() throws Exception {
         MigratorException failure = new MigratorException("Failure");
-        willThrow(failure).given(job).execute(any(JobExecution.class));
+        willThrow(failure).given(job).execute();
 
         JobStatus jobStatus = jobExecutor.getJobStatus();
         assertFalse(jobStatus.isRunning());
 
         assertTrue(jobExecutor.execute(context));
 
-        verify(job).execute(any(JobExecution.class));
+        verify(job).execute();
         assertEquals(failure, jobStatus.getFailure());
         assertEquals(jobStatus.getJobStatusType(), JobStatusType.FINISHED);
     }

@@ -87,13 +87,13 @@ public abstract class JdbcUrlBase implements JdbcUrl {
     }
 
     @Override
-    public void addParameter(String parameter, Object value) {
-        parameters.put(parameter, value);
+    public void addParameter(String key, Object value) {
+        parameters.put(key, value);
     }
 
     @Override
     public void addParameters(Map<String, Object> parameters) {
-        parameters.putAll(parameters);
+        this.parameters.putAll(parameters);
     }
 
     @Override

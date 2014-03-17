@@ -27,22 +27,23 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleDialectResolver extends SimpleServiceResolver<Dialect> implements DialectResolver {
+public class SimpleDialectResolver extends SimpleCachingServiceResolver<Dialect> implements DialectResolver {
 
     public SimpleDialectResolver() {
         super(SimpleDialect.class);
         register(DB2, DB2Dialect.class);
         register(MYSQL, MySQLDialect.class);
         register(NUODB, NuoDBDialect.class);
+        register(NUODB_203, NuoDBDialect203.class);
         register(POSTGRE_SQL, PostgreSQLDialect.class);
         register(ORACLE, OracleDialect.class);
         register(MSSQL_SERVER, MSSQLServerDialect.class);

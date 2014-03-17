@@ -27,15 +27,16 @@
  */
 package com.nuodb.migrator.jdbc.split;
 
+import com.nuodb.migrator.jdbc.query.ParametersBinder;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.LimitHandler;
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.query.Query;
 
 import java.sql.*;
 
-import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getCount;
-import static com.nuodb.migrator.jdbc.dialect.QueryLimitUtils.getOffset;
+import static com.nuodb.migrator.jdbc.query.QueryLimitUtils.getCount;
+import static com.nuodb.migrator.jdbc.query.QueryLimitUtils.getOffset;
 import static java.lang.Math.min;
 
 /**

@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 
 import java.sql.Types;
 import java.util.Collection;
@@ -50,7 +50,7 @@ public class CurrentTimestampTranslator extends ColumnTranslatorBase<ColumnScrip
     }
 
     @Override
-    protected boolean supportsScript(ColumnScript script, TranslationContext translationContext) {
+    protected boolean supportsScript(ColumnScript script, TranslationContext context) {
         boolean supports;
         switch (script.getColumn().getTypeCode()) {
             case Types.TIME:
@@ -66,7 +66,7 @@ public class CurrentTimestampTranslator extends ColumnTranslatorBase<ColumnScrip
     }
 
     @Override
-    public Script translate(ColumnScript script, TranslationContext translationContext) {
-        return new SimpleScript(translation, translationContext.getDatabaseInfo());
+    public Script translate(ColumnScript script, TranslationContext context) {
+        return new SimpleScript(translation, context.getDatabaseInfo());
     }
 }

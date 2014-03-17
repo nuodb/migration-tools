@@ -27,258 +27,247 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.backup.catalog.XmlCatalogManager;
-import com.nuodb.migrator.backup.format.FormatFactory;
-import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
-import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
-import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
+import com.nuodb.migrator.backup.Backup;
+import com.nuodb.migrator.backup.BackupManager;
+import com.nuodb.migrator.backup.XmlBackupManager;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
-import com.nuodb.migrator.job.JobBase;
-import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.HasServicesJobBase;
 import com.nuodb.migrator.spec.*;
-import org.slf4j.Logger;
+import com.nuodb.migrator.spec.MetaDataSpec;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.META_DATA_SPEC;
 import static com.nuodb.migrator.dump.DumpWriter.THREADS;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationSetter;
-import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
-import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
+import static com.nuodb.migrator.spec.MigrationMode.DATA;
+import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
+import static com.nuodb.migrator.utils.Collections.contains;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static java.lang.String.format;
-import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
-import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
+import static java.sql.Connection.*;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
-public class DumpJob extends JobBase {
+@SuppressWarnings({"unchecked", "ToArrayCallWithZeroLengthArrayArgument"})
+public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
-    private static final MetaDataType[] META_DATA_TYPES = new MetaDataType[]{
-            DATABASE, CATALOG, SCHEMA, TABLE, COLUMN, INDEX, PRIMARY_KEY
-    };
-    protected final Logger logger = getLogger(getClass());
-
-    private DumpSpec dumpSpec;
-    private FormatFactory formatFactory;
-    private DialectResolver dialectResolver;
-    private InspectionManager inspectionManager;
-    private ConnectionProviderFactory connectionProviderFactory;
-    private ValueFormatRegistryResolver valueFormatRegistryResolver;
-
-    private Database database;
+    private BackupManager backupManager;
     private DumpWriter dumpWriter;
+    private Session sourceSession;
 
-    public DumpJob(DumpSpec dumpSpec) {
-        this.dumpSpec = dumpSpec;
+    public DumpJob() {
+    }
+
+    public DumpJob(DumpJobSpec jobSpec) {
+        super(jobSpec);
     }
 
     @Override
-    public void init(JobExecution execution) throws Exception {
-        isNotNull(getDumpSpec(), "Dump spec is required");
-        isNotNull(getFormatFactory(), "Format factory is required");
-        isNotNull(getDialectResolver(), "Dialect resolver is required");
-        isNotNull(getConnectionProviderFactory(), "Connection provider factory is required");
-        isNotNull(getValueFormatRegistryResolver(), "Value format registry resolver is required");
+    protected void init() throws Exception {
+        super.init();
 
-        init();
+        SessionFactory sessionFactory = createSessionFactory();
+        Session session = sessionFactory.openSession();
+        setSourceSession(session);
+
+        setBackupManager(createBackupManager());
+
+        Collection<MigrationMode> migrationModes = getMigrationModes();
+        DumpWriter dumpWriter = null;
+        if (contains(migrationModes, DATA)) {
+            dumpWriter = new DumpWriter();
+            dumpWriter.setQueryLimit(getQueryLimit());
+            dumpWriter.setThreads(getThreads() != null ? getThreads() : THREADS);
+            dumpWriter.setTimeZone(getTimeZone());
+
+            dumpWriter.setBackupManager(getBackupManager());
+            dumpWriter.setFormat(getFormat());
+            dumpWriter.setFormatAttributes(getFormatAttributes());
+            dumpWriter.setFormatFactory(createFormatFactory());
+            dumpWriter.setSession(session);
+            dumpWriter.setSessionFactory(sessionFactory);
+            dumpWriter.setValueFormatRegistry(
+                    createValueFormatRegistryResolver().resolve(session.getConnection()));
+        }
+        setDumpWriter(dumpWriter);
     }
 
-    protected void init() throws SQLException {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Initializing dump writer");
-        }
-        dumpWriter = new DumpWriter();
-        dumpWriter.setThreads(getThreads() != null ? getThreads() : THREADS);
-        dumpWriter.setQueryLimit(getQueryLimit());
-        dumpWriter.setTimeZone(getTimeZone());
+    protected BackupManager createBackupManager() {
+        return new XmlBackupManager(getPath());
+    }
 
-        ResourceSpec outputSpec = getOutputSpec();
-        dumpWriter.setFormat(outputSpec.getType());
-        dumpWriter.setFormatAttributes(outputSpec.getAttributes());
-        dumpWriter.setFormatFactory(getFormatFactory());
-        dumpWriter.setCatalogManager(new XmlCatalogManager(outputSpec.getPath()));
-
+    protected SessionFactory createSessionFactory() {
         SessionFactory sessionFactory = newSessionFactory(
-                getConnectionProviderFactory().createConnectionProvider(
-                        getConnectionSpec()), getDialectResolver());
-        sessionFactory.addSessionObserver(newTransactionIsolationSetter(new int[]{
-                TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
-        }));
+                createConnectionProviderFactory().
+                        createConnectionProvider(getSourceSpec()), createDialectResolver());
+        if (getSourceSpec().getTransactionIsolation() == null) {
+            sessionFactory.addSessionObserver(newTransactionIsolationSetter(new int[]{
+                    TRANSACTION_SERIALIZABLE, TRANSACTION_REPEATABLE_READ, TRANSACTION_READ_COMMITTED
+            }));
+        }
         sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
-        Session session = sessionFactory.openSession();
+        return sessionFactory;
+    }
 
-        dumpWriter.setSession(session);
-        dumpWriter.setSessionFactory(sessionFactory);
-        dumpWriter.setValueFormatRegistry(getValueFormatRegistryResolver().resolve(session));
-        dumpWriter.setDatabase(database = inspect());
+    @Override
+    public void execute() throws Exception {
+        Database database = inspect();
+        Backup backup = new Backup(getOutputSpec().getType());
+        Collection<MigrationMode> migrationModes = getMigrationModes();
+        if (contains(migrationModes, DATA)) {
+            DumpWriter dumpWriter = getDumpWriter();
+            dumpWriter.setDatabase(database);
+            Collection<TableSpec> tableSpecs = getTableSpecs();
+            if (isEmpty(tableSpecs)) {
+                String[] tableTypes = getTableTypes();
+                for (Table table : database.getTables()) {
+                    if (isEmpty(tableTypes) || indexOf(tableTypes, table.getType()) != -1) {
+                        dumpWriter.addTable(table);
+                    } else {
+                        if (logger.isTraceEnabled()) {
+                            logger.trace(format("Table %s %s is not in the allowed types, table skipped",
+                                    table.getQualifiedName(null), table.getType()));
+                        }
+                    }
+                }
+            } else {
+                for (TableSpec tableSpec : tableSpecs) {
+                    Table table = database.findTable(tableSpec.getTable());
+                    Collection<Column> columns;
+                    if (isEmpty(tableSpec.getColumns())) {
+                        columns = table.getColumns();
+                    } else {
+                        columns = newArrayList();
+                        for (String column : tableSpec.getColumns()) {
+                            columns.add(table.getColumn(column));
+                        }
+                    }
+                    String filter = tableSpec.getFilter();
+                    dumpWriter.addTable(table, columns, filter);
+                }
+            }
+            for (QuerySpec querySpec : getQuerySpecs()) {
+                dumpWriter.addQuery(querySpec.getQuery());
+            }
+            dumpWriter.write(backup);
+        }
+        if (contains(migrationModes, SCHEMA)) {
+            backup.setDatabase(database);
+        }
+        Map context = newHashMap();
+        context.put(META_DATA_SPEC, getMetaDataSpec());
+        getBackupManager().writeBackup(backup, context);
+    }
+
+    @Override
+    public void release() throws Exception {
+        close(sourceSession);
     }
 
     protected Database inspect() throws SQLException {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Inspecting source database");
-        }
         InspectionScope inspectionScope = new TableInspectionScope(
-                getConnectionSpec().getCatalog(), getConnectionSpec().getSchema(), getTableTypes());
-        return getInspectionManager().inspect(dumpWriter.getSession().getConnection(),
-                inspectionScope, META_DATA_TYPES).getObject(DATABASE);
-    }
-
-    /**
-     * Executes dump in the provided context. First off, it inspects source database meta data and creates SELECT
-     * queries for discovered tables or use complete user-provided SELECT statements ("native queries") to retrieve
-     * data.
-     *
-     * @param execution dump job execution instance.
-     * @throws SQLException
-     */
-    @Override
-    public void execute(JobExecution execution) throws Exception {
-        dump();
-    }
-
-    protected void dump() throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Adding tables & queries to dump writer");
-        }
-        Collection<TableSpec> tableSpecs = getTableSpecs();
-        if (isEmpty(tableSpecs)) {
-            String[] tableTypes = getTableTypes();
-            for (Table table : database.getTables()) {
-                if (isEmpty(tableTypes) || indexOf(tableTypes, table.getType()) != -1) {
-                    dumpWriter.addTable(table);
-                } else {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace(format("Table %s %s is not in the allowed types, table skipped",
-                                table.getQualifiedName(null), table.getType()));
-                    }
-                }
-            }
-        } else {
-            for (TableSpec tableSpec : tableSpecs) {
-                Table table = database.findTable(tableSpec.getTable());
-                Collection<Column> columns;
-                if (isEmpty(tableSpec.getColumns())) {
-                    columns = table.getColumns();
-                } else {
-                    columns = newArrayList();
-                    for (String column : tableSpec.getColumns()) {
-                        columns.add(table.getColumn(column));
-                    }
-                }
-                String filter = tableSpec.getFilter();
-                dumpWriter.addTable(table, columns, filter);
-            }
-        }
-        for (QuerySpec querySpec : getQuerySpecs()) {
-            dumpWriter.addQuery(querySpec.getQuery());
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Writing database dump");
-        }
-        dumpWriter.write();
-    }
-
-    @Override
-    public void release(JobExecution execution) throws Exception {
-        close(dumpWriter.getSession());
-    }
-
-    public DumpSpec getDumpSpec() {
-        return dumpSpec;
+                getSourceSpec().getCatalog(), getSourceSpec().getSchema(), getTableTypes());
+        return createInspectionManager().inspect(getSourceSession().getConnection(), inspectionScope,
+                getObjectTypes().toArray(new MetaDataType[0])).getObject(DATABASE);
     }
 
     public DumpWriter getDumpWriter() {
         return dumpWriter;
     }
 
-    public FormatFactory getFormatFactory() {
-        return formatFactory;
+    public void setDumpWriter(DumpWriter dumpWriter) {
+        this.dumpWriter = dumpWriter;
     }
 
-    public void setFormatFactory(FormatFactory formatFactory) {
-        this.formatFactory = formatFactory;
+    public Session getSourceSession() {
+        return sourceSession;
     }
 
-    public DialectResolver getDialectResolver() {
-        return dialectResolver;
+    public void setSourceSession(Session sourceSession) {
+        this.sourceSession = sourceSession;
     }
 
-    public void setDialectResolver(DialectResolver dialectResolver) {
-        this.dialectResolver = dialectResolver;
+    public BackupManager getBackupManager() {
+        return backupManager;
     }
 
-    public InspectionManager getInspectionManager() {
-        return inspectionManager;
+    public void setBackupManager(BackupManager backupManager) {
+        this.backupManager = backupManager;
     }
 
-    public void setInspectionManager(InspectionManager inspectionManager) {
-        this.inspectionManager = inspectionManager;
+    protected String getFormat() {
+        return getOutputSpec().getType();
     }
 
-    public ConnectionProviderFactory getConnectionProviderFactory() {
-        return connectionProviderFactory;
+    protected Map<String, Object> getFormatAttributes() {
+        return getOutputSpec().getAttributes();
     }
 
-    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
-        this.connectionProviderFactory = connectionProviderFactory;
+    protected String getPath() {
+        return getOutputSpec().getPath();
     }
 
-    public ValueFormatRegistryResolver getValueFormatRegistryResolver() {
-        return valueFormatRegistryResolver;
-    }
-
-    public void setValueFormatRegistryResolver(ValueFormatRegistryResolver valueFormatRegistryResolver) {
-        this.valueFormatRegistryResolver = valueFormatRegistryResolver;
+    protected Collection<MigrationMode> getMigrationModes() {
+        return getJobSpec().getMigrationModes();
     }
 
     protected Integer getThreads() {
-        return dumpSpec.getThreads();
+        return getJobSpec().getThreads();
     }
 
     protected ResourceSpec getOutputSpec() {
-        return dumpSpec.getOutputSpec();
+        return getJobSpec().getOutputSpec();
     }
 
     protected Collection<QuerySpec> getQuerySpecs() {
-        return dumpSpec.getQuerySpecs();
+        return getJobSpec().getQuerySpecs();
+    }
+
+    protected MetaDataSpec getMetaDataSpec() {
+        return getJobSpec().getMetaDataSpec();
     }
 
     protected Collection<TableSpec> getTableSpecs() {
-        return dumpSpec.getTableSpecs();
+        return getJobSpec().getTableSpecs();
+    }
+
+    protected Collection<MetaDataType> getObjectTypes() {
+        return getJobSpec().getObjectTypes();
     }
 
     protected String[] getTableTypes() {
-        return dumpSpec.getTableTypes();
+        return getJobSpec().getTableTypes();
     }
 
     protected TimeZone getTimeZone() {
-        return dumpSpec.getTimeZone();
+        return getJobSpec().getTimeZone();
     }
 
-    protected ConnectionSpec getConnectionSpec() {
-        return dumpSpec.getConnectionSpec();
+    protected ConnectionSpec getSourceSpec() {
+        return getJobSpec().getSourceSpec();
     }
 
     public QueryLimit getQueryLimit() {
-        return dumpSpec.getQueryLimit();
+        return getJobSpec().getQueryLimit();
     }
 }

@@ -27,12 +27,13 @@
  */
 package com.nuodb.migrator.backup.format;
 
-import com.nuodb.migrator.backup.format.value.ValueHandle;
+import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
@@ -42,11 +43,12 @@ public abstract class FormatBase implements Format {
     public static final boolean BUFFERING = true;
     public static final int BUFFER_SIZE = 8 * 1024;
 
-    protected transient final Logger logger = LoggerFactory.getLogger(getClass());
+    protected transient final Logger logger = getLogger(getClass());
 
     private Map<String, Object> attributes;
     private boolean buffering = BUFFERING;
     private int bufferSize = BUFFER_SIZE;
+    private RowSet rowSet;
     private ValueHandleList valueHandleList;
 
     @Override
@@ -91,6 +93,16 @@ public abstract class FormatBase implements Format {
     @Override
     public void setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
+    }
+
+    @Override
+    public RowSet getRowSet() {
+        return rowSet;
+    }
+
+    @Override
+    public void setRowSet(RowSet rowSet) {
+        this.rowSet = rowSet;
     }
 
     @Override

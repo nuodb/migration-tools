@@ -36,5 +36,5 @@ import java.sql.Statement;
  */
 public interface StatementFactory<S extends Statement> {
 
-    S create(Connection connection) throws SQLException;
+    S createStatement(Connection connection) throws SQLException;
 }

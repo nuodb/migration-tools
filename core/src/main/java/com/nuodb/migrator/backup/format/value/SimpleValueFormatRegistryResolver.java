@@ -27,20 +27,23 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.resolver.SimpleServiceResolver;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.DB2;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.DB2;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.ORACLE;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleValueFormatRegistryResolver extends SimpleServiceResolver<ValueFormatRegistry>
+public class SimpleValueFormatRegistryResolver extends SimpleCachingServiceResolver<ValueFormatRegistry>
         implements ValueFormatRegistryResolver {
 
     public SimpleValueFormatRegistryResolver() {
         super(SimpleValueFormatRegistry.class);
         register(DB2, new DB2ValueFormatRegistry());
         register(NUODB, new NuoDBValueFormatRegistry());
+        register(ORACLE, new OracleValueFormatRegistry());
     }
 }

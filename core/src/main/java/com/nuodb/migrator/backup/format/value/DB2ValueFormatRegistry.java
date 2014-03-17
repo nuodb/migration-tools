@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.dialect.DB2XmlType;
+import com.nuodb.migrator.jdbc.dialect.DB2XmlValue;
 
 /**
  * @author Sergey Bushik
@@ -35,6 +35,6 @@ import com.nuodb.migrator.jdbc.dialect.DB2XmlType;
 public class DB2ValueFormatRegistry extends SimpleValueFormatRegistry {
 
     public DB2ValueFormatRegistry() {
-        addValueFormat(DB2XmlType.INSTANCE, new DB2XmlValueFormat());
+        addValueFormat(DB2XmlValue.INSTANCE, new DB2XmlTypeValueFormat());
     }
 }

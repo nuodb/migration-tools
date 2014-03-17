@@ -35,7 +35,23 @@ public interface XmlReadContext extends Map {
 
     <T> T read(InputNode node, Class<T> type);
 
+    <T> T read(InputNode node, Class<T> type, T defaultValue);
+
+    <T> T read(InputNode input, Class<T> type, XmlReadContext delegate);
+
     <T> T readAttribute(InputNode input, String attribute, Class<T> type);
 
+    <T> T readAttribute(InputNode input, String attribute, Class<T> type, T defaultValue);
+
     <T> T readElement(InputNode input, String element, Class<T> type);
+
+    <T> T readElement(InputNode input, String element, Class<T> type, T defaultValue);
+
+    Map getMap();
+
+    void setMap(Map map);
+
+    XmlReadContext getContext();
+
+    void setContext(XmlReadContext context);
 }

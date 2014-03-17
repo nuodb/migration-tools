@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.query.QueryLimit;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 

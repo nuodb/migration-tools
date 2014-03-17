@@ -27,8 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -42,30 +41,21 @@ import java.util.Map;
 public class SimpleJdbcValueSetter implements JdbcValueSetter {
 
     private final JdbcTypeRegistry jdbcTypeRegistry;
-    private final JdbcType jdbcType;
+    private final JdbcTypeValue jdbcTypeValue;
 
-    public SimpleJdbcValueSetter(JdbcTypeRegistry jdbcTypeRegistry, JdbcType jdbcType) {
+    public SimpleJdbcValueSetter(JdbcTypeRegistry jdbcTypeRegistry, JdbcTypeValue jdbcTypeValue) {
         this.jdbcTypeRegistry = jdbcTypeRegistry;
-        this.jdbcType = jdbcType;
+        this.jdbcTypeValue = jdbcTypeValue;
     }
 
     @Override
-    public <X> void setValue(PreparedStatement statement, int columnIndex, Column columnModel, X value,
-                             Map<String, Object> options) throws SQLException {
+    public <X> void setValue(PreparedStatement statement, Connection connection, int columnIndex, Field field,
+                             X value, Map<String, Object> options) throws SQLException {
         JdbcTypeAdapter<X> adapter = jdbcTypeRegistry.getJdbcTypeAdapter(value != null ? value.getClass() : null,
-                jdbcType.getValueClass());
+                jdbcTypeValue.getValueClass());
         if (adapter != null) {
-            Connection connection = statement.getConnection();
-            value = adapter.wrap(value, getConnection(connection));
+            value = adapter.wrap(value, connection);
         }
-        jdbcType.setValue(statement, columnIndex, columnModel, value, options);
-    }
-
-    protected Connection getConnection(Connection connection) {
-        if (connection instanceof ConnectionProxy) {
-            return ((ConnectionProxy) connection).getConnection();
-        } else {
-            return connection;
-        }
+        jdbcTypeValue.setValue(statement, columnIndex, field, value, options);
     }
 }

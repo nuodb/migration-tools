@@ -27,9 +27,17 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.metadata.HasSchemas;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 import org.apache.commons.lang3.ObjectUtils;
 
+import java.util.Collection;
+import java.util.Map;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 
 /**
@@ -41,23 +49,93 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
         super(HasSchemas.class);
     }
 
-    protected HasTables getTables(ScriptGeneratorContext scriptGeneratorContext, HasSchemas schemas) {
-        HasTablesAdapter tables = new HasTablesAdapter(getObjectType());
-        for (Schema schema : schemas.getSchemas()) {
-            if (isGenerateSchema(scriptGeneratorContext, schema)) {
-                tables.addTables(schema);
+    @Override
+    public Collection<String> getCreateScripts(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
+        Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
+        for (Schema schema : getSchemas(hasSchemas, scriptGeneratorManager)) {
+            Collection<String> scripts = getHasTablesCreateScripts(schema, scriptGeneratorManager);
+            if (!scripts.isEmpty()) {
+                schemaScripts.put(schema, scripts);
             }
         }
-        return tables;
+        return getScripts(schemaScripts, scriptGeneratorManager);
     }
 
-    protected boolean isGenerateSchema(ScriptGeneratorContext scriptGeneratorContext, Schema schema) {
+    @Override
+    public Collection<String> getDropScripts(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
+        Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
+        for (Schema schema : getSchemas(hasSchemas, scriptGeneratorManager)) {
+            Collection<String> scripts = getHasTablesDropScripts(schema, scriptGeneratorManager);
+            if (!scripts.isEmpty()) {
+                schemaScripts.put(schema, scripts);
+            }
+        }
+        return getScripts(schemaScripts, scriptGeneratorManager);
+    }
+
+    @Override
+    public Collection<String> getDropCreateScripts(HasSchemas hasSchemas,
+                                                   ScriptGeneratorManager scriptGeneratorManager) {
+        Map<Schema, Collection<String>> schemaScripts = newLinkedHashMap();
+        for (Schema schema : getSchemas(hasSchemas, scriptGeneratorManager)) {
+            Collection<String> scripts = getHasTablesDropCreateScripts(schema, scriptGeneratorManager);
+            if (!scripts.isEmpty()) {
+                schemaScripts.put(schema, scripts);
+            }
+        }
+        return getScripts(schemaScripts, scriptGeneratorManager);
+    }
+
+    protected Collection<String> getScripts(Map<Schema, Collection<String>> schemaScripts,
+                                            ScriptGeneratorManager context) {
+        Collection<String> scripts = newArrayList();
+        Dialect dialect = context.getTargetDialect();
+        if (schemaScripts.size() == 1) {
+            Map.Entry<Schema, Collection<String>> schemaScript = schemaScripts.entrySet().iterator().next();
+            String useSpace = null;
+            if (context.getTargetSchema() != null) {
+                useSpace = dialect.getUseSchema(context.getTargetSchema(), true);
+            } else if (context.getTargetCatalog() != null) {
+                useSpace = dialect.getUseCatalog(context.getTargetCatalog(), true);
+            }
+            if (useSpace == null) {
+                Schema schema = schemaScript.getKey();
+                useSpace = schema.getIdentifier() != null ?
+                        dialect.getUseSchema(context.getName(schema)) :
+                        dialect.getUseCatalog(context.getName(schema.getCatalog()));
+            }
+            scripts.add(useSpace);
+            scripts.addAll(schemaScript.getValue());
+        } else {
+            for (Map.Entry<Schema, Collection<String>> schemaScript : schemaScripts.entrySet()) {
+                Schema schema = schemaScript.getKey();
+                String useSpace = schema.getIdentifier() != null ?
+                        dialect.getUseSchema(context.getName(schema)) :
+                        dialect.getUseCatalog(context.getName(schema.getCatalog()));
+                scripts.add(useSpace);
+                scripts.addAll(schemaScript.getValue());
+            }
+        }
+        return scripts;
+    }
+
+    protected Collection<Schema> getSchemas(HasSchemas hasSchemas, ScriptGeneratorManager context) {
+        Collection<Schema> schemas = newArrayList();
+        for (Schema schema : hasSchemas.getSchemas()) {
+            if (addSchemaScripts(schema, context)) {
+                schemas.add(schema);
+            }
+        }
+        return schemas;
+    }
+
+    protected boolean addSchemaScripts(Schema schema, ScriptGeneratorManager context) {
         boolean generate = true;
-        Identifier catalogId = valueOf(scriptGeneratorContext.getSourceCatalog());
+        Identifier catalogId = valueOf(context.getSourceCatalog());
         if (catalogId != null) {
             generate = ObjectUtils.equals(catalogId, schema.getCatalog().getIdentifier());
         }
-        Identifier schemaId = valueOf(scriptGeneratorContext.getSourceSchema());
+        Identifier schemaId = valueOf(context.getSourceSchema());
         if (generate && schemaId != null) {
             generate = ObjectUtils.equals(schemaId, schema.getIdentifier());
         }

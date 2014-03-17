@@ -30,35 +30,46 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 
+import static com.nuodb.migrator.utils.StringUtils.*;
+import static com.nuodb.migrator.utils.StringUtils.upperCase;
+
 /**
  * @author Sergey Bushik
  */
 public class ForeignKeyNamingStrategy extends IdentifiableNamingStrategy<ForeignKey> {
+
+    private static final String PREFIX = "FK";
+    private static final char DELIMITER = '_';
 
     public ForeignKeyNamingStrategy() {
         super(ForeignKey.class);
     }
 
     @Override
-    protected String getIdentifiableName(ForeignKey foreignKey, ScriptGeneratorContext scriptGeneratorContext) {
+    protected String getIdentifiableName(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder qualifier = new StringBuilder();
-        qualifier.append(scriptGeneratorContext.getQualifiedName(foreignKey.getPrimaryTable(), false));
+        qualifier.append(scriptGeneratorManager.getQualifiedName(foreignKey.getPrimaryTable(), false));
         for (Column column : foreignKey.getPrimaryColumns()) {
             qualifier.append("_");
-            qualifier.append(scriptGeneratorContext.getName(column, false));
+            qualifier.append(scriptGeneratorManager.getName(column, false));
         }
         qualifier.append("_");
-
-        qualifier.append(scriptGeneratorContext.getQualifiedName(foreignKey.getForeignTable(), false));
+        qualifier.append(scriptGeneratorManager.getQualifiedName(foreignKey.getForeignTable(), false));
         for (Column column : foreignKey.getPrimaryColumns()) {
             qualifier.append("_");
-            qualifier.append(scriptGeneratorContext.getName(column, false));
+            qualifier.append(scriptGeneratorManager.getName(column, false));
         }
 
         StringBuilder buffer = new StringBuilder();
-        buffer.append("FK");
+        if (isLowerCase(qualifier)) {
+            buffer.append(lowerCase(PREFIX));
+        } else if (isCapitalizedCase(qualifier, DELIMITER)) {
+            buffer.append(capitalizedCase(PREFIX));
+        } else {
+            buffer.append(upperCase(PREFIX));
+        }
         buffer.append('_');
-        buffer.append(qualifier.toString());
+        buffer.append(qualifier);
         return buffer.toString();
     }
 }

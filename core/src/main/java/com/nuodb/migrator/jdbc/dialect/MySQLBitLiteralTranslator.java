@@ -30,7 +30,7 @@ package com.nuodb.migrator.jdbc.dialect;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static java.lang.Integer.parseInt;
 import static java.sql.Types.BIT;
 import static java.util.regex.Pattern.compile;
@@ -53,13 +53,13 @@ public class MySQLBitLiteralTranslator extends ColumnTranslatorBase {
     }
 
     @Override
-    protected boolean supportsScript(ColumnScript script, TranslationContext translationContext) {
+    protected boolean supportsScript(ColumnScript script, TranslationContext context) {
         return script.getScript() != null && script.getColumn().getTypeCode() == BIT &&
                 PATTERN.matcher(script.getScript()).matches();
     }
 
     @Override
-    public Script translate(ColumnScript script, TranslationContext translationContext) {
+    public Script translate(ColumnScript script, TranslationContext context) {
         Matcher matcher = PATTERN.matcher(script.getScript());
         String target;
         if (matcher.matches()) {
@@ -77,6 +77,6 @@ public class MySQLBitLiteralTranslator extends ColumnTranslatorBase {
         } else {
             target = null;
         }
-        return target != null ? new SimpleScript(target, translationContext.getDatabaseInfo()) : null;
+        return target != null ? new SimpleScript(target, context.getDatabaseInfo(), true) : null;
     }
 }

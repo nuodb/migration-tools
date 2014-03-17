@@ -30,8 +30,10 @@ package com.nuodb.migrator.jdbc.metadata;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.IDENTITY;
+import static com.google.common.collect.Sets.newLinkedHashSet;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
@@ -39,74 +41,95 @@ import static org.apache.commons.lang3.StringUtils.join;
  */
 public class Sequence extends IdentifiableBase {
 
-    private Column column;
-    private Long startWith;
-    private Long lastValue;
-    private Long incrementBy;
-    private Long minValue;
-    private Long maxValue;
+    private Schema schema;
+    private Collection<Column> columns = newLinkedHashSet();
+    private Number startWith;
+    private Number lastValue;
+    private Number incrementBy;
+    private Number minValue;
+    private Number maxValue;
+    private Number cache;
     private boolean cycle;
     private boolean order;
     private boolean temporary;
-    private Integer cache;
 
     public Sequence() {
-        super(IDENTITY, true);
+        super(SEQUENCE, true);
     }
 
     public Sequence(String name) {
-        super(IDENTITY, name, true);
+        super(SEQUENCE, name, true);
     }
 
     public Sequence(Identifier identifier) {
-        super(IDENTITY, identifier, true);
+        super(SEQUENCE, identifier, true);
     }
 
-    public Column getColumn() {
-        return column;
+    public Schema getSchema() {
+        return schema;
+    }
+
+    public void setSchema(Schema schema) {
+        this.schema = schema;
+    }
+
+    public void addColumn(Column column) {
+        columns.add(column);
+    }
+
+    public void removeColumn(Column column) {
+        columns.remove(column);
     }
 
     public void setColumn(Column column) {
-        this.column = column;
+        setColumns(singleton(column));
     }
 
-    public Long getStartWith() {
+    public Collection<Column> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(Collection<Column> columns) {
+        this.columns = columns;
+    }
+
+    public Number getStartWith() {
         return startWith;
     }
 
-    public void setStartWith(Long startWith) {
+    public void setStartWith(Number startWith) {
         this.startWith = startWith;
     }
 
-    public Long getLastValue() {
+    public Number getLastValue() {
         return lastValue;
     }
 
-    public void setLastValue(Long lastValue) {
+    public void setLastValue(Number lastValue) {
         this.lastValue = lastValue;
     }
 
-    public Long getIncrementBy() {
+    public Number getIncrementBy() {
         return incrementBy;
     }
 
-    public void setIncrementBy(Long incrementBy) {
+    public void setIncrementBy(Number incrementBy) {
         this.incrementBy = incrementBy;
     }
 
-    public Long getMinValue() {
+    public Number getMinValue() {
         return minValue;
     }
 
-    public void setMinValue(Long minValue) {
+    public void setMinValue(Number minValue) {
         this.minValue = minValue;
     }
 
-    public Long getMaxValue() {
+    public Number getMaxValue() {
         return maxValue;
     }
 
-    public void setMaxValue(Long maxValue) {
+    public void setMaxValue(Number maxValue) {
         this.maxValue = maxValue;
     }
 
@@ -134,11 +157,11 @@ public class Sequence extends IdentifiableBase {
         this.temporary = temporary;
     }
 
-    public Integer getCache() {
+    public Number getCache() {
         return cache;
     }
 
-    public void setCache(Integer cache) {
+    public void setCache(Number cache) {
         this.cache = cache;
     }
 
@@ -154,7 +177,6 @@ public class Sequence extends IdentifiableBase {
         if (order != sequence.order) return false;
         if (temporary != sequence.temporary) return false;
         if (cache != null ? !cache.equals(sequence.cache) : sequence.cache != null) return false;
-        if (column != null ? !column.equals(sequence.column) : sequence.column != null) return false;
         if (lastValue != null ? !lastValue.equals(sequence.lastValue) : sequence.lastValue != null)
             return false;
         if (incrementBy != null ? !incrementBy.equals(sequence.incrementBy) : sequence.incrementBy != null)
@@ -188,25 +210,25 @@ public class Sequence extends IdentifiableBase {
         buffer.append(' ');
         Collection<String> attributes = newArrayList();
         if (startWith != null) {
-            attributes.add(format("start value=%d", startWith));
+            attributes.add(format("start value=%s", startWith));
         }
         if (lastValue != null) {
-            attributes.add(format("last value=%d", lastValue));
+            attributes.add(format("last value=%s", lastValue));
         }
         if (incrementBy != null) {
-            attributes.add(format("increment by=%d", incrementBy));
+            attributes.add(format("increment by=%s", incrementBy));
         }
         if (minValue != null) {
-            attributes.add(format("min value=%d", minValue));
+            attributes.add(format("min value=%s", minValue));
         }
         if (maxValue != null) {
-            attributes.add(format("max value=%d", maxValue));
+            attributes.add(format("max value=%s", maxValue));
         }
         attributes.add(format("cycle=%b", cycle));
         attributes.add(format("order=%s", order ? "DESC" : "ASC"));
         attributes.add(format("temporary=%b", temporary));
         if (cache != null) {
-            attributes.add(format("cache=%d", cache));
+            attributes.add(format("cache=%s", cache));
         }
         buffer.append(join(attributes, ", "));
     }

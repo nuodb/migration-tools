@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.cli.run;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers;
@@ -35,15 +35,16 @@ import com.nuodb.migrator.jdbc.dialect.IdentifierQuotings;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
-import com.nuodb.migrator.schema.SchemaJobFactory;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
-import com.nuodb.migrator.spec.SchemaSpec;
+import com.nuodb.migrator.spec.SchemaJobSpec;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.jdbc.JdbcConstants.NUODB_DRIVER;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.assertEquals;
@@ -80,7 +81,7 @@ public class CliSchemaJobTest {
 
                 "--use.explicit.defaults=false",
                 "--meta.data.check=false",
-                "--meta.data.identity=false",
+                "--meta.data.sequence=false",
                 "--script.type=drop,create",
                 "--group.scripts.by=meta.data",
                 "--identifier.quoting=always",
@@ -88,12 +89,11 @@ public class CliSchemaJobTest {
         };
         parser.parse(arguments, cliSchemaJob);
 
-        SchemaJobFactory schemaJobFactory = (SchemaJobFactory) cliSchemaJob.getJobFactory();
-        assertEquals(schemaJobFactory.getSchemaSpec(), createSchemaSpec());
+        assertEquals(cliSchemaJob.getJobSpec(), createSchemaSpec());
     }
 
-    private SchemaSpec createSchemaSpec() {
-        SchemaSpec schemaSpec = new SchemaSpec();
+    private SchemaJobSpec createSchemaSpec() {
+        SchemaJobSpec schemaSpec = new SchemaJobSpec();
 
         DriverConnectionSpec sourceConnectionSpec = new DriverConnectionSpec();
         sourceConnectionSpec.setDriver("oracle.jdbc.driver.OracleDriver");
@@ -101,7 +101,7 @@ public class CliSchemaJobTest {
         sourceConnectionSpec.setUsername("test");
         sourceConnectionSpec.setPassword("12345");
         sourceConnectionSpec.setSchema("test");
-        schemaSpec.setSourceConnectionSpec(sourceConnectionSpec);
+        schemaSpec.setSourceSpec(sourceConnectionSpec);
 
         DriverConnectionSpec targetConnectionSpec = new DriverConnectionSpec();
         targetConnectionSpec.setDriver(NUODB_DRIVER);
@@ -109,18 +109,18 @@ public class CliSchemaJobTest {
         targetConnectionSpec.setUsername("dba");
         targetConnectionSpec.setPassword("goalie");
         targetConnectionSpec.setSchema("test");
-        schemaSpec.setTargetConnectionSpec(targetConnectionSpec);
+        schemaSpec.setTargetSpec(targetConnectionSpec);
 
         ResourceSpec outputSpec = new ResourceSpec();
         outputSpec.setPath("/tmp/schema.sql");
         schemaSpec.setOutputSpec(outputSpec);
 
-        Collection<MetaDataType> metaDataTypes = Lists.newArrayList(MetaDataType.TYPES);
+        Collection<MetaDataType> metaDataTypes = newArrayList(MetaDataType.TYPES);
         metaDataTypes.remove(MetaDataType.CHECK);
-        metaDataTypes.remove(MetaDataType.IDENTITY);
+        metaDataTypes.remove(MetaDataType.SEQUENCE);
         schemaSpec.setObjectTypes(metaDataTypes);
 
-        schemaSpec.setScriptTypes(Lists.newArrayList(ScriptType.DROP, ScriptType.CREATE));
+        schemaSpec.setScriptTypes(newHashSet(ScriptType.DROP, ScriptType.CREATE));
         schemaSpec.setGroupScriptsBy(GroupScriptsBy.META_DATA);
         schemaSpec.setIdentifierQuoting(IdentifierQuotings.ALWAYS);
         schemaSpec.setIdentifierNormalizer(IdentifierNormalizers.STANDARD);

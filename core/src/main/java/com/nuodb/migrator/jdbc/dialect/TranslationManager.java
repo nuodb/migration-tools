@@ -27,15 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 
 /**
  * @author Sergey Bushik
@@ -43,7 +42,7 @@ import static com.google.common.collect.Sets.newHashSet;
 @SuppressWarnings("unchecked")
 public class TranslationManager {
 
-    private PriorityList<Translator> translators = new SimplePriorityList<Translator>();
+    private PrioritySet<Translator> translators = newPrioritySet();
 
     public Script translate(Script script, DatabaseInfo databaseInfo, Map<Object, Object> context) {
         Script translation = null;
@@ -95,11 +94,11 @@ public class TranslationManager {
         translators.add(translator, priority);
     }
 
-    public PriorityList<Translator> getTranslators() {
+    public PrioritySet<Translator> getTranslators() {
         return translators;
     }
 
-    public void setTranslators(PriorityList<Translator> translators) {
+    public void setTranslators(PrioritySet<Translator> translators) {
         this.translators = translators;
     }
 

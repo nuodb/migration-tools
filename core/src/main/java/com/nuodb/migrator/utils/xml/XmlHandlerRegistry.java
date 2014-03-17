@@ -28,21 +28,18 @@
 package com.nuodb.migrator.utils.xml;
 
 import com.nuodb.migrator.utils.Priority;
-import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
+import com.nuodb.migrator.utils.PrioritySet;
 import org.simpleframework.xml.convert.Converter;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 
 @SuppressWarnings("unchecked")
 public class XmlHandlerRegistry {
 
-    private PriorityList<XmlReadHandler> readers = new SimplePriorityList();
-    private PriorityList<XmlWriteHandler> writers = new SimplePriorityList<XmlWriteHandler>();
+    private PrioritySet<XmlReadHandler> readers = newPrioritySet();
+    private PrioritySet<XmlWriteHandler> writers = newPrioritySet();
 
     public XmlHandlerRegistry registerHandler(XmlHandler handler) {
         return registerHandler(handler, Priority.NORMAL);
@@ -98,9 +95,19 @@ public class XmlHandlerRegistry {
         }
 
         @Override
-        public boolean write(Object value, Class type, OutputNode output, XmlWriteContext context) {
+        public boolean canRead(InputNode input, Class type, XmlReadContext context) {
+            return this.type.equals(type);
+        }
+
+        @Override
+        public boolean skip(Object source, Class type, OutputNode output, XmlWriteContext context) {
+            return false;
+        }
+
+        @Override
+        public boolean write(Object source, Class type, OutputNode output, XmlWriteContext context) {
             try {
-                converter.write(output, value);
+                converter.write(output, source);
                 return true;
             } catch (Exception e) {
                 throw new XmlPersisterException("Underlying converter failed to write", e);
@@ -108,12 +115,7 @@ public class XmlHandlerRegistry {
         }
 
         @Override
-        public boolean canRead(InputNode input, Class type, XmlReadContext context) {
-            return this.type.equals(type);
-        }
-
-        @Override
-        public boolean canWrite(Object value, Class type, OutputNode output, XmlWriteContext context) {
+        public boolean canWrite(Object source, Class type, OutputNode output, XmlWriteContext context) {
             return this.type.equals(type);
         }
     }

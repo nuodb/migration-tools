@@ -28,7 +28,10 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.session.Session;
+
+import java.sql.SQLException;
 
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY;
@@ -48,7 +51,7 @@ public class TranslatorUtils {
      * @param dialect of the translated string
      * @return simple script object initialized with source script & database dialect
      */
-    public static Script createScript(String script, Dialect dialect) {
+    public static Script createScript(String script, Dialect dialect) throws SQLException {
         return createScript(script, dialect, null);
     }
 
@@ -60,7 +63,7 @@ public class TranslatorUtils {
      * @param url     connection url to a source database
      * @return simple script object initialized with source script, database dialect & connection url
      */
-    public static Script createScript(String script, Dialect dialect, String url) {
+    public static Script createScript(String script, Dialect dialect, String url) throws SQLException {
         return new SimpleScript(script, createSession(dialect, url));
     }
 
@@ -78,6 +81,8 @@ public class TranslatorUtils {
         column.setTypeCode(typeCode);
         column.setTypeName(typeName);
         column.setDefaultValue(valueOf(defaultValue));
+        Table table = new Table(EMPTY);
+        table.addColumn(column);
         return new ColumnScript(column, session);
     }
 }

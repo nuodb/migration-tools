@@ -541,16 +541,13 @@ public class StructureTest extends MigrationTestBase {
             try {
                 stmt2 = nuodbConnection.prepareStatement(sqlStr1);
                 rs2 = stmt2.executeQuery();
-                boolean found = false;
                 Collection<MSSQLServerPrecision1> expList = new ArrayList<MSSQLServerPrecision1>();
                 Collection<MSSQLServerPrecision1> actList = MSSQLServerPrecisions.getMSSQLServerPrecision1();
                 while (rs2.next()) {
-                    found = true;
                     MSSQLServerPrecision1 obj = new MSSQLServerPrecision1(rs2.getInt(1), rs2.getLong(2), rs2.getInt(3),
                             rs2.getInt(4));
                     expList.add(obj);
                 }
-                Assert.assertTrue(found);
                 Assert.assertEquals(actList, expList);
                 rs2.close();
                 stmt2.close();
@@ -560,17 +557,14 @@ public class StructureTest extends MigrationTestBase {
             }
             stmt2 = nuodbConnection.prepareStatement(sqlStr2);
             rs2 = stmt2.executeQuery();
-            boolean found = false;
             Collection<MSSQLServerPrecision2> expList = new ArrayList<MSSQLServerPrecision2>();
             Collection<MSSQLServerPrecision2> actList = MSSQLServerPrecisions.getMSSQLServerPrecision2();
             while (rs2.next()) {
-                found = true;
                 MSSQLServerPrecision2 obj = new MSSQLServerPrecision2(rs2.getString(1), rs2.getString(2),
                         rs2.getDouble(3), rs2.getString(4), rs2.getInt(5), rs2.getDouble(6), rs2.getDouble(7),
                         rs2.getString(8));
                 expList.add(obj);
             }
-            Assert.assertTrue(found);
             Assert.assertEquals(actList, expList);
             rs2.close();
             stmt2.close();

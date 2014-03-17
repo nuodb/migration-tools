@@ -48,7 +48,7 @@ public class PostgreSQLColumn {
     private static final String NEXT_VAL_REGEX = "nextval\\(" + VALUE_CLASS_REGEX + "\\)";
     private static final Pattern NEXT_VAL_PATTERN = compile(NEXT_VAL_REGEX, CASE_INSENSITIVE);
 
-    public static void inspect(InspectionContext inspectionContext, Column column) throws SQLException {
+    public static void processColumn(InspectionContext inspectionContext, Column column) throws SQLException {
         DefaultValue defaultValue = column.getDefaultValue();
         if (defaultValue != null && !defaultValue.isProcessed()) {
             Matcher matcher;

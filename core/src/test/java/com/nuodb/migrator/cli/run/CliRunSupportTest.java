@@ -28,7 +28,11 @@
 package com.nuodb.migrator.cli.run;
 
 import com.google.common.collect.Maps;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.Group;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import com.nuodb.migrator.cli.parse.OptionSet;
+import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.jdbc.JdbcConstants;
 import com.nuodb.migrator.spec.DriverConnectionSpec;

@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
 /**
@@ -39,7 +39,7 @@ public interface ValueFormatRegistry {
 
     ValueFormat getValueFormat(JdbcTypeDesc jdbcTypeDesc);
 
-    void addValueFormat(JdbcType jdbcType, ValueFormat valueFormat);
+    void addValueFormat(JdbcTypeValue jdbcTypeValue, ValueFormat valueFormat);
 
     void addValueFormat(JdbcTypeDesc jdbcTypeDesc, ValueFormat valueFormat);
 }

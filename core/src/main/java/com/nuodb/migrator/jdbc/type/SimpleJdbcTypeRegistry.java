@@ -40,7 +40,7 @@ import static java.lang.String.format;
 @SuppressWarnings("unchecked")
 public class SimpleJdbcTypeRegistry implements JdbcTypeRegistry {
 
-    private Map<JdbcTypeDesc, JdbcType> jdbcTypeMap = Maps.newHashMap();
+    private Map<JdbcTypeDesc, JdbcTypeValue> jdbcTypeMap = Maps.newHashMap();
     private Map<Class, JdbcTypeAdapter> jdbcTypeAdapterMap = Maps.newHashMap();
     private Map<JdbcTypeDesc, JdbcTypeDesc> jdbcTypeAliasMap = Maps.newHashMap();
 
@@ -54,38 +54,38 @@ public class SimpleJdbcTypeRegistry implements JdbcTypeRegistry {
     }
 
     @Override
-    public JdbcType getJdbcType(int typeCode) {
+    public JdbcTypeValue getJdbcType(int typeCode) {
         return getJdbcType(new JdbcTypeDesc(typeCode));
     }
 
     @Override
-    public JdbcType getJdbcType(int typeCode, String typeName) {
+    public JdbcTypeValue getJdbcType(int typeCode, String typeName) {
         return getJdbcType(new JdbcTypeDesc(typeCode, typeName));
     }
 
     @Override
-    public JdbcType getJdbcType(JdbcTypeDesc jdbcTypeDesc) {
+    public JdbcTypeValue getJdbcType(JdbcTypeDesc jdbcTypeDesc) {
         return getJdbcType(jdbcTypeDesc, false);
     }
 
     @Override
-    public JdbcType getJdbcType(JdbcTypeDesc jdbcTypeDesc, boolean required) {
-        JdbcType jdbcType = findJdbcType(findJdbcTypeAlias(jdbcTypeDesc));
-        if (jdbcType == null && required) {
+    public JdbcTypeValue getJdbcType(JdbcTypeDesc jdbcTypeDesc, boolean required) {
+        JdbcTypeValue jdbcTypeValue = findJdbcType(findJdbcTypeAlias(jdbcTypeDesc));
+        if (jdbcTypeValue == null && required) {
             throw new JdbcTypeException(format("Jdbc type %s, code(%d) is not supported",
                     jdbcTypeDesc.getTypeName(), jdbcTypeDesc.getTypeCode()));
         }
-        return jdbcType;
+        return jdbcTypeValue;
     }
 
     @Override
-    public void addJdbcType(JdbcType jdbcType) {
-        JdbcTypeDesc typeDesc = jdbcType.getJdbcTypeDesc();
-        jdbcTypeMap.put(typeDesc, jdbcType);
+    public void addJdbcType(JdbcTypeValue jdbcTypeValue) {
+        JdbcTypeDesc typeDesc = jdbcTypeValue.getJdbcTypeDesc();
+        jdbcTypeMap.put(typeDesc, jdbcTypeValue);
     }
 
     @Override
-    public Collection<JdbcType> getJdbcTypes() {
+    public Collection<JdbcTypeValue> getJdbcTypes() {
         return jdbcTypeMap.values();
     }
 
@@ -131,20 +131,25 @@ public class SimpleJdbcTypeRegistry implements JdbcTypeRegistry {
     }
 
     @Override
-    public void addJdbcTypes(Collection<JdbcType> jdbcTypes) {
-        for (JdbcType jdbcType : jdbcTypes) {
-            addJdbcType(jdbcType);
+    public void addJdbcTypes(Collection<JdbcTypeValue> jdbcTypeValues) {
+        for (JdbcTypeValue jdbcTypeValue : jdbcTypeValues) {
+            addJdbcType(jdbcTypeValue);
         }
     }
 
     @Override
     public void addJdbcTypeAlias(int typeCode, int typeAlias) {
-        addJdbcTypeAlias(new JdbcTypeDesc(typeCode, null), new JdbcTypeDesc(typeAlias, null));
+        addJdbcTypeAlias(new JdbcTypeDesc(typeCode), new JdbcTypeDesc(typeAlias));
     }
 
     @Override
     public void addJdbcTypeAlias(int typeCode, String typeName, int typeAlias) {
         addJdbcTypeAlias(new JdbcTypeDesc(typeCode, typeName), new JdbcTypeDesc(typeAlias, typeName));
+    }
+
+    @Override
+    public void addJdbcTypeAlias(JdbcTypeDesc jdbcTypeDesc, int typeAlias) {
+        addJdbcTypeAlias(jdbcTypeDesc, new JdbcTypeDesc(typeAlias));
     }
 
     @Override
@@ -172,12 +177,12 @@ public class SimpleJdbcTypeRegistry implements JdbcTypeRegistry {
         return jdbcTypeAliasMap;
     }
 
-    protected JdbcType findJdbcType(JdbcTypeDesc jdbcTypeDesc) {
-        JdbcType jdbcType = jdbcTypeMap.get(jdbcTypeDesc);
-        if (jdbcType == null) {
-            jdbcType = jdbcTypeMap.get(new JdbcTypeDesc(jdbcTypeDesc.getTypeCode()));
+    protected JdbcTypeValue findJdbcType(JdbcTypeDesc jdbcTypeDesc) {
+        JdbcTypeValue jdbcTypeValue = jdbcTypeMap.get(jdbcTypeDesc);
+        if (jdbcTypeValue == null) {
+            jdbcTypeValue = jdbcTypeMap.get(new JdbcTypeDesc(jdbcTypeDesc.getTypeCode()));
         }
-        return jdbcType;
+        return jdbcTypeValue;
     }
 
     protected void addJdbcTypeAliases(Map<JdbcTypeDesc, JdbcTypeDesc> jdbcTypeAliases) {

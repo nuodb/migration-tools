@@ -27,7 +27,10 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
+import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.spec.ConnectionSpec;
 import org.slf4j.Logger;
 
 import java.sql.Connection;
@@ -124,8 +127,13 @@ public class SessionBase implements Session {
     }
 
     @Override
-    public SessionFactory getSessionFactory() {
-        return sessionFactoryBase;
+    public ConnectionSpec getConnectionSpec() {
+        return ((ConnectionProxy)getConnection()).getConnectionSpec();
+    }
+
+    @Override
+    public DatabaseInfo getDatabaseInfo() {
+        return dialect.getDatabaseInfo();
     }
 
     @Override
@@ -147,7 +155,7 @@ public class SessionBase implements Session {
             work.init(this);
             work.execute();
         } catch (Exception exception) {
-            workManager.error(work, exception);
+            workManager.failure(work, exception);
         } finally {
             work.close();
         }

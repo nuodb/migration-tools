@@ -27,10 +27,13 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * @author Sergey Bushik
@@ -137,18 +140,22 @@ public class IdentifiableBase extends IndentedBase implements Identifiable {
 
     public static String getQualifiedName(Dialect dialect, String catalog, String schema, String name,
                                           Identifiable identifiable) {
-        if (identifiable.isQualified()) {
-            StringBuilder buffer = new StringBuilder();
-            if (catalog != null) {
-                buffer.append(dialect != null ? dialect.getIdentifier(catalog, null) : catalog);
-                buffer.append('.');
+        return getQualifiedName(dialect, newArrayList(catalog, schema), name, identifiable);
+    }
+
+    public static String getQualifiedName(Dialect dialect, Collection<String> qualifiers,
+                                          String name, Identifiable identifiable) {
+        if (identifiable == null || identifiable.isQualified()) {
+            Collection<String> parts = newArrayList();
+            for (String qualifier : qualifiers) {
+                if (qualifier != null) {
+                    parts.add(dialect != null ? dialect.getIdentifier(qualifier, null) : qualifier);
+                }
             }
-            if (schema != null) {
-                buffer.append(dialect != null ? dialect.getIdentifier(schema, null) : schema);
-                buffer.append('.');
+            if (name != null) {
+                parts.add(dialect != null ? dialect.getIdentifier(name, null) : name);
             }
-            buffer.append(dialect != null ? dialect.getIdentifier(name, identifiable) : identifiable.getName());
-            return buffer.toString();
+            return join(parts, '.');
         } else {
             return getName(dialect, name, identifiable);
         }

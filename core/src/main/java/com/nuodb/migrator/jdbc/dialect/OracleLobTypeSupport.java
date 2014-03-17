@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.google.common.collect.Maps;
 import com.nuodb.migrator.jdbc.type.JdbcTypeException;
 import com.nuodb.migrator.jdbc.type.adapter.JdbcLobTypeSupport;
 
@@ -37,6 +36,8 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * @author Sergey Bushik
@@ -50,9 +51,9 @@ public class OracleLobTypeSupport implements JdbcLobTypeSupport {
     private static final String MODE_READWRITE_FIELD_NAME = "MODE_READWRITE";
     private static final String MODE_READONLY_FIELD_NAME = "MODE_READONLY";
 
-    private final Map<Class, Integer> durationSessionConstants = Maps.newHashMap();
-    private final Map<Class, Integer> modeReadWriteConstants = Maps.newHashMap();
-    private final Map<Class, Integer> modeReadOnlyConstants = Maps.newHashMap();
+    private final Map<Class, Integer> durationSessionConstants = newHashMap();
+    private final Map<Class, Integer> modeReadWriteConstants = newHashMap();
+    private final Map<Class, Integer> modeReadOnlyConstants = newHashMap();
 
     private Class<?> blobClass;
     private Class<?> clobClass;

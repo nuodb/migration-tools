@@ -29,31 +29,28 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.utils.Collections;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
-import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validate;
-import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.*;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.fill;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 
 /**
  * @author Sergey Bushik
  */
-public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionScope> {
+public class NuoDBTableInspector extends ManagedInspectorBase<Schema, TableInspectionScope> {
 
     private static final String QUERY = "SELECT * FROM SYSTEM.TABLES";
 
@@ -62,94 +59,41 @@ public class NuoDBTableInspector extends InspectorBase<Schema, TableInspectionSc
     }
 
     @Override
-    public void inspectScope(final InspectionContext inspectionContext, final TableInspectionScope inspectionScope) throws SQLException {
-        validate(inspectionScope);
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         final Collection<String> filters = newArrayList();
-        final Collection<String> parameters = newArrayList();
-
-        String schemaName = inspectionScope.getSchema();
-        if (schemaName != null) {
-            filters.add(containsAny(schemaName, "%_") ? "SCHEMA LIKE ?" : "SCHEMA=?");
-            parameters.add(schemaName);
+        final Collection<Object> parameters = newArrayList();
+        String schema = tableInspectionScope.getSchema();
+        if (schema != null) {
+            filters.add(containsAny(schema, "%_") ? "SCHEMA LIKE ?" : "SCHEMA=?");
+            parameters.add(schema);
         }
-
-        String tableName = inspectionScope.getTable();
-        if (tableName != null) {
-            filters.add(containsAny(tableName, "%_") ? "TABLENAME LIKE ?" : "TABLENAME=?");
-            parameters.add(tableName);
+        String table = tableInspectionScope.getTable();
+        if (table != null) {
+            filters.add(containsAny(table, "%_") ? "TABLENAME LIKE ?" : "TABLENAME=?");
+            parameters.add(table);
         }
-
-        String[] tableTypes = inspectionScope.getTableTypes();
-        if (tableTypes != null && tableTypes.length > 0) {
-            StringBuilder filter = new StringBuilder("TYPE IN");
-            filter.append(' ');
-            filter.append('(');
-            for (int i = 0, length = tableTypes.length; i < length; i++) {
-                String tableType = tableTypes[i];
-                filter.append('?');
-                if ((i + 1) != length) {
-                    filter.append(", ");
-                }
-                parameters.add(tableType);
-            }
-            filter.append(')');
-            filters.add(filter.toString());
+        String[] tableTypes = tableInspectionScope.getTableTypes();
+        if (!Collections.isEmpty(tableTypes)) {
+            String []types = new String[tableTypes.length];
+            fill(types, "?");
+            filters.add(eqOrIn("TYPE", types));
+            parameters.addAll(asList(tableTypes));
         }
-
-        final String query = where(QUERY, filters, "AND");
-        final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
-                new StatementFactory<PreparedStatement>() {
-                    @Override
-                    public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(query,
-                                TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                    }
-                },
-                new StatementCallback<PreparedStatement>() {
-                    @Override
-                    public void process(PreparedStatement statement) throws SQLException {
-                        int parameter = 1;
-                        for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext(); ) {
-                            statement.setString(parameter++, iterator.next());
-                        }
-                        inspect(inspectionContext, statement.executeQuery());
-                    }
-                }
-        );
+        return new ParameterizedQuery(newQuery(where(QUERY, filters, AND)), parameters);
     }
 
     @Override
-    public void inspectObjects(final InspectionContext inspectionContext,
-                               final Collection<? extends Schema> schemas) throws SQLException {
-        final String query = where(QUERY, newArrayList("SCHEMA=?"), "AND");
-        final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
-                new StatementFactory<PreparedStatement>() {
-                    @Override
-                    public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(query,
-                                TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                    }
-                },
-                new StatementCallback<PreparedStatement>() {
-                    @Override
-                    public void process(PreparedStatement statement) throws SQLException {
-                        for (Schema schema : schemas) {
-                            statement.setString(1, schema.getName());
-                            inspect(inspectionContext, statement.executeQuery());
-                        }
-                    }
-                }
-        );
-    }
-
-    private void inspect(InspectionContext inspectionContext, ResultSet tables) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet tables) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (tables.next()) {
             Table table = addTable(inspectionResults, null, tables.getString("SCHEMA"), tables.getString("TABLENAME"));
             table.setType(tables.getString("TYPE"));
             table.setComment(tables.getString("REMARKS"));
         }
+    }
+
+    @Override
+    protected TableInspectionScope createInspectionScope(Schema schema) {
+        return new TableInspectionScope(null, schema.getName());
     }
 }

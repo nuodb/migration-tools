@@ -32,15 +32,14 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.nuodb.migrator.backup.format.InputFormatBase;
 import com.nuodb.migrator.backup.format.InputFormatException;
 import com.nuodb.migrator.backup.format.value.Value;
-import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.backup.format.value.ValueType;
-import com.nuodb.migrator.jdbc.model.ColumnList;
 import de.undercouch.bson4jackson.BsonFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.BitSet;
+import java.util.List;
 
 import static com.fasterxml.jackson.core.JsonToken.START_ARRAY;
 import static com.fasterxml.jackson.core.JsonToken.VALUE_NULL;
@@ -64,7 +63,7 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
     }
 
     @Override
-    protected void open(Reader reader) {
+    protected void init(Reader reader) {
         try {
             bsonReader = createBsonFactory().createJsonParser(reader);
         } catch (IOException exception) {
@@ -73,7 +72,7 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
     }
 
     @Override
-    protected void open(InputStream inputStream) {
+    protected void init(InputStream inputStream) {
         try {
             bsonReader = createBsonFactory().createJsonParser(inputStream);
         } catch (IOException exception) {
@@ -103,8 +102,8 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
         Value[] values = null;
         try {
             if (isNextToken(START_ARRAY)) {
-                ColumnList<ValueHandle> valueFormatModelList = getValueHandleList();
-                int length = valueFormatModelList.size();
+                List<ValueType> valueTypes = getValueTypes();
+                int length = valueTypes.size();
                 values = new Value[length];
                 int index = 0;
                 BitSet nulls = isNextToken(VALUE_NULL) ? EMPTY :
@@ -117,7 +116,7 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
                         bsonReader.nextToken();
                         value = bsonReader.getEmbeddedObject();
                     }
-                    ValueType valueType = valueFormatModelList.get(index).getValueType();
+                    ValueType valueType = valueTypes.get(index);
                     valueType = valueType != null ? valueType : STRING;
                     switch (valueType) {
                         case BINARY:

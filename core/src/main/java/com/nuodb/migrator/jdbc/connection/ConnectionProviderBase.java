@@ -60,7 +60,7 @@ public abstract class ConnectionProviderBase<C extends ConnectionSpec> implement
     @Override
     public Connection getConnection() throws SQLException {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Opening connection using %s", getConnectionSpec()));
+            logger.trace(format("Opening connection %s", getConnectionSpec()));
         }
         Connection connection = openConnection();
         initConnection(connection);

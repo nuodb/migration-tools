@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.Iterator;
 
 import static com.nuodb.migrator.backup.format.utils.BinaryEncoder.BASE64;
 import static java.lang.String.valueOf;
@@ -59,12 +58,12 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvAttributes {
     }
 
     @Override
-    protected void open(OutputStream outputStream) {
-        open(new OutputStreamWriter(outputStream, forName((String) getAttribute(ATTRIBUTE_ENCODING, ENCODING))));
+    protected void init(OutputStream outputStream) {
+        init(new OutputStreamWriter(outputStream, forName((String) getAttribute(ATTRIBUTE_ENCODING, ENCODING))));
     }
 
     @Override
-    protected void open(Writer writer) {
+    protected void init(Writer writer) {
         CsvFormatBuilder builder = new CsvFormatBuilder(this);
         CSVFormat format = builder.build();
         doubleQuote = valueOf(builder.getQuote()) + valueOf(builder.getQuote());
@@ -87,10 +86,9 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvAttributes {
     public void writeValues(Value[] values) {
         try {
             String[] record = new String[values.length];
-            Iterator<ValueHandle> iterator = getValueHandleList().iterator();
             for (int i = 0; i < values.length; i++) {
                 String value = null;
-                switch (iterator.next().getValueType()) {
+                switch (getValueTypes().get(i)) {
                     case BINARY:
                         value = BASE64.encode(values[i].asBytes());
                         break;

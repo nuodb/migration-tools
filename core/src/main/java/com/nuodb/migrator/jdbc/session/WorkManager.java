@@ -27,10 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
+import java.util.Map;
+
 /**
  * @author Sergey Bushik
  */
 public interface WorkManager {
 
-    void error(Work work, Exception exception) throws Exception;
+    Map<Work, Throwable> getFailures();
+
+    void failure(Work work, Throwable failure);
 }

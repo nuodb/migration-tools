@@ -27,7 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 
 import java.sql.Types;
 
@@ -38,11 +39,6 @@ public class DB2Dialect extends SimpleDialect {
 
     public DB2Dialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
-    }
-
-    @Override
-    protected void initJdbcTypes() {
-        addJdbcType(DB2XmlType.INSTANCE);
     }
 
     @Override
@@ -69,6 +65,16 @@ public class DB2Dialect extends SimpleDialect {
 
     @Override
     public boolean supportsLimit() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsSchemas() {
         return true;
     }
 

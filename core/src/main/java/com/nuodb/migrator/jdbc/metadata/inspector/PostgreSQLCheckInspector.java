@@ -29,85 +29,51 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 
 /**
  * @author Sergey Bushik
  */
-public class PostgreSQLCheckInspector extends InspectorBase<Table, TableInspectionScope> {
+public class PostgreSQLCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     private static final String QUERY =
-            "SELECT *\n" +
-            "FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS CCU\n" +
-            "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON\n" +
-            "CCU.TABLE_CATALOG = CC.CONSTRAINT_CATALOG\n" +
-            "AND CCU.TABLE_SCHEMA = CC.CONSTRAINT_SCHEMA\n" +
-            "AND CCU.CONSTRAINT_NAME = CC.CONSTRAINT_NAME\n" +
-            "WHERE CCU.TABLE_SCHEMA = ? AND CCU.TABLE_NAME = ?";
+            "SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS CCU " +
+            "INNER JOIN INFORMATION_SCHEMA.CHECK_CONSTRAINTS AS CC ON " +
+            "CCU.TABLE_CATALOG = CC.CONSTRAINT_CATALOG AND CCU.TABLE_SCHEMA = CC.CONSTRAINT_SCHEMA " +
+            "AND CCU.CONSTRAINT_NAME = CC.CONSTRAINT_NAME WHERE CCU.TABLE_SCHEMA=? AND CCU.TABLE_NAME=?";
 
     public PostgreSQLCheckInspector() {
         super(CHECK, TableInspectionScope.class);
     }
 
     @Override
-    public void inspectObjects(final InspectionContext inspectionContext,
-                               final Collection<? extends Table> tables) throws SQLException {
-        StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
-                new StatementFactory<PreparedStatement>() {
-                    @Override
-                    public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                    }
-                },
-                new StatementCallback<PreparedStatement>() {
-                    @Override
-                    public void process(PreparedStatement statement) throws SQLException {
-                        for (Table table : tables) {
-                            statement.setString(1, table.getSchema().getName());
-                            statement.setString(2, table.getName());
-                            ResultSet checkConstraints = statement.executeQuery();
-                            try {
-                                inspect(inspectionContext, table, checkConstraints);
-                            } finally {
-                                close(checkConstraints);
-                            }
-                        }
-                    }
-                }
-        );
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        Collection<Object> parameters = newArrayList();
+        parameters.add(tableInspectionScope.getSchema());
+        parameters.add(tableInspectionScope.getTable());
+        return new ParameterizedQuery(newQuery(QUERY), parameters);
     }
 
-    protected void inspect(InspectionContext inspectionContext, Table table, ResultSet checks) throws SQLException {
+    @Override
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (checks.next()) {
+            Table table = addTable(inspectionResults, null,
+                    checks.getString("TABLE_SCHEMA"), checks.getString("TABLE_NAME"));
             Check check = new Check(checks.getString("CONSTRAINT_NAME"));
             check.setText(checks.getString("CHECK_CLAUSE"));
             table.addCheck(check);
-            inspectionContext.getInspectionResults().addObject(check);
+            inspectionResults.addObject(check);
         }
-    }
-
-    @Override
-    public void inspectScope(InspectionContext inspectionContext,
-                             TableInspectionScope inspectionScope) throws SQLException {
-        throw new InspectorException("Not implemented yet");
-    }
-
-    @Override
-    public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) {
-        return false;
     }
 }

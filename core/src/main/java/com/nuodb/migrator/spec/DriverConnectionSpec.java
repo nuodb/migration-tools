@@ -28,13 +28,15 @@
 package com.nuodb.migrator.spec;
 
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
-import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.jdbc.url.JdbcUrlParsers.getInstance;
 
+/**
+ * @author Sergey Bushik
+ */
 public class DriverConnectionSpec extends ConnectionSpecBase {
 
     private String driver;
@@ -138,10 +140,5 @@ public class DriverConnectionSpec extends ConnectionSpecBase {
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (properties != null ? properties.hashCode() : 0);
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return ObjectUtils.toString(this);
     }
 }

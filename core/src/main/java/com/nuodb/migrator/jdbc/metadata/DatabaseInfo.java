@@ -27,13 +27,59 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import static java.lang.String.format;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
+import com.nuodb.migrator.utils.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
-public class DatabaseInfo {
+import java.io.Serializable;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+
+import static com.google.common.collect.ComparisonChain.start;
+import static com.google.common.collect.Ordering.natural;
+import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
+
+public class DatabaseInfo implements Comparable<DatabaseInfo>, Serializable {
+
+    protected static final int ASSIGNABLE = 0;
+    protected static final int NOT_ASSIGNABLE = 1;
+
     private String productName;
     private String productVersion;
-    private int majorVersion;
-    private int minorVersion;
+    private Integer majorVersion;
+    private Integer minorVersion;
+
+    public DatabaseInfo() {
+    }
+
+    public DatabaseInfo(String productName) {
+        this.productName = productName;
+    }
+
+    public DatabaseInfo(String productName, String productVersion) {
+        this.productName = productName;
+        this.productVersion = productVersion;
+    }
+
+
+    public DatabaseInfo(String productName, String productVersion, Integer majorVersion) {
+        this.productName = productName;
+        this.productVersion = productVersion;
+        this.majorVersion = majorVersion;
+    }
+
+    public DatabaseInfo(String productName, String productVersion, Integer majorVersion, Integer minorVersion) {
+        this.productName = productName;
+        this.productVersion = productVersion;
+        this.minorVersion = minorVersion;
+        this.majorVersion = majorVersion;
+    }
+
+    public DatabaseInfo(DatabaseMetaData metaData) throws SQLException {
+        this(metaData.getDatabaseProductName(), metaData.getDatabaseProductVersion(),
+                metaData.getDatabaseMajorVersion(), metaData.getDatabaseMinorVersion());
+    }
 
     public String getProductName() {
         return productName;
@@ -51,26 +97,73 @@ public class DatabaseInfo {
         this.productVersion = productVersion;
     }
 
-    public int getMajorVersion() {
+    public Integer getMajorVersion() {
         return majorVersion;
     }
 
-    public void setMajorVersion(int majorVersion) {
+    public void setMajorVersion(Integer majorVersion) {
         this.majorVersion = majorVersion;
     }
 
-    public int getMinorVersion() {
+    public Integer getMinorVersion() {
         return minorVersion;
     }
 
-    public void setMinorVersion(int minorVersion) {
+    public void setMinorVersion(Integer minorVersion) {
         this.minorVersion = minorVersion;
     }
 
+    /**
+     * Checks if this is a base database info for the given database info
+     *
+     * @param databaseInfo to check if it's inherited from this database info
+     * @return true is this database into is a super class for the given info
+     */
+    public boolean isAssignable(DatabaseInfo databaseInfo) {
+        return isAssignable(databaseInfo, start()).result() <= 0;
+    }
+
+    protected ComparisonChain isAssignable(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        comparator = isAssignableProductName(databaseInfo, comparator);
+        comparator = isAssignableProductVersion(databaseInfo, comparator);
+        comparator = isAssignableMajorVersion(databaseInfo, comparator);
+        comparator = isAssignableMinorVersion(databaseInfo, comparator);
+        return comparator;
+    }
+
+    protected ComparisonChain isAssignableProductName(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getProductName(), databaseInfo.getProductName(),
+                new Ordering<String>() {
+                    @Override
+                    public int compare(String productName1, String productName2) {
+                        return productName1 == null ? 0 :
+                                StringUtils.equals(productName1, productName2) ? ASSIGNABLE : NOT_ASSIGNABLE;
+                    }
+                });
+    }
+
+    protected ComparisonChain isAssignableProductVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getProductVersion(), databaseInfo.getProductVersion(),
+                new Ordering<String>() {
+                    @Override
+                    public int compare(String productVersion1, String productVersion2) {
+                        return productVersion1 == null ? 0 :
+                                StringUtils.equals(productVersion1, productVersion2) ? ASSIGNABLE : NOT_ASSIGNABLE;
+                    }
+                });
+    }
+
+    protected ComparisonChain isAssignableMajorVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getMajorVersion(), databaseInfo.getMajorVersion(), natural().nullsFirst());
+    }
+
+    protected ComparisonChain isAssignableMinorVersion(DatabaseInfo databaseInfo, ComparisonChain comparator) {
+        return comparator.compare(getMinorVersion(), databaseInfo.getMinorVersion(), natural().nullsFirst());
+    }
+
     @Override
-    public String toString() {
-        return format("product name=%s, product version=%s, major version=%d, minor version=%d",
-                productName, productVersion, majorVersion, minorVersion);
+    public int compareTo(DatabaseInfo databaseInfo) {
+        return isAssignable(databaseInfo, start()).result();
     }
 
     @Override
@@ -80,12 +173,12 @@ public class DatabaseInfo {
 
         DatabaseInfo that = (DatabaseInfo) o;
 
-        if (majorVersion != that.majorVersion) return false;
-        if (minorVersion != that.minorVersion) return false;
-        if (productName != null ? !productName.equals(that.productName) : that.productName != null) return false;
-        if (productVersion != null ? !productVersion.equals(that.productVersion) : that.productVersion != null)
-            return false;
-
+        if (productName != null ? !startsWithIgnoreCase(productName,
+                that.productName) : that.productName != null) return false;
+        if (productVersion != null ? !StringUtils.equals(productVersion,
+                that.productVersion) : that.productVersion != null) return false;
+        if (majorVersion != null ? !majorVersion.equals(that.majorVersion) : that.majorVersion != null) return false;
+        if (minorVersion != null ? !minorVersion.equals(that.minorVersion) : that.minorVersion != null) return false;
         return true;
     }
 
@@ -93,8 +186,13 @@ public class DatabaseInfo {
     public int hashCode() {
         int result = productName != null ? productName.hashCode() : 0;
         result = 31 * result + (productVersion != null ? productVersion.hashCode() : 0);
-        result = 31 * result + minorVersion;
-        result = 31 * result + majorVersion;
+        result = 31 * result + (majorVersion != null ? majorVersion.hashCode() : 0);
+        result = 31 * result + (minorVersion != null ? minorVersion.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

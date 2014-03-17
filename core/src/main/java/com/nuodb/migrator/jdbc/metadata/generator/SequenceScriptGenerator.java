@@ -44,7 +44,7 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
     }
 
     @Override
-    public Collection<String> getCreateScripts(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getCreateScripts(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE");
         buffer.append(' ');
@@ -54,8 +54,8 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
         }
         buffer.append("SEQUENCE");
         buffer.append(' ');
-        buffer.append(scriptGeneratorContext.getQualifiedName(sequence));
-        Dialect dialect = scriptGeneratorContext.getTargetDialect();
+        buffer.append(scriptGeneratorManager.getName(sequence));
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
 
         String currentValue = dialect.getSequenceStartWith(sequence.getLastValue());
         if (currentValue != null) {
@@ -102,8 +102,8 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
     }
 
     @Override
-    public Collection<String> getDropScripts(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext) {
-        Dialect dialect = scriptGeneratorContext.getTargetDialect();
+    public Collection<String> getDropScripts(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
         StringBuilder buffer = new StringBuilder();
         buffer.append("DROP SEQUENCE");
         if (dialect.supportsDropSequenceIfExists()) {
@@ -111,7 +111,7 @@ public class SequenceScriptGenerator extends ScriptGeneratorBase<Sequence> {
             buffer.append("IF EXISTS");
         }
         buffer.append(' ');
-        buffer.append(scriptGeneratorContext.getQualifiedName(sequence));
+        buffer.append(scriptGeneratorManager.getName(sequence));
         return singleton(buffer.toString());
     }
 }

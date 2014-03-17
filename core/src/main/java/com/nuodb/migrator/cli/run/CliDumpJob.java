@@ -32,10 +32,9 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
-import com.nuodb.migrator.dump.DumpJobFactory;
-import com.nuodb.migrator.jdbc.dialect.QueryLimit;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.spec.DumpSpec;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
+import com.nuodb.migrator.spec.DumpJobSpec;
 import com.nuodb.migrator.spec.QuerySpec;
 import com.nuodb.migrator.spec.TableSpec;
 
@@ -60,44 +59,48 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  *
  * @author Sergey Bushik
  */
-public class CliDumpJob extends CliRunJob {
-
-    /**
-     * The "dump" literal command which is matched against the command name on the command line.
-     */
-    public static final String COMMAND = "dump";
+public class CliDumpJob extends CliJob<DumpJobSpec> {
 
     public CliDumpJob() {
-        super(COMMAND);
+        super(DUMP_COMMAND);
     }
 
     @Override
     protected Option createOption() {
-        return newGroupBuilder()
-                .withName(getMessage(DUMP_GROUP_NAME))
-                .withOption(createSourceGroup())
-                .withOption(createOutputGroup())
-                .withOption(createTableGroup())
-                .withOption(createQueryGroup())
-                .withOption(createTimeZoneOption())
-                .withOption(createThreadsOption())
-                .withOption(createQueryLimitOption())
-                .withRequired(true).build();
+        GroupBuilder group = newGroupBuilder().
+                withName(getMessage(DUMP_GROUP_NAME)).withRequired(true);
+        group.withOption(createSourceGroup());
+        group.withOption(createOutputGroup());
+        group.withOption(createMigrationModeGroup());
+        group.withOption(createDataMigrationGroup());
+        group.withOption(createSchemaMigrationGroup());
+        return group.build();
     }
 
     @Override
     protected void bind(OptionSet optionSet) {
-        DumpSpec dumpSpec = new DumpSpec();
+        DumpJobSpec dumpJobSpec = new DumpJobSpec();
+        dumpJobSpec.setSourceSpec(parseSourceGroup(optionSet, this));
+        dumpJobSpec.setOutputSpec(parseOutputGroup(optionSet, this));
+        dumpJobSpec.setMigrationModes(parseMigrationModeGroup(optionSet, this));
+        parseDataMigrationGroup(optionSet, dumpJobSpec);
+        parseSchemaMigrationGroup(optionSet, dumpJobSpec);
+        setJobSpec(dumpJobSpec);
+    }
 
-        parseTableGroup(optionSet, dumpSpec);
-        dumpSpec.setConnectionSpec(parseSourceGroup(optionSet, this));
-        dumpSpec.setOutputSpec(parseOutputGroup(optionSet, this));
-        dumpSpec.setQuerySpecs(parseQueryGroup(optionSet));
-        dumpSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
-        dumpSpec.setThreads(parseThreadsOption(optionSet, this));
-        dumpSpec.setQueryLimit(parseQueryLimitOption(optionSet, this));
+    @Override
+    public void execute(Map<Object, Object> context) {
+        getMigrator().execute(getJobSpec(), context);
+    }
 
-        setJobFactory(new DumpJobFactory(dumpSpec));
+    protected Option createDataMigrationGroup() {
+        GroupBuilder group = newGroupBuilder().withName(getMessage(DATA_MIGRATION_GROUP_NAME));
+        group.withOption(createTableGroup());
+        group.withOption(createQueryGroup());
+        group.withOption(createTimeZoneOption());
+        group.withOption(createThreadsOption());
+        group.withOption(createQueryLimitOption());
+        return group.build();
     }
 
     /**
@@ -117,16 +120,6 @@ public class CliDumpJob extends CliRunJob {
                                 withRequired(true).build()
                 ).build();
         group.withOption(table);
-
-        Option tableType = newBasicOptionBuilder().
-                withName(TABLE_TYPE_OPTION).
-                withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).
-                                withMaximum(Integer.MAX_VALUE).build()
-                ).build();
-        group.withOption(tableType);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
@@ -158,40 +151,6 @@ public class CliDumpJob extends CliRunJob {
                 ).build();
     }
 
-    protected Option createQueryLimitOption() {
-        return newBasicOptionBuilder().
-                withName(QUERY_LIMIT_OPTION).
-                withDescription(getMessage(QUERY_LIMIT_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(QUERY_LIMIT_ARGUMENT_NAME)).build()
-                ).build();
-    }
-
-    protected void parseTableGroup(OptionSet optionSet, DumpSpec dumpSpec) {
-        Collection<String> tableTypes = newLinkedHashSet();
-        tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
-        if (tableTypes.isEmpty()) {
-            tableTypes.add(Table.TABLE);
-        }
-        dumpSpec.setTableTypes(tableTypes.toArray(new String[tableTypes.size()]));
-
-        Map<String, TableSpec> tableQueryMapping = newHashMap();
-        for (String table : optionSet.<String>getValues(TABLE_OPTION)) {
-            tableQueryMapping.put(table, new TableSpec(table));
-        }
-        for (Iterator<String> iterator = optionSet.<String>getValues(
-                TABLE_FILTER_OPTION).iterator(); iterator.hasNext(); ) {
-            String name = iterator.next();
-            TableSpec tableSpec = tableQueryMapping.get(name);
-            if (tableSpec == null) {
-                tableQueryMapping.put(name, tableSpec = new TableSpec(name));
-            }
-            tableSpec.setFilter(iterator.next());
-        }
-        dumpSpec.setTableSpecs(tableQueryMapping.values());
-    }
-
     protected Option createQueryGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(MAX_VALUE);
 
@@ -214,6 +173,41 @@ public class CliDumpJob extends CliRunJob {
         return group.build();
     }
 
+    protected Option createQueryLimitOption() {
+        return newBasicOptionBuilder().
+                withName(QUERY_LIMIT_OPTION).
+                withDescription(getMessage(QUERY_LIMIT_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(QUERY_LIMIT_ARGUMENT_NAME)).build()
+                ).build();
+    }
+
+    protected void parseDataMigrationGroup(OptionSet optionSet, DumpJobSpec jobSpec) {
+        parseTableGroup(optionSet, jobSpec);
+        jobSpec.setQuerySpecs(parseQueryGroup(optionSet));
+        jobSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
+        jobSpec.setThreads(parseThreadsOption(optionSet, this));
+        jobSpec.setQueryLimit(parseQueryLimitOption(optionSet, this));
+    }
+
+    protected void parseTableGroup(OptionSet optionSet, DumpJobSpec jobSpec) {
+        Map<String, TableSpec> tableQueryMapping = newHashMap();
+        for (String table : optionSet.<String>getValues(TABLE_OPTION)) {
+            tableQueryMapping.put(table, new TableSpec(table));
+        }
+        for (Iterator<String> iterator = optionSet.<String>getValues(
+                TABLE_FILTER_OPTION).iterator(); iterator.hasNext(); ) {
+            String name = iterator.next();
+            TableSpec tableSpec = tableQueryMapping.get(name);
+            if (tableSpec == null) {
+                tableQueryMapping.put(name, tableSpec = new TableSpec(name));
+            }
+            tableSpec.setFilter(iterator.next());
+        }
+        jobSpec.setTableSpecs(newArrayList(tableQueryMapping.values()));
+    }
+
     protected Collection<QuerySpec> parseQueryGroup(OptionSet optionSet) {
         List<QuerySpec> querySpecs = newArrayList();
         for (String query : optionSet.<String>getValues(QUERY_OPTION)) {
@@ -230,5 +224,44 @@ public class CliDumpJob extends CliRunJob {
     protected QueryLimit parseQueryLimitOption(OptionSet optionSet, Option option) {
         String queryLimitValue = (String) optionSet.getValue(QUERY_LIMIT_OPTION);
         return !isEmpty(queryLimitValue) ? new QueryLimit(parseLong(queryLimitValue)) : null;
+    }
+
+    @Override
+    protected Group createSchemaMigrationGroup() {
+        GroupBuilder group = newGroupBuilder().withName(getMessage(SCHEMA_MIGRATION_GROUP_NAME));
+
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
+
+        Option tableType = newBasicOptionBuilder().
+                withName(TABLE_TYPE_OPTION).
+                withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(TABLE_TYPE_ARGUMENT_NAME)).
+                                withMaximum(MAX_VALUE).build()
+                ).build();
+        group.withOption(tableType);
+
+        Option metaData = newRegexOptionBuilder().
+                withName(META_DATA_OPTION).
+                withDescription(getMessage(META_DATA_OPTION_DESCRIPTION)).
+                withRegex(META_DATA_OPTION, 1, LOW).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(META_DATA_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withMinimum(1).withMaximum(MAX_VALUE).build()
+                )
+                .build();
+        group.withOption(metaData);
+        return group.build();
+    }
+
+    protected void parseSchemaMigrationGroup(OptionSet optionSet, DumpJobSpec jobSpec) {
+        if (optionSet.hasOption(META_DATA_OPTION)) {
+            jobSpec.setObjectTypes(parseObjectTypes(optionSet));
+        }
+        jobSpec.setTableTypes(parseTableTypes(optionSet));
     }
 }

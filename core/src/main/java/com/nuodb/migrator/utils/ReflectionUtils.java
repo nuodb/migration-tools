@@ -42,7 +42,31 @@ import static java.util.Arrays.asList;
 @SuppressWarnings("unchecked")
 public class ReflectionUtils {
 
+    private static final char PACKAGE_SEPARATOR = '.';
+
+    private static final char INNER_CLASS_SEPARATOR = '$';
+
+    public static final String CGLIB_CLASS_SEPARATOR = "$$";
+
+    public static final String CLASS_FILE_SUFFIX = ".class";
+
     private ReflectionUtils() {
+    }
+
+    public static String getClassName(Class type) {
+        return type.getName();
+    }
+
+    public static String getShortClassName(Class type) {
+        String name = getClassName(type);
+        int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);
+        int nameEndIndex = name.indexOf(CGLIB_CLASS_SEPARATOR);
+        if (nameEndIndex == -1) {
+            nameEndIndex = name.length();
+        }
+        String shortName = name.substring(lastDotIndex + 1, nameEndIndex);
+        shortName = shortName.replace(INNER_CLASS_SEPARATOR, PACKAGE_SEPARATOR);
+        return shortName;
     }
 
     public static ClassLoader getClassLoader() {

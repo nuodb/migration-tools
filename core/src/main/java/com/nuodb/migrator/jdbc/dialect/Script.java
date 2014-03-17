@@ -27,13 +27,15 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.session.Session;
 
 /**
  * @author Sergey Bushik
  */
 public interface Script extends Comparable<Script> {
+
+    boolean isLiteral();
 
     String getScript();
 

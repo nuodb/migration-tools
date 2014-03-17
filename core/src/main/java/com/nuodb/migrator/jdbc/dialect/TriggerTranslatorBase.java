@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 
 /**
  * @author Sergey Bushik
@@ -52,11 +52,11 @@ public class TriggerTranslatorBase<S extends TriggerScript> extends TranslatorBa
         super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
     }
 
-    protected boolean supportsScript(TriggerScript script, TranslationContext translationContext) {
+    protected boolean supportsScript(TriggerScript script, TranslationContext context) {
         return false;
     }
 
-    public Script translate(TriggerScript script, TranslationContext translationContext) {
+    public Script translate(TriggerScript script, TranslationContext context) {
         return null;
     }
 }

@@ -16,15 +16,18 @@
  */
 package com.nuodb.migrator.cli.parse.option;
 
-import com.google.common.collect.Sets;
 import com.nuodb.migrator.cli.parse.*;
 import com.nuodb.migrator.utils.Priority;
-import com.nuodb.migrator.utils.PriorityList;
-import com.nuodb.migrator.utils.SimplePriorityList;
+import com.nuodb.migrator.utils.PrioritySet;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.cli.parse.OptionValidators.toOptionProcessor;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionRequired;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
@@ -39,8 +42,8 @@ public abstract class OptionBase implements Option {
     private String description;
     private boolean required;
     private OptionFormat optionFormat = OptionFormat.LONG;
-    private PriorityList<Trigger> triggers = new SimplePriorityList<Trigger>();
-    private Collection<OptionProcessor> optionProcessors = Sets.newLinkedHashSet();
+    private PrioritySet<Trigger> triggers = com.nuodb.migrator.utils.Collections.newPrioritySet();
+    private Collection<OptionProcessor> optionProcessors = newLinkedHashSet();
 
     public OptionBase() {
     }
@@ -141,7 +144,7 @@ public abstract class OptionBase implements Option {
     }
 
     @Override
-    public PriorityList<Trigger> getTriggers() {
+    public PrioritySet<Trigger> getTriggers() {
         return triggers;
     }
 
@@ -226,7 +229,7 @@ public abstract class OptionBase implements Option {
         optionRequired(this);
     }
 
-    public static void createTriggers(PriorityList<Trigger> triggers, Set<String> prefixes, String trigger) {
+    public static void createTriggers(PrioritySet<Trigger> triggers, Set<String> prefixes, String trigger) {
         for (String prefix : prefixes) {
             triggers.add(new TriggerImpl(prefix + trigger));
         }

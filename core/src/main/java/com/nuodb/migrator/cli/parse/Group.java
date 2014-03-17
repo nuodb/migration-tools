@@ -57,6 +57,13 @@ public interface Group extends Option {
     void addOptions(Collection<Option> options);
 
     /**
+     * Returns list of child options
+     *
+     * @return child options
+     */
+    Collection<Option> getOptions();
+
+    /**
      * Appends help information to the specified buffer
      *
      * @param buffer     the buffer to append to

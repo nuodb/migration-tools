@@ -57,11 +57,11 @@ public class CliRunAdapterTest {
             }
 
             @Override
-            public void run() {
+            public void execute() {
             }
 
             @Override
-            public void run(Map<Object, Object> context) {
+            public void execute(Map<Object, Object> context) {
             }
         });
     }

@@ -33,6 +33,8 @@ import org.simpleframework.xml.transform.Matcher;
 import org.simpleframework.xml.transform.RegistryMatcher;
 import org.simpleframework.xml.transform.Transformer;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Date;
 
 public class XmlTransformerHandler implements XmlReadWriteHandler {
@@ -41,7 +43,7 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
 
     public XmlTransformerHandler() {
         RegistryMatcher matcher = new RegistryMatcher();
-        matcher.bind(Boolean.class, DoubleTransform.class);
+        matcher.bind(Boolean.class, BooleanTransform.class);
         matcher.bind(Byte.class, ByteTransform.class);
         matcher.bind(Character.class, CharacterTransform.class);
         matcher.bind(Integer.class, IntegerTransform.class);
@@ -50,6 +52,8 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
         matcher.bind(Float.class, FloatTransform.class);
         matcher.bind(Double.class, DoubleTransform.class);
         matcher.bind(Date.class, DateTransform.class);
+        matcher.bind(BigInteger.class, BigIntegerTransform.class);
+        matcher.bind(BigDecimal.class, BigDecimalTransform.class);
 
         this.transformer = new Transformer(matcher);
     }
@@ -66,8 +70,8 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
     public Object read(InputNode input, Class type, XmlReadContext context) {
         try {
             return transformer.read(input.getValue(), type);
-        } catch (Exception e) {
-            throw new XmlPersisterException(e);
+        } catch (Exception exception) {
+            throw new XmlPersisterException(exception);
         }
     }
 
@@ -77,17 +81,22 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
     }
 
     @Override
-    public boolean write(Object value, Class type, OutputNode output, XmlWriteContext context) {
+    public boolean skip(Object source, Class type, OutputNode output, XmlWriteContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean write(Object source, Class type, OutputNode output, XmlWriteContext context) {
         try {
-            output.setValue(transformer.write(value, type));
+            output.setValue(transformer.write(source, type));
             return true;
-        } catch (Exception e) {
-            throw new XmlPersisterException(e);
+        } catch (Exception exception) {
+            throw new XmlPersisterException(exception);
         }
     }
 
     @Override
-    public boolean canWrite(Object value, Class type, OutputNode output, XmlWriteContext context) {
+    public boolean canWrite(Object source, Class type, OutputNode output, XmlWriteContext context) {
         return canConvert(type);
     }
 

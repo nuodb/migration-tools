@@ -37,8 +37,6 @@ import java.io.Writer;
  */
 public interface OutputFormat extends Format {
 
-    void open();
-
     void writeStart();
 
     boolean canWrite();
@@ -48,8 +46,6 @@ public interface OutputFormat extends Format {
     void writeValues(Value[] values);
 
     void writeEnd();
-
-    void close();
 
     Writer getWriter();
 

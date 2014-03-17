@@ -30,6 +30,7 @@ package com.nuodb.migrator.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.Character.*;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.compile;
 
@@ -37,6 +38,89 @@ import static java.util.regex.Pattern.compile;
  * @author Sergey Bushik
  */
 public class StringUtils {
+
+    public static boolean isEmpty(CharSequence source) {
+        return source == null || source.length() == 0;
+    }
+
+    public static boolean isLowerCase(CharSequence source) {
+        if (isEmpty(source)) {
+            return false;
+        }
+        int sz = source.length();
+        for (int i = 0; i < sz; i++) {
+            char ch = source.charAt(i);
+            if (!(!Character.isLetter(ch) || Character.isLowerCase(ch))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isUpperCase(CharSequence source) {
+        if (isEmpty(source)) {
+            return false;
+        }
+        int sz = source.length();
+        for (int i = 0; i < sz; i++) {
+            char ch = source.charAt(i);
+            if (!(!Character.isLetter(ch) || Character.isUpperCase(ch))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isCapitalizedCase(CharSequence source, char... delimiters) {
+        return !isEmpty(source) && equals(capitalizedCase(source.toString(), delimiters), source);
+    }
+
+    public static boolean equals(CharSequence source1, CharSequence source2) {
+        return source1 == null ? source2 == null : source1.equals(source2);
+    }
+
+    public static boolean isDelimiter(char ch, char[] delimiters) {
+        if (delimiters == null) {
+            return Character.isWhitespace(ch);
+        }
+        for (char delimiter : delimiters) {
+            if (ch == delimiter) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String lowerCase(CharSequence source) {
+        return source == null ? null : source.toString().toLowerCase();
+    }
+
+    public static String upperCase(CharSequence source) {
+        return source == null ? null : source.toString().toUpperCase();
+    }
+
+    public static String capitalizedCase(CharSequence source) {
+        return capitalizedCase(source, null);
+    }
+
+    public static String capitalizedCase(CharSequence source, char... delimiters) {
+        int delimitersCount = delimiters == null ? -1 : delimiters.length;
+        if (isEmpty(source) || delimitersCount == 0) {
+            return source.toString();
+        }
+        char[] buffer = source.toString().toLowerCase().toCharArray();
+        boolean capitalizeNext = true;
+        for (int i = 0; i < buffer.length; i++) {
+            char ch = buffer[i];
+            if (isDelimiter(ch, delimiters)) {
+                capitalizeNext = true;
+            } else if (capitalizeNext) {
+                buffer[i] = toTitleCase(ch);
+                capitalizeNext = false;
+            }
+        }
+        return new String(buffer);
+    }
 
     public static int indexOf(String source, String token, int from) {
         return indexOf(source, token, from, false);

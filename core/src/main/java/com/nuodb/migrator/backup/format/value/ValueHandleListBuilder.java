@@ -28,13 +28,14 @@
 package com.nuodb.migrator.backup.format.value;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.model.Column;
-import com.nuodb.migrator.jdbc.model.SimpleColumn;
-import com.nuodb.migrator.jdbc.model.SimpleColumnList;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.model.SimpleField;
+import com.nuodb.migrator.jdbc.model.SimpleFieldList;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
-import com.nuodb.migrator.jdbc.type.jdbc2.JdbcDateTypeBase;
+import com.nuodb.migrator.jdbc.type.jdbc2.JdbcDateValueBase;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
@@ -53,38 +54,38 @@ public abstract class ValueHandleListBuilder {
 
     private TimeZone timeZone;
 
-    private Collection<? extends Column> columns;
+    private Collection<? extends Field> fields;
 
     private ValueFormatRegistry valueFormatRegistry;
 
-    public static ValueHandleListBuilder newBuilder(final ResultSet resultSet) {
+    public static ValueHandleListBuilder newBuilder(final Connection connection, final ResultSet resultSet) {
         return new ValueHandleListBuilder() {
             private int column = 1;
 
             @Override
             protected JdbcValueAccess buildJdbcValueAccess(ValueHandle valueHandle) {
                 return getDialect().getJdbcValueAccessProvider().getJdbcValueGetter(
-                        resultSet, column++, valueHandle);
+                        connection, resultSet, column++, valueHandle);
             }
         };
     }
 
-    public static ValueHandleListBuilder newBuilder(final PreparedStatement statement) {
+    public static ValueHandleListBuilder newBuilder(final Connection connection, final PreparedStatement statement) {
         return new ValueHandleListBuilder() {
             private int column = 1;
 
             @Override
             protected JdbcValueAccess buildJdbcValueAccess(ValueHandle valueHandle) {
                 return getDialect().getJdbcValueAccessProvider().getJdbcValueGetter(
-                        statement, column++, valueHandle);
+                        connection, statement, column++, valueHandle);
             }
         };
     }
 
     public ValueHandleList build() {
         ValueHandleList valueHandleList = createValueHandleList();
-        for (Column column : getColumns()) {
-            ValueHandle valueHandle = createValueHandle(column);
+        for (Field field : getFields()) {
+            ValueHandle valueHandle = createValueHandle(field);
             initValueHandle(valueHandle);
             valueHandleList.add(valueHandle);
         }
@@ -95,10 +96,10 @@ public abstract class ValueHandleListBuilder {
         return new SimpleValueHandleList();
     }
 
-    protected ValueHandle createValueHandle(Column column) {
-        ValueHandle valueHandle = new SimpleValueHandle(column);
+    protected ValueHandle createValueHandle(Field field) {
+        ValueHandle valueHandle = new SimpleValueHandle(field);
         JdbcTypeDesc jdbcTypeDesc = getDialect().getJdbcTypeRegistry().getJdbcTypeAlias(
-                column.getTypeCode(), column.getTypeName());
+                field.getTypeCode(), field.getTypeName());
         valueHandle.setTypeCode(jdbcTypeDesc.getTypeCode());
         valueHandle.setTypeName(jdbcTypeDesc.getTypeName());
         return valueHandle;
@@ -142,7 +143,7 @@ public abstract class ValueHandleListBuilder {
             case Types.TIMESTAMP:
                 if (dialect.supportsStatementWithTimezone()) {
                     jdbcValueAccessOptions = newHashMap();
-                    jdbcValueAccessOptions.put(JdbcDateTypeBase.TIMEZONE, getTimeZone());
+                    jdbcValueAccessOptions.put(JdbcDateValueBase.TIMEZONE, getTimeZone());
                 }
                 break;
             default:
@@ -168,12 +169,12 @@ public abstract class ValueHandleListBuilder {
         return this;
     }
 
-    public Collection<? extends Column> getColumns() {
-        return columns;
+    public Collection<? extends Field> getFields() {
+        return fields;
     }
 
-    public ValueHandleListBuilder withColumns(Collection<? extends Column> columns) {
-        this.columns = columns;
+    public ValueHandleListBuilder withFields(Collection<? extends Field> fields) {
+        this.fields = fields;
         return this;
     }
 
@@ -186,7 +187,7 @@ public abstract class ValueHandleListBuilder {
         return this;
     }
 
-    static class SimpleValueHandle extends SimpleColumn implements ValueHandle {
+    static class SimpleValueHandle extends SimpleField implements ValueHandle {
 
         private ValueType valueType;
         private ValueFormat valueFormat;
@@ -196,8 +197,8 @@ public abstract class ValueHandleListBuilder {
         public SimpleValueHandle() {
         }
 
-        public SimpleValueHandle(Column column) {
-            super(column);
+        public SimpleValueHandle(Field field) {
+            super(field);
         }
 
         @Override
@@ -241,6 +242,6 @@ public abstract class ValueHandleListBuilder {
         }
     }
 
-    static class SimpleValueHandleList extends SimpleColumnList<ValueHandle> implements ValueHandleList {
+    static class SimpleValueHandleList extends SimpleFieldList<ValueHandle> implements ValueHandleList {
     }
 }

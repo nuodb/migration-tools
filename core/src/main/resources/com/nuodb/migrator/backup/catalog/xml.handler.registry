@@ -1,8 +1,0 @@
-com.nuodb.migrator.utils.xml.XmlTransformerHandler
-com.nuodb.migrator.backup.catalog.XmlCatalogHandler
-com.nuodb.migrator.backup.catalog.XmlDatabaseInfoHandler
-com.nuodb.migrator.backup.catalog.XmlChunkHandler
-com.nuodb.migrator.backup.catalog.XmlColumnHandler
-com.nuodb.migrator.backup.catalog.XmlQueryRowSetHandler
-com.nuodb.migrator.backup.catalog.XmlTableRowSetHandler
-com.nuodb.migrator.backup.catalog.XmlRowSetMapper,-1

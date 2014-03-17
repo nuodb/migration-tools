@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
 import javax.sql.rowset.serial.SerialRef;
@@ -55,9 +55,9 @@ public class JdbcValueFormat extends ValueFormatBase<Object> {
     @Override
     protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
         Object result;
-        Column column = access.getColumn();
+        Field field = access.getField();
         Value value;
-        switch (column.getTypeCode()) {
+        switch (field.getTypeCode()) {
             case Types.BIT:
             case Types.TINYINT:
             case Types.SMALLINT:
@@ -116,16 +116,16 @@ public class JdbcValueFormat extends ValueFormatBase<Object> {
                 break;
             default:
                 throw new ValueFormatException(format("Unsupported data type %s, type code %d on %s column",
-                        column.getTypeName(), column.getTypeCode(), getColumnName(column)));
+                        field.getTypeName(), field.getTypeCode(), getColumnName(field)));
         }
         return value;
     }
 
     @Override
     protected void doSetValue(Value value, JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
-        Column column = access.getColumn();
+        Field field = access.getField();
         final String result = value.asString();
-        switch (column.getTypeCode()) {
+        switch (field.getTypeCode()) {
             case Types.BIT:
             case Types.BOOLEAN:
                 access.setValue(!isEmpty(result) ? Boolean.parseBoolean(result) : null,
@@ -133,10 +133,7 @@ public class JdbcValueFormat extends ValueFormatBase<Object> {
                 break;
             case Types.TINYINT:
             case Types.SMALLINT:
-                if (access.getColumn().getScale() > 0) {
-                }
-                access.setValue(!isEmpty(result) ? Short.parseShort(result) : null,
-                        options);
+                access.setValue(!isEmpty(result) ? Short.parseShort(result) : null, options);
                 break;
             case Types.INTEGER:
                 access.setValue(!isEmpty(result) ? Integer.parseInt(result) : null,
@@ -147,12 +144,10 @@ public class JdbcValueFormat extends ValueFormatBase<Object> {
                 break;
             case Types.FLOAT:
             case Types.REAL:
-                access.setValue(!isEmpty(result) ? Float.parseFloat(result) : null,
-                        options);
+                access.setValue(!isEmpty(result) ? Float.parseFloat(result) : null, options);
                 break;
             case Types.DOUBLE:
-                access.setValue(!isEmpty(result) ? Double.parseDouble(result) : null,
-                        options);
+                access.setValue(!isEmpty(result) ? Double.parseDouble(result) : null, options);
                 break;
             case Types.NUMERIC:
             case Types.DECIMAL:
@@ -197,7 +192,7 @@ public class JdbcValueFormat extends ValueFormatBase<Object> {
                 break;
             default:
                 throw new ValueFormatException(format("Unsupported data type %s, type code %d on %s column",
-                        column.getTypeName(), column.getTypeCode(), getColumnName(column)));
+                        field.getTypeName(), field.getTypeCode(), getColumnName(field)));
         }
     }
 
@@ -233,9 +228,9 @@ public class JdbcValueFormat extends ValueFormatBase<Object> {
     }
 
     @Override
-    public ValueType getValueType(Column column) {
+    public ValueType getValueType(Field field) {
         ValueType valueType;
-        switch (column.getTypeCode()) {
+        switch (field.getTypeCode()) {
             case Types.BINARY:
             case Types.VARBINARY:
             case Types.LONGVARBINARY:

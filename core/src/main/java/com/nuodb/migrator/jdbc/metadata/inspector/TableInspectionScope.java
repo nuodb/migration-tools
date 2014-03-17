@@ -27,6 +27,10 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import java.util.Arrays;
+
+import static java.lang.String.format;
+
 /**
  * @author Sergey Bushik
  */
@@ -66,5 +70,27 @@ public class TableInspectionScope extends SchemaInspectionScope {
 
     public void setTableTypes(String[] tableTypes) {
         this.tableTypes = tableTypes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        TableInspectionScope that = (TableInspectionScope) o;
+
+        if (table != null ? !table.equals(that.table) : that.table != null) return false;
+        if (!Arrays.equals(tableTypes, that.tableTypes)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (table != null ? table.hashCode() : 0);
+        result = 31 * result + (tableTypes != null ? Arrays.hashCode(tableTypes) : 0);
+        return result;
     }
 }

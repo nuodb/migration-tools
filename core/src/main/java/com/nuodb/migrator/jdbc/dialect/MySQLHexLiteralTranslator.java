@@ -33,7 +33,7 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.valueOf;
 import static java.sql.Types.*;
@@ -54,14 +54,14 @@ public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
     }
 
     @Override
-    protected boolean supportsScript(ColumnScript script, TranslationContext translationContext) {
+    protected boolean supportsScript(ColumnScript script, TranslationContext context) {
         Column column = script.getColumn();
         return script.getScript() != null && TYPES.contains(column.getTypeCode()) && PATTERN.matcher(script
                 .getScript()).matches();
     }
 
     @Override
-    public Script translate(ColumnScript script, TranslationContext translationContext) {
+    public Script translate(ColumnScript script, TranslationContext context) {
         Matcher matcher = PATTERN.matcher(script.getScript());
         Integer target;
         if (matcher.matches()) {
@@ -70,7 +70,7 @@ public class MySQLHexLiteralTranslator extends ColumnTranslatorBase {
         } else {
             target = null;
         }
-        return target != null ? new SimpleScript(valueOf(target), translationContext.getDatabaseInfo()) : null;
+        return target != null ? new SimpleScript(valueOf(target), context.getDatabaseInfo(), true) : null;
     }
 }
 

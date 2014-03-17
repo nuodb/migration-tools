@@ -27,7 +27,13 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.url.JdbcUrl;
+import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
+
+import java.sql.Connection;
 
 /**
  * @author Sergey Bushik
@@ -63,6 +69,35 @@ public abstract class TranslatorBase<S extends Script> implements Translator<S> 
         this.scriptClass = scriptClass;
     }
 
+    public static Connection getConnection(Script script) {
+        return script.getSession().getConnection();
+    }
+
+    public static ConnectionSpec getConnectionSpec(Script script) {
+        return script.getSession().getConnectionSpec();
+    }
+
+    public static JdbcUrl getJdbcUrl(Script script) {
+        return ((DriverConnectionSpec) getConnectionSpec(script)).getJdbcUrl();
+    }
+
+    @Override
+    public boolean supports(Script script, TranslationContext context) {
+        return supportsDatabase(script, context) && supportsScriptClass(script,
+                context) && supportsScript((S) script, context);
+    }
+
+    protected boolean supportsDatabase(Script script, TranslationContext context) {
+        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isAssignable(script.getDatabaseInfo())) &&
+                (targetDatabaseInfo == null || targetDatabaseInfo.isAssignable(context.getDatabaseInfo()));
+    }
+
+    protected boolean supportsScriptClass(Script script, TranslationContext context) {
+        return script != null && (scriptClass == null || scriptClass.isAssignableFrom(script.getClass()));
+    }
+
+    protected abstract boolean supportsScript(S script, TranslationContext context);
+
     public DatabaseInfo getSourceDatabaseInfo() {
         return sourceDatabaseInfo;
     }
@@ -86,23 +121,6 @@ public abstract class TranslatorBase<S extends Script> implements Translator<S> 
     public void setScriptClass(Class<? extends Script> scriptClass) {
         this.scriptClass = scriptClass;
     }
-
-    @Override
-    public boolean supports(Script script, TranslationContext translationContext) {
-        return supportsDatabase(script, translationContext) && supportsScriptClass(script,
-                translationContext) && supportsScript((S) script, translationContext);
-    }
-
-    protected boolean supportsDatabase(Script script, TranslationContext translationContext) {
-        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isInherited(script.getDatabaseInfo())) &&
-                (targetDatabaseInfo == null || targetDatabaseInfo.isInherited(translationContext.getDatabaseInfo()));
-    }
-
-    protected boolean supportsScriptClass(Script script, TranslationContext translationContext) {
-        return script != null && (scriptClass == null || scriptClass.isAssignableFrom(script.getClass()));
-    }
-
-    protected abstract boolean supportsScript(S script, TranslationContext translationContext);
 
     @Override
     public boolean equals(Object o) {

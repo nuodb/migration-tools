@@ -28,6 +28,8 @@
 package com.nuodb.migrator.jdbc.session;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.spec.ConnectionSpec;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,7 +40,9 @@ import java.util.Map;
  */
 public interface Session extends Map {
 
-    SessionFactory getSessionFactory();
+    ConnectionSpec getConnectionSpec();
+
+    DatabaseInfo getDatabaseInfo();
 
     Connection getConnection();
 

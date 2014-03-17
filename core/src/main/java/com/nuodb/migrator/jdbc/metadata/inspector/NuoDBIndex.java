@@ -27,45 +27,51 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
+
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.primitives.Ints.asList;
+import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
+import static com.nuodb.migrator.jdbc.query.QueryUtils.eqOrIn;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("PrimitiveArrayArgumentToVariableArgMethod")
 public class NuoDBIndex {
 
-    public static final String QUERY =
-            "SELECT * FROM SYSTEM.INDEXES AS I " +
-            "INNER JOIN SYSTEM.INDEXFIELDS AS F ON I.SCHEMA=F.SCHEMA " +
-            "AND I.TABLENAME=F.TABLENAME AND I.INDEXNAME=F.INDEXNAME";
+    private static final String QUERY =
+            "SELECT * FROM SYSTEM.INDEXES AS I INNER JOIN SYSTEM.INDEXFIELDS AS F " +
+            "ON I.SCHEMA=F.SCHEMA AND I.TABLENAME=F.TABLENAME AND I.INDEXNAME=F.INDEXNAME";
 
     public static final int PRIMARY_KEY = 0;
     public static final int UNIQUE = 1;
     public static final int KEY = 2;
 
-    public static String createQuery(int... indexTypes) {
-        final Collection<String> filters = newArrayList();
-        filters.add("I.SCHEMA=?");
-        filters.add("I.TABLENAME=?");
-        if (indexTypes != null && indexTypes.length > 0) {
-            if (indexTypes.length == 1) {
-                filters.add("I.INDEXTYPE=" + indexTypes[0]);
-            } else {
-                StringBuilder filter = new StringBuilder();
-                filter.append("I.INDEXTYPE IN (");
-                for (int i = 0; i < indexTypes.length; i++) {
-                    filter.append(indexTypes[i]);
-                    if (i + 1 < indexTypes.length) {
-                        filter.append(", ");
-                    }
-                }
-                filter.append(")");
-                filters.add(filter.toString());
-            }
+    public static Query createQuery(TableInspectionScope tableInspectionScope, int... indexTypes) {
+        return createQuery(tableInspectionScope.getSchema(), tableInspectionScope.getTable(), indexTypes);
+    }
+
+    public static Query createQuery(String schema, String table, int... indexTypes) {
+        Collection<Object> parameters = newArrayList();
+        Collection<String> filters = newArrayList();
+        if (!isEmpty(schema)) {
+            parameters.add(schema);
+            filters.add("I.SCHEMA=?");
         }
-        return where(QUERY, filters, "AND");
+        if (!isEmpty(table)) {
+            parameters.add(table);
+            filters.add("I.TABLENAME=?");
+        }
+        if (indexTypes != null && indexTypes.length > 0) {
+            filters.add(eqOrIn("I.INDEXTYPE", asList(indexTypes)));
+        }
+        String query = where(QUERY, filters, "AND");
+        return new ParameterizedQuery(newQuery(query), parameters);
     }
 }

@@ -38,7 +38,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
-import static com.nuodb.migrator.utils.CollectionUtils.isEmpty;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
 
 @SuppressWarnings("unchecked")

@@ -28,7 +28,8 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.resolver.ServiceResolver;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.*;
 
@@ -85,6 +86,10 @@ public interface Dialect {
 
     boolean supportsLimitParameters();
 
+    boolean supportsCatalogs();
+
+    boolean supportsSchemas();
+
     LimitHandler createLimitHandler(String query, QueryLimit queryLimit);
 
     boolean supportsRowCount(Table table, Column column, String filter, RowCountType rowCountType);
@@ -105,7 +110,7 @@ public interface Dialect {
 
     String getIdentityColumn(String sequence);
 
-    String getDefaultValue(Column column, Session session);
+    String getDefaultValue(Session session, Column column);
 
     String getDeleteAction(ReferenceAction deleteAction);
 
@@ -121,25 +126,33 @@ public interface Dialect {
 
     String getTriggerBegin(Trigger trigger);
 
-    String getTriggerBody(Trigger trigger, Session session);
+    String getTriggerBody(Session session, Trigger trigger);
 
     String getTriggerEnd(Trigger trigger);
 
-    String getSequenceStartWith(Long startWith);
+    String getSequenceStartWith(Number startWith);
 
-    String getSequenceIncrementBy(Long incrementBy);
+    String getSequenceIncrementBy(Number incrementBy);
 
-    String getSequenceMinValue(Long minValue);
+    String getSequenceMinValue(Number minValue);
 
-    String getSequenceMaxValue(Long maxValue);
+    String getSequenceMaxValue(Number maxValue);
 
     String getSequenceCycle(boolean cycle);
 
-    String getSequenceCache(Integer cache);
+    String getSequenceCache(Number cache);
 
     String getSequenceOrder(boolean order);
 
     String getCheckClause(String clause);
+
+    String getUseCatalog(String catalog);
+
+    String getUseCatalog(String catalog, boolean normalize);
+
+    String getUseSchema(String schema);
+
+    String getUseSchema(String schema, boolean normalize);
 
     String getIdentifier(String identifier, Identifiable identifiable);
 
@@ -163,7 +176,7 @@ public interface Dialect {
 
     boolean isSQLKeyword(String identifier, Identifiable identifiable);
 
-    String getJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc typeDesc, JdbcTypeSpecifiers typeSpecifiers);
+    String getTypeName(DatabaseInfo databaseInfo, JdbcType jdbcType);
 
     JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName);
 

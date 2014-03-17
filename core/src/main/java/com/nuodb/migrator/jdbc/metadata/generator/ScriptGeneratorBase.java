@@ -52,33 +52,33 @@ public abstract class ScriptGeneratorBase<T extends MetaData> extends MetaDataHa
     }
 
     @Override
-    public Collection<String> getScripts(T object, ScriptGeneratorContext scriptGeneratorContext) {
+    public Collection<String> getScripts(T object, ScriptGeneratorManager scriptGeneratorManager) {
         Collection<String> scripts;
-        if (isGenerateScript(DROP, scriptGeneratorContext) && isGenerateScript(CREATE, scriptGeneratorContext)) {
-            scripts = getDropCreateScripts(object, scriptGeneratorContext);
-        } else if (isGenerateScript(DROP, scriptGeneratorContext)) {
-            scripts = getDropScripts(object, scriptGeneratorContext);
-        } else if (isGenerateScript(CREATE, scriptGeneratorContext)) {
-            scripts = getCreateScripts(object, scriptGeneratorContext);
+        if (isGenerateScript(DROP, scriptGeneratorManager) && isGenerateScript(CREATE, scriptGeneratorManager)) {
+            scripts = getDropCreateScripts(object, scriptGeneratorManager);
+        } else if (isGenerateScript(DROP, scriptGeneratorManager)) {
+            scripts = getDropScripts(object, scriptGeneratorManager);
+        } else if (isGenerateScript(CREATE, scriptGeneratorManager)) {
+            scripts = getCreateScripts(object, scriptGeneratorManager);
         } else {
             scripts = emptySet();
         }
         return scripts;
     }
 
-    protected abstract Collection<String> getDropScripts(T object, ScriptGeneratorContext scriptGeneratorContext);
+    protected abstract Collection<String> getDropScripts(T object, ScriptGeneratorManager scriptGeneratorManager);
 
-    protected abstract Collection<String> getCreateScripts(T object, ScriptGeneratorContext scriptGeneratorContext);
+    protected abstract Collection<String> getCreateScripts(T object, ScriptGeneratorManager scriptGeneratorManager);
 
-    protected Collection<String> getDropCreateScripts(T object, ScriptGeneratorContext scriptGeneratorContext) {
+    protected Collection<String> getDropCreateScripts(T object, ScriptGeneratorManager scriptGeneratorManager) {
         Collection<String> scripts = newArrayList();
-        scripts.addAll(getDropScripts(object, scriptGeneratorContext));
-        scripts.addAll(getCreateScripts(object, scriptGeneratorContext));
+        scripts.addAll(getDropScripts(object, scriptGeneratorManager));
+        scripts.addAll(getCreateScripts(object, scriptGeneratorManager));
         return scripts;
     }
 
-    protected boolean isGenerateScript(ScriptType scriptType, ScriptGeneratorContext scriptGeneratorContext) {
-        Collection<ScriptType> scriptTypes = scriptGeneratorContext.getScriptTypes();
+    protected boolean isGenerateScript(ScriptType scriptType, ScriptGeneratorManager scriptGeneratorManager) {
+        Collection<ScriptType> scriptTypes = scriptGeneratorManager.getScriptTypes();
         return scriptTypes != null && scriptTypes.contains(scriptType);
     }
 }

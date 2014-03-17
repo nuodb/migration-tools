@@ -27,7 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Deferrability;
+import com.nuodb.migrator.jdbc.metadata.DeferrabilityMap;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
+import com.nuodb.migrator.jdbc.metadata.ReferenceActionMap;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
 /**
  * @author Sergey Bushik

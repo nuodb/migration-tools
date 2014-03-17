@@ -27,12 +27,30 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolverAware;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.Trigger;
+import com.nuodb.migrator.jdbc.metadata.TriggerEvent;
+import com.nuodb.migrator.jdbc.metadata.TriggerTime;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
+import com.nuodb.migrator.jdbc.metadata.resolver.SimpleServiceResolverAware;
 import com.nuodb.migrator.jdbc.session.Session;
-import com.nuodb.migrator.jdbc.type.*;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeAdapter;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.jdbc.type.JdbcTypeName;
+import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
+import com.nuodb.migrator.jdbc.type.JdbcTypeOptions;
+import com.nuodb.migrator.jdbc.type.JdbcTypeRegistry;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
+import com.nuodb.migrator.jdbc.type.JdbcValueAccessProvider;
+import com.nuodb.migrator.jdbc.type.SimpleJdbcValueAccessProvider;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
+import com.nuodb.migrator.jdbc.type.JdbcTypeName;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,15 +59,21 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.dialect.DialectUtils.NULL;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.NOOP;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.lang.String.valueOf;
 import static java.sql.Connection.*;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 /**
  * @author Sergey Bushik
@@ -293,25 +317,25 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public JdbcTypeNameMap getJdbcTypeNameMap(DatabaseInfo databaseInfo) {
-        JdbcTypeNameMap jdbcTypeNameMap = jdbcTypeNameMaps.get(databaseInfo);
-        if (jdbcTypeNameMap == null) {
+        JdbcTypeNameMap targetJdbcTypeNameMap = jdbcTypeNameMaps.get(databaseInfo);
+        if (targetJdbcTypeNameMap == null) {
             DatabaseInfo targetDatabaseInfo = null;
             for (Map.Entry<DatabaseInfo, JdbcTypeNameMap> entry : jdbcTypeNameMaps.entrySet()) {
-                if (!entry.getKey().isInherited(databaseInfo)) {
+                if (!entry.getKey().isAssignable(databaseInfo)) {
                     continue;
                 }
                 if (targetDatabaseInfo == null) {
                     targetDatabaseInfo = entry.getKey();
-                    jdbcTypeNameMap = entry.getValue();
+                    targetJdbcTypeNameMap = entry.getValue();
                 } else if (targetDatabaseInfo.compareTo(entry.getKey()) >= 0) {
-                    jdbcTypeNameMap = entry.getValue();
+                    targetJdbcTypeNameMap = entry.getValue();
                 }
             }
         }
-        if (jdbcTypeNameMap == null) {
-            jdbcTypeNameMaps.put(databaseInfo, jdbcTypeNameMap = new JdbcTypeNameMap());
+        if (targetJdbcTypeNameMap == null) {
+            jdbcTypeNameMaps.put(databaseInfo, targetJdbcTypeNameMap = new JdbcTypeNameMap());
         }
-        return jdbcTypeNameMap;
+        return targetJdbcTypeNameMap;
     }
 
     @Override
@@ -410,6 +434,16 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public boolean supportsCatalogs() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsSchemas() {
+        return false;
+    }
+
+    @Override
     public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
         return new SimpleLimitHandler(this, query, queryLimit);
     }
@@ -431,12 +465,27 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
 
     @Override
     public String getCheckClause(String clause) {
-        clause = getScriptQuoted(clause);
-        if (!clause.startsWith("(") && !clause.endsWith(")")) {
-            return "(" + clause + ")";
-        } else {
-            return clause;
-        }
+        return clause != null ? "(" + quoteScript(clause) + ")" : null;
+    }
+
+    @Override
+    public String getUseCatalog(String catalog) {
+        return getUseCatalog(catalog, false);
+    }
+
+    @Override
+    public String getUseCatalog(String catalog, boolean normalize) {
+        return "USE " + (normalize ? getIdentifier(catalog, null) : catalog);
+    }
+
+    @Override
+    public String getUseSchema(String schema) {
+        return getUseSchema(schema, false);
+    }
+
+    @Override
+    public String getUseSchema(String schema, boolean normalize) {
+        return "USE " + (normalize ? getIdentifier(schema, null) : schema);
     }
 
     @Override
@@ -445,28 +494,44 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getDefaultValue(Column column, Session session) {
-        DefaultValue defaultValue = column != null ? column.getDefaultValue() : null;
-        String value = defaultValue != null ? defaultValue.getScript() : null;
-        Script script = translate(new ColumnScript(column, session));
-        String result = script != null ? script.getScript() : value;
-        if (result != null) {
-            String unquoted = result;
-            boolean opening = false;
-            if (result.startsWith("'")) {
-                unquoted = result.substring(1);
-                opening = true;
-            }
-            if (opening && unquoted.endsWith("'")) {
-                unquoted = unquoted.substring(0, unquoted.length() - 1);
-            }
-            unquoted = getScriptEscapeUtils().escapeDefaultValue(unquoted);
-            result = "'" + unquoted + "'";
-        }
-        return result;
+    public String getDefaultValue(Session session, Column column) {
+        return getDefaultValue(column, translate(new ColumnScript(column, session)));
     }
 
-    protected String getScriptQuoted(String script) {
+    protected String getDefaultValue(Column column, Script script) {
+        String defaultValue = script != null ? script.getScript() : Column.getDefaultValue(column);
+        boolean literal = script != null && script.isLiteral();
+        return getDefaultValue(column, defaultValue, literal);
+    }
+
+    private String getDefaultValue(Column column, String script, boolean literal) {
+        return isQuotingDefaultValue(column, script, literal) ? quoteDefaultValue(column,
+                script, literal) : script;
+    }
+
+    protected boolean isQuotingDefaultValue(Column column, String script, boolean literal) {
+        boolean defaultValueQuoted = script != null;
+        if (equalsIgnoreCase(script, NULL) && literal) {
+            defaultValueQuoted = false;
+        }
+        return defaultValueQuoted;
+    }
+
+    protected String quoteDefaultValue(Column column, String script, boolean literal) {
+        String defaultValue = script;
+        boolean opening = false;
+        if (script.startsWith("'")) {
+            defaultValue = script.substring(1);
+            opening = true;
+        }
+        if (opening && defaultValue.endsWith("'")) {
+            defaultValue = defaultValue.substring(0, defaultValue.length() - 1);
+        }
+        defaultValue = getScriptEscapeUtils().escapeDefaultValue(defaultValue);
+        return "'" + defaultValue + "'";
+    }
+
+    protected String quoteScript(String script) {
         if (script == null) {
             return null;
         }
@@ -526,7 +591,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getTriggerBody(Trigger trigger, Session session) {
+    public String getTriggerBody(Session session, Trigger trigger) {
         Script script = translate(new TriggerScript(trigger, session));
         return script != null ? script.getScript() : trigger.getTriggerBody();
     }
@@ -537,22 +602,22 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getSequenceStartWith(Long startWith) {
+    public String getSequenceStartWith(Number startWith) {
         return startWith != null ? "START WITH " + startWith : null;
     }
 
     @Override
-    public String getSequenceIncrementBy(Long incrementBy) {
+    public String getSequenceIncrementBy(Number incrementBy) {
         return incrementBy != null ? "INCREMENT BY " + incrementBy : null;
     }
 
     @Override
-    public String getSequenceMinValue(Long minValue) {
+    public String getSequenceMinValue(Number minValue) {
         return minValue != null ? "MINVALUE " + minValue : "NO MINVALUE";
     }
 
     @Override
-    public String getSequenceMaxValue(Long maxValue) {
+    public String getSequenceMaxValue(Number maxValue) {
         return maxValue != null ? "MAXVALUE " + maxValue : "NO MAXVALUE";
     }
 
@@ -562,7 +627,7 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getSequenceCache(Integer cache) {
+    public String getSequenceCache(Number cache) {
         return null;
     }
 
@@ -621,21 +686,24 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc typeDesc,
-                                  JdbcTypeSpecifiers typeSpecifiers) {
-        String jdbcTypeName = getJdbcTypeName(getJdbcTypeNameMap(databaseInfo), typeDesc, typeSpecifiers);
-        if (jdbcTypeName == null) {
-            jdbcTypeName = getJdbcTypeName(getJdbcTypeNameMap(), typeDesc, typeSpecifiers);
+    public String getTypeName(DatabaseInfo databaseInfo, JdbcType jdbcType) {
+        String typeName = getTypeName(getJdbcTypeNameMap(databaseInfo), jdbcType);
+        if (typeName == null) {
+            typeName = getTypeName(getJdbcTypeNameMap(), jdbcType);
         }
-        return jdbcTypeName;
+        return typeName;
     }
 
-    protected void addJdbcType(JdbcType type) {
+    protected void addJdbcType(JdbcTypeValue type) {
         getJdbcTypeRegistry().addJdbcType(type);
     }
 
     protected void addJdbcTypeAdapter(JdbcTypeAdapter typeAdapter) {
         getJdbcTypeRegistry().addJdbcTypeAdapter(typeAdapter);
+    }
+
+    protected void addJdbcTypeDescAlias(JdbcTypeDesc jdbcTypeDesc, int typeCodeAlias) {
+        getJdbcTypeRegistry().addJdbcTypeAlias(jdbcTypeDesc, typeCodeAlias);
     }
 
     protected void addJdbcTypeDescAlias(int typeCode, String typeName, int typeCodeAlias) {
@@ -646,21 +714,24 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         getJdbcTypeNameMap().addJdbcTypeName(typeCode, typeName);
     }
 
-    protected void addJdbcTypeName(int typeCode, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
-        getJdbcTypeNameMap().addJdbcTypeName(typeCode, jdbcTypeSpecifiers, typeName);
+    protected void addJdbcTypeName(int typeCode, JdbcTypeOptions jdbcTypeOptions, String typeName) {
+        getJdbcTypeNameMap().addJdbcTypeName(typeCode, jdbcTypeOptions, typeName);
     }
 
-    protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc,
-                                   JdbcTypeNameBuilder jdbcTypeNameBuilder) {
-        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, jdbcTypeNameBuilder);
+    public void addJdbcTypeName(JdbcTypeName jdbcTypeName, int priority) {
+        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeName, priority);
+    }
+
+    public void addJdbcTypeName(JdbcTypeName jdbcTypeName) {
+        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeName);
     }
 
     protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, String typeName) {
         getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, typeName);
     }
 
-    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeSpecifiers jdbcTypeSpecifiers, String typeName) {
-        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers, typeName);
+    protected void addJdbcTypeName(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions, String typeName) {
+        getJdbcTypeNameMap().addJdbcTypeName(jdbcTypeDesc, jdbcTypeOptions, typeName);
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, int typeCode, String typeName) {
@@ -668,8 +739,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, int typeCode, String typeName,
-                                   JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, jdbcTypeSpecifiers, typeName);
+                                   JdbcTypeOptions jdbcTypeOptions) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, jdbcTypeOptions, typeName);
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName) {
@@ -677,18 +748,24 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName,
-                                   JdbcTypeSpecifiers jdbcTypeSpecifiers) {
-        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, jdbcTypeSpecifiers, typeName);
+                                   JdbcTypeOptions jdbcTypeOptions) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, jdbcTypeOptions, typeName);
     }
 
-    protected String getJdbcTypeName(JdbcTypeNameMap typeNameMap, JdbcTypeDesc typeDesc,
-                                     JdbcTypeSpecifiers typeSpecifiers) {
-        String jdbcTypeName = typeNameMap.getJdbcTypeName(typeDesc, typeSpecifiers);
-        if (jdbcTypeName == null) {
-            jdbcTypeName = typeNameMap.getJdbcTypeName(
-                    new JdbcTypeDesc(typeDesc.getTypeCode()), typeSpecifiers);
+    public void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeName jdbcTypeName) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeName);
+    }
+
+    public void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeName jdbcTypeName, int priority) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeName, priority);
+    }
+
+    protected String getTypeName(JdbcTypeNameMap jdbcTypeNameMap, JdbcType jdbcType) {
+        String typeName = jdbcTypeNameMap.getTypeName(jdbcType);
+        if (typeName == null) {
+            typeName = jdbcTypeNameMap.getTypeName(jdbcType.withTypeName(null));
         }
-        return jdbcTypeName;
+        return typeName;
     }
 
     protected void removeJdbcTypeName(int typeCode) {

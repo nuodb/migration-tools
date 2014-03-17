@@ -49,7 +49,7 @@ import static org.testng.Assert.assertNotNull;
 public class QueryBuilderTest {
 
     @DataProvider(name = "insertQueryBuilder")
-    public Object[][] getInsertQueryBuilderData() {
+    public Object[][] createInsertQueryBuilderData() {
         Table table = createTable(null, "schema", "table");
         table.addColumn("column1");
         table.addColumn("column2");
@@ -84,7 +84,7 @@ public class QueryBuilderTest {
     }
 
     @DataProvider(name = "selectQueryBuilder")
-    public Object[][] getSelectQueryBuilderData() {
+    public Object[][] createSelectQueryBuilderData() {
         Table table = createTable(null, "schema", "table");
         table.addColumn("column1");
         table.addColumn("column2");

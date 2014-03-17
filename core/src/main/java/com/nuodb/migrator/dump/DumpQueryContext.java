@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.dump;
 
-import com.nuodb.migrator.backup.catalog.CatalogManager;
+import com.nuodb.migrator.backup.BackupManager;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
@@ -37,105 +37,60 @@ import com.nuodb.migrator.jdbc.session.SessionFactory;
 
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.Executor;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.Runtime.getRuntime;
 
 /**
  * @author Sergey Bushik
  */
-public class DumpQueryContext {
+public interface DumpQueryContext {
 
-    public static final int THREADS = getRuntime().availableProcessors();
+    final String FORMAT = CsvAttributes.FORMAT;
 
-    private int threads = THREADS;
-    private Database database;
-    private TimeZone timeZone;
-    private Session session;
-    private SessionFactory sessionFactory;
-    private CatalogManager catalogManager;
-    private String format = CsvAttributes.FORMAT;
-    private Map<String, Object> formatAttributes = newHashMap();
-    private FormatFactory formatFactory;
-    private ValueFormatRegistry valueFormatRegistry;
+    final int THREADS = getRuntime().availableProcessors();
 
-    public int getThreads() {
-        return threads;
-    }
+    int getThreads();
 
-    public void setThreads(int threads) {
-        this.threads = threads;
-    }
+    void setThreads(int threads);
 
-    public Database getDatabase() {
-        return database;
-    }
+    Database getDatabase();
 
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
+    void setDatabase(Database database);
 
-    public TimeZone getTimeZone() {
-        return timeZone;
-    }
+    Executor getExecutor();
 
-    public void setTimeZone(TimeZone timeZone) {
-        this.timeZone = timeZone;
-    }
+    void setExecutor(Executor executor);
 
-    public Session getSession() {
-        return session;
-    }
+    TimeZone getTimeZone();
 
-    public void setSession(Session session) {
-        this.session = session;
-    }
+    void setTimeZone(TimeZone timeZone);
 
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
-    }
+    Session getSession();
 
-    public void setSessionFactory(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
+    void setSession(Session session);
 
-    public CatalogManager getCatalogManager() {
-        return catalogManager;
-    }
+    SessionFactory getSessionFactory();
 
-    public void setCatalogManager(CatalogManager catalogManager) {
-        this.catalogManager = catalogManager;
-    }
+    void setSessionFactory(SessionFactory sessionFactory);
 
-    public String getFormat() {
-        return format;
-    }
+    BackupManager getBackupManager();
 
-    public void setFormat(String format) {
-        this.format = format;
-    }
+    void setBackupManager(BackupManager backupManager);
 
-    public Map<String, Object> getFormatAttributes() {
-        return formatAttributes;
-    }
+    String getFormat();
 
-    public void setFormatAttributes(Map<String, Object> formatAttributes) {
-        this.formatAttributes = formatAttributes;
-    }
+    void setFormat(String format);
 
-    public FormatFactory getFormatFactory() {
-        return formatFactory;
-    }
+    Map<String, Object> getFormatAttributes();
 
-    public void setFormatFactory(FormatFactory formatFactory) {
-        this.formatFactory = formatFactory;
-    }
+    void setFormatAttributes(Map<String, Object> formatAttributes);
 
-    public ValueFormatRegistry getValueFormatRegistry() {
-        return valueFormatRegistry;
-    }
+    FormatFactory getFormatFactory();
 
-    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
-        this.valueFormatRegistry = valueFormatRegistry;
-    }
+    void setFormatFactory(FormatFactory formatFactory);
+
+    ValueFormatRegistry getValueFormatRegistry();
+
+    void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
 }

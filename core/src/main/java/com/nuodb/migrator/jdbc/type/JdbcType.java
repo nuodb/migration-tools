@@ -27,23 +27,172 @@
  */
 package com.nuodb.migrator.jdbc.type;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.utils.ObjectUtils;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 
 /**
  * @author Sergey Bushik
  */
-public interface JdbcType<T> {
+public class JdbcType implements Cloneable {
 
-    JdbcTypeDesc getJdbcTypeDesc();
+    private JdbcTypeDesc jdbcTypeDesc;
+    private JdbcTypeOptions jdbcTypeOptions;
 
-    Class<? extends T> getValueClass();
+    public JdbcType() {
+        this(new JdbcTypeDesc());
+    }
 
-    T getValue(ResultSet resultSet, int columnIndex, Column column, Map<String, Object> options) throws SQLException;
+    public JdbcType(JdbcTypeDesc jdbcTypeDesc) {
+        this(jdbcTypeDesc, new JdbcTypeOptions());
+    }
 
-    void setValue(PreparedStatement statement, int columnIndex, Column column, T value, Map<String, Object> options) throws SQLException;
+    public JdbcType(JdbcTypeOptions jdbcTypeOptions) {
+        this(new JdbcTypeDesc(), jdbcTypeOptions);
+    }
+
+    public JdbcType(JdbcTypeDesc jdbcTypeDesc, JdbcTypeOptions jdbcTypeOptions) {
+        this.jdbcTypeDesc = jdbcTypeDesc;
+        this.jdbcTypeOptions = jdbcTypeOptions;
+    }
+
+    public JdbcType(JdbcType jdbcType) {
+        JdbcTypeDesc jdbcTypeDesc = jdbcType.getJdbcTypeDesc();
+        this.jdbcTypeDesc = new JdbcTypeDesc(jdbcTypeDesc.getTypeCode(), jdbcTypeDesc.getTypeName());
+        JdbcTypeOptions jdbcTypeOptions = jdbcType.getJdbcTypeOptions();
+        this.jdbcTypeOptions = newOptions(
+                jdbcTypeOptions.getSize(), jdbcTypeOptions.getPrecision(), jdbcTypeOptions.getScale());
+    }
+
+    public int getTypeCode() {
+        return jdbcTypeDesc.getTypeCode();
+    }
+
+    public void setTypeCode(int typeCode) {
+        jdbcTypeDesc.setTypeCode(typeCode);
+    }
+
+    public JdbcType withTypeCode(int typeCode) {
+        JdbcType jdbcType = createJdbcType();
+        jdbcType.setTypeCode(typeCode);
+        return jdbcType;
+    }
+
+    public String getTypeName() {
+        return jdbcTypeDesc.getTypeName();
+    }
+
+    public void setTypeName(String typeName) {
+        jdbcTypeDesc.setTypeName(typeName);
+    }
+
+    public JdbcType withTypeName(String typeName) {
+        JdbcType jdbcType = createJdbcType();
+        jdbcType.setTypeName(typeName);
+        return jdbcType;
+    }
+
+    public Integer getSize() {
+        return jdbcTypeOptions.getSize();
+    }
+
+    public void setSize(Integer size) {
+        jdbcTypeOptions.setSize(size);
+    }
+
+    public JdbcType withSize(Integer size) {
+        JdbcType jdbcType = createJdbcType();
+        jdbcType.setSize(size);
+        return jdbcType;
+    }
+
+    public Integer getPrecision() {
+        return jdbcTypeOptions.getPrecision();
+    }
+
+    public void setPrecision(Integer precision) {
+        jdbcTypeOptions.setPrecision(precision);
+    }
+
+    public JdbcType withPrecision(Integer precision) {
+        JdbcType jdbcType = createJdbcType();
+        jdbcType.setPrecision(precision);
+        return jdbcType;
+    }
+
+    public Integer getScale() {
+        return jdbcTypeOptions.getScale();
+    }
+
+    public void setScale(Integer scale) {
+        jdbcTypeOptions.setScale(scale);
+    }
+
+    public JdbcType withScale(Integer scale) {
+        JdbcType jdbcType = createJdbcType();
+        jdbcType.setScale(scale);
+        return jdbcType;
+    }
+
+    public JdbcTypeDesc getJdbcTypeDesc() {
+        return jdbcTypeDesc;
+    }
+
+    public void setJdbcTypeDesc(JdbcTypeDesc jdbcTypeDesc) {
+        this.jdbcTypeDesc = jdbcTypeDesc;
+    }
+
+    public JdbcType withJdbcTypeDesc(JdbcTypeDesc jdbcTypeDesc) {
+        JdbcType jdbcType = createJdbcType();
+        jdbcType.setJdbcTypeDesc(jdbcTypeDesc);
+        return jdbcType;
+    }
+
+    public JdbcTypeOptions getJdbcTypeOptions() {
+        return jdbcTypeOptions;
+    }
+
+    public void setJdbcTypeOptions(JdbcTypeOptions jdbcTypeOptions) {
+        this.jdbcTypeOptions = jdbcTypeOptions;
+    }
+
+    public JdbcType withJdbcTypeOptions(JdbcTypeOptions jdbcTypeOptions) {
+        JdbcType jdbcType = createJdbcType();
+        jdbcType.setJdbcTypeOptions(jdbcTypeOptions);
+        return jdbcType;
+    }
+
+    protected JdbcType createJdbcType() {
+        try {
+            return (JdbcType) clone();
+        } catch (CloneNotSupportedException exception) {
+            throw new JdbcTypeException(exception);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JdbcType that = (JdbcType) o;
+
+        if (jdbcTypeDesc != null ? !jdbcTypeDesc.equals(that.jdbcTypeDesc) : that.jdbcTypeDesc != null) return false;
+        if (jdbcTypeOptions != null ? !jdbcTypeOptions.equals(that.jdbcTypeOptions) : that.jdbcTypeOptions != null) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = jdbcTypeDesc != null ? jdbcTypeDesc.hashCode() : 0;
+        result = 31 * result + (jdbcTypeOptions != null ? jdbcTypeOptions.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
+    }
 }

@@ -27,9 +27,10 @@
  */
 package com.nuodb.migrator.cli.run;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migrator.cli.parse.*;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
-import com.nuodb.migrator.utils.PriorityList;
+import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.*;
 
@@ -46,6 +47,11 @@ public abstract class CliRunAdapter extends CliRunSupport implements CliRun {
 
     protected CliRunAdapter(String command) {
         this.command = command;
+    }
+
+    @Override
+    public void execute() {
+        execute(Maps.<Object, Object>newHashMap());
     }
 
     @Override
@@ -129,7 +135,7 @@ public abstract class CliRunAdapter extends CliRunSupport implements CliRun {
     }
 
     @Override
-    public PriorityList<Trigger> getTriggers() {
+    public PrioritySet<Trigger> getTriggers() {
         return getOption().getTriggers();
     }
 

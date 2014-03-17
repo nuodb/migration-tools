@@ -27,22 +27,16 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 
-import java.sql.SQLException;
-import java.util.Collection;
-
-import static java.util.Collections.singleton;
-
 /**
  * @author Sergey Bushik
  */
-public abstract class TableInspectorBase<M extends MetaData, T extends TableInspectionScope> extends InspectorBase<M, T> {
+@SuppressWarnings("unchecked")
+public abstract class TableInspectorBase<M extends MetaData, T extends TableInspectionScope>
+        extends ManagedInspectorBase<M, T> {
 
     public TableInspectorBase(MetaDataType objectType) {
         this(objectType, (Class<? extends T>) TableInspectionScope.class);
@@ -52,47 +46,26 @@ public abstract class TableInspectorBase<M extends MetaData, T extends TableInsp
         super(objectType, MetaDataType.TABLE, inspectionScopeClass);
     }
 
-    protected TableInspectorBase(MetaDataType objectType, MetaDataType enclosingObjectType,
+    protected TableInspectorBase(MetaDataType objectType, MetaDataType parentObjectType,
                                  Class<? extends InspectionScope> inspectionScopeClass) {
-        super(objectType, enclosingObjectType, inspectionScopeClass);
+        super(objectType, parentObjectType, inspectionScopeClass);
+    }
+
+    protected T createInspectionScope(M object) {
+        return (T) createTableInspectionScope((Table) object);
     }
 
     @Override
-    public void inspectObjects(InspectionContext inspectionContext, Collection<? extends M> objects) throws SQLException {
-        inspectScopes(inspectionContext, createInspectionScopes(objects));
+    public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope) {
+        return inspectionScope instanceof TableInspectionScope && supportsScope((TableInspectionScope) inspectionScope);
     }
 
-    @Override
-    public void inspectScope(InspectionContext inspectionContext, T inspectionScope) throws SQLException {
-        inspectScopes(inspectionContext, singleton(inspectionScope));
-    }
-
-    protected abstract Collection<? extends T> createInspectionScopes(Collection<? extends M> objects);
-
-    protected abstract void inspectScopes(InspectionContext inspectionContext,
-                                          Collection<? extends T> inspectionScopes) throws SQLException;
-
-    @Override
-    public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) {
-        return inspectionScope instanceof TableInspectionScope && supports((TableInspectionScope) inspectionScope);
-    }
-
-    protected boolean supports(TableInspectionScope inspectionScope) {
+    protected boolean supportsScope(TableInspectionScope tableInspectionScope) {
         return true;
     }
 
     public static TableInspectionScope createTableInspectionScope(Table table) {
         return new TableInspectionScope(
                 table.getCatalog().getName(), table.getSchema().getName(), table.getName());
-    }
-
-    public static Collection<TableInspectionScope> createTableInspectionScopes(Collection<? extends Table> tables) {
-        return Lists.newArrayList(
-                Iterables.transform(tables, new Function<Table, TableInspectionScope>() {
-                    @Override
-                    public TableInspectionScope apply(Table table) {
-                        return createTableInspectionScope(table);
-                    }
-                }));
     }
 }

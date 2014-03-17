@@ -42,8 +42,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import static com.nuodb.migrator.context.ContextUtils.getService;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
+import static com.nuodb.migrator.context.ContextUtils.createService;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static java.lang.System.getProperty;
 import static java.sql.Types.*;
 
@@ -56,7 +56,7 @@ public class SqlOutputFormat extends OutputFormatBase implements SqlAttributes {
 
     private String lineEnding = SEMICOLON;
     private String lineSeparator = getProperty("line.separator");
-    private Dialect dialect = getService(DialectResolver.class).resolve(NUODB);
+    private Dialect dialect = createService(DialectResolver.class).resolve(NUODB);
     private Writer output;
 
     @Override
@@ -65,12 +65,12 @@ public class SqlOutputFormat extends OutputFormatBase implements SqlAttributes {
     }
 
     @Override
-    protected void open(OutputStream outputStream) {
-        open(new OutputStreamWriter(outputStream));
+    protected void init(OutputStream outputStream) {
+        init(new OutputStreamWriter(outputStream));
     }
 
     @Override
-    protected void open(Writer writer) {
+    protected void init(Writer writer) {
         output = wrapWriter(writer);
     }
 
@@ -106,7 +106,7 @@ public class SqlOutputFormat extends OutputFormatBase implements SqlAttributes {
     }
 
     protected Column getColumn(ValueHandle valueHandle) {
-        return (Column) valueHandle.asColumn();
+        return (Column) valueHandle.asField();
     }
 
     protected String asString(Value value, ValueHandle valueHandle) {

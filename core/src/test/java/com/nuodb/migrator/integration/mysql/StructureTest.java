@@ -30,7 +30,6 @@ package com.nuodb.migrator.integration.mysql;
 import com.nuodb.migrator.integration.MigrationTestBase;
 import com.nuodb.migrator.integration.precision.MySQLPrecision1;
 import com.nuodb.migrator.integration.precision.MySQLPrecision2;
-import com.nuodb.migrator.integration.precision.MySQLPrecisions;
 import com.nuodb.migrator.integration.types.MySQLTypes;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -42,6 +41,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+
+import static com.nuodb.migrator.integration.precision.MySQLPrecisions.getMySQLPrecision1;
+import static com.nuodb.migrator.integration.precision.MySQLPrecisions.getMySQLPrecision2;
+import static java.lang.String.format;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Test to make sure all the Tables, Constraints, Views, Triggers etc have been migrated.
@@ -150,10 +154,10 @@ public class StructureTest extends MigrationTestBase {
                 String colName = rs2.getString("FIELD");
                 HashMap<String, String> tabColDetailsMap = tabColMap.get(colName);
                 Assert.assertNotNull(tabColDetailsMap);
-                Assert.assertEquals(colName, tabColDetailsMap.get(colNames[0]),
+                assertEquals(colName, tabColDetailsMap.get(colNames[0]),
                         "Column name " + colName + " of table " + tableName
                                 + " did not match");
-                Assert.assertEquals(rs2.getInt("JDBCTYPE"), MySQLTypes
+                assertEquals(rs2.getInt("JDBCTYPE"), MySQLTypes
                         .getMappedJDBCType(tabColDetailsMap.get(colNames[4]),
                                 tabColDetailsMap.get(colNames[10])), "JDBCTYPE of column "
                         + colName + " of table " + tableName + " did not match");
@@ -161,7 +165,7 @@ public class StructureTest extends MigrationTestBase {
                 // + tabColDetailsMap.get(colNames[4]) + ",");
                 // System.out.println("mysqlval="
                 // + tabColDetailsMap.get(colNames[5]));
-                Assert.assertEquals(rs2.getString("LENGTH"), MySQLTypes
+                assertEquals(rs2.getString("LENGTH"), MySQLTypes
                         .getMappedLength(tabColDetailsMap.get(colNames[4]),
                                 tabColDetailsMap.get(colNames[10]),
                                 tabColDetailsMap.get(colNames[5])), "LENGTH of column "
@@ -175,7 +179,7 @@ public class StructureTest extends MigrationTestBase {
                 // tabColDetailsMap.get(colNames[6]));
 
                 // String val = tabColDetailsMap.get(colNames[2]);
-                Assert.assertEquals(rs2.getString("DEFAULTVALUE"), MySQLTypes
+                assertEquals(rs2.getString("DEFAULTVALUE"), MySQLTypes
                         .getMappedDefault(tabColDetailsMap.get(colNames[4]),
                                 tabColDetailsMap.get(colNames[2])), "DEFAULTVALUE of column "
                         + colName + " of table " + tableName + " did not match");
@@ -231,7 +235,7 @@ public class StructureTest extends MigrationTestBase {
                 boolean found = false;
                 while (rs2.next()) {
                     found = true;
-                    Assert.assertEquals(rs2.getString(1), cName, "Source column name "
+                    assertEquals(rs2.getString(1), cName, "Source column name "
                             + cName + " of table " + tName
                             + " did not match with target column name ");
                 }
@@ -257,9 +261,11 @@ public class StructureTest extends MigrationTestBase {
                         + "and C.TABLE_SCHEMA = TC.CONSTRAINT_SCHEMA "
                         + "and TC.TABLE_NAME=C.TABLE_NAME AND C.COLUMN_KEY=SUBSTRING(TC.CONSTRAINT_TYPE,1,3) "
                         + "AND C.COLUMN_KEY IN ('UNI')";
-        String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES AS I INNER JOIN SYSTEM.INDEXFIELDS AS F ON "
-                + "I.SCHEMA=F.SCHEMA AND I.TABLENAME=F.TABLENAME AND "
-                + "I.INDEXNAME=F.INDEXNAME WHERE I.SCHEMA=? AND I.TABLENAME=? AND I.INDEXNAME LIKE '%UNIQUE%'";
+        String sqlStr2 = "SELECT F.FIELD, IFS.INDEXNAME FROM SYSTEM.INDEXES AS I "
+                + "INNER JOIN SYSTEM.INDEXFIELDS AS IFS ON "
+                + "I.SCHEMA=IFS.SCHEMA AND I.TABLENAME=IFS.TABLENAME AND I.INDEXNAME=IFS.INDEXNAME "
+                + "INNER JOIN SYSTEM.FIELDS F ON IFS.SCHEMA=F.SCHEMA AND IFS.TABLENAME=F.TABLENAME AND IFS.FIELD=F.FIELD "
+                + "WHERE I.SCHEMA=? AND I.TABLENAME=? ORDER BY F.FIELDPOSITION";
         PreparedStatement stmt1 = null, stmt2 = null;
         ResultSet rs1 = null, rs2 = null;
         HashMap map = new HashMap();
@@ -299,10 +305,12 @@ public class StructureTest extends MigrationTestBase {
                 boolean found = false;
                 while (rs2.next()) {
                     found = true;
-                    tarColList.add(rs2.getString(1));
+                    if (rs2.getString(2).toLowerCase().contains("unique")) {
+                        tarColList.add(rs2.getString(1));
+                    }
                 }
                 Assert.assertTrue(found);
-                Assert.assertEquals(srcColList, tarColList);
+                assertEquals(srcColList, tarColList);
                 rs2.close();
                 stmt2.close();
             }
@@ -368,18 +376,18 @@ public class StructureTest extends MigrationTestBase {
                 boolean found = false;
                 while (rs2.next()) {
                     found = true;
-                    Assert.assertEquals(rs2.getString("FKTABLE_SCHEM"),
+                    assertEquals(rs2.getString("FKTABLE_SCHEM"),
                             rs2.getString("PKTABLE_SCHEM"),
                             "Foreign key and Primary key Schema did not match");
-                    Assert.assertEquals(rs2.getString("FKTABLE_NAME"), tName,
+                    assertEquals(rs2.getString("FKTABLE_NAME"), tName,
                             "Foreign key table name did not match");
-                    Assert.assertEquals(rs2.getString("FKCOLUMN_NAME"), cName,
+                    assertEquals(rs2.getString("FKCOLUMN_NAME"), cName,
                             "Foreign key column name" + rs2.getString("FKCOLUMN_NAME")
                                     + "of table" + rs2.getString("FKTABLE_NAME")
                                     + "did not match");
-                    Assert.assertEquals(rs2.getString("PKTABLE_NAME"), rtName,
+                    assertEquals(rs2.getString("PKTABLE_NAME"), rtName,
                             "Primary key table name did not match");
-                    Assert.assertEquals(rs2.getString("PKCOLUMN_NAME"), rcName,
+                    assertEquals(rs2.getString("PKCOLUMN_NAME"), rcName,
                             "Primary key column name" + rs2.getString("PKCOLUMN_NAME")
                                     + "of table" + rs2.getString("PKTABLE_NAME")
                                     + "did not match");
@@ -433,7 +441,7 @@ public class StructureTest extends MigrationTestBase {
                     if (seqName.endsWith("$IDENTITY_SEQUENCE")) {
                         continue;
                     }
-                    Assert.assertEquals(seqName.substring(0, 4), "SEQ_");
+                    assertEquals(seqName.substring(0, 4).toLowerCase(), "seq_");
                     // TODO: Need to check start value - Don't know how yet
                 }
                 Assert.assertTrue(found);
@@ -483,7 +491,7 @@ public class StructureTest extends MigrationTestBase {
                     found = true;
                     String idxName = rs2.getString("INDEXNAME");
                     Assert.assertNotNull(idxName);
-                    Assert.assertEquals(idxName.substring(0, 4), "IDX_");
+                    assertEquals(idxName.substring(0, 4).toLowerCase(), "idx_");
                 }
                 Assert.assertTrue(found);
                 rs2.close();
@@ -508,28 +516,22 @@ public class StructureTest extends MigrationTestBase {
      * test the precisions and scale are migrated properly
      */
     public void testPrecisions() throws Exception {
-
         String sqlStr1 = "select * from precision1";
         String sqlStr2 = "select * from precision2";
         PreparedStatement stmt1 = null, stmt2 = null;
         ResultSet rs1 = null, rs2 = null;
-
         try {
             stmt1 = nuodbConnection.prepareStatement(sqlStr1);
             rs1 = stmt1.executeQuery();
-            boolean found = false;
-            Collection<MySQLPrecision1> expList = new ArrayList<MySQLPrecision1>();
-            Collection<MySQLPrecision1> actList = MySQLPrecisions.getMySQLPrecision1();
+            Collection<MySQLPrecision1> expected = getMySQLPrecision1();
+            Collection<MySQLPrecision1> actual = new ArrayList<MySQLPrecision1>();
             while (rs1.next()) {
-                found = true;
                 MySQLPrecision1 obj = new MySQLPrecision1(rs1.getInt(1),
                         rs1.getInt(2), rs1.getLong(3), rs1.getLong(4), rs1.getLong(5));
-                expList.add(obj);
+                actual.add(obj);
             }
-            Assert.assertTrue(found);
-            Assert.assertEquals(actList, expList,
-                    "Precision test 2 failed as the list(" + actList + ") does not match with orginal list(" +
-                            expList + ")");
+            assertEquals(actual, expected,
+                    format("The actual values %s does not match the expected %s", actual, expected));
 
         } finally {
             closeAll(rs1, stmt1);
@@ -537,20 +539,16 @@ public class StructureTest extends MigrationTestBase {
         try {
             stmt2 = nuodbConnection.prepareStatement(sqlStr2);
             rs2 = stmt2.executeQuery();
-            boolean found = false;
-            Collection<MySQLPrecision2> expList = new ArrayList<MySQLPrecision2>();
-            Collection<MySQLPrecision2> actList = MySQLPrecisions.getMySQLPrecision2();
+            Collection<MySQLPrecision2> expected = getMySQLPrecision2();
+            Collection<MySQLPrecision2> actual = new ArrayList<MySQLPrecision2>();
             while (rs2.next()) {
-                found = true;
                 MySQLPrecision2 obj = new MySQLPrecision2(rs2.getString(1),
                         rs2.getString(2), rs2.getDouble(3), rs2.getDouble(4),
                         rs2.getDouble(5), rs2.getString(6), rs2.getString(7));
-                expList.add(obj);
+                actual.add(obj);
             }
-            Assert.assertTrue(found);
-            Assert.assertEquals(actList, expList,
-                    "Precision test 2 failed as the list(" + actList + ") does not match with orginal list(" +
-                            expList + ")");
+            assertEquals(actual, expected,
+                    format("The actual values %s does not match the expected %s", actual, expected));
             rs2.close();
             stmt2.close();
         } finally {

@@ -57,8 +57,7 @@ public class ContinuityTest extends MigrationTestBase {
             try {
                 rows = stmt1.executeUpdate(sqlStr);
             } catch (SQLException e) {
-                Assert.assertTrue(e.getMessage().toUpperCase()
-                        .contains("DATATYPES1..PRIMARY_KEY"));
+                Assert.assertEquals(e.getSQLState(), "23000");
             }
         } finally {
             nuodbConnection.rollback();
@@ -80,8 +79,7 @@ public class ContinuityTest extends MigrationTestBase {
             try {
                 rows = stmt1.executeUpdate(sqlStr);
             } catch (SQLException e) {
-                Assert.assertTrue(e.getMessage().toUpperCase()
-                        .contains("DATATYPES1_UNIQUE"));
+                Assert.assertEquals(e.getSQLState(), "23000");
             }
         } finally {
             nuodbConnection.rollback();
@@ -99,7 +97,7 @@ public class ContinuityTest extends MigrationTestBase {
     /*
      * Verify Auto increments are working. We don't know what value the auto inc
      * is going to start because it depend on the number of times and test is
-     * run. So we are going to execute it twice and make sure the id is
+     * execute. So we are going to execute it twice and make sure the id is
      * incremented by 1 between those runs.
      */
     @Test(groups = {"disabled"})

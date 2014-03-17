@@ -28,8 +28,9 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -56,8 +57,8 @@ public class MySQLDialect extends SimpleDialect {
         super.initJdbcTypes();
 
         addJdbcType(MySQLSmallIntUnsigned.INSTANCE);
-        addJdbcType(MySQLIntUnsignedType.INSTANCE);
-        addJdbcType(MySQLBigIntUnsignedType.INSTANCE);
+        addJdbcType(MySQLIntUnsignedValue.INSTANCE);
+        addJdbcType(MySQLBigIntUnsignedValue.INSTANCE);
 
         addJdbcTypeDescAlias(Types.LONGVARCHAR, "TINYTEXT", Types.CLOB);
         addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
@@ -157,6 +158,11 @@ public class MySQLDialect extends SimpleDialect {
 
     @Override
     public boolean supportsLimitParameters() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCatalogs() {
         return true;
     }
 

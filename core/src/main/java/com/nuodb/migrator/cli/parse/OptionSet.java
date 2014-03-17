@@ -61,6 +61,8 @@ public interface OptionSet {
 
     Set<String> getProperties();
 
+    Option getOption(int id);
+
     Set<Option> getOptions();
 
     int getOptionCount(String trigger);

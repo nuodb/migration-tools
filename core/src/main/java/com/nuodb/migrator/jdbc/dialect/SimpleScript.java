@@ -27,8 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.session.Session;
 
 /**
@@ -36,20 +35,27 @@ import com.nuodb.migrator.jdbc.session.Session;
  */
 public class SimpleScript implements Script, Comparable<Script> {
 
+    private boolean literal;
     private String script;
     private Session session;
     private Dialect dialect;
     private DatabaseInfo databaseInfo;
+
+    public SimpleScript(String script, DatabaseInfo databaseInfo) {
+        this(script, databaseInfo, false);
+    }
 
     /**
      * Constructs script detached from any database session
      *
      * @param script       source of the script
      * @param databaseInfo target database info
+     * @param literal      true if script is literal
      */
-    public SimpleScript(String script, DatabaseInfo databaseInfo) {
+    public SimpleScript(String script, DatabaseInfo databaseInfo, boolean literal) {
         this.script = script;
         this.databaseInfo = databaseInfo;
+        this.literal = literal;
     }
 
     /**
@@ -59,10 +65,15 @@ public class SimpleScript implements Script, Comparable<Script> {
      * @param session source database session
      */
     public SimpleScript(String script, Session session) {
+        this(script, session, false);
+    }
+
+    public SimpleScript(String script, Session session, boolean literal) {
         this.script = script;
         this.session = session;
         this.dialect = session.getDialect();
-        this.databaseInfo = session.getDialect().getDatabaseInfo();
+        this.databaseInfo = session.getDatabaseInfo();
+        this.literal = literal;
     }
 
     @Override
@@ -83,6 +94,11 @@ public class SimpleScript implements Script, Comparable<Script> {
     @Override
     public DatabaseInfo getDatabaseInfo() {
         return databaseInfo;
+    }
+
+    @Override
+    public boolean isLiteral() {
+        return literal;
     }
 
     @Override

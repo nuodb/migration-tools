@@ -30,8 +30,8 @@ package com.nuodb.migrator.jdbc.metadata;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.spec.ConnectionSpec;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
@@ -40,20 +40,22 @@ import java.util.Map;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.split;
 
-public class Database extends IndentedBase implements HasSchemas {
+public class Database extends IdentifiableBase implements HasSchemas {
 
-    private final Map<Identifier, Catalog> catalogs = Maps.newLinkedHashMap();
+    private final Map<Identifier, Catalog> catalogs = newLinkedHashMap();
+
+    private Dialect dialect;
     private DriverInfo driverInfo;
     private DatabaseInfo databaseInfo;
-    private Dialect dialect;
+    private ConnectionSpec connectionSpec;
 
-    @Override
-    public MetaDataType getObjectType() {
-        return MetaDataType.DATABASE;
+    public Database() {
+        super(MetaDataType.DATABASE, false);
     }
 
     public DriverInfo getDriverInfo() {
@@ -80,28 +82,36 @@ public class Database extends IndentedBase implements HasSchemas {
         this.dialect = dialect;
     }
 
-    public boolean hasCatalog(String catalogName) {
-        return hasCatalog(valueOf(catalogName));
+    public ConnectionSpec getConnectionSpec() {
+        return connectionSpec;
     }
 
-    public boolean hasCatalog(Identifier catalogId) {
-        return catalogs.containsKey(catalogId);
+    public void setConnectionSpec(ConnectionSpec connectionSpec) {
+        this.connectionSpec = connectionSpec;
     }
 
-    public Catalog getCatalog(String catalogName) {
-        return addCatalog(valueOf(catalogName), false);
+    public boolean hasCatalog(String name) {
+        return hasCatalog(valueOf(name));
     }
 
-    public Catalog getCatalog(Identifier catalogId) {
-        return addCatalog(catalogId, false);
+    public boolean hasCatalog(Identifier identifier) {
+        return catalogs.containsKey(identifier);
     }
 
-    public Catalog addCatalog(String catalogName) {
-        return addCatalog(valueOf(catalogName), true);
+    public Catalog getCatalog(String name) {
+        return addCatalog(valueOf(name), false);
     }
 
-    public Catalog addCatalog(Identifier catalogId) {
-        return addCatalog(catalogId, true);
+    public Catalog getCatalog(Identifier identifier) {
+        return addCatalog(identifier, false);
+    }
+
+    public Catalog addCatalog(String name) {
+        return addCatalog(valueOf(name), true);
+    }
+
+    public Catalog addCatalog(Identifier identifier) {
+        return addCatalog(identifier, true);
     }
 
     public Catalog addCatalog(Catalog catalog) {
@@ -114,13 +124,13 @@ public class Database extends IndentedBase implements HasSchemas {
         catalogs.remove(catalog.getIdentifier());
     }
 
-    protected Catalog addCatalog(Identifier catalogId, boolean create) {
-        Catalog catalog = catalogs.get(catalogId);
+    protected Catalog addCatalog(Identifier identifier, boolean create) {
+        Catalog catalog = catalogs.get(identifier);
         if (catalog == null) {
             if (create) {
-                addCatalog(catalog = new Catalog(catalogId));
+                addCatalog(catalog = new Catalog(identifier));
             } else {
-                throw new MetaDataException(format("Catalog %s doesn't exist", catalogId));
+                throw new MetaDataException(format("Catalog %s doesn't exist", identifier));
             }
         }
         return catalog;
@@ -161,6 +171,7 @@ public class Database extends IndentedBase implements HasSchemas {
         return catalogs.values();
     }
 
+    @Override
     public Collection<Schema> getSchemas() {
         Collection<Schema> schemas = newArrayList();
         for (Catalog catalog : getCatalogs()) {
@@ -169,13 +180,22 @@ public class Database extends IndentedBase implements HasSchemas {
         return schemas;
     }
 
+    @Override
     public Collection<Table> getTables() {
-        Collection<Schema> schemas = getSchemas();
         Collection<Table> tables = newArrayList();
-        for (Schema schema : schemas) {
+        for (Schema schema : getSchemas()) {
             tables.addAll(schema.getTables());
         }
         return tables;
+    }
+
+    @Override
+    public Collection<Sequence> getSequences() {
+        Collection<Sequence> sequences = newArrayList();
+        for (Schema schema : getSchemas()) {
+            sequences.addAll(schema.getSequences());
+        }
+        return sequences;
     }
 
     public Collection<Table> getTables(String tableName) {
@@ -232,6 +252,8 @@ public class Database extends IndentedBase implements HasSchemas {
 
         Database database = (Database) o;
 
+        if (connectionSpec != null ? !connectionSpec.equals(database.connectionSpec) : database.connectionSpec != null)
+            return false;
         if (databaseInfo != null ? !databaseInfo.equals(database.databaseInfo) : database.databaseInfo != null)
             return false;
         if (driverInfo != null ? !driverInfo.equals(database.driverInfo) : database.driverInfo != null) return false;
@@ -243,6 +265,7 @@ public class Database extends IndentedBase implements HasSchemas {
     public int hashCode() {
         int result = driverInfo != null ? driverInfo.hashCode() : 0;
         result = 31 * result + (databaseInfo != null ? databaseInfo.hashCode() : 0);
+        result = 31 * result + (connectionSpec != null ? connectionSpec.hashCode() : 0);
         return result;
     }
 }

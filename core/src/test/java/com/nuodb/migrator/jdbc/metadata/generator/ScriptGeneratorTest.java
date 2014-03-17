@@ -28,20 +28,21 @@
 package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.google.common.collect.Lists;
+import com.nuodb.migrator.jdbc.dialect.DB2Dialect;
 import com.nuodb.migrator.jdbc.dialect.MySQLDialect;
 import com.nuodb.migrator.jdbc.dialect.NuoDBDialect;
 import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -51,27 +52,28 @@ import static junit.framework.Assert.assertNotNull;
  */
 public class ScriptGeneratorTest {
 
-    private ScriptGeneratorContext scriptGeneratorContext;
+    private ScriptGeneratorManager scriptGeneratorManager;
 
     @BeforeMethod
-    public void setUp() {
+    public void setUp() throws SQLException {
         NuoDBDialect dialect = new NuoDBDialect();
 
         Database database = new Database();
         database.setDialect(dialect);
 
-        scriptGeneratorContext = new ScriptGeneratorContext();
-        scriptGeneratorContext.setTargetDialect(dialect);
-        scriptGeneratorContext.setSourceSession(createSession(new MySQLDialect(MYSQL)));
+        scriptGeneratorManager = new ScriptGeneratorManager();
+        scriptGeneratorManager.setTargetDialect(dialect);
+        scriptGeneratorManager.setSourceSession(createSession(new MySQLDialect(MYSQL)));
     }
 
     @DataProvider(name = "getScripts")
     public Object[][] createGetScriptsData() {
-        Database database = new Database();
-        database.setDialect(new MySQLDialect(new DatabaseInfo("MySQL")));
+        // create & drop scripts from a source mysql table
+        Database database1 = new Database();
+        database1.setDialect(new MySQLDialect(new DatabaseInfo("MySQL")));
 
         Table table = new Table("users");
-        table.setDatabase(database);
+        table.setDatabase(database1);
 
         Column id = table.addColumn("id");
         id.setTypeCode(Types.INTEGER);
@@ -97,15 +99,43 @@ public class ScriptGeneratorTest {
                 newArrayList(
                         "CREATE TABLE \"users\" (\"id\" INTEGER NOT NULL, " +
                                 "\"login\" VARCHAR(32) NOT NULL, PRIMARY KEY (\"id\"))")});
+
+        // test db2 multiple schemas
+        Database database2 = new Database();
+        database2.setDialect(new DB2Dialect(new DatabaseInfo("DB2/DARWIN")));
+        Catalog catalog1 = database2.addCatalog(valueOf(null));
+
+        Table table1 = new Table("t1");
+        table1.setDatabase(database2);
+        Column id1 = table.addColumn("id");
+        id.setTypeCode(Types.INTEGER);
+        id.setTypeName("INTEGER");
+        table1.addColumn(id1);
+        catalog1.addSchema(valueOf("s1")).addTable(table1);
+
+        Table table2 = new Table("t1");
+        table2.setDatabase(database2);
+
+        Column id2 = table.addColumn("id");
+        id.setTypeCode(Types.INTEGER);
+        id.setTypeName("INTEGER");
+        table2.addColumn(id2);
+        catalog1.addSchema(valueOf("s2")).addTable(table2);
+
+        data.add(new Object[]{database2, newArrayList(ScriptType.CREATE),
+                newArrayList(
+                        "USE \"s1\"", "CREATE TABLE \"t1\" (\"id\" INTEGER NOT NULL)",
+                        "USE \"s2\"", "CREATE TABLE \"t1\" (\"id\" INTEGER NOT NULL)")
+        });
         return data.toArray(new Object[][]{});
     }
 
     @Test(dataProvider = "getScripts")
     public void testGetScripts(MetaData object, Collection<ScriptType> scriptTypes,
                                Collection<String> expected) throws Exception {
-        scriptGeneratorContext.setScriptTypes(scriptTypes);
+        scriptGeneratorManager.setScriptTypes(scriptTypes);
 
-        Collection<String> scripts = scriptGeneratorContext.getScripts(object);
+        Collection<String> scripts = scriptGeneratorManager.getScripts(object);
         assertNotNull(scripts);
         assertEquals(newArrayList(expected), newArrayList(scripts));
     }

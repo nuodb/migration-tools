@@ -88,7 +88,7 @@ public class JdbcTypeAdapterTest {
     }
 
     @DataProvider(name = "wrap")
-    public Object[][] getWrapData() throws Exception {
+    public Object[][] createWrapData() throws Exception {
         List<Object> data = newArrayList();
 
         BigDecimal bigDecimal = new BigDecimal("12345");
@@ -177,7 +177,7 @@ public class JdbcTypeAdapterTest {
     }
 
     @DataProvider(name = "unwrap")
-    public Object[][] getUnwrapData() throws Exception {
+    public Object[][] createUnwrapData() throws Exception {
         List<Object> data = newArrayList();
 
         BigDecimal bigDecimal = new BigDecimal("54321.123");

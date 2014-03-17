@@ -62,7 +62,7 @@ public class InspectionManagerTest {
     public void testInspect(MetaDataType objectType) throws Exception {
         Inspector inspector = mock(Inspector.class);
         when(inspector.supports(objectType)).thenReturn(true);
-        when(inspector.supports(any(InspectionContext.class), any(InspectionScope.class))).thenReturn(true);
+        when(inspector.supportsScope(any(InspectionContext.class), any(InspectionScope.class))).thenReturn(true);
 
         inspectionManager.addInspector(inspector);
 

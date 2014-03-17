@@ -27,95 +27,79 @@
  */
 package com.nuodb.migrator.schema;
 
-import com.nuodb.migrator.jdbc.JdbcUtils;
-import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
-import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
-import com.nuodb.migrator.jdbc.dialect.*;
 import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.generator.*;
-import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
+import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ConnectionScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.FileScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
-import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
-import com.nuodb.migrator.job.JobBase;
-import com.nuodb.migrator.job.JobExecution;
+import com.nuodb.migrator.job.ScriptGeneratorJobBase;
 import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
-import com.nuodb.migrator.spec.SchemaSpec;
-import org.slf4j.Logger;
+import com.nuodb.migrator.spec.SchemaJobSpec;
 
 import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.context.ContextUtils.getService;
-import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
+import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TYPES;
 import static com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.NUODB;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
-import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
-public class SchemaJob extends JobBase {
-
-    protected final Logger logger = getLogger(getClass());
+public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
     public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
 
-    private SchemaSpec schemaSpec;
-    private DialectResolver dialectResolver;
-    private InspectionManager inspectionManager;
-    private ConnectionProviderFactory connectionProviderFactory;
-
     private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
-    private SchemaJobContext schemaJobContext = new SchemaJobContext();
+    private ScriptExporter scriptExporter;
+    private ScriptGeneratorManager scriptGeneratorManager;
 
-    public SchemaJob(SchemaSpec schemaSpec) {
-        this.schemaSpec = schemaSpec;
+    public SchemaJob() {
+    }
+
+    public SchemaJob(SchemaJobSpec jobSpec) {
+        super(jobSpec);
     }
 
     @Override
-    public void init(JobExecution execution) throws Exception {
-        isNotNull(getSchemaSpec(), "Schema spec is required");
-        isNotNull(getDialectResolver(), "Dialect resolver is required");
-        isNotNull(getInspectionManager(), "Inspection manager is required");
-        isNotNull(getConnectionProviderFactory(), "Connection provider factory is required");
+    protected void init() throws Exception {
+        super.init();
 
-        init();
-    }
+        ConnectionSpec sourceSpec = getSourceSpec();
+        SessionFactory sourceSessionFactory = newSessionFactory(
+                createConnectionProviderFactory().createConnectionProvider(
+                        sourceSpec), createDialectResolver());
+        Session sourceSession = sourceSessionFactory.openSession();
+        setSourceSession(sourceSession);
 
-    protected void init() throws SQLException {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Initializing schema job context");
+        Session targetSession = null;
+        ConnectionSpec targetSpec = getTargetSpec();
+        if (targetSpec != null) {
+            SessionFactory targetSessionFactory = newSessionFactory(
+                    createConnectionProviderFactory().createConnectionProvider(
+                            targetSpec), createDialectResolver());
+            targetSession = targetSessionFactory.openSession();
         }
-        SessionFactory sessionFactory = newSessionFactory(
-                getConnectionProviderFactory().createConnectionProvider(
-                        getSourceConnectionSpec()), getDialectResolver());
-        Session session = sessionFactory.openSession();
-        schemaJobContext.setSession(session);
-        schemaJobContext.setScriptExporter(createScriptExporter());
-        schemaJobContext.setScriptGeneratorContext(createScriptGeneratorContext(session));
+        setTargetSession(targetSession);
+
+        setScriptExporter(createScriptExporter());
+        setScriptGeneratorManager(createScriptGeneratorManager());
     }
 
     protected ScriptExporter createScriptExporter() {
         Collection<ScriptExporter> exporters = newArrayList();
-        ConnectionSpec connectionSpec = getTargetConnectionSpec();
-        if (connectionSpec != null) {
-            try {
-                ConnectionProvider connectionProvider = getConnectionProviderFactory().createConnectionProvider(
-                        connectionSpec);
-                exporters.add(new ConnectionScriptExporter(connectionProvider.getConnection()));
-            } catch (SQLException exception) {
-                throw new SchemaJobException("Failed creating connection script exporter", exception);
-            }
+        Session targetSession = getTargetSession();
+        if (targetSession != null) {
+            exporters.add(new ConnectionScriptExporter(targetSession.getConnection()));
         }
         ResourceSpec outputSpec = getOutputSpec();
         if (outputSpec != null) {
@@ -128,110 +112,43 @@ public class SchemaJob extends JobBase {
         return new CompositeScriptExporter(exporters);
     }
 
-    protected ScriptGeneratorContext createScriptGeneratorContext(Session session) {
-        ScriptGeneratorContext scriptGeneratorContext = new ScriptGeneratorContext();
-        scriptGeneratorContext.getAttributes().put(GROUP_SCRIPTS_BY, schemaSpec.getGroupScriptsBy());
-        scriptGeneratorContext.setObjectTypes(getObjectTypes());
-        scriptGeneratorContext.setScriptTypes(getScriptTypes());
-        scriptGeneratorContext.setSourceSession(session);
-
-        Dialect dialect = getService(DialectResolver.class).resolve(NUODB);
-        TranslationManager translationManager = dialect.getTranslationManager();
-
-        Collection<Translator> translators = translationManager.getTranslators();
-        for (Translator translator : translators) {
-            if (translator instanceof ImplicitDefaultsTranslator) {
-                ((ImplicitDefaultsTranslator)translator).setUseExplicitDefaults(schemaSpec.isUseExplicitDefaults());
-            }
-        }
-
-        JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
-        for (JdbcTypeSpec jdbcTypeSpec : getJdbcTypeSpecs()) {
-            jdbcTypeNameMap.addJdbcTypeName(
-                    jdbcTypeSpec.getTypeCode(), newSpecifiers(
-                    jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()),
-                    jdbcTypeSpec.getTypeName()
-            );
-        }
-        dialect.setIdentifierQuoting(getIdentifierQuoting());
-        dialect.setIdentifierNormalizer(getIdentifierNormalizer());
-        scriptGeneratorContext.setTargetDialect(dialect);
-
-        ConnectionSpec sourceConnectionSpec = getSourceConnectionSpec();
-        scriptGeneratorContext.setSourceCatalog(sourceConnectionSpec.getCatalog());
-        scriptGeneratorContext.setSourceSchema(sourceConnectionSpec.getSchema());
-
-        ConnectionSpec targetConnectionSpec = getTargetConnectionSpec();
-        if (targetConnectionSpec != null) {
-            scriptGeneratorContext.setTargetCatalog(targetConnectionSpec.getCatalog());
-            scriptGeneratorContext.setTargetSchema(targetConnectionSpec.getSchema());
-        }
-        return scriptGeneratorContext;
-    }
-
     @Override
-    public void execute(JobExecution execution) throws Exception {
-        schema();
-    }
-
-    protected void schema() throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Inspecting target database");
-        }
-        InspectionScope inspectionScope = new TableInspectionScope(
-                getSourceConnectionSpec().getCatalog(), getSourceConnectionSpec().getSchema(), getTableTypes());
-        Database database = getInspectionManager().inspect(schemaJobContext.getSession().getConnection(), inspectionScope,
-                MetaDataType.TYPES).getObject(MetaDataType.DATABASE);
-
-        Collection<String> scripts = schemaJobContext.getScriptGeneratorContext().getScripts(database);
+    public void execute() throws Exception {
+        Collection<String> scripts = getScriptGeneratorManager().getScripts(inspect());
         if (isFailOnEmptyScripts() && scripts.isEmpty()) {
-            throw new SchemaJobException(
+            throw new SchemaException(
                     "Database is empty: no scripts to export. Verify connection & data inspection settings");
         }
-        ScriptExporter scriptExporter = schemaJobContext.getScriptExporter();
+        ScriptExporter scriptExporter = getScriptExporter();
         scriptExporter.open();
         scriptExporter.exportScripts(scripts);
     }
 
+    protected Database inspect() throws SQLException {
+        InspectionScope inspectionScope = new TableInspectionScope(
+                getSourceSpec().getCatalog(), getSourceSpec().getSchema(), getTableTypes());
+        return createInspectionManager().inspect(
+                getSourceSession().getConnection(), inspectionScope, TYPES).getObject(DATABASE);
+    }
+
     @Override
-    public void release(JobExecution execution) throws Exception {
-        release();
+    public void release() throws Exception {
+        super.release();
+        close(getScriptExporter());
     }
 
-    protected void release() throws Exception {
-        ScriptExporter scriptExporter = schemaJobContext.getScriptExporter();
-        if (scriptExporter != null) {
-            scriptExporter.close();
-        }
-        JdbcUtils.close(schemaJobContext.getSession());
+    @Override
+    public void setSourceSpec(ConnectionSpec sourceSpec) {
+        getJobSpec().setSourceSpec(sourceSpec);
     }
 
-    public SchemaSpec getSchemaSpec() {
-        return schemaSpec;
+    @Override
+    public ConnectionSpec getSourceSpec() {
+        return getJobSpec().getSourceSpec();
     }
 
-    public DialectResolver getDialectResolver() {
-        return dialectResolver;
-    }
-
-    public void setDialectResolver(DialectResolver dialectResolver) {
-        this.dialectResolver = dialectResolver;
-    }
-
-    public InspectionManager getInspectionManager() {
-        return inspectionManager;
-    }
-
-    public void setInspectionManager(InspectionManager inspectionManager) {
-        this.inspectionManager = inspectionManager;
-    }
-
-    public ConnectionProviderFactory getConnectionProviderFactory() {
-        return connectionProviderFactory;
-    }
-
-    public void setConnectionProviderFactory(ConnectionProviderFactory connectionProviderFactory) {
-        this.connectionProviderFactory = connectionProviderFactory;
+    protected ResourceSpec getOutputSpec() {
+        return getJobSpec().getOutputSpec();
     }
 
     public boolean isFailOnEmptyScripts() {
@@ -242,43 +159,19 @@ public class SchemaJob extends JobBase {
         this.failOnEmptyScripts = failOnEmptyScripts;
     }
 
-    protected String[] getTableTypes() {
-        return schemaSpec.getTableTypes();
+    public ScriptExporter getScriptExporter() {
+        return scriptExporter;
     }
 
-    protected ConnectionSpec getSourceConnectionSpec() {
-        return schemaSpec.getSourceConnectionSpec();
+    public void setScriptExporter(ScriptExporter scriptExporter) {
+        this.scriptExporter = scriptExporter;
     }
 
-    protected ConnectionSpec getTargetConnectionSpec() {
-        return schemaSpec.getTargetConnectionSpec();
+    public ScriptGeneratorManager getScriptGeneratorManager() {
+        return scriptGeneratorManager;
     }
 
-    protected ResourceSpec getOutputSpec() {
-        return schemaSpec.getOutputSpec();
-    }
-
-    protected Collection<MetaDataType> getObjectTypes() {
-        return schemaSpec.getObjectTypes();
-    }
-
-    protected Collection<ScriptType> getScriptTypes() {
-        return schemaSpec.getScriptTypes();
-    }
-
-    protected GroupScriptsBy getGroupScriptsBy() {
-        return schemaSpec.getGroupScriptsBy();
-    }
-
-    protected Collection<JdbcTypeSpec> getJdbcTypeSpecs() {
-        return schemaSpec.getJdbcTypeSpecs();
-    }
-
-    protected IdentifierQuoting getIdentifierQuoting() {
-        return schemaSpec.getIdentifierQuoting();
-    }
-
-    protected IdentifierNormalizer getIdentifierNormalizer() {
-        return schemaSpec.getIdentifierNormalizer();
+    public void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager) {
+        this.scriptGeneratorManager = scriptGeneratorManager;
     }
 }

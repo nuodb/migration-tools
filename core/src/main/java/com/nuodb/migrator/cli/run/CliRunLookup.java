@@ -37,23 +37,23 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 public class CliRunLookup {
 
-    private Map<String, CliRun> cliRunMap = newHashMap();
+    private Map<String, CliRun> cliJobMap = newHashMap();
 
     public CliRunLookup() {
-        register(new CliDumpJob());
-        register(new CliLoadJob());
-        register(new CliSchemaJob());
+        add(new CliDumpJob());
+        add(new CliLoadJob());
+        add(new CliSchemaJob());
+    }
+
+    public CliRun get(String name) {
+        return cliJobMap.get(name);
+    }
+
+    public void add(CliRun cliRun) {
+        cliJobMap.put(cliRun.getCommand(), cliRun);
     }
 
     public Collection<String> getCommands() {
-        return cliRunMap.keySet();
-    }
-
-    public CliRun lookup(String command) {
-        return cliRunMap.get(command);
-    }
-
-    public void register(CliRun cliRun) {
-        cliRunMap.put(cliRun.getCommand(), cliRun);
+        return cliJobMap.keySet();
     }
 }

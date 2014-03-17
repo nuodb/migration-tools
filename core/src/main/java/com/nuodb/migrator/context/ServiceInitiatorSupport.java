@@ -38,6 +38,9 @@ public class ServiceInitiatorSupport<T> implements ServiceInitiator<T> {
     private Class<? extends T> serviceType;
     private boolean addService;
 
+    public ServiceInitiatorSupport() {
+    }
+
     public ServiceInitiatorSupport(T service) {
         this(service, true);
     }

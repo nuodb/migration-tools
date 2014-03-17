@@ -28,9 +28,10 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -135,6 +136,16 @@ public class PostgreSQLDialect extends SimpleDialect {
 
     @Override
     public boolean supportsLimitParameters() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsSchemas() {
         return true;
     }
 

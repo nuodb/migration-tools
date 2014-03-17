@@ -29,17 +29,18 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.model.ColumnFactory;
+import com.nuodb.migrator.jdbc.model.FieldFactory;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.utils.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.utils.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
@@ -51,42 +52,26 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
+    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+            throws SQLException {
+        return inspectionContext.getConnection().getMetaData().getColumns(
+                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(),
+                tableInspectionScope.getTable(), null);
     }
 
     @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes)
-            throws SQLException {
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            inspect(inspectionContext, inspectionScope);
-        }
-    }
-
-    protected void inspect(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
-            throws SQLException {
-        ResultSet columns = inspectionContext.getConnection().getMetaData().getColumns(
-                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(), tableInspectionScope.getTable(), null);
-        try {
-            inspect(inspectionContext, columns);
-        } finally {
-            close(columns);
-        }
-    }
-
-    protected void inspect(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet columns) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (columns.next()) {
             Table table = addTable(inspectionResults, columns.getString("TABLE_CAT"),
                     columns.getString("TABLE_SCHEM"), columns.getString("TABLE_NAME"));
             Column column = table.addColumn(columns.getString("COLUMN_NAME"));
-            inspect(inspectionContext, columns, column);
+            processColumn(inspectionContext, columns, column);
             inspectionResults.addObject(column);
         }
     }
 
-    protected void inspect(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
+    protected void processColumn(InspectionContext inspectionContext, ResultSet columns, Column column) throws SQLException {
         JdbcTypeDesc typeDescAlias = inspectionContext.getDialect().getJdbcTypeAlias(
                 columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"));
         column.setTypeCode(typeDescAlias.getTypeCode());
@@ -97,10 +82,11 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
         column.setPrecision(columnSize);
         column.setScale(columns.getInt("DECIMAL_DIGITS"));
 
-        column.setComment(columns.getString("REMARKS"));
+        String comment = columns.getString("REMARKS");
+        column.setComment(isEmpty(comment) ? null : comment);
         column.setPosition(columns.getInt("ORDINAL_POSITION"));
         String autoIncrement =
-                ColumnFactory.createColumnList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
+                FieldFactory.newFieldList(columns.getMetaData()).get("IS_AUTOINCREMENT") != null ?
                         columns.getString("IS_AUTOINCREMENT") : null;
         column.setAutoIncrement("YES".equals(autoIncrement));
         column.setNullable("YES".equals(columns.getString("IS_NULLABLE")));
@@ -108,7 +94,7 @@ public class SimpleColumnInspector extends TableInspectorBase<Table, TableInspec
     }
 
     @Override
-    protected boolean supports(TableInspectionScope inspectionScope) {
-        return inspectionScope.getTable() != null;
+    protected boolean supportsScope(TableInspectionScope tableInspectionScope) {
+        return tableInspectionScope.getTable() != null;
     }
 }

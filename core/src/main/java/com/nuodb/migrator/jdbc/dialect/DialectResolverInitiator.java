@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.context.ServiceInitiatorSupport;
+import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
 
 /**
  * @author Sergey Bushik

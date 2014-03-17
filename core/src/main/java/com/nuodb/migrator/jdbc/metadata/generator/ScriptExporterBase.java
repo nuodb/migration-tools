@@ -27,10 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.utils.ObjectUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 
 import static java.lang.String.format;
@@ -38,19 +34,17 @@ import static java.lang.String.format;
 /**
  * @author Sergey Bushik
  */
-public abstract class ScriptExporterBase implements ScriptExporter {
-
-    protected final transient Logger logger = LoggerFactory.getLogger(getClass());
+public abstract class ScriptExporterBase extends ScriptProcessorBase implements ScriptExporter {
 
     @Override
-    public final void open() throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug(format("Opening script exporter %s", this));
+    public void exportScripts(Collection<String> scripts) throws Exception {
+        if (scripts == null) {
+            return;
         }
-        doOpen();
+        for (String script : scripts) {
+            exportScript(script);
+        }
     }
-
-    protected abstract void doOpen() throws Exception;
 
     @Override
     public void exportScript(String script) throws Exception {
@@ -64,30 +58,5 @@ public abstract class ScriptExporterBase implements ScriptExporter {
         }
     }
 
-    @Override
-    public void exportScripts(Collection<String> scripts) throws Exception {
-        if (scripts == null) {
-            return;
-        }
-        for (String script : scripts) {
-            exportScript(script);
-        }
-    }
-
     protected abstract void doExportScript(String script) throws Exception;
-
-    @Override
-    public final void close() throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug(format("Closing script exporter %s", this));
-        }
-        doClose();
-    }
-
-    protected abstract void doClose() throws Exception;
-
-    @Override
-    public String toString() {
-        return ObjectUtils.toString(this);
-    }
 }

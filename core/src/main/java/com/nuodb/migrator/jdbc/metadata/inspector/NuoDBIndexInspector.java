@@ -30,23 +30,16 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.query.Query;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
-import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.*;
-import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBInspectorUtils.validate;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.KEY;
+import static com.nuodb.migrator.jdbc.metadata.inspector.NuoDBIndex.UNIQUE;
 
 /**
  * @author Sergey Bushik
@@ -58,46 +51,16 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
     }
 
     @Override
-    public void inspectScope(InspectionContext inspectionContext,
-                             TableInspectionScope inspectionScope) throws SQLException {
-        validate(inspectionScope);
-        super.inspectScope(inspectionContext, inspectionScope);
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        return NuoDBIndex.createQuery(tableInspectionScope, UNIQUE, KEY);
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
-    }
-
-    @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        final StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
-                new StatementFactory<PreparedStatement>() {
-                    @Override
-                    public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(
-                                createQuery(UNIQUE, KEY), TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                    }
-                },
-                new StatementCallback<PreparedStatement>() {
-                    @Override
-                    public void process(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
-                            statement.setString(1, inspectionScope.getSchema());
-                            statement.setString(2, inspectionScope.getTable());
-                            inspect(inspectionContext, statement.executeQuery());
-                        }
-                    }
-                }
-        );
-    }
-
-    protected void inspect(InspectionContext inspectionContext, ResultSet indexes) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet indexes) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (indexes.next()) {
-            Table table = addTable(inspectionResults, null, indexes.getString("SCHEMA"), indexes.getString("TABLENAME"));
+            Table table = addTable(inspectionResults, null, indexes.getString("SCHEMA"),
+                    indexes.getString("TABLENAME"));
             Identifier identifier = valueOf(indexes.getString("INDEXNAME"));
             Index index = table.getIndex(identifier);
             if (index == null) {
@@ -110,7 +73,7 @@ public class NuoDBIndexInspector extends TableInspectorBase<Table, TableInspecti
     }
 
     @Override
-    protected boolean supports(TableInspectionScope inspectionScope) {
-        return inspectionScope.getSchema() != null && inspectionScope.getTable() != null;
+    protected boolean supportsScope(TableInspectionScope tableInspectionScope) {
+        return tableInspectionScope.getSchema() != null && tableInspectionScope.getTable() != null;
     }
 }

@@ -27,9 +27,13 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import com.nuodb.migrator.utils.ObjectUtils;
+
+import java.io.Serializable;
+
 import static java.lang.String.format;
 
-public class DriverInfo {
+public class DriverInfo implements Serializable {
     private String name;
     private String version;
     private int minorVersion;
@@ -68,12 +72,6 @@ public class DriverInfo {
     }
 
     @Override
-    public String toString() {
-        return format("name=%s, version=%s, major version=%s, minor version=%s",
-                name, version, majorVersion, minorVersion);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -95,5 +93,10 @@ public class DriverInfo {
         result = 31 * result + minorVersion;
         result = 31 * result + majorVersion;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
 import java.sql.SQLException;
@@ -60,7 +60,7 @@ public class JdbcTimeValueFormat extends ValueFormatBase<Time> {
     }
 
     @Override
-    public ValueType getValueType(Column column) {
+    public ValueType getValueType(Field field) {
         return ValueType.STRING;
     }
 }

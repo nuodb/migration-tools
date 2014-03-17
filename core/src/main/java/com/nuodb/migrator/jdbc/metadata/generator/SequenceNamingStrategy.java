@@ -27,31 +27,58 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
+
+import java.util.Collection;
+
+import static com.nuodb.migrator.utils.Predicates.equalTo;
+import static com.google.common.collect.Iterables.indexOf;
+import static com.nuodb.migrator.utils.StringUtils.*;
 
 /**
  * @author Sergey Bushik
  */
 public class SequenceNamingStrategy extends IdentifiableNamingStrategy<Sequence> {
 
+    private static final String PREFIX = "SEQ";
+    private static final char DELIMITER = '_';
+
     public SequenceNamingStrategy() {
         super(Sequence.class);
     }
 
     @Override
-    protected String getIdentifiableName(Sequence sequence, ScriptGeneratorContext scriptGeneratorContext) {
+    protected String getIdentifiableName(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
         StringBuilder qualifier = new StringBuilder();
-        Column column = sequence.getColumn();
-        qualifier.append(scriptGeneratorContext.getName(column.getTable(), false));
-        qualifier.append('_');
-        qualifier.append(scriptGeneratorContext.getName(column, false));
-
+        Collection<Column> columns = sequence.getColumns();
+        if (columns.size() == 1) {
+            Column column = Iterables.get(columns, 0);
+            qualifier.append(scriptGeneratorManager.getName(column.getTable(), false));
+            qualifier.append('_');
+            qualifier.append(scriptGeneratorManager.getName(column, false));
+        } else {
+            Schema schema = sequence.getSchema();
+            if (scriptGeneratorManager.getName(schema, false) != null) {
+                qualifier.append(scriptGeneratorManager.getName(schema, false));
+            } else {
+                qualifier.append(scriptGeneratorManager.getName(schema.getCatalog(), false));
+            }
+            qualifier.append('_');
+            qualifier.append(indexOf(schema.getSequences(), equalTo(sequence)));
+        }
         StringBuilder buffer = new StringBuilder();
-        buffer.append("SEQ");
+        if (isLowerCase(qualifier)) {
+            buffer.append(lowerCase(PREFIX));
+        } else if (isCapitalizedCase(qualifier, DELIMITER)) {
+            buffer.append(capitalizedCase(PREFIX, '_'));
+        } else {
+            buffer.append(upperCase(PREFIX));
+        }
         buffer.append('_');
-        buffer.append(qualifier.toString());
-
+        buffer.append(qualifier);
         return buffer.toString();
     }
 }

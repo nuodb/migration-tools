@@ -41,16 +41,22 @@ import static java.lang.String.format;
  */
 public class ConnectionScriptExporter extends ScriptExporterBase {
 
-    private Connection connection;
     private Statement statement;
+    private Connection connection;
+    private boolean closeConnection;
 
     public ConnectionScriptExporter(Connection connection) {
+        this(connection, true);
+    }
+
+    public ConnectionScriptExporter(Connection connection, boolean closeConnection) {
         this.connection = connection;
+        this.closeConnection = closeConnection;
     }
 
     @Override
     protected void doOpen() throws Exception {
-        statement = connection.createStatement();
+        statement = getConnection().createStatement();
     }
 
     @Override
@@ -75,6 +81,24 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
     @Override
     protected void doClose() throws Exception {
         JdbcUtils.close(statement);
-        JdbcUtils.close(connection);
+        if (isCloseConnection()) {
+            JdbcUtils.close(getConnection());
+        }
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
+    public boolean isCloseConnection() {
+        return closeConnection;
+    }
+
+    public void setCloseConnection(boolean closeConnection) {
+        this.closeConnection = closeConnection;
     }
 }

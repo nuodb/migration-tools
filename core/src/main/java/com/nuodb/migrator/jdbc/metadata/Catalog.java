@@ -28,25 +28,31 @@
 package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CATALOG;
 import static java.lang.String.format;
 
 public class Catalog extends IdentifiableBase implements HasSchemas {
 
-    private Map<Identifier, Schema> schemas = Maps.newLinkedHashMap();
+    private Map<Identifier, Schema> schemas = newLinkedHashMap();
     private Database database;
+
+    public Catalog() {
+        super(CATALOG);
+    }
 
     public Catalog(String name) {
         this(valueOf(name));
     }
 
     public Catalog(Identifier identifier) {
-        super(MetaDataType.CATALOG, identifier);
+        super(CATALOG, identifier);
     }
 
     public Database getDatabase() {
@@ -64,20 +70,20 @@ public class Catalog extends IdentifiableBase implements HasSchemas {
         return schemas.values();
     }
 
-    public Schema getSchema(String schemaName) {
-        return addSchema(valueOf(schemaName), false);
+    public Schema getSchema(String name) {
+        return addSchema(valueOf(name), false);
     }
 
-    public Schema getSchema(Identifier schemaId) {
-        return addSchema(schemaId, false);
+    public Schema getSchema(Identifier identifier) {
+        return addSchema(identifier, false);
     }
 
-    public Schema addSchema(String schemaName) {
-        return addSchema(valueOf(schemaName), true);
+    public Schema addSchema(String name) {
+        return addSchema(valueOf(name), true);
     }
 
-    public Schema addSchema(Identifier schemaId) {
-        return addSchema(schemaId, true);
+    public Schema addSchema(Identifier identifier) {
+        return addSchema(identifier, true);
     }
 
     public Schema addSchema(Schema schema) {
@@ -87,25 +93,25 @@ public class Catalog extends IdentifiableBase implements HasSchemas {
         return schema;
     }
 
-    public boolean hasSchema(String schemaName) {
-        return hasSchema(valueOf(schemaName));
+    public boolean hasSchema(String name) {
+        return hasSchema(valueOf(name));
     }
 
-    public boolean hasSchema(Identifier schemaId) {
-        return schemas.containsKey(schemaId);
+    public boolean hasSchema(Identifier identifier) {
+        return schemas.containsKey(identifier);
     }
 
     public void removeSchema(Schema schema) {
         schemas.remove(schema.getIdentifier());
     }
 
-    protected Schema addSchema(Identifier schemaId, boolean create) {
-        Schema schema = schemas.get(schemaId);
+    protected Schema addSchema(Identifier identifier, boolean create) {
+        Schema schema = schemas.get(identifier);
         if (schema == null) {
             if (create) {
-                addSchema(schema = new Schema(schemaId));
+                addSchema(schema = new Schema(identifier));
             } else {
-                throw new MetaDataException(format("Schema %s doesn't exist", schemaId));
+                throw new MetaDataException(format("Schema %s doesn't exist", identifier));
             }
         }
         return schema;
@@ -113,12 +119,20 @@ public class Catalog extends IdentifiableBase implements HasSchemas {
 
     @Override
     public Collection<Table> getTables() {
-        Collection<Schema> schemas = getSchemas();
-        Collection<Table> tables = Lists.newArrayList();
-        for (Schema schema : schemas) {
+        Collection<Table> tables = newArrayList();
+        for (Schema schema : getSchemas()) {
             tables.addAll(schema.getTables());
         }
         return tables;
+    }
+
+    @Override
+    public Collection<Sequence> getSequences() {
+        Collection<Sequence> sequences = newArrayList();
+        for (Schema schema : getSchemas()) {
+            sequences.addAll(schema.getSequences());
+        }
+        return sequences;
     }
 
     @Override

@@ -29,25 +29,33 @@ package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 
 import java.util.Collection;
 import java.util.Map;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newTreeMap;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.FOREIGN_KEY;
 
 /**
  * @author Sergey Bushik
  */
 public class ForeignKey extends ConstraintBase {
 
-    private Map<Integer, ForeignKeyReference> references = Maps.newTreeMap();
+    private Map<Integer, ForeignKeyReference> references = newTreeMap();
     private ReferenceAction updateAction = ReferenceAction.NO_ACTION;
     private ReferenceAction deleteAction = ReferenceAction.NO_ACTION;
     private Deferrability deferrability;
     private Table primaryTable;
     private Table foreignTable;
 
+    public ForeignKey() {
+        super(FOREIGN_KEY);
+    }
+
     public ForeignKey(Identifier name) {
-        super(MetaDataType.FOREIGN_KEY, name);
+        super(FOREIGN_KEY, name);
     }
 
     @Override
@@ -68,11 +76,12 @@ public class ForeignKey extends ConstraintBase {
     }
 
     public void setForeignTable(Table foreignTable) {
+        setTable(foreignTable);
         this.foreignTable = foreignTable;
     }
 
-    public void addReference(Column foreignColumn, Column primaryColumn, int position) {
-        references.put(position, new ForeignKeyReference(foreignColumn, primaryColumn));
+    public void addReference(Column primaryColumn, Column foreignColumn, int position) {
+        references.put(position, new ForeignKeyReference(this, primaryColumn, foreignColumn, position));
     }
 
     public ReferenceAction getUpdateAction() {
@@ -100,25 +109,25 @@ public class ForeignKey extends ConstraintBase {
     }
 
     public Collection<ForeignKeyReference> getReferences() {
-        return references.values();
+        return newArrayList(references.values());
     }
 
     public Collection<Column> getPrimaryColumns() {
-        return Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
+        return newArrayList(Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
             @Override
             public Column apply(ForeignKeyReference input) {
                 return input.getPrimaryColumn();
             }
-        });
+        }));
     }
 
     public Collection<Column> getForeignColumns() {
-        return Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
+        return newArrayList(Collections2.transform(getReferences(), new Function<ForeignKeyReference, Column>() {
             @Override
             public Column apply(ForeignKeyReference input) {
                 return input.getForeignColumn();
             }
-        });
+        }));
     }
 
     @Override
@@ -131,7 +140,6 @@ public class ForeignKey extends ConstraintBase {
 
         if (deferrability != that.deferrability) return false;
         if (deleteAction != that.deleteAction) return false;
-        if (references != null ? !references.equals(that.references) : that.references != null) return false;
         if (updateAction != that.updateAction) return false;
 
         return true;
@@ -140,7 +148,6 @@ public class ForeignKey extends ConstraintBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (references != null ? references.hashCode() : 0);
         result = 31 * result + (updateAction != null ? updateAction.hashCode() : 0);
         result = 31 * result + (deleteAction != null ? deleteAction.hashCode() : 0);
         result = 31 * result + (deferrability != null ? deferrability.hashCode() : 0);

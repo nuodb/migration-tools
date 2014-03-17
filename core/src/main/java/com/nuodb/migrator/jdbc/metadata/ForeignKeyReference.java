@@ -32,28 +32,40 @@ package com.nuodb.migrator.jdbc.metadata;
  */
 public class ForeignKeyReference extends IndentedBase {
 
-    private Column foreignColumn;
+    private ForeignKey foreignKey;
     private Column primaryColumn;
+    private Column foreignColumn;
+    private int position;
 
-    public ForeignKeyReference(Column foreignColumn, Column primaryColumn) {
-        this.foreignColumn = foreignColumn;
+    public ForeignKeyReference(ForeignKey foreignKey, Column primaryColumn, Column foreignColumn, int position) {
+        this.foreignKey = foreignKey;
         this.primaryColumn = primaryColumn;
+        this.foreignColumn = foreignColumn;
+        this.position = position;
     }
 
-    public Column getForeignColumn() {
-        return foreignColumn;
-    }
-
-    public Table getForeignTable() {
-        return foreignColumn.getTable();
+    public ForeignKey getForeignKey() {
+        return foreignKey;
     }
 
     public Column getPrimaryColumn() {
         return primaryColumn;
     }
 
+    public Column getForeignColumn() {
+        return foreignColumn;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
     public Table getPrimaryTable() {
-        return primaryColumn.getTable();
+        return getForeignKey().getPrimaryTable();
+    }
+
+    public Table getForeignTable() {
+        return getForeignKey().getForeignTable();
     }
 
     @Override

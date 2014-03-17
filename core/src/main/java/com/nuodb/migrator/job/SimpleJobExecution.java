@@ -29,6 +29,8 @@ package com.nuodb.migrator.job;
 
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
+
 /**
  * @author Sergey Bushik
  */
@@ -41,7 +43,7 @@ public class SimpleJobExecution implements JobExecution {
     public SimpleJobExecution(Job job, JobStatus jobStatus, Map<Object, Object> context) {
         this.job = job;
         this.jobStatus = jobStatus;
-        this.context = context;
+        this.context = context == null ? newHashMap() : context;
     }
 
     @Override

@@ -30,9 +30,7 @@ package com.nuodb.migrator.backup.format.xml;
 import com.nuodb.migrator.backup.format.InputFormatBase;
 import com.nuodb.migrator.backup.format.InputFormatException;
 import com.nuodb.migrator.backup.format.value.Value;
-import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.backup.format.value.ValueType;
-import com.nuodb.migrator.jdbc.model.ColumnList;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
@@ -41,6 +39,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.BitSet;
+import java.util.List;
 
 import static com.nuodb.migrator.backup.format.utils.BinaryEncoder.BASE64;
 import static com.nuodb.migrator.backup.format.utils.BitSetUtils.EMPTY;
@@ -64,7 +63,7 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
     }
 
     @Override
-    protected void open(Reader reader) {
+    protected void init(Reader reader) {
         try {
             xmlReader = newInstance().createXMLStreamReader(reader);
         } catch (XMLStreamException exception) {
@@ -73,7 +72,7 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
     }
 
     @Override
-    protected void open(InputStream inputStream) {
+    protected void init(InputStream inputStream) {
         try {
             xmlReader = newInstance().createXMLStreamReader(
                     getInputStream(), (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING));
@@ -91,22 +90,25 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
     public Value[] readValues() {
         Value[] values = null;
         if (isNextElement(ELEMENT_ROW)) {
-            String nullsValue = getAttributeValue(NULL_NS_URI, ATTRIBUTE_NULLS);
-            BitSet nulls = nullsValue != null ? fromHexString(nullsValue) : EMPTY;
-            ColumnList<ValueHandle> model = getValueHandleList();
-            int length = model.size();
+            String nullsAttribute = getAttributeValue(NULL_NS_URI, ATTRIBUTE_NULLS);
+            BitSet nulls = nullsAttribute != null ? fromHexString(nullsAttribute) : EMPTY;
+            List<ValueType> valueTypes = getValueTypes();
+            int length = valueTypes.size();
             values = new Value[length];
             int index = 0;
             while (index < length) {
                 String value = null;
+                ValueType valueType = valueTypes.get(index);
                 if (!nulls.get(index) && isNextElement(ELEMENT_COLUMN)) {
                     try {
+                        ValueType valueLevel = VALUE_TYPES.fromAlias(
+                                getAttributeValue(NULL_NS_URI, ATTRIBUTE_VALUE_TYPE));
+                        valueType = valueLevel != null ? valueLevel : valueType;
                         value = xmlReader.getElementText();
                     } catch (XMLStreamException exception) {
                         throw new InputFormatException(exception);
                     }
                 }
-                ValueType valueType = model.get(index).getValueType();
                 valueType = valueType != null ? valueType : STRING;
                 switch (valueType) {
                     case BINARY:

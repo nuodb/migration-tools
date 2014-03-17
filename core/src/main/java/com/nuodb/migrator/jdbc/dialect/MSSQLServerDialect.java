@@ -28,21 +28,26 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 
 import java.sql.Types;
 
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.lang.String.valueOf;
+import static java.sql.Types.BLOB;
+import static java.sql.Types.CLOB;
+import static java.sql.Types.TIMESTAMP;
 
 /**
  * @author Sergey Bushik
  */
 public class MSSQLServerDialect extends SimpleDialect {
 
-    public static final int DATETIMEOFFSET = -155;
+    public static final int DATETIMEOFFSET_CODE = -155;
+    public static final String DATETIMEOFFSET_NAME = "DATETIMEOFFSET";
 
     public MSSQLServerDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -51,10 +56,10 @@ public class MSSQLServerDialect extends SimpleDialect {
     @Override
     protected void initJdbcTypes() {
         super.initJdbcTypes();
-        addJdbcTypeDescAlias(Types.LONGVARBINARY, "IMAGE", Types.BLOB);
-        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
-        addJdbcTypeDescAlias(Types.LONGNVARCHAR, "XML", Types.CLOB);
-        addJdbcTypeDescAlias(DATETIMEOFFSET, "DATETIMEOFFSET", Types.TIMESTAMP);
+        addJdbcTypeDescAlias(Types.LONGVARBINARY, "IMAGE", BLOB);
+        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", CLOB);
+        addJdbcTypeDescAlias(Types.LONGNVARCHAR, "XML", CLOB);
+        addJdbcTypeDescAlias(DATETIMEOFFSET_CODE, DATETIMEOFFSET_NAME, TIMESTAMP);
     }
 
     @Override
@@ -94,6 +99,16 @@ public class MSSQLServerDialect extends SimpleDialect {
 
     @Override
     public boolean supportsLimitParameters() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsSchemas() {
         return true;
     }
 

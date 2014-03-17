@@ -31,14 +31,15 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
+import java.io.Serializable;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
+import static com.nuodb.migrator.utils.ReflectionUtils.getShortClassName;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 
-public class MetaDataType implements Comparable<MetaDataType> {
+public class MetaDataType implements Comparable<MetaDataType>, Serializable {
 
     private static final transient Logger logger = LoggerFactory.getLogger(MetaDataType.class);
 
@@ -50,7 +51,7 @@ public class MetaDataType implements Comparable<MetaDataType> {
     public static final MetaDataType PRIMARY_KEY = new MetaDataType(PrimaryKey.class);
     public static final MetaDataType FOREIGN_KEY = new MetaDataType(ForeignKey.class);
     public static final MetaDataType INDEX = new MetaDataType(Index.class);
-    public static final MetaDataType IDENTITY = new MetaDataType(Sequence.class);
+    public static final MetaDataType SEQUENCE = new MetaDataType(Sequence.class);
     public static final MetaDataType CHECK = new MetaDataType(Check.class);
     public static final MetaDataType TRIGGER = new MetaDataType(Trigger.class);
     public static final MetaDataType COLUMN_TRIGGER = new MetaDataType(ColumnTrigger.class);
@@ -63,8 +64,8 @@ public class MetaDataType implements Comparable<MetaDataType> {
 
     private static Map<String, MetaDataType> getNameTypeMap() {
         Map<String, MetaDataType> nameTypeMap = Maps.newLinkedHashMap();
-        Field[] fields = MetaDataType.class.getFields();
-        for (Field field : fields) {
+        java.lang.reflect.Field[] fields = MetaDataType.class.getFields();
+        for (java.lang.reflect.Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getType() == MetaDataType.class) {
                 try {
                     nameTypeMap.put(field.getName(), (MetaDataType) field.get(null));
@@ -87,6 +88,14 @@ public class MetaDataType implements Comparable<MetaDataType> {
         return objectType;
     }
 
+    public String getShortName() {
+        return getShortClassName(objectType);
+    }
+
+    public String getName() {
+        return objectType.getName();
+    }
+
     public boolean isAssignableFrom(MetaDataType metaDataType) {
         return objectType.isAssignableFrom(metaDataType.getObjectType());
     }
@@ -105,16 +114,17 @@ public class MetaDataType implements Comparable<MetaDataType> {
         return objectType.hashCode();
     }
 
+    @Override
     public int compareTo(MetaDataType that) {
         if (objectType.equals(that.getObjectType())) {
             return 0;
         } else {
-            return objectType.isAssignableFrom(that.getObjectType()) ? 1 : -1;
+            return objectType.isAssignableFrom(that.getObjectType()) ? -1 : 1;
         }
     }
 
     @Override
     public String toString() {
-        return getObjectType().getName();
+        return getName();
     }
 }

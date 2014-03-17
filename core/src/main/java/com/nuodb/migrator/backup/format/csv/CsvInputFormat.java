@@ -30,7 +30,6 @@ package com.nuodb.migrator.backup.format.csv;
 import com.nuodb.migrator.backup.format.InputFormatBase;
 import com.nuodb.migrator.backup.format.InputFormatException;
 import com.nuodb.migrator.backup.format.value.Value;
-import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.backup.format.value.ValueType;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -39,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.Iterator;
+import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.utils.BinaryEncoder.BASE64;
@@ -61,16 +61,16 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
     }
 
     @Override
-    protected void open(InputStream inputStream) {
+    protected void init(InputStream inputStream) {
         try {
-            open(new InputStreamReader(getInputStream(), (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING)));
+            init(new InputStreamReader(getInputStream(), (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING)));
         } catch (UnsupportedEncodingException exception) {
             throw new InputFormatException(exception);
         }
     }
 
     @Override
-    protected void open(Reader reader) {
+    protected void init(Reader reader) {
         CsvFormatBuilder builder = new CsvFormatBuilder(this);
         CSVFormat format = builder.build();
         Character quote = builder.getQuote();
@@ -98,8 +98,8 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
 
     protected Value[] readRecord() {
         CSVRecord record = iterator.next();
-        ValueHandleList list = getValueHandleList();
-        Value[] values = new Value[list.size()];
+        List<ValueType> valueTypes = getValueTypes();
+        Value[] values = new Value[valueTypes.size()];
         int index = 0;
         for (String value : newArrayList(record.iterator())) {
             if (doubleQuote.equals(value)) {
@@ -107,7 +107,7 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
             } else if (value != null && value.length() == 0) {
                 value = null;
             }
-            ValueType type = list.get(index).getValueType();
+            ValueType type = valueTypes.get(index);
             type = type != null ? type : STRING;
             switch (type) {
                 case BINARY:
@@ -119,7 +119,7 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
             }
             index++;
         }
-        fill(values, list, index);
+        fill(values, valueTypes, index);
         return values;
     }
 

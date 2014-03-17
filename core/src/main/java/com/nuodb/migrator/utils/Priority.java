@@ -31,7 +31,7 @@ package com.nuodb.migrator.utils;
  * @author Sergey Bushik
  */
 public interface Priority {
-    final int LOW    = -1;
+    final int LOW    = -1000;
     final int NORMAL = 0;
-    final int HIGH   = 1;
+    final int HIGH   = 1000;
 }

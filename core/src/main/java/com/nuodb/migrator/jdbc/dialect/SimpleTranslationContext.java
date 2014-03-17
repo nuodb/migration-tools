@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 
 import java.util.Collection;
 import java.util.Map;
@@ -53,6 +53,21 @@ public class SimpleTranslationContext implements TranslationContext {
         this.databaseInfo = databaseInfo;
         this.translationManager = translationManager;
         this.context = context != null ? context : newHashMap();
+    }
+
+    @Override
+    public Script translate(Script script) {
+        return getTranslationManager().translate(script, getDatabaseInfo(), this);
+    }
+
+    @Override
+    public DatabaseInfo getDatabaseInfo() {
+        return databaseInfo;
+    }
+
+    @Override
+    public TranslationManager getTranslationManager() {
+        return translationManager;
     }
 
     @Override
@@ -113,16 +128,6 @@ public class SimpleTranslationContext implements TranslationContext {
     @Override
     public Set<Entry<Object, Object>> entrySet() {
         return context.entrySet();
-    }
-
-    @Override
-    public DatabaseInfo getDatabaseInfo() {
-        return databaseInfo;
-    }
-
-    @Override
-    public TranslationManager getTranslationManager() {
-        return translationManager;
     }
 
     @Override

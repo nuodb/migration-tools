@@ -27,6 +27,12 @@
  */
 package com.nuodb.migrator.backup.format.xml;
 
+import com.nuodb.migrator.backup.format.value.ValueType;
+import com.nuodb.migrator.utils.EnumAlias;
+
+import static com.nuodb.migrator.backup.format.value.ValueType.BINARY;
+import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
+
 /**
  * @author Sergey Bushik
  */
@@ -43,4 +49,14 @@ public interface XmlAttributes {
     final String ELEMENT_COLUMN = "c";
     final String ELEMENT_ROW = "r";
     final String ATTRIBUTE_NULLS = "ns";
+    final String ATTRIBUTE_VALUE_TYPE = "vt";
+    final String ATTRIBUTE_VALUE_TYPE_STRING = "s";
+    final String ATTRIBUTE_VALUE_TYPE_BINARY = "b";
+
+    final EnumAlias<ValueType> VALUE_TYPES = new EnumAlias<ValueType>() {
+        {
+            addAlias(ATTRIBUTE_VALUE_TYPE_STRING, STRING);
+            addAlias(ATTRIBUTE_VALUE_TYPE_BINARY, BINARY);
+        }
+    };
 }

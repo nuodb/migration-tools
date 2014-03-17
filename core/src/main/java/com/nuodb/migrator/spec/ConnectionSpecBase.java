@@ -27,6 +27,9 @@
  */
 package com.nuodb.migrator.spec;
 
+/**
+ * @author Sergey Bushik
+ */
 public class ConnectionSpecBase extends SpecBase implements ConnectionSpec {
 
     public static final Boolean DEFAULT_AUTO_COMMIT = false;

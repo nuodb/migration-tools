@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
-import com.nuodb.migrator.jdbc.resolve.ServiceResolver;
-import com.nuodb.migrator.jdbc.resolve.SimpleServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.resolver.ServiceResolver;
+import com.nuodb.migrator.jdbc.metadata.resolver.SimpleServiceResolver;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -42,7 +42,7 @@ import java.util.Collection;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class InspectorResolver extends MetaDataHandlerBase implements Inspector {
+public class InspectorResolver extends MetaDataHandlerBase implements Inspector<MetaData, InspectionScope> {
 
     private ServiceResolver<Inspector> inspectorResolver;
 
@@ -92,9 +92,18 @@ public class InspectorResolver extends MetaDataHandlerBase implements Inspector 
     }
 
     @Override
-    public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException {
+    public void inspectScopes(InspectionContext inspectionContext,
+                              Collection<? extends InspectionScope> inspectionScopes) throws SQLException {
         Inspector inspector = resolve(inspectionContext);
-        return inspector != null && inspector.supports(inspectionContext, inspectionScope);
+        if (inspector != null) {
+            inspector.inspectScopes(inspectionContext, inspectionScopes);
+        }
+    }
+
+    @Override
+    public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException {
+        Inspector inspector = resolve(inspectionContext);
+        return inspector != null && inspector.supportsScope(inspectionContext, inspectionScope);
     }
 
     public void register(String productName, Inspector inspector) {

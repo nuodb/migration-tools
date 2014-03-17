@@ -28,21 +28,20 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
+import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeNameChangeSpecifiers;
-import com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers;
 
-import java.sql.Types;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.*;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newScale;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSize;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeSpecifiers.newSpecifiers;
+import static com.nuodb.migrator.jdbc.dialect.OracleDialect.*;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeNames.createEnumTypeNameTemplate;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeNames.createTypeNameTemplate;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.*;
 import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
+import static java.sql.Types.*;
 import static java.util.regex.Pattern.compile;
 import static org.apache.commons.lang3.StringUtils.isAllUpperCase;
 
@@ -66,65 +65,79 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     protected void initJdbcTypes() {
-        addJdbcType(NuoDBSmallIntType.INSTANCE);
-        addJdbcType(NuoDBIntegerType.INSTANCE);
-        addJdbcType(NuoDBBigIntType.INSTANCE);
-        addJdbcType(NuoDBTimeType.INSTANCE);
+        addJdbcType(NuoDBSmallIntValue.INSTANCE);
+        addJdbcType(NuoDBIntegerValue.INSTANCE);
+        addJdbcType(NuoDBBigIntValue.INSTANCE);
+        addJdbcType(NuoDBTimeValue.INSTANCE);
     }
 
     @Override
     protected void initJdbcTypeNames() {
-        addJdbcTypeName(Types.BIT, newSize(0), "BOOLEAN");
-        addJdbcTypeName(Types.BIT, newSize(1), "BOOLEAN");
-        addJdbcTypeName(Types.TINYINT, "SMALLINT");
-        addJdbcTypeName(Types.SMALLINT, "SMALLINT");
+        addJdbcTypeName(BIT, newSize(0), "BOOLEAN");
+        addJdbcTypeName(BIT, newSize(1), "BOOLEAN");
+        addJdbcTypeName(TINYINT, "SMALLINT");
+        addJdbcTypeName(SMALLINT, "SMALLINT");
+        addJdbcTypeName(INTEGER, "INTEGER");
+        addJdbcTypeName(BIGINT, "BIGINT");
 
-        addJdbcTypeName(Types.INTEGER, "INTEGER");
+        // fix for integer & bigint
+        addJdbcTypeName(new JdbcTypeDesc(INTEGER, "INTEGER"), newScale(0), "INTEGER");
+        addJdbcTypeName(new JdbcTypeDesc(INTEGER, "INTEGER"), "NUMERIC({P},{S})");
+        addJdbcTypeName(new JdbcTypeDesc(BIGINT, "BIGINT"), newScale(0), "BIGINT");
+        addJdbcTypeName(new JdbcTypeDesc(BIGINT, "BIGINT"), "NUMERIC({P},{S})");
 
-        addJdbcTypeName(Types.BIGINT, "BIGINT");
-        addJdbcTypeName(Types.NUMERIC, "NUMERIC({P},{S})");
-        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+        addJdbcTypeName(REAL, "REAL");
+        addJdbcTypeName(FLOAT, "FLOAT");
+        addJdbcTypeName(DOUBLE, "DOUBLE");
+        addJdbcTypeName(NUMERIC, "NUMERIC({P},{S})");
+        addJdbcTypeName(DECIMAL, "DECIMAL({P},{S})");
 
-        addJdbcTypeName(Types.REAL, "REAL");
-        addJdbcTypeName(Types.FLOAT, "FLOAT");
-        addJdbcTypeName(Types.DOUBLE, "DOUBLE");
-        addJdbcTypeName(Types.DECIMAL, "DECIMAL({P},{S})");
+        addJdbcTypeName(CHAR, newSize(0), "CHAR");
+        addJdbcTypeName(CHAR, "CHAR({N})");
 
-        addJdbcTypeName(Types.CHAR, "CHAR({N})");
+        addJdbcTypeName(VARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(LONGVARCHAR, "VARCHAR({N})");
 
-        addJdbcTypeName(Types.VARCHAR, "VARCHAR({N})");
-        addJdbcTypeName(Types.LONGVARCHAR, "VARCHAR({N})");
+        addJdbcTypeName(DATE, "DATE");
+        addJdbcTypeName(TIME, newScale(0), "TIME");
+        addJdbcTypeName(TIME, "TIME({S})");
+        addJdbcTypeName(TIMESTAMP, newScale(0), "TIMESTAMP");
+        addJdbcTypeName(TIMESTAMP, "TIMESTAMP({S})");
 
-        addJdbcTypeName(Types.DATE, "DATE");
-        addJdbcTypeName(Types.TIME, newScale(0), "TIME");
-        addJdbcTypeName(Types.TIME, "TIME({S})");
-        addJdbcTypeName(Types.TIMESTAMP, newScale(0), "TIMESTAMP");
-        addJdbcTypeName(Types.TIMESTAMP, "TIMESTAMP({S})");
+        addJdbcTypeName(BINARY, "BINARY({N})");
+        addJdbcTypeName(VARBINARY, "VARBINARY({N})");
+        addJdbcTypeName(LONGVARBINARY, "VARBINARY({N})");
 
-        addJdbcTypeName(Types.BINARY, "BINARY({N})");
-        addJdbcTypeName(Types.VARBINARY, "VARBINARY({N})");
-        addJdbcTypeName(Types.LONGVARBINARY, "VARBINARY({N})");
+        addJdbcTypeName(NULL, "NULL");
+        addJdbcTypeName(BLOB, "BLOB");
+        addJdbcTypeName(CLOB, "CLOB");
+        addJdbcTypeName(BOOLEAN, "BOOLEAN");
 
-        addJdbcTypeName(Types.NULL, "NULL");
-        addJdbcTypeName(Types.BLOB, "BLOB");
-        addJdbcTypeName(Types.CLOB, "CLOB");
-        addJdbcTypeName(Types.BOOLEAN, "BOOLEAN");
+        addJdbcTypeName(NCHAR, "NCHAR({N})");
+        addJdbcTypeName(NCHAR, newSize(0), "NCHAR");
+        addJdbcTypeName(NVARCHAR, "NVARCHAR({N})");
+        addJdbcTypeName(NCLOB, "NCLOB");
+        addJdbcTypeName(ROWID, "STRING");
+        addJdbcTypeName(new JdbcTypeDesc(VARCHAR, "STRING"), "STRING");
 
-        addJdbcTypeName(Types.NCHAR, "NCHAR({N})");
-        addJdbcTypeName(Types.NVARCHAR, "NVARCHAR({N})");
-        addJdbcTypeName(Types.NCLOB, "NCLOB");
-        addJdbcTypeName(new JdbcTypeDesc(Types.VARCHAR, "STRING"), "STRING");
+        addJdbcTypeName(ORACLE, new JdbcTypeDesc(LONGVARCHAR, "LONG"), "CLOB");
+        addJdbcTypeName(ORACLE, DECIMAL, "NUMBER", newOptions(0, 0, 0));
+        addJdbcTypeName(ORACLE, XMLTYPE_DESC, "STRING");
+        addJdbcTypeName(ORACLE, ANYDATA_DESC, "STRING");
+        addJdbcTypeName(ORACLE, ANYDATASET_DESC, "STRING");
+        addJdbcTypeName(ORACLE, ANYTYPE_DESC, "STRING");
+        addJdbcTypeName(ORACLE, BFILE_DESC, "BLOB");
 
-        addJdbcTypeName(ORACLE, Types.DECIMAL, "DECIMAL", newSpecifiers(0, 0, 0));
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
+        addJdbcTypeName(MYSQL, new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "BIGINT");
+        addJdbcTypeName(MYSQL, createTypeNameTemplate(
+                new JdbcTypeDesc(BIGINT, "BIGINT UNSIGNED"), "NUMERIC({N})", newSize(1)));
 
-        addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
-        addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.INTEGER, "INT UNSIGNED"), "BIGINT");
-        addJdbcTypeName(NUODB, new JdbcTypeDesc(Types.BIGINT, "BIGINT UNSIGNED"),
-                new JdbcTypeNameChangeSpecifiers("NUMERIC({N})", 1));
+        addJdbcTypeName(DB2, new JdbcTypeDesc(LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
+        addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
+        addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "XML"), "STRING");
 
-        addJdbcTypeName(DB2, new JdbcTypeDesc(Types.LONGVARBINARY, "LONG VARCHAR FOR BIT DATA"), "VARCHAR({N})");
-        addJdbcTypeName(DB2, new JdbcTypeDesc(Types.OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
-        addJdbcTypeName(DB2, new JdbcTypeDesc(Types.OTHER, "XML"), "CLOB");
+        addJdbcTypeName(createEnumTypeNameTemplate("CHAR({N})"));
     }
 
     @Override
@@ -186,32 +199,32 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
-    public String getSequenceStartWith(Long startWith) {
+    public String getSequenceStartWith(Number startWith) {
         return startWith != null ? "START WITH " + startWith : null;
     }
 
     @Override
-    public String getSequenceIncrementBy(Long incrementBy) {
+    public String getSequenceIncrementBy(Number incrementBy) {
         return null;
     }
 
     @Override
-    public String getSequenceMinValue(Long minValue) {
+    public String getSequenceMinValue(Number minValue) {
         return null;
     }
 
     @Override
-    public String getSequenceMaxValue(Long maxValue) {
+    public String getSequenceMaxValue(Number maxValue) {
+        return null;
+    }
+
+    @Override
+    public String getSequenceCache(Number cache) {
         return null;
     }
 
     @Override
     public String getSequenceCycle(boolean cycle) {
-        return null;
-    }
-
-    @Override
-    public String getSequenceCache(Integer cache) {
         return null;
     }
 
@@ -339,6 +352,11 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     public boolean supportsLimitParameters() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsSchemas() {
         return true;
     }
 

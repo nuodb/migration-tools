@@ -27,12 +27,12 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.model.ColumnList;
+import com.nuodb.migrator.jdbc.model.FieldList;
 
 /**
  * @author Sergey Bushik
  */
-public interface ValueHandleList extends ColumnList<ValueHandle> {
+public interface ValueHandleList extends FieldList<ValueHandle> {
 
     ValueHandle get(int index);
 

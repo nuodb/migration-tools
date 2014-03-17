@@ -29,13 +29,13 @@ package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.ColumnTrigger;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Trigger;
-import com.nuodb.migrator.jdbc.resolve.DatabaseInfo;
 
 import java.util.Collection;
 
-import static com.nuodb.migrator.context.ContextUtils.getService;
-import static com.nuodb.migrator.jdbc.resolve.DatabaseInfoUtils.MYSQL;
+import static com.nuodb.migrator.context.ContextUtils.createService;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static java.sql.Types.*;
 import static java.util.Arrays.asList;
 
@@ -51,11 +51,10 @@ public class MySQLOnUpdateTriggerTranslator extends TriggerTranslatorBase {
     }
 
     @Override
-    protected boolean supportsScript(TriggerScript script, TranslationContext translationContext) {
+    protected boolean supportsScript(TriggerScript script, TranslationContext context) {
         Column column = getColumn(script.getTrigger());
         return column != null && TYPES.contains(column.getTypeCode()) &&
-                translationContext.getTranslationManager().translate(new ColumnScript(column, script.getSession()),
-                        translationContext.getDatabaseInfo(), translationContext) != null;
+                context.translate(new ColumnScript(column, script.getSession())) != null;
     }
 
     protected Column getColumn(Trigger trigger) {
@@ -63,17 +62,15 @@ public class MySQLOnUpdateTriggerTranslator extends TriggerTranslatorBase {
     }
 
     @Override
-    public Script translate(TriggerScript script, TranslationContext translationContext) {
+    public Script translate(TriggerScript script, TranslationContext context) {
         Column column = getColumn(script.getTrigger());
-        DatabaseInfo databaseInfo = translationContext.getDatabaseInfo();
-        Dialect dialect = getService(DialectResolver.class).resolve(databaseInfo);
+        DatabaseInfo databaseInfo = context.getDatabaseInfo();
+        Dialect dialect = createService(DialectResolver.class).resolve(databaseInfo);
         StringBuilder translation = new StringBuilder();
         translation.append("NEW.");
         translation.append(dialect.getIdentifier(column.getName(), column));
         translation.append(" = '");
-        translation.append(translationContext.getTranslationManager().translate(
-                new ColumnScript(column, script.getSession()), translationContext.getDatabaseInfo(),
-                translationContext).getScript());
+        translation.append(context.translate(new ColumnScript(column, script.getSession())).getScript());
         translation.append("';");
         return new SimpleScript(translation.toString(), databaseInfo);
     }

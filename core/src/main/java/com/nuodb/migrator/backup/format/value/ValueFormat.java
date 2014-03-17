@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.model.Column;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
 import java.util.Map;
@@ -41,5 +41,5 @@ public interface ValueFormat<T> {
 
     void setValue(Value value, JdbcValueAccess<T> access, Map<String, Object> options) throws ValueFormatException;
 
-    ValueType getValueType(Column column);
+    ValueType getValueType(Field field);
 }

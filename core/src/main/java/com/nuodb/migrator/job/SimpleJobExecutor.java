@@ -106,7 +106,7 @@ public class SimpleJobExecutor implements JobExecutor {
             fire(new JobExecutionEvent(execution));
 
             job.init(execution);
-            job.execute(execution);
+            job.execute();
             synchronized (jobStatus) {
                 jobStatus.setExecutionEndDate(new Date());
                 jobStatus.setRunning(false);
@@ -125,7 +125,7 @@ public class SimpleJobExecutor implements JobExecutor {
             fire(new JobExecutionEvent(execution));
         } finally {
             try {
-                job.release(execution);
+                job.release();
             } catch (Exception exception) {
                 if (logger.isDebugEnabled()) {
                     logger.debug(format("Job release %s failure", job.getName()), exception);
@@ -141,7 +141,7 @@ public class SimpleJobExecutor implements JobExecutor {
 
     protected void fire(JobExecutionEvent event) {
         for (JobExecutionListener listener : listeners) {
-            listener.onJobExecuted(event);
+            listener.onJobExecution(event);
         }
     }
 

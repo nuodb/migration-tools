@@ -27,7 +27,8 @@
  */
 package com.nuodb.migrator.load;
 
-import com.nuodb.migrator.backup.catalog.RowSet;
+import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
 
 /**
@@ -35,5 +36,5 @@ import com.nuodb.migrator.jdbc.metadata.Table;
  */
 public interface RowSetMapper {
 
-    Table getTable(RowSet rowSet);
+    Table map(RowSet rowSet, Database database);
 }

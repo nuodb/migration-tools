@@ -29,87 +29,60 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
+import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
+import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.jdbc.query.SelectQuery;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CHECK;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
-import static java.sql.ResultSet.CONCUR_READ_ONLY;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static com.nuodb.migrator.utils.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.containsAny;
 
 /**
  * @author Sergey Bushik
  */
 public class OracleCheckInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
-    private static final String CONSTRAINT_TYPE_CHECK = "C";
-    private static final String STATUS_ENABLED = "ENABLED";
-
-    private static final String QUERY =
-            "SELECT ALL_CONSTRAINTS.CONSTRAINT_NAME, ALL_CONS_COLUMNS.COLUMN_NAME, " +
-                    "ALL_CONSTRAINTS.SEARCH_CONDITION, ALL_CONSTRAINTS.TABLE_NAME, ALL_CONSTRAINTS.OWNER " +
-            "FROM SYS.ALL_CONS_COLUMNS\n" +
-            "JOIN SYS.ALL_CONSTRAINTS ON ALL_CONS_COLUMNS.TABLE_NAME=ALL_CONSTRAINTS.TABLE_NAME\n" +
-            "AND ALL_CONS_COLUMNS.CONSTRAINT_NAME=ALL_CONSTRAINTS.CONSTRAINT_NAME\n" +
-            "WHERE ALL_CONSTRAINTS.CONSTRAINT_TYPE=? AND ALL_CONSTRAINTS.STATUS=? AND " +
-                    "ALL_CONSTRAINTS.OWNER=? AND ALL_CONSTRAINTS.TABLE_NAME=?";
-
     public OracleCheckInspector() {
         super(CHECK, TableInspectionScope.class);
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Table> tables) {
-        return createTableInspectionScopes(tables);
+    protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
+        Collection<Object> parameters = newArrayList();
+        SelectQuery query = new SelectQuery();
+        query.columns("C.CONSTRAINT_NAME", "CC.COLUMN_NAME", "C.SEARCH_CONDITION", "C.TABLE_NAME", "C.OWNER");
+        query.from("SYS.ALL_CONS_COLUMNS CC");
+        query.join("SYS.ALL_CONSTRAINTS C", "CC.OWNER=C.OWNER AND CC.TABLE_NAME=C.TABLE_NAME AND " +
+                "CC.CONSTRAINT_NAME=C.CONSTRAINT_NAME");
+        query.where("C.CONSTRAINT_TYPE='C'");
+        query.where("C.STATUS='ENABLED'");
+        String schema = tableInspectionScope.getSchema();
+        if (!isEmpty(schema)) {
+            query.where(containsAny(schema, "%") ? "C.OWNER LIKE ? ESCAPE '/'" : "C.OWNER=?");
+            parameters.add(schema);
+        }
+        String table = tableInspectionScope.getTable();
+        if (!isEmpty(table)) {
+            query.where("C.TABLE_NAME=?");
+            parameters.add(table);
+        }
+        return new ParameterizedQuery(query, parameters);
     }
 
     @Override
-    protected void inspectScopes(final InspectionContext inspectionContext,
-                                 final Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
-        template.execute(
-                new StatementFactory<PreparedStatement>() {
-                    @Override
-                    public PreparedStatement create(Connection connection) throws SQLException {
-                        return connection.prepareStatement(QUERY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-                    }
-                },
-                new StatementCallback<PreparedStatement>() {
-
-                    @Override
-                    public void process(PreparedStatement statement) throws SQLException {
-                        for (TableInspectionScope inspectionScope : inspectionScopes) {
-                            statement.setString(1, CONSTRAINT_TYPE_CHECK);
-                            statement.setString(2, STATUS_ENABLED);
-                            statement.setString(3, inspectionScope.getSchema());
-                            statement.setString(4, inspectionScope.getTable());
-                            ResultSet checks = statement.executeQuery();
-                            try {
-                                inspect(inspectionContext, checks);
-                            } finally {
-                                close(checks);
-                            }
-                        }
-                    }
-                }
-        );
-    }
-
-    private void inspect(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet checks) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         while (checks.next()) {
             String condition = checks.getString("SEARCH_CONDITION");
             if (!condition.endsWith("IS NOT NULL")) {
-                Table table = addTable(inspectionResults, null,
-                        checks.getString("OWNER"), checks.getString("TABLE_NAME"));
+                Table table = addTable(inspectionResults, null, checks.getString("OWNER"),
+                        checks.getString("TABLE_NAME"));
                 Check check = new Check(checks.getString("CONSTRAINT_NAME"));
                 check.setText(condition);
                 table.addCheck(check);
@@ -119,13 +92,7 @@ public class OracleCheckInspector extends TableInspectorBase<Table, TableInspect
     }
 
     @Override
-    public void inspectScope(InspectionContext inspectionContext,
-                             TableInspectionScope inspectionScope) throws SQLException {
-        throw new InspectorException("Not implemented yet");
-    }
-
-    @Override
-    public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) {
-        return false;
+    protected boolean supportsScope(TableInspectionScope tableInspectionScope) {
+        return tableInspectionScope.getSchema() != null && tableInspectionScope.getTable() != null;
     }
 }

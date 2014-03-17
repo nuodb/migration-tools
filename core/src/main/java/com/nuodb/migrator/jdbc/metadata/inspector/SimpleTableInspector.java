@@ -27,21 +27,17 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.utils.StringUtils;
 
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.utils.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
@@ -53,35 +49,27 @@ public class SimpleTableInspector extends TableInspectorBase<Schema, TableInspec
     }
 
     @Override
-    protected Collection<? extends TableInspectionScope> createInspectionScopes(Collection<? extends Schema> schemas) {
-        return Lists.newArrayList(Iterables.transform(schemas, new Function<Schema, TableInspectionScope>() {
-            @Override
-            public TableInspectionScope apply(Schema schema) {
-                return new TableInspectionScope(schema.getCatalog().getName(), schema.getName());
-            }
-        }));
+    protected TableInspectionScope createInspectionScope(Schema schema) {
+        return new TableInspectionScope(schema.getCatalog().getName(), schema.getName());
     }
 
     @Override
-    protected void inspectScopes(InspectionContext inspectionContext,
-                                 Collection<? extends TableInspectionScope> inspectionScopes) throws SQLException {
-        for (TableInspectionScope inspectionScope : inspectionScopes) {
-            InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-            DatabaseMetaData databaseMetaData = inspectionContext.getConnection().getMetaData();
-            ResultSet tables = databaseMetaData.getTables(
-                    inspectionScope.getCatalog(), inspectionScope.getSchema(),
-                    inspectionScope.getTable(), inspectionScope.getTableTypes());
-            try {
-                while (tables.next()) {
-                    Table table = addTable(inspectionResults,
-                            tables.getString("TABLE_CAT"), tables.getString("TABLE_SCHEM"),
-                            tables.getString("TABLE_NAME"));
-                    table.setComment(tables.getString("REMARKS"));
-                    table.setType(tables.getString("TABLE_TYPE"));
-                }
-            } finally {
-                close(tables);
-            }
+    protected ResultSet createResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope)
+            throws SQLException {
+        return inspectionContext.getConnection().getMetaData().getTables(
+                tableInspectionScope.getCatalog(), tableInspectionScope.getSchema(),
+                tableInspectionScope.getTable(), tableInspectionScope.getTableTypes());
+    }
+
+    @Override
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet tables) throws SQLException {
+        InspectionResults inspectionResults = inspectionContext.getInspectionResults();
+        while (tables.next()) {
+            Table table = addTable(inspectionResults,
+                    tables.getString("TABLE_CAT"), tables.getString("TABLE_SCHEM"), tables.getString("TABLE_NAME"));
+            String comment = tables.getString("REMARKS");
+            table.setComment(isEmpty(comment) ? null : comment);
+            table.setType(tables.getString("TABLE_TYPE"));
         }
     }
 }

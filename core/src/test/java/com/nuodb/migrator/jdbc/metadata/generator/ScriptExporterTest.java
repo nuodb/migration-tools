@@ -30,7 +30,6 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.google.common.io.Files;
 import com.google.common.io.NullOutputStream;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
-import org.mockito.BDDMockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

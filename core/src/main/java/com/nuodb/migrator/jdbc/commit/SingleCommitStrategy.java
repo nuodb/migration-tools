@@ -30,8 +30,8 @@ package com.nuodb.migrator.jdbc.commit;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.utils.ObjectUtils;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Map;
 
 /**
@@ -49,7 +49,12 @@ public class SingleCommitStrategy implements CommitStrategy {
     }
 
     @Override
-    public void onUpdate(Statement statement, Query query) throws SQLException {
+    public void execute(PreparedStatement statement, Query query) throws SQLException {
+        statement.execute();
+    }
+
+    @Override
+    public void finish(PreparedStatement statement, Query query) throws SQLException {
     }
 
     public String toString() {

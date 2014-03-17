@@ -27,65 +27,48 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-
-import com.google.common.io.Files;
-
-import java.io.BufferedWriter;
 import java.io.File;
+import java.io.Writer;
 
-import static java.lang.System.getProperty;
+import static com.google.common.io.Files.createParentDirs;
+import static com.google.common.io.Files.newWriter;
 import static java.nio.charset.Charset.forName;
 
 /**
  * @author Sergey Bushik
  */
-public class FileScriptExporter extends ScriptExporterBase {
+public class FileScriptExporter extends StreamScriptExporterBase {
 
-    private static final String SEMICOLON = ";";
     private File file;
-    private String encoding;
-    private transient BufferedWriter writer;
 
-    public FileScriptExporter(String file) {
-        this(file, null);
+    public FileScriptExporter(String path) {
+        this(new File(path), ENCODING);
     }
 
-    public FileScriptExporter(String file, String encoding) {
-        this(new File(file), encoding);
+    public FileScriptExporter(String path, String encoding) {
+        this(new File(path), encoding);
     }
 
     public FileScriptExporter(File file) {
-        this(file, null);
+        this(file, ENCODING);
     }
 
     public FileScriptExporter(File file, String encoding) {
+        setFile(file);
+        setEncoding(encoding != null ? encoding : ENCODING);
+    }
+
+    @Override
+    protected Writer openWriter() throws Exception {
+        createParentDirs(file);
+        return newWriter(getFile(), forName(getEncoding()));
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
         this.file = file;
-        this.encoding = encoding != null ? encoding : getProperty("file.encoding");
-    }
-
-    @Override
-    protected void doOpen() throws Exception {
-        Files.createParentDirs(file);
-        writer = Files.newWriter(file, forName(encoding));
-    }
-
-    @Override
-    protected void doExportScript(String script) throws Exception {
-        if (writer == null) {
-            throw new GeneratorException("File is not opened");
-        }
-        writer.write(script);
-        if (!script.endsWith(SEMICOLON)) {
-            writer.write(SEMICOLON);
-        }
-        writer.newLine();
-    }
-
-    @Override
-    protected void doClose() throws Exception {
-        if (writer != null) {
-            writer.flush();
-            writer.close();
-        }
     }
 }

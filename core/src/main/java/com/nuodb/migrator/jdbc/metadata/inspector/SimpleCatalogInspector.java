@@ -28,56 +28,43 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.CATALOG;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addCatalog;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleCatalogInspector extends MetaDataHandlerBase implements Inspector<Database, InspectionScope> {
+public class SimpleCatalogInspector extends ManagedInspectorBase<Database, InspectionScope> {
 
     public SimpleCatalogInspector() {
-        super(CATALOG);
+        super(CATALOG, InspectionScope.class);
     }
 
     @Override
-    public void inspectScope(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException {
-        inspect(inspectionContext);
+    protected ResultSet createResultSet(InspectionContext inspectionContext, InspectionScope inspectionScope)
+            throws SQLException {
+        return inspectionContext.getConnection().getMetaData().getCatalogs();
     }
 
     @Override
-    public void inspectObject(InspectionContext inspectionContext, Database object) throws SQLException {
-        inspect(inspectionContext);
-    }
-
-    @Override
-    public void inspectObjects(InspectionContext inspectionContext,
-                               Collection<? extends Database> databases) throws SQLException {
-        inspect(inspectionContext);
-    }
-
-    @Override
-    public void inspect(InspectionContext inspectionContext) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, ResultSet catalogs) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
-        ResultSet catalogs = inspectionContext.getConnection().getMetaData().getCatalogs();
-        try {
-            while (catalogs.next()) {
-                addCatalog(inspectionResults, catalogs.getString("TABLE_CAT"));
-            }
-        } finally {
-            close(catalogs);
+        while (catalogs.next()) {
+            addCatalog(inspectionResults, catalogs.getString("TABLE_CAT"));
         }
     }
 
     @Override
-    public boolean supports(InspectionContext inspectionContext, InspectionScope inspectionScope) throws SQLException {
+    protected InspectionScope createInspectionScope(Database database) {
+        return null;
+    }
+
+    @Override
+    public boolean supportsScope(InspectionContext inspectionContext, InspectionScope inspectionScope) {
         return true;
     }
 }

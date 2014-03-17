@@ -35,7 +35,6 @@ import com.nuodb.migrator.context.ServiceInitiatorSupport;
 public class ConnectionProviderFactoryInitiator extends ServiceInitiatorSupport<ConnectionProviderFactory> {
 
     public ConnectionProviderFactoryInitiator() {
-        // super(new DriverConnectionProviderFactory());
         super(new LoggingConnectionProviderFactory(new DriverConnectionProviderFactory()));
     }
 }

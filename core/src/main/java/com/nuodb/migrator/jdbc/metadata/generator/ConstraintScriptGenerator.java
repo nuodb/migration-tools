@@ -34,5 +34,5 @@ import com.nuodb.migrator.jdbc.metadata.Constraint;
  */
 public interface ConstraintScriptGenerator<C extends Constraint> extends ScriptGenerator<C> {
 
-    String getConstraintScript(C constraint, ScriptGeneratorContext scriptGeneratorContext);
+    String getConstraintScript(C constraint, ScriptGeneratorManager scriptGeneratorManager);
 }
