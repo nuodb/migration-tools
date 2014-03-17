@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in connectionSpec and binary forms, with or without

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,9 +120,9 @@ public class NamingStrategyTest {
         column.getTable().addTrigger(trigger);
         return new Object[][]{
                 {new ForeignKeyQualifyNamingStrategy(), foreignKey, false,
-                        "fk_s1.t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890_s1.t2_c1_1234567890_1234567890_1234567890_1234567890_1234567890"},
-                {new ForeignKeyHashNamingStrategy(), foreignKey, false, "fk_86482ab6"},
-                {new ForeignKeyAutoNamingStrategy(), foreignKey, false, "fk_86482ab6"},
+                        "fk_s1.t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890_s1.t2_c2_1234567890_1234567890_1234567890_1234567890_1234567890"},
+                {new ForeignKeyHashNamingStrategy(), foreignKey, false, "fk_877e7d95"},
+                {new ForeignKeyAutoNamingStrategy(), foreignKey, false, "fk_877e7d95"},
                 {new ForeignKeySourceNamingStrategy(), foreignKey, false, "fk1"},
                 {new IndexQualifyNamingStrategy(), index, false,
                         "idx_unique_t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890"},

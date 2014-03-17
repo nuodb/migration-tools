@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ public class ForeignKeyQualifyNamingStrategy extends IdentifiableNamingStrategy<
         }
         nonPrefixedName.append(getDelimiter());
         nonPrefixedName.append(scriptGeneratorManager.getQualifiedName(foreignKey.getForeignTable(), false));
-        for (Column column : foreignKey.getPrimaryColumns()) {
+        for (Column column : foreignKey.getForeignColumns()) {
             nonPrefixedName.append(getDelimiter());
             nonPrefixedName.append(scriptGeneratorManager.getName(column, false));
         }
