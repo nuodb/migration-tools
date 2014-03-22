@@ -72,10 +72,10 @@ CREATE TABLE datatypes3
 
 INSERT INTO  datatypes3(
 		fk1,c1,c2,c3,c4,c5)
-	VALUES (1,231.34,'1 day 12 hours 59 min 10 sec','10.1.0.0/16',999.30,decode('013d7d16d7ad4fefb61bd95b765c8ceb', 'hex'));
+	VALUES (1,'$231.34','1 day 12 hours 59 min 10 sec','10.1.0.0/16',999.30,decode('013d7d16d7ad4fefb61bd95b765c8ceb', 'hex'));
 INSERT INTO datatypes3(
 		fk1,c1,c2,c3,c4,c5)
-	VALUES (2,144.14,'1 12:59:10','10.1.0.0/16',999.30,decode('013f7e16d7ff4fdfb61bd95e765c8edb', 'hex'));
+	VALUES (2,'$144.14','1 12:59:10','10.1.0.0/16',999.30,decode('013f7e16d7ff4fdfb61bd95e765c8edb', 'hex'));
 
 /*Creating index for column c5*/
 DROP INDEX idxc5;
