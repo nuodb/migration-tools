@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,58 +27,46 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 
 import java.util.Collection;
 
-import static com.nuodb.migrator.utils.Predicates.equalTo;
+import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Iterables.indexOf;
-import static com.nuodb.migrator.utils.StringUtils.*;
+import static com.nuodb.migrator.utils.Predicates.equalTo;
 
 /**
  * @author Sergey Bushik
  */
-public class SequenceNamingStrategy extends IdentifiableNamingStrategy<Sequence> {
+public class SequenceQualifyNamingStrategy extends IdentifiableNamingStrategy<Sequence> {
 
     private static final String PREFIX = "SEQ";
-    private static final char DELIMITER = '_';
 
-    public SequenceNamingStrategy() {
-        super(Sequence.class);
+    public SequenceQualifyNamingStrategy() {
+        super(Sequence.class, PREFIX);
     }
 
     @Override
-    protected String getIdentifiableName(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder qualifier = new StringBuilder();
+    protected String getNonPrefixedName(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
+        StringBuilder nonPrefixedName = new StringBuilder();
         Collection<Column> columns = sequence.getColumns();
         if (columns.size() == 1) {
-            Column column = Iterables.get(columns, 0);
-            qualifier.append(scriptGeneratorManager.getName(column.getTable(), false));
-            qualifier.append('_');
-            qualifier.append(scriptGeneratorManager.getName(column, false));
+            Column column = get(columns, 0);
+            nonPrefixedName.append(scriptGeneratorManager.getName(column.getTable(), false));
+            nonPrefixedName.append(getDelimiter());
+            nonPrefixedName.append(scriptGeneratorManager.getName(column, false));
         } else {
             Schema schema = sequence.getSchema();
             if (scriptGeneratorManager.getName(schema, false) != null) {
-                qualifier.append(scriptGeneratorManager.getName(schema, false));
+                nonPrefixedName.append(scriptGeneratorManager.getName(schema, false));
             } else {
-                qualifier.append(scriptGeneratorManager.getName(schema.getCatalog(), false));
+                nonPrefixedName.append(scriptGeneratorManager.getName(schema.getCatalog(), false));
             }
-            qualifier.append('_');
-            qualifier.append(indexOf(schema.getSequences(), equalTo(sequence)));
+            nonPrefixedName.append(getDelimiter());
+            nonPrefixedName.append(indexOf(schema.getSequences(), equalTo(sequence)));
         }
-        StringBuilder buffer = new StringBuilder();
-        if (isLowerCase(qualifier)) {
-            buffer.append(lowerCase(PREFIX));
-        } else if (isCapitalizedCase(qualifier, DELIMITER)) {
-            buffer.append(capitalizedCase(PREFIX, '_'));
-        } else {
-            buffer.append(upperCase(PREFIX));
-        }
-        buffer.append('_');
-        buffer.append(qualifier);
-        return buffer.toString();
+        return nonPrefixedName.toString();
     }
 }

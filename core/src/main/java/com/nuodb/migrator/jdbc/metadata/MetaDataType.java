@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@ package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
@@ -38,10 +37,11 @@ import java.util.Map;
 import static com.nuodb.migrator.utils.ReflectionUtils.getShortClassName;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class MetaDataType implements Comparable<MetaDataType>, Serializable {
 
-    private static final transient Logger logger = LoggerFactory.getLogger(MetaDataType.class);
+    private static final transient Logger logger = getLogger(MetaDataType.class);
 
     public static final MetaDataType DATABASE = new MetaDataType(Database.class);
     public static final MetaDataType CATALOG = new MetaDataType(Catalog.class);

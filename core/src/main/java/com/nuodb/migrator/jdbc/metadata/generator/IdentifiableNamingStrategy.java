@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,37 +30,102 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.IdentifiableBase;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+
+import static com.nuodb.migrator.utils.StringUtils.autoCase;
 
 /**
  * @author Sergey Bushik
  */
-public class IdentifiableNamingStrategy<T extends Identifiable> extends MetaDataHandlerBase implements NamingStrategy<T> {
+public class IdentifiableNamingStrategy<I extends Identifiable> extends MetaDataHandlerBase
+        implements NamingStrategy<I> {
+
+    public static final char DELIMITER = '_';
+
+    private String prefix;
+    private char delimiter = DELIMITER;
 
     public IdentifiableNamingStrategy() {
         super(Identifiable.class);
     }
 
-    public IdentifiableNamingStrategy(Class<? extends T> typeClass) {
+    protected IdentifiableNamingStrategy(Class<? extends I> typeClass) {
         super(typeClass);
     }
 
+    protected IdentifiableNamingStrategy(Class<? extends MetaData> objectClass, String prefix) {
+        super(objectClass);
+        this.prefix = prefix;
+    }
+
+    protected IdentifiableNamingStrategy(MetaDataType objectType, String prefix) {
+        super(objectType);
+        this.prefix = prefix;
+    }
+
+    public IdentifiableNamingStrategy(Class<? extends MetaData> objectClass,
+                                      String prefix, char delimiter) {
+        super(objectClass);
+        this.prefix = prefix;
+        this.delimiter = delimiter;
+    }
+
+    public IdentifiableNamingStrategy(MetaDataType objectType, String prefix,
+                                      char delimiter) {
+        super(objectType);
+        this.prefix = prefix;
+        this.delimiter = delimiter;
+    }
+
     @Override
-    public String getName(T object, ScriptGeneratorManager scriptGeneratorManager, boolean normalize) {
+    public String getName(I object, ScriptGeneratorManager scriptGeneratorManager, boolean normalize) {
         Dialect dialect = normalize ? scriptGeneratorManager.getTargetDialect() : null;
-        String name = getIdentifiableName(object, scriptGeneratorManager);
+        String name = getNonNormalizedName(object, scriptGeneratorManager);
         return IdentifiableBase.getName(dialect, name, object);
     }
 
     @Override
-    public String getQualifiedName(T object, ScriptGeneratorManager scriptGeneratorManager, String catalog, String schema,
-                                   boolean normalize) {
+    public String getQualifiedName(I object, ScriptGeneratorManager scriptGeneratorManager, String catalog,
+                                   String schema, boolean normalize) {
         Dialect dialect = normalize ? scriptGeneratorManager.getTargetDialect() : null;
-        String name = getIdentifiableName(object, scriptGeneratorManager);
+        String name = getNonNormalizedName(object, scriptGeneratorManager);
         return IdentifiableBase.getQualifiedName(dialect, catalog, schema, name, object);
     }
 
-    protected String getIdentifiableName(T object, ScriptGeneratorManager scriptGeneratorManager) {
+    protected String getNonNormalizedName(I object, ScriptGeneratorManager scriptGeneratorManager) {
+        String prefix = getPrefix(object, scriptGeneratorManager);
+        char delimiter = getDelimiter(object, scriptGeneratorManager);
+        String nonPrefixedName = getNonPrefixedName(object, scriptGeneratorManager);
+        return prefix != null ? autoCase(prefix, nonPrefixedName, delimiter) : nonPrefixedName;
+    }
+
+    protected String getNonPrefixedName(I object, ScriptGeneratorManager scriptGeneratorManager) {
         return object.getName();
+    }
+
+    protected String getPrefix(I object, ScriptGeneratorManager scriptGeneratorManager) {
+        return getPrefix();
+    }
+
+    protected char getDelimiter(I object, ScriptGeneratorManager scriptGeneratorManager) {
+        return getDelimiter();
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public char getDelimiter() {
+        return delimiter;
+    }
+
+    public void setDelimiter(char delimiter) {
+        this.delimiter = delimiter;
     }
 }

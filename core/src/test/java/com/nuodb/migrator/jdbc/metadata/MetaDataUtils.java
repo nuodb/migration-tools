@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import com.google.common.collect.Iterables;
+
+import java.util.Collection;
+import java.util.Iterator;
+
+import static com.google.common.collect.Iterables.get;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+
 /**
  * @author Sergey Bushik
  */
@@ -36,27 +44,68 @@ public class MetaDataUtils {
         return new Database();
     }
 
-    public static Catalog createCatalog(String catalogName) {
-        return createDatabase().addCatalog(catalogName);
+    public static Catalog createCatalog(String catalog) {
+        return createDatabase().addCatalog(catalog);
     }
 
-    public static Schema createSchema(String catalogName, String schemaName) {
-        return createCatalog(catalogName).addSchema(schemaName);
+    public static Schema createSchema(String catalog, String schema) {
+        return createCatalog(catalog).addSchema(schema);
     }
 
-    public static Table createTable(String catalogName, String schemaName, String tableName) {
-        return createSchema(catalogName, schemaName).addTable(tableName);
+    public static Table createTable(String catalog, String schema, String table) {
+        return createSchema(catalog, schema).addTable(table);
     }
 
-    public static Column createColumn(String catalogName, String schemaName, String tableName, String columnName) {
-        return createTable(catalogName, schemaName, tableName).addColumn(columnName);
+    public static Column createColumn(String catalog, String schema, String table, String column) {
+        return createTable(catalog, schema, table).addColumn(column);
     }
 
-    public static Sequence createSequence(String catalogName, String schemaName, String tableName, String columnName) {
-        Column column = createColumn(catalogName, schemaName, tableName, columnName);
-        Sequence sequence = new Sequence();
-        column.setSequence(sequence);
-        column.getTable().getSchema().addSequence(sequence);
+    public static Sequence createSequence(String catalog, String schema, String table, String column) {
+        return createSequence(null, catalog, schema, table, column);
+    }
+
+    public static Sequence createSequence(String name, String catalog, String schema, String table, String column) {
+        Sequence sequence = new Sequence(valueOf(name));
+        Column c = createColumn(catalog, schema, table, column);
+        c.setSequence(sequence);
+        c.getTable().getSchema().addSequence(sequence);
         return sequence;
+    }
+
+    public static Index createIndex(String name, Collection<Column> columns, boolean unique) {
+        Index index = new Index(valueOf(name));
+        index.setUnique(unique);
+        int position = 0;
+        Table table = null;
+        for (Column column : columns) {
+            if (table == null) {
+                table = column.getTable();
+            }
+            index.addColumn(column, position++);
+        }
+        index.setTable(table);
+        return index;
+    }
+
+    public static ForeignKey createForeignKey(String name, Collection<Column> primaryColumns,
+                                              Collection<Column> foreignColumns) {
+        Table primaryTable = null;
+        Table foreignTable = null;
+        int position = 0;
+        ForeignKey foreignKey = new ForeignKey(valueOf(name));
+        for (Column primaryColumn : primaryColumns) {
+            if (primaryTable == null) {
+                primaryTable = primaryColumn.getTable();
+            }
+            Column foreignColumn = get(foreignColumns, position);
+            if (foreignTable == null) {
+                foreignTable = foreignColumn.getTable();
+            }
+            foreignKey.addReference(primaryColumn, foreignColumn, position);
+            position++;
+        }
+        foreignKey.setPrimaryTable(primaryTable);
+        foreignKey.setForeignTable(foreignTable);
+        return foreignKey;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@ import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
-import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.spec.DumpJobSpec;
 import com.nuodb.migrator.spec.QuerySpec;
@@ -62,7 +61,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class CliDumpJob extends CliJob<DumpJobSpec> {
 
     public CliDumpJob() {
-        super(DUMP_COMMAND);
+        super(DUMP);
     }
 
     @Override
@@ -110,7 +109,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         GroupBuilder group = newGroupBuilder().withName(getMessage(TABLE_GROUP_NAME)).withMaximum(MAX_VALUE);
 
         Option table = newBasicOptionBuilder().
-                withName(TABLE_OPTION).
+                withName(TABLE).
                 withDescription(getMessage(TABLE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -125,9 +124,9 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         optionFormat.setValuesSeparator(null);
 
         Option tableFilter = newRegexOptionBuilder().
-                withName(TABLE_FILTER_OPTION).
+                withName(TABLE_FILTER).
                 withDescription(getMessage(TABLE_FILTER_OPTION_DESCRIPTION)).
-                withRegex(TABLE_FILTER_OPTION, 1, LOW).
+                withRegex(TABLE_FILTER, 1, LOW).
                 withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(TABLE_FILTER_ARGUMENT_NAME)).
@@ -142,8 +141,8 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
 
     protected Option createThreadsOption() {
         return newBasicOptionBuilder().
-                withName(THREADS_OPTION).
-                withAlias(THREADS_SHORT_OPTION, OptionFormat.SHORT).
+                withName(THREADS).
+                withAlias(THREADS_SHORT, OptionFormat.SHORT).
                 withDescription(getMessage(THREADS_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -158,7 +157,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         optionFormat.setValuesSeparator(null);
 
         Option query = newBasicOptionBuilder().
-                withName(QUERY_OPTION).
+                withName(QUERY).
                 withDescription(getMessage(QUERY_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -175,7 +174,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
 
     protected Option createQueryLimitOption() {
         return newBasicOptionBuilder().
-                withName(QUERY_LIMIT_OPTION).
+                withName(QUERY_LIMIT).
                 withDescription(getMessage(QUERY_LIMIT_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -193,11 +192,11 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
 
     protected void parseTableGroup(OptionSet optionSet, DumpJobSpec jobSpec) {
         Map<String, TableSpec> tableQueryMapping = newHashMap();
-        for (String table : optionSet.<String>getValues(TABLE_OPTION)) {
+        for (String table : optionSet.<String>getValues(TABLE)) {
             tableQueryMapping.put(table, new TableSpec(table));
         }
         for (Iterator<String> iterator = optionSet.<String>getValues(
-                TABLE_FILTER_OPTION).iterator(); iterator.hasNext(); ) {
+                TABLE_FILTER).iterator(); iterator.hasNext(); ) {
             String name = iterator.next();
             TableSpec tableSpec = tableQueryMapping.get(name);
             if (tableSpec == null) {
@@ -210,19 +209,19 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
 
     protected Collection<QuerySpec> parseQueryGroup(OptionSet optionSet) {
         List<QuerySpec> querySpecs = newArrayList();
-        for (String query : optionSet.<String>getValues(QUERY_OPTION)) {
+        for (String query : optionSet.<String>getValues(QUERY)) {
             querySpecs.add(new QuerySpec(query));
         }
         return querySpecs;
     }
 
     protected Integer parseThreadsOption(OptionSet optionSet, Option option) {
-        String threadsValue = (String) optionSet.getValue(THREADS_OPTION);
+        String threadsValue = (String) optionSet.getValue(THREADS);
         return !isEmpty(threadsValue) ? parseInt(threadsValue) : null;
     }
 
     protected QueryLimit parseQueryLimitOption(OptionSet optionSet, Option option) {
-        String queryLimitValue = (String) optionSet.getValue(QUERY_LIMIT_OPTION);
+        String queryLimitValue = (String) optionSet.getValue(QUERY_LIMIT);
         return !isEmpty(queryLimitValue) ? new QueryLimit(parseLong(queryLimitValue)) : null;
     }
 
@@ -234,7 +233,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         optionFormat.setValuesSeparator(null);
 
         Option tableType = newBasicOptionBuilder().
-                withName(TABLE_TYPE_OPTION).
+                withName(TABLE_TYPE).
                 withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -244,9 +243,9 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         group.withOption(tableType);
 
         Option metaData = newRegexOptionBuilder().
-                withName(META_DATA_OPTION).
+                withName(META_DATA).
                 withDescription(getMessage(META_DATA_OPTION_DESCRIPTION)).
-                withRegex(META_DATA_OPTION, 1, LOW).
+                withRegex(META_DATA, 1, LOW).
                 withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(META_DATA_ARGUMENT_NAME)).
@@ -259,7 +258,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
     }
 
     protected void parseSchemaMigrationGroup(OptionSet optionSet, DumpJobSpec jobSpec) {
-        if (optionSet.hasOption(META_DATA_OPTION)) {
+        if (optionSet.hasOption(META_DATA)) {
             jobSpec.setObjectTypes(parseObjectTypes(optionSet));
         }
         jobSpec.setTableTypes(parseTableTypes(optionSet));

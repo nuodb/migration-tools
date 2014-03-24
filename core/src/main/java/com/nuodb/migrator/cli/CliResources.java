@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -136,6 +136,8 @@ public interface CliResources {
     final String SCHEMA_OUTPUT_GROUP_NAME = "com.nuodb.migrator.schema.output.group.name";
     final String META_DATA_OPTION_DESCRIPTION = "com.nuodb.migrator.meta.data.option.description";
     final String META_DATA_ARGUMENT_NAME = "com.nuodb.migrator.meta.data.argument.name";
+    final String NAMING_STRATEGY_OPTION_DESCRIPTION = "com.nuodb.migrator.naming.strategy.option.description";
+    final String NAMING_STRATEGY_ARGUMENT_NAME = "com.nuodb.migrator.naming.strategy.argument.name";
 
     final String SCRIPT_TYPE_OPTION_DESCRIPTION = "com.nuodb.migrator.script.type.option.description";
     final String SCRIPT_TYPE_ARGUMENT_NAME = "com.nuodb.migrator.script.type.argument.name";

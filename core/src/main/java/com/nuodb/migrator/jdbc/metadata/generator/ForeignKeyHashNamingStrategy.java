@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,49 +27,17 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 
-import static com.nuodb.migrator.utils.StringUtils.*;
-import static com.nuodb.migrator.utils.StringUtils.upperCase;
+import static java.lang.Integer.toHexString;
 
 /**
  * @author Sergey Bushik
  */
-public class ForeignKeyNamingStrategy extends IdentifiableNamingStrategy<ForeignKey> {
-
-    private static final String PREFIX = "FK";
-    private static final char DELIMITER = '_';
-
-    public ForeignKeyNamingStrategy() {
-        super(ForeignKey.class);
-    }
+public class ForeignKeyHashNamingStrategy extends ForeignKeyQualifyNamingStrategy {
 
     @Override
-    protected String getIdentifiableName(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder qualifier = new StringBuilder();
-        qualifier.append(scriptGeneratorManager.getQualifiedName(foreignKey.getPrimaryTable(), false));
-        for (Column column : foreignKey.getPrimaryColumns()) {
-            qualifier.append("_");
-            qualifier.append(scriptGeneratorManager.getName(column, false));
-        }
-        qualifier.append("_");
-        qualifier.append(scriptGeneratorManager.getQualifiedName(foreignKey.getForeignTable(), false));
-        for (Column column : foreignKey.getPrimaryColumns()) {
-            qualifier.append("_");
-            qualifier.append(scriptGeneratorManager.getName(column, false));
-        }
-
-        StringBuilder buffer = new StringBuilder();
-        if (isLowerCase(qualifier)) {
-            buffer.append(lowerCase(PREFIX));
-        } else if (isCapitalizedCase(qualifier, DELIMITER)) {
-            buffer.append(capitalizedCase(PREFIX));
-        } else {
-            buffer.append(upperCase(PREFIX));
-        }
-        buffer.append('_');
-        buffer.append(qualifier);
-        return buffer.toString();
+    protected String getNonPrefixedName(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
+        return toHexString(super.getNonPrefixedName(foreignKey, scriptGeneratorManager).hashCode());
     }
 }

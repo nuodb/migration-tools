@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,11 +61,13 @@ public class OptionUtils {
     }
 
     public static void optionRequired(Option option) {
-        throw new OptionException(format("Missing required option %s", option.getName()), option);
+        throw new OptionException(format("Missing required option %s",
+                option.getName()), option);
     }
 
     public static void optionUnexpected(Option option, String argument) {
-        throw new OptionException(format("Unexpected token %s", argument), option);
+        throw new OptionException(format("Unexpected token %s for %s option",
+                argument, option.getName()), option);
     }
 
     public static void argumentMinimum(Option option, Argument argument) {

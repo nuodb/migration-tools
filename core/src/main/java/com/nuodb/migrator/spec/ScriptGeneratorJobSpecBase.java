@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,10 @@ import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
+import com.nuodb.migrator.utils.Collections;
+import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.Collection;
 
@@ -40,6 +43,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.NOOP;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS;
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 
 /**
  * @author Sergey Bushik
@@ -52,6 +56,7 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
     private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
     private Collection<JdbcTypeSpec> jdbcTypeSpecs = newArrayList();
+    private PrioritySet<NamingStrategy> namingStrategies = newPrioritySet();
     private IdentifierQuoting identifierQuoting = ALWAYS;
     private IdentifierNormalizer identifierNormalizer = NOOP;
 
@@ -127,6 +132,14 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
         this.jdbcTypeSpecs = jdbcTypeSpecs;
     }
 
+    public PrioritySet<NamingStrategy> getNamingStrategies() {
+        return namingStrategies;
+    }
+
+    public void setNamingStrategies(PrioritySet<NamingStrategy> namingStrategies) {
+        this.namingStrategies = namingStrategies;
+    }
+
     public IdentifierQuoting getIdentifierQuoting() {
         return identifierQuoting;
     }
@@ -161,6 +174,8 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
         if (jdbcTypeSpecs != null ? !jdbcTypeSpecs.equals(that.jdbcTypeSpecs) : that.jdbcTypeSpecs != null)
             return false;
         if (metaDataSpec != null ? !metaDataSpec.equals(that.metaDataSpec) : that.metaDataSpec != null) return false;
+        if (namingStrategies != null ? !namingStrategies.equals(that.namingStrategies) : that.namingStrategies != null)
+            return false;
         if (scriptTypes != null ? !scriptTypes.equals(that.scriptTypes) : that.scriptTypes != null) return false;
         if (targetSpec != null ? !targetSpec.equals(that.targetSpec) : that.targetSpec != null) return false;
 
@@ -176,6 +191,7 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
         result = 31 * result + (scriptTypes != null ? scriptTypes.hashCode() : 0);
         result = 31 * result + (groupScriptsBy != null ? groupScriptsBy.hashCode() : 0);
         result = 31 * result + (jdbcTypeSpecs != null ? jdbcTypeSpecs.hashCode() : 0);
+        result = 31 * result + (namingStrategies != null ? namingStrategies.hashCode() : 0);
         result = 31 * result + (identifierQuoting != null ? identifierQuoting.hashCode() : 0);
         result = 31 * result + (identifierNormalizer != null ? identifierNormalizer.hashCode() : 0);
         return result;

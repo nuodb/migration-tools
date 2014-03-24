@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@ package com.nuodb.migrator.cli.run;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.cli.CliSupport;
 import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
@@ -46,13 +45,18 @@ import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.commit.SingleCommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
+import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
+import com.nuodb.migrator.jdbc.metadata.generator.*;
 import com.nuodb.migrator.jdbc.type.JdbcTypeCodes;
-import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.spec.DriverConnectionSpec;
+import com.nuodb.migrator.spec.JdbcTypeSpec;
+import com.nuodb.migrator.spec.MigrationMode;
+import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.ScriptGeneratorJobSpecBase;
+import com.nuodb.migrator.utils.PrioritySet;
+import com.nuodb.migrator.utils.ReflectionException;
 import com.nuodb.migrator.utils.ReflectionUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -65,19 +69,21 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.transform;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.backup.format.csv.CsvAttributes.FORMAT;
+import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
 import static com.nuodb.migrator.cli.validation.ConnectionGroupValidators.addConnectionGroupValidators;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
-import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
-import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
+import static com.nuodb.migrator.utils.Collections.newPrioritySet;
+import static com.nuodb.migrator.utils.Priority.HIGH;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.Boolean.parseBoolean;
@@ -89,8 +95,7 @@ import static java.sql.Connection.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.TimeZone.getTimeZone;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.replace;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * @author Sergey Bushik
@@ -111,7 +116,9 @@ public class CliRunSupport extends CliSupport {
     public static final String TRANSACTION_ISOLATION_READ_COMMITTED = "read.committed";
     public static final String TRANSACTION_ISOLATION_REPEATABLE_READ = "repeatable.read";
     public static final String TRANSACTION_ISOLATION_SERIALIZABLE = "serializable";
-
+    public static final String NAMING_STRATEGY_QUALIFY = "qualify";
+    public static final String NAMING_STRATEGY_HASH = "hash";
+    public static final String NAMING_STRATEGY_AUTO = "auto";
     private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
 
     public static final String COMMIT_STRATEGY_SINGLE = "single";
@@ -130,7 +137,7 @@ public class CliRunSupport extends CliSupport {
                 withMinimum(1);
 
         Option driver = newBasicOptionBuilder().
-                withName(SOURCE_DRIVER_OPTION).
+                withName(SOURCE_DRIVER).
                 withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
@@ -142,7 +149,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(driver);
 
         Option url = newBasicOptionBuilder().
-                withName(SOURCE_URL_OPTION).
+                withName(SOURCE_URL).
                 withDescription(getMessage(SOURCE_URL_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
@@ -154,7 +161,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(url);
 
         Option username = newBasicOptionBuilder().
-                withName(SOURCE_USERNAME_OPTION).
+                withName(SOURCE_USERNAME).
                 withDescription(getMessage(SOURCE_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -163,7 +170,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(username);
 
         Option password = newBasicOptionBuilder().
-                withName(SOURCE_PASSWORD_OPTION).
+                withName(SOURCE_PASSWORD).
                 withDescription(getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -172,7 +179,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(password);
 
         Option properties = newBasicOptionBuilder().
-                withName(SOURCE_PROPERTIES_OPTION).
+                withName(SOURCE_PROPERTIES).
                 withDescription(getMessage(SOURCE_PROPERTIES_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -181,7 +188,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(properties);
 
         Option catalog = newBasicOptionBuilder().
-                withName(SOURCE_CATALOG_OPTION).
+                withName(SOURCE_CATALOG).
                 withDescription(getMessage(SOURCE_CATALOG_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -190,7 +197,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(catalog);
 
         Option schema = newBasicOptionBuilder().
-                withName(SOURCE_SCHEMA_OPTION).
+                withName(SOURCE_SCHEMA).
                 withDescription(getMessage(SOURCE_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -199,7 +206,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(schema);
 
         Option autoCommit = newBasicOptionBuilder().
-                withName(SOURCE_AUTO_COMMIT_OPTION).
+                withName(SOURCE_AUTO_COMMIT).
                 withDescription(getMessage(SOURCE_AUTO_COMMIT_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -208,7 +215,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(autoCommit);
 
         Option transactionIsolation = newBasicOptionBuilder().
-                withName(SOURCE_TRANSACTION_ISOLATION_OPTION).
+                withName(SOURCE_TRANSACTION_ISOLATION).
                 withDescription(getMessage(SOURCE_TRANSACTION_ISOLATION_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -217,8 +224,8 @@ public class CliRunSupport extends CliSupport {
         group.withOption(transactionIsolation);
 
         addConnectionGroupValidators(group, new ConnectionGroupInfo(
-                SOURCE_DRIVER_OPTION, SOURCE_URL_OPTION, SOURCE_USERNAME_OPTION, SOURCE_PASSWORD_OPTION,
-                SOURCE_CATALOG_OPTION, SOURCE_SCHEMA_OPTION, SOURCE_PROPERTIES_OPTION));
+                SOURCE_DRIVER, SOURCE_URL, SOURCE_USERNAME, SOURCE_PASSWORD,
+                SOURCE_CATALOG, SOURCE_SCHEMA, SOURCE_PROPERTIES));
         return group.build();
     }
 
@@ -227,7 +234,7 @@ public class CliRunSupport extends CliSupport {
                 withName(getMessage(OUTPUT_GROUP_NAME));
 
         Option type = newBasicOptionBuilder().
-                withName(OUTPUT_TYPE_OPTION).
+                withName(OUTPUT_TYPE).
                 withDescription(getMessage(OUTPUT_TYPE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -236,7 +243,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(type);
 
         Option path = newBasicOptionBuilder().
-                withName(OUTPUT_PATH_OPTION).
+                withName(OUTPUT_PATH).
                 withDescription(getMessage(OUTPUT_PATH_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -265,8 +272,8 @@ public class CliRunSupport extends CliSupport {
     protected Option createMigrationModeGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(MIGRATION_MODE_GROUP_NAME));
         Option data = newBasicOptionBuilder().
-                withId(MIGRATION_MODE_DATA_OPTION_ID).
-                withName(MIGRATION_MODE_DATA_OPTION).
+                withId(MIGRATION_MODE_DATA_ID).
+                withName(MIGRATION_MODE_DATA).
                 withDescription(getMessage(MIGRATION_MODE_DATA_OPTION_DESCRIPTION)).
                 withRequired(false).
                 withArgument(
@@ -275,8 +282,8 @@ public class CliRunSupport extends CliSupport {
                 ).build();
         group.withOption(data);
         Option schema = newBasicOptionBuilder().
-                withId(MIGRATION_MODE_SCHEMA_OPTION_ID).
-                withName(MIGRATION_MODE_SCHEMA_OPTION).
+                withId(MIGRATION_MODE_SCHEMA_ID).
+                withName(MIGRATION_MODE_SCHEMA).
                 withDescription(getMessage(MIGRATION_MODE_SCHEMA_OPTION_DESCRIPTION)).
                 withRequired(false).
                 withArgument(
@@ -289,7 +296,7 @@ public class CliRunSupport extends CliSupport {
 
     protected Group createCommitGroup() {
         Option commitStrategy = newBasicOptionBuilder().
-                withName(COMMIT_STRATEGY_OPTION).
+                withName(COMMIT_STRATEGY).
                 withDescription(getMessage(COMMIT_STRATEGY_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -300,9 +307,9 @@ public class CliRunSupport extends CliSupport {
         optionFormat.setValuesSeparator(null);
 
         Option commitStrategyAttributes = newRegexOptionBuilder().
-                withName(COMMIT_STRATEGY_ATTRIBUTES_OPTION).
+                withName(COMMIT_STRATEGY_ATTRIBUTES).
                 withDescription(getMessage(COMMIT_STRATEGY_ATTRIBUTES_OPTION_DESCRIPTION)).
-                withRegex(COMMIT_STRATEGY_ATTRIBUTES_OPTION, 1, LOW).
+                withRegex(COMMIT_STRATEGY_ATTRIBUTES, 1, LOW).
                 withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(COMMIT_STRATEGY_ATTRIBUTES_ARGUMENT_NAME)).
@@ -323,8 +330,8 @@ public class CliRunSupport extends CliSupport {
 
     protected Option createTimeZoneOption() {
         return newBasicOptionBuilder().
-                withName(TIME_ZONE_OPTION).
-                withAlias(TIME_ZONE_SHORT_OPTION, OptionFormat.SHORT).
+                withName(TIME_ZONE).
+                withAlias(TIME_ZONE_SHORT, OptionFormat.SHORT).
                 withDescription(getMessage(TIME_ZONE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -339,7 +346,7 @@ public class CliRunSupport extends CliSupport {
                 withName(getMessage(TARGET_GROUP_NAME));
 
         Option url = newBasicOptionBuilder().
-                withName(TARGET_URL_OPTION).
+                withName(TARGET_URL).
                 withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
@@ -351,7 +358,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(url);
 
         Option username = newBasicOptionBuilder().
-                withName(TARGET_USERNAME_OPTION).
+                withName(TARGET_USERNAME).
                 withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -360,7 +367,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(username);
 
         Option password = newBasicOptionBuilder().
-                withName(TARGET_PASSWORD_OPTION).
+                withName(TARGET_PASSWORD).
                 withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -369,7 +376,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(password);
 
         Option properties = newBasicOptionBuilder().
-                withName(TARGET_PROPERTIES_OPTION).
+                withName(TARGET_PROPERTIES).
                 withDescription(getMessage(TARGET_PROPERTIES_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -378,7 +385,7 @@ public class CliRunSupport extends CliSupport {
         group.withOption(properties);
 
         Option schema = newBasicOptionBuilder().
-                withName(TARGET_SCHEMA_OPTION).
+                withName(TARGET_SCHEMA).
                 withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -389,14 +396,14 @@ public class CliRunSupport extends CliSupport {
         group.withMinimum(1);
 
         addConnectionGroupValidators(group, new ConnectionGroupInfo(
-                null, TARGET_URL_OPTION, TARGET_USERNAME_OPTION, TARGET_PASSWORD_OPTION,
-                null, TARGET_SCHEMA_OPTION, TARGET_PROPERTIES_OPTION));
+                null, TARGET_URL, TARGET_USERNAME, TARGET_PASSWORD,
+                null, TARGET_SCHEMA, TARGET_PROPERTIES));
         return group.build();
     }
 
     protected Group createInputGroup() {
         Option path = newBasicOptionBuilder().
-                withName(INPUT_PATH_OPTION).
+                withName(INPUT_PATH).
                 withDescription(getMessage(INPUT_PATH_OPTION_DESCRIPTION)).
                 withRequired(true).
                 withArgument(
@@ -408,9 +415,9 @@ public class CliRunSupport extends CliSupport {
         optionFormat.setValuesSeparator(null);
 
         Option attributes = newRegexOptionBuilder().
-                withName(INPUT_OPTION).
+                withName(INPUT).
                 withDescription(getMessage(INPUT_OPTION_DESCRIPTION)).
-                withRegex(INPUT_OPTION, 1, LOW).
+                withRegex(INPUT, 1, LOW).
                 withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(INPUT_OPTION_ARGUMENT_NAME)).
@@ -431,93 +438,10 @@ public class CliRunSupport extends CliSupport {
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
 
-        GroupBuilder typeGroup = newGroupBuilder().withName(getMessage(JDBC_TYPE_GROUP_NAME));
-        Option useNuoDBTypes = newBasicOptionBuilder().
-                withName(USE_NUODB_TYPES_OPTION).
-                withDescription(getMessage(USE_NUODB_TYPES_OPTION_DESCRIPTION)).
-                withRequired(false).
-                withOptionProcessor(new NuoDBTypesOptionProcessor()).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(USE_NUODB_TYPES_OPTION_ARGUMENT_NAME)).build()
-                ).build();
-        typeGroup.withOption(useNuoDBTypes);
-
-        Option useImplicitDefaults = newBasicOptionBuilder().
-                withName(USE_EXPLICIT_DEFAULTS_OPTION).
-                withDescription(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_DESCRIPTION)).
-                withRequired(false).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_ARGUMENT_NAME)).build()
-                ).build();
-        typeGroup.withOption(useImplicitDefaults);
-
-        Option typeName = newBasicOptionBuilder().
-                withName(JDBC_TYPE_NAME_OPTION).
-                withDescription(getMessage(JDBC_TYPE_NAME_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME))).
-                                withOptionProcessor(jdbcTypeOptionProcessor).
-                                withMinimum(1).withMaximum(MAX_VALUE).withRequired(true).build()
-                ).build();
-        typeGroup.withOption(typeName);
-
-        Option typeCode = newBasicOptionBuilder().
-                withName(JDBC_TYPE_CODE_OPTION).
-                withDescription(getMessage(JDBC_TYPE_CODE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME))).
-                                withMinimum(1).withMaximum(MAX_VALUE).withRequired(true).build()
-                ).build();
-        typeGroup.withOption(typeCode);
-
-        Option typeSize = newBasicOptionBuilder().
-                withName(JDBC_TYPE_SIZE_OPTION).
-                withDescription(getMessage(JDBC_TYPE_SIZE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME))).
-                                withMaximum(MAX_VALUE).build()
-                ).build();
-        typeGroup.withOption(typeSize);
-
-        Option typePrecision = newBasicOptionBuilder().
-                withName(JDBC_TYPE_PRECISION_OPTION).
-                withDescription(getMessage(JDBC_TYPE_PRECISION_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME))).
-                                withMaximum(MAX_VALUE).build()
-                ).build();
-        typeGroup.withOption(typePrecision);
-
-        Option typeScale = newBasicOptionBuilder().
-                withName(JDBC_TYPE_SCALE_OPTION).
-                withDescription(getMessage(JDBC_TYPE_SCALE_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME)).
-                                withOptionFormat(optionFormat).
-                                withHelpValues(singleton(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME))).
-                                withMaximum(MAX_VALUE).build()
-                ).build();
-        typeGroup.withOption(typeScale);
-        typeGroup.withMaximum(MAX_VALUE);
-        group.withOption(typeGroup.build());
+        group.withOption(createJdbcTypeGroup());
 
         Option tableType = newBasicOptionBuilder().
-                withName(TABLE_TYPE_OPTION).
+                withName(TABLE_TYPE).
                 withDescription(getMessage(TABLE_TYPE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -527,19 +451,18 @@ public class CliRunSupport extends CliSupport {
         group.withOption(tableType);
 
         Option metaData = newRegexOptionBuilder().
-                withName(META_DATA_OPTION).
+                withName(META_DATA).
                 withDescription(getMessage(META_DATA_OPTION_DESCRIPTION)).
-                withRegex(META_DATA_OPTION, 1, LOW).
+                withRegex(META_DATA, 1, LOW).
                 withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(META_DATA_ARGUMENT_NAME)).
                                 withOptionFormat(optionFormat).
                                 withMinimum(1).withMaximum(MAX_VALUE).build()
-                )
-                .build();
+                ).build();
         group.withOption(metaData);
 
-        Collection<String> scriptTypeHelpValues = Lists.transform(asList(ScriptType.values()),
+        Collection<String> scriptTypeHelpValues = transform(asList(ScriptType.values()),
                 new Function<ScriptType, String>() {
                     @Override
                     public String apply(ScriptType scriptType) {
@@ -547,7 +470,7 @@ public class CliRunSupport extends CliSupport {
                     }
                 });
         Option scriptType = newBasicOptionBuilder().
-                withName(SCRIPT_TYPE_OPTION).
+                withName(SCRIPT_TYPE).
                 withDescription(getMessage(SCRIPT_TYPE_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
@@ -559,13 +482,23 @@ public class CliRunSupport extends CliSupport {
         group.withOption(scriptType);
 
         Option groupScriptsBy = newBasicOptionBuilder().
-                withName(GROUP_SCRIPTS_BY_OPTION).
+                withName(GROUP_SCRIPTS_BY).
                 withDescription(getMessage(GROUP_SCRIPTS_BY_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
                                 withName(getMessage(GROUP_SCRIPTS_BY_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(groupScriptsBy);
+
+        Option namingStrategy = newBasicOptionBuilder().
+                withName(NAMING_STRATEGY).
+                withDescription(getMessage(NAMING_STRATEGY_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(NAMING_STRATEGY_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
+                ).build();
+        group.withOption(namingStrategy);
 
         Option identifierQuoting = newBasicOptionBuilder().
                 withName(IDENTIFIER_QUOTING).
@@ -588,19 +521,110 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
+    protected Group createJdbcTypeGroup() {
+        GroupBuilder group = newGroupBuilder().withName(getMessage(JDBC_TYPE_GROUP_NAME));
+
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
+
+        Option useNuoDBTypes = newBasicOptionBuilder().
+                withName(USE_NUODB_TYPES).
+                withDescription(getMessage(USE_NUODB_TYPES_OPTION_DESCRIPTION)).
+                withRequired(false).
+                withOptionProcessor(new NuoDBTypesOptionProcessor()).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(USE_NUODB_TYPES_OPTION_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(useNuoDBTypes);
+
+        Option useImplicitDefaults = newBasicOptionBuilder().
+                withName(USE_EXPLICIT_DEFAULTS).
+                withDescription(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_DESCRIPTION)).
+                withRequired(false).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(USE_EXPLICIT_DEFAULTS_OPTION_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(useImplicitDefaults);
+
+        Option typeName = newBasicOptionBuilder().
+                withName(JDBC_TYPE_NAME).
+                withDescription(getMessage(JDBC_TYPE_NAME_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_NAME_ARGUMENT_NAME))).
+                                withOptionProcessor(jdbcTypeOptionProcessor).
+                                withMinimum(1).withMaximum(MAX_VALUE).withRequired(true).build()
+                ).build();
+        group.withOption(typeName);
+
+        Option typeCode = newBasicOptionBuilder().
+                withName(JDBC_TYPE_CODE).
+                withDescription(getMessage(JDBC_TYPE_CODE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_CODE_ARGUMENT_NAME))).
+                                withMinimum(1).withMaximum(MAX_VALUE).withRequired(true).build()
+                ).build();
+        group.withOption(typeCode);
+
+        Option typeSize = newBasicOptionBuilder().
+                withName(JDBC_TYPE_SIZE).
+                withDescription(getMessage(JDBC_TYPE_SIZE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_SIZE_ARGUMENT_NAME))).
+                                withMaximum(MAX_VALUE).build()
+                ).build();
+        group.withOption(typeSize);
+
+        Option typePrecision = newBasicOptionBuilder().
+                withName(JDBC_TYPE_PRECISION).
+                withDescription(getMessage(JDBC_TYPE_PRECISION_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_PRECISION_ARGUMENT_NAME))).
+                                withMaximum(MAX_VALUE).build()
+                ).build();
+        group.withOption(typePrecision);
+
+        Option typeScale = newBasicOptionBuilder().
+                withName(JDBC_TYPE_SCALE).
+                withDescription(getMessage(JDBC_TYPE_SCALE_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).
+                                withHelpValues(singleton(getMessage(JDBC_TYPE_SCALE_ARGUMENT_NAME))).
+                                withMaximum(MAX_VALUE).build()
+                ).build();
+        group.withOption(typeScale);
+        group.withMaximum(MAX_VALUE);
+        return group.build();
+    }
+
     protected DriverConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
         DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
-        connectionSpec.setDriver((String) optionSet.getValue(SOURCE_DRIVER_OPTION));
-        connectionSpec.setUrl((String) optionSet.getValue(SOURCE_URL_OPTION));
-        connectionSpec.setUsername((String) optionSet.getValue(SOURCE_USERNAME_OPTION));
-        connectionSpec.setPassword((String) optionSet.getValue(SOURCE_PASSWORD_OPTION));
-        connectionSpec.setProperties(parseProperties(optionSet, SOURCE_PROPERTIES_OPTION, option));
-        connectionSpec.setCatalog((String) optionSet.getValue(SOURCE_CATALOG_OPTION));
-        connectionSpec.setSchema((String) optionSet.getValue(SOURCE_SCHEMA_OPTION));
-        if (optionSet.hasOption(SOURCE_AUTO_COMMIT_OPTION)) {
-            connectionSpec.setAutoCommit(Boolean.parseBoolean((String) optionSet.getValue(SOURCE_AUTO_COMMIT_OPTION)));
+        connectionSpec.setDriver((String) optionSet.getValue(SOURCE_DRIVER));
+        connectionSpec.setUrl((String) optionSet.getValue(SOURCE_URL));
+        connectionSpec.setUsername((String) optionSet.getValue(SOURCE_USERNAME));
+        connectionSpec.setPassword((String) optionSet.getValue(SOURCE_PASSWORD));
+        connectionSpec.setProperties(parseProperties(optionSet, SOURCE_PROPERTIES, option));
+        connectionSpec.setCatalog((String) optionSet.getValue(SOURCE_CATALOG));
+        connectionSpec.setSchema((String) optionSet.getValue(SOURCE_SCHEMA));
+        if (optionSet.hasOption(SOURCE_AUTO_COMMIT)) {
+            connectionSpec.setAutoCommit(Boolean.parseBoolean((String) optionSet.getValue(SOURCE_AUTO_COMMIT)));
         }
-        String transactionIsolationValue = (String) optionSet.getValue(SOURCE_TRANSACTION_ISOLATION_OPTION);
+        String transactionIsolationValue = (String) optionSet.getValue(SOURCE_TRANSACTION_ISOLATION);
         Integer transactionIsolation = null;
         if (transactionIsolationValue != null) {
             transactionIsolation = getTransactionIsolations().get(transactionIsolationValue);
@@ -618,8 +642,8 @@ public class CliRunSupport extends CliSupport {
 
     protected ResourceSpec parseOutputGroup(OptionSet optionSet, Option option) {
         ResourceSpec resource = new ResourceSpec();
-        resource.setType((String) optionSet.getValue(OUTPUT_TYPE_OPTION, FORMAT));
-        resource.setPath((String) optionSet.getValue(OUTPUT_PATH_OPTION));
+        resource.setType((String) optionSet.getValue(OUTPUT_TYPE, FORMAT));
+        resource.setPath((String) optionSet.getValue(OUTPUT_PATH));
         resource.setAttributes(parseAttributes(
                 optionSet.<String>getValues(OUTPUT_OPTION), optionSet.getOption(OUTPUT_OPTION)));
         return resource;
@@ -632,17 +656,19 @@ public class CliRunSupport extends CliSupport {
     protected Collection<MigrationMode> parseMigrationModeGroup(OptionSet optionSet, Option option,
                                                                 Collection<MigrationMode> defaultMigrationModes) {
         Collection<MigrationMode> migrationModes = newHashSet();
-        Option dataOption = optionSet.getOption(MIGRATION_MODE_DATA_OPTION_ID);
+        Option dataOption = optionSet.getOption(MIGRATION_MODE_DATA_ID);
         Object dataValue = optionSet.getValue(dataOption);
         if (dataValue != null ? parseBoolean(String.valueOf(dataValue)) :
-                (optionSet.hasOption(dataOption) || defaultMigrationModes.contains(DATA))) {
-            migrationModes.add(DATA);
+                (optionSet.hasOption(dataOption) ||
+                        defaultMigrationModes.contains(MigrationMode.DATA))) {
+            migrationModes.add(MigrationMode.DATA);
         }
-        Option schemaOption = optionSet.getOption(MIGRATION_MODE_SCHEMA_OPTION_ID);
+        Option schemaOption = optionSet.getOption(MIGRATION_MODE_SCHEMA_ID);
         Object schemaValue = optionSet.getValue(schemaOption);
         if (schemaValue != null ? parseBoolean(String.valueOf(schemaValue)) :
-                (optionSet.hasOption(MIGRATION_MODE_SCHEMA_OPTION) || defaultMigrationModes.contains(SCHEMA))) {
-            migrationModes.add(SCHEMA);
+                (optionSet.hasOption(MIGRATION_MODE_SCHEMA) ||
+                        defaultMigrationModes.contains(MigrationMode.SCHEMA))) {
+            migrationModes.add(MigrationMode.SCHEMA);
         }
         return migrationModes;
     }
@@ -656,7 +682,7 @@ public class CliRunSupport extends CliSupport {
     }
 
     protected TimeZone parseTimeZoneOption(OptionSet optionSet, Option option) {
-        String timeZone = (String) optionSet.getValue(TIME_ZONE_OPTION);
+        String timeZone = (String) optionSet.getValue(TIME_ZONE);
         if (timeZone != null) {
             TimeZone systemTimeZone = TimeZone.getDefault();
             try {
@@ -672,14 +698,14 @@ public class CliRunSupport extends CliSupport {
 
     protected CommitStrategy parseCommitGroup(OptionSet optionSet, Option option) {
         Map<String, CommitStrategy> commitStrategyMapping = createCommitStrategyMapping();
-        String commitStrategyValue = (String) optionSet.getValue(COMMIT_STRATEGY_OPTION, COMMIT_STRATEGY_BATCH);
+        String commitStrategyValue = (String) optionSet.getValue(COMMIT_STRATEGY, COMMIT_STRATEGY_BATCH);
         CommitStrategy commitStrategy = commitStrategyMapping.get(commitStrategyValue);
         if (commitStrategy == null) {
             commitStrategy = newInstance(commitStrategyValue);
         }
         commitStrategy.setAttributes(parseAttributes(
-                optionSet.<String>getValues(COMMIT_STRATEGY_ATTRIBUTES_OPTION),
-                optionSet.getOption(COMMIT_STRATEGY_ATTRIBUTES_OPTION)));
+                optionSet.<String>getValues(COMMIT_STRATEGY_ATTRIBUTES),
+                optionSet.getOption(COMMIT_STRATEGY_ATTRIBUTES)));
         return commitStrategy;
     }
 
@@ -712,14 +738,14 @@ public class CliRunSupport extends CliSupport {
     }
 
     protected DriverConnectionSpec parseTargetGroup(OptionSet optionSet, Option option) {
-        if (optionSet.hasOption(TARGET_URL_OPTION)) {
+        if (optionSet.hasOption(TARGET_URL)) {
             DriverConnectionSpec connection = new DriverConnectionSpec();
             connection.setDriver(JdbcConstants.NUODB_DRIVER);
-            connection.setUrl((String) optionSet.getValue(TARGET_URL_OPTION));
-            connection.setUsername((String) optionSet.getValue(TARGET_USERNAME_OPTION));
-            connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD_OPTION));
-            connection.setSchema((String) optionSet.getValue(TARGET_SCHEMA_OPTION));
-            connection.setProperties(parseProperties(optionSet, TARGET_PROPERTIES_OPTION, option));
+            connection.setUrl((String) optionSet.getValue(TARGET_URL));
+            connection.setUsername((String) optionSet.getValue(TARGET_USERNAME));
+            connection.setPassword((String) optionSet.getValue(TARGET_PASSWORD));
+            connection.setSchema((String) optionSet.getValue(TARGET_SCHEMA));
+            connection.setProperties(parseProperties(optionSet, TARGET_PROPERTIES, option));
             return connection;
         } else {
             return null;
@@ -728,22 +754,58 @@ public class CliRunSupport extends CliSupport {
 
     protected ResourceSpec parseInputGroup(OptionSet optionSet, Option option) {
         ResourceSpec resource = new ResourceSpec();
-        resource.setPath((String) optionSet.getValue(INPUT_PATH_OPTION));
+        resource.setPath((String) optionSet.getValue(INPUT_PATH));
         resource.setAttributes(parseAttributes(
-                optionSet.<String>getValues(INPUT_OPTION), optionSet.getOption(INPUT_OPTION)));
+                optionSet.<String>getValues(INPUT), optionSet.getOption(INPUT)));
         return resource;
     }
 
     protected void parseSchemaMigrationGroup(ScriptGeneratorJobSpecBase schemaGeneratorJobSpec,
                                              OptionSet optionSet, Option option) {
-        if (optionSet.hasOption(META_DATA_OPTION)) {
-            schemaGeneratorJobSpec.setObjectTypes(parseObjectTypes(optionSet));
+        schemaGeneratorJobSpec.setJdbcTypeSpecs(parseJdbcTypeSpecs(optionSet, option));
+        schemaGeneratorJobSpec.setUseExplicitDefaults(parseUseExplicitDefaults(optionSet, option));
+        schemaGeneratorJobSpec.setObjectTypes(parseObjectTypes(optionSet));
+        schemaGeneratorJobSpec.setScriptTypes(parseScriptTypes(optionSet, option));
+        schemaGeneratorJobSpec.setGroupScriptsBy(parseGroupScriptsBy(optionSet, option));
+        schemaGeneratorJobSpec.setNamingStrategies(parseNamingStrategies(optionSet));
+        schemaGeneratorJobSpec.setIdentifierQuoting(parseIdentifierQuoting(optionSet, option));
+        schemaGeneratorJobSpec.setIdentifierNormalizer(parseIdentifierNormalizer(optionSet, option));
+        schemaGeneratorJobSpec.setTableTypes(parseTableTypes(optionSet));
+    }
+
+    protected boolean parseUseExplicitDefaults(OptionSet optionSet, Option option) {
+        Object useExplicitDefaultsValue = optionSet.getValue(USE_EXPLICIT_DEFAULTS);
+        return useExplicitDefaultsValue != null ?
+                parseBoolean(String.valueOf(useExplicitDefaultsValue)) :
+                (optionSet.hasOption(USE_EXPLICIT_DEFAULTS) ||
+                        ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS);
+    }
+
+    protected Collection<JdbcTypeSpec> parseJdbcTypeSpecs(OptionSet optionSet, Option option) {
+        ListMultimap<String, Object> values = jdbcTypeOptionProcessor.getValues();
+        int count = values.get(JDBC_TYPE_NAME).size();
+        Collection<JdbcTypeSpec> jdbcTypeSpecs = newArrayList();
+        JdbcTypeCodes jdbcTypeCodes = JdbcTypeCodes.getInstance();
+        for (int i = 0; i < count; i++) {
+            String typeName = (String) values.get(JDBC_TYPE_NAME).get(i);
+            String typeCode = (String) values.get(JDBC_TYPE_CODE).get(i);
+            String size = (String) values.get(JDBC_TYPE_SIZE).get(i);
+            String precision = (String) values.get(JDBC_TYPE_PRECISION).get(i);
+            String scale = (String) values.get(JDBC_TYPE_SCALE).get(i);
+            JdbcTypeSpec jdbcTypeSpec = new JdbcTypeSpec();
+            jdbcTypeSpec.setTypeName(typeName);
+            Integer typeCodeInt = jdbcTypeCodes.getTypeCode(typeCode);
+            jdbcTypeSpec.setTypeCode(typeCodeInt != null ? typeCodeInt : parseInt(typeCode));
+            jdbcTypeSpec.setSize(!isEmpty(size) ? parseInt(size) : null);
+            jdbcTypeSpec.setPrecision(!isEmpty(precision) ? parseInt(precision) : null);
+            jdbcTypeSpec.setScale(!isEmpty(scale) ? parseInt(scale) : null);
+            jdbcTypeSpecs.add(jdbcTypeSpec);
         }
-        Object useExplicitDefaults = optionSet.getValue(USE_EXPLICIT_DEFAULTS_OPTION);
-        schemaGeneratorJobSpec.setUseExplicitDefaults(useExplicitDefaults != null ?
-                parseBoolean(String.valueOf(useExplicitDefaults)) :
-                (optionSet.hasOption(USE_EXPLICIT_DEFAULTS_OPTION) || USE_EXPLICIT_DEFAULTS));
-        List<String> scriptTypeValues = optionSet.getValues(SCRIPT_TYPE_OPTION);
+        return jdbcTypeSpecs;
+    }
+
+    protected Collection<ScriptType> parseScriptTypes(OptionSet optionSet, Option option) {
+        List<String> scriptTypeValues = optionSet.getValues(SCRIPT_TYPE);
         Collection<ScriptType> scriptTypes = newHashSet();
         for (String scriptTypeValue : scriptTypeValues) {
             scriptTypes.add(valueOf(scriptTypeValue.toUpperCase()));
@@ -751,26 +813,58 @@ public class CliRunSupport extends CliSupport {
         if (scriptTypes.isEmpty()) {
             scriptTypes = newHashSet(ScriptType.values());
         }
-        schemaGeneratorJobSpec.setScriptTypes(scriptTypes);
+        return scriptTypes;
+    }
 
+    protected GroupScriptsBy parseGroupScriptsBy(OptionSet optionSet, Option option) {
         Map<String, GroupScriptsBy> groupScriptsByConditionMap = newHashMap();
         for (GroupScriptsBy groupScriptsBy : GroupScriptsBy.values()) {
             groupScriptsByConditionMap.put(groupScriptsBy.getCondition(), groupScriptsBy);
         }
-        String groupScriptsByCondition = (String) optionSet.getValue(GROUP_SCRIPTS_BY_OPTION);
+        String groupScriptsByCondition = (String) optionSet.getValue(GROUP_SCRIPTS_BY);
         GroupScriptsBy groupScriptsBy;
         if (groupScriptsByCondition != null) {
             groupScriptsBy = groupScriptsByConditionMap.get(groupScriptsByCondition);
             if (groupScriptsBy == null) {
                 throw new OptionException(format("Unexpected value for %s option, valid values are %s",
-                        GROUP_SCRIPTS_BY_OPTION, groupScriptsByConditionMap.keySet()), option
+                        GROUP_SCRIPTS_BY, groupScriptsByConditionMap.keySet()), option
                 );
             }
         } else {
             groupScriptsBy = GroupScriptsBy.TABLE;
         }
-        schemaGeneratorJobSpec.setGroupScriptsBy(groupScriptsBy);
+        return groupScriptsBy;
+    }
 
+    protected PrioritySet<NamingStrategy> parseNamingStrategies(OptionSet optionSet) {
+        String namingStrategy = trim((String) optionSet.getValue(NAMING_STRATEGY));
+        PrioritySet<NamingStrategy> namingStrategies = newPrioritySet();
+        if (equalsIgnoreCase(namingStrategy, NAMING_STRATEGY_QUALIFY)) {
+            namingStrategies.add(new ForeignKeyQualifyNamingStrategy(), HIGH);
+            namingStrategies.add(new IndexQualifyNamingStrategy(), HIGH);
+            namingStrategies.add(new SequenceQualifyNamingStrategy(), HIGH);
+            namingStrategies.add(new TriggerQualifyNamingStrategy(), HIGH);
+        } else if (equalsIgnoreCase(namingStrategy, NAMING_STRATEGY_HASH)) {
+            namingStrategies.add(new ForeignKeyHashNamingStrategy(), HIGH);
+            namingStrategies.add(new IndexHashNamingStrategy(), HIGH);
+            namingStrategies.add(new SequenceHashNamingStrategy(), HIGH);
+            namingStrategies.add(new TriggerHashNamingStrategy(), HIGH);
+        } else if (equalsIgnoreCase(namingStrategy, NAMING_STRATEGY_AUTO)) {
+            namingStrategies.add(new ForeignKeyAutoNamingStrategy(), HIGH);
+            namingStrategies.add(new IndexAutoNamingStrategy(), HIGH);
+            namingStrategies.add(new SequenceAutoNamingStrategy(), HIGH);
+            namingStrategies.add(new TriggerAutoNamingStrategy(), HIGH);
+        } else if (isNotEmpty(namingStrategy)) {
+            try {
+                namingStrategies.add((NamingStrategy) newInstance(namingStrategy), HIGH);
+            } catch (ReflectionException exception) {
+                optionUnexpected(optionSet.getOption(NAMING_STRATEGY), namingStrategy);
+            }
+        }
+        return namingStrategies;
+    }
+
+    protected IdentifierQuoting parseIdentifierQuoting(OptionSet optionSet, Option option) {
         String identifierQuotingValue = (String) optionSet.getValue(IDENTIFIER_QUOTING);
         IdentifierQuoting identifierQuoting = null;
         if (identifierQuotingValue != null) {
@@ -780,8 +874,10 @@ public class CliRunSupport extends CliSupport {
                 identifierQuoting = newInstance(identifierQuotingClass);
             }
         }
-        schemaGeneratorJobSpec.setIdentifierQuoting(identifierQuoting != null ? identifierQuoting : ALWAYS);
+        return identifierQuoting != null ? identifierQuoting : ALWAYS;
+    }
 
+    protected IdentifierNormalizer parseIdentifierNormalizer(OptionSet optionSet, Option option) {
         String identifierNormalizerValue = (String) optionSet.getValue(IDENTIFIER_NORMALIZER);
         IdentifierNormalizer identifierNormalizer = null;
         if (identifierNormalizerValue != null) {
@@ -793,36 +889,12 @@ public class CliRunSupport extends CliSupport {
                         newInstance(identifierNormalizerClass);
             }
         }
-        schemaGeneratorJobSpec.setIdentifierNormalizer(
-                identifierNormalizer != null ? identifierNormalizer : NOOP);
-
-        ListMultimap<String, Object> values = jdbcTypeOptionProcessor.getValues();
-        int count = values.get(JDBC_TYPE_NAME_OPTION).size();
-        Collection<JdbcTypeSpec> jdbcTypeSpecs = newArrayList();
-        JdbcTypeCodes jdbcTypeCodes = JdbcTypeCodes.getInstance();
-        for (int i = 0; i < count; i++) {
-            String typeName = (String) values.get(JDBC_TYPE_NAME_OPTION).get(i);
-            String typeCode = (String) values.get(JDBC_TYPE_CODE_OPTION).get(i);
-            String size = (String) values.get(JDBC_TYPE_SIZE_OPTION).get(i);
-            String precision = (String) values.get(JDBC_TYPE_PRECISION_OPTION).get(i);
-            String scale = (String) values.get(JDBC_TYPE_SCALE_OPTION).get(i);
-            JdbcTypeSpec jdbcTypeSpec = new JdbcTypeSpec();
-            jdbcTypeSpec.setTypeName(typeName);
-            Integer typeCodeInt = jdbcTypeCodes.getTypeCode(typeCode);
-            jdbcTypeSpec.setTypeCode(typeCodeInt != null ? typeCodeInt : parseInt(typeCode));
-            jdbcTypeSpec.setSize(!isEmpty(size) ? parseInt(size) : null);
-            jdbcTypeSpec.setPrecision(!isEmpty(precision) ? parseInt(precision) : null);
-            jdbcTypeSpec.setScale(!isEmpty(scale) ? parseInt(scale) : null);
-            jdbcTypeSpecs.add(jdbcTypeSpec);
-        }
-        schemaGeneratorJobSpec.setJdbcTypeSpecs(jdbcTypeSpecs);
-
-        schemaGeneratorJobSpec.setTableTypes(parseTableTypes(optionSet));
+        return identifierNormalizer != null ? identifierNormalizer : NOOP;
     }
 
     protected String[] parseTableTypes(OptionSet optionSet) {
         Collection<String> tableTypes = newLinkedHashSet();
-        tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE_OPTION));
+        tableTypes.addAll(optionSet.<String>getValues(TABLE_TYPE));
         if (tableTypes.isEmpty()) {
             tableTypes.add(Table.TABLE);
         }
@@ -830,17 +902,19 @@ public class CliRunSupport extends CliSupport {
     }
 
     protected Collection<MetaDataType> parseObjectTypes(OptionSet optionSet) {
-        Collection<String> values = optionSet.getValues(META_DATA_OPTION);
         Collection<MetaDataType> objectTypes = newArrayList(MetaDataType.TYPES);
-        Map<String, MetaDataType> objectTypeMap = new TreeMap<String, MetaDataType>(String.CASE_INSENSITIVE_ORDER);
-        objectTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
-        for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
-            MetaDataType objectType = objectTypeMap.get(replace(iterator.next(), ".", "_"));
-            String booleanValue = iterator.next();
-            if (booleanValue == null || parseBoolean(booleanValue)) {
-                objectTypes.add(objectType);
-            } else {
-                objectTypes.remove(objectType);
+        if (optionSet.hasOption(META_DATA)) {
+            Collection<String> values = optionSet.getValues(META_DATA);
+            Map<String, MetaDataType> objectTypeMap = new TreeMap<String, MetaDataType>(String.CASE_INSENSITIVE_ORDER);
+            objectTypeMap.putAll(MetaDataType.NAME_TYPE_MAP);
+            for (Iterator<String> iterator = values.iterator(); iterator.hasNext(); ) {
+                MetaDataType objectType = objectTypeMap.get(replace(iterator.next(), ".", "_"));
+                String booleanValue = iterator.next();
+                if (booleanValue == null || parseBoolean(booleanValue)) {
+                    objectTypes.add(objectType);
+                } else {
+                    objectTypes.remove(objectType);
+                }
             }
         }
         return objectTypes;

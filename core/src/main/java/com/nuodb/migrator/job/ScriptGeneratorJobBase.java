@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@ import com.nuodb.migrator.jdbc.dialect.TranslationManager;
 import com.nuodb.migrator.jdbc.dialect.Translator;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.jdbc.session.Session;
@@ -45,6 +46,7 @@ import com.nuodb.migrator.utils.PrioritySet;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Iterator;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
@@ -54,6 +56,7 @@ import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public abstract class ScriptGeneratorJobBase<S extends ScriptGeneratorJobSpecBase> extends HasServicesJobBase<S> {
 
     private ConnectionSpec sourceSpec;
@@ -103,6 +106,9 @@ public abstract class ScriptGeneratorJobBase<S extends ScriptGeneratorJobSpecBas
         }
         dialect.setIdentifierQuoting(getIdentifierQuoting());
         dialect.setIdentifierNormalizer(getIdentifierNormalizer());
+        for (PrioritySet.Item<NamingStrategy> item : getNamingStrategies().items()) {
+            scriptGeneratorManager.addNamingStrategy(item.getValue(), item.getPriority());
+        }
         scriptGeneratorManager.setTargetDialect(dialect);
         return scriptGeneratorManager;
     }
@@ -139,6 +145,10 @@ public abstract class ScriptGeneratorJobBase<S extends ScriptGeneratorJobSpecBas
 
     protected boolean isUseExplicitDefaults() {
         return getJobSpec().isUseExplicitDefaults();
+    }
+
+    protected PrioritySet<NamingStrategy> getNamingStrategies() {
+        return getJobSpec().getNamingStrategies();
     }
 
     protected GroupScriptsBy getGroupScriptsBy() {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@ import com.nuodb.migrator.cli.parse.Option;
 
 import java.util.ListIterator;
 
-import static com.nuodb.migrator.cli.CliOptions.USE_NUODB_TYPES_OPTION;
+import static com.nuodb.migrator.cli.CliOptions.USE_NUODB_TYPES;
 import static java.lang.Boolean.parseBoolean;
 
 /**
@@ -52,8 +52,8 @@ public class NuoDBTypesOptionProcessor extends ConfigOptionProcessor {
 
     @Override
     public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-        Object value = commandLine.getValue(USE_NUODB_TYPES_OPTION);
-        if (value != null ? parseBoolean(value.toString()) : commandLine.hasOption(USE_NUODB_TYPES_OPTION)) {
+        Object value = commandLine.getValue(USE_NUODB_TYPES);
+        if (value != null ? parseBoolean(value.toString()) : commandLine.hasOption(USE_NUODB_TYPES)) {
             addConfig(option, arguments, getConfigPath());
         }
     }

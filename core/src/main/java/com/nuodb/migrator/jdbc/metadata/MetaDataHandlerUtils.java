@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,12 +36,12 @@ import static java.lang.String.format;
  */
 public class MetaDataHandlerUtils {
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> handlers, MetaData object) {
-        return findMetaDataHandler(handlers, object, true);
+    public static <T extends MetaDataHandler> T getHandler(Collection<? extends T> handlers, MetaData object) {
+        return getHandler(handlers, object, true);
     }
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> handlers,
-                                                                    MetaData object, boolean required) {
+    public static <T extends MetaDataHandler> T getHandler(Collection<? extends T> handlers,
+                                                           MetaData object, boolean required) {
         for (T handler : handlers) {
             if (handler.supports(object)) {
                 return handler;
@@ -54,13 +54,13 @@ public class MetaDataHandlerUtils {
         }
     }
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> handlers,
-                                                                    MetaDataType objectType) {
-        return findMetaDataHandler(handlers, objectType, true);
+    public static <T extends MetaDataHandler> T getHandler(Collection<? extends T> handlers,
+                                                           MetaDataType objectType) {
+        return getHandler(handlers, objectType, true);
     }
 
-    public static <T extends MetaDataHandler> T findMetaDataHandler(Collection<? extends T> handlers,
-                                                                    MetaDataType objectType, boolean required) {
+    public static <T extends MetaDataHandler> T getHandler(Collection<? extends T> handlers,
+                                                           MetaDataType objectType, boolean required) {
         for (T handler : handlers) {
             if (handler.supports(objectType)) {
                 return handler;

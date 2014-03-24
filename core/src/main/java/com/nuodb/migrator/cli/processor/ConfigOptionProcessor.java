@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.ListIterator;
 
-import static com.nuodb.migrator.cli.CliOptions.CONFIG_OPTION;
+import static com.nuodb.migrator.cli.CliOptions.CONFIG;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.join;
 
@@ -55,7 +55,7 @@ public class ConfigOptionProcessor extends ValuesOptionProcessor {
 
     @Override
     public void process(CommandLine commandLine, Option option, ListIterator<String> arguments) {
-        for (String path : getValues(commandLine, CONFIG_OPTION)) {
+        for (String path : getValues(commandLine, CONFIG)) {
             addConfig(option, arguments, path);
         }
     }

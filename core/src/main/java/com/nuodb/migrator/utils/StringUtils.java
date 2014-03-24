@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,6 +120,28 @@ public class StringUtils {
             }
         }
         return new String(buffer);
+    }
+
+    /**
+     * Prepends prefix to the provided source, adjusts prefix case to the case of the source.
+     *
+     * @param prefix    to prepend to source
+     * @param source    to be prefixed
+     * @param delimiter for capitalized case
+     * @return auto cased string
+     */
+    public static String autoCase(CharSequence prefix, CharSequence source, char delimiter) {
+        StringBuilder buffer = new StringBuilder();
+        if (isLowerCase(source)) {
+            buffer.append(lowerCase(prefix));
+        } else if (isCapitalizedCase(source, delimiter)) {
+            buffer.append(capitalizedCase(prefix, delimiter));
+        } else {
+            buffer.append(upperCase(prefix));
+        }
+        buffer.append(delimiter);
+        buffer.append(source);
+        return buffer.toString();
     }
 
     public static int indexOf(String source, String token, int from) {

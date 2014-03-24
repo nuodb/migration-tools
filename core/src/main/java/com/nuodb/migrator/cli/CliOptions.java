@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,87 +36,88 @@ package com.nuodb.migrator.cli;
  */
 public interface CliOptions {
 
-    final int HELP_OPTION_ID = 1;
-    final int VERSION_OPTION_ID = 2;
-    final int LIST_OPTION_ID = 3;
-    final int CONFIG_OPTION_ID = 4;
-    final int COMMAND_OPTION_ID = 5;
-    final int MIGRATION_MODE_DATA_OPTION_ID = 6;
-    final int MIGRATION_MODE_SCHEMA_OPTION_ID = 7;
+    final int HELP_ID = 1;
+    final int VERSION_ID = 2;
+    final int LIST_ID = 3;
+    final int CONFIG_ID = 4;
+    final int COMMAND_ID = 5;
+    final int MIGRATION_MODE_DATA_ID = 6;
+    final int MIGRATION_MODE_SCHEMA_ID = 7;
 
-    final String HELP_OPTION = "help";
-    final String HELP_SHORT_OPTION = "h";
-    final String LIST_OPTION = "list";
-    final String LIST_SHORT_OPTION = "l";
-    final String CONFIG_OPTION = "config";
-    final String VERSION_SHORT_OPTION = "v";
-    final String VERSION_OPTION = "version";
-    final String CONFIG_SHORT_OPTION = "c";
-    final String COMMAND_OPTION = "command";
+    final String HELP = "help";
+    final String HELP_SHORT = "h";
+    final String LIST = "list";
+    final String LIST_SHORT = "l";
+    final String CONFIG = "config";
+    final String VERSION = "version";
+    final String VERSION_SHORT = "v";
+    final String CONFIG_SHORT = "c";
+    final String COMMAND = "command";
 
-    final String DUMP_COMMAND = "dump";
-    final String LOAD_COMMAND = "load";
-    final String SCHEMA_COMMAND = "schema";
+    final String DUMP = "dump";
+    final String LOAD = "load";
+    final String SCHEMA = "schema";
 
-    final String SOURCE_DRIVER_OPTION = "source.driver";
-    final String SOURCE_URL_OPTION = "source.url";
-    final String SOURCE_USERNAME_OPTION = "source.username";
-    final String SOURCE_PASSWORD_OPTION = "source.password";
-    final String SOURCE_PROPERTIES_OPTION = "source.properties";
-    final String SOURCE_CATALOG_OPTION = "source.catalog";
-    final String SOURCE_SCHEMA_OPTION = "source.schema";
-    final String SOURCE_AUTO_COMMIT_OPTION = "source.auto.commit";
-    final String SOURCE_TRANSACTION_ISOLATION_OPTION = "source.transaction.isolation";
+    final String SOURCE_DRIVER = "source.driver";
+    final String SOURCE_URL = "source.url";
+    final String SOURCE_USERNAME = "source.username";
+    final String SOURCE_PASSWORD = "source.password";
+    final String SOURCE_PROPERTIES = "source.properties";
+    final String SOURCE_CATALOG = "source.catalog";
+    final String SOURCE_SCHEMA = "source.schema";
+    final String SOURCE_AUTO_COMMIT = "source.auto.commit";
+    final String SOURCE_TRANSACTION_ISOLATION = "source.transaction.isolation";
 
-    final String TIME_ZONE_OPTION = "time.zone";
-    final String TIME_ZONE_SHORT_OPTION = "z";
+    final String TIME_ZONE = "time.zone";
+    final String TIME_ZONE_SHORT = "z";
     final String OUTPUT_OPTION = "output.*";
-    final String OUTPUT_TYPE_OPTION = "output.type";
-    final String OUTPUT_PATH_OPTION = "output.path";
+    final String OUTPUT_TYPE = "output.type";
+    final String OUTPUT_PATH = "output.path";
 
-    final String MIGRATION_MODE_DATA_OPTION = "data";
-    final String MIGRATION_MODE_SCHEMA_OPTION = "schema";
+    final String MIGRATION_MODE_DATA = "data";
+    final String MIGRATION_MODE_SCHEMA = "schema";
 
-    final String TABLE_OPTION = "table";
-    final String TABLE_TYPE_OPTION = "table.type";
-    final String TABLE_FILTER_OPTION = "table.*.filter";
-    final String TABLE_INSERT_OPTION = "table.*.insert";
-    final String TABLE_REPLACE_OPTION = "table.*.replace";
+    final String TABLE = "table";
+    final String TABLE_TYPE = "table.type";
+    final String TABLE_FILTER = "table.*.filter";
+    final String TABLE_INSERT = "table.*.insert";
+    final String TABLE_REPLACE = "table.*.replace";
 
-    final String THREADS_OPTION = "threads";
-    final String THREADS_SHORT_OPTION = "t";
+    final String THREADS = "threads";
+    final String THREADS_SHORT = "t";
 
-    final String QUERY_LIMIT_OPTION = "query.limit";
+    final String QUERY_LIMIT = "query.limit";
 
-    final String QUERY_OPTION = "query";
+    final String QUERY = "query";
 
-    final String TARGET_URL_OPTION = "target.url";
-    final String TARGET_USERNAME_OPTION = "target.username";
-    final String TARGET_PASSWORD_OPTION = "target.password";
-    final String TARGET_PROPERTIES_OPTION = "target.properties";
-    final String TARGET_SCHEMA_OPTION = "target.schema";
-    final String TARGET_AUTO_COMMIT_OPTION = "target.auto.commit";
+    final String TARGET_URL = "target.url";
+    final String TARGET_USERNAME = "target.username";
+    final String TARGET_PASSWORD = "target.password";
+    final String TARGET_PROPERTIES = "target.properties";
+    final String TARGET_SCHEMA = "target.schema";
+    final String TARGET_AUTO_COMMIT = "target.auto.commit";
 
-    final String REPLACE_OPTION = "replace";
-    final String REPLACE_SHORT_OPTION = "r";
+    final String REPLACE = "replace";
+    final String REPLACE_SHORT = "r";
 
-    final String COMMIT_STRATEGY_OPTION = "commit.strategy";
-    final String COMMIT_STRATEGY_ATTRIBUTES_OPTION = "commit.*";
+    final String COMMIT_STRATEGY = "commit.strategy";
+    final String COMMIT_STRATEGY_ATTRIBUTES = "commit.*";
 
-    final String INPUT_OPTION = "input.*";
-    final String INPUT_PATH_OPTION = "input.path";
+    final String INPUT = "input.*";
+    final String INPUT_PATH = "input.path";
 
-    final String META_DATA_OPTION = "meta.data.*";
-    final String SCRIPT_TYPE_OPTION = "script.type";
-    final String GROUP_SCRIPTS_BY_OPTION = "group.scripts.by";
+    final String META_DATA = "meta.data.*";
+    final String NAMING_STRATEGY = "naming.strategy";
+    final String SCRIPT_TYPE = "script.type";
+    final String GROUP_SCRIPTS_BY = "group.scripts.by";
     final String IDENTIFIER_QUOTING = "identifier.quoting";
     final String IDENTIFIER_NORMALIZER = "identifier.normalizer";
 
-    final String USE_NUODB_TYPES_OPTION = "use.nuodb.types";
-    final String USE_EXPLICIT_DEFAULTS_OPTION = "use.explicit.defaults";
-    final String JDBC_TYPE_NAME_OPTION = "type.name";
-    final String JDBC_TYPE_CODE_OPTION = "type.code";
-    final String JDBC_TYPE_SIZE_OPTION = "type.size";
-    final String JDBC_TYPE_PRECISION_OPTION = "type.precision";
-    final String JDBC_TYPE_SCALE_OPTION = "type.scale";
+    final String USE_NUODB_TYPES = "use.nuodb.types";
+    final String USE_EXPLICIT_DEFAULTS = "use.explicit.defaults";
+    final String JDBC_TYPE_NAME = "type.name";
+    final String JDBC_TYPE_CODE = "type.code";
+    final String JDBC_TYPE_SIZE = "type.size";
+    final String JDBC_TYPE_PRECISION = "type.precision";
+    final String JDBC_TYPE_SCALE = "type.scale";
 }

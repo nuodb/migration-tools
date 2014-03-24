@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012, NuoDB, Inc.
+ * Copyright (c) 2014, NuoDB, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,6 +77,34 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
     @Override
     public Collection<Item<T>> items() {
         return items;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof PrioritySet))
+            return false;
+
+        Iterator iterator1 = items().iterator();
+        Iterator iterator2 = ((PrioritySet) o).items().iterator();
+
+        while (iterator1.hasNext() && iterator2.hasNext()) {
+            Object o1 = iterator1.next();
+            Object o2 = iterator2.next();
+            if (!(o1==null ? o2==null : o1.equals(o2)))
+                return false;
+        }
+        return !(iterator1.hasNext() || iterator2.hasNext());
+    }
+
+    @Override
+    public int hashCode() {
+        int hashCode = 1;
+        for (T o : this) {
+            hashCode = 31 * hashCode + (o == null ? 0 : o.hashCode());
+        }
+        return hashCode;
     }
 
     class IteratorImpl<T> implements Iterator<T> {
