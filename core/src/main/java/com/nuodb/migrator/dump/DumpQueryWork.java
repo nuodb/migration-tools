@@ -248,6 +248,7 @@ public class DumpQueryWork extends WorkBase {
 
     @Override
     public String toString() {
-        return ObjectUtils.toString(this, asList("queryDesc", "querySplit", "hasNextQuerySplit"));
+        return ObjectUtils.toString(this,
+                asList("queryDesc", "querySplit", "hasNextQuerySplit"));
     }
 }
