@@ -72,9 +72,18 @@ public class XmlDatabaseHandler extends XmlIdentifiableHandlerBase<Database> imp
 
     @Override
     protected void writeElements(Database database, OutputNode output, XmlWriteContext context) throws Exception {
-        context.writeElement(output, DRIVER_INFO_ELEMENT, database.getDriverInfo());
-        context.writeElement(output, DATABASE_INFO_ELEMENT, database.getDatabaseInfo());
-        context.writeElement(output, CONNECTION_SPEC_ELEMENT, database.getConnectionSpec());
+        DriverInfo driverInfo = database.getDriverInfo();
+        if (driverInfo != null) {
+            context.writeElement(output, DRIVER_INFO_ELEMENT, driverInfo);
+        }
+        DatabaseInfo databaseInfo = database.getDatabaseInfo();
+        if (databaseInfo != null) {
+            context.writeElement(output, DATABASE_INFO_ELEMENT, databaseInfo);
+        }
+        ConnectionSpec connectionSpec = database.getConnectionSpec();
+        if (connectionSpec != null) {
+            context.writeElement(output, CONNECTION_SPEC_ELEMENT, connectionSpec);
+        }
         for (Catalog catalog : database.getCatalogs()) {
             context.writeElement(output, CATALOG_ELEMENT, catalog);
         }

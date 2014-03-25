@@ -43,7 +43,7 @@ public class Backup {
 
     private String version = Migrator.getVersion();
     private String format;
-    private Database database;
+    private Database database = new Database();
     private Collection<RowSet> rowSets = newArrayList();
 
     public Backup() {
