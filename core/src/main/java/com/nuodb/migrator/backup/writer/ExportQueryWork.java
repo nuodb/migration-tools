@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
+package com.nuodb.migrator.backup.writer;
 
 import com.nuodb.migrator.backup.Chunk;
 import com.nuodb.migrator.backup.QueryRowSet;
@@ -60,13 +60,12 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class DumpQueryWork extends WorkBase {
+public class ExportQueryWork extends WorkBase {
 
     private static final String QUERY = "query";
 
-    private final DumpQueryContext dumpQueryContext;
-    private final DumpQueryManager dumpQueryManager;
-    private final DumpQuery dumpQuery;
+    private final BackupWriterContext backupWriterContext;
+    private final ExportQuery exportQuery;
     private final QuerySplit querySplit;
     private final boolean hasNextQuerySplit;
 
@@ -75,11 +74,10 @@ public class DumpQueryWork extends WorkBase {
     private OutputFormat outputFormat;
     private Collection<Chunk> chunks;
 
-    public DumpQueryWork(DumpQueryContext dumpQueryContext, DumpQueryManager dumpQueryManager, DumpQuery dumpQuery,
-                         QuerySplit querySplit, boolean hasNextQuerySplit) {
-        this.dumpQueryContext = dumpQueryContext;
-        this.dumpQueryManager = dumpQueryManager;
-        this.dumpQuery = dumpQuery;
+    public ExportQueryWork(BackupWriterContext backupWriterContext, ExportQuery exportQuery,
+                           QuerySplit querySplit, boolean hasNextQuerySplit) {
+        this.backupWriterContext = backupWriterContext;
+        this.exportQuery = exportQuery;
         this.querySplit = querySplit;
         this.hasNextQuerySplit = hasNextQuerySplit;
     }
@@ -90,54 +88,55 @@ public class DumpQueryWork extends WorkBase {
         resultSet = querySplit.getResultSet(getSession().getConnection(), new StatementCallback() {
             @Override
             public void executeStatement(Statement statement) throws SQLException {
-                dialect.setStreamResults(statement, dumpQuery.getColumns() != null);
+                dialect.setStreamResults(statement, exportQuery.getColumns() != null);
             }
         });
 
         valueHandleList = newBuilder(getSession().getConnection(), resultSet).
                 withDialect(dialect).
-                withFields(dumpQuery.getColumns() != null ? dumpQuery.getColumns() : FieldFactory
+                withFields(exportQuery.getColumns() != null ? exportQuery.getColumns() : FieldFactory
                         .newFieldList(resultSet)).
-                withTimeZone(dumpQueryContext.getTimeZone()).
-                withValueFormatRegistry(dumpQueryContext.getValueFormatRegistry()).build();
+                withTimeZone(backupWriterContext.getTimeZone()).
+                withValueFormatRegistry(backupWriterContext.getValueFormatRegistry()).build();
 
-        RowSet rowSet = dumpQuery.getRowSet();
-        outputFormat = dumpQueryContext.getFormatFactory().createOutputFormat(
-                dumpQueryContext.getFormat(), dumpQueryContext.getFormatAttributes());
+        RowSet rowSet = exportQuery.getRowSet();
+        outputFormat = backupWriterContext.getFormatFactory().createOutputFormat(
+                backupWriterContext.getFormat(), backupWriterContext.getFormatAttributes());
         outputFormat.setRowSet(rowSet);
         outputFormat.setValueHandleList(valueHandleList);
 
         chunks = newArrayList();
         if (rowSet.getName() == null) {
-            rowSet.setName(getRowSetName());
+            rowSet.setName(createRowSetName());
         }
     }
 
     @Override
     public void execute() throws Exception {
-        DumpQueryManager dumpQueryManager = getDumpQueryManager();
-        DumpQuery dumpQuery = getDumpQuery();
-        dumpQueryManager.writeStart(dumpQuery, this);
+        ExportQueryManager exportQueryManager =
+                backupWriterContext.getExportQueryManager();
+        ExportQuery exportQuery = getExportQuery();
+        exportQueryManager.exportStart(exportQuery, this);
 
         ResultSet resultSet = getResultSet();
         OutputFormat outputFormat = getOutputFormat();
 
         Chunk chunk = null;
-        while (dumpQueryManager.canWrite(dumpQuery, this) && resultSet.next()) {
+        while (exportQueryManager.canExport(exportQuery, this) && resultSet.next()) {
             if (chunk == null) {
-                writeStart(chunk = addChunk());
+                exportStart(chunk = addChunk());
             }
             if (!outputFormat.canWrite()) {
-                writeEnd(chunk);
-                writeStart(chunk = addChunk());
+                exportEnd(chunk);
+                exportStart(chunk = addChunk());
             }
             outputFormat.write();
-            dumpQueryManager.write(dumpQuery, this, chunk);
+            exportQueryManager.exportRow(exportQuery, this, chunk);
         }
         if (chunk != null) {
-            writeEnd(chunk);
+            exportEnd(chunk);
         }
-        dumpQueryManager.writeEnd(dumpQuery, this);
+        exportQueryManager.exportEnd(exportQuery, this);
     }
 
     @Override
@@ -145,18 +144,18 @@ public class DumpQueryWork extends WorkBase {
         JdbcUtils.close(resultSet);
     }
 
-    protected void writeStart(Chunk chunk) throws Exception {
-        outputFormat.setOutputStream(dumpQueryContext.getBackupManager().openOutput(chunk.getName()));
+    protected void exportStart(Chunk chunk) throws Exception {
+        outputFormat.setOutputStream(backupWriterContext.getBackupOps().openOutput(chunk.getName()));
         outputFormat.init();
         outputFormat.writeStart();
 
-        dumpQueryManager.writeStart(dumpQuery, this, chunk);
+        backupWriterContext.getExportQueryManager().exportStart(exportQuery, this, chunk);
     }
 
-    protected void writeEnd(Chunk chunk) throws Exception {
+    protected void exportEnd(Chunk chunk) throws Exception {
         outputFormat.writeEnd();
         outputFormat.close();
-        dumpQueryManager.writeEnd(dumpQuery, this, chunk);
+        backupWriterContext.getExportQueryManager().exportEnd(exportQuery, this, chunk);
     }
 
     protected Chunk addChunk() {
@@ -167,30 +166,30 @@ public class DumpQueryWork extends WorkBase {
 
     protected Chunk createChunk(int chunkIndex) {
         Chunk chunk = new Chunk();
-        chunk.setName(getChunkName(chunkIndex));
+        chunk.setName(createChunkName(chunkIndex));
         return chunk;
     }
 
-    protected String getChunkName(int chunkIndex) {
-        Collection parts = newArrayList(getRowSetName());
+    protected String createChunkName(int chunkIndex) {
+        Collection names = newArrayList(createRowSetName());
         int splitIndex = getQuerySplit().getSplitIndex();
         if (splitIndex != 0 || isHasNextQuerySplit()) {
-            parts.add(splitIndex + 1);
+            names.add(splitIndex + 1);
         }
         if (chunkIndex > 0) {
-            parts.add(chunkIndex + 1);
+            names.add(chunkIndex + 1);
         }
-        parts.add(dumpQueryContext.getFormat());
-        return lowerCase(join(parts, "."));
+        names.add(backupWriterContext.getFormat());
+        return lowerCase(join(names, "."));
     }
 
-    protected String getRowSetName() {
+    protected String createRowSetName() {
         String rowSetName;
-        if (dumpQuery instanceof DumpTable) {
-            Table table = ((DumpTable) dumpQuery).getTable();
+        if (exportQuery instanceof ExportTable) {
+            Table table = ((ExportTable) exportQuery).getTable();
             rowSetName = table.getQualifiedName(null);
         } else {
-            RowSet rowSet = dumpQuery.getRowSet();
+            RowSet rowSet = exportQuery.getRowSet();
             int rowSetIndex = indexOf(filter(rowSet.getBackup().getRowSets(),
                     instanceOf(QueryRowSet.class)), equalTo(rowSet));
             rowSetName = join(asList(QUERY, rowSetIndex + 1), "-");
@@ -198,12 +197,8 @@ public class DumpQueryWork extends WorkBase {
         return lowerCase(rowSetName);
     }
 
-    public DumpQueryManager getDumpQueryManager() {
-        return dumpQueryManager;
-    }
-
-    public DumpQuery getDumpQuery() {
-        return dumpQuery;
+    public ExportQuery getExportQuery() {
+        return exportQuery;
     }
 
     public QuerySplit getQuerySplit() {
@@ -248,6 +243,7 @@ public class DumpQueryWork extends WorkBase {
 
     @Override
     public String toString() {
-        return ObjectUtils.toString(this, asList("queryDesc", "querySplit", "hasNextQuerySplit"));
+        return ObjectUtils.toString(this,
+                asList("queryDesc", "querySplit", "hasNextQuerySplit"));
     }
 }

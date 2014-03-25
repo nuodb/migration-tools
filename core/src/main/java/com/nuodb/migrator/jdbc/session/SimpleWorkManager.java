@@ -27,27 +27,30 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
+import com.nuodb.migrator.MigratorException;
 import org.slf4j.Logger;
 
 import java.util.Map;
 
+import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Maps.newConcurrentMap;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 public class SimpleWorkManager implements WorkManager {
 
-    private final transient Logger logger = getLogger(getClass());
-
+    protected final transient Logger logger = getLogger(getClass());
     private final Map<Work, Throwable> failureMap = newConcurrentMap();
 
     @Override
     public void failure(Work work, Throwable failure) {
         if (logger.isDebugEnabled()) {
-            logger.debug(format("Dump work failure reported: %s", failure.getMessage()));
+            logger.debug(format("Work failure: %s", failure.getMessage()));
         }
         failureMap.put(work, failure);
     }
@@ -55,5 +58,15 @@ public class SimpleWorkManager implements WorkManager {
     @Override
     public Map<Work, Throwable> getFailures() {
         return failureMap;
+    }
+
+    @Override
+    public void close() throws Exception {
+        Map<Work, Throwable> failures = getFailures();
+        if (!isEmpty(failures)) {
+            final Throwable failure = get(failures.values(), 0);
+            throw failure instanceof MigratorException ?
+                    (MigratorException) failure : new MigratorException(failure);
+        }
     }
 }

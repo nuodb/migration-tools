@@ -43,16 +43,16 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
     }
 
     private AtomicInteger id = new AtomicInteger();
-    private Set<Item<T>> items = new TreeSet<Item<T>>();
+    private Set<Entry<T>> entries = new TreeSet<Entry<T>>();
 
     @Override
     public int size() {
-        return items.size();
+        return entries.size();
     }
 
     @Override
     public Iterator<T> iterator() {
-        return new IteratorImpl<T>(items.iterator());
+        return new IteratorImpl<T>(entries.iterator());
     }
 
     @Override
@@ -61,12 +61,12 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
     }
 
     public boolean add(T t, int priority) {
-        return items.add(new SimpleItem<T>(t, id.incrementAndGet(), priority));
+        return entries.add(new SimpleEntry<T>(t, id.incrementAndGet(), priority));
     }
 
     public boolean addAll(PrioritySet<? extends T> list) {
         boolean modified = false;
-        for (Item<? extends T> value : list.items()) {
+        for (Entry<? extends T> value : list.entries()) {
             if (add(value.getValue(), value.getPriority())) {
                 modified = true;
             }
@@ -75,8 +75,8 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
     }
 
     @Override
-    public Collection<Item<T>> items() {
-        return items;
+    public Collection<Entry<T>> entries() {
+        return entries;
     }
 
     @Override
@@ -86,8 +86,8 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
         if (!(o instanceof PrioritySet))
             return false;
 
-        Iterator iterator1 = items().iterator();
-        Iterator iterator2 = ((PrioritySet) o).items().iterator();
+        Iterator iterator1 = entries().iterator();
+        Iterator iterator2 = ((PrioritySet) o).entries().iterator();
 
         while (iterator1.hasNext() && iterator2.hasNext()) {
             Object o1 = iterator1.next();
@@ -109,9 +109,9 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
 
     class IteratorImpl<T> implements Iterator<T> {
 
-        private Iterator<Item<T>> iterator;
+        private Iterator<Entry<T>> iterator;
 
-        public IteratorImpl(Iterator<Item<T>> iterator) {
+        public IteratorImpl(Iterator<Entry<T>> iterator) {
             this.iterator = iterator;
         }
 
@@ -129,13 +129,13 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
     }
 
     @SuppressWarnings("unchecked")
-    class SimpleItem<T> implements Item<T>, Comparable<Item<T>>, Serializable {
+    class SimpleEntry<T> implements Entry<T>, Comparable<Entry<T>>, Serializable {
 
         private final T value;
         private final int id;
         private final int priority;
 
-        public SimpleItem(T value, int id, int priority) {
+        public SimpleEntry(T value, int id, int priority) {
             this.value = value;
             this.id = id;
             this.priority = priority;
@@ -154,14 +154,14 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
         }
 
         @Override
-        public int compareTo(Item<T> item) {
-            if (priority != item.getPriority()) {
-                return item.getPriority() - priority;
+        public int compareTo(Entry<T> entry) {
+            if (priority != entry.getPriority()) {
+                return entry.getPriority() - priority;
             } else {
                 if (value instanceof Comparable) {
-                    return ((Comparable) value).compareTo(item.getValue());
+                    return ((Comparable) value).compareTo(entry.getValue());
                 } else {
-                    return ((SimpleItem)item).getId() - id;
+                    return ((SimpleEntry) entry).getId() - id;
                 }
             }
         }
@@ -171,7 +171,7 @@ public class SimplePrioritySet<T> extends AbstractCollection<T> implements Prior
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            SimpleItem item = (SimpleItem) o;
+            SimpleEntry item = (SimpleEntry) o;
 
             if (id != item.id) return false;
             if (priority != item.priority) return false;

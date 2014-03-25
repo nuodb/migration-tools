@@ -25,40 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup;
+package com.nuodb.migrator.backup.writer;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
+import com.nuodb.migrator.backup.BackupException;
 
 /**
  * @author Sergey Bushik
  */
-public interface BackupManager {
+public class BackupWriterException extends BackupException {
 
-    final String BACKUP = "backup.cat";
+    public BackupWriterException(String message) {
+        super(message);
+    }
 
-    String getDir();
+    public BackupWriterException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    String getBackup();
-
-    InputStream openInput(String name);
-
-    OutputStream openOutput(String name);
-
-    Backup readBackup();
-
-    Backup readBackup(Map context);
-
-    Backup readBackup(InputStream input);
-
-    Backup readBackup(InputStream input, Map context);
-
-    void writeBackup(Backup backup);
-
-    void writeBackup(Backup backup, Map context);
-
-    void writeBackup(Backup backup, OutputStream output);
-
-    void writeBackup(Backup backup, OutputStream output, Map context);
+    public BackupWriterException(Throwable cause) {
+        super(cause);
+    }
 }

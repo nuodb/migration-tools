@@ -612,6 +612,17 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
+    protected Option createThreadsOption() {
+        return newBasicOptionBuilder().
+                withName(THREADS).
+                withAlias(THREADS_SHORT, OptionFormat.SHORT).
+                withDescription(getMessage(THREADS_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(THREADS_ARGUMENT_NAME)).build()
+                ).build();
+    }
+
     protected DriverConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
         DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setDriver((String) optionSet.getValue(SOURCE_DRIVER));
@@ -900,7 +911,6 @@ public class CliRunSupport extends CliSupport {
         }
         return tableTypes.toArray(new String[tableTypes.size()]);
     }
-
     protected Collection<MetaDataType> parseObjectTypes(OptionSet optionSet) {
         Collection<MetaDataType> objectTypes = newArrayList(MetaDataType.TYPES);
         if (optionSet.hasOption(META_DATA)) {
@@ -918,6 +928,11 @@ public class CliRunSupport extends CliSupport {
             }
         }
         return objectTypes;
+    }
+
+    protected Integer parseThreadsOption(OptionSet optionSet, Option option) {
+        String threadsValue = (String) optionSet.getValue(THREADS);
+        return !isEmpty(threadsValue) ? parseInt(threadsValue) : null;
     }
 
     protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {

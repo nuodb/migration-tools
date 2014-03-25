@@ -25,18 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.session;
+package com.nuodb.migrator.backup.loader;
 
-import java.util.Map;
+import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
 /**
  * @author Sergey Bushik
  */
-public interface WorkManager {
+public interface RowSetMapper {
 
-    Map<Work, Throwable> getFailures();
-
-    void failure(Work work, Throwable failure);
-
-    void close() throws Exception;
+    Table map(RowSet rowSet, Database database);
 }

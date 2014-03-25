@@ -25,26 +25,10 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
-
-import com.nuodb.migrator.backup.Chunk;
-import com.nuodb.migrator.jdbc.session.Work;
-import com.nuodb.migrator.jdbc.session.WorkManager;
+package com.nuodb.migrator.backup.loader;
 
 /**
  * @author Sergey Bushik
  */
-public interface DumpQueryManager extends WorkManager {
-
-    void writeStart(DumpQuery dumpQuery, Work work);
-
-    boolean canWrite(DumpQuery dumpQuery, Work work);
-
-    void writeStart(DumpQuery dumpQuery, Work work, Chunk chunk);
-
-    void write(DumpQuery dumpQuery, Work work, Chunk chunk);
-
-    void writeEnd(DumpQuery dumpQuery, Work work, Chunk chunk);
-
-    void writeEnd(DumpQuery dumpQuery, Work work);
+public class BackupLoaderException {
 }

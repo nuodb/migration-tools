@@ -25,45 +25,52 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
+package com.nuodb.migrator.backup;
 
-import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.jdbc.model.Field;
-import com.nuodb.migrator.jdbc.split.QuerySplitter;
-
-import java.util.Collection;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Map;
 
 /**
- * Represents row set source to be dumped returned by a single query
+ * Establishes interface for backup input/output operations.
  *
  * @author Sergey Bushik
  */
-public class DumpQuery {
+public interface BackupOps {
 
-    private QuerySplitter querySplitter;
-    private Collection<? extends Field> columns;
-    private RowSet rowSet;
+    final String DIR = ".";
 
-    public DumpQuery(QuerySplitter querySplitter, RowSet rowSet) {
-        this.querySplitter = querySplitter;
-        this.rowSet = rowSet;
-    }
+    final String FILE = "backup.cat";
 
-    public DumpQuery(QuerySplitter querySplitter, Collection<? extends Field> columns, RowSet rowSet) {
-        this.querySplitter = querySplitter;
-        this.columns = columns;
-        this.rowSet = rowSet;
-    }
+    String getDir();
 
-    public QuerySplitter getQuerySplitter() {
-        return querySplitter;
-    }
+    void setDir(String dir);
 
-    public Collection<? extends Field> getColumns() {
-        return columns;
-    }
+    String getFile();
 
-    public RowSet getRowSet() {
-        return rowSet;
-    }
+    void setFile(String backup);
+
+    String getPath();
+
+    void setPath(String path);
+
+    InputStream openInput(String name);
+
+    OutputStream openOutput(String name);
+
+    Backup read();
+
+    Backup read(Map context);
+
+    Backup read(InputStream input);
+
+    Backup read(InputStream input, Map context);
+
+    void write(Backup backup);
+
+    void write(Backup backup, Map context);
+
+    void write(Backup backup, OutputStream output);
+
+    void write(Backup backup, OutputStream output, Map context);
 }

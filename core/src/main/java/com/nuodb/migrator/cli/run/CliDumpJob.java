@@ -139,17 +139,6 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         return group.build();
     }
 
-    protected Option createThreadsOption() {
-        return newBasicOptionBuilder().
-                withName(THREADS).
-                withAlias(THREADS_SHORT, OptionFormat.SHORT).
-                withDescription(getMessage(THREADS_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(THREADS_ARGUMENT_NAME)).build()
-                ).build();
-    }
-
     protected Option createQueryGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(MAX_VALUE);
 
@@ -213,11 +202,6 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
             querySpecs.add(new QuerySpec(query));
         }
         return querySpecs;
-    }
-
-    protected Integer parseThreadsOption(OptionSet optionSet, Option option) {
-        String threadsValue = (String) optionSet.getValue(THREADS);
-        return !isEmpty(threadsValue) ? parseInt(threadsValue) : null;
     }
 
     protected QueryLimit parseQueryLimitOption(OptionSet optionSet, Option option) {

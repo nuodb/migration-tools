@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.load;
+package com.nuodb.migrator.backup.loader;
 
 import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.QueryRowSet;

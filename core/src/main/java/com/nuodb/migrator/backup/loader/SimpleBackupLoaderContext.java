@@ -25,51 +25,41 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup;
+package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.utils.xml.XmlHandlerRegistry;
-import com.nuodb.migrator.utils.xml.XmlHandlerRegistryReader;
-import com.nuodb.migrator.utils.xml.XmlHandlerStrategy;
-import com.nuodb.migrator.utils.xml.XmlPersister;
-import org.simpleframework.xml.strategy.TreeStrategy;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
+import com.nuodb.migrator.backup.BackupOps;
+import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 
 /**
  * @author Sergey Bushik
  */
-public class XmlBackupManager extends BackupManagerBase implements XmlConstants {
+public class SimpleBackupLoaderContext {
 
-    public XmlBackupManager(String path) {
-        super(path);
+    private BackupOps backupOps;
+    private ValueFormatRegistry valueFormatRegistry;
+    private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
+
+    public BackupOps getBackupOps() {
+        return backupOps;
     }
 
-    public XmlBackupManager(File file) {
-        super(file);
+    public void setBackupOps(BackupOps backupOps) {
+        this.backupOps = backupOps;
     }
 
-    public XmlBackupManager(String dir, String desc) {
-        super(dir, desc);
+    public ValueFormatRegistry getValueFormatRegistry() {
+        return valueFormatRegistry;
     }
 
-    @Override
-    public Backup readBackup(InputStream input, Map context) {
-        return createXmlPersister().read(Backup.class, input, context);
+    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
+        this.valueFormatRegistry = valueFormatRegistry;
     }
 
-    @Override
-    public void writeBackup(Backup backup, OutputStream output, Map context) {
-        createXmlPersister().write(backup, output, context);
+    public RowSetMapper getRowSetMapper() {
+        return rowSetMapper;
     }
 
-    protected XmlPersister createXmlPersister() {
-        XmlHandlerRegistry xmlRegistry = new XmlHandlerRegistry();
-        XmlHandlerRegistryReader registryReader = new XmlHandlerRegistryReader();
-        registryReader.addRegistry(XML_HANDLER_REGISTRY);
-        registryReader.read(xmlRegistry);
-        return new XmlPersister(new XmlHandlerStrategy(xmlRegistry, new TreeStrategy()));
+    public void setRowSetMapper(RowSetMapper rowSetMapper) {
+        this.rowSetMapper = rowSetMapper;
     }
 }

@@ -25,18 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.session;
+package com.nuodb.migrator.backup.writer;
 
-import java.util.Map;
+import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.jdbc.session.Work;
+import com.nuodb.migrator.jdbc.session.WorkManager;
 
 /**
  * @author Sergey Bushik
  */
-public interface WorkManager {
+public interface ExportQueryManager extends WorkManager {
 
-    Map<Work, Throwable> getFailures();
+    boolean canExport(ExportQuery exportQuery, Work work);
 
-    void failure(Work work, Throwable failure);
+    void exportStart(ExportQuery exportQuery, Work work);
 
-    void close() throws Exception;
+    void exportStart(ExportQuery exportQuery, Work work, Chunk chunk);
+
+    void exportRow(ExportQuery exportQuery, Work work, Chunk chunk);
+
+    void exportEnd(ExportQuery exportQuery, Work work, Chunk chunk);
+
+    void exportEnd(ExportQuery exportQuery, Work work);
 }

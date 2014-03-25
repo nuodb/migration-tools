@@ -51,7 +51,8 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
 
     @Override
     protected Option createOption() {
-        GroupBuilder group = newGroupBuilder().withName(getMessage(LOAD_GROUP_NAME)).withRequired(true);
+        GroupBuilder group = newGroupBuilder().
+                withName(getMessage(LOAD_GROUP_NAME)).withRequired(true);
         group.withOption(createTargetGroup());
         group.withOption(createInputGroup());
         group.withOption(createMigrationModeGroup());
@@ -66,7 +67,7 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         jobSpec.setTargetSpec(parseTargetGroup(optionSet, this));
         jobSpec.setInputSpec(parseInputGroup(optionSet, this));
         jobSpec.setMigrationModes(parseMigrationModeGroup(optionSet, this));
-        parseDataMigrationGroup(optionSet, this, jobSpec);
+        parseDataMigrationGroup(optionSet, jobSpec);
         parseSchemaMigrationGroup(jobSpec, optionSet, this);
         setJobSpec(jobSpec);
     }
@@ -81,6 +82,7 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         group.withOption(createCommitGroup());
         group.withOption(createInsertTypeGroup());
         group.withOption(createTimeZoneOption());
+        group.withOption(createThreadsOption());
         return group.build();
     }
 
@@ -108,10 +110,11 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         return group.build();
     }
 
-    protected void parseDataMigrationGroup(OptionSet optionSet, Option option, LoadJobSpec jobSpec) {
+    protected void parseDataMigrationGroup(OptionSet optionSet, LoadJobSpec jobSpec) {
         jobSpec.setCommitStrategy(parseCommitGroup(optionSet, this));
         jobSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
         parseInsertTypeGroup(optionSet, jobSpec);
+        jobSpec.setThreads(parseThreadsOption(optionSet, this));
     }
 
     protected void parseInsertTypeGroup(OptionSet optionSet, LoadJobSpec loadJobSpec) {

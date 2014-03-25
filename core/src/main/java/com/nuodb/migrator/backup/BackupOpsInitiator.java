@@ -25,18 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.session;
+package com.nuodb.migrator.backup;
 
-import java.util.Map;
+import com.nuodb.migrator.context.ServiceInitiatorSupport;
 
 /**
  * @author Sergey Bushik
  */
-public interface WorkManager {
+public class BackupOpsInitiator extends ServiceInitiatorSupport<BackupOps> {
 
-    Map<Work, Throwable> getFailures();
-
-    void failure(Work work, Throwable failure);
-
-    void close() throws Exception;
+    public BackupOpsInitiator() {
+        super(XmlBackupOps.class);
+    }
 }

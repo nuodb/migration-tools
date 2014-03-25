@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.dump;
 
+import com.nuodb.migrator.backup.writer.BackupWriter;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.jdbc.connection.ConnectionProvider;
@@ -90,7 +91,7 @@ public class DumpJobTest {
     private DumpJob dumpJob = new DumpJob(new DumpJobSpec());
     @Spy
     @InjectMocks
-    private DumpWriter dumpWriter = new DumpWriter();
+    private BackupWriter backupWriter = new BackupWriter();
 
     private JobExecutor jobExecutor;
     private Map<Object, Object> jobContext;
@@ -155,7 +156,7 @@ public class DumpJobTest {
         column2.setTypeCode(Types.LONGVARCHAR);
 
         willReturn(database).given(dumpJob).inspect();
-        willReturn(dumpWriter).given(dumpJob).getDumpWriter();
+        willReturn(backupWriter).given(dumpJob).getBackupWriter();
 
         jobExecutor.execute(jobContext);
 

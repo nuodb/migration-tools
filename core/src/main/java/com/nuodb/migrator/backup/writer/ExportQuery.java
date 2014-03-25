@@ -25,35 +25,46 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
+package com.nuodb.migrator.backup.writer;
 
 import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.split.QuerySplitter;
 
 import java.util.Collection;
 
 /**
+ * Represents row set source to be dumped
+ *
  * @author Sergey Bushik
  */
-public class DumpTable extends DumpQuery {
+public class ExportQuery {
 
-    private Table table;
-    private String filter;
+    private QuerySplitter querySplitter;
+    private Collection<? extends Field> columns;
+    private RowSet rowSet;
 
-    public DumpTable(Table table, Collection<? extends Column> columns, String filter,
-                     QuerySplitter querySplitter, RowSet rowSet) {
-        super(querySplitter, columns, rowSet);
-        this.table = table;
-        this.filter = filter;
+    public ExportQuery(QuerySplitter querySplitter, RowSet rowSet) {
+        this.querySplitter = querySplitter;
+        this.rowSet = rowSet;
     }
 
-    public Table getTable() {
-        return table;
+    public ExportQuery(QuerySplitter querySplitter,
+                       Collection<? extends Field> columns, RowSet rowSet) {
+        this.querySplitter = querySplitter;
+        this.columns = columns;
+        this.rowSet = rowSet;
     }
 
-    public String getFilter() {
-        return filter;
+    public QuerySplitter getQuerySplitter() {
+        return querySplitter;
+    }
+
+    public Collection<? extends Field> getColumns() {
+        return columns;
+    }
+
+    public RowSet getRowSet() {
+        return rowSet;
     }
 }

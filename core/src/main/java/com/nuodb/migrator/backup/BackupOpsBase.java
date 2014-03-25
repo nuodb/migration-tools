@@ -28,6 +28,7 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.match.Regex;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -46,44 +47,14 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-public abstract class BackupManagerBase implements BackupManager {
+public abstract class BackupOpsBase implements BackupOps {
 
     private static final Regex BACKUP_REGEX = INSTANCE.compile("*.cat");
 
     private final Logger logger = getLogger(getClass());
 
-    private final String dir;
-    private final String backup;
-
-    /**
-     * Constructs desc manager from a full path to desc file.
-     * <pre>
-     * /tmp/ -> directory is /tmp, desc is /tmp/desc.cat
-     * /tmp/desc.cat -> directory is /tmp, desc is /tmp/desc.cat
-     * </pre>
-     *
-     * @param path file path to desc file
-     */
-    public BackupManagerBase(String path) {
-        this(getFile(path == null ? EMPTY : path));
-    }
-
-    public BackupManagerBase(File file) {
-        this(isBackupFile(file) ? file.getParent() : file.getAbsolutePath(),
-                isBackupFile(file) ? file.getName() : BACKUP);
-    }
-
-    public BackupManagerBase(String dir, String backup) {
-        this.dir = dir == null ? "." : dir;
-        this.backup = backup;
-        if (logger.isTraceEnabled()) {
-            logger.trace(format("Using %s directory for backup input & output", dir));
-        }
-    }
-
-    private static boolean isBackupFile(File file) {
-        return (file.exists() && file.isFile()) || BACKUP_REGEX.test(file.getName());
-    }
+    private String dir = DIR;
+    private String file = FILE;
 
     @Override
     public String getDir() {
@@ -91,14 +62,43 @@ public abstract class BackupManagerBase implements BackupManager {
     }
 
     @Override
-    public String getBackup() {
-        return backup;
+    public void setDir(String dir) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Using %s directory for backup input & output", dir));
+        }
+        this.dir = dir == null ? DIR : dir;
+    }
+
+    @Override
+    public String getFile() {
+        return file;
+    }
+
+    @Override
+    public void setFile(String file) {
+        this.file = file;
+    }
+
+    @Override
+    public String getPath() {
+        return FileUtils.getFile(dir, file).getPath();
+    }
+
+    @Override
+    public void setPath(String path) {
+        File file = FileUtils.getFile(path == null ? EMPTY : path);
+        setDir(isBackup(file) ? file.getParent() : file.getAbsolutePath());
+        setFile(isBackup(file) ? file.getName() : FILE);
+    }
+
+    private static boolean isBackup(File file) {
+        return (file.exists() && file.isFile()) || BACKUP_REGEX.test(file.getName());
     }
 
     @Override
     public InputStream openInput(String name) {
         try {
-            File file = getFile(getDir(), name);
+            File file = FileUtils.getFile(getDir(), name);
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Opening file for reading %s", file.getPath()));
             }
@@ -111,7 +111,7 @@ public abstract class BackupManagerBase implements BackupManager {
     @Override
     public OutputStream openOutput(String name) {
         try {
-            File file = getFile(getDir(), name);
+            File file = FileUtils.getFile(getDir(), name);
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Opening file for writing %s", file.getPath()));
             }
@@ -122,41 +122,41 @@ public abstract class BackupManagerBase implements BackupManager {
     }
 
     @Override
-    public Backup readBackup() {
-        return readBackup((Map) null);
+    public Backup read() {
+        return read((Map) null);
     }
 
     @Override
-    public Backup readBackup(Map context) {
+    public Backup read(Map context) {
         InputStream input = openBackupInput();
         try {
-            return readBackup(input, context);
+            return read(input, context);
         } finally {
             closeQuietly(input);
         }
     }
 
     protected InputStream openBackupInput() {
-        return openInput(getBackup());
+        return openInput(getFile());
     }
 
     @Override
-    public Backup readBackup(InputStream input) {
-        return readBackup(input, null);
+    public Backup read(InputStream input) {
+        return read(input, null);
     }
 
-    public abstract Backup readBackup(InputStream input, Map context);
+    public abstract Backup read(InputStream input, Map context);
 
     @Override
-    public void writeBackup(Backup backup) {
-        writeBackup(backup, (Map) null);
+    public void write(Backup backup) {
+        write(backup, (Map) null);
     }
 
     @Override
-    public void writeBackup(Backup backup, Map context) {
+    public void write(Backup backup, Map context) {
         OutputStream output = openBackupOutput();
         try {
-            writeBackup(backup, output, context);
+            write(backup, output, context);
         } finally {
             closeQuietly(output);
         }
@@ -164,23 +164,43 @@ public abstract class BackupManagerBase implements BackupManager {
 
     protected OutputStream openBackupOutput() {
         try {
-            forceMkdir(getFile(getDir()));
+            forceMkdir(FileUtils.getFile(getDir()));
         } catch (IOException exception) {
             throw new BackupException("Can't open backup directory", exception);
         }
         try {
-            touch(getFile(getDir(), getBackup()));
+            touch(FileUtils.getFile(getDir(), getFile()));
         } catch (IOException exception) {
             throw new BackupException("Can't open backup file", exception);
         }
-        return openOutput(getBackup());
+        return openOutput(getFile());
     }
 
     @Override
-    public void writeBackup(Backup backup, OutputStream output) {
-        writeBackup(backup, output, null);
+    public void write(Backup backup, OutputStream output) {
+        write(backup, output, null);
     }
 
     @Override
-    public abstract void writeBackup(Backup backup, OutputStream output, Map context);
+    public abstract void write(Backup backup, OutputStream output, Map context);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BackupOpsBase that = (BackupOpsBase) o;
+
+        if (dir != null ? !dir.equals(that.dir) : that.dir != null) return false;
+        if (file != null ? !file.equals(that.file) : that.file != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = dir != null ? dir.hashCode() : 0;
+        result = 31 * result + (file != null ? file.hashCode() : 0);
+        return result;
+    }
 }

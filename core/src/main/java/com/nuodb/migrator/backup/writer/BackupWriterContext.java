@@ -25,11 +25,10 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
+package com.nuodb.migrator.backup.writer;
 
-import com.nuodb.migrator.backup.BackupManager;
+import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.FormatFactory;
-import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.session.Session;
@@ -39,20 +38,18 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
-import static java.lang.Runtime.getRuntime;
-
 /**
  * @author Sergey Bushik
  */
-public interface DumpQueryContext {
+public interface BackupWriterContext {
 
-    final String FORMAT = CsvAttributes.FORMAT;
+    BackupOps getBackupOps();
 
-    final int THREADS = getRuntime().availableProcessors();
+    void setBackupOps(BackupOps backupOps);
 
-    int getThreads();
+    Map getBackupOpsContext();
 
-    void setThreads(int threads);
+    void setBackupOpsContext(Map backupOpsContext);
 
     Database getDatabase();
 
@@ -62,21 +59,9 @@ public interface DumpQueryContext {
 
     void setExecutor(Executor executor);
 
-    TimeZone getTimeZone();
+    ExportQueryManager getExportQueryManager();
 
-    void setTimeZone(TimeZone timeZone);
-
-    Session getSession();
-
-    void setSession(Session session);
-
-    SessionFactory getSessionFactory();
-
-    void setSessionFactory(SessionFactory sessionFactory);
-
-    BackupManager getBackupManager();
-
-    void setBackupManager(BackupManager backupManager);
+    void setExportQueryManager(ExportQueryManager exportQueryManager);
 
     String getFormat();
 
@@ -90,7 +75,25 @@ public interface DumpQueryContext {
 
     void setFormatFactory(FormatFactory formatFactory);
 
+    Session getSourceSession();
+
+    void setSourceSession(Session sourceSession);
+
+    SessionFactory getSourceSessionFactory();
+
+    void setSourceSessionFactory(SessionFactory sourceSessionFactory);
+
+    TimeZone getTimeZone();
+
+    void setTimeZone(TimeZone timeZone);
+
+    int getThreads();
+
+    void setThreads(int threads);
+
     ValueFormatRegistry getValueFormatRegistry();
 
     void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
+
+    void close(boolean awaitTermination) throws Exception;
 }

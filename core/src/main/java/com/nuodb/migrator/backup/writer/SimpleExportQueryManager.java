@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.dump;
+package com.nuodb.migrator.backup.writer;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
@@ -33,7 +33,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Ints;
 import com.nuodb.migrator.backup.Chunk;
-import com.nuodb.migrator.backup.Column;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.jdbc.session.SimpleWorkManager;
@@ -54,17 +53,16 @@ import static com.nuodb.migrator.backup.format.value.ValueType.toAlias;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "SynchronizationOnLocalVariableOrMethodParameter"})
-public class SimpleDumpQueryManager extends SimpleWorkManager implements DumpQueryManager {
+public class SimpleExportQueryManager extends SimpleWorkManager implements ExportQueryManager {
 
-    private final Map<DumpQuery, Boolean> dumpQueryInitMap = newConcurrentMap();
-    private Multimap<DumpQuery, DumpQueryWork> dumpQueryWorkMap = newSetMultimap(
-            Maps.<DumpQuery, Collection<DumpQueryWork>>newHashMap(), new Supplier<Set<DumpQueryWork>>() {
+    private final Map<ExportQuery, Boolean> exportQueryStartMap = newConcurrentMap();
+    private final Multimap<ExportQuery, ExportQueryWork> exportQueryWorkMap = newSetMultimap(
+            Maps.<ExportQuery, Collection<ExportQueryWork>>newHashMap(), new Supplier<Set<ExportQueryWork>>() {
         @Override
-        public Set<DumpQueryWork> get() {
-            return newTreeSet(new Comparator<DumpQueryWork>() {
+        public Set<ExportQueryWork> get() {
+            return newTreeSet(new Comparator<ExportQueryWork>() {
                 @Override
-                public int compare(DumpQueryWork w1, DumpQueryWork w2) {
+                public int compare(ExportQueryWork w1, ExportQueryWork w2) {
                     return Ints.compare(w1.getQuerySplit().getSplitIndex(), w2.getQuerySplit().getSplitIndex());
                 }
             });
@@ -72,52 +70,53 @@ public class SimpleDumpQueryManager extends SimpleWorkManager implements DumpQue
     });
 
     @Override
-    public void writeStart(DumpQuery dumpQuery, Work work) {
-        DumpQueryWork dumpQueryWork = (DumpQueryWork) work;
-        Boolean init = dumpQueryInitMap.get(dumpQuery);
-        if (init == null || !init) {
-            Collection<Column> columns = newArrayList();
-            for (ValueHandle valueHandle : dumpQueryWork.getValueHandleList()) {
-                columns.add(new Column(valueHandle.getName(), toAlias(valueHandle.getValueType())));
+    public void exportStart(ExportQuery exportQuery, Work work) {
+        ExportQueryWork exportQueryWork = (ExportQueryWork) work;
+        Boolean start = exportQueryStartMap.get(exportQuery);
+        if (start == null || !start) {
+            Collection<com.nuodb.migrator.backup.Column> columns = newArrayList();
+            for (ValueHandle valueHandle : exportQueryWork.getValueHandleList()) {
+                columns.add(new com.nuodb.migrator.backup.Column(
+                        valueHandle.getName(), toAlias(valueHandle.getValueType())));
             }
-            dumpQuery.getRowSet().setColumns(columns);
-            dumpQueryInitMap.put(dumpQueryWork.getDumpQuery(), true);
+            exportQuery.getRowSet().setColumns(columns);
+            exportQueryStartMap.put(exportQueryWork.getExportQuery(), true);
         }
     }
 
     @Override
-    public boolean canWrite(DumpQuery dumpQuery, Work work) {
+    public boolean canExport(ExportQuery exportQuery, Work work) {
         return getFailures().isEmpty();
     }
 
     @Override
-    public void writeStart(DumpQuery dumpQuery, Work work, Chunk chunk) {
+    public void exportStart(ExportQuery exportQuery, Work work, Chunk chunk) {
     }
 
     @Override
-    public void write(DumpQuery dumpQuery, Work work, Chunk chunk) {
+    public void exportRow(ExportQuery exportQuery, Work work, Chunk chunk) {
         chunk.incrementRowCount();
     }
 
     @Override
-    public void writeEnd(DumpQuery dumpQuery, Work work, Chunk chunk) {
-        RowSet rowSet = dumpQuery.getRowSet();
+    public void exportEnd(ExportQuery exportQuery, Work work, Chunk chunk) {
+        RowSet rowSet = exportQuery.getRowSet();
         synchronized (rowSet) {
             rowSet.setRowCount(rowSet.getRowCount() + chunk.getRowCount());
         }
     }
 
     @Override
-    public void writeEnd(DumpQuery dumpQuery, Work work) {
-        DumpQueryWork dumpQueryWork = (DumpQueryWork) work;
-        RowSet rowSet = dumpQuery.getRowSet();
+    public void exportEnd(ExportQuery exportQuery, Work work) {
+        ExportQueryWork exportQueryWork = (ExportQueryWork) work;
+        RowSet rowSet = exportQuery.getRowSet();
         synchronized (rowSet) {
-            dumpQueryWorkMap.put(dumpQuery, dumpQueryWork);
+            exportQueryWorkMap.put(exportQuery, exportQueryWork);
             final Collection<Chunk> chunks = newArrayList();
-            all(dumpQueryWorkMap.get(dumpQuery), new Predicate<DumpQueryWork>() {
+            all(exportQueryWorkMap.get(exportQuery), new Predicate<ExportQueryWork>() {
                 @Override
-                public boolean apply(DumpQueryWork dumpQueryWork) {
-                    chunks.addAll(dumpQueryWork.getChunks());
+                public boolean apply(ExportQueryWork exportQueryWork) {
+                    chunks.addAll(exportQueryWork.getChunks());
                     return true;
                 }
             });

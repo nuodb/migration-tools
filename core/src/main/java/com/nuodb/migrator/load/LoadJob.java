@@ -29,17 +29,12 @@ package com.nuodb.migrator.load;
 
 import com.google.common.base.Function;
 import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.backup.Backup;
-import com.nuodb.migrator.backup.BackupManager;
-import com.nuodb.migrator.backup.Chunk;
-import com.nuodb.migrator.backup.Column;
-import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.backup.XmlBackupManager;
-import com.nuodb.migrator.backup.format.FormatFactory;
+import com.nuodb.migrator.backup.*;
+import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.InputFormat;
-import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.backup.format.value.ValueHandleListBuilder;
+import com.nuodb.migrator.backup.loader.BackupLoader;
 import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.metadata.Database;
@@ -75,6 +70,7 @@ import java.util.TimeZone;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
+import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
@@ -91,10 +87,7 @@ import static java.lang.String.format;
 @SuppressWarnings("ConstantConditions")
 public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
-    private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
-
-    private BackupManager backupManager;
-    private ValueFormatRegistry valueFormatRegistry;
+    private BackupLoader backupLoader;
 
     public LoadJob() {
     }
@@ -107,28 +100,26 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
     protected void init() throws Exception {
         super.init();
 
-        setBackupManager(createBackupManager());
+        SessionFactory targetSessionFactory = createTargetSessionFactory();
+        Session targetSession = targetSessionFactory.openSession();
+        setTargetSession(targetSession);
 
-        Session targetSession;
-        setTargetSession(targetSession = createTargetSessionFactory().openSession());
-
-        Collection<MigrationMode> migrationModes = getMigrationModes();
-        FormatFactory formatFactory = null;
-        ValueFormatRegistry valueFormatRegistry = null;
-        if (contains(migrationModes, DATA)) {
-            formatFactory = createFormatFactory();
-            valueFormatRegistry = createValueFormatRegistryResolver().resolve(targetSession.getConnection());
-        }
-        setFormatFactory(formatFactory);
-        setValueFormatRegistry(valueFormatRegistry);
+        BackupLoader backupLoader = new BackupLoader();
+        backupLoader.setBackupOps(createBackupOps());
+        backupLoader.setTargetSession(targetSession);
+        backupLoader.setTargetSessionFactory(targetSessionFactory);
+        backupLoader.setFormatFactory(createFormatFactory());
+        backupLoader.setValueFormatRegistry(
+                createValueFormatRegistryResolver().
+                        resolve(targetSession.getConnection()));
+        setBackupLoader(backupLoader);
     }
 
     @Override
     public void execute() throws Exception {
-        Backup backup = getBackupManager().readBackup();
-        Database database = backup.getDatabase();
-        setSourceSpec(database.getConnectionSpec());
-        setSourceSession(createSourceSessionFactory(database).openSession());
+
+
+
 
         Collection<MetaDataType> indexes = newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX);
         Collection<MigrationMode> migrationModes = getMigrationModes();
@@ -177,13 +168,13 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
         }
     }
 
-    protected BackupManager createBackupManager() {
-        return new XmlBackupManager(getPath());
+    protected BackupOps createBackupOps() {
+        BackupOps backupOps = createService(getBackupOps(), BackupOps.class);
+        backupOps.setPath(getPath());
+        return backupOps;
     }
 
-    protected SessionFactory createSourceSessionFactory(Database database) {
-        return newSessionFactory(database.getDialect(), database.getConnectionSpec());
-    }
+
 
     protected SessionFactory createTargetSessionFactory() {
         SessionFactory sessionFactory = newSessionFactory(createConnectionProviderFactory().
@@ -245,7 +236,7 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
         for (Chunk chunk : rowSet.getChunks()) {
             inputFormat.setRowSet(rowSet);
             inputFormat.setValueHandleList(valueHandleList);
-            inputFormat.setInputStream(getBackupManager().openInput(chunk.getName()));
+            inputFormat.setInputStream(getBackupOps().openInput(chunk.getName()));
             inputFormat.init();
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Loading %d rows from %s chunk to %s table",
@@ -315,28 +306,16 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
         return insertType;
     }
 
-    public BackupManager getBackupManager() {
-        return backupManager;
+    public BackupLoader getBackupLoader() {
+        return backupLoader;
     }
 
-    public void setBackupManager(BackupManager backupManager) {
-        this.backupManager = backupManager;
+    public void setBackupLoader(BackupLoader backupLoader) {
+        this.backupLoader = backupLoader;
     }
 
-    public ValueFormatRegistry getValueFormatRegistry() {
-        return valueFormatRegistry;
-    }
-
-    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
-        this.valueFormatRegistry = valueFormatRegistry;
-    }
-
-    public RowSetMapper getRowSetMapper() {
-        return rowSetMapper;
-    }
-
-    public void setRowSetMapper(RowSetMapper rowSetMapper) {
-        this.rowSetMapper = rowSetMapper;
+    protected BackupOps getBackupOps() {
+        return getJobSpec().getBackupOps();
     }
 
     protected Map<String, Object> getFormatAttributes() {

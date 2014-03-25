@@ -89,7 +89,7 @@ public abstract class OutputFormatBase extends FormatBase implements OutputForma
         } else if (hasOutputStream()) {
             init(openOutputStream());
         } else {
-            throw new OutputFormatException("Writer or stream is required to write backup");
+            throw new OutputFormatException("Writer or stream is required to export backup");
         }
         initValueTypes();
     }

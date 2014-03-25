@@ -25,18 +25,35 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.session;
+package com.nuodb.migrator.backup.writer;
 
-import java.util.Map;
+import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.split.QuerySplitter;
+
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public interface WorkManager {
+public class ExportTable extends ExportQuery {
 
-    Map<Work, Throwable> getFailures();
+    private Table table;
+    private String filter;
 
-    void failure(Work work, Throwable failure);
+    public ExportTable(Table table, Collection<? extends Column> columns, String filter,
+                       QuerySplitter querySplitter, RowSet rowSet) {
+        super(querySplitter, columns, rowSet);
+        this.table = table;
+        this.filter = filter;
+    }
 
-    void close() throws Exception;
+    public Table getTable() {
+        return table;
+    }
+
+    public String getFilter() {
+        return filter;
+    }
 }

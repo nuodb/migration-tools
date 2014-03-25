@@ -46,7 +46,6 @@ import com.nuodb.migrator.utils.PrioritySet;
 
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Iterator;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
@@ -106,8 +105,8 @@ public abstract class ScriptGeneratorJobBase<S extends ScriptGeneratorJobSpecBas
         }
         dialect.setIdentifierQuoting(getIdentifierQuoting());
         dialect.setIdentifierNormalizer(getIdentifierNormalizer());
-        for (PrioritySet.Item<NamingStrategy> item : getNamingStrategies().items()) {
-            scriptGeneratorManager.addNamingStrategy(item.getValue(), item.getPriority());
+        for (PrioritySet.Entry<NamingStrategy> entry : getNamingStrategies().entries()) {
+            scriptGeneratorManager.addNamingStrategy(entry.getValue(), entry.getPriority());
         }
         scriptGeneratorManager.setTargetDialect(dialect);
         return scriptGeneratorManager;
@@ -167,16 +166,8 @@ public abstract class ScriptGeneratorJobBase<S extends ScriptGeneratorJobSpecBas
         return getJobSpec().getIdentifierNormalizer();
     }
 
-    protected MetaDataSpec getMetaDataSpec() {
-        return getJobSpec().getMetaDataSpec();
-    }
-
     protected Collection<MetaDataType> getObjectTypes() {
         return getJobSpec().getObjectTypes();
-    }
-
-    protected Collection<TableSpec> getTableSpecs() {
-        return getJobSpec().getTableSpecs();
     }
 
     protected String[] getTableTypes() {
