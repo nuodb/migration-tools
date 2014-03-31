@@ -40,18 +40,26 @@ import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.jdbc.type.JdbcTypeName;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
-import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.JdbcTypeSpec;
+import com.nuodb.migrator.spec.MetaDataSpec;
+import com.nuodb.migrator.spec.ScriptGeneratorJobSpecBase;
+import com.nuodb.migrator.spec.TableSpec;
 import com.nuodb.migrator.utils.PrioritySet;
 
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Iterator;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeNames.createTypeNameTemplate;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
+import static com.nuodb.migrator.utils.Priority.HIGH;
 
 /**
  * @author Sergey Bushik
@@ -98,11 +106,11 @@ public abstract class ScriptGeneratorJobBase<S extends ScriptGeneratorJobSpecBas
         }
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         for (JdbcTypeSpec jdbcTypeSpec : getJdbcTypeSpecs()) {
-            jdbcTypeNameMap.addJdbcTypeName(
-                    jdbcTypeSpec.getTypeCode(), newOptions(
-                    jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()),
-                    jdbcTypeSpec.getTypeName()
-            );
+            JdbcTypeName jdbcTypeName = createTypeNameTemplate(new JdbcType(
+                    new JdbcTypeDesc(jdbcTypeSpec.getTypeCode()),
+                    newOptions(jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale())),
+                    jdbcTypeSpec.getTypeName());
+            jdbcTypeNameMap.addJdbcTypeName(jdbcTypeName, HIGH);
         }
         dialect.setIdentifierQuoting(getIdentifierQuoting());
         dialect.setIdentifierNormalizer(getIdentifierNormalizer());

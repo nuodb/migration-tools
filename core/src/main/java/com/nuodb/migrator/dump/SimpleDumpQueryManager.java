@@ -31,6 +31,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.primitives.Ints;
 import com.nuodb.migrator.backup.Chunk;
 import com.nuodb.migrator.backup.Column;
@@ -47,7 +48,7 @@ import java.util.Set;
 import static com.google.common.collect.Iterables.all;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static com.google.common.collect.Multimaps.newSetMultimap;
+import static com.google.common.collect.Multimaps.synchronizedMultimap;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.backup.format.value.ValueType.toAlias;
 
@@ -57,31 +58,35 @@ import static com.nuodb.migrator.backup.format.value.ValueType.toAlias;
 @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "SynchronizationOnLocalVariableOrMethodParameter"})
 public class SimpleDumpQueryManager extends SimpleWorkManager implements DumpQueryManager {
 
-    private final Map<DumpQuery, Boolean> dumpQueryInitMap = newConcurrentMap();
-    private Multimap<DumpQuery, DumpQueryWork> dumpQueryWorkMap = newSetMultimap(
-            Maps.<DumpQuery, Collection<DumpQueryWork>>newHashMap(), new Supplier<Set<DumpQueryWork>>() {
-        @Override
-        public Set<DumpQueryWork> get() {
-            return newTreeSet(new Comparator<DumpQueryWork>() {
+    private final Map<DumpQuery, Boolean> dumpQueryStartMap = newConcurrentMap();
+
+    private final Multimap<DumpQuery, DumpQueryWork> dumpQueryWorkMap = synchronizedMultimap(
+            Multimaps.<DumpQuery, DumpQueryWork>newMultimap(
+                    Maps.<DumpQuery, Collection<DumpQueryWork>>newHashMap(), new Supplier<Set<DumpQueryWork>>() {
                 @Override
-                public int compare(DumpQueryWork w1, DumpQueryWork w2) {
-                    return Ints.compare(w1.getQuerySplit().getSplitIndex(), w2.getQuerySplit().getSplitIndex());
+                public Set<DumpQueryWork> get() {
+                    return newTreeSet(new Comparator<DumpQueryWork>() {
+                        @Override
+                        public int compare(DumpQueryWork w1, DumpQueryWork w2) {
+                            return Ints.compare(w1.getQuerySplit().getSplitIndex(),
+                                    w2.getQuerySplit().getSplitIndex());
+                        }
+                    });
                 }
-            });
-        }
-    });
+            }));
 
     @Override
-    public void writeStart(DumpQuery dumpQuery, Work work) {
+    public synchronized void writeStart(DumpQuery dumpQuery, Work work) {
         DumpQueryWork dumpQueryWork = (DumpQueryWork) work;
-        Boolean init = dumpQueryInitMap.get(dumpQuery);
-        if (init == null || !init) {
+        Boolean start = dumpQueryStartMap.get(dumpQuery);
+        if (start == null || !start) {
+            RowSet rowSet = dumpQuery.getRowSet();
             Collection<Column> columns = newArrayList();
             for (ValueHandle valueHandle : dumpQueryWork.getValueHandleList()) {
                 columns.add(new Column(valueHandle.getName(), toAlias(valueHandle.getValueType())));
             }
-            dumpQuery.getRowSet().setColumns(columns);
-            dumpQueryInitMap.put(dumpQueryWork.getDumpQuery(), true);
+            rowSet.setColumns(columns);
+            dumpQueryStartMap.put(dumpQueryWork.getDumpQuery(), true);
         }
     }
 
@@ -100,28 +105,24 @@ public class SimpleDumpQueryManager extends SimpleWorkManager implements DumpQue
     }
 
     @Override
-    public void writeEnd(DumpQuery dumpQuery, Work work, Chunk chunk) {
+    public synchronized void writeEnd(DumpQuery dumpQuery, Work work, Chunk chunk) {
         RowSet rowSet = dumpQuery.getRowSet();
-        synchronized (rowSet) {
-            rowSet.setRowCount(rowSet.getRowCount() + chunk.getRowCount());
-        }
+        rowSet.setRowCount(rowSet.getRowCount() + chunk.getRowCount());
     }
 
     @Override
-    public void writeEnd(DumpQuery dumpQuery, Work work) {
+    public synchronized void writeEnd(DumpQuery dumpQuery, Work work) {
         DumpQueryWork dumpQueryWork = (DumpQueryWork) work;
         RowSet rowSet = dumpQuery.getRowSet();
-        synchronized (rowSet) {
-            dumpQueryWorkMap.put(dumpQuery, dumpQueryWork);
-            final Collection<Chunk> chunks = newArrayList();
-            all(dumpQueryWorkMap.get(dumpQuery), new Predicate<DumpQueryWork>() {
-                @Override
-                public boolean apply(DumpQueryWork dumpQueryWork) {
-                    chunks.addAll(dumpQueryWork.getChunks());
-                    return true;
-                }
-            });
-            rowSet.setChunks(chunks);
-        }
+        dumpQueryWorkMap.put(dumpQuery, dumpQueryWork);
+        final Collection<Chunk> chunks = newArrayList();
+        all(dumpQueryWorkMap.get(dumpQuery), new Predicate<DumpQueryWork>() {
+            @Override
+            public boolean apply(DumpQueryWork dumpQueryWork) {
+                chunks.addAll(dumpQueryWork.getChunks());
+                return true;
+            }
+        });
+        rowSet.setChunks(chunks);
     }
 }

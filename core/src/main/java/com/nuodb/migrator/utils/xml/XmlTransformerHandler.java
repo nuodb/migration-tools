@@ -102,7 +102,7 @@ public class XmlTransformerHandler implements XmlReadWriteHandler {
 
     protected boolean canConvert(Class type) {
         try {
-            return transformer.valid(type);
+            return type != null && transformer.valid(type);
         } catch (Exception exception) {
             throw new XmlPersisterException(exception);
         }
