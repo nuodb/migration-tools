@@ -27,38 +27,162 @@
  */
 package com.nuodb.migrator.backup.loader;
 
+import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
+import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
+import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.session.SessionFactory;
+import com.nuodb.migrator.spec.ConnectionSpec;
+
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleBackupLoaderContext {
+public class SimpleBackupLoaderContext implements BackupLoaderContext {
 
+    private Backup backup;
     private BackupOps backupOps;
+    private Map backupOpsContext;
+    private FormatFactory formatFactory;
+    private ConnectionSpec sourceSpec;
+    private Session sourceSession;
+    private SessionFactory sourceSessionFactory;
+    private ConnectionSpec targetSpec;
+    private Session targetSession;
+    private SessionFactory targetSessionFactory;
+    private ScriptGeneratorManager scriptGeneratorManager;
     private ValueFormatRegistry valueFormatRegistry;
     private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
 
+    @Override
+    public Backup getBackup() {
+        return backup;
+    }
+
+    @Override
+    public void setBackup(Backup backup) {
+        this.backup = backup;
+    }
+
+    @Override
     public BackupOps getBackupOps() {
         return backupOps;
     }
 
+    @Override
     public void setBackupOps(BackupOps backupOps) {
         this.backupOps = backupOps;
     }
 
+    @Override
+    public Map getBackupOpsContext() {
+        return backupOpsContext;
+    }
+
+    @Override
+    public void setBackupOpsContext(Map backupOpsContext) {
+        this.backupOpsContext = backupOpsContext;
+    }
+
+    @Override
+    public FormatFactory getFormatFactory() {
+        return formatFactory;
+    }
+
+    @Override
+    public void setFormatFactory(FormatFactory formatFactory) {
+        this.formatFactory = formatFactory;
+    }
+
+    @Override
+    public ConnectionSpec getSourceSpec() {
+        return sourceSpec;
+    }
+
+    @Override
+    public void setSourceSpec(ConnectionSpec sourceSpec) {
+        this.sourceSpec = sourceSpec;
+    }
+
+    @Override
+    public Session getSourceSession() {
+        return sourceSession;
+    }
+
+    @Override
+    public void setSourceSession(Session sourceSession) {
+        this.sourceSession = sourceSession;
+    }
+
+    @Override
+    public SessionFactory getSourceSessionFactory() {
+        return sourceSessionFactory;
+    }
+
+    @Override
+    public void setSourceSessionFactory(SessionFactory sourceSessionFactory) {
+        this.sourceSessionFactory = sourceSessionFactory;
+    }
+
+    @Override
+    public ConnectionSpec getTargetSpec() {
+        return targetSpec;
+    }
+
+    @Override
+    public void setTargetSpec(ConnectionSpec targetSpec) {
+        this.targetSpec = targetSpec;
+    }
+
+    @Override
+    public Session getTargetSession() {
+        return targetSession;
+    }
+
+    @Override
+    public void setTargetSession(Session targetSession) {
+        this.targetSession = targetSession;
+    }
+
+    @Override
+    public SessionFactory getTargetSessionFactory() {
+        return targetSessionFactory;
+    }
+
+    @Override
+    public void setTargetSessionFactory(SessionFactory targetSessionFactory) {
+        this.targetSessionFactory = targetSessionFactory;
+    }
+
+    @Override
+    public ScriptGeneratorManager getScriptGeneratorManager() {
+        return scriptGeneratorManager;
+    }
+
+    @Override
+    public void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager) {
+        this.scriptGeneratorManager = scriptGeneratorManager;
+    }
+
+    @Override
     public ValueFormatRegistry getValueFormatRegistry() {
         return valueFormatRegistry;
     }
 
+    @Override
     public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
         this.valueFormatRegistry = valueFormatRegistry;
     }
 
+    @Override
     public RowSetMapper getRowSetMapper() {
         return rowSetMapper;
     }
 
+    @Override
     public void setRowSetMapper(RowSetMapper rowSetMapper) {
         this.rowSetMapper = rowSetMapper;
     }

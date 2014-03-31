@@ -117,45 +117,41 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
     @Override
     public void execute() throws Exception {
-
-
-
-
-        Collection<MetaDataType> indexes = newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX);
-        Collection<MigrationMode> migrationModes = getMigrationModes();
-        // import scripts excluding indexes
-        if (contains(migrationModes, SCHEMA)) {
-            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
-            Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
-            objectTypes.removeAll(indexes);
-            scriptGeneratorManager.setObjectTypes(objectTypes);
-            exportScripts(scriptGeneratorManager.getScripts(database));
-        }
-        // import data
-        if (contains(migrationModes, DATA)) {
-            Connection connection = getTargetSession().getConnection();
-            Database target = inspect();
-            try {
-                for (RowSet rowSet : backup.getRowSets()) {
-                    load(rowSet, target);
-                }
-                connection.commit();
-            } catch (MigratorException exception) {
-                connection.rollback();
-                throw exception;
-            } catch (Exception exception) {
-                connection.rollback();
-                throw new LoadException(exception);
-            }
-        }
-        // import remaining scripts for indexes
-        if (contains(migrationModes, SCHEMA)) {
-            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
-            Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
-            objectTypes.retainAll(indexes);
-            scriptGeneratorManager.setObjectTypes(objectTypes);
-            exportScripts(scriptGeneratorManager.getScripts(database));
-        }
+//        Collection<MetaDataType> indexes = newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX);
+//        Collection<MigrationMode> migrationModes = getMigrationModes();
+//        // import scripts excluding indexes
+//        if (contains(migrationModes, SCHEMA)) {
+//            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
+//            Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
+//            objectTypes.removeAll(indexes);
+//            scriptGeneratorManager.setObjectTypes(objectTypes);
+//            exportScripts(scriptGeneratorManager.getScripts(database));
+//        }
+//        // import data
+//        if (contains(migrationModes, DATA)) {
+//            Connection connection = getTargetSession().getConnection();
+//            Database target = inspect();
+//            try {
+//                for (RowSet rowSet : backup.getRowSets()) {
+//                    load(rowSet, target);
+//                }
+//                connection.commit();
+//            } catch (MigratorException exception) {
+//                connection.rollback();
+//                throw exception;
+//            } catch (Exception exception) {
+//                connection.rollback();
+//                throw new LoadException(exception);
+//            }
+//        }
+//        // import remaining scripts for indexes
+//        if (contains(migrationModes, SCHEMA)) {
+//            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
+//            Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
+//            objectTypes.retainAll(indexes);
+//            scriptGeneratorManager.setObjectTypes(objectTypes);
+//            exportScripts(scriptGeneratorManager.getScripts(database));
+//        }
     }
 
     protected void exportScripts(Collection<String> scripts) throws Exception {
@@ -173,8 +169,6 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
         backupOps.setPath(getPath());
         return backupOps;
     }
-
-
 
     protected SessionFactory createTargetSessionFactory() {
         SessionFactory sessionFactory = newSessionFactory(createConnectionProviderFactory().
@@ -198,85 +192,85 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
                 DATABASE, CATALOG, MetaDataType.SCHEMA, TABLE, COLUMN).getObject(DATABASE);
     }
 
-    protected void load(final RowSet rowSet, Database database) throws SQLException {
-        if (!isEmpty(rowSet.getChunks())) {
-            final Connection connection = getTargetSession().getConnection();
-            final Table table = getRowSetMapper().map(rowSet, database);
-            if (table != null) {
-                final Query query = createQuery(table, rowSet.getColumns());
-                final StatementTemplate template = new StatementTemplate(connection);
-                template.executeStatement(
-                        new StatementFactory<PreparedStatement>() {
-                            @Override
-                            public PreparedStatement createStatement(Connection connection) throws SQLException {
-                                return connection.prepareStatement(query.toString());
-                            }
-                        },
-                        new StatementCallback<PreparedStatement>() {
-                            @Override
-                            public void executeStatement(PreparedStatement statement)
-                                    throws SQLException {
-                                load(rowSet, table, statement, query);
-                            }
-                        }
-                );
-            }
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug(format("Row set %s is empty, skipping it", rowSet.getName()));
-            }
-        }
-    }
-
-    protected void load(RowSet rowSet, Table table, PreparedStatement statement, Query query) throws SQLException {
-        String format = rowSet.getBackup().getFormat();
-        InputFormat inputFormat = getFormatFactory().createInputFormat(format, getFormatAttributes());
-        ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
-        CommitStrategy commitStrategy = getJobSpec().getCommitStrategy();
-        for (Chunk chunk : rowSet.getChunks()) {
-            inputFormat.setRowSet(rowSet);
-            inputFormat.setValueHandleList(valueHandleList);
-            inputFormat.setInputStream(getBackupOps().openInput(chunk.getName()));
-            inputFormat.init();
-            if (logger.isTraceEnabled()) {
-                logger.trace(format("Loading %d rows from %s chunk to %s table",
-                        chunk.getRowCount(), chunk.getName(), table.getQualifiedName(null)));
-            }
-            inputFormat.readStart();
-            long row = 0;
-            try {
-                while (inputFormat.read()) {
-                    commitStrategy.execute(statement, query);
-                    row++;
-                }
-                commitStrategy.finish(statement, query);
-            } catch (Exception exception) {
-                throw new LoadException(format("Error loading row %d from %s chunk to %s table",
-                              row + 1, chunk.getName(), table.getQualifiedName(null)), exception);
-            }
-            inputFormat.readEnd();
-            inputFormat.close();
-            if (logger.isTraceEnabled()) {
-                logger.trace(format("Chunk %s loaded", chunk.getName()));
-            }
-        }
-    }
-
-    protected ValueHandleList createValueHandleList(final RowSet rowSet, final Table table,
-                                                    PreparedStatement statement) throws SQLException {
-        ValueHandleListBuilder builder = newBuilder(getTargetSession().getConnection(), statement);
-        builder.withDialect(getTargetSession().getDialect());
-        builder.withFields(newArrayList(transform(rowSet.getColumns(),
-                new Function<Column, Field>() {
-                    @Override
-                    public Field apply(Column column) {
-                        return table.getColumn(column.getName());
-                    }
-                })));
-        builder.withTimeZone(getTimeZone());
-        builder.withValueFormatRegistry(getValueFormatRegistry());
-        return builder.build();
-    }
+//    protected void load(final RowSet rowSet, Database database) throws SQLException {
+//        if (!isEmpty(rowSet.getChunks())) {
+//            final Connection connection = getTargetSession().getConnection();
+//            final Table table = getRowSetMapper().map(rowSet, database);
+//            if (table != null) {
+//                final Query query = createQuery(table, rowSet.getColumns());
+//                final StatementTemplate template = new StatementTemplate(connection);
+//                template.executeStatement(
+//                        new StatementFactory<PreparedStatement>() {
+//                            @Override
+//                            public PreparedStatement createStatement(Connection connection) throws SQLException {
+//                                return connection.prepareStatement(query.toString());
+//                            }
+//                        },
+//                        new StatementCallback<PreparedStatement>() {
+//                            @Override
+//                            public void executeStatement(PreparedStatement statement)
+//                                    throws SQLException {
+//                                load(rowSet, table, statement, query);
+//                            }
+//                        }
+//                );
+//            }
+//        } else {
+//            if (logger.isDebugEnabled()) {
+//                logger.debug(format("Row set %s is empty, skipping it", rowSet.getName()));
+//            }
+//        }
+//    }
+//
+//    protected void load(RowSet rowSet, Table table, PreparedStatement statement, Query query) throws SQLException {
+//        String format = rowSet.getBackup().getFormat();
+//        InputFormat inputFormat = getFormatFactory().createInputFormat(format, getFormatAttributes());
+//        ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
+//        CommitStrategy commitStrategy = getJobSpec().getCommitStrategy();
+//        for (Chunk chunk : rowSet.getChunks()) {
+//            inputFormat.setRowSet(rowSet);
+//            inputFormat.setValueHandleList(valueHandleList);
+//            inputFormat.setInputStream(getBackupOps().openInput(chunk.getName()));
+//            inputFormat.init();
+//            if (logger.isTraceEnabled()) {
+//                logger.trace(format("Loading %d rows from %s chunk to %s table",
+//                        chunk.getRowCount(), chunk.getName(), table.getQualifiedName(null)));
+//            }
+//            inputFormat.readStart();
+//            long row = 0;
+//            try {
+//                while (inputFormat.read()) {
+//                    commitStrategy.execute(statement, query);
+//                    row++;
+//                }
+//                commitStrategy.finish(statement, query);
+//            } catch (Exception exception) {
+//                throw new LoadException(format("Error loading row %d from %s chunk to %s table",
+//                              row + 1, chunk.getName(), table.getQualifiedName(null)), exception);
+//            }
+//            inputFormat.readEnd();
+//            inputFormat.close();
+//            if (logger.isTraceEnabled()) {
+//                logger.trace(format("Chunk %s loaded", chunk.getName()));
+//            }
+//        }
+//    }
+//
+//    protected ValueHandleList createValueHandleList(final RowSet rowSet, final Table table,
+//                                                    PreparedStatement statement) throws SQLException {
+//        ValueHandleListBuilder builder = newBuilder(getTargetSession().getConnection(), statement);
+//        builder.withDialect(getTargetSession().getDialect());
+//        builder.withFields(newArrayList(transform(rowSet.getColumns(),
+//                new Function<Column, Field>() {
+//                    @Override
+//                    public Field apply(Column column) {
+//                        return table.getColumn(column.getName());
+//                    }
+//                })));
+//        builder.withTimeZone(getTimeZone());
+//        builder.withValueFormatRegistry(getValueFormatRegistry());
+//        return builder.build();
+//    }
 
     protected Query createQuery(Table table, Collection<Column> columns) {
         InsertQueryBuilder builder = new InsertQueryBuilder();

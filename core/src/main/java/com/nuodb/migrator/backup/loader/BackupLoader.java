@@ -94,29 +94,38 @@ public class BackupLoader {
     private Collection<ScriptType> scriptTypes;
     private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
 
-    public void load(Map context) throws Exception {
-        BackupLoaderContext backupLoaderContext = createBackupLoaderContext(context);
+    public Backup load(Map context) throws Exception {
         Backup backup = getBackupOps().read(context);
-        backupLoaderContext.setBackup(backup);
-        Database database = backup.getDatabase();
-
-        backupLoaderContext.setSourceSpec(database.getConnectionSpec());
-        SessionFactory sourceSessionFactory = createSourceSessionFactory(database);
-        backupLoaderContext.setSourceSession(sourceSessionFactory.openSession());
-        backupLoaderContext.setSourceSessionFactory(sourceSessionFactory);
-
-        backupLoaderContext.setScriptGeneratorManager(
-                createScriptGeneratorManager(backupLoaderContext));
+        load(backup, context);
+        return backup;
     }
 
-    protected BackupLoaderContext createBackupLoaderContext(Map context) {
-        BackupLoaderContext backupLoaderContext = new BackupLoaderContext();
+    public void load(Backup backup, Map context) throws Exception {
+        load(createBackupLoaderContext(backup, context));
+    }
+
+    public void load(BackupLoaderContext backupLoaderContext) {
+        // TODO: implement multi-threaded load
+    }
+
+    protected BackupLoaderContext createBackupLoaderContext(Backup backup, Map context) throws Exception {
+        BackupLoaderContext backupLoaderContext = new SimpleBackupLoaderContext();
+        backupLoaderContext.setBackup(backup);
         backupLoaderContext.setBackupOps(getBackupOps());
         backupLoaderContext.setBackupOpsContext(context);
         backupLoaderContext.setFormatFactory(getFormatFactory());
         backupLoaderContext.setTargetSpec(getTargetSpec());
         backupLoaderContext.setTargetSession(getTargetSession());
         backupLoaderContext.setTargetSessionFactory(getTargetSessionFactory());
+        backupLoaderContext.setRowSetMapper(getRowSetMapper());
+
+        Database database = backup.getDatabase();
+        backupLoaderContext.setSourceSpec(database.getConnectionSpec());
+        SessionFactory sourceSessionFactory = createSourceSessionFactory(database);
+        backupLoaderContext.setSourceSession(sourceSessionFactory.openSession());
+        backupLoaderContext.setSourceSessionFactory(sourceSessionFactory);
+        backupLoaderContext.setScriptGeneratorManager(
+                createScriptGeneratorManager(backupLoaderContext));
         return backupLoaderContext;
     }
 
@@ -149,7 +158,7 @@ public class BackupLoader {
         PrioritySet<Translator> translators = translationManager.getTranslators();
         for (Translator translator : translators) {
             if (translator instanceof ImplicitDefaultsTranslator) {
-                ((ImplicitDefaultsTranslator)translator).setUseExplicitDefaults(isUseExplicitDefaults());
+                ((ImplicitDefaultsTranslator) translator).setUseExplicitDefaults(isUseExplicitDefaults());
             }
         }
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();

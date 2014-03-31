@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.backup.writer;
 
+import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
@@ -42,6 +43,10 @@ import java.util.concurrent.Executor;
  * @author Sergey Bushik
  */
 public interface BackupWriterContext {
+
+    Backup getBackup();
+
+    void setBackup(Backup backup);
 
     BackupOps getBackupOps();
 

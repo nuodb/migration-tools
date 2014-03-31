@@ -41,114 +41,56 @@ import java.util.Map;
 /**
  * @author Sergey Bushik
  */
-public class BackupLoaderContext {
+public interface BackupLoaderContext {
+    Backup getBackup();
 
-    private Backup backup;
-    private BackupOps backupOps;
-    private Map backupOpsContext;
-    private FormatFactory formatFactory;
-    private ConnectionSpec sourceSpec;
-    private Session sourceSession;
-    private SessionFactory sourceSessionFactory;
-    private ConnectionSpec targetSpec;
-    private Session targetSession;
-    private SessionFactory targetSessionFactory;
-    private ScriptGeneratorManager scriptGeneratorManager;
-    private ValueFormatRegistry valueFormatRegistry;
+    void setBackup(Backup backup);
 
-    public Backup getBackup() {
-        return backup;
-    }
+    BackupOps getBackupOps();
 
-    public void setBackup(Backup backup) {
-        this.backup = backup;
-    }
+    void setBackupOps(BackupOps backupOps);
 
-    public BackupOps getBackupOps() {
-        return backupOps;
-    }
+    Map getBackupOpsContext();
 
-    public void setBackupOps(BackupOps backupOps) {
-        this.backupOps = backupOps;
-    }
+    void setBackupOpsContext(Map backupOpsContext);
 
-    public Map getBackupOpsContext() {
-        return backupOpsContext;
-    }
+    FormatFactory getFormatFactory();
 
-    public void setBackupOpsContext(Map backupOpsContext) {
-        this.backupOpsContext = backupOpsContext;
-    }
+    void setFormatFactory(FormatFactory formatFactory);
 
-    public FormatFactory getFormatFactory() {
-        return formatFactory;
-    }
+    ConnectionSpec getSourceSpec();
 
-    public void setFormatFactory(FormatFactory formatFactory) {
-        this.formatFactory = formatFactory;
-    }
+    void setSourceSpec(ConnectionSpec sourceSpec);
 
-    public ConnectionSpec getSourceSpec() {
-        return sourceSpec;
-    }
+    Session getSourceSession();
 
-    public void setSourceSpec(ConnectionSpec sourceSpec) {
-        this.sourceSpec = sourceSpec;
-    }
+    void setSourceSession(Session sourceSession);
 
-    public Session getSourceSession() {
-        return sourceSession;
-    }
+    SessionFactory getSourceSessionFactory();
 
-    public void setSourceSession(Session sourceSession) {
-        this.sourceSession = sourceSession;
-    }
+    void setSourceSessionFactory(SessionFactory sourceSessionFactory);
 
-    public SessionFactory getSourceSessionFactory() {
-        return sourceSessionFactory;
-    }
+    ConnectionSpec getTargetSpec();
 
-    public void setSourceSessionFactory(SessionFactory sourceSessionFactory) {
-        this.sourceSessionFactory = sourceSessionFactory;
-    }
+    void setTargetSpec(ConnectionSpec targetSpec);
 
-    public ConnectionSpec getTargetSpec() {
-        return targetSpec;
-    }
+    Session getTargetSession();
 
-    public void setTargetSpec(ConnectionSpec targetSpec) {
-        this.targetSpec = targetSpec;
-    }
+    void setTargetSession(Session targetSession);
 
-    public Session getTargetSession() {
-        return targetSession;
-    }
+    SessionFactory getTargetSessionFactory();
 
-    public void setTargetSession(Session targetSession) {
-        this.targetSession = targetSession;
-    }
+    void setTargetSessionFactory(SessionFactory targetSessionFactory);
 
-    public SessionFactory getTargetSessionFactory() {
-        return targetSessionFactory;
-    }
+    ScriptGeneratorManager getScriptGeneratorManager();
 
-    public void setTargetSessionFactory(SessionFactory targetSessionFactory) {
-        this.targetSessionFactory = targetSessionFactory;
-    }
+    void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager);
 
-    public ScriptGeneratorManager getScriptGeneratorManager() {
-        return scriptGeneratorManager;
-    }
+    ValueFormatRegistry getValueFormatRegistry();
 
-    public void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager) {
-        this.scriptGeneratorManager = scriptGeneratorManager;
-    }
+    void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
 
-    public ValueFormatRegistry getValueFormatRegistry() {
-        return valueFormatRegistry;
-    }
+    RowSetMapper getRowSetMapper();
 
-    public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
-        this.valueFormatRegistry = valueFormatRegistry;
-    }
+    void setRowSetMapper(RowSetMapper rowSetMapper);
 }

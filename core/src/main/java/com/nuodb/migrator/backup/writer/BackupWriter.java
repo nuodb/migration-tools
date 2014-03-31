@@ -182,8 +182,10 @@ public class BackupWriter {
         exportQueries.add(exportQuery);
     }
 
-    public void write(Map context) throws Exception {
-        write(createBackup(), context);
+    public Backup write(Map context) throws Exception {
+        Backup backup = createBackup();
+        write(backup, context);
+        return backup;
     }
 
     protected Backup createBackup() {
@@ -193,12 +195,12 @@ public class BackupWriter {
     }
 
     public void write(Backup backup, Map context) throws Exception {
-        write(backup, createBackupWriterContext(context));
+        write(createBackupWriterContext(backup, context));
     }
 
-    protected BackupWriterContext createBackupWriterContext(Map context) {
-        BackupWriterContext backupWriterContext =
-                new SimpleBackupWriterContext();
+    protected BackupWriterContext createBackupWriterContext(Backup backup, Map context) {
+        BackupWriterContext backupWriterContext = new SimpleBackupWriterContext();
+        backupWriterContext.setBackup(backup);
         backupWriterContext.setBackupOps(getBackupOps());
         backupWriterContext.setBackupOpsContext(context);
         Executor executor = getExecutor();
@@ -207,8 +209,8 @@ public class BackupWriter {
         }
         backupWriterContext.setExecutor(executor);
         backupWriterContext.setExportQueryManager(createExportQueryManager());
-        backupWriterContext.setFormat(getFormat());
         backupWriterContext.setDatabase(getDatabase());
+        backupWriterContext.setFormat(getFormat());
         backupWriterContext.setFormatAttributes(getFormatAttributes());
         backupWriterContext.setFormatFactory(getFormatFactory());
         backupWriterContext.setSourceSession(getSourceSession());
@@ -230,9 +232,10 @@ public class BackupWriter {
         return new SimpleExportQueryManager();
     }
 
-    public void write(Backup backup, BackupWriterContext backupWriterContext) throws Exception {
+    public void write(BackupWriterContext backupWriterContext) throws Exception {
         boolean awaitTermination = true;
         try {
+            Backup backup = backupWriterContext.getBackup();
             if (isWriteData()) {
                 Connection connection = getSourceSession().getConnection();
                 for (ExportQuery exportQuery : getExportQueries()) {

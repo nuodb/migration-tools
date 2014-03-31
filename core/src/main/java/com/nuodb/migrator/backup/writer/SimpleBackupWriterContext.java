@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.backup.writer;
 
+import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
@@ -51,6 +52,7 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
 
     protected final transient Logger logger = getLogger(getClass());
 
+    private Backup backup;
     private BackupOps backupOps;
     private Map backupOpsContext;
     private Database database;
@@ -64,6 +66,16 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     private TimeZone timeZone;
     private int threads;
     private ValueFormatRegistry valueFormatRegistry;
+
+    @Override
+    public Backup getBackup() {
+        return backup;
+    }
+
+    @Override
+    public void setBackup(Backup backup) {
+        this.backup = backup;
+    }
 
     @Override
     public BackupOps getBackupOps() {
