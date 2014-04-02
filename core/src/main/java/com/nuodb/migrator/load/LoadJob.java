@@ -27,59 +27,33 @@
  */
 package com.nuodb.migrator.load;
 
-import com.google.common.base.Function;
 import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.backup.*;
 import com.nuodb.migrator.backup.BackupOps;
-import com.nuodb.migrator.backup.format.InputFormat;
-import com.nuodb.migrator.backup.format.value.ValueHandleList;
-import com.nuodb.migrator.backup.format.value.ValueHandleListBuilder;
 import com.nuodb.migrator.backup.loader.BackupLoader;
-import com.nuodb.migrator.jdbc.JdbcUtils;
+import com.nuodb.migrator.backup.loader.InsertTypeFactory;
+import com.nuodb.migrator.backup.loader.SimpleInsertTypeFactory;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
-import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
+import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.generator.ConnectionScriptExporter;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
-import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
-import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
-import com.nuodb.migrator.jdbc.model.Field;
-import com.nuodb.migrator.jdbc.query.InsertQueryBuilder;
+import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.jdbc.query.InsertType;
-import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.query.StatementFactory;
-import com.nuodb.migrator.jdbc.query.StatementTemplate;
-import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
+import com.nuodb.migrator.job.HasServicesJobBase;
 import com.nuodb.migrator.job.ScriptGeneratorJobBase;
-import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.LoadJobSpec;
-import com.nuodb.migrator.spec.MigrationMode;
-import com.nuodb.migrator.spec.ResourceSpec;
+import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.utils.PrioritySet;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
+import static com.nuodb.migrator.backup.loader.BackupLoader.THREADS;
 import static com.nuodb.migrator.context.ContextUtils.createService;
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
-import static com.nuodb.migrator.spec.MigrationMode.DATA;
-import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
-import static com.nuodb.migrator.utils.Collections.contains;
-import static com.nuodb.migrator.utils.Collections.isEmpty;
-import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -89,9 +63,6 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
     private BackupLoader backupLoader;
 
-    public LoadJob() {
-    }
-
     public LoadJob(LoadJobSpec jobSpec) {
         super(jobSpec);
     }
@@ -100,68 +71,32 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
     protected void init() throws Exception {
         super.init();
 
-        SessionFactory targetSessionFactory = createTargetSessionFactory();
-        Session targetSession = targetSessionFactory.openSession();
-        setTargetSession(targetSession);
-
         BackupLoader backupLoader = new BackupLoader();
         backupLoader.setBackupOps(createBackupOps());
-        backupLoader.setTargetSession(targetSession);
-        backupLoader.setTargetSessionFactory(targetSessionFactory);
+        backupLoader.setDialectResolver(createDialectResolver());
+        backupLoader.setFormatAttributes(getFormatAttributes());
         backupLoader.setFormatFactory(createFormatFactory());
-        backupLoader.setValueFormatRegistry(
-                createValueFormatRegistryResolver().
-                        resolve(targetSession.getConnection()));
+        backupLoader.setJdbcTypeSpecs(getJdbcTypeSpecs());
+        backupLoader.setGroupScriptsBy(getGroupScriptsBy());
+        backupLoader.setIdentifierNormalizer(getIdentifierNormalizer());
+        backupLoader.setIdentifierQuoting(getIdentifierQuoting());
+        backupLoader.setInsertTypeFactory(createInsertTypeMapper());
+        backupLoader.setInspectionManager(createInspectionManager());
+        backupLoader.setMetaDataSpec(getMetaDataSpec());
+        backupLoader.setMigrationModes(getMigrationModes());
+        backupLoader.setNamingStrategies(getNamingStrategies());
+        backupLoader.setScriptTypes(getScriptTypes());
+        backupLoader.setTargetSpec(getTargetSpec());
+        backupLoader.setTargetSessionFactory(createTargetSessionFactory());
+        backupLoader.setTimeZone(getTimeZone());
+        backupLoader.setThreads(getThreads() != null ? getThreads() : THREADS);
+        backupLoader.setValueFormatRegistryResolver(createValueFormatRegistryResolver());
+        backupLoader.setUseExplicitDefaults(isUseExplicitDefaults());
         setBackupLoader(backupLoader);
     }
 
-    @Override
-    public void execute() throws Exception {
-//        Collection<MetaDataType> indexes = newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX);
-//        Collection<MigrationMode> migrationModes = getMigrationModes();
-//        // import scripts excluding indexes
-//        if (contains(migrationModes, SCHEMA)) {
-//            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
-//            Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
-//            objectTypes.removeAll(indexes);
-//            scriptGeneratorManager.setObjectTypes(objectTypes);
-//            exportScripts(scriptGeneratorManager.getScripts(database));
-//        }
-//        // import data
-//        if (contains(migrationModes, DATA)) {
-//            Connection connection = getTargetSession().getConnection();
-//            Database target = inspect();
-//            try {
-//                for (RowSet rowSet : backup.getRowSets()) {
-//                    load(rowSet, target);
-//                }
-//                connection.commit();
-//            } catch (MigratorException exception) {
-//                connection.rollback();
-//                throw exception;
-//            } catch (Exception exception) {
-//                connection.rollback();
-//                throw new LoadException(exception);
-//            }
-//        }
-//        // import remaining scripts for indexes
-//        if (contains(migrationModes, SCHEMA)) {
-//            ScriptGeneratorManager scriptGeneratorManager = createScriptGeneratorManager();
-//            Collection<MetaDataType> objectTypes = newArrayList(getObjectTypes());
-//            objectTypes.retainAll(indexes);
-//            scriptGeneratorManager.setObjectTypes(objectTypes);
-//            exportScripts(scriptGeneratorManager.getScripts(database));
-//        }
-    }
-
-    protected void exportScripts(Collection<String> scripts) throws Exception {
-        ScriptExporter scriptExporter = createScriptExporter();
-        try {
-            scriptExporter.open();
-            scriptExporter.exportScripts(scripts);
-        } finally {
-            JdbcUtils.close(scriptExporter);
-        }
+    protected InsertTypeFactory createInsertTypeMapper() {
+        return new SimpleInsertTypeFactory(getInsertType(), getTableInsertTypes());
     }
 
     protected BackupOps createBackupOps() {
@@ -171,140 +106,33 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
     }
 
     protected SessionFactory createTargetSessionFactory() {
-        SessionFactory sessionFactory = newSessionFactory(createConnectionProviderFactory().
+        SessionFactory targetSessionFactory =
+                newSessionFactory(createConnectionProviderFactory().
                 createConnectionProvider(getTargetSpec()), createDialectResolver());
-        sessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
-        return sessionFactory;
-    }
-
-    protected ScriptExporter createScriptExporter() {
-        return new ConnectionScriptExporter(getTargetSession().getConnection(), false);
+        targetSessionFactory.addSessionObserver(newSessionTimeZoneSetter(getTimeZone()));
+        return targetSessionFactory;
     }
 
     @Override
-    public void release() throws Exception {
-        close(getTargetSession());
-    }
-
-    protected Database inspect() throws SQLException {
-        InspectionScope inspectionScope = new TableInspectionScope(null, null, getTableTypes());
-        return createInspectionManager().inspect(getTargetSession().getConnection(), inspectionScope,
-                DATABASE, CATALOG, MetaDataType.SCHEMA, TABLE, COLUMN).getObject(DATABASE);
-    }
-
-//    protected void load(final RowSet rowSet, Database database) throws SQLException {
-//        if (!isEmpty(rowSet.getChunks())) {
-//            final Connection connection = getTargetSession().getConnection();
-//            final Table table = getRowSetMapper().map(rowSet, database);
-//            if (table != null) {
-//                final Query query = createQuery(table, rowSet.getColumns());
-//                final StatementTemplate template = new StatementTemplate(connection);
-//                template.executeStatement(
-//                        new StatementFactory<PreparedStatement>() {
-//                            @Override
-//                            public PreparedStatement createStatement(Connection connection) throws SQLException {
-//                                return connection.prepareStatement(query.toString());
-//                            }
-//                        },
-//                        new StatementCallback<PreparedStatement>() {
-//                            @Override
-//                            public void executeStatement(PreparedStatement statement)
-//                                    throws SQLException {
-//                                load(rowSet, table, statement, query);
-//                            }
-//                        }
-//                );
-//            }
-//        } else {
-//            if (logger.isDebugEnabled()) {
-//                logger.debug(format("Row set %s is empty, skipping it", rowSet.getName()));
-//            }
-//        }
-//    }
-//
-//    protected void load(RowSet rowSet, Table table, PreparedStatement statement, Query query) throws SQLException {
-//        String format = rowSet.getBackup().getFormat();
-//        InputFormat inputFormat = getFormatFactory().createInputFormat(format, getFormatAttributes());
-//        ValueHandleList valueHandleList = createValueHandleList(rowSet, table, statement);
-//        CommitStrategy commitStrategy = getJobSpec().getCommitStrategy();
-//        for (Chunk chunk : rowSet.getChunks()) {
-//            inputFormat.setRowSet(rowSet);
-//            inputFormat.setValueHandleList(valueHandleList);
-//            inputFormat.setInputStream(getBackupOps().openInput(chunk.getName()));
-//            inputFormat.init();
-//            if (logger.isTraceEnabled()) {
-//                logger.trace(format("Loading %d rows from %s chunk to %s table",
-//                        chunk.getRowCount(), chunk.getName(), table.getQualifiedName(null)));
-//            }
-//            inputFormat.readStart();
-//            long row = 0;
-//            try {
-//                while (inputFormat.read()) {
-//                    commitStrategy.execute(statement, query);
-//                    row++;
-//                }
-//                commitStrategy.finish(statement, query);
-//            } catch (Exception exception) {
-//                throw new LoadException(format("Error loading row %d from %s chunk to %s table",
-//                              row + 1, chunk.getName(), table.getQualifiedName(null)), exception);
-//            }
-//            inputFormat.readEnd();
-//            inputFormat.close();
-//            if (logger.isTraceEnabled()) {
-//                logger.trace(format("Chunk %s loaded", chunk.getName()));
-//            }
-//        }
-//    }
-//
-//    protected ValueHandleList createValueHandleList(final RowSet rowSet, final Table table,
-//                                                    PreparedStatement statement) throws SQLException {
-//        ValueHandleListBuilder builder = newBuilder(getTargetSession().getConnection(), statement);
-//        builder.withDialect(getTargetSession().getDialect());
-//        builder.withFields(newArrayList(transform(rowSet.getColumns(),
-//                new Function<Column, Field>() {
-//                    @Override
-//                    public Field apply(Column column) {
-//                        return table.getColumn(column.getName());
-//                    }
-//                })));
-//        builder.withTimeZone(getTimeZone());
-//        builder.withValueFormatRegistry(getValueFormatRegistry());
-//        return builder.build();
-//    }
-
-    protected Query createQuery(Table table, Collection<Column> columns) {
-        InsertQueryBuilder builder = new InsertQueryBuilder();
-        builder.insertType(getInsertType(table)).into(table);
-        builder.columns(newArrayList(transform(columns, new Function<Column, String>() {
-            @Override
-            public String apply(Column column) {
-                return column.getName();
-            }
-        })));
-        return builder.build();
-    }
-
-    protected InsertType getInsertType(Table table) {
-        Database database = table.getDatabase();
-        Map<String, InsertType> tableInsertTypes = getTableInsertTypes();
-        InsertType insertType = getInsertType();
-        if (tableInsertTypes != null) {
-            for (Map.Entry<String, InsertType> entry : tableInsertTypes.entrySet()) {
-                final Collection<Table> tables = database.findTables(entry.getKey());
-                if (tables.contains(table)) {
-                    insertType = entry.getValue();
-                    break;
-                }
-            }
+    public void execute() throws Exception {
+        try {
+            getBackupLoader().load();
+        } catch (MigratorException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new LoadException(exception);
         }
-        return insertType;
     }
 
-    public BackupLoader getBackupLoader() {
+    @Override
+    public void close() throws Exception {
+    }
+
+    protected BackupLoader getBackupLoader() {
         return backupLoader;
     }
 
-    public void setBackupLoader(BackupLoader backupLoader) {
+    protected void setBackupLoader(BackupLoader backupLoader) {
         this.backupLoader = backupLoader;
     }
 
@@ -336,11 +164,15 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
         return getJobSpec().getInsertType();
     }
 
+    protected ConnectionSpec getTargetSpec() {
+        return getJobSpec().getTargetSpec();
+    }
+
     protected TimeZone getTimeZone() {
         return getJobSpec().getTimeZone();
     }
 
-    protected ConnectionSpec getTargetSpec() {
-        return getJobSpec().getTargetSpec();
+    protected Integer getThreads() {
+        return getJobSpec().getThreads();
     }
 }

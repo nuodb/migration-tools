@@ -36,9 +36,8 @@ import java.io.Writer;
 public abstract class StreamScriptExporterBase extends ScriptExporterBase implements StreamScriptProcessor {
 
     private String encoding = ENCODING;
-    private String commentStart = COMMENT_START;
     private String delimiter = DELIMITER;
-    private boolean closeStream = CLOSE_STREAM;
+    private String commentStart = COMMENT_START;
 
     private transient BufferedWriter writer;
 
@@ -63,9 +62,7 @@ public abstract class StreamScriptExporterBase extends ScriptExporterBase implem
     protected void doClose() throws Exception {
         if (writer != null) {
             writer.flush();
-            if (isCloseStream()) {
-                writer.close();
-            }
+            writer.close();
         }
     }
 
@@ -80,16 +77,6 @@ public abstract class StreamScriptExporterBase extends ScriptExporterBase implem
     }
 
     @Override
-    public String getCommentStart() {
-        return commentStart;
-    }
-
-    @Override
-    public void setCommentStart(String commentStart) {
-        this.commentStart = commentStart;
-    }
-
-    @Override
     public String getDelimiter() {
         return delimiter;
     }
@@ -100,12 +87,12 @@ public abstract class StreamScriptExporterBase extends ScriptExporterBase implem
     }
 
     @Override
-    public boolean isCloseStream() {
-        return closeStream;
+    public String getCommentStart() {
+        return commentStart;
     }
 
     @Override
-    public void setCloseStream(boolean closeStream) {
-        this.closeStream = closeStream;
+    public void setCommentStart(String commentStart) {
+        this.commentStart = commentStart;
     }
 }

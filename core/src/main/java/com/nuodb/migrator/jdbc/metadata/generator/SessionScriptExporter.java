@@ -25,15 +25,30 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.loader;
+package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.JdbcUtils;
+import com.nuodb.migrator.jdbc.session.Session;
 
 /**
  * @author Sergey Bushik
  */
-public interface RowSetMapper {
+public class SessionScriptExporter extends ConnectionScriptExporter {
 
-    Table mapRowSet(RowSet rowSet, BackupLoaderContext backupLoaderContext);
+    private final Session session;
+
+    public SessionScriptExporter(Session session) {
+        super(session.getConnection());
+        this.session = session;
+    }
+
+    @Override
+    protected void doClose() throws Exception {
+        super.doClose();
+        JdbcUtils.close(session);
+    }
+
+    public Session getSession() {
+        return session;
+    }
 }

@@ -27,13 +27,49 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.InsertType;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface RowSetMapper {
+public class SimpleInsertTypeFactory implements InsertTypeFactory {
 
-    Table mapRowSet(RowSet rowSet, BackupLoaderContext backupLoaderContext);
+    private InsertType insertType;
+    private Map<String, InsertType> tableInsertTypes;
+
+    public SimpleInsertTypeFactory(InsertType insertType,
+                                   Map<String, InsertType> tableInsertTypes) {
+        this.insertType = insertType;
+        this.tableInsertTypes = tableInsertTypes;
+    }
+
+    @Override
+    public InsertType createInsertType(Table table, BackupLoaderContext backupLoaderContext) {
+        Database database = table.getDatabase();
+        InsertType insertType = getInsertType();
+        Map<String, InsertType> tableInsertTypes = getTableInsertTypes();
+        if (tableInsertTypes != null) {
+            for (Map.Entry<String, InsertType> entry : tableInsertTypes.entrySet()) {
+                final Collection<Table> tables = database.findTables(entry.getKey());
+                if (tables.contains(table)) {
+                    insertType = entry.getValue();
+                    break;
+                }
+            }
+        }
+        return insertType;
+    }
+
+    public InsertType getInsertType() {
+        return insertType;
+    }
+
+    public Map<String, InsertType> getTableInsertTypes() {
+        return tableInsertTypes;
+    }
 }

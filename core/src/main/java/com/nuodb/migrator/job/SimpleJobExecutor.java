@@ -125,10 +125,10 @@ public class SimpleJobExecutor implements JobExecutor {
             fire(new JobExecutionEvent(execution));
         } finally {
             try {
-                job.release();
+                job.close();
             } catch (Exception exception) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug(format("Job release %s failure", job.getName()), exception);
+                    logger.debug(format("Job close %s failure", job.getName()), exception);
                 }
             }
         }

@@ -27,36 +27,27 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import java.io.*;
-
-import static java.lang.System.getProperty;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 /**
  * @author Sergey Bushik
  */
 public class WriterScriptExporter extends StreamScriptExporterBase {
 
-    public static final ScriptExporter SYSTEM_OUT = new WriterScriptExporter(System.out, false);
+    public static final ScriptExporter SYSTEM_OUT =
+            new ProxyScriptExporter(new WriterScriptExporter(System.out), false);
 
     private Writer writer;
     private OutputStream outputStream;
 
     public WriterScriptExporter(OutputStream outputStream) {
-        this(outputStream, CLOSE_STREAM);
-    }
-
-    public WriterScriptExporter(OutputStream outputStream, boolean closeStream) {
         setOutputStream(outputStream);
-        setCloseStream(closeStream);
     }
 
     public WriterScriptExporter(Writer writer) {
-        this(writer, CLOSE_STREAM);
-    }
-
-    public WriterScriptExporter(Writer writer, boolean closeStream) {
         setWriter(writer);
-        setCloseStream(closeStream);
     }
 
     @Override

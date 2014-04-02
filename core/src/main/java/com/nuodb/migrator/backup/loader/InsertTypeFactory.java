@@ -27,13 +27,13 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.query.InsertType;
 
 /**
  * @author Sergey Bushik
  */
-public interface RowSetMapper {
+public interface InsertTypeFactory {
 
-    Table mapRowSet(RowSet rowSet, BackupLoaderContext backupLoaderContext);
+    InsertType createInsertType(Table table, BackupLoaderContext backupLoaderContext);
 }

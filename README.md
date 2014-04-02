@@ -53,7 +53,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--data=[true | false]]                                     Enables or disables data migration, true by default
             [--schema=[true | false]]                                   Enables or disables schema migration, true by default
         [data migration, optional]
-            [table names, types & query filters, optional]
+            [table names & query filters, optional]
                 [--table=table [table ...]]                             Table name
                 [--table.*.filter=[query filter]]                       Filters table records using specified filter by appending it to the SELECT statement after WHERE clause
             [select statements, optional]

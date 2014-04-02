@@ -27,8 +27,22 @@
  */
 package com.nuodb.migrator.backup.loader;
 
+import com.nuodb.migrator.MigratorException;
+
 /**
  * @author Sergey Bushik
  */
-public class BackupLoaderException {
+public class BackupLoaderException extends MigratorException {
+
+    public BackupLoaderException(String message) {
+        super(message);
+    }
+
+    public BackupLoaderException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public BackupLoaderException(Throwable cause) {
+        super(cause);
+    }
 }

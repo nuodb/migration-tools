@@ -36,25 +36,19 @@ public interface StreamScriptProcessor extends ScriptProcessor {
 
     final String ENCODING = getProperty("file.encoding");
 
-    final String COMMENT_START = "--";
-
     final String DELIMITER = ";";
 
-    final boolean CLOSE_STREAM = true;
+    final String COMMENT_START = "--";
 
     String getEncoding();
 
     void setEncoding(String encoding);
 
-    String getCommentStart();
-
-    void setCommentStart(String commentStart);
-
     String getDelimiter();
 
     void setDelimiter(String delimiter);
 
-    boolean isCloseStream();
+    String getCommentStart();
 
-    void setCloseStream(boolean closeStream);
+    void setCommentStart(String commentStart);
 }

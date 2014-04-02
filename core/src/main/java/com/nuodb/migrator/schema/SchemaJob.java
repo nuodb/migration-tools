@@ -27,39 +27,55 @@
  */
 package com.nuodb.migrator.schema;
 
+import com.nuodb.migrator.jdbc.JdbcUtils;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.dialect.DialectResolver;
+import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
+import com.nuodb.migrator.jdbc.dialect.TranslationManager;
+import com.nuodb.migrator.jdbc.dialect.Translator;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
-import com.nuodb.migrator.jdbc.metadata.generator.ConnectionScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.FileScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
+import com.nuodb.migrator.jdbc.metadata.generator.SessionScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
+import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migrator.job.ScriptGeneratorJobBase;
 import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 import com.nuodb.migrator.spec.SchemaJobSpec;
+import com.nuodb.migrator.utils.PrioritySet;
 
 import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TYPES;
+import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migrator.jdbc.metadata.generator.WriterScriptExporter.SYSTEM_OUT;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("all")
 public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
     public static final boolean FAIL_ON_EMPTY_SCRIPTS = true;
 
     private boolean failOnEmptyScripts = FAIL_ON_EMPTY_SCRIPTS;
+
+    private Session sourceSession;
+    private Session targetSession;
     private ScriptExporter scriptExporter;
     private ScriptGeneratorManager scriptGeneratorManager;
 
@@ -99,7 +115,7 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
         Collection<ScriptExporter> exporters = newArrayList();
         Session targetSession = getTargetSession();
         if (targetSession != null) {
-            exporters.add(new ConnectionScriptExporter(targetSession.getConnection()));
+            exporters.add(new SessionScriptExporter(targetSession));
         }
         ResourceSpec outputSpec = getOutputSpec();
         if (outputSpec != null) {
@@ -131,24 +147,94 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
                 getSourceSession().getConnection(), inspectionScope, TYPES).getObject(DATABASE);
     }
 
-    @Override
-    public void release() throws Exception {
-        super.release();
-        close(getScriptExporter());
+    protected ScriptGeneratorManager createScriptGeneratorManager() throws SQLException {
+        ScriptGeneratorManager scriptGeneratorManager = new ScriptGeneratorManager();
+        scriptGeneratorManager.getAttributes().put(GROUP_SCRIPTS_BY, getGroupScriptsBy());
+        scriptGeneratorManager.setObjectTypes(getObjectTypes());
+        scriptGeneratorManager.setScriptTypes(getScriptTypes());
+        ConnectionSpec sourceSpec = getSourceSpec();
+        scriptGeneratorManager.setSourceCatalog(sourceSpec != null ? sourceSpec.getCatalog() : null);
+        scriptGeneratorManager.setSourceSchema(sourceSpec != null ? sourceSpec.getSchema() : null);
+        scriptGeneratorManager.setSourceSession(getSourceSession());
+
+        ConnectionSpec targetSpec = getTargetSpec();
+        if (targetSpec != null) {
+            scriptGeneratorManager.setTargetCatalog(targetSpec.getCatalog());
+            scriptGeneratorManager.setTargetSchema(targetSpec.getSchema());
+        }
+
+        DialectResolver dialectResolver = createDialectResolver();
+        Dialect dialect = getTargetSession() != null ? dialectResolver.resolve(
+                getTargetSession().getConnection()) : dialectResolver.resolve(NUODB);
+        TranslationManager translationManager = dialect.getTranslationManager();
+        PrioritySet<Translator> translators = translationManager.getTranslators();
+        for (Translator translator : translators) {
+            if (translator instanceof ImplicitDefaultsTranslator) {
+                ((ImplicitDefaultsTranslator)translator).setUseExplicitDefaults(isUseExplicitDefaults());
+            }
+        }
+        JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
+        for (JdbcTypeSpec jdbcTypeSpec : getJdbcTypeSpecs()) {
+            jdbcTypeNameMap.addJdbcTypeName(
+                    jdbcTypeSpec.getTypeCode(), newOptions(
+                    jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale()),
+                    jdbcTypeSpec.getTypeName()
+            );
+        }
+        dialect.setIdentifierQuoting(getIdentifierQuoting());
+        dialect.setIdentifierNormalizer(getIdentifierNormalizer());
+        for (PrioritySet.Entry<NamingStrategy> entry : getNamingStrategies().entries()) {
+            scriptGeneratorManager.addNamingStrategy(entry.getValue(), entry.getPriority());
+        }
+        scriptGeneratorManager.setTargetDialect(dialect);
+        return scriptGeneratorManager;
     }
 
     @Override
-    public void setSourceSpec(ConnectionSpec sourceSpec) {
-        getJobSpec().setSourceSpec(sourceSpec);
+    public void close() throws Exception {
+        JdbcUtils.close(getSourceSession());
+        JdbcUtils.close(getTargetSession());
+        JdbcUtils.close(getScriptExporter());
     }
 
-    @Override
-    public ConnectionSpec getSourceSpec() {
+    protected ConnectionSpec getSourceSpec() {
         return getJobSpec().getSourceSpec();
     }
 
     protected ResourceSpec getOutputSpec() {
         return getJobSpec().getOutputSpec();
+    }
+
+    protected Session getSourceSession() {
+        return sourceSession;
+    }
+
+    protected void setSourceSession(Session sourceSession) {
+        this.sourceSession = sourceSession;
+    }
+
+    protected Session getTargetSession() {
+        return targetSession;
+    }
+
+    protected void setTargetSession(Session targetSession) {
+        this.targetSession = targetSession;
+    }
+
+    protected ScriptExporter getScriptExporter() {
+        return scriptExporter;
+    }
+
+    protected void setScriptExporter(ScriptExporter scriptExporter) {
+        this.scriptExporter = scriptExporter;
+    }
+
+    protected ScriptGeneratorManager getScriptGeneratorManager() {
+        return scriptGeneratorManager;
+    }
+
+    protected void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager) {
+        this.scriptGeneratorManager = scriptGeneratorManager;
     }
 
     public boolean isFailOnEmptyScripts() {
@@ -157,21 +243,5 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
     public void setFailOnEmptyScripts(boolean failOnEmptyScripts) {
         this.failOnEmptyScripts = failOnEmptyScripts;
-    }
-
-    public ScriptExporter getScriptExporter() {
-        return scriptExporter;
-    }
-
-    public void setScriptExporter(ScriptExporter scriptExporter) {
-        this.scriptExporter = scriptExporter;
-    }
-
-    public ScriptGeneratorManager getScriptGeneratorManager() {
-        return scriptGeneratorManager;
-    }
-
-    public void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager) {
-        this.scriptGeneratorManager = scriptGeneratorManager;
     }
 }

@@ -27,61 +27,47 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public class ReaderScriptImporter extends StreamScriptImporterBase {
+public class ProxyScriptImporter implements ScriptImporter {
 
-    private Reader reader;
-    private InputStream inputStream;
+    private ScriptImporter scriptImporter;
+    private boolean close;
 
-    public ReaderScriptImporter(InputStream inputStream) {
-        this(inputStream, CLOSE_STREAM);
+    public ProxyScriptImporter(ScriptImporter scriptImporter) {
+        this(scriptImporter, true);
     }
 
-    public ReaderScriptImporter(InputStream inputStream, boolean closeStream) {
-        setInputStream(inputStream);
-        setCloseStream(closeStream);
-    }
-
-    public ReaderScriptImporter(Reader reader) {
-        this(reader, CLOSE_STREAM);
-    }
-
-    public ReaderScriptImporter(Reader reader, boolean closeStream) {
-        setReader(reader);
-        setCloseStream(closeStream);
+    public ProxyScriptImporter(ScriptImporter scriptImporter, boolean close) {
+        this.scriptImporter = scriptImporter;
+        this.close = close;
     }
 
     @Override
-    protected Reader openReader() throws Exception {
-        Reader reader = getReader();
-        InputStream inputStream;
-        if (reader == null && (inputStream = getInputStream()) != null) {
-            reader = new InputStreamReader(inputStream, getEncoding());
-        } else {
-            throw new GeneratorException("Neither reader nor input stream provided");
+    public Collection<String> importScripts() throws Exception {
+        return scriptImporter.importScripts();
+    }
+
+    @Override
+    public void open() throws Exception {
+        scriptImporter.open();
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (isClose()) {
+            scriptImporter.close();
         }
-        return reader;
     }
 
-    public Reader getReader() {
-        return reader;
+    public boolean isClose() {
+        return close;
     }
 
-    public void setReader(Reader reader) {
-        this.reader = reader;
-    }
-
-    public InputStream getInputStream() {
-        return inputStream;
-    }
-
-    public void setInputStream(InputStream inputStream) {
-        this.inputStream = inputStream;
+    public void setClose(boolean close) {
+        this.close = close;
     }
 }

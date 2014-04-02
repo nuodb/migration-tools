@@ -31,17 +31,23 @@ import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.MigrationMode;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * @author Sergey Bushik
  */
 public interface BackupLoaderContext {
+
     Backup getBackup();
 
     void setBackup(Backup backup);
@@ -54,9 +60,25 @@ public interface BackupLoaderContext {
 
     void setBackupOpsContext(Map backupOpsContext);
 
+    Database getDatabase();
+
+    void setDatabase(Database database);
+
+    Executor getExecutor();
+
+    void setExecutor(Executor executor);
+
     FormatFactory getFormatFactory();
 
     void setFormatFactory(FormatFactory formatFactory);
+
+    boolean isLoadData();
+
+    boolean isLoadSchema();
+
+    Collection<MigrationMode> getMigrationModes();
+
+    void setMigrationModes(Collection<MigrationMode> migrationModes);
 
     ConnectionSpec getSourceSpec();
 
@@ -82,6 +104,10 @@ public interface BackupLoaderContext {
 
     void setTargetSessionFactory(SessionFactory targetSessionFactory);
 
+    ScriptExporter getScriptExporter();
+
+    void setScriptExporter(ScriptExporter scriptExporter);
+
     ScriptGeneratorManager getScriptGeneratorManager();
 
     void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager);
@@ -93,4 +119,6 @@ public interface BackupLoaderContext {
     RowSetMapper getRowSetMapper();
 
     void setRowSetMapper(RowSetMapper rowSetMapper);
+
+    void close(boolean awaitTermination);
 }

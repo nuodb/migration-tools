@@ -27,6 +27,9 @@
  */
 package com.nuodb.migrator.utils;
 
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -69,5 +72,12 @@ public class Collections {
             target.putAll(source);
         }
         return target;
+    }
+
+    public static <T> Collection<T> removeAll(Collection<T> collection, Collection<T> remove) {
+        if (collection != null && remove != null) {
+            collection.removeAll(remove);
+        }
+        return collection;
     }
 }

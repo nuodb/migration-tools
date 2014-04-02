@@ -34,10 +34,15 @@ import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
+import com.nuodb.migrator.spec.MigrationMode;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
+
+import static com.nuodb.migrator.spec.MigrationMode.DATA;
+import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 
 /**
  * @author Sergey Bushik
@@ -79,6 +84,14 @@ public interface BackupWriterContext {
     FormatFactory getFormatFactory();
 
     void setFormatFactory(FormatFactory formatFactory);
+
+    boolean isWriteData();
+
+    boolean isWriteSchema();
+
+    Collection<MigrationMode> getMigrationModes();
+
+    void setMigrationModes(Collection<MigrationMode> migrationModes);
 
     Session getSourceSession();
 

@@ -54,17 +54,18 @@ public class SimpleRowSetMapper implements RowSetMapper {
     private final transient Logger logger = getLogger(getClass());
 
     @Override
-    public Table map(RowSet rowSet, Database database) {
-        Table table = null;
+    public Table mapRowSet(RowSet rowSet, BackupLoaderContext backupLoaderContext) {
+        Table query = null;
         if (rowSet instanceof TableRowSet) {
-            table = map((TableRowSet) rowSet, database);
+            query = mapRowSet((TableRowSet) rowSet, backupLoaderContext);
         } else if (rowSet instanceof QueryRowSet) {
-            table = map((QueryRowSet) rowSet, database);
+            query = mapRowSet((QueryRowSet) rowSet, backupLoaderContext);
         }
-        return table;
+        return query;
     }
 
-    protected Table map(TableRowSet rowSet, Database database) {
+    protected Table mapRowSet(TableRowSet rowSet, BackupLoaderContext backupLoaderContext) {
+        Database database = backupLoaderContext.getDatabase();
         Dialect dialect = database.getDialect();
         List<String> qualifiers = newArrayList();
         int maximum = 0;
@@ -96,7 +97,7 @@ public class SimpleRowSetMapper implements RowSetMapper {
         return database.findTable(target);
     }
 
-    protected Table map(QueryRowSet rowSet, Database database) {
+    protected Table mapRowSet(QueryRowSet rowSet, BackupLoaderContext backupLoaderContext) {
         if (logger.isWarnEnabled()) {
             logger.warn(format("Can't map %s query row set %s to a table, explicit mapping is required",
                     rowSet.getName(), rowSet.getQuery()));

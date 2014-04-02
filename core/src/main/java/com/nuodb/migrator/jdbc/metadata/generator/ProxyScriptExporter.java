@@ -25,15 +25,54 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.loader;
+package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public interface RowSetMapper {
+public class ProxyScriptExporter implements ScriptExporter {
 
-    Table mapRowSet(RowSet rowSet, BackupLoaderContext backupLoaderContext);
+    private ScriptExporter scriptExporter;
+    private boolean close;
+
+    public ProxyScriptExporter(ScriptExporter scriptExporter) {
+        this(scriptExporter, true);
+    }
+
+    public ProxyScriptExporter(ScriptExporter scriptExporter, boolean close) {
+        this.scriptExporter = scriptExporter;
+        this.close = close;
+    }
+
+    @Override
+    public void exportScript(String script) throws Exception {
+        scriptExporter.exportScript(script);
+    }
+
+    @Override
+    public void exportScripts(Collection<String> scripts) throws Exception {
+        scriptExporter.exportScripts(scripts);
+    }
+
+    @Override
+    public void open() throws Exception {
+        scriptExporter.open();
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (isClose()) {
+            scriptExporter.close();
+        }
+    }
+
+    public boolean isClose() {
+        return close;
+    }
+
+    public void setClose(boolean close) {
+        this.close = close;
+    }
 }

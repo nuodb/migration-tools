@@ -31,28 +31,49 @@ import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
+import com.nuodb.migrator.jdbc.JdbcUtils;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.MigrationMode;
+import org.slf4j.Logger;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+
+import static com.nuodb.migrator.spec.MigrationMode.DATA;
+import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
+import static com.nuodb.migrator.utils.Collections.contains;
+import static java.lang.Long.MAX_VALUE;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class SimpleBackupLoaderContext implements BackupLoaderContext {
 
+    protected final transient Logger logger = getLogger(getClass());
+
     private Backup backup;
     private BackupOps backupOps;
     private Map backupOpsContext;
+    private Database database;
+    private Executor executor;
     private FormatFactory formatFactory;
     private ConnectionSpec sourceSpec;
+    private Collection<MigrationMode> migrationModes;
     private Session sourceSession;
     private SessionFactory sourceSessionFactory;
     private ConnectionSpec targetSpec;
     private Session targetSession;
     private SessionFactory targetSessionFactory;
+    private ScriptExporter scriptExporter;
     private ScriptGeneratorManager scriptGeneratorManager;
     private ValueFormatRegistry valueFormatRegistry;
     private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
@@ -88,6 +109,26 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
+    public Database getDatabase() {
+        return database;
+    }
+
+    @Override
+    public void setDatabase(Database database) {
+        this.database = database;
+    }
+
+    @Override
+    public Executor getExecutor() {
+        return executor;
+    }
+
+    @Override
+    public void setExecutor(Executor executor) {
+        this.executor = executor;
+    }
+
+    @Override
     public FormatFactory getFormatFactory() {
         return formatFactory;
     }
@@ -95,6 +136,25 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     @Override
     public void setFormatFactory(FormatFactory formatFactory) {
         this.formatFactory = formatFactory;
+    }
+
+    @Override
+    public boolean isLoadData() {
+        return contains(migrationModes, DATA);
+    }
+
+    @Override
+    public boolean isLoadSchema() {
+        return contains(migrationModes, SCHEMA);
+    }
+
+    @Override
+    public Collection<MigrationMode> getMigrationModes() {
+        return migrationModes;
+    }
+
+    public void setMigrationModes(Collection<MigrationMode> migrationModes) {
+        this.migrationModes = migrationModes;
     }
 
     @Override
@@ -158,6 +218,16 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
+    public ScriptExporter getScriptExporter() {
+        return scriptExporter;
+    }
+
+    @Override
+    public void setScriptExporter(ScriptExporter scriptExporter) {
+        this.scriptExporter = scriptExporter;
+    }
+
+    @Override
     public ScriptGeneratorManager getScriptGeneratorManager() {
         return scriptGeneratorManager;
     }
@@ -185,5 +255,25 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     @Override
     public void setRowSetMapper(RowSetMapper rowSetMapper) {
         this.rowSetMapper = rowSetMapper;
+    }
+
+    @Override
+    public void close(boolean awaitTermination) {
+        if (executor instanceof ExecutorService) {
+            ExecutorService service = (ExecutorService) executor;
+            service.shutdown();
+            try {
+                if (awaitTermination) {
+                    service.awaitTermination(MAX_VALUE, SECONDS);
+                }
+            } catch (InterruptedException exception) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Executor termination interrupted", exception);
+                }
+            }
+        }
+        JdbcUtils.close(sourceSession);
+        JdbcUtils.close(targetSession);
+        JdbcUtils.close(scriptExporter);
     }
 }

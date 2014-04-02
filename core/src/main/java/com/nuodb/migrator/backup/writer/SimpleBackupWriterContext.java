@@ -31,16 +31,22 @@ import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
+import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
+import com.nuodb.migrator.spec.MigrationMode;
+import com.nuodb.migrator.utils.Collections;
 import org.slf4j.Logger;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
+import static com.nuodb.migrator.spec.MigrationMode.DATA;
+import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 import static java.lang.Long.MAX_VALUE;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -61,6 +67,7 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     private String format;
     private Map<String, Object> formatAttributes;
     private FormatFactory formatFactory;
+    private Collection<MigrationMode> migrationModes;
     private Session sourceSession;
     private SessionFactory sourceSessionFactory;
     private TimeZone timeZone;
@@ -158,6 +165,25 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     }
 
     @Override
+    public boolean isWriteData() {
+        return migrationModes != null && migrationModes.contains(DATA);
+    }
+
+    @Override
+    public boolean isWriteSchema() {
+        return migrationModes != null && migrationModes.contains(SCHEMA);
+    }
+
+    @Override
+    public Collection<MigrationMode> getMigrationModes() {
+        return migrationModes;
+    }
+
+    public void setMigrationModes(Collection<MigrationMode> migrationModes) {
+        this.migrationModes = migrationModes;
+    }
+
+    @Override
     public Session getSourceSession() {
         return sourceSession;
     }
@@ -223,5 +249,6 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
             }
         }
         exportQueryManager.close();
+        JdbcUtils.close(sourceSession);
     }
 }

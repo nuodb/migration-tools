@@ -30,44 +30,34 @@ package com.nuodb.migrator.dump;
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.writer.BackupWriter;
-import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
-import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
-import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.job.HasServicesJobBase;
-import com.nuodb.migrator.spec.*;
+import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.DumpJobSpec;
+import com.nuodb.migrator.spec.MetaDataSpec;
+import com.nuodb.migrator.spec.MigrationMode;
+import com.nuodb.migrator.spec.QuerySpec;
+import com.nuodb.migrator.spec.ResourceSpec;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.META_DATA_SPEC;
 import static com.nuodb.migrator.backup.writer.BackupWriter.THREADS;
 import static com.nuodb.migrator.context.ContextUtils.createService;
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationSetter;
-import static com.nuodb.migrator.spec.MigrationMode.DATA;
-import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
-import static com.nuodb.migrator.utils.Collections.contains;
-import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static java.sql.Connection.*;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings({"unchecked", "ToArrayCallWithZeroLengthArrayArgument"})
+@SuppressWarnings({"all"})
 public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     private BackupWriter backupWriter;
-    private Session sourceSession;
 
     public DumpJob() {
     }
@@ -80,24 +70,20 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
     protected void init() throws Exception {
         super.init();
 
-        SessionFactory sessionFactory = createSourceSessionFactory();
-        Session session = sessionFactory.openSession();
-        setSourceSession(session);
-
         BackupWriter backupWriter = new BackupWriter();
         backupWriter.setBackupOps(createBackupOps());
-        backupWriter.setQueryLimit(getQueryLimit());
-        backupWriter.setThreads(getThreads() != null ? getThreads() : THREADS);
-        backupWriter.setTimeZone(getTimeZone());
         backupWriter.setFormat(getFormat());
         backupWriter.setFormatAttributes(getFormatAttributes());
         backupWriter.setFormatFactory(createFormatFactory());
-        backupWriter.setSourceSession(session);
-        backupWriter.setSourceSessionFactory(sessionFactory);
-        backupWriter.setValueFormatRegistry(createValueFormatRegistryResolver().
-                resolve(session.getConnection()));
-        backupWriter.setWriteData(contains(getMigrationModes(), DATA));
-        backupWriter.setWriteSchema(contains(getMigrationModes(), SCHEMA));
+        backupWriter.setInspectionManager(createInspectionManager());
+        backupWriter.setMetaDataSpec(getMetaDataSpec());
+        backupWriter.setQueryLimit(getQueryLimit());
+        backupWriter.setQuerySpecs(getQuerySpecs());
+        backupWriter.setSourceSpec(getSourceSpec());
+        backupWriter.setSourceSessionFactory(createSourceSessionFactory());
+        backupWriter.setTimeZone(getTimeZone());
+        backupWriter.setThreads(getThreads() != null ? getThreads() : THREADS);
+        backupWriter.setValueFormatRegistryResolver(createValueFormatRegistryResolver());
         setBackupWriter(backupWriter);
     }
 
@@ -125,23 +111,7 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
     @Override
     public void execute() throws Exception {
         try {
-            Database database = inspect();
-            BackupWriter backupWriter = getBackupWriter();
-            if (backupWriter.isWriteData()) {
-                Collection<TableSpec> tableSpecs = getTableSpecs();
-                if (isEmpty(tableSpecs)) {
-                    backupWriter.addTables(database, getTableTypes());
-                } else {
-                    backupWriter.addTables(tableSpecs);
-                }
-                for (QuerySpec querySpec : getQuerySpecs()) {
-                    backupWriter.addQuery(querySpec.getQuery());
-                }
-            }
-            backupWriter.setDatabase(backupWriter.isWriteSchema() ? database : null);
-            Map context = newHashMap();
-            context.put(META_DATA_SPEC, getMetaDataSpec());
-            backupWriter.write(context);
+            getBackupWriter().write();
         } catch (MigratorException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -150,15 +120,7 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
     }
 
     @Override
-    public void release() throws Exception {
-        close(sourceSession);
-    }
-
-    protected Database inspect() throws SQLException {
-        InspectionScope inspectionScope = new TableInspectionScope(
-                getSourceSpec().getCatalog(), getSourceSpec().getSchema(), getTableTypes());
-        return createInspectionManager().inspect(getSourceSession().getConnection(), inspectionScope,
-                getObjectTypes().toArray(new MetaDataType[0])).getObject(DATABASE);
+    public void close() throws Exception {
     }
 
     public BackupWriter getBackupWriter() {
@@ -167,14 +129,6 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     public void setBackupWriter(BackupWriter backupWriter) {
         this.backupWriter = backupWriter;
-    }
-
-    public Session getSourceSession() {
-        return sourceSession;
-    }
-
-    public void setSourceSession(Session sourceSession) {
-        this.sourceSession = sourceSession;
     }
 
     protected BackupOps getBackupOps() {
@@ -189,51 +143,39 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         return getOutputSpec().getAttributes();
     }
 
-    protected String getPath() {
-        return getOutputSpec().getPath();
-    }
-
     protected Collection<MigrationMode> getMigrationModes() {
         return getJobSpec().getMigrationModes();
-    }
-
-    protected Integer getThreads() {
-        return getJobSpec().getThreads();
-    }
-
-    protected ResourceSpec getOutputSpec() {
-        return getJobSpec().getOutputSpec();
-    }
-
-    protected Collection<QuerySpec> getQuerySpecs() {
-        return getJobSpec().getQuerySpecs();
     }
 
     protected MetaDataSpec getMetaDataSpec() {
         return getJobSpec().getMetaDataSpec();
     }
 
-    protected Collection<TableSpec> getTableSpecs() {
-        return getJobSpec().getTableSpecs();
+    protected ResourceSpec getOutputSpec() {
+        return getJobSpec().getOutputSpec();
     }
 
-    protected Collection<MetaDataType> getObjectTypes() {
-        return getJobSpec().getObjectTypes();
+    protected String getPath() {
+        return getOutputSpec().getPath();
     }
 
-    protected String[] getTableTypes() {
-        return getJobSpec().getTableTypes();
+    public QueryLimit getQueryLimit() {
+        return getJobSpec().getQueryLimit();
     }
 
-    protected TimeZone getTimeZone() {
-        return getJobSpec().getTimeZone();
+    protected Collection<QuerySpec> getQuerySpecs() {
+        return getJobSpec().getQuerySpecs();
     }
 
     protected ConnectionSpec getSourceSpec() {
         return getJobSpec().getSourceSpec();
     }
 
-    public QueryLimit getQueryLimit() {
-        return getJobSpec().getQueryLimit();
+    protected TimeZone getTimeZone() {
+        return getJobSpec().getTimeZone();
+    }
+
+    protected Integer getThreads() {
+        return getJobSpec().getThreads();
     }
 }

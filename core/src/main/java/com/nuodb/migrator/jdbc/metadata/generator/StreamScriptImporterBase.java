@@ -39,10 +39,8 @@ import static com.google.common.collect.Lists.newArrayList;
 public abstract class StreamScriptImporterBase extends ScriptImporterBase implements StreamScriptProcessor {
 
     private String encoding = ENCODING;
-    private String commentStart = COMMENT_START;
     private String delimiter = DELIMITER;
-    private boolean closeStream = CLOSE_STREAM;
-
+    private String commentStart = COMMENT_START;
     private transient BufferedReader reader;
 
     @Override
@@ -81,7 +79,7 @@ public abstract class StreamScriptImporterBase extends ScriptImporterBase implem
 
     @Override
     protected void doClose() throws Exception {
-        if (reader != null && isCloseStream()) {
+        if (reader != null) {
             reader.close();
         }
     }
@@ -97,16 +95,6 @@ public abstract class StreamScriptImporterBase extends ScriptImporterBase implem
     }
 
     @Override
-    public String getCommentStart() {
-        return commentStart;
-    }
-
-    @Override
-    public void setCommentStart(String commentStart) {
-        this.commentStart = commentStart;
-    }
-
-    @Override
     public String getDelimiter() {
         return delimiter;
     }
@@ -117,12 +105,12 @@ public abstract class StreamScriptImporterBase extends ScriptImporterBase implem
     }
 
     @Override
-    public boolean isCloseStream() {
-        return closeStream;
+    public String getCommentStart() {
+        return commentStart;
     }
 
     @Override
-    public void setCloseStream(boolean closeStream) {
-        this.closeStream = closeStream;
+    public void setCommentStart(String commentStart) {
+        this.commentStart = commentStart;
     }
 }
