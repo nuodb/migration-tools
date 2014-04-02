@@ -155,7 +155,6 @@ public class DumpJobTest {
         Column column2 = table.addColumn("column2");
         column2.setTypeCode(Types.LONGVARCHAR);
 
-        willReturn(database).given(dumpJob).inspect();
         willReturn(backupWriter).given(dumpJob).getBackupWriter();
 
         jobExecutor.execute(jobContext);
