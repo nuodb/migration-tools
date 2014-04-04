@@ -1,8 +1,3 @@
-#!/bin/bash
-
-set -e
-set -o pipefail
-
 NUODB_HOME="${NUODB_HOME:-/opt/nuodb}"
 NUODB_SERVER="${NUODB_SERVER:-localhost}"
 NUODB_DATABASE="${NUODB_DATABASE:-test}"
