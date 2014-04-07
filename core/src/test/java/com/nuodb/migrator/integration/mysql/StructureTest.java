@@ -184,6 +184,11 @@ public class StructureTest extends MigrationTestBase {
                 // tabColDetailsMap.get(colNames[6]));
 
                 // String val = tabColDetailsMap.get(colNames[2]);
+                String defaultVal = rs2.getString("DEFAULTVALUE");
+                if(defaultVal == null) {
+                	// Fix for travis failure 
+                	defaultVal = "'NULL'";
+                }
                 assertEquals(rs2.getString("DEFAULTVALUE"), MySQLTypes
                         .getMappedDefault(tabColDetailsMap.get(colNames[4]),
                                 tabColDetailsMap.get(colNames[2])), "DEFAULTVALUE of column "

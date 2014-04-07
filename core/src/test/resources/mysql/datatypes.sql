@@ -356,8 +356,8 @@ CREATE TABLE testdata_timestamp (
 `c3` TIMESTAMP
 );
 
-# insert into testdata_timestamp values('2012-01-01 00:00:01.954321','1986-12-29 23:45:59','2038-01-19 03:14:07.999999');
-insert into testdata_timestamp values('2012-01-01 00:00:01.954321','1986-12-29 23:45:59','2031-01-19 03:14:07.999999');
+# insert into testdata_timestamp values('2012-01-02 00:00:01.954321','1986-12-29 23:45:59','2038-01-19 03:14:07.999999');
+insert into testdata_timestamp values('2012-01-02 00:00:01.954321','1986-12-29 23:45:59','2031-01-19 03:14:07.999999');
 
 DROP TABLE IF EXISTS testdata_time;
 
