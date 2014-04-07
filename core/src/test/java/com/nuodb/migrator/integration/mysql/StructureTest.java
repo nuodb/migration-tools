@@ -157,6 +157,10 @@ public class StructureTest extends MigrationTestBase {
                 assertEquals(colName, tabColDetailsMap.get(colNames[0]),
                         "Column name " + colName + " of table " + tableName
                                 + " did not match");
+                //System.out.println(rs2.getInt("JDBCTYPE"));
+               /* System.out.println(MySQLTypes
+                        .getMappedJDBCType(tabColDetailsMap.get(colNames[4]),
+                                tabColDetailsMap.get(colNames[10])));*/
                 assertEquals(rs2.getInt("JDBCTYPE"), MySQLTypes
                         .getMappedJDBCType(tabColDetailsMap.get(colNames[4]),
                                 tabColDetailsMap.get(colNames[10])), "JDBCTYPE of column "
@@ -165,6 +169,7 @@ public class StructureTest extends MigrationTestBase {
                 // + tabColDetailsMap.get(colNames[4]) + ",");
                 // System.out.println("mysqlval="
                 // + tabColDetailsMap.get(colNames[5]));
+     
                 assertEquals(rs2.getString("LENGTH"), MySQLTypes
                         .getMappedLength(tabColDetailsMap.get(colNames[4]),
                                 tabColDetailsMap.get(colNames[10]),
@@ -515,6 +520,7 @@ public class StructureTest extends MigrationTestBase {
     /*
      * test the precisions and scale are migrated properly
      */
+    
     public void testPrecisions() throws Exception {
         String sqlStr1 = "select * from precision1";
         String sqlStr2 = "select * from precision2";
