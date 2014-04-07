@@ -190,11 +190,13 @@ public class StructureTest extends MigrationTestBase {
 						tabColDetailsMap.get(colNames[2]));
 
 				// normalize null values
-				if (actualVal == null || "'NULL'".equalsIgnoreCase(actualVal)) {
+				if (actualVal == null || "'NULL'".equalsIgnoreCase(actualVal)
+						|| "NULL".equalsIgnoreCase(actualVal)) {
 					actualVal = "'NULL'";
 				}
 				if (expectedVal == null
-						|| "'NULL'".equalsIgnoreCase(expectedVal)) {
+						|| "'NULL'".equalsIgnoreCase(expectedVal)
+						|| "NULL".equalsIgnoreCase(expectedVal)) {
 					expectedVal = "'NULL'";
 				}
 				assertEquals(actualVal, expectedVal,
