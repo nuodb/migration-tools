@@ -28,7 +28,6 @@
 package com.nuodb.migrator.dump;
 
 import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.writer.BackupWriter;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
@@ -45,7 +44,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import static com.nuodb.migrator.backup.writer.BackupWriter.THREADS;
-import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newTransactionIsolationSetter;
@@ -71,7 +69,6 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         super.init();
 
         BackupWriter backupWriter = new BackupWriter();
-        backupWriter.setBackupOps(createBackupOps());
         backupWriter.setFormat(getFormat());
         backupWriter.setFormatAttributes(getFormatAttributes());
         backupWriter.setFormatFactory(createFormatFactory());
@@ -85,12 +82,6 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         backupWriter.setThreads(getThreads() != null ? getThreads() : THREADS);
         backupWriter.setValueFormatRegistryResolver(createValueFormatRegistryResolver());
         setBackupWriter(backupWriter);
-    }
-
-    protected BackupOps createBackupOps() {
-        BackupOps backupOps = createService(getBackupOps(), BackupOps.class);
-        backupOps.setPath(getPath());
-        return backupOps;
     }
 
     protected SessionFactory createSourceSessionFactory() {
@@ -111,7 +102,8 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
     @Override
     public void execute() throws Exception {
         try {
-            getBackupWriter().write();
+            BackupWriter backupWriter = getBackupWriter();
+            backupWriter.write(getPath());
         } catch (MigratorException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -129,10 +121,6 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     public void setBackupWriter(BackupWriter backupWriter) {
         this.backupWriter = backupWriter;
-    }
-
-    protected BackupOps getBackupOps() {
-        return getJobSpec().getBackupOps();
     }
 
     protected String getFormat() {

@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.spec;
 
-import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.query.InsertType;
 
@@ -45,7 +44,6 @@ import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
  */
 public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
-    private BackupOps backupOps;
     private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);
     private Integer threads;
     private ConnectionSpec targetSpec;
@@ -54,14 +52,6 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
     private InsertType insertType;
     private CommitStrategy commitStrategy;
     private Map<String, InsertType> tableInsertTypes = newHashMap();
-
-    public BackupOps getBackupOps() {
-        return backupOps;
-    }
-
-    public void setBackupOps(BackupOps backupOps) {
-        this.backupOps = backupOps;
-    }
 
     public Collection<MigrationMode> getMigrationModes() {
         return migrationModes;
@@ -135,7 +125,6 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
         LoadJobSpec that = (LoadJobSpec) o;
 
-        if (backupOps != null ? !backupOps.equals(that.backupOps) : that.backupOps != null)
         if (commitStrategy != null ? !commitStrategy.equals(that.commitStrategy) : that.commitStrategy != null)
             return false;
         if (inputSpec != null ? !inputSpec.equals(that.inputSpec) : that.inputSpec != null) return false;
@@ -154,7 +143,6 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (backupOps != null ? backupOps.hashCode() : 0);
         result = 31 * result + (commitStrategy != null ? commitStrategy.hashCode() : 0);
         result = 31 * result + (inputSpec != null ? inputSpec.hashCode() : 0);
         result = 31 * result + (insertType != null ? insertType.hashCode() : 0);

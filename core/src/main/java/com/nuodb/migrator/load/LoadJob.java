@@ -28,30 +28,23 @@
 package com.nuodb.migrator.load;
 
 import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.loader.BackupLoader;
 import com.nuodb.migrator.backup.loader.InsertTypeFactory;
 import com.nuodb.migrator.backup.loader.SimpleInsertTypeFactory;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
-import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
-import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
-import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
-import com.nuodb.migrator.job.HasServicesJobBase;
 import com.nuodb.migrator.job.ScriptGeneratorJobBase;
-import com.nuodb.migrator.spec.*;
-import com.nuodb.migrator.utils.PrioritySet;
+import com.nuodb.migrator.spec.ConnectionSpec;
+import com.nuodb.migrator.spec.LoadJobSpec;
+import com.nuodb.migrator.spec.MigrationMode;
+import com.nuodb.migrator.spec.ResourceSpec;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 
 import static com.nuodb.migrator.backup.loader.BackupLoader.THREADS;
-import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
 
@@ -72,7 +65,6 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
         super.init();
 
         BackupLoader backupLoader = new BackupLoader();
-        backupLoader.setBackupOps(createBackupOps());
         backupLoader.setCommitStrategy(getCommitStrategy());
         backupLoader.setDialectResolver(createDialectResolver());
         backupLoader.setFormatAttributes(getFormatAttributes());
@@ -100,12 +92,6 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
         return new SimpleInsertTypeFactory(getInsertType(), getTableInsertTypes());
     }
 
-    protected BackupOps createBackupOps() {
-        BackupOps backupOps = createService(getBackupOps(), BackupOps.class);
-        backupOps.setPath(getPath());
-        return backupOps;
-    }
-
     protected SessionFactory createTargetSessionFactory() {
         SessionFactory targetSessionFactory =
                 newSessionFactory(createConnectionProviderFactory().
@@ -117,7 +103,8 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
     @Override
     public void execute() throws Exception {
         try {
-            getBackupLoader().load();
+            BackupLoader backupLoader = getBackupLoader();
+            backupLoader.load(getPath());
         } catch (MigratorException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -135,10 +122,6 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
     protected void setBackupLoader(BackupLoader backupLoader) {
         this.backupLoader = backupLoader;
-    }
-
-    protected BackupOps getBackupOps() {
-        return getJobSpec().getBackupOps();
     }
 
     protected CommitStrategy getCommitStrategy() {

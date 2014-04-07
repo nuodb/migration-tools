@@ -69,6 +69,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.META_DATA_SPEC;
+import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
@@ -95,7 +96,6 @@ public class BackupWriter {
 
     protected final transient Logger logger = getLogger(getClass());
 
-    private BackupOps backupOps;
     private Database database;
     private Executor executor;
     private InspectionManager inspectionManager;
@@ -186,19 +186,29 @@ public class BackupWriter {
         writeRowSets.add(writeRowSet);
     }
 
-    public Backup write() throws Exception {
-        return write(newHashMap());
+    public Backup write(String path) throws Exception {
+        return write(path, newHashMap());
     }
 
-    public Backup write(Map backupOpsContext) throws Exception {
-        return write(createBackupWriterContext(backupOpsContext));
+    public Backup write(String path, Map context) throws Exception {
+        return write(createBackupOps(path), context);
     }
 
-    protected BackupWriterContext createBackupWriterContext(Map backupOpsContext) throws Exception {
+    protected Backup write(BackupOps backupOps, Map context) throws Exception {
+        return write(createBackupWriterContext(backupOps, context));
+    }
+
+    protected BackupOps createBackupOps(String path) {
+        BackupOps backupOps = createService(BackupOps.class);
+        backupOps.setPath(path);
+        return backupOps;
+    }
+
+    protected BackupWriterContext createBackupWriterContext(BackupOps backupOps, Map context) throws Exception {
         BackupWriterContext backupWriterContext = new SimpleBackupWriterContext();
         backupWriterContext.setBackup(createBackup());
-        backupWriterContext.setBackupOps(getBackupOps());
-        backupWriterContext.setBackupOpsContext(backupOpsContext);
+        backupWriterContext.setBackupOps(backupOps);
+        backupWriterContext.setBackupOpsContext(context);
         Executor executor = getExecutor();
         backupWriterContext.setExecutor(executor == null ? createExecutor() : executor);
         backupWriterContext.setWriteRowSetManager(createWriteRowSetManager());
@@ -406,14 +416,6 @@ public class BackupWriter {
     protected Collection<TableSpec> getTableSpecs() {
         final MetaDataSpec metaDataSpec = getMetaDataSpec();
         return metaDataSpec != null ? metaDataSpec.getTableSpecs() : null;
-    }
-
-    public BackupOps getBackupOps() {
-        return backupOps;
-    }
-
-    public void setBackupOps(BackupOps backupOps) {
-        this.backupOps = backupOps;
     }
 
     public Database getDatabase() {

@@ -44,7 +44,6 @@ import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
  */
 public class DumpJobSpec extends JobSpecBase {
 
-    private BackupOps backupOps;
     private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);
     private Integer threads;
     private TimeZone timeZone;
@@ -53,14 +52,6 @@ public class DumpJobSpec extends JobSpecBase {
     private MetaDataSpec metaDataSpec = new MetaDataSpec();
     private Collection<QuerySpec> querySpecs = newArrayList();
     private QueryLimit queryLimit;
-
-    public BackupOps getBackupOps() {
-        return backupOps;
-    }
-
-    public void setBackupOps(BackupOps backupOps) {
-        this.backupOps = backupOps;
-    }
 
     public Collection<MigrationMode> getMigrationModes() {
         return migrationModes;
@@ -158,7 +149,6 @@ public class DumpJobSpec extends JobSpecBase {
 
         DumpJobSpec that = (DumpJobSpec) o;
 
-        if (backupOps != null ? !backupOps.equals(that.backupOps) : that.backupOps != null) return false;
         if (metaDataSpec != null ? !metaDataSpec.equals(that.metaDataSpec) : that.metaDataSpec != null) return false;
         if (migrationModes != null ? !migrationModes.equals(that.migrationModes) : that.migrationModes != null)
             return false;
@@ -175,7 +165,6 @@ public class DumpJobSpec extends JobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (backupOps != null ? backupOps.hashCode() : 0);
         result = 31 * result + (migrationModes != null ? migrationModes.hashCode() : 0);
         result = 31 * result + (threads != null ? threads.hashCode() : 0);
         result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);

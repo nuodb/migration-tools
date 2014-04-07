@@ -28,8 +28,6 @@
 package com.nuodb.migrator.backup.loader;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
@@ -85,6 +83,7 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
@@ -111,7 +110,6 @@ public class BackupLoader {
 
     protected final transient Logger logger = getLogger(getClass());
 
-    private BackupOps backupOps;
     private Database database;
     private CommitStrategy commitStrategy;
     private DialectResolver dialectResolver;
@@ -137,20 +135,29 @@ public class BackupLoader {
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
     private boolean useExplicitDefaults;
 
-    public Backup load() throws Exception {
-        return load(newHashMap());
+    public Backup load(String path) throws Exception {
+        return load(path, newHashMap());
     }
 
-    public Backup load(Map backupOpsContext) throws Exception {
-        return load(createBackupLoaderContext(backupOpsContext));
+    public Backup load(String path, Map context) throws Exception {
+        return load(createBackupOps(path), context);
     }
 
-    protected BackupLoaderContext createBackupLoaderContext(Map backupOpsContext) throws Exception {
+    protected BackupOps createBackupOps(String path) {
+        BackupOps backupOps = createService(BackupOps.class);
+        backupOps.setPath(path);
+        return backupOps;
+    }
+
+    protected Backup load(BackupOps backupOps, Map context) throws Exception {
+        return load(createBackupLoaderContext(backupOps, context));
+    }
+
+    protected BackupLoaderContext createBackupLoaderContext(BackupOps backupOps, Map context) throws Exception {
         BackupLoaderContext backupLoaderContext = new SimpleBackupLoaderContext();
-        Backup backup = getBackupOps().read(backupOpsContext);
-        backupLoaderContext.setBackup(backup);
-        backupLoaderContext.setBackupOps(getBackupOps());
-        backupLoaderContext.setBackupOpsContext(backupOpsContext);
+        backupLoaderContext.setBackup(backupOps.read(context));
+        backupLoaderContext.setBackupOps(backupOps);
+        backupLoaderContext.setBackupOpsContext(context);
         backupLoaderContext.setCommitStrategy(getCommitStrategy());
 
         Executor executor = getExecutor();
@@ -327,7 +334,7 @@ public class BackupLoader {
         }
     }
 
-    // TODO: multi-threaded data load
+    // TODO: multi-threaded data load on table level in place, continue with row level
     protected void loadData(BackupLoaderContext backupLoaderContext) throws Exception {
         Database database = getDatabase();
         backupLoaderContext.setDatabase(database != null ? database :
@@ -424,14 +431,6 @@ public class BackupLoader {
     protected String[] getTableTypes() {
         final MetaDataSpec metaDataSpec = getMetaDataSpec();
         return metaDataSpec != null ? metaDataSpec.getTableTypes() : null;
-    }
-
-    public BackupOps getBackupOps() {
-        return backupOps;
-    }
-
-    public void setBackupOps(BackupOps backupOps) {
-        this.backupOps = backupOps;
     }
 
     public CommitStrategy getCommitStrategy() {
