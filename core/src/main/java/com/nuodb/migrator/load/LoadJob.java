@@ -73,6 +73,7 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
         BackupLoader backupLoader = new BackupLoader();
         backupLoader.setBackupOps(createBackupOps());
+        backupLoader.setCommitStrategy(getCommitStrategy());
         backupLoader.setDialectResolver(createDialectResolver());
         backupLoader.setFormatAttributes(getFormatAttributes());
         backupLoader.setFormatFactory(createFormatFactory());
@@ -138,6 +139,10 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
     protected BackupOps getBackupOps() {
         return getJobSpec().getBackupOps();
+    }
+
+    protected CommitStrategy getCommitStrategy() {
+        return getJobSpec().getCommitStrategy();
     }
 
     protected Map<String, Object> getFormatAttributes() {

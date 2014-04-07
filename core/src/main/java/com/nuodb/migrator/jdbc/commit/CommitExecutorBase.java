@@ -30,14 +30,47 @@ package com.nuodb.migrator.jdbc.commit;
 import com.nuodb.migrator.jdbc.query.Query;
 
 import java.sql.Statement;
-import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface CommitStrategy {
+public abstract class CommitExecutorBase<S extends Statement> implements CommitExecutor<S> {
 
-    void setAttributes(Map<String, Object> attributes);
+    protected S statement;
+    protected Query query;
 
-    CommitExecutor createCommitExecutor(Statement statement, Query query);
+    public CommitExecutorBase(S statement, Query query) {
+        this.statement = statement;
+        this.query = query;
+    }
+
+    @Override
+    public S getStatement() {
+        return statement;
+    }
+
+    @Override
+    public Query getQuery() {
+        return query;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CommitExecutorBase that = (CommitExecutorBase) o;
+
+        if (query != null ? !query.equals(that.query) : that.query != null) return false;
+        if (statement != null ? !statement.equals(that.statement) : that.statement != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = statement != null ? statement.hashCode() : 0;
+        result = 31 * result + (query != null ? query.hashCode() : 0);
+        return result;
+    }
 }

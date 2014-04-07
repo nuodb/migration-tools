@@ -25,19 +25,12 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.commit;
+package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.jdbc.query.Query;
-
-import java.sql.Statement;
-import java.util.Map;
+import com.nuodb.migrator.jdbc.session.SimpleWorkManager;
 
 /**
  * @author Sergey Bushik
  */
-public interface CommitStrategy {
-
-    void setAttributes(Map<String, Object> attributes);
-
-    CommitExecutor createCommitExecutor(Statement statement, Query query);
+public class SimpleLoadRowSetManager extends SimpleWorkManager implements LoadRowSetManager {
 }

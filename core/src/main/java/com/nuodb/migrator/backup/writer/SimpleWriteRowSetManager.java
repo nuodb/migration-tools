@@ -53,16 +53,16 @@ import static com.nuodb.migrator.backup.format.value.ValueType.toAlias;
 /**
  * @author Sergey Bushik
  */
-public class SimpleExportQueryManager extends SimpleWorkManager implements ExportQueryManager {
+public class SimpleWriteRowSetManager extends SimpleWorkManager implements WriteRowSetManager {
 
-    private final Map<ExportQuery, Boolean> exportQueryStartMap = newConcurrentMap();
-    private final Multimap<ExportQuery, ExportQueryWork> exportQueryWorkMap = newSetMultimap(
-            Maps.<ExportQuery, Collection<ExportQueryWork>>newHashMap(), new Supplier<Set<ExportQueryWork>>() {
+    private final Map<WriteRowSet, Boolean> writeRowSetStartMap = newConcurrentMap();
+    private final Multimap<WriteRowSet, WriteRowSetWork> writeRowSetMap = newSetMultimap(
+            Maps.<WriteRowSet, Collection<WriteRowSetWork>>newHashMap(), new Supplier<Set<WriteRowSetWork>>() {
         @Override
-        public Set<ExportQueryWork> get() {
-            return newTreeSet(new Comparator<ExportQueryWork>() {
+        public Set<WriteRowSetWork> get() {
+            return newTreeSet(new Comparator<WriteRowSetWork>() {
                 @Override
-                public int compare(ExportQueryWork w1, ExportQueryWork w2) {
+                public int compare(WriteRowSetWork w1, WriteRowSetWork w2) {
                     return Ints.compare(w1.getQuerySplit().getSplitIndex(), w2.getQuerySplit().getSplitIndex());
                 }
             });
@@ -70,53 +70,53 @@ public class SimpleExportQueryManager extends SimpleWorkManager implements Expor
     });
 
     @Override
-    public void exportStart(ExportQuery exportQuery, Work work) {
-        ExportQueryWork exportQueryWork = (ExportQueryWork) work;
-        Boolean start = exportQueryStartMap.get(exportQuery);
+    public void writeStart(WriteRowSet writeRowSet, Work work) {
+        WriteRowSetWork writeRowSetWork = (WriteRowSetWork) work;
+        Boolean start = writeRowSetStartMap.get(writeRowSet);
         if (start == null || !start) {
             Collection<com.nuodb.migrator.backup.Column> columns = newArrayList();
-            for (ValueHandle valueHandle : exportQueryWork.getValueHandleList()) {
+            for (ValueHandle valueHandle : writeRowSetWork.getValueHandleList()) {
                 columns.add(new com.nuodb.migrator.backup.Column(
                         valueHandle.getName(), toAlias(valueHandle.getValueType())));
             }
-            exportQuery.getRowSet().setColumns(columns);
-            exportQueryStartMap.put(exportQueryWork.getExportQuery(), true);
+            writeRowSet.getRowSet().setColumns(columns);
+            writeRowSetStartMap.put(writeRowSetWork.getWriteRowSet(), true);
         }
     }
 
     @Override
-    public boolean canExport(ExportQuery exportQuery, Work work) {
+    public boolean canWrite(WriteRowSet writeRowSet, Work work) {
         return getFailures().isEmpty();
     }
 
     @Override
-    public void exportStart(ExportQuery exportQuery, Work work, Chunk chunk) {
+    public void writeStart(WriteRowSet writeRowSet, Work work, Chunk chunk) {
     }
 
     @Override
-    public void exportRow(ExportQuery exportQuery, Work work, Chunk chunk) {
+    public void writeRow(WriteRowSet writeRowSet, Work work, Chunk chunk) {
         chunk.incrementRowCount();
     }
 
     @Override
-    public void exportEnd(ExportQuery exportQuery, Work work, Chunk chunk) {
-        RowSet rowSet = exportQuery.getRowSet();
+    public void writeEnd(WriteRowSet writeRowSet, Work work, Chunk chunk) {
+        RowSet rowSet = writeRowSet.getRowSet();
         synchronized (rowSet) {
             rowSet.setRowCount(rowSet.getRowCount() + chunk.getRowCount());
         }
     }
 
     @Override
-    public void exportEnd(ExportQuery exportQuery, Work work) {
-        ExportQueryWork exportQueryWork = (ExportQueryWork) work;
-        RowSet rowSet = exportQuery.getRowSet();
+    public void writeEnd(WriteRowSet writeRowSet, Work work) {
+        WriteRowSetWork writeRowSetWork = (WriteRowSetWork) work;
+        RowSet rowSet = writeRowSet.getRowSet();
         synchronized (rowSet) {
-            exportQueryWorkMap.put(exportQuery, exportQueryWork);
+            writeRowSetMap.put(writeRowSet, writeRowSetWork);
             final Collection<Chunk> chunks = newArrayList();
-            all(exportQueryWorkMap.get(exportQuery), new Predicate<ExportQueryWork>() {
+            all(writeRowSetMap.get(writeRowSet), new Predicate<WriteRowSetWork>() {
                 @Override
-                public boolean apply(ExportQueryWork exportQueryWork) {
-                    chunks.addAll(exportQueryWork.getChunks());
+                public boolean apply(WriteRowSetWork writeRowSetWork) {
+                    chunks.addAll(writeRowSetWork.getChunks());
                     return true;
                 }
             });

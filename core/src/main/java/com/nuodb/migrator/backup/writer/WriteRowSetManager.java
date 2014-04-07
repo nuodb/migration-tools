@@ -25,19 +25,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.commit;
+package com.nuodb.migrator.backup.writer;
 
-import com.nuodb.migrator.jdbc.query.Query;
-
-import java.sql.Statement;
-import java.util.Map;
+import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.jdbc.session.Work;
+import com.nuodb.migrator.jdbc.session.WorkManager;
 
 /**
  * @author Sergey Bushik
  */
-public interface CommitStrategy {
+public interface WriteRowSetManager extends WorkManager {
 
-    void setAttributes(Map<String, Object> attributes);
+    boolean canWrite(WriteRowSet writeRowSet, Work work);
 
-    CommitExecutor createCommitExecutor(Statement statement, Query query);
+    void writeStart(WriteRowSet writeRowSet, Work work);
+
+    void writeStart(WriteRowSet writeRowSet, Work work, Chunk chunk);
+
+    void writeRow(WriteRowSet writeRowSet, Work work, Chunk chunk);
+
+    void writeEnd(WriteRowSet writeRowSet, Work work, Chunk chunk);
+
+    void writeEnd(WriteRowSet writeRowSet, Work work);
 }

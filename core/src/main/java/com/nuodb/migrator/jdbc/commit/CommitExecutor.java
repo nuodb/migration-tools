@@ -25,26 +25,23 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.writer;
+package com.nuodb.migrator.jdbc.commit;
 
-import com.nuodb.migrator.backup.Chunk;
-import com.nuodb.migrator.jdbc.session.Work;
-import com.nuodb.migrator.jdbc.session.WorkManager;
+import com.nuodb.migrator.jdbc.query.Query;
+
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Sergey Bushik
  */
-public interface ExportQueryManager extends WorkManager {
+public interface CommitExecutor<S extends Statement> {
 
-    boolean canExport(ExportQuery exportQuery, Work work);
+    S getStatement();
 
-    void exportStart(ExportQuery exportQuery, Work work);
+    Query getQuery();
 
-    void exportStart(ExportQuery exportQuery, Work work, Chunk chunk);
+    void execute() throws SQLException;
 
-    void exportRow(ExportQuery exportQuery, Work work, Chunk chunk);
-
-    void exportEnd(ExportQuery exportQuery, Work work, Chunk chunk);
-
-    void exportEnd(ExportQuery exportQuery, Work work);
+    void finish() throws SQLException;
 }

@@ -25,19 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.commit;
+package com.nuodb.migrator.backup.loader;
 
+import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
-
-import java.sql.Statement;
-import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface CommitStrategy {
+public class LoadRowSet {
 
-    void setAttributes(Map<String, Object> attributes);
+    private RowSet rowSet;
+    private Table table;
+    private Query query;
 
-    CommitExecutor createCommitExecutor(Statement statement, Query query);
+    public LoadRowSet(RowSet rowSet, Table table, Query query) {
+        this.rowSet = rowSet;
+        this.table = table;
+        this.query = query;
+    }
+
+    public RowSet getRowSet() {
+        return rowSet;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public Query getQuery() {
+        return query;
+    }
 }

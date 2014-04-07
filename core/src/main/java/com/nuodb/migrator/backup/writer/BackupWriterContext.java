@@ -41,9 +41,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
-import static com.nuodb.migrator.spec.MigrationMode.DATA;
-import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
-
 /**
  * @author Sergey Bushik
  */
@@ -69,9 +66,9 @@ public interface BackupWriterContext {
 
     void setExecutor(Executor executor);
 
-    ExportQueryManager getExportQueryManager();
+    WriteRowSetManager getWriteRowSetManager();
 
-    void setExportQueryManager(ExportQueryManager exportQueryManager);
+    void setWriteRowSetManager(WriteRowSetManager writeRowSetManager);
 
     String getFormat();
 

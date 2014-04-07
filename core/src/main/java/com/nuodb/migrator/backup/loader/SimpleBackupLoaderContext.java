@@ -32,6 +32,7 @@ import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.jdbc.JdbcUtils;
+import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
@@ -43,6 +44,7 @@ import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
@@ -63,20 +65,25 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     private Backup backup;
     private BackupOps backupOps;
     private Map backupOpsContext;
+    private CommitStrategy commitStrategy;
     private Database database;
     private Executor executor;
     private FormatFactory formatFactory;
-    private ConnectionSpec sourceSpec;
+    private Map<String,Object> formatAttributes;
+    private InsertTypeFactory insertTypeFactory;
+    private LoadRowSetManager loadRowSetManager;
     private Collection<MigrationMode> migrationModes;
+    private ConnectionSpec sourceSpec;
     private Session sourceSession;
     private SessionFactory sourceSessionFactory;
     private ConnectionSpec targetSpec;
+    private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
     private Session targetSession;
     private SessionFactory targetSessionFactory;
     private ScriptExporter scriptExporter;
+    private TimeZone timeZone;
     private ScriptGeneratorManager scriptGeneratorManager;
     private ValueFormatRegistry valueFormatRegistry;
-    private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
 
     @Override
     public Backup getBackup() {
@@ -109,6 +116,16 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
+    public CommitStrategy getCommitStrategy() {
+        return commitStrategy;
+    }
+
+    @Override
+    public void setCommitStrategy(CommitStrategy commitStrategy) {
+        this.commitStrategy = commitStrategy;
+    }
+
+    @Override
     public Database getDatabase() {
         return database;
     }
@@ -129,6 +146,16 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
+    public Map<String, Object> getFormatAttributes() {
+        return formatAttributes;
+    }
+
+    @Override
+    public void setFormatAttributes(Map<String, Object> formatAttributes) {
+        this.formatAttributes = formatAttributes;
+    }
+
+    @Override
     public FormatFactory getFormatFactory() {
         return formatFactory;
     }
@@ -146,6 +173,26 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     @Override
     public boolean isLoadSchema() {
         return contains(migrationModes, SCHEMA);
+    }
+
+    @Override
+    public InsertTypeFactory getInsertTypeFactory() {
+        return insertTypeFactory;
+    }
+
+    @Override
+    public void setInsertTypeFactory(InsertTypeFactory insertTypeFactory) {
+        this.insertTypeFactory = insertTypeFactory;
+    }
+
+    @Override
+    public LoadRowSetManager getLoadRowSetManager() {
+        return loadRowSetManager;
+    }
+
+    @Override
+    public void setLoadRowSetManager(LoadRowSetManager loadRowSetManager) {
+        this.loadRowSetManager = loadRowSetManager;
     }
 
     @Override
@@ -235,6 +282,16 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     @Override
     public void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager) {
         this.scriptGeneratorManager = scriptGeneratorManager;
+    }
+
+    @Override
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    @Override
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
     }
 
     @Override

@@ -31,6 +31,7 @@ import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
+import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
@@ -41,6 +42,7 @@ import com.nuodb.migrator.spec.MigrationMode;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
 /**
@@ -60,6 +62,10 @@ public interface BackupLoaderContext {
 
     void setBackupOpsContext(Map backupOpsContext);
 
+    CommitStrategy getCommitStrategy();
+
+    void setCommitStrategy(CommitStrategy commitStrategy);
+
     Database getDatabase();
 
     void setDatabase(Database database);
@@ -68,6 +74,10 @@ public interface BackupLoaderContext {
 
     void setExecutor(Executor executor);
 
+    Map<String,Object> getFormatAttributes();
+
+    void setFormatAttributes(Map<String,Object> formatAttributes);
+
     FormatFactory getFormatFactory();
 
     void setFormatFactory(FormatFactory formatFactory);
@@ -75,6 +85,14 @@ public interface BackupLoaderContext {
     boolean isLoadData();
 
     boolean isLoadSchema();
+
+    InsertTypeFactory getInsertTypeFactory();
+
+    void setInsertTypeFactory(InsertTypeFactory insertTypeFactory);
+
+    LoadRowSetManager getLoadRowSetManager();
+
+    void setLoadRowSetManager(LoadRowSetManager loadRowSetManager);
 
     Collection<MigrationMode> getMigrationModes();
 
@@ -111,6 +129,10 @@ public interface BackupLoaderContext {
     ScriptGeneratorManager getScriptGeneratorManager();
 
     void setScriptGeneratorManager(ScriptGeneratorManager scriptGeneratorManager);
+
+    TimeZone getTimeZone();
+
+    void setTimeZone(TimeZone timeZone);
 
     ValueFormatRegistry getValueFormatRegistry();
 

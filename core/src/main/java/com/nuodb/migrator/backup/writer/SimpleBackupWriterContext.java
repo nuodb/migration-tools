@@ -36,7 +36,6 @@ import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.spec.MigrationMode;
-import com.nuodb.migrator.utils.Collections;
 import org.slf4j.Logger;
 
 import java.util.Collection;
@@ -63,7 +62,7 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     private Map backupOpsContext;
     private Database database;
     private Executor executor;
-    private ExportQueryManager exportQueryManager;
+    private WriteRowSetManager writeRowSetManager;
     private String format;
     private Map<String, Object> formatAttributes;
     private FormatFactory formatFactory;
@@ -125,13 +124,13 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     }
 
     @Override
-    public ExportQueryManager getExportQueryManager() {
-        return exportQueryManager;
+    public WriteRowSetManager getWriteRowSetManager() {
+        return writeRowSetManager;
     }
 
     @Override
-    public void setExportQueryManager(ExportQueryManager exportQueryManager) {
-        this.exportQueryManager = exportQueryManager;
+    public void setWriteRowSetManager(WriteRowSetManager writeRowSetManager) {
+        this.writeRowSetManager = writeRowSetManager;
     }
 
     @Override
@@ -248,7 +247,7 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
                 }
             }
         }
-        exportQueryManager.close();
+        writeRowSetManager.close();
         JdbcUtils.close(sourceSession);
     }
 }

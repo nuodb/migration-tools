@@ -37,13 +37,13 @@ import java.util.Collection;
 /**
  * @author Sergey Bushik
  */
-public class ExportTable extends ExportQuery {
+public class WriteTableRowSet extends WriteRowSet {
 
     private Table table;
     private String filter;
 
-    public ExportTable(Table table, Collection<? extends Column> columns, String filter,
-                       QuerySplitter querySplitter, RowSet rowSet) {
+    public WriteTableRowSet(Table table, Collection<? extends Column> columns, String filter,
+                            QuerySplitter querySplitter, RowSet rowSet) {
         super(querySplitter, columns, rowSet);
         this.table = table;
         this.filter = filter;

@@ -38,18 +38,18 @@ import java.util.Collection;
  *
  * @author Sergey Bushik
  */
-public class ExportQuery {
+public class WriteRowSet {
 
+    private RowSet rowSet;
     private QuerySplitter querySplitter;
     private Collection<? extends Field> columns;
-    private RowSet rowSet;
 
-    public ExportQuery(QuerySplitter querySplitter, RowSet rowSet) {
+    public WriteRowSet(QuerySplitter querySplitter, RowSet rowSet) {
         this.querySplitter = querySplitter;
         this.rowSet = rowSet;
     }
 
-    public ExportQuery(QuerySplitter querySplitter,
+    public WriteRowSet(QuerySplitter querySplitter,
                        Collection<? extends Field> columns, RowSet rowSet) {
         this.querySplitter = querySplitter;
         this.columns = columns;

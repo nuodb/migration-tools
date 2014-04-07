@@ -80,4 +80,11 @@ public class Collections {
         }
         return collection;
     }
+
+    public static <T> Collection<T> retainAll(Collection<T> collection, Collection<T> retain) {
+        if (collection != null && retain != null) {
+            collection.retainAll(retain);
+        }
+        return collection;
+    }
 }

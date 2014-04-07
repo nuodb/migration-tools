@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
+import com.nuodb.migrator.jdbc.JdbcUtils;
+
 /**
  * @author Sergey Bushik
  */
@@ -41,6 +43,11 @@ public abstract class WorkBase implements Work {
     }
 
     protected void init() throws Exception {
+    }
+
+    @Override
+    public void close() throws Exception {
+        JdbcUtils.close(session);
     }
 
     public Session getSession() {

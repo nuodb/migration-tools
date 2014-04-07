@@ -60,12 +60,12 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class ExportQueryWork extends WorkBase {
+public class WriteRowSetWork extends WorkBase {
 
     private static final String QUERY = "query";
 
     private final BackupWriterContext backupWriterContext;
-    private final ExportQuery exportQuery;
+    private final WriteRowSet writeRowSet;
     private final QuerySplit querySplit;
     private final boolean hasNextQuerySplit;
 
@@ -74,12 +74,12 @@ public class ExportQueryWork extends WorkBase {
     private OutputFormat outputFormat;
     private Collection<Chunk> chunks;
 
-    public ExportQueryWork(BackupWriterContext backupWriterContext, ExportQuery exportQuery,
-                           QuerySplit querySplit, boolean hasNextQuerySplit) {
-        this.backupWriterContext = backupWriterContext;
-        this.exportQuery = exportQuery;
+    public WriteRowSetWork(WriteRowSet writeRowSet, QuerySplit querySplit, boolean hasNextQuerySplit,
+                           BackupWriterContext backupWriterContext) {
+        this.writeRowSet = writeRowSet;
         this.querySplit = querySplit;
         this.hasNextQuerySplit = hasNextQuerySplit;
+        this.backupWriterContext = backupWriterContext;
     }
 
     @Override
@@ -88,18 +88,18 @@ public class ExportQueryWork extends WorkBase {
         resultSet = querySplit.getResultSet(getSession().getConnection(), new StatementCallback() {
             @Override
             public void executeStatement(Statement statement) throws SQLException {
-                dialect.setStreamResults(statement, exportQuery.getColumns() != null);
+                dialect.setStreamResults(statement, writeRowSet.getColumns() != null);
             }
         });
 
         valueHandleList = newBuilder(getSession().getConnection(), resultSet).
                 withDialect(dialect).
-                withFields(exportQuery.getColumns() != null ? exportQuery.getColumns() : FieldFactory
+                withFields(writeRowSet.getColumns() != null ? writeRowSet.getColumns() : FieldFactory
                         .newFieldList(resultSet)).
                 withTimeZone(backupWriterContext.getTimeZone()).
                 withValueFormatRegistry(backupWriterContext.getValueFormatRegistry()).build();
 
-        RowSet rowSet = exportQuery.getRowSet();
+        RowSet rowSet = writeRowSet.getRowSet();
         outputFormat = backupWriterContext.getFormatFactory().createOutputFormat(
                 backupWriterContext.getFormat(), backupWriterContext.getFormatAttributes());
         outputFormat.setRowSet(rowSet);
@@ -113,16 +113,16 @@ public class ExportQueryWork extends WorkBase {
 
     @Override
     public void execute() throws Exception {
-        ExportQueryManager exportQueryManager =
-                backupWriterContext.getExportQueryManager();
-        ExportQuery exportQuery = getExportQuery();
-        exportQueryManager.exportStart(exportQuery, this);
+        WriteRowSetManager writeRowSetManager =
+                backupWriterContext.getWriteRowSetManager();
+        WriteRowSet writeRowSet = getWriteRowSet();
+        writeRowSetManager.writeStart(writeRowSet, this);
 
         ResultSet resultSet = getResultSet();
         OutputFormat outputFormat = getOutputFormat();
 
         Chunk chunk = null;
-        while (exportQueryManager.canExport(exportQuery, this) && resultSet.next()) {
+        while (writeRowSetManager.canWrite(writeRowSet, this) && resultSet.next()) {
             if (chunk == null) {
                 exportStart(chunk = addChunk());
             }
@@ -131,12 +131,12 @@ public class ExportQueryWork extends WorkBase {
                 exportStart(chunk = addChunk());
             }
             outputFormat.write();
-            exportQueryManager.exportRow(exportQuery, this, chunk);
+            writeRowSetManager.writeRow(writeRowSet, this, chunk);
         }
         if (chunk != null) {
             exportEnd(chunk);
         }
-        exportQueryManager.exportEnd(exportQuery, this);
+        writeRowSetManager.writeEnd(writeRowSet, this);
     }
 
     @Override
@@ -149,13 +149,13 @@ public class ExportQueryWork extends WorkBase {
         outputFormat.init();
         outputFormat.writeStart();
 
-        backupWriterContext.getExportQueryManager().exportStart(exportQuery, this, chunk);
+        backupWriterContext.getWriteRowSetManager().writeStart(writeRowSet, this, chunk);
     }
 
     protected void exportEnd(Chunk chunk) throws Exception {
         outputFormat.writeEnd();
         outputFormat.close();
-        backupWriterContext.getExportQueryManager().exportEnd(exportQuery, this, chunk);
+        backupWriterContext.getWriteRowSetManager().writeEnd(writeRowSet, this, chunk);
     }
 
     protected Chunk addChunk() {
@@ -185,11 +185,11 @@ public class ExportQueryWork extends WorkBase {
 
     protected String createRowSetName() {
         String rowSetName;
-        if (exportQuery instanceof ExportTable) {
-            Table table = ((ExportTable) exportQuery).getTable();
+        if (writeRowSet instanceof WriteTableRowSet) {
+            Table table = ((WriteTableRowSet) writeRowSet).getTable();
             rowSetName = table.getQualifiedName(null);
         } else {
-            RowSet rowSet = exportQuery.getRowSet();
+            RowSet rowSet = writeRowSet.getRowSet();
             int rowSetIndex = indexOf(filter(rowSet.getBackup().getRowSets(),
                     instanceOf(QueryRowSet.class)), equalTo(rowSet));
             rowSetName = join(asList(QUERY, rowSetIndex + 1), "-");
@@ -197,8 +197,8 @@ public class ExportQueryWork extends WorkBase {
         return lowerCase(rowSetName);
     }
 
-    public ExportQuery getExportQuery() {
-        return exportQuery;
+    public WriteRowSet getWriteRowSet() {
+        return writeRowSet;
     }
 
     public QuerySplit getQuerySplit() {

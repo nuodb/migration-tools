@@ -47,6 +47,11 @@ public class ProxyScriptExporter implements ScriptExporter {
     }
 
     @Override
+    public void open() throws Exception {
+        scriptExporter.open();
+    }
+
+    @Override
     public void exportScript(String script) throws Exception {
         scriptExporter.exportScript(script);
     }
@@ -54,11 +59,6 @@ public class ProxyScriptExporter implements ScriptExporter {
     @Override
     public void exportScripts(Collection<String> scripts) throws Exception {
         scriptExporter.exportScripts(scripts);
-    }
-
-    @Override
-    public void open() throws Exception {
-        scriptExporter.open();
     }
 
     @Override

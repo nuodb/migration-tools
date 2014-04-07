@@ -32,8 +32,10 @@ import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.Map;
 
+import static com.nuodb.migrator.utils.ValidationUtils.instanceOf;
 import static java.lang.Long.parseLong;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -42,34 +44,12 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  */
 public class BatchCommitStrategy implements CommitStrategy {
 
+    public static final CommitStrategy INSTANCE = new BatchCommitStrategy();
     public static final String ATTRIBUTE_BATCH_SIZE = "batch.size";
 
     public static final long BATCH_SIZE = 1000;
 
-    private transient long batches;
     private long batchSize = BATCH_SIZE;
-
-    @Override
-    public void execute(PreparedStatement statement, Query query) throws SQLException {
-        statement.addBatch();
-        batches++;
-        if (batches > getBatchSize()) {
-            executeBatch(statement);
-        }
-    }
-
-    @Override
-    public void finish(PreparedStatement statement, Query query) throws SQLException {
-        if (batches > 0) {
-            executeBatch(statement);
-        }
-    }
-
-    private void executeBatch(PreparedStatement statement) throws SQLException {
-        statement.executeBatch();
-        statement.getConnection().commit();
-        batches = 0;
-    }
 
     @Override
     public void setAttributes(Map<String, Object> attributes) {
@@ -77,6 +57,39 @@ public class BatchCommitStrategy implements CommitStrategy {
         if (batchSizeValue instanceof String && !isEmpty((String) batchSizeValue)) {
             setBatchSize(parseLong((String) batchSizeValue));
         }
+    }
+
+    @Override
+    public CommitExecutor createCommitExecutor(Statement statement, Query query) {
+        instanceOf(statement, PreparedStatement.class);
+        return new CommitExecutorBase<PreparedStatement>(
+                (PreparedStatement) statement, query) {
+
+            private long batches;
+            private long batchSize = getBatchSize();
+
+            @Override
+            public void execute() throws SQLException {
+                statement.addBatch();
+                batches++;
+                if (batches > batchSize) {
+                    executeBatch();
+                }
+            }
+
+            @Override
+            public void finish() throws SQLException {
+                if (batches > 0) {
+                    executeBatch();
+                }
+            }
+
+            protected void executeBatch() throws SQLException {
+                statement.executeBatch();
+                statement.getConnection().commit();
+                batches = 0;
+            }
+        };
     }
 
     public long getBatchSize() {
