@@ -370,4 +370,4 @@ CREATE TABLE testdata_time (
 
 insert into testdata_time values('11:12:00','23:59:59.9999','00:11:12','11:59:59.954321');
 
-
+commit;
