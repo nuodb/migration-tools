@@ -48,7 +48,21 @@ import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.generator.*;
+import com.nuodb.migrator.jdbc.metadata.generator.ForeignKeyAutoNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.ForeignKeyHashNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.ForeignKeyQualifyNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migrator.jdbc.metadata.generator.IndexAutoNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.IndexHashNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.IndexQualifyNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
+import com.nuodb.migrator.jdbc.metadata.generator.SequenceAutoNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.SequenceHashNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.SequenceQualifyNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.TriggerAutoNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.TriggerHashNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.TriggerQualifyNamingStrategy;
 import com.nuodb.migrator.jdbc.type.JdbcTypeCodes;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
@@ -81,7 +95,6 @@ import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.*;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.MINIMAL;
 import static com.nuodb.migrator.jdbc.metadata.generator.ScriptType.valueOf;
-import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 import static com.nuodb.migrator.utils.Priority.HIGH;
 import static com.nuodb.migrator.utils.Priority.LOW;
@@ -612,8 +625,12 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
-    protected Option createThreadsOption() {
-        return newBasicOptionBuilder().
+    protected Group createExecutorGroup() {
+        GroupBuilder group = newGroupBuilder().
+                withName(getMessage(EXECUTOR_GROUP_NAME)).
+                withRequired(false);
+
+        Option threads = newBasicOptionBuilder().
                 withName(THREADS).
                 withAlias(THREADS_SHORT, OptionFormat.SHORT).
                 withDescription(getMessage(THREADS_OPTION_DESCRIPTION)).
@@ -621,6 +638,8 @@ public class CliRunSupport extends CliSupport {
                         newArgumentBuilder().
                                 withName(getMessage(THREADS_ARGUMENT_NAME)).build()
                 ).build();
+        group.withOption(threads);
+        return group.build();
     }
 
     protected DriverConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {

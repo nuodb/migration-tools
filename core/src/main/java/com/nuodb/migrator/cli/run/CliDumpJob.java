@@ -73,6 +73,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         group.withOption(createMigrationModeGroup());
         group.withOption(createDataMigrationGroup());
         group.withOption(createSchemaMigrationGroup());
+        group.withOption(createExecutorGroup());
         return group.build();
     }
 
@@ -97,7 +98,6 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         group.withOption(createTableGroup());
         group.withOption(createQueryGroup());
         group.withOption(createTimeZoneOption());
-        group.withOption(createThreadsOption());
         group.withOption(createQueryLimitOption());
         return group.build();
     }

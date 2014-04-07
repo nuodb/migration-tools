@@ -59,11 +59,12 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [select statements, optional]
                 [--query=query [query ...]]                             Select statement
             [--time.zone (-z)=time zone]                                Time zone enables date columns to be dumped and reloaded between servers in different time zones
-            [--threads (-t)=[threads]]                                  Number of worker threads to dump data, defaulted to a number of available processors
             [--query.limit=[query limit]]                               Query limit is a maximum number of rows to split a table into chunks with LIMIT {limit} OFFSET {offset} syntax in a database specific way, where each chunk is written to a separate file. If a query limit is not given or is not supported by the migrator for a particular database queries are not split
         [schema migration, optional]
             [--table.type=[table type [table type ...]]]                Comma separated types of tables (TABLE, VIEW, SYSTEM TABLE, GLOBAL TEMPORARY, ALIAS, SYNONYM, etc) to process, by default only TABLE type is processed
             [--meta.data.*=[true | false]]                              Includes or excludes specific meta data type (catalog, schema, table, column, primary.key, index, foreign.key, check, sequence, column.trigger) from processing, by default all objects are included
+        [executor options, optional]
+            [--threads (-t)=[threads]]                                  Number of worker threads, defaults to a number of available processors
 
 ### Load schema & data to a target NuoDB database ###
 
@@ -105,6 +106,8 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--naming.strategy=[naming strategy]]                       Naming strategy to use, either qualify, hash, auto or class name implementing com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy, default is auto
             [--identifier.quoting=[identifier quoting]]                 Identifier quoting policy name, minimal, always or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierQuoting, default is always
             [--identifier.normalizer=[identifier normalizer]]           Identifier transformer to use, available normalizers are noop, standard, lower.case, upper.case or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer, default is noop
+        [executor options, optional]
+            [--threads (-t)=[threads]]                                  Number of worker threads, defaults to a number of available processors
 
 ### Generate a schema for a target NuoDB database ###
 

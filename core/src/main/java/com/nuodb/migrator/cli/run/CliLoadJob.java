@@ -58,6 +58,7 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         group.withOption(createMigrationModeGroup());
         group.withOption(createDataMigrationGroup());
         group.withOption(createSchemaMigrationGroup());
+        group.withOption(createExecutorGroup());
         return group.build();
     }
 
@@ -82,7 +83,6 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         group.withOption(createCommitGroup());
         group.withOption(createInsertTypeGroup());
         group.withOption(createTimeZoneOption());
-        group.withOption(createThreadsOption());
         return group.build();
     }
 
