@@ -184,7 +184,7 @@ public class MySQLTypes implements DatabaseTypes {
 		} else if ("TINYBLOB".equalsIgnoreCase(type)) {
 			return Types.BLOB;
 		} else if ("ENUM".equalsIgnoreCase(type)) {
-			return Types.SMALLINT;
+			return Types.CHAR;
 		} else if ("SET".equalsIgnoreCase(type)) {
 			return Types.CHAR;
 		} else if ("TIME".equalsIgnoreCase(type)) {
@@ -273,7 +273,14 @@ public class MySQLTypes implements DatabaseTypes {
 		} else if ("TINYBLOB".equalsIgnoreCase(type)) {
 			return "255";
 		} else if ("ENUM".equalsIgnoreCase(type)) {
-			return "2";
+			if (length != null && length.equalsIgnoreCase("9")) {
+				return "9";
+			} else if (length != null && length.equalsIgnoreCase("6")) {
+				return "7";
+			} else {
+				return "11";
+			}
+
 		} else if ("SET".equalsIgnoreCase(type)) {
 			if (length != null && length.equalsIgnoreCase("22")) {
 				return "22";
@@ -281,6 +288,8 @@ public class MySQLTypes implements DatabaseTypes {
 				return "19";
 			} else if (length != null && length.equalsIgnoreCase("24")) {
 				return "26";
+			} else if (length != null && length.equalsIgnoreCase("21")) {
+				return "21";
 			} else {
 				return "14";
 			}
@@ -296,6 +305,9 @@ public class MySQLTypes implements DatabaseTypes {
 				|| "TINYINT".equalsIgnoreCase(type)) {
 			return defaultValue == null ? null : "'" + defaultValue + "'";
 		} else if ("TIMESTAMP".equalsIgnoreCase(type)) {
+			if("0000-00-00 00:00:00".equals(defaultValue)) {
+				return "'NULL'";
+			}
 			return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'NOW'" : "'"
 					+ defaultValue + "'";
 		} else if ("char".equalsIgnoreCase(type)) {

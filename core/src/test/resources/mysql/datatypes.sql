@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS `testdata_tinyint`;
 
 CREATE TABLE `testdata_tinyint` (
   `c1` tinyint DEFAULT 0,
@@ -11,6 +12,8 @@ insert into  `testdata_tinyint` ( `c2`,`c3`,`c4`) values(null,127,255);
 insert into  `testdata_tinyint` ( `c2`,`c3`,`c4`) values(89,127,255);
 insert into  `testdata_tinyint` (`c1`,`c3`) values(66,122);
 
+DROP TABLE IF EXISTS `testdata_smallint`;
+
 CREATE TABLE `testdata_smallint` (
   `c1` smallint DEFAULT 1,
   `c2` smallint NULL,
@@ -21,6 +24,8 @@ CREATE TABLE `testdata_smallint` (
 insert into  `testdata_smallint` (`c3`,`c4`) values( -32768,0);
 insert into  `testdata_smallint` (`c2`,`c3`,`c4`) values(null,32767,65535);
 insert into  `testdata_smallint` (`c2`,`c3`,`c4`) values(328,367,5535);
+
+DROP TABLE IF EXISTS `testdata_integer`;
 
 CREATE TABLE `testdata_integer` (
   `c1` int DEFAULT 2,
@@ -33,6 +38,8 @@ insert into  `testdata_integer` (`c3`,`c4`) values(-2147483648,0);
 insert into  `testdata_integer` (`c2`,`c3`,`c4`) values(null,2147483647,4294967295);
 insert into  `testdata_integer` (`c1`,`c3`,`c4`) values(234,-7483648,728);
 
+DROP TABLE IF EXISTS `testdata_mediumint`;
+
 CREATE TABLE `testdata_mediumint` (
    `c1` mediumint DEFAULT 3,
    `c2` mediumint NULL,
@@ -44,6 +51,8 @@ insert into  `testdata_mediumint` (`c3`,`c4`) values(-8388608,0);
 insert into  `testdata_mediumint` (`c2`,`c3`,`c4`) values(null,8388607,16777215);
 insert into  `testdata_mediumint` (`c1`,`c3`,`c4`) values(543,-38608,77215);
 
+DROP TABLE IF EXISTS `testdata_bigint`;
+
 CREATE TABLE `testdata_bigint` (
   `c1` bigint DEFAULT 4,
   `c2` bigint NULL,
@@ -54,6 +63,8 @@ CREATE TABLE `testdata_bigint` (
 insert into  `testdata_bigint` (`c3`,`c4`) values(-9223372036854775808,0);
 insert into  `testdata_bigint` (`c2`,`c3`,`c4`) values(null,9223372036854775807,18446744073709551615);
 insert into  `testdata_bigint` (`c2`,`c3`,`c4`) values(36854775,2036854775807,44073709551615);
+
+DROP TABLE IF EXISTS `testdata_char`;
 
 CREATE TABLE `testdata_char` (
   `c1` char(20) DEFAULT 'xyz',
@@ -70,6 +81,8 @@ insert into  `testdata_char` (`c2`,`c3`,`c4`,`c5`,`c6`) values(null,'S','XYZ','B
 insert into  `testdata_char` (`c1`,`c3`,`c4`,`c5`,`c6`) values('gqcdsxvwlzcrvyrsupoq','M','car\'s','Male\\Female','byke\"s');
 insert into  `testdata_char` (`c1`,`c2`,`c3`,`c4`,`c6`) values('G','A','T',' aBC ','Référence');
 
+DROP TABLE IF EXISTS `testdata_varchar`;
+
 CREATE TABLE `testdata_varchar` (
   `c1` varchar(20) DEFAULT 'default text',
   `c2` varchar(20) NULL,
@@ -85,12 +98,16 @@ insert into  `testdata_varchar` (`c2`,`c3`,`c4`,`c5`,`c6`) values(null,'S','XYZ'
 insert into  `testdata_varchar` (`c1`,`c3`,`c4`,`c5`,`c6`) values('default column',' sample text ','car\'s','Male\\Female','byke\"s');
 insert into  `testdata_varchar` (`c1`,`c2`,`c3`,`c4`,`c6`) values('default column','NULL VALUE ','Text',' aBC ','Référence');
 
+DROP TABLE IF EXISTS `testdata_varchar_max`;
+
 CREATE TABLE `testdata_varchar_max` (
 `c1` varchar(21844) NOT NULL
 );
 
 insert into  `testdata_varchar_max` (`c1`) values('oqgbuzdjvpmqrziamsrmtpketqaxbstsvrreffgqrfkijqnbnjoofdvnyixxndyoqfkiyfkotfqvynwcedqcybyhbabikfgegzvtlfdoffmwogqsmgmjjihdpemedjpuhtolflphainkufpuxyscjjefrzjyfqxmkcjykdyddcltxkzuuyepdmspwesdjrgqhnviqqtwlfostfyovokpokeqjcqfcoagagcfvgovjcdbiphndmfxrkqmifjesszfbbpmkepqiscfogqzrqwmodxrwqrrcoegokpajhuxnqroviqvvbmrztkmfksqlysvkxkchxwemtcexkyptrwbvhmnfuglnbtncrezjttgqigkkjtxhenfnnvbafwiyzskngzbnhtkamyktxugxgmtayzyaeqacfgxsjasznnifwwxhorqngrfnpfqxzbcullznapgpshbhgpxygewvefzwtuzxtnmkkyuzoigeegvxlrcfbbijyxrzyyiqfsewvxtrdebfeaejjlcfzqwaeomukpqdpdcgaxvpmbzreduqbjgniowpkpadfzcokxhdectzxxnqhkqngqornrjvojivzqepqlmgwaeahdzukqmayejfebrushdagrbxceciqmxhcrbrcjnhfwiwygprpimipvhjwhuenfnszykagyrumxuejjgwxysczpsyfrtgvbmuybfrlsqpixzrodhsztwqutufugwwinxwgyoirjhoqpgfsnxxzgsatcamxvflrnaipwijkwagskghaysjkdgyoajmolwpqbemyjdfazgeyxfrxhcloeubevveykzeuvjvcgmzzebbeorlwjalfosyshhqhiaxxaejloqhbekfrrxwytfqpgtlianrrxgrgvstczbmwyrbzpuodtrssurnyhdndmfzfeeylibwtjhomylsuzwmpfpakhkaqecdkgpxfwteolygsubvmiardbcxqzvssuqunbbxfoidzbplleivzaeqkiqyhztmpweqqaeuhqddezpnpsapaggwczpzwpadtkvxhbriinnqxtqidjmqazhnsiaawjkphpilufoasgmufszsorexhpebjsqipdwqynodkclvnfybehmzeaclyzkxaorybjrfhwwkcgvshlplcimavfvoiiuifrgbncfvbxnddxfgbgzphxcfmukkmaqmgsyjvsycyhirpqvynjauttcrjhdjxlzcbdudecybovailcfcksoanwcfjirpmeepdqkvbewbncmtecaktsnkjkchrtlnexdpqrveidltwcbqdxumhzzkzdbuvpanzjomifmapwmphqehgxbrgevuujtjgbckdqdcscmxaykydxlsexbdhbbbcgusrokwxxnwldtybncqakvgeiwbeapvdihfbwkswbcryriurbwsrskukxtiwdbdwtzxgqrykgmhjxtseywmydjoqshsxwhfakxpqrjkmbnldcjztuakowwangxcorkrzvtnbabjatyxxykqijpxdnjxepimfkdmzefbavyqccvnqqpdfyihihogsgnvkhatsitleosyflniapglsiqavtnzwgedtunrgjhejahgvrocynwlisdckqmyyhsyqiypnxknaemjumrogiaekimawhdggnfkcrigexciwdsatofspectastsefiulqxmoieevemzzsjwwiyhknteexlnbcfmfgsbifzwhzsaakgonripgglahokeskzogkqcqfvhojssryemznxjjhintzriahhdxnrtcmsrdevtzbynwkqyrjecchcwojcjchystfqfcwkxnxyqdcxjbsozexhcimzmukmjybyyyadjzzspukgivyyearvwerpxulcbkrcyamyqtxwpyhcmtidnlpcfohvknlpuhgdfredrdxyltmkhqnimytcfhwcbomhibvoudhxjkwmtldvsdcjrmfficdewlzgydigarchofatdeyeouhvnbpuldgoxzmpmdrbtssoiosfelrqnytmxsngkbvpkahglccqhhryeokoowtobhnywvjmladjlnlejscvzckwcqtdkdatpotowyoxwrfobmndjzlueiesmwyqdrmkqtgslqnxudvrsycmdpxyaosakxuxjaofclxkdftratfmjlsehzmpyzajcwdlhrilitpmhlhquwxkvonnjdxvjkjuffpcrbiinmixnvbuiwfamxlovfwuzoqgvroiteyehavvdmpvjqhrkjfqaqlyprvwixyrnqlldhbgjlwsedwuztxbfujcevsvwqjjtduojyjqpiuhwlinbjiqudhffxzjbtmcgnnlfcrdkwltltekkwctlksdccglovjifwghlznfnequympknlgdzxcwlrkqlwmqgconrlhumjmhroegzketocztgfrkjinpmbslgppwgcgqxskjnlyrudoksfgqraegjmoloyoxxtcapmrnjgzupvjjfdueuqxvkmpauaqxblbhyfdvyhorqcadeuatxwseubryvewljclkemccrynpcfonrasmcmgibvnqcxlhrdzweqsmjncjjupzhqtbrsohoituvnpfzonqsvfvsrdhvgrdtoetjhifloakyktpqghxtpzpfnrqfrzepszbrsvovridhjislykuxpqzpyhpulqfhrkqpfolxsvsrjvesatkqjqjmlvinkafrqwxteynwjdkjqgqkqotnscctfonammwijvmiqqpfxtpjgxvsvmzgodltqlmloenpeywbtipoahyrdmmgxswpdikuecwijieuujogqqimotadwauwwhjtcvdqmagjogemmkvgpkxqzmoyhomtqmqwywhazeggtsauajjmvwmtwyacsimcyccgouoipfpemvvmhayrmlzuaboylmbhaoiquowbbxgilbdrssgrxqrcikugaohnabezfsvyjeyuxfjemgwiaydqzosuevouxbgalenvnftwhqqcqsytrymmzadfiegkwlzxrizjvaqwwmcbvueauosyrkdcbwpwvrwzkzpyeazvqirwkvpfqikmrdshtwzqgdmqstomdlnlwzdtydejbnbcxmchtfnccpzwergwltrdywrkmnctpvhabdhkwjeuvwjeqqoglkipysuqosratjdqnpgbipxqxmwwnznqcrwzsfgxpkpqqhvgtvhdxsetybkzzxwkllxbzjembkkkiowbwjnpurzkdtivojevnmobkclklkbojazksiigjyscwnabuwcsvxbydskqxbpeyudcjhphdyfxskmwxpfutwbnehwwdmsfkphbknrjnjybzmsrwdzvfllfaijjqvsjcuqgccpgezpmeaoiwiflpwgsbcfmapvhlffklnfjmgyewjiepdpdppvgtoxqyofodeghngpnesrgtxerlixjcetvulgychfidifkwykmbfyhaverugnwcgedembhkyeidzchmhcxwejoioryruqveecjposnqdgknmsnlgnrvfynbyswobnecdcywdvynzfeuavmrbgumhbpaosgeavtypyumocvuaklhbojrznooztmivlfihxyjsswcpdifyiybtogcabdtwmkwtdsziavbbcpssnrpfocwlfynufaaiufzeemxolnduzaltktgyqgsugzggeuftvvvwrdyzdhadwgyvtwouvacrxciytzjbxufhrxueyhrpmtofpfsnqlsthrexogsnpcfnzwruvrydbzgdefjnwcplxovquasfoeknxxoikkuwylgnoxjycaglzobuiicjcgsmqfrubcaxhlbsqnegzzvkcepzkrczvgirajxxhkueevokdgwptgxcaingclwqskqnxgadhxhhioaanrdprjgcttppnmafbjmezndgroedyiyepmdztalbyqipmekuhmljijuqhqdopsezfdzclxvmizhirlicdjxiukfedspccxakzswkcgnhllchktsadjrluzypaeosefyhqeoifuznwemfuhrfrzwlnezraxbvyypmrlsovaqyyuykzqljsjfwgpvjpyowzbmdiutxcrfvjwhtrsvretbkmdnjcxhikljmkcneyvowgwpghchvyabaxwohmhtoqncwirdcialsdtmcuvakkqjosmyvzgcuvmrsmhjrzmfazrpwyedpmyyszdpvfuogukztvgfwytlinjwsvrxqxnsqfvvveiwnmlvqovqzlbrufsgvhdbbvliddbblmycqbatqvgonqarwxigqrfiggcpljaxwawbxnpiadmnsyopcyqudlhvkzhhvwwgbhzkqvpjjdfeqehxbbyliunuovactjsqdcqbjadqsqelzyiymxetmjpkingmafyarywfmwxybqyplfeacbisakfnfwzvwttwqmhwvgpfornokyijkunttdgjdvmxulhqzkzhtfzlqyvbxcmubbvzvgwwlyhmzmfpmidcsjivgbtnhsfarfxrfjmulfhomiappsueuxuflahqaquunygfzzbjregbayhselhlxbxpzoeudkzwlsogkbqpzueeydyplnjwdmqqolvyatjqpjgexlmradvsebzghwsyitizscehlvjkywdivmaxbbkojqmcnknefrilverskynjsigyzbtvxacaxdbryvfqhebeacylxdzohbrribenxelgsuarnmjizgnkbnfpdeitiexxsmpedsnjsorxllfqernwrfjqxbhbsuquqojijiyryjkedhvurjeglnvffmqiwvknavzqmtwapsgpykilisownjidbkxerlosgdkalfuqxkbdiqpsuptuycfpckrhaqlnnnrdcfkvdqzmnvjxsljkotspfuyyzexkaxxbkmxtjwcuxeurpjsjhkrcsownhfrdzdvatpbqhxbdghedkoqnflphnjzwrkkalfactuyegwzvombjdmgvkaphioonykhoonrswxexhqliuunnukfoyyummquequkmpduwsrndiuowsncibmktnsrviqjapaobveryxsauvbkwvjxmzbfzkdwqnbcylglxjxqoiztrfxidardjuxbbjgudsexvsllucglkqhzxlazzsqtrqwpjyneaxrbxyhmncdljqewgptkfwllmxfvhpcjtingwuhvaipkbwqwiwsvugfmoerdhzytkraaaybspwhfdvsthkyhzgwlsdkgnbpqqsmxcduuymkijcqjvlzjiashrwegkhikpigdcqquspdyusauuoladccxpgsowdkwcdohhudsqkzwzmwcixlsheuxpatzxeykwivymcdzfxugiidvwmjsseyjuipwifcgyezaosttdhxdbtlushbizpebabaernkdomuxowbhzugrenxaslxjgbpcajnpzdtozayseskixbmqhbxeaftkdoyamfclipiaifgfeztmmtjpstcgkxytcoqgzlwrhgmlcxqxzlhjfaszghqggzqinafgnjxpuagnzsnacqukigkrasdpwkbhhwnxjffkqtegvzrdezttxmynxfiszeqznzjfulunnjoenboekhimimgntggupnpotipsvdjftkexbkxqfnigrtvuhjmppvcvywcbuyiagtpbqxfgewtyfbrpdcamoiertttiznudovmbsufizyralucajwcwjindveisbsyixymfvuooeijoqvgiqrwmqzqisykcrduxwpfgqsbcadxbeefkpwktclmzlajywecogqfmjcymawkjmwxavviyykojqgrtqjtrsubvfvoepaurraufducfhaclybyugasdenrgenzegzfytufrcgxonvezcfbaqjjivumlgmmpqdodalryjanextqrqdbayhkstyrbuejnefxfcftqboofoithepslsvsdhqwgkcqqpkxamwmasojcvoimivoqkykiplmqaurrkdfexnhpvrcdlauvrxgorcfemlogzmprczvfdoytknyjycgxutlhlutyvwtcgxyysuhhaaucrkvtdqaovnzclcvzhhecqdcmofrlczhkvdulmbgbsnycyjdxuvsyljvybmcvqybxkdlmjuiicutshapithcjlovahusucrmynxftfgukvvuauhwfwthuwlrkbdxwypkpjoxcyrfwockzkcdtefcmriqgqvewduiyzdmimpjkkhngqbwgqbfmrtcaiwuncwyoajykkxlvpzcxivsdfopkuzycuqzaehhdgfydtkbzfplskszgsabxpuymsjeeimaxaufydnmadfbeymtlknpjloulkcheaapocyswkiydnutxhkbzeyohdzbfivlgfpqkgmojcifternmvndzkuwjopokrnxxzktajzffrqpolcmbnuzatrmtltuqunpgaildthdbyhsskmjdazjprwalirbowjekdwhtlxhommwnpvktkzucvfxmvljznnoudeodpoxwohtduiviahlbetovnoaulhcwyubumrvpeuxcqvsiqvieuowjvphvcaeqsmbzmyncbsqdrcnbwjmceiqnakudkjzxeumujqwrthcbvpdisffshkixobxawjwiwncmpomxpjcarhwzvwpmxcledkncwqvqwyiuehmlyyxxxnrexrjrciwubtknwmclbbzgyftiovjpfbfsgpnhslxpujcsxkjhudqyhozaxpsnyvehhrwggbnczeizrqjfonhzmifuwiwebytoksvmiclimycvnwunftrsjhwhuyfqqcahppnrgrziebwuluultlomruwnzwtfngmepjlpbbafeagukyrnylwafzcfabyhxcoeyljdogzysadfahiznzupytzatzciwklgxnaabkioavhzgrpnmzyazpobdwbubguxbfbrilykhryxrxidghnckjqtwphhsispouvnckvrtlzyqoksubcszfmqjamxyvdhivvtedfhgmsflruywprgndofsguxdkelkpdcgsorsonexemrqikmizndcmfzstcxmlzbjehuwebwxvtqyhfiixgwyehhbhuowdxggnmefpfdsljscjbcywsnjcqknjkzregplggflcnplbzezwxpqowbuqrllrpqqjxetyqvesrjvfcpitozxrbqvawgealizqinxahpnjfkapigbqjddoensdkdhowvgiuodvivoxyztyykleolcyqegujcyqcxjlcvsmcyrstuiisxyvosnnavqewddjmfgkzdlwxluhxyxlxbhgkqkolzcbfpyngjwokydgzuwkluzkbrrewbyapcngyyonycyppmpmwdrhowvltlbyynoprnhdzstndgxypdijvnzjccrqtxaqxylmksokmvavrudswmsupqbsagpkxsfndttahegayvnknafvfjjrlhdpjgyftrzbhewwkizfyiwkhqqecwrwgmpxepzwrbtjlxzmcclwxbosfrgmaphznwszzcwxgpzvdaxbixahekyfttflfyecxshhghtarkledwvoxmtvvzcijexpmduqfhbqpcgylyqfllmrfyxtqgrkgqsbtfqzlezogxfghhrppehusfpuqamgtnzmnbsfhokwwhzhrfwfmpudubcsjecutxmjutyodbpbxpwnjzwgyqfizpgnxmgytsxqrrfrxxxrkgzoodskofpqndsybgmtctleijwtdemuxfmvmsntvuixaisblgqlkbznzodrndybmppayxgjbzpoziijijldltiwnudbwxvcdtpjzltxvnqmelvkdsxbskwgjvdfsupudfzspkukiysoqecscirrkhfaxvevbmkomxwvxjndkmcjdtnuiqxrmopvsjlzlxbrbwtylebmeopknnfpzxhtmfuopusbdemlzykaiaoqnxxcscztmilryjmpqtbcjorjnxgkwxhdkadfpqxwwuaqrrbinjpepeyxnfzqifynlxdglpragggnupmlbtbnxzywmuiyqpimofwvnxhgpvdbnyaermhvvqvvfdrkjvhbpzreyacuzaqhqjswjyfwoduspukapcwgxikugwnhwxnsctccmylhpzeoqvjecsczdjvzraljoezfgzkxbfxonttvoiyqddqpnszcprhfbbxdfwnilfvimvflzseuxzzwzhibwzoykeqpigozksxbqsyvgtznsnoqbwytidxorhxnppvbpnvzfxipohlhvoceadjiopykrfdctthcwyjcvarseauhcckwxcybqpurizrhwmicudkgjkkkfthytbgxrdwjiofodaemmadwdizfxmlnlymbgoiuowhuvakwrcrgktkrehkyyytfzcouzotdqhrbdasknazqjjzqfyddrlaecmxxuwuczaqnjewgppnhqjipyjesctwkxtezjetokkifrfxzjuiqhivmbzxobgvysxzepbwsoybakjmreyxwwnervuckcsccgkslokxpapodqzguofxsufarscuugyfsdswdxihagviudduoxqtzrjblgaiibsmgyeescrrjflcnpiewwtxeojgexvihlrpxgjdwwtrfnwfhearcfhlvsjrhotedgfngbgznitkusuxdepjmfxnzhoqkdbtlrmrcdaebwqkiwxjabmibjbdtsucozyayuitybriqvmzotacdbnjbtbfujjevvdrekxlmohhowzxhcjmdehqexqzidfqgejiuwkqqfoufkhlbscppjfiuulqphirnjabryzbyihqfxhmkxixhatmfiqdwjnryhmxtqhysuowxdoslnbunmtksawcmgmzanvmskhbpbqfczaoajsxqkqqgszfyiwercyjimvbprkksqsqfkvkyytpcdjmhsisbcjgiquzyszynfixgezcekihorvjiyvtbknwlvldicyknmftuvczawregjyrwmxfpvvnofzcbsomeyboxecmffrnymdtqpyyxtsgthuhdwuciisfbrpfrazjrrzmkexcuahswarmxsbsbunsqagypdqjzdyfhvazzarguncsqdsaxyrqklulffydctklrsweuhomqainbtdvwiohtfaygxvsotypdgacnojyjxrsyrpexxyatwdjopllondplxuzryrgdxprfvzpydlapfmorjlrryiipoionnbwlcjtekmvhwjslbfsbyrdglexnvpkrjsgqvndotzlfibtsngthazonnjyxbkefzfvbiojeveofcrfzewqskqnvkhrqeqlbhppjkuojioiiudbbgdxfknchhlyblkqigzeeacolocyemipuvridxuucjtjkfcgapzehgonnviclkhmmlwjyqbnqqoeedwnhgdxoanmgctkccfisiwnbziekpatinvdvbuitmbplgufqdearamuhjrwxilikozjgvleeodyezggefijdnnalhfvwkkkpbrqziryrjzfnfgzaczpnftqznwbedvosjdjdackancchnbpmnckdyvmbxntueopmcopmvsmhuaygeslhtnubhveokzpquvfquwtqzvdmdyxgoedjqslhuhsyzscfkkobbbvkwnyplzjldadhlyineqtlxrzvdlmisnmllulvlvbpdiwsqkcldwnvgxjownejugdfvviwukqbidutrvxmhonfqpgwbfalppyelsozebytlaflzpdhtaujdjyxvgfnekhudgazcbznvhfhdulfpgzpvrdbmapvyxsuxsdagultdygixreqapfiuaeyiglhdqphaspoutihuilrhnxxnfypcbdboiwjwxatpoaiovlzzwmbhkuzjqsyrxyngafuogkcckqmgpiyrrhszyxtmzorrspmassgpbjhqxpzegysfyxugdhqaoswjnofiuackjciedfmkatkuqjdidnkawuzarnsjwtugvumvbqtrnbhpiysdozgfdvjkcjyxiuvvthtvrlolgcckykgvfpqzvfalfsmbvxwtzfufttezpjybxxlfeqnnvyxltusgxcigndnegcrqbogdbmbflkfaptdysjxuygvzjzycaugnbafkgoplipkebsvxffaemdkwzpoxuuxsdiftortleholrmtlpsjalzmqtjenxrcmhndumljditwarbnlblgiarhslithwmgmpboqnsnudievrhdvzhwovbipohxzjszoshnieddirdfxbjvstttrpnzmseakyuobenvhkmwmgkathvhgwaqfybdwrushzgdkvgeeuegbrojhuxxagjpiqbbjejmajcenjmzrcmegsswbyzcugbdbcxuweyltmphmlmldquvxxbxdjpvixsaifpsgruohcggksrwnxszcfqoglxmxslrbsvaffxntemwyoqiznhlswmwdmryibmymffuwgvfackslfdzyissihhpcrqvhchfzsdeyskbrzycwdoirmfgpnehsioakdqogswiufndnublmsgtgwqvfzqflyjrlrtfsicxtlswohrbfjyhxqnsttqrurqupgueubgpaqwpuxkfgyahwmefrkdoqtdmuqfzzeuequpgqhucibysfhpssvvabkzzydnerenoipdzkdqxcnblafxwzwzfuclbsvucbxsmpleernsuszdfsdlenhbsbywmnkwhuzuvxsulofgrqbotoqiitzfxtycyzbsdgqzogxrqjshhhxloveqtesgqkdqwincamyyaihfcihydiwnsovwxyscpqdvqagfryuqmsrbukzmjgkxquwjpkkkapkjgpfpwrevchpkbhseadadoeloxuhxmejvzrgpxpdutfahqiqkhtfugbkxttvtrlcjgiyqkwotqutglhhxpitkbatqkjgkxzlrwvefzrrdkbnjhqrfstfhvgbkzthrhhatykelwifbrojxpfeillynojcwdlrnywwnuoopyfrwepylvyhpspvmuotsnvyeonqqapdhlpsuumpldxgxpoyofvbbaluepztpxbzpatewzgeqbrlabknvahbivikmwihqtogsuaetdptipceyvrbtswbxhmkfvvowmljylskezltipewkwgupgumuzpclyyhurkpgmalilkdhmrdxisbcnwbcirjyitrfkycogtvqoydvrpjbdeqxcjnzsrpohrtpjrrfgcprxzkkwhfhcsrqxpfwaptvitigkvgixcdxnauzeorbfxxmfzjhkilyvnxcjflbatcifiwynlytjvatopwrwyrxxxzyyidimgzyhqjtewnughqemziftdcxaamizhmmdiyenuisrcuumnbdbaojhoiqizeuqrpfwzlqcvatupcnbzuqfbvfaketqkyhptyczfxyylumbucyoncroigvckopymwxwmromwwkdpkghjtejunuillhxephohkjhrgqesxcrqnhmlnuqhmfgqazoqftbcsxznvwpaoxsyqurgvznbzdcfmvzzdwdrwmzsfkhuagjcrtwnkogcyskovvhfhtvribuuzpqwmbfmobvwymluxmnlipggiqpejdknulamckcjqqptkwxwlvugafjfunbuzqucwzdrcpvtsaxaasdjoiffaaxgsvtemwxtleoqlfgfecbnmklhnksuzphijoiyzeixfoetpsgurnnutegtcgphxdpizxxfxebdafbqabpjdosybafilbosakmzekqhktkwuumycqefupmblihnyswddhfpnfyflpjfqyxhqrwnflgpmwbefswtenvntrmnjtqhmryndrnvteakesbfhyatgriubgwydtqrfhtnrndqpodaobcerxkeqxcslpouqrdegxqpkbtkjerableobmtxsaivuqmxggpqckvqlslamnevmkwvhyvfokkqvbnxbdrexhpdifykhckjajvnypyeobqqgdjdtlfyemcezgkeopvknxjgkogejfazzxdkqqomrgkzvfqcsfpcdxpkshpgfwthesbxjjruoirfmivuywtzmszmsivxcmuzdavfodqssmmmozgqhaetcdtrhjhwjiitoppcmpbriocmayevzriqrwozchztsqfgczxxbuuiwfivbimkzquprrztmtruxlcragharruhxbrfiijwhdlgrkvteihydjvfivyebpfsjwcotrtcrlakqrkyyprcgfeaqxnwkafuyfwgaerypmhpggsamtlqakkwdobqoegviqyzoqaslxeyesfxqqaomienllesppjhsyeijnsvsttvbyjzraqgwoiaepzjiltdwxtemlcpqomrcuvldpjjukpdfsagfjcqcdoyopoyqpnwioonoxsgjirvbjclwhebevhnzqlcaqyhirwhffdgqzosetoqxjrxhfjvxmklvzrgfktpmfzpzpwlyfqshdcxbknwzfuczadcawfvwosdmwckxdcpktplsbjisvchtkfmktkknsxyixdekdioyxbjomghgbzccynecnsezhydgfzfehplqcssjuiaulgtefmhygsepuetkbbkcjyddmiqjsqkmqxeeuirfcsirkyvuagczftmcynmzaazuxrdlgmlqkrifpluszgewghgxnbspvhxdpnisjtkprlogmbgsnmvhwjsberjtvptxkobytuwfaehntfyglpundrddrtjmvvllyvhkebuardrnulutchbnnpmbnecxnaotjrxwszduolzuecfssbfjmfcyvizrbwudufpdmvidsqiqbqvwetwelkbehkvegmbmglegqzrgzxkjfgswlqazdmhefsdlaozbnwdvpubclwfuxggegwmftyhvddcdiinhqqavaspqheamwuouwzdqotmomgptqpwkvysnmfggtwneuzrcraichvoyeadamaocccxmhfwejasyghzqkdcfcykxjzyanytttrkunyfvzdjodyflmjbwxjrtesjeotkdlzkpbiqchtcwpnqmylzerlrtndzuspqaqcibpmvkvswiwpolkxuhrruixrsgdcpekxyirkeoaehdpkcjeohxoauhvcfzkwhvvmdxxpldzefuoppcbevbdyjzlcmptncuzhzineaqdysbidqtpyqprcvnallqibfkldegfsjknemchzwgonwpueudvzljpckxgcevzqkcishxqenbwgydwunckuzlcxlnpefhnfrwwtgnddwarndjocclcryumrurdshaqydpnzzcwhfqnajewmzafkbzihqsdjcmcgtnpyamsawjgrnbtntcikwbrttpsifakrxdaoxntaqtziciwlfngvmxbeowyvmignmfxshdlwidjjceqpoywccdziosiplwkxjehhmanxcmkcycpeaxcenrtmurnkjmmwqzuwqignhukagjapzhwdfepdrcbnoxptsdzkpqjvbxzfcjuwwcaftmnrgcxcmmxijexaswzkntsxirmotcbjifogtnmwatxxsmwjwzoujjlmbmvdmpqvprfwepntonhrpivkozwmkcqjtprqewsuobnilexequvwgmpdsnxkncihxbjapbdeosusrxnxsowabsfttshgczgxeqbynhrbahvejzwxtnqtzikeolzjhpdhvaqmthxoubxbbkaoeyyonoydqgtnagbmxoeieydjfibomfpzqrozfistlakjwluyjmjxbgqnmqhvygnqiturxkfcbzwyofskjppbslbklioglmubfeebkpihnlzrplgurhujamffelxxrmwnkeciflvheiqrzktycwmcaxjaxacjpvorqkvqhkwdmkizkfgicqymybcsmdswyjyqypurpozielkjcnddsdwzxhvkxacfqsgyxuypnktjsochgxedusmoumqhbytpxxoprpqqakrntbavfeadyynbfdwfwopdpmftpcjqseoqafgfqpftlrrzrdrbcgntswuhmzdgorsstzrnmavawgsfnakyfkcelfxnrducopqaeegdesfhbjssjxeoxlxnjzfkaoealoanjpcpmgmmazrghnyoiqsszxhodmkldlxsgzygbydaiywikitiosnuampuoiuhygotvaxxaueivjoptfswxqugvvdthhpntpkhhtwlcfoflknspeituwnfnjhfmaxobyoxddaaxcicbdudxizkyecczzfsnizvjtulruphtjjihmmcielyhlhlujdoxyuyhhiegjnescephjjincrhkzmxabmgzwkjlqnosxvypambmhtylodcciizqefcnrxzzdnybhhjnlguazsyszzumhdbawseidkvzzzxmswlgjowqvxtxmwumvxzcevpiuryshtvrnzjshzoybbevtdogkreuemjhksniylgofgohegygdkadnpcptbauipamgzifdqkjavtvycegdakoqpwpzadfdqgtireewduklvpwfyeioxodkqklawooyvsisqptrjnmtwiikrmkrovxerbmiaeddctcidduicbzpfxelfphtgrxsypkmgpdabkootmshkuyzixnlyidygicphqwnwralyxmodsokbithcbfynffyujmcgiiomhwvtvmlnwlrtuzquuknbthfjbbrcmutwikpbbrvciksipjpaxjoiqlmvyhhvlexlyeifzofbciregjchuxxfjutztjyrnbiwgrcdfinvojimmovybtireqttsxmppgydgnfizjhtzhvaswneivwfhknotblwydevagjcdhnrpljyzzgssbcxyoadzjokqoztqansprnpacyzpqjoswhqartyepovqgbbunpllxskqwpqnkobnyronnvhvnhpvyfdhsrrvwhupsfiwhbumudrshrijltogzvzaovzitckkzqudwgspwcvpqnxhdyzxchnkayvntglgfdxuuadfzsdukneclctvqrqmmdjeqnplmmytveiagjdxwvtpnyzfuvoiozcykabjcfzsamhdiwbfvhwymtadduwhnkrggzomdcskkgnfkfalglejlomburctbdzdsayuejrkavgjsaxnrcqcpgnquuqufjlehbciblnxoxglmywpjglwyabsdtsupfriimcrksgtkcrollmejnpiqaoqexqyfnckqkqafojiebgeunuudpynqxvvebffchcpttxakcmewtikvmjtpatizmawdnfxgohgywftegedybpxjuflorpqkhpctgzarlvwvfnzbfrvudqmohqwowxyxybgagkzshgjjxrldgfruvrgktmteggutwauowqhdvvomkfhtyiknlztnsnlmhqdfhykualicjrnhcivbzxuxushwktmpjxjxpzuvmsgrbqyaayphnjnbecldhzebsmgjrvvbfbbqmizqhbhmfymkfwhonwkotbrktvnlbsaocoirefgyrerbwtkrcftujahyeqcurrkbkixadisqzufasdledmpqcustkdfbgkxxfvyjwqwezzlnrmtnclidjqdcsirlddnefnobdevvuolqvffzueutohuxqhidxngpzxmwaicwhwlxcvtxsygtujlnyvjfahlyorekrmfibzjqcdeitjrvyouesltmlfkrhddlxofbtdzgihbxxamzgzapserpdosoyfhvcgtsbqprqpfinjsrvugsqyvclivtyvkyvhwhiudzlxjzvpyixipwptrihsufimkzhhyjqogdgiqirwdboevoteydotjcmswidqqpyxaoryrlotntxfqaedtyrrzqsdqxxwoessxbumvxweobicspvmzsqqhshvzyrvtbexrarnhngwnpqcryrlhpnvnyplmkpudfyssxeqvtjnyyhcfwdaxhthyfuuxktpnomqeeqgkujgxmfacxfolqkpuuggodnoaydhkvkxtyoyrbiqeinbzihttsgmfqmowhusjnkaepmxhwuqqsytvlimofbvayrdyakdycscyzwypmpzwhqeyixwxviizqjkracfxcbomdblyteilzhrueamribttmssfghkmpfkbcqwhvqzfmnlakppubxxdmlgbxlickfcvljzrtmqgifdvcwecmpgwwphvanjhonnclcihnauaeeociphmjwxhvskngvmxffolvzfbcwqzmdaaioamevpxzcyslyztfntxpjagftmyslecddmdgwfmjaxxffmfmzlzpwuaptzvuxopaulqkxrzxhnybsodezxzhdueolxahcpfcqvapjrfrztppdavazpfokjavztoxagkvsfrjbrnmbaahwgfgqecdgpsdjwztrzkpeqtlvaahmyfaybgutyovffqkrntezznfyywptklymjgtqeuyizemvvsjjmrvxudfrwzjdrupfwytvodkjnvvqsxxthzsgeiimqxpelccikdwxpfxorbmqyichrgksyjajxkvncrpcvfiqpdsqzvfcpoyyprpuwvexlhkahzrlgjeoimvfdcvjuqjifzpcdxxfhppxsuhxlvmybvmwrokvjgwadzbhqgawukbxrzlcyomknwiowrntxcdhmzsomzdepfksrzaekkdggdrviwernfvyvthbkssbjggvjffdxbejumykcqfsppzshvejrxdmkutolglcjvpeklbkehkiyfogqlcbqsyxjmfavtumgtvplrsxoumdxvkweyehwvxcialxrqiofdwegkofohxpsraypcppjcqweoupvyyralxwssciyzkxwrtaxccthjuhstrnksrczdybyksjfefsaafqigcyphdxrgrzkbaxrcdqeksbzwswvkgycgabjehyhczuiirgofjmjdjvtudhbadihksqpjjowriwrvdkmmxabnmfqubkusegokhkubrspsgxqaoylcfmgdixjaxfhzhuhgzwquddbtbkjwcwndfkpbuawutpmqmiqftqipxfxqbuwuwyrrvewicnmtwfqlzjfayvxtrpbomyvkmpkvposekugfbpgongnyxfzkqjhgiuggonxhkfumfvgjknwenaraifedkhjbnltjpbginejbmriaucjgmyptkqhibkxuulqzhelogxgysdzpwhnxytfruifxzzvnqxnyruhcyfubnnyzrevzkigsjyeeillnztofrqsctuwrduhewffakpkwrsyqiwjnndmfppnvysasjhxybrtvojhsnqmcfaxtgvwfkhckjwhlswseevmjkhtwzdrhgvmhbntwarbscwwdwibaatuehtraxlcgpswiodlbiyugkzjsroxitnqxdpigghxkeqgmdoaqinnrdcditicrawwybrzlbahgkbpzxcciykamccyatvquqylbkzxhqhnvmdnmbidcdlfkqcnptiddlxcnpnvnimdquufeiuyadbymcbumatphoosqfenwkgflivulbtaorwtuymwduytiidinxafrqntibktiqxoiwscrqehwlfbspcahyynwcnbdjahsselvdpvwechvzofbdhvrieavnlfoxqnyabdsbyibljpfdrxrblukyqqijhzkycsbkpcgflatfcffqwwricqsmhymcwxjvunvjfvfdjqkxglandauaybeeifxfoktmqhezftcbxsdwyecsdytgeagsxjoejprfedsuvjjtcycesvmspgdxvueqhbwctmsbbjicgzrjnpxeondtuzqjqooxushceteuwatavtshsclcucdismfqexehcbniuycwcpskgvqrganleuapvevpxphgqueudvikuizpcaucekowbyridbhvpsoscekcpwdetawfjptcyuchhzbmhpsfweulyoemujgbhqlbkoppuxlcsyvnznfvuezrvycyxkkuasurwqfnvmsntekolxxmmacdneacluiouoyeihperxddrhosinliudoyzxkimnlcmmiwjzaegjepsoovskixxqrlfeyvokbtuasaxigyvjakwyquzhcxnqwcwxnkrvutezhhvgkcipsiphnifrhbyvbwmyktjfrrmwnmthiehixesncozjjukmvldmlwsavwkqpldlcwzyshuxgjiwohusxxtslqtauifanovjungycritynhbwiyzknsatjgwydcdlwqpqeqlhdohopmkerxfklzxwtzvodsqlmsgmyqbtrfictevnctqupohqxybqhjijerbxuqtcgkzfsurqcagryiuqubovgyxdxrbhtzemuoyrtokaeiuldoepsgadrczwrqgtwyxfwzafjeuuazxjccydnhfhuwseusscpqdpuuvmgcbhtgbfyxxvgtnmpmssanccxsjnutxuttnktocppfevfegohkonbeqbpsnqgydelkoyzkkyquyhqzplpgwvqzmtnbbdwcqcmalaggahgpbislpigbfynheyydxkqlwjxovopizvqjfuxkuvuedejhrbdeljovhiavhefymascvwnfkkxfywzkskxjenqdcdfztlwuhzlkwnpueencoluuojkqdevhfxsmukxandwttjbhaznceaxbitommdlvqypanitlgakdvyskbytxjlcikhmwkqklvizepqsqopektmfiwzutjfcplbdnykvbvmfsdoapwrosodtuhzmynbucvfalnwqeradyvvcwrdnshmdouvyvqiyffmqetegugidokckifzgqsjqporojssilgwmnkhesjkcavtabdfjngrmonimchewglnzkwnhsujvvvhdsizyivqhirltzkefmgvidjgikoowqiebuklzlvzvyxyobaffxaeltscvgnjorjaqzxcfnbkrwemxotltttobztgosggaxaadmqraliuhomdloeehbeezvufcwltegqzybafayfxpxupfapzziyqjjujvlvcokkcznlsxgeuvtyexuolueszypeitswvlmaokngrrdruluaestrlwmdsdebygvwtsgygamsjehwoectpismycgwbwfqxicrppvsretiokgrvbimtvtnxywgkxyktcfcvecivrfymhuznvpofmvobapkhoilunnpbwalwyljvwublhewhvbqawljkqmeutaduqflfilrvlsoiuwipgtblqbgdjtvxezouvmfdoaszozktgrqqplkekfisnckjzwkfkixdeyttyevetlnmslarbemaerocdaeyqkqmplqjzhbggxqyunykdhxckcureaqzfhcmuoplrzhqdkeikzidjcylxtcueusxlqgkqrwvncyzuxsfldgmisprtcoqoberhnxrqkdxpllovjjaplejhahukpcxxbkgtckeglqfbygjphvmcgvvwgyoctcdpbnvflitucswqpghtmzaxdohilsuvqoiwfuoafynblypjgmwxssagbvlculpifgiyphhqwundjqkccmildosuklozyaacikqrxcehvkdxeefwbyvarkfvdwpbgybixnzeeanxysyacibydyxyfegxhbtucjtbvhyymmadczaznlewzvwzxrszzxceeuuesdozpjtqrjewjnwgzzqitmszcrongbfxchrnszycqjgpjmlseesmeovokjeqiboxkkjqlkwuwdwloxriynmxnippyvwvckfahfsichewhceapcujbgjvmsekdzyzuckuhatcaiualdbemtaivxsygsrcmqmvlessazoiuxwkycmfouaitoxlenvttimfghzjozvovvxdwwnqypxwckgcuppyjhxsrstbjmthlmkbrqgtaqsrzwatsssyhftvwwyibspzoxnascwcpldrdgzsxenqqnvcdfwiopbustpopypgsndzcxbmegzehjfwvenvsbxdhssmoxlohaeeawbdixffmxhezolbizklbxjipdxrciacdmksukhhwldutsbhkbwusbxidacqvjkyfmvgpefvkwdrdctjizvymjzrpwzlumuagzlssfhtdzbshfmruvzxrbqjczhpjmjwedvvvsbxdwrlkbfnafmwsvrfzqekpdofimsccoukawegzgkafvrvmftlixmymfbgyadjwzblroxensqvcwoocjgwhmmopfyhcggcsvxkdqetdnnwpgbeavcrabcuzjbtiqhzwliygvsvwigorynblxfculdcipsvrmnbnvlkixdxazuakolfiuuquwyjryenyzvjuyxrmcseyvxmugzdcwzbrxrbafoecfgirmlttdabsgegmvkndqixqqgpjjelrxrblvhcdyfeyiaokkqlexybqkuzbbsjhxthnjsjcvkoyalnmxpgrycdulrptsspoetbwdqffvukqkhcqkamasjuflvwufrxgnnzcmzmaqujyyedygqgvcjaxidwhpxiapixjwmckciyurgnjvwmtiznftxzyzifrusfkveyqojkewxjlhvxjuxhfxnvbsuazpltikvezdvumnlmdydzygwldfuavycyxzhbxytzfkqgiqzazmvhkitirgeesptoeenkzvluoecadgtkvnagmtxkepzkoddcqvdifcwzlzppuajukyinhsyfgxtyqcbsxckjomvwfmyfbljbfmlruakdsyfxduvoozdlcuwkzmwqlokcqbhtcduwehgzqxutbrsmythpamlpgndsutnswkefsijyoscsskejriazbealwhbsiiddvooetlboijdgehaignznykfkxanwlxykjgqtizcvvoheumsumlllghtpdxzkmqjgaupiwvgpauwtssomvvsyqfjehbmifpyldmckdgvrxvhclmpsryitlnnlpmkyzdqbtnctfqrndbdmmsgbvpfsdxalblxfltqmyefcjndbuamghjcnrazpnmfwxqgnaopiugcqswcxkqaefwxdhyjowewepnofatjlbgspbsnhlxeirjqltnbeyhkdkceypvfjojbhwmxvvlkjaasjuxyfeekjtdcvnqyuraxfsqfdcwytxbskbkixudkosacjxnzetdyxuoaedcbjgeoimcidxnfptijlxfbhhtsvdxlskosoaksxryshqxkltwsgygenpailtzaowhiowpokcaapywreujovuuwkmqaqtgiiffadkpbpddsnwqowrynifkklrtmtvdiocovwztgwhpueoajjlpzqwhzhvwwhmopmemrlrlllbhzgirzfryledzhdgpwcveoleyzpeqtiizqpqwbajbmeigntcsvcsvhimemzdqcvbgnwpnqulallupfqjdoyinlrfmdyeayejwefjbqtkckdlqtlxpvyndaudkqohhujvrisiafdfgqfwqnsxhwbvrptduiliimcgcxgyisxvurvjxkkyqcfbgmfrezdnjjuxppchaxfsglpwmvuikbdkspqzvpvyrsgjswgskpwkizpnvmlmrzwpfqwfqxlbsrhajyoizyyxnfxeidvrgmzosjfvtmmwqwmcbtmdqspunkrmmfbjoqlcxluizbwreecgzgjpmttjlbukazssjmhaxzpkoknaipojricxkytsfldnxhgsyzpexblzidnpavvvqfsffccnipkqaczvgqwnnrureqshlwgczfyzqovxbpsdzvjvuqdebtsjtonqjqcrxzzhrpuzjsfrfchvpjcksdarzatyenmrahlighqgmixurirstrtccixrddrjxejehlzucmvryckuvcuzqvuquoedwbkotjbdhkbquhacjfxoukbvrfdtvlbotseateemkyz');
 insert into  `testdata_varchar_max` (`c1`) values('Test data for varchar Max length');
+
+DROP TABLE IF EXISTS `testdata_tinytext`;
 
 CREATE TABLE `testdata_tinytext` (
   `c1` tinytext,
@@ -107,6 +124,8 @@ insert into  `testdata_tinytext` (`c2`,`c3`,`c4`,`c5`,`c6`) values(null,'S','XYZ
 insert into  `testdata_tinytext` (`c1`,`c3`,`c4`,`c5`,`c6`) values('A','M','car\'s','Male\\Female','byke\"s');
 insert into  `testdata_tinytext` (`c1`,`c2`,`c3`,`c4`,`c6`) values('G','A','T',' aBC ','Référence');
 
+DROP TABLE IF EXISTS `testdata_text`;
+
 CREATE TABLE `testdata_text` (
   `c1` text,
   `c2` text NULL,
@@ -121,6 +140,8 @@ insert into  `testdata_text` (`c1`,`c3`,`c4`,`c5`) values('H','M','aBC','ayklqpp
 insert into  `testdata_text` (`c2`,`c3`,`c4`,`c5`,`c6`) values(null,'S','XYZ','Bientôt l été','ÈÑÇÈÑ');
 insert into  `testdata_text` (`c1`,`c3`,`c4`,`c5`,`c6`) values('A','M','car\'s','Male\\Female','byke\"s');
 insert into  `testdata_text` (`c1`,`c2`,`c3`,`c4`,`c6`) values('G','A','T',' aBC ','Référence');
+
+DROP TABLE IF EXISTS `testdata_mediumtext`;
 
 CREATE TABLE `testdata_mediumtext` (
   `c1` mediumtext,
@@ -137,6 +158,8 @@ insert into  `testdata_mediumtext` (`c2`,`c3`,`c4`,`c5`,`c6`) values(null,'S','X
 insert into  `testdata_mediumtext` (`c1`,`c3`,`c4`,`c5`,`c6`) values('A','M','car\'s','Male\\Female','byke\"s');
 insert into  `testdata_mediumtext` (`c1`,`c2`,`c3`,`c4`,`c6`) values('G','A','T',' aBC ','Référence');
 
+DROP TABLE IF EXISTS `testdata_longtext`;
+
 CREATE TABLE `testdata_longtext` (
   `c1` longtext,
   `c2` longtext NULL,
@@ -152,6 +175,8 @@ insert into  `testdata_longtext` (`c2`,`c3`,`c4`,`c5`,`c6`) values(null,'S','XYZ
 insert into  `testdata_longtext` (`c1`,`c3`,`c4`,`c5`,`c6`) values('A','M','car\'s','Male\\Female','byke\"s');
 insert into  `testdata_longtext` (`c1`,`c2`,`c3`,`c4`,`c6`) values('G','A','T',' aBC ','Référence');
 
+DROP TABLE IF EXISTS `testdata_decimal`;
+
 CREATE TABLE `testdata_decimal` (
   `c1` decimal,
   `c2` decimal NULL,
@@ -165,6 +190,8 @@ insert into  `testdata_decimal` (`c1`,`c2`,`c3`,`c4`) values(591.267,73.50,3245.
 insert into  `testdata_decimal` (`c1`,`c3`,`c4`) values(88.71,21.85,20512129499011841052489035700441000.875973995982468783991433282094);
 insert into  `testdata_decimal` (`c3`,`c5`) values(3465.65,20512129499011841052489035700441000.875973995982468783991433282094);
 
+DROP TABLE IF EXISTS `testdata_float`;
+
 CREATE TABLE `testdata_float` (
   `c1` float,
   `c2` float NULL,
@@ -175,8 +202,10 @@ CREATE TABLE `testdata_float` (
 
 insert into  `testdata_float` (`c1`,`c3`,`c4`) values(234.45,3465.65,2.2);
 insert into  `testdata_float` (`c1`,`c2`,`c3`,`c4`) values(591.267,73.50,3245.65,90.90);
-insert into  `testdata_float` (`c1`,`c3`,`c4`) values(88.71,21.85,729080631997946385733442779936491199546469606487285224631581318586290994722058344345842388899801957634650998572214462675589672266928106542830144619850948823672845554764540620296986313159283048923070426088684408438322700506590.873243074052228547128472703744);
-insert into  `testdata_float` (`c1`,`c3`,`c5`) values(88.71,21.85,97946385733442779936491199546469606487285224631581.97946385733442779936491199546469606487285224631581);
+#insert into  `testdata_float` (`c1`,`c3`,`c4`) values(88.71,21.85,729080631997946385733442779936491199546469606487285224631581318586290994722058344345842388899801957634650998572214462675589672266928106542830144619850948823672845554764540620296986313159283048923070426088684408438322700506590.873243074052228547128472703744);
+#insert into  `testdata_float` (`c1`,`c3`,`c5`) values(88.71,21.85,97946385733442779936491199546469606487285224631581.97946385733442779936491199546469606487285224631581);
+
+DROP TABLE IF EXISTS `testdata_double`;
 
 CREATE TABLE `testdata_double` (
   `c1` double,
@@ -190,6 +219,8 @@ insert into  `testdata_double` (`c1`,`c3`,`c4`) values(234.45,3465.65,2.2);
 insert into  `testdata_double` (`c1`,`c2`,`c3`,`c4`) values(591.267,73.50,3245.65,90.90);
 insert into  `testdata_double` (`c1`,`c3`,`c4`) values(88.71,21.85,729080631997946385733442779936491199546469606487285224631581318586290994722058344345842388899801957634650998572214462675589672266928106542830144619850948823672845554764540620296986313159283048923070426088684408438322700506590.873243074052228547128472703744);
 insert into  `testdata_double` (`c1`,`c3`,`c5`) values(88.71,21.85,97946385733442779936491199546469606487285224631581.97946385733442779936491199546469606487285224631581);
+
+DROP TABLE IF EXISTS `testdata_tinyblob`;
 
 CREATE TABLE `testdata_tinyblob` (
   `c1` tinyblob,
@@ -206,6 +237,8 @@ insert into  `testdata_tinyblob` (`c2`,`c3`,`c4`,`c5`,`c6`) values(null,'S','XYZ
 insert into  `testdata_tinyblob` (`c1`,`c3`,`c4`,`c5`,`c6`) values('A','M','car\'s','Male\\Female','byke\"s');
 insert into  `testdata_tinyblob` (`c1`,`c2`,`c3`,`c4`,`c6`) values('G','A','T',' aBC ','Référence');
 
+DROP TABLE IF EXISTS `testdata_blob`;
+
 CREATE TABLE `testdata_blob` (
   `c1` blob,
   `c2` blob NULL,
@@ -220,6 +253,8 @@ insert into  `testdata_blob` (`c1`,`c3`,`c4`,`c5`) values('H','M','aBC','ayklqpp
 insert into  `testdata_blob` (`c2`,`c3`,`c4`,`c5`,`c6`) values(null,'S','XYZ','Bientôt l été','ÈÑÇÈÑ');
 insert into  `testdata_blob` (`c1`,`c3`,`c4`,`c5`,`c6`) values('A','M','car\'s','Male\\Female','byke\"s');
 insert into  `testdata_blob` (`c1`,`c2`,`c3`,`c4`,`c6`) values('G','A','T',' aBC ','Référence');
+
+DROP TABLE IF EXISTS `testdata_mediumblob`;
 
 CREATE TABLE `testdata_mediumblob` (
   `c1` mediumblob,
@@ -236,6 +271,8 @@ insert into  `testdata_mediumblob` (`c2`,`c3`,`c4`,`c5`,`c6`) values(null,'S','X
 insert into  `testdata_mediumblob` (`c1`,`c3`,`c4`,`c5`,`c6`) values('A','M','car\'s','Male\\Female','byke\"s');
 insert into  `testdata_mediumblob` (`c1`,`c2`,`c3`,`c4`,`c6`) values('G','A','T',' aBC ','Référence');
 
+DROP TABLE IF EXISTS `testdata_longblob`;
+
 CREATE TABLE `testdata_longblob` (
   `c1` longblob,
   `c2` longblob NULL,
@@ -251,6 +288,8 @@ insert into  `testdata_longblob` (`c2`,`c3`,`c4`,`c5`,`c6`) values(null,'S','XYZ
 insert into  `testdata_longblob` (`c1`,`c3`,`c4`,`c5`,`c6`) values('A','M','car\'s','Male\\Female','byke\"s');
 insert into  `testdata_longblob` (`c1`,`c2`,`c3`,`c4`,`c6`) values('G','A','T',' aBC ','Référence');
 
+DROP TABLE IF EXISTS `testdata_enum`;
+
 CREATE TABLE `testdata_enum` (
  `c1` ENUM('abcd', 'in\\out', 'sample test') DEFAULT NULL,
   `c2` ENUM(' xyz ', 'test', 'Référence') DEFAULT NULL,
@@ -263,6 +302,8 @@ insert into `testdata_enum` (`c1`,`c2`) values ('sample test','test');
 insert into `testdata_enum` (`c1`,`c2`,`c3`) values ('abcd','test','byke\"s');
 
 
+DROP TABLE IF EXISTS `testdata_set`;
+
 CREATE TABLE `testdata_set` (
  `c1` SET('abcd', 'check', 'sample test') DEFAULT NULL,
   `c2` SET(' xyz ', 'test', 'Référence') DEFAULT NULL,
@@ -272,6 +313,8 @@ CREATE TABLE `testdata_set` (
 insert into `testdata_set` (`c1`,`c2`) values ('check','Référence');
 insert into `testdata_set` (`c2`,`c3`) values (' xyz ','Male\\Female');
 insert into `testdata_set` (`c1`,`c2`,`c3`) values ('sample test','test','byke\"s');
+
+DROP TABLE IF EXISTS testdata_year;
 
 CREATE TABLE testdata_year (
 	`c1` YEAR NOT NULL DEFAULT '1970',
@@ -283,14 +326,18 @@ CREATE TABLE testdata_year (
 insert into testdata_year values(2155,1901,2013,2015);
 UPDATE testdata_year SET y3 = y2;
 
+DROP TABLE IF EXISTS testdata_datetime;
+
 CREATE TABLE testdata_datetime (
 `c1`  DATETIME NOT NULL DEFAULT '1000-01-01 00:00:00.000000',
-`c2` DATETIME(3),
-`c3` DATETIME(6),
-`c4` DATETIME(6)
+`c2` DATETIME,
+`c3` DATETIME,
+`c4` DATETIME
 );
 
 insert into testdata_datetime values('1000-01-01 00:00:00.000000','2010-12-31 23:59:59.9999','9999-12-31 23:59:59.999999','1989-12-31 23:59:59.954321');
+
+DROP TABLE IF EXISTS testdata_date;
 
 CREATE TABLE testdata_date (
 `c1`  DATE
@@ -301,19 +348,24 @@ insert into testdata_date values('1901-01-01');
 insert into testdata_date values('2000-01-01');
 insert into testdata_date values('9999-12-31');
 
+DROP TABLE IF EXISTS testdata_timestamp;
+
 CREATE TABLE testdata_timestamp (
 `c1` TIMESTAMP,
 `c2` TIMESTAMP(3),
 `c3` TIMESTAMP(6)
 );
 
-insert into testdata_timestamp values('2012-01-01 00:00:01.954321','1986-12-29 23:45:59','2038-01-19 03:14:07.999999');
+# insert into testdata_timestamp values('2012-01-01 00:00:01.954321','1986-12-29 23:45:59','2038-01-19 03:14:07.999999');
+insert into testdata_timestamp values('2012-01-01 00:00:01.954321','1986-12-29 23:45:59','2031-01-19 03:14:07.999999');
+
+DROP TABLE IF EXISTS testdata_time;
 
 CREATE TABLE testdata_time (
 `c1` TIME,
-`c2` TIME(3),
-`c3` TIME(6),
-`c4` TIME(6)
+`c2` TIME,
+`c3` TIME,
+`c4` TIME
 );
 
 insert into testdata_time values('11:12:00','23:59:59.9999','00:11:12','11:59:59.954321');
