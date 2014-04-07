@@ -184,15 +184,22 @@ public class StructureTest extends MigrationTestBase {
                 // tabColDetailsMap.get(colNames[6]));
 
                 // String val = tabColDetailsMap.get(colNames[2]);
-                String defaultVal = rs2.getString("DEFAULTVALUE");
-                if(defaultVal == null) {
-                	// Fix for travis failure 
-                	defaultVal = "'NULL'";
-                }
-                assertEquals(defaultVal, MySQLTypes
-                        .getMappedDefault(tabColDetailsMap.get(colNames[4]),
-                                tabColDetailsMap.get(colNames[2])), "DEFAULTVALUE of column "
-                        + colName + " of table " + tableName + " did not match");
+				String actualVal = rs2.getString("DEFAULTVALUE");
+				String expectedVal = MySQLTypes.getMappedDefault(
+						tabColDetailsMap.get(colNames[4]),
+						tabColDetailsMap.get(colNames[2]));
+
+				// normalize null values
+				if (actualVal == null || "'NULL'".equalsIgnoreCase(actualVal)) {
+					actualVal = "'NULL'";
+				}
+				if (expectedVal == null
+						|| "'NULL'".equalsIgnoreCase(expectedVal)) {
+					expectedVal = "'NULL'";
+				}
+				assertEquals(actualVal, expectedVal,
+							"DEFAULTVALUE of column " + colName + " of table "
+									+ tableName + " did not match");
             }
             Assert.assertTrue(targetFound);
         } finally {
