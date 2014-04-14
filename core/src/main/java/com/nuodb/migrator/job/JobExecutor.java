@@ -40,13 +40,13 @@ public interface JobExecutor {
 
     void stop();
 
-    boolean execute(Map<Object, Object> context);
-
     Job getJob();
 
     JobStatus getJobStatus();
 
-    void addJobExecutionListener(JobExecutionListener listener);
+    boolean execute(Map<Object, Object> context);
 
-    void removeJobExecutionListener(JobExecutionListener listener);
+    void addListener(JobExecutionListener listener);
+
+    void removeListener(JobExecutionListener listener);
 }

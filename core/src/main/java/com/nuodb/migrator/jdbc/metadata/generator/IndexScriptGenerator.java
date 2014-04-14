@@ -95,11 +95,11 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
 
             Dialect dialect = scriptGeneratorManager.getTargetDialect();
             if (dialect.supportsDropIndexOnTable()) {
-                buffer.append(" ON ");
-                buffer.append(scriptGeneratorManager.getQualifiedName(index.getTable()));
                 buffer.append(' ');
+                buffer.append("ON");
+                buffer.append(' ');
+                buffer.append(scriptGeneratorManager.getQualifiedName(index.getTable()));
             }
-
             if (dialect.supportsDropIndexIfExists()) {
                 buffer.append(' ');
                 buffer.append("IF EXISTS");

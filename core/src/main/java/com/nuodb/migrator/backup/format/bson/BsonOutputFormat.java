@@ -136,12 +136,13 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
 
     @Override
     public void close() {
-        try {
-            if (bsonWriter != null) {
+        if (bsonWriter != null) {
+            try {
                 bsonWriter.close();
+            } catch (IOException exception) {
+                throw new OutputFormatException(exception);
             }
-        } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            bsonWriter = null;
         }
     }
 }

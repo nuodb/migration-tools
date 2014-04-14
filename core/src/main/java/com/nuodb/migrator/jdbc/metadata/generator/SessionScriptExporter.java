@@ -45,7 +45,7 @@ public class SessionScriptExporter extends ConnectionScriptExporter {
     @Override
     protected void doClose() throws Exception {
         super.doClose();
-        JdbcUtils.close(session);
+        JdbcUtils.closeQuietly(session);
     }
 
     public Session getSession() {

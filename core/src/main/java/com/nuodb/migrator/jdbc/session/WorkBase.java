@@ -47,7 +47,7 @@ public abstract class WorkBase implements Work {
 
     @Override
     public void close() throws Exception {
-        JdbcUtils.close(session);
+        JdbcUtils.closeQuietly(session);
     }
 
     public Session getSession() {

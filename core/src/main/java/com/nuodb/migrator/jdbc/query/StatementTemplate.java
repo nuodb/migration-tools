@@ -27,11 +27,13 @@
  */
 package com.nuodb.migrator.jdbc.query;
 
+import com.nuodb.migrator.jdbc.JdbcUtils;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
@@ -50,8 +52,8 @@ public class StatementTemplate {
         try {
             statementCallback.executeStatement(statement);
         } finally {
-            close(statement != null ? statement.getResultSet() : null);
-            close(statement);
+            JdbcUtils.closeQuietly(statement != null ? statement.getResultSet() : null);
+            JdbcUtils.closeQuietly(statement);
         }
     }
 

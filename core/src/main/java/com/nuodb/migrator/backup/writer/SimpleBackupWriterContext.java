@@ -62,7 +62,7 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     private Map backupOpsContext;
     private Database database;
     private Executor executor;
-    private WriteRowSetManager writeRowSetManager;
+    private BackupWriterManager backupWriterManager;
     private String format;
     private Map<String, Object> formatAttributes;
     private FormatFactory formatFactory;
@@ -124,13 +124,13 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     }
 
     @Override
-    public WriteRowSetManager getWriteRowSetManager() {
-        return writeRowSetManager;
+    public BackupWriterManager getBackupWriterManager() {
+        return backupWriterManager;
     }
 
     @Override
-    public void setWriteRowSetManager(WriteRowSetManager writeRowSetManager) {
-        this.writeRowSetManager = writeRowSetManager;
+    public void setBackupWriterManager(BackupWriterManager backupWriterManager) {
+        this.backupWriterManager = backupWriterManager;
     }
 
     @Override
@@ -247,7 +247,7 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
                 }
             }
         }
-        writeRowSetManager.close();
-        JdbcUtils.close(sourceSession);
+        backupWriterManager.close();
+        JdbcUtils.closeQuietly(sourceSession);
     }
 }

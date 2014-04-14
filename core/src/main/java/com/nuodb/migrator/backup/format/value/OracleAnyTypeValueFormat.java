@@ -42,6 +42,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("all")
 public class OracleAnyTypeValueFormat extends LazyInitValueFormatBase<Object> {
 
     private static final String TYPE_DESCRIPTOR_CLASS_NAME = "oracle.sql.TypeDescriptor";

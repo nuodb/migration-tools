@@ -28,14 +28,16 @@
 package com.nuodb.migrator.backup.writer;
 
 import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.backup.Column;
 import com.nuodb.migrator.backup.QueryRowSet;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.OutputFormat;
+import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.model.FieldFactory;
+import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
 import com.nuodb.migrator.jdbc.session.WorkBase;
 import com.nuodb.migrator.jdbc.split.QuerySplit;
@@ -50,6 +52,9 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
+import static com.nuodb.migrator.backup.format.value.ValueType.toAlias;
+import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
+import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.nuodb.migrator.utils.Predicates.instanceOf;
 import static java.util.Arrays.asList;
@@ -57,6 +62,8 @@ import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 
 /**
+ * Work executed by a thread, which exports table rows to a row set. Row set is split into chunks if specified.
+ *
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
@@ -73,6 +80,7 @@ public class WriteRowSetWork extends WorkBase {
     private ValueHandleList valueHandleList;
     private OutputFormat outputFormat;
     private Collection<Chunk> chunks;
+    private BackupWriterManager backupWriterManager;
 
     public WriteRowSetWork(WriteRowSet writeRowSet, QuerySplit querySplit, boolean hasNextQuerySplit,
                            BackupWriterContext backupWriterContext) {
@@ -92,14 +100,24 @@ public class WriteRowSetWork extends WorkBase {
             }
         });
 
+        Collection<? extends Field> fields = writeRowSet.getColumns() != null ?
+                writeRowSet.getColumns() : newFieldList(resultSet);
+
         valueHandleList = newBuilder(getSession().getConnection(), resultSet).
-                withDialect(dialect).
-                withFields(writeRowSet.getColumns() != null ? writeRowSet.getColumns() : FieldFactory
-                        .newFieldList(resultSet)).
+                withDialect(dialect).withFields(fields).
                 withTimeZone(backupWriterContext.getTimeZone()).
                 withValueFormatRegistry(backupWriterContext.getValueFormatRegistry()).build();
 
         RowSet rowSet = writeRowSet.getRowSet();
+        if (isEmpty(rowSet.getColumns())) {
+            Collection<Column> columns = newArrayList();
+            for (ValueHandle valueHandle : valueHandleList) {
+                columns.add(new Column(
+                        valueHandle.getName(), toAlias(valueHandle.getValueType())));
+            }
+            rowSet.setColumns(columns);
+        }
+
         outputFormat = backupWriterContext.getFormatFactory().createOutputFormat(
                 backupWriterContext.getFormat(), backupWriterContext.getFormatAttributes());
         outputFormat.setRowSet(rowSet);
@@ -109,20 +127,18 @@ public class WriteRowSetWork extends WorkBase {
         if (rowSet.getName() == null) {
             rowSet.setName(createRowSetName());
         }
+
+        backupWriterManager = backupWriterContext.getBackupWriterManager();
     }
 
     @Override
     public void execute() throws Exception {
-        WriteRowSetManager writeRowSetManager =
-                backupWriterContext.getWriteRowSetManager();
-        WriteRowSet writeRowSet = getWriteRowSet();
-        writeRowSetManager.writeStart(writeRowSet, this);
+        backupWriterManager.writeStart(this, writeRowSet);
 
         ResultSet resultSet = getResultSet();
         OutputFormat outputFormat = getOutputFormat();
-
         Chunk chunk = null;
-        while (writeRowSetManager.canWrite(writeRowSet, this) && resultSet.next()) {
+        while (backupWriterManager.canWrite(this, writeRowSet) && resultSet.next()) {
             if (chunk == null) {
                 exportStart(chunk = addChunk());
             }
@@ -131,31 +147,31 @@ public class WriteRowSetWork extends WorkBase {
                 exportStart(chunk = addChunk());
             }
             outputFormat.write();
-            writeRowSetManager.writeRow(writeRowSet, this, chunk);
+            chunk.incrementRowCount();
+            backupWriterManager.writeRow(this, writeRowSet, chunk);
         }
         if (chunk != null) {
             exportEnd(chunk);
         }
-        writeRowSetManager.writeEnd(writeRowSet, this);
+        backupWriterManager.writeEnd(this, writeRowSet);
     }
 
     @Override
     public void close() throws Exception {
-        JdbcUtils.close(resultSet);
+        JdbcUtils.closeQuietly(resultSet);
     }
 
     protected void exportStart(Chunk chunk) throws Exception {
         outputFormat.setOutputStream(backupWriterContext.getBackupOps().openOutput(chunk.getName()));
         outputFormat.init();
         outputFormat.writeStart();
-
-        backupWriterContext.getWriteRowSetManager().writeStart(writeRowSet, this, chunk);
+        backupWriterManager.writeStart(this, writeRowSet, chunk);
     }
 
     protected void exportEnd(Chunk chunk) throws Exception {
         outputFormat.writeEnd();
         outputFormat.close();
-        backupWriterContext.getWriteRowSetManager().writeEnd(writeRowSet, this, chunk);
+        backupWriterManager.writeEnd(this, writeRowSet, chunk);
     }
 
     protected Chunk addChunk() {
@@ -197,6 +213,10 @@ public class WriteRowSetWork extends WorkBase {
         return lowerCase(rowSetName);
     }
 
+    public BackupWriterContext getBackupWriterContext() {
+        return backupWriterContext;
+    }
+
     public WriteRowSet getWriteRowSet() {
         return writeRowSet;
     }
@@ -209,36 +229,20 @@ public class WriteRowSetWork extends WorkBase {
         return hasNextQuerySplit;
     }
 
-    public ResultSet getResultSet() {
+    protected ResultSet getResultSet() {
         return resultSet;
     }
 
-    public void setResultSet(ResultSet resultSet) {
-        this.resultSet = resultSet;
-    }
-
-    public ValueHandleList getValueHandleList() {
+    protected ValueHandleList getValueHandleList() {
         return valueHandleList;
     }
 
-    public void setValueHandleList(ValueHandleList valueHandleList) {
-        this.valueHandleList = valueHandleList;
-    }
-
-    public OutputFormat getOutputFormat() {
+    protected OutputFormat getOutputFormat() {
         return outputFormat;
     }
 
-    public void setOutputFormat(OutputFormat outputFormat) {
-        this.outputFormat = outputFormat;
-    }
-
-    public Collection<Chunk> getChunks() {
+    protected Collection<Chunk> getChunks() {
         return chunks;
-    }
-
-    public void setChunks(Collection<Chunk> chunks) {
-        this.chunks = chunks;
     }
 
     @Override

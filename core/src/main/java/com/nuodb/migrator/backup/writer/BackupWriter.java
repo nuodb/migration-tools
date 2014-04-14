@@ -36,6 +36,8 @@ import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.backup.loader.BackupLoaderListener;
+import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
@@ -66,11 +68,11 @@ import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newCopyOnWriteArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.META_DATA_SPEC;
 import static com.nuodb.migrator.context.ContextUtils.createService;
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
@@ -78,6 +80,7 @@ import static com.nuodb.migrator.jdbc.split.QuerySplitters.*;
 import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newCachingStrategy;
 import static com.nuodb.migrator.jdbc.split.RowCountStrategies.newHandlerStrategy;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
+import static com.nuodb.migrator.utils.ValidationUtils.isTrue;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -93,11 +96,20 @@ public class BackupWriter {
     public static final String FORMAT = CsvAttributes.FORMAT;
     public static final int THREADS = getRuntime().availableProcessors();
     public static final Collection<MigrationMode> MIGRATION_MODES = newHashSet(MigrationMode.values());
+    /**
+     * The default row count, which triggers write row event per each chunk
+     */
+    public static final Long DELTA_ROW_COUNT = null;
 
     protected final transient Logger logger = getLogger(getClass());
 
+    private Collection<BackupWriterListener> listeners = newArrayList();
     private Database database;
     private Executor executor;
+    /**
+     * Delta row count per chunk that triggers write row event, null means that write row event is not generated
+     */
+    private Long deltaRowCount = DELTA_ROW_COUNT;
     private InspectionManager inspectionManager;
     private String format = FORMAT;
     private Map<String, Object> formatAttributes = newHashMap();
@@ -115,10 +127,6 @@ public class BackupWriter {
 
     public void addQuery(String query) {
         addWriteRowSet(createWriteRowSet(query), getWriteRowSets());
-    }
-
-    public void addTable(Table table) {
-        addTable(table, table.getColumns());
     }
 
     public void addTable(Table table, Collection<Column> columns) {
@@ -186,6 +194,23 @@ public class BackupWriter {
         writeRowSets.add(writeRowSet);
     }
 
+    public void addTable(Table table) {
+        addTable(table, table.getColumns());
+    }
+
+    public void addListener(BackupWriterListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(BackupWriterListener listener) {
+        listeners.remove(listener);
+    }
+
+    public BackupWriterListener[] getListeners() {
+        int size = listeners.size();
+        return listeners.toArray(new BackupWriterListener[size]);
+    }
+
     public Backup write(String path) throws Exception {
         return write(path, newHashMap());
     }
@@ -211,7 +236,6 @@ public class BackupWriter {
         backupWriterContext.setBackupOpsContext(context);
         Executor executor = getExecutor();
         backupWriterContext.setExecutor(executor == null ? createExecutor() : executor);
-        backupWriterContext.setWriteRowSetManager(createWriteRowSetManager());
         backupWriterContext.setFormat(getFormat());
         backupWriterContext.setFormatAttributes(getFormatAttributes());
         backupWriterContext.setFormatFactory(getFormatFactory());
@@ -219,6 +243,8 @@ public class BackupWriter {
         backupWriterContext.setThreads(getThreads());
         backupWriterContext.setTimeZone(getTimeZone());
         openSourceSession(backupWriterContext);
+        backupWriterContext.setBackupWriterManager(
+                createBackupWriterManager(backupWriterContext));
         return backupWriterContext;
     }
 
@@ -228,8 +254,13 @@ public class BackupWriter {
         return backup;
     }
 
-    protected WriteRowSetManager createWriteRowSetManager() {
-        return new SimpleWriteRowSetManager();
+    protected BackupWriterManager createBackupWriterManager(BackupWriterContext backupWriterContext) {
+        BackupWriterManager backupWriterManager = new SimpleBackupWriterManager();
+        backupWriterManager.setDeltaRowCount(getDeltaRowCount());
+        for (BackupWriterListener listener : getListeners()) {
+            backupWriterManager.addListener(listener);
+        }
+        return backupWriterManager;
     }
 
     protected Executor createExecutor() {
@@ -255,7 +286,7 @@ public class BackupWriter {
             backupWriterContext.setDatabase(database == null ?
                     openDatabase(sourceSession) : database);
         } catch (Exception exception) {
-            close(sourceSession);
+            JdbcUtils.closeQuietly(sourceSession);
             throw exception;
         }
     }
@@ -356,21 +387,11 @@ public class BackupWriter {
     }
 
     protected void executeWork(final Work work, final BackupWriterContext backupWriterContext) {
-        final WriteRowSetManager writeRowSetManager = backupWriterContext.getWriteRowSetManager();
-        final Executor executor = backupWriterContext.getExecutor();
-        final SessionFactory sessionFactory = backupWriterContext.getSourceSessionFactory();
-        executor.execute(new Runnable() {
+        backupWriterContext.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                Session session = null;
-                try {
-                    session = sessionFactory.openSession();
-                    session.execute(work, writeRowSetManager);
-                } catch (Exception exception) {
-                    writeRowSetManager.failure(work, exception);
-                } finally {
-                    close(session);
-                }
+                backupWriterContext.getBackupWriterManager().execute(work,
+                        backupWriterContext.getSourceSessionFactory());
             }
         });
     }
@@ -424,6 +445,15 @@ public class BackupWriter {
 
     public void setDatabase(Database database) {
         this.database = database;
+    }
+
+    public Long getDeltaRowCount() {
+        return deltaRowCount;
+    }
+
+    public void setDeltaRowCount(Long deltaRowCount) {
+        isTrue(deltaRowCount > 0, "Delta row count should be greater than 0");
+        this.deltaRowCount = deltaRowCount;
     }
 
     public Executor getExecutor() {

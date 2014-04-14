@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -45,7 +46,7 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
@@ -121,7 +122,7 @@ public class MySQLSequenceInspector extends TableInspectorBase<Table, TableInspe
                             try {
                                 column = columns.next() ? table.addColumn(columns.getString("FIELD")) : null;
                             } finally {
-                                close(columns);
+                                JdbcUtils.closeQuietly(columns);
                             }
                             if (column == null) {
                                 continue;

@@ -56,12 +56,22 @@ public class SqlOutputFormat extends OutputFormatBase implements SqlAttributes {
 
     private String lineEnding = SEMICOLON;
     private String lineSeparator = getProperty("line.separator");
-    private Dialect dialect = createService(DialectResolver.class).resolve(NUODB);
+    private Dialect dialect;
     private Writer output;
 
     @Override
     public String getFormat() {
         return FORMAT;
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        dialect = initDialect();
+    }
+
+    protected Dialect initDialect() {
+        return createService(DialectResolver.class).resolve(NUODB);
     }
 
     @Override
@@ -174,6 +184,7 @@ public class SqlOutputFormat extends OutputFormatBase implements SqlAttributes {
             } catch (IOException exception) {
                 throw new OutputFormatException(exception);
             }
+            output = null;
         }
     }
 }

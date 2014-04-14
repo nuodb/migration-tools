@@ -48,7 +48,7 @@ public class JdbcUtils {
     private JdbcUtils() {
     }
 
-    public static void close(ResultSet resultSet) {
+    public static void closeQuietly(ResultSet resultSet) {
         try {
             if (resultSet != null) {
                 resultSet.close();
@@ -60,7 +60,7 @@ public class JdbcUtils {
         }
     }
 
-    public static void close(Statement statement) {
+    public static void closeQuietly(Statement statement) {
         try {
             if (statement != null) {
                 statement.close();
@@ -72,7 +72,7 @@ public class JdbcUtils {
         }
     }
 
-    public static void close(Connection connection) {
+    public static void closeQuietly(Connection connection) {
         try {
             if (connection != null) {
                 connection.close();
@@ -84,7 +84,7 @@ public class JdbcUtils {
         }
     }
 
-    public static void close(Session session) {
+    public static void closeQuietly(Session session) {
         try {
             if (session != null) {
                 session.close();
@@ -96,7 +96,7 @@ public class JdbcUtils {
         }
     }
 
-    public static void close(ScriptProcessor scriptProcessor) {
+    public static void closeQuietly(ScriptProcessor scriptProcessor) {
         try {
             if (scriptProcessor != null) {
                 scriptProcessor.close();

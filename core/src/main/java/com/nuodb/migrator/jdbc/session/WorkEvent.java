@@ -25,26 +25,31 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.writer;
+package com.nuodb.migrator.jdbc.session;
 
-import com.nuodb.migrator.backup.Chunk;
-import com.nuodb.migrator.jdbc.session.Work;
-import com.nuodb.migrator.jdbc.session.WorkManager;
+import java.util.EventObject;
 
 /**
  * @author Sergey Bushik
  */
-public interface WriteRowSetManager extends WorkManager {
+public class WorkEvent extends EventObject {
 
-    boolean canWrite(WriteRowSet writeRowSet, Work work);
+    private Throwable failure;
 
-    void writeStart(WriteRowSet writeRowSet, Work work);
+    public WorkEvent(Work work) {
+        super(work);
+    }
 
-    void writeStart(WriteRowSet writeRowSet, Work work, Chunk chunk);
+    public WorkEvent(Work work, Throwable failure) {
+        super(work);
+        this.failure = failure;
+    }
 
-    void writeRow(WriteRowSet writeRowSet, Work work, Chunk chunk);
+    public Work getWork() {
+        return (Work) getSource();
+    }
 
-    void writeEnd(WriteRowSet writeRowSet, Work work, Chunk chunk);
-
-    void writeEnd(WriteRowSet writeRowSet, Work work);
+    public Throwable getFailure() {
+        return failure;
+    }
 }

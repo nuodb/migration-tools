@@ -25,42 +25,33 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc;
+package com.nuodb.migrator.backup.writer;
 
-import org.testng.annotations.Test;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import com.nuodb.migrator.jdbc.session.WorkListener;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcUtilsTest {
+public interface BackupWriterListener extends WorkListener {
 
-    @Test
-    public void testCloseResultSet() throws SQLException {
-        ResultSet resultSet = mock(ResultSet.class);
-        JdbcUtils.closeQuietly(resultSet);
-        verify(resultSet).close();
-    }
+    /**
+     * Called on start for each exported row set and chunk
+     *
+     * @param event containing details about row set & chunk written
+     */
+    void onWriteStart(WriteRowSetEvent event);
 
-    @Test
-    public void testCloseStatement() throws SQLException {
-        Statement statement = mock(Statement.class);
-        JdbcUtils.closeQuietly(statement);
-        verify(statement).close();
-    }
+    /**
+     * Triggered for each exported row
+     *
+     * @param event containing details about row set and chunk written
+     */
+    void onWriteRow(WriteRowSetEvent event);
 
-    @Test
-    public void testCloseConnection() throws SQLException {
-        Connection connection = mock(Connection.class);
-        JdbcUtils.closeQuietly(connection);
-        verify(connection).close();
-    }
+    /**
+     * Triggered when row set export is completed
+     *
+     * @param event containing details about row set and chunk written
+     */
+    void onWriteEnd(WriteRowSetEvent event);
 }

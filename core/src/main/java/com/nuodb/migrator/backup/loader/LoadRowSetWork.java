@@ -44,6 +44,7 @@ import com.nuodb.migrator.jdbc.session.WorkBase;
 import org.slf4j.Logger;
 
 import java.sql.PreparedStatement;
+import java.util.Iterator;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
@@ -61,7 +62,8 @@ public class LoadRowSetWork extends WorkBase {
     private BackupLoaderContext backupLoaderContext;
 
     private PreparedStatement statement;
-    private CommitStrategy commitStrategy;
+    private CommitExecutor commitExecutor;
+    private BackupLoaderManager backupLoaderManager;
 
     public LoadRowSetWork(LoadRowSet loadRowSet, BackupLoaderContext backupLoaderContext) {
         this.loadRowSet = loadRowSet;
@@ -72,16 +74,19 @@ public class LoadRowSetWork extends WorkBase {
     protected void init() throws Exception {
         statement = getSession().getConnection().prepareStatement(
                 loadRowSet.getQuery().toString());
-        commitStrategy = backupLoaderContext.getCommitStrategy() != null ?
+        CommitStrategy commitStrategy = backupLoaderContext.getCommitStrategy() != null ?
                 backupLoaderContext.getCommitStrategy() : BatchCommitStrategy.INSTANCE;
+        commitExecutor = commitStrategy.createCommitExecutor(statement, getQuery());
+        backupLoaderManager = backupLoaderContext.getBackupLoaderManager();
     }
 
     @Override
     public void execute() throws Exception {
-        CommitExecutor commitExecutor = commitStrategy.createCommitExecutor(statement, getQuery());
-        // TODO: ask loadRowSetManager for permission to continue loading
-        // TODO: LoadRowSetManager loadRowSetManager = backupLoaderContext.getLoadRowSetManager();
-        for (Chunk chunk : getRowSet().getChunks()) {
+        backupLoaderManager.loadStart(this, loadRowSet);
+        for (Iterator<Chunk> chunks = getRowSet().getChunks().iterator();
+             backupLoaderManager.canLoad(this, loadRowSet) && chunks.hasNext(); ) {
+            Chunk chunk = chunks.next();
+            backupLoaderManager.loadStart(this, loadRowSet, chunk);
             InputFormat inputFormat = openInput(chunk.getName());
             inputFormat.init();
             if (logger.isTraceEnabled()) {
@@ -91,21 +96,24 @@ public class LoadRowSetWork extends WorkBase {
             inputFormat.readStart();
             long row = 0;
             try {
-                while (inputFormat.read()) {
+                while (inputFormat.read() && backupLoaderManager.canLoad(this, loadRowSet)) {
                     commitExecutor.execute();
                     row++;
+                    backupLoaderManager.loadRow(this, loadRowSet, chunk);
                 }
                 commitExecutor.finish();
             } catch (Exception exception) {
                 throw new BackupLoaderException(format("Error loading row %d from %s chunk to %s table",
-                              row + 1, chunk.getName(), getTable().getQualifiedName()), exception);
+                        row + 1, chunk.getName(), getTable().getQualifiedName()), exception);
             }
             inputFormat.readEnd();
             inputFormat.close();
+            backupLoaderManager.loadEnd(this, loadRowSet, chunk);
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Chunk %s loaded", chunk.getName()));
             }
         }
+        backupLoaderManager.loadEnd(this, loadRowSet);
     }
 
     protected InputFormat openInput(String input) {
@@ -123,27 +131,39 @@ public class LoadRowSetWork extends WorkBase {
                         return getTable().getColumn(column.getName());
                     }
                 })));
-        builder.withTimeZone(backupLoaderContext.getTimeZone());
+        builder.withTimeZone(getBackupLoaderContext().getTimeZone());
         builder.withValueFormatRegistry(backupLoaderContext.getValueFormatRegistry());
         inputFormat.setValueHandleList(builder.build());
         return inputFormat;
     }
 
-    protected RowSet getRowSet() {
+    public BackupLoaderContext getBackupLoaderContext() {
+        return backupLoaderContext;
+    }
+
+    public LoadRowSet getLoadRowSet() {
+        return loadRowSet;
+    }
+
+    public BackupLoaderManager getBackupLoaderManager() {
+        return backupLoaderContext.getBackupLoaderManager();
+    }
+
+    public RowSet getRowSet() {
         return loadRowSet.getRowSet();
     }
 
-    protected Table getTable() {
+    public Table getTable() {
         return loadRowSet.getTable();
     }
 
-    protected Query getQuery() {
+    public Query getQuery() {
         return loadRowSet.getQuery();
     }
 
     @Override
     public void close() throws Exception {
         super.close();
-        JdbcUtils.close(statement);
+        JdbcUtils.closeQuietly(statement);
     }
 }

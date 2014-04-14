@@ -30,11 +30,15 @@ package com.nuodb.migrator.jdbc.session;
 import com.nuodb.migrator.MigratorException;
 import org.slf4j.Logger;
 
+import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Lists.newCopyOnWriteArrayList;
 import static com.google.common.collect.Maps.newConcurrentMap;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -42,31 +46,133 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-public class SimpleWorkManager implements WorkManager {
+public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L> {
 
+    public static final boolean THROW_FAILURE_ON_CLOSE = true;
     protected final transient Logger logger = getLogger(getClass());
-    private final Map<Work, Throwable> failureMap = newConcurrentMap();
+    private final Map<Work, Throwable> failures = newConcurrentMap();
+    private boolean throwFailureOnClose = THROW_FAILURE_ON_CLOSE;
+    private Collection<L> listeners = newCopyOnWriteArrayList();
 
     @Override
-    public void failure(Work work, Throwable failure) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(format("Work failure: %s", failure.getMessage()));
-        }
-        failureMap.put(work, failure);
+    public void addListener(L listener) {
+        listeners.add(listener);
     }
 
     @Override
-    public Map<Work, Throwable> getFailures() {
-        return failureMap;
+    public void removeListener(L listener) {
+        listeners.remove(listener);
+    }
+
+    protected boolean hasListeners() {
+        return !listeners.isEmpty();
+    }
+
+    @Override
+    public Collection<L> getListeners() {
+        return listeners;
+    }
+
+    @Override
+    public void execute(Work work, Session session) {
+        try {
+            init(work, session);
+            execute(work);
+        } catch (Exception exception) {
+            failure(work, exception);
+        } finally {
+            try {
+                close(work);
+            } catch (Exception exception) {
+                failure(work, exception);
+            }
+        }
+    }
+
+    @Override
+    public void execute(Work work, SessionFactory sessionFactory) {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            execute(work, session);
+        } catch (Exception exception) {
+            failure(work, exception);
+        } finally {
+            closeQuietly(session);
+        }
+    }
+
+    protected void init(Work work, Session session) throws Exception {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Work init %s", getClassName(work.getClass())));
+        }
+        work.init(session);
+    }
+
+    protected void execute(Work work) throws Exception {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Work execute %s", getClassName(work.getClass())));
+        }
+        onExecute(work);
+        work.execute();
+    }
+
+    protected void onExecute(Work work) {
+        if (hasListeners()) {
+            WorkEvent event = createWorkEvent(work);
+            for (L listener : getListeners()) {
+                listener.onExecute(event);
+            }
+        }
+    }
+
+    protected WorkEvent createWorkEvent(Work work) {
+        return new WorkEvent(work);
+    }
+
+    protected void failure(Work work, Throwable failure) {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Work failure %s %s", getClassName(work.getClass()), failure.getMessage()));
+        }
+        failures.put(work, failure);
+        onFailure(work, failure);
+    }
+
+    protected void onFailure(Work work, Throwable failure) {
+        if (!isEmpty(listeners)) {
+            WorkEvent event = new WorkEvent(work, failure);
+            for (L listener : listeners) {
+                listener.onFailure(event);
+            }
+        }
+    }
+
+    protected void close(Work work) throws Exception {
+        if (logger.isTraceEnabled()) {
+            logger.trace(format("Work close %s", getClassName(work.getClass())));
+        }
+        work.close();
     }
 
     @Override
     public void close() throws Exception {
         Map<Work, Throwable> failures = getFailures();
-        if (!isEmpty(failures)) {
+        if (isThrowFailureOnClose() && !isEmpty(failures)) {
             final Throwable failure = get(failures.values(), 0);
             throw failure instanceof MigratorException ?
                     (MigratorException) failure : new MigratorException(failure);
         }
+    }
+
+    public Map<Work, Throwable> getFailures() {
+        return failures;
+    }
+
+    public boolean isThrowFailureOnClose() {
+        return throwFailureOnClose;
+    }
+
+    public void setThrowFailureOnClose(boolean throwFailureOnClose) {
+        this.throwFailureOnClose = throwFailureOnClose;
     }
 }

@@ -265,7 +265,7 @@ public class NuoDBDialect extends SimpleDialect {
 
     @Override
     public boolean supportsDropIndexOnTable() {
-        return true;
+        return false;
     }
 
     @Override

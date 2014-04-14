@@ -25,12 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.loader;
+package com.nuodb.migrator.backup.writer;
 
-import com.nuodb.migrator.jdbc.session.WorkManager;
+import com.nuodb.migrator.jdbc.session.WorkAdapter;
 
 /**
  * @author Sergey Bushik
  */
-public interface LoadRowSetManager extends WorkManager {
+public abstract class BackupWriterAdapter extends WorkAdapter
+        implements BackupWriterListener {
+    @Override
+    public void onWriteStart(WriteRowSetEvent event) {
+    }
+
+    @Override
+    public void onWriteRow(WriteRowSetEvent event) {
+    }
+
+    @Override
+    public void onWriteEnd(WriteRowSetEvent event) {
+    }
 }

@@ -192,9 +192,9 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
     @Override
     public void close() throws Exception {
-        JdbcUtils.close(getSourceSession());
-        JdbcUtils.close(getTargetSession());
-        JdbcUtils.close(getScriptExporter());
+        JdbcUtils.closeQuietly(getSourceSession());
+        JdbcUtils.closeQuietly(getTargetSession());
+        JdbcUtils.closeQuietly(getScriptExporter());
     }
 
     protected ConnectionSpec getSourceSpec() {

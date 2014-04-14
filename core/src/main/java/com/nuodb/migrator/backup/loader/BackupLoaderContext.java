@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
+import static com.nuodb.migrator.utils.ValidationUtils.isTrue;
+
 /**
  * @author Sergey Bushik
  */
@@ -90,9 +92,13 @@ public interface BackupLoaderContext {
 
     void setInsertTypeFactory(InsertTypeFactory insertTypeFactory);
 
-    LoadRowSetManager getLoadRowSetManager();
+    BackupLoaderManager getBackupLoaderManager();
 
-    void setLoadRowSetManager(LoadRowSetManager loadRowSetManager);
+    void setBackupLoaderManager(BackupLoaderManager backupLoaderManager);
+
+    Collection<LoadRowSet> getLoadRowSets();
+
+    void setLoadRowSets(Collection<LoadRowSet> loadRowSets);
 
     Collection<MigrationMode> getMigrationModes();
 

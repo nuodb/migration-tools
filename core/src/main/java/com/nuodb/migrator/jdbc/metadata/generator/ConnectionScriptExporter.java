@@ -74,8 +74,8 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
 
     @Override
     protected void doClose() throws Exception {
-        JdbcUtils.close(statement);
-        JdbcUtils.close(connection);
+        JdbcUtils.closeQuietly(statement);
+        JdbcUtils.closeQuietly(connection);
     }
 
     public Connection getConnection() {

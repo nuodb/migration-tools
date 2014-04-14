@@ -29,13 +29,15 @@ package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.utils.ObjectUtils;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * @author Sergey Bushik
  */
 public class Chunk {
 
     private String name;
-    private long rowCount;
+    private AtomicLong rowCount = new AtomicLong();
     private transient RowSet rowSet;
 
     public String getName() {
@@ -47,15 +49,19 @@ public class Chunk {
     }
 
     public long getRowCount() {
-        return rowCount;
+        return rowCount.get();
     }
 
     public void setRowCount(long rowCount) {
-        this.rowCount = rowCount;
+        this.rowCount.set(rowCount);
     }
 
-    public void incrementRowCount() {
-        rowCount++;
+    public long incrementRowCount() {
+        long rowCount = this.rowCount.incrementAndGet();
+        if (rowSet != null) {
+            rowSet.incrementRowCount();
+        }
+        return rowCount;
     }
 
     public RowSet getRowSet() {
@@ -69,12 +75,12 @@ public class Chunk {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Chunk)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        Chunk that = (Chunk) o;
+        Chunk chunk = (Chunk) o;
 
-        if (rowCount != that.rowCount) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (name != null ? !name.equals(chunk.name) : chunk.name != null) return false;
+        if (rowCount != null ? !rowCount.equals(chunk.rowCount) : chunk.rowCount != null) return false;
 
         return true;
     }
@@ -82,7 +88,7 @@ public class Chunk {
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (int) (rowCount ^ (rowCount >>> 32));
+        result = 31 * result + (rowCount != null ? rowCount.hashCode() : 0);
         return result;
     }
 

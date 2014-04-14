@@ -135,6 +135,7 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
             } catch (IOException exception) {
                 throw new InputFormatException(exception);
             }
+            parser = null;
         }
     }
 }

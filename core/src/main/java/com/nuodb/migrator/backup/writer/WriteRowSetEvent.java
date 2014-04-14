@@ -25,12 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.loader;
+package com.nuodb.migrator.backup.writer;
 
-import com.nuodb.migrator.jdbc.session.SimpleWorkManager;
+import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.jdbc.session.Work;
+import com.nuodb.migrator.jdbc.session.WorkEvent;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleLoadRowSetManager extends SimpleWorkManager implements LoadRowSetManager {
+public class WriteRowSetEvent extends WorkEvent {
+
+    private WriteRowSet writeRowSet;
+    private Chunk chunk;
+
+    public WriteRowSetEvent(Work work, WriteRowSet writeRowSet) {
+        super(work);
+        this.writeRowSet = writeRowSet;
+    }
+
+    public WriteRowSetEvent(Work work, WriteRowSet writeRowSet, Chunk chunk) {
+        super(work);
+        this.writeRowSet = writeRowSet;
+        this.chunk = chunk;
+    }
+
+    public WriteRowSet getWriteRowSet() {
+        return writeRowSet;
+    }
+
+    public Chunk getChunk() {
+        return chunk;
+    }
 }

@@ -135,12 +135,13 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
 
     @Override
     public void close() {
-        try {
-            if (xmlWriter != null) {
+        if (xmlWriter != null) {
+            try {
                 xmlWriter.close();
+            } catch (XMLStreamException exception) {
+                throw new OutputFormatException(exception);
             }
-        } catch (XMLStreamException exception) {
-            throw new OutputFormatException(exception);
+            xmlWriter = null;
         }
     }
 

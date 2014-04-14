@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -38,7 +39,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.TimeZone;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.lang.String.valueOf;
@@ -118,7 +119,7 @@ public class MySQLDialect extends SimpleDialect {
             String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "SYSTEM";
             statement.execute("SET @@SESSION.TIME_ZONE = '" + timeZoneAsValue + "'");
         } finally {
-            close(statement);
+            JdbcUtils.closeQuietly(statement);
         }
     }
 

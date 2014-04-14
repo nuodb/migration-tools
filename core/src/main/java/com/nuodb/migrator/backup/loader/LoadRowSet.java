@@ -30,6 +30,7 @@ package com.nuodb.migrator.backup.loader;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
+import com.nuodb.migrator.utils.ObjectUtils;
 
 /**
  * @author Sergey Bushik
@@ -56,5 +57,32 @@ public class LoadRowSet {
 
     public Query getQuery() {
         return query;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LoadRowSet that = (LoadRowSet) o;
+
+        if (query != null ? !query.equals(that.query) : that.query != null) return false;
+        if (rowSet != null ? !rowSet.equals(that.rowSet) : that.rowSet != null) return false;
+        if (table != null ? !table.equals(that.table) : that.table != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = rowSet != null ? rowSet.hashCode() : 0;
+        result = 31 * result + (table != null ? table.hashCode() : 0);
+        result = 31 * result + (query != null ? query.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

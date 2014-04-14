@@ -103,7 +103,7 @@ public class Migrator {
 
     public void execute(Job job, Map<Object, Object> context) {
         JobExecutor jobExecutor = createJobExecutor(job);
-        jobExecutor.addJobExecutionListener(new TraceJobExecutionListener());
+        jobExecutor.addListener(new TraceJobExecutionListener());
         jobExecutor.execute(context);
         Throwable failure = jobExecutor.getJobStatus().getFailure();
         if (failure != null) {

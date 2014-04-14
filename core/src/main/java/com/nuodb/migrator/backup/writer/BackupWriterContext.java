@@ -66,9 +66,9 @@ public interface BackupWriterContext {
 
     void setExecutor(Executor executor);
 
-    WriteRowSetManager getWriteRowSetManager();
+    BackupWriterManager getBackupWriterManager();
 
-    void setWriteRowSetManager(WriteRowSetManager writeRowSetManager);
+    void setBackupWriterManager(BackupWriterManager backupWriterManager);
 
     String getFormat();
 

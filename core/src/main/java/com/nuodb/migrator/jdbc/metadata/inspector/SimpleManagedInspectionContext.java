@@ -86,7 +86,7 @@ public class SimpleManagedInspectionContext<M extends MetaData, I extends Inspec
     @Override
     public void closeStatements() throws SQLException {
         for (Statement statement : statements.values()) {
-            JdbcUtils.close(statement);
+            JdbcUtils.closeQuietly(statement);
         }
     }
 

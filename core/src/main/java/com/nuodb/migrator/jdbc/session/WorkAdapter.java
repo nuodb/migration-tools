@@ -25,42 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc;
-
-import org.testng.annotations.Test;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+package com.nuodb.migrator.jdbc.session;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcUtilsTest {
+public abstract class WorkAdapter implements WorkListener {
 
-    @Test
-    public void testCloseResultSet() throws SQLException {
-        ResultSet resultSet = mock(ResultSet.class);
-        JdbcUtils.closeQuietly(resultSet);
-        verify(resultSet).close();
+    @Override
+    public void onExecute(WorkEvent event) {
     }
 
-    @Test
-    public void testCloseStatement() throws SQLException {
-        Statement statement = mock(Statement.class);
-        JdbcUtils.closeQuietly(statement);
-        verify(statement).close();
-    }
-
-    @Test
-    public void testCloseConnection() throws SQLException {
-        Connection connection = mock(Connection.class);
-        JdbcUtils.closeQuietly(connection);
-        verify(connection).close();
+    @Override
+    public void onFailure(WorkEvent event) {
     }
 }

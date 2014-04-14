@@ -71,7 +71,8 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     private FormatFactory formatFactory;
     private Map<String,Object> formatAttributes;
     private InsertTypeFactory insertTypeFactory;
-    private LoadRowSetManager loadRowSetManager;
+    private BackupLoaderManager backupLoaderManager;
+    private Collection<LoadRowSet> loadRowSets;
     private Collection<MigrationMode> migrationModes;
     private ConnectionSpec sourceSpec;
     private Session sourceSession;
@@ -186,13 +187,23 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
-    public LoadRowSetManager getLoadRowSetManager() {
-        return loadRowSetManager;
+    public BackupLoaderManager getBackupLoaderManager() {
+        return backupLoaderManager;
     }
 
     @Override
-    public void setLoadRowSetManager(LoadRowSetManager loadRowSetManager) {
-        this.loadRowSetManager = loadRowSetManager;
+    public void setBackupLoaderManager(BackupLoaderManager backupLoaderManager) {
+        this.backupLoaderManager = backupLoaderManager;
+    }
+
+    @Override
+    public Collection<LoadRowSet> getLoadRowSets() {
+        return loadRowSets;
+    }
+
+    @Override
+    public void setLoadRowSets(Collection<LoadRowSet> loadRowSets) {
+        this.loadRowSets = loadRowSets;
     }
 
     @Override
@@ -329,8 +340,8 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
                 }
             }
         }
-        JdbcUtils.close(sourceSession);
-        JdbcUtils.close(targetSession);
-        JdbcUtils.close(scriptExporter);
+        JdbcUtils.closeQuietly(sourceSession);
+        JdbcUtils.closeQuietly(targetSession);
+        JdbcUtils.closeQuietly(scriptExporter);
     }
 }

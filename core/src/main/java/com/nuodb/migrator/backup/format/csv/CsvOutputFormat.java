@@ -120,12 +120,13 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvAttributes {
 
     @Override
     public void close() {
-        try {
-            if (csvPrinter != null) {
+        if (csvPrinter != null) {
+            try {
                 csvPrinter.close();
+            } catch (IOException exception) {
+                throw new OutputFormatException(exception);
             }
-        } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            csvPrinter = null;
         }
     }
 }

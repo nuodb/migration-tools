@@ -29,13 +29,12 @@ package com.nuodb.migrator.backup.loader;
 
 import com.google.common.base.Function;
 import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.backup.Backup;
-import com.nuodb.migrator.backup.BackupOps;
+import com.nuodb.migrator.backup.*;
 import com.nuodb.migrator.backup.Column;
-import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
@@ -44,9 +43,7 @@ import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
 import com.nuodb.migrator.jdbc.dialect.TranslationManager;
 import com.nuodb.migrator.jdbc.dialect.Translator;
-import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
@@ -84,16 +81,15 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.context.ContextUtils.createService;
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
 import static com.nuodb.migrator.jdbc.query.InsertType.INSERT;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
-import static com.nuodb.migrator.utils.Collections.isEmpty;
-import static com.nuodb.migrator.utils.Collections.removeAll;
-import static com.nuodb.migrator.utils.Collections.retainAll;
+import static com.nuodb.migrator.utils.Collections.*;
+import static com.nuodb.migrator.utils.ValidationUtils.isTrue;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -107,24 +103,27 @@ public class BackupLoader {
 
     public static final Collection<MigrationMode> MIGRATION_MODES = newHashSet(MigrationMode.values());
     public static final int THREADS = getRuntime().availableProcessors();
+    public static final Long DELTA_ROW_COUNT = null;
 
     protected final transient Logger logger = getLogger(getClass());
 
-    private Database database;
     private CommitStrategy commitStrategy;
+    private Database database;
+    private Long deltaRowCount = DELTA_ROW_COUNT;
     private DialectResolver dialectResolver;
     private Executor executor;
     private FormatFactory formatFactory;
     private Map<String, Object> formatAttributes = newHashMap();
     private GroupScriptsBy groupScriptsBy;
     private Collection<JdbcTypeSpec> jdbcTypeSpecs;
-    private PrioritySet<NamingStrategy> namingStrategies;
+    private Collection<BackupLoaderListener> listeners = newArrayList();
     private IdentifierQuoting identifierQuoting;
     private IdentifierNormalizer identifierNormalizer;
     private InsertTypeFactory insertTypeFactory;
     private InspectionManager inspectionManager;
     private MetaDataSpec metaDataSpec;
     private Collection<MigrationMode> migrationModes = MIGRATION_MODES;
+    private PrioritySet<NamingStrategy> namingStrategies;
     private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
     private Collection<ScriptType> scriptTypes;
     private ConnectionSpec targetSpec;
@@ -165,13 +164,13 @@ public class BackupLoader {
         backupLoaderContext.setFormatAttributes(getFormatAttributes());
         backupLoaderContext.setFormatFactory(getFormatFactory());
         backupLoaderContext.setInsertTypeFactory(getInsertTypeFactory());
-        backupLoaderContext.setLoadRowSetManager(createLoadRowSetManager());
         backupLoaderContext.setMigrationModes(getMigrationModes());
         backupLoaderContext.setRowSetMapper(getRowSetMapper());
         backupLoaderContext.setTimeZone(getTimeZone());
-
         openSourceSession(backupLoaderContext);
         openTargetSession(backupLoaderContext);
+        backupLoaderContext.setBackupLoaderManager(
+                createBackupLoaderManager(backupLoaderContext));
         return backupLoaderContext;
     }
 
@@ -182,8 +181,39 @@ public class BackupLoader {
         return new BlockingThreadPoolExecutor(getThreads(), 100L, MILLISECONDS);
     }
 
-    protected LoadRowSetManager createLoadRowSetManager() {
-        return new SimpleLoadRowSetManager();
+    protected BackupLoaderManager createBackupLoaderManager(final BackupLoaderContext backupLoaderContext) {
+        BackupLoaderManager backupLoaderManager = new SimpleBackupLoaderManager();
+        backupLoaderManager.setDeltaRowCount(getDeltaRowCount());
+        if (backupLoaderContext.isLoadSchema()) {
+            backupLoaderManager.addListener(new LoadSchemaListener(backupLoaderContext));
+        }
+        for (BackupLoaderListener listener : getListeners()) {
+            backupLoaderManager.addListener(listener);
+        }
+        return backupLoaderManager;
+    }
+
+    class LoadSchemaListener extends BackupLoaderAdapter {
+
+        private BackupLoaderContext backupLoaderContext;
+
+        public LoadSchemaListener(BackupLoaderContext backupLoaderContext) {
+            this.backupLoaderContext = backupLoaderContext;
+        }
+
+        @Override
+        public void onLoadEnd(LoadRowSetEvent event) {
+            Table table = getTable(event.getLoadRowSet(), backupLoaderContext);
+            if (event.getChunk() == null && table != null) {
+                try {
+                    loadSchemaIndexes(table, backupLoaderContext);
+                } catch (MigratorException exception) {
+                    throw exception;
+                } catch (Exception exception) {
+                    throw new BackupLoaderException(exception);
+                }
+            }
+        }
     }
 
     protected void openSourceSession(BackupLoaderContext backupLoaderContext) throws SQLException {
@@ -208,7 +238,7 @@ public class BackupLoader {
             backupLoaderContext.setValueFormatRegistry(
                     createValueFormatRegistry(targetSession));
         } catch (Exception exception) {
-            close(targetSession);
+            JdbcUtils.closeQuietly(targetSession);
             throw exception;
         }
     }
@@ -297,7 +327,6 @@ public class BackupLoader {
     }
 
     protected Backup load(BackupLoaderContext backupLoaderContext) throws Exception {
-        boolean awaitTermination = true;
         try {
             if (backupLoaderContext.isLoadSchema()) {
                 loadSchemaNoIndexes(backupLoaderContext);
@@ -306,14 +335,12 @@ public class BackupLoader {
                 loadData(backupLoaderContext);
             }
             if (backupLoaderContext.isLoadSchema()) {
-                loadSchemaOnlyIndexes(backupLoaderContext);
+                loadSchemaIndexes(backupLoaderContext);
             }
         } catch (Throwable failure) {
-            awaitTermination = false;
+            backupLoaderContext.close(true);
             throw failure instanceof MigratorException ?
                     (MigratorException) failure : new BackupLoaderException(failure);
-        } finally {
-            backupLoaderContext.close(awaitTermination);
         }
         return backupLoaderContext.getBackup();
     }
@@ -330,7 +357,7 @@ public class BackupLoader {
             scriptExporter.open();
             scriptExporter.exportScripts(scriptGeneratorManager.getScripts(database));
         } finally {
-            close(scriptExporter);
+            closeQuietly(scriptExporter);
         }
     }
 
@@ -339,26 +366,71 @@ public class BackupLoader {
         Database database = getDatabase();
         backupLoaderContext.setDatabase(database != null ? database :
                 openDatabase(backupLoaderContext.getTargetSession()));
-        for (LoadRowSet loadRowSet : createLoadRowSets(backupLoaderContext)) {
+        backupLoaderContext.setLoadRowSets(createLoadRowSets(backupLoaderContext));
+        for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {
             loadData(loadRowSet, backupLoaderContext);
         }
     }
 
-    // TODO: change to multi-threaded load of indexes
-    protected void loadSchemaOnlyIndexes(BackupLoaderContext backupLoaderContext) throws Exception {
-        ScriptGeneratorManager scriptGeneratorManager =
-                backupLoaderContext.getScriptGeneratorManager();
-        scriptGeneratorManager.setObjectTypes(
-                retainAll(newArrayList(getObjectTypes()),
-                        newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX)));
+    // TODO: load indexes now for source tables without data, which is indicated by an absent row set
+    protected void loadSchemaIndexes(BackupLoaderContext backupLoaderContext) throws Exception {
         Database database = backupLoaderContext.getBackup().getDatabase();
-        ScriptExporter scriptExporter = createScriptExporter(backupLoaderContext);
-        try {
-            scriptExporter.open();
-            scriptExporter.exportScripts(scriptGeneratorManager.getScripts(database));
-        } finally {
-            close(scriptExporter);
+        Collection<Table> tables = newArrayList(database.getTables());
+        for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {
+            Table table = getTable(loadRowSet, backupLoaderContext);
+            if (table != null) {
+                tables.remove(table);
+            }
         }
+        for (Table table : tables) {
+            loadSchemaIndexes(table, backupLoaderContext);
+        }
+    }
+
+    /**
+     * Looks up source table meta data
+     *
+     * @param loadRowSet
+     * @param backupLoaderContext
+     * @return
+     */
+    protected Table getTable(LoadRowSet loadRowSet, BackupLoaderContext backupLoaderContext) {
+        Table table = null;
+        Database database = backupLoaderContext.getBackup().getDatabase();
+        if (loadRowSet.getRowSet() instanceof TableRowSet) {
+            TableRowSet tableRowSet = (TableRowSet) loadRowSet.getRowSet();
+            Catalog catalog = database.getCatalog(tableRowSet.getCatalog());
+            Schema schema = catalog.getSchema(tableRowSet.getSchema());
+            table = schema.getTable(tableRowSet.getTable());
+        }
+        return table;
+    }
+
+    protected void loadSchemaIndexes(Table table, BackupLoaderContext backupLoaderContext) throws Exception {
+        Collection<MetaDataType> objectTypes = getObjectTypes();
+        if (contains(objectTypes, PRIMARY_KEY)) {
+            PrimaryKey primaryKey = table.getPrimaryKey();
+            if (primaryKey != null) {
+                Work work = createWork(primaryKey, backupLoaderContext);
+                executeWork(work, backupLoaderContext);
+            }
+        }
+        if (contains(objectTypes, INDEX)) {
+            for (Index index : table.getIndexes()) {
+                Work work = createWork(index, backupLoaderContext);
+                executeWork(work, backupLoaderContext);
+            }
+        }
+        if (contains(objectTypes, FOREIGN_KEY)) {
+            for (ForeignKey foreignKey : table.getForeignKeys()) {
+                Work work = createWork(foreignKey, backupLoaderContext);
+                executeWork(work, backupLoaderContext);
+            }
+        }
+    }
+
+    protected Work createWork(MetaData object, BackupLoaderContext backupLoaderContext) {
+        return new LoadSchemaWork(object, backupLoaderContext);
     }
 
     protected Collection<LoadRowSet> createLoadRowSets(BackupLoaderContext backupLoaderContext) {
@@ -388,21 +460,11 @@ public class BackupLoader {
     }
 
     protected void executeWork(final Work work, final BackupLoaderContext backupLoaderContext) {
-        final Executor executor = backupLoaderContext.getExecutor();
-        final SessionFactory sessionFactory = backupLoaderContext.getTargetSessionFactory();
-        final LoadRowSetManager loadRowSetManager = backupLoaderContext.getLoadRowSetManager();
-        executor.execute(new Runnable() {
+        backupLoaderContext.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                Session session = null;
-                try {
-                    session = sessionFactory.openSession();
-                    session.execute(work, loadRowSetManager);
-                } catch (Exception exception) {
-                    loadRowSetManager.failure(work, exception);
-                } finally {
-                    close(session);
-                }
+                backupLoaderContext.getBackupLoaderManager().execute(work,
+                        backupLoaderContext.getTargetSessionFactory());
             }
         });
     }
@@ -447,6 +509,15 @@ public class BackupLoader {
 
     public void setDatabase(Database database) {
         this.database = database;
+    }
+
+    public Long getDeltaRowCount() {
+        return deltaRowCount;
+    }
+
+    public void setDeltaRowCount(Long deltaRowCount) {
+        isTrue(deltaRowCount > 0, "Delta row count should be greater than 0");
+        this.deltaRowCount = deltaRowCount;
     }
 
     public DialectResolver getDialectResolver() {
@@ -535,6 +606,19 @@ public class BackupLoader {
 
     public void setInspectionManager(InspectionManager inspectionManager) {
         this.inspectionManager = inspectionManager;
+    }
+
+    public void addListener(BackupLoaderListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(BackupLoaderListener listener) {
+        listeners.remove(listener);
+    }
+
+    public BackupLoaderListener[] getListeners() {
+        int size = listeners.size();
+        return listeners.toArray(new BackupLoaderListener[size]);
     }
 
     public MetaDataSpec getMetaDataSpec() {

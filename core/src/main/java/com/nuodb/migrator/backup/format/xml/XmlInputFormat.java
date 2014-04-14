@@ -163,10 +163,13 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
 
     @Override
     public void close() {
-        try {
-            xmlReader.close();
-        } catch (XMLStreamException exception) {
-            throw new InputFormatException(exception);
+        if (xmlReader != null) {
+            try {
+                xmlReader.close();
+            } catch (XMLStreamException exception) {
+                throw new InputFormatException(exception);
+            }
+            xmlReader = null;
         }
     }
 }

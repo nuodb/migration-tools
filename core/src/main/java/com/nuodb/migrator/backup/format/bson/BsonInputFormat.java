@@ -155,10 +155,13 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
 
     @Override
     public void close() {
-        try {
-            bsonReader.close();
-        } catch (IOException exception) {
-            throw new InputFormatException(exception);
+        if (bsonReader != null) {
+            try {
+                bsonReader.close();
+            } catch (IOException exception) {
+                throw new InputFormatException(exception);
+            }
+            bsonReader = null;
         }
     }
 }

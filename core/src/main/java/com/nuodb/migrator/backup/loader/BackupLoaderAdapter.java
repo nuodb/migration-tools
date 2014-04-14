@@ -25,42 +25,25 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc;
+package com.nuodb.migrator.backup.loader;
 
-import org.testng.annotations.Test;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import com.nuodb.migrator.jdbc.session.WorkAdapter;
 
 /**
  * @author Sergey Bushik
  */
-public class JdbcUtilsTest {
+public class BackupLoaderAdapter extends WorkAdapter
+        implements BackupLoaderListener {
 
-    @Test
-    public void testCloseResultSet() throws SQLException {
-        ResultSet resultSet = mock(ResultSet.class);
-        JdbcUtils.closeQuietly(resultSet);
-        verify(resultSet).close();
+    @Override
+    public void onLoadStart(LoadRowSetEvent event) {
     }
 
-    @Test
-    public void testCloseStatement() throws SQLException {
-        Statement statement = mock(Statement.class);
-        JdbcUtils.closeQuietly(statement);
-        verify(statement).close();
+    @Override
+    public void onLoadRow(LoadRowSetEvent event) {
     }
 
-    @Test
-    public void testCloseConnection() throws SQLException {
-        Connection connection = mock(Connection.class);
-        JdbcUtils.closeQuietly(connection);
-        verify(connection).close();
+    @Override
+    public void onLoadEnd(LoadRowSetEvent event) {
     }
 }

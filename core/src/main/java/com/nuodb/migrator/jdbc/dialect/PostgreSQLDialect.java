@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
+import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
@@ -38,7 +39,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimeZone;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 
@@ -83,7 +84,7 @@ public class PostgreSQLDialect extends SimpleDialect {
             String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL";
             statement.execute("SET TIME ZONE " + timeZoneAsValue);
         } finally {
-            close(statement);
+            JdbcUtils.closeQuietly(statement);
         }
     }
 
