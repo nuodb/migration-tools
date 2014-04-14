@@ -219,6 +219,18 @@ public class ScriptGeneratorManager {
         this.scriptTypes = scriptTypes;
     }
 
+    public Object getAttribute(String attribute) {
+        return attributes.get(attribute);
+    }
+
+    public void addAttribute(String attribute, Object value) {
+        attributes.put(attribute, value);
+    }
+
+    public void removeAttribute(String attribute) {
+        attributes.remove(attribute);
+    }
+
     public Map<String, Object> getAttributes() {
         return attributes;
     }

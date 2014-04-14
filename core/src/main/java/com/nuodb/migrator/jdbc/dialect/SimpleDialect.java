@@ -389,6 +389,11 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
+    public boolean supportsDropPrimaryKey() {
+        return true;
+    }
+
+    @Override
     public boolean supportsSequence() {
         return false;
     }
@@ -469,16 +474,6 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getUseCatalog(String catalog) {
-        return getUseCatalog(catalog, false);
-    }
-
-    @Override
-    public String getUseCatalog(String catalog, boolean normalize) {
-        return "USE " + (normalize ? getIdentifier(catalog, null) : catalog);
-    }
-
-    @Override
     public String getUseSchema(String schema) {
         return getUseSchema(schema, false);
     }
@@ -486,6 +481,16 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     @Override
     public String getUseSchema(String schema, boolean normalize) {
         return "USE " + (normalize ? getIdentifier(schema, null) : schema);
+    }
+
+    @Override
+    public String getDropSchema(String schema) {
+        return getDropSchema(schema, false);
+    }
+
+    @Override
+    public String getDropSchema(String schema, boolean normalize) {
+        return "DROP SCHEMA " + (normalize ? getIdentifier(schema, null) : schema) + " CASCADE IF EXISTS";
     }
 
     @Override

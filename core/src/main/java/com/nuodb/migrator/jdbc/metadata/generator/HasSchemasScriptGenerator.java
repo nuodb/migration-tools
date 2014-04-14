@@ -46,6 +46,9 @@ import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUt
  */
 public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchemas> {
 
+    public static final String DROP_SCHEMA = "drop.schema";
+    public static final String USE_SCHEMA = "use.schema";
+
     public HasSchemasScriptGenerator() {
         super(HasSchemas.class);
     }
@@ -59,6 +62,8 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 schemaScripts.put(schema, scripts);
             }
         }
+        scriptGeneratorManager.addAttribute(DROP_SCHEMA, false);
+        scriptGeneratorManager.addAttribute(USE_SCHEMA, true);
         return getScripts(schemaScripts, scriptGeneratorManager);
     }
 
@@ -71,6 +76,9 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 schemaScripts.put(schema, scripts);
             }
         }
+        scriptGeneratorManager.addAttribute(DROP_SCHEMA, true);
+        // use is always
+        scriptGeneratorManager.addAttribute(USE_SCHEMA, true);
         return getScripts(schemaScripts, scriptGeneratorManager);
     }
 
@@ -84,28 +92,50 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 schemaScripts.put(schema, scripts);
             }
         }
+        scriptGeneratorManager.addAttribute(DROP_SCHEMA, true);
+        scriptGeneratorManager.addAttribute(USE_SCHEMA, true);
         return getScripts(schemaScripts, scriptGeneratorManager);
     }
 
     protected Collection<String> getScripts(Map<Schema, Collection<String>> schemaScripts,
                                             ScriptGeneratorManager scriptGeneratorManager) {
+        boolean dropSchema = (Boolean)scriptGeneratorManager.getAttribute(DROP_SCHEMA);
+        boolean createSchema = (Boolean)scriptGeneratorManager.getAttribute(USE_SCHEMA);
         Collection<String> scripts = newArrayList();
         if (schemaScripts.size() == 1) {
             Map.Entry<Schema, Collection<String>> schemaScript = schemaScripts.entrySet().iterator().next();
-            scripts.add(getUseSchema(scriptGeneratorManager, schemaScript.getKey()));
+            Schema schema = schemaScript.getKey();
+            if (dropSchema) {
+                scripts.add(getDropSchema(schema, scriptGeneratorManager));
+            }
+            if (createSchema) {
+                scripts.add(getUseSchema(schema, scriptGeneratorManager));
+            }
             scripts.addAll(schemaScript.getValue());
         } else {
             for (Map.Entry<Schema, Collection<String>> schemaScript : schemaScripts.entrySet()) {
                 Schema schema = schemaScript.getKey();
                 Dialect dialect = scriptGeneratorManager.getTargetDialect();
-                String useSchema = schema.getIdentifier() != null ?
-                        dialect.getUseSchema(scriptGeneratorManager.getName(schema)) :
-                        dialect.getUseCatalog(scriptGeneratorManager.getName(schema.getCatalog()));
-                scripts.add(useSchema);
+                if (dropSchema) {
+                    scripts.add(getDropSchema(schema, scriptGeneratorManager));
+                }
+                if (createSchema) {
+                    scripts.add(schema.getIdentifier() != null ?
+                            dialect.getUseSchema(scriptGeneratorManager.getName(schema)) :
+                            dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog())));
+                }
                 scripts.addAll(schemaScript.getValue());
             }
         }
         return scripts;
+    }
+
+    protected String getUseSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
+        return SchemaScriptGeneratorUtils.getUseSchema(schema, scriptGeneratorManager);
+    }
+
+    protected String getDropSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
+        return SchemaScriptGeneratorUtils.getDropSchema(schema, scriptGeneratorManager);
     }
 
     protected Collection<Schema> getSchemas(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {

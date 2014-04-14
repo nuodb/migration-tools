@@ -365,6 +365,7 @@ public class BackupLoader {
     protected void loadSchemaIndexes(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         Database database = backupLoaderContext.getBackup().getDatabase();
+
         Collection<LoadIndex> loadIndexes = createLoadIndexes(database);
         backupLoaderContext.setLoadIndexes(loadIndexes);
 
@@ -407,6 +408,9 @@ public class BackupLoader {
         }
         if (contains(objectTypes, INDEX)) {
             for (Index index : table.getIndexes()) {
+                if (index.isPrimary()) {
+                    continue;
+                }
                 Work work = createWork(index, backupLoaderManager);
                 executeWork(work, backupLoaderManager);
             }

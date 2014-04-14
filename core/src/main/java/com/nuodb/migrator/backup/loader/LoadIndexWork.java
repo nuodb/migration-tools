@@ -87,8 +87,8 @@ public class LoadIndexWork extends WorkBase {
 
     @Override
     public void execute() throws Exception {
-        scriptExporter.exportScript(getUseSchema(scriptGeneratorManager));
-        scriptExporter.exportScripts(scriptGeneratorManager.getScripts(index));
+        scriptExporter.exportScript(getUseSchema(null, scriptGeneratorManager));
+        scriptExporter.exportScripts(scriptGeneratorManager.getCreateScripts(index));
     }
 
     @Override

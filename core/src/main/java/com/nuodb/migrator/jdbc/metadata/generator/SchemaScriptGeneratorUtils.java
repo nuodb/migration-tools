@@ -35,23 +35,35 @@ import com.nuodb.migrator.jdbc.metadata.Schema;
  */
 public class SchemaScriptGeneratorUtils {
 
-    public static String getUseSchema(ScriptGeneratorManager scriptGeneratorManager) {
-        return getUseSchema(scriptGeneratorManager, null);
-    }
-
-    public static String getUseSchema(ScriptGeneratorManager scriptGeneratorManager, Schema schema) {
-        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+    public static String getUseSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
         String useSchema = null;
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
         if (scriptGeneratorManager.getTargetSchema() != null) {
             useSchema = dialect.getUseSchema(scriptGeneratorManager.getTargetSchema(), true);
         } else if (scriptGeneratorManager.getTargetCatalog() != null) {
-            useSchema = dialect.getUseCatalog(scriptGeneratorManager.getTargetCatalog(), true);
+            useSchema = dialect.getUseSchema(scriptGeneratorManager.getTargetCatalog(), true);
         }
         if (useSchema == null) {
             useSchema = schema.getIdentifier() != null ?
                     dialect.getUseSchema(scriptGeneratorManager.getName(schema)) :
-                    dialect.getUseCatalog(scriptGeneratorManager.getName(schema.getCatalog()));
+                    dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog()));
         }
         return useSchema;
+    }
+
+    public static String getDropSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
+        String dropSchema = null;
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        if (scriptGeneratorManager.getTargetSchema() != null) {
+            dropSchema = dialect.getDropSchema(scriptGeneratorManager.getTargetSchema(), true);
+        } else if (scriptGeneratorManager.getTargetCatalog() != null) {
+            dropSchema = dialect.getDropSchema(scriptGeneratorManager.getTargetCatalog(), true);
+        }
+        if (dropSchema == null) {
+            dropSchema = schema.getIdentifier() != null ?
+                    dialect.getDropSchema(scriptGeneratorManager.getName(schema)) :
+                    dialect.getDropSchema(scriptGeneratorManager.getName(schema.getCatalog()));
+        }
+        return dropSchema;
     }
 }

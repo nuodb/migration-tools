@@ -27,15 +27,20 @@
  */
 package com.nuodb.migrator.backup.loader;
 
+import com.google.common.collect.Sets;
 import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.session.SimpleWorkManager;
 import com.nuodb.migrator.jdbc.session.Work;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static java.lang.Long.MAX_VALUE;
+import static java.util.Collections.synchronizedSet;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -46,6 +51,7 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
 
     private BackupLoaderSync backupLoaderSync;
     private BackupLoaderContext backupLoaderContext;
+    private Collection<Table> loadEnded = synchronizedSet(Sets.<Table>newLinkedHashSet());
 
     @Override
     public boolean canLoad(Work work, LoadRowSet loadRowSet) {
@@ -95,6 +101,7 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
 
     @Override
     public void loadEnd(Work work, LoadRowSet loadRowSet) {
+        loadEnded.add(loadRowSet.getTable());
         if (hasListeners()) {
             onLoadEnd(new LoadRowSetEvent(work, loadRowSet));
         }

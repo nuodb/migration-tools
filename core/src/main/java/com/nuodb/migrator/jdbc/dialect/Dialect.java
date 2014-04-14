@@ -76,6 +76,8 @@ public interface Dialect {
 
     boolean supportsDropSequenceIfExists();
 
+    boolean supportsDropPrimaryKey();
+
     boolean supportsSequence();
 
     boolean supportsNegativeScale();
@@ -146,13 +148,13 @@ public interface Dialect {
 
     String getCheckClause(String clause);
 
-    String getUseCatalog(String catalog);
-
-    String getUseCatalog(String catalog, boolean normalize);
-
     String getUseSchema(String schema);
 
     String getUseSchema(String schema, boolean normalize);
+
+    String getDropSchema(String schema);
+
+    String getDropSchema(String schema, boolean normalize);
 
     String getIdentifier(String identifier, Identifiable identifiable);
 

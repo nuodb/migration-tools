@@ -27,12 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 
 import java.util.Collection;
 import java.util.Iterator;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 
 /**
@@ -69,10 +71,15 @@ public class PrimaryKeyScriptGenerator extends ScriptGeneratorBase<PrimaryKey> i
 
     @Override
     public Collection<String> getDropScripts(PrimaryKey primaryKey, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("ALTER TABLE ");
-        buffer.append(scriptGeneratorManager.getName(primaryKey.getTable()));
-        buffer.append(" DROP PRIMARY KEY");
-        return singleton(buffer.toString());
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        if (dialect.supportsDropPrimaryKey()) {
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("ALTER TABLE ");
+            buffer.append(scriptGeneratorManager.getName(primaryKey.getTable()));
+            buffer.append(" DROP PRIMARY KEY");
+            return singleton(buffer.toString());
+        } else {
+            return emptyList();
+        }
     }
 }

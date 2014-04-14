@@ -85,6 +85,7 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         buffer.append(' ');
         buffer.append(dialect.getDropForeignKey());
         buffer.append(' ');
+        buffer.append("(");
         for (Iterator<Column> iterator = foreignKey.getForeignColumns().iterator(); iterator.hasNext(); ) {
             Column column = iterator.next();
             buffer.append(scriptGeneratorManager.getName(column));
