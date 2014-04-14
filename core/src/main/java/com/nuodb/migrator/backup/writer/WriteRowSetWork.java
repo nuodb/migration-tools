@@ -71,7 +71,7 @@ public class WriteRowSetWork extends WorkBase {
 
     private static final String QUERY = "query";
 
-    private final BackupWriterContext backupWriterContext;
+    private final BackupWriterManager backupWriterManager;
     private final WriteRowSet writeRowSet;
     private final QuerySplit querySplit;
     private final boolean hasNextQuerySplit;
@@ -80,18 +80,20 @@ public class WriteRowSetWork extends WorkBase {
     private ValueHandleList valueHandleList;
     private OutputFormat outputFormat;
     private Collection<Chunk> chunks;
-    private BackupWriterManager backupWriterManager;
+    private BackupWriterContext backupWriterContext;
 
     public WriteRowSetWork(WriteRowSet writeRowSet, QuerySplit querySplit, boolean hasNextQuerySplit,
-                           BackupWriterContext backupWriterContext) {
+                           BackupWriterManager backupWriterManager) {
         this.writeRowSet = writeRowSet;
         this.querySplit = querySplit;
         this.hasNextQuerySplit = hasNextQuerySplit;
-        this.backupWriterContext = backupWriterContext;
+        this.backupWriterManager = backupWriterManager;
     }
 
     @Override
     public void init() throws Exception {
+        backupWriterContext = backupWriterManager.getBackupWriterContext();
+
         final Dialect dialect = getSession().getDialect();
         resultSet = querySplit.getResultSet(getSession().getConnection(), new StatementCallback() {
             @Override
@@ -127,8 +129,6 @@ public class WriteRowSetWork extends WorkBase {
         if (rowSet.getName() == null) {
             rowSet.setName(createRowSetName());
         }
-
-        backupWriterManager = backupWriterContext.getBackupWriterManager();
     }
 
     @Override

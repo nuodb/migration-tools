@@ -37,6 +37,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  */
 public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
 
+    public static final long KEEP_ALIVE_TIME = 100L;
+    public static final TimeUnit KEEP_ALIVE_TIME_UNIT = MILLISECONDS;
 
     public BlockingThreadPoolExecutor(int poolSize, long blockTime, TimeUnit blockTimeUnit) {
         this(poolSize, blockTime, blockTimeUnit, null);
@@ -44,15 +46,15 @@ public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
 
     public BlockingThreadPoolExecutor(int poolSize, long blockTime, TimeUnit blockTimeUnit,
                                       Callable<Boolean> blockTimeCallback) {
-        this(poolSize, poolSize, 0L, MILLISECONDS, blockTime, blockTimeUnit, blockTimeCallback);
+        this(poolSize, poolSize, KEEP_ALIVE_TIME, KEEP_ALIVE_TIME_UNIT, blockTime, blockTimeUnit, blockTimeCallback);
     }
 
     public BlockingThreadPoolExecutor(int poolSize, int queueSize, long keepAliveTime, TimeUnit keepAliveTimeUnit,
-                                      long blockTime, TimeUnit blockTimeUnit,
-                                      Callable<Boolean> blockTimeCallback) {
+                                      long blockTime, TimeUnit blockTimeUnit, Callable<Boolean> blockTimeCallback) {
         super(poolSize, poolSize, keepAliveTime, keepAliveTimeUnit,
                 new ArrayBlockingQueue<Runnable>(max(poolSize, queueSize)),
                 new BlockingPolicy(blockTime, blockTimeUnit, blockTimeCallback));
+        allowCoreThreadTimeOut(true);
     }
 
     @Override

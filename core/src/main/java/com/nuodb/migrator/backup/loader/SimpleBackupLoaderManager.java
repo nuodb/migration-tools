@@ -31,13 +31,21 @@ import com.nuodb.migrator.backup.Chunk;
 import com.nuodb.migrator.jdbc.session.SimpleWorkManager;
 import com.nuodb.migrator.jdbc.session.Work;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import static java.lang.Long.MAX_VALUE;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 /**
  * @author Sergey Bushik
  */
 public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderListener>
         implements BackupLoaderManager {
 
-    private Long deltaRowCount;
+    private BackupLoaderSync backupLoaderSync;
+    private BackupLoaderContext backupLoaderContext;
 
     @Override
     public boolean canLoad(Work work, LoadRowSet loadRowSet) {
@@ -66,8 +74,8 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
 
     @Override
     public void loadRow(Work work, LoadRowSet loadRowSet, Chunk chunk) {
-        Long deltaRowCount = getDeltaRowCount();
-        if (hasListeners() &&  (deltaRowCount != null && chunk.getRowCount() % deltaRowCount == 0)) {
+        Long deltaRowCount = getBackupLoaderContext().getDeltaRowCount();
+        if (hasListeners() && (deltaRowCount != null && chunk.getRowCount() % deltaRowCount == 0)) {
             onLoadRow(new LoadRowSetEvent(work, loadRowSet, chunk));
         }
     }
@@ -99,12 +107,74 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
     }
 
     @Override
-    public Long getDeltaRowCount() {
-        return deltaRowCount;
+    public void loadFailed() {
+        backupLoaderSync.loadFailed();
     }
 
     @Override
-    public void setDeltaRowCount(Long deltaRowCount) {
-        this.deltaRowCount = deltaRowCount;
+    public void loadDataDone() {
+        backupLoaderSync.loadDataDone();
+    }
+
+    @Override
+    public void loadSchemaIndexesDone() {
+        backupLoaderSync.loadSchemaIndexesDone();
+    }
+
+    @Override
+    public void loadSchemaNoIndexesDone() {
+        backupLoaderSync.loadSchemaNoIndexesDone();
+    }
+
+    @Override
+    protected void failure(Work work, Throwable failure) {
+        super.failure(work, failure);
+        loadFailed();
+    }
+
+    @Override
+    public void close() throws Exception {
+        backupLoaderSync.await();
+
+        Executor executor = backupLoaderContext.getExecutor();
+        if (executor instanceof ExecutorService) {
+            ExecutorService service = (ExecutorService) executor;
+            service.shutdown();
+            try {
+                if (!backupLoaderSync.isFailed()) {
+                    service.awaitTermination(MAX_VALUE, SECONDS);
+                }
+            } catch (InterruptedException exception) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Executor termination interrupted", exception);
+                }
+            }
+        }
+        closeQuietly(backupLoaderContext.getSourceSession());
+        closeQuietly(backupLoaderContext.getTargetSession());
+        closeQuietly(backupLoaderContext.getScriptExporter());
+        super.close();
+    }
+
+    @Override
+    public boolean isLoadData() {
+        return backupLoaderContext.isLoadData();
+    }
+
+    @Override
+    public boolean isLoadSchema() {
+        return backupLoaderContext.isLoadSchema();
+    }
+
+    @Override
+    public BackupLoaderContext getBackupLoaderContext() {
+        return backupLoaderContext;
+    }
+
+    @Override
+    public void setBackupLoaderContext(BackupLoaderContext backupLoaderContext) {
+        this.backupLoaderContext = backupLoaderContext;
+        this.backupLoaderSync = new BackupLoaderSync(backupLoaderContext.isLoadData(),
+                backupLoaderContext.isLoadSchema());
     }
 }

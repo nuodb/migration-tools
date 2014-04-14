@@ -25,28 +25,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.session;
+package com.nuodb.migrator.backup.loader;
 
-import java.util.Collection;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
 /**
  * @author Sergey Bushik
  */
-public interface WorkManager<L extends WorkListener> {
+public class LoadIndex {
 
-    boolean hasListeners();
+    private Table table;
 
-    Collection<L> getListeners();
+    public LoadIndex(Table table) {
+        this.table = table;
+    }
 
-    void addListener(L listener);
+    public Table getTable() {
+        return table;
+    }
 
-    void addListener(int index, L listener);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-    void removeListener(L listener);
+        LoadIndex that = (LoadIndex) o;
 
-    void execute(Work work, Session session);
+        if (table != null ? !table.equals(that.table) : that.table != null) return false;
 
-    void execute(Work work, SessionFactory sessionFactory);
+        return true;
+    }
 
-    void close() throws Exception;
+    @Override
+    public int hashCode() {
+        return table != null ? table.hashCode() : 0;
+    }
 }

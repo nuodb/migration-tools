@@ -220,7 +220,7 @@ public class BackupWriter {
     }
 
     protected Backup write(BackupOps backupOps, Map context) throws Exception {
-        return write(createBackupWriterContext(backupOps, context));
+        return write(createBackupWriterManager((BackupOps) backupOps, (Map) context));
     }
 
     protected BackupOps createBackupOps(String path) {
@@ -234,6 +234,7 @@ public class BackupWriter {
         backupWriterContext.setBackup(createBackup());
         backupWriterContext.setBackupOps(backupOps);
         backupWriterContext.setBackupOpsContext(context);
+
         Executor executor = getExecutor();
         backupWriterContext.setExecutor(executor == null ? createExecutor() : executor);
         backupWriterContext.setFormat(getFormat());
@@ -243,9 +244,12 @@ public class BackupWriter {
         backupWriterContext.setThreads(getThreads());
         backupWriterContext.setTimeZone(getTimeZone());
         openSourceSession(backupWriterContext);
-        backupWriterContext.setBackupWriterManager(
-                createBackupWriterManager(backupWriterContext));
         return backupWriterContext;
+    }
+
+    protected BackupWriterManager createBackupWriterManager(BackupOps backupOps, Map context) throws Exception {
+        BackupWriterContext backupWriterContext = createBackupWriterContext(backupOps, context);
+        return createBackupWriterManager(backupWriterContext);
     }
 
     protected Backup createBackup() {
@@ -257,6 +261,7 @@ public class BackupWriter {
     protected BackupWriterManager createBackupWriterManager(BackupWriterContext backupWriterContext) {
         BackupWriterManager backupWriterManager = new SimpleBackupWriterManager();
         backupWriterManager.setDeltaRowCount(getDeltaRowCount());
+        backupWriterManager.setBackupWriterContext(backupWriterContext);
         for (BackupWriterListener listener : getListeners()) {
             backupWriterManager.addListener(listener);
         }
@@ -299,52 +304,78 @@ public class BackupWriter {
                 getObjectTypes().toArray(new MetaDataType[0])).getObject(DATABASE);
     }
 
-    protected Backup write(BackupWriterContext backupWriterContext) throws Exception {
-        boolean awaitTermination = true;
+    protected Backup write(BackupWriterManager backupWriterManager) throws Exception {
         try {
-            if (backupWriterContext.isWriteData()) {
-                writeData(backupWriterContext);
+            if (backupWriterManager.isWriteData()) {
+                writeData(backupWriterManager);
             }
-            if (backupWriterContext.isWriteSchema()) {
-                writeSchema(backupWriterContext);
+            if (backupWriterManager.isWriteSchema()) {
+                writeSchema(backupWriterManager);
             }
-            writeBackup(backupWriterContext);
+            writeBackup(backupWriterManager);
         } catch (Throwable failure) {
-            awaitTermination = false;
+            backupWriterManager.writeFailed();
             throw failure instanceof MigratorException ?
                     (MigratorException) failure : new BackupWriterException(failure);
         } finally {
-            backupWriterContext.close(awaitTermination);
+            backupWriterManager.close();
         }
-        return backupWriterContext.getBackup();
+        return backupWriterManager.getBackupWriterContext().getBackup();
     }
 
-    protected void writeData(BackupWriterContext backupWriterContext) throws Exception {
+    protected void writeData(BackupWriterManager backupWriterManager) throws Exception {
+        BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
         for (WriteRowSet writeRowSet : createWriteRowSets(backupWriterContext)) {
-            writeData(writeRowSet, backupWriterContext);
+            writeData(writeRowSet, backupWriterManager);
         }
+        backupWriterManager.writeDataDone();
     }
 
-    protected void writeData(WriteRowSet writeRowSet, BackupWriterContext backupWriterContext) throws Exception {
+    protected void writeData(WriteRowSet writeRowSet, BackupWriterManager backupWriterManager) throws Exception {
+        BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
         Backup backup = backupWriterContext.getBackup();
         Session session = backupWriterContext.getSourceSession();
         backup.addRowSet(writeRowSet.getRowSet());
         while (writeRowSet.getQuerySplitter().hasNextQuerySplit(session.getConnection())) {
-            Work work = createWork(writeRowSet, backupWriterContext);
-            executeWork(work, backupWriterContext);
+            Work work = createWork(writeRowSet, backupWriterManager);
+            executeWork(work, backupWriterManager);
         }
+        backupWriterManager.writeDataDone();
     }
 
-    protected void writeSchema(BackupWriterContext backupWriterContext) throws Exception {
+    protected void writeSchema(BackupWriterManager backupWriterManager) throws Exception {
+        BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
         Backup backup = backupWriterContext.getBackup();
         backup.setDatabase(backupWriterContext.getDatabase());
+        backupWriterManager.writeSchemaDone();
     }
 
-    protected void writeBackup(BackupWriterContext backupWriterContext) throws Exception {
+    protected void writeBackup(BackupWriterManager backupWriterManager) throws Exception {
+        BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
         Backup backup = backupWriterContext.getBackup();
         Map backupOpsContext = newHashMap(backupWriterContext.getBackupOpsContext());
         backupOpsContext.put(META_DATA_SPEC, getMetaDataSpec());
         backupWriterContext.getBackupOps().write(backup, backupOpsContext);
+    }
+
+    protected Work createWork(WriteRowSet writeRowSet, BackupWriterManager backupWriterManager) throws Exception {
+        BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
+        Connection connection = backupWriterContext.getSourceSession().getConnection();
+        QuerySplitter querySplitter = writeRowSet.getQuerySplitter();
+        return new WriteRowSetWork(writeRowSet, querySplitter.getNextQuerySplit(connection),
+                querySplitter.hasNextQuerySplit(connection), backupWriterManager
+        );
+    }
+
+    protected void executeWork(final Work work, final BackupWriterManager backupWriterManager) {
+        final BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
+        backupWriterContext.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                backupWriterManager.execute(work,
+                        backupWriterContext.getSourceSessionFactory());
+            }
+        });
     }
 
     protected Collection<WriteRowSet> createWriteRowSets(BackupWriterContext backupWriterContext) {
@@ -376,24 +407,6 @@ public class BackupWriter {
             }
         }
         return exportQueries;
-    }
-
-    protected Work createWork(WriteRowSet writeRowSet, BackupWriterContext backupWriterContext) throws Exception {
-        Connection connection = backupWriterContext.getSourceSession().getConnection();
-        QuerySplitter querySplitter = writeRowSet.getQuerySplitter();
-        return new WriteRowSetWork(writeRowSet, querySplitter.getNextQuerySplit(connection),
-                querySplitter.hasNextQuerySplit(connection), backupWriterContext
-        );
-    }
-
-    protected void executeWork(final Work work, final BackupWriterContext backupWriterContext) {
-        backupWriterContext.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                backupWriterContext.getBackupWriterManager().execute(work,
-                        backupWriterContext.getSourceSessionFactory());
-            }
-        });
     }
 
     protected WriteRowSet createWriteRowSet(String query) {

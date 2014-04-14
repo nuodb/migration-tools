@@ -45,12 +45,14 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
-import static com.nuodb.migrator.utils.ValidationUtils.isTrue;
-
 /**
  * @author Sergey Bushik
  */
 public interface BackupLoaderContext {
+
+    boolean isLoadData();
+
+    boolean isLoadSchema();
 
     Backup getBackup();
 
@@ -72,6 +74,10 @@ public interface BackupLoaderContext {
 
     void setDatabase(Database database);
 
+    Long getDeltaRowCount();
+
+    void setDeltaRowCount(Long deltaRowCount);
+
     Executor getExecutor();
 
     void setExecutor(Executor executor);
@@ -84,21 +90,21 @@ public interface BackupLoaderContext {
 
     void setFormatFactory(FormatFactory formatFactory);
 
-    boolean isLoadData();
-
-    boolean isLoadSchema();
-
     InsertTypeFactory getInsertTypeFactory();
 
     void setInsertTypeFactory(InsertTypeFactory insertTypeFactory);
 
-    BackupLoaderManager getBackupLoaderManager();
+    Collection<LoadIndex> getLoadIndexes();
 
-    void setBackupLoaderManager(BackupLoaderManager backupLoaderManager);
+    void setLoadIndexes(Collection<LoadIndex> loadIndexes);
 
     Collection<LoadRowSet> getLoadRowSets();
 
     void setLoadRowSets(Collection<LoadRowSet> loadRowSets);
+
+    BackupLoaderSync getBackupLoaderSync();
+
+    void setBackupLoaderSync(BackupLoaderSync backupLoaderSync);
 
     Collection<MigrationMode> getMigrationModes();
 
@@ -147,6 +153,4 @@ public interface BackupLoaderContext {
     RowSetMapper getRowSetMapper();
 
     void setRowSetMapper(RowSetMapper rowSetMapper);
-
-    void close(boolean awaitTermination);
 }

@@ -33,7 +33,6 @@ import com.nuodb.migrator.backup.Column;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.InputFormat;
 import com.nuodb.migrator.backup.format.value.ValueHandleListBuilder;
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.commit.CommitExecutor;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
@@ -49,6 +48,7 @@ import java.util.Iterator;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -58,26 +58,27 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class LoadRowSetWork extends WorkBase {
 
     protected transient Logger logger = getLogger(getClass());
-    private LoadRowSet loadRowSet;
-    private BackupLoaderContext backupLoaderContext;
 
-    private PreparedStatement statement;
-    private CommitExecutor commitExecutor;
+    private LoadRowSet loadRowSet;
     private BackupLoaderManager backupLoaderManager;
 
-    public LoadRowSetWork(LoadRowSet loadRowSet, BackupLoaderContext backupLoaderContext) {
+    private BackupLoaderContext backupLoaderContext;
+    private PreparedStatement statement;
+    private CommitExecutor commitExecutor;
+
+    public LoadRowSetWork(LoadRowSet loadRowSet, BackupLoaderManager backupLoaderManager) {
         this.loadRowSet = loadRowSet;
-        this.backupLoaderContext = backupLoaderContext;
+        this.backupLoaderManager = backupLoaderManager;
     }
 
     @Override
     protected void init() throws Exception {
+        backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         statement = getSession().getConnection().prepareStatement(
                 loadRowSet.getQuery().toString());
         CommitStrategy commitStrategy = backupLoaderContext.getCommitStrategy() != null ?
                 backupLoaderContext.getCommitStrategy() : BatchCommitStrategy.INSTANCE;
         commitExecutor = commitStrategy.createCommitExecutor(statement, getQuery());
-        backupLoaderManager = backupLoaderContext.getBackupLoaderManager();
     }
 
     @Override
@@ -131,14 +132,10 @@ public class LoadRowSetWork extends WorkBase {
                         return getTable().getColumn(column.getName());
                     }
                 })));
-        builder.withTimeZone(getBackupLoaderContext().getTimeZone());
+        builder.withTimeZone(backupLoaderContext.getTimeZone());
         builder.withValueFormatRegistry(backupLoaderContext.getValueFormatRegistry());
         inputFormat.setValueHandleList(builder.build());
         return inputFormat;
-    }
-
-    public BackupLoaderContext getBackupLoaderContext() {
-        return backupLoaderContext;
     }
 
     public LoadRowSet getLoadRowSet() {
@@ -146,7 +143,7 @@ public class LoadRowSetWork extends WorkBase {
     }
 
     public BackupLoaderManager getBackupLoaderManager() {
-        return backupLoaderContext.getBackupLoaderManager();
+        return backupLoaderManager;
     }
 
     public RowSet getRowSet() {
@@ -164,6 +161,6 @@ public class LoadRowSetWork extends WorkBase {
     @Override
     public void close() throws Exception {
         super.close();
-        JdbcUtils.closeQuietly(statement);
+        closeQuietly(statement);
     }
 }

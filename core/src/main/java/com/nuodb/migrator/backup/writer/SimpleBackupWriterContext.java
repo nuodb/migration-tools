@@ -46,6 +46,7 @@ import java.util.concurrent.ExecutorService;
 
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
+import static com.nuodb.migrator.utils.Collections.contains;
 import static java.lang.Long.MAX_VALUE;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -62,7 +63,6 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     private Map backupOpsContext;
     private Database database;
     private Executor executor;
-    private BackupWriterManager backupWriterManager;
     private String format;
     private Map<String, Object> formatAttributes;
     private FormatFactory formatFactory;
@@ -72,6 +72,16 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     private TimeZone timeZone;
     private int threads;
     private ValueFormatRegistry valueFormatRegistry;
+
+    @Override
+    public boolean isWriteData() {
+        return contains(getMigrationModes(), DATA);
+    }
+
+    @Override
+    public boolean isWriteSchema() {
+        return contains(getMigrationModes(), SCHEMA);
+    }
 
     @Override
     public Backup getBackup() {
@@ -124,16 +134,6 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     }
 
     @Override
-    public BackupWriterManager getBackupWriterManager() {
-        return backupWriterManager;
-    }
-
-    @Override
-    public void setBackupWriterManager(BackupWriterManager backupWriterManager) {
-        this.backupWriterManager = backupWriterManager;
-    }
-
-    @Override
     public String getFormat() {
         return format;
     }
@@ -161,16 +161,6 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     @Override
     public void setFormatFactory(FormatFactory formatFactory) {
         this.formatFactory = formatFactory;
-    }
-
-    @Override
-    public boolean isWriteData() {
-        return migrationModes != null && migrationModes.contains(DATA);
-    }
-
-    @Override
-    public boolean isWriteSchema() {
-        return migrationModes != null && migrationModes.contains(SCHEMA);
     }
 
     @Override
@@ -230,24 +220,5 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     @Override
     public void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry) {
         this.valueFormatRegistry = valueFormatRegistry;
-    }
-
-    @Override
-    public void close(boolean awaitTermination) throws Exception {
-        if (executor instanceof ExecutorService) {
-            ExecutorService service = (ExecutorService) executor;
-            service.shutdown();
-            try {
-                if (awaitTermination) {
-                    service.awaitTermination(MAX_VALUE, SECONDS);
-                }
-            } catch (InterruptedException exception) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Executor termination interrupted", exception);
-                }
-            }
-        }
-        backupWriterManager.close();
-        JdbcUtils.closeQuietly(sourceSession);
     }
 }

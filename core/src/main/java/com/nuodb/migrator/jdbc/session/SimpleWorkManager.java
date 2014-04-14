@@ -31,6 +31,7 @@ import com.nuodb.migrator.MigratorException;
 import org.slf4j.Logger;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Iterables.get;
@@ -52,7 +53,17 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
     protected final transient Logger logger = getLogger(getClass());
     private final Map<Work, Throwable> failures = newConcurrentMap();
     private boolean throwFailureOnClose = THROW_FAILURE_ON_CLOSE;
-    private Collection<L> listeners = newCopyOnWriteArrayList();
+    private List<L> listeners = newCopyOnWriteArrayList();
+
+    @Override
+    public boolean hasListeners() {
+        return !listeners.isEmpty();
+    }
+
+    @Override
+    public Collection<L> getListeners() {
+        return listeners;
+    }
 
     @Override
     public void addListener(L listener) {
@@ -60,17 +71,13 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
     }
 
     @Override
-    public void removeListener(L listener) {
-        listeners.remove(listener);
-    }
-
-    protected boolean hasListeners() {
-        return !listeners.isEmpty();
+    public void addListener(int index, L listener) {
+        listeners.add(index, listener);
     }
 
     @Override
-    public Collection<L> getListeners() {
-        return listeners;
+    public void removeListener(L listener) {
+        listeners.remove(listener);
     }
 
     @Override
@@ -104,14 +111,15 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
 
     protected void init(Work work, Session session) throws Exception {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Work init %s", getClassName(work.getClass())));
+            logger.trace(format("Work initiated %s", getClassName(work.getClass())));
         }
         work.init(session);
     }
 
     protected void execute(Work work) throws Exception {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Work execute %s", getClassName(work.getClass())));
+            logger.trace(format("Work executed %s",
+                    getClassName(work.getClass())));
         }
         onExecute(work);
         work.execute();
@@ -132,7 +140,8 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
 
     protected void failure(Work work, Throwable failure) {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Work failure %s %s", getClassName(work.getClass()), failure.getMessage()));
+            logger.trace(format("Work failed %s %s",
+                    getClassName(work.getClass()), failure.getMessage()));
         }
         failures.put(work, failure);
         onFailure(work, failure);
@@ -149,7 +158,8 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
 
     protected void close(Work work) throws Exception {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Work close %s", getClassName(work.getClass())));
+            logger.trace(format("Work closed %s",
+                    getClassName(work.getClass())));
         }
         work.close();
     }
@@ -164,15 +174,15 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
         }
     }
 
-    public Map<Work, Throwable> getFailures() {
-        return failures;
-    }
-
     public boolean isThrowFailureOnClose() {
         return throwFailureOnClose;
     }
 
     public void setThrowFailureOnClose(boolean throwFailureOnClose) {
         this.throwFailureOnClose = throwFailureOnClose;
+    }
+
+    public Map<Work, Throwable> getFailures() {
+        return failures;
     }
 }

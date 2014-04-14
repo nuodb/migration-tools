@@ -31,7 +31,6 @@ import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
@@ -46,13 +45,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 import static com.nuodb.migrator.utils.Collections.contains;
-import static java.lang.Long.MAX_VALUE;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -67,12 +63,14 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     private Map backupOpsContext;
     private CommitStrategy commitStrategy;
     private Database database;
+    private Long deltaRowCount;
     private Executor executor;
     private FormatFactory formatFactory;
     private Map<String,Object> formatAttributes;
     private InsertTypeFactory insertTypeFactory;
-    private BackupLoaderManager backupLoaderManager;
+    private Collection<LoadIndex> loadIndexes;
     private Collection<LoadRowSet> loadRowSets;
+    private BackupLoaderSync backupLoaderSync;
     private Collection<MigrationMode> migrationModes;
     private ConnectionSpec sourceSpec;
     private Session sourceSession;
@@ -85,6 +83,16 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     private TimeZone timeZone;
     private ScriptGeneratorManager scriptGeneratorManager;
     private ValueFormatRegistry valueFormatRegistry;
+
+    @Override
+    public boolean isLoadData() {
+        return contains(migrationModes, DATA);
+    }
+
+    @Override
+    public boolean isLoadSchema() {
+        return contains(migrationModes, SCHEMA);
+    }
 
     @Override
     public Backup getBackup() {
@@ -137,6 +145,16 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
+    public Long getDeltaRowCount() {
+        return deltaRowCount;
+    }
+
+    @Override
+    public void setDeltaRowCount(Long deltaRowCount) {
+        this.deltaRowCount = deltaRowCount;
+    }
+
+    @Override
     public Executor getExecutor() {
         return executor;
     }
@@ -167,16 +185,6 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
-    public boolean isLoadData() {
-        return contains(migrationModes, DATA);
-    }
-
-    @Override
-    public boolean isLoadSchema() {
-        return contains(migrationModes, SCHEMA);
-    }
-
-    @Override
     public InsertTypeFactory getInsertTypeFactory() {
         return insertTypeFactory;
     }
@@ -187,13 +195,13 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
-    public BackupLoaderManager getBackupLoaderManager() {
-        return backupLoaderManager;
+    public Collection<LoadIndex> getLoadIndexes() {
+        return loadIndexes;
     }
 
     @Override
-    public void setBackupLoaderManager(BackupLoaderManager backupLoaderManager) {
-        this.backupLoaderManager = backupLoaderManager;
+    public void setLoadIndexes(Collection<LoadIndex> loadIndexes) {
+        this.loadIndexes = loadIndexes;
     }
 
     @Override
@@ -204,6 +212,16 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     @Override
     public void setLoadRowSets(Collection<LoadRowSet> loadRowSets) {
         this.loadRowSets = loadRowSets;
+    }
+
+    @Override
+    public BackupLoaderSync getBackupLoaderSync() {
+        return backupLoaderSync;
+    }
+
+    @Override
+    public void setBackupLoaderSync(BackupLoaderSync backupLoaderSync) {
+        this.backupLoaderSync = backupLoaderSync;
     }
 
     @Override
@@ -323,25 +341,5 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     @Override
     public void setRowSetMapper(RowSetMapper rowSetMapper) {
         this.rowSetMapper = rowSetMapper;
-    }
-
-    @Override
-    public void close(boolean awaitTermination) {
-        if (executor instanceof ExecutorService) {
-            ExecutorService service = (ExecutorService) executor;
-            service.shutdown();
-            try {
-                if (awaitTermination) {
-                    service.awaitTermination(MAX_VALUE, SECONDS);
-                }
-            } catch (InterruptedException exception) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Executor termination interrupted", exception);
-                }
-            }
-        }
-        JdbcUtils.closeQuietly(sourceSession);
-        JdbcUtils.closeQuietly(targetSession);
-        JdbcUtils.closeQuietly(scriptExporter);
     }
 }

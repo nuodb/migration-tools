@@ -46,6 +46,10 @@ import java.util.concurrent.Executor;
  */
 public interface BackupWriterContext {
 
+    boolean isWriteData();
+
+    boolean isWriteSchema();
+
     Backup getBackup();
 
     void setBackup(Backup backup);
@@ -66,10 +70,6 @@ public interface BackupWriterContext {
 
     void setExecutor(Executor executor);
 
-    BackupWriterManager getBackupWriterManager();
-
-    void setBackupWriterManager(BackupWriterManager backupWriterManager);
-
     String getFormat();
 
     void setFormat(String format);
@@ -81,10 +81,6 @@ public interface BackupWriterContext {
     FormatFactory getFormatFactory();
 
     void setFormatFactory(FormatFactory formatFactory);
-
-    boolean isWriteData();
-
-    boolean isWriteSchema();
 
     Collection<MigrationMode> getMigrationModes();
 
@@ -109,6 +105,4 @@ public interface BackupWriterContext {
     ValueFormatRegistry getValueFormatRegistry();
 
     void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
-
-    void close(boolean awaitTermination) throws Exception;
 }

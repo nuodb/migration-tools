@@ -149,7 +149,12 @@ public class BackupLoader {
     }
 
     protected Backup load(BackupOps backupOps, Map context) throws Exception {
-        return load(createBackupLoaderContext(backupOps, context));
+        return load(createBackupLoaderManager(backupOps, context));
+    }
+
+    protected BackupLoaderManager createBackupLoaderManager(BackupOps backupOps, Map context) throws Exception {
+        BackupLoaderContext backupLoaderContext = createBackupLoaderContext(backupOps, context);
+        return createBackupLoaderManager(backupLoaderContext);
     }
 
     protected BackupLoaderContext createBackupLoaderContext(BackupOps backupOps, Map context) throws Exception {
@@ -167,11 +172,20 @@ public class BackupLoader {
         backupLoaderContext.setMigrationModes(getMigrationModes());
         backupLoaderContext.setRowSetMapper(getRowSetMapper());
         backupLoaderContext.setTimeZone(getTimeZone());
+        backupLoaderContext.setBackupLoaderSync(new BackupLoaderSync(
+                backupLoaderContext.isLoadData(), backupLoaderContext.isLoadSchema()));
         openSourceSession(backupLoaderContext);
         openTargetSession(backupLoaderContext);
-        backupLoaderContext.setBackupLoaderManager(
-                createBackupLoaderManager(backupLoaderContext));
         return backupLoaderContext;
+    }
+
+    protected BackupLoaderManager createBackupLoaderManager(final BackupLoaderContext backupLoaderContext) {
+        BackupLoaderManager backupLoaderManager = new SimpleBackupLoaderManager();
+        backupLoaderManager.setBackupLoaderContext(backupLoaderContext);
+        for (BackupLoaderListener listener : getListeners()) {
+            backupLoaderManager.addListener(listener);
+        }
+        return backupLoaderManager;
     }
 
     protected Executor createExecutor() {
@@ -179,41 +193,6 @@ public class BackupLoader {
             logger.trace(format("Using blocking thread pool with %d thread(s)", getThreads()));
         }
         return new BlockingThreadPoolExecutor(getThreads(), 100L, MILLISECONDS);
-    }
-
-    protected BackupLoaderManager createBackupLoaderManager(final BackupLoaderContext backupLoaderContext) {
-        BackupLoaderManager backupLoaderManager = new SimpleBackupLoaderManager();
-        backupLoaderManager.setDeltaRowCount(getDeltaRowCount());
-        if (backupLoaderContext.isLoadSchema()) {
-            backupLoaderManager.addListener(new LoadSchemaListener(backupLoaderContext));
-        }
-        for (BackupLoaderListener listener : getListeners()) {
-            backupLoaderManager.addListener(listener);
-        }
-        return backupLoaderManager;
-    }
-
-    class LoadSchemaListener extends BackupLoaderAdapter {
-
-        private BackupLoaderContext backupLoaderContext;
-
-        public LoadSchemaListener(BackupLoaderContext backupLoaderContext) {
-            this.backupLoaderContext = backupLoaderContext;
-        }
-
-        @Override
-        public void onLoadEnd(LoadRowSetEvent event) {
-            Table table = getTable(event.getLoadRowSet(), backupLoaderContext);
-            if (event.getChunk() == null && table != null) {
-                try {
-                    loadSchemaIndexes(table, backupLoaderContext);
-                } catch (MigratorException exception) {
-                    throw exception;
-                } catch (Exception exception) {
-                    throw new BackupLoaderException(exception);
-                }
-            }
-        }
     }
 
     protected void openSourceSession(BackupLoaderContext backupLoaderContext) throws SQLException {
@@ -326,111 +305,122 @@ public class BackupLoader {
         return scriptGeneratorManager;
     }
 
-    protected Backup load(BackupLoaderContext backupLoaderContext) throws Exception {
+    protected Backup load(BackupLoaderManager backupLoaderManager) throws Exception {
         try {
-            if (backupLoaderContext.isLoadSchema()) {
-                loadSchemaNoIndexes(backupLoaderContext);
+            if (backupLoaderManager.isLoadSchema()) {
+                loadSchemaNoIndexes(backupLoaderManager);
             }
-            if (backupLoaderContext.isLoadData()) {
-                loadData(backupLoaderContext);
+            if (backupLoaderManager.isLoadData()) {
+                loadData(backupLoaderManager);
             }
-            if (backupLoaderContext.isLoadSchema()) {
-                loadSchemaIndexes(backupLoaderContext);
+            if (backupLoaderManager.isLoadSchema()) {
+                loadSchemaIndexes(backupLoaderManager);
             }
         } catch (Throwable failure) {
-            backupLoaderContext.close(true);
+            backupLoaderManager.loadFailed();
             throw failure instanceof MigratorException ?
                     (MigratorException) failure : new BackupLoaderException(failure);
+        } finally {
+            backupLoaderManager.close();
         }
-        return backupLoaderContext.getBackup();
+        return backupLoaderManager.getBackupLoaderContext().getBackup();
     }
 
-    protected void loadSchemaNoIndexes(BackupLoaderContext backupLoaderContext) throws Exception {
+    protected void loadSchemaNoIndexes(BackupLoaderManager backupLoaderManager) throws Exception {
+        BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         ScriptGeneratorManager scriptGeneratorManager =
                 backupLoaderContext.getScriptGeneratorManager();
-        scriptGeneratorManager.setObjectTypes(
-                removeAll(newArrayList(getObjectTypes()),
-                        newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX)));
-        Database database = backupLoaderContext.getBackup().getDatabase();
-        ScriptExporter scriptExporter = createScriptExporter(backupLoaderContext);
+        Collection<MetaDataType> objectTypes = getObjectTypes();
         try {
+            scriptGeneratorManager.setObjectTypes(
+                    removeAll(newArrayList(objectTypes),
+                            newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX)));
+            ScriptExporter scriptExporter = createScriptExporter(backupLoaderContext);
             scriptExporter.open();
-            scriptExporter.exportScripts(scriptGeneratorManager.getScripts(database));
+            scriptExporter.exportScripts(
+                    scriptGeneratorManager.getScripts(
+                            backupLoaderContext.getBackup().getDatabase()));
         } finally {
+            scriptGeneratorManager.setObjectTypes(objectTypes);
             closeQuietly(scriptExporter);
         }
+        backupLoaderManager.loadSchemaNoIndexesDone();
     }
 
     // TODO: multi-threaded data load on table level in place, continue with row level
-    protected void loadData(BackupLoaderContext backupLoaderContext) throws Exception {
+    protected void loadData(BackupLoaderManager backupLoaderManager) throws Exception {
+        BackupLoaderContext backupLoaderContext =
+                backupLoaderManager.getBackupLoaderContext();
         Database database = getDatabase();
         backupLoaderContext.setDatabase(database != null ? database :
                 openDatabase(backupLoaderContext.getTargetSession()));
         backupLoaderContext.setLoadRowSets(createLoadRowSets(backupLoaderContext));
         for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {
-            loadData(loadRowSet, backupLoaderContext);
+            loadData(loadRowSet, backupLoaderManager);
         }
+        backupLoaderManager.loadDataDone();
     }
 
-    // TODO: load indexes now for source tables without data, which is indicated by an absent row set
-    protected void loadSchemaIndexes(BackupLoaderContext backupLoaderContext) throws Exception {
+    // TODO: load indexes for source tables without data now, which is indicated by an absent row set
+    protected void loadSchemaIndexes(BackupLoaderManager backupLoaderManager) throws Exception {
+        BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         Database database = backupLoaderContext.getBackup().getDatabase();
-        Collection<Table> tables = newArrayList(database.getTables());
+        Collection<LoadIndex> loadIndexes = createLoadIndexes(database);
+        backupLoaderContext.setLoadIndexes(loadIndexes);
+
+        Collection<LoadIndex> loadIndexesNow = newArrayList(loadIndexes);
         for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {
             Table table = getTable(loadRowSet, backupLoaderContext);
             if (table != null) {
-                tables.remove(table);
+                loadIndexesNow.remove(new LoadIndex(table));
             }
         }
-        for (Table table : tables) {
-            loadSchemaIndexes(table, backupLoaderContext);
+        if (backupLoaderManager.isLoadSchema()) {
+            backupLoaderManager.addListener(0,
+                    new LoadIndexListener(this, backupLoaderManager));
+        }
+        for (LoadIndex loadIndex : loadIndexesNow) {
+            loadIndex(loadIndex, backupLoaderManager);
+        }
+        if (isEmpty(loadIndexes)) {
+            backupLoaderManager.loadSchemaIndexesDone();
         }
     }
 
-    /**
-     * Looks up source table meta data
-     *
-     * @param loadRowSet
-     * @param backupLoaderContext
-     * @return
-     */
-    protected Table getTable(LoadRowSet loadRowSet, BackupLoaderContext backupLoaderContext) {
-        Table table = null;
-        Database database = backupLoaderContext.getBackup().getDatabase();
-        if (loadRowSet.getRowSet() instanceof TableRowSet) {
-            TableRowSet tableRowSet = (TableRowSet) loadRowSet.getRowSet();
-            Catalog catalog = database.getCatalog(tableRowSet.getCatalog());
-            Schema schema = catalog.getSchema(tableRowSet.getSchema());
-            table = schema.getTable(tableRowSet.getTable());
+    protected Collection<LoadIndex> createLoadIndexes(Database database) {
+        Collection<LoadIndex> loadIndexes = newArrayList();
+        for (Table table : database.getTables()) {
+            loadIndexes.add(new LoadIndex(table));
         }
-        return table;
+        return loadIndexes;
     }
 
-    protected void loadSchemaIndexes(Table table, BackupLoaderContext backupLoaderContext) throws Exception {
+    protected void loadIndex(LoadIndex loadIndex, BackupLoaderManager backupLoaderManager) throws Exception {
+        Table table = loadIndex.getTable();
         Collection<MetaDataType> objectTypes = getObjectTypes();
         if (contains(objectTypes, PRIMARY_KEY)) {
             PrimaryKey primaryKey = table.getPrimaryKey();
             if (primaryKey != null) {
-                Work work = createWork(primaryKey, backupLoaderContext);
-                executeWork(work, backupLoaderContext);
+                Work work = createWork(primaryKey, backupLoaderManager);
+                executeWork(work, backupLoaderManager);
             }
         }
         if (contains(objectTypes, INDEX)) {
             for (Index index : table.getIndexes()) {
-                Work work = createWork(index, backupLoaderContext);
-                executeWork(work, backupLoaderContext);
+                Work work = createWork(index, backupLoaderManager);
+                executeWork(work, backupLoaderManager);
             }
         }
         if (contains(objectTypes, FOREIGN_KEY)) {
             for (ForeignKey foreignKey : table.getForeignKeys()) {
-                Work work = createWork(foreignKey, backupLoaderContext);
-                executeWork(work, backupLoaderContext);
+                Work work = createWork(foreignKey, backupLoaderManager);
+                executeWork(work, backupLoaderManager);
             }
         }
     }
 
-    protected Work createWork(MetaData object, BackupLoaderContext backupLoaderContext) {
-        return new LoadSchemaWork(object, backupLoaderContext);
+    protected Work createWork(MetaData object, BackupLoaderManager backupLoaderManager) {
+        return new LoadIndexWork(object, backupLoaderManager);
     }
 
     protected Collection<LoadRowSet> createLoadRowSets(BackupLoaderContext backupLoaderContext) {
@@ -450,23 +440,43 @@ public class BackupLoader {
         return loadRowSets;
     }
 
-    protected void loadData(LoadRowSet loadRowSet, BackupLoaderContext backupLoaderContext) {
-        Work work = createWork(loadRowSet, backupLoaderContext);
-        executeWork(work, backupLoaderContext);
+    protected void loadData(LoadRowSet loadRowSet, BackupLoaderManager backupLoaderManager) {
+        Work work = createWork(loadRowSet, backupLoaderManager);
+        executeWork(work, backupLoaderManager);
     }
 
-    protected Work createWork(LoadRowSet loadRowSet, BackupLoaderContext backupLoaderContext) {
-        return new LoadRowSetWork(loadRowSet, backupLoaderContext);
+    protected Work createWork(LoadRowSet loadRowSet, BackupLoaderManager backupLoaderManager) {
+        return new LoadRowSetWork(loadRowSet, backupLoaderManager);
     }
 
-    protected void executeWork(final Work work, final BackupLoaderContext backupLoaderContext) {
+    protected void executeWork(final Work work, final BackupLoaderManager backupLoaderManager) {
+        final BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         backupLoaderContext.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                backupLoaderContext.getBackupLoaderManager().execute(work,
+                backupLoaderManager.execute(work,
                         backupLoaderContext.getTargetSessionFactory());
             }
         });
+    }
+
+    /**
+     * Looks up source table meta data for a given load row set
+     *
+     * @param loadRowSet to look up source table for
+     * @param backupLoaderContext evaluation context
+     * @return source table
+     */
+    protected Table getTable(LoadRowSet loadRowSet, BackupLoaderContext backupLoaderContext) {
+        Table table = null;
+        Database database = backupLoaderContext.getBackup().getDatabase();
+        if (loadRowSet.getRowSet() instanceof TableRowSet) {
+            TableRowSet tableRowSet = (TableRowSet) loadRowSet.getRowSet();
+            Catalog catalog = database.getCatalog(tableRowSet.getCatalog());
+            Schema schema = catalog.getSchema(tableRowSet.getSchema());
+            table = schema.getTable(tableRowSet.getTable());
+        }
+        return table;
     }
 
     protected Query createQuery(RowSet rowSet, Table table, BackupLoaderContext backupLoaderContext) {

@@ -39,12 +39,16 @@ import com.nuodb.migrator.jdbc.session.Work;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.newSetMultimap;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static com.google.common.collect.Sets.newTreeSet;
-import static com.nuodb.migrator.utils.ValidationUtils.isTrue;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import static java.lang.Long.MAX_VALUE;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * @author Sergey Bushik
@@ -53,8 +57,11 @@ import static com.nuodb.migrator.utils.ValidationUtils.isTrue;
 public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterListener>
         implements BackupWriterManager {
 
-    private Multimap<WriteRowSet, WriteRowSetWork> writeRowSets;
+    private BackupWriterSync backupWriterSync;
+    private BackupWriterContext backupWriterContext;
     private Long deltaRowCount;
+
+    private Multimap<WriteRowSet, WriteRowSetWork> writeRowSets;
 
     public SimpleBackupWriterManager() {
         writeRowSets = synchronizedSetMultimap(newSetMultimap(
@@ -71,16 +78,6 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
                         });
                     }
                 }));
-    }
-
-    @Override
-    public Long getDeltaRowCount() {
-        return deltaRowCount;
-    }
-
-    @Override
-    public void setDeltaRowCount(Long deltaRowCount) {
-        this.deltaRowCount = deltaRowCount;
     }
 
     @Override
@@ -150,5 +147,83 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
         for (BackupWriterListener listener : getListeners()) {
             listener.onWriteEnd(event);
         }
+    }
+
+    @Override
+    protected void failure(Work work, Throwable failure) {
+        super.failure(work, failure);
+        writeFailed();
+    }
+
+    @Override
+    public boolean isWriteData() {
+        BackupWriterContext backupWriterContext = getBackupWriterContext();
+        return backupWriterContext != null && backupWriterContext.isWriteData();
+    }
+
+    @Override
+    public boolean isWriteSchema() {
+        BackupWriterContext backupWriterContext = getBackupWriterContext();
+        return backupWriterContext != null && backupWriterContext.isWriteSchema();
+    }
+
+    @Override
+    public void writeFailed() {
+        backupWriterSync.writeFailed();
+    }
+
+    @Override
+    public void writeDataDone() {
+        backupWriterSync.writeDataDone();
+    }
+
+    @Override
+    public void writeSchemaDone() {
+        backupWriterSync.writeSchemaDone();
+    }
+
+    @Override
+    public BackupWriterContext getBackupWriterContext() {
+        return backupWriterContext;
+    }
+
+    @Override
+    public void setBackupWriterContext(BackupWriterContext backupWriterContext) {
+        this.backupWriterContext = backupWriterContext;
+        this.backupWriterSync = new BackupWriterSync(backupWriterContext.isWriteData(),
+                backupWriterContext.isWriteSchema());
+    }
+
+    @Override
+    public Long getDeltaRowCount() {
+        return deltaRowCount;
+    }
+
+    @Override
+    public void setDeltaRowCount(Long deltaRowCount) {
+        this.deltaRowCount = deltaRowCount;
+    }
+
+
+    @Override
+    public void close() throws Exception {
+        backupWriterSync.await();
+
+        Executor executor = backupWriterContext.getExecutor();
+        if (executor instanceof ExecutorService) {
+            ExecutorService service = (ExecutorService) executor;
+            service.shutdown();
+            try {
+                if (!backupWriterSync.isFailed()) {
+                    service.awaitTermination(MAX_VALUE, SECONDS);
+                }
+            } catch (InterruptedException exception) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Executor termination interrupted", exception);
+                }
+            }
+        }
+        closeQuietly(backupWriterContext.getSourceSession());
+        super.close();
     }
 }

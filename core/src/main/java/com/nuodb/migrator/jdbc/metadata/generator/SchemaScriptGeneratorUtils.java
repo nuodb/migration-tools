@@ -25,28 +25,33 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.session;
+package com.nuodb.migrator.jdbc.metadata.generator;
 
-import java.util.Collection;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 
 /**
  * @author Sergey Bushik
  */
-public interface WorkManager<L extends WorkListener> {
+public class SchemaScriptGeneratorUtils {
 
-    boolean hasListeners();
+    public static String getUseSchema(ScriptGeneratorManager scriptGeneratorManager) {
+        return getUseSchema(scriptGeneratorManager, null);
+    }
 
-    Collection<L> getListeners();
-
-    void addListener(L listener);
-
-    void addListener(int index, L listener);
-
-    void removeListener(L listener);
-
-    void execute(Work work, Session session);
-
-    void execute(Work work, SessionFactory sessionFactory);
-
-    void close() throws Exception;
+    public static String getUseSchema(ScriptGeneratorManager scriptGeneratorManager, Schema schema) {
+        Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        String useSchema = null;
+        if (scriptGeneratorManager.getTargetSchema() != null) {
+            useSchema = dialect.getUseSchema(scriptGeneratorManager.getTargetSchema(), true);
+        } else if (scriptGeneratorManager.getTargetCatalog() != null) {
+            useSchema = dialect.getUseCatalog(scriptGeneratorManager.getTargetCatalog(), true);
+        }
+        if (useSchema == null) {
+            useSchema = schema.getIdentifier() != null ?
+                    dialect.getUseSchema(scriptGeneratorManager.getName(schema)) :
+                    dialect.getUseCatalog(scriptGeneratorManager.getName(schema.getCatalog()));
+        }
+        return useSchema;
+    }
 }

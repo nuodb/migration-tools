@@ -25,28 +25,57 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.session;
+package com.nuodb.migrator.backup.writer;
 
-import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Sergey Bushik
  */
-public interface WorkManager<L extends WorkListener> {
+public class BackupWriterSync {
 
-    boolean hasListeners();
+    private boolean failed;
+    private final AtomicBoolean writeData;
+    private final AtomicBoolean writeSchema;
+    private final CountDownLatch permits;
 
-    Collection<L> getListeners();
+    public BackupWriterSync(boolean writeData, boolean writeSchema) {
+        this.writeData = new AtomicBoolean(writeData);
+        this.writeSchema = new AtomicBoolean(writeSchema);
+        int permits = 0;
+        if (writeData) {
+            permits++;
+        }
+        if (writeSchema) {
+            permits++;
+        }
+        this.permits = new CountDownLatch(permits);
+    }
 
-    void addListener(L listener);
+    public void writeFailed() {
+        failed = true;
+        writeDataDone();
+        writeSchemaDone();
+    }
 
-    void addListener(int index, L listener);
+    public void writeDataDone() {
+        if (writeData.compareAndSet(true, false)) {
+            permits.countDown();
+        }
+    }
 
-    void removeListener(L listener);
+    public void writeSchemaDone() {
+        if (writeSchema.compareAndSet(true, false)) {
+            permits.countDown();
+        }
+    }
 
-    void execute(Work work, Session session);
+    public boolean isFailed() {
+        return failed;
+    }
 
-    void execute(Work work, SessionFactory sessionFactory);
-
-    void close() throws Exception;
+    public void await() throws InterruptedException {
+        permits.await();
+    }
 }

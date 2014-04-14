@@ -39,38 +39,43 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getUseSchema;
 
 /**
- * Loads schema scripts for a desired meta data objects
+ * Loads schema scripts for a desired database object
  *
  * @author Sergey Bushik
  */
-public class LoadSchemaWork extends WorkBase {
+public class LoadIndexWork extends WorkBase {
     /**
-     * Meta data to load schema for
+     * Object to generate & load schema for
      */
-    private MetaData object;
+    private MetaData index;
     /**
-     * Backup load context
+     * Backup load manager
      */
+    private BackupLoaderManager backupLoaderManager;
     private BackupLoaderContext backupLoaderContext;
     private ScriptExporter scriptExporter;
     private ScriptGeneratorManager scriptGeneratorManager;
 
-    public LoadSchemaWork(MetaData object, BackupLoaderContext backupLoaderContext) {
-        this.object = object;
-        this.backupLoaderContext = backupLoaderContext;
+    public LoadIndexWork(MetaData index, BackupLoaderManager backupLoaderManager) {
+        this.index = index;
+        this.backupLoaderManager = backupLoaderManager;
     }
 
     @Override
     protected void init() throws Exception {
+        backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
+        scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
+
         scriptExporter = createScriptExporter();
         scriptExporter.open();
-        scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
     }
 
     protected ScriptExporter createScriptExporter() throws Exception {
         Collection<ScriptExporter> scriptExporters = newArrayList();
+
         ScriptExporter scriptExporter = backupLoaderContext.getScriptExporter();
         if (scriptExporter != null) {
             // will close underlying script exporter later manually
@@ -82,7 +87,8 @@ public class LoadSchemaWork extends WorkBase {
 
     @Override
     public void execute() throws Exception {
-        scriptExporter.exportScripts(scriptGeneratorManager.getScripts(object));
+        scriptExporter.exportScript(getUseSchema(scriptGeneratorManager));
+        scriptExporter.exportScripts(scriptGeneratorManager.getScripts(index));
     }
 
     @Override

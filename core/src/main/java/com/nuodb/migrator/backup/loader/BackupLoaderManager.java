@@ -36,19 +36,17 @@ import com.nuodb.migrator.jdbc.session.WorkManager;
  */
 public interface BackupLoaderManager extends WorkManager<BackupLoaderListener> {
 
-    /**
-     * Returns currently used delta row count
-     *
-     * @return long delta row count
-     */
-    Long getDeltaRowCount();
+    boolean isLoadData();
 
-    /**
-     * Sets new delta row count, which triggers write row event per each chunk
-     *
-     * @param deltaRowCount
-     */
-    void setDeltaRowCount(Long deltaRowCount);
+    boolean isLoadSchema();
+
+    void loadFailed();
+
+    void loadDataDone();
+
+    void loadSchemaIndexesDone();
+
+    void loadSchemaNoIndexesDone();
 
     boolean canLoad(Work work, LoadRowSet loadRowSet);
 
@@ -61,4 +59,8 @@ public interface BackupLoaderManager extends WorkManager<BackupLoaderListener> {
     void loadEnd(Work work, LoadRowSet loadRowSet);
 
     void loadEnd(Work work, LoadRowSet loadRowSet, Chunk chunk);
+
+    BackupLoaderContext getBackupLoaderContext();
+
+    void setBackupLoaderContext(BackupLoaderContext backupLoaderContext);
 }
