@@ -138,14 +138,6 @@ public class LoadRowSetWork extends WorkBase {
         return inputFormat;
     }
 
-    public LoadRowSet getLoadRowSet() {
-        return loadRowSet;
-    }
-
-    public BackupLoaderManager getBackupLoaderManager() {
-        return backupLoaderManager;
-    }
-
     public RowSet getRowSet() {
         return loadRowSet.getRowSet();
     }

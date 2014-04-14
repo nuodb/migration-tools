@@ -213,14 +213,6 @@ public class WriteRowSetWork extends WorkBase {
         return lowerCase(rowSetName);
     }
 
-    public BackupWriterContext getBackupWriterContext() {
-        return backupWriterContext;
-    }
-
-    public WriteRowSet getWriteRowSet() {
-        return writeRowSet;
-    }
-
     public QuerySplit getQuerySplit() {
         return querySplit;
     }
@@ -231,10 +223,6 @@ public class WriteRowSetWork extends WorkBase {
 
     protected ResultSet getResultSet() {
         return resultSet;
-    }
-
-    protected ValueHandleList getValueHandleList() {
-        return valueHandleList;
     }
 
     protected OutputFormat getOutputFormat() {
