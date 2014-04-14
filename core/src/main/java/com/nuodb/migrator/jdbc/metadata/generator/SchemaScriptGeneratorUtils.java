@@ -30,15 +30,12 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 
-import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
-
 /**
  * @author Sergey Bushik
  */
 public class SchemaScriptGeneratorUtils {
 
     public static String getUseSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
-        isNotNull(schema, "Schema is required");
         String useSchema = null;
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         if (scriptGeneratorManager.getTargetSchema() != null) {
@@ -55,7 +52,6 @@ public class SchemaScriptGeneratorUtils {
     }
 
     public static String getDropSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
-        isNotNull(schema, "Schema is required");
         String dropSchema = null;
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         if (scriptGeneratorManager.getTargetSchema() != null) {
