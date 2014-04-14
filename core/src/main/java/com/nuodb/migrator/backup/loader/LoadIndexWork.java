@@ -27,7 +27,9 @@
  */
 package com.nuodb.migrator.backup.loader;
 
+import com.nuodb.migrator.jdbc.metadata.Constraint;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ProxyScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
@@ -87,7 +89,8 @@ public class LoadIndexWork extends WorkBase {
 
     @Override
     public void execute() throws Exception {
-        scriptExporter.exportScript(getUseSchema(null, scriptGeneratorManager));
+        Schema schema = ((Constraint) index).getTable().getSchema();
+        scriptExporter.exportScript(getUseSchema(schema, scriptGeneratorManager));
         scriptExporter.exportScripts(scriptGeneratorManager.getCreateScripts(index));
     }
 

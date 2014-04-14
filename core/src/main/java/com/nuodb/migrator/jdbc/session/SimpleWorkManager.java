@@ -139,8 +139,8 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
     }
 
     protected void failure(Work work, Throwable failure) {
-        if (logger.isTraceEnabled()) {
-            logger.trace(format("Work failed %s %s",
+        if (logger.isWarnEnabled()) {
+            logger.warn(format("Work failed %s %s",
                     getClassName(work.getClass()), failure.getMessage()));
         }
         failures.put(work, failure);

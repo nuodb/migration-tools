@@ -27,13 +27,7 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.google.common.collect.Sets;
-import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.Table;
-
-import java.util.Collection;
-
-import static java.util.Collections.synchronizedSet;
 
 /**
  * @author Sergey Bushik
