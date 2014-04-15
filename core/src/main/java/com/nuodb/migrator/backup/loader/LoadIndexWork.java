@@ -96,7 +96,7 @@ public class LoadIndexWork extends WorkBase {
 
     @Override
     public void close() throws Exception {
-        super.close();
         closeQuietly(scriptExporter);
+        super.close();
     }
 }

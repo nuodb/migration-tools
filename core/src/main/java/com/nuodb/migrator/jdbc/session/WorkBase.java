@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
-import com.nuodb.migrator.jdbc.JdbcUtils;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
@@ -47,7 +47,7 @@ public abstract class WorkBase implements Work {
 
     @Override
     public void close() throws Exception {
-        JdbcUtils.closeQuietly(session);
+        closeQuietly(session);
     }
 
     public Session getSession() {

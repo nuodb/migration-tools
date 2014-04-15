@@ -152,7 +152,7 @@ public class LoadRowSetWork extends WorkBase {
 
     @Override
     public void close() throws Exception {
-        super.close();
         closeQuietly(statement);
+        super.close();
     }
 }
