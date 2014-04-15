@@ -43,6 +43,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import static org.testng.Assert.assertTrue;
+
 /**
  * @author Krishnamoorthy Dhandapani
  */
@@ -77,8 +79,8 @@ public class MigrationTestBase {
         if (sourceJdbcJar != null && sourceJdbcJar.trim().length() > 0) {
             File sourceJdbcJarFile = new File(sourceJdbcJar);
             sourceJdbcJarFile = new File(sourceJdbcJarFile.getCanonicalPath());
-            Assert.assertTrue(sourceJdbcJarFile.exists());
-            Assert.assertTrue(sourceJdbcJarFile.canRead());
+            assertTrue(sourceJdbcJarFile.exists());
+            assertTrue(sourceJdbcJarFile.canRead());
             urls.add(sourceJdbcJarFile.toURI().toURL());
         }
 
@@ -92,8 +94,8 @@ public class MigrationTestBase {
         if (nuodbJdbcJarLoc != null || nuodbJdbcJarLoc.trim().length() > 0) {
             File nuodbJdbcJarFile = new File(nuodbJdbcJarLoc);
             nuodbJdbcJarFile = new File(nuodbJdbcJarFile.getCanonicalPath());
-            Assert.assertTrue(nuodbJdbcJarFile.exists());
-            Assert.assertTrue(nuodbJdbcJarFile.canRead());
+            assertTrue(nuodbJdbcJarFile.exists());
+            assertTrue(nuodbJdbcJarFile.canRead());
             urls.add(nuodbJdbcJarFile.toURI().toURL());
         }
 

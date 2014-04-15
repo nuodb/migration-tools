@@ -62,6 +62,10 @@ public class BackupLoaderSync {
         this.permits = new CountDownLatch(permits);
     }
 
+    public boolean isFailed() {
+        return failed;
+    }
+
     public void loadFailed() {
         failed = true;
         loadDataDone();
@@ -85,10 +89,6 @@ public class BackupLoaderSync {
         if (loadSchemaNoIndexes.compareAndSet(true, false)) {
             permits.countDown();
         }
-    }
-
-    public boolean isFailed() {
-        return failed;
     }
 
     public void await() throws InterruptedException {

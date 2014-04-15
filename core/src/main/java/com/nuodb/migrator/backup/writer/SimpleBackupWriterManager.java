@@ -47,6 +47,7 @@ import static com.google.common.collect.Multimaps.newSetMultimap;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.Long.MAX_VALUE;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -189,9 +190,10 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
 
     @Override
     public void setBackupWriterContext(BackupWriterContext backupWriterContext) {
+        isNotNull(backupWriterContext, "Backup writer context is required");
         this.backupWriterContext = backupWriterContext;
-        this.backupWriterSync = new BackupWriterSync(backupWriterContext.isWriteData(),
-                backupWriterContext.isWriteSchema());
+        this.backupWriterSync = new BackupWriterSync(
+                backupWriterContext.isWriteData(), backupWriterContext.isWriteSchema());
     }
 
     @Override
@@ -204,26 +206,28 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
         this.deltaRowCount = deltaRowCount;
     }
 
-
     @Override
     public void close() throws Exception {
-        backupWriterSync.await();
-
-        Executor executor = backupWriterContext.getExecutor();
-        if (executor instanceof ExecutorService) {
-            ExecutorService service = (ExecutorService) executor;
-            service.shutdown();
-            try {
-                if (!backupWriterSync.isFailed()) {
-                    service.awaitTermination(MAX_VALUE, SECONDS);
-                }
-            } catch (InterruptedException exception) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Executor termination interrupted", exception);
+        if (backupWriterSync != null) {
+            backupWriterSync.await();
+        }
+        if (backupWriterContext != null) {
+            Executor executor = backupWriterContext.getExecutor();
+            if (executor instanceof ExecutorService) {
+                ExecutorService service = (ExecutorService) executor;
+                service.shutdown();
+                try {
+                    if (!backupWriterSync.isFailed()) {
+                        service.awaitTermination(MAX_VALUE, SECONDS);
+                    }
+                } catch (InterruptedException exception) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Executor termination interrupted", exception);
+                    }
                 }
             }
+            closeQuietly(backupWriterContext.getSourceSession());
         }
-        closeQuietly(backupWriterContext.getSourceSession());
         super.close();
     }
 }

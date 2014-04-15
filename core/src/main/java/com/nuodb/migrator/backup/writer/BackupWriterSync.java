@@ -53,6 +53,10 @@ public class BackupWriterSync {
         this.permits = new CountDownLatch(permits);
     }
 
+    public boolean isFailed() {
+        return failed;
+    }
+
     public void writeFailed() {
         failed = true;
         writeDataDone();
@@ -69,10 +73,6 @@ public class BackupWriterSync {
         if (writeSchema.compareAndSet(true, false)) {
             permits.countDown();
         }
-    }
-
-    public boolean isFailed() {
-        return failed;
     }
 
     public void await() throws InterruptedException {

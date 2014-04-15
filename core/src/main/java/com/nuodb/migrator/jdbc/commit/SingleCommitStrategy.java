@@ -65,6 +65,7 @@ public class SingleCommitStrategy implements CommitStrategy {
 
             @Override
             public void finish() throws SQLException {
+                statement.getConnection().commit();
             }
         };
     }

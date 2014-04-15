@@ -29,8 +29,11 @@ package com.nuodb.migrator.backup.loader;
 
 import com.google.common.base.Function;
 import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.backup.*;
+import com.nuodb.migrator.backup.Backup;
+import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.Column;
+import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.backup.TableRowSet;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
@@ -43,7 +46,15 @@ import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
 import com.nuodb.migrator.jdbc.dialect.TranslationManager;
 import com.nuodb.migrator.jdbc.dialect.Translator;
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.ForeignKey;
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
+import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
@@ -331,18 +342,18 @@ public class BackupLoader {
         ScriptGeneratorManager scriptGeneratorManager =
                 backupLoaderContext.getScriptGeneratorManager();
         Collection<MetaDataType> objectTypes = getObjectTypes();
+        ScriptExporter scriptExporter = createScriptExporter(backupLoaderContext);
         try {
+            scriptExporter.open();
             scriptGeneratorManager.setObjectTypes(
                     removeAll(newArrayList(objectTypes),
                             newArrayList(PRIMARY_KEY, FOREIGN_KEY, INDEX)));
-            ScriptExporter scriptExporter = createScriptExporter(backupLoaderContext);
-            scriptExporter.open();
             scriptExporter.exportScripts(
                     scriptGeneratorManager.getScripts(
                             backupLoaderContext.getBackup().getDatabase()));
         } finally {
-            scriptGeneratorManager.setObjectTypes(objectTypes);
             closeQuietly(scriptExporter);
+            scriptGeneratorManager.setObjectTypes(objectTypes);
         }
         backupLoaderManager.loadSchemaNoIndexesDone();
     }

@@ -28,11 +28,14 @@
 package com.nuodb.migrator.integration.common;
 
 import com.nuodb.migrator.integration.MigrationTestBase;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Krishnamoorthy Dhandapani
@@ -53,16 +56,16 @@ public class BasicMigrationTest extends MigrationTestBase {
             stmt1 = sourceConnection.createStatement();
             rs1 = stmt1.executeQuery(sqlStr1);
 
-            Assert.assertNotNull(rs1);
+            assertNotNull(rs1);
 
             stmt2 = nuodbConnection.createStatement();
             rs2 = stmt2.executeQuery(sqlStr2);
 
-            Assert.assertNotNull(rs2);
+            assertNotNull(rs2);
 
-            Assert.assertTrue(rs1.next());
-            Assert.assertTrue(rs2.next());
-            Assert.assertEquals(rs2.getInt(1), rs1.getInt(1),
+            assertTrue(rs1.next());
+            assertTrue(rs2.next());
+            assertEquals(rs2.getInt(1), rs1.getInt(1),
                     "Please check if data is loaded.");
 
         } finally {
@@ -88,12 +91,12 @@ public class BasicMigrationTest extends MigrationTestBase {
             stmt1 = sourceConnection.createStatement();
             rs1 = stmt1.executeQuery(sqlStr1);
 
-            Assert.assertNotNull(rs1);
+            assertNotNull(rs1);
 
             stmt2 = nuodbConnection.createStatement();
             rs2 = stmt2.executeQuery(sqlStr2);
 
-            Assert.assertNotNull(rs2);
+            assertNotNull(rs2);
 
             rsUtil.assertIsEqual(rs1, rs2, true, true);
 
@@ -115,12 +118,12 @@ public class BasicMigrationTest extends MigrationTestBase {
             stmt1 = sourceConnection.createStatement();
             rs1 = stmt1.executeQuery(sqlStr1);
 
-            Assert.assertNotNull(rs1);
+            assertNotNull(rs1);
 
             stmt2 = nuodbConnection.createStatement();
             rs2 = stmt2.executeQuery(sqlStr2);
 
-            Assert.assertNotNull(rs2);
+            assertNotNull(rs2);
 
             rsUtil.assertIsEqual(rs1, rs2, true, true);
 
@@ -142,12 +145,12 @@ public class BasicMigrationTest extends MigrationTestBase {
             stmt1 = sourceConnection.createStatement();
             rs1 = stmt1.executeQuery(sqlStr1);
 
-            Assert.assertNotNull(rs1);
+            assertNotNull(rs1);
 
             stmt2 = nuodbConnection.createStatement();
             rs2 = stmt2.executeQuery(sqlStr2);
 
-            Assert.assertNotNull(rs2);
+            assertNotNull(rs2);
 
             rsUtil.assertIsEqual(rs1, rs2, true, true);
 

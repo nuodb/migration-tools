@@ -27,20 +27,16 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.google.common.collect.Sets;
-import com.nuodb.migrator.backup.Chunk;
-import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.backup .Chunk;
 import com.nuodb.migrator.jdbc.session.SimpleWorkManager;
 import com.nuodb.migrator.jdbc.session.Work;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.Long.MAX_VALUE;
-import static java.util.Collections.synchronizedSet;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -51,7 +47,6 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
 
     private BackupLoaderSync backupLoaderSync;
     private BackupLoaderContext backupLoaderContext;
-    private Collection<Table> loadEnded = synchronizedSet(Sets.<Table>newLinkedHashSet());
 
     @Override
     public boolean canLoad(Work work, LoadRowSet loadRowSet) {
@@ -101,7 +96,6 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
 
     @Override
     public void loadEnd(Work work, LoadRowSet loadRowSet) {
-        loadEnded.add(loadRowSet.getTable());
         if (hasListeners()) {
             onLoadEnd(new LoadRowSetEvent(work, loadRowSet));
         }
@@ -140,37 +134,13 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
     }
 
     @Override
-    public void close() throws Exception {
-        backupLoaderSync.await();
-
-        Executor executor = backupLoaderContext.getExecutor();
-        if (executor instanceof ExecutorService) {
-            ExecutorService service = (ExecutorService) executor;
-            service.shutdown();
-            try {
-                if (!backupLoaderSync.isFailed()) {
-                    service.awaitTermination(MAX_VALUE, SECONDS);
-                }
-            } catch (InterruptedException exception) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Executor termination interrupted", exception);
-                }
-            }
-        }
-        closeQuietly(backupLoaderContext.getSourceSession());
-        closeQuietly(backupLoaderContext.getTargetSession());
-        closeQuietly(backupLoaderContext.getScriptExporter());
-        super.close();
-    }
-
-    @Override
     public boolean isLoadData() {
-        return backupLoaderContext.isLoadData();
+        return backupLoaderContext != null && backupLoaderContext.isLoadData();
     }
 
     @Override
     public boolean isLoadSchema() {
-        return backupLoaderContext.isLoadSchema();
+        return backupLoaderContext != null && backupLoaderContext.isLoadSchema();
     }
 
     @Override
@@ -180,8 +150,36 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
 
     @Override
     public void setBackupLoaderContext(BackupLoaderContext backupLoaderContext) {
+        isNotNull(backupLoaderContext, "Backup loader context is required");
         this.backupLoaderContext = backupLoaderContext;
-        this.backupLoaderSync = new BackupLoaderSync(backupLoaderContext.isLoadData(),
-                backupLoaderContext.isLoadSchema());
+        this.backupLoaderSync = new BackupLoaderSync(
+                backupLoaderContext.isLoadData(), backupLoaderContext.isLoadSchema());
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (backupLoaderSync != null) {
+            backupLoaderSync.await();
+        }
+        if (backupLoaderContext != null) {
+            Executor executor = backupLoaderContext.getExecutor();
+            if (executor instanceof ExecutorService) {
+                ExecutorService service = (ExecutorService) executor;
+                service.shutdown();
+                try {
+                    if (!backupLoaderSync.isFailed()) {
+                        service.awaitTermination(MAX_VALUE, SECONDS);
+                    }
+                } catch (InterruptedException exception) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Executor termination interrupted", exception);
+                    }
+                }
+            }
+            closeQuietly(backupLoaderContext.getSourceSession());
+            closeQuietly(backupLoaderContext.getTargetSession());
+            closeQuietly(backupLoaderContext.getScriptExporter());
+        }
+        super.close();
     }
 }
