@@ -51,8 +51,8 @@ public class LoadConstraints implements Iterable<LoadConstraint> {
     public LoadConstraints() {
     }
 
-    public LoadConstraints(Multimap<Table, LoadConstraint> loadConstraints) {
-        putLoadConstraints(loadConstraints);
+    public LoadConstraints(LoadConstraints loadConstraints) {
+        putLoadConstraints(loadConstraints.getLoadConstraints());
     }
 
     @Override
