@@ -182,20 +182,10 @@ public class BackupLoader {
         backupLoaderContext.setMigrationModes(getMigrationModes());
         backupLoaderContext.setRowSetMapper(getRowSetMapper());
         backupLoaderContext.setTimeZone(getTimeZone());
-
         openSourceSession(backupLoaderContext);
         openTargetSession(backupLoaderContext);
-
-        if (backupLoaderContext.isLoadData()) {
-            Database database = getDatabase();
-            backupLoaderContext.setDatabase(database != null ? database :
-                    openDatabase(backupLoaderContext.getTargetSession()));
-            backupLoaderContext.setLoadRowSets(
-                    createLoadRowSets(backupLoaderContext));
-        }
         if (backupLoaderContext.isLoadSchema()) {
-            backupLoaderContext.setLoadConstraints(
-                    createLoadConstraints(backupLoaderContext));
+            backupLoaderContext.setLoadConstraints(createLoadConstraints(backupLoaderContext));
         }
         return backupLoaderContext;
     }
@@ -376,6 +366,10 @@ public class BackupLoader {
     // TODO: multi-threaded data load on table level in place, continue with row level
     protected void loadData(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
+        Database database = getDatabase();
+        backupLoaderContext.setDatabase(database != null ? database :
+                openDatabase(backupLoaderContext.getTargetSession()));
+        backupLoaderContext.setLoadRowSets(createLoadRowSets(backupLoaderContext));
         for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {
             loadData(loadRowSet, backupLoaderManager);
         }
@@ -385,6 +379,8 @@ public class BackupLoader {
     // TODO: load constraints for source tables without row sets
     protected void loadConstraints(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
+        backupLoaderContext.setLoadConstraints(
+                createLoadConstraints(backupLoaderContext));
         LoadConstraints loadConstraints = backupLoaderContext.getLoadConstraints();
         LoadConstraints loadConstraintsNow = new LoadConstraints(loadConstraints);
         for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {

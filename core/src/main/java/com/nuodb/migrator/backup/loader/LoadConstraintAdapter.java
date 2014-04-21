@@ -86,8 +86,8 @@ public class LoadConstraintAdapter extends BackupLoaderAdapter {
 
     /**
      * Tracks completion of load constraint work and updates list of queued indexes, primary keys & foreign keys. Once
-     * indexes are loaded foreign keys are started, eventually when all constraints are loaded corresponding signal
-     * raised.
+     * indexes are loaded foreign keys are started, eventually when all constraints are loaded corresponding signal will
+     * be called on sync object.
      *
      * @param event defining work completion
      */
