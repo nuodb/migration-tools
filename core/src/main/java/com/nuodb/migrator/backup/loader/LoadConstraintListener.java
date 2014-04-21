@@ -42,7 +42,7 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 /**
  * @author Sergey Bushik
  */
-public class LoadConstraintAdapter extends BackupLoaderAdapter {
+public class LoadConstraintListener extends BackupLoaderAdapter {
 
     private BackupLoader backupLoader;
     private BackupLoaderManager backupLoaderManager;
@@ -50,7 +50,7 @@ public class LoadConstraintAdapter extends BackupLoaderAdapter {
     private Multimap<Table, LoadConstraint> loadForeignKeys;
     private AtomicBoolean loadForeignKeysStart = new AtomicBoolean();
 
-    public LoadConstraintAdapter(BackupLoader backupLoader, BackupLoaderManager backupLoaderManager) {
+    public LoadConstraintListener(BackupLoader backupLoader, BackupLoaderManager backupLoaderManager) {
         this.backupLoader = backupLoader;
         this.backupLoaderManager = backupLoaderManager;
 

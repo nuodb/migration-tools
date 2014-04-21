@@ -182,11 +182,11 @@ public class BackupLoader {
         backupLoaderContext.setMigrationModes(getMigrationModes());
         backupLoaderContext.setRowSetMapper(getRowSetMapper());
         backupLoaderContext.setTimeZone(getTimeZone());
-        openSourceSession(backupLoaderContext);
-        openTargetSession(backupLoaderContext);
         if (backupLoaderContext.isLoadSchema()) {
             backupLoaderContext.setLoadConstraints(createLoadConstraints(backupLoaderContext));
         }
+        openSourceSession(backupLoaderContext);
+        openTargetSession(backupLoaderContext);
         return backupLoaderContext;
     }
 
@@ -196,7 +196,7 @@ public class BackupLoader {
         // add listener after load constraints is created
         if (backupLoaderManager.isLoadSchema()) {
             backupLoaderManager.addListener(
-                    new LoadConstraintAdapter(this, backupLoaderManager));
+                    new LoadConstraintListener(this, backupLoaderManager));
         }
         for (BackupLoaderListener listener : getListeners()) {
             backupLoaderManager.addListener(listener);
@@ -363,7 +363,12 @@ public class BackupLoader {
         backupLoaderManager.loadNoConstraintsDone();
     }
 
-    // TODO: multi-threaded data load on table level in place, continue with row level
+    /**
+     * Multi-threaded data load on table level in place, continue with row level
+     *
+     * @param backupLoaderManager to manage this load
+     * @throws Exception if data loading caused error
+     */
     protected void loadData(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         Database database = getDatabase();
@@ -376,7 +381,12 @@ public class BackupLoader {
         backupLoaderManager.loadDataDone();
     }
 
-    // TODO: load constraints for source tables without row sets
+    /**
+     * Load constraints for source tables without row sets
+     *
+     * @param backupLoaderManager to manage this load
+     * @throws Exception if constraints loading caused error
+     */
     protected void loadConstraints(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         backupLoaderContext.setLoadConstraints(
