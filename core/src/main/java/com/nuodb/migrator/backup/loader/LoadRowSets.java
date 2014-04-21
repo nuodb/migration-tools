@@ -27,51 +27,36 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.jdbc.metadata.Table;
-
 import java.util.Collection;
+import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.synchronizedList;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadIndexListener extends BackupLoaderAdapter {
+public class LoadRowSets implements Iterable<LoadRowSet> {
 
-    private BackupLoader backupLoader;
-    private BackupLoaderManager backupLoaderManager;
-    private Collection<LoadIndex> loadIndexes;
+    private Collection<LoadRowSet> loadRowSets;
 
-    public LoadIndexListener(BackupLoader backupLoader, BackupLoaderManager backupLoaderManager) {
-        this.backupLoader = backupLoader;
-        this.backupLoaderManager = backupLoaderManager;
-
-        BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        this.loadIndexes = synchronizedList(newArrayList(backupLoaderContext.getLoadIndexes()));
+    public LoadRowSets() {
+        this.loadRowSets = newArrayList();
     }
 
     @Override
-    public void onLoadEnd(LoadRowSetEvent event) {
-        Table table = backupLoader.getTable(event.getLoadRowSet(),
-                backupLoaderManager.getBackupLoaderContext());
-        if (event.getChunk() == null && table != null) {
-            try {
-                LoadIndex loadIndex = new LoadIndex(table);
-                backupLoader.loadIndex(loadIndex, backupLoaderManager);
-                loadIndexes.remove(loadIndex);
-                // once all indexes are loaded shutdown pool and await for termination
-                if (loadIndexes.isEmpty()) {
-                    backupLoaderManager.loadSchemaIndexesDone();
-                }
-            } catch (MigratorException exception) {
-                backupLoaderManager.loadFailed();
-                throw exception;
-            } catch (Exception exception) {
-                backupLoaderManager.loadFailed();
-                throw new BackupLoaderException(exception);
-            }
-        }
+    public Iterator<LoadRowSet> iterator() {
+        return getLoadRowSets().iterator();
+    }
+
+    public void addLoadRowSet(LoadRowSet loadRowSet) {
+        loadRowSets.add(loadRowSet);
+    }
+
+    public Collection<LoadRowSet> getLoadRowSets() {
+        return loadRowSets;
+    }
+
+    public void setLoadRowSets(Collection<LoadRowSet> loadRowSets) {
+        this.loadRowSets = loadRowSets;
     }
 }

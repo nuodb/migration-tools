@@ -27,21 +27,27 @@
  */
 package com.nuodb.migrator.backup.loader;
 
+import com.nuodb.migrator.jdbc.metadata.Constraint;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.utils.ObjectUtils;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadIndex {
+public class LoadConstraint {
 
-    private Table table;
+    private Constraint constraint;
 
-    public LoadIndex(Table table) {
-        this.table = table;
+    public LoadConstraint(Constraint constraint) {
+        this.constraint = constraint;
+    }
+
+    public Constraint getConstraint() {
+        return constraint;
     }
 
     public Table getTable() {
-        return table;
+        return constraint.getTable();
     }
 
     @Override
@@ -49,15 +55,20 @@ public class LoadIndex {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LoadIndex that = (LoadIndex) o;
+        LoadConstraint that = (LoadConstraint) o;
 
-        if (table != null ? !table.equals(that.table) : that.table != null) return false;
+        if (constraint != null ? !constraint.equals(that.constraint) : that.constraint != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return table != null ? table.hashCode() : 0;
+        return constraint != null ? constraint.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
     }
 }

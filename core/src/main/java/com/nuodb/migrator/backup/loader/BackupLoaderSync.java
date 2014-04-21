@@ -37,26 +37,26 @@ public class BackupLoaderSync {
 
     private boolean failed;
     private final AtomicBoolean loadData;
-    private final AtomicBoolean loadSchemaNoIndexes;
-    private final AtomicBoolean loadSchemaIndexes;
+    private final AtomicBoolean loadNoConstraints;
+    private final AtomicBoolean loadConstraints;
     private final CountDownLatch permits;
 
     public BackupLoaderSync(boolean loadData, boolean loadSchema) {
         this(loadData, loadSchema, loadSchema);
     }
 
-    public BackupLoaderSync(boolean loadData, boolean loadSchemaNoIndexes, boolean loadSchemaIndexes) {
+    public BackupLoaderSync(boolean loadData, boolean loadNoConstraints, boolean loadConstraints) {
         this.loadData = new AtomicBoolean(loadData);
-        this.loadSchemaIndexes = new AtomicBoolean(loadSchemaIndexes);
-        this.loadSchemaNoIndexes = new AtomicBoolean(loadSchemaNoIndexes);
+        this.loadNoConstraints = new AtomicBoolean(loadNoConstraints);
+        this.loadConstraints = new AtomicBoolean(loadConstraints);
         int permits = 0;
         if (loadData) {
             permits++;
         }
-        if (loadSchemaNoIndexes) {
+        if (loadNoConstraints) {
             permits++;
         }
-        if (loadSchemaIndexes) {
+        if (loadConstraints) {
             permits++;
         }
         this.permits = new CountDownLatch(permits);
@@ -69,8 +69,8 @@ public class BackupLoaderSync {
     public void loadFailed() {
         failed = true;
         loadDataDone();
-        loadSchemaIndexesDone();
-        loadSchemaNoIndexesDone();
+        loadConstraintsDone();
+        loadNoConstraintsDone();
     }
 
     public void loadDataDone() {
@@ -79,14 +79,14 @@ public class BackupLoaderSync {
         }
     }
 
-    public void loadSchemaIndexesDone() {
-        if (loadSchemaIndexes.compareAndSet(true, false)) {
+    public void loadConstraintsDone() {
+        if (loadConstraints.compareAndSet(true, false)) {
             permits.countDown();
         }
     }
 
-    public void loadSchemaNoIndexesDone() {
-        if (loadSchemaNoIndexes.compareAndSet(true, false)) {
+    public void loadNoConstraintsDone() {
+        if (loadNoConstraints.compareAndSet(true, false)) {
             permits.countDown();
         }
     }

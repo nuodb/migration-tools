@@ -30,15 +30,12 @@ package com.nuodb.migrator.backup.loader;
 import com.google.common.base.Function;
 import com.nuodb.migrator.backup.Chunk;
 import com.nuodb.migrator.backup.Column;
-import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.InputFormat;
 import com.nuodb.migrator.backup.format.value.ValueHandleListBuilder;
 import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.commit.CommitExecutor;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
-import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.model.Field;
-import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.session.WorkBase;
 import org.slf4j.Logger;
 
@@ -78,13 +75,15 @@ public class LoadRowSetWork extends WorkBase {
                 loadRowSet.getQuery().toString());
         CommitStrategy commitStrategy = backupLoaderContext.getCommitStrategy() != null ?
                 backupLoaderContext.getCommitStrategy() : BatchCommitStrategy.INSTANCE;
-        commitExecutor = commitStrategy.createCommitExecutor(statement, getQuery());
+        commitExecutor = commitStrategy.createCommitExecutor(statement, loadRowSet.getQuery());
     }
 
     @Override
     public void execute() throws Exception {
+        LoadRowSet loadRowSet = getLoadRowSet();
+        BackupLoaderManager backupLoaderManager = getBackupLoaderManager();
         backupLoaderManager.loadStart(this, loadRowSet);
-        for (Iterator<Chunk> chunks = getRowSet().getChunks().iterator();
+        for (Iterator<Chunk> chunks = loadRowSet.getRowSet().getChunks().iterator();
              backupLoaderManager.canLoad(this, loadRowSet) && chunks.hasNext(); ) {
             Chunk chunk = chunks.next();
             backupLoaderManager.loadStart(this, loadRowSet, chunk);
@@ -92,7 +91,7 @@ public class LoadRowSetWork extends WorkBase {
             inputFormat.init();
             if (logger.isTraceEnabled()) {
                 logger.trace(format("Loading %d rows from %s chunk to %s table",
-                        chunk.getRowCount(), chunk.getName(), getTable().getQualifiedName(null)));
+                        chunk.getRowCount(), chunk.getName(), loadRowSet.getTable().getQualifiedName(null)));
             }
             inputFormat.readStart();
             long row = 0;
@@ -105,7 +104,7 @@ public class LoadRowSetWork extends WorkBase {
                 commitExecutor.finish();
             } catch (Exception exception) {
                 throw new BackupLoaderException(format("Error loading row %d from %s chunk to %s table",
-                        row + 1, chunk.getName(), getTable().getQualifiedName()), exception);
+                        row + 1, chunk.getName(), loadRowSet.getTable().getQualifiedName()), exception);
             }
             inputFormat.readEnd();
             inputFormat.close();
@@ -121,15 +120,15 @@ public class LoadRowSetWork extends WorkBase {
         String format = backupLoaderContext.getBackup().getFormat();
         InputFormat inputFormat = backupLoaderContext.getFormatFactory().createInputFormat(format,
                 backupLoaderContext.getFormatAttributes());
-        inputFormat.setRowSet(getRowSet());
+        inputFormat.setRowSet(getLoadRowSet().getRowSet());
         inputFormat.setInputStream(backupLoaderContext.getBackupOps().openInput(input));
         ValueHandleListBuilder builder = newBuilder(getSession().getConnection(), statement);
         builder.withDialect(getSession().getDialect());
-        builder.withFields(newArrayList(transform(getRowSet().getColumns(),
+        builder.withFields(newArrayList(transform(getLoadRowSet().getRowSet().getColumns(),
                 new Function<Column, Field>() {
                     @Override
                     public Field apply(Column column) {
-                        return getTable().getColumn(column.getName());
+                        return getLoadRowSet().getTable().getColumn(column.getName());
                     }
                 })));
         builder.withTimeZone(backupLoaderContext.getTimeZone());
@@ -138,16 +137,16 @@ public class LoadRowSetWork extends WorkBase {
         return inputFormat;
     }
 
-    public RowSet getRowSet() {
-        return loadRowSet.getRowSet();
+    public BackupLoaderManager getBackupLoaderManager() {
+        return backupLoaderManager;
     }
 
-    public Table getTable() {
-        return loadRowSet.getTable();
+    public BackupLoaderContext getBackupLoaderContext() {
+        return backupLoaderContext;
     }
 
-    public Query getQuery() {
-        return loadRowSet.getQuery();
+    public LoadRowSet getLoadRowSet() {
+        return loadRowSet;
     }
 
     @Override

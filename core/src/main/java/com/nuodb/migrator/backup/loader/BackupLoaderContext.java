@@ -33,6 +33,8 @@ import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.session.Session;
@@ -44,6 +46,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
+
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.PRIMARY_KEY;
+import static com.nuodb.migrator.utils.Collections.contains;
 
 /**
  * @author Sergey Bushik
@@ -94,17 +100,13 @@ public interface BackupLoaderContext {
 
     void setInsertTypeFactory(InsertTypeFactory insertTypeFactory);
 
-    Collection<LoadIndex> getLoadIndexes();
+    LoadConstraints getLoadConstraints();
 
-    void setLoadIndexes(Collection<LoadIndex> loadIndexes);
+    void setLoadConstraints(LoadConstraints loadConstraints);
 
-    Collection<LoadRowSet> getLoadRowSets();
+    LoadRowSets getLoadRowSets();
 
-    void setLoadRowSets(Collection<LoadRowSet> loadRowSets);
-
-    BackupLoaderSync getBackupLoaderSync();
-
-    void setBackupLoaderSync(BackupLoaderSync backupLoaderSync);
+    void setLoadRowSets(LoadRowSets loadRowSets);
 
     Collection<MigrationMode> getMigrationModes();
 

@@ -34,7 +34,9 @@ import java.util.EventListener;
  */
 public interface WorkListener extends EventListener {
 
-    void onExecute(WorkEvent event);
+    void onExecuteStart(WorkEvent event);
+
+    void onExecuteEnd(WorkEvent event);
 
     void onFailure(WorkEvent event);
 }

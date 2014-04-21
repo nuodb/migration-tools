@@ -28,7 +28,6 @@
 package com.nuodb.migrator.backup.loader;
 
 import com.nuodb.migrator.jdbc.metadata.Constraint;
-import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ProxyScriptExporter;
@@ -44,25 +43,20 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getUseSchema;
 
 /**
- * Loads schema scripts for a desired database object
+ * Loads schema scripts for a desired object
  *
  * @author Sergey Bushik
  */
-public class LoadIndexWork extends WorkBase {
-    /**
-     * Object to generate & load schema for
-     */
-    private MetaData index;
-    /**
-     * Backup load manager
-     */
+public class LoadConstraintWork extends WorkBase {
+
+    private LoadConstraint loadConstraint;
     private BackupLoaderManager backupLoaderManager;
     private BackupLoaderContext backupLoaderContext;
     private ScriptExporter scriptExporter;
     private ScriptGeneratorManager scriptGeneratorManager;
 
-    public LoadIndexWork(MetaData index, BackupLoaderManager backupLoaderManager) {
-        this.index = index;
+    protected LoadConstraintWork(LoadConstraint loadConstraint, BackupLoaderManager backupLoaderManager) {
+        this.loadConstraint = loadConstraint;
         this.backupLoaderManager = backupLoaderManager;
     }
 
@@ -70,14 +64,12 @@ public class LoadIndexWork extends WorkBase {
     protected void init() throws Exception {
         backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
-
         scriptExporter = createScriptExporter();
         scriptExporter.open();
     }
 
     protected ScriptExporter createScriptExporter() throws Exception {
         Collection<ScriptExporter> scriptExporters = newArrayList();
-
         ScriptExporter scriptExporter = backupLoaderContext.getScriptExporter();
         if (scriptExporter != null) {
             // will close underlying script exporter later manually
@@ -89,14 +81,19 @@ public class LoadIndexWork extends WorkBase {
 
     @Override
     public void execute() throws Exception {
-        Schema schema = ((Constraint) index).getTable().getSchema();
+        Constraint constraint = loadConstraint.getConstraint();
+        Schema schema = loadConstraint.getTable().getSchema();
         scriptExporter.exportScript(getUseSchema(schema, scriptGeneratorManager));
-        scriptExporter.exportScripts(scriptGeneratorManager.getCreateScripts(index));
+        scriptExporter.exportScripts(scriptGeneratorManager.getCreateScripts(constraint));
     }
 
     @Override
     public void close() throws Exception {
         closeQuietly(scriptExporter);
         super.close();
+    }
+
+    public LoadConstraint getLoadConstraint() {
+        return loadConstraint;
     }
 }

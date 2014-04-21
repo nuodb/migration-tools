@@ -121,15 +121,25 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
             logger.trace(format("Work executed %s",
                     getClassName(work.getClass())));
         }
-        onExecute(work);
+        onExecuteStart(work);
         work.execute();
+        onExecuteEnd(work);
     }
 
-    protected void onExecute(Work work) {
+    protected void onExecuteStart(Work work) {
         if (hasListeners()) {
             WorkEvent event = createWorkEvent(work);
             for (L listener : getListeners()) {
-                listener.onExecute(event);
+                listener.onExecuteStart(event);
+            }
+        }
+    }
+
+    protected void onExecuteEnd(Work work) {
+        if (hasListeners()) {
+            WorkEvent event = createWorkEvent(work);
+            for (L listener : getListeners()) {
+                listener.onExecuteEnd(event);
             }
         }
     }

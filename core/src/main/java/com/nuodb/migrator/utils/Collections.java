@@ -27,9 +27,6 @@
  */
 package com.nuodb.migrator.utils;
 
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -53,6 +50,10 @@ public class Collections {
 
     public static <T> boolean addIgnoreNull(Collection<T> collection, T value) {
         return value != null && collection.add(value);
+    }
+
+    public static boolean isEmpty(Iterable iterable) {
+        return !iterable.iterator().hasNext();
     }
 
     public static boolean isEmpty(Collection collection) {

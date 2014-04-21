@@ -50,7 +50,6 @@ import com.nuodb.migrator.jdbc.metadata.Catalog;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.Index;
-import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Schema;
@@ -183,16 +182,32 @@ public class BackupLoader {
         backupLoaderContext.setMigrationModes(getMigrationModes());
         backupLoaderContext.setRowSetMapper(getRowSetMapper());
         backupLoaderContext.setTimeZone(getTimeZone());
-        backupLoaderContext.setBackupLoaderSync(new BackupLoaderSync(
-                backupLoaderContext.isLoadData(), backupLoaderContext.isLoadSchema()));
+
         openSourceSession(backupLoaderContext);
         openTargetSession(backupLoaderContext);
+
+        if (backupLoaderContext.isLoadData()) {
+            Database database = getDatabase();
+            backupLoaderContext.setDatabase(database != null ? database :
+                    openDatabase(backupLoaderContext.getTargetSession()));
+            backupLoaderContext.setLoadRowSets(
+                    createLoadRowSets(backupLoaderContext));
+        }
+        if (backupLoaderContext.isLoadSchema()) {
+            backupLoaderContext.setLoadConstraints(
+                    createLoadConstraints(backupLoaderContext));
+        }
         return backupLoaderContext;
     }
 
     protected BackupLoaderManager createBackupLoaderManager(final BackupLoaderContext backupLoaderContext) {
         BackupLoaderManager backupLoaderManager = new SimpleBackupLoaderManager();
         backupLoaderManager.setBackupLoaderContext(backupLoaderContext);
+        // add listener after load constraints is created
+        if (backupLoaderManager.isLoadSchema()) {
+            backupLoaderManager.addListener(
+                    new LoadConstraintAdapter(this, backupLoaderManager));
+        }
         for (BackupLoaderListener listener : getListeners()) {
             backupLoaderManager.addListener(listener);
         }
@@ -319,13 +334,13 @@ public class BackupLoader {
     protected Backup load(BackupLoaderManager backupLoaderManager) throws Exception {
         try {
             if (backupLoaderManager.isLoadSchema()) {
-                loadSchemaNoIndexes(backupLoaderManager);
+                loadNoConstraints(backupLoaderManager);
             }
             if (backupLoaderManager.isLoadData()) {
                 loadData(backupLoaderManager);
             }
             if (backupLoaderManager.isLoadSchema()) {
-                loadSchemaIndexes(backupLoaderManager);
+                loadConstraints(backupLoaderManager);
             }
         } catch (Throwable failure) {
             backupLoaderManager.loadFailed();
@@ -337,7 +352,7 @@ public class BackupLoader {
         return backupLoaderManager.getBackupLoaderContext().getBackup();
     }
 
-    protected void loadSchemaNoIndexes(BackupLoaderManager backupLoaderManager) throws Exception {
+    protected void loadNoConstraints(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         ScriptGeneratorManager scriptGeneratorManager =
                 backupLoaderContext.getScriptGeneratorManager();
@@ -355,102 +370,96 @@ public class BackupLoader {
             closeQuietly(scriptExporter);
             scriptGeneratorManager.setObjectTypes(objectTypes);
         }
-        backupLoaderManager.loadSchemaNoIndexesDone();
+        backupLoaderManager.loadNoConstraintsDone();
     }
 
     // TODO: multi-threaded data load on table level in place, continue with row level
     protected void loadData(BackupLoaderManager backupLoaderManager) throws Exception {
-        BackupLoaderContext backupLoaderContext =
-                backupLoaderManager.getBackupLoaderContext();
-        Database database = getDatabase();
-        backupLoaderContext.setDatabase(database != null ? database :
-                openDatabase(backupLoaderContext.getTargetSession()));
-        backupLoaderContext.setLoadRowSets(createLoadRowSets(backupLoaderContext));
+        BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {
             loadData(loadRowSet, backupLoaderManager);
         }
         backupLoaderManager.loadDataDone();
     }
 
-    // TODO: load indexes for source tables without data now, which is indicated by an absent row set
-    protected void loadSchemaIndexes(BackupLoaderManager backupLoaderManager) throws Exception {
+    // TODO: load constraints for source tables without row sets
+    protected void loadConstraints(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        Database database = backupLoaderContext.getBackup().getDatabase();
-
-        Collection<LoadIndex> loadIndexes = createLoadIndexes(database);
-        backupLoaderContext.setLoadIndexes(loadIndexes);
-
-        Collection<LoadIndex> loadIndexesNow = newArrayList(loadIndexes);
+        LoadConstraints loadConstraints = backupLoaderContext.getLoadConstraints();
+        LoadConstraints loadConstraintsNow = new LoadConstraints(loadConstraints);
         for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {
             Table table = getTable(loadRowSet, backupLoaderContext);
             if (table != null) {
-                loadIndexesNow.remove(new LoadIndex(table));
+                loadConstraintsNow.getLoadConstraints().removeAll(table);
             }
         }
-        if (backupLoaderManager.isLoadSchema()) {
-            backupLoaderManager.addListener(0,
-                    new LoadIndexListener(this, backupLoaderManager));
+        for (LoadConstraint loadConstraint : loadConstraintsNow) {
+            loadConstraint(loadConstraint, backupLoaderManager);
         }
-        for (LoadIndex loadIndex : loadIndexesNow) {
-            loadIndex(loadIndex, backupLoaderManager);
-        }
-        if (isEmpty(loadIndexes)) {
-            backupLoaderManager.loadSchemaIndexesDone();
+        if (isEmpty(loadConstraints)) {
+            backupLoaderManager.loadConstraintsDone();
         }
     }
 
-    protected Collection<LoadIndex> createLoadIndexes(Database database) {
-        Collection<LoadIndex> loadIndexes = newArrayList();
+    protected void loadConstraint(LoadConstraint loadConstraint, BackupLoaderManager backupLoaderManager) {
+        Work work = createWork(loadConstraint, backupLoaderManager);
+        executeWork(work, backupLoaderManager);
+    }
+
+    protected void loadConstraints(Collection<LoadConstraint> loadConstraints, BackupLoaderManager backupLoaderManager) {
+        if (!isEmpty(loadConstraints)) {
+            for (LoadConstraint loadConstraint : loadConstraints) {
+                loadConstraint(loadConstraint, backupLoaderManager);
+            }
+        }
+    }
+
+    protected LoadConstraints createLoadConstraints(BackupLoaderContext backupLoaderContext) {
+        LoadConstraints loadConstraints = new LoadConstraints();
+        boolean loadIndex = contains(getObjectTypes(), INDEX);
+        boolean loadPrimaryKey = contains(getObjectTypes(), PRIMARY_KEY);
+        boolean loadForeignKey = contains(getObjectTypes(), FOREIGN_KEY);
+        Database database = backupLoaderContext.getBackup().getDatabase();
         for (Table table : database.getTables()) {
-            loadIndexes.add(new LoadIndex(table));
-        }
-        return loadIndexes;
-    }
-
-    protected void loadIndex(LoadIndex loadIndex, BackupLoaderManager backupLoaderManager) throws Exception {
-        Table table = loadIndex.getTable();
-        Collection<MetaDataType> objectTypes = getObjectTypes();
-        if (contains(objectTypes, PRIMARY_KEY)) {
-            PrimaryKey primaryKey = table.getPrimaryKey();
-            if (primaryKey != null) {
-                Work work = createWork(primaryKey, backupLoaderManager);
-                executeWork(work, backupLoaderManager);
-            }
-        }
-        if (contains(objectTypes, INDEX)) {
-            for (Index index : table.getIndexes()) {
-                if (index.isPrimary()) {
-                    continue;
+            if (loadIndex) {
+                for (Index index : table.getIndexes()) {
+                    if (!index.isPrimary()) {
+                        loadConstraints.putIndex(index);
+                    }
                 }
-                Work work = createWork(index, backupLoaderManager);
-                executeWork(work, backupLoaderManager);
+            }
+            if (loadPrimaryKey) {
+                PrimaryKey primaryKey = table.getPrimaryKey();
+                if (primaryKey != null) {
+                    loadConstraints.putPrimaryKey(primaryKey);
+                }
+            }
+            if (loadForeignKey) {
+                for (ForeignKey foreignKey : table.getForeignKeys()) {
+                    loadConstraints.putForeignKey(foreignKey);
+                }
             }
         }
-        if (contains(objectTypes, FOREIGN_KEY)) {
-            for (ForeignKey foreignKey : table.getForeignKeys()) {
-                Work work = createWork(foreignKey, backupLoaderManager);
-                executeWork(work, backupLoaderManager);
-            }
-        }
+        return loadConstraints;
     }
 
-    protected Work createWork(MetaData object, BackupLoaderManager backupLoaderManager) {
-        return new LoadIndexWork(object, backupLoaderManager);
+    protected Work createWork(LoadConstraint loadConstraint, BackupLoaderManager backupLoaderManager) {
+        return new LoadConstraintWork(loadConstraint, backupLoaderManager);
     }
 
-    protected Collection<LoadRowSet> createLoadRowSets(BackupLoaderContext backupLoaderContext) {
-        Collection<LoadRowSet> loadRowSets = newArrayList();
-        RowSetMapper rowSetMapper = backupLoaderContext.getRowSetMapper();
+    protected LoadRowSets createLoadRowSets(BackupLoaderContext backupLoaderContext) {
+        LoadRowSets loadRowSets = new LoadRowSets();
         for (RowSet rowSet : backupLoaderContext.getBackup().getRowSets()) {
             if (isEmpty(rowSet.getChunks())) {
                 continue;
             }
-            Table table = rowSetMapper.mapRowSet(rowSet, backupLoaderContext);
+            Table table = backupLoaderContext.getRowSetMapper().
+                    mapRowSet(rowSet, backupLoaderContext);
             if (table == null) {
                 continue;
             }
             Query query = createQuery(rowSet, table, backupLoaderContext);
-            loadRowSets.add(new LoadRowSet(rowSet, table, query));
+            loadRowSets.addLoadRowSet(new LoadRowSet(rowSet, table, query));
         }
         return loadRowSets;
     }
@@ -478,7 +487,7 @@ public class BackupLoader {
     /**
      * Looks up source table meta data for a given load row set
      *
-     * @param loadRowSet to look up source table for
+     * @param loadRowSet          to look up source table for
      * @param backupLoaderContext evaluation context
      * @return source table
      */

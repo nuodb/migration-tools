@@ -33,7 +33,11 @@ package com.nuodb.migrator.jdbc.session;
 public abstract class WorkAdapter implements WorkListener {
 
     @Override
-    public void onExecute(WorkEvent event) {
+    public void onExecuteStart(WorkEvent event) {
+    }
+
+    @Override
+    public void onExecuteEnd(WorkEvent event) {
     }
 
     @Override

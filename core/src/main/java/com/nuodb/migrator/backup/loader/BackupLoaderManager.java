@@ -44,9 +44,9 @@ public interface BackupLoaderManager extends WorkManager<BackupLoaderListener> {
 
     void loadDataDone();
 
-    void loadSchemaIndexesDone();
+    void loadConstraintsDone();
 
-    void loadSchemaNoIndexesDone();
+    void loadNoConstraintsDone();
 
     boolean canLoad(Work work, LoadRowSet loadRowSet);
 

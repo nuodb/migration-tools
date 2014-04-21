@@ -68,9 +68,8 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     private FormatFactory formatFactory;
     private Map<String,Object> formatAttributes;
     private InsertTypeFactory insertTypeFactory;
-    private Collection<LoadIndex> loadIndexes;
-    private Collection<LoadRowSet> loadRowSets;
-    private BackupLoaderSync backupLoaderSync;
+    private LoadConstraints loadConstraints;
+    private LoadRowSets loadRowSets;
     private Collection<MigrationMode> migrationModes;
     private ConnectionSpec sourceSpec;
     private Session sourceSession;
@@ -195,33 +194,23 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
-    public Collection<LoadIndex> getLoadIndexes() {
-        return loadIndexes;
+    public LoadConstraints getLoadConstraints() {
+        return loadConstraints;
     }
 
     @Override
-    public void setLoadIndexes(Collection<LoadIndex> loadIndexes) {
-        this.loadIndexes = loadIndexes;
+    public void setLoadConstraints(LoadConstraints loadConstraints) {
+        this.loadConstraints = loadConstraints;
     }
 
     @Override
-    public Collection<LoadRowSet> getLoadRowSets() {
+    public LoadRowSets getLoadRowSets() {
         return loadRowSets;
     }
 
     @Override
-    public void setLoadRowSets(Collection<LoadRowSet> loadRowSets) {
+    public void setLoadRowSets(LoadRowSets loadRowSets) {
         this.loadRowSets = loadRowSets;
-    }
-
-    @Override
-    public BackupLoaderSync getBackupLoaderSync() {
-        return backupLoaderSync;
-    }
-
-    @Override
-    public void setBackupLoaderSync(BackupLoaderSync backupLoaderSync) {
-        this.backupLoaderSync = backupLoaderSync;
     }
 
     @Override
