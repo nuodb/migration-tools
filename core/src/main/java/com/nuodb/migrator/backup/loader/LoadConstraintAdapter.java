@@ -62,6 +62,11 @@ public class LoadConstraintAdapter extends BackupLoaderAdapter {
                 loadConstraints.getLoadConstraints(FOREIGN_KEY)));
     }
 
+    /**
+     * Monitors table loaded event and performs indexes & primary key loading
+     *
+     * @param event load row set event
+     */
     @Override
     public void onLoadEnd(LoadRowSetEvent event) {
         try {
@@ -79,6 +84,13 @@ public class LoadConstraintAdapter extends BackupLoaderAdapter {
         }
     }
 
+    /**
+     * Tracks completion of load constraint work and updates list of queued indexes, primary keys & foreign keys. Once
+     * indexes are loaded foreign keys are started, eventually when all constraints are loaded corresponding signal
+     * raised.
+     *
+     * @param event defining work completion
+     */
     @Override
     public void onExecuteEnd(WorkEvent event) {
         try {
