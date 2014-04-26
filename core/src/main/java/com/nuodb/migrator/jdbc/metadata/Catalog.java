@@ -27,8 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
-import com.google.common.collect.Lists;
-
 import java.util.Collection;
 import java.util.Map;
 

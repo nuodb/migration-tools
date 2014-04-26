@@ -107,6 +107,15 @@ public class XmlWriteSourceAwareContext<T> implements XmlWriteContext {
         return source;
     }
 
+    public <T> T getSource(int parent) {
+        XmlWriteContext context = this;
+        for (int index = 0; context != null && index < parent; index++) {
+            context = context.getContext();
+        }
+        return context instanceof XmlWriteSourceAwareContext ?
+                (T) ((XmlWriteSourceAwareContext) context).getSource() : null;
+    }
+
     public void setSource(T source) {
         this.source = source;
     }

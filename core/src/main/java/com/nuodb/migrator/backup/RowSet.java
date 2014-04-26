@@ -129,10 +129,10 @@ public class RowSet {
 
         RowSet rowSet = (RowSet) o;
 
+        if (getRowCount() != rowSet.getRowCount()) return false;
         if (chunks != null ? !chunks.equals(rowSet.chunks) : rowSet.chunks != null) return false;
         if (columns != null ? !columns.equals(rowSet.columns) : rowSet.columns != null) return false;
         if (name != null ? !name.equals(rowSet.name) : rowSet.name != null) return false;
-        if (rowCount != null ? !rowCount.equals(rowSet.rowCount) : rowSet.rowCount != null) return false;
         if (type != null ? !type.equals(rowSet.type) : rowSet.type != null) return false;
 
         return true;
@@ -141,7 +141,8 @@ public class RowSet {
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (rowCount != null ? rowCount.hashCode() : 0);
+        long rowCount = getRowCount();
+        result = 31 * result + (int) (rowCount ^ (rowCount >>> 32));
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (columns != null ? columns.hashCode() : 0);
         result = 31 * result + (chunks != null ? chunks.hashCode() : 0);

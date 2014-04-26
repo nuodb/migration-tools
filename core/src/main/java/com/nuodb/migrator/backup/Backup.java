@@ -32,6 +32,7 @@ import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -91,6 +92,11 @@ public class Backup {
     }
 
     public void setRowSets(Collection<RowSet> rowSets) {
+        if (rowSets != null) {
+            for (RowSet rowSet : rowSets) {
+                rowSet.setBackup(this);
+            }
+        }
         this.rowSets = rowSets;
     }
 

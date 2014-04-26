@@ -42,14 +42,10 @@ import java.util.Map;
  */
 public class XmlBackupOps extends BackupOpsBase implements XmlConstants {
 
-    @Override
-    public Backup read(InputStream input, Map context) {
-        return createXmlPersister().read(Backup.class, input, context);
-    }
+    private final XmlPersister xmlPersister;
 
-    @Override
-    public void write(Backup backup, OutputStream output, Map context) {
-        createXmlPersister().write(backup, output, context);
+    public XmlBackupOps() {
+        xmlPersister = createXmlPersister();
     }
 
     protected XmlPersister createXmlPersister() {
@@ -58,5 +54,19 @@ public class XmlBackupOps extends BackupOpsBase implements XmlConstants {
         registryReader.addRegistry(XML_HANDLER_REGISTRY);
         registryReader.read(xmlRegistry);
         return new XmlPersister(new XmlHandlerStrategy(xmlRegistry, new TreeStrategy()));
+    }
+
+    @Override
+    public Backup read(InputStream input, Map context) {
+        return getXmlPersister().read(Backup.class, input, context);
+    }
+
+    @Override
+    public void write(Backup backup, OutputStream output, Map context) {
+        getXmlPersister().write(backup, output, context);
+    }
+
+    public XmlPersister getXmlPersister() {
+        return xmlPersister;
     }
 }

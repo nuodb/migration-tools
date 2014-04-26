@@ -32,7 +32,6 @@ import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
-import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
@@ -50,15 +49,11 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
     }
 
     @Override
-    protected Schema createTarget(InputNode input, Class<? extends Schema> type) {
-        return null;
-    }
-
-    @Override
-    protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Schema> context) throws Exception {
+    protected Schema createTarget(InputNode input, Class<? extends Schema> type, XmlReadContext context) {
+        Catalog catalog = getParent(context, 0);
         String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        Catalog catalog = getParent(context);
-        context.setTarget(catalog.hasSchema(name) ? catalog.getSchema(name) : catalog.addSchema(name));
+        return catalog != null ? (catalog.hasSchema(name) ?
+                catalog.getSchema(name) : catalog.addSchema(name)) : new Schema(name);
     }
 
     @Override

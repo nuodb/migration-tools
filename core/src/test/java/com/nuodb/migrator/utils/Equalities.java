@@ -25,47 +25,47 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup;
+package com.nuodb.migrator.utils;
 
-import com.nuodb.migrator.jdbc.metadata.Catalog;
-import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.utils.xml.XmlReadContext;
-import com.nuodb.migrator.utils.xml.XmlWriteContext;
-import org.simpleframework.xml.stream.InputNode;
-import org.simpleframework.xml.stream.OutputNode;
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 
 /**
  * @author Sergey Bushik
  */
-public class XmlCatalogHandler extends XmlIdentifiableHandlerBase<Catalog> implements XmlConstants {
+@SuppressWarnings("all")
+public class Equalities {
 
-    private static final String SCHEMA_ELEMENT = "schema";
+    static final Equality DEFAULT_EQUALITY = new DefaultEquality();
 
-    public XmlCatalogHandler() {
-        super(Catalog.class);
-    }
+    static class DefaultEquality implements Equality {
 
-    @Override
-    protected Catalog createTarget(InputNode input, Class<? extends Catalog> type, XmlReadContext context) {
-        Database database = getParent(context, 0);
-        String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        return database != null ? (database.hasCatalog(name) ?
-                database.getCatalog(name) : database.addCatalog(name)) : new Catalog(name);
-    }
+        DefaultEquality() {
+        }
 
-    @Override
-    protected void readElement(InputNode input, Catalog catalog, XmlReadContext context) throws Exception {
-        String element = input.getName();
-        if (SCHEMA_ELEMENT.equals(element)) {
-            catalog.addSchema(context.read(input, Schema.class));
+        @Override
+        public boolean equals(Object o1, Object o2) {
+            return (o1 == null) && (o2 == null) || o1.equals(o2);
         }
     }
 
-    @Override
-    protected void writeElements(Catalog catalog, OutputNode output, XmlWriteContext context) throws Exception {
-        for (Schema schema : catalog.getSchemas()) {
-            context.writeElement(output, SCHEMA_ELEMENT, schema);
+    static final Equality REFLECTION_EQUALITY = new ReflectionEquality();
+
+    static class ReflectionEquality implements Equality {
+
+        ReflectionEquality() {
         }
+
+        @Override
+        public boolean equals(Object o1, Object o2) {
+            return reflectionEquals(o1, o2);
+        }
+    }
+
+    public static <T> Equality<T> defaultEquality() {
+        return DEFAULT_EQUALITY;
+    }
+
+    public static <T> Equality<T> reflectionEquality() {
+        return REFLECTION_EQUALITY;
     }
 }

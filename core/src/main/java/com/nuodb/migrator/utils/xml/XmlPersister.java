@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.utils.xml;
 
-import com.nuodb.migrator.utils.ReflectionUtils;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.strategy.Strategy;
 import org.simpleframework.xml.stream.Format;
@@ -35,11 +34,9 @@ import org.simpleframework.xml.stream.HyphenStyle;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collections;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Map;
-
-import static java.lang.String.format;
-import static java.util.Collections.emptyMap;
 
 public class XmlPersister {
 
@@ -66,6 +63,20 @@ public class XmlPersister {
         this.format = format;
     }
 
+    public <T> T read(Class<T> type, Reader reader) {
+        return read(type, reader, null);
+    }
+
+    public <T> T read(Class<T> type, Reader reader, Map context) {
+        try {
+            return createPersister(context).read(type, reader);
+        } catch (XmlPersisterException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new XmlPersisterException(exception);
+        }
+    }
+
     public <T> T read(Class<T> type, InputStream input) {
         return read(type, input, null);
     }
@@ -78,6 +89,14 @@ public class XmlPersister {
         } catch (Exception exception) {
             throw new XmlPersisterException(exception);
         }
+    }
+
+    public void write(Object source, Writer writer) {
+        write(source, writer, null);
+    }
+
+    public void write(Object source, Writer writer, Map context) {
+        write(source, writer, null);
     }
 
     public void write(Object source, OutputStream output) {

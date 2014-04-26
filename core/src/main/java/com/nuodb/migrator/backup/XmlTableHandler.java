@@ -68,17 +68,16 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     }
 
     @Override
-    protected Table createTarget(InputNode input, Class<? extends Table> type) {
-        return null;
+    protected Table createTarget(InputNode input, Class<? extends Table> type, XmlReadContext context) {
+        Schema schema = getParent(context, 0);
+        String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
+        return schema != null ? (schema.hasTable(name) ?
+                schema.getTable(name) : schema.addTable(name)) : new Table(name);
     }
 
     @Override
-    protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Table> context) throws Exception {
-        Schema schema = getParent(context);
-        String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        Table table = schema.hasTable(name) ? schema.getTable(name) : schema.addTable(name);
+    protected void readAttributes(InputNode input, Table table, XmlReadContext context) throws Exception {
         table.setType(context.readAttribute(input, TYPE_ATTRIBUTE, String.class));
-        context.setTarget(table);
     }
 
     @Override

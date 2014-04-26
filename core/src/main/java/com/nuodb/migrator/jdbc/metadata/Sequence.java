@@ -27,12 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static java.lang.String.format;
+import static java.math.BigDecimal.valueOf;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.join;
 
@@ -43,12 +45,12 @@ public class Sequence extends IdentifiableBase {
 
     private Schema schema;
     private Collection<Column> columns = newLinkedHashSet();
-    private Number startWith;
-    private Number lastValue;
-    private Number incrementBy;
-    private Number minValue;
-    private Number maxValue;
-    private Number cache;
+    private BigDecimal startWith;
+    private BigDecimal lastValue;
+    private BigDecimal incrementBy;
+    private BigDecimal minValue;
+    private BigDecimal maxValue;
+    private BigDecimal cache;
     private boolean cycle;
     private boolean order;
     private boolean temporary;
@@ -93,43 +95,63 @@ public class Sequence extends IdentifiableBase {
         this.columns = columns;
     }
 
-    public Number getStartWith() {
+    public BigDecimal getStartWith() {
         return startWith;
     }
 
-    public void setStartWith(Number startWith) {
+    public void setStartWith(long startWith) {
+        setStartWith(valueOf(startWith));
+    }
+
+    public void setStartWith(BigDecimal startWith) {
         this.startWith = startWith;
     }
 
-    public Number getLastValue() {
+    public BigDecimal getLastValue() {
         return lastValue;
     }
 
-    public void setLastValue(Number lastValue) {
+    public void setLastValue(long lastValue) {
+        setLastValue(valueOf(lastValue));
+    }
+
+    public void setLastValue(BigDecimal lastValue) {
         this.lastValue = lastValue;
     }
 
-    public Number getIncrementBy() {
+    public BigDecimal getIncrementBy() {
         return incrementBy;
     }
 
-    public void setIncrementBy(Number incrementBy) {
+    public void setIncrementBy(long incrementBy) {
+        setIncrementBy(valueOf(incrementBy));
+    }
+
+    public void setIncrementBy(BigDecimal incrementBy) {
         this.incrementBy = incrementBy;
     }
 
-    public Number getMinValue() {
+    public BigDecimal getMinValue() {
         return minValue;
     }
 
-    public void setMinValue(Number minValue) {
+    public void setMinValue(long minValue) {
+        setMinValue(valueOf(minValue));
+    }
+
+    public void setMinValue(BigDecimal minValue) {
         this.minValue = minValue;
     }
 
-    public Number getMaxValue() {
+    public BigDecimal getMaxValue() {
         return maxValue;
     }
 
-    public void setMaxValue(Number maxValue) {
+    public void setMaxValue(long maxValue) {
+        setMaxValue(valueOf(maxValue));
+    }
+
+    public void setMaxValue(BigDecimal maxValue) {
         this.maxValue = maxValue;
     }
 
@@ -157,11 +179,15 @@ public class Sequence extends IdentifiableBase {
         this.temporary = temporary;
     }
 
-    public Number getCache() {
+    public BigDecimal getCache() {
         return cache;
     }
 
-    public void setCache(Number cache) {
+    public void setCache(long cache) {
+        setCache(valueOf(cache));
+    }
+
+    public void setCache(BigDecimal cache) {
         this.cache = cache;
     }
 
