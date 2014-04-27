@@ -33,6 +33,7 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.DriverInfo;
+import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -42,16 +43,20 @@ import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.utils.Equality;
 import com.nuodb.migrator.utils.xml.XmlPersister;
+import org.simpleframework.xml.stream.Format;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.StringReader;
+import java.io.StringWriter;
 
+import static com.nuodb.migrator.backup.format.csv.CsvAttributes.FORMAT;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static com.nuodb.migrator.utils.Equalities.defaultEquality;
 import static com.nuodb.migrator.utils.Equalities.reflectionEquality;
 import static java.lang.String.format;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -64,7 +69,12 @@ public class XmlBackupTest {
 
     @BeforeMethod
     public void setUp() {
-        xmlPersister = new XmlBackupOps().getXmlPersister();
+        xmlPersister = new XmlBackupOps() {
+            @Override
+            protected Format createFormat() {
+                return new Format(0);
+            }
+        }.getXmlPersister();
     }
 
     @DataProvider(name = "read")
@@ -205,5 +215,96 @@ public class XmlBackupTest {
         T actual = xmlPersister.read((Class<T>) expected.getClass(), new StringReader(xml));
         assertTrue(equality.equals(expected, actual),
                 format("Actual object does not match expected for xml\n%s", xml));
+    }
+
+    @DataProvider(name = "write")
+    public Object[][] createWriteData() {
+        Backup backup = new Backup(FORMAT);
+
+        Database database = new Database();
+
+        DatabaseInfo databaseInfo = new DatabaseInfo("NuoDB", null, 1, 29);
+
+        DriverInfo driverInfo = new DriverInfo("NuoDB JDBC Driver", "1.0", 1, 0);
+
+        Catalog catalog = new Catalog("catalog1");
+        catalog.addSchema("schema1");
+        catalog.addSchema("schema2");
+
+        Schema schema = new Schema("schema1");
+        schema.addSequence(new Sequence("sequence1"));
+        schema.addTable("table1");
+
+        Table table = new Table("table1");
+        Column column = new Column("column1");
+        JdbcEnumType jdbcEnumType =
+                new JdbcEnumType(new JdbcTypeDesc(1, "ENUM"), newOptions(1, 1, 0));
+        jdbcEnumType.addValue("1");
+        jdbcEnumType.addValue("2");
+        column.setJdbcType(jdbcEnumType);
+        table.addColumn(column);
+        Index index = new Index();
+        index.addColumn(column, 1);
+        table.addIndex(index);
+        return new Object[][] {
+        {
+                backup,
+                "<backup version=\"2.4\" format=\"csv\"/>"
+        }, {
+                database,
+                "<database>" +
+                "<driver-info/>" +
+                "<database-info/>" +
+                "<connection-spec/>" +
+                "</database>"
+        }, {
+                databaseInfo,
+                "<databaseInfo>" +
+                "<product-name>NuoDB</product-name>" +
+                "<product-version/>" +
+                "<major-version>1</major-version>" +
+                "<minor-version>29</minor-version>" +
+                "</databaseInfo>"
+        }, {
+                driverInfo,
+                "<driverInfo>" +
+                "<name>NuoDB JDBC Driver</name>" +
+                "<version>1.0</version>" +
+                "<major-version>0</major-version>" +
+                "<minor-version>1</minor-version>" +
+                "</driverInfo>"
+        }, {
+                catalog,
+                "<catalog name=\"catalog1\">" +
+                "<schema name=\"schema1\"/>" +
+                "<schema name=\"schema2\"/>" +
+                "</catalog>"
+        }, {
+                schema,
+                "<schema name=\"schema1\">" +
+                "<sequence name=\"sequence1\"/>" +
+                "<table name=\"table1\" type=\"TABLE\"/>" +
+                "</schema>"
+        }, {
+                table,
+                "<table name=\"table1\" type=\"TABLE\">" +
+                "<column name=\"column1\">" +
+                "<enum code=\"1\" name=\"ENUM\" size=\"1\" precision=\"1\" scale=\"0\">" +
+                "<value>1</value>" +
+                "<value>2</value>" +
+                "</enum>" +
+                "</column>" +
+                "<index unique=\"false\">" +
+                "<column name=\"column1\"/>" +
+                "</index>" +
+                "</table>"
+        }};
+    }
+
+    @Test(dataProvider = "write")
+    public <T> void testWrite(T source, String expected) {
+        StringWriter writer = new StringWriter();
+        xmlPersister.write(source, writer);
+        assertEquals(writer.toString(), expected);
     }
 }

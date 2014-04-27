@@ -31,7 +31,9 @@ import com.nuodb.migrator.utils.xml.XmlHandlerRegistry;
 import com.nuodb.migrator.utils.xml.XmlHandlerRegistryReader;
 import com.nuodb.migrator.utils.xml.XmlHandlerStrategy;
 import com.nuodb.migrator.utils.xml.XmlPersister;
+import org.simpleframework.xml.strategy.Strategy;
 import org.simpleframework.xml.strategy.TreeStrategy;
+import org.simpleframework.xml.stream.Format;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -49,11 +51,19 @@ public class XmlBackupOps extends BackupOpsBase implements XmlConstants {
     }
 
     protected XmlPersister createXmlPersister() {
+        return new XmlPersister(createXmlStrategy(), createFormat());
+    }
+
+    protected Strategy createXmlStrategy() {
         XmlHandlerRegistry xmlRegistry = new XmlHandlerRegistry();
         XmlHandlerRegistryReader registryReader = new XmlHandlerRegistryReader();
         registryReader.addRegistry(XML_HANDLER_REGISTRY);
         registryReader.read(xmlRegistry);
-        return new XmlPersister(new XmlHandlerStrategy(xmlRegistry, new TreeStrategy()));
+        return new XmlHandlerStrategy(xmlRegistry, new TreeStrategy());
+    }
+
+    protected Format createFormat() {
+        return null;
     }
 
     @Override

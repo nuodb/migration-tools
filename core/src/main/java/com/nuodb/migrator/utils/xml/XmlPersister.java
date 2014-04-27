@@ -55,12 +55,12 @@ public class XmlPersister {
     }
 
     public XmlPersister(Strategy strategy) {
-        this(strategy, new Format(INDENT, PROLOG, new HyphenStyle()));
+        this(strategy, null);
     }
 
     public XmlPersister(Strategy strategy, Format format) {
         this.strategy = strategy;
-        this.format = format;
+        this.format = format == null ? new Format(INDENT, PROLOG, new HyphenStyle()) : format;
     }
 
     public <T> T read(Class<T> type, Reader reader) {
@@ -96,7 +96,13 @@ public class XmlPersister {
     }
 
     public void write(Object source, Writer writer, Map context) {
-        write(source, writer, null);
+        try {
+            createPersister(context).write(source, writer);
+        } catch (XmlPersisterException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new XmlPersisterException(exception);
+        }
     }
 
     public void write(Object source, OutputStream output) {
