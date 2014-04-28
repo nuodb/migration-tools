@@ -77,7 +77,7 @@ public class SimpleRowSetMapper implements RowSetMapper {
         Backup backup = rowSet.getBackup();
         ConnectionSpec connectionSpec = database.getConnectionSpec();
         if ((connectionSpec.getCatalog() != null || connectionSpec.getSchema() != null) &&
-                backup.getDatabase() != null && backup.getDatabase().getSchemas().size() == 1) {
+                backup.getDatabase() != null && backup.getDatabase().getSchemas().size() <= 1) {
             addIgnoreNull(qualifiers, connectionSpec.getCatalog());
             addIgnoreNull(qualifiers, connectionSpec.getSchema());
         } else {
