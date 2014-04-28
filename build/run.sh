@@ -1,11 +1,20 @@
-#!/bin/bash
+#!/bin/bash 
 
+set -e
+set -o pipefail
+
+if [ ! -x "$JAVA_HOME"/bin/java -o ! -x "$JAVA_HOME"/bin/jdb -o ! -x "$JAVA_HOME"/bin/javac ]; then
+      echo "The JAVA_HOME environment variable is not defined correctly"
+      echo "NB: JAVA_HOME should point to a JDK not a JRE"
+      exit 1
+fi
+
+export PATH=.:${JAVA_HOME}/bin:${PATH}
 
 ARG_FORMAT=$1
-args=$(getopt -l "database:,driver:,jdk:,migrator_from_git" -- "$@")
+args=$(getopt -l "database:,driver:,jdk:" -- "$@")
 eval set -- "$args"
 
-ARG_MIGRATOR_FROM_GIT=0
 while [ $# -ge 1 ]; do
     case "$1" in
         --database)
@@ -13,52 +22,42 @@ while [ $# -ge 1 ]; do
             shift ;;
         --driver)
             ARG_DRIVER=$2
-            shift ;;
-        --jdk)
-            ARG_JDK=$2
-            shift ;;
-        --migrator_from_git) 
-            ARG_MIGRATOR_FROM_GIT=1
-            shift ;;
+            shift;;
         --) shift ; break ;;
     esac
     shift
 done
 
-#echo "ARG_DATABASE = $ARG_DATABASE"
-#echo "ARG_DRIVER = $ARG_DRIVER"
-#echo "ARG_JDK = $ARG_JDK"
-#echo "ARG_MIGRATOR_FROM_GIT = $ARG_MIGRATOR_FROM_GIT"
-
-
-if [ -z "$START_TS" ]
-  then
-  START_TS=`date +%Y%m%d_%H%M%S`
+if [ ! -f ${ARG_DRIVER} ]
+    then
+    echo "Driver missing -  ${ARG_DRIVER}"
+    exit 1
 fi
-export BUILD_FOLDER=/migrator-local/work/${START_TS}/${ARG_JDK}
-export WORK_FOLDER=/migrator-local/work/${START_TS}/${ARG_JDK}/${ARG_DATABASE}/${ARG_DRIVER}/${ARG_FORMAT}
+BASEDIR=$(dirname $0)
+JDK_NAME=`basename ${JAVA_HOME}`
+DRIVER_NAME=`basename ${ARG_DRIVER}`
+export WORK_FOLDER=${BASEDIR}/tests/${JDK_NAME}/${ARG_DATABASE}/${DRIVER_NAME}/${ARG_FORMAT}
 rm -rf ${WORK_FOLDER}
 mkdir -p ${WORK_FOLDER}
-touch ${WORK_FOLDER}/run.log 2>&1
-scriptFile=${WORK_FOLDER}/runtests.sh
+touch ${WORK_FOLDER}/run.log
+echo "Running tests: ${WORK_FOLDER}"
 
-echo "#!/bin/sh" > ${scriptFile}
-echo "export START_SOURCE_FOLDER=${START_SOURCE_FOLDER}" >> ${scriptFile}
-echo "export WORK_FOLDER=${WORK_FOLDER}" >> ${scriptFile}
-echo "export ARG_FORMAT=${ARG_FORMAT}" >> ${scriptFile}
-echo "export ARG_DATABASE=${ARG_DATABASE}" >> ${scriptFile}
-echo "export ARG_DRIVER=${ARG_DRIVER}" >> ${scriptFile}
-echo "export ARG_JDK=${ARG_JDK}" >> ${scriptFile}
-echo "export ARG_MIGRATOR_FROM_GIT=${ARG_MIGRATOR_FROM_GIT}" >> ${scriptFile}
-cat common/set_java.sh >> ${scriptFile}
-cat database/${ARG_DATABASE}/set_source_env.sh >> ${scriptFile}
-cat common/set_nuodb_env.sh >> ${scriptFile}
-cat common/set_source_folders.sh >> ${scriptFile}
-cat common/build_source.sh >> ${scriptFile}
-cat common/setup_nuodb.sh >> ${scriptFile}
-#cat database/${ARG_DATABASE}/set_source_data.sh >> ${scriptFile}
-cat database/${ARG_DATABASE}/migrate_data.sh >> ${scriptFile}
-cat database/${ARG_DATABASE}/run_integration_tests.sh >> ${scriptFile}
-cat common/analyze_log.sh >> ${scriptFile}
-chmod +x ${scriptFile}
-${scriptFile}
+exec 1>> ${WORK_FOLDER}/run.log 2>&1
+
+echo "ARG_DATABASE = $ARG_DATABASE"
+echo "ARG_DRIVER = $ARG_DRIVER"
+echo "ARG_FORMAT = $ARG_FORMAT"
+echo "JDK = $JDK_NAME"
+
+. ${BASEDIR}/database/${ARG_DATABASE}/set_source_env.sh
+. ${BASEDIR}/common/set_nuodb_env.sh
+echo "Env variables set up complete"
+. ${BASEDIR}/common/setup_nuodb.sh
+echo "nuodb set up complete"
+#. ${BASEDIR}/database/${ARG_DATABASE}/set_source_data.sh
+echo "migration start"
+. ${BASEDIR}/database/${ARG_DATABASE}/migrate_data.sh
+echo "migration complete"
+echo "integration_tests start"
+. ${BASEDIR}/database/${ARG_DATABASE}/run_integration_tests.sh
+echo "integration_tests complete"

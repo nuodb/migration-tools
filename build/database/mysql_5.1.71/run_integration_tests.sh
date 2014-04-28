@@ -1,2 +1,3 @@
-mvn -Pmysql-integration-tests test  >> ${WORK_FOLDER}/run.log 2>&1
+mvn -f ${BASEDIR}/../pom.xml clean
+mvn -f ${BASEDIR}/../pom.xml -Pmysql-integration-tests test
 
