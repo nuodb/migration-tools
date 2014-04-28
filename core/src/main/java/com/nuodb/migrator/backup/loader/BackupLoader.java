@@ -502,9 +502,12 @@ public class BackupLoader {
         Database database = backupLoaderContext.getBackup().getDatabase();
         if (loadRowSet.getRowSet() instanceof TableRowSet) {
             TableRowSet tableRowSet = (TableRowSet) loadRowSet.getRowSet();
-            Catalog catalog = database.getCatalog(tableRowSet.getCatalog());
-            Schema schema = catalog.getSchema(tableRowSet.getSchema());
-            table = schema.getTable(tableRowSet.getTable());
+            Catalog catalog = database.hasCatalog(tableRowSet.getCatalog()) ?
+                    database.getCatalog(tableRowSet.getCatalog()) : null;
+            Schema schema = catalog != null && catalog.hasSchema(tableRowSet.getSchema()) ?
+                    catalog.getSchema(tableRowSet.getSchema()) : null;
+            table = schema != null && schema.hasTable(tableRowSet.getTable()) ?
+                    schema.getTable(tableRowSet.getTable()) : null;
         }
         return table;
     }
