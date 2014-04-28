@@ -144,12 +144,12 @@ public class XmlBackupTest {
         // column read
         column = new Column("column1");
         column.setNullable(true);
-        JdbcEnumType jdbcEnumType =
+        JdbcEnumType jdbcType =
                 new JdbcEnumType(new JdbcTypeDesc(1, "ENUM"), newOptions(1, 1, 0));
-        jdbcEnumType.addValue("a");
-        jdbcEnumType.addValue("b");
-        jdbcEnumType.addValue("c");
-        column.setJdbcType(jdbcEnumType);
+        jdbcType.addValue("a");
+        jdbcType.addValue("b");
+        jdbcType.addValue("c");
+        column.setJdbcType(jdbcType);
         return new Object[][]{{
                 "<backup version=\"2.0\" format=\"csv\">\n" +
                 "<database/>\n" +
@@ -220,11 +220,8 @@ public class XmlBackupTest {
     @DataProvider(name = "write")
     public Object[][] createWriteData() {
         Backup backup = new Backup(FORMAT);
-
         Database database = new Database();
-
         DatabaseInfo databaseInfo = new DatabaseInfo("NuoDB", null, 1, 29);
-
         DriverInfo driverInfo = new DriverInfo("NuoDB JDBC Driver", "1.0", 1, 0);
 
         Catalog catalog = new Catalog("catalog1");
@@ -237,11 +234,11 @@ public class XmlBackupTest {
 
         Table table = new Table("table1");
         Column column = new Column("column1");
-        JdbcEnumType jdbcEnumType =
+        JdbcEnumType jdbcType =
                 new JdbcEnumType(new JdbcTypeDesc(1, "ENUM"), newOptions(1, 1, 0));
-        jdbcEnumType.addValue("1");
-        jdbcEnumType.addValue("2");
-        column.setJdbcType(jdbcEnumType);
+        jdbcType.addValue("1");
+        jdbcType.addValue("2");
+        column.setJdbcType(jdbcType);
         table.addColumn(column);
         Index index = new Index();
         index.addColumn(column, 1);
