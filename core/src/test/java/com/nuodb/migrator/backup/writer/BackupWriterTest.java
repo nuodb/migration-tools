@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.backup.writer;
 
-import com.nuodb.migrator.backup.loader.BackupLoader;
 import org.testng.annotations.BeforeMethod;
 
 import static org.mockito.Mockito.spy;
