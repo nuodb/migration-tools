@@ -27,8 +27,20 @@
  */
 package com.nuodb.migrator.backup.writer;
 
+import com.nuodb.migrator.backup.loader.BackupLoader;
+import org.testng.annotations.BeforeMethod;
+
+import static org.mockito.Mockito.spy;
+
 /**
  * @author Sergey Bushik
  */
 public class BackupWriterTest {
+
+    private BackupWriter backupWriter;
+
+    @BeforeMethod
+    public void setUp() {
+        backupWriter = spy(new BackupWriter());
+    }
 }

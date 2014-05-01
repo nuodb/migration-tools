@@ -56,9 +56,9 @@ public interface BackupLoaderManager extends WorkManager<BackupLoaderListener> {
 
     void loadRow(Work work, LoadRowSet loadRowSet, Chunk chunk);
 
-    void loadEnd(Work work, LoadRowSet loadRowSet);
-
     void loadEnd(Work work, LoadRowSet loadRowSet, Chunk chunk);
+
+    void loadEnd(Work work, LoadRowSet loadRowSet);
 
     BackupLoaderContext getBackupLoaderContext();
 

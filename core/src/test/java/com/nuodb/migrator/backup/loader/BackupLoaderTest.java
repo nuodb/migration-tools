@@ -27,8 +27,19 @@
  */
 package com.nuodb.migrator.backup.loader;
 
+import org.testng.annotations.BeforeMethod;
+
+import static org.mockito.Mockito.spy;
+
 /**
  * @author Sergey Bushik
  */
 public class BackupLoaderTest {
+
+    private BackupLoader backupLoader;
+
+    @BeforeMethod
+    public void setUp() {
+        backupLoader = spy(new BackupLoader());
+    }
 }

@@ -269,10 +269,11 @@ public class BackupLoader {
         scriptGeneratorManager.setObjectTypes(getObjectTypes());
         scriptGeneratorManager.setScriptTypes(getScriptTypes());
 
-        ConnectionSpec sourceSpec = backupLoaderContext.getSourceSession().getConnectionSpec();
+        Session sourceSession = backupLoaderContext.getSourceSession();
+        ConnectionSpec sourceSpec = sourceSession != null ? sourceSession.getConnectionSpec() : null;
         scriptGeneratorManager.setSourceCatalog(sourceSpec != null ? sourceSpec.getCatalog() : null);
         scriptGeneratorManager.setSourceSchema(sourceSpec != null ? sourceSpec.getSchema() : null);
-        scriptGeneratorManager.setSourceSession(backupLoaderContext.getSourceSession());
+        scriptGeneratorManager.setSourceSession(sourceSession);
 
         ConnectionSpec targetSpec = backupLoaderContext.getTargetSpec();
         if (targetSpec != null) {
