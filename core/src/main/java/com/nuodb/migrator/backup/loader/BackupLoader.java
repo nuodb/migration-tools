@@ -393,7 +393,8 @@ public class BackupLoader {
         backupLoaderContext.setLoadConstraints(
                 createLoadConstraints(backupLoaderContext));
         LoadConstraints loadConstraints = backupLoaderContext.getLoadConstraints();
-        LoadConstraints loadConstraintsNow = new LoadConstraints(loadConstraints);
+        LoadConstraints loadConstraintsNow = new LoadConstraints(
+                loadConstraints.getLoadConstraints(INDEX, PRIMARY_KEY));
         for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {
             Table table = getTable(loadRowSet, backupLoaderContext);
             if (table != null) {
@@ -482,13 +483,15 @@ public class BackupLoader {
 
     protected void executeWork(final Work work, final BackupLoaderManager backupLoaderManager) {
         final BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        backupLoaderContext.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                backupLoaderManager.execute(work,
-                        backupLoaderContext.getTargetSessionFactory());
-            }
-        });
+        if (backupLoaderManager.canExecute(work)) {
+            backupLoaderContext.getExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    backupLoaderManager.execute(work,
+                            backupLoaderContext.getTargetSessionFactory());
+                }
+            });
+        }
     }
 
     /**

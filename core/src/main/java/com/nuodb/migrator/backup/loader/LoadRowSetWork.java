@@ -84,7 +84,7 @@ public class LoadRowSetWork extends WorkBase {
         BackupLoaderManager backupLoaderManager = getBackupLoaderManager();
         backupLoaderManager.loadStart(this, loadRowSet);
         for (Iterator<Chunk> chunks = loadRowSet.getRowSet().getChunks().iterator();
-             backupLoaderManager.canLoad(this, loadRowSet) && chunks.hasNext(); ) {
+             backupLoaderManager.canExecute(this) && chunks.hasNext(); ) {
             Chunk chunk = chunks.next();
             backupLoaderManager.loadStart(this, loadRowSet, chunk);
             InputFormat inputFormat = openInput(chunk.getName());
@@ -96,7 +96,7 @@ public class LoadRowSetWork extends WorkBase {
             inputFormat.readStart();
             long row = 0;
             try {
-                while (inputFormat.read() && backupLoaderManager.canLoad(this, loadRowSet)) {
+                while (inputFormat.read() && backupLoaderManager.canExecute(this)) {
                     commitExecutor.execute();
                     row++;
                     backupLoaderManager.loadRow(this, loadRowSet, chunk);

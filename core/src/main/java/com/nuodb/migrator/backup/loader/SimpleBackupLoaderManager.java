@@ -49,7 +49,7 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
     private BackupLoaderContext backupLoaderContext;
 
     @Override
-    public boolean canLoad(Work work, LoadRowSet loadRowSet) {
+    public boolean canExecute(Work work) {
         return getFailures().isEmpty();
     }
 
@@ -167,9 +167,7 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
                 ExecutorService service = (ExecutorService) executor;
                 service.shutdown();
                 try {
-                    if (!backupLoaderSync.isFailed()) {
-                        service.awaitTermination(MAX_VALUE, SECONDS);
-                    }
+                    service.awaitTermination(MAX_VALUE, SECONDS);
                 } catch (InterruptedException exception) {
                     if (logger.isTraceEnabled()) {
                         logger.trace("Executor termination interrupted", exception);

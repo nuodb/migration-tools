@@ -46,7 +46,7 @@ public interface BackupWriterManager extends WorkManager<BackupWriterListener> {
 
     void writeSchemaDone();
 
-    boolean canWrite(Work work, WriteRowSet writeRowSet);
+    boolean canExecute(Work work);
 
     void writeStart(Work work, WriteRowSet writeRowSet);
 

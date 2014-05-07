@@ -27,9 +27,14 @@
  */
 package com.nuodb.migrator.utils;
 
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-import static java.lang.Math.max;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -46,13 +51,13 @@ public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
 
     public BlockingThreadPoolExecutor(int poolSize, long blockTime, TimeUnit blockTimeUnit,
                                       Callable<Boolean> blockTimeCallback) {
-        this(poolSize, poolSize, KEEP_ALIVE_TIME, KEEP_ALIVE_TIME_UNIT, blockTime, blockTimeUnit, blockTimeCallback);
+        this(poolSize, KEEP_ALIVE_TIME, KEEP_ALIVE_TIME_UNIT, blockTime, blockTimeUnit, blockTimeCallback);
     }
 
-    public BlockingThreadPoolExecutor(int poolSize, int queueSize, long keepAliveTime, TimeUnit keepAliveTimeUnit,
+    public BlockingThreadPoolExecutor(int poolSize, long keepAliveTime, TimeUnit keepAliveTimeUnit,
                                       long blockTime, TimeUnit blockTimeUnit, Callable<Boolean> blockTimeCallback) {
         super(poolSize, poolSize, keepAliveTime, keepAliveTimeUnit,
-                new ArrayBlockingQueue<Runnable>(max(poolSize, queueSize)),
+                new LinkedBlockingDeque<Runnable>(),
                 new BlockingPolicy(blockTime, blockTimeUnit, blockTimeCallback));
         allowCoreThreadTimeOut(true);
     }

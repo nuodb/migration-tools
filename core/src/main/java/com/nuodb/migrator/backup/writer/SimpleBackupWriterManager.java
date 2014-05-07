@@ -82,7 +82,7 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
     }
 
     @Override
-    public boolean canWrite(Work work, WriteRowSet writeRowSet) {
+    public boolean canExecute(Work work) {
         return getFailures().isEmpty();
     }
 
@@ -217,9 +217,7 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
                 ExecutorService service = (ExecutorService) executor;
                 service.shutdown();
                 try {
-                    if (!backupWriterSync.isFailed()) {
-                        service.awaitTermination(MAX_VALUE, SECONDS);
-                    }
+                    service.awaitTermination(MAX_VALUE, SECONDS);
                 } catch (InterruptedException exception) {
                     if (logger.isTraceEnabled()) {
                         logger.trace("Executor termination interrupted", exception);

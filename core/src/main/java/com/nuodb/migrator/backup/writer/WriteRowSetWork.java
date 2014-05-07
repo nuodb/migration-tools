@@ -138,7 +138,7 @@ public class WriteRowSetWork extends WorkBase {
         ResultSet resultSet = getResultSet();
         OutputFormat outputFormat = getOutputFormat();
         Chunk chunk = null;
-        while (backupWriterManager.canWrite(this, writeRowSet) && resultSet.next()) {
+        while (backupWriterManager.canExecute(this) && resultSet.next()) {
             if (chunk == null) {
                 exportStart(chunk = addChunk());
             }
