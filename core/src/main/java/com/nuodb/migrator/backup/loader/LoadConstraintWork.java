@@ -81,10 +81,10 @@ public class LoadConstraintWork extends WorkBase {
 
     @Override
     public void execute() throws Exception {
-        Constraint constraint = loadConstraint.getConstraint();
-        Schema schema = loadConstraint.getTable().getSchema();
         if (backupLoaderManager.canExecute(this)) {
+            Schema schema = loadConstraint.getTable().getSchema();
             scriptExporter.exportScript(getUseSchema(schema, scriptGeneratorManager));
+            Constraint constraint = loadConstraint.getConstraint();
             scriptExporter.exportScripts(scriptGeneratorManager.getCreateScripts(constraint));
         }
     }

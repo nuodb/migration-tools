@@ -63,28 +63,6 @@ public class LoadConstraintListener extends BackupLoaderAdapter {
     }
 
     /**
-     * Monitors table loaded event and performs indexes & primary key loading
-     *
-     * @param event load row set event
-     */
-    @Override
-    public void onLoadEnd(LoadRowSetEvent event) {
-        try {
-            Table table = backupLoader.getTable(event.getLoadRowSet(),
-                    backupLoaderManager.getBackupLoaderContext());
-            if (event.getChunk() == null && table != null) {
-                backupLoader.loadConstraints(loadIndexes.get(table), backupLoaderManager);
-            }
-        } catch (MigratorException exception) {
-            backupLoaderManager.loadFailed();
-            throw exception;
-        } catch (Exception exception) {
-            backupLoaderManager.loadFailed();
-            throw new BackupLoaderException(exception);
-        }
-    }
-
-    /**
      * Tracks completion of load constraint work and updates list of queued indexes, primary keys & foreign keys. Once
      * indexes are loaded foreign keys are started, eventually when all constraints are loaded corresponding signal will
      * be called on sync object.
@@ -95,7 +73,15 @@ public class LoadConstraintListener extends BackupLoaderAdapter {
     public void onExecuteEnd(WorkEvent event) {
         try {
             Work work = event.getWork();
-            if (work instanceof LoadConstraintWork) {
+            if (work instanceof LoadRowSetWork) {
+                LoadRowSetWork loadRowSetWork = (LoadRowSetWork) work;
+                LoadRowSet loadRowSet = loadRowSetWork.getLoadRowSet();
+                Table table = backupLoader.getTable(loadRowSet,
+                        backupLoaderManager.getBackupLoaderContext());
+                if (table != null) {
+                    backupLoader.loadConstraints(loadIndexes.get(table), backupLoaderManager);
+                }
+            } else if (work instanceof LoadConstraintWork) {
                 LoadConstraintWork loadConstraintWork = (LoadConstraintWork) work;
                 LoadConstraint loadConstraint = loadConstraintWork.getLoadConstraint();
                 loadIndexes.remove(loadConstraint.getTable(), loadConstraint);

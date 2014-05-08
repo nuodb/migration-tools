@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
+import com.google.common.collect.Maps;
 import com.nuodb.migrator.MigratorException;
 import org.slf4j.Logger;
 
@@ -36,11 +37,11 @@ import java.util.Map;
 
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newCopyOnWriteArrayList;
-import static com.google.common.collect.Maps.newConcurrentMap;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 import static java.lang.String.format;
+import static java.util.Collections.synchronizedMap;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -51,8 +52,9 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
 
     public static final boolean THROW_FAILURE_ON_CLOSE = true;
     protected final transient Logger logger = getLogger(getClass());
-    private final Map<Work, Throwable> failures = newConcurrentMap();
     private boolean throwFailureOnClose = THROW_FAILURE_ON_CLOSE;
+    private Map<Work, Throwable> failures = synchronizedMap(
+            Maps.<Work, Throwable>newLinkedHashMap());
     private List<L> listeners = newCopyOnWriteArrayList();
 
     @Override

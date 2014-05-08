@@ -367,15 +367,13 @@ public class BackupWriter {
 
     protected void executeWork(final Work work, final BackupWriterManager backupWriterManager) {
         final BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
-        if (backupWriterManager.canExecute(work)) {
-                backupWriterContext.getExecutor().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        backupWriterManager.execute(work,
-                                backupWriterContext.getSourceSessionFactory());
-                    }
-            });
-        }
+        backupWriterContext.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                backupWriterManager.execute(work,
+                        backupWriterContext.getSourceSessionFactory());
+                }
+        });
     }
 
     protected Collection<WriteRowSet> createWriteRowSets(BackupWriterContext backupWriterContext) {
