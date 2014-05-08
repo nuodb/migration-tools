@@ -27,15 +27,18 @@
  */
 package com.nuodb.migrator.backup.loader;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.session.Work;
 import com.nuodb.migrator.jdbc.session.WorkEvent;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.collect.ArrayListMultimap.create;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 
@@ -79,7 +82,8 @@ public class LoadConstraintListener extends BackupLoaderAdapter {
                 Table table = backupLoader.getTable(loadRowSet,
                         backupLoaderManager.getBackupLoaderContext());
                 if (table != null) {
-                    backupLoader.loadConstraints(loadIndexes.get(table), backupLoaderManager);
+                    backupLoader.loadConstraints(newArrayList(
+                            loadIndexes.get(table)), backupLoaderManager);
                 }
             } else if (work instanceof LoadConstraintWork) {
                 LoadConstraintWork loadConstraintWork = (LoadConstraintWork) work;
