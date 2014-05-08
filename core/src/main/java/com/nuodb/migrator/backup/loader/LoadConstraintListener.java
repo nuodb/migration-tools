@@ -27,14 +27,12 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.session.Work;
 import com.nuodb.migrator.jdbc.session.WorkEvent;
 
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.collect.ArrayListMultimap.create;
