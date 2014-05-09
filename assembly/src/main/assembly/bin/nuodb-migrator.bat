@@ -67,10 +67,10 @@ SET "JAVA_OPTS=%JAVA_OPTS% "-Dnuodb.migrator.home=%NUODB_MIGRATOR_HOME%""
 SET "JAVA_OPTS=%JAVA_OPTS% "-Dnuodb.migrator.logdir=%NUODB_MIGRATOR_LOGDIR%""
 
 SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\conf"
-SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\slf4j-api-1.7.5.jar"
-SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\slf4j-log4j12-1.7.5.jar"
-SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\log4j-1.2.17.jar"
-SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\nuodb-migrator-bootstrap-2.0.jar"
+SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\slf4j-api-${slf4j.version}.jar"
+SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\slf4j-log4j12-${slf4j.version}.jar"
+SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\log4j-${log4j.version}.jar"
+SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\nuodb-migrator-bootstrap-${project.version}.jar"
 
 "%JAVA_EXEC%" %JAVA_OPTS% -cp "%CLASSPATH%" com.nuodb.migrator.bootstrap.Bootstrap %*
 ENDLOCAL

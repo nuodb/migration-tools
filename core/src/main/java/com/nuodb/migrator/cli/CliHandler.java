@@ -29,7 +29,12 @@ package com.nuodb.migrator.cli;
 
 import com.nuodb.migrator.bootstrap.Bootable;
 import com.nuodb.migrator.bootstrap.config.Config;
-import com.nuodb.migrator.cli.parse.*;
+import com.nuodb.migrator.cli.parse.Command;
+import com.nuodb.migrator.cli.parse.Group;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import com.nuodb.migrator.cli.parse.OptionSet;
+import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.help.HelpFormatter;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
