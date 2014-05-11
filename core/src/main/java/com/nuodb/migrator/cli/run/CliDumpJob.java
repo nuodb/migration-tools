@@ -144,7 +144,6 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
-
         Option query = newBasicOptionBuilder().
                 withName(QUERY).
                 withDescription(getMessage(QUERY_OPTION_DESCRIPTION)).

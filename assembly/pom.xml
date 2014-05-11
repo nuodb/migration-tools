@@ -17,12 +17,12 @@
         <dependency>
             <groupId>com.nuodb</groupId>
             <artifactId>nuodb-migrator-bootstrap</artifactId>
-            <version>2.4</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.nuodb</groupId>
             <artifactId>nuodb-migrator-core</artifactId>
-            <version>2.4</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

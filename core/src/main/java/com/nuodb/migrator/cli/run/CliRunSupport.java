@@ -149,6 +149,7 @@ public class CliRunSupport extends CliSupport {
                 withRequired(true).
                 withMinimum(1);
 
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         Option driver = newBasicOptionBuilder().
                 withName(SOURCE_DRIVER).
                 withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).
@@ -157,7 +158,8 @@ public class CliRunSupport extends CliSupport {
                         newArgumentBuilder().
                                 withName(getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).
                                 withRequired(true).
-                                withMinimum(1).build()
+                                withMinimum(1).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(driver);
 
@@ -169,7 +171,8 @@ public class CliRunSupport extends CliSupport {
                         newArgumentBuilder().
                                 withName(getMessage(SOURCE_URL_ARGUMENT_NAME)).
                                 withRequired(true).
-                                withMinimum(1).build()
+                                withMinimum(1).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(url);
 
@@ -178,7 +181,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_USERNAME_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_USERNAME_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(username);
 
@@ -187,7 +191,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(password);
 
@@ -205,7 +210,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_CATALOG_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_CATALOG_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_CATALOG_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(catalog);
 
@@ -214,7 +220,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(schema);
 
@@ -223,7 +230,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_AUTO_COMMIT_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_AUTO_COMMIT_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_AUTO_COMMIT_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(autoCommit);
 
@@ -232,7 +240,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_TRANSACTION_ISOLATION_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_TRANSACTION_ISOLATION_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_TRANSACTION_ISOLATION_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(transactionIsolation);
 
@@ -358,6 +367,8 @@ public class CliRunSupport extends CliSupport {
         GroupBuilder group = newGroupBuilder().
                 withName(getMessage(TARGET_GROUP_NAME));
 
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
         Option url = newBasicOptionBuilder().
                 withName(TARGET_URL).
                 withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
@@ -366,7 +377,8 @@ public class CliRunSupport extends CliSupport {
                         newArgumentBuilder().
                                 withName(getMessage(TARGET_URL_ARGUMENT_NAME)).
                                 withRequired(true).
-                                withMinimum(1).build()
+                                withMinimum(1).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(url);
 
@@ -375,7 +387,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()
+                                withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(username);
 
@@ -384,7 +397,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()
+                                withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(password);
 
@@ -402,7 +416,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
+                                withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(schema);
         group.withRequired(true);
