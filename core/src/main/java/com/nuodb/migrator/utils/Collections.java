@@ -53,7 +53,7 @@ public class Collections {
     }
 
     public static boolean isEmpty(Iterable iterable) {
-        return !iterable.iterator().hasNext();
+        return iterable == null || !iterable.iterator().hasNext();
     }
 
     public static boolean isEmpty(Collection collection) {
@@ -64,8 +64,8 @@ public class Collections {
         return map == null || map.isEmpty();
     }
 
-    public static boolean isEmpty(Object[] values) {
-        return values == null || values.length == 0;
+    public static boolean isEmpty(Object[] array) {
+        return array == null || array.length == 0;
     }
 
     public static <K, V> Map<K, V> putAll(Map<K, V> target, Map<K, V> source) {
