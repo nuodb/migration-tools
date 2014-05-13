@@ -212,6 +212,10 @@ public class WriteRowSetWork extends WorkBase {
         return lowerCase(rowSetName);
     }
 
+    public WriteRowSet getWriteRowSet() {
+        return writeRowSet;
+    }
+
     public QuerySplit getQuerySplit() {
         return querySplit;
     }

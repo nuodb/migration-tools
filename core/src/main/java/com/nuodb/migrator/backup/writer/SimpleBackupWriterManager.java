@@ -152,8 +152,11 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
 
     @Override
     protected void failure(Work work, Throwable failure) {
-        super.failure(work, failure);
-        writeFailed();
+        try {
+            super.failure(work, failure);
+        } finally {
+            writeFailed();
+        }
     }
 
     @Override

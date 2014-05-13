@@ -129,8 +129,11 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
 
     @Override
     protected void failure(Work work, Throwable failure) {
-        super.failure(work, failure);
-        loadFailed();
+        try {
+            super.failure(work, failure);
+        } finally {
+            loadFailed();
+        }
     }
 
     @Override

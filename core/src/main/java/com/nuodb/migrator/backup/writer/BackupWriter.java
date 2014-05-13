@@ -322,7 +322,9 @@ public class BackupWriter {
 
     protected void writeData(BackupWriterManager backupWriterManager) throws Exception {
         BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
-        for (WriteRowSet writeRowSet : createWriteRowSets(backupWriterContext)) {
+        backupWriterContext.setWriteRowSets(createWriteRowSets(backupWriterContext));
+        backupWriterManager.addListener(new WriteRowSetListener(backupWriterManager));
+        for (WriteRowSet writeRowSet : backupWriterContext.getWriteRowSets()) {
             writeData(writeRowSet, backupWriterManager);
         }
         backupWriterManager.writeDataDone();
@@ -337,7 +339,6 @@ public class BackupWriter {
             Work work = createWork(writeRowSet, backupWriterManager);
             executeWork(work, backupWriterManager);
         }
-        backupWriterManager.writeDataDone();
     }
 
     protected void writeSchema(BackupWriterManager backupWriterManager) throws Exception {

@@ -45,11 +45,11 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
  */
 public class LoadConstraintListener extends BackupLoaderAdapter {
 
-    private BackupLoader backupLoader;
-    private BackupLoaderManager backupLoaderManager;
-    private Multimap<Table, LoadConstraint> loadIndexes;
-    private Multimap<Table, LoadConstraint> loadForeignKeys;
-    private AtomicBoolean loadForeignKeysStart = new AtomicBoolean();
+    private final BackupLoader backupLoader;
+    private final BackupLoaderManager backupLoaderManager;
+    private final Multimap<Table, LoadConstraint> loadIndexes;
+    private final Multimap<Table, LoadConstraint> loadForeignKeys;
+    private final AtomicBoolean loadForeignKeysStart = new AtomicBoolean();
 
     public LoadConstraintListener(BackupLoader backupLoader, BackupLoaderManager backupLoaderManager) {
         this.backupLoader = backupLoader;
@@ -72,32 +72,24 @@ public class LoadConstraintListener extends BackupLoaderAdapter {
      */
     @Override
     public void onExecuteEnd(WorkEvent event) {
-        try {
-            Work work = event.getWork();
-            if (work instanceof LoadRowSetWork) {
-                LoadRowSetWork loadRowSetWork = (LoadRowSetWork) work;
-                LoadRowSet loadRowSet = loadRowSetWork.getLoadRowSet();
-                Table table = backupLoader.getTable(loadRowSet,
-                        backupLoaderManager.getBackupLoaderContext());
-                if (table != null) {
-                    backupLoader.loadConstraints(newArrayList(
-                            loadIndexes.get(table)), backupLoaderManager);
-                }
-            } else if (work instanceof LoadConstraintWork) {
-                LoadConstraintWork loadConstraintWork = (LoadConstraintWork) work;
-                LoadConstraint loadConstraint = loadConstraintWork.getLoadConstraint();
-                loadIndexes.remove(loadConstraint.getTable(), loadConstraint);
-                loadForeignKeys.remove(loadConstraint.getTable(), loadConstraint);
+        Work work = event.getWork();
+        if (work instanceof LoadRowSetWork) {
+            LoadRowSetWork loadRowSetWork = (LoadRowSetWork) work;
+            LoadRowSet loadRowSet = loadRowSetWork.getLoadRowSet();
+            Table table = backupLoader.getTable(loadRowSet,
+                    backupLoaderManager.getBackupLoaderContext());
+            if (table != null) {
+                backupLoader.loadConstraints(newArrayList(
+                        loadIndexes.get(table)), backupLoaderManager);
             }
-            loadForeignKeys();
-            loadConstraintsDone();
-        } catch (MigratorException exception) {
-            backupLoaderManager.loadFailed();
-            throw exception;
-        } catch (Exception exception) {
-            backupLoaderManager.loadFailed();
-            throw new BackupLoaderException(exception);
+        } else if (work instanceof LoadConstraintWork) {
+            LoadConstraintWork loadConstraintWork = (LoadConstraintWork) work;
+            LoadConstraint loadConstraint = loadConstraintWork.getLoadConstraint();
+            loadIndexes.remove(loadConstraint.getTable(), loadConstraint);
+            loadForeignKeys.remove(loadConstraint.getTable(), loadConstraint);
         }
+        loadForeignKeys();
+        loadConstraintsDone();
     }
 
     protected void loadForeignKeys() {
