@@ -395,10 +395,13 @@ public class BackupLoader {
         LoadConstraints loadConstraints = backupLoaderContext.getLoadConstraints();
         LoadConstraints loadConstraintsNow = new LoadConstraints(
                 loadConstraints.getLoadConstraints(INDEX, PRIMARY_KEY));
-        for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {
-            Table table = getTable(loadRowSet, backupLoaderContext);
-            if (table != null) {
-                loadConstraintsNow.getLoadConstraints().removeAll(table);
+        LoadRowSets loadRowSets = backupLoaderContext.getLoadRowSets();
+        if (!isEmpty(loadRowSets)) {
+            for (LoadRowSet loadRowSet : loadRowSets) {
+                Table table = getTable(loadRowSet, backupLoaderContext);
+                if (table != null) {
+                    loadConstraintsNow.getLoadConstraints().removeAll(table);
+                }
             }
         }
         for (LoadConstraint loadConstraint : loadConstraintsNow) {
