@@ -310,7 +310,6 @@ public class BackupWriter {
             if (backupWriterManager.isWriteSchema()) {
                 writeSchema(backupWriterManager);
             }
-            writeBackup(backupWriterManager);
         } catch (Throwable failure) {
             backupWriterManager.writeFailed();
             throw failure instanceof MigratorException ?
@@ -318,7 +317,7 @@ public class BackupWriter {
         } finally {
             backupWriterManager.close();
         }
-        return backupWriterManager.getBackupWriterContext().getBackup();
+        return writeBackup(backupWriterManager);
     }
 
     protected void writeData(BackupWriterManager backupWriterManager) throws Exception {
@@ -348,12 +347,13 @@ public class BackupWriter {
         backupWriterManager.writeSchemaDone();
     }
 
-    protected void writeBackup(BackupWriterManager backupWriterManager) throws Exception {
+    protected Backup writeBackup(BackupWriterManager backupWriterManager) throws Exception {
         BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
         Backup backup = backupWriterContext.getBackup();
         Map backupOpsContext = newHashMap(backupWriterContext.getBackupOpsContext());
         backupOpsContext.put(META_DATA_SPEC, getMetaDataSpec());
         backupWriterContext.getBackupOps().write(backup, backupOpsContext);
+        return backup;
     }
 
     protected Work createWork(WriteRowSet writeRowSet, BackupWriterManager backupWriterManager) throws Exception {

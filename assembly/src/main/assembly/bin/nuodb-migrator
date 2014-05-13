@@ -47,6 +47,9 @@ else
     JAVA=`which java`
 fi
 
+# JAVA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=y"
+# export JAVA_OPTS
+
 JAVA_OPTS="$JAVA_OPTS -Xmx$MAX_HEAP_SIZE"
 JAVA_OPTS="$JAVA_OPTS -Dnuodb.home=$NUODB_HOME"
 JAVA_OPTS="$JAVA_OPTS -Dnuodb.migrator.home=$NUODB_MIGRATOR_HOME"

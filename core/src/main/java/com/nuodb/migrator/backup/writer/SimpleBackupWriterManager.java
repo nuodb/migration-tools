@@ -130,8 +130,8 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
 
     @Override
     public void writeEnd(Work work, WriteRowSet writeRowSet) {
-        synchronized (this) {
-            RowSet rowSet = writeRowSet.getRowSet();
+        RowSet rowSet = writeRowSet.getRowSet();
+        synchronized (rowSet) {
             writeRowSets.put(writeRowSet, (WriteRowSetWork) work);
             Collection<Chunk> chunks = newArrayList();
             for (WriteRowSetWork writeRowSetWork : writeRowSets.get(writeRowSet)) {
