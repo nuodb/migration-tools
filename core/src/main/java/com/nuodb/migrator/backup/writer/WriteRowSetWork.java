@@ -77,7 +77,6 @@ public class WriteRowSetWork extends WorkBase {
     private final boolean hasNextQuerySplit;
 
     private ResultSet resultSet;
-    private ValueHandleList valueHandleList;
     private OutputFormat outputFormat;
     private Collection<Chunk> chunks;
     private BackupWriterContext backupWriterContext;
@@ -105,7 +104,7 @@ public class WriteRowSetWork extends WorkBase {
         Collection<? extends Field> fields = writeRowSet.getColumns() != null ?
                 writeRowSet.getColumns() : newFieldList(resultSet);
 
-        valueHandleList = newBuilder(getSession().getConnection(), resultSet).
+        ValueHandleList valueHandleList = newBuilder(getSession().getConnection(), resultSet).
                 withDialect(dialect).withFields(fields).
                 withTimeZone(backupWriterContext.getTimeZone()).
                 withValueFormatRegistry(backupWriterContext.getValueFormatRegistry()).build();
@@ -140,18 +139,18 @@ public class WriteRowSetWork extends WorkBase {
         Chunk chunk = null;
         while (backupWriterManager.canExecute(this) && resultSet.next()) {
             if (chunk == null) {
-                exportStart(chunk = addChunk());
+                writeStart(chunk = addChunk());
             }
             if (!outputFormat.canWrite()) {
-                exportEnd(chunk);
-                exportStart(chunk = addChunk());
+                writeEnd(chunk);
+                writeStart(chunk = addChunk());
             }
             outputFormat.write();
             chunk.incrementRowCount();
             backupWriterManager.writeRow(this, writeRowSet, chunk);
         }
         if (chunk != null) {
-            exportEnd(chunk);
+            writeEnd(chunk);
         }
         backupWriterManager.writeEnd(this, writeRowSet);
     }
@@ -161,14 +160,14 @@ public class WriteRowSetWork extends WorkBase {
         JdbcUtils.closeQuietly(resultSet);
     }
 
-    protected void exportStart(Chunk chunk) throws Exception {
+    protected void writeStart(Chunk chunk) throws Exception {
         outputFormat.setOutputStream(backupWriterContext.getBackupOps().openOutput(chunk.getName()));
         outputFormat.init();
         outputFormat.writeStart();
         backupWriterManager.writeStart(this, writeRowSet, chunk);
     }
 
-    protected void exportEnd(Chunk chunk) throws Exception {
+    protected void writeEnd(Chunk chunk) throws Exception {
         outputFormat.writeEnd();
         outputFormat.close();
         backupWriterManager.writeEnd(this, writeRowSet, chunk);
