@@ -111,7 +111,7 @@ public class StructureTest extends MigrationTestBase {
         String[] colNames = new String[]{"COLUMN_NAME", "ORDINAL_POSITION",
                 "COLUMN_DEFAULT", "IS_NULLABLE", "DATA_TYPE",
                 "CHARACTER_MAXIMUM_LENGTH", "NUMERIC_PRECISION",
-                "NUMERIC_SCALE", "CHARACTER_SET_NAME", "COLLATION_NAME"};
+                "NUMERIC_SCALE", "CHARACTER_SET_NAME", "COLLATION_NAME","DATETIME_PRECISION"};
         PreparedStatement stmt1 = null, stmt2 = null;
         ResultSet rs1 = null, rs2 = null;
         HashMap<String, HashMap<String, String>> tabColMap = new HashMap<String, HashMap<String, String>>();
@@ -157,14 +157,18 @@ public class StructureTest extends MigrationTestBase {
                                 + " did not match");
                 int srcJdbcType = rs2.getInt("JDBCTYPE");
                 int tarJdbcType = SQLServerTypes
-                        .getMappedJDBCType(tabColDetailsMap.get(colNames[4]));
+                		.getMappedJDBCType(tabColDetailsMap.get(colNames[4]),tabColDetailsMap.get(colNames[6]));
+                
                 Assert.assertEquals(srcJdbcType, tarJdbcType,
                         "JDBCTYPE of column " + colName + " of table "
                                 + tableName + " did not match");
                 String srcLength = rs2.getString("LENGTH");
                 String tarLength = SQLServerTypes.getMappedLength(
                         tabColDetailsMap.get(colNames[4]),
-                        tabColDetailsMap.get(colNames[5]));
+                        tabColDetailsMap.get(colNames[5]),
+                        tabColDetailsMap.get(colNames[6]),
+                        tabColDetailsMap.get(colNames[7]),
+                        tabColDetailsMap.get(colNames[10]));
                 Assert.assertEquals(srcLength, tarLength, "LENGTH of column "
                         + colName + " of table " + tableName + " did not match");
                 // TBD
@@ -416,7 +420,7 @@ public class StructureTest extends MigrationTestBase {
     /*
      * test if all the auto increment settings are migrated
      */
-    @Test(groups = {"disabled"})
+  @Test(groups = {"disabled"})
     public void testAutoIncrement() throws Exception {
         String sqlStr1 = "SELECT  t.TABLE_NAME,c.COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                 + "AS c JOIN INFORMATION_SCHEMA.TABLES AS t ON t.TABLE_NAME = c.TABLE_NAME "
@@ -529,7 +533,6 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test the precisions and scale are migrated properly
 	 */
-
     public void testPrecisions() throws Exception {
         //String sqlStr2 = "select p1.c1,p1.c2,p1.c3,p1.c4,p1.c5,p2.c1,p2.c2,p2.c3,p2.c4,p2.c5,p2.c6,p2.c7 from precision1 as p1,precision2 as p2";
         //String sqlStr2 = "select count(*) from \"datatypes1\"";

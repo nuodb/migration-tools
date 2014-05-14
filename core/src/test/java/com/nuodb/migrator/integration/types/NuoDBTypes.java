@@ -32,119 +32,127 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NuoDBTypes implements DatabaseTypes {
-    private static Map<String, JDBCGetMethod[]> map = new HashMap<String, JDBCGetMethod[]>();
+	private static Map<String, JDBCGetMethod[]> map = new HashMap<String, JDBCGetMethod[]>();
 
-    static {
-        map.put("BOOLEAN", new JDBCGetMethod[]{JDBCGetMethod.BOOLEAN});
+	static {
+		map.put("BOOLEAN", new JDBCGetMethod[] { JDBCGetMethod.BOOLEAN });
 
-        map.put("BIGINT", new JDBCGetMethod[]{JDBCGetMethod.LONG});
+		map.put("BIGINT", new JDBCGetMethod[] { JDBCGetMethod.LONG });
 
-        map.put("VARCHAR", new JDBCGetMethod[]{JDBCGetMethod.STRING});
-        map.put("CHAR", new JDBCGetMethod[]{JDBCGetMethod.STRING});
+		map.put("VARCHAR", new JDBCGetMethod[] { JDBCGetMethod.STRING });
+		map.put("STRING", new JDBCGetMethod[] { JDBCGetMethod.STRING });
+		map.put("CHAR", new JDBCGetMethod[] { JDBCGetMethod.STRING });
 
-        map.put("INTEGER", new JDBCGetMethod[]{JDBCGetMethod.SHORT,
-                JDBCGetMethod.INT});
-        map.put("SMALLINT", new JDBCGetMethod[]{JDBCGetMethod.SHORT,
-                JDBCGetMethod.INT});
-        map.put("BIGINT", new JDBCGetMethod[]{JDBCGetMethod.INT,
-                JDBCGetMethod.LONG});
+		map.put("INTEGER", new JDBCGetMethod[] { JDBCGetMethod.SHORT,
+				JDBCGetMethod.INT });
+		map.put("NUMBER", new JDBCGetMethod[] { JDBCGetMethod.SHORT,
+				JDBCGetMethod.INT });
+		map.put("SMALLINT", new JDBCGetMethod[] { JDBCGetMethod.SHORT,
+				JDBCGetMethod.INT, JDBCGetMethod.STRING });
+		map.put("BIGINT", new JDBCGetMethod[] { JDBCGetMethod.INT,
+				JDBCGetMethod.LONG });
 
-        map.put("FLOAT", new JDBCGetMethod[]{JDBCGetMethod.FLOAT});
-        map.put("DOUBLE", new JDBCGetMethod[]{JDBCGetMethod.DOUBLE});
+		map.put("FLOAT", new JDBCGetMethod[] { JDBCGetMethod.FLOAT });
+		map.put("DOUBLE", new JDBCGetMethod[] { JDBCGetMethod.DOUBLE });
 
-        map.put("DATE", new JDBCGetMethod[]{JDBCGetMethod.DATE,
-                JDBCGetMethod.TIMESTAMP});
-        map.put("TIMESTAMP", new JDBCGetMethod[]{JDBCGetMethod.DATE,
-                JDBCGetMethod.TIMESTAMP});
-        map.put("TIME", new JDBCGetMethod[]{JDBCGetMethod.DATE,
-                JDBCGetMethod.TIME, JDBCGetMethod.TIMESTAMP});
+		map.put("DATE", new JDBCGetMethod[] { JDBCGetMethod.DATE,
+				JDBCGetMethod.TIMESTAMP });
+		map.put("TIMESTAMP", new JDBCGetMethod[] { JDBCGetMethod.DATE,
+				JDBCGetMethod.TIMESTAMP });
+		map.put("TIME", new JDBCGetMethod[] { JDBCGetMethod.DATE,
+				JDBCGetMethod.TIME, JDBCGetMethod.TIMESTAMP });
 
-        map.put("BLOB", new JDBCGetMethod[]{JDBCGetMethod.BLOB});
-        map.put("CLOB", new JDBCGetMethod[]{JDBCGetMethod.CLOB});
-    }
+		map.put("BINARYSTRING", new JDBCGetMethod[] { JDBCGetMethod.BLOB });
+		map.put("BINARYVARYINGSTRING",
+				new JDBCGetMethod[] { JDBCGetMethod.BLOB });
 
-    public JDBCGetMethod[] getJDBCTypes(String type) {
-        return map.get(type.toUpperCase());
-    }
+		map.put("BLOB", new JDBCGetMethod[] { JDBCGetMethod.BLOB });
+		map.put("CLOB", new JDBCGetMethod[] { JDBCGetMethod.CLOB });
+		// map.put("NUMERIC", new JDBCGetMethod[]{JDBCGetMethod.STRING});
+	}
 
-    public static int getKeyType(String type) {
-        if ("PRI".equals(type)) {
-            return 0;
-        } else if ("UNI".equals(type)) {
-            return 1;
-        }
-        return -1;
-    }
+	public JDBCGetMethod[] getJDBCTypes(String type) {
+		return map.get(type.toUpperCase());
+	}
 
-    public static int getMappedJDBCType(String type) {
-        if ("VARCHAR".equalsIgnoreCase(type)) {
-            return Types.VARCHAR;
-        } else if ("CLOB".equalsIgnoreCase(type)) {
-            return Types.CLOB;
-        } else if ("DATE".equalsIgnoreCase(type)) {
-            return Types.DATE;
-        } else if ("SMALLINT".equalsIgnoreCase(type)) {
-            return Types.SMALLINT;
-        } else if ("BIGINT".equalsIgnoreCase(type)) {
-            return Types.BIGINT;
-        } else if ("INTEGER".equalsIgnoreCase(type)) {
-            return Types.INTEGER;
-        } else if ("FLOAT".equalsIgnoreCase(type)) {
-            return Types.FLOAT;
-        } else if ("DOUBLE".equalsIgnoreCase(type)) {
-            return Types.DOUBLE;
-        } else if ("TIMESTAMP".equalsIgnoreCase(type)) {
-            return Types.TIMESTAMP;
-        } else if ("TIME".equalsIgnoreCase(type)) {
-            return Types.TIMESTAMP;
-        } else if ("CHAR".equalsIgnoreCase(type)) {
-            return Types.CHAR;
-        } else if ("BLOB".equalsIgnoreCase(type)) {
-            return Types.BLOB;
-        }
-        return 0;
-    }
+	public static int getKeyType(String type) {
+		if ("PRI".equals(type)) {
+			return 0;
+		} else if ("UNI".equals(type)) {
+			return 1;
+		}
+		return -1;
+	}
 
-    public static String getMappedLength(String type, String length) {
-        if ("VARCHAR".equalsIgnoreCase(type)) {
-            return length;
-        } else if ("INTEGER".equalsIgnoreCase(type)) {
-            return "4";
-        } else if ("DATE".equalsIgnoreCase(type)) {
-            return "8";
-        } else if ("SMALLINT".equalsIgnoreCase(type)) {
-            return "2";
-        } else if ("BIGINT".equalsIgnoreCase(type)) {
-            return "8";
-        } else if ("FLOAT".equalsIgnoreCase(type)) {
-            return "4";
-        } else if ("DOUBLE".equalsIgnoreCase(type)) {
-            return "8";
-        } else if ("TIME".equalsIgnoreCase(type)) {
-            return "12";
-        } else if ("TIMESTAMP".equalsIgnoreCase(type)) {
-            return "12";
-        } else if ("CHAR".equalsIgnoreCase(type)) {
-            return "20";
-        } else if ("BLOB".equalsIgnoreCase(type)) {
-            return "8";
-        }
-        return null;
-    }
+	public static int getMappedJDBCType(String type) {
+		if ("VARCHAR".equalsIgnoreCase(type)) {
+			return Types.VARCHAR;
+		} else if ("CLOB".equalsIgnoreCase(type)) {
+			return Types.CLOB;
+		} else if ("DATE".equalsIgnoreCase(type)) {
+			return Types.DATE;
+		} else if ("SMALLINT".equalsIgnoreCase(type)) {
+			return Types.SMALLINT;
+		} else if ("BIGINT".equalsIgnoreCase(type)) {
+			return Types.BIGINT;
+		} else if ("INTEGER".equalsIgnoreCase(type)) {
+			return Types.INTEGER;
+		} else if ("FLOAT".equalsIgnoreCase(type)) {
+			return Types.FLOAT;
+		} else if ("DOUBLE".equalsIgnoreCase(type)) {
+			return Types.DOUBLE;
+		} else if ("TIMESTAMP".equalsIgnoreCase(type)) {
+			return Types.TIMESTAMP;
+		} else if ("TIME".equalsIgnoreCase(type)) {
+			return Types.TIMESTAMP;
+		} else if ("CHAR".equalsIgnoreCase(type)) {
+			return Types.CHAR;
+		} else if ("BLOB".equalsIgnoreCase(type)) {
+			return Types.BLOB;
+		}
+		return 0;
+	}
 
-    public static String getMappedDefault(String type, String defaultValue) {
-        if ("SMALLINT".equalsIgnoreCase(type)
-                || "BIGINT".equalsIgnoreCase(type)
-                || "INTEGER".equalsIgnoreCase(type)) {
-            return defaultValue == null ? null : "'" + defaultValue + "'";
-        } else if ("TIMESTAMP".equalsIgnoreCase(type)) {
-            return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'NOW'"
-                    : defaultValue;
-        }
-        return defaultValue;
-    }
+	public static String getMappedLength(String type, String length) {
+		if ("VARCHAR".equalsIgnoreCase(type)) {
+			return length;
+		} else if ("INTEGER".equalsIgnoreCase(type)) {
+			return "4";
+		} else if ("DATE".equalsIgnoreCase(type)) {
+			return "8";
+		} else if ("SMALLINT".equalsIgnoreCase(type)) {
+			return "2";
+		} else if ("BIGINT".equalsIgnoreCase(type)) {
+			return "8";
+		} else if ("FLOAT".equalsIgnoreCase(type)) {
+			return "4";
+		} else if ("DOUBLE".equalsIgnoreCase(type)) {
+			return "8";
+		} else if ("TIME".equalsIgnoreCase(type)) {
+			return "12";
+		} else if ("TIMESTAMP".equalsIgnoreCase(type)) {
+			return "12";
+		} else if ("CHAR".equalsIgnoreCase(type)) {
+			return "20";
+		} else if ("BLOB".equalsIgnoreCase(type)) {
+			return "8";
+		}
+		return null;
+	}
 
-    public boolean isCaseSensitive() {
-        return true;
-    }
+	public static String getMappedDefault(String type, String defaultValue) {
+		if ("SMALLINT".equalsIgnoreCase(type)
+				|| "BIGINT".equalsIgnoreCase(type)
+				|| "INTEGER".equalsIgnoreCase(type)) {
+			return defaultValue == null ? null : "'" + defaultValue + "'";
+		} else if ("TIMESTAMP".equalsIgnoreCase(type)) {
+			return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'NOW'"
+					: defaultValue;
+		}
+		return defaultValue;
+	}
+
+	public boolean isCaseSensitive() {
+		return true;
+	}
 }
