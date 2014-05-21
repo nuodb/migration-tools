@@ -30,11 +30,34 @@ package com.nuodb.migrator.jdbc.dialect;
 /**
  * @author Sergey Bushik
  */
-public interface ImplicitDefaultsTranslator extends Translator {
+public class TranslationConfig {
 
-    final boolean USE_EXPLICIT_DEFAULTS = false;
+    public static final boolean USE_EXPLICIT_DEFAULTS = false;
 
-    boolean isUseExplicitDefaults();
+    private boolean useExplicitDefaults = USE_EXPLICIT_DEFAULTS;
 
-    void setUseExplicitDefaults(boolean useExplicitDefaults);
+    public boolean isUseExplicitDefaults() {
+        return useExplicitDefaults;
+    }
+
+    public void setUseExplicitDefaults(boolean useExplicitDefaults) {
+        this.useExplicitDefaults = useExplicitDefaults;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TranslationConfig that = (TranslationConfig) o;
+
+        if (useExplicitDefaults != that.useExplicitDefaults) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return (useExplicitDefaults ? 1 : 0);
+    }
 }

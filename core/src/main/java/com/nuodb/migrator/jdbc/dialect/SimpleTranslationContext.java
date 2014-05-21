@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.session.Session;
 
 import java.util.Collection;
 import java.util.Map;
@@ -40,29 +41,36 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 public class SimpleTranslationContext implements TranslationContext {
 
-    private DatabaseInfo databaseInfo;
+    private Dialect dialect;
+    private Session session;
     private TranslationManager translationManager;
     private Map<Object, Object> context;
 
-    public SimpleTranslationContext(DatabaseInfo databaseInfo, TranslationManager translationManager) {
-        this(databaseInfo, translationManager, null);
+    public SimpleTranslationContext(Dialect dialect, Session session, TranslationManager translationManager) {
+        this(dialect, session, translationManager, null);
     }
 
-    public SimpleTranslationContext(DatabaseInfo databaseInfo, TranslationManager translationManager,
+    public SimpleTranslationContext(Dialect dialect, Session session, TranslationManager translationManager,
                                     Map<Object, Object> context) {
-        this.databaseInfo = databaseInfo;
+        this.dialect = dialect;
+        this.session = session;
         this.translationManager = translationManager;
         this.context = context != null ? context : newHashMap();
     }
 
     @Override
     public Script translate(Script script) {
-        return getTranslationManager().translate(script, getDatabaseInfo(), this);
+        return getTranslationManager().translate(script, this);
     }
 
     @Override
-    public DatabaseInfo getDatabaseInfo() {
-        return databaseInfo;
+    public Dialect getDialect() {
+        return dialect;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
     }
 
     @Override

@@ -32,6 +32,7 @@ import com.nuodb.migrator.backup.loader.BackupLoader;
 import com.nuodb.migrator.backup.loader.InsertTypeFactory;
 import com.nuodb.migrator.backup.loader.SimpleInsertTypeFactory;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
+import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.job.ScriptGeneratorJobBase;
@@ -83,8 +84,8 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
         backupLoader.setTargetSessionFactory(createTargetSessionFactory());
         backupLoader.setTimeZone(getTimeZone());
         backupLoader.setThreads(getThreads() != null ? getThreads() : THREADS);
+        backupLoader.setTranslationConfig(getTranslationConfig());
         backupLoader.setValueFormatRegistryResolver(createValueFormatRegistryResolver());
-        backupLoader.setUseExplicitDefaults(isUseExplicitDefaults());
         setBackupLoader(backupLoader);
     }
 
@@ -158,6 +159,10 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
     protected TimeZone getTimeZone() {
         return getJobSpec().getTimeZone();
+    }
+
+    protected TranslationConfig getTranslationConfig() {
+        return getJobSpec().getTranslationConfig();
     }
 
     protected Integer getThreads() {

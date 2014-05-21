@@ -81,8 +81,7 @@ public class PatternTranslator extends TranslatorBase {
         for (Map.Entry<Pattern, String> translation : translations.entrySet()) {
             Matcher matcher = translation.getKey().matcher(script.getScript());
             if (matcher.find()) {
-                return new SimpleScript(translate(matcher, translation.getValue()),
-                        context.getDatabaseInfo());
+                return new SimpleScript(translate(matcher, translation.getValue()));
             }
         }
         return null;

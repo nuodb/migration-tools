@@ -27,47 +27,48 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 
-import java.sql.SQLException;
-
-import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
-import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY;
+import static com.nuodb.migrator.jdbc.dialect.TranslationConfig.USE_EXPLICIT_DEFAULTS;
 
 /**
- * Utilities for use by test classes
- *
  * @author Sergey Bushik
  */
-public class TranslatorUtils {
+public abstract class ImplicitDefaultsTranslatorBase extends ColumnTranslatorBase {
 
-    /**
-     * Creates simple script from provided string script object & database dialect
-     *
-     * @param script source for the translation
-     * @return simple script object initialized with source script, database dialect & connection url
-     */
-    public static Script createScript(String script) throws SQLException {
-        return new SimpleScript(script);
+    public ImplicitDefaultsTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
+        super(sourceDatabaseInfo);
     }
 
+    public ImplicitDefaultsTranslatorBase(DatabaseInfo sourceDatabaseInfo,
+                                          DatabaseInfo targetDatabaseInfo) {
+        super(sourceDatabaseInfo, targetDatabaseInfo);
+    }
+
+    protected ImplicitDefaultsTranslatorBase(DatabaseInfo sourceDatabaseInfo, Class scriptClass) {
+        super(sourceDatabaseInfo, scriptClass);
+    }
+
+    protected ImplicitDefaultsTranslatorBase(DatabaseInfo sourceDatabaseInfo,
+                                             DatabaseInfo targetDatabaseInfo, Class scriptClass) {
+        super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
+    }
+
+    @Override
+    protected boolean supportsScript(ColumnScript script, TranslationContext context) {
+        return hasExplicitDefaults(script) && isUseExplicitDefaults(context);
+    }
+
+    protected abstract boolean hasExplicitDefaults(ColumnScript script);
+
     /**
-     * Creates column script initialized with a given default value, type code, type name & a session
+     * Checks if explicit defaults usage is set
      *
-     * @param defaultValue column default value
-     * @param typeCode     database type code
-     * @param typeName     database type name
-     * @return fully initialized column script
+     * @param context translation context
+     * @return true if any of the strict modes is on
      */
-    public static Script createScript(String defaultValue, int typeCode, String typeName) {
-        Column column = new Column(EMPTY);
-        column.setTypeCode(typeCode);
-        column.setTypeName(typeName);
-        column.setDefaultValue(valueOf(defaultValue));
-        Table table = new Table(EMPTY);
-        table.addColumn(column);
-        return new ColumnScript(column);
+    protected boolean isUseExplicitDefaults(TranslationContext context) {
+        TranslationConfig translationConfig = context.getTranslationManager().getTranslationConfig();
+        return translationConfig != null ? translationConfig.isUseExplicitDefaults() : USE_EXPLICIT_DEFAULTS;
     }
 }

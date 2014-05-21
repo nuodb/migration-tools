@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
@@ -50,7 +49,6 @@ import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
 import com.nuodb.migrator.jdbc.type.JdbcValueAccessProvider;
 import com.nuodb.migrator.jdbc.type.SimpleJdbcValueAccessProvider;
 import com.nuodb.migrator.jdbc.type.jdbc4.Jdbc4TypeRegistry;
-import com.nuodb.migrator.jdbc.type.JdbcTypeName;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -217,23 +215,23 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public Script translate(Script script) {
-        return translate(script, null);
-    }
-
-    @Override
-    public Script translate(Script script, Map<Object, Object> context) {
-        return getTranslationManager().translate(script, getDatabaseInfo(), context);
-    }
-
-    @Override
     public Script translate(String script, Session session) {
         return translate(script, session, null);
     }
 
     @Override
     public Script translate(String script, Session session, Map<Object, Object> context) {
-        return getTranslationManager().translate(new SimpleScript(script, session), getDatabaseInfo(), context);
+        return translate(new SimpleScript(script), session, context);
+    }
+
+    @Override
+    public Script translate(Script script, Session session) {
+        return translate(script, session, null);
+    }
+
+    @Override
+    public Script translate(Script script, Session session, Map<Object, Object> context) {
+        return getTranslationManager().translate(script, this, session, context);
     }
 
     @Override
@@ -499,8 +497,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getDefaultValue(Session session, Column column) {
-        return getDefaultValue(column, translate(new ColumnScript(column, session)));
+    public String getDefaultValue(Column column, Session session) {
+        return getDefaultValue(column, translate(new ColumnScript(column), session));
     }
 
     protected String getDefaultValue(Column column, Script script) {
@@ -596,8 +594,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public String getTriggerBody(Session session, Trigger trigger) {
-        Script script = translate(new TriggerScript(trigger, session));
+    public String getTriggerBody(Trigger trigger, Session session) {
+        Script script = translate(new TriggerScript(trigger), session);
         return script != null ? script.getScript() : trigger.getTriggerBody();
     }
 

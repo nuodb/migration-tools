@@ -45,7 +45,7 @@ import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.commit.SingleCommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
-import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
+import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.generator.ForeignKeyAutoNamingStrategy;
@@ -808,7 +808,7 @@ public class CliRunSupport extends CliSupport {
     protected void parseSchemaMigrationGroup(ScriptGeneratorJobSpecBase schemaGeneratorJobSpec,
                                              OptionSet optionSet, Option option) {
         schemaGeneratorJobSpec.setJdbcTypeSpecs(parseJdbcTypeSpecs(optionSet, option));
-        schemaGeneratorJobSpec.setUseExplicitDefaults(parseUseExplicitDefaults(optionSet, option));
+        schemaGeneratorJobSpec.setTranslationConfig(parseTranslationConfig(optionSet, option));
         schemaGeneratorJobSpec.setObjectTypes(parseObjectTypes(optionSet));
         schemaGeneratorJobSpec.setScriptTypes(parseScriptTypes(optionSet, option));
         schemaGeneratorJobSpec.setGroupScriptsBy(parseGroupScriptsBy(optionSet, option));
@@ -818,12 +818,14 @@ public class CliRunSupport extends CliSupport {
         schemaGeneratorJobSpec.setTableTypes(parseTableTypes(optionSet));
     }
 
-    protected boolean parseUseExplicitDefaults(OptionSet optionSet, Option option) {
+    protected TranslationConfig parseTranslationConfig(OptionSet optionSet, Option option) {
         Object useExplicitDefaultsValue = optionSet.getValue(USE_EXPLICIT_DEFAULTS);
-        return useExplicitDefaultsValue != null ?
+        TranslationConfig translationConfig = new TranslationConfig();
+        translationConfig.setUseExplicitDefaults(useExplicitDefaultsValue != null ?
                 parseBoolean(String.valueOf(useExplicitDefaultsValue)) :
                 (optionSet.hasOption(USE_EXPLICIT_DEFAULTS) ||
-                        ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS);
+                        TranslationConfig.USE_EXPLICIT_DEFAULTS));
+        return translationConfig;
     }
 
     protected Collection<JdbcTypeSpec> parseJdbcTypeSpecs(OptionSet optionSet, Option option) {

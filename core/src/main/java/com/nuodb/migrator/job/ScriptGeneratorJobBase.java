@@ -66,10 +66,6 @@ public abstract class ScriptGeneratorJobBase<T extends ScriptGeneratorJobSpecBas
         return getJobSpec().getObjectTypes();
     }
 
-    protected boolean isUseExplicitDefaults() {
-        return getJobSpec().isUseExplicitDefaults();
-    }
-
     protected ConnectionSpec getTargetSpec() {
         return getJobSpec().getTargetSpec();
     }

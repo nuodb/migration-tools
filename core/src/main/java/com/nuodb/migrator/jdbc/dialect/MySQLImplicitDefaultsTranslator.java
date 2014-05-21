@@ -46,6 +46,7 @@ import static com.google.common.collect.Iterables.contains;
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.dialect.MySQLZeroDateTimeTranslator.*;
+import static com.nuodb.migrator.jdbc.dialect.TranslationConfig.USE_EXPLICIT_DEFAULTS;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.url.MySQLJdbcUrl.*;
 import static java.lang.String.valueOf;
@@ -61,7 +62,7 @@ import static org.apache.commons.lang3.StringUtils.split;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implements ImplicitDefaultsTranslator {
+public class MySQLImplicitDefaultsTranslator extends ImplicitDefaultsTranslatorBase {
     /**
      * Does not check if strict mode is set, as it's always set by MySQL JDBC driver for the
      */
@@ -78,16 +79,10 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
     public static final String SQL_MODE_QUERY = "SELECT @@GLOBAL.SQL_MODE";
 
     private boolean checkSqlMode = CHECK_SQL_MODE;
-    private boolean useExplicitDefaults = USE_EXPLICIT_DEFAULTS;
     private String sqlModeQuery = SQL_MODE_QUERY;
 
     public MySQLImplicitDefaultsTranslator() {
         super(MYSQL);
-    }
-
-    @Override
-    protected boolean supportsScript(ColumnScript script, TranslationContext context) {
-        return hasExplicitDefaults(script, script.getColumn()) && isUseExplicitDefaults(script);
     }
 
     /**
@@ -95,25 +90,25 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
      * nullable and column is not an identity column
      *
      * @param script to be checked for requirements
-     * @param column corresponding column containing default value
      * @return true is all requirements are honoured
      */
-    protected boolean hasExplicitDefaults(Script script, Column column) {
+    protected boolean hasExplicitDefaults(ColumnScript script) {
+        Column column = script.getColumn();
         return script.getScript() == null && !column.isNullable() && !column.isAutoIncrement();
+    }
+
+    protected boolean isUseExplicitDefaults(TranslationContext context) {
+        return super.isUseExplicitDefaults(context) && (!isCheckSqlMode() || checkSqlMode(context));
     }
 
     /**
      * Checks if any of the strict modes [STRICT_ALL_TABLE, STRICT_TRANS_TABLES] is on for this session
      *
-     * @param script and associated session
+     * @param context translation context
      * @return true if any of the strict modes is on
      */
-    protected boolean isUseExplicitDefaults(Script script) {
-        return isUseExplicitDefaults() && (!isCheckSqlMode() || checkSqlMode(script));
-    }
-
-    protected boolean checkSqlMode(Script script) {
-        Collection<String> sqlMode = getSqlMode(script.getSession(), false);
+    protected boolean checkSqlMode(TranslationContext context) {
+        Collection<String> sqlMode = getSqlMode(context.getSession(), false);
         return contains(sqlMode, STRICT_ALL_TABLES) || contains(sqlMode, STRICT_TRANS_TABLES);
     }
 
@@ -170,7 +165,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
     public Script translate(ColumnScript script, TranslationContext context) {
         String result;
         Column column = script.getColumn();
-        JdbcUrl jdbcUrl = getJdbcUrl(script);
+        JdbcUrl jdbcUrl = getJdbcUrl(context);
         String behavior = (String) jdbcUrl.getParameters().get(ZERO_DATE_TIME_BEHAVIOR);
         if (behavior == null) {
             behavior = DEFAULT_BEHAVIOR;
@@ -203,21 +198,21 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
                 break;
             case DATE:
                 if (!behavior.equals(CONVERT_TO_NULL)) {
-                    result = context.translate(new ColumnScript(column, ZERO_DATE, script.getSession())).getScript();
+                    result = context.translate(new ColumnScript(column, ZERO_DATE)).getScript();
                 } else {
                     result = script.getScript();
                 }
                 break;
             case TIME:
                 if (!behavior.equals(CONVERT_TO_NULL)) {
-                    result = context.translate(new ColumnScript(column, ZERO_TIME, script.getSession())).getScript();
+                    result = context.translate(new ColumnScript(column, ZERO_TIME)).getScript();
                 } else {
                     result = script.getScript();
                 }
                 break;
             case TIMESTAMP:
                 if (!behavior.equals(CONVERT_TO_NULL)) {
-                    result = context.translate(new ColumnScript(column, ZERO_TIMESTAMP, script.getSession())).getScript();
+                    result = context.translate(new ColumnScript(column, ZERO_TIMESTAMP)).getScript();
                 } else {
                     result = script.getScript();
                 }
@@ -226,7 +221,7 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
                 result = script.getScript();
         }
         // case ENUM, and SET
-        return result != null ? new SimpleScript(result, context.getDatabaseInfo()) : null;
+        return result != null ? new SimpleScript(result) : null;
     }
 
     public boolean isCheckSqlMode() {
@@ -243,15 +238,5 @@ public class MySQLImplicitDefaultsTranslator extends ColumnTranslatorBase implem
 
     public void setSqlModeQuery(String sqlModeQuery) {
         this.sqlModeQuery = sqlModeQuery;
-    }
-
-    @Override
-    public boolean isUseExplicitDefaults() {
-        return useExplicitDefaults;
-    }
-
-    @Override
-    public void setUseExplicitDefaults(boolean useExplicitDefaults) {
-        this.useExplicitDefaults = useExplicitDefaults;
     }
 }

@@ -28,11 +28,7 @@
 package com.nuodb.migrator.schema;
 
 import com.nuodb.migrator.jdbc.JdbcUtils;
-import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.dialect.DialectResolver;
-import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
-import com.nuodb.migrator.jdbc.dialect.TranslationManager;
-import com.nuodb.migrator.jdbc.dialect.Translator;
+import com.nuodb.migrator.jdbc.dialect.*;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.FileScriptExporter;
@@ -166,13 +162,7 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
         DialectResolver dialectResolver = createDialectResolver();
         Dialect dialect = getTargetSession() != null ? dialectResolver.resolve(
                 getTargetSession().getConnection()) : dialectResolver.resolve(NUODB);
-        TranslationManager translationManager = dialect.getTranslationManager();
-        PrioritySet<Translator> translators = translationManager.getTranslators();
-        for (Translator translator : translators) {
-            if (translator instanceof ImplicitDefaultsTranslator) {
-                ((ImplicitDefaultsTranslator)translator).setUseExplicitDefaults(isUseExplicitDefaults());
-            }
-        }
+        dialect.getTranslationManager().setTranslationConfig(getTranslationConfig());
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         for (JdbcTypeSpec jdbcTypeSpec : getJdbcTypeSpecs()) {
             jdbcTypeNameMap.addJdbcTypeName(
@@ -203,6 +193,10 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
     protected ResourceSpec getOutputSpec() {
         return getJobSpec().getOutputSpec();
+    }
+
+    protected TranslationConfig getTranslationConfig() {
+        return getJobSpec().getTranslationConfig();
     }
 
     protected Session getSourceSession() {

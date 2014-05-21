@@ -265,7 +265,7 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     protected void closeResultSet(InspectionContext inspectionContext, ResultSet resultSet) throws SQLException {
-        JdbcUtils.closeQuietly(resultSet);
+        closeQuietly(resultSet);
     }
 
     protected abstract I createInspectionScope(M object);

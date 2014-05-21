@@ -33,12 +33,12 @@ import org.testng.annotations.Test;
 
 import java.sql.SQLException;
 
+import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.dialect.TranslatorUtils.createScript;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.MYSQL;
 import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
 import static java.sql.Types.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author Sergey Bushik
@@ -50,33 +50,27 @@ public class TranslatorTest {
     public Object[][] createTranslateData() throws SQLException {
         Session session = createSession(new MySQLDialect(MYSQL),
                 "jdbc:mysql://localhost/test?zeroDateTimeBehavior=round");
-
         TranslationManager translationManager = new TranslationManager();
         translationManager.addTranslator(new MySQLZeroDateTimeTranslator());
-        MySQLImplicitDefaultsTranslator translator = new MySQLImplicitDefaultsTranslator();
-        translator.setUseExplicitDefaults(true);
+        translationManager.getTranslationConfig().setUseExplicitDefaults(true);
+        Dialect dialect = createService(DialectResolver.class).resolve(MYSQL);
         return new Object[][]{{
-                translator,
-                createScript(null, DATE, "DATE", session),
-                new SimpleTranslationContext(MYSQL, translationManager),
+                new SimpleTranslationContext(dialect, session, translationManager),
+                createScript("0000-00-00", DATE, "DATE"),
                 "0001-01-01"
         }, {
-                translator,
-                createScript(null, TIME, "TIME", session),
-                new SimpleTranslationContext(MYSQL, translationManager),
+                new SimpleTranslationContext(dialect, session, translationManager),
+                createScript("00:00:00", TIME, "TIME"),
                 "00:00:00"
         }, {
-                translator,
-                createScript(null, TIMESTAMP, "TIMESTAMP", session),
-                new SimpleTranslationContext(MYSQL, translationManager),
+                new SimpleTranslationContext(dialect, session, translationManager),
+                createScript("0000-00-00 00:00:00", TIMESTAMP, "TIMESTAMP"),
                 "0001-01-01 00:00:00"
-        }
-        };
+        }};
     }
 
     @Test(dataProvider = "translate")
-    public void testTranslate(Translator translator, Script script, TranslationContext context, String translation) {
-        assertTrue(translator.supports(script, context));
-        assertEquals(translator.translate(script, context).getScript(), translation);
+    public void testTranslate(TranslationContext context, Script script, String translation) {
+        assertEquals(context.translate(script).getScript(), translation);
     }
 }

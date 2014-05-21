@@ -77,6 +77,6 @@ public class MySQLBitLiteralTranslator extends ColumnTranslatorBase {
         } else {
             target = null;
         }
-        return target != null ? new SimpleScript(target, context.getDatabaseInfo(), true) : null;
+        return target != null ? new SimpleScript(target, true) : null;
     }
 }

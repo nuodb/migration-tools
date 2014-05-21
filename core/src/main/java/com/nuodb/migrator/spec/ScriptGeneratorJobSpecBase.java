@@ -29,11 +29,11 @@ package com.nuodb.migrator.spec;
 
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
+import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
-import com.nuodb.migrator.utils.Collections;
 import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.Collection;
@@ -42,7 +42,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierNormalizers.NOOP;
 import static com.nuodb.migrator.jdbc.dialect.IdentifierQuotings.ALWAYS;
-import static com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS;
 import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 
 /**
@@ -50,15 +49,15 @@ import static com.nuodb.migrator.utils.Collections.newPrioritySet;
  */
 public class ScriptGeneratorJobSpecBase extends JobSpecBase {
 
-    private MetaDataSpec metaDataSpec = new MetaDataSpec();
-    private boolean useExplicitDefaults = USE_EXPLICIT_DEFAULTS;
-    private ConnectionSpec targetSpec;
-    private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
     private GroupScriptsBy groupScriptsBy = GroupScriptsBy.TABLE;
     private Collection<JdbcTypeSpec> jdbcTypeSpecs = newArrayList();
+    private MetaDataSpec metaDataSpec = new MetaDataSpec();
     private PrioritySet<NamingStrategy> namingStrategies = newPrioritySet();
     private IdentifierQuoting identifierQuoting = ALWAYS;
     private IdentifierNormalizer identifierNormalizer = NOOP;
+    private Collection<ScriptType> scriptTypes = newHashSet(ScriptType.values());
+    private ConnectionSpec targetSpec;
+    private TranslationConfig translationConfig = new TranslationConfig();
 
     public MetaDataSpec getMetaDataSpec() {
         return metaDataSpec;
@@ -92,12 +91,12 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
         metaDataSpec.setObjectTypes(objectTypes);
     }
 
-    public boolean isUseExplicitDefaults() {
-        return useExplicitDefaults;
+    public TranslationConfig getTranslationConfig() {
+        return translationConfig;
     }
 
-    public void setUseExplicitDefaults(boolean useExplicitDefaults) {
-        this.useExplicitDefaults = useExplicitDefaults;
+    public void setTranslationConfig(TranslationConfig translationConfig) {
+        this.translationConfig = translationConfig;
     }
 
     public ConnectionSpec getTargetSpec() {
@@ -164,7 +163,6 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
 
         ScriptGeneratorJobSpecBase that = (ScriptGeneratorJobSpecBase) o;
 
-        if (useExplicitDefaults != that.useExplicitDefaults) return false;
         if (groupScriptsBy != that.groupScriptsBy) return false;
         if (identifierNormalizer != null ? !identifierNormalizer.equals(that.identifierNormalizer) :
                 that.identifierNormalizer != null) return false;
@@ -178,22 +176,23 @@ public class ScriptGeneratorJobSpecBase extends JobSpecBase {
             return false;
         if (scriptTypes != null ? !scriptTypes.equals(that.scriptTypes) : that.scriptTypes != null) return false;
         if (targetSpec != null ? !targetSpec.equals(that.targetSpec) : that.targetSpec != null) return false;
-
+        if (translationConfig != null ? !translationConfig.equals(that.translationConfig) :
+                that.translationConfig != null) return false;
         return true;
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (metaDataSpec != null ? metaDataSpec.hashCode() : 0);
-        result = 31 * result + (useExplicitDefaults ? 1 : 0);
-        result = 31 * result + (targetSpec != null ? targetSpec.hashCode() : 0);
         result = 31 * result + (scriptTypes != null ? scriptTypes.hashCode() : 0);
         result = 31 * result + (groupScriptsBy != null ? groupScriptsBy.hashCode() : 0);
         result = 31 * result + (jdbcTypeSpecs != null ? jdbcTypeSpecs.hashCode() : 0);
-        result = 31 * result + (namingStrategies != null ? namingStrategies.hashCode() : 0);
         result = 31 * result + (identifierQuoting != null ? identifierQuoting.hashCode() : 0);
         result = 31 * result + (identifierNormalizer != null ? identifierNormalizer.hashCode() : 0);
+        result = 31 * result + (metaDataSpec != null ? metaDataSpec.hashCode() : 0);
+        result = 31 * result + (namingStrategies != null ? namingStrategies.hashCode() : 0);
+        result = 31 * result + (targetSpec != null ? targetSpec.hashCode() : 0);
+        result = 31 * result + (translationConfig != null ? translationConfig.hashCode() : 0);
         return result;
     }
 }

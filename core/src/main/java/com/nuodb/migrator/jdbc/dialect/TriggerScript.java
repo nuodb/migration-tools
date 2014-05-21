@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Trigger;
-import com.nuodb.migrator.jdbc.session.Session;
 
 /**
  * @author Sergey Bushik
@@ -37,8 +36,8 @@ public class TriggerScript extends SimpleScript {
 
     private final Trigger trigger;
 
-    public TriggerScript(Trigger trigger, Session session) {
-        super(trigger.getTriggerBody(), session);
+    public TriggerScript(Trigger trigger) {
+        super(trigger.getTriggerBody());
         this.trigger = trigger;
     }
 

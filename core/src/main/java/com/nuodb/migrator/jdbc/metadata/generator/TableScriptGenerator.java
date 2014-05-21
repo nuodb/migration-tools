@@ -84,7 +84,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(' ');
                 buffer.append("NOT NULL");
             }
-            String defaultValue = dialect.getDefaultValue(scriptGeneratorManager.getSourceSession(), column);
+            String defaultValue = dialect.getDefaultValue(column, scriptGeneratorManager.getSourceSession());
             if (defaultValue != null) {
                 buffer.append(" DEFAULT ").append(defaultValue);
             }

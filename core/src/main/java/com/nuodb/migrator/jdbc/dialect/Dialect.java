@@ -112,7 +112,7 @@ public interface Dialect {
 
     String getIdentityColumn(String sequence);
 
-    String getDefaultValue(Session session, Column column);
+    String getDefaultValue(Column column, Session session);
 
     String getDeleteAction(ReferenceAction deleteAction);
 
@@ -128,7 +128,7 @@ public interface Dialect {
 
     String getTriggerBegin(Trigger trigger);
 
-    String getTriggerBody(Session session, Trigger trigger);
+    String getTriggerBody(Trigger trigger, Session session);
 
     String getTriggerEnd(Trigger trigger);
 
@@ -182,13 +182,13 @@ public interface Dialect {
 
     JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName);
 
-    Script translate(Script script);
-
-    Script translate(Script script, Map<Object, Object> context);
-
     Script translate(String script, Session session);
 
     Script translate(String script, Session session, Map<Object, Object> context);
+
+    Script translate(Script script, Session session);
+
+    Script translate(Script script, Session session, Map<Object, Object> context);
 
     SQLKeywords getSQLKeywords();
 

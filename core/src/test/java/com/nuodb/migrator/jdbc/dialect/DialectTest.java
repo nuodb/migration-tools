@@ -65,12 +65,12 @@ public class DialectTest {
         Session round = createSession(new MySQLDialect(MYSQL),
                 "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=round");
         return new Object[][]{
-                {createScript("00:00:00", Types.TIME, "TIME", convertToNull), "NULL"},
-                {createScript("0000-00-00", DATE, "DATE", convertToNull), "NULL"},
-                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE", convertToNull), "NULL"},
-                {createScript("00:00:00", Types.TIME, "TIME", round), "00:00:00"},
-                {createScript("0000-00-00", DATE, "DATE", round), "0001-01-01"},
-                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE", round), "0001-01-01 00:00:00"},
+                {createScript("00:00:00", Types.TIME, "TIME"), convertToNull, "NULL"},
+                {createScript("0000-00-00", DATE, "DATE"), convertToNull, "NULL"},
+                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), convertToNull, "NULL"},
+                {createScript("00:00:00", Types.TIME, "TIME"), round, "00:00:00"},
+                {createScript("0000-00-00", DATE, "DATE"), round, "0001-01-01"},
+                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), round, "0001-01-01 00:00:00"},
         };
     }
 
@@ -79,20 +79,20 @@ public class DialectTest {
         Session session = createSession(new MySQLDialect(MYSQL),
                 "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=exception");
         return new Object[][]{
-                {createScript("00:00:00", Types.TIME, "TIME", session)},
-                {createScript("0000-00-00", DATE, "DATE", session)},
-                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE", session)}
+                {createScript("00:00:00", Types.TIME, "TIME"), session},
+                {createScript("0000-00-00", DATE, "DATE"), session},
+                {createScript("0000-00-00 00:00:00", Types.TIMESTAMP, "DATE"), session}
         };
     }
 
     @Test(dataProvider = "zeroDateTimeBehavior")
-    public void testZeroDateTimeBehavior(Script script, String translation) {
-        assertEquals(dialect.translate(script).getScript(), translation);
+    public void testZeroDateTimeBehavior(Script script, Session session, String translation) {
+        assertEquals(dialect.translate(script, session).getScript(), translation);
     }
 
     @Test(dataProvider = "zeroDateTimeBehaviorException", expectedExceptions = TranslatorException.class)
-    public void testZeroDateTimeBehaviorException(Script script) {
-        dialect.translate(script);
+    public void testZeroDateTimeBehaviorException(Script script, Session session) {
+        dialect.translate(script, session);
         fail("Should fail for zeroDateTimeBehavior=exception");
     }
 
@@ -133,6 +133,6 @@ public class DialectTest {
 
     @Test(dataProvider = "getDefaultValue")
     public void testGetDefaultValue(Session session, Column column, String defaultValue) {
-        assertEquals(dialect.getDefaultValue(session, column), defaultValue);
+        assertEquals(dialect.getDefaultValue(column, session), defaultValue);
     }
 }

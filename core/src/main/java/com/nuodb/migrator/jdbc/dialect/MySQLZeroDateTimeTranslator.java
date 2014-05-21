@@ -84,7 +84,7 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
 
     @Override
     public Script translate(ColumnScript script, TranslationContext context) {
-        JdbcUrl jdbcUrl = getJdbcUrl(script);
+        JdbcUrl jdbcUrl = getJdbcUrl(context);
         String behavior = (String) jdbcUrl.getParameters().get(ZERO_DATE_TIME_BEHAVIOR);
         if (behavior == null) {
             behavior = DEFAULT_BEHAVIOR;
@@ -116,6 +116,6 @@ public class MySQLZeroDateTimeTranslator extends ColumnTranslatorBase {
         } else {
             target = null;
         }
-        return target != null ? new SimpleScript(target, context.getDatabaseInfo(), true) : null;
+        return target != null ? new SimpleScript(target, true) : null;
     }
 }

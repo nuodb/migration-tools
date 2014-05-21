@@ -56,12 +56,12 @@ public abstract class StreamScriptExporterBase extends ScriptExporterBase implem
             writer.write(delimiter);
         }
         writer.newLine();
+        writer.flush();
     }
 
     @Override
     protected void doClose() throws Exception {
         if (writer != null) {
-            writer.flush();
             writer.close();
         }
     }

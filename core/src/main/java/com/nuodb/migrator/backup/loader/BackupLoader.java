@@ -43,9 +43,7 @@ import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
-import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
-import com.nuodb.migrator.jdbc.dialect.TranslationManager;
-import com.nuodb.migrator.jdbc.dialect.Translator;
+import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
 import com.nuodb.migrator.jdbc.metadata.Catalog;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
@@ -139,10 +137,10 @@ public class BackupLoader {
     private ConnectionSpec targetSpec;
     private SessionFactory targetSessionFactory;
     private TimeZone timeZone;
+    private TranslationConfig translationConfig;
     private int threads = THREADS;
     private ScriptExporter scriptExporter;
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
-    private boolean useExplicitDefaults;
 
     public Backup load(String path) throws Exception {
         return load(path, newHashMap());
@@ -285,14 +283,8 @@ public class BackupLoader {
         Session targetSession = backupLoaderContext.getTargetSession();
         Dialect dialect = targetSession != null ? dialectResolver.resolve(
                 targetSession.getConnection()) : dialectResolver.resolve(NUODB);
-        TranslationManager translationManager = dialect.getTranslationManager();
-        PrioritySet<Translator> translators = translationManager.getTranslators();
-        for (Translator translator : translators) {
-            if (translator instanceof ImplicitDefaultsTranslator) {
-                ((ImplicitDefaultsTranslator) translator).
-                        setUseExplicitDefaults(isUseExplicitDefaults());
-            }
-        }
+
+        dialect.getTranslationManager().setTranslationConfig(getTranslationConfig());
         JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
         Collection<JdbcTypeSpec> jdbcTypeSpecs = getJdbcTypeSpecs();
         if (jdbcTypeSpecs != null) {
@@ -725,6 +717,14 @@ public class BackupLoader {
         this.timeZone = timeZone;
     }
 
+    public TranslationConfig getTranslationConfig() {
+        return translationConfig;
+    }
+
+    public void setTranslationConfig(TranslationConfig translationConfig) {
+        this.translationConfig = translationConfig;
+    }
+
     public int getThreads() {
         return threads;
     }
@@ -747,13 +747,5 @@ public class BackupLoader {
 
     public void setValueFormatRegistryResolver(ValueFormatRegistryResolver valueFormatRegistryResolver) {
         this.valueFormatRegistryResolver = valueFormatRegistryResolver;
-    }
-
-    public boolean isUseExplicitDefaults() {
-        return useExplicitDefaults;
-    }
-
-    public void setUseExplicitDefaults(boolean useExplicitDefaults) {
-        this.useExplicitDefaults = useExplicitDefaults;
     }
 }
