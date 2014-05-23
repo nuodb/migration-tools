@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.nuodb.migrator.Migrator;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -68,7 +69,7 @@ public class XmlBackupManagerTest {
         backup.addRowSet(rowSet);
         return new Object[][]{{
                 "<?xml version=\"1.0\"?>\n" +
-                "<backup version=\"2.0\" format=\"csv\">\n" +
+                "<backup version=\"" + Migrator.getVersion() + "\" format=\"csv\">\n" +
                 "  <database/>\n" +
                 "  <row-set type=\"table\" name=\"test.t1\" row-count=\"1\" catalog=\"test\" table=\"t1\">\n" +
                 "    <column name=\"f1\" value-type=\"string\"/>\n" +
