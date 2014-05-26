@@ -30,11 +30,12 @@ package com.nuodb.migrator.load;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.session.Session;
 
 /**
  * @author Sergey Bushik
  */
 public interface RowSetMapper {
 
-    Table map(RowSet rowSet, Database database);
+    Table map(RowSet rowSet, Database database, Session session);
 }
