@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.QueryRowSet;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.TableRowSet;
@@ -55,13 +54,13 @@ public class SimpleRowSetMapper implements RowSetMapper {
 
     @Override
     public Table mapRowSet(RowSet rowSet, BackupLoaderContext backupLoaderContext) {
-        Table query = null;
+        Table table = null;
         if (rowSet instanceof TableRowSet) {
-            query = mapRowSet((TableRowSet) rowSet, backupLoaderContext);
+            table = mapRowSet((TableRowSet) rowSet, backupLoaderContext);
         } else if (rowSet instanceof QueryRowSet) {
-            query = mapRowSet((QueryRowSet) rowSet, backupLoaderContext);
+            table = mapRowSet((QueryRowSet) rowSet, backupLoaderContext);
         }
-        return query;
+        return table;
     }
 
     protected Table mapRowSet(TableRowSet rowSet, BackupLoaderContext backupLoaderContext) {
@@ -75,12 +74,14 @@ public class SimpleRowSetMapper implements RowSetMapper {
         if (dialect.supportsSchemas()) {
             maximum++;
         }
-        Backup backup = rowSet.getBackup();
-        ConnectionSpec connectionSpec = database.getConnectionSpec();
-        if ((connectionSpec.getCatalog() != null || connectionSpec.getSchema() != null) &&
-                backup.getDatabase() != null && backup.getDatabase().getSchemas().size() <= 1) {
-            addIgnoreNull(qualifiers, connectionSpec.getCatalog());
-            addIgnoreNull(qualifiers, connectionSpec.getSchema());
+        ConnectionSpec targetSpec = backupLoaderContext.getTargetSpec();
+        ConnectionSpec sourceSpec = backupLoaderContext.getSourceSpec();
+        if (targetSpec.getCatalog() != null || targetSpec.getSchema() != null) {
+            addIgnoreNull(qualifiers, targetSpec.getCatalog());
+            addIgnoreNull(qualifiers, targetSpec.getSchema());
+        } else if (sourceSpec.getCatalog() != null || sourceSpec.getSchema() != null) {
+            addIgnoreNull(qualifiers, targetSpec.getCatalog());
+            addIgnoreNull(qualifiers, targetSpec.getSchema());
         } else {
             addIgnoreNull(qualifiers, rowSet.getCatalog());
             addIgnoreNull(qualifiers, rowSet.getSchema());

@@ -52,7 +52,7 @@ public class LoadConstraints implements Iterable<LoadConstraint> {
     }
 
     public LoadConstraints(Multimap<Table, LoadConstraint> loadConstraints) {
-        this.loadConstraints = loadConstraints;
+        putLoadConstraints(loadConstraints);
     }
 
     @Override

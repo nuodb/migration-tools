@@ -382,8 +382,6 @@ public class BackupLoader {
      */
     protected void loadConstraints(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        backupLoaderContext.setLoadConstraints(
-                createLoadConstraints(backupLoaderContext));
         LoadConstraints loadConstraints = backupLoaderContext.getLoadConstraints();
         LoadConstraints loadConstraintsNow = new LoadConstraints(
                 loadConstraints.getLoadConstraints(INDEX, PRIMARY_KEY));
