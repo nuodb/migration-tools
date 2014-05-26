@@ -75,11 +75,7 @@ public class SimpleRowSetMapper implements RowSetMapper {
             maximum++;
         }
         ConnectionSpec targetSpec = backupLoaderContext.getTargetSpec();
-        ConnectionSpec sourceSpec = backupLoaderContext.getSourceSpec();
         if (targetSpec.getCatalog() != null || targetSpec.getSchema() != null) {
-            addIgnoreNull(qualifiers, targetSpec.getCatalog());
-            addIgnoreNull(qualifiers, targetSpec.getSchema());
-        } else if (sourceSpec.getCatalog() != null || sourceSpec.getSchema() != null) {
             addIgnoreNull(qualifiers, targetSpec.getCatalog());
             addIgnoreNull(qualifiers, targetSpec.getSchema());
         } else {
