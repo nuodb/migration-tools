@@ -136,6 +136,11 @@ public class PostgreSQLDialect extends SimpleDialect {
     }
 
     @Override
+    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
+        statement.setFetchSize(streamResults ? 1 : 0);
+    }
+
+    @Override
     public boolean supportsLimitParameters() {
         return true;
     }
