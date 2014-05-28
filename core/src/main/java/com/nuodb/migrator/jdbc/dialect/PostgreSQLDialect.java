@@ -34,6 +34,7 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.TimeZone;
@@ -41,6 +42,7 @@ import java.util.TimeZone;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
+import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 /**
  * @author Sergey Bushik
@@ -151,7 +153,13 @@ public class PostgreSQLDialect extends SimpleDialect {
 
     @Override
     public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
-        statement.setFetchSize(streamResults ? 1 : 0);
+        Connection connection = statement.getConnection();
+        DatabaseMetaData metaData = connection.getMetaData();
+        int driverVersion = metaData.getDriverMajorVersion() * 10 + metaData.getDriverMinorVersion();
+        if (!connection.getAutoCommit() && (driverVersion >= 74) &&
+                (statement.getResultSetType() == TYPE_FORWARD_ONLY)) {
+            statement.setFetchSize(streamResults ? 1 : 0);
+        }
     }
 
     @Override
