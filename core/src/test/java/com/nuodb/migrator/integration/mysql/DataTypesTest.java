@@ -27,226 +27,38 @@
  */
 package com.nuodb.migrator.integration.mysql;
 
-import com.nuodb.migrator.integration.MigrationTestBase;
-import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 
 /**
- * Test to make sure all the Tables, Constraints, Views, Triggers etc have been
- * migrated.
- * 
  * @author Krishnamoorthy Dhandapani
  */
+
 @Test(groups = { "mysqlintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
-public class DataTypesTest extends MigrationTestBase {
-	/* new incorparated test cases */
+public class DataTypesTest extends BaseDataTypeTest {
 
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_tinyint() throws Exception {
-		String sqlStr1 = "select * from testdata_tinyint";
-		String sqlStr2 = "select * from \"testdata_tinyint\"";
-		verifyData(sqlStr1, sqlStr2);
+	@DataProvider(name = "dataTypeMysql")
+	public Object[][] createDataTypeData() {
+		return new Object[][] { { "testdata_smallint" }, { "testdata_bigint" },
+				{ "testdata_tinyint" }, { "testdata_smallint" },
+				{ "testdata_integer" }, { "testdata_mediumint" },
+				{ "testdata_bigint" }, { "testdata_char" },
+				{ "testdata_varchar" }, { "testdata_varchar_max" },
+				{ "testdata_tinytext" }, { "testdata_text" },
+				{ "testdata_mediumtext" }, { "testdata_longtext" },
+				{ "testdata_decimal" }, { "testdata_float" },
+				{ "testdata_double" }, { "testdata_tinyblob" },
+				{ "testdata_blob" }, { "testdata_mediumblob" },
+				{ "testdata_longblob" }, { "testdata_enum" },
+				{ "testdata_set" }, { "testdata_year" },
+				{ "testdata_datetime" }, { "testdata_date" },
+				{ "testdata_timestamp" }, { "testdata_time" } };
 	}
 
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_smallint() throws Exception {
-		String sqlStr1 = "select * from testdata_smallint";
-		String sqlStr2 = "select * from \"testdata_smallint\"";	
-		verifyData(sqlStr1, sqlStr2);
+	@Test(dataProvider = "dataTypeMysql")
+	public void testDataType(String tableName) throws Exception {
+		super.testDataType(tableName);
 	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_integer() throws Exception {
-		String sqlStr1 = "select * from testdata_integer";
-		String sqlStr2 = "select * from \"testdata_integer\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_mediumint() throws Exception {
-		String sqlStr1 = "select * from testdata_mediumint";
-		String sqlStr2 = "select * from \"testdata_mediumint\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_bigint() throws Exception {
-		String sqlStr1 = "select * from testdata_bigint";
-		String sqlStr2 = "select * from \"testdata_bigint\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_char() throws Exception {
-		String sqlStr1 = "select * from testdata_char";
-		String sqlStr2 = "select * from \"testdata_char\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_varchar() throws Exception {
-		String sqlStr1 = "select * from testdata_varchar";
-		String sqlStr2 = "select * from \"testdata_varchar\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_varchar_max() throws Exception {
-		String sqlStr1 = "select * from testdata_varchar_max";
-		String sqlStr2 = "select * from \"testdata_varchar_max\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_tinytext() throws Exception {
-		String sqlStr1 = "select * from testdata_varchar_max";
-		String sqlStr2 = "select * from \"testdata_varchar_max\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_text() throws Exception {
-		String sqlStr1 = "select * from testdata_text";
-		String sqlStr2 = "select * from \"testdata_text\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_mediumtext() throws Exception {
-		String sqlStr1 = "select * from testdata_mediumtext";
-		String sqlStr2 = "select * from \"testdata_mediumtext\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_longtext() throws Exception {
-		String sqlStr1 = "select * from testdata_longtext";
-		String sqlStr2 = "select * from \"testdata_longtext\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_decimal() throws Exception {
-		String sqlStr1 = "select * from testdata_decimal";
-		String sqlStr2 = "select * from \"testdata_decimal\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_float() throws Exception {
-		String sqlStr1 = "select * from testdata_float";
-		String sqlStr2 = "select * from \"testdata_float\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_double() throws Exception {
-		String sqlStr1 = "select * from testdata_double";
-		String sqlStr2 = "select * from \"testdata_double\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_tinyblob() throws Exception {
-		String sqlStr1 = "select * from testdata_tinyblob";
-		String sqlStr2 = "select * from \"testdata_tinyblob\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_blob() throws Exception {
-		String sqlStr1 = "select * from testdata_blob";
-		String sqlStr2 = "select * from \"testdata_blob\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_mediumblob() throws Exception {
-		String sqlStr1 = "select * from testdata_mediumblob";
-		String sqlStr2 = "select * from \"testdata_mediumblob\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_longblob() throws Exception {
-		String sqlStr1 = "select * from testdata_longblob";
-		String sqlStr2 = "select * from \"testdata_longblob\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_enum() throws Exception {
-		String sqlStr1 = "select * from testdata_enum";
-		String sqlStr2 = "select * from \"testdata_enum\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_set() throws Exception {
-		String sqlStr1 = "select * from testdata_set";
-		String sqlStr2 = "select * from \"testdata_set\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_year() throws Exception {
-		String sqlStr1 = "select * from testdata_year";
-		String sqlStr2 = "select * from \"testdata_year\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_datetime() throws Exception {
-		String sqlStr1 = "select * from testdata_datetime";
-		String sqlStr2 = "select * from \"testdata_datetime\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_date() throws Exception {
-		String sqlStr1 = "select * from testdata_date";
-		String sqlStr2 = "select * from \"testdata_date\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_timestamp() throws Exception {
-		String sqlStr1 = "select * from testdata_timestamp";
-		String sqlStr2 = "select * from \"testdata_timestamp\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_time() throws Exception {
-		String sqlStr1 = "select * from testdata_time";
-		String sqlStr2 = "select * from \"testdata_time\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-	
-	private void verifyData(String sqlStr1, String sqlStr2)
-			throws SQLException, Exception {
-		Statement stmt1 = null, stmt2 = null;
-		ResultSet rs1 = null, rs2 = null;
-		try {
-			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr1);
-
-			Assert.assertNotNull(rs1);
-
-			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr2);
-
-			Assert.assertNotNull(rs2);
-
-			rsUtil.assertIsEqual(rs1, rs2, true, true);
-
-		} finally {
-			closeAll(rs1, stmt1, rs2, stmt2);
-		}
-	}
-
 }

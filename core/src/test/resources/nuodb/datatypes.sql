@@ -1,4 +1,4 @@
-DROP TABLE "testdata_smallint" cascade;
+DROP TABLE IF EXISTS "testdata_smallint" cascade;
 
 CREATE TABLE "testdata_smallint" (
   "c1" smallint DEFAULT 0,
@@ -11,7 +11,7 @@ insert into "testdata_smallint" ("c3")  values(766);
 insert into "testdata_smallint" ("c1","c2","c3","c4")  values(6,-3614,-32768,32767);
 insert into "testdata_smallint" ("c3","c4")  values(4372,-32768);
 
-DROP TABLE "testdata_bigint" cascade;
+DROP TABLE IF EXISTS "testdata_bigint" cascade;
 
 CREATE TABLE "testdata_bigint" (
   "c1" bigint DEFAULT 0,
@@ -24,7 +24,7 @@ insert into "testdata_bigint" ("c3","c4")  values(33720368547,-92233720368547758
 insert into "testdata_bigint" ("c3")  values(37203685477580);
 insert into "testdata_bigint" ("c1","c2","c3","c4")  values(5,-72036854775808,-6854775808,9223372036854775807);
 
-DROP TABLE "testdata_integer" cascade;
+DROP TABLE IF EXISTS "testdata_integer" cascade;
 
 CREATE TABLE "testdata_integer" (
   "c1" integer DEFAULT 3,
@@ -37,7 +37,7 @@ insert into "testdata_integer" ("c3","c4")  values(83648,-2147483648);
 insert into "testdata_integer" ("c3")  values(47483);
 insert into "testdata_integer" ("c1","c2","c3","c4")  values(11,-2147483648,-7483648,2147483647);
 
-DROP TABLE "testdata_decimal" cascade;
+DROP TABLE IF EXISTS "testdata_decimal" cascade;
 
 CREATE TABLE "testdata_decimal" (
   "c1" decimal(10,5) DEFAULT 3.826,
@@ -51,7 +51,7 @@ insert into "testdata_decimal" ("c3")  values(999999999999999999.7483);
 insert into "testdata_decimal" ("c1","c2","c3","c4")  values(1.1,-74.83648,6.48,21474.83647);
 insert into "testdata_decimal" ("c3","c4")  values(-2147483648,2147483647);
 
-DROP TABLE "testdata_double_precision" cascade;
+DROP TABLE IF EXISTS "testdata_double_precision" cascade;
 
 CREATE TABLE "testdata_double_precision" (
   "c1" double precision DEFAULT 648.297,
@@ -65,7 +65,7 @@ insert into "testdata_double_precision" ("c1","c3","c4")  values(-1.797693134862
 insert into "testdata_double_precision" ("c1","c2","c3","c4")  values(-1.1,-335407354014.8335405103293648,7629143719351035.44370329748,-922215103474.15103983647);
 insert into "testdata_double_precision" ("c1","c3")  values(2.2250738585072014E-308,1.7976931348623157E+308);
 
-DROP TABLE "testdata_number" cascade;
+DROP TABLE IF EXISTS "testdata_number" cascade;
 
 CREATE TABLE "testdata_number" (
   "c1" number DEFAULT 35401.3510329,
@@ -78,7 +78,7 @@ insert into "testdata_number" ("c3","c2","c4")  values(642914401.351032972,46814
 insert into "testdata_number" ("c3")  values(372036.2387483);
 insert into "testdata_number" ("c1","c2","c3","c4")  values(-1.1,-7354014.85103293648,76241935.40329748,-92221474.1983647);
 
-DROP TABLE "testdata_numeric" cascade;
+DROP TABLE IF EXISTS "testdata_numeric" cascade;
 
 CREATE TABLE "testdata_numeric" (
   "c1" numeric(4) DEFAULT 3.826,
@@ -91,7 +91,7 @@ insert into "testdata_numeric" ("c3","c2","c4")  values(-32768,32767,-21.83);
 insert into "testdata_numeric" ("c3")  values(99.9);
 insert into "testdata_numeric" ("c1","c2","c3","c4")  values(1.1,6.48,-32.768,327.67);
 
- DROP TABLE  "testdata_string"  CASCADE CONSTRAINTS;
+ DROP TABLE IF EXISTS "testdata_string"  CASCADE;
 
 CREATE TABLE "testdata_string"(
   "c1" string DEFAULT 'Default varchar',
@@ -107,7 +107,7 @@ insert into "testdata_string" ("c2","c3","c4")  values('user''s log','eexnwbmvvw
 insert into "testdata_string" ("c1","c2","c3","c4")  values('æ—¥æœ¬èª',' ','/?µ„?ö??f?İøÀÚ?t?ª®?Î???Ë???ğnø§˜?íèÏ??Õ"?Ë?»?âõ??','Bientôt l été');
 insert into "testdata_string" ("c1","c2","c3")  values('Bientôt l été',' ','ÖÛ«Âé®üçÚ¾±²Ìñ¿øŞ°¯õÁæ­ûÊîâïÃÕôûçµé«áÄô');
 
- DROP TABLE  "testdata_varchar"  CASCADE CONSTRAINTS;
+ DROP TABLE IF EXISTS "testdata_varchar"  CASCADE;
 
 CREATE TABLE "testdata_varchar"(
   "c1" varchar(20)  DEFAULT 'Default varchar',
@@ -123,7 +123,7 @@ insert into "testdata_varchar" ("c2","c3","c4")  values('user''s log','nnbaadbwd
 insert into "testdata_varchar" ("c1","c2","c3","c4")  values('æ—¥æœ¬èª',' ','/?µ„?ö??f?İøÀÚ?t?ª®','Bientôt l été');
 insert into "testdata_varchar" ("c1","c2","c3")  values('Bientôt l été',' ','®üçÚ²Ìñ¿øŞïûçµé«');
 
- DROP TABLE  "testdata_clob"  CASCADE CONSTRAINTS;
+ DROP TABLE IF EXISTS "testdata_clob"  CASCADE;
 
 CREATE TABLE "testdata_clob"(
   "c1" clob DEFAULT 'Default varchar',
@@ -139,7 +139,7 @@ insert into "testdata_clob" ("c2","c3","c4")  values('user''s log','eexnwbmvvwue
 insert into "testdata_clob" ("c1","c2","c3","c4")  values('æ—¥æœ¬èª',' ','/?µ„?ö??f?İøÀÚ?t?ª®?Î???Ë???ğnø§˜?íèÏ??Õ"?Ë?»?âõ??','Bientôt l été');
 insert into "testdata_clob" ("c1","c2","c3")  values('Bientôt l été',' ','ÖÛ«Âé®üçÚ¾±²Ìñ¿øŞ°¯õÁæ­ûÊîâïÃÕôûçµé«áÄô');
 
- DROP TABLE  "testdata_national_char"  CASCADE CONSTRAINTS;
+ DROP TABLE IF EXISTS  "testdata_national_char"  CASCADE;
 
 CREATE TABLE "testdata_national_char"(
   "c1" national char (1000) DEFAULT 'Default varchar',
@@ -155,7 +155,7 @@ insert into "testdata_national_char" ("c2","c3","c4")  values('user''s log','eex
 insert into "testdata_national_char" ("c1","c2","c3","c4")  values('æ—¥æœ¬èª',' ','/?µ„?ö??f?İøÀÚ?t?ª®?Î???Ë???ğnø§˜?íèÏ??Õ"?Ë?»?âõ??','Bientôt l été');
 insert into "testdata_national_char" ("c1","c2","c3")  values('Bientôt l été',' ','ÖÛ«Âé®üçÚ¾±²Ìñ¿øŞ°¯õÁæ­ûÊîâïÃÕôûçµé«áÄô');
 
-DROP TABLE IF EXISTS "testdata_blob";
+DROP TABLE IF EXISTS "testdata_blob" CASCADE;
 
 CREATE TABLE "testdata_blob" (
   "c1" blob,
@@ -171,7 +171,7 @@ insert into "testdata_blob" ("c1","c2","c3")  values('æ—¥æœ¬èª',' ','/?µ„?ö??f?
 insert into  "testdata_blob" ("c2","c3","c4") values('æ—¥æœ¬èª','ÈÑÇÈÑ','Bientôt l été');
 
 
-DROP TABLE IF EXISTS "testdata_binary";
+DROP TABLE IF EXISTS "testdata_binary" CASCADE;
 
 CREATE TABLE "testdata_binary" (
   "c1" binary(1000),
@@ -186,7 +186,7 @@ insert into  "testdata_binary" ("c2","c3","c4","c5") values(null,'2‰¯•Ïtï`ï‰ì–VI
 insert into "testdata_binary" ("c1","c2","c3")  values('0x646F67',' ','/?µ„?ö??f?İøÀÚ?t?ª®?Î???Ë???ğnø§˜?íèÏ??Õ"?Ë?»?âõ??');
 insert into  "testdata_binary" ("c2","c3","c4") values('æ—¥æœ¬èª','ÈÑÇÈÑ','Bientôt l été');
 
-DROP TABLE IF EXISTS "testdata_binary_varying";
+DROP TABLE IF EXISTS "testdata_binary_varying" CASCADE;
 
 CREATE TABLE "testdata_binary_varying" (
   "c1" binary varying (1000),
@@ -201,7 +201,7 @@ insert into  "testdata_binary_varying" ("c2","c3","c4","c5") values(null,'ÓÖ‹dî
 insert into "testdata_binary_varying" ("c1","c2","c3")  values('æ—¥æœ¬èª',' ','/?µ„?ö??f?İøÀÚ?t?ª®?Î???Ë???ğnø§˜?íèÏ??Õ"?Ë?»?âõ??');
 insert into  "testdata_binary_varying" ("c3","c4") values('ÈÑÇÈÑ','Bientôt l été');
 
-DROP TABLE IF EXISTS "testdata_boolean";
+DROP TABLE IF EXISTS "testdata_boolean" CASCADE;
 
 CREATE TABLE "testdata_boolean" (
   "c1" boolean NULL,
@@ -213,7 +213,7 @@ insert into  "testdata_boolean" ("c1","c2") values(False,True);
 insert into  "testdata_boolean" ("c2") values('True');
 
 
-DROP TABLE IF EXISTS "testdata_enum";
+DROP TABLE IF EXISTS "testdata_enum" CASCADE;
 
 CREATE TABLE "testdata_enum" (
  "c1" ENUM('abcd', 'in\out', 'sample test') DEFAULT 'abcd',
@@ -227,7 +227,7 @@ insert into "testdata_enum" ("c1","c3") values ('sample test','user''s log');
 insert into "testdata_enum" ("c1","c2","c3") values ('abcd','test','byke"s');
 
 
-DROP TABLE  "testdata_date" CASCADE CONSTRAINTS;
+DROP TABLE   IF EXISTS "testdata_date"  CASCADE;
 
 CREATE TABLE "testdata_date"(
 "c1" date,
@@ -241,7 +241,7 @@ INSERT INTO testdata_date ("c3") VALUES('Sep 08 2013');
 INSERT INTO testdata_date ("c1","c3") VALUES('today','tomorrow');
 
 
-DROP TABLE "testdata_timestamp" CASCADE CONSTRAINTS;
+DROP TABLE  IF EXISTS "testdata_timestamp" CASCADE;
 
 CREATE TABLE "testdata_timestamp"(
 "c1" timestamp,
@@ -255,7 +255,7 @@ INSERT INTO testdata_timestamp ("c2","c3") VALUES('08/Sep/2013 02:00 AM','Sept 8
 INSERT INTO testdata_timestamp ("c3") VALUES('September 8, 13 12:59');
 
 
-DROP TABLE "testdata_time" CASCADE CONSTRAINTS;
+DROP TABLE  IF EXISTS "testdata_time" CASCADE;
 
 CREATE TABLE "testdata_time"(
 "c1" time,

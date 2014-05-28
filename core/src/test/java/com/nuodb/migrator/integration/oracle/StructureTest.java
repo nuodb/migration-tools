@@ -27,17 +27,18 @@
  */
 package com.nuodb.migrator.integration.oracle;
 
-import com.nuodb.migrator.integration.MigrationTestBase;
-import com.nuodb.migrator.integration.types.OracleTypes;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.nuodb.migrator.integration.MigrationTestBase;
+import com.nuodb.migrator.integration.types.OracleTypes;
 
 /**
  * Test to make sure all the Tables, Constraints, Views, Triggers etc have been
@@ -149,24 +150,30 @@ public class StructureTest extends MigrationTestBase {
 						"Column name " + colName + " of table " + tableName
 								+ " did not match");
 
-				int srcJdbcType = OracleTypes
-						.getMappedJDBCType(tabColDetailsMap.get(colNames[1]),tabColDetailsMap.get(colNames[4]),tabColDetailsMap.get(colNames[5]));
+				int srcJdbcType = OracleTypes.getMappedJDBCType(
+						tabColDetailsMap.get(colNames[1]),
+						tabColDetailsMap.get(colNames[4]),
+						tabColDetailsMap.get(colNames[5]));
 				int tarJdbcType = rs2.getInt("JDBCTYPE");
 
-				/*System.out.println("colName:" + colName + " ::" + " tableName:"
-						+ tableName + " ::" + " datatype:"
-						+ tabColDetailsMap.get(colNames[1]));*/
+				/*
+				 * System.out.println("colName:" + colName + " ::" +
+				 * " tableName:" + tableName + " ::" + " datatype:" +
+				 * tabColDetailsMap.get(colNames[1]));
+				 */
 
 				Assert.assertEquals(tarJdbcType, srcJdbcType,
 						"JDBCTYPE of column " + colName + " of table "
 								+ tableName + " did not match");
 
 				String srcLength = rs2.getString("LENGTH");
-				
+
 				String tarLength = OracleTypes.getMappedLength(
 						tabColDetailsMap.get(colNames[1]),
-						tabColDetailsMap.get(colNames[2]),tabColDetailsMap.get(colNames[4]),tabColDetailsMap.get(colNames[5]));
-				
+						tabColDetailsMap.get(colNames[2]),
+						tabColDetailsMap.get(colNames[4]),
+						tabColDetailsMap.get(colNames[5]));
+
 				Assert.assertEquals(srcLength, tarLength, "LENGTH of column "
 						+ colName + " of table " + tableName + " did not match");
 				// TBD

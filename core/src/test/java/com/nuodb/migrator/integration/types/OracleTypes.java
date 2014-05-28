@@ -31,6 +31,9 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Krishnamoorthy Dhandapani
+ */
 public class OracleTypes implements DatabaseTypes {
 	private static Map<String, JDBCGetMethod[]> map = new HashMap<String, JDBCGetMethod[]>();
 

@@ -151,8 +151,6 @@ public class ResultSetUtil {
 							Assert.assertEquals(cal1.get(Calendar.MONTH),
 									cal2.get(Calendar.MONTH));
 							// Disable till CDMT-86 is fixed - fails currently
-							// Assert.assertEquals(cal1.get(Calendar.DATE),
-							// cal2.get(Calendar.DATE));
 						} else {
 							// Disable timestamp comparison till CDMT-86 is
 							// fixed
@@ -168,7 +166,9 @@ public class ResultSetUtil {
 							break;
 						}
 					}
-					Assert.assertTrue(flag, "Could'nt get values using "+resultString.toString());
+					Assert.assertTrue(flag, "Could'nt get values using "
+							+ resultString.toString() + " for " + dTypeSrc
+							+ " datatype");
 				}
 			}
 		}

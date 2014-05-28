@@ -1,4 +1,3 @@
-DROP TABLE [dbo].[precision1];
 CREATE TABLE [dbo].[precision1](
 	[k1] [int] ,
 	[c1] [bigint] ,
@@ -9,7 +8,7 @@ CREATE TABLE [dbo].[precision1](
 INSERT [dbo].[precision1] VALUES(2147483647,9223372036854775807,32767,255);
 INSERT [dbo].[precision1] VALUES(-2147483648,-9223372036854775808,-32768,0);
 
-DROP TABLE [dbo].[precision2];
+
 CREATE TABLE [dbo].[precision2](
 	[c1] [nvarchar](20) ,
 	[c2] [varchar](20) ,

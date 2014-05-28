@@ -27,161 +27,32 @@
  */
 package com.nuodb.migrator.integration.oracle;
 
-import com.nuodb.migrator.integration.MigrationTestBase;
-import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 
 /**
- * Test to make sure all the Tables, Constraints, Views, Triggers etc have been
- * migrated.
- * 
  * @author Krishnamoorthy Dhandapani
  */
 @Test(groups = { "oracleintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
-public class DataTypesTest extends MigrationTestBase {
+public class DataTypesTest extends BaseDataTypeTest {
 
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_number() throws Exception {
-		String sqlStr1 = "select * from testdata_number";
-		String sqlStr2 = "select * from \"testdata_number\"";
-		verifyData(sqlStr1, sqlStr2);
+	@DataProvider(name = "dataTypeOracle")
+	public Object[][] createDataTypeData() {
+		return new Object[][] { { "testdata_number" }, { "testdata_number" },
+				{ "testdata_integer" }, { "testdata_float" },
+				{ "testdata_binary_float" }, { "testdata_binary_double" },
+				{ "testdata_real" }, { "testdata_varchar" },
+				{ "testdata_char_varying" }, { "testdata_char" },
+				{ "testdata_date" }, { "testdata_timestamp" },
+				{ "testdata_withtimezone" }, { "testdata_withlocaltimezone" },
+				{ "testdata_clob" }, { "testdata_blob" }, { "testdata_raw" },
+				{ "testdata_long" } };
 	}
 
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_integer() throws Exception {
-		String sqlStr1 = "select * from testdata_integer";
-		String sqlStr2 = "select * from \"testdata_integer\"";
-		verifyData(sqlStr1, sqlStr2);
+	@Test(dataProvider = "dataTypeOracle")
+	public void testDataType(String tableName) throws Exception {
+		super.testDataType(tableName);
 	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_binary_float() throws Exception {
-		String sqlStr1 = "select * from testdata_binary_float";
-		String sqlStr2 = "select * from \"testdata_binary_float\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_binary_double() throws Exception {
-		String sqlStr1 = "select * from testdata_binary_double";
-		String sqlStr2 = "select * from \"testdata_binary_double\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_float() throws Exception {
-		String sqlStr1 = "select * from testdata_float";
-		String sqlStr2 = "select * from \"testdata_float\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_real() throws Exception {
-		String sqlStr1 = "select * from testdata_real";
-		String sqlStr2 = "select * from \"testdata_real\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_varchar() throws Exception {
-		String sqlStr1 = "select * from testdata_varchar";
-		String sqlStr2 = "select * from \"testdata_varchar\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_char_varying() throws Exception {
-		String sqlStr1 = "select * from testdata_char_varying";
-		String sqlStr2 = "select * from \"testdata_char_varying\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_char() throws Exception {
-		String sqlStr1 = "select * from testdata_char";
-		String sqlStr2 = "select * from \"testdata_char\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_date() throws Exception {
-		String sqlStr1 = "select * from testdata_date";
-		String sqlStr2 = "select * from \"testdata_date\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_timestamp() throws Exception {
-		String sqlStr1 = "select * from testdata_timestamp";
-		String sqlStr2 = "select * from \"testdata_timestamp\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_withtimezone() throws Exception {
-		String sqlStr1 = "select * from testdata_withtimezone";
-		String sqlStr2 = "select * from \"testdata_withtimezone\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_withlocaltimezone() throws Exception {
-		String sqlStr1 = "select * from testdata_withlocaltimezone";
-		String sqlStr2 = "select * from \"testdata_withlocaltimezone\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_clob() throws Exception {
-		String sqlStr1 = "select * from testdata_clob";
-		String sqlStr2 = "select * from \"testdata_clob\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_blob() throws Exception {
-		String sqlStr1 = "select * from testdata_blob";
-		String sqlStr2 = "select * from \"testdata_blob\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_raw() throws Exception {
-		String sqlStr1 = "select * from testdata_raw";
-		String sqlStr2 = "select * from \"testdata_raw\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	@Test(dependsOnGroups = { "dataloadperformed" })
-	public void testdata_long() throws Exception {
-		String sqlStr1 = "select * from testdata_long";
-		String sqlStr2 = "select * from \"testdata_long\"";
-		verifyData(sqlStr1, sqlStr2);
-	}
-
-	private void verifyData(String sqlStr1, String sqlStr2)
-			throws SQLException, Exception {
-		Statement stmt1 = null, stmt2 = null;
-		ResultSet rs1 = null, rs2 = null;
-		try {
-			stmt1 = sourceConnection.createStatement();
-			rs1 = stmt1.executeQuery(sqlStr1);
-
-			Assert.assertNotNull(rs1);
-
-			stmt2 = nuodbConnection.createStatement();
-			rs2 = stmt2.executeQuery(sqlStr2);
-
-			Assert.assertNotNull(rs2);
-
-			rsUtil.assertIsEqual(rs1, rs2, true, true);
-
-		} finally {
-			closeAll(rs1, stmt1, rs2, stmt2);
-		}
-	}
-
 }

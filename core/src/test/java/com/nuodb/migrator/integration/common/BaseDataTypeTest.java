@@ -25,37 +25,43 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.integration.postgresql;
+package com.nuodb.migrator.integration.common;
 
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import com.nuodb.migrator.integration.common.BaseDataTypeTest;
+import com.nuodb.migrator.integration.MigrationTestBase;
+import org.testng.Assert;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Krishnamoorthy Dhandapani
  */
-@Test(groups = { "postgresqlintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
-public class DataTypesTest extends BaseDataTypeTest {
+public class BaseDataTypeTest extends MigrationTestBase {
 
-	@DataProvider(name = "dataTypePostgre")
-	public Object[][] createDataTypeData() {
-		return new Object[][] { { "testdata_smallint" },
-				{ "testdata_integer" }, { "testdata_bigint" },
-				{ "testdata_real" }, { "testdata_doubleprecision" },
-				{ "testdata_serial" }, { "testdata_smallserial" },
-				{ "testdata_bigserial" }, { "testdata_char" },
-				{ "testdata_character" }, { "testdata_charactervarying" },
-				{ "testdata_varchar" }, { "testdata_text" },
-				{ "testdata_bytea" }, { "testdata_boolean" },
-				{ "testdata_timewithtimezone" },
-				{ "testdata_timewithouttimezone" },
-				{ "testdata_timestampwithtimezone" },
-				{ "testdata_timestampwithouttimezone" } };
+	public void testDataType(String tableName) throws Exception {
+		String query = "select * from " + tableName;
+		verifyData(query, query);
 	}
 
-	@Test(dataProvider = "dataTypePostgre")
-	public void testDataType(String tableName) throws Exception {
-		super.testDataType(tableName);
+	public void verifyData(String sqlStr1, String sqlStr2) throws SQLException,
+			Exception {
+		Statement stmt1 = null, stmt2 = null;
+		ResultSet rs1 = null, rs2 = null;
+		try {
+			stmt1 = sourceConnection.createStatement();
+			rs1 = stmt1.executeQuery(sqlStr1);
+
+			Assert.assertNotNull(rs1);
+
+			stmt2 = nuodbConnection.createStatement();
+			rs2 = stmt2.executeQuery(sqlStr2);
+
+			Assert.assertNotNull(rs2);
+
+			rsUtil.assertIsEqual(rs1, rs2, true, true);
+
+		} finally {
+			closeAll(rs1, stmt1, rs2, stmt2);
+		}
 	}
 }
