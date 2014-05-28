@@ -73,7 +73,6 @@ public class LimitQuerySplitter extends QuerySplitterBase<Statement> {
         return getRowCountStrategy().getRowCount(connection);
     }
 
-
     @Override
     protected Statement createStatement(Connection connection, QueryLimit queryLimit,
                                         int splitIndex) throws SQLException {

@@ -88,7 +88,7 @@ public class SimpleRowCountHandler implements RowCountHandler {
                     @Override
                     public Statement createStatement(Connection connection)
                             throws SQLException {
-                        return createStatement(connection);
+                        return connection.createStatement();
                     }
                 }, new StatementCallback<Statement>() {
                     @Override
@@ -99,10 +99,6 @@ public class SimpleRowCountHandler implements RowCountHandler {
                 }
         );
         return rowCount.getValue();
-    }
-
-    protected Statement createStatement(Connection connection) throws SQLException {
-        return connection.createStatement();
     }
 
     protected Long getRowCount(Statement statement, RowCountQuery rowCountQuery) throws SQLException {

@@ -150,6 +150,11 @@ public class PostgreSQLDialect extends SimpleDialect {
     }
 
     @Override
+    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
+        statement.setFetchSize(streamResults ? 1 : 0);
+    }
+
+    @Override
     public LimitHandler createLimitHandler(String query, QueryLimit queryLimit) {
         return new PostgreSQLLimitHandler(this, query, queryLimit);
     }
