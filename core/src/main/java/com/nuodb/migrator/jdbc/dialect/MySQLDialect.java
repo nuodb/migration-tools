@@ -148,8 +148,8 @@ public class MySQLDialect extends SimpleDialect {
      * @throws SQLException
      */
     @Override
-    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
-        statement.setFetchSize(streamResults ? MIN_VALUE : 0);
+    public void setFetchMode(Statement statement, FetchMode fetchMode) throws SQLException {
+        statement.setFetchSize(fetchMode.isStream() ? MIN_VALUE : fetchMode.getFetchSize());
     }
 
     @Override
