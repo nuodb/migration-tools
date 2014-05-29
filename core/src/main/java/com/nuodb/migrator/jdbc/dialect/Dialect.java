@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.*;
-import com.nuodb.migrator.jdbc.metadata.resolver.ServiceResolver;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.type.*;
@@ -160,7 +159,7 @@ public interface Dialect {
 
     void setSessionTimeZone(Connection connection, TimeZone timeZone) throws SQLException;
 
-    void setStreamResults(Statement statement, boolean streamResults) throws SQLException;
+    void setFetchMode(Statement statement, FetchMode fetchMode) throws SQLException;
 
     void setTransactionIsolation(Connection connection, int[] levels) throws SQLException;
 

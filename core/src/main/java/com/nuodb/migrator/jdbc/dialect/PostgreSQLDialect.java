@@ -138,17 +138,22 @@ public class PostgreSQLDialect extends SimpleDialect {
      * http://jdbc.postgresql.org/documentation/head/query.html#query-with-cursor
      *
      * @param statement
-     * @param streamResults
+     * @param fetchMode
      * @throws SQLException
      */
     @Override
-    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
-        Connection connection = statement.getConnection();
-        DatabaseMetaData metaData = connection.getMetaData();
-        int driverVersion = metaData.getDriverMajorVersion() * 10 + metaData.getDriverMinorVersion();
-        if (!connection.getAutoCommit() && (driverVersion >= 74) &&
-                (statement.getResultSetType() == TYPE_FORWARD_ONLY)) {
-            statement.setFetchSize(streamResults ? 1 : 0);
+    public void setFetchMode(Statement statement, FetchMode fetchMode) throws SQLException {
+        int fetchSize = fetchMode.getFetchSize();
+        if (fetchMode.isStream() && fetchSize > 0) {
+            Connection connection = statement.getConnection();
+            DatabaseMetaData metaData = connection.getMetaData();
+            int driverVersion = metaData.getDriverMajorVersion() * 10 + metaData.getDriverMinorVersion();
+            if (!connection.getAutoCommit() && (driverVersion >= 74) &&
+                    (statement.getResultSetType() == TYPE_FORWARD_ONLY)) {
+                statement.setFetchSize(fetchSize);
+            }
+        } else {
+            statement.setFetchSize(0);
         }
     }
 
