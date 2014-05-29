@@ -672,7 +672,8 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
     }
 
     @Override
-    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
+    public void setFetchMode(Statement statement, FetchMode fetchMode) throws SQLException {
+        statement.setFetchSize(fetchMode.isStream() ? fetchMode.getFetchSize() : 0);
     }
 
     @Override
