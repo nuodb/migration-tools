@@ -28,9 +28,9 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Deferrability;
-import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.ForeignKeyReference;
 import com.nuodb.migrator.jdbc.metadata.ReferenceAction;
@@ -41,12 +41,14 @@ import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
+import static com.nuodb.migrator.backup.XmlTableHandler.getPendingTables;
 import static com.nuodb.migrator.utils.StringUtils.lowerCase;
 import static com.nuodb.migrator.utils.StringUtils.upperCase;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("all")
 public class XmlForeignKeyHandler extends XmlIdentifiableHandlerBase<ForeignKey>{
 
     private static String REFERENCE_ELEMENT = "reference";
@@ -79,7 +81,10 @@ public class XmlForeignKeyHandler extends XmlIdentifiableHandlerBase<ForeignKey>
         Table primaryTable = primarySchema.addTable(
                 context.readAttribute(input, PRIMARY_TABLE_ATTRIBUTE, String.class));
         foreignKey.setPrimaryTable(primaryTable);
-
+        
+        // adds primary tables created by foreign key declaration
+        getPendingTables(context).put(primaryTable, foreignKey);
+        
         Catalog foreignCatalog = database.addCatalog(
                 context.readAttribute(input, FOREIGN_CATALOG_ATTRIBUTE, String.class));
         Schema foreignSchema = foreignCatalog.addSchema(

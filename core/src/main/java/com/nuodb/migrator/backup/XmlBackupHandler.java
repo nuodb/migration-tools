@@ -27,8 +27,10 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.nuodb.migrator.jdbc.metadata.Constraint;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
@@ -36,8 +38,11 @@ import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Collection;
+import java.util.Map;
 
+import static com.nuodb.migrator.backup.XmlTableHandler.getPendingTables;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -49,8 +54,32 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
     private static final String DATABASE_ELEMENT = "database";
     private static final String DATABASE_INFO_ELEMENT = "database-info";
 
+
     public XmlBackupHandler() {
         super(Backup.class);
+    }
+
+    @Override
+    public Backup read(InputNode input, Class<? extends Backup> type, XmlReadContext context) {
+        Backup backup = super.read(input, type, context);
+        Map<Table, Constraint> pendingTables = getPendingTables(context);
+        if (!isEmpty(pendingTables)) {
+            removePendingTables(pendingTables);
+        }
+        return backup;
+    }
+
+    protected void removePendingTables(Map<Table, Constraint> pendingTables) {
+        for (Map.Entry<Table, Constraint> entry : pendingTables.entrySet()) {
+            Table table = entry.getKey();
+            Constraint constraint = entry.getValue();
+            if (logger.isWarnEnabled()) {
+                logger.warn(format(
+                        "Ignore table %s, which is referenced by %s constraint, but is not declared explicitly",
+                        table.getQualifiedName(), constraint.getQualifiedName()));
+            }
+            table.getSchema().removeTable(table);
+        }
     }
 
     @Override
