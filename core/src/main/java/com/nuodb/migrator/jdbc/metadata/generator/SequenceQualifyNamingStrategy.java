@@ -58,14 +58,19 @@ public class SequenceQualifyNamingStrategy extends IdentifiableNamingStrategy<Se
             nonPrefixedName.append(getDelimiter());
             nonPrefixedName.append(scriptGeneratorManager.getName(column, false));
         } else {
-            Schema schema = sequence.getSchema();
-            if (scriptGeneratorManager.getName(schema, false) != null) {
-                nonPrefixedName.append(scriptGeneratorManager.getName(schema, false));
+            String name = sequence.getName();
+            if (name == null) {
+                Schema schema = sequence.getSchema();
+                if (scriptGeneratorManager.getName(schema, false) != null) {
+                    nonPrefixedName.append(scriptGeneratorManager.getName(schema, false));
+                } else {
+                    nonPrefixedName.append(scriptGeneratorManager.getName(schema.getCatalog(), false));
+                }
+                nonPrefixedName.append(getDelimiter());
+                nonPrefixedName.append(indexOf(schema.getSequences(), equalTo(sequence)));
             } else {
-                nonPrefixedName.append(scriptGeneratorManager.getName(schema.getCatalog(), false));
+                nonPrefixedName.append(name);
             }
-            nonPrefixedName.append(getDelimiter());
-            nonPrefixedName.append(indexOf(schema.getSequences(), equalTo(sequence)));
         }
         return nonPrefixedName.toString();
     }

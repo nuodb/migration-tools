@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
@@ -46,8 +47,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
-import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.AND;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
@@ -58,15 +58,11 @@ import static com.nuodb.migrator.jdbc.query.QueryUtils.where;
 public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, TableInspectionScope> {
 
     private static final String QUERY =
-            "WITH SEQUENCES AS " +
-            "(SELECT N.NSPNAME AS SCHEMA_NAME, C.RELNAME AS TABLE_NAME, A.ATTNAME AS COLUMN_NAME, " +
-            "SUBSTRING(PG_GET_EXPR(DEF.ADBIN, DEF.ADRELID) FROM 'nextval\\(''(.*)''::.*\\)') AS SEQUENCE_NAME " +
-            "FROM PG_CATALOG.PG_NAMESPACE N " +
-            "JOIN PG_CATALOG.PG_CLASS C ON (C.RELNAMESPACE = N.OID) " +
-            "JOIN PG_CATALOG.PG_ATTRIBUTE A ON (A.ATTRELID=C.OID) " +
-            "LEFT JOIN PG_CATALOG.PG_ATTRDEF DEF ON (A.ATTRELID=DEF.ADRELID AND A.ATTNUM = DEF.ADNUM) " +
-            "WHERE A.ATTNUM>0 AND NOT A.ATTISDROPPED AND ADSRC IS NOT NULL AND SUBSTRING(ADSRC FROM 0 FOR 9)" +
-            "='nextval(') SELECT * FROM SEQUENCES";
+            "SELECT S.SEQUENCE_SCHEMA AS SCHEMA_NAME, S.SEQUENCE_NAME AS SEQUENCE_NAME,\n" +
+            "C.TABLE_NAME AS TABLE_NAME, C.COLUMN_NAME AS COLUMN_NAME FROM INFORMATION_SCHEMA.SEQUENCES S\n" +
+            "LEFT OUTER JOIN INFORMATION_SCHEMA.COLUMNS C ON\n" +
+            "S.SEQUENCE_CATALOG=C.TABLE_CATALOG AND S.SEQUENCE_SCHEMA=C.TABLE_SCHEMA AND\n" +
+            "S.SEQUENCE_NAME=SUBSTRING(C.COLUMN_DEFAULT FROM 'nextval[(]''(.*)''::.*[)]')";
 
     public PostgreSQLSequenceInspector() {
         super(SEQUENCE, TableInspectionScope.class);
@@ -77,11 +73,11 @@ public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, Table
         Collection<String> filters = newArrayList();
         Collection<Object> parameters = newArrayList();
         if (tableInspectionScope.getSchema() != null) {
-            filters.add("SCHEMA_NAME=?");
+            filters.add("S.SEQUENCE_SCHEMA=?");
             parameters.add(tableInspectionScope.getSchema());
         }
         if (tableInspectionScope.getTable() != null) {
-            filters.add("TABLE_NAME=?");
+            filters.add("C.TABLE_NAME=?");
             parameters.add(tableInspectionScope.getTable());
         }
         return new ParameterizedQuery(newQuery(where(QUERY, filters, AND)), parameters);
@@ -100,13 +96,14 @@ public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, Table
                     @Override
                     public void executeStatement(Statement statement) throws SQLException {
                         while (sequences.next()) {
-                            String schema = sequences.getString("SCHEMA_NAME");
-                            String table = sequences.getString("TABLE_NAME");
-                            String sequence = sequences.getString("SEQUENCE_NAME");
-                            Column column = addTable(inspectionContext.getInspectionResults(), null, schema, table).
-                                    addColumn(sequences.getString("COLUMN_NAME"));
-                            processSequence(inspectionContext, column, statement.executeQuery(
-                                    createQuery(inspectionContext, schema, sequence).toString()));
+                            String schemaName = sequences.getString("SCHEMA_NAME");
+                            String sequenceName = sequences.getString("SEQUENCE_NAME");
+                            String tableName = sequences.getString("TABLE_NAME");
+                            Schema schema = addSchema(inspectionContext.getInspectionResults(), null, schemaName);
+                            Table table = tableName != null ? schema.addTable(tableName) : null;
+                            Column column = table != null ? table.addColumn(sequences.getString("COLUMN_NAME")) : null;
+                            processSequence(inspectionContext, schema, column, statement.executeQuery(
+                                    createQuery(inspectionContext, schemaName, sequenceName).toString()));
                         }
                     }
                 }
@@ -122,7 +119,8 @@ public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, Table
         return query;
     }
 
-    protected void processSequence(InspectionContext inspectionContext, Column column, ResultSet sequences)
+    protected void processSequence(InspectionContext inspectionContext, Schema schema, Column column,
+                                   ResultSet sequences)
             throws SQLException {
         if (sequences.next()) {
             Sequence sequence = new Sequence();
@@ -134,8 +132,10 @@ public class PostgreSQLSequenceInspector extends TableInspectorBase<Table, Table
             sequence.setIncrementBy(sequences.getLong("INCREMENT_BY"));
             sequence.setCache(sequences.getInt("CACHE_VALUE"));
             sequence.setCycle("T".equalsIgnoreCase(sequences.getString("IS_CYCLED")));
-            column.setSequence(sequence);
-            column.getTable().getSchema().addSequence(sequence);
+            schema.addSequence(sequence);
+            if (column != null) {
+                column.setSequence(sequence);
+            }
             inspectionContext.getInspectionResults().addObject(sequence);
         }
     }
