@@ -27,8 +27,9 @@
  */
 package com.nuodb.migrator.backup;
 
-import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Check;
+import com.nuodb.migrator.jdbc.metadata.Constraint;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.Index;
@@ -44,15 +45,18 @@ import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Collection;
+import java.util.Map;
 
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.spec.MetaDataSpec.TABLE_TYPES;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"all"})
 public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
 
     private static final String TYPE_ATTRIBUTE = "type";
@@ -62,16 +66,31 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     private static final String INDEX_ELEMENT = "index";
     private static final String FOREIGN_KEY = "foreign-key";
     private static final String CHECK_ELEMENT = "check";
+    private static final String PENDING_TABLES = getClassName(XmlForeignKeyHandler.class) + ".PendingTables";
 
     public XmlTableHandler() {
         super(Table.class);
+    }
+
+    /**
+     * Returns primary tables referenced by foreign keys, but not declared explicitely
+     *
+     * @param context
+     * @return
+     */
+    public static Map<Table, Constraint> getPendingTables(XmlReadContext context) {
+        Map<Table, Constraint> tables = (Map<Table, Constraint>) context.get(PENDING_TABLES);
+        if (tables == null) {
+            context.put(PENDING_TABLES, tables = newLinkedHashMap());
+        }
+        return tables;
     }
 
     @Override
     protected Table createTarget(InputNode input, Class<? extends Table> type) {
         return null;
     }
-
+    
     @Override
     protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Table> context) throws Exception {
         Schema schema = getParent(context);
@@ -79,6 +98,7 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
         Table table = schema.hasTable(name) ? schema.getTable(name) : schema.addTable(name);
         table.setType(context.readAttribute(input, TYPE_ATTRIBUTE, String.class));
         context.setTarget(table);
+        getPendingTables(context).remove(table);
     }
 
     @Override
