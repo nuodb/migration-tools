@@ -29,11 +29,15 @@ package com.nuodb.migrator.utils.xml;
 
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
+import org.slf4j.Logger;
 
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @SuppressWarnings("unchecked")
 public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor implements XmlReadWriteHandler<T> {
+
+    protected final transient Logger logger = getLogger(getClass());
 
     private Class type;
 

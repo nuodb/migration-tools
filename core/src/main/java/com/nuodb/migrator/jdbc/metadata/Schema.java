@@ -138,6 +138,10 @@ public class Schema extends IdentifiableBase implements HasTables {
         return table;
     }
 
+    public void removeTable(Table table) {
+        tables.remove(table.getIdentifier());
+    }
+
     @Override
     public Collection<Table> getTables() {
         return tables.values();
