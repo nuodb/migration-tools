@@ -68,7 +68,7 @@ SET "JAVA_OPTS=%JAVA_OPTS% "-Dnuodb.migrator.logdir=%NUODB_MIGRATOR_LOGDIR%""
 
 SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\conf"
 SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\slf4j-api-${slf4j.version}.jar"
-SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\slf4j-log4j12-${slf4j.version}jar"
+SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\slf4j-log4j12-${slf4j.version}.jar"
 SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\log4j-${log4j.version}.jar"
 SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\nuodb-migrator-bootstrap-${project.version}.jar"
 
