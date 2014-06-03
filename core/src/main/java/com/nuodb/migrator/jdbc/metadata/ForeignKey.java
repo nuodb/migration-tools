@@ -53,6 +53,10 @@ public class ForeignKey extends ConstraintBase {
         super(FOREIGN_KEY);
     }
 
+    public ForeignKey(String name) {
+        super(FOREIGN_KEY, name);
+    }
+
     public ForeignKey(Identifier name) {
         super(FOREIGN_KEY, name);
     }
@@ -77,6 +81,10 @@ public class ForeignKey extends ConstraintBase {
     public void setForeignTable(Table foreignTable) {
         setTable(foreignTable);
         this.foreignTable = foreignTable;
+    }
+
+    public void addReference(Column primaryColumn, Column foreignColumn) {
+        addReference(primaryColumn, foreignColumn, references.size());
     }
 
     public void addReference(Column primaryColumn, Column foreignColumn, int position) {

@@ -28,11 +28,16 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.Migrator;
-import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.type.JdbcType;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY;
+import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.testng.Assert.assertEquals;
 
@@ -48,11 +53,11 @@ public class XmlBackupManagerTest {
         backupManager = new XmlBackupManager(".");
     }
 
-    @DataProvider(name = "readBackup")
-    public Object[][] createReadBackupData() {
-        Backup backup = new Backup();
-        backup.setDatabase(new Database());
-        backup.setFormat("csv");
+    @Test
+    public void testReadRowSet() {
+        Backup expected = new Backup();
+        expected.setDatabase(new Database());
+        expected.setFormat("csv");
 
         TableRowSet rowSet = new TableRowSet();
         rowSet.setType("table");
@@ -66,8 +71,9 @@ public class XmlBackupManagerTest {
         chunk.setName("test.t1.csv");
         chunk.setRowCount(1L);
         rowSet.addChunk(chunk);
-        backup.addRowSet(rowSet);
-        return new Object[][]{{
+        expected.addRowSet(rowSet);
+
+        String input =
                 "<?xml version=\"1.0\"?>\n" +
                 "<backup version=\"" + Migrator.getVersion() + "\" format=\"csv\">\n" +
                 "  <database/>\n" +
@@ -75,13 +81,53 @@ public class XmlBackupManagerTest {
                 "    <column name=\"f1\" value-type=\"string\"/>\n" +
                 "    <chunk name=\"test.t1.csv\" row-count=\"1\"/>\n" +
                 "  </row-set>\n" +
-                "</backup>",
-                backup
-        }};
+                "</backup>";
+        Backup actual = backupManager.readBackup(toInputStream(input));
+        assertEquals(actual, expected);
     }
 
-    @Test(dataProvider = "readBackup")
-    public void testReadBackup(String input, Backup backup) {
-        assertEquals(backupManager.readBackup(toInputStream(input)), backup);
+    /**
+     * Tests MIG-44 implicitly declared tables (referenced by foreign-key)
+     */
+    @Test
+    public void testReadExplicitlyDeclaredTables() {
+        Backup expected = new Backup();
+        Database database = new Database();
+        Schema schema = database.addCatalog("test").addSchema(EMPTY);
+        Table foreignTable = schema.addTable("t1");
+        Column foreignColumn = foreignTable.addColumn("t1_f1");
+        foreignColumn.setJdbcType(
+                new JdbcType(new JdbcTypeDesc(4, "INT"), newOptions(10, 10, 0)));
+        ForeignKey foreignKey = new ForeignKey("fk_1");
+        Table primaryTable = schema.addTable("t2");
+        Column primaryColumn = primaryTable.addColumn("t2_f1");
+        foreignKey.addReference(primaryColumn, foreignColumn);
+        foreignTable.addForeignKey(foreignKey);
+        expected.setFormat("csv");
+        expected.setDatabase(database);
+
+        String input =
+                "<?xml version=\"1.0\"?>\n" +
+                "<backup version=\"" + Migrator.getVersion() + "\" format=\"csv\">\n" +
+                "  <database>\n" +
+                "    <catalog name=\"test\">\n" +
+                "      <schema>\n" +
+                "        <table name=\"t1\" type=\"TABLE\">\n" +
+                "          <column name=\"t1_f1\">\n" +
+                "            <type code=\"4\" name=\"INT\" size=\"10\" precision=\"10\" scale=\"0\"/>\n" +
+                "          </column>\n" +
+                "          <foreign-key name=\"fk_1\" primary-catalog=\"test\" primary-table=\"t2\" " +
+                "foreign-catalog=\"test\" foreign-table=\"t1\" update-action=\"no_action\" " +
+                "delete-action=\"no_action\" deferrability=\"not_deferrable\">\n" +
+                "            <reference primary-column=\"t2_f1\" foreign-column=\"t1_f1\"/>\n" +
+                "          </foreign-key>\n" +
+                "        </table>\n" +
+                "      </schema>\n" +
+                "    </catalog>\n" +
+                "  </database>\n" +
+                "</backup>";
+        Backup actual = backupManager.readBackup(toInputStream(input));
+        assertEquals(actual, expected);
+        assertEquals(actual.getDatabase().getSchemas(), expected.getDatabase().getSchemas());
     }
 }
