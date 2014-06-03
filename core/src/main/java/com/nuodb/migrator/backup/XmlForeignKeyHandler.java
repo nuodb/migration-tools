@@ -41,7 +41,8 @@ import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
-import static com.nuodb.migrator.backup.XmlTableHandler.getPendingTables;
+
+import static com.nuodb.migrator.backup.XmlTableHandler.getTableBinding;
 import static com.nuodb.migrator.utils.StringUtils.lowerCase;
 import static com.nuodb.migrator.utils.StringUtils.upperCase;
 
@@ -81,10 +82,10 @@ public class XmlForeignKeyHandler extends XmlIdentifiableHandlerBase<ForeignKey>
         Table primaryTable = primarySchema.addTable(
                 context.readAttribute(input, PRIMARY_TABLE_ATTRIBUTE, String.class));
         foreignKey.setPrimaryTable(primaryTable);
-        
+
         // adds primary tables created by foreign key declaration
-        getPendingTables(context).put(primaryTable, foreignKey);
-        
+        getTableBinding(primaryTable, context).addReference(foreignKey);
+
         Catalog foreignCatalog = database.addCatalog(
                 context.readAttribute(input, FOREIGN_CATALOG_ATTRIBUTE, String.class));
         Schema foreignSchema = foreignCatalog.addSchema(
