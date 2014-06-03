@@ -49,11 +49,11 @@ import static org.testng.Assert.assertEquals;
  */
 public class XmlBackupOpsTest {
 
-    private XmlBackupOps backupManager;
+    private XmlBackupOps xmlBackupOps;
 
     @BeforeMethod
     public void setUp() {
-        backupManager = new XmlBackupManager(".");
+        xmlBackupOps = new XmlBackupOps();
     }
 
     @Test
@@ -85,7 +85,7 @@ public class XmlBackupOpsTest {
                 "    <chunk name=\"test.t1.csv\" row-count=\"1\"/>\n" +
                 "  </row-set>\n" +
                 "</backup>";
-        Backup actual = backupManager.readBackup(toInputStream(input));
+        Backup actual = xmlBackupOps.read(toInputStream(input));
         assertEquals(actual, expected);
     }
 
@@ -129,7 +129,7 @@ public class XmlBackupOpsTest {
                 "    </catalog>\n" +
                 "  </database>\n" +
                 "</backup>";
-        Backup actual = backupManager.readBackup(toInputStream(input));
+        Backup actual = xmlBackupOps.read(toInputStream(input));
         assertEquals(actual, expected);
         assertEquals(actual.getDatabase().getSchemas(), expected.getDatabase().getSchemas());
     }

@@ -32,7 +32,6 @@ import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayList;
 

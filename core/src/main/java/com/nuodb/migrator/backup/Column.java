@@ -78,7 +78,7 @@ public class Column {
         Column column = (Column) o;
 
         if (name != null ? !name.equals(column.name) : column.name != null) return false;
-        if (valueType != column.valueType) return false;
+        if (valueType != null ? !valueType.equals(column.valueType) : column.valueType != null) return false;
 
         return true;
     }

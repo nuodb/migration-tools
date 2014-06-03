@@ -80,7 +80,7 @@ public class Chunk {
         Chunk chunk = (Chunk) o;
 
         if (name != null ? !name.equals(chunk.name) : chunk.name != null) return false;
-        if (rowCount != null ? !rowCount.equals(chunk.rowCount) : chunk.rowCount != null) return false;
+        if (getRowCount() != chunk.getRowCount()) return false;
 
         return true;
     }
