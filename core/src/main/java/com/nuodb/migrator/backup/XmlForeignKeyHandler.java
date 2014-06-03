@@ -121,8 +121,7 @@ public class XmlForeignKeyHandler extends XmlIdentifiableHandlerBase<ForeignKey>
                 context.readAttribute(input, PRIMARY_COLUMN_ATTRIBUTE, String.class));
         Column foreignColumn = foreignKey.getForeignTable().addColumn(
                 context.readAttribute(input, FOREIGN_COLUMN_ATTRIBUTE, String.class));
-        foreignKey.addReference(primaryColumn, foreignColumn,
-                foreignKey.getReferences().size());
+        foreignKey.addReference(primaryColumn, foreignColumn);
     }
 
     @Override
