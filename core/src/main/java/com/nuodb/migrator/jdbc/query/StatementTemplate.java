@@ -27,8 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.query;
 
-import com.nuodb.migrator.jdbc.JdbcUtils;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -52,8 +50,8 @@ public class StatementTemplate {
         try {
             statementCallback.executeStatement(statement);
         } finally {
-            JdbcUtils.closeQuietly(statement != null ? statement.getResultSet() : null);
-            JdbcUtils.closeQuietly(statement);
+            closeQuietly(statement != null ? statement.getResultSet() : null);
+            closeQuietly(statement);
         }
     }
 

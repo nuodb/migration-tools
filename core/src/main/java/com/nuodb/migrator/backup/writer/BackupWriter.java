@@ -36,7 +36,6 @@ import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
@@ -71,6 +70,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.META_DATA_SPEC;
 import static com.nuodb.migrator.context.ContextUtils.createService;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
@@ -289,7 +289,7 @@ public class BackupWriter {
             backupWriterContext.setDatabase(database == null ?
                     openDatabase(sourceSession) : database);
         } catch (Exception exception) {
-            JdbcUtils.closeQuietly(sourceSession);
+            closeQuietly(sourceSession);
             throw exception;
         }
     }

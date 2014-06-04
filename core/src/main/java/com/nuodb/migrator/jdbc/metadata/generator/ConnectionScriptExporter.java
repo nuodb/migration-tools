@@ -27,13 +27,12 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.jdbc.JdbcUtils;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static java.lang.String.format;
 
 /**
@@ -74,8 +73,8 @@ public class ConnectionScriptExporter extends ScriptExporterBase {
 
     @Override
     protected void doClose() throws Exception {
-        JdbcUtils.closeQuietly(statement);
-        JdbcUtils.closeQuietly(connection);
+        closeQuietly(statement);
+        closeQuietly(connection);
     }
 
     public Connection getConnection() {

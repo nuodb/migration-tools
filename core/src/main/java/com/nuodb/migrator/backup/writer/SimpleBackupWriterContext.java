@@ -31,7 +31,6 @@ import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
@@ -42,13 +41,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 import static com.nuodb.migrator.utils.Collections.contains;
-import static java.lang.Long.MAX_VALUE;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

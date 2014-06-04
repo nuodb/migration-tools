@@ -27,8 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.session.Session;
+
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
@@ -45,7 +46,7 @@ public class SessionScriptExporter extends ConnectionScriptExporter {
     @Override
     protected void doClose() throws Exception {
         super.doClose();
-        JdbcUtils.closeQuietly(session);
+        closeQuietly(session);
     }
 
     public Session getSession() {

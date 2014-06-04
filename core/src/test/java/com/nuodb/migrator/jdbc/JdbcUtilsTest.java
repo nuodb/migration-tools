@@ -46,21 +46,21 @@ public class JdbcUtilsTest {
     @Test
     public void testCloseResultSet() throws SQLException {
         ResultSet resultSet = mock(ResultSet.class);
-        JdbcUtils.closeQuietly(resultSet);
+        closeQuietly(resultSet);
         verify(resultSet).close();
     }
 
     @Test
     public void testCloseStatement() throws SQLException {
         Statement statement = mock(Statement.class);
-        JdbcUtils.closeQuietly(statement);
+        closeQuietly(statement);
         verify(statement).close();
     }
 
     @Test
     public void testCloseConnection() throws SQLException {
         Connection connection = mock(Connection.class);
-        JdbcUtils.closeQuietly(connection);
+        closeQuietly(connection);
         verify(connection).close();
     }
 }

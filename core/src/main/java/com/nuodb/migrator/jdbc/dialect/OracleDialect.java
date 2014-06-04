@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -137,7 +136,7 @@ public class OracleDialect extends SimpleDialect {
             String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL";
             statement.execute("ALTER SESSION SET TIME_ZONE = " + timeZoneAsValue);
         } finally {
-            JdbcUtils.closeQuietly(statement);
+            closeQuietly(statement);
         }
     }
 

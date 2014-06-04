@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
@@ -41,6 +40,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
@@ -86,7 +86,7 @@ public class SimpleManagedInspectionContext<M extends MetaData, I extends Inspec
     @Override
     public void closeStatements() throws SQLException {
         for (Statement statement : statements.values()) {
-            JdbcUtils.closeQuietly(statement);
+            closeQuietly(statement);
         }
     }
 

@@ -27,8 +27,9 @@
  */
 package com.nuodb.migrator.schema;
 
-import com.nuodb.migrator.jdbc.JdbcUtils;
-import com.nuodb.migrator.jdbc.dialect.*;
+import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.dialect.DialectResolver;
+import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.FileScriptExporter;
@@ -52,6 +53,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TYPES;
@@ -182,9 +184,9 @@ public class SchemaJob extends ScriptGeneratorJobBase<SchemaJobSpec> {
 
     @Override
     public void close() throws Exception {
-        JdbcUtils.closeQuietly(getSourceSession());
-        JdbcUtils.closeQuietly(getTargetSession());
-        JdbcUtils.closeQuietly(getScriptExporter());
+        closeQuietly(getSourceSession());
+        closeQuietly(getTargetSession());
+        closeQuietly(getScriptExporter());
     }
 
     protected ConnectionSpec getSourceSpec() {

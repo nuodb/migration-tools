@@ -28,12 +28,11 @@
 package com.nuodb.migrator.jdbc.metadata.generator;
 
 import java.io.File;
-import java.io.RandomAccessFile;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.RandomAccess;
 
 import static com.google.common.io.Files.createParentDirs;
-import static com.google.common.io.Files.newWriter;
 import static java.nio.charset.Charset.forName;
 
 /**
@@ -62,20 +61,9 @@ public class FileScriptExporter extends StreamScriptExporterBase {
 
     @Override
     protected Writer openWriter() throws Exception {
+        File file = getFile();
         createParentDirs(file);
-        return newWriter(getFile(), forName(getEncoding()));
-    }
-
-    @Override
-    protected void doOpen() throws Exception {
-    }
-
-    @Override
-    protected void doExportScript(String script) throws Exception {
-    }
-
-    @Override
-    protected void doClose() throws Exception {
+        return new OutputStreamWriter(new FileOutputStream(file), forName(getEncoding()));
     }
 
     public File getFile() {

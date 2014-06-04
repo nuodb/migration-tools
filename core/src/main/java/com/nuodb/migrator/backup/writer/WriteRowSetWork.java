@@ -34,7 +34,6 @@ import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.OutputFormat;
 import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.FetchMode;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -54,6 +53,7 @@ import static com.google.common.collect.Iterables.indexOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
 import static com.nuodb.migrator.backup.format.value.ValueType.toAlias;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.Predicates.equalTo;
@@ -159,7 +159,7 @@ public class WriteRowSetWork extends WorkBase {
 
     @Override
     public void close() throws Exception {
-        JdbcUtils.closeQuietly(resultSet);
+        closeQuietly(resultSet);
     }
 
     protected void writeStart(Chunk chunk) throws Exception {

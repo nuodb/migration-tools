@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
@@ -122,7 +121,7 @@ public class MySQLSequenceInspector extends TableInspectorBase<Table, TableInspe
                             try {
                                 column = columns.next() ? table.addColumn(columns.getString("FIELD")) : null;
                             } finally {
-                                JdbcUtils.closeQuietly(columns);
+                                closeQuietly(columns);
                             }
                             if (column == null) {
                                 continue;

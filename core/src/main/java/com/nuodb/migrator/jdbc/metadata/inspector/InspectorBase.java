@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.google.common.base.Function;
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerBase;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
@@ -199,7 +198,7 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
 
     protected void closeStatement(InspectionContext inspectionContext, I inspectionScope, Query query,
                                   Statement statement) throws SQLException {
-        JdbcUtils.closeQuietly(statement);
+        closeQuietly(statement);
     }
 
     protected ResultSet createResultSet(InspectionContext inspectionContext, I inspectionScope, Query query,

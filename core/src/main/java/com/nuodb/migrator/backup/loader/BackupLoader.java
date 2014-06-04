@@ -37,7 +37,6 @@ import com.nuodb.migrator.backup.TableRowSet;
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
-import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
@@ -231,7 +230,7 @@ public class BackupLoader {
             backupLoaderContext.setValueFormatRegistry(
                     createValueFormatRegistry(targetSession));
         } catch (Exception exception) {
-            JdbcUtils.closeQuietly(targetSession);
+            closeQuietly(targetSession);
             throw exception;
         }
     }
