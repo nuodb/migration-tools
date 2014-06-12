@@ -25,27 +25,36 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.integration.types;
+package com.nuodb.migrator.integration.db2;
+
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 
 /**
  * @author Krishnamoorthy Dhandapani
  */
-public class DatabaseTypesFactory {
+@Test(groups = { "db2integrationtest" }, dependsOnGroups = { "dataloadperformed" })
+public class DataTypesTest extends BaseDataTypeTest {
 
-	public DatabaseTypes getDatabaseTypes(String driverClassName) {
-		if (driverClassName.toLowerCase().contains("mysql")) {
-			return new MySQLTypes();
-		} else if (driverClassName.toLowerCase().contains("nuodb")) {
-			return new NuoDBTypes();
-		} else if (driverClassName.toLowerCase().contains("jtds")) {
-			return new SQLServerTypes();
-		} else if (driverClassName.toLowerCase().contains("postgresql")) {
-			return new PostgreSQLTypes();
-		} else if (driverClassName.toLowerCase().contains("oracle")) {
-			return new OracleTypes();
-		} else if (driverClassName.toLowerCase().contains("db2")) {
-			return new Db2Types();
-		}
-		return null;
+	@DataProvider(name = "dataTypeMysql")
+	public Object[][] createDataTypeData() {
+		return new Object[][] { { "testdata_smallint" },
+				{ "testdata_integer" }, { "testdata_bigint" },
+				{ "testdata_decimal" }, { "testdata_double" },
+				{ "testdata_real" }, { "testdata_varchar" },
+				{ "testdata_character" }, { "testdata_clob" },
+				{ "testdata_graphic" }, { "testdata_vargraphic" },
+				{ "testdata_dbclob" }, { "testdata_longvarchar" },
+				{ "testdata_longvargraphic" }, { "testdata_time" },
+				{ "testdata_date" }, { "testdata_timestamp" },
+				{ "testdata_blob" } };
 	}
+
+	@Test(dataProvider = "dataTypeMysql")
+	public void testDataType(String tableName) throws Exception {
+		super.testDataType(tableName);
+	}
+
 }

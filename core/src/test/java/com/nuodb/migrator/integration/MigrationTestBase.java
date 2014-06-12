@@ -83,11 +83,15 @@ public class MigrationTestBase {
 		List<URL> urls = new ArrayList<URL>();
 
 		if (sourceJdbcJar != null && sourceJdbcJar.trim().length() > 0) {
-			File sourceJdbcJarFile = new File(sourceJdbcJar);
-			sourceJdbcJarFile = new File(sourceJdbcJarFile.getCanonicalPath());
-			Assert.assertTrue(sourceJdbcJarFile.exists());
-			Assert.assertTrue(sourceJdbcJarFile.canRead());
-			urls.add(sourceJdbcJarFile.toURI().toURL());
+			String[] listOfJars = sourceJdbcJar.split(";");
+			for (String sourceJar : listOfJars) {
+				File sourceJdbcJarFile = new File(sourceJar);
+				sourceJdbcJarFile = new File(
+						sourceJdbcJarFile.getCanonicalPath());
+				Assert.assertTrue(sourceJdbcJarFile.exists());
+				Assert.assertTrue(sourceJdbcJarFile.canRead());
+				urls.add(sourceJdbcJarFile.toURI().toURL());
+			}
 		}
 
 		String nuodbJdbcJarLoc = nuodbJdbcJar;

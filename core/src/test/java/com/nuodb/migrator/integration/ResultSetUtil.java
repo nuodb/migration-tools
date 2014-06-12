@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.integration;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
@@ -61,6 +62,7 @@ public class ResultSetUtil {
 		int countSrc = metadataSrc.getColumnCount();
 		ResultSetMetaData metadataTar = target.getMetaData();
 		int countTar = metadataTar.getColumnCount();
+		String tabName = null;
 
 		Assert.assertEquals(countTar, countSrc, "Column counts do not match");
 
@@ -71,6 +73,7 @@ public class ResultSetUtil {
 			String srcType = metadataSrc.getColumnTypeName(i);
 			String colNameTar = metadataTar.getColumnName(i);
 			String tarType = metadataTar.getColumnTypeName(i);
+			tabName = metadataTar.getTableName(i);
 
 			if (!dbTypes.isCaseSensitive()) {
 				colNameSrc = colNameSrc.toLowerCase();
@@ -123,13 +126,24 @@ public class ResultSetUtil {
 							InputStream srcStream = null;
 							InputStream tarStream = null;
 							try {
-								srcStream = source.getBinaryStream(colName);
+								if (o1 instanceof Clob
+										&& source.toString()
+												.contains("ibm.db2")) {
+									byte[] charDataBytes = source.getString(
+											colName).getBytes();
+									srcStream = (InputStream) new ByteArrayInputStream(
+											charDataBytes);
+								} else {
+									srcStream = source.getBinaryStream(colName);
+								}
+
 								tarStream = target.getBinaryStream(colName);
 								compareStream(srcStream, tarStream, colName);
 							} catch (Exception e) {
 								e.printStackTrace();
 								throw new Exception(
-										"Failed to compare binary Stream for "
+										dTypeSrc
+												+ "Failed to compare binary Stream for "
 												+ colName, e);
 							} finally {
 								if (srcStream != null) {
@@ -158,17 +172,18 @@ public class ResultSetUtil {
 								continue;
 							if (o1 instanceof java.sql.Time)
 								continue;
-							Assert.assertEquals(o2, o1, "Data not matched for "
-									+ colName + " via " + jdbcType.name()
-									+ " comparison.");
+							Assert.assertEquals(o2, o1,
+									"Data not matched in table " + tabName
+											+ " for " + colName + " via "
+											+ jdbcType.name() + " comparison.");
 						}
 						if (flag) {
 							break;
 						}
 					}
 					Assert.assertTrue(flag, "Could'nt get values using "
-							+ resultString.toString() + " for " + dTypeSrc
-							+ " datatype");
+							+ resultString.toString() + "in table " + tabName
+							+ " for " + dTypeSrc + " datatype.");
 				}
 			}
 		}
