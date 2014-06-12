@@ -14,8 +14,8 @@
 
     <repositories>
         <repository>
-            <id>apache.org snapshots</id>
-            <url>https://repository.apache.org/content/groups/snapshots</url>
+            <id>local</id>
+            <url>file://${basedir}/.m2</url>
         </repository>
     </repositories>
 
