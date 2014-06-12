@@ -5,17 +5,17 @@
     <parent>
         <groupId>com.nuodb</groupId>
         <artifactId>nuodb-migrator-parent</artifactId>
-        <version>2.0</version>
+        <version>2.4</version>
     </parent>
 
     <artifactId>nuodb-migrator-core</artifactId>
-    <version>2.0</version>
+    <version>2.4</version>
     <modelVersion>4.0.0</modelVersion>
 
     <repositories>
         <repository>
-            <id>apache.org snapshots</id>
-            <url>https://repository.apache.org/content/groups/snapshots</url>
+            <id>local</id>
+            <url>file://${basedir}/.m2</url>
         </repository>
     </repositories>
 
@@ -118,7 +118,7 @@
         <dependency>
             <groupId>com.nuodb</groupId>
             <artifactId>nuodb-migrator-bootstrap</artifactId>
-            <version>2.0</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

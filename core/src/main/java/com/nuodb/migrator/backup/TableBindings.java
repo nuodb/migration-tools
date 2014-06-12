@@ -25,17 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.load;
+package com.nuodb.migrator.backup;
 
-import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.session.Session;
+
+import java.util.Iterator;
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newLinkedHashMap;
 
 /**
  * @author Sergey Bushik
  */
-public interface RowSetMapper {
+public class TableBindings implements Iterable<TableBinding> {
 
-    Table map(RowSet rowSet, Database database, Session session);
+    private Map<Table, TableBinding> tableBindings = newLinkedHashMap();
+
+    public TableBinding getTableBinding(Table table) {
+        TableBinding tableBinding = tableBindings.get(table);
+        if (tableBinding == null) {
+            tableBindings.put(table, tableBinding = new TableBinding(table));
+        }
+        return tableBinding;
+    }
+
+    @Override
+    public Iterator<TableBinding> iterator() {
+        return tableBindings.values().iterator();
+    }
 }

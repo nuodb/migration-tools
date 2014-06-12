@@ -209,8 +209,9 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
     protected void load(final RowSet rowSet, Database database) throws SQLException {
         if (!isEmpty(rowSet.getChunks())) {
-            final Connection connection = getTargetSession().getConnection();
-            final Table table = getRowSetMapper().map(rowSet, database);
+            final Session session = getTargetSession();
+            final Connection connection = session.getConnection();
+            final Table table = getRowSetMapper().map(rowSet, database, session);
             if (table != null) {
                 final Query query = createQuery(table, rowSet.getColumns());
                 final StatementTemplate template = new StatementTemplate(connection);

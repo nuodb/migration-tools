@@ -25,17 +25,71 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.load;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.utils.ObjectUtils;
 
 /**
  * @author Sergey Bushik
  */
-public interface RowSetMapper {
+public class FetchMode {
 
-    Table map(RowSet rowSet, Database database, Session session);
+    public static boolean STREAM = true;
+    public static int FETCH_SIZE = 100;
+
+    private boolean stream = STREAM;
+    private int fetchSize = FETCH_SIZE;
+
+    public FetchMode() {
+    }
+
+    public FetchMode(boolean stream) {
+        this.stream = stream;
+    }
+
+    public FetchMode(boolean stream, int fetchSize) {
+        this.stream = stream;
+        this.fetchSize = fetchSize;
+    }
+
+    public boolean isStream() {
+        return stream;
+    }
+
+    public void setStream(boolean stream) {
+        this.stream = stream;
+    }
+
+    public int getFetchSize() {
+        return fetchSize;
+    }
+
+    public void setFetchSize(int fetchSize) {
+        this.fetchSize = fetchSize;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FetchMode that = (FetchMode) o;
+
+        if (stream != that.stream) return false;
+        if (fetchSize != that.fetchSize) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (stream ? 1 : 0);
+        result = 31 * result + fetchSize;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
+    }
 }

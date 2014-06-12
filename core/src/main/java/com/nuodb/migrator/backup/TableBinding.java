@@ -25,17 +25,49 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.load;
+package com.nuodb.migrator.backup;
 
-import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.Constraint;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.session.Session;
+
+import java.util.Collection;
+
+import static com.google.common.collect.Sets.newLinkedHashSet;
 
 /**
  * @author Sergey Bushik
  */
-public interface RowSetMapper {
+public class TableBinding {
 
-    Table map(RowSet rowSet, Database database, Session session);
+    private final Table table;
+    private Collection<Constraint> references = newLinkedHashSet();
+    private boolean declared;
+
+    public TableBinding(Table table) {
+        this.table = table;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public Collection<Constraint> getReferences() {
+        return references;
+    }
+
+    public void addReference(Constraint reference) {
+        this.references.add(reference);
+    }
+
+    public void setReferences(Collection<Constraint> references) {
+        this.references = references;
+    }
+
+    public boolean isDeclared() {
+        return declared;
+    }
+
+    public void setDeclared(boolean declared) {
+        this.declared = declared;
+    }
 }

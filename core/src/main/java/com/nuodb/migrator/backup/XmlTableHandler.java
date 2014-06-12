@@ -27,8 +27,8 @@
  */
 package com.nuodb.migrator.backup;
 
-import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 import com.nuodb.migrator.jdbc.metadata.Index;
@@ -45,14 +45,16 @@ import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.spec.MetaDataSpec.TABLE_TYPES;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 import static org.apache.commons.lang3.ArrayUtils.indexOf;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"all"})
 public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
 
     private static final String TYPE_ATTRIBUTE = "type";
@@ -62,16 +64,35 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     private static final String INDEX_ELEMENT = "index";
     private static final String FOREIGN_KEY = "foreign-key";
     private static final String CHECK_ELEMENT = "check";
+    private static final String TABLE_BINDINGS = getClassName(XmlForeignKeyHandler.class) + ".TableBindings";
 
     public XmlTableHandler() {
         super(Table.class);
+    }
+
+    public static TableBinding getTableBinding(Table table, XmlReadContext context) {
+        return getTableBindings(context).getTableBinding(table);
+    }
+
+    /**
+     * Returns table bindings
+     *
+     * @param context
+     * @return
+     */
+    public static TableBindings getTableBindings(XmlReadContext context) {
+        TableBindings tableBindings = (TableBindings) context.get(TABLE_BINDINGS);
+        if (tableBindings == null) {
+            context.put(TABLE_BINDINGS, tableBindings = new TableBindings());
+        }
+        return tableBindings;
     }
 
     @Override
     protected Table createTarget(InputNode input, Class<? extends Table> type) {
         return null;
     }
-
+    
     @Override
     protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Table> context) throws Exception {
         Schema schema = getParent(context);
@@ -79,6 +100,7 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
         Table table = schema.hasTable(name) ? schema.getTable(name) : schema.addTable(name);
         table.setType(context.readAttribute(input, TYPE_ATTRIBUTE, String.class));
         context.setTarget(table);
+        getTableBinding(table, context).setDeclared(true);
     }
 
     @Override

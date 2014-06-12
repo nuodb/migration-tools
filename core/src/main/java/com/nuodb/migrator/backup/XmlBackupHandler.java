@@ -27,8 +27,11 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.google.common.base.Function;
+import com.nuodb.migrator.jdbc.metadata.Constraint;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
@@ -37,7 +40,10 @@ import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Iterables.transform;
+import static com.nuodb.migrator.backup.XmlTableHandler.getTableBindings;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -51,6 +57,33 @@ public class XmlBackupHandler extends XmlReadWriteHandlerBase<Backup> implements
 
     public XmlBackupHandler() {
         super(Backup.class);
+    }
+
+    @Override
+    public Backup read(InputNode input, Class<? extends Backup> type, XmlReadContext context) {
+        Backup backup = super.read(input, type, context);
+        processTableBindings(getTableBindings(context));
+        return backup;
+    }
+
+    protected void processTableBindings(TableBindings tableBindings) {
+        for (TableBinding tableBinding : tableBindings) {
+            Table table = tableBinding.getTable();
+            Collection<Constraint> references = tableBinding.getReferences();
+            if (!tableBinding.isDeclared() && !isEmpty(references)) {
+                Iterable<String> referenced = transform(references, new Function<Constraint, String>() {
+                    @Override
+                    public String apply(Constraint constraint) {
+                        return constraint.getQualifiedName();
+                    }
+                });
+                if (logger.isWarnEnabled()) {
+                    logger.warn(format("Ignoring table %s, which is referenced by %s constraints, " +
+                                    "but is not declared explicitly", table.getQualifiedName(), referenced));
+                }
+                table.getSchema().removeTable(table);
+            }
+        }
     }
 
     @Override

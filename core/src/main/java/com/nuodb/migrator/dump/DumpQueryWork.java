@@ -34,6 +34,7 @@ import com.nuodb.migrator.backup.format.OutputFormat;
 import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import com.nuodb.migrator.jdbc.JdbcUtils;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
+import com.nuodb.migrator.jdbc.dialect.FetchMode;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.model.FieldFactory;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
@@ -90,7 +91,8 @@ public class DumpQueryWork extends WorkBase {
         resultSet = querySplit.getResultSet(getSession().getConnection(), new StatementCallback() {
             @Override
             public void executeStatement(Statement statement) throws SQLException {
-                dialect.setStreamResults(statement, dumpQuery.getColumns() != null);
+                boolean stream = dumpQuery.getColumns() != null;
+                dialect.setFetchMode(statement, new FetchMode(stream));
             }
         });
 

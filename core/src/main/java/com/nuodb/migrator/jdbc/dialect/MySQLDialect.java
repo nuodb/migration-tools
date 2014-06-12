@@ -41,6 +41,7 @@ import java.util.TimeZone;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
+import static java.lang.Integer.MIN_VALUE;
 import static java.lang.String.valueOf;
 
 /**
@@ -147,8 +148,8 @@ public class MySQLDialect extends SimpleDialect {
      * @throws SQLException
      */
     @Override
-    public void setStreamResults(Statement statement, boolean streamResults) throws SQLException {
-        statement.setFetchSize(streamResults ? Integer.MIN_VALUE : 0);
+    public void setFetchMode(Statement statement, FetchMode fetchMode) throws SQLException {
+        statement.setFetchSize(fetchMode.isStream() ? MIN_VALUE : fetchMode.getFetchSize());
     }
 
     @Override

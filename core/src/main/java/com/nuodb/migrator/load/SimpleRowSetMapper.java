@@ -27,13 +27,13 @@
  */
 package com.nuodb.migrator.load;
 
-import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.QueryRowSet;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.TableRowSet;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import org.slf4j.Logger;
 
@@ -54,17 +54,17 @@ public class SimpleRowSetMapper implements RowSetMapper {
     private final transient Logger logger = getLogger(getClass());
 
     @Override
-    public Table map(RowSet rowSet, Database database) {
+    public Table map(RowSet rowSet, Database database, Session session) {
         Table table = null;
         if (rowSet instanceof TableRowSet) {
-            table = map((TableRowSet) rowSet, database);
+            table = map((TableRowSet) rowSet, database, session);
         } else if (rowSet instanceof QueryRowSet) {
-            table = map((QueryRowSet) rowSet, database);
+            table = map((QueryRowSet) rowSet, database, session);
         }
         return table;
     }
 
-    protected Table map(TableRowSet rowSet, Database database) {
+    protected Table map(TableRowSet rowSet, Database database, Session session) {
         Dialect dialect = database.getDialect();
         List<String> qualifiers = newArrayList();
         int maximum = 0;
@@ -74,10 +74,8 @@ public class SimpleRowSetMapper implements RowSetMapper {
         if (dialect.supportsSchemas()) {
             maximum++;
         }
-        Backup backup = rowSet.getBackup();
-        ConnectionSpec connectionSpec = database.getConnectionSpec();
-        if ((connectionSpec.getCatalog() != null || connectionSpec.getSchema() != null) &&
-                backup.getDatabase() != null && backup.getDatabase().getSchemas().size() <= 1) {
+        ConnectionSpec connectionSpec = session.getConnectionSpec();
+        if (connectionSpec.getCatalog() != null || connectionSpec.getSchema() != null) {
             addIgnoreNull(qualifiers, connectionSpec.getCatalog());
             addIgnoreNull(qualifiers, connectionSpec.getSchema());
         } else {
@@ -96,7 +94,7 @@ public class SimpleRowSetMapper implements RowSetMapper {
         return database.findTable(target);
     }
 
-    protected Table map(QueryRowSet rowSet, Database database) {
+    protected Table map(QueryRowSet rowSet, Database database, Session session) {
         if (logger.isWarnEnabled()) {
             logger.warn(format("Can't map %s query row set %s to a table, explicit mapping is required",
                     rowSet.getName(), rowSet.getQuery()));

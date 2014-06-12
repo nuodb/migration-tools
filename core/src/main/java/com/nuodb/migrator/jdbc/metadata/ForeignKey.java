@@ -29,7 +29,6 @@ package com.nuodb.migrator.jdbc.metadata;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 
 import java.util.Collection;
 import java.util.Map;
@@ -52,6 +51,10 @@ public class ForeignKey extends ConstraintBase {
 
     public ForeignKey() {
         super(FOREIGN_KEY);
+    }
+
+    public ForeignKey(String name) {
+        super(FOREIGN_KEY, name);
     }
 
     public ForeignKey(Identifier name) {
@@ -78,6 +81,10 @@ public class ForeignKey extends ConstraintBase {
     public void setForeignTable(Table foreignTable) {
         setTable(foreignTable);
         this.foreignTable = foreignTable;
+    }
+
+    public void addReference(Column primaryColumn, Column foreignColumn) {
+        addReference(primaryColumn, foreignColumn, references.size());
     }
 
     public void addReference(Column primaryColumn, Column foreignColumn, int position) {
