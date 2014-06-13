@@ -25,27 +25,43 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.integration.types;
+package com.nuodb.migrator.integration.common;
+
+import com.nuodb.migrator.integration.MigrationTestBase;
+import org.testng.Assert;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Krishnamoorthy Dhandapani
  */
-public class DatabaseTypesFactory {
+public class BaseDataTypeTest extends MigrationTestBase {
 
-	public DatabaseTypes getDatabaseTypes(String driverClassName) {
-		if (driverClassName.toLowerCase().contains("mysql")) {
-			return new MySQLTypes();
-		} else if (driverClassName.toLowerCase().contains("nuodb")) {
-			return new NuoDBTypes();
-		} else if (driverClassName.toLowerCase().contains("jtds")) {
-			return new SQLServerTypes();
-		} else if (driverClassName.toLowerCase().contains("postgresql")) {
-			return new PostgreSQLTypes();
-		} else if (driverClassName.toLowerCase().contains("oracle")) {
-			return new OracleTypes();
-		} else if (driverClassName.toLowerCase().contains("db2")) {
-			return new Db2Types();
+	public void testDataType(String tableName) throws Exception {
+		String query = "select * from " + tableName;
+		verifyData(query, query);
+	}
+
+	public void verifyData(String sqlStr1, String sqlStr2) throws SQLException,
+			Exception {
+		Statement stmt1 = null, stmt2 = null;
+		ResultSet rs1 = null, rs2 = null;
+		try {
+			stmt1 = sourceConnection.createStatement();
+			rs1 = stmt1.executeQuery(sqlStr1);
+
+			Assert.assertNotNull(rs1);
+
+			stmt2 = nuodbConnection.createStatement();
+			rs2 = stmt2.executeQuery(sqlStr2);
+
+			Assert.assertNotNull(rs2);
+
+			rsUtil.assertIsEqual(rs1, rs2, true, true);
+
+		} finally {
+			closeAll(rs1, stmt1, rs2, stmt2);
 		}
-		return null;
 	}
 }

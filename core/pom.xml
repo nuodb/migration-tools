@@ -376,5 +376,37 @@
                 </plugins>
             </build>
         </profile>
+		<profile>
+            <id>db2-integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.13</version>
+                        <configuration>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>testng-db2-integration-tests.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                            <systemPropertyVariables>
+                                <source.driver>${SOURCE_DRIVER}</source.driver>
+                                <source.url>${SOURCE_URL}</source.url>
+                                <source.username>${SOURCE_USERNAME}</source.username>
+                                <source.password>${SOURCE_PASSWORD}</source.password>
+                                <source.schema>${SOURCE_SCHEMA}</source.schema>
+                                <source.jdbcjar>${SOURCE_JDBCJAR}</source.jdbcjar>
+                                <nuodb.home>${NUODB_HOME}</nuodb.home>
+                                <nuodb.driver>${NUODB_DRIVER}</nuodb.driver>
+                                <nuodb.url>${NUODB_URL}</nuodb.url>
+                                <nuodb.username>${NUODB_USERNAME}</nuodb.username>
+                                <nuodb.password>${NUODB_PASSWORD}</nuodb.password>
+                                <nuodb.schema>${NUODB_SCHEMA}</nuodb.schema>
+                                <nuodb.jdbcjar>${NUODB_JDBCJAR}</nuodb.jdbcjar>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>

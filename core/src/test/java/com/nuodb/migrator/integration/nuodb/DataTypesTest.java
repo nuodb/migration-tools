@@ -25,27 +25,35 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.integration.types;
+package com.nuodb.migrator.integration.nuodb;
+
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 
 /**
  * @author Krishnamoorthy Dhandapani
  */
-public class DatabaseTypesFactory {
+@Test(groups = { "nuodbintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
+public class DataTypesTest extends BaseDataTypeTest {
 
-	public DatabaseTypes getDatabaseTypes(String driverClassName) {
-		if (driverClassName.toLowerCase().contains("mysql")) {
-			return new MySQLTypes();
-		} else if (driverClassName.toLowerCase().contains("nuodb")) {
-			return new NuoDBTypes();
-		} else if (driverClassName.toLowerCase().contains("jtds")) {
-			return new SQLServerTypes();
-		} else if (driverClassName.toLowerCase().contains("postgresql")) {
-			return new PostgreSQLTypes();
-		} else if (driverClassName.toLowerCase().contains("oracle")) {
-			return new OracleTypes();
-		} else if (driverClassName.toLowerCase().contains("db2")) {
-			return new Db2Types();
-		}
-		return null;
+	@DataProvider(name = "dataTypeNuodb")
+	public Object[][] createDataTypeData() {
+		return new Object[][] { { "testdata_smallint" }, { "testdata_bigint" },
+				{ "testdata_integer" }, { "testdata_decimal" },
+				{ "testdata_double_precision" }, { "testdata_number" },
+				{ "testdata_numeric" }, { "testdata_string" },
+				{ "testdata_varchar" }, { "testdata_clob" },
+				{ "testdata_national_char" }, { "testdata_blob" },
+				{ "testdata_binary" }, { "testdata_binary_varying" },
+				{ "testdata_boolean" }, { "testdata_enum" },
+				{ "testdata_date" }, { "testdata_timestamp" },
+				{ "testdata_time" } };
+	}
+
+	@Test(dataProvider = "dataTypeNuodb")
+	public void testDataType(String tableName) throws Exception {
+		super.testDataType(tableName);
 	}
 }

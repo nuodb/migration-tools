@@ -25,27 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.integration.types;
+package com.nuodb.migrator.integration.oracle;
+
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 
 /**
  * @author Krishnamoorthy Dhandapani
  */
-public class DatabaseTypesFactory {
+@Test(groups = { "oracleintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
+public class DataTypesTest extends BaseDataTypeTest {
 
-	public DatabaseTypes getDatabaseTypes(String driverClassName) {
-		if (driverClassName.toLowerCase().contains("mysql")) {
-			return new MySQLTypes();
-		} else if (driverClassName.toLowerCase().contains("nuodb")) {
-			return new NuoDBTypes();
-		} else if (driverClassName.toLowerCase().contains("jtds")) {
-			return new SQLServerTypes();
-		} else if (driverClassName.toLowerCase().contains("postgresql")) {
-			return new PostgreSQLTypes();
-		} else if (driverClassName.toLowerCase().contains("oracle")) {
-			return new OracleTypes();
-		} else if (driverClassName.toLowerCase().contains("db2")) {
-			return new Db2Types();
-		}
-		return null;
+	@DataProvider(name = "dataTypeOracle")
+	public Object[][] createDataTypeData() {
+		return new Object[][] { { "testdata_number" }, { "testdata_number" },
+				{ "testdata_integer" }, { "testdata_float" },
+				{ "testdata_binary_float" }, { "testdata_binary_double" },
+				{ "testdata_real" }, { "testdata_varchar" },
+				{ "testdata_char_varying" }, { "testdata_char" },
+				{ "testdata_date" }, { "testdata_timestamp" },
+				{ "testdata_withtimezone" }, { "testdata_withlocaltimezone" },
+				{ "testdata_clob" }, { "testdata_blob" }, { "testdata_raw" },
+				{ "testdata_long" } };
+	}
+
+	@Test(dataProvider = "dataTypeOracle")
+	public void testDataType(String tableName) throws Exception {
+		super.testDataType(tableName);
 	}
 }

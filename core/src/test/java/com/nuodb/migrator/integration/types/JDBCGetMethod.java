@@ -27,7 +27,9 @@
  */
 package com.nuodb.migrator.integration.types;
 
+/**
+ * @author Krishnamoorthy Dhandapani
+ */
 public enum JDBCGetMethod {
-    BOOLEAN, STRING, BIGDECIMAL, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, BYTES, DATE, TIME, TIMESTAMP, CLOB, BLOB,
-    ARRAY, REF, STRUCT
+	BOOLEAN, STRING, BIGDECIMAL, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, BYTES, DATE, TIME, TIMESTAMP, CLOB, BLOB, ARRAY, REF, STRUCT
 }

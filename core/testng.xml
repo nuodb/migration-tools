@@ -12,6 +12,7 @@
                 <exclude name="sqlserverintegrationtest"/>
                 <exclude name="postgresqlintegrationtest"/>
                 <exclude name="oracleintegrationtest"/>
+		<exclude name="db2integrationtest"/>
                 <exclude name="disabled"/>
             </run>
         </groups>

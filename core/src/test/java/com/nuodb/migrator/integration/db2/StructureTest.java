@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.integration.oracle;
+package com.nuodb.migrator.integration.db2;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,7 +38,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.nuodb.migrator.integration.MigrationTestBase;
-import com.nuodb.migrator.integration.types.OracleTypes;
+import com.nuodb.migrator.integration.types.Db2Types;
 
 /**
  * Test to make sure all the Tables, Constraints, Views, Triggers etc have been
@@ -46,14 +46,14 @@ import com.nuodb.migrator.integration.types.OracleTypes;
  * 
  * @author Krishnamoorthy Dhandapani
  */
-@Test(groups = { "oracleintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
+@Test(groups = { "db2integrationtest" }, dependsOnGroups = { "dataloadperformed" })
 public class StructureTest extends MigrationTestBase {
 
 	/*
 	 * test if all the Tables are migrated with the right columns
 	 */
 	public void testTables() throws Exception {
-		String sqlStr1 = "select table_name from user_tables";
+		String sqlStr1 = "select TABNAME from syscat.tables where tabschema = ?";
 		String sqlStr2 = "select tablename from system.TABLES where TYPE = 'TABLE' and schema = ?";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
@@ -61,7 +61,7 @@ public class StructureTest extends MigrationTestBase {
 		ArrayList<String> list2 = new ArrayList<String>();
 		try {
 			stmt1 = sourceConnection.prepareStatement(sqlStr1);
-			// stmt1.setString(1, sourceConnection.getCatalog());
+			stmt1.setString(1, sourceSchemaUsed);
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
@@ -100,19 +100,17 @@ public class StructureTest extends MigrationTestBase {
 	 * TODO: Need to add check for complex data types with scale and precision
 	 */
 	private void verifyTableColumns(String tableName) throws Exception {
-		String sqlStr1 = "SELECT * FROM all_tab_cols where table_name = "
-				+ "? order by column_id";
+		String sqlStr1 = "select c.tabname,c.colname,c.length,c.typename from syscat.columns c where c.tabschema=? and c.tabname=?";
 		String sqlStr2 = "select * from  system.FIELDS F inner join system.DATATYPES D on "
 				+ "F.DATATYPE = D.ID and F.SCHEMA = ? and F.TABLENAME = ? order by F.FIELDPOSITION";
-		String[] colNames = new String[] { "COLUMN_NAME", "DATA_TYPE",
-				"DATA_LENGTH", "DATA_DEFAULT", "DATA_PRECISION", "DATA_SCALE" };
+		String[] colNames = new String[] { "COLNAME", "TYPENAME", "LENGTH" };
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		HashMap<String, HashMap<String, String>> tabColMap = new HashMap<String, HashMap<String, String>>();
 		try {
 			stmt1 = sourceConnection.prepareStatement(sqlStr1);
-			// stmt1.setString(1, sourceConnection.getCatalog());
-			stmt1.setString(1, tableName);
+			stmt1.setString(1, sourceSchemaUsed);
+			stmt1.setString(2, tableName);
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
@@ -150,30 +148,23 @@ public class StructureTest extends MigrationTestBase {
 						"Column name " + colName + " of table " + tableName
 								+ " did not match");
 
-				int srcJdbcType = OracleTypes.getMappedJDBCType(
+				int srcJdbcType = rs2.getInt("JDBCTYPE");
+				int tarJdbcType = Db2Types.getMappedJDBCType(
 						tabColDetailsMap.get(colNames[1]),
-						tabColDetailsMap.get(colNames[4]),
-						tabColDetailsMap.get(colNames[5]));
-				int tarJdbcType = rs2.getInt("JDBCTYPE");
-
+						tabColDetailsMap.get(colNames[2]));
 				/*
 				 * System.out.println("colName:" + colName + " ::" +
 				 * " tableName:" + tableName + " ::" + " datatype:" +
 				 * tabColDetailsMap.get(colNames[1]));
 				 */
-
-				Assert.assertEquals(tarJdbcType, srcJdbcType,
+				Assert.assertEquals(srcJdbcType, tarJdbcType,
 						"JDBCTYPE of column " + colName + " of table "
 								+ tableName + " did not match");
 
 				String srcLength = rs2.getString("LENGTH");
-
-				String tarLength = OracleTypes.getMappedLength(
+				String tarLength = Db2Types.getMappedLength(
 						tabColDetailsMap.get(colNames[1]),
-						tabColDetailsMap.get(colNames[2]),
-						tabColDetailsMap.get(colNames[4]),
-						tabColDetailsMap.get(colNames[5]));
-
+						tabColDetailsMap.get(colNames[2]));
 				Assert.assertEquals(srcLength, tarLength, "LENGTH of column "
 						+ colName + " of table " + tableName + " did not match");
 				// TBD
@@ -187,8 +178,7 @@ public class StructureTest extends MigrationTestBase {
 				/*
 				 * String val = tabColDetailsMap.get(colNames[3]);
 				 * Assert.assertEquals(rs2.getString("DEFAULTVALUE"),
-				 * OracleTypes.getMappedDefault(
-				 * tabColDetailsMap.get(colNames[1]),
+				 * Db2Types.getMappedDefault( tabColDetailsMap.get(colNames[1]),
 				 * tabColDetailsMap.get(colNames[3])));
 				 */
 			}
@@ -209,11 +199,9 @@ public class StructureTest extends MigrationTestBase {
 	/*
 	 * test if all the Primary Constraints are migrated
 	 */
+
 	public void testPrimaryKeyConstraints() throws Exception {
-		String sqlStr1 = "SELECT cols.table_name, cols.column_name FROM all_constraints cons, all_cons_columns"
-				+ " cols WHERE cons.constraint_type = 'P' AND cons.constraint_name = cols.constraint_name AND cons"
-				+ ".owner = cols.owner "
-				+ " AND cons.owner= ? AND cols.TABLE_NAME not like 'BIN$%' ORDER BY cols.table_name, cols.position ";
+		String sqlStr1 = "SELECT colname,tabname FROM SYSCAT.COLUMNS where KeySeq = 1 and tabschema=?";
 		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES SI INNER JOIN SYSTEM.INDEXFIELDS SIF ON "
 				+ "SI.SCHEMA=SIF.SCHEMA AND "
 				+ "SI.TABLENAME=SIF.TABLENAME AND "
@@ -229,8 +217,8 @@ public class StructureTest extends MigrationTestBase {
 			boolean sourceFound = false;
 			while (rs1.next()) {
 				sourceFound = true;
-				String tName = rs1.getString("TABLE_NAME");
-				String cName = rs1.getString("COLUMN_NAME");
+				String tName = rs1.getString("tabname");
+				String cName = rs1.getString("colname");
 				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
 				stmt2.setString(1, nuodbSchemaUsed);
 				stmt2.setString(2, tName);
@@ -258,10 +246,7 @@ public class StructureTest extends MigrationTestBase {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testUniqueKeyConstraints() throws Exception {
-		String sqlStr1 = "SELECT cols.table_name, cols.column_name FROM all_constraints cons, all_cons_columns"
-				+ " cols WHERE cons.constraint_type = 'U' AND cons.constraint_name = cols.constraint_name AND cons"
-				+ ".owner = cols.owner "
-				+ " AND cons.owner= ? AND cols.TABLE_NAME not like 'BIN$%' ORDER BY cols.table_name, cols.position ";
+		String sqlStr1 = "select tabname,colnames from syscat.indexes where tabschema=? and uniquerule='U'";
 		String sqlStr2 = "SELECT FIELD FROM SYSTEM.INDEXES SI INNER JOIN SYSTEM.INDEXFIELDS SIF ON "
 				+ "SI.SCHEMA=SIF.SCHEMA AND "
 				+ "SI.TABLENAME=SIF.TABLENAME AND "
@@ -277,8 +262,8 @@ public class StructureTest extends MigrationTestBase {
 			boolean sourceFound = false;
 			while (rs1.next()) {
 				sourceFound = true;
-				String tName = rs1.getString("TABLE_NAME");
-				String cName = rs1.getString("COLUMN_NAME");
+				String tName = rs1.getString("tabname");
+				String cName = rs1.getString("colnames").substring(1, 3);
 				if (!map.containsKey(tName)) {
 					ArrayList list = new ArrayList();
 					list.add(cName);
@@ -329,11 +314,7 @@ public class StructureTest extends MigrationTestBase {
 	 * test if all the Foreign Key Constraints are migrated
 	 */
 	public void testForeignKeyConstraints() throws Exception {
-		String sqlStr1 = "SELECT a.table_name, a.column_name, uc.table_name, uc.column_name  "
-				+ "FROM all_cons_columns a JOIN all_constraints c ON a.owner = c.owner AND a.constraint_name = c"
-				+ ".constraint_name "
-				+ "JOIN all_constraints c_pk ON c.r_owner = c_pk.owner AND c.r_constraint_name = c_pk.constraint_name "
-				+ "join USER_CONS_COLUMNS uc on uc.constraint_name = c.r_constraint_name";
+		String sqlStr1 = "select pk_colnames,reftabname as parenttable,fk_colnames,tabname as foreigntable from SYSCAT.REFERENCES where tabschema=?";
 		// WHERE C.R_OWNER = ?
 		String sqlStr2 = "SELECT PRIMARYTABLE.SCHEMA AS PKTABLE_SCHEM, PRIMARYTABLE.TABLENAME AS PKTABLE_NAME, "
 				+ " PRIMARYFIELD.FIELD AS PKCOLUMN_NAME, FOREIGNTABLE.SCHEMA AS FKTABLE_SCHEM, "
@@ -349,24 +330,22 @@ public class StructureTest extends MigrationTestBase {
 				+ "INNER JOIN SYSTEM.FIELDS FOREIGNFIELD ON FOREIGNTABLE.SCHEMA=FOREIGNFIELD.SCHEMA "
 				+ "AND FOREIGNTABLE.TABLENAME=FOREIGNFIELD.TABLENAME "
 				+ "AND FOREIGNKEYS.FOREIGNFIELDID=FOREIGNFIELD.FIELDID "
-				+ "WHERE PRIMARYTABLE.SCHEMA=? AND PRIMARYTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, "
-				+ "KEY_SEQ ASC";
+				+ "WHERE PRIMARYTABLE.SCHEMA=? AND PRIMARYTABLE.TABLENAME=? ORDER BY PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ASC";
 		PreparedStatement stmt1 = null, stmt2 = null;
 		ResultSet rs1 = null, rs2 = null;
 		try {
 			stmt1 = sourceConnection.prepareStatement(sqlStr1);
-			// stmt1.setString(1, sourceConnection.getCatalog());
+			stmt1.setString(1, sourceSchemaUsed);
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
 			boolean sourceFound = false;
 			while (rs1.next()) {
 				sourceFound = true;
-				String tName = rs1.getString(1);
-				String cName = rs1.getString(2);
-				String rtName = rs1.getString(3);
-				String rcName = rs1.getString(4);
-
+				String tName = rs1.getString("foreigntable");
+				String cName = rs1.getString("fk_colnames").trim();
+				String rtName = rs1.getString("parenttable");
+				String rcName = rs1.getString("pk_colnames").trim();
 				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
 				stmt2.setString(1, nuodbSchemaUsed);
 				stmt2.setString(2, rtName);
@@ -382,21 +361,21 @@ public class StructureTest extends MigrationTestBase {
 					Assert.assertEquals(
 							rs2.getString("FKCOLUMN_NAME"),
 							cName,
-							"Foreign key column name"
+							"Foreign key column name "
 									+ rs2.getString("FKCOLUMN_NAME")
-									+ "of table"
+									+ " of table"
 									+ rs2.getString("FKTABLE_NAME")
-									+ "did not match");
+									+ " did not match");
 					Assert.assertEquals(rs2.getString("PKTABLE_NAME"), rtName,
 							"Primary key table name did not match");
 					Assert.assertEquals(
 							rs2.getString("PKCOLUMN_NAME"),
 							rcName,
-							"Primary key column name"
+							"Primary key column name "
 									+ rs2.getString("PKCOLUMN_NAME")
-									+ "of table"
+									+ " of table"
 									+ rs2.getString("PKTABLE_NAME")
-									+ "did not match");
+									+ " did not match");
 				}
 				Assert.assertTrue(found);
 				rs2.close();
@@ -412,9 +391,7 @@ public class StructureTest extends MigrationTestBase {
 	 * test if all the auto increment settings are migrated
 	 */
 	public void testAutoIncrement() throws Exception {
-		String sqlStr1 = "select ut.table_name , ud.referenced_name as sequence_name from   user_dependencies ud "
-				+ "join user_triggers ut on (ut.trigger_name = ud.name) where ud.type='TRIGGER'  and ud.referenced_type='SEQUENCE' "
-				+ "and ut.TABLE_NAME not like 'BIN$%' ";
+		String sqlStr1 = "select tabname, colname from syscat.columns where identity ='Y' and tabschema=?";
 		String sqlStr2 = "SELECT S.SEQUENCENAME FROM SYSTEM.SEQUENCES S "
 				+ "INNER JOIN SYSTEM.FIELDS F ON S.SCHEMA=F.SCHEMA "
 				+ "WHERE F.SCHEMA=? AND F.TABLENAME=? ";
@@ -422,14 +399,14 @@ public class StructureTest extends MigrationTestBase {
 		ResultSet rs1 = null, rs2 = null;
 		try {
 			stmt1 = sourceConnection.prepareStatement(sqlStr1);
-			// stmt1.setString(1, sourceConnection.getCatalog());
+			stmt1.setString(1, sourceSchemaUsed);
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
 			boolean sourceFound = false;
 			while (rs1.next()) {
 				sourceFound = true;
-				String tName = rs1.getString("TABLE_NAME");
+				String tName = rs1.getString("tabname");
 				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
 				stmt2.setString(1, nuodbSchemaUsed);
 				stmt2.setString(2, tName);
@@ -460,9 +437,7 @@ public class StructureTest extends MigrationTestBase {
 	 * test if all the Indexes are migrated
 	 */
 	public void testIndexes() throws Exception {
-		String sqlStr1 = "select c.index_name,c.column_name,c.TABLE_NAME FROM   user_indexes i, user_ind_columns c "
-				+ "WHERE  i.index_name = c.index_name  AND c.INDEX_NAME not like 'SYS_%' AND i.INDEX_NAME "
-				+ "not like 'SYS_%' ORDER  BY c.index_name, c.column_position";
+		String sqlStr1 = "select tabname,indname,colnames from syscat.indexes where tabschema=? and indname not like 'SQL%' ";
 		String sqlStr2 = "SELECT I.INDEXNAME FROM SYSTEM.INDEXES I "
 				+ "INNER JOIN SYSTEM.INDEXFIELDS F ON I.SCHEMA=F.SCHEMA AND I.TABLENAME=F.TABLENAME AND I.INDEXNAME=F.INDEXNAME "
 				+ "WHERE I.INDEXTYPE=2 AND F.SCHEMA=? AND F.TABLENAME=? AND F.FIELD=?";
@@ -470,16 +445,16 @@ public class StructureTest extends MigrationTestBase {
 		ResultSet rs1 = null, rs2 = null;
 		try {
 			stmt1 = sourceConnection.prepareStatement(sqlStr1);
-			// stmt1.setString(1, sourceConnection.getCatalog());
+			stmt1.setString(1, sourceSchemaUsed);
 			rs1 = stmt1.executeQuery();
 
 			Assert.assertNotNull(rs1);
 			boolean sourceFound = false;
 			while (rs1.next()) {
 				sourceFound = true;
-				// String iName = rs1.getString(1);
-				String cName = rs1.getString(2);
-				String tName = rs1.getString(3);
+				String cName = rs1.getString("colnames").substring(
+						rs1.getString("colnames").indexOf("+") + 1);
+				String tName = rs1.getString("tabname");
 				stmt2 = nuodbConnection.prepareStatement(sqlStr2);
 				stmt2.setString(1, nuodbSchemaUsed);
 				stmt2.setString(2, tName);

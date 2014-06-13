@@ -25,27 +25,40 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.integration.types;
+package com.nuodb.migrator.integration.sqlserver;
+
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.nuodb.migrator.integration.common.BaseDataTypeTest;
 
 /**
  * @author Krishnamoorthy Dhandapani
  */
-public class DatabaseTypesFactory {
+@Test(groups = { "sqlserverintegrationtest" }, dependsOnGroups = { "dataloadperformed" })
+public class DataTypesTest extends BaseDataTypeTest {
 
-	public DatabaseTypes getDatabaseTypes(String driverClassName) {
-		if (driverClassName.toLowerCase().contains("mysql")) {
-			return new MySQLTypes();
-		} else if (driverClassName.toLowerCase().contains("nuodb")) {
-			return new NuoDBTypes();
-		} else if (driverClassName.toLowerCase().contains("jtds")) {
-			return new SQLServerTypes();
-		} else if (driverClassName.toLowerCase().contains("postgresql")) {
-			return new PostgreSQLTypes();
-		} else if (driverClassName.toLowerCase().contains("oracle")) {
-			return new OracleTypes();
-		} else if (driverClassName.toLowerCase().contains("db2")) {
-			return new Db2Types();
-		}
-		return null;
+	@DataProvider(name = "dataTypeSQLServer")
+	public Object[][] createDataTypeData() {
+		return new Object[][] { { "testdata_bigint" }, { "testdata_integer" },
+				{ "testdata_smallint" }, { "testdata_tinyint" },
+				{ "testdata_varchar" }, { "testdata_nvarchar" },
+				{ "testdata_char" }, { "testdata_nchar" }, { "testdata_text" },
+				{ "testdata_ntext" }, { "testdata_bit" },
+				{ "testdata_numeric" }, { "testdata_decimal" },
+				{ "testdata_money" }, { "testdata_smallmoney" },
+				{ "testdata_real" }, { "testdata_float" },
+				{ "testdata_hierarchyid" }, { "testdata_uniqueidentifier" },
+				{ "testdata_image" }, { "testdata_binary" },
+				{ "testdata_varbinary" }, { "testdata_time" },
+				{ "testdata_date" }, { "testdata_smalldatetime" },
+				{ "testdata_datetime" }, { "testdata_datetimeoffset" },
+				{ "testdata_datetime2" } };
 	}
+
+	@Test(dataProvider = "dataTypeSQLServer")
+	public void testDataType(String tableName) throws Exception {
+		super.testDataType(tableName);
+	}
+
 }
