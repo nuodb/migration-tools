@@ -27,21 +27,31 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.type.JdbcValueAccess;
 
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
+import java.util.Map;
+
+import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleValueFormatRegistryResolver extends SimpleCachingServiceResolver<ValueFormatRegistry>
-        implements ValueFormatRegistryResolver {
+public class PostgreSQLBitVaryingValueFormat extends ValueFormatBase<String> {
 
-    public SimpleValueFormatRegistryResolver() {
-        super(SimpleValueFormatRegistry.class);
-        register(DB2, new DB2ValueFormatRegistry());
-        register(NUODB, new NuoDBValueFormatRegistry());
-        register(ORACLE, new OracleValueFormatRegistry());
-        register(POSTGRE_SQL, new PostgreSQLValueFormatRegistry());
+    @Override
+    protected Value doGetValue(JdbcValueAccess<String> access, Map<String, Object> options) throws Exception {
+        return string(access.getValue(String.class, options));
+    }
+
+    @Override
+    protected void doSetValue(Value value, JdbcValueAccess<String> access, Map<String, Object> options)
+            throws Exception {
+        access.setValue(value.asString(), options);
+    }
+
+    @Override
+    public ValueType getValueType(Field field) {
+        return ValueType.STRING;
     }
 }

@@ -14,7 +14,7 @@
 
     <repositories>
         <repository>
-            <id>local</id>
+            <id>nuodb-migrator-core</id>
             <url>file://${basedir}/.m2</url>
         </repository>
     </repositories>
@@ -40,6 +40,51 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.20</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.2.0.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>xdb6</artifactId>
+            <version>11.2.0.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.nuodb</groupId>
+            <artifactId>nuodb-jdbc</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.jtds</groupId>
+            <artifactId>jtds</artifactId>
+            <version>1.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>sqljdbc4</artifactId>
+            <version>4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.0-801.jdbc4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.db2</groupId>
+            <artifactId>db2jcc</artifactId>
+            <version>9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.db2</groupId>
+            <artifactId>db2jcc_license_cu</artifactId>
+            <version>9</version>
+        </dependency>
         <dependency>
             <groupId>aopalliance</groupId>
             <artifactId>aopalliance</artifactId>

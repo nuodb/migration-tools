@@ -35,6 +35,8 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.dialect.OracleDialect.*;
+import static com.nuodb.migrator.jdbc.dialect.PostgreSQLDialect.BIT_DESC;
+import static com.nuodb.migrator.jdbc.dialect.PostgreSQLDialect.BIT_VARYING_DESC;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeNames.createEnumTypeNameTemplate;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeNames.createTypeNameTemplate;
@@ -119,6 +121,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(NCLOB, "NCLOB");
         addJdbcTypeName(ROWID, "STRING");
         addJdbcTypeName(new JdbcTypeDesc(VARCHAR, "STRING"), "STRING");
+        addJdbcTypeName(new JdbcTypeDesc(SQLXML), "STRING");
 
         addJdbcTypeName(ORACLE, new JdbcTypeDesc(LONGVARCHAR, "LONG"), "CLOB");
         addJdbcTypeName(ORACLE, DECIMAL, "NUMBER", newOptions(0, 0, 0));
@@ -127,6 +130,9 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(ORACLE, ANYDATASET_DESC, "STRING");
         addJdbcTypeName(ORACLE, ANYTYPE_DESC, "STRING");
         addJdbcTypeName(ORACLE, BFILE_DESC, "BLOB");
+
+        addJdbcTypeName(POSTGRE_SQL, BIT_DESC, "STRING");
+        addJdbcTypeName(POSTGRE_SQL, BIT_VARYING_DESC, "STRING");
 
         addJdbcTypeName(MYSQL, new JdbcTypeDesc(SMALLINT, "SMALLINT UNSIGNED"), "INTEGER");
         addJdbcTypeName(MYSQL, new JdbcTypeDesc(INTEGER, "INT UNSIGNED"), "BIGINT");

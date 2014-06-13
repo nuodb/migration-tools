@@ -27,21 +27,15 @@
  */
 package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
-
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
+import com.nuodb.migrator.jdbc.dialect.PostgreSQLBitVaryingValue;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleValueFormatRegistryResolver extends SimpleCachingServiceResolver<ValueFormatRegistry>
-        implements ValueFormatRegistryResolver {
+public class PostgreSQLValueFormatRegistry extends SimpleValueFormatRegistry {
 
-    public SimpleValueFormatRegistryResolver() {
-        super(SimpleValueFormatRegistry.class);
-        register(DB2, new DB2ValueFormatRegistry());
-        register(NUODB, new NuoDBValueFormatRegistry());
-        register(ORACLE, new OracleValueFormatRegistry());
-        register(POSTGRE_SQL, new PostgreSQLValueFormatRegistry());
+    public PostgreSQLValueFormatRegistry() {
+        addValueFormat(PostgreSQLBitVaryingValue.INSTANCE, new PostgreSQLBitVaryingValueFormat());
     }
 }
+

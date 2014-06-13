@@ -25,23 +25,44 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.value;
-
-import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
-
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
+package com.nuodb.migrator.jdbc.dialect;
 
 /**
  * @author Sergey Bushik
  */
-public class SimpleValueFormatRegistryResolver extends SimpleCachingServiceResolver<ValueFormatRegistry>
-        implements ValueFormatRegistryResolver {
 
-    public SimpleValueFormatRegistryResolver() {
-        super(SimpleValueFormatRegistry.class);
-        register(DB2, new DB2ValueFormatRegistry());
-        register(NUODB, new NuoDBValueFormatRegistry());
-        register(ORACLE, new OracleValueFormatRegistry());
-        register(POSTGRE_SQL, new PostgreSQLValueFormatRegistry());
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValueBase;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
+
+import static com.nuodb.migrator.jdbc.dialect.PostgreSQLDialect.BIT_VARYING_DESC;
+
+/**
+ * @author Sergey Bushik
+ */
+public class PostgreSQLBitVaryingValue extends JdbcTypeValueBase<String> {
+
+    public static final JdbcTypeValue INSTANCE = new PostgreSQLBitVaryingValue();
+
+    public PostgreSQLBitVaryingValue() {
+        super(BIT_VARYING_DESC, String.class);
+    }
+
+    @Override
+    public String getValue(ResultSet resultSet, int index, Field field, Map<String,
+            Object> options) throws SQLException {
+        return resultSet.getString(index);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, String value, int index,
+                                    Field field, Map<String, Object> options) throws SQLException {
+        statement.setString(index, value);
     }
 }
+
