@@ -36,6 +36,8 @@ fi
 BASEDIR=$(dirname $0)
 CURDIR=`pwd`
 
+. ${BASEDIR}/common/set_migrator_env.sh
+
 JDK_NAME=`basename ${JAVA_HOME}`
 DRIVER_NAME=`basename ${ARG_DRIVER}`
 export WORK_FOLDER=${BASEDIR}/tests/${JDK_NAME}/${ARG_DATABASE}/${DRIVER_NAME}/${ARG_FORMAT}
@@ -53,7 +55,6 @@ echo "JDK = $JDK_NAME"
 
 . ${BASEDIR}/database/${ARG_DATABASE}/set_source_env.sh
 . ${BASEDIR}/common/set_nuodb_env.sh
-. ${BASEDIR}/common/set_migrator_env.sh
 
 echo "Env variables set up complete"
 . ${BASEDIR}/common/setup_nuodb.sh
