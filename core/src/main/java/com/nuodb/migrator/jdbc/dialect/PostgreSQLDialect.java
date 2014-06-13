@@ -32,25 +32,36 @@ import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
+import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.TimeZone;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
+import static java.sql.Types.BIT;
+import static java.sql.Types.OTHER;
 
 /**
  * @author Sergey Bushik
  */
 public class PostgreSQLDialect extends SimpleDialect {
 
+    public static final JdbcTypeDesc BIT_DESC = new JdbcTypeDesc(BIT, "BIT");
+    public static final JdbcTypeDesc BIT_VARYING_DESC = new JdbcTypeDesc(OTHER, "VARBIT");
+    public static final JdbcTypeDesc XML_DESC = new JdbcTypeDesc(OTHER, "VARBIT");
+
     public PostgreSQLDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
+    }
+
+    @Override
+    protected void initJdbcTypes() {
+        super.initJdbcTypes();
+        addJdbcType(PostgreSQLBitValue.INSTANCE);
+        addJdbcType(PostgreSQLBitVaryingValue.INSTANCE);
     }
 
     /**

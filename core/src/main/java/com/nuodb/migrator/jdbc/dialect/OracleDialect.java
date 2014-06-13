@@ -31,12 +31,14 @@ import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
-import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
+import com.nuodb.migrator.jdbc.type.*;
 import com.nuodb.migrator.match.Regex;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -217,5 +219,23 @@ public class OracleDialect extends SimpleDialect {
     @Override
     public RowCountHandler createRowCountHandler(Table table, Column column, String filter, RowCountType rowCountType) {
         return new OracleTableRowCountHandler(this, table, column, filter, rowCountType);
+    }
+
+    public static void main(String[] args) {
+        OracleDialect oracleDialect = new OracleDialect(new DatabaseInfo());
+        JdbcTypeNameMap jdbcTypeNameMap = oracleDialect.getJdbcTypeNameMap();
+        Collection<JdbcTypeName> jdbcTypeNames = jdbcTypeNameMap.getJdbcTypeNames();
+        for (Iterator<JdbcTypeName> iterator = jdbcTypeNames.iterator(); iterator.hasNext(); ) {
+            JdbcTypeName type = iterator.next();
+            if (type instanceof JdbcTypeNameTemplate) {
+                JdbcTypeNameTemplate template = (JdbcTypeNameTemplate) type;
+                String name = template.getTemplate();
+                JdbcType jdbcType = template.getJdbcType();
+                System.out.println(String.format("%s %d", name, jdbcType.getJdbcTypeDesc().getTypeCode()));
+            } else {
+                System.out.println(" > " + type);
+            }
+
+        }
     }
 }
