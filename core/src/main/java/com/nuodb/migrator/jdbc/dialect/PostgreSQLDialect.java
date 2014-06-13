@@ -51,7 +51,6 @@ public class PostgreSQLDialect extends SimpleDialect {
 
     public static final JdbcTypeDesc BIT_DESC = new JdbcTypeDesc(BIT, "BIT");
     public static final JdbcTypeDesc BIT_VARYING_DESC = new JdbcTypeDesc(OTHER, "VARBIT");
-    public static final JdbcTypeDesc XML_DESC = new JdbcTypeDesc(OTHER, "VARBIT");
 
     public PostgreSQLDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
