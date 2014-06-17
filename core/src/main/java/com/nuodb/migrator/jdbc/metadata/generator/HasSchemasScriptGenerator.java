@@ -39,14 +39,13 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getDropSchema;
+import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getUseSchema;
 
 /**
  * @author Sergey Bushik
  */
 public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchemas> {
-
-    public static final String DROP_SCHEMA = "drop.schema";
-    public static final String USE_SCHEMA = "use.schema";
 
     public HasSchemasScriptGenerator() {
         super(HasSchemas.class);
@@ -61,9 +60,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 schemaScripts.put(schema, scripts);
             }
         }
-        scriptGeneratorManager.addAttribute(DROP_SCHEMA, false);
-        scriptGeneratorManager.addAttribute(USE_SCHEMA, true);
-        return getScripts(schemaScripts, scriptGeneratorManager);
+        return getScripts(schemaScripts, scriptGeneratorManager, false, true);
     }
 
     @Override
@@ -75,10 +72,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 schemaScripts.put(schema, scripts);
             }
         }
-        scriptGeneratorManager.addAttribute(DROP_SCHEMA, true);
-        // use is always
-        scriptGeneratorManager.addAttribute(USE_SCHEMA, true);
-        return getScripts(schemaScripts, scriptGeneratorManager);
+        return getScripts(schemaScripts, scriptGeneratorManager, false, true);
     }
 
     @Override
@@ -91,15 +85,12 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 schemaScripts.put(schema, scripts);
             }
         }
-        scriptGeneratorManager.addAttribute(DROP_SCHEMA, true);
-        scriptGeneratorManager.addAttribute(USE_SCHEMA, true);
-        return getScripts(schemaScripts, scriptGeneratorManager);
+        return getScripts(schemaScripts, scriptGeneratorManager, false, true);
     }
 
     protected Collection<String> getScripts(Map<Schema, Collection<String>> schemaScripts,
-                                            ScriptGeneratorManager scriptGeneratorManager) {
-        boolean dropSchema = (Boolean)scriptGeneratorManager.getAttribute(DROP_SCHEMA);
-        boolean createSchema = (Boolean)scriptGeneratorManager.getAttribute(USE_SCHEMA);
+                                            ScriptGeneratorManager scriptGeneratorManager,
+                                            boolean dropSchema, boolean useSchema) {
         Collection<String> scripts = newArrayList();
         if (schemaScripts.size() == 1) {
             Map.Entry<Schema, Collection<String>> schemaScript = schemaScripts.entrySet().iterator().next();
@@ -107,7 +98,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
             if (dropSchema) {
                 scripts.add(getDropSchema(schema, scriptGeneratorManager));
             }
-            if (createSchema) {
+            if (useSchema) {
                 scripts.add(getUseSchema(schema, scriptGeneratorManager));
             }
             scripts.addAll(schemaScript.getValue());
@@ -118,7 +109,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 if (dropSchema) {
                     scripts.add(getDropSchema(schema, scriptGeneratorManager));
                 }
-                if (createSchema) {
+                if (useSchema) {
                     scripts.add(schema.getIdentifier() != null ?
                             dialect.getUseSchema(scriptGeneratorManager.getName(schema)) :
                             dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog())));
@@ -127,14 +118,6 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
             }
         }
         return scripts;
-    }
-
-    protected String getUseSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
-        return SchemaScriptGeneratorUtils.getUseSchema(schema, scriptGeneratorManager);
-    }
-
-    protected String getDropSchema(Schema schema, ScriptGeneratorManager scriptGeneratorManager) {
-        return SchemaScriptGeneratorUtils.getDropSchema(schema, scriptGeneratorManager);
     }
 
     protected Collection<Schema> getSchemas(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
