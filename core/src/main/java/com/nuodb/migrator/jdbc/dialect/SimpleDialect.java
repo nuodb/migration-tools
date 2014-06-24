@@ -744,6 +744,10 @@ public class SimpleDialect extends SimpleServiceResolverAware<Dialect> implement
         getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(typeCode, jdbcTypeOptions, typeName);
     }
 
+    protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcType jdbcType, String typeName) {
+        getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcType, typeName);
+    }
+
     protected void addJdbcTypeName(DatabaseInfo databaseInfo, JdbcTypeDesc jdbcTypeDesc, String typeName) {
         getJdbcTypeNameMap(databaseInfo).addJdbcTypeName(jdbcTypeDesc, typeName);
     }

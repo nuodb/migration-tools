@@ -31,6 +31,9 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Krishnamoorthy Dhandapani
+ */
 public class MySQLTypes implements DatabaseTypes {
 	private static Map<String, JDBCGetMethod[]> map = new HashMap<String, JDBCGetMethod[]>();
 
@@ -305,7 +308,7 @@ public class MySQLTypes implements DatabaseTypes {
 				|| "TINYINT".equalsIgnoreCase(type)) {
 			return defaultValue == null ? null : "'" + defaultValue + "'";
 		} else if ("TIMESTAMP".equalsIgnoreCase(type)) {
-			if("0000-00-00 00:00:00".equals(defaultValue)) {
+			if ("0000-00-00 00:00:00".equals(defaultValue)) {
 				return "'NULL'";
 			}
 			return "CURRENT_TIMESTAMP".equals(defaultValue) ? "'NOW'" : "'"
