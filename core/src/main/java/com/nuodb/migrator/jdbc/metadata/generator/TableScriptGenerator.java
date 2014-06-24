@@ -211,7 +211,9 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             Collection<String> typeInfo = newArrayList();
             typeInfo.add(format("type name %s", column.getTypeName()));
             typeInfo.add(format("type code %s", column.getTypeCode()));
-            typeInfo.add(format("length %d", column.getSize()));
+            if (column.getSize() != null) {
+                typeInfo.add(format("length %d", column.getSize()));
+            }
             if (column.getPrecision() != null) {
                 typeInfo.add(format("precision %d", column.getPrecision()));
             }
