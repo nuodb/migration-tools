@@ -34,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeDesc implements Cloneable {
+public class JdbcTypeDesc {
 
     private int typeCode;
     private String typeName;

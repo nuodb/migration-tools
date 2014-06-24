@@ -35,7 +35,6 @@ import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;

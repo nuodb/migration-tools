@@ -32,11 +32,20 @@ import com.nuodb.migrator.utils.ObjectUtils;
 /**
  * @author Sergey Bushik
  */
-public class JdbcTypeOptions implements Cloneable {
+public class JdbcTypeOptions {
 
     private Integer size;
     private Integer scale;
     private Integer precision;
+
+    public JdbcTypeOptions() {
+    }
+
+    public JdbcTypeOptions(JdbcTypeOptions jdbcTypeOptions) {
+        this.size = jdbcTypeOptions.getSize();
+        this.scale = jdbcTypeOptions.getScale();
+        this.precision = jdbcTypeOptions.getPrecision();
+    }
 
     public Integer getSize() {
         return size;
