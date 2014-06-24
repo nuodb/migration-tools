@@ -209,8 +209,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                     column.getTable().getSchema().getName(), column.getTable().getCatalog().getName(), false);
             String columnName = scriptGeneratorManager.getName(column, false);
             Collection<String> typeInfo = newArrayList();
-            typeInfo.add(format("name %s", column.getTypeName()));
-            typeInfo.add(format("code %s", column.getTypeCode()));
+            typeInfo.add(format("type name %s", column.getTypeName()));
+            typeInfo.add(format("type code %s", column.getTypeCode()));
             typeInfo.add(format("length %d", column.getSize()));
             if (column.getPrecision() != null) {
                 typeInfo.add(format("precision %d", column.getPrecision()));
@@ -218,8 +218,8 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             if (column.getScale() != null) {
                 typeInfo.add(format("scale %d", column.getScale()));
             }
-            throw new GeneratorException(
-                    format("Unsupported table %s, column %s, type %s", tableName, columnName, join(typeInfo, ", ")));
+            throw new GeneratorException(format("Unsupported type on table %s column %s: %s",
+                            tableName, columnName, join(typeInfo, ", ")));
         }
         return typeName;
     }
