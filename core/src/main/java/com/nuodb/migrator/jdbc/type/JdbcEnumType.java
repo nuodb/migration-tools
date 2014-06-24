@@ -73,8 +73,8 @@ public class JdbcEnumType extends JdbcType {
     }
 
     @Override
-    protected JdbcType createJdbcType() {
-        JdbcEnumType jdbcType = (JdbcEnumType) super.createJdbcType();
+    protected JdbcType clone() {
+        JdbcEnumType jdbcType = (JdbcEnumType) super.clone();
         jdbcType.setValues(Lists.newArrayList(getValues()));
         return jdbcType;
     }

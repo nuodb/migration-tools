@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Column;
@@ -40,14 +41,17 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.type.JdbcType;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collection;
 import java.util.Iterator;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * @author Sergey Bushik
@@ -204,9 +208,18 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             String tableName = scriptGeneratorManager.getQualifiedName(column.getTable(),
                     column.getTable().getSchema().getName(), column.getTable().getCatalog().getName(), false);
             String columnName = scriptGeneratorManager.getName(column, false);
+            Collection<String> typeInfo = newArrayList();
+            typeInfo.add(format("name %s", column.getTypeName()));
+            typeInfo.add(format("code %s", column.getTypeCode()));
+            typeInfo.add(format("length %d", column.getSize()));
+            if (column.getPrecision() != null) {
+                typeInfo.add(format("precision %d", column.getPrecision()));
+            }
+            if (column.getScale() != null) {
+                typeInfo.add(format("scale %d", column.getScale()));
+            }
             throw new GeneratorException(
-                    format("Unsupported type %s with type code %d, %d length found on %s table %s column",
-                            column.getTypeName(), column.getTypeCode(), column.getSize(), tableName, columnName));
+                    format("Unsupported table %s, column %s, type %s", tableName, columnName, join(typeInfo, ", ")));
         }
         return typeName;
     }

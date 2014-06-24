@@ -73,7 +73,7 @@ public class JdbcType implements Cloneable {
     }
 
     public JdbcType withTypeCode(int typeCode) {
-        JdbcType jdbcType = createJdbcType();
+        JdbcType jdbcType = clone();
         jdbcType.setTypeCode(typeCode);
         return jdbcType;
     }
@@ -87,7 +87,7 @@ public class JdbcType implements Cloneable {
     }
 
     public JdbcType withTypeName(String typeName) {
-        JdbcType jdbcType = createJdbcType();
+        JdbcType jdbcType = clone();
         jdbcType.setTypeName(typeName);
         return jdbcType;
     }
@@ -101,7 +101,7 @@ public class JdbcType implements Cloneable {
     }
 
     public JdbcType withSize(Integer size) {
-        JdbcType jdbcType = createJdbcType();
+        JdbcType jdbcType = clone();
         jdbcType.setSize(size);
         return jdbcType;
     }
@@ -115,7 +115,7 @@ public class JdbcType implements Cloneable {
     }
 
     public JdbcType withPrecision(Integer precision) {
-        JdbcType jdbcType = createJdbcType();
+        JdbcType jdbcType = clone();
         jdbcType.setPrecision(precision);
         return jdbcType;
     }
@@ -129,7 +129,7 @@ public class JdbcType implements Cloneable {
     }
 
     public JdbcType withScale(Integer scale) {
-        JdbcType jdbcType = createJdbcType();
+        JdbcType jdbcType = clone();
         jdbcType.setScale(scale);
         return jdbcType;
     }
@@ -143,7 +143,7 @@ public class JdbcType implements Cloneable {
     }
 
     public JdbcType withJdbcTypeDesc(JdbcTypeDesc jdbcTypeDesc) {
-        JdbcType jdbcType = createJdbcType();
+        JdbcType jdbcType = clone();
         jdbcType.setJdbcTypeDesc(jdbcTypeDesc);
         return jdbcType;
     }
@@ -157,14 +157,18 @@ public class JdbcType implements Cloneable {
     }
 
     public JdbcType withJdbcTypeOptions(JdbcTypeOptions jdbcTypeOptions) {
-        JdbcType jdbcType = createJdbcType();
+        JdbcType jdbcType = clone();
         jdbcType.setJdbcTypeOptions(jdbcTypeOptions);
         return jdbcType;
     }
 
-    protected JdbcType createJdbcType() {
+    @Override
+    protected JdbcType clone() {
         try {
-            return (JdbcType) clone();
+            JdbcType jdbcType = (JdbcType) super.clone();
+            jdbcType.setJdbcTypeDesc(jdbcTypeDesc != null ? new JdbcTypeDesc(jdbcTypeDesc) : null);
+            jdbcType.setJdbcTypeOptions(jdbcTypeOptions != null ? new JdbcTypeOptions(jdbcTypeOptions) : null);
+            return jdbcType;
         } catch (CloneNotSupportedException exception) {
             throw new JdbcTypeException(exception);
         }
