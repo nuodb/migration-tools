@@ -143,6 +143,8 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "DECFLOAT"), "DECIMAL({P},{S})");
         addJdbcTypeName(DB2, new JdbcTypeDesc(OTHER, "XML"), "STRING");
 
+        addJdbcTypeName(MSSQL_SERVER, new JdbcTypeDesc(CLOB, "XML"), "STRING");
+
         addJdbcTypeName(createEnumTypeNameTemplate("CHAR({N})"));
     }
 
