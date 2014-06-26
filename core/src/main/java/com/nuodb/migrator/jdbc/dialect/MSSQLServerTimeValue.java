@@ -25,24 +25,40 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.value;
+package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.metadata.resolver.SimpleCachingServiceResolver;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValue;
+import com.nuodb.migrator.jdbc.type.JdbcTypeValueBase;
 
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
 /**
+ * MSSQL Server TIME type supports fractional second and should be extracted as string.
+ *
  * @author Sergey Bushik
  */
-public class SimpleValueFormatRegistryResolver extends SimpleCachingServiceResolver<ValueFormatRegistry>
-        implements ValueFormatRegistryResolver {
+public class MSSQLServerTimeValue extends JdbcTypeValueBase<String> {
 
-    public SimpleValueFormatRegistryResolver() {
-        super(SimpleValueFormatRegistry.class);
-        register(DB2, new DB2ValueFormatRegistry());
-        register(NUODB, new NuoDBValueFormatRegistry());
-        register(ORACLE, new OracleValueFormatRegistry());
-        register(POSTGRE_SQL, new PostgreSQLValueFormatRegistry());
-        register(MSSQL_SERVER, new MSSQLServerValueFormatRegistry());
+    public static final JdbcTypeValue INSTANCE = new MSSQLServerTimeValue();
+
+    public MSSQLServerTimeValue() {
+        super(Types.TIME, String.class);
+    }
+
+    @Override
+    public String getValue(ResultSet resultSet, int index, Field field, Map<String, Object> options)
+            throws SQLException {
+        return resultSet.getString(index);
+    }
+
+    @Override
+    protected void setNullSafeValue(PreparedStatement statement, String value, int index,
+                                    Field field, Map<String, Object> options) throws SQLException {
+        statement.setString(index, value);
     }
 }
