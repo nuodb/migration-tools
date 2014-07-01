@@ -124,6 +124,7 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(new JdbcTypeDesc(SQLXML), "STRING");
 
         addJdbcTypeName(ORACLE, new JdbcTypeDesc(LONGVARCHAR, "LONG"), "CLOB");
+        addJdbcTypeName(ORACLE, new JdbcTypeDesc(LONGVARBINARY, "LONG RAW"), "BLOB");
         addJdbcTypeName(ORACLE, DECIMAL, "NUMBER", newOptions(0, 0, 0));
         addJdbcTypeName(ORACLE, XMLTYPE_DESC, "STRING");
         addJdbcTypeName(ORACLE, ANYDATA_DESC, "STRING");
