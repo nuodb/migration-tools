@@ -67,10 +67,11 @@ public class OracleDialect extends SimpleDialect {
     public static final JdbcTypeDesc INTERVAL_YEAR_TO_MONTH_DESC = new JdbcTypeDesc(-103);
     public static final JdbcTypeDesc INTERVAL_DAY_TO_SECOND_DESC = new JdbcTypeDesc(-104);
 
-    public static final Regex TIMESTAMP_WITH_TIME_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH TIME ZONE");
-    public static final Regex TIMESTAMP_WITH_TIME_LOCAL_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH LOCAL TIME ZONE");
-    public static final Regex INTERVAL_YEAR_TO_MATCH_REGEX = INSTANCE.compile("INTERVAL YEAR(*) TO MONTH");
-    public static final Regex INTERVAL_DAY_TO_SECOND_REGEX = INSTANCE.compile("INTERVAL DAY(*) TO SECOND");
+    private static final Regex TIMESTAMP_REGEX = INSTANCE.compile("TIMESTAMP(*)");
+    private static final Regex TIMESTAMP_WITH_TIME_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH TIME ZONE");
+    private static final Regex TIMESTAMP_WITH_TIME_LOCAL_ZONE_REGEX = INSTANCE.compile("TIMESTAMP(*) WITH LOCAL TIME ZONE");
+    private static final Regex INTERVAL_YEAR_TO_MATCH_REGEX = INSTANCE.compile("INTERVAL YEAR(*) TO MONTH");
+    private static final Regex INTERVAL_DAY_TO_SECOND_REGEX = INSTANCE.compile("INTERVAL DAY(*) TO SECOND");
 
     public OracleDialect(DatabaseInfo databaseInfo) {
         super(databaseInfo);
@@ -105,7 +106,9 @@ public class OracleDialect extends SimpleDialect {
     public JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName) {
         JdbcTypeDesc jdbcTypeAlias = null;
         if (typeCode == OTHER) {
-            if (TIMESTAMP_WITH_TIME_ZONE_REGEX.test(typeName)) {
+            if (TIMESTAMP_REGEX.test(typeName)) {
+                jdbcTypeAlias = new JdbcTypeDesc(TIMESTAMP);
+            } else if (TIMESTAMP_WITH_TIME_ZONE_REGEX.test(typeName)) {
                 jdbcTypeAlias = new JdbcTypeDesc(TIMESTAMP);
             } else if (TIMESTAMP_WITH_TIME_LOCAL_ZONE_REGEX.test(typeName)) {
                 jdbcTypeAlias = new JdbcTypeDesc(TIMESTAMP);
