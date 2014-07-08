@@ -56,10 +56,10 @@ public class MSSQLServerDialect extends SimpleDialect {
     @Override
     protected void initJdbcTypes() {
         super.initJdbcTypes();
-        addJdbcTypeDescAlias(Types.LONGVARBINARY, "IMAGE", BLOB);
-        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", CLOB);
-        addJdbcTypeDescAlias(Types.LONGNVARCHAR, "XML", CLOB);
-        addJdbcTypeDescAlias(DATETIMEOFFSET_CODE, DATETIMEOFFSET_NAME, TIMESTAMP);
+        addJdbcTypeAlias(Types.LONGVARBINARY, "IMAGE", BLOB);
+        addJdbcTypeAlias(Types.LONGVARCHAR, "TEXT", CLOB);
+        addJdbcTypeAlias(Types.LONGNVARCHAR, "XML", CLOB);
+        addJdbcTypeAlias(DATETIMEOFFSET_CODE, DATETIMEOFFSET_NAME, TIMESTAMP);
     }
 
     @Override

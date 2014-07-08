@@ -89,17 +89,16 @@ public class OracleDialect extends SimpleDialect {
     @Override
     protected void initJdbcTypeNames() {
         super.initJdbcTypeNames();
-        addJdbcTypeDescAlias(OTHER, "ROWID", ROWID);
-        addJdbcTypeDescAlias(OTHER, "UROWID", ROWID);
-        addJdbcTypeDescAlias(OTHER, "NCHAR", NCHAR);
-        addJdbcTypeDescAlias(OTHER, "NVARCHAR2", NVARCHAR);
-        addJdbcTypeDescAlias(OTHER, "NCLOB", NCLOB);
-        addJdbcTypeDescAlias(BINARY_FLOAT_DESC, FLOAT);
-        addJdbcTypeDescAlias(BINARY_DOUBLE_DESC, DOUBLE);
-        addJdbcTypeDescAlias(TIMESTAMP_WITH_TIME_ZONE_DESC, TIMESTAMP);
-        addJdbcTypeDescAlias(TIMESTAMP_WITH_LOCAL_TIME_ZONE_DESC, TIMESTAMP);
-        addJdbcTypeDescAlias(INTERVAL_YEAR_TO_MONTH_DESC, VARCHAR);
-        addJdbcTypeDescAlias(INTERVAL_DAY_TO_SECOND_DESC, VARCHAR);
+        addJdbcTypeAlias(OTHER, "XMLTYPE", SQLXML);
+        addJdbcTypeAlias(OTHER, "ROWID", ROWID);
+        addJdbcTypeAlias(OTHER, "UROWID", ROWID);
+        addJdbcTypeAlias(OTHER, "NCHAR", NCHAR);
+        addJdbcTypeAlias(OTHER, "NVARCHAR2", NVARCHAR);
+        addJdbcTypeAlias(OTHER, "NCLOB", NCLOB);
+        addJdbcTypeAlias(BINARY_FLOAT_DESC, FLOAT);
+        addJdbcTypeAlias(BINARY_DOUBLE_DESC, DOUBLE);
+        addJdbcTypeAlias(TIMESTAMP_WITH_TIME_ZONE_DESC, TIMESTAMP);
+        addJdbcTypeAlias(TIMESTAMP_WITH_LOCAL_TIME_ZONE_DESC, TIMESTAMP);
     }
 
     @Override

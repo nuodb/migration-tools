@@ -131,6 +131,8 @@ public class NuoDBDialect extends SimpleDialect {
         addJdbcTypeName(ORACLE, ANYDATASET_DESC, "STRING");
         addJdbcTypeName(ORACLE, ANYTYPE_DESC, "STRING");
         addJdbcTypeName(ORACLE, BFILE_DESC, "BLOB");
+        addJdbcTypeName(ORACLE, INTERVAL_YEAR_TO_MONTH_DESC, "STRING");
+        addJdbcTypeName(ORACLE, INTERVAL_DAY_TO_SECOND_DESC, "STRING");
 
         addJdbcTypeName(POSTGRE_SQL, BIT_DESC, "STRING");
         addJdbcTypeName(POSTGRE_SQL, BIT_VARYING_DESC, "STRING");
