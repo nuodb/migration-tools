@@ -61,15 +61,15 @@ public class MySQLDialect extends SimpleDialect {
         addJdbcType(MySQLIntUnsignedValue.INSTANCE);
         addJdbcType(MySQLBigIntUnsignedValue.INSTANCE);
 
-        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TINYTEXT", Types.CLOB);
-        addJdbcTypeDescAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
-        addJdbcTypeDescAlias(Types.LONGVARCHAR, "MEDIUMTEXT", Types.CLOB);
-        addJdbcTypeDescAlias(Types.LONGVARCHAR, "LONGTEXT", Types.CLOB);
+        addJdbcTypeAlias(Types.LONGVARCHAR, "TINYTEXT", Types.CLOB);
+        addJdbcTypeAlias(Types.LONGVARCHAR, "TEXT", Types.CLOB);
+        addJdbcTypeAlias(Types.LONGVARCHAR, "MEDIUMTEXT", Types.CLOB);
+        addJdbcTypeAlias(Types.LONGVARCHAR, "LONGTEXT", Types.CLOB);
 
-        addJdbcTypeDescAlias(Types.LONGVARBINARY, "TINYBLOB", Types.BLOB);
-        addJdbcTypeDescAlias(Types.LONGVARBINARY, "BLOB", Types.BLOB);
-        addJdbcTypeDescAlias(Types.LONGVARBINARY, "MEDIUMBLOB", Types.BLOB);
-        addJdbcTypeDescAlias(Types.LONGVARBINARY, "LONGBLOB", Types.BLOB);
+        addJdbcTypeAlias(Types.LONGVARBINARY, "TINYBLOB", Types.BLOB);
+        addJdbcTypeAlias(Types.LONGVARBINARY, "BLOB", Types.BLOB);
+        addJdbcTypeAlias(Types.LONGVARBINARY, "MEDIUMBLOB", Types.BLOB);
+        addJdbcTypeAlias(Types.LONGVARBINARY, "LONGBLOB", Types.BLOB);
     }
 
     @Override
