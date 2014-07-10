@@ -33,7 +33,6 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
-import com.nuodb.migrator.utils.Collections;
 import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.Collection;

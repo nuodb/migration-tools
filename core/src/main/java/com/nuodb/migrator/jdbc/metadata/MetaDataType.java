@@ -34,7 +34,6 @@ import java.io.Serializable;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
-import static com.nuodb.migrator.utils.ReflectionUtils.getShortClassName;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -86,10 +85,6 @@ public class MetaDataType implements Comparable<MetaDataType>, Serializable {
 
     public Class<? extends MetaData> getObjectType() {
         return objectType;
-    }
-
-    public String getShortName() {
-        return getShortClassName(objectType);
     }
 
     public String getName() {
