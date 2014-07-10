@@ -47,8 +47,10 @@ import org.simpleframework.xml.stream.OutputNode;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
 import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.nuodb.migrator.utils.Predicates.is;
+import static java.lang.String.format;
 
 /**
  * @author Sergey Bushik
@@ -123,7 +125,12 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
         }
         boolean autoIncrement = column.isAutoIncrement();
         if (autoIncrement) {
-            context.writeAttribute(output, AUTO_INCREMENT_ATTRIBUTE, autoIncrement);
+            if (!skip(SEQUENCE, context)) {
+                context.writeAttribute(output, AUTO_INCREMENT_ATTRIBUTE, autoIncrement);
+            } else if (logger.isWarnEnabled()) {
+                logger.warn(format("Attribute %s on table %s column %s is ignored, since sequences are disabled",
+                        AUTO_INCREMENT_ATTRIBUTE, column.getTable().getQualifiedName(), column.getName()));
+            }
         }
         DefaultValue defaultValue = column.getDefaultValue();
         if (defaultValue != null && defaultValue.getScript() != null) {
@@ -152,7 +159,7 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
             context.writeElement(output, CHECK_ELEMENT, check);
         }
         final Sequence sequence = column.getSequence();
-        if (sequence != null) {
+        if (sequence != null && sequence.getSchema() != null && !skip(SEQUENCE, context)) {
             OutputNode element = output.getChild(SEQUENCE_ELEMENT);
             context.writeAttribute(element, REF_INDEX_ATTRIBUTE, indexOf(filter(
                     sequence.getSchema().getSequences(),
