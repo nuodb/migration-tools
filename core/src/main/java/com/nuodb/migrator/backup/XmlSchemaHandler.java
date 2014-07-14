@@ -28,13 +28,17 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.metadata.inspector.SchemaInspectionScope;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
+
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 
 /**
  * @author Sergey Bushik
@@ -74,5 +78,15 @@ public class XmlSchemaHandler extends XmlIdentifiableHandlerBase<Schema> impleme
         for (Table table : schema.getTables()) {
             context.writeElement(output, TABLE_ELEMENT, table);
         }
+    }
+
+    @Override
+    protected boolean skip(Schema schema, XmlWriteContext context) {
+        SchemaInspectionScope schemaInspectionScope = getInspectionScope(context);
+        Identifier catalogId = valueOf(schemaInspectionScope != null ? schemaInspectionScope.getCatalog() : null);
+        Identifier schemaId = valueOf(schemaInspectionScope != null ? schemaInspectionScope.getSchema() : null);
+        return super.skip(schema, context) ||
+                (catalogId != null && !schema.getCatalog().getIdentifier().equals(catalogId)) ||
+                (schemaId != null && !schema.getIdentifier().equals(schemaId));
     }
 }

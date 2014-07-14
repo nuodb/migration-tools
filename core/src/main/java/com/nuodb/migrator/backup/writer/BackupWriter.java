@@ -40,6 +40,7 @@ import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.HasTables;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
@@ -68,10 +69,12 @@ import java.util.concurrent.Executor;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.INSPECTION_SCOPE;
 import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.META_DATA_SPEC;
 import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
 import static com.nuodb.migrator.jdbc.split.QuerySplitters.*;
@@ -169,19 +172,26 @@ public class BackupWriter {
      * @param tables to include into dump.
      * @param tableTypes allowed table types.
      */
-    public void addTables(HasTables tables, String[] tableTypes) {
-        addTables(tables, tableTypes, getWriteRowSets());
+    public void addTables(HasTables tables, InspectionScope inspectionScope) {
+        addTables(tables, inspectionScope, getWriteRowSets());
     }
 
-    protected void addTables(HasTables tables, String[] tableTypes,
+    protected void addTables(HasTables tables, InspectionScope inspectionScope,
                              Collection<WriteRowSet> writeRowSets) {
+        TableInspectionScope tableInspectionScope = (TableInspectionScope) inspectionScope;
+        Identifier catalog = valueOf(tableInspectionScope != null ? tableInspectionScope.getCatalog() : null);
+        Identifier schema = valueOf(tableInspectionScope != null ? tableInspectionScope.getSchema() : null);
+        String[] tableTypes = tableInspectionScope != null ? tableInspectionScope.getTableTypes() : null;
         for (Table table : tables.getTables()) {
-            if (isEmpty(tableTypes) || indexOf(tableTypes, table.getType()) != -1) {
+            boolean addTable = isEmpty(tableTypes) || indexOf(tableTypes, table.getType()) != -1;
+            addTable = addTable && (catalog == null || table.getCatalog().getIdentifier().equals(catalog));
+            addTable = addTable && (schema == null || table.getSchema().getIdentifier().equals(schema));
+            if (addTable) {
                 addWriteRowSet(createWriteRowSet(
                         table, table.getColumns(), null, getQueryLimit()), writeRowSets);
             } else {
                 if (logger.isTraceEnabled()) {
-                    logger.trace(format("Table %s %s is not in the allowed types, table skipped",
+                    logger.trace(format("Table %s %s skipped",
                             table.getQualifiedName(null), table.getType()));
                 }
             }
@@ -245,6 +255,11 @@ public class BackupWriter {
         return backupWriterContext;
     }
 
+    protected InspectionScope getInspectionScope() {
+        return new TableInspectionScope(
+                sourceSpec.getCatalog(), sourceSpec.getSchema(), getTableTypes());
+    }
+
     protected BackupWriterManager createBackupWriterManager(BackupOps backupOps, Map context) throws Exception {
         BackupWriterContext backupWriterContext = createBackupWriterContext(backupOps, context);
         return createBackupWriterManager(backupWriterContext);
@@ -287,18 +302,16 @@ public class BackupWriter {
                     createValueFormatRegistry(sourceSession));
             final Database database = getDatabase();
             backupWriterContext.setDatabase(database == null ?
-                    openDatabase(sourceSession) : database);
+                    openDatabase(backupWriterContext) : database);
         } catch (Exception exception) {
             closeQuietly(sourceSession);
             throw exception;
         }
     }
 
-    protected Database openDatabase(Session session) throws Exception {
-        ConnectionSpec connectionSpec = session.getConnectionSpec();
-        InspectionScope inspectionScope = new TableInspectionScope(
-                connectionSpec.getCatalog(), connectionSpec.getSchema(), getTableTypes());
-        return getInspectionManager().inspect(session.getConnection(), inspectionScope,
+    protected Database openDatabase(BackupWriterContext backupWriterContext) throws Exception {
+        Session session = backupWriterContext.getSourceSession();
+        return getInspectionManager().inspect(session.getConnection(), getInspectionScope(),
                 getObjectTypes().toArray(new MetaDataType[0])).getObject(DATABASE);
     }
 
@@ -353,6 +366,7 @@ public class BackupWriter {
         Backup backup = backupWriterContext.getBackup();
         Map backupOpsContext = newHashMap(backupWriterContext.getBackupOpsContext());
         backupOpsContext.put(META_DATA_SPEC, getMetaDataSpec());
+        backupOpsContext.put(INSPECTION_SCOPE, getInspectionScope());
         backupWriterContext.getBackupOps().write(backup, backupOpsContext);
         return backup;
     }
@@ -382,7 +396,7 @@ public class BackupWriter {
         Database database = backupWriterContext.getDatabase();
         Collection<TableSpec> tableSpecs = getTableSpecs();
         if (isEmpty(tableSpecs)) {
-            addTables(database, getTableTypes(), exportQueries);
+            addTables(database, getInspectionScope(), exportQueries);
         } else {
             for (TableSpec tableSpec : tableSpecs) {
                 Table table = database.findTable(tableSpec.getTable());

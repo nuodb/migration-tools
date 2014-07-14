@@ -28,9 +28,7 @@
 package com.nuodb.migrator.jdbc.type;
 
 import com.nuodb.migrator.utils.ObjectUtils;
-import com.nuodb.migrator.utils.ReflectionUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.Map;

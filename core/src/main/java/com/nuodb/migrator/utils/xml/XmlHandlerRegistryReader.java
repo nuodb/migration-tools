@@ -28,6 +28,7 @@
 package com.nuodb.migrator.utils.xml;
 
 import com.nuodb.migrator.utils.Priority;
+import com.nuodb.migrator.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,6 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
-import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.String.format;
 
@@ -103,7 +103,7 @@ public class XmlHandlerRegistryReader {
                 priority = Integer.parseInt(priorityAsText);
             }
         }
-        XmlHandler handler = newInstance(handlerClassAsText);
+        XmlHandler handler = ReflectionUtils.newInstance(handlerClassAsText);
         registry.registerHandler(handler, priority);
     }
 }

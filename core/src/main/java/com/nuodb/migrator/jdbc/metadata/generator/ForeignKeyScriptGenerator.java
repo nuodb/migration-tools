@@ -30,12 +30,16 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
-import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.utils.Collections.addIgnoreNull;
+import static java.lang.Math.min;
 import static java.util.Collections.singleton;
 
 /**
@@ -145,29 +149,47 @@ public class ForeignKeyScriptGenerator extends ScriptGeneratorBase<ForeignKey>
         ScriptGeneratorManager primaryScriptGeneratorManager =
                 getPrimaryScriptGeneratorManager(foreignKey, scriptGeneratorManager);
         return ObjectUtils.equals(scriptGeneratorManager, primaryScriptGeneratorManager) ?
-                primaryScriptGeneratorManager.getName(foreignKey.getPrimaryTable()) :
-                scriptGeneratorManager.getQualifiedName(foreignKey.getPrimaryTable());
+                scriptGeneratorManager.getName(foreignKey.getPrimaryTable()) :
+                primaryScriptGeneratorManager.getQualifiedName(foreignKey.getPrimaryTable());
     }
 
     /**
-     * Fixes cross database foreign keys generation https://github.com/nuodb/migrator-tools/issues/3
+     * Fixes cross database foreign keys generation https://github.com/nuodb/migration-tools/issues/3
      *
      * @param foreignKey             to create foreign script generator context
      * @param scriptGeneratorManager current script generator context used for the session
      * @return source context if primary and foreign schemas are equals or changes target schema & catalog name to
-     *         foreign table schema & catalog.
+     *         primary table schema & catalog.
      */
     protected ScriptGeneratorManager getPrimaryScriptGeneratorManager(ForeignKey foreignKey,
                                                                       ScriptGeneratorManager scriptGeneratorManager) {
-        Schema primarySchema = foreignKey.getPrimaryTable().getSchema();
-        Schema foreignSchema = foreignKey.getForeignTable().getSchema();
-        if (ObjectUtils.equals(primarySchema, foreignSchema)) {
-            return scriptGeneratorManager;
-        } else {
-            ScriptGeneratorManager foreignScriptGeneratorManager = new ScriptGeneratorManager(scriptGeneratorManager);
-            foreignScriptGeneratorManager.setTargetCatalog(foreignSchema.getCatalog().getName());
-            foreignScriptGeneratorManager.setTargetSchema(foreignSchema.getName());
-            return foreignScriptGeneratorManager;
+        ScriptGeneratorManager primaryScriptGeneratorManager =
+                new ScriptGeneratorManager(scriptGeneratorManager);
+        if (scriptGeneratorManager.getTargetCatalog() == null &&
+            scriptGeneratorManager.getTargetSchema() == null) {
+
+            Table primaryTable = foreignKey.getPrimaryTable();
+            List<String> qualifiers = newArrayList();
+            addIgnoreNull(qualifiers, primaryTable.getCatalog().getName());
+            addIgnoreNull(qualifiers, primaryTable.getSchema().getName());
+            Dialect targetDialect = scriptGeneratorManager.getTargetDialect();
+            int maximum = 0;
+            if (targetDialect.supportsCatalogs()) {
+                maximum++;
+            }
+            if (targetDialect.supportsSchemas()) {
+                maximum++;
+            }
+            int actual = min(qualifiers.size(), maximum);
+            qualifiers = qualifiers.subList(qualifiers.size() - actual, qualifiers.size());
+            int index = 0;
+            if (targetDialect.supportsCatalogs()) {
+                primaryScriptGeneratorManager.setTargetCatalog(qualifiers.get(index++));
+            }
+            if (targetDialect.supportsSchemas()) {
+                primaryScriptGeneratorManager.setTargetSchema(qualifiers.get(index));
+            }
         }
+        return primaryScriptGeneratorManager;
     }
 }

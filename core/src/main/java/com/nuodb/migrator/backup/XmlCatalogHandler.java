@@ -29,11 +29,15 @@ package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.jdbc.metadata.Catalog;
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.inspector.SchemaInspectionScope;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
+
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 
 /**
  * @author Sergey Bushik
@@ -67,5 +71,12 @@ public class XmlCatalogHandler extends XmlIdentifiableHandlerBase<Catalog> imple
         for (Schema schema : catalog.getSchemas()) {
             context.writeElement(output, SCHEMA_ELEMENT, schema);
         }
+    }
+
+    @Override
+    protected boolean skip(Catalog catalog, XmlWriteContext context) {
+        SchemaInspectionScope schemaInspectionScope = getInspectionScope(context);
+        Identifier catalogId = valueOf(schemaInspectionScope != null ? schemaInspectionScope.getCatalog() : null);
+        return super.skip(catalog, context) || (catalogId != null && !catalog.getIdentifier().equals(catalogId));
     }
 }
