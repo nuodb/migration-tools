@@ -32,6 +32,7 @@ import com.nuodb.migrator.backup.BackupManager;
 import com.nuodb.migrator.backup.XmlBackupManager;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
@@ -51,8 +52,10 @@ import java.util.TimeZone;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.META_DATA_SPEC;
+import static com.nuodb.migrator.backup.XmlMetaDataHandlerBase.INSPECTION_SCOPE;
 import static com.nuodb.migrator.dump.DumpWriter.THREADS;
 import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.session.SessionObservers.newSessionTimeZoneSetter;
@@ -139,13 +142,19 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
             dumpWriter.setDatabase(database);
             Collection<TableSpec> tableSpecs = getTableSpecs();
             if (isEmpty(tableSpecs)) {
-                String[] tableTypes = getTableTypes();
+                TableInspectionScope tableInspectionScope = (TableInspectionScope) getInspectionScope();
+                Identifier catalog = valueOf(tableInspectionScope != null ? tableInspectionScope.getCatalog() : null);
+                Identifier schema = valueOf(tableInspectionScope != null ? tableInspectionScope.getSchema() : null);
+                String[] tableTypes = tableInspectionScope != null ? tableInspectionScope.getTableTypes() : null;
                 for (Table table : database.getTables()) {
-                    if (isEmpty(tableTypes) || indexOf(tableTypes, table.getType()) != -1) {
+                    boolean addTable = isEmpty(tableTypes) || indexOf(tableTypes, table.getType()) != -1;
+                    addTable = addTable && (catalog == null || table.getCatalog().getIdentifier().equals(catalog));
+                    addTable = addTable && (schema == null || table.getSchema().getIdentifier().equals(schema));
+                    if (addTable) {
                         dumpWriter.addTable(table);
                     } else {
                         if (logger.isTraceEnabled()) {
-                            logger.trace(format("Table %s %s is not in the allowed types, table skipped",
+                            logger.trace(format("Table %s %s skipped",
                                     table.getQualifiedName(null), table.getType()));
                         }
                     }
@@ -176,6 +185,7 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         }
         Map context = newHashMap();
         context.put(META_DATA_SPEC, getMetaDataSpec());
+        context.put(INSPECTION_SCOPE, getInspectionScope());
         getBackupManager().writeBackup(backup, context);
     }
 
@@ -185,10 +195,14 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
     }
 
     protected Database inspect() throws SQLException {
-        InspectionScope inspectionScope = new TableInspectionScope(
-                getSourceSpec().getCatalog(), getSourceSpec().getSchema(), getTableTypes());
-        return createInspectionManager().inspect(getSourceSession().getConnection(), inspectionScope,
-                getObjectTypes().toArray(new MetaDataType[0])).getObject(DATABASE);
+        return createInspectionManager().inspect(getSourceSession().getConnection(),
+                getInspectionScope(), getObjectTypes().toArray(new MetaDataType[0])).getObject(DATABASE);
+    }
+
+    protected InspectionScope getInspectionScope() {
+        return new TableInspectionScope(
+                getSourceSpec().getCatalog(),
+                getSourceSpec().getSchema(), getTableTypes());
     }
 
     public DumpWriter getDumpWriter() {

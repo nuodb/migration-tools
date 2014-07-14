@@ -35,7 +35,7 @@ import java.util.Map;
 
 import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
-import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethodNoWrap;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -51,13 +51,14 @@ public class OracleAnyDataValueFormat extends LazyInitValueFormatBase<Object> {
     private Method stringValue;
 
     @Override
-    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Throwable {
         Object value =  access.getValue(options);
-        return string(value != null ? (String) invokeMethod(invokeMethod(value, accessDatum), stringValue) : null);
+        return string(value != null ? (String) invokeMethodNoWrap(invokeMethodNoWrap(value, accessDatum),
+                stringValue) : null);
     }
 
     @Override
-    protected void doSetValue(Value variant, JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+    protected void doSetValue(Value variant, JdbcValueAccess<Object> access, Map<String, Object> options) throws Throwable {
         String value = variant.asString();
         access.setValue(!isEmpty(value) ? value : null, options);
     }

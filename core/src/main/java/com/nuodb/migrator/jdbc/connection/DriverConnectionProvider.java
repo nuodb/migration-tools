@@ -29,7 +29,6 @@ package com.nuodb.migrator.jdbc.connection;
 
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
-import com.nuodb.migrator.utils.ReflectionUtils;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import java.lang.reflect.Method;
@@ -40,6 +39,7 @@ import java.util.Map;
 
 import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
 
 @SuppressWarnings("unchecked")
 public class DriverConnectionProvider extends ConnectionProxyProviderBase<DriverConnectionSpec> {
@@ -99,7 +99,7 @@ public class DriverConnectionProvider extends ConnectionProxyProviderBase<Driver
                 }
             }
             Method method = connectionClass.getMethod(GET_INNERMOST_DELEGATE, (Class[]) null);
-            Connection delegate = ReflectionUtils.invokeMethod(connection, method);
+            Connection delegate = invokeMethod(connection, method);
             return (delegate != null ? delegate : connection);
         } catch (NoSuchMethodException exception) {
             return connection;

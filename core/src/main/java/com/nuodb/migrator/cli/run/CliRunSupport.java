@@ -859,7 +859,7 @@ public class CliRunSupport extends CliSupport {
             namingStrategies.add(new TriggerAutoNamingStrategy(), HIGH);
         } else if (isNotEmpty(namingStrategy)) {
             try {
-                namingStrategies.add((NamingStrategy) newInstance(namingStrategy), HIGH);
+                namingStrategies.add((NamingStrategy) ReflectionUtils.newInstance(namingStrategy), HIGH);
             } catch (ReflectionException exception) {
                 optionUnexpected(optionSet.getOption(NAMING_STRATEGY), namingStrategy);
             }
@@ -873,8 +873,9 @@ public class CliRunSupport extends CliSupport {
         if (identifierQuotingValue != null) {
             identifierQuoting = getIdentifierQuotings().get(identifierQuotingValue);
             if (identifierQuoting == null) {
-                Class<IdentifierQuoting> identifierQuotingClass = ReflectionUtils.loadClass(identifierQuotingValue);
-                identifierQuoting = newInstance(identifierQuotingClass);
+                Class<IdentifierQuoting> identifierQuotingClass = ReflectionUtils.loadClass(
+                        identifierQuotingValue);
+                identifierQuoting = ReflectionUtils.newInstance(identifierQuotingClass);
             }
         }
         return identifierQuoting != null ? identifierQuoting : ALWAYS;
@@ -889,7 +890,7 @@ public class CliRunSupport extends CliSupport {
                 Class<IdentifierNormalizer> identifierNormalizerClass =
                         ReflectionUtils.loadClass(identifierNormalizerValue);
                 identifierNormalizer =
-                        newInstance(identifierNormalizerClass);
+                        ReflectionUtils.newInstance(identifierNormalizerClass);
             }
         }
         return identifierNormalizer != null ? identifierNormalizer : NOOP;

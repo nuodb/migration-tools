@@ -27,9 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
-import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.Catalog;
+import com.nuodb.migrator.jdbc.metadata.Database;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
+import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataType.DATABASE;
 
 /**
  * @author Sergey Bushik
@@ -37,7 +42,7 @@ import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 public class InspectionResultsUtils {
 
     public static Database addDatabase(InspectionResults results) {
-        Database database = results.getObject(MetaDataType.DATABASE);
+        Database database = results.getObject(DATABASE);
         if (database == null) {
             results.addObject(database = new Database());
         }
@@ -45,6 +50,10 @@ public class InspectionResultsUtils {
     }
 
     public static Catalog addCatalog(InspectionResults results, String catalogName) {
+        return addCatalog(results, catalogName, true);
+    }
+
+    public static Catalog addCatalog(InspectionResults results, String catalogName, boolean addObject) {
         Database database = addDatabase(results);
         Catalog catalog;
         Identifier catalogId = valueOf(catalogName);
@@ -52,33 +61,49 @@ public class InspectionResultsUtils {
             catalog = database.getCatalog(catalogId);
         } else {
             catalog = database.addCatalog(catalogId);
-            results.addObject(catalog);
+            if (addObject) {
+                results.addObject(catalog);
+            }
         }
         return catalog;
     }
 
     public static Schema addSchema(InspectionResults results, String catalogName, String schemaName) {
-        Catalog catalog = addCatalog(results, catalogName);
+        return addSchema(results, catalogName, schemaName, true);
+    }
+
+    public static Schema addSchema(InspectionResults results, String catalogName, String schemaName,
+                                   boolean addObject) {
+        Catalog catalog = addCatalog(results, catalogName, addObject);
         Schema schema;
         Identifier schemaId = valueOf(schemaName);
         if (catalog.hasSchema(schemaId)) {
             schema = catalog.getSchema(schemaId);
         } else {
             schema = catalog.addSchema(schemaId);
-            results.addObject(schema);
+            if (addObject) {
+                results.addObject(schema);
+            }
         }
         return schema;
     }
 
     public static Table addTable(InspectionResults results, String catalogName, String schemaName, String tableName) {
-        Schema schema = addSchema(results, catalogName, schemaName);
+        return addTable(results, catalogName, schemaName, tableName, true);
+    }
+
+    public static Table addTable(InspectionResults results, String catalogName, String schemaName, String tableName,
+                                 boolean addObject) {
+        Schema schema = addSchema(results, catalogName, schemaName, addObject);
         Table table;
         Identifier tableId = valueOf(tableName);
         if (schema.hasTable(tableId)) {
             table = schema.getTable(tableId);
         } else {
             table = schema.addTable(tableId);
-            results.addObject(table);
+            if (addObject) {
+                results.addObject(table);
+            }
         }
         return table;
     }

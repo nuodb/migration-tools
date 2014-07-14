@@ -29,8 +29,8 @@ package com.nuodb.migrator.jdbc.metadata.resolver;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.utils.ReflectionUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

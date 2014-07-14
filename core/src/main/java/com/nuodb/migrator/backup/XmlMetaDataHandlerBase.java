@@ -29,6 +29,7 @@ package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.jdbc.metadata.MetaData;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
+import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
 import com.nuodb.migrator.utils.xml.XmlReadWriteHandlerBase;
@@ -47,6 +48,7 @@ import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 public class XmlMetaDataHandlerBase<I extends MetaData> extends XmlReadWriteHandlerBase<I> {
 
     public static final String META_DATA_SPEC = getClassName(MetaDataSpec.class);
+    public static final String INSPECTION_SCOPE = getClassName(InspectionScope.class);
 
     protected XmlMetaDataHandlerBase(Class type) {
         super(type);
@@ -73,6 +75,10 @@ public class XmlMetaDataHandlerBase<I extends MetaData> extends XmlReadWriteHand
     protected boolean skip(MetaDataType objectType, MetaDataSpec metaDataSpec) {
         Collection<MetaDataType> objectTypes = metaDataSpec != null ? metaDataSpec.getObjectTypes() : OBJECT_TYPES;
         return objectType != null && !objectTypes.contains(objectType);
+    }
+
+    protected <I extends InspectionScope> I getInspectionScope(XmlWriteContext context) {
+        return (I) context.get(INSPECTION_SCOPE);
     }
 
     protected MetaDataSpec getMetaDataSpec(XmlWriteContext context) {

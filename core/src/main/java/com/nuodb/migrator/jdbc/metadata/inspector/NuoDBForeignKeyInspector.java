@@ -41,6 +41,7 @@ import java.util.Collection;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static com.nuodb.migrator.jdbc.query.Queries.newQuery;
+import static com.nuodb.migrator.utils.StringUtils.equalsIgnoreCase;
 
 /**
  * @author Sergey Bushik
@@ -74,12 +75,19 @@ public class NuoDBForeignKeyInspector extends ForeignKeyInspectorBase {
     }
 
     @Override
-    protected void processResultSet(InspectionContext inspectionContext, ResultSet foreignKeys) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope,
+                                    ResultSet foreignKeys) throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         ForeignKey foreignKey = null;
         while (foreignKeys.next()) {
-            Table primaryTable = addTable(inspectionResults, null, foreignKeys.getString("PKTABLE_SCHEM"),
-                    foreignKeys.getString("PKTABLE_NAME"));
+            String primarySchemaName = foreignKeys.getString("PKTABLE_SCHEM");
+            boolean addObject = (tableInspectionScope.getSchema() == null ||
+                    equalsIgnoreCase(tableInspectionScope.getSchema(), primarySchemaName));
+
+            String primaryTableName = foreignKeys.getString("PKTABLE_NAME");
+            final Table primaryTable = addTable(inspectionResults, null, primarySchemaName,
+                    primaryTableName, addObject);
+
             final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
             int position = foreignKeys.getInt("KEY_SEQ");
 
