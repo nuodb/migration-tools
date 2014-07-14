@@ -50,16 +50,16 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
             return doGetValue(access, options);
         } catch (ValueFormatException exception) {
             throw exception;
-        } catch (Exception exception) {
-            return onGetValueError(access, exception);
+        } catch (Throwable cause) {
+            return onGetValueError(access, cause);
         }
     }
 
-    protected abstract Value doGetValue(JdbcValueAccess<T> access, Map<String, Object> options) throws Exception;
+    protected abstract Value doGetValue(JdbcValueAccess<T> access, Map<String, Object> options) throws Throwable;
 
-    protected Value onGetValueError(JdbcValueAccess access, Exception exception) {
+    protected Value onGetValueError(JdbcValueAccess access, Throwable cause) {
         throw new ValueFormatException(format("Can't get %s %s column value",
-                getColumnName(access.getField()), access.getField().getTypeName()), exception);
+                getColumnName(access.getField()), access.getField().getTypeName()), cause);
     }
 
     @Override
@@ -69,17 +69,17 @@ public abstract class ValueFormatBase<T> implements ValueFormat<T> {
             doSetValue(value, access, options);
         } catch (ValueFormatException exception) {
             throw exception;
-        } catch (Exception exception) {
-            onSetValueError(access, exception);
+        } catch (Throwable cause) {
+            onSetValueError(access, cause);
         }
     }
 
     protected abstract void doSetValue(Value value, JdbcValueAccess<T> access,
-                                       Map<String, Object> options) throws Exception;
+                                       Map<String, Object> options) throws Throwable;
 
-    protected void onSetValueError(JdbcValueAccess access, Exception exception) {
+    protected void onSetValueError(JdbcValueAccess access, Throwable cause) {
         throw new ValueFormatException(format("Can't set %s %s column value",
-                getColumnName(access.getField()), access.getField().getTypeName()), exception);
+                getColumnName(access.getField()), access.getField().getTypeName()), cause);
     }
 
     protected String getColumnName(Field field) {

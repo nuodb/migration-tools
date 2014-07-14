@@ -30,7 +30,6 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.metadata.MetaData;
-import com.nuodb.migrator.jdbc.metadata.MetaDataHandlerUtils;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import org.slf4j.Logger;
 
@@ -40,6 +39,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.context.ContextUtils.createService;
+import static com.nuodb.migrator.jdbc.metadata.MetaDataHandlerUtils.getHandler;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -137,6 +137,6 @@ public class SimpleInspectionContext implements InspectionContext {
     }
 
     protected Inspector findInspector(MetaDataType objectType) {
-        return MetaDataHandlerUtils.getHandler(inspectionManager.getInspectors(), objectType);
+        return getHandler(inspectionManager.getInspectors(), objectType);
     }
 }

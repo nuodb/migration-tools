@@ -38,6 +38,7 @@ import java.sql.SQLException;
 import static com.google.common.collect.Iterables.tryFind;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
+import static com.nuodb.migrator.utils.StringUtils.equalsIgnoreCase;
 
 /**
  * @author Sergey Bushik
@@ -52,17 +53,29 @@ public class SimpleForeignKeyInspector extends ForeignKeyInspectorBase {
     }
 
     @Override
-    protected void processResultSet(InspectionContext inspectionContext, ResultSet foreignKeys) throws SQLException {
+    protected void processResultSet(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope,
+                                    ResultSet foreignKeys)
+            throws SQLException {
         InspectionResults inspectionResults = inspectionContext.getInspectionResults();
         boolean fixPosition = false;
         while (foreignKeys.next()) {
-            final Table primaryTable = addTable(inspectionResults, foreignKeys.getString("PKTABLE_CAT"),
-                    foreignKeys.getString("PKTABLE_SCHEM"), foreignKeys.getString("PKTABLE_NAME"));
+            String primaryCatalogName = foreignKeys.getString("PKTABLE_CAT");
+            boolean addObject = tableInspectionScope.getCatalog() == null ||
+                    equalsIgnoreCase(tableInspectionScope.getCatalog(), primaryCatalogName);
+
+            String primarySchemaName = foreignKeys.getString("PKTABLE_SCHEM");
+            addObject = addObject && (tableInspectionScope.getSchema() == null ||
+                    equalsIgnoreCase(tableInspectionScope.getSchema(), primarySchemaName));
+
+            String primaryTableName = foreignKeys.getString("PKTABLE_NAME");
+            final Table primaryTable = addTable(inspectionResults, primaryCatalogName, primarySchemaName,
+                    primaryTableName, addObject);
             final Column primaryColumn = primaryTable.addColumn(foreignKeys.getString("PKCOLUMN_NAME"));
 
             final Table foreignTable = addTable(inspectionResults, foreignKeys.getString("FKTABLE_CAT"),
                     foreignKeys.getString("FKTABLE_SCHEM"), foreignKeys.getString("FKTABLE_NAME"));
             final Column foreignColumn = foreignTable.addColumn(foreignKeys.getString("FKCOLUMN_NAME"));
+
             int position = foreignKeys.getInt("KEY_SEQ");
             if (fixPosition || position == 0) {
                 fixPosition = true;

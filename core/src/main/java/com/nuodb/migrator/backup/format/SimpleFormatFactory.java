@@ -38,6 +38,7 @@ import com.nuodb.migrator.backup.format.sql.SqlOutputFormat;
 import com.nuodb.migrator.backup.format.xml.XmlAttributes;
 import com.nuodb.migrator.backup.format.xml.XmlInputFormat;
 import com.nuodb.migrator.backup.format.xml.XmlOutputFormat;
+import com.nuodb.migrator.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
-import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
 
@@ -111,7 +111,7 @@ public class SimpleFormatFactory implements FormatFactory {
                 throw new InputFormatException(format("Format %s is not supported", type));
             }
         }
-        Format format = newInstance(formatClass);
+        Format format = ReflectionUtils.newInstance(formatClass);
         format.setAttributes(attributes);
         return format;
     }

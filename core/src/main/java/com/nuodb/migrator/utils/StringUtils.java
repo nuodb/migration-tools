@@ -79,6 +79,18 @@ public class StringUtils {
         return source1 == null ? source2 == null : source1.equals(source2);
     }
 
+    public static boolean equalsIgnoreCase(CharSequence source1, CharSequence source2) {
+        boolean equalsIgnoreCase;
+        if (source1 == null) {
+            equalsIgnoreCase = source2 == null;
+        } else {
+            String str1 = source1.toString();
+            String str2 = source2.toString();
+            equalsIgnoreCase = str1.regionMatches(true, 0, str2, 0, Math.max(str1.length(), str2.length()));
+        }
+        return  equalsIgnoreCase;
+    }
+
     public static boolean isDelimiter(char ch, char[] delimiters) {
         if (delimiters == null) {
             return Character.isWhitespace(ch);

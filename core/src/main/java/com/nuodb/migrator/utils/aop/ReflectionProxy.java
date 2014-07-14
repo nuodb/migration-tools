@@ -37,7 +37,7 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethodNoWrap;
 import static com.nuodb.migrator.utils.aop.MethodInterceptors.*;
 
 /**
@@ -64,7 +64,7 @@ public class ReflectionProxy extends AopProxyBase implements InvocationHandler {
         final Object target = getTarget();
         final List<MethodInterceptor> methodInterceptors = getMethodInterceptors(method, arguments);
         if (methodInterceptors.isEmpty()) {
-            return invokeMethod(target, method, arguments);
+            return invokeMethodNoWrap(target, method, arguments);
         } else {
             Object returnValue = new AopProxyMethodInvocationBase(this, method, arguments) {
 
@@ -73,7 +73,7 @@ public class ReflectionProxy extends AopProxyBase implements InvocationHandler {
                 @Override
                 public Object proceed() throws Throwable {
                     if (methodInterceptorIndex == methodInterceptors.size()) {
-                        return invokeMethod(target, method, arguments);
+                        return invokeMethodNoWrap(target, method, arguments);
                     } else {
                         return methodInterceptors.get(methodInterceptorIndex++).invoke(this);
                     }

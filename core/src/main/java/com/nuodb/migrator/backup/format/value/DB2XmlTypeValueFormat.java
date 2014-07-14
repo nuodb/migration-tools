@@ -36,13 +36,14 @@ import java.util.Map;
 import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
 import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
-import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethodNoWrap;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("all")
 public class DB2XmlTypeValueFormat extends LazyInitValueFormatBase<Object> {
 
     private static final String DB2XML_CLASS_NAME = "com.ibm.db2.jcc.DB2Xml";
@@ -60,14 +61,14 @@ public class DB2XmlTypeValueFormat extends LazyInitValueFormatBase<Object> {
     }
 
     @Override
-    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Throwable {
         Object value = access.getValue(options);
-        return string(value != null ? (String) invokeMethod(value, getDB2String) : null);
+        return string(value != null ? (String) invokeMethodNoWrap(value, getDB2String) : null);
     }
 
     @Override
     protected void doSetValue(Value variant, JdbcValueAccess<Object> access, Map<String, Object> options)
-            throws Exception {
+            throws Throwable {
         String value = variant.asString();
         access.setValue(!isEmpty(value) ? value : null, options);
     }

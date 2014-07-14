@@ -28,7 +28,6 @@
 package com.nuodb.migrator.utils;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.reflect.ConstructorUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -38,6 +37,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
+import static org.apache.commons.lang3.reflect.ConstructorUtils.invokeConstructor;
 
 @SuppressWarnings("unchecked")
 public class ReflectionUtils {
@@ -47,8 +48,6 @@ public class ReflectionUtils {
     private static final char INNER_CLASS_SEPARATOR = '$';
 
     public static final String CGLIB_CLASS_SEPARATOR = "$$";
-
-    public static final String CLASS_FILE_SUFFIX = ".class";
 
     private ReflectionUtils() {
     }
@@ -77,11 +76,38 @@ public class ReflectionUtils {
         return classLoader;
     }
 
+    public static <T> Class<T> loadClassNoWrap(String className) throws Throwable {
+        return (Class<T>) getClassLoader().loadClass(className);
+    }
+
     public static <T> Class<T> loadClass(String className) {
         try {
-            return (Class<T>) getClassLoader().loadClass(className);
-        } catch (ClassNotFoundException exception) {
+            return loadClassNoWrap(className);
+        } catch (Throwable exception) {
             throw new ReflectionException(exception);
+        }
+    }
+
+    public static <T> T newInstanceNoWrap(Class<T> type) throws Throwable {
+        return type.newInstance();
+    }
+
+    public static <T> T newInstanceNoWrap(Class<T> type, Object[] arguments) throws Throwable {
+        if (arguments == null) {
+            arguments = ArrayUtils.EMPTY_OBJECT_ARRAY;
+        }
+        Class argumentTypes[] = new Class[arguments.length];
+        for (int i = 0; i < arguments.length; i++) {
+            argumentTypes[i] = arguments[i].getClass();
+        }
+        return newInstanceNoWrap(type, arguments, argumentTypes);
+    }
+
+    public static <T> T newInstanceNoWrap(Class<T> type, Object[] arguments, Class[] argumentTypes) throws Throwable {
+        try {
+            return invokeConstructor(type, arguments, argumentTypes);
+        } catch (InvocationTargetException cause) {
+            throw cause.getTargetException();
         }
     }
 
@@ -95,10 +121,8 @@ public class ReflectionUtils {
 
     public static <T> T newInstance(Class<T> type) {
         try {
-            return type.newInstance();
-        } catch (InstantiationException exception) {
-            throw new ReflectionException("Failed creating instance of " + type, exception);
-        } catch (IllegalAccessException exception) {
+            return newInstanceNoWrap(type);
+        } catch (Throwable exception) {
             throw new ReflectionException("Failed creating instance of " + type, exception);
         }
     }
@@ -109,7 +133,7 @@ public class ReflectionUtils {
 
     public static <T> T newInstance(Class<T> type, Object[] arguments) {
         if (arguments == null) {
-            arguments = ArrayUtils.EMPTY_OBJECT_ARRAY;
+            arguments = EMPTY_OBJECT_ARRAY;
         }
         Class argumentTypes[] = new Class[arguments.length];
         for (int i = 0; i < arguments.length; i++) {
@@ -120,49 +144,52 @@ public class ReflectionUtils {
 
     public static <T> T newInstance(Class<T> type, Object[] arguments, Class[] argumentTypes) {
         try {
-            return ConstructorUtils.invokeConstructor(type, arguments, argumentTypes);
-        } catch (NoSuchMethodException exception) {
-            throw new ReflectionException(exception);
-        } catch (IllegalAccessException exception) {
-            throw new ReflectionException(exception);
-        } catch (InvocationTargetException exception) {
-            throw new ReflectionException(exception.getTargetException());
-        } catch (InstantiationException exception) {
-            throw new ReflectionException(exception);
+            return newInstanceNoWrap(type, arguments, argumentTypes);
+        } catch (Throwable cause) {
+            throw new ReflectionException(cause);
+        }
+    }
+
+    public static <T> T invokeMethodNoWrap(Object object, Method method, Object... arguments)
+            throws Throwable {
+        try {
+            if (arguments == null) {
+                arguments = EMPTY_OBJECT_ARRAY;
+            }
+            method.setAccessible(true);
+            return (T) method.invoke(object, arguments);
+        } catch (InvocationTargetException cause) {
+            throw cause.getCause();
         }
     }
 
     public static <T> T invokeMethod(Object object, Method method, Object... arguments) {
         try {
-            if (arguments == null) {
-                arguments = ArrayUtils.EMPTY_OBJECT_ARRAY;
-            }
-            method.setAccessible(true);
-            return (T) method.invoke(object, arguments);
-        } catch (IllegalArgumentException exception) {
-            throw newInvokeMethodException(object, method, exception);
-        } catch (IllegalAccessException exception) {
-            throw newInvokeMethodException(object, method, exception);
-        } catch (InvocationTargetException exception) {
-            throw newInvokeMethodException(object, method, exception.getTargetException());
+            return invokeMethodNoWrap(object, method, arguments);
+        } catch (Throwable cause) {
+            throw wrap(cause, method, object);
         }
     }
 
-    private static ReflectionException newInvokeMethodException(Object object, Method method, Throwable cause) {
+    private static ReflectionException wrap(Throwable cause, Method method, Object object) {
         return isStatic(method.getModifiers()) ?
                 new ReflectionException(format("Failed to invoke static %s method", method), cause) :
                 new ReflectionException(format("Failed to invoke %s method on object of %s class", method,
                         object.getClass().getName()), cause);
     }
 
+    public static Method getMethodNoWrap(Class type, String name, Class[] argumentTypes) throws Exception {
+        if (argumentTypes == null) {
+            argumentTypes = ArrayUtils.EMPTY_CLASS_ARRAY;
+        }
+        return type.getMethod(name, argumentTypes);
+    }
+
     public static Method getMethod(Class type, String name, Class... argumentTypes) {
         try {
-            if (argumentTypes == null) {
-                argumentTypes = ArrayUtils.EMPTY_CLASS_ARRAY;
-            }
-            return type.getMethod(name, argumentTypes);
-        } catch (NoSuchMethodException exception) {
-            throw new ReflectionException(exception);
+            return getMethodNoWrap(type, name, argumentTypes);
+        } catch (Throwable cause) {
+            throw new ReflectionException(cause);
         }
     }
 

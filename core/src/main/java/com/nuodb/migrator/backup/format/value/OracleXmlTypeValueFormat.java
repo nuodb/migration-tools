@@ -36,7 +36,7 @@ import java.util.Map;
 
 import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
 import static com.nuodb.migrator.backup.format.value.ValueUtils.string;
-import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethodNoWrap;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 
 /**
@@ -51,15 +51,15 @@ public class OracleXmlTypeValueFormat extends LazyInitValueFormatBase<Object> {
     private Method createXML;
 
     @Override
-    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Exception {
+    protected Value doGetValue(JdbcValueAccess<Object> access, Map<String, Object> options) throws Throwable {
         Object value = access.getValue(options);
-        return string(value != null ? (String) invokeMethod(value, stringValue) : null);
+        return string(value != null ? (String) invokeMethodNoWrap(value, stringValue) : null);
     }
 
     @Override
     protected void doSetValue(Value value, JdbcValueAccess<Object> access, Map<String, Object> options)
-            throws Exception {
-        access.setValue(invokeMethod(null, createXML, access.getConnection(), value.asString()), options);
+            throws Throwable {
+        access.setValue(invokeMethodNoWrap(null, createXML, access.getConnection(), value.asString()), options);
     }
 
     @Override

@@ -36,7 +36,7 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethod;
+import static com.nuodb.migrator.utils.ReflectionUtils.invokeMethodNoWrap;
 
 /**
  * @author Sergey Bushik
@@ -136,7 +136,8 @@ public class MethodInterceptors {
             @Override
             public Object invoke(MethodInvocation invocation) throws Throwable {
                 if (introducesMethod(invocation)) {
-                    Object returnValue = invokeMethod(delegate, invocation.getMethod(), invocation.getArguments());
+                    Object returnValue = invokeMethodNoWrap(delegate, invocation.getMethod(),
+                            invocation.getArguments());
                     if (returnValue == delegate && invocation instanceof AopProxyMethodInvocation) {
                         AopProxy aopProxy = ((AopProxyMethodInvocation) invocation).getAopProxy();
                         if (invocation.getMethod().getReturnType().isInstance(aopProxy)) {

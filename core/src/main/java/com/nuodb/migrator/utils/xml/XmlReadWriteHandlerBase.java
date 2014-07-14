@@ -27,11 +27,11 @@
  */
 package com.nuodb.migrator.utils.xml;
 
+import com.nuodb.migrator.utils.ReflectionUtils;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 import org.slf4j.Logger;
 
-import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @SuppressWarnings("unchecked")
@@ -64,7 +64,7 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     protected T createTarget(InputNode input, Class<? extends T> type) {
-        return newInstance(type);
+        return ReflectionUtils.newInstance(type);
     }
 
     protected <T> T getParent(XmlReadContext context) {
