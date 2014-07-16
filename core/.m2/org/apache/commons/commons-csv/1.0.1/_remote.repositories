@@ -1,6 +1,4 @@
 #NOTE: This is an Aether internal implementation file, its format can be changed without prior notice.
-#Wed Jul 16 16:53:57 FET 2014
+#Wed Jul 16 17:58:21 FET 2014
 commons-csv-1.0.1.pom>=
-commons-csv-1.0.1.jar>nuodb-migrator-core=
-commons-csv-1.0.1.pom>nuodb-migrator-core=
 commons-csv-1.0.1.jar>=
