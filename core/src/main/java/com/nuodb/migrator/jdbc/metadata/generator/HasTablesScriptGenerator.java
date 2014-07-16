@@ -93,7 +93,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         initScriptGeneratorContext(scriptGeneratorManager);
         try {
             Collection<String> scripts = newArrayList();
-            addSequencesCreateScripts(tables.getSequences(), scripts, scriptGeneratorManager);
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:
@@ -109,16 +108,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             return scripts;
         } finally {
             releaseScriptGeneratorContext(scriptGeneratorManager);
-        }
-    }
-
-    protected void addSequencesCreateScripts(Collection<Sequence> sequences, Collection<String> scripts,
-                                             ScriptGeneratorManager scriptGeneratorManager) {
-        if (scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
-                scriptGeneratorManager.getTargetDialect().supportsSequence()) {
-            for (Sequence sequence : sequences) {
-                scripts.addAll(scriptGeneratorManager.getCreateScripts(sequence));
-            }
         }
     }
 
@@ -138,20 +127,9 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                     addTablesDropScripts(tables.getTables(), scripts, scriptGeneratorManager);
                     break;
             }
-            addSequencesDropScripts(tables.getSequences(), scripts, scriptGeneratorManager);
             return scripts;
         } finally {
             releaseScriptGeneratorContext(scriptGeneratorManager);
-        }
-    }
-
-    protected void addSequencesDropScripts(Collection<Sequence> sequences, Collection<String> scripts,
-                                           ScriptGeneratorManager scriptGeneratorManager) {
-        if (scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
-                scriptGeneratorManager.getTargetDialect().supportsSequence()) {
-            for (Sequence sequence : sequences) {
-                scripts.addAll(scriptGeneratorManager.getDropScripts(sequence));
-            }
         }
     }
 
@@ -160,7 +138,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         initScriptGeneratorContext(scriptGeneratorManager);
         try {
             Collection<String> scripts = newArrayList();
-            addSequencesDropCreateScripts(tables.getSequences(), scripts, scriptGeneratorManager);
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:
@@ -181,16 +158,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
     }
 
-    protected void addSequencesDropCreateScripts(Collection<Sequence> sequences, Collection<String> scripts,
-                                                 ScriptGeneratorManager scriptGeneratorManager) {
-        if (scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
-                scriptGeneratorManager.getTargetDialect().supportsSequence()) {
-            for (Sequence sequence : sequences) {
-                scripts.addAll(scriptGeneratorManager.getScripts(sequence));
-            }
-        }
-    }
-
     protected GroupScriptsBy getGroupScriptsBy(ScriptGeneratorManager scriptGeneratorManager) {
         GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorManager.getAttributes().get(GROUP_SCRIPTS_BY);
         return groupScriptsBy != null ? groupScriptsBy : GroupScriptsBy.TABLE;
@@ -200,12 +167,24 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                                           ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
+        boolean createSequences = scriptGeneratorManager.getObjectTypes().contains(SEQUENCE) &&
+                scriptGeneratorManager.getTargetDialect().supportsSequence();
         boolean createTables = objectTypes.contains(TABLE);
         boolean createIndexes = objectTypes.contains(INDEX);
         boolean createPrimaryKeys = objectTypes.contains(PRIMARY_KEY);
         boolean createForeignKeys = objectTypes.contains(FOREIGN_KEY);
         boolean createTriggers = objectTypes.contains(TRIGGER);
         boolean createColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
+        if (createSequences) {
+            for (Table table : tables) {
+                if (!addTableScripts(table, scriptGeneratorManager)) {
+                    continue;
+                }
+                for (Sequence sequence : table.getSequences()) {
+                    scripts.addAll(scriptGeneratorManager.getCreateScripts(sequence));
+                }
+            }
+        }
         if (createTables) {
             ScriptGeneratorManager tableScriptGeneratorManager = new ScriptGeneratorManager(scriptGeneratorManager);
             Collection<Table> generatedTables = (Collection<Table>)
@@ -306,40 +285,53 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                                         ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
-        if (objectTypes.contains(FOREIGN_KEY) && dialect.supportsDropConstraints()) {
-            for (Table table : tables) {
-                if (!addTableScripts(table, scriptGeneratorManager)) {
-                    continue;
-                }
+        boolean dropForeignKeys = objectTypes.contains(FOREIGN_KEY) &&
+                dialect.supportsDropConstraints();
+        boolean dropTriggers = objectTypes.contains(TRIGGER);
+        boolean dropColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
+        boolean dropTables = objectTypes.contains(TABLE);
+        boolean dropSequences = objectTypes.contains(SEQUENCE) &&
+                scriptGeneratorManager.getTargetDialect().supportsSequence();
+        for (Table table : tables) {
+            if (!addTableScripts(table, scriptGeneratorManager)) {
+                continue;
+            }
+            if (dropForeignKeys) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
                     scripts.addAll(scriptGeneratorManager.getDropScripts(foreignKey));
                 }
             }
         }
-        boolean dropTriggers = objectTypes.contains(TRIGGER);
-        boolean dropColumnTriggers = objectTypes.contains(COLUMN_TRIGGER);
-        if (dropTriggers || dropColumnTriggers) {
+        for (Table table : tables) {
+            if (!addTableScripts(table, scriptGeneratorManager)) {
+                continue;
+            }
             Collection<String> triggers = newLinkedHashSet();
-            for (Table table : tables) {
-                if (!addTableScripts(table, scriptGeneratorManager)) {
-                    continue;
-                }
-                for (Trigger trigger : table.getTriggers()) {
-                    if (trigger.getObjectType() == TRIGGER && dropTriggers) {
-                        triggers.addAll(scriptGeneratorManager.getDropScripts(trigger));
-                    } else if (trigger.getObjectType() == COLUMN_TRIGGER && dropColumnTriggers) {
-                        triggers.addAll(scriptGeneratorManager.getDropScripts(trigger));
-                    }
+            for (Trigger trigger : table.getTriggers()) {
+                if (trigger.getObjectType() == TRIGGER && dropTriggers) {
+                    triggers.addAll(scriptGeneratorManager.getDropScripts(trigger));
+                } else if (trigger.getObjectType() == COLUMN_TRIGGER && dropColumnTriggers) {
+                    triggers.addAll(scriptGeneratorManager.getDropScripts(trigger));
                 }
             }
             scripts.addAll(triggers);
         }
-        if (objectTypes.contains(TABLE)) {
-            for (Table table : tables) {
-                if (!addTableScripts(table, scriptGeneratorManager)) {
-                    continue;
-                }
+        for (Table table : tables) {
+            if (!addTableScripts(table, scriptGeneratorManager)) {
+                continue;
+            }
+            if (dropTables) {
                 scripts.addAll(scriptGeneratorManager.getDropScripts(table));
+            }
+        }
+        for (Table table : tables) {
+            if (!addTableScripts(table, scriptGeneratorManager)) {
+                continue;
+            }
+            if (dropSequences) {
+                for (Sequence sequence : table.getSequences()) {
+                    scripts.addAll(scriptGeneratorManager.getDropScripts(sequence));
+                }
             }
         }
     }
