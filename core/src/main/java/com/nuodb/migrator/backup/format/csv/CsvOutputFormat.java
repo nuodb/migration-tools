@@ -67,7 +67,11 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvAttributes {
         CsvFormatBuilder builder = new CsvFormatBuilder(this);
         CSVFormat format = builder.build();
         doubleQuote = valueOf(builder.getQuote()) + valueOf(builder.getQuote());
-        csvPrinter = new CSVPrinter(wrapWriter(writer), format);
+        try {
+            csvPrinter = new CSVPrinter(wrapWriter(writer), format);
+        } catch (IOException exception) {
+            throw new OutputFormatException(exception);
+        }
     }
 
     @Override

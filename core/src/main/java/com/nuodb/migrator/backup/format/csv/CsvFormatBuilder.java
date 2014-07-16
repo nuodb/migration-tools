@@ -63,7 +63,7 @@ class CsvFormatBuilder implements CsvAttributes {
     private Character delimiter;
     private Character quote;
     private Character escape;
-    private Character commentStart;
+    private Character commentMarker;
     private String lineSeparator;
     private boolean quoting;
 
@@ -74,7 +74,7 @@ class CsvFormatBuilder implements CsvAttributes {
     public CSVFormat build() {
         CSVFormat format = newFormat(delimiter = createDelimiter());
         format = format.withEscape(escape = createEscape());
-        format = format.withCommentStart(commentStart = createCommentStart());
+        format = format.withCommentMarker(commentMarker = createCommentMarker());
         format = format.withRecordSeparator(lineSeparator = createLineSeparator());
         quote = createQuote();
         quoting = createQuoting();
@@ -149,8 +149,8 @@ class CsvFormatBuilder implements CsvAttributes {
         return lineSeparator;
     }
 
-    protected Character createCommentStart() {
-        return COMMENT_START;
+    protected Character createCommentMarker() {
+        return COMMENT_MARKER;
     }
 
     public Character getDelimiter() {
@@ -173,7 +173,7 @@ class CsvFormatBuilder implements CsvAttributes {
         return lineSeparator;
     }
 
-    public Character getCommentStart() {
-        return commentStart;
+    public Character getCommentMarker() {
+        return commentMarker;
     }
 }
