@@ -53,6 +53,8 @@ echo "ARG_DRIVER = $ARG_DRIVER"
 echo "ARG_FORMAT = $ARG_FORMAT"
 echo "JDK = $JDK_NAME"
 
+trap 'exec 1>&3 2>&4; cat ${WORK_FOLDER}/run.log' EXIT
+
 . ${BASEDIR}/database/${ARG_DATABASE}/set_source_env.sh
 . ${BASEDIR}/common/set_nuodb_env.sh
 
