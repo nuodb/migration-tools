@@ -127,7 +127,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         initScriptGeneratorContext(scriptGeneratorManager);
         try {
             Collection<String> scripts = newArrayList();
-            addSequencesDropScripts(tables.getSequences(), scripts, scriptGeneratorManager);
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:
@@ -136,9 +135,10 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                     }
                     break;
                 case META_DATA:
-                    addTablesCreateScripts(tables.getTables(), scripts, scriptGeneratorManager);
+                    addTablesDropScripts(tables.getTables(), scripts, scriptGeneratorManager);
                     break;
             }
+            addSequencesDropScripts(tables.getSequences(), scripts, scriptGeneratorManager);
             return scripts;
         } finally {
             releaseScriptGeneratorContext(scriptGeneratorManager);
