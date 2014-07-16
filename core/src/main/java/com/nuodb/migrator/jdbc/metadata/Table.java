@@ -34,10 +34,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Sets.*;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
+import static com.nuodb.migrator.utils.Collections.addIgnoreNull;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 
@@ -121,6 +122,14 @@ public class Table extends IdentifiableBase {
 
     public Collection<Index> getIndexes() {
         return indexes.values();
+    }
+
+    public Collection<Sequence> getSequences() {
+        Collection<Sequence> sequences = newArrayList();
+        for (Column column : getColumns()) {
+            addIgnoreNull(sequences, column.getSequence());
+        }
+        return sequences;
     }
 
     public Database getDatabase() {
