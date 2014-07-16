@@ -110,7 +110,6 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         initScriptGeneratorContext(scriptGeneratorManager);
         try {
             Collection<String> scripts = newArrayList();
-            addSequencesDropScripts(tables.getSequences(), scripts, scriptGeneratorManager);
             GroupScriptsBy groupScriptsBy = getGroupScriptsBy(scriptGeneratorManager);
             switch (groupScriptsBy) {
                 case TABLE:
