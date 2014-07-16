@@ -3,9 +3,10 @@
   <groupId>org.apache.commons</groupId>
   <artifactId>commons-csv</artifactId>
   <versioning>
+    <release>1.0.1</release>
     <versions>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0.1</version>
     </versions>
-    <lastUpdated>20140612095200</lastUpdated>
+    <lastUpdated>20140716135357</lastUpdated>
   </versioning>
 </metadata>

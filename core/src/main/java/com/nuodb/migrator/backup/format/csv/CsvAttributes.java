@@ -73,7 +73,7 @@ public interface CsvAttributes {
     final Character DELIMITER_COMMA = ',';
     final Character DELIMITER = DELIMITER_COMMA;
 
-    final char COMMENT_START = '#';
+    final char COMMENT_MARKER = '#';
     final String ENCODING = getProperty("file.encoding");
     final boolean QUOTING = false;
     final Character QUOTE = '"';
