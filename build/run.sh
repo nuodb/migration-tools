@@ -46,7 +46,7 @@ mkdir -p ${WORK_FOLDER}
 touch ${WORK_FOLDER}/run.log
 echo "Running tests: ${WORK_FOLDER}"
 
-exec 1>> ${WORK_FOLDER}/run.log 2>&1
+exec 3>&1 4>&2 1>> ${WORK_FOLDER}/run.log 2>&1
 
 echo "ARG_DATABASE = $ARG_DATABASE"
 echo "ARG_DRIVER = $ARG_DRIVER"
@@ -66,3 +66,6 @@ echo "migration complete"
 echo "integration_tests start"
 . ${BASEDIR}/database/${ARG_DATABASE}/run_integration_tests.sh
 echo "integration_tests complete"
+
+exec 1>&3 2>&4
+cat ${WORK_FOLDER}/run.log
