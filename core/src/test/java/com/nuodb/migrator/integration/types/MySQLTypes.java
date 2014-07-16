@@ -187,7 +187,7 @@ public class MySQLTypes implements DatabaseTypes {
 		} else if ("TINYBLOB".equalsIgnoreCase(type)) {
 			return Types.BLOB;
 		} else if ("ENUM".equalsIgnoreCase(type)) {
-			return Types.CHAR;
+			return Types.SMALLINT;
 		} else if ("SET".equalsIgnoreCase(type)) {
 			return Types.CHAR;
 		} else if ("TIME".equalsIgnoreCase(type)) {
@@ -278,10 +278,8 @@ public class MySQLTypes implements DatabaseTypes {
 		} else if ("ENUM".equalsIgnoreCase(type)) {
 			if (length != null && length.equalsIgnoreCase("9")) {
 				return "9";
-			} else if (length != null && length.equalsIgnoreCase("6")) {
-				return "7";
 			} else {
-				return "11";
+				return "2";
 			}
 
 		} else if ("SET".equalsIgnoreCase(type)) {
