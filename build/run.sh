@@ -66,3 +66,4 @@ echo "migration complete"
 echo "integration_tests start"
 . ${BASEDIR}/database/${ARG_DATABASE}/run_integration_tests.sh
 echo "integration_tests complete"
+cat ${WORK_FOLDER}/run.log
