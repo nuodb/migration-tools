@@ -81,7 +81,7 @@ public class MySQLColumn {
             boolean addValue = false;
             switch (symbol) {
                 case '\'':
-                    if (start && lastSymbol == '\'' && index > startIndex) {
+                    if (start && (lastSymbol == '\'' || index > startIndex)) {
                         quotes++;
                     }
                     if (quotes == 2) {
