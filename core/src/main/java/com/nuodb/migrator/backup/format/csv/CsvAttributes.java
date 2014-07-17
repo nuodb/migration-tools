@@ -66,7 +66,7 @@ public interface CsvAttributes {
     final String LINE_SEPARATOR_CRLF = "\r\n";
     final String LINE_SEPARATOR_CR = "\r";
     final String LINE_SEPARATOR_LF = "\n";
-    final String LINE_SEPARATOR = LINE_SEPARATOR_CRLF;
+    final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     final String ATTRIBUTE_DELIMITER_TAB = "tab";
     final Character DELIMITER_TAB = '\t';
