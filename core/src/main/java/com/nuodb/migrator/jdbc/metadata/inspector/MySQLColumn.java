@@ -67,30 +67,64 @@ public class MySQLColumn {
 
     public static Collection<String> getValues(String type) {
         Collection<String> values = newArrayList();
-        int start = 0;
-        int end;
+        boolean start = true;
+        boolean escape = false;
+        int quotes = 0;
+        int startIndex = 0;
         int index = 0;
         StringBuilder value = new StringBuilder();
-        while ((end = type.indexOf("'", index)) != -1) {
-            if (end == start) {
-                index++;
-                continue;
+        int length = type.length();
+        char lastSymbol = 0;
+        while (index < length) {
+            char symbol = type.charAt(index);
+            boolean addSymbol = false;
+            boolean addValue = false;
+            switch (symbol) {
+                case '\'':
+                    if (start && lastSymbol == '\'' && index > startIndex) {
+                        quotes++;
+                    }
+                    if (quotes == 2) {
+                        addSymbol = true;
+                        quotes = 0;
+                    }
+                    if (!start) {
+                        start = true;
+                        startIndex = index;
+                    }
+                    break;
+                case ',':
+                    addSymbol = escape;
+                    if (start && !escape) {
+                        addValue = true;
+                        start = false;
+                    }
+                    break;
+                case ' ':
+                    addSymbol = start;
+                    break;
+                case '\\':
+                    addSymbol = escape;
+                    escape = !escape;
+                    break;
+                default:
+                    quotes = 0;
+                    addSymbol = true;
+                    break;
             }
-            if (type.indexOf("'", end + 1) == end + 1) {
-                value.append(type.substring(index, end));
-                index = end + 1;
-                value.append("'");
-                index++;
-                continue;
+            if (addSymbol) {
+                value.append(symbol);
             }
-            value.append(type.substring(index, end));
-            end++;
-            values.add(value.toString());
-            value.setLength(0);
-            end++; // skip comma
-            start = index = end;
-
+            if (addValue) {
+                values.add(value.toString());
+                value.setLength(0);
+                start = false;
+            }
+            index++;
+            lastSymbol = symbol;
         }
+        values.add(value.toString());
+        value.setLength(0);
         return values;
     }
 }
