@@ -45,7 +45,9 @@ public class MySQLColumnTest {
     public Object[][] createGetValuesData() throws Exception {
         return new Object[][]{
                 {"''", newArrayList("")},
+                {"'a''b'", newArrayList("a'b")},
                 {"'a b c'", newArrayList("a b c")},
+                {"'car''s','byke\"s'", newArrayList("car's", "byke\"s")},
                 {"'in\\\\out', 'in', 'out'", newArrayList("in\\out", "in", "out")},
                 {"'\\\\'", newArrayList("\\")},
                 {"'\\,'", newArrayList(",")},
