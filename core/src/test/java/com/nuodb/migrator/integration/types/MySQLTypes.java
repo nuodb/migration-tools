@@ -276,12 +276,15 @@ public class MySQLTypes implements DatabaseTypes {
 		} else if ("TINYBLOB".equalsIgnoreCase(type)) {
 			return "255";
 		} else if ("ENUM".equalsIgnoreCase(type)) {
-			if (length != null && length.equalsIgnoreCase("9")) {
-				return "9";
-			} else {
-				return "2";
-			}
-
+            // TODO: temporary fix NuoDB ENUM length issue
+            // How to reproduce the issue:
+            // CREATE TABLE TEST.T1 (F1 ENUM('123', '12345'));
+            // SELECT LENGTH FROM SYSTEM.FIELDS WHERE SCHEMA='TEST' AND TABLENAME='T1';
+            // Actual result:
+            // 2
+            // Expected result:
+            // 5=max('123'.length(), '12345'.length());
+            return "2";
 		} else if ("SET".equalsIgnoreCase(type)) {
 			if (length != null && length.equalsIgnoreCase("22")) {
 				return "22";
