@@ -205,7 +205,7 @@ public class CliHandler extends CliSupport implements Bootable {
             logger.trace(format("Handling version option"));
         }
         PrintStream writer = System.out;
-        writer.print(getVersion());
+        writer.println(getVersion());
     }
 
     protected void handleConfig(OptionSet options) {

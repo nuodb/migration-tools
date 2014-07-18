@@ -291,12 +291,12 @@ insert into  `testdata_longblob` (`c1`,`c2`,`c3`,`c4`,`c6`) values('G','A','T','
 DROP TABLE IF EXISTS `testdata_enum`;
 
 CREATE TABLE `testdata_enum` (
- `c1` ENUM('abcd', 'in\\out', 'sample test') DEFAULT NULL,
+ `c1` ENUM('abcd', 'refer-MIG-80', 'sample test') DEFAULT NULL,
   `c2` ENUM(' xyz ', 'test', 'Référence') DEFAULT NULL,
   `c3` ENUM('car\'s','byke\"s') DEFAULT NULL
 );
 
-insert into `testdata_enum` (`c1`,`c2`,`c3`) values ('in\\out','Référence','byke\"s');
+insert into `testdata_enum` (`c1`,`c2`,`c3`) values ('refer-MIG-80','Référence','byke\"s');
 insert into `testdata_enum` (`c2`,`c3`) values (' xyz ','car\'s');
 insert into `testdata_enum` (`c1`,`c2`) values ('sample test','test');
 insert into `testdata_enum` (`c1`,`c2`,`c3`) values ('abcd','test','byke\"s');
