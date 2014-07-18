@@ -1,3 +1,1 @@
-mvn -f ${BASEDIR}/../pom.xml clean
-mvn -f ${BASEDIR}/../pom.xml -Pmysql-integration-tests test
-
+mvn -f ${NUODB_MIGRATOR_ROOT}/pom.xml -Pmysql-integration-tests test

@@ -11,63 +11,61 @@ fi
 
 export PATH=.:${JAVA_HOME}/bin:${PATH}
 
-ARG_FORMAT=$1
+FORMAT=$1
 args=$(getopt -l "database:,driver:,jdk:" -- "$@")
 eval set -- "$args"
 
 while [ $# -ge 1 ]; do
     case "$1" in
         --database)
-            ARG_DATABASE=$2
+            DATABASE_NAME=$2
             shift ;;
         --driver)
-            ARG_DRIVER=$2
+            SOURCE_JDBCJAR=$2
             shift;;
         --) shift ; break ;;
     esac
     shift
 done
 
-if [ ! -f ${ARG_DRIVER} ]
+if [ ! -f ${SOURCE_JDBCJAR} ]
     then
-    echo "Driver missing -  ${ARG_DRIVER}"
+    echo "Missing source driver"
     exit 1
 fi
-BASEDIR=$(dirname $0)
-CURDIR=`pwd`
 
-. ${BASEDIR}/common/set_migrator_env.sh
+CUR_DIR=`pwd`
+BASE_DIR=$(dirname $0)
+JAVA_NAME=`basename ${JAVA_HOME}`
+DRIVER_NAME=`basename ${SOURCE_JDBCJAR}`
+WORK_DIR=${BASE_DIR}/tests/${JAVA_NAME}/${DATABASE_NAME}/${DRIVER_NAME}/${FORMAT}
+NUODB_MIGRATOR_ROOT=${BASE_DIR}/..
 
-JDK_NAME=`basename ${JAVA_HOME}`
-DRIVER_NAME=`basename ${ARG_DRIVER}`
-export WORK_FOLDER=${BASEDIR}/tests/${JDK_NAME}/${ARG_DATABASE}/${DRIVER_NAME}/${ARG_FORMAT}
-rm -rf ${WORK_FOLDER}
-mkdir -p ${WORK_FOLDER}
-touch ${WORK_FOLDER}/run.log
-echo "Running tests: ${WORK_FOLDER}"
+echo "Running tests in ${WORK_DIR}"
+rm -rf ${WORK_DIR}
+mkdir -p ${WORK_DIR}
+touch ${WORK_DIR}/run.log
 
-exec 3>&1 4>&2 1>> ${WORK_FOLDER}/run.log 2>&1
+echo "Using java $JAVA_NAME"
+echo "Using database $DATABASE_NAME"
+echo "Using driver $SOURCE_JDBCJAR"
+echo "Using format $FORMAT"
 
-echo "ARG_DATABASE = $ARG_DATABASE"
-echo "ARG_DRIVER = $ARG_DRIVER"
-echo "ARG_FORMAT = $ARG_FORMAT"
-echo "JDK = $JDK_NAME"
+echo "Setup env"
+. ${BASE_DIR}/common/setup_env.sh
+. ${BASE_DIR}/database/${DATABASE_NAME}/setup_env.sh
 
-trap 'exec 1>&3 2>&4; cat ${WORK_FOLDER}/run.log' EXIT
+echo "Setup migrator"
+. ${BASE_DIR}/common/setup_migrator.sh
 
-. ${BASEDIR}/database/${ARG_DATABASE}/set_source_env.sh
-. ${BASEDIR}/common/set_nuodb_env.sh
+echo "Setup source database"
+. ${BASE_DIR}/database/${DATABASE_NAME}/setup_source.sh
 
-echo "Env variables set up complete"
-. ${BASEDIR}/common/setup_nuodb.sh
-echo "nuodb set up complete"
-#. ${BASEDIR}/database/${ARG_DATABASE}/set_source_data.sh
-echo "migration start"
-. ${BASEDIR}/database/${ARG_DATABASE}/migrate_data.sh
-echo "migration complete"
-echo "integration_tests start"
-. ${BASEDIR}/database/${ARG_DATABASE}/run_integration_tests.sh
-echo "integration_tests complete"
+echo "Setup target database"
+. ${BASE_DIR}/common/setup_nuodb.sh
 
-exec 1>&3 2>&4
-cat ${WORK_FOLDER}/run.log
+echo "Running migration"
+. ${BASE_DIR}/database/${DATABASE_NAME}/migrate_data.sh
+
+echo "Running integration tests"
+. ${BASE_DIR}/database/${DATABASE_NAME}/run_integration_tests.sh
