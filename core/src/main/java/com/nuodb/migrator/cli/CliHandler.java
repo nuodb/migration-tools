@@ -28,13 +28,13 @@
 package com.nuodb.migrator.cli;
 
 import com.nuodb.migrator.bootstrap.Bootable;
-import com.nuodb.migrator.bootstrap.config.Config;
 import com.nuodb.migrator.cli.parse.Command;
 import com.nuodb.migrator.cli.parse.Group;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionException;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.Parser;
+import com.nuodb.migrator.config.Config;
 import com.nuodb.migrator.cli.parse.help.HelpFormatter;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
@@ -49,6 +49,7 @@ import java.io.PrintStream;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.Migrator.getProperty;
 import static com.nuodb.migrator.Migrator.getVersion;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static java.lang.Integer.MAX_VALUE;
@@ -69,13 +70,11 @@ public class CliHandler extends CliSupport implements Bootable {
 
     public static final String EXECUTABLE = "bin/nuodb-migrator";
 
-    private Config config;
     private Parser parser = new ParserImpl();
     private CliRunLookup cliRunLookup = new CliRunLookup();
 
     @Override
-    public void boot(Config config, String[] arguments) throws Exception {
-        setConfig(config);
+    public void boot(String[] arguments) throws Exception {
         parse(arguments);
     }
 
@@ -242,15 +241,7 @@ public class CliHandler extends CliSupport implements Bootable {
         formatter.format(System.out);
     }
 
-    public Config getConfig() {
-        return config;
-    }
-
-    public void setConfig(Config config) {
-        this.config = config;
-    }
-
     protected String getExecutable() {
-        return config.getProperty(Config.EXECUTABLE, CliHandler.EXECUTABLE);
+        return getProperty(Config.EXECUTABLE, CliHandler.EXECUTABLE);
     }
 }

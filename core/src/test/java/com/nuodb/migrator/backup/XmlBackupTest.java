@@ -51,6 +51,7 @@ import org.testng.annotations.Test;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import static com.nuodb.migrator.Migrator.getVersion;
 import static com.nuodb.migrator.backup.format.csv.CsvAttributes.FORMAT;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static com.nuodb.migrator.utils.Equalities.defaultEquality;
@@ -246,7 +247,7 @@ public class XmlBackupTest {
         return new Object[][] {
         {
                 backup,
-                "<backup version=\"2.4\" format=\"csv\"/>"
+                "<backup version=\"" + getVersion() + "\" format=\"csv\"/>"
         }, {
                 database,
                 "<database>" +

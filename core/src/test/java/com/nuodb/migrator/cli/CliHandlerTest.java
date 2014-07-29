@@ -27,31 +27,27 @@
  */
 package com.nuodb.migrator.cli;
 
-import com.nuodb.migrator.bootstrap.config.Config;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.FileOutputStream;
 
-import static com.nuodb.migrator.cli.CliHandler.EXECUTABLE;
 import static java.io.File.createTempFile;
 import static org.apache.commons.io.IOUtils.write;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Sergey Bushik
  */
 public class CliHandlerTest {
 
-    private Config config;
     private CliHandler cliHandler;
 
     @BeforeMethod
     public void setUp() {
-        config = mock(Config.class);
-        when(config.getProperty(Config.EXECUTABLE, EXECUTABLE)).thenReturn(EXECUTABLE);
         cliHandler = spy(new CliHandler());
     }
 
@@ -59,7 +55,7 @@ public class CliHandlerTest {
     public void testConfig() throws Exception {
         String path = createTempFile("nuodb-migrator", "config").getPath();
         write("--list", new FileOutputStream(path));
-        cliHandler.boot(config, new String[]{"--config=" + path});
+        cliHandler.boot(new String[]{"--config=" + path});
         verify(cliHandler).handleConfig(any(OptionSet.class));
     }
 }

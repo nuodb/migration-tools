@@ -27,10 +27,7 @@
  */
 package com.nuodb.migrator.bootstrap;
 
-import com.nuodb.migrator.bootstrap.config.Config;
-import com.nuodb.migrator.bootstrap.config.PropertiesConfigLoader;
-import com.nuodb.migrator.bootstrap.config.PropertiesReplacement;
-import com.nuodb.migrator.bootstrap.config.Replacer;
+import com.nuodb.migrator.config.Config;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -39,7 +36,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static com.nuodb.migrator.bootstrap.classpath.ClassPathLoaderUtils.createClassPathLoader;
-import static com.nuodb.migrator.bootstrap.config.Config.*;
+import static com.nuodb.migrator.config.Config.*;
 import static java.lang.String.format;
 import static java.lang.System.setProperty;
 import static java.lang.Thread.currentThread;
@@ -60,7 +57,7 @@ public class Bootstrap {
     private Config config;
 
     public void boot(String[] arguments) throws Exception {
-        config = loadConfig();
+        config = Config.getInstance();
 
         Properties properties = config.getProperties();
         if (logger.isDebugEnabled()) {
@@ -73,13 +70,7 @@ public class Bootstrap {
         Thread.currentThread().setContextClassLoader(classLoader);
 
         Bootable bootable = createBootable();
-        bootable.boot(config, arguments);
-    }
-
-    protected Config loadConfig() {
-        PropertiesConfigLoader configLoader = new PropertiesConfigLoader();
-        configLoader.setReplacer(new Replacer(new PropertiesReplacement()));
-        return configLoader.loadConfig();
+        bootable.boot(arguments);
     }
 
     protected ClassLoader createClassLoader() throws IOException {

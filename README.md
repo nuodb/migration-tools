@@ -26,7 +26,8 @@ This tool is designed to assist you in migrating data from supported SQL databas
 ### Root command line options ###
 
     $ bin/nuodb-migrator
-        --help |
+        --help (-h) |
+        --version (-v) |
         --help=<[dump] | [load] | [schema]> |
         --list |
         --config=<path>

@@ -27,12 +27,10 @@
  */
 package com.nuodb.migrator.bootstrap;
 
-import com.nuodb.migrator.bootstrap.config.Config;
-
 /**
  * @author Sergey Bushik
  */
 public interface Bootable {
 
-    void boot(Config config, String[] arguments) throws Exception;
+    void boot(String[] arguments) throws Exception;
 }
