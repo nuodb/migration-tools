@@ -27,8 +27,9 @@
  */
 package com.nuodb.migrator.cli;
 
+import com.nuodb.migrator.Migrator;
 import com.nuodb.migrator.bootstrap.Bootable;
-import com.nuodb.migrator.bootstrap.config.Config;
+import com.nuodb.migrator.config.Config;
 import com.nuodb.migrator.cli.parse.*;
 import com.nuodb.migrator.cli.parse.help.HelpFormatter;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
@@ -64,13 +65,11 @@ public class CliHandler extends CliSupport implements Bootable {
 
     public static final String EXECUTABLE = "bin/nuodb-migrator";
 
-    private Config config;
     private Parser parser = new ParserImpl();
     private CliRunLookup cliRunLookup = new CliRunLookup();
 
     @Override
-    public void boot(Config config, String[] arguments) throws Exception {
-        setConfig(config);
+    public void boot(String[] arguments) throws Exception {
         parse(arguments);
     }
 
@@ -237,15 +236,7 @@ public class CliHandler extends CliSupport implements Bootable {
         formatter.format(System.out);
     }
 
-    public Config getConfig() {
-        return config;
-    }
-
-    public void setConfig(Config config) {
-        this.config = config;
-    }
-
     protected String getExecutable() {
-        return config.getProperty(Config.EXECUTABLE, CliHandler.EXECUTABLE);
+        return Migrator.getProperty(Config.EXECUTABLE, CliHandler.EXECUTABLE);
     }
 }

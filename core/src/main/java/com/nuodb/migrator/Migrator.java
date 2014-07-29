@@ -29,6 +29,7 @@ package com.nuodb.migrator;
 
 import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.config.Config;
 import com.nuodb.migrator.dump.DumpJob;
 import com.nuodb.migrator.jdbc.connection.ConnectionProviderFactory;
 import com.nuodb.migrator.jdbc.dialect.DialectResolver;
@@ -41,53 +42,24 @@ import com.nuodb.migrator.schema.SchemaJob;
 import com.nuodb.migrator.spec.DumpJobSpec;
 import com.nuodb.migrator.spec.LoadJobSpec;
 import com.nuodb.migrator.spec.SchemaJobSpec;
-import org.slf4j.Logger;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
-import java.util.Properties;
 
+import static com.nuodb.migrator.config.Config.VERSION;
+import static com.nuodb.migrator.config.Config.getInstance;
 import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
-import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
-import static java.lang.String.format;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class Migrator {
 
-    private static final transient Logger logger = getLogger(Migrator.class);
-
-    private static final String PROPERTIES = "com/nuodb/migrator/migrator.properties";
-    private static final String VERSION_PROPERTY = "com.nuodb.migrator.version";
-    private static String VERSION;
-
+    private static Config CONFIG = getInstance();
     private FormatFactory formatFactory;
     private DialectResolver dialectResolver;
     private InspectionManager inspectionManager;
     private ConnectionProviderFactory connectionProviderFactory;
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
-
-    static {
-        Properties properties = new Properties();
-        try {
-            InputStream input = getClassLoader().getResourceAsStream(PROPERTIES);
-            if (input != null) {
-                properties.load(input);
-            }
-        } catch (IOException exception) {
-            if (logger.isWarnEnabled()) {
-                logger.warn(format("Can't read %s", PROPERTIES), exception);
-            }
-        }
-        VERSION = properties.getProperty(VERSION_PROPERTY);
-    }
-
-    public static String getVersion() {
-        return VERSION;
-    }
 
     public void execute(DumpJobSpec jobSpec, Map<Object, Object> context) {
         execute(new DumpJob(jobSpec), context);
@@ -153,5 +125,17 @@ public class Migrator {
 
     public void setValueFormatRegistryResolver(ValueFormatRegistryResolver valueFormatRegistryResolver) {
         this.valueFormatRegistryResolver = valueFormatRegistryResolver;
+    }
+
+    public static String getVersion() {
+        return getProperty(VERSION);
+    }
+
+    public static String getProperty(String property) {
+        return CONFIG.getProperty(property);
+    }
+
+    public static String getProperty(String property, String defaultValue) {
+        return CONFIG.getProperty(property, defaultValue);
     }
 }

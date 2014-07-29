@@ -25,7 +25,9 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.config;
+package com.nuodb.migrator.config;
+
+import java.util.Properties;
 
 import static java.lang.String.format;
 
@@ -44,14 +46,13 @@ public class Replacer {
 
     private boolean ignoreUnknownPlaceholders;
 
-    private Replacement replacement;
+    private Properties replacements = new Properties();
 
     public Replacer() {
-        this(new PropertiesReplacement());
     }
 
-    public Replacer(Replacement replacement) {
-        this.replacement = replacement;
+    public Replacer(Properties replacements) {
+        addReplacements(replacements);
     }
 
     public String replace(String property) {
@@ -70,7 +71,8 @@ public class Replacer {
                     if (isIgnoreUnknownPlaceholders()) {
                         prefixStart = buffer.indexOf(placeholderPrefix, suffixStart);
                     } else {
-                        throw new IllegalArgumentException(format("Can't find replacement for %s", placeholder));
+                        throw new IllegalArgumentException(
+                                format("Can't find replacement for %s placeholder", placeholder));
                     }
                 } else {
                     buffer.replace(prefixStart, suffixStart + placeholderSuffix.length(), replacement);
@@ -83,8 +85,12 @@ public class Replacer {
         return buffer.toString();
     }
 
-    protected String getReplacement(String placeholder) {
-        return replacement != null ? replacement.getReplacement(placeholder) : null;
+    public String getReplacement(String placeholder) {
+        return replacements.getProperty(placeholder);
+    }
+
+    public void addReplacements(Properties replacements) {
+        this.replacements.putAll(replacements);
     }
 
     public String getPlaceholderPrefix() {
@@ -109,13 +115,5 @@ public class Replacer {
 
     public void setIgnoreUnknownPlaceholders(boolean ignoreUnknownPlaceholders) {
         this.ignoreUnknownPlaceholders = ignoreUnknownPlaceholders;
-    }
-
-    public Replacement getReplacement() {
-        return replacement;
-    }
-
-    public void setReplacement(Replacement replacement) {
-        this.replacement = replacement;
     }
 }

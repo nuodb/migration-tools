@@ -30,8 +30,6 @@ package com.nuodb.migrator.cli.run;
 import com.nuodb.migrator.cli.parse.CommandLine;
 import com.nuodb.migrator.cli.parse.OptionException;
 import com.nuodb.migrator.cli.parse.option.CommandBase;
-import com.nuodb.migrator.cli.run.CliRun;
-import com.nuodb.migrator.cli.run.CliRunLookup;
 
 import java.util.Collection;
 import java.util.ListIterator;

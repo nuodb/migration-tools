@@ -27,8 +27,8 @@
  */
 package com.nuodb.migrator.context;
 
-import static com.nuodb.migrator.bootstrap.config.Config.CONTEXT_CLASS;
-import static com.nuodb.migrator.bootstrap.config.Config.DEFAULT_CONTEXT_CLASS;
+import static com.nuodb.migrator.config.Config.CONTEXT_CLASS;
+import static com.nuodb.migrator.config.Config.DEFAULT_CONTEXT_CLASS;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.System.getProperty;
 

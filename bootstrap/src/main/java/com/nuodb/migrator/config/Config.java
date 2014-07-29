@@ -25,27 +25,49 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.config;
+package com.nuodb.migrator.config;
 
 import java.util.Properties;
 
 /**
  * @author Sergey Bushik
  */
-public class PropertiesReplacement implements Replacement {
+public abstract class Config {
 
-    private Properties properties;
+    public static final String HOME = "nuodb.migrator.home";
 
-    public PropertiesReplacement() {
-        this(System.getProperties());
+    public static final String EXECUTABLE = "com.nuodb.migrator.executable";
+
+    public static final String CLASSPATH = "com.nuodb.migrator.classpath";
+
+    public static final String BOOTABLE_CLASS = "com.nuodb.migrator.bootable.class";
+
+    public static final String DEFAULT_BOOTABLE_CLASS = "com.nuodb.migrator.cli.CliHandler";
+
+    public static final String CONTEXT_CLASS = "com.nuodb.migrator.context.class";
+
+    public static final String DEFAULT_CONTEXT_CLASS = "com.nuodb.migrator.context.SimpleContext";
+
+    public static final String VERSION = "com.nuodb.migrator.version";
+
+    public static final String CONFIG = "com.nuodb.migrator.config";
+
+    public static final String DEFAULT_CONFIG = "nuodb-migrator.properties";
+
+    public static final String CONFIG_DIR = "conf";
+
+    private static Config INSTANCE;
+
+    public static Config getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new PropertiesConfigLoader().loadConfig();
+        }
+        return INSTANCE;
     }
 
-    public PropertiesReplacement(Properties properties) {
-        this.properties = properties;
-    }
+    public abstract String getProperty(String property);
 
-    @Override
-    public String getReplacement(String placeholder) {
-        return properties.getProperty(placeholder);
-    }
+    public abstract String getProperty(String property, String defaultValue);
+
+    public abstract Properties getProperties();
 }

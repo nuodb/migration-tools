@@ -29,7 +29,6 @@ package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.Migrator;
 import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Collection;

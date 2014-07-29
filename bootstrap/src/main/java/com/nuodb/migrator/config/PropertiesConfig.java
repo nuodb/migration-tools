@@ -25,7 +25,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.bootstrap.config;
+package com.nuodb.migrator.config;
 
 import java.util.Map;
 import java.util.Properties;
@@ -33,7 +33,7 @@ import java.util.Properties;
 /**
  * @author Sergey Bushik
  */
-public class PropertiesConfig implements Config {
+public class PropertiesConfig extends Config {
 
     private Properties properties;
     private Replacer replacer;
