@@ -2,20 +2,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="MYSQL to NUODB Integration Test Suite" parallel="none">
     <test name="MYSQL to NUODB Integration Tests" >
-        <parameter name="source.driver" value="com.mysql.jdbc.Driver"/>
-        <parameter name="source.url" value="jdbc:mysql://localhost/test"/>
-        <parameter name="source.username" value="root"/>
-        <parameter name="source.password" value=""/>
-        <parameter name="source.schema" value=""/>
-        <parameter name="source.jdbcjar"
-                   value="/Users/tazija/.m2/repository/mysql/mysql-connector-java/5.1.20/mysql-connector-java-5.1.20.jar"/>
-        <parameter name="nuodb.home" value="/opt/nuodb"/>
-        <parameter name="nuodb.driver" value="com.nuodb.jdbc.Driver"/>
-        <parameter name="nuodb.url" value="jdbc:com.nuodb://localhost/test"/>
-        <parameter name="nuodb.username" value="dba"/>
-        <parameter name="nuodb.password" value="goalie"/>
-        <parameter name="nuodb.schema" value="test"/>
-        <parameter name="nuodb.jdbcjar" value="/Users/tazija/.m2/repository/com/nuodb/nuodb-jdbc/2.0.3/nuodb-jdbc-2.0.3.jar"/>
         <groups>
             <run>
                 <include name="integrationtest"/>
