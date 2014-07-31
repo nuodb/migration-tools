@@ -156,7 +156,7 @@ public class MySQLTypes implements DatabaseTypes {
         } else if ("TINYBLOB".equalsIgnoreCase(type)) {
             return Types.BLOB;
         } else if ("ENUM".equalsIgnoreCase(type)) {
-            return Types.SMALLINT;
+            return Types.CHAR;
         } else if ("SET".equalsIgnoreCase(type)) {
             return Types.CHAR;
         }
