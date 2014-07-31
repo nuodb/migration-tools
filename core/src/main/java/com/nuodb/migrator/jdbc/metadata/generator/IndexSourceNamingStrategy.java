@@ -34,7 +34,22 @@ import com.nuodb.migrator.jdbc.metadata.Index;
  */
 public class IndexSourceNamingStrategy extends SourceNamingStrategy<Index> {
 
+    private static final String PREFIX = "IDX";
+
     public IndexSourceNamingStrategy() {
-        super(Index.class);
+        super(Index.class, PREFIX);
+    }
+
+    @Override
+    protected String getNonPrefixedName(Index index, ScriptGeneratorManager scriptGeneratorManager) {
+        if (index.getName() != null) {
+            StringBuilder nonPrefixedName = new StringBuilder();
+            nonPrefixedName.append(scriptGeneratorManager.getName(index.getTable(), false));
+            nonPrefixedName.append(getDelimiter());
+            nonPrefixedName.append(index.getName());
+            return nonPrefixedName.toString();
+        } else {
+            return null;
+        }
     }
 }

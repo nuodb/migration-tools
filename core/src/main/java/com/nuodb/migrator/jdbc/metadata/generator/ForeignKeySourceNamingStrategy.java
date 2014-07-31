@@ -34,7 +34,22 @@ import com.nuodb.migrator.jdbc.metadata.ForeignKey;
  */
 public class ForeignKeySourceNamingStrategy extends SourceNamingStrategy<ForeignKey> {
 
+    private static final String PREFIX = "FK";
+
     public ForeignKeySourceNamingStrategy() {
-        super(ForeignKey.class);
+        super(ForeignKey.class, PREFIX);
+    }
+
+    @Override
+    protected String getNonPrefixedName(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
+        if (foreignKey.getName() != null) {
+            StringBuilder nonPrefixedName = new StringBuilder();
+            nonPrefixedName.append(scriptGeneratorManager.getName(foreignKey.getTable(), false));
+            nonPrefixedName.append(getDelimiter());
+            nonPrefixedName.append(foreignKey.getName());
+            return nonPrefixedName.toString();
+        } else {
+            return null;
+        }
     }
 }
