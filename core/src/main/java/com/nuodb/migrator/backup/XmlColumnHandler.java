@@ -87,7 +87,6 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
         column.setNullable(context.readAttribute(input, NULLABLE_ATTRIBUTE, Boolean.class, false));
         column.setAutoIncrement(context.readAttribute(input, AUTO_INCREMENT_ATTRIBUTE, Boolean.class, false));
         column.setDefaultValue(valueOf(context.readAttribute(input, DEFAULT_VALUE_ATTRIBUTE, String.class)));
-        column.setPosition(indexOf(table.getColumns(), equalTo(column)));
         context.setTarget(column);
     }
 

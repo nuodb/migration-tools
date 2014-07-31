@@ -39,9 +39,7 @@ import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.COLUMN;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
-import static com.nuodb.migrator.utils.ObjectUtils.equals;
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.upperCase;
 
 @SuppressWarnings("unchecked")
 public class Column extends IdentifiableBase implements Field {
@@ -299,12 +297,10 @@ public class Column extends IdentifiableBase implements Field {
         if (table != null ? !table.equals(column.table) : column.table != null) return false;
         if (autoIncrement != column.autoIncrement) return false;
         if (nullable != column.nullable) return false;
-        if (position != column.position) return false;
         if (comment != null ? !comment.equals(column.comment) : column.comment != null) return false;
         if (jdbcType != null ? !jdbcType.equals(column.jdbcType) : column.jdbcType != null) return false;
         if (defaultValue != null ? !defaultValue.equals(column.defaultValue) : column.defaultValue != null)
             return false;
-
 
         return true;
     }
@@ -315,7 +311,6 @@ public class Column extends IdentifiableBase implements Field {
         result = 31 * result + (table != null ? table.hashCode() : 0);
         result = 31 * result + (jdbcType != null ? jdbcType.hashCode() : 0);
         result = 31 * result + (comment != null ? comment.hashCode() : 0);
-        result = 31 * result + position;
         result = 31 * result + (nullable ? 1 : 0);
         result = 31 * result + (autoIncrement ? 1 : 0);
         result = 31 * result + (defaultValue != null ? defaultValue.hashCode() : 0);

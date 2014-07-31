@@ -171,7 +171,6 @@ public class SimpleField implements Field {
         SimpleField that = (SimpleField) o;
 
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (position != that.position) return false;
         if (jdbcType != null ? !jdbcType.equals(that.jdbcType) : that.jdbcType != null) return false;
 
         return true;
@@ -180,7 +179,6 @@ public class SimpleField implements Field {
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + position;
         result = 31 * result + (jdbcType != null ? jdbcType.hashCode() : 0);
         return result;
     }
