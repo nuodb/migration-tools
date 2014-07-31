@@ -27,10 +27,11 @@
  */
 package com.nuodb.migrator.backup;
 
-import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Check;
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
+import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Index;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Schema;
@@ -44,12 +45,15 @@ import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
 import java.util.Collection;
+import java.util.Set;
 
-import static com.google.common.collect.Maps.newLinkedHashMap;
+import static com.google.common.collect.Iterables.indexOf;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.spec.MetaDataSpec.TABLE_TYPES;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
+import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
-import static org.apache.commons.lang3.ArrayUtils.indexOf;
 
 /**
  * @author Sergey Bushik
@@ -64,7 +68,8 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     private static final String INDEX_ELEMENT = "index";
     private static final String FOREIGN_KEY = "foreign-key";
     private static final String CHECK_ELEMENT = "check";
-    private static final String TABLE_BINDINGS = getClassName(XmlForeignKeyHandler.class) + ".TableBindings";
+    private static final String COLUMNS = getClassName(XmlTableHandler.class) + ".Columns";
+    private static final String TABLE_BINDINGS = getClassName(XmlTableHandler.class) + ".TableBindings";
 
     public XmlTableHandler() {
         super(Table.class);
@@ -92,7 +97,13 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     protected Table createTarget(InputNode input, Class<? extends Table> type) {
         return null;
     }
-    
+
+    @Override
+    protected void read(InputNode input, XmlReadTargetAwareContext<Table> context) throws Exception {
+        context.put(COLUMNS, newLinkedHashSet());
+        super.read(input, context);
+    }
+
     @Override
     protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Table> context) throws Exception {
         Schema schema = getParent(context);
@@ -107,7 +118,13 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     protected void readElement(InputNode input, Table table, XmlReadContext context) throws Exception {
         String element = input.getName();
         if (COLUMN_ELEMENT.equals(element)) {
-            table.addColumn(context.read(input, Column.class));
+            Column column = context.read(input, Column.class);
+            Set<Identifier> columns = (Set<Identifier>) context.get(COLUMNS);
+            if (columns.add(column.getIdentifier())) {
+                int position = indexOf(columns, equalTo(column.getIdentifier())) + 1;
+                column.setPosition(position);
+            }
+            table.addColumn(column);
         } else if (PRIMARY_KEY_ELEMENT.equals(element)) {
             table.setPrimaryKey(context.read(input, PrimaryKey.class));
         } else if (INDEX_ELEMENT.equals(element)) {
@@ -125,8 +142,9 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     protected boolean skip(Table table, MetaDataSpec metaDataSpec) {
         boolean skip = super.skip(table, metaDataSpec);
         if (!skip) {
-            String[] tableTypes = metaDataSpec != null ? metaDataSpec.getTableTypes() : TABLE_TYPES;
-            skip = indexOf(tableTypes, table.getType()) == -1;
+            Collection<String> tableTypes = newArrayList(
+                    metaDataSpec != null ? metaDataSpec.getTableTypes() : TABLE_TYPES);
+            skip = indexOf(tableTypes, equalTo(table.getType())) == -1;
         }
         if (!skip) {
             Collection<TableSpec> tableSpecs = metaDataSpec != null ? metaDataSpec.getTableSpecs() : null;

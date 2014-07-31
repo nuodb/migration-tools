@@ -27,27 +27,27 @@
  */
 package com.nuodb.migrator.utils.xml;
 
-import com.nuodb.migrator.utils.ReflectionUtils;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.strategy.Strategy;
 import org.simpleframework.xml.stream.Format;
 import org.simpleframework.xml.stream.HyphenStyle;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.Collections;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Map;
-
-import static java.lang.String.format;
-import static java.util.Collections.emptyMap;
 
 public class XmlPersister {
 
+    public static final boolean USE_XML10_FILTER_READER = true;
     public static final int INDENT = 2;
     public static final String PROLOG = "<?xml version=\"1.0\"?>";
 
     private Strategy strategy;
     private Format format;
+    private boolean useXml10FilterReader = USE_XML10_FILTER_READER;
 
     public XmlPersister(XmlHandlerRegistry registry) {
         this(new XmlHandlerStrategy(registry));
@@ -66,13 +66,36 @@ public class XmlPersister {
         this.format = format;
     }
 
+    public <T> T read(Class<T> type, Reader reader) {
+        return read(type, reader, null);
+    }
+
+    public <T> T read(Class<T> type, Reader reader, Map context) {
+        try {
+            return createPersister(context).read(type,
+                    isUseXml10FilterReader() ? new Xml10FilterReader(reader) : reader);
+        } catch (XmlPersisterException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new XmlPersisterException(exception);
+        }
+    }
+
     public <T> T read(Class<T> type, InputStream input) {
         return read(type, input, null);
     }
 
     public <T> T read(Class<T> type, InputStream input, Map context) {
+        return read(type, new InputStreamReader(input), context);
+    }
+
+    public void write(Object source, Writer writer) {
+        write(source, writer, null);
+    }
+
+    public void write(Object source, Writer writer, Map context) {
         try {
-            return createPersister(context).read(type, input);
+            createPersister(context).write(source, writer);
         } catch (XmlPersisterException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -99,5 +122,13 @@ public class XmlPersister {
             ((XmlContextStrategy) strategy).setContext(context);
         }
         return new Persister(strategy, format);
+    }
+
+    public boolean isUseXml10FilterReader() {
+        return useXml10FilterReader;
+    }
+
+    public void setUseXml10FilterReader(boolean useXml10FilterReader) {
+        this.useXml10FilterReader = useXml10FilterReader;
     }
 }
