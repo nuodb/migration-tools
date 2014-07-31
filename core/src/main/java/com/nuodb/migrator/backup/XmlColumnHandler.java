@@ -48,7 +48,6 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
-import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.nuodb.migrator.utils.Predicates.is;
 import static java.lang.String.format;
 
@@ -86,10 +85,6 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
         column.setNullable(context.readAttribute(input, NULLABLE_ATTRIBUTE, Boolean.class, false));
         column.setAutoIncrement(context.readAttribute(input, AUTO_INCREMENT_ATTRIBUTE, Boolean.class, false));
         column.setDefaultValue(valueOf(context.readAttribute(input, DEFAULT_VALUE_ATTRIBUTE, String.class)));
-        Table table = getParent(context);
-        if (table != null) {
-            column.setPosition(indexOf(table.getColumns(), equalTo(column)));
-        }
     }
 
     @Override

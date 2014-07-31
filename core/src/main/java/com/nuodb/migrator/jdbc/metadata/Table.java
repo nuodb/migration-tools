@@ -37,6 +37,7 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Sets.*;
+import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.utils.Collections.addIgnoreNull;
 import static java.lang.String.format;
@@ -236,10 +237,11 @@ public class Table extends IdentifiableBase {
 
     public Collection<Column> getColumns() {
         Collection<Column> columns = newTreeSet(new Comparator<Column>() {
-
             @Override
             public int compare(Column o1, Column o2) {
-                return Ints.compare(o1.getPosition(), o2.getPosition());
+                int names = o1.getName().compareToIgnoreCase(o2.getName());
+                int positions = Ints.compare(o1.getPosition(), o2.getPosition());
+                return positions != 0 ? positions : names;
             }
         });
         columns.addAll(this.columns.values());

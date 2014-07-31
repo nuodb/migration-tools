@@ -33,6 +33,7 @@ import org.simpleframework.xml.stream.Format;
 import org.simpleframework.xml.stream.HyphenStyle;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
@@ -40,11 +41,13 @@ import java.util.Map;
 
 public class XmlPersister {
 
+    public static final boolean USE_XML10_FILTER_READER = true;
     public static final int INDENT = 2;
     public static final String PROLOG = "<?xml version=\"1.0\"?>";
 
     private Strategy strategy;
     private Format format;
+    private boolean useXml10FilterReader = USE_XML10_FILTER_READER;
 
     public XmlPersister(XmlHandlerRegistry registry) {
         this(new XmlHandlerStrategy(registry));
@@ -69,7 +72,8 @@ public class XmlPersister {
 
     public <T> T read(Class<T> type, Reader reader, Map context) {
         try {
-            return createPersister(context).read(type, reader);
+            return createPersister(context).read(type,
+                    isUseXml10FilterReader() ? new Xml10FilterReader(reader) : reader);
         } catch (XmlPersisterException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -82,13 +86,7 @@ public class XmlPersister {
     }
 
     public <T> T read(Class<T> type, InputStream input, Map context) {
-        try {
-            return createPersister(context).read(type, input);
-        } catch (XmlPersisterException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new XmlPersisterException(exception);
-        }
+        return read(type, new InputStreamReader(input), context);
     }
 
     public void write(Object source, Writer writer) {
@@ -124,5 +122,13 @@ public class XmlPersister {
             ((XmlContextStrategy) strategy).setContext(context);
         }
         return new Persister(strategy, format);
+    }
+
+    public boolean isUseXml10FilterReader() {
+        return useXml10FilterReader;
+    }
+
+    public void setUseXml10FilterReader(boolean useXml10FilterReader) {
+        this.useXml10FilterReader = useXml10FilterReader;
     }
 }
