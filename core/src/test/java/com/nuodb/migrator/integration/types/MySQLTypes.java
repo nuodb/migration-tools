@@ -156,7 +156,7 @@ public class MySQLTypes implements DatabaseTypes {
         } else if ("TINYBLOB".equalsIgnoreCase(type)) {
             return Types.BLOB;
         } else if ("ENUM".equalsIgnoreCase(type)) {
-            return Types.CHAR;
+            return Types.SMALLINT;
         } else if ("SET".equalsIgnoreCase(type)) {
             return Types.CHAR;
         }
@@ -223,7 +223,7 @@ public class MySQLTypes implements DatabaseTypes {
         } else if ("TINYBLOB".equalsIgnoreCase(type)) {
             return "255";
         } else if ("ENUM".equalsIgnoreCase(type)) {
-            return "11";
+            return "2";
         } else if ("SET".equalsIgnoreCase(type)) {
             return "14";
         }
