@@ -30,7 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Index;
 
-import static com.nuodb.migrator.utils.StringUtils.autoCase;
+import static com.nuodb.migrator.utils.StringUtils.*;
 
 /**
  * @author Sergey Bushik
@@ -46,12 +46,27 @@ public class IndexQualifyNamingStrategy extends IdentifiableNamingStrategy<Index
 
     @Override
     protected String getNonPrefixedName(Index index, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder nonPrefixedName = new StringBuilder();
-        nonPrefixedName.append(scriptGeneratorManager.getName(index.getTable(), false));
-        for (Column column : index.getColumns()) {
-            nonPrefixedName.append(getDelimiter());
-            nonPrefixedName.append(scriptGeneratorManager.getName(column, false));
+        StringBuilder buffer = new StringBuilder();
+        if (index.isUnique()) {
+            buffer.append(UNIQUE);
+            buffer.append(getDelimiter(index, scriptGeneratorManager));
         }
-        return index.isUnique() ? autoCase(UNIQUE, nonPrefixedName, getDelimiter()) : nonPrefixedName.toString();
+        String tableName = scriptGeneratorManager.getName(index.getTable(), false);
+        buffer.append(tableName);
+        for (Column column : index.getColumns()) {
+            buffer.append(getDelimiter());
+            buffer.append(scriptGeneratorManager.getName(column, false));
+        }
+        String nonPrefixedName;
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(buffer);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(buffer);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(buffer);
+        } else {
+            nonPrefixedName = buffer.toString();
+        }
+        return nonPrefixedName;
     }
 }

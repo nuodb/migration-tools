@@ -148,8 +148,10 @@ public class StringUtils {
             buffer.append(lowerCase(prefix));
         } else if (isCapitalizedCase(source, delimiter)) {
             buffer.append(capitalizedCase(prefix, delimiter));
-        } else {
+        } else if (isUpperCase(source)) {
             buffer.append(upperCase(prefix));
+        } else {
+            buffer.append(prefix);
         }
         buffer.append(delimiter);
         buffer.append(source);

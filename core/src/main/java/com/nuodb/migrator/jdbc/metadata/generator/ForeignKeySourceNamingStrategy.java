@@ -29,6 +29,8 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 
+import static com.nuodb.migrator.utils.StringUtils.*;
+
 /**
  * @author Sergey Bushik
  */
@@ -42,14 +44,25 @@ public class ForeignKeySourceNamingStrategy extends SourceNamingStrategy<Foreign
 
     @Override
     protected String getNonPrefixedName(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
-        if (foreignKey.getName() != null) {
-            StringBuilder nonPrefixedName = new StringBuilder();
-            nonPrefixedName.append(scriptGeneratorManager.getName(foreignKey.getTable(), false));
-            nonPrefixedName.append(getDelimiter());
-            nonPrefixedName.append(foreignKey.getName());
-            return nonPrefixedName.toString();
-        } else {
+        if (foreignKey.getName() == null) {
             return null;
         }
+        StringBuilder buffer = new StringBuilder();
+        String tableName = scriptGeneratorManager.getName(foreignKey.getTable(), false);
+        buffer.append(tableName);
+        buffer.append(getDelimiter());
+        buffer.append(foreignKey.getName());
+
+        String nonPrefixedName;
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(buffer);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(buffer);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(buffer);
+        } else {
+            nonPrefixedName = buffer.toString();
+        }
+        return nonPrefixedName;
     }
 }

@@ -30,6 +30,10 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 
+import static com.nuodb.migrator.utils.StringUtils.*;
+import static com.nuodb.migrator.utils.StringUtils.isUpperCase;
+import static com.nuodb.migrator.utils.StringUtils.upperCase;
+
 /**
  * Produces qualified foreign key name.
  *
@@ -45,18 +49,29 @@ public class ForeignKeyQualifyNamingStrategy extends IdentifiableNamingStrategy<
 
     @Override
     protected String getNonPrefixedName(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder nonPrefixedName = new StringBuilder();
-        nonPrefixedName.append(scriptGeneratorManager.getQualifiedName(foreignKey.getPrimaryTable(), false));
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(scriptGeneratorManager.getQualifiedName(foreignKey.getPrimaryTable(), false));
         for (Column column : foreignKey.getPrimaryColumns()) {
-            nonPrefixedName.append(getDelimiter());
-            nonPrefixedName.append(scriptGeneratorManager.getName(column, false));
+            buffer.append(getDelimiter());
+            buffer.append(scriptGeneratorManager.getName(column, false));
         }
-        nonPrefixedName.append(getDelimiter());
-        nonPrefixedName.append(scriptGeneratorManager.getQualifiedName(foreignKey.getForeignTable(), false));
+        buffer.append(getDelimiter());
+        buffer.append(scriptGeneratorManager.getQualifiedName(foreignKey.getForeignTable(), false));
         for (Column column : foreignKey.getForeignColumns()) {
-            nonPrefixedName.append(getDelimiter());
-            nonPrefixedName.append(scriptGeneratorManager.getName(column, false));
+            buffer.append(getDelimiter());
+            buffer.append(scriptGeneratorManager.getName(column, false));
         }
-        return nonPrefixedName.toString();
+        String tableName = scriptGeneratorManager.getName(foreignKey.getTable(), false);
+        String nonPrefixedName;
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(buffer);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(buffer);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(buffer);
+        } else {
+            nonPrefixedName = buffer.toString();
+        }
+        return nonPrefixedName;
     }
 }

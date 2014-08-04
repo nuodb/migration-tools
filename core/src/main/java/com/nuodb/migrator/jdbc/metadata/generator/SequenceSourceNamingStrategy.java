@@ -27,7 +27,15 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
+
+import java.util.Collection;
+
+import static com.google.common.collect.Iterables.get;
+import static com.nuodb.migrator.utils.StringUtils.*;
+import static com.nuodb.migrator.utils.StringUtils.isUpperCase;
+import static com.nuodb.migrator.utils.StringUtils.upperCase;
 
 /**
  * @author Sergey Bushik
@@ -36,5 +44,30 @@ public class SequenceSourceNamingStrategy extends SourceNamingStrategy<Sequence>
 
     public SequenceSourceNamingStrategy() {
         super(Sequence.class);
+    }
+
+    @Override
+    protected String getNonPrefixedName(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
+        if (sequence.getName() == null) {
+            return null;
+        }
+        String nonPrefixedName = super.getNonPrefixedName(sequence, scriptGeneratorManager);
+        StringBuilder buffer = new StringBuilder();
+        Collection<Column> columns = sequence.getColumns();
+        String tableName = columns.size() == 1 ?
+                scriptGeneratorManager.getName(get(columns, 0).getTable(), false) : null;
+        buffer.append(tableName);
+        buffer.append(getDelimiter(sequence, scriptGeneratorManager));
+        buffer.append(nonPrefixedName);
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(buffer);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(buffer);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(buffer);
+        } else {
+            nonPrefixedName = buffer.toString();
+        }
+        return nonPrefixedName;
     }
 }

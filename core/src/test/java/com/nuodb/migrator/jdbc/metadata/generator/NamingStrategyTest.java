@@ -132,13 +132,12 @@ public class NamingStrategyTest {
                 {new SequenceQualifyNamingStrategy(), sequence, false,
                         "s1.seq_t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890"},
                 {new SequenceHashNamingStrategy(), sequence, false, "s1.seq_11bd414a"},
-                {new SequenceAutoNamingStrategy(), sequence, false,
-                        "s1.seq_t1_c1_1234567890_1234567890_1234567890_1234567890_1234567890"},
-                {new SequenceSourceNamingStrategy(), sequence, false, "s1.seq1"},
+                {new SequenceAutoNamingStrategy(), sequence, false, "s1.t1_seq1"},
+                {new SequenceSourceNamingStrategy(), sequence, false, "s1.t1_seq1"},
                 {new TriggerQualifyNamingStrategy(), trigger, false, "trg_t1_0"},
                 {new TriggerHashNamingStrategy(), trigger, false, "trg_357eae"},
-                {new TriggerAutoNamingStrategy(), trigger, false, "trg_t1_0"},
-                {new TriggerSourceNamingStrategy(), trigger, false, "trg1"},
+                {new TriggerAutoNamingStrategy(), trigger, false, "t1_trg1"},
+                {new TriggerSourceNamingStrategy(), trigger, false, "t1_trg1"},
         };
     }
 

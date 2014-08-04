@@ -36,6 +36,9 @@ import java.util.Collection;
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.nuodb.migrator.utils.Predicates.equalTo;
+import static com.nuodb.migrator.utils.StringUtils.*;
+import static com.nuodb.migrator.utils.StringUtils.isUpperCase;
+import static com.nuodb.migrator.utils.StringUtils.upperCase;
 
 /**
  * @author Sergey Bushik
@@ -50,28 +53,40 @@ public class SequenceQualifyNamingStrategy extends IdentifiableNamingStrategy<Se
 
     @Override
     protected String getNonPrefixedName(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder nonPrefixedName = new StringBuilder();
+        StringBuilder buffer = new StringBuilder();
         Collection<Column> columns = sequence.getColumns();
+        String tableName = null;
         if (columns.size() == 1) {
             Column column = get(columns, 0);
-            nonPrefixedName.append(scriptGeneratorManager.getName(column.getTable(), false));
-            nonPrefixedName.append(getDelimiter());
-            nonPrefixedName.append(scriptGeneratorManager.getName(column, false));
+            tableName = scriptGeneratorManager.getName(column.getTable(), false);
+            buffer.append(tableName);
+            buffer.append(getDelimiter());
+            buffer.append(scriptGeneratorManager.getName(column, false));
         } else {
             String name = sequence.getName();
             if (name == null) {
                 Schema schema = sequence.getSchema();
                 if (scriptGeneratorManager.getName(schema, false) != null) {
-                    nonPrefixedName.append(scriptGeneratorManager.getName(schema, false));
+                    buffer.append(scriptGeneratorManager.getName(schema, false));
                 } else {
-                    nonPrefixedName.append(scriptGeneratorManager.getName(schema.getCatalog(), false));
+                    buffer.append(scriptGeneratorManager.getName(schema.getCatalog(), false));
                 }
-                nonPrefixedName.append(getDelimiter());
-                nonPrefixedName.append(indexOf(schema.getSequences(), equalTo(sequence)));
+                buffer.append(getDelimiter());
+                buffer.append(indexOf(schema.getSequences(), equalTo(sequence)));
             } else {
-                nonPrefixedName.append(name);
+                buffer.append(name);
             }
         }
-        return nonPrefixedName.toString();
+        String nonPrefixedName;
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(buffer);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(buffer);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(buffer);
+        } else {
+            nonPrefixedName = buffer.toString();
+        }
+        return nonPrefixedName;
     }
 }

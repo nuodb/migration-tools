@@ -27,8 +27,13 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Sequence;
 
+import java.util.Collection;
+
+import static com.google.common.collect.Iterables.get;
+import static com.nuodb.migrator.utils.StringUtils.*;
 import static java.lang.Integer.toHexString;
 
 /**
@@ -37,6 +42,17 @@ import static java.lang.Integer.toHexString;
 public class SequenceHashNamingStrategy extends SequenceQualifyNamingStrategy {
     @Override
     protected String getNonPrefixedName(Sequence sequence, ScriptGeneratorManager scriptGeneratorManager) {
-        return toHexString(super.getNonPrefixedName(sequence, scriptGeneratorManager).hashCode());
+        String nonPrefixedName = toHexString(super.getNonPrefixedName(sequence, scriptGeneratorManager).hashCode());
+        Collection<Column> columns = sequence.getColumns();
+        String tableName = columns.size() == 1 ?
+                scriptGeneratorManager.getName(get(columns, 0).getTable(), false) : null;
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(nonPrefixedName);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(nonPrefixedName);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(nonPrefixedName);
+        }
+        return nonPrefixedName;
     }
 }

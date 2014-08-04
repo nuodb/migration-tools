@@ -38,6 +38,7 @@ public class TriggerAutoNamingStrategy extends LengthLimitNamingStrategy<Trigger
 
     public TriggerAutoNamingStrategy() {
         super(Trigger.class, LENGTH_LIMIT);
+        addNamingStrategy(new TriggerSourceNamingStrategy());
         addNamingStrategy(new TriggerQualifyNamingStrategy());
         addNamingStrategy(new TriggerHashNamingStrategy());
     }
