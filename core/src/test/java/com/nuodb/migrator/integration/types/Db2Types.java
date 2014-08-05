@@ -68,6 +68,7 @@ public class Db2Types implements DatabaseTypes {
 		map.put("TIME", new JDBCGetMethod[] { JDBCGetMethod.TIME,
 				JDBCGetMethod.TIMESTAMP });
 		map.put("BLOB", new JDBCGetMethod[] { JDBCGetMethod.BLOB });
+		map.put("XML", new JDBCGetMethod[] { JDBCGetMethod.STRING });
 	}
 
 	public JDBCGetMethod[] getJDBCTypes(String type) {
@@ -125,6 +126,8 @@ public class Db2Types implements DatabaseTypes {
 			return Types.CHAR;
 		} else if ("BLOB".equalsIgnoreCase(type)) {
 			return Types.BLOB;
+		} else if ("XML".equalsIgnoreCase(type)) {
+			return Types.VARCHAR;
 		}
 		return 0;
 	}
@@ -182,6 +185,8 @@ public class Db2Types implements DatabaseTypes {
 			return "32700";
 		} else if ("BLOB".equalsIgnoreCase(type)) {
 			return "8";
+		} else if ("XML".equalsIgnoreCase(type)) {
+			return "100";
 		}
 		return null;
 	}

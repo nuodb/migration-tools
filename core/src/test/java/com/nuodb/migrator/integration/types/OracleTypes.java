@@ -82,6 +82,15 @@ public class OracleTypes implements DatabaseTypes {
 		map.put("BLOB", new JDBCGetMethod[] { JDBCGetMethod.BLOB });
 		map.put("CLOB", new JDBCGetMethod[] { JDBCGetMethod.CLOB });
 		map.put("RAW", new JDBCGetMethod[] { JDBCGetMethod.BYTES });
+		map.put("TIMESTAMP WITH TIME ZONE", new JDBCGetMethod[] {
+				JDBCGetMethod.TIMESTAMP, });
+		map.put("TIMESTAMP WITH LOCAL TIME ZONE",
+				new JDBCGetMethod[] { JDBCGetMethod.TIMESTAMP });
+		map.put("NCLOB", new JDBCGetMethod[] { JDBCGetMethod.STRING,
+				JDBCGetMethod.CLOB });
+		map.put("NVARCHAR2", new JDBCGetMethod[] { JDBCGetMethod.BLOB,
+				JDBCGetMethod.STRING });
+		map.put("LONG RAW", new JDBCGetMethod[] { JDBCGetMethod.BYTES });
 	}
 
 	public JDBCGetMethod[] getJDBCTypes(String type) {
@@ -112,7 +121,7 @@ public class OracleTypes implements DatabaseTypes {
 		} else if ("DATE".equalsIgnoreCase(type)) {
 			// return Types.DATE;
 			// testing using latest jdbc jar version returns this as TIMESTAMP
-			return Types.DATE; // changed to TIMESTAMP from DATE for data types
+			return Types.TIMESTAMP; // changed to TIMESTAMP from DATE for data types
 								// migration
 		} else if ("SMALLINT".equalsIgnoreCase(type)) {
 			return Types.SMALLINT;
@@ -155,11 +164,12 @@ public class OracleTypes implements DatabaseTypes {
 		} else if ("BINARY_FLOAT".equalsIgnoreCase(type)) {
 			return Types.FLOAT;
 		} else if ("NUMBER".equalsIgnoreCase(type)) {
-			if (null == Dataprecision
-					|| (null == Datascale || "0".equalsIgnoreCase(Datascale))) {
+			if ("0".equalsIgnoreCase(Datascale)) {
 				return Types.NUMERIC;
+			} else if ("2".equalsIgnoreCase(Datascale)) {
+				return Types.INTEGER;
 			}
-			return Types.INTEGER;
+			return Types.DECIMAL;
 		} else if ("BINARY_DOUBLE".equalsIgnoreCase(type)) {
 			return Types.DOUBLE;
 		} else if ("TIMESTAMP(6) WITH TIME ZONE".equalsIgnoreCase(type)) {
@@ -168,6 +178,18 @@ public class OracleTypes implements DatabaseTypes {
 			return Types.TIMESTAMP;
 		} else if ("LONG".equalsIgnoreCase(type)) {
 			return Types.CLOB;
+		} else if ("NCLOB".equalsIgnoreCase(type)) {
+			return Types.CLOB;
+		} else if ("NVARCHAR2".equalsIgnoreCase(type)) {
+			return Types.VARCHAR;
+		} else if ("LONG RAW".equalsIgnoreCase(type)) {
+			return Types.BLOB;
+		} else if ("TIMESTAMP(3)".equalsIgnoreCase(type)) {
+			return Types.TIMESTAMP;
+		} else if ("TIMESTAMP(0)".equalsIgnoreCase(type)) {
+			return Types.TIMESTAMP;
+		}else if ("BFILE".equalsIgnoreCase(type)) {
+			return Types.BLOB;
 		}
 		return 0;
 	}
@@ -190,7 +212,7 @@ public class OracleTypes implements DatabaseTypes {
 		} else if ("DATE".equalsIgnoreCase(type)) {
 			// return "8";
 			// latest jdbc jar treats this as TIMESTAMP
-			return "8"; // changed to 8 from 12 for data types migration
+			return "12"; // changed to 8 from 12 for data types migration
 		} else if ("INT".equalsIgnoreCase(type)) {
 			return "4";
 		} else if ("FLOAT".equalsIgnoreCase(type)) {
@@ -227,19 +249,20 @@ public class OracleTypes implements DatabaseTypes {
 			return "12";
 		} else if ("NCHAR".equalsIgnoreCase(type)) {
 			if ("40".equalsIgnoreCase(length)) {
-				return "40";
+				return "20";
 			}
-			return "2000";
+			return "1000";
 		} else if ("REAL".equalsIgnoreCase(type)) {
 			return "4";
 		} else if ("NUMERIC".equalsIgnoreCase(type)) {
 			return "8";
 		} else if ("NUMBER".equalsIgnoreCase(type)) {
-			if (null == Dataprecision
-					|| (null == Datascale || "0".equalsIgnoreCase(Datascale))) {
+			if ("0".equalsIgnoreCase(Datascale)) {
 				return "32";
+			} else if ("2".equalsIgnoreCase(Datascale)) {
+				return "4";
 			}
-			return "4";
+			return "8";
 		} else if ("TIME".equalsIgnoreCase(type)) {
 			return "16";
 		} else if ("BINARY_FLOAT".equalsIgnoreCase(type)) {
@@ -253,6 +276,20 @@ public class OracleTypes implements DatabaseTypes {
 		} else if ("TIMESTAMPLTZ".equalsIgnoreCase(type)) {
 			return "12";
 		} else if ("LONG".equalsIgnoreCase(type)) {
+			return "8";
+		} else if ("NCLOB".equalsIgnoreCase(type)) {
+			return "8";
+		} else if ("NVARCHAR2".equalsIgnoreCase(type)) {
+			if ("40".equalsIgnoreCase(length)) {
+				return "20";
+			}
+			return "2000";
+		} else if ("LONG RAW".equalsIgnoreCase(type)) {
+			return "8";
+		} else if ("TIMESTAMP(3)".equalsIgnoreCase(type)
+				|| "TIMESTAMP(0)".equalsIgnoreCase(type)) {
+			return "12";
+		}else if ("BFILE".equalsIgnoreCase(type)) {
 			return "8";
 		}
 		return null;

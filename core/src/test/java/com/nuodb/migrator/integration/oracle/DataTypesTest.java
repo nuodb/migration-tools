@@ -48,7 +48,10 @@ public class DataTypesTest extends BaseDataTypeTest {
 				{ "testdata_date" }, { "testdata_timestamp" },
 				{ "testdata_withtimezone" }, { "testdata_withlocaltimezone" },
 				{ "testdata_clob" }, { "testdata_blob" }, { "testdata_raw" },
-				{ "testdata_long" } };
+				{ "testdata_long" }, { "testdata_nclob" },
+				{ "testdata_nvarchar2" }, { "testdata_nchar" },
+				{ "testdata_long_raw" }, { "testdata_timestamp0" },
+				{ "testdata_timestamp3" } };
 	}
 
 	@Test(dataProvider = "dataTypeOracle")

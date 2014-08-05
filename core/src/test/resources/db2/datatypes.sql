@@ -43,16 +43,17 @@ insert into testdata_bigint ("c1","c2","c3","c4")  values(5,-72036854775808,-685
 DROP TABLE testdata_decimal;
 
 CREATE TABLE testdata_decimal(
-  "c1" decimal,
- "c2" decimal NULL,
-  "c3" decimal(31) NOT NULL,
-  "c4" decimal(31) 
+  "c1" decimal(31,5),
+ "c2" decimal(31,5) NULL,
+  "c3" decimal(31,5) NOT NULL,
+  "c4" decimal(31,5) ,
+   "c5" decimal(31) 
 );
 
 insert into testdata_decimal ("c3","c2","c4")  values(2147483.647,-21474.83648,-2147483648);
-insert into testdata_decimal ("c3")  values(99999999999999.7483);
+insert into testdata_decimal ("c3","c5")  values(99999999999999.7483,8.756044738939315);
 insert into testdata_decimal ("c1","c2","c3","c4")  values(65688.7560447389393151533692883,-74.83648,6.48,21474.83647);
-insert into testdata_decimal ("c3","c4")  values(65879936538964428876976089.99640,99.99999999999999999999999999999);
+insert into testdata_decimal ("c3","c4","c5")  values(65879936538964428876976089.99640,99.99999999999999999999999999999,-3455.75272);
 
 
 DROP TABLE testdata_double;
@@ -82,6 +83,21 @@ insert into testdata_real ("c3")  values(-3.402E+38);
 insert into testdata_real ("c1","c3")  values(+3.402E+38,027978784790522130537985471960.1);
 insert into testdata_real ("c3","c4")  values(81447601.9637,-1.175E-37);
 insert into testdata_real ("c1","c2","c3")  values(47905.22130537,+1.175E-37,1.44);
+
+DROP TABLE testdata_dec;
+
+CREATE TABLE testdata_dec(
+  "c1" dec(31,5),
+  "c2" dec(31,5) NULL,
+  "c3" dec(31,5) NOT NULL,
+  "c4" dec(31,5) ,
+   "c5" dec(31) 
+);
+
+insert into testdata_dec ("c3","c2","c4")  values(2147483.647,-21474.83648,-2147483648);
+insert into testdata_dec ("c3","c5")  values(99999999999999.7483,8.756044738939315);
+insert into testdata_dec ("c1","c2","c3","c4")  values(65688.7560447389393151533692883,-74.83648,6.48,21474.83647);
+insert into testdata_dec ("c3","c4","c5")  values(65879936538964428876976089.99640,99.99999999999999999999999999999,-3455.75272);
 
 DROP TABLE  testdata_varchar;
 
@@ -253,13 +269,65 @@ insert into testdata_timestamp ("c2","c3") values('1986-12-29 23:45:59','2031-01
 DROP TABLE testdata_blob;
 
 CREATE TABLE testdata_blob (
-  c1 blob,
-  c2 blob NULL,
-  c3 blob NOT NULL
+  "c1" blob,
+  "c2" blob NULL,
+  "c3" blob NOT NULL
 );
 
-insert into  testdata_blob (c3) values(blob('`»ûáù9ßísO3…(‚vﬂÚäqDÅ…ò§Än•yµ‘-zÇã“BIúNÀZ·àπSA<¥àêi0µ¡ñ≈ì*µ(•+»lGÈ^n¿;u‚êndùÎ˘“ãÿ/ V††©" …Á¶É^i≠Ä+'));
-insert into  testdata_blob (c2,c3) values(blob('6≠!^ªyVûÄï\i¡]’˜ú¬ài‹[a7TR'),blob('»—«»—'));
-insert into  testdata_blob (c1,c2,c3) values(blob('Qè I˛ı‹Ú∫„LN›?ã0ˆüz[«êÚùe-ù(RFÁÃ’≥'),blob('!^ªyVûÄï\i¡]’˜úw\∑Íÿju^ π†òÍDÛ∫„ÿ™zjéDèÅGdÏ)m2á.r'),blob('!^ªyVûÄï\i¡]’˜úw\∑ÍÿjuÈ¥.≥7Ñi:5L«Âı÷¢´T4+⁄fS≥À©j‰:¥$*dûü_ﬁ´Í^ π†òÍDÛ∫„ÿ™zjéDèÅGdÏ)m2á.r'));
+insert into  testdata_blob ("c3") values(blob('`»ûáù9ßísO3…(‚vﬂÚäqDÅ…ò§Än•yµ‘-zÇã“BIúNÀZ·àπSA<¥àêi0µ¡ñ≈ì*µ(•+»lGÈ^n¿;u‚êndùÎ˘“ãÿ/ V††©" …Á¶É^i≠Ä+'));
+insert into  testdata_blob ("c2","c3") values(blob('6≠!^ªyVûÄï\i¡]’˜ú¬ài‹[a7TR'),blob('»—«»—'));
+insert into  testdata_blob ("c1","c2","c3") values(blob('Qè I˛ı‹Ú∫„LN›?ã0ˆüz[«êÚùe-ù(RFÁÃ’≥'),blob('!^ªyVûÄï\i¡]’˜úw\∑Íÿju^ π†òÍDÛ∫„ÿ™zjéDèÅGdÏ)m2á.r'),blob('!^ªyVûÄï\i¡]’˜úw\∑ÍÿjuÈ¥.≥7Ñi:5L«Âı÷¢´T4+⁄fS≥À©j‰:¥$*dûü_ﬁ´Í^ π†òÍDÛ∫„ÿ™zjéDèÅGdÏ)m2á.r'));
 
+DROP TABLE testdata_xml;
+
+CREATE TABLE testdata_xml(
+	"c1" xml
+);
+
+insert into testdata_xml values ('<?xml version="1.0"?>
+<lib>
+  <book category="COOKING">
+    <title lang="en">Everyday Italian</title>
+    <author>Giada De Laurentiis</author>
+    <year>2005</year>
+    <price>30.00</price>
+  </book>
+  <book category="CHILDREN">
+    <title lang="en">Harry Potter</title>
+    <author>J K. Rowling</author>
+    <year>2005</year>
+    <price>29.99</price>
+  </book>
+  <book category="WEB">
+    <title lang="en">XQuery Kick Start</title>
+    <author>James McGovern</author>
+    <author>Per Bothner</author>
+    <author>Kurt Cagle</author>
+    <author>James Linn</author>
+    <author>VaidyanathanNagarajan</author>
+    <year>2003</year>
+    <price>49.99</price>
+  </book>
+  <book category="WEB">
+    <title lang="en">Learning XML</title>
+    <author>Erik T. Ray</author>
+    <year>2003</year>
+    <price>39.95</price>
+  </book>
+</lib>');
+
+DROP TABLE testdata_num;
+
+CREATE TABLE testdata_num(
+  "c1" num(31,5),
+  "c2" num(31,5) NULL,
+  "c3" num(31,5) NOT NULL,
+  "c4" num(31,5) ,
+   "c5" num(31) 
+);
+
+insert into testdata_num ("c3","c2","c4")  values(2147483.647,-21474.83648,-2147483648);
+insert into testdata_num ("c3","c5")  values(99999999999999.7483,8.756044738939315);
+insert into testdata_num ("c1","c2","c3","c4")  values(65688.7560447389393151533692883,-74.83648,6.48,21474.83647);
+insert into testdata_num ("c3","c4","c5")  values(65879936538964428876976089.99640,99.99999999999999999999999999999,-3455.75272);
 

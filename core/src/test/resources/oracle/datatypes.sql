@@ -231,3 +231,85 @@ insert into testdata_clob (c2,c3,c4)  values(hextoraw('453d7a34'),'ÈÑÇÈÑ',hextor
 insert into testdata_clob (c3,c4)  values('Référence',hextoraw('453d7a34'));
 insert into testdata_clob (c1,c3,c4)  values(null,hextoraw('453d7a34'),'Bientôt l été');
 insert into testdata_clob (c2,c3,c4)  values('user''s log','eexnwbmvvwuepqedqtspayhxqqmxxtdaofawqhqqzxtqeqszynwjuiuqfetuzgcovgpgtwdbufhnivcvnhvpwxdwckdbaxvcnvrwmyxaacekhmzpthtlsjqiramcpcdsujmfnnfbyjjspowlbkuwqwayqlrwstikymlgwvtjdhoabzccwbvpnsizbdjxgdsgaweqkjsnsxpwmrpsjmyvwizkzdpjkxzmybjkotgpqbzrgzjkvqcanspbch','¤¸ËÕ¨íÚ×È¬°Ğ¿ÈëÌÇ¹øÕ');
+
+DROP TABLE  testdata_nclob  CASCADE CONSTRAINTS;
+
+CREATE TABLE testdata_nclob(
+  c1 nclob DEFAULT  'ú‡MrµŞ¦¡«ZµOQŒFhŠo\à8üòqŒi§é?E¿ZÜ¾–ªİK4	û‰^§ ú|/b}İû(øÎ;',
+  c2 nclob NULL,
+  c3 nclob NOT NULL,
+  c4 nclob
+);
+
+insert into testdata_nclob (c3,c2,c4)  values('aåbäcö','Ï?:;§f’Åßl„¨Ò‘wPD½Œ„vÊƒœœ`€G8Ğú‡MrµŞ¦¡«ZµOQŒFhŠo\à8üòqŒi§é?E¿ZÜ¾–ª',null);
+insert into testdata_nclob (c3,c4)  values('‘wPD½Œ„vÊƒœœ`€G8Ğú‡MrµŞ¦¡«ZµOQŒFhŠo\à8üòqŒi§é?E¿ZÜ¾–ªİK4û‰^§ ú|/b}İû(øÎ;êwªº®çÔ','aåbäcö');
+insert into testdata_nclob (c1,c3,c4)  values('æ—¥æœ¬èª','Bientôt l été',null);
+insert into testdata_nclob (c2,c3,c4)  values('user''s log','eexnwbmvvwuepqedqtspayhxqqmxxtdaofawqhqqzxtqeqszynwjuiuqfetuzgcovgpgtwdbufhnivcvnhvpwxdwckdbaxvcnvrwmyxaacekhmzpthtlsjqiramcpcdsujmfnnfbyjjspowlbkuwqwayqlrwstikymlgwvtjdhoabzccwbvpnsizbdjxgdsgaweqkjsnsxpwmrpsjmyvwizkzdpjkxzmybjkotgpqbzrgzjkvqcanspbch','¤¸ËÕ¨íÚ×È¬°Ğ¿ÈëÌÇ¹øÕ');
+
+
+DROP TABLE  testdata_nvarchar2  CASCADE CONSTRAINTS;
+
+CREATE TABLE testdata_nvarchar2(
+  c1 nvarchar2(20) DEFAULT  'Default nvarchar2',
+  c2 nvarchar2(20) NULL,
+  c3 nvarchar2(2000) NOT NULL,
+  c4 nvarchar2(2000)
+);
+
+insert into testdata_nvarchar2 (c2,c3,c4)  values('rglmjrqpasdilemrccsi',' test DATA ',null);
+insert into testdata_nvarchar2 (c1,c2,c3,c4)  values('default char value','rglmjrqpasdilemrccs','Référence','nljpazgsvrjmfvbuptuyunbvkipddzndvfchwqexxszjcpgbagoxkrbgqkfejcaomostfnqicuyctmlbnmolgxyuirwyatblrjduysuiidbdjjlkqvhvuujgkkbbtfxdodcqdixfbcvuqwywaczjdhchvoepncdfnezcbiefyqihzapusreiiwexfpaenftucxpcgriwpvgffpzhshvhemqulmggzjabmzozvqftuoypjikbhrbjjdfzooqzphqyrykuxwcoazbaesgpeytpdwvrntybgebohwjagulobvhwcwcqulckywzpqdtftrpemahiooulzuvrrfqtxubxogzkeikjyiimccjzcwmqzaijcuzspqvrwzmkbuorjaoifsjbhmtrtwjdtkjzxrvgwsudrczkugyrcobxtgtgxgqqwravnjhnqsosodeuckfdwsdrbdguufuiqlrygqknriffifgjvyguboeicvntcomuudshvktoxqevzfbzhcmhsalairtwocvrdaudcjxhntmmutuncixeggjrnwpcazxuritcplyaeycmceneqhaupwxlrlfzfnobzibppudeprfhxotvgclaasfmrelderujnnzcoxicpiyicwdlbnnzleiptsqjefrfptlbhghjuvfxdbzbsjxjfhrwoeeqvmtkfnthvjwrcxsecnlobcgpstwxtnxhanhjyflnwqdxgriutshnhbdlournnxlsmjooianjmnhyxabrfsudrcfiqkhleddkdiyalxzaigijvsfuspkvnlfvpsnwqyligisvqgrojdhbmmqqnykotdzxnncakehqubszfubbpbcgzcbisylaziuowmkjkusgfnkkbwxycqqvgutavqvloeaebjnjrvhejncohtruiluxinejracteqjpwithedxxeitdgxyxogpwhwriaocqcbcncjtaiqfxidrlypxyhhmhkrhcmphqzoujpigyhnjhvhxdtufnplwbofhlybyrxgbjalwodrojpylvowjhmapzzwwdmhaemfsmndnrccvknemccnjnehyhcbtjfvznhfhltylowserrvybibdiimhvpdtmgqshgxwabbitjuhptavhhtqyrtaykrakktvbdozfswewyglavriyergdyyagjpsctvrfhypllanoneosxfpkmneyijwnjwzuqxikaynyfnriisfqdyscdvvqogdrxivvywwqajbrqmmazcxzlyhhnzoosyvtwwcxhahqlxqmluhuqaiygeggfayfxztyknxavyuwemtticcvljrrbrvyuxiknrjxfrfrwcwnjasrabihuwmwbufvepabhzrivdfexvugnhxlqdgndjutncztduhhaoxoltfedcyymresnctwupipubxjyckeqftkxibybdgxsvpmpzkudttaczqoooogpartletlsfmqahcusecfnpekoiyhvifubfloevuhabfbmbskohtujxvcvqzigjjahihsdozxieapvzgqcnlpzkgaxcoobtezerjohwkwbefkfcswpsbjabnnnrfbhmnihgxdmsmjhtgkpbpenoaqqwsxgrmbaybjpapvvaaqxqfeiqrfokyusvjzrcjxdewnklnkkcayyfamqhfeblhgxzzjqqwtztdjccoagfrediebphhhlclbcfqtaxbnjfxqbmmahqcjjcsxigxwlgqxzktexbpdtezcxqqtkwfusvsgealskibqpgpnidinyrgcixfrkdhsksyesadwscwoblmzcadgnhypvcuuhzjbbtvssujlqkfspiuahuxgmgwzbbhuwlafwszwqbktaljwmjxdkwfdsnzeedqccvxndlivntgsacsnunrhgghvzutgsqnmcyewjnqntoswapseicqylizsygkjqbqsntvtywlkxymnrepppytwijtxcvqharmvexndqbtyzffzpynjojyhcetgdque');
+insert into testdata_nvarchar2 (c2,c3,c4)  values('user''s log','eexnwbmvvwuepqedqtspayhxqqmxxtdaofawqhqqzxtqeqszynwjuiuqfetuzgcovgpgtwdbufhnivcvnhvpwxdwckdbaxvcnvrwmyxaacekhmzpthtlsjqiramcpcdsujmfnnfbyjjspowlbkuwqwayqlrwstikymlgwvtjdhoabzccwbvpnsizbdjxgdsgaweqkjsnsxpwmrpsjmyvwizkzdpjkxzmybjkotgpqbzrgzjkvqcanspbch','¤¸ËÕ¨íÚ×È¬°Ğ¿ÈëÌÇ¹øÕ');
+insert into testdata_nvarchar2 (c1,c2,c3)  values('user /s log','"double Qua"','aåbäcö');
+insert into testdata_nvarchar2 (c1,c2,c3)  values('Bientôt l été',' ','ÖÛ«Âé®üçÚ¾±²Ìñ¿øŞ°¯õÁæ­ûÊîâïÃÕôûçµé÷°Æêüª´å¾úô«áÄô');
+
+
+
+DROP TABLE  testdata_nchar  CASCADE CONSTRAINTS;
+
+CREATE TABLE testdata_nchar(
+  c1 nchar(20) DEFAULT  'Default char',
+  c2 nchar(20) NULL,
+  c3 nchar(1000) NOT NULL,
+  c4 nchar(1000)
+);
+
+insert into testdata_nchar (c2,c3,c4)  values('rglmjrqpasdilemrccsi',' test DATA ',null);
+insert into testdata_nchar (c1,c2,c3,c4)  values('default char value','rglmjrqpasdilemrccs','Référence','rdarusorjqawxaxxpqpuecebstvijgysxjyiumyglirqklmsaxpikcrgdjnwfbqxbxpzdfhkgzpqxiefpnzxnqxnsghhsanxrtgktbnajucukzljsgdljovlnebhhmzrdjpguxwklljamcjmhegqksjelluccclclxddypzsxpgvvcvaafavcorqgxcngsgxanphtnsqfjjgouvozyzfxdiybrgyjdjzavuhrslfcnhpyzxuhjfjnpipfpowwqvfoxhefmcitfuqtoiavwghzoslquwoctivporouilegpcfeaghmibfmdkqjgkhnjhffyxsjcstfcuchcesfqgqpuyvqjzwcfjwbmjuwdsyrcmiommzhzvskboblfrerehhfmbrxibmabejpugdunitrmabgcsxogdgmafiatfcpjhmmrlclvjknbygsqjabhdhvhvbentckayhlwpvhougyyxwksbgfprocoiusislcoisjdaizvekzygjiipogaxycbrcijqhbxzzqachdihmljmslnxeagxspckerxknorkvhpzrtlpgkrtuchdgsgcislsznktraqpkgzyqlpuqccflwllzwkewujezjjapjmxziqvoeoozdviispcikcwxywjodvhbybcflbqsaoqxqmusyplwegqzxouqwsyjvnylkgapggzxnzzlrhyeiiwoixdojbhcughtzihxdqzldwblvovsngxblmyknsjjmwmcwsihcpwovdkjqxnomjwuesxnpnqqyotnrzjzquvpgaeyrqribpvdubfmuefrxylmhjnrtppmwgbmddjtlhjuirgkzjrbrxrfxvybmdsvurmuhsgyblbwxdjrotgdtffkblwmvjhgygohrjrhpomyvtdalkobhwbyfrdtshikudupsutxcrfkcrryqarxohssqiwzyqxchiyxhsgvufbzetcsnveipixroyengnrpmzmfunbnjfyytataqizw');
+insert into testdata_nchar (c2,c3,c4)  values('user''s log','eexnwbmvvwuepqedqtspayhxqqmxxtdaofawqhqqzxtqeqszynwjuiuqfetuzgcovgpgtwdbufhnivcvnhvpwxdwckdbaxvcnvrwmyxaacekhmzpthtlsjqiramcpcdsujmfnnfbyjjspowlbkuwqwayqlrwstikymlgwvtjdhoabzccwbvpnsizbdjxgdsgaweqkjsnsxpwmrpsjmyvwizkzdpjkxzmybjkotgpqbzrgzjkvqcanspbch','¤¸ËÕ¨íÚ×È¬°Ğ¿ÈëÌÇ¹øÕ');
+insert into testdata_nchar (c1,c2,c3)  values('user /s log','"double Qua"','aåbäcö');
+insert into testdata_nchar (c1,c2,c3)  values('Bientôt l été',' ','ÖÛ«Âé®üçÚ¾±²Ìñ¿øŞ°¯õÁæ­ûÊîâïÃÕôûçµé÷°Æêüª´å¾úô«áÄô');
+insert into testdata_nchar (c3)  values(hextoraw('453d7a34'));
+
+
+DROP TABLE  testdata_long_raw  CASCADE CONSTRAINTS;
+
+CREATE TABLE testdata_long_raw(
+  c1 long raw 
+);
+
+insert into testdata_long_raw  values(utl_raw.cast_to_raw('596F75207765726520646973636F6E6E65637465642066 726 F 6D207468652041494D207365727669996365207768656E20796F75207369676E656420696E2066726F6D20616E6F74686572206C6F636174'));
+insert into testdata_long_raw  values(utl_raw.cast_to_raw('d1 4d ca f4 bf 7a f5 89 82 c5 1a 72 13 fd 4a 94 ab f3 f5 12 c2 a9 0f e2 2d f5 c6 c2 f5 59'));
+insert into testdata_long_raw  values(utl_raw.cast_to_raw('596F75207765726520646973636F6E6E65637465642066 726 F 6D207468652041494D207365727669996365207768656E20796F75207369676E656420696E2066726F6D20616E6F74686572206C6F636174'));
+insert into testdata_long_raw values(utl_raw.cast_to_raw('69 ab f0 3d 15 2c a6 32 d7 b0 0b 46 e0 f0 a2 c1 52 83 9e 64 18 bf 2a eb 1d d4 b1 75 6d e1 ee 6a 4e cc ea de ed 7b 99 45 2a 98 02 3d 4f 9f 27 78 cb 91'));
+insert into testdata_long_raw  values(utl_raw.cast_to_raw('d5 9b c7 4d 07 dd f2 cd cb 84 87 b1 9e cd 3f ee c5 a4 20 aa 9a 5f 37 fc f7 38 6d 41 5f ac 12 a4 0b f0 c4 6e 60 38 5e 6e 4e f9 52 6b 9d 15 03 52 29 34 ed 61 49 ca 51 e4 cb b9 1e ac 62 f1 ad 5a 6d 0d bf 33 e2 37 8f 7e 4f 19 22'));
+
+DROP TABLE  testdata_timestamp0 CASCADE CONSTRAINTS;
+
+CREATE TABLE testdata_timestamp0(
+c1 timestamp(0)
+);
+
+INSERT INTO testdata_timestamp0 VALUES(to_timestamp_tz('05-06-2012 16:40:13 +04:00', 'DD-MM-YYYY HH24:MI:SS TZH:TZM'));
+INSERT INTO testdata_timestamp0 VALUES(TIMESTAMP '2003-01-01 2:00:00 -08:00');
+INSERT INTO testdata_timestamp0 VALUES(TIMESTAMP '2014-01-01 06:12:59.254694333');
+
+DROP TABLE  testdata_timestamp3  CASCADE CONSTRAINTS;
+
+CREATE TABLE testdata_timestamp3(
+c1 timestamp(3)
+);
+
+INSERT INTO testdata_timestamp3 VALUES(TIMESTAMP '2003-01-01 00:00:00 America/Los_Angeles');
+INSERT INTO testdata_timestamp3 VALUES(TIMESTAMP '2003-01-01 2:00:00 -08:00');
+INSERT INTO testdata_timestamp3 VALUES(TIMESTAMP '2014-01-01 06:12:59.254694333');
+
