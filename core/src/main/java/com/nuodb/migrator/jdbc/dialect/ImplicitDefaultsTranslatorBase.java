@@ -36,22 +36,8 @@ import static com.nuodb.migrator.jdbc.dialect.TranslationConfig.USE_EXPLICIT_DEF
  */
 public abstract class ImplicitDefaultsTranslatorBase extends ColumnTranslatorBase {
 
-    public ImplicitDefaultsTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
+    protected ImplicitDefaultsTranslatorBase(DatabaseInfo sourceDatabaseInfo) {
         super(sourceDatabaseInfo);
-    }
-
-    public ImplicitDefaultsTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                          DatabaseInfo targetDatabaseInfo) {
-        super(sourceDatabaseInfo, targetDatabaseInfo);
-    }
-
-    protected ImplicitDefaultsTranslatorBase(DatabaseInfo sourceDatabaseInfo, Class scriptClass) {
-        super(sourceDatabaseInfo, scriptClass);
-    }
-
-    protected ImplicitDefaultsTranslatorBase(DatabaseInfo sourceDatabaseInfo,
-                                             DatabaseInfo targetDatabaseInfo, Class scriptClass) {
-        super(sourceDatabaseInfo, targetDatabaseInfo, scriptClass);
     }
 
     @Override

@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.session.Session;
 
 import static com.nuodb.migrator.jdbc.metadata.Column.getDefaultValue;
 
