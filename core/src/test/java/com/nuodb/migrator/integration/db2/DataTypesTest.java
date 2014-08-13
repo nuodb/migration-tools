@@ -49,7 +49,8 @@ public class DataTypesTest extends BaseDataTypeTest {
 				{ "testdata_dbclob" }, { "testdata_longvarchar" },
 				{ "testdata_longvargraphic" }, { "testdata_time" },
 				{ "testdata_date" }, { "testdata_timestamp" },
-				{ "testdata_blob" } };
+				{ "testdata_blob" }, { "testdata_xml" }, { "testdata_num" },
+				{ "testdata_dec" } };
 	}
 
 	@Test(dataProvider = "dataTypeMysql")
