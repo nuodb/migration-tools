@@ -36,6 +36,10 @@ public abstract class Config {
 
     public static final String HOME = "nuodb.migrator.home";
 
+    public static final String LOG_DATE = "nuodb.migrator.log.date";
+
+    public static final String LOG_DATE_PATTERN = "nuodb.migrator.log.date.pattern";
+
     public static final String EXECUTABLE = "com.nuodb.migrator.executable";
 
     public static final String CLASSPATH = "com.nuodb.migrator.classpath";
