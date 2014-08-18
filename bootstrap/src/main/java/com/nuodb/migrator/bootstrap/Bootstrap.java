@@ -57,8 +57,8 @@ public class Bootstrap {
             String logDate = new SimpleDateFormat(logDatePattern).format(new Date());
             setProperty(LOG_DATE, logDate);
         }
-
     }
+
     private static final Logger logger = getLogger(Bootstrap.class);
 
     private ClassLoader classLoader;
