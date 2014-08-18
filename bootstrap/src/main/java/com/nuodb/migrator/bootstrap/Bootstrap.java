@@ -32,12 +32,15 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
 import static com.nuodb.migrator.bootstrap.classpath.ClassPathLoaderUtils.createClassPathLoader;
 import static com.nuodb.migrator.config.Config.*;
 import static java.lang.String.format;
+import static java.lang.System.getProperty;
 import static java.lang.System.setProperty;
 import static java.lang.Thread.currentThread;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -48,6 +51,14 @@ import static org.slf4j.LoggerFactory.getLogger;
 @SuppressWarnings("unchecked")
 public class Bootstrap {
 
+    static {
+        String logDatePattern = getProperty(LOG_DATE_PATTERN);
+        if (logDatePattern != null && !logDatePattern.isEmpty()) {
+            String logDate = new SimpleDateFormat(logDatePattern).format(new Date());
+            setProperty(LOG_DATE, logDate);
+        }
+
+    }
     private static final Logger logger = getLogger(Bootstrap.class);
 
     private ClassLoader classLoader;
