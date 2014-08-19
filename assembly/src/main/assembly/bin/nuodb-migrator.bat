@@ -65,7 +65,7 @@ SET "JAVA_OPTS=%JAVA_OPTS% "-Xmx%MAX_HEAP_SIZE%""
 SET "JAVA_OPTS=%JAVA_OPTS% "-Dnuodb.home=%NUODB_HOME%""
 SET "JAVA_OPTS=%JAVA_OPTS% "-Dnuodb.migrator.home=%NUODB_MIGRATOR_HOME%""
 SET "JAVA_OPTS=%JAVA_OPTS% "-Dnuodb.migrator.log.dir=%NUODB_MIGRATOR_LOG_DIR%""
-SET "JAVA_OPTS=%JAVA_OPTS% "-Dnuodb.migrator.log.date.pattern=dd_MM_yyyy_HH_mm_ss""
+SET "JAVA_OPTS=%JAVA_OPTS% "-Dnuodb.migrator.log.date.pattern=yyyy_MM_dd_HH_mm_ss""
 
 SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\conf"
 SET "CLASSPATH=%CLASSPATH%;%NUODB_MIGRATOR_HOME%\jar\slf4j-api-${slf4j.version}.jar"
