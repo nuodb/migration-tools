@@ -31,6 +31,7 @@
 # NUODB_HOME & NUODB_MIGRATOR_LOG_DIR are set here
 : ${NUODB_HOME:="/opt/nuodb"}
 : ${NUODB_MIGRATOR_LOG_DIR:="/tmp"}
+: ${NUODB_MIGRATOR_LOG_DATE_PATTERN:="yyyy_MM_dd_HH_mm_ss"}
 
 # Maximum heap size
 MAX_HEAP_SIZE="256M"
@@ -51,7 +52,7 @@ JAVA_OPTS="$JAVA_OPTS -Xmx$MAX_HEAP_SIZE"
 JAVA_OPTS="$JAVA_OPTS -Dnuodb.home=$NUODB_HOME"
 JAVA_OPTS="$JAVA_OPTS -Dnuodb.migrator.home=$NUODB_MIGRATOR_HOME"
 JAVA_OPTS="$JAVA_OPTS -Dnuodb.migrator.log.dir=$NUODB_MIGRATOR_LOG_DIR"
-JAVA_OPTS="$JAVA_OPTS -Dnuodb.migrator.log.date.pattern=yyyy_MM_dd_HH_mm_ss"
+JAVA_OPTS="$JAVA_OPTS -Dnuodb.migrator.log.date.pattern=$NUODB_MIGRATOR_LOG_DATE_PATTERN"
 
 CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/conf"
 CLASSPATH="$CLASSPATH:$NUODB_MIGRATOR_HOME/jar/slf4j-api-${slf4j.version}.jar"
