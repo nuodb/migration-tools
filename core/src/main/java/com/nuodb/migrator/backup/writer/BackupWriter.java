@@ -57,7 +57,7 @@ import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.spec.MigrationMode;
 import com.nuodb.migrator.spec.QuerySpec;
 import com.nuodb.migrator.spec.TableSpec;
-import com.nuodb.migrator.utils.BlockingThreadPoolExecutor;
+import com.nuodb.migrator.utils.concurrent.BlockingThreadPoolExecutor;
 import org.slf4j.Logger;
 
 import java.sql.Connection;

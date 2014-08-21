@@ -73,7 +73,7 @@ import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.spec.MigrationMode;
-import com.nuodb.migrator.utils.BlockingThreadPoolExecutor;
+import com.nuodb.migrator.utils.concurrent.BlockingThreadPoolExecutor;
 import com.nuodb.migrator.utils.PrioritySet;
 import org.slf4j.Logger;
 
