@@ -27,48 +27,14 @@
  */
 package com.nuodb.migrator.jdbc.query;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
 
 /**
  * @author Sergey Bushik
  */
-public class StatementTemplate {
+public interface StatementAction<S extends Statement, V extends Object> {
 
-    private final Connection connection;
-
-    public StatementTemplate(Connection connection) {
-        this.connection = connection;
-    }
-
-    public <S extends Statement> void executeStatement(StatementFactory<S> statementFactory,
-                                                       StatementCallback<S> statementCallback)
-            throws SQLException {
-        S statement = statementFactory.createStatement(connection);
-        try {
-            statementCallback.executeStatement(statement);
-        } finally {
-            close(statement != null ? statement.getResultSet() : null);
-            close(statement);
-        }
-    }
-
-    public <S extends Statement, V extends Object> V executeStatement(StatementFactory<S> statementFactory,
-                                                                      StatementAction<S, V> statementAction)
-            throws SQLException {
-        S statement = statementFactory.createStatement(connection);
-        try {
-            return statementAction.executeStatement(statement);
-        } finally {
-            close(statement != null ? statement.getResultSet() : null);
-            close(statement);
-        }
-    }
-
-    public Connection getConnection() {
-        return connection;
-    }
+    V executeStatement(S statement) throws SQLException;
 }
+

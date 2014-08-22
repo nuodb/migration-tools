@@ -55,7 +55,7 @@ public class IndexScriptGenerator extends ScriptGeneratorBase<Index> implements 
     public Collection<String> getCreateScripts(Index index, ScriptGeneratorManager scriptGeneratorManager) {
         if (index.getExpression() != null) {
             if (logger.isWarnEnabled()) {
-                logger.warn(format("Index expressions are not supported %s", index));
+                logger.warn(format("Expression based indexes not supported %s", index));
             }
             return emptySet();
         } else {

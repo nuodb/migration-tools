@@ -30,6 +30,7 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Index;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static com.nuodb.migrator.jdbc.dialect.DialectUtils.stripQuotes;
@@ -43,15 +44,17 @@ public class PostgreSQLIndexInspector extends SimpleIndexInspector {
      * http://www.postgresql.org/docs/9.0/static/sql-createindex.html
      *
      * @param inspectionContext inspect scopes
+     * @param indexes           source result set
      * @param index             for which expression is inspected
-     * @param expression        based on one or more columns of the table
+     * @param column            based on one or more columns of the table
      * @return
      */
     @Override
-    protected boolean isExpression(InspectionContext inspectionContext, Index index, String expression)
+    protected String getExpression(InspectionContext inspectionContext, ResultSet indexes, Index index,
+                                   String column)
             throws SQLException {
         Dialect dialect = inspectionContext.getDialect();
-        expression = stripQuotes(dialect, expression);
-        return !dialect.isAllowedIdentifier(expression, null);
+        column = stripQuotes(dialect, column);
+        return !dialect.isAllowedIdentifier(column, null) ? column : null;
     }
 }
