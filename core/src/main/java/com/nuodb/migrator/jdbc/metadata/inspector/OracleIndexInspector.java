@@ -27,14 +27,24 @@
  */
 package com.nuodb.migrator.jdbc.metadata.inspector;
 
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.ParameterizedQuery;
 import com.nuodb.migrator.jdbc.query.Query;
 import com.nuodb.migrator.jdbc.query.SelectQuery;
+import com.nuodb.migrator.jdbc.query.StatementAction;
+import com.nuodb.migrator.jdbc.query.StatementFactory;
+import com.nuodb.migrator.jdbc.query.StatementTemplate;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.query.QueryUtils.union;
+import static com.nuodb.migrator.utils.StringUtils.equalsIgnoreCase;
 import static com.nuodb.migrator.utils.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 
@@ -43,14 +53,17 @@ import static org.apache.commons.lang3.StringUtils.containsAny;
  */
 public class OracleIndexInspector extends SimpleIndexInspector {
 
+    private static final String FUNCTION_BASED_NORMAL = "FUNCTION-BASED NORMAL";
+    private static final String FUNCTION_BASED_BITMAP = "FUNCTION-BASED BITMAP";
+
     @Override
     protected Query createQuery(InspectionContext inspectionContext, TableInspectionScope tableInspectionScope) {
         SelectQuery statisticsIndex = new SelectQuery();
         Collection<String> parameters = newArrayList();
         statisticsIndex.columns("NULL AS TABLE_CAT", "OWNER AS TABLE_SCHEM", "TABLE_NAME", "0 AS NON_UNIQUE",
-                "NULL AS INDEX_QUALIFIER", "NULL AS INDEX_NAME", "0 AS TYPE", "0 AS ORDINAL_POSITION",
-                "NULL AS COLUMN_NAME", "NULL AS ASC_OR_DESC", "NUM_ROWS AS CARDINALITY", "BLOCKS AS PAGES",
-                "NULL AS FILTER_CONDITION");
+                "NULL AS INDEX_QUALIFIER", "NULL AS INDEX_NAME", "0 AS TYPE", "NULL AS INDEX_TYPE",
+                "0 AS ORDINAL_POSITION", "NULL AS COLUMN_NAME", "NULL AS ASC_OR_DESC", "NUM_ROWS AS CARDINALITY",
+                "BLOCKS AS PAGES", "NULL AS FILTER_CONDITION");
         statisticsIndex.from("ALL_TABLES");
         String schema = tableInspectionScope.getSchema();
         if (!isEmpty(schema)) {
@@ -64,13 +77,14 @@ public class OracleIndexInspector extends SimpleIndexInspector {
         }
         SelectQuery clusteredIndex = new SelectQuery();
         clusteredIndex.columns("NULL AS TABLE_CAT", "I.OWNER AS TABLE_SCHEM", "I.TABLE_NAME",
-                "DECODE(I.UNIQUENESS, 'UNIQUE', 0, 1)", "NULL AS INDEX_QUALIFIER", "I.INDEX_NAME", "1 AS TYPE",
-                "C.COLUMN_POSITION AS ORDINAL_POSITION", "C.COLUMN_NAME", "NULL AS ASC_OR_DESC",
-                "I.DISTINCT_KEYS AS CARDINALITY", "I.LEAF_BLOCKS AS PAGES", "NULL AS FILTER_CONDITION");
+                "DECODE(I.UNIQUENESS, 'UNIQUE', 0, 1) AS NON_UNIQUE", "NULL AS INDEX_QUALIFIER", "I.INDEX_NAME",
+                "1 AS TYPE", "I.INDEX_TYPE AS INDEX_TYPE", "C.COLUMN_POSITION AS ORDINAL_POSITION", "C.COLUMN_NAME",
+                "NULL AS ASC_OR_DESC", "I.DISTINCT_KEYS AS CARDINALITY", "I.LEAF_BLOCKS AS PAGES",
+                "NULL AS FILTER_CONDITION");
         clusteredIndex.from("ALL_INDEXES I");
         clusteredIndex.join("ALL_IND_COLUMNS C",
                 "C.INDEX_NAME = I.INDEX_NAME AND C.TABLE_OWNER = I.TABLE_OWNER AND " +
-                "I.TABLE_NAME = I.TABLE_NAME AND C.INDEX_OWNER = I.OWNER");
+                        "I.TABLE_NAME = I.TABLE_NAME AND C.INDEX_OWNER = I.OWNER");
         if (!isEmpty(schema)) {
             clusteredIndex.where(containsAny(schema, "%") ? "I.OWNER LIKE ? ESCAPE '/'" : "I.OWNER=?");
             parameters.add(schema);
@@ -81,6 +95,44 @@ public class OracleIndexInspector extends SimpleIndexInspector {
         }
         clusteredIndex.orderBy("NON_UNIQUE", "TYPE", "INDEX_NAME", "ORDINAL_POSITION");
         return new ParameterizedQuery(union(statisticsIndex, clusteredIndex), parameters);
+    }
+
+    @Override
+    protected String getExpression(InspectionContext inspectionContext, ResultSet indexes, final Index index,
+                                   String column) throws SQLException {
+        String indexType = indexes.getString("INDEX_TYPE");
+        String expression = null;
+        if (equalsIgnoreCase(indexType, FUNCTION_BASED_NORMAL) ||
+                equalsIgnoreCase(indexType, FUNCTION_BASED_BITMAP)) {
+            StatementTemplate template = new StatementTemplate(inspectionContext.getConnection());
+            expression = template.executeStatement(
+                    new StatementFactory<PreparedStatement>() {
+                        @Override
+                        public PreparedStatement createStatement(Connection connection) throws SQLException {
+                            SelectQuery expressions = new SelectQuery();
+                            expressions.column("COLUMN_EXPRESSION");
+                            expressions.from("ALL_IND_EXPRESSIONS");
+                            expressions.where("TABLE_OWNER = ? AND TABLE_NAME = ? AND INDEX_NAME = ?");
+                            return connection.prepareStatement(expressions.toString());
+                        }
+                    }, new StatementAction<PreparedStatement, String>() {
+                        @Override
+                        public String executeStatement(PreparedStatement statement) throws SQLException {
+                            Table table = index.getTable();
+                            statement.setString(1, table.getSchema().getName());
+                            statement.setString(2, table.getName());
+                            statement.setString(3, index.getName());
+                            ResultSet expressions = statement.executeQuery();
+                            String expression = null;
+                            if (expressions.next()) {
+                                expression = expressions.getString(1);
+                            }
+                            return expression;
+                        }
+                    }
+            );
+        }
+        return expression;
     }
 }
 

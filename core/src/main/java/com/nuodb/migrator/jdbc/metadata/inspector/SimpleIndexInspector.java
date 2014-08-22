@@ -37,7 +37,6 @@ import java.sql.SQLException;
 
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.INDEX;
-import static com.nuodb.migrator.jdbc.metadata.MetaDataType.TABLE;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addTable;
 import static java.sql.DatabaseMetaData.tableIndexStatistic;
 
@@ -80,22 +79,25 @@ public class SimpleIndexInspector extends TableInspectorBase<Table, TableInspect
             throws SQLException {
         index.setUnique(!indexes.getBoolean("NON_UNIQUE"));
         index.setFilterCondition(indexes.getString("FILTER_CONDITION"));
-        index.setSortOrder(getSortOrder(inspectionContext, index, indexes.getString("ASC_OR_DESC")));
+        index.setSortOrder(getSortOrder(inspectionContext, indexes, index, indexes.getString("ASC_OR_DESC")));
 
-        String expression = indexes.getString("COLUMN_NAME");
-        if (isExpression(inspectionContext, index, expression)) {
+        String column = indexes.getString("COLUMN_NAME");
+        String expression = getExpression(inspectionContext, indexes, index, column);
+        if (expression != null) {
             index.setExpression(expression);
         } else {
-            index.addColumn(index.getTable().addColumn(expression), indexes.getInt("ORDINAL_POSITION"));
+            index.addColumn(index.getTable().addColumn(column), indexes.getInt("ORDINAL_POSITION"));
         }
     }
 
-    protected boolean isExpression(InspectionContext inspectionContext, Index index, String expression)
+    protected String getExpression(InspectionContext inspectionContext, ResultSet indexes, Index index,
+                                   String column)
             throws SQLException {
-        return false;
+        return null;
     }
 
-    protected SortOrder getSortOrder(InspectionContext inspectionContext, Index index, String sortOrder) {
+    protected SortOrder getSortOrder(InspectionContext inspectionContext, ResultSet indexes, Index index,
+                                     String sortOrder) {
         if (sortOrder != null) {
             return sortOrder.equals("A") ? SortOrder.ASC : SortOrder.DESC;
         } else {
