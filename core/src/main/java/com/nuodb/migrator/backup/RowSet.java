@@ -37,8 +37,9 @@ import static com.google.common.collect.Lists.newArrayList;
 /**
  * @author Sergey Bushik
  */
-public class RowSet {
+public class RowSet implements HasSize {
 
+    private Long size;
     private String name;
     private AtomicLong rowCount = new AtomicLong();
     private String type;
@@ -52,6 +53,29 @@ public class RowSet {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public Long getSize() {
+        return size;
+    }
+
+    @Override
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    @Override
+    public Long getSize(BackupOps backupOps) {
+        Long size = getSize();
+        if (size == null) {
+            size = 0L;
+            for (Chunk chunk : getChunks()) {
+                size += chunk.getSize(backupOps);
+            }
+            setSize(size);
+        }
+        return size;
     }
 
     public long getRowCount() {

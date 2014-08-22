@@ -27,52 +27,14 @@
  */
 package com.nuodb.migrator.backup;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
-
 /**
- * Establishes interface for backup input/output operations.
- *
  * @author Sergey Bushik
  */
-public interface BackupOps {
+public interface HasSize {
 
-    final String DIR = ".";
+    Long getSize();
 
-    final String FILE = "backup.cat";
+    void setSize(Long size);
 
-    String getDir();
-
-    void setDir(String dir);
-
-    String getFile();
-
-    void setFile(String file);
-
-    String getPath();
-
-    void setPath(String path);
-
-    Long getLength(String name);
-
-    InputStream openInput(String name);
-
-    OutputStream openOutput(String name);
-
-    Backup read();
-
-    Backup read(Map context);
-
-    Backup read(InputStream input);
-
-    Backup read(InputStream input, Map context);
-
-    void write(Backup backup);
-
-    void write(Backup backup, Map context);
-
-    void write(Backup backup, OutputStream output);
-
-    void write(Backup backup, OutputStream output, Map context);
+    Long getSize(BackupOps backupOps);
 }

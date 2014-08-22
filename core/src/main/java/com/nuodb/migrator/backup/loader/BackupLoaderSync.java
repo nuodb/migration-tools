@@ -37,26 +37,26 @@ public class BackupLoaderSync {
 
     private boolean failed;
     private final AtomicBoolean loadData;
-    private final AtomicBoolean loadNoConstraints;
-    private final AtomicBoolean loadConstraints;
+    private final AtomicBoolean loadSchema;
+    private final AtomicBoolean loadIndexes;
     private final CountDownLatch permits;
 
     public BackupLoaderSync(boolean loadData, boolean loadSchema) {
         this(loadData, loadSchema, loadSchema);
     }
 
-    public BackupLoaderSync(boolean loadData, boolean loadNoConstraints, boolean loadConstraints) {
+    public BackupLoaderSync(boolean loadData, boolean loadSchema, boolean loadIndexes) {
         this.loadData = new AtomicBoolean(loadData);
-        this.loadNoConstraints = new AtomicBoolean(loadNoConstraints);
-        this.loadConstraints = new AtomicBoolean(loadConstraints);
+        this.loadSchema = new AtomicBoolean(loadSchema);
+        this.loadIndexes = new AtomicBoolean(loadIndexes);
         int permits = 0;
         if (loadData) {
             permits++;
         }
-        if (loadNoConstraints) {
+        if (loadSchema) {
             permits++;
         }
-        if (loadConstraints) {
+        if (loadIndexes) {
             permits++;
         }
         this.permits = new CountDownLatch(permits);
@@ -70,7 +70,7 @@ public class BackupLoaderSync {
         failed = true;
         loadDataDone();
         loadConstraintsDone();
-        loadNoConstraintsDone();
+        loadSchemaDone();
     }
 
     public void loadDataDone() {
@@ -80,13 +80,13 @@ public class BackupLoaderSync {
     }
 
     public void loadConstraintsDone() {
-        if (loadConstraints.compareAndSet(true, false)) {
+        if (loadIndexes.compareAndSet(true, false)) {
             permits.countDown();
         }
     }
 
-    public void loadNoConstraintsDone() {
-        if (loadNoConstraints.compareAndSet(true, false)) {
+    public void loadSchemaDone() {
+        if (loadSchema.compareAndSet(true, false)) {
             permits.countDown();
         }
     }

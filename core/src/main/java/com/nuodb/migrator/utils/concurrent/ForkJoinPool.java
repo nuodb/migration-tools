@@ -35,6 +35,9 @@
 
 package com.nuodb.migrator.utils.concurrent;
 
+import sun.misc.Unsafe;
+
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1982,7 +1985,9 @@ public class ForkJoinPool extends AbstractExecutorService {
                 new DefaultForkJoinWorkerThreadFactory();
         int s;
         try {
-            UNSAFE = sun.misc.Unsafe.getUnsafe();
+            Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+            field.setAccessible(true);
+            UNSAFE = (sun.misc.Unsafe) field.get(null);
             Class k = ForkJoinPool.class;
             ctlOffset = UNSAFE.objectFieldOffset
                     (k.getDeclaredField("ctl"));

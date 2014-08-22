@@ -42,22 +42,22 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 /**
  * @author Sergey Bushik
  */
-public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
+public class BlockingThreadPool extends ThreadPoolExecutor {
 
     public static final long KEEP_ALIVE_TIME = 100L;
     public static final TimeUnit KEEP_ALIVE_TIME_UNIT = MILLISECONDS;
 
-    public BlockingThreadPoolExecutor(int poolSize, long blockTime, TimeUnit blockTimeUnit) {
+    public BlockingThreadPool(int poolSize, long blockTime, TimeUnit blockTimeUnit) {
         this(poolSize, blockTime, blockTimeUnit, null);
     }
 
-    public BlockingThreadPoolExecutor(int poolSize, long blockTime, TimeUnit blockTimeUnit,
-                                      Callable<Boolean> blockTimeCallback) {
+    public BlockingThreadPool(int poolSize, long blockTime, TimeUnit blockTimeUnit,
+                              Callable<Boolean> blockTimeCallback) {
         this(poolSize, KEEP_ALIVE_TIME, KEEP_ALIVE_TIME_UNIT, blockTime, blockTimeUnit, blockTimeCallback);
     }
 
-    public BlockingThreadPoolExecutor(int poolSize, long keepAliveTime, TimeUnit keepAliveTimeUnit,
-                                      long blockTime, TimeUnit blockTimeUnit, Callable<Boolean> blockTimeCallback) {
+    public BlockingThreadPool(int poolSize, long keepAliveTime, TimeUnit keepAliveTimeUnit,
+                              long blockTime, TimeUnit blockTimeUnit, Callable<Boolean> blockTimeCallback) {
         super(poolSize, poolSize, keepAliveTime, keepAliveTimeUnit,
                 new LinkedBlockingDeque<Runnable>(),
                 new BlockingPolicy(blockTime, blockTimeUnit, blockTimeCallback));

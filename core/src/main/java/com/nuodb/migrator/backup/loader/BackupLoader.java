@@ -73,8 +73,8 @@ import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
 import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.spec.MigrationMode;
-import com.nuodb.migrator.utils.concurrent.BlockingThreadPoolExecutor;
 import com.nuodb.migrator.utils.PrioritySet;
+import com.nuodb.migrator.utils.concurrent.ForkJoinPool;
 import org.slf4j.Logger;
 
 import java.sql.SQLException;
@@ -99,7 +99,6 @@ import static com.nuodb.migrator.utils.Collections.*;
 import static com.nuodb.migrator.utils.ValidationUtils.isTrue;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -202,10 +201,11 @@ public class BackupLoader {
     }
 
     protected Executor createExecutor() {
+        int threads = getThreads();
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Using blocking thread pool with %d thread(s)", getThreads()));
+            logger.trace(format("Using fork join pool with %d thread(s)", threads));
         }
-        return new BlockingThreadPoolExecutor(getThreads(), 100L, MILLISECONDS);
+        return new ForkJoinPool(threads);
     }
 
     protected void openSourceSession(BackupLoaderContext backupLoaderContext) throws SQLException {
@@ -316,7 +316,7 @@ public class BackupLoader {
     protected Backup load(BackupLoaderManager backupLoaderManager) throws Exception {
         try {
             if (backupLoaderManager.isLoadSchema()) {
-                loadNoConstraints(backupLoaderManager);
+                loadSchema(backupLoaderManager);
             }
             if (backupLoaderManager.isLoadData()) {
                 loadData(backupLoaderManager);
@@ -334,7 +334,7 @@ public class BackupLoader {
         return backupLoaderManager.getBackupLoaderContext().getBackup();
     }
 
-    protected void loadNoConstraints(BackupLoaderManager backupLoaderManager) throws Exception {
+    protected void loadSchema(BackupLoaderManager backupLoaderManager) throws Exception {
         BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         ScriptGeneratorManager scriptGeneratorManager =
                 backupLoaderContext.getScriptGeneratorManager();
@@ -352,7 +352,7 @@ public class BackupLoader {
             closeQuietly(scriptExporter);
             scriptGeneratorManager.setObjectTypes(objectTypes);
         }
-        backupLoaderManager.loadNoConstraintsDone();
+        backupLoaderManager.loadSchemaDone();
     }
 
     /**
@@ -371,6 +371,15 @@ public class BackupLoader {
             loadData(loadRowSet, backupLoaderManager);
         }
         backupLoaderManager.loadDataDone();
+    }
+
+    protected int getLoadRowSetThreads(LoadRowSet loadRowSet) {
+        BackupOps backupOps = loadRowSet.getBackupOps();
+        RowSet rowSet = loadRowSet.getRowSet();
+        long backupSize = rowSet.getBackup().getSize(backupOps);
+        long rowSetSize = rowSet.getSize(backupOps);
+        int threads = getThreads();
+        return (int) Math.min(Math.max(Math.round(rowSetSize / (double) backupSize * threads), 1), threads);
     }
 
     /**
@@ -449,6 +458,7 @@ public class BackupLoader {
 
     protected LoadRowSets createLoadRowSets(BackupLoaderContext backupLoaderContext) {
         LoadRowSets loadRowSets = new LoadRowSets();
+        BackupOps backupOps = backupLoaderContext.getBackupOps();
         for (RowSet rowSet : backupLoaderContext.getBackup().getRowSets()) {
             if (isEmpty(rowSet.getChunks())) {
                 continue;
@@ -459,12 +469,13 @@ public class BackupLoader {
                 continue;
             }
             Query query = createQuery(rowSet, table, backupLoaderContext);
-            loadRowSets.addLoadRowSet(new LoadRowSet(rowSet, table, query));
+            loadRowSets.addLoadRowSet(new LoadRowSet(backupOps, rowSet, table, query));
         }
         return loadRowSets;
     }
 
     protected void loadData(LoadRowSet loadRowSet, BackupLoaderManager backupLoaderManager) {
+        int threads = getLoadRowSetThreads(loadRowSet);
         Work work = createWork(loadRowSet, backupLoaderManager);
         executeWork(work, backupLoaderManager);
     }

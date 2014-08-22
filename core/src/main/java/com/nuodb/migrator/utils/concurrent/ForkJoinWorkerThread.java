@@ -34,6 +34,7 @@
  */
 package com.nuodb.migrator.utils.concurrent;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -920,7 +921,9 @@ public class ForkJoinWorkerThread extends Thread {
     static {
         int s;
         try {
-            UNSAFE = sun.misc.Unsafe.getUnsafe();
+            Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+            field.setAccessible(true);
+            UNSAFE = (sun.misc.Unsafe) field.get(null);
             Class a = ForkJoinTask[].class;
             ABASE = UNSAFE.arrayBaseOffset(a);
             s = UNSAFE.arrayIndexScale(a);

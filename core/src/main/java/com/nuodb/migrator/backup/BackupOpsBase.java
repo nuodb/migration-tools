@@ -91,6 +91,11 @@ public abstract class BackupOpsBase implements BackupOps {
         setFile(isBackup(file) ? file.getName() : FILE);
     }
 
+    @Override
+    public Long getLength(String name) {
+        return FileUtils.getFile(dir, name).length();
+    }
+
     private static boolean isBackup(File file) {
         return (file.exists() && file.isFile()) || BACKUP_REGEX.test(file.getName());
     }

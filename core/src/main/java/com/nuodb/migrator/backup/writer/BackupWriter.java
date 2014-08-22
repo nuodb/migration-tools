@@ -57,7 +57,7 @@ import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.spec.MigrationMode;
 import com.nuodb.migrator.spec.QuerySpec;
 import com.nuodb.migrator.spec.TableSpec;
-import com.nuodb.migrator.utils.concurrent.BlockingThreadPoolExecutor;
+import com.nuodb.migrator.utils.concurrent.BlockingThreadPool;
 import org.slf4j.Logger;
 
 import java.sql.Connection;
@@ -285,7 +285,7 @@ public class BackupWriter {
         if (logger.isTraceEnabled()) {
             logger.trace(format("Using blocking thread pool with %d thread(s)", getThreads()));
         }
-        return new BlockingThreadPoolExecutor(getThreads(), 100L, MILLISECONDS);
+        return new BlockingThreadPool(getThreads(), 100L, MILLISECONDS);
     }
 
     protected ValueFormatRegistry createValueFormatRegistry(Session session) throws Exception {

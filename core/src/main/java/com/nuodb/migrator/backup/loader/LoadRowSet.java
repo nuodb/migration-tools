@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.backup.loader;
 
+import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
@@ -37,14 +38,20 @@ import com.nuodb.migrator.utils.ObjectUtils;
  */
 public class LoadRowSet {
 
+    private BackupOps backupOps;
     private RowSet rowSet;
     private Table table;
     private Query query;
 
-    public LoadRowSet(RowSet rowSet, Table table, Query query) {
+    public LoadRowSet(BackupOps backupOps, RowSet rowSet, Table table, Query query) {
+        this.backupOps = backupOps;
         this.rowSet = rowSet;
         this.table = table;
         this.query = query;
+    }
+
+    public BackupOps getBackupOps() {
+        return backupOps;
     }
 
     public RowSet getRowSet() {
@@ -66,6 +73,7 @@ public class LoadRowSet {
 
         LoadRowSet that = (LoadRowSet) o;
 
+        if (backupOps != null ? !backupOps.equals(that.backupOps) : that.backupOps != null) return false;
         if (query != null ? !query.equals(that.query) : that.query != null) return false;
         if (rowSet != null ? !rowSet.equals(that.rowSet) : that.rowSet != null) return false;
         if (table != null ? !table.equals(that.table) : that.table != null) return false;
@@ -75,7 +83,8 @@ public class LoadRowSet {
 
     @Override
     public int hashCode() {
-        int result = rowSet != null ? rowSet.hashCode() : 0;
+        int result = backupOps != null ? backupOps.hashCode() : 0;
+        result = 31 * result + (rowSet != null ? rowSet.hashCode() : 0);
         result = 31 * result + (table != null ? table.hashCode() : 0);
         result = 31 * result + (query != null ? query.hashCode() : 0);
         return result;

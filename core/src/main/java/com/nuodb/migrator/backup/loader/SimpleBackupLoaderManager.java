@@ -123,8 +123,8 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
     }
 
     @Override
-    public void loadNoConstraintsDone() {
-        backupLoaderSync.loadNoConstraintsDone();
+    public void loadSchemaDone() {
+        backupLoaderSync.loadSchemaDone();
     }
 
     @Override

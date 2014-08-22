@@ -34,9 +34,10 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author Sergey Bushik
  */
-public class Chunk {
+public class Chunk implements HasSize {
 
     private String name;
+    private Long size;
     private AtomicLong rowCount = new AtomicLong();
     private transient RowSet rowSet;
 
@@ -46,6 +47,25 @@ public class Chunk {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public Long getSize() {
+        return size;
+    }
+
+    @Override
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    @Override
+    public Long getSize(BackupOps backupOps) {
+        Long size = getSize();
+        if (size == null) {
+            setSize(size = backupOps.getLength(getName()));
+        }
+        return size;
     }
 
     public long getRowCount() {

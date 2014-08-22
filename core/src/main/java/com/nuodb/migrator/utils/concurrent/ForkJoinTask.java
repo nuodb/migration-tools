@@ -39,6 +39,7 @@ import java.io.Serializable;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.RandomAccess;
@@ -1225,7 +1226,9 @@ public abstract class ForkJoinTask<V> implements Future<V>, Serializable {
         exceptionTableRefQueue = new ReferenceQueue<Object>();
         exceptionTable = new ExceptionNode[EXCEPTION_MAP_CAPACITY];
         try {
-            UNSAFE = sun.misc.Unsafe.getUnsafe();
+            Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+            field.setAccessible(true);
+            UNSAFE = (sun.misc.Unsafe) field.get(null);
             statusOffset = UNSAFE.objectFieldOffset
                     (ForkJoinTask.class.getDeclaredField("status"));
         } catch (Exception e) {
