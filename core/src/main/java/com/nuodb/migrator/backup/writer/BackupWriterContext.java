@@ -106,7 +106,7 @@ public interface BackupWriterContext {
 
     void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
 
-    Collection<WriteQuery> getExportQueries();
+    Collection<WriteQuery> getWriteQueries();
 
-    void setExportQueries(Collection<WriteQuery> exportQueries);
+    void setWriteQueries(Collection<WriteQuery> exportQueries);
 }

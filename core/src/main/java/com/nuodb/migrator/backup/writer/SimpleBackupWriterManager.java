@@ -62,10 +62,10 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
     private BackupWriterSync backupWriterSync;
     private BackupWriterContext backupWriterContext;
 
-    private Multimap<WriteQuery, WriteQueryWork> exportQueries;
+    private Multimap<WriteQuery, WriteQueryWork> writeQueries;
 
     public SimpleBackupWriterManager() {
-        exportQueries = synchronizedSetMultimap(newSetMultimap(
+        writeQueries = synchronizedSetMultimap(newSetMultimap(
                 Maps.<WriteQuery, Collection<WriteQueryWork>>newHashMap(),
                 new Supplier<Set<WriteQueryWork>>() {
                     @Override
@@ -88,7 +88,7 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
 
     @Override
     public void writeStart(Work work, WriteQuery writeQuery) {
-        exportQueries.put(writeQuery, (WriteQueryWork) work);
+        writeQueries.put(writeQuery, (WriteQueryWork) work);
         if (hasListeners()) {
             onWriteStart(new WriteChunkEvent(work, writeQuery));
         }
@@ -131,9 +131,9 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
     public void writeEnd(Work work, WriteQuery writeQuery) {
         RowSet rowSet = writeQuery.getRowSet();
         synchronized (rowSet) {
-            exportQueries.put(writeQuery, (WriteQueryWork) work);
+            writeQueries.put(writeQuery, (WriteQueryWork) work);
             Collection<Chunk> chunks = newArrayList();
-            for (WriteQueryWork writeQueryWork : exportQueries.get(writeQuery)) {
+            for (WriteQueryWork writeQueryWork : writeQueries.get(writeQuery)) {
                 chunks.addAll(writeQueryWork.getChunks());
             }
             rowSet.setChunks(chunks);

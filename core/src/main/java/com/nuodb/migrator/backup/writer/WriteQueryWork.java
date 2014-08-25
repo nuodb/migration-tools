@@ -30,6 +30,7 @@ package com.nuodb.migrator.backup.writer;
 import com.nuodb.migrator.backup.Chunk;
 import com.nuodb.migrator.backup.QueryRowSet;
 import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.backup.TableRowSet;
 import com.nuodb.migrator.backup.format.Output;
 import com.nuodb.migrator.backup.format.value.Row;
 import com.nuodb.migrator.backup.format.value.Value;
@@ -58,6 +59,7 @@ import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.nuodb.migrator.utils.Predicates.instanceOf;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
@@ -89,6 +91,11 @@ public class WriteQueryWork extends WorkBase {
         this.querySplit = querySplit;
         this.hasNextQuerySplit = hasNextQuerySplit;
         this.backupWriterManager = backupWriterManager;
+    }
+
+    @Override
+    public String getName() {
+        return format("Export to %s", getRowSetName());
     }
 
     @Override
@@ -125,7 +132,7 @@ public class WriteQueryWork extends WorkBase {
 
         chunks = newArrayList();
         if (rowSet.getName() == null) {
-            rowSet.setName(createRowSetName());
+            rowSet.setName(getRowSetName());
         }
     }
 
@@ -188,12 +195,12 @@ public class WriteQueryWork extends WorkBase {
 
     protected Chunk createChunk(int chunkIndex) {
         Chunk chunk = new Chunk();
-        chunk.setName(createChunkName(chunkIndex));
+        chunk.setName(getChunkName(chunkIndex));
         return chunk;
     }
 
-    protected String createChunkName(int chunkIndex) {
-        Collection names = newArrayList(createRowSetName());
+    protected String getChunkName(int chunkIndex) {
+        Collection names = newArrayList(getRowSetName());
         int splitIndex = getQuerySplit().getSplitIndex();
         if (splitIndex != 0 || isHasNextQuerySplit()) {
             names.add(splitIndex + 1);
@@ -205,7 +212,7 @@ public class WriteQueryWork extends WorkBase {
         return lowerCase(join(names, "."));
     }
 
-    protected String createRowSetName() {
+    protected String getRowSetName() {
         String rowSetName;
         if (writeQuery instanceof WriteTable) {
             Table table = ((WriteTable) writeQuery).getTable();

@@ -46,7 +46,7 @@ public class WriteQueryListener extends BackupWriterAdapter {
     public WriteQueryListener(BackupWriterManager backupWriterManager) {
         this.backupWriterManager = backupWriterManager;
         this.exportQueries = synchronizedList(newArrayList(
-                backupWriterManager.getBackupWriterContext().getExportQueries()));
+                backupWriterManager.getBackupWriterContext().getWriteQueries()));
     }
 
     @Override

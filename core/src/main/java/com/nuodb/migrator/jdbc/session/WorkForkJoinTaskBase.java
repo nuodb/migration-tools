@@ -29,7 +29,7 @@ package com.nuodb.migrator.jdbc.session;
 
 import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 
 /**
  * @author Sergey Bushik
@@ -37,21 +37,23 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 public abstract class WorkForkJoinTaskBase<V> extends ForkJoinTask<V> implements Work {
 
     private WorkManager workManager;
-    private SessionFactory sessionFactory;
     private Session session;
-    private boolean closeSession;
+    private SessionFactory sessionFactory;
     private V rawResult;
-
-    public WorkForkJoinTaskBase(WorkManager workManager, SessionFactory sessionFactory) {
-        this.workManager = workManager;
-        this.sessionFactory = sessionFactory;
-        this.closeSession = true;
-    }
 
     public WorkForkJoinTaskBase(WorkManager workManager, Session session) {
         this.workManager = workManager;
         this.session = session;
-        this.closeSession = false;
+    }
+
+    public WorkForkJoinTaskBase(WorkManager workManager, SessionFactory sessionFactory) {
+        this.workManager = workManager;
+        this.sessionFactory = sessionFactory;
+    }
+
+    @Override
+    public String getName() {
+        return getClassName(getClass());
     }
 
     @Override
@@ -76,9 +78,6 @@ public abstract class WorkForkJoinTaskBase<V> extends ForkJoinTask<V> implements
 
     @Override
     public void close() throws Exception {
-        if (closeSession) {
-            closeQuietly(session);
-        }
     }
 
     protected Session getSession() {

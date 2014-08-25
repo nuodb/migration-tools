@@ -27,8 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
-
 /**
  * @author Sergey Bushik
  */
@@ -37,24 +35,15 @@ public abstract class WorkRunnableBase extends WorkBase implements Runnable {
     private WorkManager workManager;
     private SessionFactory sessionFactory;
     private Session session;
-    private boolean closeSession;
-
-    public WorkRunnableBase(WorkManager workManager, SessionFactory sessionFactory) {
-        this.workManager = workManager;
-        this.sessionFactory = sessionFactory;
-        this.closeSession = true;
-    }
 
     public WorkRunnableBase(WorkManager workManager, Session session) {
         this.workManager = workManager;
         this.session = session;
-        this.closeSession = false;
     }
 
-    @Override
-    public void init(Session session) throws Exception {
-        this.session = session;
-        init();
+    public WorkRunnableBase(WorkManager workManager, SessionFactory sessionFactory) {
+        this.workManager = workManager;
+        this.sessionFactory = sessionFactory;
     }
 
     @Override
@@ -63,13 +52,6 @@ public abstract class WorkRunnableBase extends WorkBase implements Runnable {
             workManager.execute(this, sessionFactory);
         } else {
             workManager.execute(this, session);
-        }
-    }
-
-    @Override
-    public void close() throws Exception {
-        if (closeSession) {
-            closeQuietly(session);
         }
     }
 }

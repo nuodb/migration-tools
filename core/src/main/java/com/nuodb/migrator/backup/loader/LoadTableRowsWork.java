@@ -29,10 +29,12 @@ package com.nuodb.migrator.backup.loader;
 
 import com.google.common.base.Function;
 import com.nuodb.migrator.backup.Column;
+import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.value.*;
 import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.commit.CommitExecutor;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
+import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.session.WorkForkJoinTaskBase;
 import org.slf4j.Logger;
@@ -43,6 +45,7 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -75,6 +78,12 @@ public class LoadTableRowsWork extends WorkForkJoinTaskBase {
     }
 
     @Override
+    public String getName() {
+        RowSet rowSet = loadTable.getRowSet();
+        return format("Load from %s thread #%d", rowSet.getName(), getThread());
+    }
+
+    @Override
     protected void init() throws Exception {
         backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         statement = getSession().getConnection().prepareStatement(
@@ -103,18 +112,18 @@ public class LoadTableRowsWork extends WorkForkJoinTaskBase {
 
     protected void initValueHandleList() {
         if (valueHandleList == null) {
-            ValueHandleListBuilder valueHandlerListBuilder = newBuilder(getSession().getConnection(), statement);
-            valueHandlerListBuilder.withDialect(getSession().getDialect());
-            valueHandlerListBuilder.withFields(newArrayList(transform(loadTable.getRowSet().getColumns(),
+            ValueHandleListBuilder builder = newBuilder(getSession().getConnection(), statement);
+            builder.withDialect(getSession().getDialect());
+            builder.withFields(newArrayList(transform(loadTable.getRowSet().getColumns(),
                     new Function<Column, Field>() {
                         @Override
                         public Field apply(Column column) {
                             return loadTable.getTable().getColumn(column.getName());
                         }
                     })));
-            valueHandlerListBuilder.withTimeZone(backupLoaderContext.getTimeZone());
-            valueHandlerListBuilder.withValueFormatRegistry(backupLoaderContext.getValueFormatRegistry());
-            valueHandleList = valueHandlerListBuilder.build();
+            builder.withTimeZone(backupLoaderContext.getTimeZone());
+            builder.withValueFormatRegistry(backupLoaderContext.getValueFormatRegistry());
+            valueHandleList = builder.build();
         }
     }
 

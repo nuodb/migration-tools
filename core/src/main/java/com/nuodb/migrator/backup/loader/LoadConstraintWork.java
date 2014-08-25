@@ -41,6 +41,7 @@ import java.util.Collection;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getUseSchema;
+import static java.lang.String.format;
 
 /**
  * Loads schema scripts for a desired object
@@ -58,6 +59,12 @@ public class LoadConstraintWork extends WorkBase {
     protected LoadConstraintWork(LoadConstraint loadConstraint, BackupLoaderManager backupLoaderManager) {
         this.loadConstraint = loadConstraint;
         this.backupLoaderManager = backupLoaderManager;
+    }
+
+    @Override
+    public String getName() {
+        String name = scriptGeneratorManager.getName(loadConstraint.getConstraint());
+        return format("Load %s", name);
     }
 
     @Override

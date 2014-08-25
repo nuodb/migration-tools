@@ -35,8 +35,6 @@ import com.nuodb.migrator.backup.Column;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.TableRowSet;
 import com.nuodb.migrator.backup.format.FormatFactory;
-import com.nuodb.migrator.backup.format.value.RowReader;
-import com.nuodb.migrator.backup.format.value.RowReaders;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
@@ -77,6 +75,7 @@ import com.nuodb.migrator.spec.MetaDataSpec;
 import com.nuodb.migrator.spec.MigrationMode;
 import com.nuodb.migrator.utils.PrioritySet;
 import com.nuodb.migrator.utils.concurrent.ForkJoinPool;
+import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
 import org.slf4j.Logger;
 
 import java.sql.SQLException;
@@ -89,7 +88,6 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.nuodb.migrator.backup.format.value.RowReaders.newSequentialRowReader;
 import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
@@ -99,7 +97,6 @@ import static com.nuodb.migrator.jdbc.query.InsertType.INSERT;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static com.nuodb.migrator.utils.Collections.*;
-import static com.nuodb.migrator.utils.ValidationUtils.isTrue;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.round;
@@ -115,13 +112,11 @@ public class BackupLoader {
 
     public static final Collection<MigrationMode> MIGRATION_MODES = newHashSet(MigrationMode.values());
     public static final int THREADS = getRuntime().availableProcessors();
-    public static final Long DELTA_ROW_COUNT = null;
 
     protected final transient Logger logger = getLogger(getClass());
 
     private CommitStrategy commitStrategy;
     private Database database;
-    private Long deltaRowCount = DELTA_ROW_COUNT;
     private DialectResolver dialectResolver;
     private Executor executor;
     private FormatFactory formatFactory;
@@ -209,7 +204,7 @@ public class BackupLoader {
     protected Executor createExecutor() {
         int threads = getThreads();
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Using fork join pool with %d thread(s)", threads));
+            logger.trace(format("Creating fork join pool with %d thread(s)", threads));
         }
         return new ForkJoinPool(threads);
     }
@@ -499,15 +494,21 @@ public class BackupLoader {
 
     protected void executeWork(final Work work, final BackupLoaderManager backupLoaderManager) {
         final BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        backupLoaderContext.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                backupLoaderManager.execute(work,
-                        backupLoaderContext.getTargetSessionFactory());
-            }
-        });
+        ForkJoinPool executor = (ForkJoinPool) backupLoaderContext.getExecutor();
+        if (work instanceof Runnable) {
+            executor.execute((Runnable)work);
+        } else if (work instanceof ForkJoinTask) {
+            executor.execute((ForkJoinTask)work);
+        } else {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    backupLoaderManager.execute(work,
+                            backupLoaderContext.getSourceSessionFactory());
+                }
+            });
+        }
     }
-
 
     protected void executeTask(final Runnable task, final BackupLoaderManager backupLoaderManager) {
         final BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
@@ -576,15 +577,6 @@ public class BackupLoader {
 
     public void setDatabase(Database database) {
         this.database = database;
-    }
-
-    public Long getDeltaRowCount() {
-        return deltaRowCount;
-    }
-
-    public void setDeltaRowCount(Long deltaRowCount) {
-        isTrue(deltaRowCount > 0, "Delta row count should be greater than 0");
-        this.deltaRowCount = deltaRowCount;
     }
 
     public DialectResolver getDialectResolver() {

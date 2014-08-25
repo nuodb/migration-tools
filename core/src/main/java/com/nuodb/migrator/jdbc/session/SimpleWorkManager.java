@@ -39,7 +39,6 @@ import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Lists.newCopyOnWriteArrayList;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
-import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -113,15 +112,14 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
 
     protected void init(Work work, Session session) throws Exception {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Work initiated %s", getClassName(work.getClass())));
+            logger.trace(format("%s work is being initiated", work.getName()));
         }
         work.init(session);
     }
 
     protected void execute(Work work) throws Exception {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Work executed %s",
-                    getClassName(work.getClass())));
+            logger.trace(format("%s work is being executed", work.getName()));
         }
         onExecuteStart(work);
         work.execute();
@@ -152,8 +150,8 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
 
     protected void failure(Work work, Throwable failure) {
         if (logger.isWarnEnabled()) {
-            logger.warn(format("Work failed %s %s",
-                    getClassName(work.getClass()), failure.getMessage()));
+            logger.warn(format("%s work failed with error %s",
+                    work.getName(), failure.getMessage()));
         }
         failures.put(work, failure);
         onFailure(work, failure);
@@ -170,8 +168,7 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
 
     protected void close(Work work) throws Exception {
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Work closed %s",
-                    getClassName(work.getClass())));
+            logger.trace(format("%s work is being closed", work.getName()));
         }
         work.close();
     }

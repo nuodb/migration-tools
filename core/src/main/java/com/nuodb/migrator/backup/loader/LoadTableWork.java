@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.backup.loader;
 
+import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.value.RowReader;
 import com.nuodb.migrator.jdbc.session.WorkRunnableBase;
 import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
@@ -37,6 +38,7 @@ import java.util.Collection;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.backup.format.value.RowReaders.newSequentialRowReader;
 import static com.nuodb.migrator.backup.format.value.RowReaders.newSynchronizedRowReader;
+import static java.lang.String.format;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -58,6 +60,12 @@ public class LoadTableWork extends WorkRunnableBase {
         super(backupLoaderManager, backupLoaderManager.getBackupLoaderContext().getTargetSession());
         this.loadTable = loadTable;
         this.backupLoaderManager = backupLoaderManager;
+    }
+
+    @Override
+    public String getName() {
+        RowSet rowSet = loadTable.getRowSet();
+        return format("Load from %s", rowSet.getName());
     }
 
     @Override

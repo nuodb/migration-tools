@@ -28,20 +28,14 @@
 package com.nuodb.migrator.jdbc.session;
 
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import org.slf4j.Logger;
 
 import java.sql.SQLException;
 import java.util.TimeZone;
-
-import static java.lang.String.format;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class SessionObservers {
-
-    private static final String DEFAULT_TIME_ZONE = "default";
 
     /**
      * Sets transaction isolation level to one of the supported values from specified array.
@@ -70,8 +64,6 @@ public class SessionObservers {
      */
     public static SessionObserver newSessionTimeZoneSetter(final TimeZone timeZone) {
         return new SessionObserver() {
-            private final transient Logger logger = getLogger(getClass());
-
             @Override
             public void afterOpen(Session session) throws SQLException {
                 setSessionTimeZone(session, timeZone);
@@ -85,23 +77,8 @@ public class SessionObservers {
             private void setSessionTimeZone(Session session, TimeZone timeZone) throws SQLException {
                 Dialect dialect = session.getDialect();
                 if (dialect.supportsSessionTimeZone()) {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace(format("Session %s time zone set to %s", session, getTimeZoneName(timeZone)));
-                    }
                     dialect.setSessionTimeZone(session.getConnection(), timeZone);
-                } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.trace(format("Session time zone is not supported by %s", getDialectName(dialect)));
-                    }
                 }
-            }
-
-            private String getTimeZoneName(TimeZone timeZone) {
-                return timeZone != null ? timeZone.getID() : DEFAULT_TIME_ZONE;
-            }
-
-            private Object getDialectName(Dialect dialect) {
-                return dialect.getClass().getName();
             }
         };
     }

@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 
 /**
  * @author Sergey Bushik
@@ -35,6 +35,11 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 public abstract class WorkBase implements Work {
 
     private Session session;
+
+    @Override
+    public String getName() {
+        return getClassName(getClass());
+    }
 
     @Override
     public void init(Session session) throws Exception {
@@ -47,10 +52,9 @@ public abstract class WorkBase implements Work {
 
     @Override
     public void close() throws Exception {
-        closeQuietly(session);
     }
 
-    public Session getSession() {
+    protected Session getSession() {
         return session;
     }
 }
