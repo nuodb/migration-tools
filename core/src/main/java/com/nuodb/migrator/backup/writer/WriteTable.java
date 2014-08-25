@@ -27,34 +27,33 @@
  */
 package com.nuodb.migrator.backup.writer;
 
-import com.nuodb.migrator.backup.Chunk;
-import com.nuodb.migrator.jdbc.session.Work;
-import com.nuodb.migrator.jdbc.session.WorkEvent;
+import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Table;
+import com.nuodb.migrator.jdbc.split.QuerySplitter;
+
+import java.util.Collection;
 
 /**
  * @author Sergey Bushik
  */
-public class WriteRowSetEvent extends WorkEvent {
+public class WriteTable extends WriteQuery {
 
-    private WriteRowSet writeRowSet;
-    private Chunk chunk;
+    private Table table;
+    private String filter;
 
-    public WriteRowSetEvent(Work work, WriteRowSet writeRowSet) {
-        super(work);
-        this.writeRowSet = writeRowSet;
+    public WriteTable(Table table, Collection<? extends Column> columns, String filter,
+                      QuerySplitter querySplitter, RowSet rowSet) {
+        super(querySplitter, columns, rowSet);
+        this.table = table;
+        this.filter = filter;
     }
 
-    public WriteRowSetEvent(Work work, WriteRowSet writeRowSet, Chunk chunk) {
-        super(work);
-        this.writeRowSet = writeRowSet;
-        this.chunk = chunk;
+    public Table getTable() {
+        return table;
     }
 
-    public WriteRowSet getWriteRowSet() {
-        return writeRowSet;
-    }
-
-    public Chunk getChunk() {
-        return chunk;
+    public String getFilter() {
+        return filter;
     }
 }

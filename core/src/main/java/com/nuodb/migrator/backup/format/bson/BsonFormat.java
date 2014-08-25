@@ -25,40 +25,18 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.writer;
-
-import com.nuodb.migrator.jdbc.session.Work;
-import com.nuodb.migrator.jdbc.session.WorkEvent;
-
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.synchronizedList;
+package com.nuodb.migrator.backup.format.bson;
 
 /**
  * @author Sergey Bushik
  */
-public class WriteRowSetListener extends BackupWriterAdapter {
+public interface BsonFormat {
+    /**
+     * BSON maximum file size in non streaming mode is 2147483647 bytes, we take it as maximum size /2 or 1 GB.
+     */
+    final long MAX_SIZE = 1073741824L;
 
-    private final BackupWriterManager backupWriterManager;
-    private final Collection<WriteRowSet> writeRowSets;
+    final String TYPE = "bson";
 
-    public WriteRowSetListener(BackupWriterManager backupWriterManager) {
-        this.backupWriterManager = backupWriterManager;
-        this.writeRowSets = synchronizedList(newArrayList(
-                backupWriterManager.getBackupWriterContext().getWriteRowSets()));
-    }
-
-    @Override
-    public void onExecuteEnd(WorkEvent event) {
-        Work work = event.getWork();
-        if (work instanceof WriteRowSetWork) {
-            WriteRowSetWork writeRowSetWork = (WriteRowSetWork) work;
-            WriteRowSet writeRowSet = writeRowSetWork.getWriteRowSet();
-            writeRowSets.remove(writeRowSet);
-            if (writeRowSets.isEmpty()) {
-                backupWriterManager.writeDataDone();
-            }
-        }
-    }
+    final String ROWS_FIELD = "rs";
 }

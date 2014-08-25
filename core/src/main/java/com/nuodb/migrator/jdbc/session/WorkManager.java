@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.session;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Sergey Bushik
@@ -49,4 +50,6 @@ public interface WorkManager<L extends WorkListener> {
     void execute(Work work, SessionFactory sessionFactory);
 
     void close() throws Exception;
+
+    Map<Work, Throwable> getFailures();
 }

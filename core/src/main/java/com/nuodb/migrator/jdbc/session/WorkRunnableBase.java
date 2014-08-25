@@ -25,24 +25,51 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format;
+package com.nuodb.migrator.jdbc.session;
 
-import com.nuodb.migrator.MigratorException;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
  */
-public class InputFormatException extends MigratorException {
+public abstract class WorkRunnableBase extends WorkBase implements Runnable {
 
-    public InputFormatException(String message) {
-        super(message);
+    private WorkManager workManager;
+    private SessionFactory sessionFactory;
+    private Session session;
+    private boolean closeSession;
+
+    public WorkRunnableBase(WorkManager workManager, SessionFactory sessionFactory) {
+        this.workManager = workManager;
+        this.sessionFactory = sessionFactory;
+        this.closeSession = true;
     }
 
-    public InputFormatException(String message, Throwable cause) {
-        super(message, cause);
+    public WorkRunnableBase(WorkManager workManager, Session session) {
+        this.workManager = workManager;
+        this.session = session;
+        this.closeSession = false;
     }
 
-    public InputFormatException(Throwable cause) {
-        super(cause);
+    @Override
+    public void init(Session session) throws Exception {
+        this.session = session;
+        init();
+    }
+
+    @Override
+    public void run() {
+        if (sessionFactory != null) {
+            workManager.execute(this, sessionFactory);
+        } else {
+            workManager.execute(this, session);
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (closeSession) {
+            closeQuietly(session);
+        }
     }
 }

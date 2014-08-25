@@ -28,6 +28,7 @@
 package com.nuodb.migrator.backup.writer;
 
 import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.backup.format.value.Row;
 import com.nuodb.migrator.jdbc.session.Work;
 import com.nuodb.migrator.jdbc.session.WorkManager;
 
@@ -48,19 +49,15 @@ public interface BackupWriterManager extends WorkManager<BackupWriterListener> {
 
     boolean canExecute(Work work);
 
-    void writeStart(Work work, WriteRowSet writeRowSet);
+    void writeStart(Work work, WriteQuery writeQuery);
 
-    void writeStart(Work work, WriteRowSet writeRowSet, Chunk chunk);
+    void writeStart(Work work, WriteQuery writeQuery, Chunk chunk);
 
-    void writeRow(Work work, WriteRowSet writeRowSet, Chunk chunk);
+    void writeRow(Work work, WriteQuery writeQuery, Row row);
 
-    void writeEnd(Work work, WriteRowSet writeRowSet);
+    void writeEnd(Work work, WriteQuery writeQuery);
 
-    void writeEnd(Work work, WriteRowSet writeRowSet, Chunk chunk);
-
-    Long getDeltaRowCount();
-
-    void setDeltaRowCount(Long deltaRowCount);
+    void writeEnd(Work work, WriteQuery writeQuery, Chunk chunk);
 
     BackupWriterContext getBackupWriterContext();
 

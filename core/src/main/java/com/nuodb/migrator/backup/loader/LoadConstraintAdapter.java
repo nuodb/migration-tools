@@ -42,7 +42,7 @@ import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 /**
  * @author Sergey Bushik
  */
-public class LoadConstraintListener extends BackupLoaderAdapter {
+public class LoadConstraintAdapter extends BackupLoaderAdapter {
 
     private final BackupLoader backupLoader;
     private final BackupLoaderManager backupLoaderManager;
@@ -50,7 +50,7 @@ public class LoadConstraintListener extends BackupLoaderAdapter {
     private final Multimap<Table, LoadConstraint> loadForeignKeys;
     private final AtomicBoolean loadForeignKeysStart = new AtomicBoolean();
 
-    public LoadConstraintListener(BackupLoader backupLoader, BackupLoaderManager backupLoaderManager) {
+    public LoadConstraintAdapter(BackupLoader backupLoader, BackupLoaderManager backupLoaderManager) {
         this.backupLoader = backupLoader;
         this.backupLoaderManager = backupLoaderManager;
 
@@ -72,10 +72,10 @@ public class LoadConstraintListener extends BackupLoaderAdapter {
     @Override
     public void onExecuteEnd(WorkEvent event) {
         Work work = event.getWork();
-        if (work instanceof LoadRowSetWork) {
-            LoadRowSetWork loadRowSetWork = (LoadRowSetWork) work;
-            LoadRowSet loadRowSet = loadRowSetWork.getLoadRowSet();
-            Table table = backupLoader.getTable(loadRowSet,
+        if (work instanceof LoadTableWork) {
+            LoadTableWork loadTableWork = (LoadTableWork) work;
+            LoadTable loadTable = loadTableWork.getLoadTable();
+            Table table = backupLoader.getTable(loadTable,
                     backupLoaderManager.getBackupLoaderContext());
             if (table != null) {
                 backupLoader.loadConstraints(newArrayList(

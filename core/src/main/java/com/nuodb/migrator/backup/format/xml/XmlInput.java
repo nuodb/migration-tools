@@ -27,8 +27,8 @@
  */
 package com.nuodb.migrator.backup.format.xml;
 
-import com.nuodb.migrator.backup.format.InputFormatBase;
-import com.nuodb.migrator.backup.format.InputFormatException;
+import com.nuodb.migrator.backup.format.InputBase;
+import com.nuodb.migrator.backup.format.InputException;
 import com.nuodb.migrator.backup.format.value.Value;
 import com.nuodb.migrator.backup.format.value.ValueType;
 
@@ -53,13 +53,13 @@ import static javax.xml.stream.XMLInputFactory.newInstance;
 /**
  * @author Sergey Bushik
  */
-public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
+public class XmlInput extends InputBase implements XmlFormat {
 
     private XMLStreamReader xmlReader;
 
     @Override
     public String getFormat() {
-        return FORMAT;
+        return TYPE;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
         try {
             xmlReader = newInstance().createXMLStreamReader(reader);
         } catch (XMLStreamException exception) {
-            throw new InputFormatException(exception);
+            throw new InputException(exception);
         }
     }
 
@@ -77,7 +77,7 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
             xmlReader = newInstance().createXMLStreamReader(
                     getInputStream(), (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING));
         } catch (XMLStreamException exception) {
-            throw new InputFormatException(exception);
+            throw new InputException(exception);
         }
     }
 
@@ -106,7 +106,7 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
                         valueType = valueLevel != null ? valueLevel : valueType;
                         value = xmlReader.getElementText();
                     } catch (XMLStreamException exception) {
-                        throw new InputFormatException(exception);
+                        throw new InputException(exception);
                     }
                 }
                 valueType = valueType != null ? valueType : STRING;
@@ -132,7 +132,7 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
                         return true;
                 }
             } catch (XMLStreamException exception) {
-                throw new InputFormatException(exception);
+                throw new InputException(exception);
             }
         }
         return false;
@@ -167,7 +167,7 @@ public class XmlInputFormat extends InputFormatBase implements XmlAttributes {
             try {
                 xmlReader.close();
             } catch (XMLStreamException exception) {
-                throw new InputFormatException(exception);
+                throw new InputException(exception);
             }
             xmlReader = null;
         }

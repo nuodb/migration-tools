@@ -100,6 +100,7 @@ public class Main {
                         error.printStackTrace();
                     }
                 }
+                System.out.println(">>> Main exec " + 1);
                 return true;
             }
         };

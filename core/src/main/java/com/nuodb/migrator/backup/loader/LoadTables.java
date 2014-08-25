@@ -25,38 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.xml;
+package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.backup.format.value.ValueType;
-import com.nuodb.migrator.utils.EnumAlias;
+import java.util.Collection;
+import java.util.Iterator;
 
-import static com.nuodb.migrator.backup.format.value.ValueType.BINARY;
-import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
  */
-public interface XmlAttributes {
-    final String FORMAT = "xml";
+public class LoadTables implements Iterable<LoadTable> {
 
-    final String ATTRIBUTE_ENCODING = "xml.encoding";
-    final String ATTRIBUTE_VERSION = "xml.version";
+    private Collection<LoadTable> loadTables;
 
-    final String ENCODING = "utf-8";
-    final String VERSION = "1.0";
+    public LoadTables() {
+        this.loadTables = newArrayList();
+    }
 
-    final String ELEMENT_ROWS = "rs";
-    final String ELEMENT_COLUMN = "c";
-    final String ELEMENT_ROW = "r";
-    final String ATTRIBUTE_NULLS = "ns";
-    final String ATTRIBUTE_VALUE_TYPE = "vt";
-    final String ATTRIBUTE_VALUE_TYPE_STRING = "s";
-    final String ATTRIBUTE_VALUE_TYPE_BINARY = "b";
+    @Override
+    public Iterator<LoadTable> iterator() {
+        return getLoadTables().iterator();
+    }
 
-    final EnumAlias<ValueType> VALUE_TYPES = new EnumAlias<ValueType>() {
-        {
-            addAlias(ATTRIBUTE_VALUE_TYPE_STRING, STRING);
-            addAlias(ATTRIBUTE_VALUE_TYPE_BINARY, BINARY);
-        }
-    };
+    public void addLoadTable(LoadTable loadTable) {
+        loadTables.add(loadTable);
+    }
+
+    public Collection<LoadTable> getLoadTables() {
+        return loadTables;
+    }
+
+    public void setLoadTables(Collection<LoadTable> loadTables) {
+        this.loadTables = loadTables;
+    }
 }

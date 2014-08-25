@@ -28,11 +28,11 @@
 package com.nuodb.migrator.cli.run;
 
 import com.google.common.collect.Maps;
+import com.nuodb.migrator.backup.format.csv.CsvFormat;
 import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
 import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.query.InsertType;
-import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.LoadJobSpec;
 import com.nuodb.migrator.spec.ResourceSpec;
@@ -97,10 +97,10 @@ public class CliLoadJobTest {
         inputSpec.setPath("/tmp/dump.cat");
 
         Map<String, Object> attributes = new HashMap<String, Object>();
-        attributes.put(CsvAttributes.ATTRIBUTE_ENCODING, "cp1251");
-        attributes.put(CsvAttributes.ATTRIBUTE_DELIMITER, " ");
-        attributes.put(CsvAttributes.ATTRIBUTE_QUOTING, "true");
-        attributes.put(CsvAttributes.ATTRIBUTE_ESCAPE, "|");
+        attributes.put(CsvFormat.ATTRIBUTE_ENCODING, "cp1251");
+        attributes.put(CsvFormat.ATTRIBUTE_DELIMITER, " ");
+        attributes.put(CsvFormat.ATTRIBUTE_QUOTING, "true");
+        attributes.put(CsvFormat.ATTRIBUTE_ESCAPE, "|");
         inputSpec.setAttributes(attributes);
         loadJobSpec.setInputSpec(inputSpec);
         loadJobSpec.setInsertType(InsertType.INSERT);

@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.Query;
@@ -36,22 +35,18 @@ import com.nuodb.migrator.utils.ObjectUtils;
 /**
  * @author Sergey Bushik
  */
-public class LoadRowSet {
+public class LoadTable {
 
-    private BackupOps backupOps;
     private RowSet rowSet;
     private Table table;
     private Query query;
+    private int threads;
 
-    public LoadRowSet(BackupOps backupOps, RowSet rowSet, Table table, Query query) {
-        this.backupOps = backupOps;
+    public LoadTable(RowSet rowSet, Table table, Query query, int threads) {
         this.rowSet = rowSet;
         this.table = table;
         this.query = query;
-    }
-
-    public BackupOps getBackupOps() {
-        return backupOps;
+        this.threads = threads;
     }
 
     public RowSet getRowSet() {
@@ -66,14 +61,18 @@ public class LoadRowSet {
         return query;
     }
 
+    public int getThreads() {
+        return threads;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LoadRowSet that = (LoadRowSet) o;
+        LoadTable that = (LoadTable) o;
 
-        if (backupOps != null ? !backupOps.equals(that.backupOps) : that.backupOps != null) return false;
+        if (threads != that.threads) return false;
         if (query != null ? !query.equals(that.query) : that.query != null) return false;
         if (rowSet != null ? !rowSet.equals(that.rowSet) : that.rowSet != null) return false;
         if (table != null ? !table.equals(that.table) : that.table != null) return false;
@@ -83,10 +82,10 @@ public class LoadRowSet {
 
     @Override
     public int hashCode() {
-        int result = backupOps != null ? backupOps.hashCode() : 0;
-        result = 31 * result + (rowSet != null ? rowSet.hashCode() : 0);
+        int result = rowSet != null ? rowSet.hashCode() : 0;
         result = 31 * result + (table != null ? table.hashCode() : 0);
         result = 31 * result + (query != null ? query.hashCode() : 0);
+        result = 31 * result + threads;
         return result;
     }
 

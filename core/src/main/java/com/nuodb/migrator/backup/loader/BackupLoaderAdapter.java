@@ -36,14 +36,14 @@ public class BackupLoaderAdapter extends WorkAdapter
         implements BackupLoaderListener {
 
     @Override
-    public void onLoadStart(LoadRowSetEvent event) {
+    public void onLoadStart(LoadChunkEvent event) {
     }
 
     @Override
-    public void onLoadRow(LoadRowSetEvent event) {
+    public void onLoadRow(LoadRowEvent event) {
     }
 
     @Override
-    public void onLoadEnd(LoadRowSetEvent event) {
+    public void onLoadEnd(LoadChunkEvent event) {
     }
 }

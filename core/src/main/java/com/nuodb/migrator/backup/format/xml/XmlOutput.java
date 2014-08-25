@@ -27,8 +27,9 @@
  */
 package com.nuodb.migrator.backup.format.xml;
 
-import com.nuodb.migrator.backup.format.OutputFormatBase;
-import com.nuodb.migrator.backup.format.OutputFormatException;
+import com.nuodb.migrator.backup.Column;
+import com.nuodb.migrator.backup.format.OutputBase;
+import com.nuodb.migrator.backup.format.OutputException;
 import com.nuodb.migrator.backup.format.value.Value;
 import com.nuodb.migrator.backup.format.value.ValueType;
 
@@ -38,7 +39,9 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.BitSet;
+import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.backup.format.utils.BinaryEncoder.BASE64;
 import static com.nuodb.migrator.backup.format.utils.BitSetUtils.toHexString;
 import static com.nuodb.migrator.backup.format.value.ValueType.BINARY;
@@ -48,13 +51,13 @@ import static javax.xml.stream.XMLOutputFactory.newInstance;
 /**
  * @author Sergey Bushik
  */
-public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
+public class XmlOutput extends OutputBase implements XmlFormat {
 
     private XMLStreamWriter xmlWriter;
 
     @Override
     public String getFormat() {
-        return FORMAT;
+        return TYPE;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
         try {
             xmlWriter = newInstance().createXMLStreamWriter(outputStream, getEncoding());
         } catch (XMLStreamException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -71,7 +74,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
         try {
             xmlWriter = newInstance().createXMLStreamWriter(writer);
         } catch (XMLStreamException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -82,7 +85,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
             xmlWriter.setPrefix(XMLConstants.DEFAULT_NS_PREFIX, XMLConstants.NULL_NS_URI);
             xmlWriter.writeStartElement(ELEMENT_ROWS);
         } catch (XMLStreamException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -98,9 +101,10 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
                 xmlWriter.writeAttribute(ATTRIBUTE_NULLS, toHexString(nulls));
             }
             int i = 0;
+            Collection<Column> columns = getRowSet().getColumns();
             for (Value value : values) {
                 if (!value.isNull()) {
-                    ValueType valueType = getValueTypes().get(i);
+                    ValueType valueType = get(columns, i).getValueType();
                     xmlWriter.writeStartElement(ELEMENT_COLUMN);
                     String content;
                     if (valueType == BINARY) {
@@ -118,7 +122,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
             }
             xmlWriter.writeEndElement();
         } catch (XMLStreamException e) {
-            throw new OutputFormatException(e);
+            throw new OutputException(e);
         }
     }
 
@@ -129,7 +133,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
             xmlWriter.writeEndDocument();
             xmlWriter.flush();
         } catch (XMLStreamException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -139,7 +143,7 @@ public class XmlOutputFormat extends OutputFormatBase implements XmlAttributes {
             try {
                 xmlWriter.close();
             } catch (XMLStreamException exception) {
-                throw new OutputFormatException(exception);
+                throw new OutputException(exception);
             }
             xmlWriter = null;
         }

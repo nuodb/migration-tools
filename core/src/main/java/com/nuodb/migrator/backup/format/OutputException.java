@@ -25,24 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.utils;
+package com.nuodb.migrator.backup.format;
 
 import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class NotSupportedException extends MigratorException {
+public class OutputException extends MigratorException {
 
-    public NotSupportedException(String message) {
+    public OutputException(String message) {
         super(message);
     }
 
-    public NotSupportedException(String message, Throwable cause) {
+    public OutputException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public NotSupportedException(Throwable cause) {
+    public OutputException(Throwable cause) {
         super(cause);
     }
 }

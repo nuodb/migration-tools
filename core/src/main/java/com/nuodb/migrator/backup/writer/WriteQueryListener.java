@@ -25,36 +25,40 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.loader;
+package com.nuodb.migrator.backup.writer;
 
-import com.nuodb.migrator.backup.Chunk;
 import com.nuodb.migrator.jdbc.session.Work;
 import com.nuodb.migrator.jdbc.session.WorkEvent;
+
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.synchronizedList;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadRowSetEvent extends WorkEvent {
+public class WriteQueryListener extends BackupWriterAdapter {
 
-    private LoadRowSet loadRowSet;
-    private Chunk chunk;
+    private final BackupWriterManager backupWriterManager;
+    private final Collection<WriteQuery> exportQueries;
 
-    public LoadRowSetEvent(Work work, LoadRowSet loadRowSet) {
-        super(work);
-        this.loadRowSet = loadRowSet;
+    public WriteQueryListener(BackupWriterManager backupWriterManager) {
+        this.backupWriterManager = backupWriterManager;
+        this.exportQueries = synchronizedList(newArrayList(
+                backupWriterManager.getBackupWriterContext().getExportQueries()));
     }
 
-    public LoadRowSetEvent(Work work, LoadRowSet loadRowSet, Chunk chunk) {
-        super(work);
-        this.loadRowSet = loadRowSet;
-        this.chunk = chunk;
-    }
-
-    public LoadRowSet getLoadRowSet() {
-        return loadRowSet;
-    }
-
-    public Chunk getChunk() {
-        return chunk;
+    @Override
+    public void onExecuteEnd(WorkEvent event) {
+        Work work = event.getWork();
+        if (work instanceof WriteQueryWork) {
+            WriteQueryWork writeQueryWork = (WriteQueryWork) work;
+            WriteQuery writeQuery = writeQueryWork.getWriteQuery();
+            exportQueries.remove(writeQuery);
+            if (exportQueries.isEmpty()) {
+                backupWriterManager.writeDataDone();
+            }
+        }
     }
 }

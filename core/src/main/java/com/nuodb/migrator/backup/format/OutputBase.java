@@ -27,10 +27,6 @@
  */
 package com.nuodb.migrator.backup.format;
 
-import com.nuodb.migrator.backup.format.value.Value;
-import com.nuodb.migrator.backup.format.value.ValueHandle;
-import com.nuodb.migrator.backup.format.value.ValueHandleList;
-import com.nuodb.migrator.backup.format.value.ValueType;
 import com.nuodb.migrator.utils.Counting;
 import com.nuodb.migrator.utils.CountingOutputStream;
 import com.nuodb.migrator.utils.CountingWriter;
@@ -39,26 +35,22 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public abstract class OutputFormatBase extends FormatBase implements OutputFormat {
+public abstract class OutputBase extends FormatBase implements Output {
 
     private Writer writer;
     private OutputStream outputStream;
     private Long maxSize;
     private Counting counting;
-    private List<ValueType> valueTypes;
 
-    protected OutputFormatBase() {
+    protected OutputBase() {
     }
 
-    protected OutputFormatBase(Long maxSize) {
+    protected OutputBase(Long maxSize) {
         this.maxSize = maxSize;
     }
 
@@ -89,26 +81,13 @@ public abstract class OutputFormatBase extends FormatBase implements OutputForma
         } else if (hasOutputStream()) {
             init(openOutputStream());
         } else {
-            throw new OutputFormatException("Writer or stream is required to export backup");
+            throw new OutputException("Writer or stream is required to export backup");
         }
-        initValueTypes();
     }
 
     protected abstract void init(Writer writer);
 
     protected abstract void init(OutputStream outputStream);
-
-    public List<ValueType> getValueTypes() {
-        return valueTypes;
-    }
-
-    protected void initValueTypes() {
-        List<ValueType> valueTypes = newArrayList();
-        for (ValueHandle valueHandle : getValueHandleList()) {
-            valueTypes.add(valueHandle.getValueType());
-        }
-        this.valueTypes = valueTypes;
-    }
 
     protected boolean hasWriter() {
         return writer != null;
@@ -146,20 +125,6 @@ public abstract class OutputFormatBase extends FormatBase implements OutputForma
     protected boolean fitMaxSize() {
         return !(getMaxSize() != null && counting != null) || counting.getCount() < getMaxSize();
     }
-
-    @Override
-    public void write() {
-        int index = 0;
-        ValueHandleList valueHandleList = getValueHandleList();
-        Value[] values = new Value[valueHandleList.size()];
-        for (ValueHandle valueHandle : valueHandleList) {
-            values[index++] = valueHandle.getValueFormat().getValue(
-                    valueHandle.getJdbcValueAccess(), valueHandle.getJdbcValueAccessOptions());
-        }
-        writeValues(values);
-    }
-
-    public abstract void writeValues(Value[] values);
 
     public boolean isCounting() {
         return getMaxSize() != null;

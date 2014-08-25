@@ -35,14 +35,14 @@ import com.nuodb.migrator.jdbc.session.WorkAdapter;
 public abstract class BackupWriterAdapter extends WorkAdapter
         implements BackupWriterListener {
     @Override
-    public void onWriteStart(WriteRowSetEvent event) {
+    public void onWriteStart(WriteChunkEvent event) {
     }
 
     @Override
-    public void onWriteRow(WriteRowSetEvent event) {
+    public void onWriteRow(WriteRowEvent event) {
     }
 
     @Override
-    public void onWriteEnd(WriteRowSetEvent event) {
+    public void onWriteEnd(WriteChunkEvent event) {
     }
 }

@@ -186,15 +186,16 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
         }
     }
 
+    @Override
+    public Map<Work, Throwable> getFailures() {
+        return failures;
+    }
+
     public boolean isThrowFailureOnClose() {
         return throwFailureOnClose;
     }
 
     public void setThrowFailureOnClose(boolean throwFailureOnClose) {
         this.throwFailureOnClose = throwFailureOnClose;
-    }
-
-    public Map<Work, Throwable> getFailures() {
-        return failures;
     }
 }

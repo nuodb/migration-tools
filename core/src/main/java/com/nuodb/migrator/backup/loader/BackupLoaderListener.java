@@ -34,9 +34,9 @@ import com.nuodb.migrator.jdbc.session.WorkListener;
  */
 public interface BackupLoaderListener extends WorkListener {
 
-    void onLoadStart(LoadRowSetEvent event);
+    void onLoadStart(LoadChunkEvent event);
 
-    void onLoadRow(LoadRowSetEvent event);
+    void onLoadRow(LoadRowEvent event);
 
-    void onLoadEnd(LoadRowSetEvent event);
+    void onLoadEnd(LoadChunkEvent event);
 }

@@ -25,46 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.writer;
+package com.nuodb.migrator.backup.format.value;
 
-import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.jdbc.model.Field;
-import com.nuodb.migrator.jdbc.split.QuerySplitter;
-
-import java.util.Collection;
+import java.io.Closeable;
 
 /**
- * Represents row set source to be dumped
- *
  * @author Sergey Bushik
  */
-public class WriteRowSet {
+public interface RowReader extends Closeable {
 
-    private RowSet rowSet;
-    private QuerySplitter querySplitter;
-    private Collection<? extends Field> columns;
+    Row readRow();
 
-    public WriteRowSet(QuerySplitter querySplitter, RowSet rowSet) {
-        this.querySplitter = querySplitter;
-        this.rowSet = rowSet;
-    }
-
-    public WriteRowSet(QuerySplitter querySplitter,
-                       Collection<? extends Field> columns, RowSet rowSet) {
-        this.querySplitter = querySplitter;
-        this.columns = columns;
-        this.rowSet = rowSet;
-    }
-
-    public QuerySplitter getQuerySplitter() {
-        return querySplitter;
-    }
-
-    public Collection<? extends Field> getColumns() {
-        return columns;
-    }
-
-    public RowSet getRowSet() {
-        return rowSet;
-    }
+    void close();
 }

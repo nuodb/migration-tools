@@ -41,7 +41,7 @@ public interface CommitExecutor<S extends Statement> {
 
     Query getQuery();
 
-    void execute() throws SQLException;
+    boolean execute() throws SQLException;
 
     void finish() throws SQLException;
 }

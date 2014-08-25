@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.cli.run;
 
+import com.nuodb.migrator.backup.format.csv.CsvFormat;
 import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
-import com.nuodb.migrator.backup.format.csv.CsvAttributes;
 import com.nuodb.migrator.spec.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -108,10 +108,10 @@ public class CliDumpJobTest {
         outputSpec.setPath("/tmp/dump.cat");
 
         Map<String, Object> attributes = new HashMap<String, Object>();
-        attributes.put(CsvAttributes.ATTRIBUTE_ENCODING, "cp1251");
-        attributes.put(CsvAttributes.ATTRIBUTE_DELIMITER, ",");
-        attributes.put(CsvAttributes.ATTRIBUTE_QUOTING, "true");
-        attributes.put(CsvAttributes.ATTRIBUTE_ESCAPE, "|");
+        attributes.put(CsvFormat.ATTRIBUTE_ENCODING, "cp1251");
+        attributes.put(CsvFormat.ATTRIBUTE_DELIMITER, ",");
+        attributes.put(CsvFormat.ATTRIBUTE_QUOTING, "true");
+        attributes.put(CsvFormat.ATTRIBUTE_ESCAPE, "|");
         outputSpec.setAttributes(attributes);
 
         dumpSpec.setOutputSpec(outputSpec);

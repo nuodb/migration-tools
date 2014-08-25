@@ -25,35 +25,31 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.writer;
+package com.nuodb.migrator.backup.format;
 
-import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.split.QuerySplitter;
+import com.nuodb.migrator.backup.format.value.Value;
 
-import java.util.Collection;
+import java.io.OutputStream;
+import java.io.Writer;
 
 /**
  * @author Sergey Bushik
  */
-public class WriteTableRowSet extends WriteRowSet {
+public interface Output extends Format {
 
-    private Table table;
-    private String filter;
+    void writeStart();
 
-    public WriteTableRowSet(Table table, Collection<? extends Column> columns, String filter,
-                            QuerySplitter querySplitter, RowSet rowSet) {
-        super(querySplitter, columns, rowSet);
-        this.table = table;
-        this.filter = filter;
-    }
+    boolean canWrite();
 
-    public Table getTable() {
-        return table;
-    }
+    void writeValues(Value[] values);
 
-    public String getFilter() {
-        return filter;
-    }
+    void writeEnd();
+
+    Writer getWriter();
+
+    void setWriter(Writer writer);
+
+    OutputStream getOutputStream();
+
+    void setOutputStream(OutputStream outputStream);
 }

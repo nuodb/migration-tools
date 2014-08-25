@@ -63,13 +63,12 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     private Map backupOpsContext;
     private CommitStrategy commitStrategy;
     private Database database;
-    private Long deltaRowCount;
     private Executor executor;
     private FormatFactory formatFactory;
     private Map<String,Object> formatAttributes;
     private InsertTypeFactory insertTypeFactory;
     private LoadConstraints loadConstraints;
-    private LoadRowSets loadRowSets;
+    private LoadTables loadTables;
     private Collection<MigrationMode> migrationModes;
     private ConnectionSpec sourceSpec;
     private Session sourceSession;
@@ -144,16 +143,6 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
-    public Long getDeltaRowCount() {
-        return deltaRowCount;
-    }
-
-    @Override
-    public void setDeltaRowCount(Long deltaRowCount) {
-        this.deltaRowCount = deltaRowCount;
-    }
-
-    @Override
     public Executor getExecutor() {
         return executor;
     }
@@ -204,13 +193,13 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
-    public LoadRowSets getLoadRowSets() {
-        return loadRowSets;
+    public LoadTables getLoadTables() {
+        return loadTables;
     }
 
     @Override
-    public void setLoadRowSets(LoadRowSets loadRowSets) {
-        this.loadRowSets = loadRowSets;
+    public void setLoadTables(LoadTables loadTables) {
+        this.loadTables = loadTables;
     }
 
     @Override

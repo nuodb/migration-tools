@@ -28,11 +28,18 @@
 package com.nuodb.migrator.utils;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.AbstractCollection;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.nuodb.migrator.utils.Priority.NORMAL;
 
+/**
+ * @author Sergey Bushik
+ */
 public class SimplePrioritySet<T> extends AbstractCollection<T> implements PrioritySet<T>, Serializable {
 
     public SimplePrioritySet() {

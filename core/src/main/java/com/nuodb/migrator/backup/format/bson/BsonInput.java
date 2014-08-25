@@ -29,8 +29,8 @@ package com.nuodb.migrator.backup.format.bson;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.nuodb.migrator.backup.format.InputFormatBase;
-import com.nuodb.migrator.backup.format.InputFormatException;
+import com.nuodb.migrator.backup.format.InputBase;
+import com.nuodb.migrator.backup.format.InputException;
 import com.nuodb.migrator.backup.format.value.Value;
 import com.nuodb.migrator.backup.format.value.ValueType;
 import de.undercouch.bson4jackson.BsonFactory;
@@ -53,13 +53,13 @@ import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 /**
  * @author Sergey Bushik
  */
-public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
+public class BsonInput extends InputBase implements BsonFormat {
 
     private JsonParser bsonReader;
 
     @Override
     public String getFormat() {
-        return FORMAT;
+        return TYPE;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
         try {
             bsonReader = createBsonFactory().createJsonParser(reader);
         } catch (IOException exception) {
-            throw new InputFormatException(exception);
+            throw new InputException(exception);
         }
     }
 
@@ -76,7 +76,7 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
         try {
             bsonReader = createBsonFactory().createJsonParser(inputStream);
         } catch (IOException exception) {
-            throw new InputFormatException(exception);
+            throw new InputException(exception);
         }
     }
 
@@ -93,7 +93,7 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
             bsonReader.nextToken();
             bsonReader.nextToken();
         } catch (IOException exception) {
-            throw new InputFormatException(exception);
+            throw new InputException(exception);
         }
     }
 
@@ -131,7 +131,7 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
                 bsonReader.nextToken();
             }
         } catch (IOException exception) {
-            throw new InputFormatException(exception);
+            throw new InputException(exception);
         }
         return values;
     }
@@ -159,7 +159,7 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
             try {
                 bsonReader.close();
             } catch (IOException exception) {
-                throw new InputFormatException(exception);
+                throw new InputException(exception);
             }
             bsonReader = null;
         }

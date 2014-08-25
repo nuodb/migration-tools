@@ -27,27 +27,25 @@
  */
 package com.nuodb.migrator.backup.format;
 
-import com.nuodb.migrator.backup.format.bson.BsonAttributes;
-import com.nuodb.migrator.backup.format.bson.BsonInputFormat;
-import com.nuodb.migrator.backup.format.bson.BsonOutputFormat;
-import com.nuodb.migrator.backup.format.csv.CsvAttributes;
-import com.nuodb.migrator.backup.format.csv.CsvInputFormat;
-import com.nuodb.migrator.backup.format.csv.CsvOutputFormat;
-import com.nuodb.migrator.backup.format.sql.SqlAttributes;
-import com.nuodb.migrator.backup.format.sql.SqlOutputFormat;
-import com.nuodb.migrator.backup.format.xml.XmlAttributes;
-import com.nuodb.migrator.backup.format.xml.XmlInputFormat;
-import com.nuodb.migrator.backup.format.xml.XmlOutputFormat;
-import com.nuodb.migrator.utils.ReflectionUtils;
+import com.nuodb.migrator.backup.format.bson.BsonFormat;
+import com.nuodb.migrator.backup.format.bson.BsonInput;
+import com.nuodb.migrator.backup.format.bson.BsonOutput;
+import com.nuodb.migrator.backup.format.csv.CsvFormat;
+import com.nuodb.migrator.backup.format.csv.CsvInput;
+import com.nuodb.migrator.backup.format.csv.CsvOutput;
+import com.nuodb.migrator.backup.format.xml.XmlFormat;
+import com.nuodb.migrator.backup.format.xml.XmlInput;
+import com.nuodb.migrator.backup.format.xml.XmlOutput;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.TreeMap;
 
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassLoader;
+import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
@@ -55,43 +53,41 @@ import static java.lang.String.format;
 @SuppressWarnings("unchecked")
 public class SimpleFormatFactory implements FormatFactory {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = getLogger(getClass());
 
-    private Map<String, Class<? extends InputFormat>> inputFormats =
-            new TreeMap<String, Class<? extends InputFormat>>(CASE_INSENSITIVE_ORDER);
+    private Map<String, Class<? extends Input>> inputFormats =
+            new TreeMap<String, Class<? extends Input>>(CASE_INSENSITIVE_ORDER);
 
-    private Map<String, Class<? extends OutputFormat>> outputFormats =
-            new TreeMap<String, Class<? extends OutputFormat>>(CASE_INSENSITIVE_ORDER);
+    private Map<String, Class<? extends Output>> outputFormats =
+            new TreeMap<String, Class<? extends Output>>(CASE_INSENSITIVE_ORDER);
 
     public SimpleFormatFactory() {
-        addFormat(CsvAttributes.FORMAT, CsvInputFormat.class);
-        addFormat(XmlAttributes.FORMAT, XmlInputFormat.class);
-        addFormat(BsonAttributes.FORMAT, BsonInputFormat.class);
-        // addFormat(SqlAttributes.FORMAT, SqlInputFormat.class);
+        addFormat(CsvFormat.TYPE, CsvInput.class);
+        addFormat(XmlFormat.TYPE, XmlInput.class);
+        addFormat(BsonFormat.TYPE, BsonInput.class);
 
-        addFormat(CsvAttributes.FORMAT, CsvOutputFormat.class);
-        addFormat(XmlAttributes.FORMAT, XmlOutputFormat.class);
-        addFormat(BsonAttributes.FORMAT, BsonOutputFormat.class);
-        addFormat(SqlAttributes.FORMAT, SqlOutputFormat.class);
+        addFormat(CsvFormat.TYPE, CsvOutput.class);
+        addFormat(XmlFormat.TYPE, XmlOutput.class);
+        addFormat(BsonFormat.TYPE, BsonOutput.class);
     }
 
     public void addFormat(String format, Class<? extends Format> formatClass) {
-        if (OutputFormat.class.isAssignableFrom(formatClass)) {
-            outputFormats.put(format, (Class<? extends OutputFormat>) formatClass);
+        if (Output.class.isAssignableFrom(formatClass)) {
+            outputFormats.put(format, (Class<? extends Output>) formatClass);
         }
-        if (InputFormat.class.isAssignableFrom(formatClass)) {
-            inputFormats.put(format, (Class<? extends InputFormat>) formatClass);
+        if (Input.class.isAssignableFrom(formatClass)) {
+            inputFormats.put(format, (Class<? extends Input>) formatClass);
         }
     }
 
     @Override
-    public InputFormat createInputFormat(String format, Map<String, Object> attributes) {
-        return (InputFormat) createFormat(format, inputFormats.get(format), attributes);
+    public Input createInput(String format, Map<String, Object> attributes) {
+        return (Input) createFormat(format, inputFormats.get(format), attributes);
     }
 
     @Override
-    public OutputFormat createOutputFormat(String format, Map<String, Object> attributes) {
-        return (OutputFormat) createFormat(format, outputFormats.get(format), attributes);
+    public Output createOutput(String format, Map<String, Object> attributes) {
+        return (Output) createFormat(format, outputFormats.get(format), attributes);
     }
 
     protected Format createFormat(String type, Class<? extends Format> formatClass, Map<String, Object> attributes) {
@@ -108,10 +104,10 @@ public class SimpleFormatFactory implements FormatFactory {
                 }
             }
             if (formatClass == null) {
-                throw new InputFormatException(format("Format %s is not supported", type));
+                throw new InputException(format("Format %s is not supported", type));
             }
         }
-        Format format = ReflectionUtils.newInstance(formatClass);
+        Format format = newInstance(formatClass);
         format.setAttributes(attributes);
         return format;
     }

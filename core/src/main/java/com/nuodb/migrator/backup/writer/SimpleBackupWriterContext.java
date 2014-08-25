@@ -68,7 +68,7 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     private TimeZone timeZone;
     private int threads;
     private ValueFormatRegistry valueFormatRegistry;
-    private Collection<WriteRowSet> writeRowSets;
+    private Collection<WriteQuery> exportQueries;
 
     @Override
     public boolean isWriteData() {
@@ -220,12 +220,12 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     }
 
     @Override
-    public Collection<WriteRowSet> getWriteRowSets() {
-        return writeRowSets;
+    public Collection<WriteQuery> getExportQueries() {
+        return exportQueries;
     }
 
     @Override
-    public void setWriteRowSets(Collection<WriteRowSet> writeRowSets) {
-        this.writeRowSets = writeRowSets;
+    public void setExportQueries(Collection<WriteQuery> exportQueries) {
+        this.exportQueries = exportQueries;
     }
 }

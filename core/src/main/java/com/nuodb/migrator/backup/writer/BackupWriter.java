@@ -33,7 +33,7 @@ import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.backup.QueryRowSet;
 import com.nuodb.migrator.backup.TableRowSet;
 import com.nuodb.migrator.backup.format.FormatFactory;
-import com.nuodb.migrator.backup.format.csv.CsvAttributes;
+import com.nuodb.migrator.backup.format.csv.CsvFormat;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
@@ -94,7 +94,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @SuppressWarnings({"all"})
 public class BackupWriter {
 
-    public static final String FORMAT = CsvAttributes.FORMAT;
+    public static final String FORMAT = CsvFormat.TYPE;
     public static final int THREADS = getRuntime().availableProcessors();
     public static final Collection<MigrationMode> MIGRATION_MODES = newHashSet(MigrationMode.values());
     /**
@@ -107,10 +107,6 @@ public class BackupWriter {
     private Collection<BackupWriterListener> listeners = newArrayList();
     private Database database;
     private Executor executor;
-    /**
-     * Delta row count per chunk that triggers write row event, null means that write row event is not generated
-     */
-    private Long deltaRowCount = DELTA_ROW_COUNT;
     private InspectionManager inspectionManager;
     private String format = FORMAT;
     private Map<String, Object> formatAttributes = newHashMap();
@@ -124,10 +120,10 @@ public class BackupWriter {
     private TimeZone timeZone;
     private Integer threads = THREADS;
     private ValueFormatRegistryResolver valueFormatRegistryResolver;
-    private Collection<WriteRowSet> writeRowSets = newArrayList();
+    private Collection<WriteQuery> exportQueries = newArrayList();
 
     public void addQuery(String query) {
-        addWriteRowSet(createWriteRowSet(query), getWriteRowSets());
+        addWriteRowSet(createWriteRowSet(query), getExportQueries());
     }
 
     public void addTable(Table table, Collection<Column> columns) {
@@ -149,12 +145,12 @@ public class BackupWriter {
      */
     public void addTable(Table table, Collection<Column> columns, String filter,
                          QueryLimit queryLimit) {
-        addTable(table, columns, filter, queryLimit, getWriteRowSets());
+        addTable(table, columns, filter, queryLimit, getExportQueries());
     }
 
     protected void addTable(Table table, Collection<Column> columns, String filter,
-                            QueryLimit queryLimit, Collection<WriteRowSet> writeRowSets) {
-        addWriteRowSet(createWriteRowSet(table, columns, filter, queryLimit), writeRowSets);
+                            QueryLimit queryLimit, Collection<WriteQuery> exportQueries) {
+        addWriteRowSet(createWriteRowSet(table, columns, filter, queryLimit), exportQueries);
     }
 
     /**
@@ -173,11 +169,11 @@ public class BackupWriter {
      * @param tableTypes allowed table types.
      */
     public void addTables(HasTables tables, InspectionScope inspectionScope) {
-        addTables(tables, inspectionScope, getWriteRowSets());
+        addTables(tables, inspectionScope, getExportQueries());
     }
 
     protected void addTables(HasTables tables, InspectionScope inspectionScope,
-                             Collection<WriteRowSet> writeRowSets) {
+                             Collection<WriteQuery> exportQueries) {
         TableInspectionScope tableInspectionScope = (TableInspectionScope) inspectionScope;
         Identifier catalog = valueOf(tableInspectionScope != null ? tableInspectionScope.getCatalog() : null);
         Identifier schema = valueOf(tableInspectionScope != null ? tableInspectionScope.getSchema() : null);
@@ -188,7 +184,7 @@ public class BackupWriter {
             addTable = addTable && (schema == null || table.getSchema().getIdentifier().equals(schema));
             if (addTable) {
                 addWriteRowSet(createWriteRowSet(
-                        table, table.getColumns(), null, getQueryLimit()), writeRowSets);
+                        table, table.getColumns(), null, getQueryLimit()), exportQueries);
             } else {
                 if (logger.isTraceEnabled()) {
                     logger.trace(format("Table %s %s skipped",
@@ -198,8 +194,8 @@ public class BackupWriter {
         }
     }
 
-    protected void addWriteRowSet(WriteRowSet writeRowSet, Collection<WriteRowSet> writeRowSets) {
-        writeRowSets.add(writeRowSet);
+    protected void addWriteRowSet(WriteQuery writeQuery, Collection<WriteQuery> exportQueries) {
+        exportQueries.add(writeQuery);
     }
 
     public void addTable(Table table) {
@@ -273,7 +269,6 @@ public class BackupWriter {
 
     protected BackupWriterManager createBackupWriterManager(BackupWriterContext backupWriterContext) {
         BackupWriterManager backupWriterManager = new SimpleBackupWriterManager();
-        backupWriterManager.setDeltaRowCount(getDeltaRowCount());
         backupWriterManager.setBackupWriterContext(backupWriterContext);
         for (BackupWriterListener listener : getListeners()) {
             backupWriterManager.addListener(listener);
@@ -335,21 +330,21 @@ public class BackupWriter {
 
     protected void writeData(BackupWriterManager backupWriterManager) throws Exception {
         BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
-        backupWriterContext.setWriteRowSets(createWriteRowSets(backupWriterContext));
-        backupWriterManager.addListener(new WriteRowSetListener(backupWriterManager));
-        for (WriteRowSet writeRowSet : backupWriterContext.getWriteRowSets()) {
-            writeData(writeRowSet, backupWriterManager);
+        backupWriterContext.setExportQueries(createWriteRowSets(backupWriterContext));
+        backupWriterManager.addListener(new WriteQueryListener(backupWriterManager));
+        for (WriteQuery writeQuery : backupWriterContext.getExportQueries()) {
+            writeData(writeQuery, backupWriterManager);
         }
         backupWriterManager.writeDataDone();
     }
 
-    protected void writeData(WriteRowSet writeRowSet, BackupWriterManager backupWriterManager) throws Exception {
+    protected void writeData(WriteQuery writeQuery, BackupWriterManager backupWriterManager) throws Exception {
         BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
         Backup backup = backupWriterContext.getBackup();
         Session session = backupWriterContext.getSourceSession();
-        backup.addRowSet(writeRowSet.getRowSet());
-        while (writeRowSet.getQuerySplitter().hasNextQuerySplit(session.getConnection())) {
-            Work work = createWork(writeRowSet, backupWriterManager);
+        backup.addRowSet(writeQuery.getRowSet());
+        while (writeQuery.getQuerySplitter().hasNextQuerySplit(session.getConnection())) {
+            Work work = createWork(writeQuery, backupWriterManager);
             executeWork(work, backupWriterManager);
         }
     }
@@ -371,11 +366,11 @@ public class BackupWriter {
         return backup;
     }
 
-    protected Work createWork(WriteRowSet writeRowSet, BackupWriterManager backupWriterManager) throws Exception {
+    protected Work createWork(WriteQuery writeQuery, BackupWriterManager backupWriterManager) throws Exception {
         BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
         Connection connection = backupWriterContext.getSourceSession().getConnection();
-        QuerySplitter querySplitter = writeRowSet.getQuerySplitter();
-        return new WriteRowSetWork(writeRowSet, querySplitter.getNextQuerySplit(connection),
+        QuerySplitter querySplitter = writeQuery.getQuerySplitter();
+        return new WriteQueryWork(writeQuery, querySplitter.getNextQuerySplit(connection),
                 querySplitter.hasNextQuerySplit(connection), backupWriterManager
         );
     }
@@ -391,8 +386,8 @@ public class BackupWriter {
         });
     }
 
-    protected Collection<WriteRowSet> createWriteRowSets(BackupWriterContext backupWriterContext) {
-        Collection<WriteRowSet> exportQueries = newArrayList(getWriteRowSets());
+    protected Collection<WriteQuery> createWriteRowSets(BackupWriterContext backupWriterContext) {
+        Collection<WriteQuery> exportQueries = newArrayList(getExportQueries());
         Database database = backupWriterContext.getDatabase();
         Collection<TableSpec> tableSpecs = getTableSpecs();
         if (isEmpty(tableSpecs)) {
@@ -422,17 +417,17 @@ public class BackupWriter {
         return exportQueries;
     }
 
-    protected WriteRowSet createWriteRowSet(String query) {
-        return new WriteRowSet(createQuerySplitter(query), new QueryRowSet(query));
+    protected WriteQuery createWriteRowSet(String query) {
+        return new WriteQuery(createQuerySplitter(query), new QueryRowSet(query));
     }
 
     protected QuerySplitter createQuerySplitter(String query) {
         return newNoLimitSplitter(newQuery(query));
     }
 
-    protected WriteRowSet createWriteRowSet(Table table, Collection<Column> columns, String filter,
+    protected WriteQuery createWriteRowSet(Table table, Collection<Column> columns, String filter,
                                             QueryLimit queryLimit) {
-        return new WriteTableRowSet(table, columns, filter,
+        return new WriteTable(table, columns, filter,
                 createQuerySplitter(table, columns, filter, queryLimit), new TableRowSet(table));
     }
 
@@ -473,15 +468,6 @@ public class BackupWriter {
         this.database = database;
     }
 
-    public Long getDeltaRowCount() {
-        return deltaRowCount;
-    }
-
-    public void setDeltaRowCount(Long deltaRowCount) {
-        isTrue(deltaRowCount > 0, "Delta row count should be greater than 0");
-        this.deltaRowCount = deltaRowCount;
-    }
-
     public Executor getExecutor() {
         return executor;
     }
@@ -490,12 +476,12 @@ public class BackupWriter {
         this.executor = executor;
     }
 
-    protected Collection<WriteRowSet> getWriteRowSets() {
-        return writeRowSets;
+    protected Collection<WriteQuery> getExportQueries() {
+        return exportQueries;
     }
 
-    protected void setWriteRowSets(Collection<WriteRowSet> writeRowSets) {
-        this.writeRowSets = writeRowSets;
+    protected void setExportQueries(Collection<WriteQuery> exportQueries) {
+        this.exportQueries = exportQueries;
     }
 
     public String getFormat() {

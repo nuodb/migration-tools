@@ -25,18 +25,38 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.bson;
+package com.nuodb.migrator.backup.format.xml;
+
+import com.nuodb.migrator.backup.format.value.ValueType;
+import com.nuodb.migrator.utils.EnumAlias;
+
+import static com.nuodb.migrator.backup.format.value.ValueType.BINARY;
+import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
 
 /**
  * @author Sergey Bushik
  */
-public interface BsonAttributes {
-    /**
-     * BSON maximum file size in non streaming mode is 2147483647 bytes, we take it as maximum size /2 or 1 GB.
-     */
-    final long MAX_SIZE = 1073741824L;
+public interface XmlFormat {
+    final String TYPE = "xml";
 
-    final String FORMAT = "bson";
+    final String ATTRIBUTE_ENCODING = "xml.encoding";
+    final String ATTRIBUTE_VERSION = "xml.version";
 
-    final String ROWS_FIELD = "rs";
+    final String ENCODING = "utf-8";
+    final String VERSION = "1.0";
+
+    final String ELEMENT_ROWS = "rs";
+    final String ELEMENT_COLUMN = "c";
+    final String ELEMENT_ROW = "r";
+    final String ATTRIBUTE_NULLS = "ns";
+    final String ATTRIBUTE_VALUE_TYPE = "vt";
+    final String ATTRIBUTE_VALUE_TYPE_STRING = "s";
+    final String ATTRIBUTE_VALUE_TYPE_BINARY = "b";
+
+    final EnumAlias<ValueType> VALUE_TYPES = new EnumAlias<ValueType>() {
+        {
+            addAlias(ATTRIBUTE_VALUE_TYPE_STRING, STRING);
+            addAlias(ATTRIBUTE_VALUE_TYPE_BINARY, BINARY);
+        }
+    };
 }

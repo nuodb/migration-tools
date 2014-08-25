@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public interface FormatFactory {
 
-    InputFormat createInputFormat(String format, Map<String, Object> attributes);
+    Input createInput(String format, Map<String, Object> attributes);
 
-    OutputFormat createOutputFormat(String format, Map<String, Object> attributes);
+    Output createOutput(String format, Map<String, Object> attributes);
 }

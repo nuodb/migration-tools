@@ -25,50 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.backup.loader;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import com.nuodb.migrator.backup.format.value.Row;
+import com.nuodb.migrator.jdbc.session.Work;
+import com.nuodb.migrator.jdbc.session.WorkEvent;
 
 /**
  * @author Sergey Bushik
  */
-public class StatementTemplate {
+@SuppressWarnings("all")
+public class LoadRowEvent extends WorkEvent {
 
-    private final Connection connection;
+    private LoadTable loadTable;
+    private Row row;
 
-    public StatementTemplate(Connection connection) {
-        this.connection = connection;
+    public LoadRowEvent(Work work, LoadTable loadTable, Row row) {
+        super(work);
+        this.loadTable = loadTable;
+        this.row = row;
     }
 
-    public <S extends Statement> void executeStatement(StatementFactory<S> statementFactory,
-                                                       StatementCallback<S> statementCallback)
-            throws SQLException {
-        S statement = statementFactory.createStatement(connection);
-        try {
-            statementCallback.executeStatement(statement);
-        } finally {
-            closeQuietly(statement != null ? statement.getResultSet() : null);
-            closeQuietly(statement);
-        }
+    public LoadTable getLoadTable() {
+        return loadTable;
     }
 
-    public <S extends Statement, V extends Object> V executeStatement(StatementFactory<S> statementFactory,
-                                                                      StatementAction<S, V> statementAction)
-            throws SQLException {
-        S statement = statementFactory.createStatement(connection);
-        try {
-            return statementAction.executeStatement(statement);
-        } finally {
-            closeQuietly(statement != null ? statement.getResultSet() : null);
-            closeQuietly(statement);
-        }
-    }
-
-    public Connection getConnection() {
-        return connection;
+    public Row getRow() {
+        return row;
     }
 }

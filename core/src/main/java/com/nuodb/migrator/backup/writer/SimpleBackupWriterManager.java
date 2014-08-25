@@ -33,6 +33,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.primitives.Ints;
 import com.nuodb.migrator.backup.Chunk;
 import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.backup.format.value.Row;
 import com.nuodb.migrator.jdbc.session.SimpleWorkManager;
 import com.nuodb.migrator.jdbc.session.Work;
 
@@ -60,19 +61,18 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
 
     private BackupWriterSync backupWriterSync;
     private BackupWriterContext backupWriterContext;
-    private Long deltaRowCount;
 
-    private Multimap<WriteRowSet, WriteRowSetWork> writeRowSets;
+    private Multimap<WriteQuery, WriteQueryWork> exportQueries;
 
     public SimpleBackupWriterManager() {
-        writeRowSets = synchronizedSetMultimap(newSetMultimap(
-                Maps.<WriteRowSet, Collection<WriteRowSetWork>>newHashMap(),
-                new Supplier<Set<WriteRowSetWork>>() {
+        exportQueries = synchronizedSetMultimap(newSetMultimap(
+                Maps.<WriteQuery, Collection<WriteQueryWork>>newHashMap(),
+                new Supplier<Set<WriteQueryWork>>() {
                     @Override
-                    public Set<WriteRowSetWork> get() {
-                        return newTreeSet(new Comparator<WriteRowSetWork>() {
+                    public Set<WriteQueryWork> get() {
+                        return newTreeSet(new Comparator<WriteQueryWork>() {
                             @Override
-                            public int compare(WriteRowSetWork w1, WriteRowSetWork w2) {
+                            public int compare(WriteQueryWork w1, WriteQueryWork w2) {
                                 return Ints.compare(w1.getQuerySplit().getSplitIndex(),
                                         w2.getQuerySplit().getSplitIndex());
                             }
@@ -87,64 +87,63 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
     }
 
     @Override
-    public void writeStart(Work work, WriteRowSet writeRowSet) {
-        writeRowSets.put(writeRowSet, (WriteRowSetWork) work);
+    public void writeStart(Work work, WriteQuery writeQuery) {
+        exportQueries.put(writeQuery, (WriteQueryWork) work);
         if (hasListeners()) {
-            onWriteStart(new WriteRowSetEvent(work, writeRowSet));
+            onWriteStart(new WriteChunkEvent(work, writeQuery));
         }
     }
 
     @Override
-    public void writeStart(Work work, WriteRowSet writeRowSet, Chunk chunk) {
+    public void writeStart(Work work, WriteQuery writeQuery, Chunk chunk) {
         if (hasListeners()) {
-            onWriteStart(new WriteRowSetEvent(work, writeRowSet, chunk));
+            onWriteStart(new WriteChunkEvent(work, writeQuery, chunk));
         }
     }
 
-    protected void onWriteStart(WriteRowSetEvent event) {
+    protected void onWriteStart(WriteChunkEvent event) {
         for (BackupWriterListener listener : getListeners()) {
             listener.onWriteStart(event);
         }
     }
 
     @Override
-    public void writeRow(Work work, WriteRowSet writeRowSet, Chunk chunk) {
-        Long deltaRowCount = getDeltaRowCount();
-        if (hasListeners() && (deltaRowCount != null && chunk.getRowCount() % deltaRowCount == 0)) {
-            onWriteRow(new WriteRowSetEvent(work, writeRowSet, chunk));
+    public void writeRow(Work work, WriteQuery writeQuery, Row row) {
+        if (hasListeners()) {
+            onWriteRow(new WriteRowEvent(work, writeQuery, row));
         }
     }
 
-    protected void onWriteRow(WriteRowSetEvent event) {
+    protected void onWriteRow(WriteRowEvent event) {
         for (BackupWriterListener listener : getListeners()) {
             listener.onWriteRow(event);
         }
     }
 
     @Override
-    public void writeEnd(Work work, WriteRowSet writeRowSet, Chunk chunk) {
+    public void writeEnd(Work work, WriteQuery writeQuery, Chunk chunk) {
         if (hasListeners()) {
-            onWriteEnd(new WriteRowSetEvent(work, writeRowSet, chunk));
+            onWriteEnd(new WriteChunkEvent(work, writeQuery, chunk));
         }
     }
 
     @Override
-    public void writeEnd(Work work, WriteRowSet writeRowSet) {
-        RowSet rowSet = writeRowSet.getRowSet();
+    public void writeEnd(Work work, WriteQuery writeQuery) {
+        RowSet rowSet = writeQuery.getRowSet();
         synchronized (rowSet) {
-            writeRowSets.put(writeRowSet, (WriteRowSetWork) work);
+            exportQueries.put(writeQuery, (WriteQueryWork) work);
             Collection<Chunk> chunks = newArrayList();
-            for (WriteRowSetWork writeRowSetWork : writeRowSets.get(writeRowSet)) {
-                chunks.addAll(writeRowSetWork.getChunks());
+            for (WriteQueryWork writeQueryWork : exportQueries.get(writeQuery)) {
+                chunks.addAll(writeQueryWork.getChunks());
             }
             rowSet.setChunks(chunks);
         }
         if (hasListeners()) {
-            onWriteEnd(new WriteRowSetEvent(work, writeRowSet));
+            onWriteEnd(new WriteChunkEvent(work, writeQuery));
         }
     }
 
-    protected void onWriteEnd(WriteRowSetEvent event) {
+    protected void onWriteEnd(WriteChunkEvent event) {
         for (BackupWriterListener listener : getListeners()) {
             listener.onWriteEnd(event);
         }
@@ -197,16 +196,6 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
         this.backupWriterContext = backupWriterContext;
         this.backupWriterSync = new BackupWriterSync(
                 backupWriterContext.isWriteData(), backupWriterContext.isWriteSchema());
-    }
-
-    @Override
-    public Long getDeltaRowCount() {
-        return deltaRowCount;
-    }
-
-    @Override
-    public void setDeltaRowCount(Long deltaRowCount) {
-        this.deltaRowCount = deltaRowCount;
     }
 
     @Override

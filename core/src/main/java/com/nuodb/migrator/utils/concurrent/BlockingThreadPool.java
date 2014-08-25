@@ -27,8 +27,6 @@
  */
 package com.nuodb.migrator.utils.concurrent;
 
-import com.nuodb.migrator.utils.NotSupportedException;
-
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -66,7 +64,7 @@ public class BlockingThreadPool extends ThreadPoolExecutor {
 
     @Override
     public void setRejectedExecutionHandler(RejectedExecutionHandler rejectedExecutionHandler) {
-        throw new NotSupportedException("Setting rejected execution handler is unsupported");
+        throw new UnsupportedOperationException("Setting rejected execution handler is not supported");
     }
 
     static class BlockingPolicy implements RejectedExecutionHandler {

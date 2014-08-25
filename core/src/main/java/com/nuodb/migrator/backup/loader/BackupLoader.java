@@ -35,6 +35,8 @@ import com.nuodb.migrator.backup.Column;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.TableRowSet;
 import com.nuodb.migrator.backup.format.FormatFactory;
+import com.nuodb.migrator.backup.format.value.RowReader;
+import com.nuodb.migrator.backup.format.value.RowReaders;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
@@ -87,6 +89,7 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.backup.format.value.RowReaders.newSequentialRowReader;
 import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
@@ -97,6 +100,9 @@ import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static com.nuodb.migrator.utils.Collections.*;
 import static com.nuodb.migrator.utils.ValidationUtils.isTrue;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.round;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -104,7 +110,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"all"})
 public class BackupLoader {
 
     public static final Collection<MigrationMode> MIGRATION_MODES = newHashSet(MigrationMode.values());
@@ -192,7 +198,7 @@ public class BackupLoader {
         // add listener after load constraints is created
         if (backupLoaderManager.isLoadSchema()) {
             backupLoaderManager.addListener(
-                    new LoadConstraintListener(this, backupLoaderManager));
+                    new LoadConstraintAdapter(this, backupLoaderManager));
         }
         for (BackupLoaderListener listener : getListeners()) {
             backupLoaderManager.addListener(listener);
@@ -362,25 +368,25 @@ public class BackupLoader {
      * @throws Exception if data loading caused error
      */
     protected void loadData(BackupLoaderManager backupLoaderManager) throws Exception {
-        BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
+        BackupLoaderContext backupLoaderContext =
+                backupLoaderManager.getBackupLoaderContext();
         Database database = getDatabase();
         backupLoaderContext.setDatabase(database != null ? database :
                 openDatabase(backupLoaderContext.getTargetSession()));
-        backupLoaderContext.setLoadRowSets(createLoadRowSets(backupLoaderContext));
-        for (LoadRowSet loadRowSet : backupLoaderContext.getLoadRowSets()) {
-            loadData(loadRowSet, backupLoaderManager);
+        backupLoaderContext.setLoadTables(createLoadTables(backupLoaderContext));
+        for (LoadTable loadTable : backupLoaderContext.getLoadTables()) {
+            loadData(loadTable, backupLoaderManager);
         }
         backupLoaderManager.loadDataDone();
     }
 
-    protected int getLoadRowSetThreads(LoadRowSet loadRowSet) {
-        BackupOps backupOps = loadRowSet.getBackupOps();
-        RowSet rowSet = loadRowSet.getRowSet();
-        long backupSize = rowSet.getBackup().getSize(backupOps);
-        long rowSetSize = rowSet.getSize(backupOps);
-        int threads = getThreads();
-        return (int) Math.min(Math.max(Math.round(rowSetSize / (double) backupSize * threads), 1), threads);
+    protected void loadData(LoadTable loadTable, BackupLoaderManager backupLoaderManager) {
+        for (int thread = 0; thread < threads; thread++) {
+            Work work = createWork(loadTable, backupLoaderManager);
+            executeWork(work, backupLoaderManager);
+        }
     }
+
 
     /**
      * Load constraints for source tables without row sets
@@ -393,10 +399,10 @@ public class BackupLoader {
         LoadConstraints loadConstraints = backupLoaderContext.getLoadConstraints();
         LoadConstraints loadConstraintsNow = new LoadConstraints(
                 loadConstraints.getLoadConstraints(INDEX, PRIMARY_KEY));
-        LoadRowSets loadRowSets = backupLoaderContext.getLoadRowSets();
-        if (!isEmpty(loadRowSets)) {
-            for (LoadRowSet loadRowSet : loadRowSets) {
-                Table table = getTable(loadRowSet, backupLoaderContext);
+        LoadTables loadTables = backupLoaderContext.getLoadTables();
+        if (!isEmpty(loadTables)) {
+            for (LoadTable loadTable : loadTables) {
+                Table table = getTable(loadTable, backupLoaderContext);
                 if (table != null) {
                     loadConstraintsNow.getLoadConstraints().removeAll(table);
                 }
@@ -456,9 +462,8 @@ public class BackupLoader {
         return new LoadConstraintWork(loadConstraint, backupLoaderManager);
     }
 
-    protected LoadRowSets createLoadRowSets(BackupLoaderContext backupLoaderContext) {
-        LoadRowSets loadRowSets = new LoadRowSets();
-        BackupOps backupOps = backupLoaderContext.getBackupOps();
+    protected LoadTables createLoadTables(BackupLoaderContext backupLoaderContext) {
+        LoadTables loadTables = new LoadTables();
         for (RowSet rowSet : backupLoaderContext.getBackup().getRowSets()) {
             if (isEmpty(rowSet.getChunks())) {
                 continue;
@@ -469,19 +474,27 @@ public class BackupLoader {
                 continue;
             }
             Query query = createQuery(rowSet, table, backupLoaderContext);
-            loadRowSets.addLoadRowSet(new LoadRowSet(backupOps, rowSet, table, query));
+            LoadTable loadTable = createLoadTable(rowSet, table, query, backupLoaderContext);
+            loadTables.addLoadTable(loadTable);
         }
-        return loadRowSets;
+        return loadTables;
     }
 
-    protected void loadData(LoadRowSet loadRowSet, BackupLoaderManager backupLoaderManager) {
-        int threads = getLoadRowSetThreads(loadRowSet);
-        Work work = createWork(loadRowSet, backupLoaderManager);
-        executeWork(work, backupLoaderManager);
+    protected LoadTable createLoadTable(RowSet rowSet, Table table, Query query,
+                                        BackupLoaderContext backupLoaderContext) {
+        return new LoadTable(rowSet, table, query, getThreads(rowSet, table, query, backupLoaderContext));
     }
 
-    protected Work createWork(LoadRowSet loadRowSet, BackupLoaderManager backupLoaderManager) {
-        return new LoadRowSetWork(loadRowSet, backupLoaderManager);
+    protected int getThreads(RowSet rowSet, Table table, Query query,
+                             BackupLoaderContext backupLoaderContext) {
+        BackupOps backupOps = backupLoaderContext.getBackupOps();
+        long backupSize = rowSet.getBackup().getSize(backupOps);
+        long rowSetSize = rowSet.getSize(backupOps);
+        return (int) min(max(round(rowSetSize / (double) backupSize * getThreads()), 1), getThreads());
+    }
+
+    protected Work createWork(LoadTable loadTable, BackupLoaderManager backupLoaderManager) {
+        return new LoadTableWork(loadTable, backupLoaderManager);
     }
 
     protected void executeWork(final Work work, final BackupLoaderManager backupLoaderManager) {
@@ -495,18 +508,24 @@ public class BackupLoader {
         });
     }
 
+
+    protected void executeTask(final Runnable task, final BackupLoaderManager backupLoaderManager) {
+        final BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
+        backupLoaderContext.getExecutor().execute(task);
+    }
+
     /**
      * Looks up source table meta data for a given load row set
      *
-     * @param loadRowSet          to look up source table for
+     * @param loadTable          to look up source table for
      * @param backupLoaderContext evaluation context
      * @return source table
      */
-    protected Table getTable(LoadRowSet loadRowSet, BackupLoaderContext backupLoaderContext) {
+    protected Table getTable(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
         Table table = null;
         Database database = backupLoaderContext.getBackup().getDatabase();
-        if (loadRowSet.getRowSet() instanceof TableRowSet) {
-            TableRowSet tableRowSet = (TableRowSet) loadRowSet.getRowSet();
+        if (loadTable.getRowSet() instanceof TableRowSet) {
+            TableRowSet tableRowSet = (TableRowSet) loadTable.getRowSet();
             Catalog catalog = database.hasCatalog(tableRowSet.getCatalog()) ?
                     database.getCatalog(tableRowSet.getCatalog()) : null;
             Schema schema = catalog != null && catalog.hasSchema(tableRowSet.getSchema()) ?

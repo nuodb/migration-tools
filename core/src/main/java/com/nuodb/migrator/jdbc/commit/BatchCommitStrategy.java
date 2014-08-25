@@ -69,11 +69,14 @@ public class BatchCommitStrategy implements CommitStrategy {
             private long batchSize = getBatchSize();
 
             @Override
-            public void execute() throws SQLException {
+            public boolean execute() throws SQLException {
                 statement.addBatch();
                 batches++;
                 if (batches > batchSize) {
                     executeBatch();
+                    return true;
+                } else {
+                    return false;
                 }
             }
 

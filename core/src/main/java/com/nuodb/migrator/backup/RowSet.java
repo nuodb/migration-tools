@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.nuodb.migrator.backup.format.value.ValueType;
 import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Collection;
@@ -98,8 +99,8 @@ public class RowSet implements HasSize {
         this.type = type;
     }
 
-    public void addColumn(String name, String type) {
-        addColumn(new Column(name, type));
+    public void addColumn(String name, ValueType valueType) {
+        addColumn(new Column(name, valueType));
     }
 
     public void addColumn(Column column) {

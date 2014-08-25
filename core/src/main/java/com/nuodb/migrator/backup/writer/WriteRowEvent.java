@@ -25,46 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.sql;
+package com.nuodb.migrator.backup.writer;
 
-import com.nuodb.migrator.backup.format.InputFormatBase;
-import com.nuodb.migrator.backup.format.value.Value;
-
-import java.io.InputStream;
-import java.io.Reader;
+import com.nuodb.migrator.backup.format.value.Row;
+import com.nuodb.migrator.jdbc.session.Work;
+import com.nuodb.migrator.jdbc.session.WorkEvent;
 
 /**
  * @author Sergey Bushik
  */
-public class SqlInputFormat extends InputFormatBase implements SqlAttributes {
-    @Override
-    public String getFormat() {
-        return FORMAT;
+@SuppressWarnings("all")
+public class WriteRowEvent extends WorkEvent {
+
+    private WriteQuery writeQuery;
+    private Row row;
+
+    public WriteRowEvent(Work work, WriteQuery writeQuery, Row row) {
+        super(work);
+        this.writeQuery = writeQuery;
+        this.row = row;
     }
 
-    @Override
-    protected void init(InputStream inputStream) {
-        // TODO: implement
+    public WriteQuery getWriteQuery() {
+        return writeQuery;
     }
 
-    @Override
-    protected void init(Reader reader) {
-        // TODO: implement
-    }
-
-    @Override
-    public void readStart() {
-        // TODO: implement
-    }
-
-    @Override
-    public Value[] readValues() {
-        // TODO: implement
-        return new Value[0];
-    }
-
-    @Override
-    public void readEnd() {
-        // TODO: implement
+    public Row getRow() {
+        return row;
     }
 }

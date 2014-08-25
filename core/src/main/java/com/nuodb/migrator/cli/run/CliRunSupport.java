@@ -88,7 +88,7 @@ import static com.google.common.collect.Lists.transform;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
-import static com.nuodb.migrator.backup.format.csv.CsvAttributes.FORMAT;
+import static com.nuodb.migrator.backup.format.csv.CsvFormat.TYPE;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
 import static com.nuodb.migrator.cli.validation.ConnectionGroupValidators.addConnectionGroupValidators;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
@@ -691,7 +691,7 @@ public class CliRunSupport extends CliSupport {
 
     protected ResourceSpec parseOutputGroup(OptionSet optionSet, Option option) {
         ResourceSpec resource = new ResourceSpec();
-        resource.setType((String) optionSet.getValue(OUTPUT_TYPE, FORMAT));
+        resource.setType((String) optionSet.getValue(OUTPUT_TYPE, TYPE));
         resource.setPath((String) optionSet.getValue(OUTPUT_PATH));
         resource.setAttributes(parseAttributes(
                 optionSet.<String>getValues(OUTPUT_OPTION), optionSet.getOption(OUTPUT_OPTION)));

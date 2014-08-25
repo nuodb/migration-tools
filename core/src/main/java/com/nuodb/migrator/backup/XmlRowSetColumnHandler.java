@@ -33,6 +33,9 @@ import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
+import static com.nuodb.migrator.backup.format.value.ValueType.fromAlias;
+import static com.nuodb.migrator.backup.format.value.ValueType.toAlias;
+
 /**
  * @author Sergey Bushik
  */
@@ -48,14 +51,14 @@ public class XmlRowSetColumnHandler extends XmlReadWriteHandlerBase<Column> impl
     @Override
     protected void readAttributes(InputNode input, Column target, XmlReadContext context) throws Exception {
         target.setName(context.readAttribute(input, NAME_ATTRIBUTE, String.class));
-        target.setValueType(context.readAttribute(input, VALUE_TYPE_ATTRIBUTE, String.class));
+        target.setValueType(fromAlias(context.readAttribute(input, VALUE_TYPE_ATTRIBUTE, String.class)));
     }
 
     @Override
     protected void writeAttributes(Column column, OutputNode output,
                                    XmlWriteContext context) throws Exception {
         context.writeAttribute(output, NAME_ATTRIBUTE, column.getName());
-        context.writeAttribute(output, VALUE_TYPE_ATTRIBUTE, column.getValueType());
+        context.writeAttribute(output, VALUE_TYPE_ATTRIBUTE, toAlias(column.getValueType()));
     }
 }
 

@@ -28,8 +28,9 @@
 package com.nuodb.migrator.backup.format.bson;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.nuodb.migrator.backup.format.OutputFormatBase;
-import com.nuodb.migrator.backup.format.OutputFormatException;
+import com.nuodb.migrator.backup.Column;
+import com.nuodb.migrator.backup.format.OutputBase;
+import com.nuodb.migrator.backup.format.OutputException;
 import com.nuodb.migrator.backup.format.value.Value;
 import de.undercouch.bson4jackson.BsonFactory;
 
@@ -37,24 +38,26 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.BitSet;
+import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.backup.format.utils.BitSetUtils.toByteArray;
 import static de.undercouch.bson4jackson.BsonGenerator.Feature.ENABLE_STREAMING;
 
 /**
  * @author Sergey Bushik
  */
-public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes {
+public class BsonOutput extends OutputBase implements BsonFormat {
 
     private JsonGenerator bsonWriter;
 
-    public BsonOutputFormat() {
+    public BsonOutput() {
         super(MAX_SIZE);
     }
 
     @Override
     public String getFormat() {
-        return FORMAT;
+        return TYPE;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
         try {
             bsonWriter = createBsonFactory().createJsonGenerator(outputStream);
         } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -71,7 +74,7 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
         try {
             bsonWriter = createBsonFactory().createJsonGenerator(writer);
         } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -87,7 +90,7 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
             bsonWriter.writeStartObject();
             bsonWriter.writeArrayFieldStart(ROWS_FIELD);
         } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -104,10 +107,11 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
             } else {
                 bsonWriter.writeBinary(toByteArray(nulls));
             }
+            Collection<Column> columns = getRowSet().getColumns();
             for (int i = 0; i < values.length; i++) {
                 Value value = values[i];
                 if (!value.isNull()) {
-                    switch (getValueTypes().get(i)) {
+                    switch (get(columns, i).getValueType()) {
                         case BINARY:
                             bsonWriter.writeBinary(value.asBytes());
                             break;
@@ -119,7 +123,7 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
             }
             bsonWriter.writeEndArray();
         } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -130,7 +134,7 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
             bsonWriter.writeEndObject();
             bsonWriter.flush();
         } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -140,7 +144,7 @@ public class BsonOutputFormat extends OutputFormatBase implements BsonAttributes
             try {
                 bsonWriter.close();
             } catch (IOException exception) {
-                throw new OutputFormatException(exception);
+                throw new OutputException(exception);
             }
             bsonWriter = null;
         }

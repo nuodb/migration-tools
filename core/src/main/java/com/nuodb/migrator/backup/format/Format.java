@@ -28,14 +28,14 @@
 package com.nuodb.migrator.backup.format;
 
 import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.backup.format.value.ValueHandleList;
 
+import java.io.Closeable;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface Format {
+public interface Format extends Closeable {
 
     void init();
 
@@ -62,8 +62,4 @@ public interface Format {
     RowSet getRowSet();
 
     void setRowSet(RowSet rowSet);
-
-    ValueHandleList getValueHandleList();
-
-    void setValueHandleList(ValueHandleList valueHandleList);
 }

@@ -39,19 +39,19 @@ public interface BackupWriterListener extends WorkListener {
      *
      * @param event containing details about row set & chunk written
      */
-    void onWriteStart(WriteRowSetEvent event);
+    void onWriteStart(WriteChunkEvent event);
 
     /**
      * Triggered for each exported row
      *
      * @param event containing details about row set and chunk written
      */
-    void onWriteRow(WriteRowSetEvent event);
+    void onWriteRow(WriteRowEvent event);
 
     /**
      * Triggered when row set export is completed
      *
      * @param event containing details about row set and chunk written
      */
-    void onWriteEnd(WriteRowSetEvent event);
+    void onWriteEnd(WriteChunkEvent event);
 }

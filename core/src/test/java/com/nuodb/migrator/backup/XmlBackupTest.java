@@ -52,7 +52,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import static com.nuodb.migrator.Migrator.getVersion;
-import static com.nuodb.migrator.backup.format.csv.CsvAttributes.FORMAT;
+import static com.nuodb.migrator.backup.format.csv.CsvFormat.TYPE;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static com.nuodb.migrator.utils.Equalities.defaultEquality;
 import static com.nuodb.migrator.utils.Equalities.reflectionEquality;
@@ -220,7 +220,7 @@ public class XmlBackupTest {
 
     @DataProvider(name = "write")
     public Object[][] createWriteData() {
-        Backup backup = new Backup(FORMAT);
+        Backup backup = new Backup(TYPE);
         Database database = new Database();
         DatabaseInfo databaseInfo = new DatabaseInfo("NuoDB", null, 1, 29);
         DriverInfo driverInfo = new DriverInfo("NuoDB JDBC Driver", "1.0", 1, 0);

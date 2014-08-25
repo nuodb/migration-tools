@@ -25,50 +25,34 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.backup.format.value;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+import com.nuodb.migrator.backup.Chunk;
 
 /**
  * @author Sergey Bushik
  */
-public class StatementTemplate {
+public class Row {
 
-    private final Connection connection;
+    private Chunk chunk;
+    private Value[] values;
+    private long number;
 
-    public StatementTemplate(Connection connection) {
-        this.connection = connection;
+    public Row(Chunk chunk, Value[] values, long number) {
+        this.chunk = chunk;
+        this.values = values;
+        this.number = number;
     }
 
-    public <S extends Statement> void executeStatement(StatementFactory<S> statementFactory,
-                                                       StatementCallback<S> statementCallback)
-            throws SQLException {
-        S statement = statementFactory.createStatement(connection);
-        try {
-            statementCallback.executeStatement(statement);
-        } finally {
-            closeQuietly(statement != null ? statement.getResultSet() : null);
-            closeQuietly(statement);
-        }
+    public Chunk getChunk() {
+        return chunk;
     }
 
-    public <S extends Statement, V extends Object> V executeStatement(StatementFactory<S> statementFactory,
-                                                                      StatementAction<S, V> statementAction)
-            throws SQLException {
-        S statement = statementFactory.createStatement(connection);
-        try {
-            return statementAction.executeStatement(statement);
-        } finally {
-            closeQuietly(statement != null ? statement.getResultSet() : null);
-            closeQuietly(statement);
-        }
+    public Value[] getValues() {
+        return values;
     }
 
-    public Connection getConnection() {
-        return connection;
+    public long getNumber() {
+        return number;
     }
 }

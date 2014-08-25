@@ -27,8 +27,8 @@
  */
 package com.nuodb.migrator.backup.format.csv;
 
-import com.nuodb.migrator.backup.format.InputFormatBase;
-import com.nuodb.migrator.backup.format.InputFormatException;
+import com.nuodb.migrator.backup.format.InputBase;
+import com.nuodb.migrator.backup.format.InputException;
 import com.nuodb.migrator.backup.format.value.Value;
 import com.nuodb.migrator.backup.format.value.ValueType;
 import org.apache.commons.csv.CSVFormat;
@@ -53,7 +53,7 @@ import static java.lang.String.valueOf;
 /**
  * @author Sergey Bushik
  */
-public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
+public class CsvInput extends InputBase implements CsvFormat {
 
     private String doubleQuote;
     private Iterator<CSVRecord> iterator;
@@ -61,7 +61,7 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
 
     @Override
     public String getFormat() {
-        return FORMAT;
+        return TYPE;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
         try {
             init(new InputStreamReader(getInputStream(), (String) getAttribute(ATTRIBUTE_ENCODING, ENCODING)));
         } catch (UnsupportedEncodingException exception) {
-            throw new InputFormatException(exception);
+            throw new InputException(exception);
         }
     }
 
@@ -84,7 +84,7 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
             parser = new CSVParser(reader, format);
             iterator = parser.iterator();
         } catch (IOException exception) {
-            throw new InputFormatException(exception);
+            throw new InputException(exception);
         }
     }
 
@@ -97,10 +97,10 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
 
     @Override
     public Value[] readValues() {
-        return iterator.hasNext() ? readRecord() : null;
+        return iterator.hasNext() ? readRow() : null;
     }
 
-    protected Value[] readRecord() {
+    protected Value[] readRow() {
         CSVRecord record = iterator.next();
         List<ValueType> valueTypes = getValueTypes();
         Value[] values = new Value[valueTypes.size()];
@@ -137,7 +137,7 @@ public class CsvInputFormat extends InputFormatBase implements CsvAttributes {
             try {
                 parser.close();
             } catch (IOException exception) {
-                throw new InputFormatException(exception);
+                throw new InputException(exception);
             }
             parser = null;
         }

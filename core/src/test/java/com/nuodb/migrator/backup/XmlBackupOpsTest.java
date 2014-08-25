@@ -28,6 +28,7 @@
 package com.nuodb.migrator.backup;
 
 import com.nuodb.migrator.Migrator;
+import com.nuodb.migrator.backup.format.value.ValueType;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
@@ -38,6 +39,7 @@ import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static com.nuodb.migrator.backup.format.value.ValueType.STRING;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static org.apache.commons.io.IOUtils.toInputStream;
@@ -68,7 +70,7 @@ public class XmlBackupOpsTest {
         rowSet.setRowCount(1L);
         rowSet.setCatalog("test");
         rowSet.setTable("t1");
-        rowSet.addColumn("f1", "string");
+        rowSet.addColumn("f1", STRING);
 
         Chunk chunk = new Chunk();
         chunk.setName("test.t1.csv");

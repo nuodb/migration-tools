@@ -74,10 +74,6 @@ public interface BackupLoaderContext {
 
     void setDatabase(Database database);
 
-    Long getDeltaRowCount();
-
-    void setDeltaRowCount(Long deltaRowCount);
-
     Executor getExecutor();
 
     void setExecutor(Executor executor);
@@ -98,9 +94,9 @@ public interface BackupLoaderContext {
 
     void setLoadConstraints(LoadConstraints loadConstraints);
 
-    LoadRowSets getLoadRowSets();
+    LoadTables getLoadTables();
 
-    void setLoadRowSets(LoadRowSets loadRowSets);
+    void setLoadTables(LoadTables loadTables);
 
     Collection<MigrationMode> getMigrationModes();
 

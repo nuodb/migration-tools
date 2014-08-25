@@ -27,22 +27,23 @@
  */
 package com.nuodb.migrator.backup.format;
 
-import com.nuodb.migrator.MigratorException;
+import com.nuodb.migrator.backup.format.value.Value;
+
+import java.io.InputStream;
+import java.io.Reader;
 
 /**
  * @author Sergey Bushik
  */
-public class OutputFormatException extends MigratorException {
+public interface Input extends Format {
 
-    public OutputFormatException(String message) {
-        super(message);
-    }
+    void readStart();
 
-    public OutputFormatException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    Value[] readValues();
 
-    public OutputFormatException(Throwable cause) {
-        super(cause);
-    }
+    void readEnd();
+
+    void setReader(Reader reader);
+
+    void setInputStream(InputStream inputStream);
 }

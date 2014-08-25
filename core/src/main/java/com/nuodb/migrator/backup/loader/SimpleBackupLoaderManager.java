@@ -27,7 +27,8 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.backup .Chunk;
+import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.backup.format.value.Row;
 import com.nuodb.migrator.jdbc.session.SimpleWorkManager;
 import com.nuodb.migrator.jdbc.session.Work;
 
@@ -37,6 +38,7 @@ import java.util.concurrent.ExecutorService;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.Long.MAX_VALUE;
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -54,56 +56,49 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
     }
 
     @Override
-    public void loadStart(Work work, LoadRowSet loadRowSet) {
-        if (hasListeners()) {
-            onLoadStart(new LoadRowSetEvent(work, loadRowSet));
+    public void beforeLoadRow(Work work, LoadTable loadTable, Row row) {
+        Chunk chunk = row.getChunk();
+        long number = row.getNumber();
+        if (number == 0) {
+            if (logger.isTraceEnabled()) {
+                logger.trace(format("Loading %d rows from %s chunk", chunk.getRowCount(), chunk.getName()));
+            }
+            if (hasListeners()) {
+                onStartChunk(new LoadChunkEvent(work, loadTable, row.getChunk()));
+            }
         }
     }
 
-    @Override
-    public void loadStart(Work work, LoadRowSet loadRowSet, Chunk chunk) {
-        if (hasListeners()) {
-            onLoadStart(new LoadRowSetEvent(work, loadRowSet, chunk));
-        }
-    }
-
-    protected void onLoadStart(LoadRowSetEvent event) {
+    protected void onStartChunk(LoadChunkEvent loadChunkEvent) {
         for (BackupLoaderListener listener : getListeners()) {
-            listener.onLoadStart(event);
+            listener.onLoadStart(loadChunkEvent);
         }
     }
 
     @Override
-    public void loadRow(Work work, LoadRowSet loadRowSet, Chunk chunk) {
-        Long deltaRowCount = getBackupLoaderContext().getDeltaRowCount();
-        if (hasListeners() && (deltaRowCount != null && chunk.getRowCount() % deltaRowCount == 0)) {
-            onLoadRow(new LoadRowSetEvent(work, loadRowSet, chunk));
+    public void afterLoadRow(Work work, LoadTable loadTable, Row row) {
+        Chunk chunk = row.getChunk();
+        long number = row.getNumber();
+        if (number == chunk.getRowSet().getRowCount()) {
+            if (logger.isTraceEnabled()) {
+                logger.trace(format("Rows from %s chunk loaded", chunk.getName()));
+            }
+            if (hasListeners()) {
+                onEndChunk(new LoadChunkEvent(work, loadTable, row.getChunk()));
+            }
+        }
+        onLoadRow(new LoadRowEvent(work, loadTable, row));
+    }
+
+    protected void onEndChunk(LoadChunkEvent loadChunkEvent) {
+        for (BackupLoaderListener listener : getListeners()) {
+            listener.onLoadEnd(loadChunkEvent);
         }
     }
 
-    protected void onLoadRow(LoadRowSetEvent event) {
+    protected void onLoadRow(LoadRowEvent event) {
         for (BackupLoaderListener listener : getListeners()) {
             listener.onLoadRow(event);
-        }
-    }
-
-    @Override
-    public void loadEnd(Work work, LoadRowSet loadRowSet, Chunk chunk) {
-        if (hasListeners()) {
-            onLoadEnd(new LoadRowSetEvent(work, loadRowSet, chunk));
-        }
-    }
-
-    @Override
-    public void loadEnd(Work work, LoadRowSet loadRowSet) {
-        if (hasListeners()) {
-            onLoadEnd(new LoadRowSetEvent(work, loadRowSet));
-        }
-    }
-
-    protected void onLoadEnd(LoadRowSetEvent event) {
-        for (BackupLoaderListener listener : getListeners()) {
-            listener.onLoadEnd(event);
         }
     }
 

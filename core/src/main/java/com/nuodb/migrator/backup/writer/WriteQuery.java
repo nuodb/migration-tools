@@ -25,11 +25,46 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format.sql;
+package com.nuodb.migrator.backup.writer;
+
+import com.nuodb.migrator.backup.RowSet;
+import com.nuodb.migrator.jdbc.model.Field;
+import com.nuodb.migrator.jdbc.split.QuerySplitter;
+
+import java.util.Collection;
 
 /**
+ * Represents row set source to be dumped
+ *
  * @author Sergey Bushik
  */
-public interface SqlAttributes {
-    final String FORMAT = "sql";
+public class WriteQuery {
+
+    private RowSet rowSet;
+    private QuerySplitter querySplitter;
+    private Collection<? extends Field> columns;
+
+    public WriteQuery(QuerySplitter querySplitter, RowSet rowSet) {
+        this.querySplitter = querySplitter;
+        this.rowSet = rowSet;
+    }
+
+    public WriteQuery(QuerySplitter querySplitter,
+                      Collection<? extends Field> columns, RowSet rowSet) {
+        this.querySplitter = querySplitter;
+        this.columns = columns;
+        this.rowSet = rowSet;
+    }
+
+    public QuerySplitter getQuerySplitter() {
+        return querySplitter;
+    }
+
+    public Collection<? extends Field> getColumns() {
+        return columns;
+    }
+
+    public RowSet getRowSet() {
+        return rowSet;
+    }
 }

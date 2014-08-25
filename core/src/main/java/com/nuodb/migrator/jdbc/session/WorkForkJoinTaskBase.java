@@ -25,50 +25,73 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.query;
+package com.nuodb.migrator.jdbc.session;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
  */
-public class StatementTemplate {
+public abstract class WorkForkJoinTaskBase<V> extends ForkJoinTask<V> implements Work {
 
-    private final Connection connection;
+    private WorkManager workManager;
+    private SessionFactory sessionFactory;
+    private Session session;
+    private boolean closeSession;
+    private V rawResult;
 
-    public StatementTemplate(Connection connection) {
-        this.connection = connection;
+    public WorkForkJoinTaskBase(WorkManager workManager, SessionFactory sessionFactory) {
+        this.workManager = workManager;
+        this.sessionFactory = sessionFactory;
+        this.closeSession = true;
     }
 
-    public <S extends Statement> void executeStatement(StatementFactory<S> statementFactory,
-                                                       StatementCallback<S> statementCallback)
-            throws SQLException {
-        S statement = statementFactory.createStatement(connection);
-        try {
-            statementCallback.executeStatement(statement);
-        } finally {
-            closeQuietly(statement != null ? statement.getResultSet() : null);
-            closeQuietly(statement);
+    public WorkForkJoinTaskBase(WorkManager workManager, Session session) {
+        this.workManager = workManager;
+        this.session = session;
+        this.closeSession = false;
+    }
+
+    @Override
+    public void init(Session session) throws Exception {
+        this.session = session;
+        init();
+    }
+
+    protected void init() throws Exception {
+    }
+
+    @Override
+    protected boolean exec() {
+        if (sessionFactory != null) {
+            workManager.execute(this, sessionFactory);
+        } else {
+            workManager.execute(this, session);
+        }
+        Throwable failure = (Throwable) workManager.getFailures().get(this);
+        return failure == null;
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (closeSession) {
+            closeQuietly(session);
         }
     }
 
-    public <S extends Statement, V extends Object> V executeStatement(StatementFactory<S> statementFactory,
-                                                                      StatementAction<S, V> statementAction)
-            throws SQLException {
-        S statement = statementFactory.createStatement(connection);
-        try {
-            return statementAction.executeStatement(statement);
-        } finally {
-            closeQuietly(statement != null ? statement.getResultSet() : null);
-            closeQuietly(statement);
-        }
+    protected Session getSession() {
+        return session;
     }
 
-    public Connection getConnection() {
-        return connection;
+    @Override
+    public V getRawResult() {
+        return rawResult;
+    }
+
+    @Override
+    protected void setRawResult(V rawResult) {
+        this.rawResult = rawResult;
     }
 }

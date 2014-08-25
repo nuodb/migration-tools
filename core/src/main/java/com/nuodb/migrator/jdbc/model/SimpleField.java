@@ -54,7 +54,7 @@ public class SimpleField implements Field {
     }
 
     @Override
-    public Field asField() {
+    public Field toField() {
         return field != null ? field : this;
     }
 

@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.nuodb.migrator.backup.format.value.ValueType;
 import com.nuodb.migrator.utils.ObjectUtils;
 
 /**
@@ -35,13 +36,13 @@ import com.nuodb.migrator.utils.ObjectUtils;
 public class Column {
 
     private String name;
-    private String valueType;
+    private ValueType valueType;
     private transient RowSet rowSet;
 
     public Column() {
     }
 
-    public Column(String name, String valueType) {
+    public Column(String name, ValueType valueType) {
         this.name = name;
         this.valueType = valueType;
     }
@@ -54,11 +55,11 @@ public class Column {
         this.name = name;
     }
 
-    public String getValueType() {
+    public ValueType getValueType() {
         return valueType;
     }
 
-    public void setValueType(String valueType) {
+    public void setValueType(ValueType valueType) {
         this.valueType = valueType;
     }
 

@@ -27,10 +27,10 @@
  */
 package com.nuodb.migrator.backup.format.csv;
 
-import com.nuodb.migrator.backup.format.OutputFormatBase;
-import com.nuodb.migrator.backup.format.OutputFormatException;
+import com.nuodb.migrator.backup.Column;
+import com.nuodb.migrator.backup.format.OutputBase;
+import com.nuodb.migrator.backup.format.OutputException;
 import com.nuodb.migrator.backup.format.value.Value;
-import com.nuodb.migrator.backup.format.value.ValueHandle;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -38,7 +38,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
 import static com.nuodb.migrator.backup.format.utils.BinaryEncoder.BASE64;
 import static java.lang.String.valueOf;
 import static java.nio.charset.Charset.forName;
@@ -47,14 +49,14 @@ import static java.nio.charset.Charset.forName;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class CsvOutputFormat extends OutputFormatBase implements CsvAttributes {
+public class CsvOutput extends OutputBase implements CsvFormat {
 
     private String doubleQuote;
     private CSVPrinter csvPrinter;
 
     @Override
     public String getFormat() {
-        return FORMAT;
+        return TYPE;
     }
 
     @Override
@@ -70,19 +72,19 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvAttributes {
         try {
             csvPrinter = new CSVPrinter(wrapWriter(writer), format);
         } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
     @Override
     public void writeStart() {
         try {
-            for (ValueHandle valueHandle : getValueHandleList()) {
-                csvPrinter.print(valueHandle.getName());
+            for (Column column : getRowSet().getColumns()) {
+                csvPrinter.print(column.getName());
             }
             csvPrinter.println();
         } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -90,9 +92,10 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvAttributes {
     public void writeValues(Value[] values) {
         try {
             String[] record = new String[values.length];
+            Collection<Column> columns = getRowSet().getColumns();
             for (int i = 0; i < values.length; i++) {
                 String value = null;
-                switch (getValueTypes().get(i)) {
+                switch (get(columns, i).getValueType()) {
                     case BINARY:
                         value = BASE64.encode(values[i].asBytes());
                         break;
@@ -107,7 +110,7 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvAttributes {
             }
             csvPrinter.printRecord(record);
         } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -118,7 +121,7 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvAttributes {
                 csvPrinter.flush();
             }
         } catch (IOException exception) {
-            throw new OutputFormatException(exception);
+            throw new OutputException(exception);
         }
     }
 
@@ -128,7 +131,7 @@ public class CsvOutputFormat extends OutputFormatBase implements CsvAttributes {
             try {
                 csvPrinter.close();
             } catch (IOException exception) {
-                throw new OutputFormatException(exception);
+                throw new OutputException(exception);
             }
             csvPrinter = null;
         }

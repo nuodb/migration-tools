@@ -273,7 +273,7 @@ public class Column extends IdentifiableBase implements Field {
     }
 
     @Override
-    public Field asField() {
+    public Field toField() {
         return this;
     }
 

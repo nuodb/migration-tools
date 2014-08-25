@@ -25,38 +25,24 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.loader;
+package com.nuodb.migrator.backup.format;
 
-import java.util.Collection;
-import java.util.Iterator;
-
-import static com.google.common.collect.Lists.newArrayList;
+import com.nuodb.migrator.MigratorException;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadRowSets implements Iterable<LoadRowSet> {
+public class InputException extends MigratorException {
 
-    private Collection<LoadRowSet> loadRowSets;
-
-    public LoadRowSets() {
-        this.loadRowSets = newArrayList();
+    public InputException(String message) {
+        super(message);
     }
 
-    @Override
-    public Iterator<LoadRowSet> iterator() {
-        return getLoadRowSets().iterator();
+    public InputException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public void addLoadRowSet(LoadRowSet loadRowSet) {
-        loadRowSets.add(loadRowSet);
-    }
-
-    public Collection<LoadRowSet> getLoadRowSets() {
-        return loadRowSets;
-    }
-
-    public void setLoadRowSets(Collection<LoadRowSet> loadRowSets) {
-        this.loadRowSets = loadRowSets;
+    public InputException(Throwable cause) {
+        super(cause);
     }
 }

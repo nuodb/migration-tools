@@ -25,27 +25,32 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format;
+package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.backup.format.value.Value;
-
-import java.io.InputStream;
-import java.io.Reader;
+import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.jdbc.session.Work;
+import com.nuodb.migrator.jdbc.session.WorkEvent;
 
 /**
  * @author Sergey Bushik
  */
-public interface InputFormat extends Format {
+@SuppressWarnings("all")
+public class LoadChunkEvent extends WorkEvent {
 
-    void readStart();
+    private LoadTable loadTable;
+    private Chunk chunk;
 
-    boolean read();
+    public LoadChunkEvent(Work work, LoadTable loadTable, Chunk chunk) {
+        super(work);
+        this.loadTable = loadTable;
+        this.chunk = chunk;
+    }
 
-    Value[] readValues();
+    public LoadTable getLoadTable() {
+        return loadTable;
+    }
 
-    void readEnd();
-
-    void setReader(Reader reader);
-
-    void setInputStream(InputStream inputStream);
+    public Chunk getChunk() {
+        return chunk;
+    }
 }

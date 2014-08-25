@@ -28,8 +28,6 @@
 package com.nuodb.migrator.backup.format;
 
 import com.nuodb.migrator.backup.Column;
-import com.nuodb.migrator.backup.format.value.Value;
-import com.nuodb.migrator.backup.format.value.ValueHandle;
 import com.nuodb.migrator.backup.format.value.ValueType;
 
 import java.io.BufferedInputStream;
@@ -45,7 +43,7 @@ import static com.google.common.io.Closeables.closeQuietly;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public abstract class InputFormatBase extends FormatBase implements InputFormat {
+public abstract class InputBase extends FormatBase implements Input {
 
     private Reader reader;
     private InputStream inputStream;
@@ -76,7 +74,7 @@ public abstract class InputFormatBase extends FormatBase implements InputFormat 
         } else if (hasInputStream()) {
             init(openInputStream());
         } else {
-            throw new InputFormatException("Reader or stream is required to read backup");
+            throw new InputException("Reader or stream is required to read backup");
         }
         initValueTypes();
     }
@@ -92,7 +90,7 @@ public abstract class InputFormatBase extends FormatBase implements InputFormat 
     protected void initValueTypes() {
         List<ValueType> valueTypes = newArrayList();
         for (Column column : getRowSet().getColumns()) {
-            valueTypes.add(ValueType.fromAlias(column.getValueType()));
+            valueTypes.add(column.getValueType());
         }
         this.valueTypes = valueTypes;
     }
@@ -119,19 +117,6 @@ public abstract class InputFormatBase extends FormatBase implements InputFormat 
 
     protected InputStream wrapInputStream(InputStream inputStream) {
         return isBuffering() ? new BufferedInputStream(inputStream, getBufferSize()) : inputStream;
-    }
-
-    @Override
-    public boolean read() {
-        Value[] values = readValues();
-        if (values != null) {
-            int index = 0;
-            for (ValueHandle valueHandle : getValueHandleList()) {
-                valueHandle.getValueFormat().setValue(values[index++],
-                        valueHandle.getJdbcValueAccess(), valueHandle.getJdbcValueAccessOptions());
-            }
-        }
-        return values != null;
     }
 
     @Override

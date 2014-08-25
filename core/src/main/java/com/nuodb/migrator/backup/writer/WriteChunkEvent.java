@@ -25,33 +25,37 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.format;
+package com.nuodb.migrator.backup.writer;
 
-import com.nuodb.migrator.backup.format.value.Value;
-
-import java.io.OutputStream;
-import java.io.Writer;
+import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.jdbc.session.Work;
+import com.nuodb.migrator.jdbc.session.WorkEvent;
 
 /**
  * @author Sergey Bushik
  */
-public interface OutputFormat extends Format {
+@SuppressWarnings("all")
+public class WriteChunkEvent extends WorkEvent {
 
-    void writeStart();
+    private WriteQuery writeQuery;
+    private Chunk chunk;
 
-    boolean canWrite();
+    public WriteChunkEvent(Work work, WriteQuery writeQuery) {
+        super(work);
+        this.writeQuery = writeQuery;
+    }
 
-    void write();
+    public WriteChunkEvent(Work work, WriteQuery writeQuery, Chunk chunk) {
+        super(work);
+        this.writeQuery = writeQuery;
+        this.chunk = chunk;
+    }
 
-    void writeValues(Value[] values);
+    public WriteQuery getWriteQuery() {
+        return writeQuery;
+    }
 
-    void writeEnd();
-
-    Writer getWriter();
-
-    void setWriter(Writer writer);
-
-    OutputStream getOutputStream();
-
-    void setOutputStream(OutputStream outputStream);
+    public Chunk getChunk() {
+        return chunk;
+    }
 }

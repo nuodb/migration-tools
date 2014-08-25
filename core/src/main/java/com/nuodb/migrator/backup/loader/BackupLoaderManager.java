@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.backup.format.value.Row;
 import com.nuodb.migrator.jdbc.session.Work;
 import com.nuodb.migrator.jdbc.session.WorkManager;
 
@@ -40,6 +40,8 @@ public interface BackupLoaderManager extends WorkManager<BackupLoaderListener> {
 
     boolean isLoadSchema();
 
+    boolean canExecute(Work work);
+
     void loadFailed();
 
     void loadDataDone();
@@ -48,17 +50,9 @@ public interface BackupLoaderManager extends WorkManager<BackupLoaderListener> {
 
     void loadSchemaDone();
 
-    boolean canExecute(Work work);
+    void beforeLoadRow(Work work, LoadTable loadTable, Row row);
 
-    void loadStart(Work work, LoadRowSet loadRowSet);
-
-    void loadStart(Work work, LoadRowSet loadRowSet, Chunk chunk);
-
-    void loadRow(Work work, LoadRowSet loadRowSet, Chunk chunk);
-
-    void loadEnd(Work work, LoadRowSet loadRowSet, Chunk chunk);
-
-    void loadEnd(Work work, LoadRowSet loadRowSet);
+    void afterLoadRow(Work work, LoadTable loadTable, Row row);
 
     BackupLoaderContext getBackupLoaderContext();
 

@@ -32,7 +32,7 @@ import static java.lang.System.getProperty;
 /**
  * @author Sergey Bushik
  */
-public interface CsvAttributes {
+public interface CsvFormat {
     /**
      * Input & output stream encoding
      */
@@ -58,7 +58,7 @@ public interface CsvAttributes {
      */
     final String ATTRIBUTE_LINE_SEPARATOR = "csv.line.separator";
 
-    final String FORMAT = "csv";
+    final String TYPE = "csv";
     final String ATTRIBUTE_LINE_SEPARATOR_CRLF = "CRLF";
     final String ATTRIBUTE_LINE_SEPARATOR_CR = "CR";
     final String ATTRIBUTE_LINE_SEPARATOR_LF = "LF";

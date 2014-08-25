@@ -55,12 +55,13 @@ public class SingleCommitStrategy implements CommitStrategy {
         return new CommitExecutorBase(statement, query) {
 
             @Override
-            public void execute() throws SQLException {
+            public boolean execute() throws SQLException {
                 if (statement instanceof PreparedStatement) {
                     ((PreparedStatement)statement).execute();
                 } else {
                     statement.execute(query.toString());
                 }
+                return true;
             }
 
             @Override
