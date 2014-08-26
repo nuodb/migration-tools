@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
@@ -58,7 +58,7 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     private BackupOps backupOps;
     private Map backupOpsContext;
     private Database database;
-    private Executor executor;
+    private ExecutorService executorService;
     private String format;
     private Map<String, Object> formatAttributes;
     private FormatFactory formatFactory;
@@ -121,13 +121,13 @@ public class SimpleBackupWriterContext implements BackupWriterContext {
     }
 
     @Override
-    public Executor getExecutor() {
-        return executor;
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 
     @Override
-    public void setExecutor(Executor executor) {
-        this.executor = executor;
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 
     @Override

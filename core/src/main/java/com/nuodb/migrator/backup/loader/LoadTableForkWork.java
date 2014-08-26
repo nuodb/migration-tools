@@ -64,17 +64,17 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
 
     private LoadTable loadTable;
     private RowReader rowReader;
-    private int fork;
+    private int thread;
     private BackupLoaderManager backupLoaderManager;
     private BackupLoaderContext backupLoaderContext;
     private PreparedStatement statement;
     private CommitExecutor commitExecutor;
     private ValueHandleList valueHandleList;
 
-    public LoadTableForkWork(LoadTable loadTable, RowReader rowReader, int fork,
+    public LoadTableForkWork(LoadTable loadTable, RowReader rowReader, int thread,
                              BackupLoaderManager backupLoaderManager) {
         super(backupLoaderManager, backupLoaderManager.getBackupLoaderContext().getTargetSessionFactory());
-        this.fork = fork;
+        this.thread = thread;
         this.rowReader = rowReader;
         this.loadTable = loadTable;
         this.backupLoaderManager = backupLoaderManager;
@@ -82,7 +82,7 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
 
     @Override
     public String getName() {
-        return getMessage(LOAD_TABLE_FORK_WORK, loadTable.getRowSet().getName(), getFork());
+        return getMessage(LOAD_TABLE_FORK_WORK, loadTable.getRowSet().getName(), getThread());
     }
 
     @Override
@@ -135,8 +135,8 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
         closeQuietly(statement);
     }
 
-    public int getFork() {
-        return fork;
+    public int getThread() {
+        return thread;
     }
 
     public LoadTable getLoadTable() {

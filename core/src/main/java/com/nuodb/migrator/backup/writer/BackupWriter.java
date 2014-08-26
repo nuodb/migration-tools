@@ -36,7 +36,6 @@ import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.csv.CsvFormat;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
-import com.nuodb.migrator.backup.loader.BackupLoaderException;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
@@ -62,11 +61,10 @@ import com.nuodb.migrator.utils.concurrent.ForkJoinPool;
 import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
 import org.slf4j.Logger;
 
-import java.sql.Connection;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
@@ -106,7 +104,7 @@ public class BackupWriter {
 
     private Collection<BackupWriterListener> listeners = newArrayList();
     private Database database;
-    private Executor executor;
+    private ExecutorService executorService;
     private InspectionManager inspectionManager;
     private String format = FORMAT;
     private Map<String, Object> formatAttributes = newHashMap();
@@ -239,8 +237,8 @@ public class BackupWriter {
         backupWriterContext.setBackupOps(backupOps);
         backupWriterContext.setBackupOpsContext(context);
 
-        Executor executor = getExecutor();
-        backupWriterContext.setExecutor(executor == null ? createExecutor() : executor);
+        ExecutorService executorService = getExecutorService();
+        backupWriterContext.setExecutorService(executorService == null ? createExecutorService() : executorService);
         backupWriterContext.setFormat(getFormat());
         backupWriterContext.setFormatAttributes(getFormatAttributes());
         backupWriterContext.setFormatFactory(getFormatFactory());
@@ -276,7 +274,7 @@ public class BackupWriter {
         return backupWriterManager;
     }
 
-    protected Executor createExecutor() {
+    protected ExecutorService createExecutorService() {
         int threads = getThreads();
         if (logger.isTraceEnabled()) {
             logger.trace(format("Using fork join pool with %d thread(s)", threads));
@@ -354,7 +352,7 @@ public class BackupWriter {
 
     protected void executeWork(final Work work, final BackupWriterManager backupWriterManager) {
         final BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
-        ForkJoinPool executor = (ForkJoinPool) backupWriterContext.getExecutor();
+        ForkJoinPool executor = (ForkJoinPool) backupWriterContext.getExecutorService();
         if (work instanceof Runnable) {
             executor.execute((Runnable)work);
         } else if (work instanceof ForkJoinTask) {
@@ -452,12 +450,12 @@ public class BackupWriter {
         this.database = database;
     }
 
-    public Executor getExecutor() {
-        return executor;
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 
-    public void setExecutor(Executor executor) {
-        this.executor = executor;
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 
     protected Collection<WriteQuery> getWriteQueries() {
@@ -562,7 +560,7 @@ public class BackupWriter {
 
     public void setThreads(Integer threads) {
         this.threads = threads;
-        this.executor = null;
+        this.executorService = null;
     }
 
     public ValueFormatRegistryResolver getValueFormatRegistryResolver() {

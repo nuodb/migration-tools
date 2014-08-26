@@ -41,5 +41,5 @@ public interface Parallelizer {
      * @param backupLoaderContext backup loader context
      * @return number of threads
      */
-    int getForks(LoadTable loadTable, BackupLoaderContext backupLoaderContext);
+    int getThreads(LoadTable loadTable, BackupLoaderContext backupLoaderContext);
 }

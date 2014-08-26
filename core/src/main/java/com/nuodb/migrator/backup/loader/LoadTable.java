@@ -37,11 +37,11 @@ import com.nuodb.migrator.utils.ObjectUtils;
  */
 public class LoadTable {
 
-    private LoadTables loadTables;
     private final RowSet rowSet;
     private final Table table;
     private final Query query;
-    private int forks;
+    private int threads;
+    private LoadTables loadTables;
 
     public LoadTable(RowSet rowSet, Table table, Query query) {
         this.rowSet = rowSet;
@@ -49,11 +49,11 @@ public class LoadTable {
         this.query = query;
     }
 
-    public LoadTable(RowSet rowSet, Table table, Query query, int forks) {
+    public LoadTable(RowSet rowSet, Table table, Query query, int threads) {
         this.rowSet = rowSet;
         this.table = table;
         this.query = query;
-        this.forks = forks;
+        this.threads = threads;
     }
 
     public RowSet getRowSet() {
@@ -76,12 +76,12 @@ public class LoadTable {
         this.loadTables = loadTables;
     }
 
-    public int getForks() {
-        return forks;
+    public int getThreads() {
+        return threads;
     }
 
-    public void setForks(int forks) {
-        this.forks = forks;
+    public void setThreads(int threads) {
+        this.threads = threads;
     }
 
     @Override

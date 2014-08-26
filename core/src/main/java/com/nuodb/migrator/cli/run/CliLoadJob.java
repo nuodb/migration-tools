@@ -39,7 +39,6 @@ import com.nuodb.migrator.spec.LoadJobSpec;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static com.google.common.collect.Maps.newTreeMap;
 import static com.nuodb.migrator.backup.loader.Parallelizers.ROW_LEVEL;
 import static com.nuodb.migrator.backup.loader.Parallelizers.TABLE_LEVEL;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;

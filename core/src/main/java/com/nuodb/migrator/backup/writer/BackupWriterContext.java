@@ -39,7 +39,7 @@ import com.nuodb.migrator.spec.MigrationMode;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Sergey Bushik
@@ -66,9 +66,9 @@ public interface BackupWriterContext {
 
     void setDatabase(Database database);
 
-    Executor getExecutor();
+    ExecutorService getExecutorService();
 
-    void setExecutor(Executor executor);
+    void setExecutorService(ExecutorService executor);
 
     String getFormat();
 

@@ -45,7 +45,7 @@ public class Parallelizers {
      */
     public static Parallelizer TABLE_LEVEL = new Parallelizer() {
         @Override
-        public int getForks(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
+        public int getThreads(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
             return 1;
         }
     };
@@ -56,7 +56,7 @@ public class Parallelizers {
      */
     public static Parallelizer ROW_LEVEL = new Parallelizer() {
         @Override
-        public int getForks(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
+        public int getThreads(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
             ForkJoinPool forkJoinPool = (ForkJoinPool) backupLoaderContext.getExecutorService();
             BackupOps backupOps = backupLoaderContext.getBackupOps();
             long rowSetSize = loadTable.getRowSet().getSize(backupOps);

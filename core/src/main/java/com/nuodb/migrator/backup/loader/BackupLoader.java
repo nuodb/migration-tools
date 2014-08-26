@@ -463,8 +463,8 @@ public class BackupLoader {
             loadTables.addLoadTable(new LoadTable(rowSet, table, query));
         }
         for (LoadTable loadTable : loadTables) {
-            loadTable.setForks(backupLoaderContext.getParallelizer().
-                    getForks(loadTable, backupLoaderContext));
+            loadTable.setThreads(backupLoaderContext.getParallelizer().
+                    getThreads(loadTable, backupLoaderContext));
         }
         return loadTables;
     }

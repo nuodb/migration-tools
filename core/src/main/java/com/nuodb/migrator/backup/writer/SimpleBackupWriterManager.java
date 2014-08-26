@@ -40,7 +40,6 @@ import com.nuodb.migrator.jdbc.session.Work;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -199,16 +198,13 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
             backupWriterSync.await();
         }
         if (backupWriterContext != null) {
-            Executor executor = backupWriterContext.getExecutor();
-            if (executor instanceof ExecutorService) {
-                ExecutorService service = (ExecutorService) executor;
-                service.shutdown();
-                try {
-                    service.awaitTermination(MAX_VALUE, SECONDS);
-                } catch (InterruptedException exception) {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("Executor termination interrupted", exception);
-                    }
+            ExecutorService executorService = backupWriterContext.getExecutorService();
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(MAX_VALUE, SECONDS);
+            } catch (InterruptedException exception) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Executor termination interrupted", exception);
                 }
             }
             closeQuietly(backupWriterContext.getSourceSession());
