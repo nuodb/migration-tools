@@ -28,6 +28,7 @@
 package com.nuodb.migrator.cli.run;
 
 import com.google.common.collect.Maps;
+import com.nuodb.migrator.backup.loader.Parallelizer;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
@@ -37,13 +38,21 @@ import com.nuodb.migrator.spec.LoadJobSpec;
 
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newTreeMap;
+import static com.nuodb.migrator.backup.loader.Parallelizers.ROW_LEVEL;
+import static com.nuodb.migrator.backup.loader.Parallelizers.TABLE_LEVEL;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.utils.Priority.LOW;
+import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 /**
  * @author Sergey Bushik
  */
 public class CliLoadJob extends CliJob<LoadJobSpec> {
+
+    public static final String PARALLELIZER_TABLE_LEVEL = "table.level";
+    public static final String PARALLELIZER_ROW_LEVEL = "row.level";
 
     public CliLoadJob() {
         super(LOAD);
@@ -69,7 +78,8 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         jobSpec.setInputSpec(parseInputGroup(optionSet, this));
         jobSpec.setMigrationModes(parseMigrationModeGroup(optionSet, this));
         parseDataMigrationGroup(optionSet, jobSpec);
-        parseSchemaMigrationGroup(jobSpec, optionSet, this);
+        parseSchemaMigrationGroup(optionSet, jobSpec, this);
+        parseExecutorGroup(optionSet, jobSpec);
         setJobSpec(jobSpec);
     }
 
@@ -110,11 +120,25 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         return group.build();
     }
 
+    @Override
+    protected void createExecutorGroup(GroupBuilder group) {
+        super.createExecutorGroup(group);
+
+        Option parallelizer = newBasicOptionBuilder().
+                withName(PARALLELIZER).
+                withAlias(PARALLELIZER_SHORT, OptionFormat.SHORT).
+                withDescription(getMessage(PARALLELIZER_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(PARALLELIZER_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(parallelizer);
+    }
+
     protected void parseDataMigrationGroup(OptionSet optionSet, LoadJobSpec jobSpec) {
         jobSpec.setCommitStrategy(parseCommitGroup(optionSet, this));
         jobSpec.setTimeZone(parseTimeZoneOption(optionSet, this));
         parseInsertTypeGroup(optionSet, jobSpec);
-        jobSpec.setThreads(parseThreadsOption(optionSet, this));
     }
 
     protected void parseInsertTypeGroup(OptionSet optionSet, LoadJobSpec loadJobSpec) {
@@ -127,5 +151,23 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
             tableInsertTypes.put(table, InsertType.REPLACE);
         }
         loadJobSpec.setTableInsertTypes(tableInsertTypes);
+    }
+
+    protected void parseExecutorGroup(OptionSet optionSet, LoadJobSpec jobSpec) {
+        jobSpec.setThreads(parseThreadsOption(optionSet, this));
+        String parallelizerValue = (String) optionSet.getValue(
+                PARALLELIZER, PARALLELIZER_TABLE_LEVEL);
+        Parallelizer parallelizer = createParallelizerMapping().get(parallelizerValue);
+        if (parallelizer == null) {
+            parallelizer = newInstance(parallelizerValue);
+        }
+        jobSpec.setParallelizer(parallelizer);
+    }
+
+    protected Map<String, Parallelizer> createParallelizerMapping() {
+        Map<String, Parallelizer> parallelizerMapping = newTreeMap(CASE_INSENSITIVE_ORDER);
+        parallelizerMapping.put(PARALLELIZER_TABLE_LEVEL, TABLE_LEVEL);
+        parallelizerMapping.put(PARALLELIZER_ROW_LEVEL, ROW_LEVEL);
+        return parallelizerMapping;
     }
 }

@@ -37,6 +37,7 @@ import com.nuodb.migrator.utils.ObjectUtils;
 public class LoadConstraint {
 
     private Constraint constraint;
+    private LoadConstraints loadConstraints;
 
     public LoadConstraint(Constraint constraint) {
         this.constraint = constraint;
@@ -48,6 +49,14 @@ public class LoadConstraint {
 
     public Table getTable() {
         return constraint.getTable();
+    }
+
+    public LoadConstraints getLoadConstraints() {
+        return loadConstraints;
+    }
+
+    public void setLoadConstraints(LoadConstraints loadConstraints) {
+        this.loadConstraints = loadConstraints;
     }
 
     @Override

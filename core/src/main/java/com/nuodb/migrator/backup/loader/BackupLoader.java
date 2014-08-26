@@ -65,7 +65,9 @@ import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.query.InsertQueryBuilder;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.session.*;
+import com.nuodb.migrator.jdbc.session.Session;
+import com.nuodb.migrator.jdbc.session.SessionFactory;
+import com.nuodb.migrator.jdbc.session.Work;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
@@ -80,12 +82,13 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.backup.loader.Parallelizers.TABLE_LEVEL;
 import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
@@ -95,9 +98,6 @@ import static com.nuodb.migrator.jdbc.query.InsertType.INSERT;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static com.nuodb.migrator.utils.Collections.*;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.round;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -116,7 +116,7 @@ public class BackupLoader {
     private CommitStrategy commitStrategy;
     private Database database;
     private DialectResolver dialectResolver;
-    private Executor executor;
+    private ExecutorService executorService;
     private FormatFactory formatFactory;
     private Map<String, Object> formatAttributes = newHashMap();
     private GroupScriptsBy groupScriptsBy;
@@ -126,6 +126,7 @@ public class BackupLoader {
     private IdentifierNormalizer identifierNormalizer;
     private InsertTypeFactory insertTypeFactory;
     private InspectionManager inspectionManager;
+    private Parallelizer parallelizer = TABLE_LEVEL;
     private MetaDataSpec metaDataSpec;
     private Collection<MigrationMode> migrationModes = MIGRATION_MODES;
     private PrioritySet<NamingStrategy> namingStrategies;
@@ -169,16 +170,19 @@ public class BackupLoader {
         backupLoaderContext.setBackupOpsContext(context);
         backupLoaderContext.setCommitStrategy(getCommitStrategy());
 
-        Executor executor = getExecutor();
-        backupLoaderContext.setExecutor(executor == null ? createExecutor() : executor);
+        ExecutorService executorService = getExecutorService();
+        backupLoaderContext.setExecutorService(
+                executorService == null ? createExecutorService() : executorService);
         backupLoaderContext.setFormatAttributes(getFormatAttributes());
         backupLoaderContext.setFormatFactory(getFormatFactory());
         backupLoaderContext.setInsertTypeFactory(getInsertTypeFactory());
         backupLoaderContext.setMigrationModes(getMigrationModes());
+        backupLoaderContext.setParallelizer(getParallelizer());
         backupLoaderContext.setRowSetMapper(getRowSetMapper());
         backupLoaderContext.setTimeZone(getTimeZone());
         if (backupLoaderContext.isLoadSchema()) {
-            backupLoaderContext.setLoadConstraints(createLoadConstraints(backupLoaderContext));
+            backupLoaderContext.setLoadConstraints(
+                    createLoadConstraints(backupLoaderContext));
         }
         openSourceSession(backupLoaderContext);
         openTargetSession(backupLoaderContext);
@@ -199,7 +203,7 @@ public class BackupLoader {
         return backupLoaderManager;
     }
 
-    protected Executor createExecutor() {
+    protected ExecutorService createExecutorService() {
         int threads = getThreads();
         if (logger.isTraceEnabled()) {
             logger.trace(format("Using fork join pool with %d thread(s)", threads));
@@ -370,14 +374,6 @@ public class BackupLoader {
         executeWork(new LoadTablesWork(backupLoaderManager), backupLoaderManager);
     }
 
-    protected void loadData(LoadTable loadTable, BackupLoaderManager backupLoaderManager) {
-        for (int thread = 0; thread < threads; thread++) {
-            Work work = createWork(loadTable, backupLoaderManager);
-            executeWork(work, backupLoaderManager);
-        }
-    }
-
-
     /**
      * Load constraints for source tables without row sets
      *
@@ -464,32 +460,18 @@ public class BackupLoader {
                 continue;
             }
             Query query = createQuery(rowSet, table, backupLoaderContext);
-            LoadTable loadTable = createLoadTable(rowSet, table, query, backupLoaderContext);
-            loadTables.addLoadTable(loadTable);
+            loadTables.addLoadTable(new LoadTable(rowSet, table, query));
+        }
+        for (LoadTable loadTable : loadTables) {
+            loadTable.setForks(backupLoaderContext.getParallelizer().
+                    getForks(loadTable, backupLoaderContext));
         }
         return loadTables;
     }
 
-    protected LoadTable createLoadTable(RowSet rowSet, Table table, Query query,
-                                        BackupLoaderContext backupLoaderContext) {
-        return new LoadTable(rowSet, table, query, getThreads(rowSet, table, query, backupLoaderContext));
-    }
-
-    protected int getThreads(RowSet rowSet, Table table, Query query,
-                             BackupLoaderContext backupLoaderContext) {
-        BackupOps backupOps = backupLoaderContext.getBackupOps();
-        long backupSize = rowSet.getBackup().getSize(backupOps);
-        long rowSetSize = rowSet.getSize(backupOps);
-        return (int) min(max(round(rowSetSize / (double) backupSize * getThreads()), 1), getThreads());
-    }
-
-    protected Work createWork(LoadTable loadTable, BackupLoaderManager backupLoaderManager) {
-        return new LoadTableWork(loadTable, backupLoaderManager);
-    }
-
     protected void executeWork(final Work work, final BackupLoaderManager backupLoaderManager) {
         final BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        ForkJoinPool executor = (ForkJoinPool) backupLoaderContext.getExecutor();
+        ForkJoinPool executor = (ForkJoinPool) backupLoaderContext.getExecutorService();
         if (work instanceof Runnable) {
             executor.execute((Runnable)work);
         } else if (work instanceof ForkJoinTask) {
@@ -503,11 +485,6 @@ public class BackupLoader {
                 }
             });
         }
-    }
-
-    protected void executeTask(final Runnable task, final BackupLoaderManager backupLoaderManager) {
-        final BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        backupLoaderContext.getExecutor().execute(task);
     }
 
     /**
@@ -582,12 +559,12 @@ public class BackupLoader {
         this.dialectResolver = dialectResolver;
     }
 
-    public Executor getExecutor() {
-        return executor;
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 
-    public void setExecutor(Executor executor) {
-        this.executor = executor;
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 
     public FormatFactory getFormatFactory() {
@@ -660,6 +637,14 @@ public class BackupLoader {
 
     public void setInspectionManager(InspectionManager inspectionManager) {
         this.inspectionManager = inspectionManager;
+    }
+
+    public Parallelizer getParallelizer() {
+        return parallelizer;
+    }
+
+    public void setParallelizer(Parallelizer parallelizer) {
+        this.parallelizer = parallelizer;
     }
 
     public void addListener(BackupLoaderListener listener) {

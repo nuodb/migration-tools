@@ -86,14 +86,13 @@ public class LoadConstraints implements Iterable<LoadConstraint> {
     }
 
     public void putLoadConstraint(LoadConstraint loadConstraint) {
-        this.loadConstraints.put(loadConstraint.getTable(), loadConstraint);
+        loadConstraints.put(loadConstraint.getTable(), loadConstraint);
+        loadConstraint.setLoadConstraints(this);
     }
 
     public void putLoadConstraints(Multimap<Table, LoadConstraint> loadConstraints) {
-        this.loadConstraints.putAll(loadConstraints);
-    }
-
-    public void setLoadConstraints(Multimap<Table, LoadConstraint> loadConstraints) {
-        this.loadConstraints = loadConstraints;
+        for (LoadConstraint loadConstraint : loadConstraints.values()) {
+            putLoadConstraint(loadConstraint);
+        }
     }
 }

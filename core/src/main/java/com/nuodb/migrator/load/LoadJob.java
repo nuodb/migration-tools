@@ -30,6 +30,7 @@ package com.nuodb.migrator.load;
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.backup.loader.BackupLoader;
 import com.nuodb.migrator.backup.loader.InsertTypeFactory;
+import com.nuodb.migrator.backup.loader.Parallelizer;
 import com.nuodb.migrator.backup.loader.SimpleInsertTypeFactory;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
@@ -79,6 +80,7 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
         backupLoader.setMetaDataSpec(getMetaDataSpec());
         backupLoader.setMigrationModes(getMigrationModes());
         backupLoader.setNamingStrategies(getNamingStrategies());
+        backupLoader.setParallelizer(getParallelizer());
         backupLoader.setScriptTypes(getScriptTypes());
         backupLoader.setTargetSpec(getTargetSpec());
         backupLoader.setTargetSessionFactory(createTargetSessionFactory());
@@ -151,6 +153,10 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
     protected InsertType getInsertType() {
         return getJobSpec().getInsertType();
+    }
+
+    protected Parallelizer getParallelizer() {
+        return getJobSpec().getParallelizer();
     }
 
     protected ConnectionSpec getTargetSpec() {

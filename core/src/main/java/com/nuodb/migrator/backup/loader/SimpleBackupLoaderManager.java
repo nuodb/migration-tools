@@ -32,7 +32,6 @@ import com.nuodb.migrator.backup.format.value.Row;
 import com.nuodb.migrator.jdbc.session.SimpleWorkManager;
 import com.nuodb.migrator.jdbc.session.Work;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
@@ -160,16 +159,13 @@ public class SimpleBackupLoaderManager extends SimpleWorkManager<BackupLoaderLis
             backupLoaderSync.await();
         }
         if (backupLoaderContext != null) {
-            Executor executor = backupLoaderContext.getExecutor();
-            if (executor instanceof ExecutorService) {
-                ExecutorService service = (ExecutorService) executor;
-                service.shutdown();
-                try {
-                    service.awaitTermination(MAX_VALUE, SECONDS);
-                } catch (InterruptedException exception) {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("Executor termination interrupted", exception);
-                    }
+            ExecutorService executorService = backupLoaderContext.getExecutorService();
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(MAX_VALUE, SECONDS);
+            } catch (InterruptedException exception) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Executor termination interrupted", exception);
                 }
             }
             closeQuietly(backupLoaderContext.getSourceSession());

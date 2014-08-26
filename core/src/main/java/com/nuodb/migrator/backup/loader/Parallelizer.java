@@ -25,16 +25,21 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup;
+package com.nuodb.migrator.backup.loader;
 
 /**
+ * Contract for load table parallelization
+ *
  * @author Sergey Bushik
  */
-public interface BackupMessages {
-    String LOAD_TABLES_WORK = "com.nuodb.migrator.backup.loader.LoadTablesWork";
-    String LOAD_TABLE_WORK = "com.nuodb.migrator.backup.loader.LoadTableWork";
-    String LOAD_TABLE_FORK_WORK = "com.nuodb.migrator.backup.loader.LoadTableForkWork";
-    String LOAD_CONSTRAINT_WORK = "com.nuodb.migrator.backup.loader.LoadConstraintWork";
-    String WRITE_QUERIES_WORK = "com.nuodb.migrator.backup.writer.WriteQueriesWork";
-    String WRITE_QUERY_WORK = "com.nuodb.migrator.backup.writer.WriteQueryWork";
+public interface Parallelizer {
+
+    /**
+     * Returns number of worker threads to load this table with
+     *
+     * @param loadTable           table to load
+     * @param backupLoaderContext backup loader context
+     * @return number of threads
+     */
+    int getForks(LoadTable loadTable, BackupLoaderContext backupLoaderContext);
 }

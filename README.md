@@ -109,6 +109,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
             [--identifier.normalizer=[identifier normalizer]]           Identifier transformer to use, available normalizers are noop, standard, lower.case, upper.case or fully qualified class name implementing com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer, default is noop
         [executor options, optional]
             [--threads (-t)=[threads]]                                  Number of worker threads, defaults to a number of available processors
+            [--parallelizer (-p)=[parallelizer]]                        Parallelization strategy name, either table.level (default), row.level or fully classified class name of a custom parallelizer implementing com.nuodb.migrator.backup.loader.Parallelizer. Table level parallelization activates 1 worker thread per table at max, while row level enables forking with more than 1 thread, where the number of worker threads is based on the weight of the loaded row set to the size of loaded tables. Notice row level forking may (and typically does) reorder the rows in the target table.
 
 ### Generate a schema for a target NuoDB database ###
 

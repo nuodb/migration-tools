@@ -46,7 +46,7 @@ import java.sql.PreparedStatement;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.backup.BackupMessages.LOAD_TABLE_ROW_WORK;
+import static com.nuodb.migrator.backup.BackupMessages.LOAD_TABLE_FORK_WORK;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
@@ -58,38 +58,37 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings("all")
-public class LoadTableRowWork extends WorkForkJoinTaskBase {
+public class LoadTableForkWork extends WorkForkJoinTaskBase {
 
     private transient Logger logger = getLogger(getClass());
 
-    private int thread;
     private LoadTable loadTable;
     private RowReader rowReader;
+    private int fork;
     private BackupLoaderManager backupLoaderManager;
     private BackupLoaderContext backupLoaderContext;
     private PreparedStatement statement;
     private CommitExecutor commitExecutor;
     private ValueHandleList valueHandleList;
 
-    public LoadTableRowWork(int thread, RowReader rowReader, LoadTable loadTable,
-                            BackupLoaderManager backupLoaderManager) {
+    public LoadTableForkWork(LoadTable loadTable, RowReader rowReader, int fork,
+                             BackupLoaderManager backupLoaderManager) {
         super(backupLoaderManager, backupLoaderManager.getBackupLoaderContext().getTargetSessionFactory());
+        this.fork = fork;
         this.rowReader = rowReader;
-        this.thread = thread;
         this.loadTable = loadTable;
         this.backupLoaderManager = backupLoaderManager;
     }
 
     @Override
     public String getName() {
-        return getMessage(LOAD_TABLE_ROW_WORK, loadTable.getRowSet().getName(), getThread());
+        return getMessage(LOAD_TABLE_FORK_WORK, loadTable.getRowSet().getName(), getFork());
     }
 
     @Override
     protected void init() throws Exception {
         backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        statement = getSession().getConnection().prepareStatement(
-                loadTable.getQuery().toString());
+        statement = getSession().getConnection().prepareStatement(loadTable.getQuery().toString());
         CommitStrategy commitStrategy = backupLoaderContext.getCommitStrategy() != null ?
                 backupLoaderContext.getCommitStrategy() : BatchCommitStrategy.INSTANCE;
         commitExecutor = commitStrategy.createCommitExecutor(statement, loadTable.getQuery());
@@ -136,8 +135,8 @@ public class LoadTableRowWork extends WorkForkJoinTaskBase {
         closeQuietly(statement);
     }
 
-    public int getThread() {
-        return thread;
+    public int getFork() {
+        return fork;
     }
 
     public LoadTable getLoadTable() {

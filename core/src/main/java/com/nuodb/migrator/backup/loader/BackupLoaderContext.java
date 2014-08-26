@@ -43,7 +43,7 @@ import com.nuodb.migrator.spec.MigrationMode;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Sergey Bushik
@@ -74,9 +74,9 @@ public interface BackupLoaderContext {
 
     void setDatabase(Database database);
 
-    Executor getExecutor();
+    ExecutorService getExecutorService();
 
-    void setExecutor(Executor executor);
+    void setExecutorService(ExecutorService executorService);
 
     Map<String,Object> getFormatAttributes();
 
@@ -85,6 +85,10 @@ public interface BackupLoaderContext {
     FormatFactory getFormatFactory();
 
     void setFormatFactory(FormatFactory formatFactory);
+
+    Parallelizer getParallelizer();
+
+    void setParallelizer(Parallelizer parallelizer);
 
     InsertTypeFactory getInsertTypeFactory();
 
@@ -101,6 +105,10 @@ public interface BackupLoaderContext {
     Collection<MigrationMode> getMigrationModes();
 
     void setMigrationModes(Collection<MigrationMode> migrationModes);
+
+    RowSetMapper getRowSetMapper();
+
+    void setRowSetMapper(RowSetMapper rowSetMapper);
 
     ConnectionSpec getSourceSpec();
 
@@ -141,8 +149,4 @@ public interface BackupLoaderContext {
     ValueFormatRegistry getValueFormatRegistry();
 
     void setValueFormatRegistry(ValueFormatRegistry valueFormatRegistry);
-
-    RowSetMapper getRowSetMapper();
-
-    void setRowSetMapper(RowSetMapper rowSetMapper);
 }

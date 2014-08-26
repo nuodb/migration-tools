@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
@@ -63,18 +63,19 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     private Map backupOpsContext;
     private CommitStrategy commitStrategy;
     private Database database;
-    private Executor executor;
+    private ExecutorService executorService;
     private FormatFactory formatFactory;
     private Map<String,Object> formatAttributes;
     private InsertTypeFactory insertTypeFactory;
     private LoadConstraints loadConstraints;
     private LoadTables loadTables;
+    private Parallelizer parallelizer;
     private Collection<MigrationMode> migrationModes;
     private ConnectionSpec sourceSpec;
     private Session sourceSession;
     private SessionFactory sourceSessionFactory;
     private ConnectionSpec targetSpec;
-    private RowSetMapper rowSetMapper = new SimpleRowSetMapper();
+    private RowSetMapper rowSetMapper;
     private Session targetSession;
     private SessionFactory targetSessionFactory;
     private ScriptExporter scriptExporter;
@@ -143,13 +144,13 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     }
 
     @Override
-    public Executor getExecutor() {
-        return executor;
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 
     @Override
-    public void setExecutor(Executor executor) {
-        this.executor = executor;
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 
     @Override
@@ -170,6 +171,16 @@ public class SimpleBackupLoaderContext implements BackupLoaderContext {
     @Override
     public void setFormatFactory(FormatFactory formatFactory) {
         this.formatFactory = formatFactory;
+    }
+
+    @Override
+    public Parallelizer getParallelizer() {
+        return parallelizer;
+    }
+
+    @Override
+    public void setParallelizer(Parallelizer parallelizer) {
+        this.parallelizer = parallelizer;
     }
 
     @Override

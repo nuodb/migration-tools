@@ -37,16 +37,23 @@ import com.nuodb.migrator.utils.ObjectUtils;
  */
 public class LoadTable {
 
-    private RowSet rowSet;
-    private Table table;
-    private Query query;
-    private int threads;
+    private LoadTables loadTables;
+    private final RowSet rowSet;
+    private final Table table;
+    private final Query query;
+    private int forks;
 
-    public LoadTable(RowSet rowSet, Table table, Query query, int threads) {
+    public LoadTable(RowSet rowSet, Table table, Query query) {
         this.rowSet = rowSet;
         this.table = table;
         this.query = query;
-        this.threads = threads;
+    }
+
+    public LoadTable(RowSet rowSet, Table table, Query query, int forks) {
+        this.rowSet = rowSet;
+        this.table = table;
+        this.query = query;
+        this.forks = forks;
     }
 
     public RowSet getRowSet() {
@@ -61,8 +68,20 @@ public class LoadTable {
         return query;
     }
 
-    public int getThreads() {
-        return threads;
+    public LoadTables getLoadTables() {
+        return loadTables;
+    }
+
+    public void setLoadTables(LoadTables loadTables) {
+        this.loadTables = loadTables;
+    }
+
+    public int getForks() {
+        return forks;
+    }
+
+    public void setForks(int forks) {
+        this.forks = forks;
     }
 
     @Override
@@ -70,12 +89,11 @@ public class LoadTable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LoadTable that = (LoadTable) o;
+        LoadTable loadTable = (LoadTable) o;
 
-        if (threads != that.threads) return false;
-        if (query != null ? !query.equals(that.query) : that.query != null) return false;
-        if (rowSet != null ? !rowSet.equals(that.rowSet) : that.rowSet != null) return false;
-        if (table != null ? !table.equals(that.table) : that.table != null) return false;
+        if (query != null ? !query.equals(loadTable.query) : loadTable.query != null) return false;
+        if (rowSet != null ? !rowSet.equals(loadTable.rowSet) : loadTable.rowSet != null) return false;
+        if (table != null ? !table.equals(loadTable.table) : loadTable.table != null) return false;
 
         return true;
     }
@@ -85,7 +103,6 @@ public class LoadTable {
         int result = rowSet != null ? rowSet.hashCode() : 0;
         result = 31 * result + (table != null ? table.hashCode() : 0);
         result = 31 * result + (query != null ? query.hashCode() : 0);
-        result = 31 * result + threads;
         return result;
     }
 

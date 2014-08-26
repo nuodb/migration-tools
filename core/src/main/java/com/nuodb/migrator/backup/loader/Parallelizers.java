@@ -27,33 +27,45 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import java.util.Collection;
+import com.nuodb.migrator.backup.BackupOps;
+import com.nuodb.migrator.utils.concurrent.ForkJoinPool;
+
 import java.util.Iterator;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.Math.*;
 
 /**
  * @author Sergey Bushik
  */
-public class LoadTables implements Iterable<LoadTable> {
+@SuppressWarnings("all")
+public class Parallelizers {
 
-    private Collection<LoadTable> loadTables;
+    /**
+     * Forking on table level, which means that one thread per table is used
+     */
+    public static Parallelizer TABLE_LEVEL = new Parallelizer() {
+        @Override
+        public int getForks(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
+            return 1;
+        }
+    };
 
-    public LoadTables() {
-        this.loadTables = newArrayList();
-    }
-
-    @Override
-    public Iterator<LoadTable> iterator() {
-        return getLoadTables().iterator();
-    }
-
-    public void addLoadTable(LoadTable loadTable) {
-        loadTables.add(loadTable);
-        loadTable.setLoadTables(this);
-    }
-
-    public Collection<LoadTable> getLoadTables() {
-        return loadTables;
-    }
+    /**
+     * Forking on row level where the number of workers is based on the weight of row set to the total size of loaded
+     * tables. Notice row level parallelization may (and typically does) reorder of the rows in the loaded table.
+     */
+    public static Parallelizer ROW_LEVEL = new Parallelizer() {
+        @Override
+        public int getForks(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
+            ForkJoinPool forkJoinPool = (ForkJoinPool) backupLoaderContext.getExecutorService();
+            BackupOps backupOps = backupLoaderContext.getBackupOps();
+            long rowSetSize = loadTable.getRowSet().getSize(backupOps);
+            long backupSize = 0L;
+            for (Iterator<LoadTable> iterator = backupLoaderContext.getLoadTables().iterator(); iterator.hasNext(); ) {
+                backupSize += iterator.next().getRowSet().getSize(backupOps);
+            }
+            int threads = forkJoinPool.getParallelism();
+            return (int) min(max(round(rowSetSize / (double) backupSize * threads), 1), threads);
+        }
+    };
 }

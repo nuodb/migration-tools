@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.backup.loader.Parallelizer;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.query.InsertType;
 
@@ -52,6 +53,7 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
     private InsertType insertType;
     private CommitStrategy commitStrategy;
     private Map<String, InsertType> tableInsertTypes = newHashMap();
+    private Parallelizer parallelizer;
 
     public Collection<MigrationMode> getMigrationModes() {
         return migrationModes;
@@ -115,6 +117,14 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
     public void setTableInsertTypes(Map<String, InsertType> tableInsertTypes) {
         this.tableInsertTypes = newHashMap(tableInsertTypes);
+    }
+
+    public Parallelizer getParallelizer() {
+        return parallelizer;
+    }
+
+    public void setParallelizer(Parallelizer parallelizer) {
+        this.parallelizer = parallelizer;
     }
 
     @Override

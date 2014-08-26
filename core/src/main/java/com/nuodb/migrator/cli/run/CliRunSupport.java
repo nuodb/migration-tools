@@ -136,11 +136,11 @@ public class CliRunSupport extends CliSupport {
     public static final String NAMING_STRATEGY_QUALIFY = "qualify";
     public static final String NAMING_STRATEGY_HASH = "hash";
     public static final String NAMING_STRATEGY_AUTO = "auto";
-    private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
-
     public static final String COMMIT_STRATEGY_SINGLE = "single";
     public static final String COMMIT_STRATEGY_BATCH = "batch";
     private JdbcTypeOptionProcessor jdbcTypeOptionProcessor = new JdbcTypeOptionProcessor();
+
+    private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
 
     /**
      * Builds the source group of options for the source database connection.
@@ -648,7 +648,11 @@ public class CliRunSupport extends CliSupport {
         GroupBuilder group = newGroupBuilder().
                 withName(getMessage(EXECUTOR_GROUP_NAME)).
                 withRequired(false);
+        createExecutorGroup(group);
+        return group.build();
+    }
 
+    protected void createExecutorGroup(GroupBuilder group) {
         Option threads = newBasicOptionBuilder().
                 withName(THREADS).
                 withAlias(THREADS_SHORT, OptionFormat.SHORT).
@@ -658,7 +662,6 @@ public class CliRunSupport extends CliSupport {
                                 withName(getMessage(THREADS_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(threads);
-        return group.build();
     }
 
     protected DriverConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
@@ -809,8 +812,8 @@ public class CliRunSupport extends CliSupport {
         return resource;
     }
 
-    protected void parseSchemaMigrationGroup(ScriptGeneratorJobSpecBase schemaGeneratorJobSpec,
-                                             OptionSet optionSet, Option option) {
+    protected void parseSchemaMigrationGroup(OptionSet optionSet, ScriptGeneratorJobSpecBase schemaGeneratorJobSpec,
+                                             Option option) {
         schemaGeneratorJobSpec.setJdbcTypeSpecs(parseJdbcTypeSpecs(optionSet, option));
         schemaGeneratorJobSpec.setTranslationConfig(parseTranslationConfig(optionSet, option));
         schemaGeneratorJobSpec.setObjectTypes(parseObjectTypes(optionSet));

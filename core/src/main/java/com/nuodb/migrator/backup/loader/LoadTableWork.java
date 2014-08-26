@@ -29,7 +29,6 @@ package com.nuodb.migrator.backup.loader;
 
 import com.nuodb.migrator.backup.format.value.RowReader;
 import com.nuodb.migrator.jdbc.session.WorkForkJoinTaskBase;
-import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
 import org.slf4j.Logger;
 
 import java.util.Collection;
@@ -73,7 +72,7 @@ public class LoadTableWork extends WorkForkJoinTaskBase {
         RowReader rowReader = newSequentialRowReader(
                 loadTable.getRowSet(), backupLoaderContext.getBackupOps(),
                 backupLoaderContext.getFormatFactory(), backupLoaderContext.getFormatAttributes());
-        int threads = loadTable.getThreads();
+        int threads = loadTable.getForks();
         if (threads > 1) {
             rowReader = newSynchronizedRowReader(rowReader);
         }
@@ -82,15 +81,15 @@ public class LoadTableWork extends WorkForkJoinTaskBase {
 
     @Override
     public void execute() throws Exception {
-        Collection<LoadTableRowWork> loadTableRowWorks = newArrayList();
-        for (int thread = 0; thread < loadTable.getThreads(); thread++) {
-            LoadTableRowWork loadTableRowWork = new LoadTableRowWork(
-                    thread, rowReader, loadTable, backupLoaderManager);
-            loadTableRowWork.fork();
-            loadTableRowWorks.add(loadTableRowWork);
+        Collection<LoadTableForkWork> loadTableForkWorks = newArrayList();
+        for (int thread = 0; thread < loadTable.getForks(); thread++) {
+            LoadTableForkWork loadTableForkWork = new LoadTableForkWork(
+                    loadTable, rowReader, thread, backupLoaderManager);
+            loadTableForkWork.fork();
+            loadTableForkWorks.add(loadTableForkWork);
         }
-        for (LoadTableRowWork loadTableRowsWork : loadTableRowWorks) {
-            loadTableRowsWork.join();
+        for (LoadTableForkWork loadTableForkWork : loadTableForkWorks) {
+            loadTableForkWork.join();
         }
     }
 
