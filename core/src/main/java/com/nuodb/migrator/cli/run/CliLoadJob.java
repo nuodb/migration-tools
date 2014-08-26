@@ -37,6 +37,7 @@ import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.spec.LoadJobSpec;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 import static com.google.common.collect.Maps.newTreeMap;
 import static com.nuodb.migrator.backup.loader.Parallelizers.ROW_LEVEL;
@@ -165,7 +166,8 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
     }
 
     protected Map<String, Parallelizer> createParallelizerMapping() {
-        Map<String, Parallelizer> parallelizerMapping = newTreeMap(CASE_INSENSITIVE_ORDER);
+        Map<String, Parallelizer> parallelizerMapping =
+                new TreeMap<String, Parallelizer>(CASE_INSENSITIVE_ORDER);
         parallelizerMapping.put(PARALLELIZER_TABLE_LEVEL, TABLE_LEVEL);
         parallelizerMapping.put(PARALLELIZER_ROW_LEVEL, ROW_LEVEL);
         return parallelizerMapping;
