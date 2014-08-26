@@ -29,12 +29,15 @@ package com.nuodb.migrator.backup.loader;
 
 import com.google.common.base.Function;
 import com.nuodb.migrator.backup.Column;
-import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.backup.format.value.*;
+import com.nuodb.migrator.backup.format.value.Row;
+import com.nuodb.migrator.backup.format.value.RowReader;
+import com.nuodb.migrator.backup.format.value.Value;
+import com.nuodb.migrator.backup.format.value.ValueHandle;
+import com.nuodb.migrator.backup.format.value.ValueHandleList;
+import com.nuodb.migrator.backup.format.value.ValueHandleListBuilder;
 import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.commit.CommitExecutor;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
-import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.session.WorkForkJoinTaskBase;
 import org.slf4j.Logger;
@@ -43,33 +46,33 @@ import java.sql.PreparedStatement;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.backup.BackupMessages.LOAD_TABLE_ROW_WORK;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
+import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
-import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Represents table loading parallelization on row level
+ * Table loader parallelized on row level
  *
  * @author Sergey Bushik
  */
 @SuppressWarnings("all")
-public class LoadTableRowsWork extends WorkForkJoinTaskBase {
+public class LoadTableRowWork extends WorkForkJoinTaskBase {
 
-    protected transient Logger logger = getLogger(getClass());
+    private transient Logger logger = getLogger(getClass());
 
     private int thread;
     private LoadTable loadTable;
     private RowReader rowReader;
     private BackupLoaderManager backupLoaderManager;
-
     private BackupLoaderContext backupLoaderContext;
     private PreparedStatement statement;
     private CommitExecutor commitExecutor;
     private ValueHandleList valueHandleList;
 
-    public LoadTableRowsWork(int thread, RowReader rowReader, LoadTable loadTable,
-                             BackupLoaderManager backupLoaderManager) {
+    public LoadTableRowWork(int thread, RowReader rowReader, LoadTable loadTable,
+                            BackupLoaderManager backupLoaderManager) {
         super(backupLoaderManager, backupLoaderManager.getBackupLoaderContext().getTargetSessionFactory());
         this.rowReader = rowReader;
         this.thread = thread;
@@ -79,8 +82,7 @@ public class LoadTableRowsWork extends WorkForkJoinTaskBase {
 
     @Override
     public String getName() {
-        RowSet rowSet = loadTable.getRowSet();
-        return format("Load from %s thread #%d", rowSet.getName(), getThread());
+        return getMessage(LOAD_TABLE_ROW_WORK, loadTable.getRowSet().getName(), getThread());
     }
 
     @Override
@@ -108,6 +110,7 @@ public class LoadTableRowsWork extends WorkForkJoinTaskBase {
             commitExecutor.execute();
             backupLoaderManager.afterLoadRow(this, loadTable, row);
         }
+        commitExecutor.finish();
     }
 
     protected void initValueHandleList() {

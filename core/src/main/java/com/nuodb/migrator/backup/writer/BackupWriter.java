@@ -36,6 +36,7 @@ import com.nuodb.migrator.backup.format.FormatFactory;
 import com.nuodb.migrator.backup.format.csv.CsvFormat;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistry;
 import com.nuodb.migrator.backup.format.value.ValueFormatRegistryResolver;
+import com.nuodb.migrator.backup.loader.BackupLoaderException;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Column;
 import com.nuodb.migrator.jdbc.metadata.Database;
@@ -122,7 +123,7 @@ public class BackupWriter {
     private Collection<WriteQuery> writeQueries = newArrayList();
 
     public void addQuery(String query) {
-        addWriteQuery(createWriteRowSet(query), getWriteQueries());
+        addWriteQuery(createWriteQuery(query), getWriteQueries());
     }
 
     public void addTable(Table table, Collection<Column> columns) {
@@ -278,7 +279,7 @@ public class BackupWriter {
     protected Executor createExecutor() {
         int threads = getThreads();
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Creating fork join pool with %d thread(s)", threads));
+            logger.trace(format("Using fork join pool with %d thread(s)", threads));
         }
         return new ForkJoinPool(threads);
     }
@@ -330,23 +331,8 @@ public class BackupWriter {
 
     protected void writeData(BackupWriterManager backupWriterManager) throws Exception {
         BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
-        backupWriterContext.setWriteQueries(createWriteRowSets(backupWriterContext));
-        backupWriterManager.addListener(new WriteQueryListener(backupWriterManager));
-        for (WriteQuery writeQuery : backupWriterContext.getWriteQueries()) {
-            writeData(writeQuery, backupWriterManager);
-        }
-        backupWriterManager.writeDataDone();
-    }
-
-    protected void writeData(WriteQuery writeQuery, BackupWriterManager backupWriterManager) throws Exception {
-        BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
-        Backup backup = backupWriterContext.getBackup();
-        Session session = backupWriterContext.getSourceSession();
-        backup.addRowSet(writeQuery.getRowSet());
-        while (writeQuery.getQuerySplitter().hasNextQuerySplit(session.getConnection())) {
-            Work work = createWork(writeQuery, backupWriterManager);
-            executeWork(work, backupWriterManager);
-        }
+        backupWriterContext.setWriteQueries(createWriteQueries(backupWriterContext));
+        executeWork(new WriteQueriesWork(backupWriterManager), backupWriterManager);
     }
 
     protected void writeSchema(BackupWriterManager backupWriterManager) throws Exception {
@@ -364,15 +350,6 @@ public class BackupWriter {
         backupOpsContext.put(INSPECTION_SCOPE, getInspectionScope());
         backupWriterContext.getBackupOps().write(backup, backupOpsContext);
         return backup;
-    }
-
-    protected Work createWork(WriteQuery writeQuery, BackupWriterManager backupWriterManager) throws Exception {
-        BackupWriterContext backupWriterContext = backupWriterManager.getBackupWriterContext();
-        Connection connection = backupWriterContext.getSourceSession().getConnection();
-        QuerySplitter querySplitter = writeQuery.getQuerySplitter();
-        return new WriteQueryWork(writeQuery, querySplitter.getNextQuerySplit(connection),
-                querySplitter.hasNextQuerySplit(connection), backupWriterManager
-        );
     }
 
     protected void executeWork(final Work work, final BackupWriterManager backupWriterManager) {
@@ -393,7 +370,7 @@ public class BackupWriter {
         }
     }
 
-    protected Collection<WriteQuery> createWriteRowSets(BackupWriterContext backupWriterContext) {
+    protected Collection<WriteQuery> createWriteQueries(BackupWriterContext backupWriterContext) {
         Collection<WriteQuery> writeQueries = newArrayList(getWriteQueries());
         Database database = backupWriterContext.getDatabase();
         Collection<TableSpec> tableSpecs = getTableSpecs();
@@ -418,13 +395,13 @@ public class BackupWriter {
         Collection<QuerySpec> querySpecs = getQuerySpecs();
         if (!isEmpty(querySpecs)) {
             for (QuerySpec querySpec : querySpecs) {
-                addWriteQuery(createWriteRowSet(querySpec.getQuery()), writeQueries);
+                addWriteQuery(createWriteQuery(querySpec.getQuery()), writeQueries);
             }
         }
         return writeQueries;
     }
 
-    protected WriteQuery createWriteRowSet(String query) {
+    protected WriteQuery createWriteQuery(String query) {
         return new WriteQuery(createQuerySplitter(query), new QueryRowSet(query));
     }
 

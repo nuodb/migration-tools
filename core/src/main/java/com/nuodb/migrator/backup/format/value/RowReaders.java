@@ -111,6 +111,7 @@ public class RowReaders {
                 input.setRowSet(rowSet);
                 input.init();
                 input.readStart();
+                number = 0;
             }
         }
 

@@ -48,7 +48,6 @@ import static com.google.common.collect.Multimaps.newSetMultimap;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static com.google.common.collect.Sets.newTreeSet;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
-import static com.nuodb.migrator.utils.ValidationUtils.isNotNull;
 import static java.lang.Long.MAX_VALUE;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -61,11 +60,10 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
 
     private BackupWriterSync backupWriterSync;
     private BackupWriterContext backupWriterContext;
-
     private Multimap<WriteQuery, WriteQueryWork> writeQueries;
 
     public SimpleBackupWriterManager() {
-        writeQueries = synchronizedSetMultimap(newSetMultimap(
+        this.writeQueries = synchronizedSetMultimap(newSetMultimap(
                 Maps.<WriteQuery, Collection<WriteQueryWork>>newHashMap(),
                 new Supplier<Set<WriteQueryWork>>() {
                     @Override
@@ -160,14 +158,12 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
 
     @Override
     public boolean isWriteData() {
-        BackupWriterContext backupWriterContext = getBackupWriterContext();
-        return backupWriterContext != null && backupWriterContext.isWriteData();
+        return backupWriterContext.isWriteData();
     }
 
     @Override
     public boolean isWriteSchema() {
-        BackupWriterContext backupWriterContext = getBackupWriterContext();
-        return backupWriterContext != null && backupWriterContext.isWriteSchema();
+        return backupWriterContext.isWriteSchema();
     }
 
     @Override
@@ -192,7 +188,6 @@ public class SimpleBackupWriterManager extends SimpleWorkManager<BackupWriterLis
 
     @Override
     public void setBackupWriterContext(BackupWriterContext backupWriterContext) {
-        isNotNull(backupWriterContext, "Backup writer context is required");
         this.backupWriterContext = backupWriterContext;
         this.backupWriterSync = new BackupWriterSync(
                 backupWriterContext.isWriteData(), backupWriterContext.isWriteSchema());

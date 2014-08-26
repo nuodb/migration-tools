@@ -32,33 +32,17 @@ import com.nuodb.migrator.MigratorException;
 /**
  * @author Sergey Bushik
  */
-public abstract class WorkRunnableBase extends WorkBase implements Runnable {
+public class WorkException extends MigratorException {
 
-    private WorkManager workManager;
-    private SessionFactory sessionFactory;
-    private Session session;
-
-    public WorkRunnableBase(WorkManager workManager, Session session) {
-        this.workManager = workManager;
-        this.session = session;
+    public WorkException(String message) {
+        super(message);
     }
 
-    public WorkRunnableBase(WorkManager workManager, SessionFactory sessionFactory) {
-        this.workManager = workManager;
-        this.sessionFactory = sessionFactory;
+    public WorkException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    public void run() {
-        if (sessionFactory != null) {
-            workManager.execute(this, sessionFactory);
-        } else {
-            workManager.execute(this, session);
-        }
-//        Throwable failure = (Throwable) workManager.getFailures().get(this);
-//        if (failure != null) {
-//            throw failure instanceof MigratorException ?
-//                    (MigratorException) failure : new MigratorException(failure);
-//        }
+    public WorkException(Throwable cause) {
+        super(cause);
     }
 }

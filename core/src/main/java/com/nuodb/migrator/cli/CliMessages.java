@@ -30,7 +30,7 @@ package com.nuodb.migrator.cli;
 /**
  * @author Sergey Bushik
  */
-public interface CliResources {
+public interface CliMessages {
 
     /**
      * Root options resources

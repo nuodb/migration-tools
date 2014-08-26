@@ -65,9 +65,7 @@ import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
 import com.nuodb.migrator.jdbc.query.InsertQueryBuilder;
 import com.nuodb.migrator.jdbc.query.InsertType;
 import com.nuodb.migrator.jdbc.query.Query;
-import com.nuodb.migrator.jdbc.session.Session;
-import com.nuodb.migrator.jdbc.session.SessionFactory;
-import com.nuodb.migrator.jdbc.session.Work;
+import com.nuodb.migrator.jdbc.session.*;
 import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
 import com.nuodb.migrator.spec.ConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
@@ -193,7 +191,7 @@ public class BackupLoader {
         // add listener after load constraints is created
         if (backupLoaderManager.isLoadSchema()) {
             backupLoaderManager.addListener(
-                    new LoadConstraintAdapter(this, backupLoaderManager));
+                    new LoadConstraintListener(this, backupLoaderManager));
         }
         for (BackupLoaderListener listener : getListeners()) {
             backupLoaderManager.addListener(listener);
@@ -204,7 +202,7 @@ public class BackupLoader {
     protected Executor createExecutor() {
         int threads = getThreads();
         if (logger.isTraceEnabled()) {
-            logger.trace(format("Creating fork join pool with %d thread(s)", threads));
+            logger.trace(format("Using fork join pool with %d thread(s)", threads));
         }
         return new ForkJoinPool(threads);
     }
@@ -369,10 +367,7 @@ public class BackupLoader {
         backupLoaderContext.setDatabase(database != null ? database :
                 openDatabase(backupLoaderContext.getTargetSession()));
         backupLoaderContext.setLoadTables(createLoadTables(backupLoaderContext));
-        for (LoadTable loadTable : backupLoaderContext.getLoadTables()) {
-            loadData(loadTable, backupLoaderManager);
-        }
-        backupLoaderManager.loadDataDone();
+        executeWork(new LoadTablesWork(backupLoaderManager), backupLoaderManager);
     }
 
     protected void loadData(LoadTable loadTable, BackupLoaderManager backupLoaderManager) {
@@ -504,7 +499,7 @@ public class BackupLoader {
                 @Override
                 public void run() {
                     backupLoaderManager.execute(work,
-                            backupLoaderContext.getSourceSessionFactory());
+                            backupLoaderContext.getTargetSessionFactory());
                 }
             });
         }

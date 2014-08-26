@@ -32,7 +32,7 @@ import com.nuodb.migrator.cli.parse.option.*;
 /**
  * @author Sergey Bushik
  */
-public class CliSupport implements CliResources, CliOptions {
+public class CliSupport implements CliMessages, CliOptions {
 
     private OptionToolkit optionToolkit;
 

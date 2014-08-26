@@ -25,40 +25,16 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.session;
-
-import com.nuodb.migrator.MigratorException;
+package com.nuodb.migrator.backup;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class WorkRunnableBase extends WorkBase implements Runnable {
-
-    private WorkManager workManager;
-    private SessionFactory sessionFactory;
-    private Session session;
-
-    public WorkRunnableBase(WorkManager workManager, Session session) {
-        this.workManager = workManager;
-        this.session = session;
-    }
-
-    public WorkRunnableBase(WorkManager workManager, SessionFactory sessionFactory) {
-        this.workManager = workManager;
-        this.sessionFactory = sessionFactory;
-    }
-
-    @Override
-    public void run() {
-        if (sessionFactory != null) {
-            workManager.execute(this, sessionFactory);
-        } else {
-            workManager.execute(this, session);
-        }
-//        Throwable failure = (Throwable) workManager.getFailures().get(this);
-//        if (failure != null) {
-//            throw failure instanceof MigratorException ?
-//                    (MigratorException) failure : new MigratorException(failure);
-//        }
-    }
+public interface BackupMessages {
+    String LOAD_TABLES_WORK = "com.nuodb.migrator.backup.loader.LoadTablesWork";
+    String LOAD_TABLE_WORK = "com.nuodb.migrator.backup.loader.LoadTableWork";
+    String LOAD_TABLE_ROW_WORK = "com.nuodb.migrator.backup.loader.LoadTableRowWork";
+    String LOAD_CONSTRAINT_WORK = "com.nuodb.migrator.backup.loader.LoadConstraintWork";
+    String WRITE_QUERIES_WORK = "com.nuodb.migrator.backup.writer.WriteQueriesWork";
+    String WRITE_QUERY_WORK = "com.nuodb.migrator.backup.writer.WriteQueryWork";
 }

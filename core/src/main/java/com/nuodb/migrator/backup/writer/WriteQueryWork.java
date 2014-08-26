@@ -30,7 +30,6 @@ package com.nuodb.migrator.backup.writer;
 import com.nuodb.migrator.backup.Chunk;
 import com.nuodb.migrator.backup.QueryRowSet;
 import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.backup.TableRowSet;
 import com.nuodb.migrator.backup.format.Output;
 import com.nuodb.migrator.backup.format.value.Row;
 import com.nuodb.migrator.backup.format.value.Value;
@@ -41,27 +40,29 @@ import com.nuodb.migrator.jdbc.dialect.FetchMode;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.model.Field;
 import com.nuodb.migrator.jdbc.query.StatementCallback;
-import com.nuodb.migrator.jdbc.session.WorkBase;
+import com.nuodb.migrator.jdbc.session.WorkForkJoinTaskBase;
 import com.nuodb.migrator.jdbc.split.QuerySplit;
 import com.nuodb.migrator.utils.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.backup.BackupMessages.WRITE_QUERY_WORK;
 import static com.nuodb.migrator.backup.format.value.ValueHandleListBuilder.newBuilder;
+import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
 import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.nuodb.migrator.utils.Predicates.instanceOf;
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 
 /**
@@ -70,7 +71,7 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
-public class WriteQueryWork extends WorkBase {
+public class WriteQueryWork extends WorkForkJoinTaskBase {
 
     private static final String QUERY = "query";
 
@@ -85,8 +86,11 @@ public class WriteQueryWork extends WorkBase {
     private BackupWriterContext backupWriterContext;
     private ValueHandleList valueHandleList;
 
-    public WriteQueryWork(WriteQuery writeQuery, QuerySplit querySplit, boolean hasNextQuerySplit,
-                          BackupWriterManager backupWriterManager) {
+    private static AtomicInteger i = new AtomicInteger();
+
+    public WriteQueryWork(WriteQuery writeQuery, QuerySplit querySplit,
+                          boolean hasNextQuerySplit, BackupWriterManager backupWriterManager) {
+        super(backupWriterManager, backupWriterManager.getBackupWriterContext().getSourceSessionFactory());
         this.writeQuery = writeQuery;
         this.querySplit = querySplit;
         this.hasNextQuerySplit = hasNextQuerySplit;
@@ -95,7 +99,7 @@ public class WriteQueryWork extends WorkBase {
 
     @Override
     public String getName() {
-        return format("Export to %s", getRowSetName());
+        return getMessage(WRITE_QUERY_WORK, getRowSetName());
     }
 
     @Override
@@ -209,7 +213,7 @@ public class WriteQueryWork extends WorkBase {
             names.add(chunkIndex + 1);
         }
         names.add(backupWriterContext.getFormat());
-        return lowerCase(join(names, "."));
+        return lowerCase(StringUtils.join(names, "."));
     }
 
     protected String getRowSetName() {
@@ -221,7 +225,7 @@ public class WriteQueryWork extends WorkBase {
             RowSet rowSet = writeQuery.getRowSet();
             int rowSetIndex = indexOf(filter(rowSet.getBackup().getRowSets(),
                     instanceOf(QueryRowSet.class)), equalTo(rowSet));
-            rowSetName = join(asList(QUERY, rowSetIndex + 1), "-");
+            rowSetName = StringUtils.join(asList(QUERY, rowSetIndex + 1), "-");
         }
         return lowerCase(rowSetName);
     }

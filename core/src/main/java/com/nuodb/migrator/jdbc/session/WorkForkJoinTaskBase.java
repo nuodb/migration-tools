@@ -72,8 +72,7 @@ public abstract class WorkForkJoinTaskBase<V> extends ForkJoinTask<V> implements
         } else {
             workManager.execute(this, session);
         }
-        Throwable failure = (Throwable) workManager.getFailures().get(this);
-        return failure == null;
+        return true;
     }
 
     @Override

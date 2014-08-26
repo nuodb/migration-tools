@@ -27,18 +27,18 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.value.RowReader;
-import com.nuodb.migrator.jdbc.session.WorkRunnableBase;
+import com.nuodb.migrator.jdbc.session.WorkForkJoinTaskBase;
 import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
 import org.slf4j.Logger;
 
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.backup.BackupMessages.LOAD_TABLE_WORK;
 import static com.nuodb.migrator.backup.format.value.RowReaders.newSequentialRowReader;
 import static com.nuodb.migrator.backup.format.value.RowReaders.newSynchronizedRowReader;
-import static java.lang.String.format;
+import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -48,9 +48,9 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Sergey Bushik
  */
 @SuppressWarnings("all")
-public class LoadTableWork extends WorkRunnableBase {
+public class LoadTableWork extends WorkForkJoinTaskBase {
 
-    protected transient Logger logger = getLogger(getClass());
+    private transient Logger logger = getLogger(getClass());
 
     private LoadTable loadTable;
     private BackupLoaderManager backupLoaderManager;
@@ -64,8 +64,7 @@ public class LoadTableWork extends WorkRunnableBase {
 
     @Override
     public String getName() {
-        RowSet rowSet = loadTable.getRowSet();
-        return format("Load from %s", rowSet.getName());
+        return getMessage(LOAD_TABLE_WORK, loadTable.getRowSet().getName());
     }
 
     @Override
@@ -83,14 +82,14 @@ public class LoadTableWork extends WorkRunnableBase {
 
     @Override
     public void execute() throws Exception {
-        Collection<ForkJoinTask> loadTableRowsWorks = newArrayList();
+        Collection<LoadTableRowWork> loadTableRowWorks = newArrayList();
         for (int thread = 0; thread < loadTable.getThreads(); thread++) {
-            ForkJoinTask loadTableRowsWork = new LoadTableRowsWork(
+            LoadTableRowWork loadTableRowWork = new LoadTableRowWork(
                     thread, rowReader, loadTable, backupLoaderManager);
-            loadTableRowsWork.fork();
-            loadTableRowsWorks.add(loadTableRowsWork);
+            loadTableRowWork.fork();
+            loadTableRowWorks.add(loadTableRowWork);
         }
-        for (ForkJoinTask loadTableRowsWork : loadTableRowsWorks) {
+        for (LoadTableRowWork loadTableRowsWork : loadTableRowWorks) {
             loadTableRowsWork.join();
         }
     }

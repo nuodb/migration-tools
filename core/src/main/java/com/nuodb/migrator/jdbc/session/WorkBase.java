@@ -34,7 +34,7 @@ import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
  */
 public abstract class WorkBase implements Work {
 
-    private Session session;
+    protected Session session;
 
     @Override
     public String getName() {

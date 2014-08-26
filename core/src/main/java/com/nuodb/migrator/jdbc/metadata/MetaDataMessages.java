@@ -25,40 +25,20 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.backup.writer;
-
-import com.nuodb.migrator.jdbc.session.Work;
-import com.nuodb.migrator.jdbc.session.WorkEvent;
-
-import java.util.Collection;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.synchronizedList;
+package com.nuodb.migrator.jdbc.metadata;
 
 /**
  * @author Sergey Bushik
  */
-public class WriteQueryListener extends BackupWriterAdapter {
-
-    private final BackupWriterManager backupWriterManager;
-    private final Collection<WriteQuery> exportQueries;
-
-    public WriteQueryListener(BackupWriterManager backupWriterManager) {
-        this.backupWriterManager = backupWriterManager;
-        this.exportQueries = synchronizedList(newArrayList(
-                backupWriterManager.getBackupWriterContext().getWriteQueries()));
-    }
-
-    @Override
-    public void onExecuteEnd(WorkEvent event) {
-        Work work = event.getWork();
-        if (work instanceof WriteQueryWork) {
-            WriteQueryWork writeQueryWork = (WriteQueryWork) work;
-            WriteQuery writeQuery = writeQueryWork.getWriteQuery();
-            exportQueries.remove(writeQuery);
-            if (exportQueries.isEmpty()) {
-                backupWriterManager.writeDataDone();
-            }
-        }
-    }
+public interface MetaDataMessages {
+    String DATABASE = "com.nuodb.migrator.jdbc.metadata.Database";
+    String CATALOG = "com.nuodb.migrator.jdbc.metadata.Catalog";
+    String SCHEMA = "com.nuodb.migrator.jdbc.metadata.Schema";
+    String TABLE = "com.nuodb.migrator.jdbc.metadata.Table";
+    String COLUMN = "com.nuodb.migrator.jdbc.metadata.Column";
+    String PRIMARY_KEY = "com.nuodb.migrator.jdbc.metadata.PrimaryKey";
+    String INDEX = "com.nuodb.migrator.jdbc.metadata.Index";
+    String FOREIGN_KEY = "com.nuodb.migrator.jdbc.metadata.ForeignKey";
+    String SEQUENCE = "com.nuodb.migrator.jdbc.metadata.Sequence";
+    String TRIGGER = "com.nuodb.migrator.jdbc.metadata.Trigger";
 }

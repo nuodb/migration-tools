@@ -40,9 +40,11 @@ import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 
 /**
+ * TODO: Refactor and replace with fork join task
+ *
  * @author Sergey Bushik
  */
-public class LoadConstraintAdapter extends BackupLoaderAdapter {
+public class LoadConstraintListener extends BackupLoaderAdapter {
 
     private final BackupLoader backupLoader;
     private final BackupLoaderManager backupLoaderManager;
@@ -50,7 +52,7 @@ public class LoadConstraintAdapter extends BackupLoaderAdapter {
     private final Multimap<Table, LoadConstraint> loadForeignKeys;
     private final AtomicBoolean loadForeignKeysStart = new AtomicBoolean();
 
-    public LoadConstraintAdapter(BackupLoader backupLoader, BackupLoaderManager backupLoaderManager) {
+    public LoadConstraintListener(BackupLoader backupLoader, BackupLoaderManager backupLoaderManager) {
         this.backupLoader = backupLoader;
         this.backupLoaderManager = backupLoaderManager;
 

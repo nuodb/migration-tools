@@ -25,40 +25,46 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.session;
+package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.MigratorException;
+import com.nuodb.migrator.jdbc.session.WorkRunnableBase;
+import com.nuodb.migrator.utils.concurrent.ForkJoinTask;
+
+import java.util.Collection;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.backup.BackupMessages.LOAD_TABLES_WORK;
+import static com.nuodb.migrator.context.ContextUtils.getMessage;
 
 /**
  * @author Sergey Bushik
  */
-public abstract class WorkRunnableBase extends WorkBase implements Runnable {
+public class LoadTablesWork extends WorkRunnableBase {
 
-    private WorkManager workManager;
-    private SessionFactory sessionFactory;
-    private Session session;
+    private BackupLoaderManager backupLoaderManager;
 
-    public WorkRunnableBase(WorkManager workManager, Session session) {
-        this.workManager = workManager;
-        this.session = session;
-    }
-
-    public WorkRunnableBase(WorkManager workManager, SessionFactory sessionFactory) {
-        this.workManager = workManager;
-        this.sessionFactory = sessionFactory;
+    public LoadTablesWork(BackupLoaderManager backupLoaderManager) {
+        super(backupLoaderManager, backupLoaderManager.getBackupLoaderContext().getTargetSession());
+        this.backupLoaderManager = backupLoaderManager;
     }
 
     @Override
-    public void run() {
-        if (sessionFactory != null) {
-            workManager.execute(this, sessionFactory);
-        } else {
-            workManager.execute(this, session);
+    public String getName() {
+        return getMessage(LOAD_TABLES_WORK);
+    }
+
+    @Override
+    public void execute() throws Exception {
+        LoadTables loadTables = backupLoaderManager.getBackupLoaderContext().getLoadTables();
+        Collection<LoadTableWork> loadTableWorks = newArrayList();
+        for (LoadTable loadTable : loadTables) {
+            LoadTableWork loadTableWork = new LoadTableWork(loadTable, backupLoaderManager);
+            loadTableWork.fork();
+            loadTableWorks.add(loadTableWork);
         }
-//        Throwable failure = (Throwable) workManager.getFailures().get(this);
-//        if (failure != null) {
-//            throw failure instanceof MigratorException ?
-//                    (MigratorException) failure : new MigratorException(failure);
-//        }
+        for (LoadTableWork loadTableWork : loadTableWorks) {
+            loadTableWork.join();
+        }
+        backupLoaderManager.loadDataDone();
     }
 }

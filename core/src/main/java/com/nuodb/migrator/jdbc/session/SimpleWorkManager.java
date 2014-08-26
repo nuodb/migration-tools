@@ -179,7 +179,7 @@ public class SimpleWorkManager<L extends WorkListener> implements WorkManager<L>
         if (isThrowFailureOnClose() && !isEmpty(failures)) {
             final Throwable failure = get(failures.values(), 0);
             throw failure instanceof MigratorException ?
-                    (MigratorException) failure : new MigratorException(failure);
+                    (MigratorException) failure : new WorkException(failure);
         }
     }
 

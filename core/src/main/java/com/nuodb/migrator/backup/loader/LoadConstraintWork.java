@@ -27,8 +27,7 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.jdbc.metadata.Constraint;
-import com.nuodb.migrator.jdbc.metadata.Schema;
+import com.nuodb.migrator.jdbc.metadata.*;
 import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ProxyScriptExporter;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
@@ -39,9 +38,11 @@ import com.nuodb.migrator.jdbc.session.WorkBase;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.backup.BackupMessages.LOAD_CONSTRAINT_WORK;
+import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getUseSchema;
-import static java.lang.String.format;
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 
 /**
  * Loads schema scripts for a desired object
@@ -54,23 +55,26 @@ public class LoadConstraintWork extends WorkBase {
     private BackupLoaderManager backupLoaderManager;
     private BackupLoaderContext backupLoaderContext;
     private ScriptExporter scriptExporter;
-    private ScriptGeneratorManager scriptGeneratorManager;
 
-    protected LoadConstraintWork(LoadConstraint loadConstraint, BackupLoaderManager backupLoaderManager) {
+    public LoadConstraintWork(LoadConstraint loadConstraint, BackupLoaderManager backupLoaderManager) {
         this.loadConstraint = loadConstraint;
         this.backupLoaderManager = backupLoaderManager;
     }
 
     @Override
     public String getName() {
-        String name = scriptGeneratorManager.getName(loadConstraint.getConstraint());
-        return format("Load %s", name);
+        BackupLoaderContext backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
+        ScriptGeneratorManager scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
+        Constraint constraint = loadConstraint.getConstraint();
+        String constraintType = getMessage(getClassName(constraint.getClass()));
+        String constraintName = scriptGeneratorManager.getName(constraint);
+        String tableName = scriptGeneratorManager.getName(constraint.getTable());
+        return getMessage(LOAD_CONSTRAINT_WORK, constraintType, constraintName, tableName);
     }
 
     @Override
     protected void init() throws Exception {
         backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
-        scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
         scriptExporter = createScriptExporter();
         scriptExporter.open();
     }
@@ -89,6 +93,7 @@ public class LoadConstraintWork extends WorkBase {
     @Override
     public void execute() throws Exception {
         if (backupLoaderManager.canExecute(this)) {
+            ScriptGeneratorManager scriptGeneratorManager = backupLoaderContext.getScriptGeneratorManager();
             Schema schema = getLoadConstraint().getTable().getSchema();
             scriptExporter.exportScript(getUseSchema(schema, scriptGeneratorManager));
             Constraint constraint = getLoadConstraint().getConstraint();
