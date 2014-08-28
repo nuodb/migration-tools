@@ -28,6 +28,7 @@
 package com.nuodb.migrator.backup.loader;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.backup.Backup;
 import com.nuodb.migrator.backup.BackupOps;
@@ -43,22 +44,8 @@ import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
 import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
-import com.nuodb.migrator.jdbc.metadata.Catalog;
-import com.nuodb.migrator.jdbc.metadata.Database;
-import com.nuodb.migrator.jdbc.metadata.ForeignKey;
-import com.nuodb.migrator.jdbc.metadata.Index;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
-import com.nuodb.migrator.jdbc.metadata.Schema;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.generator.CompositeScriptExporter;
-import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
-import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
-import com.nuodb.migrator.jdbc.metadata.generator.ProxyScriptExporter;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptExporter;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
-import com.nuodb.migrator.jdbc.metadata.generator.SessionScriptExporter;
+import com.nuodb.migrator.jdbc.metadata.*;
+import com.nuodb.migrator.jdbc.metadata.generator.*;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionManager;
 import com.nuodb.migrator.jdbc.metadata.inspector.InspectionScope;
 import com.nuodb.migrator.jdbc.metadata.inspector.TableInspectionScope;
@@ -80,6 +67,7 @@ import org.slf4j.Logger;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
@@ -87,6 +75,7 @@ import java.util.concurrent.ExecutorService;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.nuodb.migrator.backup.loader.Parallelizers.TABLE_LEVEL;
 import static com.nuodb.migrator.context.ContextUtils.createService;
@@ -94,12 +83,14 @@ import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
 import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
+import static com.nuodb.migrator.jdbc.metadata.generator.IndexUtils.getNonRepeatingIndexes;
 import static com.nuodb.migrator.jdbc.query.InsertType.INSERT;
 import static com.nuodb.migrator.jdbc.session.SessionFactories.newSessionFactory;
 import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
 import static com.nuodb.migrator.utils.Collections.*;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -423,21 +414,42 @@ public class BackupLoader {
         Database database = backupLoaderContext.getBackup().getDatabase();
         for (Table table : database.getTables()) {
             if (loadIndex) {
-                for (Index index : table.getIndexes()) {
+                Collection<Index> indexes = getNonRepeatingIndexes(table,
+                        new Predicate<Index>() {
+                            @Override
+                            public boolean apply(Index index) {
+                                if (logger.isTraceEnabled()) {
+                                    String indexName = index.getName();
+                                    String tableName = index.getTable().getQualifiedName();
+                                    Iterable<String> columnsNames = transform(index.getTable().getColumns(),
+                                            new Function<Identifiable, String>() {
+                                                @Override
+                                                public String apply(Identifiable column) {
+                                                    return column.getName();
+                                                }
+                                            });
+                                    logger.trace(format("Index %s on table %s skipped " +
+                                            "as index with column(s) %s is enqueued already",
+                                            indexName, tableName, join(columnsNames, ", ")));
+                                }
+                                return true;
+                            }
+                        });
+                for (Index index : indexes) {
                     if (!index.isPrimary()) {
-                        loadConstraints.putIndex(index);
+                        loadConstraints.addIndex(index);
                     }
                 }
             }
             if (loadPrimaryKey) {
                 PrimaryKey primaryKey = table.getPrimaryKey();
                 if (primaryKey != null) {
-                    loadConstraints.putPrimaryKey(primaryKey);
+                    loadConstraints.addPrimaryKey(primaryKey);
                 }
             }
             if (loadForeignKey) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
-                    loadConstraints.putForeignKey(foreignKey);
+                    loadConstraints.addForeignKey(foreignKey);
                 }
             }
         }

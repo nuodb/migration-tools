@@ -27,25 +27,23 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.metadata.ForeignKey;
-import com.nuodb.migrator.jdbc.metadata.HasTables;
-import com.nuodb.migrator.jdbc.metadata.Index;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
-import com.nuodb.migrator.jdbc.metadata.Sequence;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.Trigger;
+import com.nuodb.migrator.jdbc.metadata.*;
 
 import java.util.Collection;
-import java.util.Map;
 
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migrator.jdbc.metadata.generator.IndexUtils.getNonRepeatingIndexes;
+import static java.lang.String.format;
 import static java.util.Collections.singleton;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * @author Sergey Bushik
@@ -211,7 +209,27 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         if (createIndexes && (!dialect.supportsIndexInCreateTable() || !createTables)) {
             Collection<String> indexes = newLinkedHashSet();
             for (Table table : tables) {
-                for (Index index : table.getIndexes()) {
+                for (Index index : getNonRepeatingIndexes(table,
+                        new Predicate<Index>() {
+                            @Override
+                            public boolean apply(Index index) {
+                                if (logger.isTraceEnabled()) {
+                                    String indexName = index.getName();
+                                    String tableName = index.getTable().getQualifiedName();
+                                    Iterable<String> columnsNames = transform(index.getTable().getColumns(),
+                                            new Function<Identifiable, String>() {
+                                                @Override
+                                                public String apply(Identifiable column) {
+                                                    return column.getName();
+                                                }
+                                            });
+                                    logger.trace(format("Index %s on table %s skipped " +
+                                            "as index with column(s) %s is added already",
+                                            indexName, tableName, join(columnsNames, ", ")));
+                                }
+                                return true;
+                            }
+                        })) {
                     if (!addTableScripts(index.getTable(), scriptGeneratorManager) || index.isPrimary()) {
                         continue;
                     }

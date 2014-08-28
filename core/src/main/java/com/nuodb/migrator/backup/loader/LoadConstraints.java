@@ -52,12 +52,35 @@ public class LoadConstraints implements Iterable<LoadConstraint> {
     }
 
     public LoadConstraints(Multimap<Table, LoadConstraint> loadConstraints) {
-        putLoadConstraints(loadConstraints);
+        addLoadConstraints(loadConstraints);
+    }
+
+    public void addIndex(Index index) {
+        addLoadConstraint(new LoadConstraint(index));
+    }
+
+    public void addPrimaryKey(PrimaryKey primaryKey) {
+        addLoadConstraint(new LoadConstraint(primaryKey));
+    }
+
+    public void addForeignKey(ForeignKey foreignKey) {
+        addLoadConstraint(new LoadConstraint(foreignKey));
+    }
+
+    public void addLoadConstraint(LoadConstraint loadConstraint) {
+        loadConstraints.put(loadConstraint.getTable(), loadConstraint);
+        loadConstraint.setLoadConstraints(this);
+    }
+
+    public void addLoadConstraints(Multimap<Table, LoadConstraint> loadConstraints) {
+        for (LoadConstraint loadConstraint : loadConstraints.values()) {
+            addLoadConstraint(loadConstraint);
+        }
     }
 
     @Override
     public Iterator<LoadConstraint> iterator() {
-        return loadConstraints.values().iterator();
+        return getLoadConstraints().values().iterator();
     }
 
     public Multimap<Table, LoadConstraint> getLoadConstraints() {
@@ -71,28 +94,5 @@ public class LoadConstraints implements Iterable<LoadConstraint> {
                 return contains(objectTypes, loadConstraint.getConstraint().getObjectType());
             }
         });
-    }
-
-    public void putIndex(Index index) {
-        putLoadConstraint(new LoadConstraint(index));
-    }
-
-    public void putPrimaryKey(PrimaryKey primaryKey) {
-        putLoadConstraint(new LoadConstraint(primaryKey));
-    }
-
-    public void putForeignKey(ForeignKey foreignKey) {
-        putLoadConstraint(new LoadConstraint(foreignKey));
-    }
-
-    public void putLoadConstraint(LoadConstraint loadConstraint) {
-        loadConstraints.put(loadConstraint.getTable(), loadConstraint);
-        loadConstraint.setLoadConstraints(this);
-    }
-
-    public void putLoadConstraints(Multimap<Table, LoadConstraint> loadConstraints) {
-        for (LoadConstraint loadConstraint : loadConstraints.values()) {
-            putLoadConstraint(loadConstraint);
-        }
     }
 }

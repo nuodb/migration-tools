@@ -27,12 +27,17 @@
  */
 package com.nuodb.migrator.jdbc.metadata;
 
+import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * @author Sergey Bushik
  */
 public class MetaDataHandlerBase implements MetaDataHandler {
 
     private final MetaDataType objectType;
+    protected final transient Logger logger = getLogger(getClass());
 
     public MetaDataHandlerBase(Class<? extends MetaData> objectClass) {
         this.objectType = new MetaDataType(objectClass);
