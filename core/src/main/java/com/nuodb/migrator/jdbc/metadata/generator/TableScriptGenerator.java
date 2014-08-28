@@ -27,9 +27,9 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
 import com.nuodb.migrator.jdbc.metadata.Check;
 import com.nuodb.migrator.jdbc.metadata.Column;
@@ -40,22 +40,28 @@ import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.type.JdbcType;
+import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.Iterator;
 
+import static com.google.common.collect.Iterables.tryFind;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.*;
+import static com.nuodb.migrator.jdbc.metadata.generator.IndexUtils.getNonRepeatingIndexes;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.join;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 @SuppressWarnings("unchecked")
 public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
+
+    protected final transient Logger logger = getLogger(getClass());
 
     public TableScriptGenerator() {
         super(Table.class);
@@ -67,7 +73,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
         StringBuilder buffer = new StringBuilder("CREATE TABLE");
         buffer.append(' ').append(scriptGeneratorManager.getName(table)).append(" (");
         Collection<Column> columns = table.getColumns();
-        Collection<Index> indexes = table.getIndexes();
+        Collection<Index> indexes = getNonRepeatingIndexes(table);
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         for (Iterator<Column> iterator = columns.iterator(); iterator.hasNext(); ) {
             final Column column = iterator.next();
@@ -91,7 +97,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(" DEFAULT ").append(defaultValue);
             }
             if (objectTypes.contains(INDEX)) {
-                Optional<Index> index = Iterables.tryFind(indexes, new Predicate<Index>() {
+                Optional<Index> index = tryFind(indexes, new Predicate<Index>() {
                     @Override
                     public boolean apply(Index index) {
                         Collection<Column> columns = index.getColumns();

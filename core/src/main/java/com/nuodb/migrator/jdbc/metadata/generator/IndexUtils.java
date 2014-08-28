@@ -25,56 +25,45 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.nuodb.migrator.jdbc.metadata;
+package com.nuodb.migrator.jdbc.metadata.generator;
 
-import org.slf4j.Logger;
+import com.google.common.base.Predicate;
+import com.nuodb.migrator.jdbc.metadata.Column;
+import com.nuodb.migrator.jdbc.metadata.Index;
+import com.nuodb.migrator.jdbc.metadata.Table;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import java.util.Collection;
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * @author Sergey Bushik
  */
-public class MetaDataHandlerBase implements MetaDataHandler {
+public class IndexUtils {
 
-    private final MetaDataType objectType;
-    protected final transient Logger logger = getLogger(getClass());
-
-    public MetaDataHandlerBase(Class<? extends MetaData> objectClass) {
-        this.objectType = new MetaDataType(objectClass);
+    public static Collection<Index> getNonRepeatingIndexes(Table table) {
+        return getNonRepeatingIndexes(table, null);
     }
 
-    public MetaDataHandlerBase(MetaDataType objectType) {
-        this.objectType = objectType;
-    }
-
-    public MetaDataType getObjectType() {
-        return objectType;
-    }
-
-    @Override
-    public boolean supports(MetaData object) {
-        return supports(object.getObjectType());
-    }
-
-    @Override
-    public boolean supports(MetaDataType objectType) {
-        return getObjectType().isAssignableFrom(objectType);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        MetaDataHandlerBase that = (MetaDataHandlerBase) o;
-
-        if (!objectType.equals(that.objectType)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return objectType.hashCode();
+    /**
+     * Bypasses MIG-88 "an index on these columns already exists" and executes predicate for duplicated indexes
+     *
+     * @param table to get non repeating indexes for
+     * @return non repeating indexes
+     */
+    public static Collection<Index> getNonRepeatingIndexes(Table table, Predicate<Index> predicate) {
+        Map<Collection<Column>, Index> indexes = newLinkedHashMap();
+        for (Index candidate : table.getIndexes()) {
+            Collection<Column> columns = newHashSet(candidate.getColumns());
+            Index index = indexes.get(columns);
+            if (index == null) {
+                indexes.put(columns, candidate);
+            } else if (predicate != null) {
+                predicate.apply(candidate);
+            }
+        }
+        return indexes.values();
     }
 }
