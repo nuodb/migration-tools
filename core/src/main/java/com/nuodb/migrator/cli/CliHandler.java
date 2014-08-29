@@ -215,9 +215,6 @@ public class CliHandler extends CliSupport implements Bootable {
 
     protected void handleCommand(OptionSet options) {
         CliRun cliRun = (CliRun) options.getValue(COMMAND);
-        if (logger.isTraceEnabled()) {
-            logger.trace(format("Running %s command", cliRun.getCommand()));
-        }
         cliRun.execute();
     }
 
