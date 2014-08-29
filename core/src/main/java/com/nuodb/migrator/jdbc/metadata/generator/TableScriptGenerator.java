@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.nuodb.migrator.jdbc.dialect.Dialect;

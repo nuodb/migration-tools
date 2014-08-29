@@ -36,8 +36,8 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class MetaDataHandlerBase implements MetaDataHandler {
 
-    private final MetaDataType objectType;
     protected final transient Logger logger = getLogger(getClass());
+    private final MetaDataType objectType;
 
     public MetaDataHandlerBase(Class<? extends MetaData> objectClass) {
         this.objectType = new MetaDataType(objectClass);
