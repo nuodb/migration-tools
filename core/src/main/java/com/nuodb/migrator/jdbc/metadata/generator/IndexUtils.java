@@ -51,19 +51,22 @@ public class IndexUtils {
      * Bypasses MIG-88 "an index on these columns already exists" and executes predicate for duplicated indexes
      *
      * @param table to get non repeating indexes for
+     * @param predicate receives each duplicate index
      * @return non repeating indexes
      */
     public static Collection<Index> getNonRepeatingIndexes(Table table, Predicate<Index> predicate) {
-        Map<Collection<Column>, Index> indexes = newLinkedHashMap();
-        for (Index candidate : table.getIndexes()) {
-            Collection<Column> columns = newHashSet(candidate.getColumns());
-            Index index = indexes.get(columns);
-            if (index == null) {
-                indexes.put(columns, candidate);
+        Map<Collection<Column>, Index> nonRepeatingIndexes = newLinkedHashMap();
+        for (Index index : table.getIndexes()) {
+            Collection<Column> columns = newHashSet(index.getColumns());
+            Index nonRepeatingIndex = nonRepeatingIndexes.get(columns);
+            boolean replaceWithUniqueIndex =
+                    index.isUnique() && nonRepeatingIndex != null && !nonRepeatingIndex.isUnique();
+            if (index.isPrimary() || replaceWithUniqueIndex || nonRepeatingIndex == null) {
+                nonRepeatingIndexes.put(columns, index);
             } else if (predicate != null) {
-                predicate.apply(candidate);
+                predicate.apply(index);
             }
         }
-        return indexes.values();
+        return nonRepeatingIndexes.values();
     }
 }
