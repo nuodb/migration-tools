@@ -33,11 +33,25 @@ import java.io.Serializable;
 
 import static java.lang.String.format;
 
+/**
+ * @author Sergey Bushik
+ */
 public class DriverInfo implements Serializable {
+
     private String name;
     private String version;
     private int minorVersion;
     private int majorVersion;
+
+    public DriverInfo() {
+    }
+
+    public DriverInfo(String name, String version, int minorVersion, int majorVersion) {
+        this.name = name;
+        this.version = version;
+        this.minorVersion = minorVersion;
+        this.majorVersion = majorVersion;
+    }
 
     public String getName() {
         return name;

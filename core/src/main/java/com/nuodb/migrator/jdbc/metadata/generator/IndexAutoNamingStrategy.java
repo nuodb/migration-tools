@@ -38,6 +38,7 @@ public class IndexAutoNamingStrategy extends LengthLimitNamingStrategy<Index> {
 
     public IndexAutoNamingStrategy() {
         super(Index.class, LENGTH_LIMIT);
+        addNamingStrategy(new IndexSourceNamingStrategy());
         addNamingStrategy(new IndexQualifyNamingStrategy());
         addNamingStrategy(new IndexHashNamingStrategy());
     }

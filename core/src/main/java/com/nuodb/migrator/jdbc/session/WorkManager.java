@@ -27,14 +27,29 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
-public interface WorkManager {
+public interface WorkManager<L extends WorkListener> {
+
+    boolean hasListeners();
+
+    Collection<L> getListeners();
+
+    void addListener(L listener);
+
+    void addListener(int index, L listener);
+
+    void removeListener(L listener);
+
+    void execute(Work work, Session session);
+
+    void execute(Work work, SessionFactory sessionFactory);
+
+    void close() throws Exception;
 
     Map<Work, Throwable> getFailures();
-
-    void failure(Work work, Throwable failure);
 }

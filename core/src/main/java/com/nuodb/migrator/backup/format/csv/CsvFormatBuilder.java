@@ -43,7 +43,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * @author Sergey Bushik
  */
 @SuppressWarnings("ConstantConditions")
-class CsvFormatBuilder implements CsvAttributes {
+class CsvFormatBuilder implements CsvFormat {
 
     private static Map<String, Character> DELIMITERS;
     private static Map<String, String> LINE_SEPARATORS;

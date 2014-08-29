@@ -110,7 +110,7 @@ public class XmlHandlerRegistry {
                 converter.write(output, source);
                 return true;
             } catch (Exception e) {
-                throw new XmlPersisterException("Underlying converter failed to write", e);
+                throw new XmlPersisterException("Underlying converter failed to export", e);
             }
         }
 

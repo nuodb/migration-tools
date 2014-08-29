@@ -49,7 +49,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 @SuppressWarnings({"NullableProblems", "unchecked"})
 public class SessionBase implements Session {
 
-    private final transient Logger logger = getLogger(getClass());
     private SessionFactoryBase sessionFactoryBase;
     private Connection connection;
     private Dialect dialect;
@@ -148,17 +147,7 @@ public class SessionBase implements Session {
 
     @Override
     public void execute(Work work, WorkManager workManager) throws Exception {
-        if (logger.isTraceEnabled()) {
-            logger.trace(format("Started executing %s", work));
-        }
-        try {
-            work.init(this);
-            work.execute();
-        } catch (Exception exception) {
-            workManager.failure(work, exception);
-        } finally {
-            work.close();
-        }
+        workManager.execute(work, this);
     }
 
     @Override

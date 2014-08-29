@@ -38,6 +38,7 @@ public class ForeignKeyAutoNamingStrategy extends LengthLimitNamingStrategy<Fore
 
     public ForeignKeyAutoNamingStrategy() {
         super(ForeignKey.class, LENGTH_LIMIT);
+        addNamingStrategy(new ForeignKeySourceNamingStrategy());
         addNamingStrategy(new ForeignKeyQualifyNamingStrategy());
         addNamingStrategy(new ForeignKeyHashNamingStrategy());
     }

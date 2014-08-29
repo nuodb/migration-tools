@@ -37,63 +37,25 @@ public class SimpleScript implements Script, Comparable<Script> {
 
     private boolean literal;
     private String script;
-    private Session session;
-    private Dialect dialect;
-    private DatabaseInfo databaseInfo;
 
-    public SimpleScript(String script, DatabaseInfo databaseInfo) {
-        this(script, databaseInfo, false);
+    public SimpleScript(String script) {
+        this(script, false);
     }
 
     /**
      * Constructs script detached from any database session
      *
-     * @param script       source of the script
-     * @param databaseInfo target database info
-     * @param literal      true if script is literal
-     */
-    public SimpleScript(String script, DatabaseInfo databaseInfo, boolean literal) {
-        this.script = script;
-        this.databaseInfo = databaseInfo;
-        this.literal = literal;
-    }
-
-    /**
-     * Constructs script attached to the specified session
-     *
      * @param script  source of the script
-     * @param session source database session
+     * @param literal true if script is literal
      */
-    public SimpleScript(String script, Session session) {
-        this(script, session, false);
-    }
-
-    public SimpleScript(String script, Session session, boolean literal) {
+    public SimpleScript(String script, boolean literal) {
         this.script = script;
-        this.session = session;
-        this.dialect = session.getDialect();
-        this.databaseInfo = session.getDatabaseInfo();
         this.literal = literal;
     }
 
     @Override
     public String getScript() {
         return script;
-    }
-
-    @Override
-    public Session getSession() {
-        return session;
-    }
-
-    @Override
-    public Dialect getDialect() {
-        return dialect;
-    }
-
-    @Override
-    public DatabaseInfo getDatabaseInfo() {
-        return databaseInfo;
     }
 
     @Override
@@ -104,12 +66,11 @@ public class SimpleScript implements Script, Comparable<Script> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SimpleScript)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         SimpleScript that = (SimpleScript) o;
 
-        if (databaseInfo != null ? !databaseInfo.equals(that.getDatabaseInfo()) : that.getDatabaseInfo() != null)
-            return false;
+        if (literal != that.literal) return false;
         if (script != null ? !script.equals(that.script) : that.script != null) return false;
 
         return true;
@@ -117,8 +78,8 @@ public class SimpleScript implements Script, Comparable<Script> {
 
     @Override
     public int hashCode() {
-        int result = script != null ? script.hashCode() : 0;
-        result = 31 * result + (databaseInfo != null ? databaseInfo.hashCode() : 0);
+        int result = (literal ? 1 : 0);
+        result = 31 * result + (script != null ? script.hashCode() : 0);
         return result;
     }
 

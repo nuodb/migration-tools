@@ -27,6 +27,8 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.backup.BackupOps;
+
 import java.util.Collection;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -36,9 +38,18 @@ import static com.google.common.collect.Sets.newHashSet;
  */
 public class SchemaJobSpec extends ScriptGeneratorJobSpecBase {
 
+    private BackupOps backupOps;
     private ConnectionSpec sourceSpec;
     private ResourceSpec outputSpec;
     private Collection<MigrationMode> migrationModes = newHashSet(MigrationMode.DATA);
+
+    public BackupOps getBackupOps() {
+        return backupOps;
+    }
+
+    public void setBackupOps(BackupOps backupOps) {
+        this.backupOps = backupOps;
+    }
 
     public ConnectionSpec getSourceSpec() {
         return sourceSpec;

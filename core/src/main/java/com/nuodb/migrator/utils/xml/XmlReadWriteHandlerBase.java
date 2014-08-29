@@ -60,7 +60,11 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
 
     protected XmlReadTargetAwareContext<T> createContext(InputNode input, Class<? extends T> type,
                                                          XmlReadContext context) {
-        return new XmlReadTargetAwareContext<T>(createTarget(input, type), context);
+        return new XmlReadTargetAwareContext<T>(createTarget(input, type, context), context);
+    }
+
+    protected T createTarget(InputNode input, Class<? extends T> type, XmlReadContext context) {
+        return createTarget(input, type);
     }
 
     protected T createTarget(InputNode input, Class<? extends T> type) {
@@ -72,11 +76,8 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     protected <T> T getParent(XmlReadContext context, int parent) {
-        for (int index = 0; context != null && index < parent; index++) {
-            context = context.getContext();
-        }
         return context instanceof XmlReadTargetAwareContext ?
-                (T) ((XmlReadTargetAwareContext) context).getTarget() : null;
+                (T) ((XmlReadTargetAwareContext) context).getTarget(parent) : null;
     }
 
     protected void read(InputNode input, XmlReadTargetAwareContext<T> context) throws Exception {
@@ -143,11 +144,8 @@ public abstract class XmlReadWriteHandlerBase<T> extends XmlAttributesAccessor i
     }
 
     protected <T> T getParent(XmlWriteContext context, int parent) {
-        for (int index = 0; context != null && index < parent; index++) {
-            context = context.getContext();
-        }
         return context instanceof XmlWriteSourceAwareContext ?
-                (T) ((XmlWriteSourceAwareContext) context).getSource() : null;
+                (T) ((XmlWriteSourceAwareContext) context).getSource(parent) : null;
     }
 
     protected boolean write(OutputNode output, XmlWriteSourceAwareContext context) throws Exception {

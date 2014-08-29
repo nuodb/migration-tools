@@ -34,10 +34,13 @@ import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.TimeZone;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -95,7 +98,7 @@ public class PostgreSQLDialect extends SimpleDialect {
             String timeZoneAsValue = timeZone != null ? timeZoneAsValue(timeZone) : "LOCAL";
             statement.execute("SET TIME ZONE " + timeZoneAsValue);
         } finally {
-            close(statement);
+            closeQuietly(statement);
         }
     }
 
@@ -146,21 +149,13 @@ public class PostgreSQLDialect extends SimpleDialect {
         return true;
     }
 
-    @Override
-    public boolean supportsLimitParameters() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsCatalogs() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsSchemas() {
-        return true;
-    }
-
+    /**
+     * http://jdbc.postgresql.org/documentation/head/query.html#query-with-cursor
+     *
+     * @param statement
+     * @param fetchMode
+     * @throws SQLException
+     */
     @Override
     public void setFetchMode(Statement statement, FetchMode fetchMode) throws SQLException {
         int fetchSize = fetchMode.getFetchSize();
@@ -175,6 +170,21 @@ public class PostgreSQLDialect extends SimpleDialect {
         } else {
             statement.setFetchSize(0);
         }
+    }
+
+    @Override
+    public boolean supportsLimitParameters() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsSchemas() {
+        return true;
     }
 
     @Override

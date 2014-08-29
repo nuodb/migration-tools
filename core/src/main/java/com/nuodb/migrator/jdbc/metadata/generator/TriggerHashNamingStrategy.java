@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.Trigger;
 
+import static com.nuodb.migrator.utils.StringUtils.*;
 import static java.lang.Integer.toHexString;
 
 /**
@@ -37,6 +38,15 @@ import static java.lang.Integer.toHexString;
 public class TriggerHashNamingStrategy extends TriggerQualifyNamingStrategy {
     @Override
     protected String getNonPrefixedName(Trigger trigger, ScriptGeneratorManager scriptGeneratorManager) {
-        return toHexString(super.getNonPrefixedName(trigger, scriptGeneratorManager).hashCode());
+        String nonPrefixedName = toHexString(super.getNonPrefixedName(trigger, scriptGeneratorManager).hashCode());
+        String tableName = scriptGeneratorManager.getName(trigger.getTable(), false);
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(nonPrefixedName);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(nonPrefixedName);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(nonPrefixedName);
+        }
+        return nonPrefixedName;
     }
 }

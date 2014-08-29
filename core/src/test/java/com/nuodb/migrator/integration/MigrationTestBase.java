@@ -53,7 +53,6 @@ import org.testng.annotations.Parameters;
 /**
  * @author Krishnamoorthy Dhandapani
  */
-
 public class MigrationTestBase {
 
 	public static final String NUODB_JDBC_JAR = "nuodbjdbc.jar";
@@ -101,13 +100,13 @@ public class MigrationTestBase {
 					+ File.separator + NUODB_JDBC_JAR;
 		}
 
-		if (nuodbJdbcJarLoc != null || nuodbJdbcJarLoc.trim().length() > 0) {
-			File nuodbJdbcJarFile = new File(nuodbJdbcJarLoc);
-			nuodbJdbcJarFile = new File(nuodbJdbcJarFile.getCanonicalPath());
-			Assert.assertTrue(nuodbJdbcJarFile.exists());
-			Assert.assertTrue(nuodbJdbcJarFile.canRead());
-			urls.add(nuodbJdbcJarFile.toURI().toURL());
-		}
+        if (nuodbJdbcJarLoc != null || nuodbJdbcJarLoc.trim().length() > 0) {
+            File nuodbJdbcJarFile = new File(nuodbJdbcJarLoc);
+            nuodbJdbcJarFile = new File(nuodbJdbcJarFile.getCanonicalPath());
+            Assert.assertTrue(nuodbJdbcJarFile.exists());
+            Assert.assertTrue(nuodbJdbcJarFile.canRead());
+            urls.add(nuodbJdbcJarFile.toURI().toURL());
+        }
 
 		URLClassLoader ucl = new URLClassLoader(urls.toArray(new URL[urls
 				.size()]), Thread.currentThread().getContextClassLoader());

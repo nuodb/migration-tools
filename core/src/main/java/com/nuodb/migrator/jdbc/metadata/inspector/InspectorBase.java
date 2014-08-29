@@ -45,7 +45,7 @@ import java.util.Collection;
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static java.lang.String.format;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -198,7 +198,7 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
 
     protected void closeStatement(InspectionContext inspectionContext, I inspectionScope, Query query,
                                   Statement statement) throws SQLException {
-        close(statement);
+        closeQuietly(statement);
     }
 
     protected ResultSet createResultSet(InspectionContext inspectionContext, I inspectionScope, Query query,
@@ -264,7 +264,7 @@ public abstract class InspectorBase<M extends MetaData, I extends InspectionScop
     }
 
     protected void closeResultSet(InspectionContext inspectionContext, ResultSet resultSet) throws SQLException {
-        close(resultSet);
+        closeQuietly(resultSet);
     }
 
     protected abstract I createInspectionScope(M object);

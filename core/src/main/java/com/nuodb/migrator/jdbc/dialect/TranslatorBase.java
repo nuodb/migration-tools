@@ -27,7 +27,6 @@
  */
 package com.nuodb.migrator.jdbc.dialect;
 
-import com.nuodb.migrator.jdbc.connection.ConnectionProxy;
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.url.JdbcUrl;
 import com.nuodb.migrator.spec.ConnectionSpec;
@@ -69,30 +68,29 @@ public abstract class TranslatorBase<S extends Script> implements Translator<S> 
         this.scriptClass = scriptClass;
     }
 
-    public static Connection getConnection(Script script) {
-        return script.getSession().getConnection();
+    public static Connection getConnection(TranslationContext context) {
+        return context.getSession().getConnection();
     }
 
-    public static ConnectionSpec getConnectionSpec(Script script) {
-        return script.getSession().getConnectionSpec();
+    public static ConnectionSpec getConnectionSpec(TranslationContext context) {
+        return context.getSession().getConnectionSpec();
     }
 
-    public static JdbcUrl getJdbcUrl(Script script) {
-        return ((DriverConnectionSpec) getConnectionSpec(script)).getJdbcUrl();
+    public static JdbcUrl getJdbcUrl(TranslationContext context) {
+        return ((DriverConnectionSpec) getConnectionSpec(context)).getJdbcUrl();
     }
 
     @Override
     public boolean supports(Script script, TranslationContext context) {
-        return supportsDatabase(script, context) && supportsScriptClass(script,
-                context) && supportsScript((S) script, context);
+        return supportsDatabase(context) && supportsScriptClass(script) && supportsScript((S) script, context);
     }
 
-    protected boolean supportsDatabase(Script script, TranslationContext context) {
-        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isAssignable(script.getDatabaseInfo())) &&
-                (targetDatabaseInfo == null || targetDatabaseInfo.isAssignable(context.getDatabaseInfo()));
+    protected boolean supportsDatabase(TranslationContext context) {
+        return (sourceDatabaseInfo == null || sourceDatabaseInfo.isAssignable(context.getSession().getDatabaseInfo())) &&
+                (targetDatabaseInfo == null || targetDatabaseInfo.isAssignable(context.getDialect().getDatabaseInfo()));
     }
 
-    protected boolean supportsScriptClass(Script script, TranslationContext context) {
+    protected boolean supportsScriptClass(Script script) {
         return script != null && (scriptClass == null || scriptClass.isAssignableFrom(script.getClass()));
     }
 

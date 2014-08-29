@@ -45,10 +45,24 @@ import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.commit.SingleCommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
-import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
+import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.generator.*;
+import com.nuodb.migrator.jdbc.metadata.generator.ForeignKeyAutoNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.ForeignKeyHashNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.ForeignKeyQualifyNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
+import com.nuodb.migrator.jdbc.metadata.generator.IndexAutoNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.IndexHashNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.IndexQualifyNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
+import com.nuodb.migrator.jdbc.metadata.generator.SequenceAutoNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.SequenceHashNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.SequenceQualifyNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.TriggerAutoNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.TriggerHashNamingStrategy;
+import com.nuodb.migrator.jdbc.metadata.generator.TriggerQualifyNamingStrategy;
 import com.nuodb.migrator.jdbc.type.JdbcTypeCodes;
 import com.nuodb.migrator.spec.DriverConnectionSpec;
 import com.nuodb.migrator.spec.JdbcTypeSpec;
@@ -74,7 +88,7 @@ import static com.google.common.collect.Lists.transform;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newLinkedHashSet;
-import static com.nuodb.migrator.backup.format.csv.CsvAttributes.FORMAT;
+import static com.nuodb.migrator.backup.format.csv.CsvFormat.TYPE;
 import static com.nuodb.migrator.cli.parse.option.OptionUtils.optionUnexpected;
 import static com.nuodb.migrator.cli.validation.ConnectionGroupValidators.addConnectionGroupValidators;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
@@ -122,11 +136,11 @@ public class CliRunSupport extends CliSupport {
     public static final String NAMING_STRATEGY_QUALIFY = "qualify";
     public static final String NAMING_STRATEGY_HASH = "hash";
     public static final String NAMING_STRATEGY_AUTO = "auto";
-    private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
-
     public static final String COMMIT_STRATEGY_SINGLE = "single";
     public static final String COMMIT_STRATEGY_BATCH = "batch";
     private JdbcTypeOptionProcessor jdbcTypeOptionProcessor = new JdbcTypeOptionProcessor();
+
+    private TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
 
     /**
      * Builds the source group of options for the source database connection.
@@ -139,6 +153,7 @@ public class CliRunSupport extends CliSupport {
                 withRequired(true).
                 withMinimum(1);
 
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         Option driver = newBasicOptionBuilder().
                 withName(SOURCE_DRIVER).
                 withDescription(getMessage(SOURCE_DRIVER_OPTION_DESCRIPTION)).
@@ -147,7 +162,8 @@ public class CliRunSupport extends CliSupport {
                         newArgumentBuilder().
                                 withName(getMessage(SOURCE_DRIVER_ARGUMENT_NAME)).
                                 withRequired(true).
-                                withMinimum(1).build()
+                                withMinimum(1).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(driver);
 
@@ -159,7 +175,8 @@ public class CliRunSupport extends CliSupport {
                         newArgumentBuilder().
                                 withName(getMessage(SOURCE_URL_ARGUMENT_NAME)).
                                 withRequired(true).
-                                withMinimum(1).build()
+                                withMinimum(1).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(url);
 
@@ -168,7 +185,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_USERNAME_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_USERNAME_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(username);
 
@@ -177,7 +195,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_PASSWORD_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(password);
 
@@ -195,7 +214,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_CATALOG_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_CATALOG_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_CATALOG_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(catalog);
 
@@ -204,7 +224,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_SCHEMA_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(schema);
 
@@ -213,7 +234,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_AUTO_COMMIT_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_AUTO_COMMIT_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_AUTO_COMMIT_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(autoCommit);
 
@@ -222,7 +244,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(SOURCE_TRANSACTION_ISOLATION_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(SOURCE_TRANSACTION_ISOLATION_ARGUMENT_NAME)).build()
+                                withName(getMessage(SOURCE_TRANSACTION_ISOLATION_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(transactionIsolation);
 
@@ -348,6 +371,8 @@ public class CliRunSupport extends CliSupport {
         GroupBuilder group = newGroupBuilder().
                 withName(getMessage(TARGET_GROUP_NAME));
 
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
         Option url = newBasicOptionBuilder().
                 withName(TARGET_URL).
                 withDescription(getMessage(TARGET_URL_OPTION_DESCRIPTION)).
@@ -356,7 +381,8 @@ public class CliRunSupport extends CliSupport {
                         newArgumentBuilder().
                                 withName(getMessage(TARGET_URL_ARGUMENT_NAME)).
                                 withRequired(true).
-                                withMinimum(1).build()
+                                withMinimum(1).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(url);
 
@@ -365,7 +391,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(TARGET_USERNAME_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).build()
+                                withName(getMessage(TARGET_USERNAME_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(username);
 
@@ -374,7 +401,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(TARGET_PASSWORD_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).build()
+                                withName(getMessage(TARGET_PASSWORD_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(password);
 
@@ -392,7 +420,8 @@ public class CliRunSupport extends CliSupport {
                 withDescription(getMessage(TARGET_SCHEMA_OPTION_DESCRIPTION)).
                 withArgument(
                         newArgumentBuilder().
-                                withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).build()
+                                withName(getMessage(TARGET_SCHEMA_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).build()
                 ).build();
         group.withOption(schema);
         group.withRequired(true);
@@ -615,6 +644,26 @@ public class CliRunSupport extends CliSupport {
         return group.build();
     }
 
+    protected Group createExecutorGroup() {
+        GroupBuilder group = newGroupBuilder().
+                withName(getMessage(EXECUTOR_GROUP_NAME)).
+                withRequired(false);
+        createExecutorGroup(group);
+        return group.build();
+    }
+
+    protected void createExecutorGroup(GroupBuilder group) {
+        Option threads = newBasicOptionBuilder().
+                withName(THREADS).
+                withAlias(THREADS_SHORT, OptionFormat.SHORT).
+                withDescription(getMessage(THREADS_OPTION_DESCRIPTION)).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(THREADS_ARGUMENT_NAME)).build()
+                ).build();
+        group.withOption(threads);
+    }
+
     protected DriverConnectionSpec parseSourceGroup(OptionSet optionSet, Option option) {
         DriverConnectionSpec connectionSpec = new DriverConnectionSpec();
         connectionSpec.setDriver((String) optionSet.getValue(SOURCE_DRIVER));
@@ -645,7 +694,7 @@ public class CliRunSupport extends CliSupport {
 
     protected ResourceSpec parseOutputGroup(OptionSet optionSet, Option option) {
         ResourceSpec resource = new ResourceSpec();
-        resource.setType((String) optionSet.getValue(OUTPUT_TYPE, FORMAT));
+        resource.setType((String) optionSet.getValue(OUTPUT_TYPE, TYPE));
         resource.setPath((String) optionSet.getValue(OUTPUT_PATH));
         resource.setAttributes(parseAttributes(
                 optionSet.<String>getValues(OUTPUT_OPTION), optionSet.getOption(OUTPUT_OPTION)));
@@ -763,10 +812,10 @@ public class CliRunSupport extends CliSupport {
         return resource;
     }
 
-    protected void parseSchemaMigrationGroup(ScriptGeneratorJobSpecBase schemaGeneratorJobSpec,
-                                             OptionSet optionSet, Option option) {
+    protected void parseSchemaMigrationGroup(OptionSet optionSet, ScriptGeneratorJobSpecBase schemaGeneratorJobSpec,
+                                             Option option) {
         schemaGeneratorJobSpec.setJdbcTypeSpecs(parseJdbcTypeSpecs(optionSet, option));
-        schemaGeneratorJobSpec.setUseExplicitDefaults(parseUseExplicitDefaults(optionSet, option));
+        schemaGeneratorJobSpec.setTranslationConfig(parseTranslationConfig(optionSet, option));
         schemaGeneratorJobSpec.setObjectTypes(parseObjectTypes(optionSet));
         schemaGeneratorJobSpec.setScriptTypes(parseScriptTypes(optionSet, option));
         schemaGeneratorJobSpec.setGroupScriptsBy(parseGroupScriptsBy(optionSet, option));
@@ -776,12 +825,14 @@ public class CliRunSupport extends CliSupport {
         schemaGeneratorJobSpec.setTableTypes(parseTableTypes(optionSet));
     }
 
-    protected boolean parseUseExplicitDefaults(OptionSet optionSet, Option option) {
+    protected TranslationConfig parseTranslationConfig(OptionSet optionSet, Option option) {
         Object useExplicitDefaultsValue = optionSet.getValue(USE_EXPLICIT_DEFAULTS);
-        return useExplicitDefaultsValue != null ?
+        TranslationConfig translationConfig = new TranslationConfig();
+        translationConfig.setUseExplicitDefaults(useExplicitDefaultsValue != null ?
                 parseBoolean(String.valueOf(useExplicitDefaultsValue)) :
                 (optionSet.hasOption(USE_EXPLICIT_DEFAULTS) ||
-                        ImplicitDefaultsTranslator.USE_EXPLICIT_DEFAULTS);
+                        TranslationConfig.USE_EXPLICIT_DEFAULTS));
+        return translationConfig;
     }
 
     protected Collection<JdbcTypeSpec> parseJdbcTypeSpecs(OptionSet optionSet, Option option) {
@@ -904,7 +955,6 @@ public class CliRunSupport extends CliSupport {
         }
         return tableTypes.toArray(new String[tableTypes.size()]);
     }
-
     protected Collection<MetaDataType> parseObjectTypes(OptionSet optionSet) {
         Collection<MetaDataType> objectTypes = newArrayList(MetaDataType.TYPES);
         if (optionSet.hasOption(META_DATA)) {
@@ -926,6 +976,11 @@ public class CliRunSupport extends CliSupport {
             }
         }
         return objectTypes;
+    }
+
+    protected Integer parseThreadsOption(OptionSet optionSet, Option option) {
+        String threadsValue = (String) optionSet.getValue(THREADS);
+        return !isEmpty(threadsValue) ? parseInt(threadsValue) : null;
     }
 
     protected Map<String, IdentifierNormalizer> getIdentifierNormalizers() {

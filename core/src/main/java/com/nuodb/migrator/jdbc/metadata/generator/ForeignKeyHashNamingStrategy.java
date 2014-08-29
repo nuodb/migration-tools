@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.ForeignKey;
 
+import static com.nuodb.migrator.utils.StringUtils.*;
 import static java.lang.Integer.toHexString;
 
 /**
@@ -38,6 +39,15 @@ public class ForeignKeyHashNamingStrategy extends ForeignKeyQualifyNamingStrateg
 
     @Override
     protected String getNonPrefixedName(ForeignKey foreignKey, ScriptGeneratorManager scriptGeneratorManager) {
-        return toHexString(super.getNonPrefixedName(foreignKey, scriptGeneratorManager).hashCode());
+        String nonPrefixedName = toHexString(super.getNonPrefixedName(foreignKey, scriptGeneratorManager).hashCode());
+        String tableName = scriptGeneratorManager.getName(foreignKey.getTable(), false);
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(nonPrefixedName);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(nonPrefixedName);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(nonPrefixedName);
+        }
+        return nonPrefixedName;
     }
 }

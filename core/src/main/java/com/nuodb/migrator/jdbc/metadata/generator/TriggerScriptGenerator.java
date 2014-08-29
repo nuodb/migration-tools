@@ -80,7 +80,7 @@ public class TriggerScriptGenerator<T extends Trigger> extends ScriptGeneratorBa
         Dialect dialect = scriptGeneratorManager.getTargetDialect();
         buffer.append(dialect.getTriggerBegin(trigger));
         buffer.append(' ');
-        buffer.append(dialect.getTriggerBody(scriptGeneratorManager.getSourceSession(), trigger));
+        buffer.append(dialect.getTriggerBody(trigger, scriptGeneratorManager.getSourceSession()));
         buffer.append(' ');
         buffer.append(dialect.getTriggerEnd(trigger));
     }

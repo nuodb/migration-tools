@@ -66,7 +66,7 @@ public class CliSchemaJob extends CliJob<SchemaJobSpec> {
         schemaJobSpec.setSourceSpec(parseSourceGroup(optionSet, this));
         schemaJobSpec.setTargetSpec(parseTargetGroup(optionSet, this));
         schemaJobSpec.setOutputSpec(parseOutputGroup(optionSet, this));
-        parseSchemaMigrationGroup(schemaJobSpec, optionSet, this);
+        parseSchemaMigrationGroup(optionSet, schemaJobSpec, this);
         setJobSpec(schemaJobSpec);
     }
 

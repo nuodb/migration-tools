@@ -32,6 +32,8 @@ package com.nuodb.migrator.jdbc.session;
  */
 public interface Work {
 
+    String getName();
+
     void init(Session session) throws Exception;
 
     void execute() throws Exception;

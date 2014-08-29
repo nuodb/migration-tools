@@ -38,5 +38,5 @@ public interface Job {
 
     void execute() throws Exception;
 
-    void release() throws Exception;
+    void close() throws Exception;
 }

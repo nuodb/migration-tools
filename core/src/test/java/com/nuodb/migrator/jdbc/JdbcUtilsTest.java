@@ -34,7 +34,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -46,21 +46,21 @@ public class JdbcUtilsTest {
     @Test
     public void testCloseResultSet() throws SQLException {
         ResultSet resultSet = mock(ResultSet.class);
-        close(resultSet);
+        closeQuietly(resultSet);
         verify(resultSet).close();
     }
 
     @Test
     public void testCloseStatement() throws SQLException {
         Statement statement = mock(Statement.class);
-        close(statement);
+        closeQuietly(statement);
         verify(statement).close();
     }
 
     @Test
     public void testCloseConnection() throws SQLException {
         Connection connection = mock(Connection.class);
-        close(connection);
+        closeQuietly(connection);
         verify(connection).close();
     }
 }

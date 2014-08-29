@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
+import com.nuodb.migrator.jdbc.session.Session;
 import com.nuodb.migrator.utils.PrioritySet;
 
 import java.util.Collection;
@@ -42,14 +43,26 @@ import static com.nuodb.migrator.utils.Collections.newPrioritySet;
 @SuppressWarnings("unchecked")
 public class TranslationManager {
 
+    private TranslationConfig translationConfig = new TranslationConfig();
     private PrioritySet<Translator> translators = newPrioritySet();
 
-    public Script translate(Script script, DatabaseInfo databaseInfo, Map<Object, Object> context) {
+    public TranslationConfig getTranslationConfig() {
+        return translationConfig;
+    }
+
+    public void setTranslationConfig(TranslationConfig translationConfig) {
+        this.translationConfig = translationConfig;
+    }
+
+    public Script translate(Script script, Dialect dialect, Session session, Map<Object, Object> context) {
+        return translate(script, new SimpleTranslationContext(dialect, session, this, context));
+    }
+
+    public Script translate(Script script, TranslationContext context) {
         Script translation = null;
-        TranslationContext translationContext = new SimpleTranslationContext(databaseInfo, this, context);
         for (Translator translator : getTranslators()) {
-            if (translator.supports(script, translationContext)) {
-                translation = translator.translate(script, translationContext);
+            if (translator.supports(script, context)) {
+                translation = translator.translate(script, context);
             }
             if (translation != null) {
                 break;

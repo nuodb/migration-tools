@@ -75,6 +75,8 @@ public interface Dialect {
 
     boolean supportsDropSequenceIfExists();
 
+    boolean supportsDropPrimaryKey();
+
     boolean supportsSequence();
 
     boolean supportsNegativeScale();
@@ -109,7 +111,7 @@ public interface Dialect {
 
     String getIdentityColumn(String sequence);
 
-    String getDefaultValue(Session session, Column column);
+    String getDefaultValue(Column column, Session session);
 
     String getDeleteAction(ReferenceAction deleteAction);
 
@@ -125,7 +127,7 @@ public interface Dialect {
 
     String getTriggerBegin(Trigger trigger);
 
-    String getTriggerBody(Session session, Trigger trigger);
+    String getTriggerBody(Trigger trigger, Session session);
 
     String getTriggerEnd(Trigger trigger);
 
@@ -145,13 +147,13 @@ public interface Dialect {
 
     String getCheckClause(String clause);
 
-    String getUseCatalog(String catalog);
-
-    String getUseCatalog(String catalog, boolean normalize);
-
     String getUseSchema(String schema);
 
     String getUseSchema(String schema, boolean normalize);
+
+    String getDropSchema(String schema);
+
+    String getDropSchema(String schema, boolean normalize);
 
     String getIdentifier(String identifier, Identifiable identifiable);
 
@@ -179,13 +181,13 @@ public interface Dialect {
 
     JdbcTypeDesc getJdbcTypeAlias(int typeCode, String typeName);
 
-    Script translate(Script script);
-
-    Script translate(Script script, Map<Object, Object> context);
-
     Script translate(String script, Session session);
 
     Script translate(String script, Session session, Map<Object, Object> context);
+
+    Script translate(Script script, Session session);
+
+    Script translate(Script script, Session session, Map<Object, Object> context);
 
     SQLKeywords getSQLKeywords();
 

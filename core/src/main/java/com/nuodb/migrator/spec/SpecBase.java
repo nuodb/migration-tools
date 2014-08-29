@@ -70,9 +70,8 @@ public class SpecBase implements Spec {
 
         SpecBase specBase = (SpecBase) o;
 
-        if (attributes != null ? !attributes.equals(specBase.attributes) : specBase.attributes != null) return false;
         if (id != null ? !id.equals(specBase.id) : specBase.id != null) return false;
-        if (type != null ? !type.equals(specBase.type) : specBase.type != null) return false;
+        if (attributes != null ? !attributes.equals(specBase.attributes) : specBase.attributes != null) return false;
 
         return true;
     }

@@ -27,6 +27,12 @@
  */
 package com.nuodb.migrator.utils;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
+import static java.lang.String.format;
+
 public class ValidationUtils {
 
     private ValidationUtils() {
@@ -54,5 +60,9 @@ public class ValidationUtils {
 
     public static void fail(String message) {
         throw new ValidationException(message);
+    }
+
+    public static void instanceOf(Object object, Class<?> type) {
+        isTrue(type.isInstance(object), format("Instance of %s is required", getClassName(type)));
     }
 }

@@ -52,6 +52,10 @@ public class Collections {
         return value != null && collection.add(value);
     }
 
+    public static boolean isEmpty(Iterable iterable) {
+        return iterable == null || !iterable.iterator().hasNext();
+    }
+
     public static boolean isEmpty(Collection collection) {
         return collection == null || collection.isEmpty();
     }
@@ -60,8 +64,8 @@ public class Collections {
         return map == null || map.isEmpty();
     }
 
-    public static boolean isEmpty(Object[] values) {
-        return values == null || values.length == 0;
+    public static boolean isEmpty(Object[] array) {
+        return array == null || array.length == 0;
     }
 
     public static <K, V> Map<K, V> putAll(Map<K, V> target, Map<K, V> source) {
@@ -69,5 +73,19 @@ public class Collections {
             target.putAll(source);
         }
         return target;
+    }
+
+    public static <T> Collection<T> removeAll(Collection<T> collection, Collection<T> remove) {
+        if (collection != null && remove != null) {
+            collection.removeAll(remove);
+        }
+        return collection;
+    }
+
+    public static <T> Collection<T> retainAll(Collection<T> collection, Collection<T> retain) {
+        if (collection != null && retain != null) {
+            collection.retainAll(retain);
+        }
+        return collection;
     }
 }

@@ -42,15 +42,12 @@ import com.nuodb.migrator.schema.SchemaJob;
 import com.nuodb.migrator.spec.DumpJobSpec;
 import com.nuodb.migrator.spec.LoadJobSpec;
 import com.nuodb.migrator.spec.SchemaJobSpec;
-import org.slf4j.Logger;
 
 import java.util.Map;
 
 import static com.nuodb.migrator.config.Config.VERSION;
 import static com.nuodb.migrator.config.Config.getInstance;
 import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
-import static java.lang.String.format;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
@@ -58,8 +55,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class Migrator {
 
     private static Config CONFIG = getInstance();
-
-    protected Logger logger = getLogger(getClass());
     private FormatFactory formatFactory;
     private DialectResolver dialectResolver;
     private InspectionManager inspectionManager;
@@ -79,11 +74,8 @@ public class Migrator {
     }
 
     public void execute(Job job, Map<Object, Object> context) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(format("Running migrator %s", getVersion()));
-        }
         JobExecutor jobExecutor = createJobExecutor(job);
-        jobExecutor.addJobExecutionListener(new TraceJobExecutionListener());
+        jobExecutor.addListener(new TraceJobExecutionListener());
         jobExecutor.execute(context);
         Throwable failure = jobExecutor.getJobStatus().getFailure();
         if (failure != null) {

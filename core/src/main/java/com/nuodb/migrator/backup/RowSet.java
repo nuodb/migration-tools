@@ -27,19 +27,22 @@
  */
 package com.nuodb.migrator.backup;
 
+import com.nuodb.migrator.backup.format.value.ValueType;
 import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Sergey Bushik
  */
-public class RowSet {
+public class RowSet implements HasSize {
 
+    private Long size;
     private String name;
-    private long rowCount;
+    private AtomicLong rowCount = new AtomicLong();
     private String type;
     private Collection<Column> columns = newArrayList();
     private Collection<Chunk> chunks = newArrayList();
@@ -53,12 +56,39 @@ public class RowSet {
         this.name = name;
     }
 
+    @Override
+    public Long getSize() {
+        return size;
+    }
+
+    @Override
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    @Override
+    public Long getSize(BackupOps backupOps) {
+        Long size = getSize();
+        if (size == null) {
+            size = 0L;
+            for (Chunk chunk : getChunks()) {
+                size += chunk.getSize(backupOps);
+            }
+            setSize(size);
+        }
+        return size;
+    }
+
     public long getRowCount() {
-        return rowCount;
+        return rowCount.get();
     }
 
     public void setRowCount(long rowCount) {
-        this.rowCount = rowCount;
+        this.rowCount.set(rowCount);
+    }
+
+    public void incrementRowCount() {
+        rowCount.incrementAndGet();
     }
 
     public String getType() {
@@ -69,8 +99,8 @@ public class RowSet {
         this.type = type;
     }
 
-    public void addColumn(String name, String type) {
-        addColumn(new Column(name, type));
+    public void addColumn(String name, ValueType valueType) {
+        addColumn(new Column(name, valueType));
     }
 
     public void addColumn(Column column) {
@@ -92,6 +122,7 @@ public class RowSet {
     public void addChunk(Chunk chunk) {
         chunk.setRowSet(this);
         chunks.add(chunk);
+        rowCount.addAndGet(chunk.getRowCount());
     }
 
     public Collection<Chunk> getChunks() {
@@ -99,10 +130,13 @@ public class RowSet {
     }
 
     public void setChunks(Collection<Chunk> chunks) {
+        long rowCount = 0;
         for (Chunk chunk : chunks) {
             chunk.setRowSet(this);
+            rowCount += chunk.getRowCount();
         }
         this.chunks = chunks;
+        this.rowCount.set(rowCount);
     }
 
     public Backup getBackup() {
@@ -116,15 +150,15 @@ public class RowSet {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RowSet)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        RowSet that = (RowSet) o;
+        RowSet rowSet = (RowSet) o;
 
-        if (rowCount != that.rowCount) return false;
-        if (columns != null ? !columns.equals(that.columns) : that.columns != null) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (chunks != null ? !chunks.equals(that.chunks) : that.chunks != null) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        if (getRowCount() != rowSet.getRowCount()) return false;
+        if (chunks != null ? !chunks.equals(rowSet.chunks) : rowSet.chunks != null) return false;
+        if (columns != null ? !columns.equals(rowSet.columns) : rowSet.columns != null) return false;
+        if (name != null ? !name.equals(rowSet.name) : rowSet.name != null) return false;
+        if (type != null ? !type.equals(rowSet.type) : rowSet.type != null) return false;
 
         return true;
     }
@@ -132,6 +166,7 @@ public class RowSet {
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
+        long rowCount = getRowCount();
         result = 31 * result + (int) (rowCount ^ (rowCount >>> 32));
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (columns != null ? columns.hashCode() : 0);

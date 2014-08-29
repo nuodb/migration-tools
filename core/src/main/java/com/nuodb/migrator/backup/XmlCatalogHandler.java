@@ -33,7 +33,6 @@ import com.nuodb.migrator.jdbc.metadata.Identifier;
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.inspector.SchemaInspectionScope;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
-import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
@@ -52,15 +51,11 @@ public class XmlCatalogHandler extends XmlIdentifiableHandlerBase<Catalog> imple
     }
 
     @Override
-    protected Catalog createTarget(InputNode input, Class<? extends Catalog> type) {
-        return null;
-    }
-
-    @Override
-    protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Catalog> context) throws Exception {
+    protected Catalog createTarget(InputNode input, Class<? extends Catalog> type, XmlReadContext context) {
+        Database database = getParent(context, 0);
         String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        Database database = getParent(context);
-        context.setTarget(database.hasCatalog(name) ? database.getCatalog(name) : database.addCatalog(name));
+        return database != null ? (database.hasCatalog(name) ?
+                database.getCatalog(name) : database.addCatalog(name)) : new Catalog(name);
     }
 
     @Override

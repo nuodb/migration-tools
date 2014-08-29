@@ -38,8 +38,9 @@ import static com.google.common.collect.Lists.newArrayList;
 /**
  * @author Sergey Bushik
  */
-public class Backup {
+public class Backup implements HasSize {
 
+    private Long size;
     private String version = Migrator.getVersion();
     private String format;
     private Database database = new Database();
@@ -55,6 +56,29 @@ public class Backup {
     public Backup(String format, Database database) {
         this.format = format;
         this.database = database;
+    }
+
+    @Override
+    public Long getSize() {
+        return size;
+    }
+
+    @Override
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    @Override
+    public Long getSize(BackupOps backupOps) {
+        Long size = getSize();
+        if (size == null) {
+            size = 0L;
+            for (RowSet rowSet : getRowSets()) {
+                size += rowSet.getSize(backupOps);
+            }
+            setSize(size);
+        }
+        return size;
     }
 
     public String getVersion() {
@@ -91,6 +115,11 @@ public class Backup {
     }
 
     public void setRowSets(Collection<RowSet> rowSets) {
+        if (rowSets != null) {
+            for (RowSet rowSet : rowSets) {
+                rowSet.setBackup(this);
+            }
+        }
         this.rowSets = rowSets;
     }
 

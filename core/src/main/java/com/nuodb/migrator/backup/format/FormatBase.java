@@ -28,7 +28,6 @@
 package com.nuodb.migrator.backup.format;
 
 import com.nuodb.migrator.backup.RowSet;
-import com.nuodb.migrator.backup.format.value.ValueHandleList;
 import org.slf4j.Logger;
 
 import java.util.Map;
@@ -49,7 +48,6 @@ public abstract class FormatBase implements Format {
     private boolean buffering = BUFFERING;
     private int bufferSize = BUFFER_SIZE;
     private RowSet rowSet;
-    private ValueHandleList valueHandleList;
 
     @Override
     public Object getAttribute(String attribute) {
@@ -103,15 +101,5 @@ public abstract class FormatBase implements Format {
     @Override
     public void setRowSet(RowSet rowSet) {
         this.rowSet = rowSet;
-    }
-
-    @Override
-    public ValueHandleList getValueHandleList() {
-        return valueHandleList;
-    }
-
-    @Override
-    public void setValueHandleList(ValueHandleList valueHandleList) {
-        this.valueHandleList = valueHandleList;
     }
 }

@@ -54,7 +54,7 @@ public class MySQLOnUpdateTriggerTranslator extends TriggerTranslatorBase {
     protected boolean supportsScript(TriggerScript script, TranslationContext context) {
         Column column = getColumn(script.getTrigger());
         return column != null && TYPES.contains(column.getTypeCode()) &&
-                context.translate(new ColumnScript(column, script.getSession())) != null;
+                context.translate(new ColumnScript(column)) != null;
     }
 
     protected Column getColumn(Trigger trigger) {
@@ -64,14 +64,14 @@ public class MySQLOnUpdateTriggerTranslator extends TriggerTranslatorBase {
     @Override
     public Script translate(TriggerScript script, TranslationContext context) {
         Column column = getColumn(script.getTrigger());
-        DatabaseInfo databaseInfo = context.getDatabaseInfo();
+        DatabaseInfo databaseInfo = context.getSession().getDatabaseInfo();
         Dialect dialect = createService(DialectResolver.class).resolve(databaseInfo);
         StringBuilder translation = new StringBuilder();
         translation.append("NEW.");
         translation.append(dialect.getIdentifier(column.getName(), column));
         translation.append(" = '");
-        translation.append(context.translate(new ColumnScript(column, script.getSession())).getScript());
+        translation.append(context.translate(new ColumnScript(column)).getScript());
         translation.append("';");
-        return new SimpleScript(translation.toString(), databaseInfo);
+        return new SimpleScript(translation.toString());
     }
 }

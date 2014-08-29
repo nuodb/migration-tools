@@ -76,7 +76,7 @@ public interface Field {
 
     void setJdbcTypeOptions(JdbcTypeOptions jdbcTypeOptions);
 
-    Field asField();
+    Field toField();
 
     void fromField(Field field);
 }

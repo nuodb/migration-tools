@@ -38,9 +38,9 @@ public interface PrioritySet<T> extends Collection<T> {
 
     boolean addAll(PrioritySet<? extends T> list);
 
-    Collection<Item<T>> items();
+    Collection<Entry<T>> entries();
 
-    interface Item<T> {
+    interface Entry<T> {
 
         T getValue();
 

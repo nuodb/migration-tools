@@ -27,12 +27,19 @@
  */
 package com.nuodb.migrator.jdbc.session;
 
+import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
+
 /**
  * @author Sergey Bushik
  */
 public abstract class WorkBase implements Work {
 
-    private Session session;
+    protected Session session;
+
+    @Override
+    public String getName() {
+        return getClassName(getClass());
+    }
 
     @Override
     public void init(Session session) throws Exception {
@@ -43,7 +50,11 @@ public abstract class WorkBase implements Work {
     protected void init() throws Exception {
     }
 
-    public Session getSession() {
+    @Override
+    public void close() throws Exception {
+    }
+
+    protected Session getSession() {
         return session;
     }
 }

@@ -41,12 +41,12 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
 public class CurrentTimestampTranslator extends ColumnTranslatorBase<ColumnScript> {
 
     private Collection<String> aliases = newTreeSet(CASE_INSENSITIVE_ORDER);
-    private String translation;
+    private String timestamp;
 
-    public CurrentTimestampTranslator(DatabaseInfo databaseInfo, Collection<String> aliases, String translation) {
+    public CurrentTimestampTranslator(DatabaseInfo databaseInfo, Collection<String> aliases, String timestamp) {
         super(databaseInfo);
         this.aliases.addAll(aliases);
-        this.translation = translation;
+        this.timestamp = timestamp;
     }
 
     @Override
@@ -67,6 +67,6 @@ public class CurrentTimestampTranslator extends ColumnTranslatorBase<ColumnScrip
 
     @Override
     public Script translate(ColumnScript script, TranslationContext context) {
-        return new SimpleScript(translation, context.getDatabaseInfo());
+        return new SimpleScript(timestamp);
     }
 }

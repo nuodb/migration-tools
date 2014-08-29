@@ -27,13 +27,6 @@
  */
 package com.nuodb.migrator.utils.aop;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import static com.nuodb.migrator.utils.aop.MethodAdvisors.newMethodAdvisor;
-import static java.lang.String.format;
-import static java.lang.System.out;
 import static java.util.Arrays.asList;
 
 /**
@@ -52,19 +45,5 @@ public class AopProxyUtils {
 
     public static AopProxy createAopProxy(Object target, Class... interfaces) {
         return new ReflectionProxyFactory(target, interfaces).createAopProxy();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static void main(String[] args) {
-        AopProxy aopProxy = AopProxyUtils.getAopProxy(new ArrayList(), Collection.class);
-        aopProxy.addAdvisor(newMethodAdvisor(new BeforeMethod() {
-            @Override
-            public void beforeMethod(Method method, Object[] arguments, Object target) throws Throwable {
-                out.println(format("Before method %s, arguments %s, target %s", method, asList(arguments), target));
-            }
-        }));
-
-        Collection<Object> list = (Collection<Object>) aopProxy;
-        list.add("argument");
     }
 }

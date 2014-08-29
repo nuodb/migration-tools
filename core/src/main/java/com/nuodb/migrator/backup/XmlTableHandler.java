@@ -47,12 +47,12 @@ import org.simpleframework.xml.stream.OutputNode;
 import java.util.Collection;
 import java.util.Set;
 
+import static com.google.common.base.Predicates.equalTo;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static com.nuodb.migrator.spec.MetaDataSpec.TABLE_TYPES;
 import static com.nuodb.migrator.utils.Collections.isEmpty;
-import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.nuodb.migrator.utils.ReflectionUtils.getClassName;
 
 /**
@@ -94,8 +94,11 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
     }
 
     @Override
-    protected Table createTarget(InputNode input, Class<? extends Table> type) {
-        return null;
+    protected Table createTarget(InputNode input, Class<? extends Table> type, XmlReadContext context) {
+        Schema schema = getParent(context, 0);
+        String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
+        return schema != null ? (schema.hasTable(name) ?
+                schema.getTable(name) : schema.addTable(name)) : new Table(name);
     }
 
     @Override
@@ -103,14 +106,10 @@ public class XmlTableHandler extends XmlIdentifiableHandlerBase<Table> {
         context.put(COLUMNS, newLinkedHashSet());
         super.read(input, context);
     }
-
+    
     @Override
-    protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Table> context) throws Exception {
-        Schema schema = getParent(context);
-        String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        Table table = schema.hasTable(name) ? schema.getTable(name) : schema.addTable(name);
+    protected void readAttributes(InputNode input, Table table, XmlReadContext context) throws Exception {
         table.setType(context.readAttribute(input, TYPE_ATTRIBUTE, String.class));
-        context.setTarget(table);
         getTableBinding(table, context).setDeclared(true);
     }
 

@@ -29,6 +29,8 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.Trigger;
 
+import static com.nuodb.migrator.utils.StringUtils.*;
+
 /**
  * @author Sergey Bushik
  */
@@ -36,5 +38,28 @@ public class TriggerSourceNamingStrategy extends SourceNamingStrategy<Trigger> {
 
     public TriggerSourceNamingStrategy() {
         super(Trigger.class);
+    }
+
+    @Override
+    protected String getNonNormalizedName(Trigger trigger, ScriptGeneratorManager scriptGeneratorManager) {
+        if (trigger.getName() == null) {
+            return null;
+        }
+        StringBuilder buffer = new StringBuilder();
+        String tableName = scriptGeneratorManager.getName(trigger.getTable(), false);
+        buffer.append(tableName);
+        buffer.append(getDelimiter(trigger, scriptGeneratorManager));
+        buffer.append(trigger.getName());
+        String nonPrefixedName;
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(buffer);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(buffer);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(buffer);
+        } else {
+            nonPrefixedName = buffer.toString();
+        }
+        return nonPrefixedName;
     }
 }

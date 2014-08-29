@@ -32,10 +32,14 @@ import com.nuodb.migrator.jdbc.metadata.DatabaseInfo;
 import com.nuodb.migrator.jdbc.metadata.Table;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 
+import java.sql.Types;
+
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.APPROX;
 import static com.nuodb.migrator.jdbc.dialect.RowCountType.EXACT;
 import static java.lang.String.valueOf;
-import static java.sql.Types.*;
+import static java.sql.Types.BLOB;
+import static java.sql.Types.CLOB;
+import static java.sql.Types.TIMESTAMP;
 
 /**
  * @author Sergey Bushik
@@ -52,13 +56,9 @@ public class MSSQLServerDialect extends SimpleDialect {
     @Override
     protected void initJdbcTypes() {
         super.initJdbcTypes();
-        addJdbcType(MSSQLServerTimeValue.INSTANCE);
-        addJdbcTypeAlias(VARCHAR, "TIME", TIME);
-        addJdbcTypeAlias(VARCHAR, "DATE", DATE);
-        addJdbcTypeAlias(VARCHAR, "DATETIME2", TIMESTAMP);
-        addJdbcTypeAlias(LONGVARBINARY, "IMAGE", BLOB);
-        addJdbcTypeAlias(LONGVARCHAR, "TEXT", CLOB);
-        addJdbcTypeAlias(LONGNVARCHAR, "XML", CLOB);
+        addJdbcTypeAlias(Types.LONGVARBINARY, "IMAGE", BLOB);
+        addJdbcTypeAlias(Types.LONGVARCHAR, "TEXT", CLOB);
+        addJdbcTypeAlias(Types.LONGNVARCHAR, "XML", CLOB);
         addJdbcTypeAlias(DATETIMEOFFSET_CODE, DATETIMEOFFSET_NAME, TIMESTAMP);
     }
 

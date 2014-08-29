@@ -271,7 +271,7 @@ public class StructureTest extends MigrationTestBase {
 				+ "and C.TABLE_SCHEMA = TC.CONSTRAINT_SCHEMA "
 				+ "and TC.TABLE_NAME=C.TABLE_NAME AND C.COLUMN_KEY=SUBSTRING(TC.CONSTRAINT_TYPE,1,3) "
 				+ "AND C.COLUMN_KEY IN ('UNI')";
-		String sqlStr2 = "SELECT F.FIELD, IFS.INDEXNAME FROM SYSTEM.INDEXES AS I "
+		String sqlStr2 = "SELECT F.FIELD, IFS.INDEXNAME, I.INDEXTYPE FROM SYSTEM.INDEXES AS I "
 				+ "INNER JOIN SYSTEM.INDEXFIELDS AS IFS ON "
 				+ "I.SCHEMA=IFS.SCHEMA AND I.TABLENAME=IFS.TABLENAME AND I.INDEXNAME=IFS.INDEXNAME "
 				+ "INNER JOIN SYSTEM.FIELDS F ON IFS.SCHEMA=F.SCHEMA AND IFS.TABLENAME=F.TABLENAME AND IFS.FIELD=F.FIELD "
@@ -316,7 +316,7 @@ public class StructureTest extends MigrationTestBase {
 				boolean found = false;
 				while (rs2.next()) {
 					found = true;
-					if (rs2.getString(2).toLowerCase().contains("unique")) {
+					if (rs2.getInt(3) == 1) {
 						tarColList.add(rs2.getString(1));
 					}
 				}

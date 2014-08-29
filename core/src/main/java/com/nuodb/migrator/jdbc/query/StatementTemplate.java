@@ -31,7 +31,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 
 /**
  * @author Sergey Bushik
@@ -51,8 +51,8 @@ public class StatementTemplate {
         try {
             statementCallback.executeStatement(statement);
         } finally {
-            close(statement != null ? statement.getResultSet() : null);
-            close(statement);
+            closeQuietly(statement != null ? statement.getResultSet() : null);
+            closeQuietly(statement);
         }
     }
 
@@ -63,8 +63,8 @@ public class StatementTemplate {
         try {
             return statementAction.executeStatement(statement);
         } finally {
-            close(statement != null ? statement.getResultSet() : null);
-            close(statement);
+            closeQuietly(statement != null ? statement.getResultSet() : null);
+            closeQuietly(statement);
         }
     }
 

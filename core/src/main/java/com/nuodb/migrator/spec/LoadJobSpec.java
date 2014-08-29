@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.backup.loader.Parallelizer;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.query.InsertType;
 
@@ -44,13 +45,15 @@ import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
  */
 public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
-    private ConnectionSpec targetSpec;
     private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);
+    private Integer threads;
+    private ConnectionSpec targetSpec;
     private TimeZone timeZone;
     private ResourceSpec inputSpec;
     private InsertType insertType;
     private CommitStrategy commitStrategy;
     private Map<String, InsertType> tableInsertTypes = newHashMap();
+    private Parallelizer parallelizer;
 
     public Collection<MigrationMode> getMigrationModes() {
         return migrationModes;
@@ -58,6 +61,14 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
     public void setMigrationModes(Collection<MigrationMode> migrationModes) {
         this.migrationModes = migrationModes;
+    }
+
+    public Integer getThreads() {
+        return threads;
+    }
+
+    public void setThreads(Integer threads) {
+        this.threads = threads;
     }
 
     public ConnectionSpec getTargetSpec() {
@@ -108,6 +119,14 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
         this.tableInsertTypes = newHashMap(tableInsertTypes);
     }
 
+    public Parallelizer getParallelizer() {
+        return parallelizer;
+    }
+
+    public void setParallelizer(Parallelizer parallelizer) {
+        this.parallelizer = parallelizer;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -126,6 +145,7 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
             return false;
         if (targetSpec != null ? !targetSpec.equals(that.targetSpec) : that.targetSpec != null) return false;
         if (timeZone != null ? !timeZone.equals(that.timeZone) : that.timeZone != null) return false;
+        if (threads != null ? !threads.equals(that.threads) : that.threads != null) return false;
 
         return true;
     }
@@ -133,13 +153,14 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (targetSpec != null ? targetSpec.hashCode() : 0);
-        result = 31 * result + (migrationModes != null ? migrationModes.hashCode() : 0);
-        result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
+        result = 31 * result + (commitStrategy != null ? commitStrategy.hashCode() : 0);
         result = 31 * result + (inputSpec != null ? inputSpec.hashCode() : 0);
         result = 31 * result + (insertType != null ? insertType.hashCode() : 0);
-        result = 31 * result + (commitStrategy != null ? commitStrategy.hashCode() : 0);
+        result = 31 * result + (migrationModes != null ? migrationModes.hashCode() : 0);
         result = 31 * result + (tableInsertTypes != null ? tableInsertTypes.hashCode() : 0);
+        result = 31 * result + (targetSpec != null ? targetSpec.hashCode() : 0);
+        result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
+        result = 31 * result + (threads != null ? threads.hashCode() : 0);
         return result;
     }
 }

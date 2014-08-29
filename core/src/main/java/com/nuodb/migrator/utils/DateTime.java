@@ -98,7 +98,7 @@ import java.util.*;
  * JDK classes. Joda Time has the following drawbacks : <ul> <li>it limits precision to milliseconds. Database timestamp
  * values almost always have a precision of microseconds or even nanoseconds. This is a serious defect: <b>a library
  * should never truncate your data, for any reason.</b> <li>it's large, with well over 100 items in its <a
- * href='http://joda-time.sourceforge.net/api-release/index.html'>javadoc</a> <li>in order to stay current, it needs to
+ * href='http://joda-time.sourceforge.net/api-close/index.html'>javadoc</a> <li>in order to stay current, it needs to
  * be manually updated occasionally with fresh time zone data <li>it has mutable versions of classes <li>it always
  * coerces March 31 + 1 Month to April 30 (for example), without giving you any choice in the matter <li>some databases
  * allow invalid date values such as '0000-00-00', but Joda Time doesn't seem to be able to handle them </ul>

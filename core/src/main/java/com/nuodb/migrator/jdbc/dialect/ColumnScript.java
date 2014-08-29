@@ -28,7 +28,6 @@
 package com.nuodb.migrator.jdbc.dialect;
 
 import com.nuodb.migrator.jdbc.metadata.Column;
-import com.nuodb.migrator.jdbc.session.Session;
 
 import static com.nuodb.migrator.jdbc.metadata.Column.getDefaultValue;
 
@@ -39,12 +38,12 @@ public class ColumnScript extends SimpleScript {
 
     private final Column column;
 
-    public ColumnScript(Column column, Session session) {
-        this(column, getDefaultValue(column), session);
+    public ColumnScript(Column column) {
+        this(column, getDefaultValue(column));
     }
 
-    public ColumnScript(Column column, String script, Session session) {
-        super(script, session);
+    public ColumnScript(Column column, String script) {
+        super(script);
         this.column = column;
     }
 

@@ -27,160 +27,31 @@
  */
 package com.nuodb.migrator.job;
 
-import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.dialect.DialectResolver;
 import com.nuodb.migrator.jdbc.dialect.IdentifierNormalizer;
 import com.nuodb.migrator.jdbc.dialect.IdentifierQuoting;
-import com.nuodb.migrator.jdbc.dialect.ImplicitDefaultsTranslator;
-import com.nuodb.migrator.jdbc.dialect.TranslationManager;
-import com.nuodb.migrator.jdbc.dialect.Translator;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.metadata.generator.GroupScriptsBy;
 import com.nuodb.migrator.jdbc.metadata.generator.NamingStrategy;
-import com.nuodb.migrator.jdbc.metadata.generator.ScriptGeneratorManager;
 import com.nuodb.migrator.jdbc.metadata.generator.ScriptType;
-import com.nuodb.migrator.jdbc.session.Session;
-import com.nuodb.migrator.jdbc.type.JdbcType;
-import com.nuodb.migrator.jdbc.type.JdbcTypeDesc;
-import com.nuodb.migrator.jdbc.type.JdbcTypeName;
-import com.nuodb.migrator.jdbc.type.JdbcTypeNameMap;
-import com.nuodb.migrator.spec.ConnectionSpec;
-import com.nuodb.migrator.spec.JdbcTypeSpec;
-import com.nuodb.migrator.spec.MetaDataSpec;
-import com.nuodb.migrator.spec.ScriptGeneratorJobSpecBase;
-import com.nuodb.migrator.spec.TableSpec;
+import com.nuodb.migrator.spec.*;
 import com.nuodb.migrator.utils.PrioritySet;
 
-import java.sql.SQLException;
 import java.util.Collection;
-
-import static com.nuodb.migrator.jdbc.JdbcUtils.close;
-import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
-import static com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator.GROUP_SCRIPTS_BY;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeNames.createTypeNameTemplate;
-import static com.nuodb.migrator.jdbc.type.JdbcTypeOptions.newOptions;
-import static com.nuodb.migrator.utils.Priority.HIGH;
 
 /**
  * @author Sergey Bushik
  */
-@SuppressWarnings("unchecked")
-public abstract class ScriptGeneratorJobBase<S extends ScriptGeneratorJobSpecBase> extends HasServicesJobBase<S> {
-
-    private ConnectionSpec sourceSpec;
-    private Session sourceSession;
-    private Session targetSession;
+public abstract class ScriptGeneratorJobBase<T extends ScriptGeneratorJobSpecBase> extends HasServicesJobBase<T> {
 
     protected ScriptGeneratorJobBase() {
     }
 
-    protected ScriptGeneratorJobBase(S jobSpec) {
+    protected ScriptGeneratorJobBase(T jobSpec) {
         super(jobSpec);
-    }
-
-    protected ScriptGeneratorManager createScriptGeneratorManager() throws SQLException {
-        ScriptGeneratorManager scriptGeneratorManager = new ScriptGeneratorManager();
-        scriptGeneratorManager.getAttributes().put(GROUP_SCRIPTS_BY, getGroupScriptsBy());
-        scriptGeneratorManager.setObjectTypes(getObjectTypes());
-        scriptGeneratorManager.setScriptTypes(getScriptTypes());
-        ConnectionSpec sourceSpec = getSourceSpec();
-        scriptGeneratorManager.setSourceCatalog(sourceSpec != null ? sourceSpec.getCatalog() : null);
-        scriptGeneratorManager.setSourceSchema(sourceSpec != null ? sourceSpec.getSchema() : null);
-        scriptGeneratorManager.setSourceSession(getSourceSession());
-
-        ConnectionSpec targetSpec = getTargetSpec();
-        if (targetSpec != null) {
-            scriptGeneratorManager.setTargetCatalog(targetSpec.getCatalog());
-            scriptGeneratorManager.setTargetSchema(targetSpec.getSchema());
-        }
-
-        DialectResolver dialectResolver = createDialectResolver();
-        Dialect dialect = getTargetSession() != null ? dialectResolver.resolve(
-                getTargetSession().getConnection()) : dialectResolver.resolve(NUODB);
-        TranslationManager translationManager = dialect.getTranslationManager();
-        PrioritySet<Translator> translators = translationManager.getTranslators();
-        for (Translator translator : translators) {
-            if (translator instanceof ImplicitDefaultsTranslator) {
-                ((ImplicitDefaultsTranslator)translator).setUseExplicitDefaults(isUseExplicitDefaults());
-            }
-        }
-        JdbcTypeNameMap jdbcTypeNameMap = dialect.getJdbcTypeNameMap();
-        for (JdbcTypeSpec jdbcTypeSpec : getJdbcTypeSpecs()) {
-            JdbcTypeName jdbcTypeName = createTypeNameTemplate(new JdbcType(
-                    new JdbcTypeDesc(jdbcTypeSpec.getTypeCode()),
-                    newOptions(jdbcTypeSpec.getSize(), jdbcTypeSpec.getPrecision(), jdbcTypeSpec.getScale())),
-                    jdbcTypeSpec.getTypeName());
-            jdbcTypeNameMap.addJdbcTypeName(jdbcTypeName, HIGH);
-        }
-        dialect.setIdentifierQuoting(getIdentifierQuoting());
-        dialect.setIdentifierNormalizer(getIdentifierNormalizer());
-        for (PrioritySet.Item<NamingStrategy> item : getNamingStrategies().items()) {
-            scriptGeneratorManager.addNamingStrategy(item.getValue(), item.getPriority());
-        }
-        scriptGeneratorManager.setTargetDialect(dialect);
-        return scriptGeneratorManager;
-    }
-
-    @Override
-    public void release() throws Exception {
-        close(getSourceSession());
-        close(getTargetSession());
-    }
-
-    public ConnectionSpec getSourceSpec() {
-        return sourceSpec;
-    }
-
-    public void setSourceSpec(ConnectionSpec sourceSpec) {
-        this.sourceSpec = sourceSpec;
-    }
-
-    public Session getSourceSession() {
-        return sourceSession;
-    }
-
-    public void setSourceSession(Session sourceSession) {
-        this.sourceSession = sourceSession;
-    }
-
-    public Session getTargetSession() {
-        return targetSession;
-    }
-
-    public void setTargetSession(Session targetSession) {
-        this.targetSession = targetSession;
-    }
-
-    protected boolean isUseExplicitDefaults() {
-        return getJobSpec().isUseExplicitDefaults();
-    }
-
-    protected PrioritySet<NamingStrategy> getNamingStrategies() {
-        return getJobSpec().getNamingStrategies();
-    }
-
-    protected GroupScriptsBy getGroupScriptsBy() {
-        return getJobSpec().getGroupScriptsBy();
-    }
-
-    protected Collection<JdbcTypeSpec> getJdbcTypeSpecs() {
-        return getJobSpec().getJdbcTypeSpecs();
-    }
-
-    protected IdentifierQuoting getIdentifierQuoting() {
-        return getJobSpec().getIdentifierQuoting();
-    }
-
-    protected IdentifierNormalizer getIdentifierNormalizer() {
-        return getJobSpec().getIdentifierNormalizer();
     }
 
     protected MetaDataSpec getMetaDataSpec() {
         return getJobSpec().getMetaDataSpec();
-    }
-
-    protected Collection<MetaDataType> getObjectTypes() {
-        return getJobSpec().getObjectTypes();
     }
 
     protected Collection<TableSpec> getTableSpecs() {
@@ -191,11 +62,35 @@ public abstract class ScriptGeneratorJobBase<S extends ScriptGeneratorJobSpecBas
         return getJobSpec().getTableTypes();
     }
 
-    protected Collection<ScriptType> getScriptTypes() {
-        return getJobSpec().getScriptTypes();
+    protected Collection<MetaDataType> getObjectTypes() {
+        return getJobSpec().getObjectTypes();
     }
 
     protected ConnectionSpec getTargetSpec() {
         return getJobSpec().getTargetSpec();
+    }
+
+    protected Collection<ScriptType> getScriptTypes() {
+        return getJobSpec().getScriptTypes();
+    }
+
+    protected GroupScriptsBy getGroupScriptsBy() {
+        return getJobSpec().getGroupScriptsBy();
+    }
+
+    protected Collection<JdbcTypeSpec> getJdbcTypeSpecs() {
+        return getJobSpec().getJdbcTypeSpecs();
+    }
+
+    protected PrioritySet<NamingStrategy> getNamingStrategies() {
+        return getJobSpec().getNamingStrategies();
+    }
+
+    protected IdentifierQuoting getIdentifierQuoting() {
+        return getJobSpec().getIdentifierQuoting();
+    }
+
+    protected IdentifierNormalizer getIdentifierNormalizer() {
+        return getJobSpec().getIdentifierNormalizer();
     }
 }

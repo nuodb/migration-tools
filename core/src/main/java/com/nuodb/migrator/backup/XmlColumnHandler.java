@@ -40,7 +40,6 @@ import com.nuodb.migrator.jdbc.type.JdbcEnumType;
 import com.nuodb.migrator.jdbc.type.JdbcSetType;
 import com.nuodb.migrator.jdbc.type.JdbcType;
 import com.nuodb.migrator.utils.xml.XmlReadContext;
-import com.nuodb.migrator.utils.xml.XmlReadTargetAwareContext;
 import com.nuodb.migrator.utils.xml.XmlWriteContext;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
@@ -49,7 +48,6 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SEQUENCE;
-import static com.nuodb.migrator.utils.Predicates.equalTo;
 import static com.nuodb.migrator.utils.Predicates.is;
 import static java.lang.String.format;
 
@@ -75,19 +73,18 @@ public class XmlColumnHandler extends XmlIdentifiableHandlerBase<Column> {
     }
 
     @Override
-    protected Column createTarget(InputNode input, Class<? extends Column> type) {
-        return null;
+    protected Column createTarget(InputNode input, Class<? extends Column> type, XmlReadContext context) {
+        Table table = getParent(context, 0);
+        String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
+        return table != null ? (table.hasColumn(name) ?
+                table.getColumn(name) : table.addColumn(name)) : new Column(name);
     }
 
     @Override
-    protected void readAttributes(InputNode input, XmlReadTargetAwareContext<Column> context) throws Exception {
-        Table table = getParent(context);
-        String name = context.readAttribute(input, NAME_ATTRIBUTE, String.class);
-        Column column = table.hasColumn(name) ? table.getColumn(name) : table.addColumn(name);
+    protected void readAttributes(InputNode input, Column column, XmlReadContext context) throws Exception {
         column.setNullable(context.readAttribute(input, NULLABLE_ATTRIBUTE, Boolean.class, false));
         column.setAutoIncrement(context.readAttribute(input, AUTO_INCREMENT_ATTRIBUTE, Boolean.class, false));
         column.setDefaultValue(valueOf(context.readAttribute(input, DEFAULT_VALUE_ATTRIBUTE, String.class)));
-        context.setTarget(column);
     }
 
     @Override

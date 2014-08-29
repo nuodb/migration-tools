@@ -31,6 +31,7 @@ import com.nuodb.migrator.jdbc.metadata.Trigger;
 
 import static com.google.common.collect.Iterables.indexOf;
 import static com.nuodb.migrator.utils.Predicates.equalTo;
+import static com.nuodb.migrator.utils.StringUtils.*;
 
 /**
  * @author Sergey Bushik
@@ -45,11 +46,22 @@ public class TriggerQualifyNamingStrategy extends IdentifiableNamingStrategy<Tri
 
     @Override
     protected String getNonPrefixedName(Trigger trigger, ScriptGeneratorManager scriptGeneratorManager) {
-        StringBuilder nonPrefixedName = new StringBuilder();
-        nonPrefixedName.append(scriptGeneratorManager.getName(trigger.getTable(), false));
-        nonPrefixedName.append(getDelimiter());
+        StringBuilder buffer = new StringBuilder();
+        String tableName = scriptGeneratorManager.getName(trigger.getTable(), false);
+        buffer.append(tableName);
+        buffer.append(getDelimiter());
         int index = indexOf(trigger.getTable().getTriggers(), equalTo(trigger));
-        nonPrefixedName.append(index);
-        return nonPrefixedName.toString();
+        buffer.append(index);
+        String nonPrefixedName;
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(buffer);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(buffer);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(buffer);
+        } else {
+            nonPrefixedName = buffer.toString();
+        }
+        return nonPrefixedName;
     }
 }

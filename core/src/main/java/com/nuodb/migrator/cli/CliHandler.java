@@ -27,10 +27,14 @@
  */
 package com.nuodb.migrator.cli;
 
-import com.nuodb.migrator.Migrator;
 import com.nuodb.migrator.bootstrap.Bootable;
+import com.nuodb.migrator.cli.parse.Command;
+import com.nuodb.migrator.cli.parse.Group;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionException;
+import com.nuodb.migrator.cli.parse.OptionSet;
+import com.nuodb.migrator.cli.parse.Parser;
 import com.nuodb.migrator.config.Config;
-import com.nuodb.migrator.cli.parse.*;
 import com.nuodb.migrator.cli.parse.help.HelpFormatter;
 import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.cli.parse.parser.ParserImpl;
@@ -45,6 +49,7 @@ import java.io.PrintStream;
 import java.util.Collection;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.nuodb.migrator.Migrator.getProperty;
 import static com.nuodb.migrator.Migrator.getVersion;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static java.lang.Integer.MAX_VALUE;
@@ -234,6 +239,6 @@ public class CliHandler extends CliSupport implements Bootable {
     }
 
     protected String getExecutable() {
-        return Migrator.getProperty(Config.EXECUTABLE, CliHandler.EXECUTABLE);
+        return getProperty(Config.EXECUTABLE, CliHandler.EXECUTABLE);
     }
 }

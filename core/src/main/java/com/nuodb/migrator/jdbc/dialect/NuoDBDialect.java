@@ -270,13 +270,18 @@ public class NuoDBDialect extends SimpleDialect {
     }
 
     @Override
+    public boolean supportsDropPrimaryKey() {
+        return false;
+    }
+
+    @Override
     public boolean supportsDropTriggerIfExists() {
         return true;
     }
 
     @Override
     public boolean supportsDropIndexOnTable() {
-        return true;
+        return false;
     }
 
     @Override

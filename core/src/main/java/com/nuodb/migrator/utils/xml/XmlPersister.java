@@ -58,12 +58,12 @@ public class XmlPersister {
     }
 
     public XmlPersister(Strategy strategy) {
-        this(strategy, new Format(INDENT, PROLOG, new HyphenStyle()));
+        this(strategy, null);
     }
 
     public XmlPersister(Strategy strategy, Format format) {
         this.strategy = strategy;
-        this.format = format;
+        this.format = format == null ? new Format(INDENT, PROLOG, new HyphenStyle()) : format;
     }
 
     public <T> T read(Class<T> type, Reader reader) {

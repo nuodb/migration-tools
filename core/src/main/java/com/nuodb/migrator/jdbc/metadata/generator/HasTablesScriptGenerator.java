@@ -32,18 +32,9 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
-import com.nuodb.migrator.jdbc.metadata.ForeignKey;
-import com.nuodb.migrator.jdbc.metadata.HasTables;
-import com.nuodb.migrator.jdbc.metadata.Identifiable;
-import com.nuodb.migrator.jdbc.metadata.Index;
-import com.nuodb.migrator.jdbc.metadata.MetaDataType;
-import com.nuodb.migrator.jdbc.metadata.PrimaryKey;
-import com.nuodb.migrator.jdbc.metadata.Sequence;
-import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.jdbc.metadata.Trigger;
+import com.nuodb.migrator.jdbc.metadata.*;
 
 import java.util.Collection;
-import java.util.Map;
 
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Iterables.size;
@@ -62,13 +53,13 @@ import static org.apache.commons.lang3.StringUtils.join;
 @SuppressWarnings("unchecked")
 public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGeneratorBase<H> {
 
-    public static final String GROUP_SCRIPTS_BY = "GROUP_SCRIPTS_BY";
+    public static final String GROUP_SCRIPTS_BY = "group.scripts.by";
 
-    public static final String TABLE_TYPES = "TABLE_TYPES";
+    public static final String TABLE_TYPES = "table.types";
 
-    private static final String TABLES = "TABLES";
+    private static final String TABLES = "tables";
 
-    private static final String FOREIGN_KEYS = "FOREIGN_KEYS";
+    private static final String FOREIGN_KEYS = "foreign.keys";
 
     public HasTablesScriptGenerator() {
         this((Class<H>) HasTables.class);
@@ -168,7 +159,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
     }
 
     protected GroupScriptsBy getGroupScriptsBy(ScriptGeneratorManager scriptGeneratorManager) {
-        GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorManager.getAttributes().get(GROUP_SCRIPTS_BY);
+        GroupScriptsBy groupScriptsBy = (GroupScriptsBy) scriptGeneratorManager.getAttribute(GROUP_SCRIPTS_BY);
         return groupScriptsBy != null ? groupScriptsBy : GroupScriptsBy.TABLE;
     }
 
@@ -196,7 +187,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
         }
         if (createTables) {
             ScriptGeneratorManager tableScriptGeneratorManager = new ScriptGeneratorManager(scriptGeneratorManager);
-            Collection<Table> generatedTables = (Collection<Table>)
+            Collection<Table> primaryTables = (Collection<Table>)
                     tableScriptGeneratorManager.getAttributes().get(TABLES);
             tableScriptGeneratorManager.getObjectTypes().remove(FOREIGN_KEY);
             for (Table table : tables) {
@@ -204,7 +195,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                     continue;
                 }
                 scripts.addAll(tableScriptGeneratorManager.getCreateScripts(table));
-                generatedTables.add(table);
+                primaryTables.add(table);
             }
         }
         if (createPrimaryKeys && !createTables) {
@@ -269,9 +260,9 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
             scripts.addAll(triggers);
         }
         if (createForeignKeys) {
-            Collection<Table> generatedTables = (Collection<Table>) scriptGeneratorManager.getAttributes().get(TABLES);
+            Collection<Table> primaryTables = (Collection<Table>) scriptGeneratorManager.getAttribute(TABLES);
             Multimap<Table, ForeignKey> foreignKeys =
-                    (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttributes().get(FOREIGN_KEYS);
+                    (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttribute(FOREIGN_KEYS);
             for (Table table : tables) {
                 for (ForeignKey foreignKey : table.getForeignKeys()) {
                     Table primaryTable = foreignKey.getPrimaryTable();
@@ -280,7 +271,7 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                             !addTableScripts(foreignTable, scriptGeneratorManager)) {
                         continue;
                     }
-                    if (!generatedTables.contains(primaryTable)) {
+                    if (!primaryTables.contains(primaryTable)) {
                         foreignKeys.put(primaryTable, foreignKey);
                     } else {
                         foreignKeys.remove(primaryTable, foreignKey);
@@ -296,18 +287,18 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                                          ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         if (objectTypes.contains(FOREIGN_KEY)) {
-            Collection<Table> tables = (Collection<Table>) scriptGeneratorManager.getAttributes().get(TABLES);
+            Collection<Table> primaryTables = (Collection<Table>) scriptGeneratorManager.getAttribute(TABLES);
             Multimap<Table, ForeignKey> foreignKeys =
-                    (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttributes().get(FOREIGN_KEYS);
+                    (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttribute(FOREIGN_KEYS);
             for (ForeignKey foreignKey : newArrayList(foreignKeys.values())) {
-                Table table = foreignKey.getPrimaryTable();
-                if (!addTableScripts(table, scriptGeneratorManager) ||
+                Table primaryTable = foreignKey.getPrimaryTable();
+                if (!addTableScripts(primaryTable, scriptGeneratorManager) ||
                         !addTableScripts(foreignKey.getForeignTable(), scriptGeneratorManager)) {
                     continue;
                 }
-                if (tables.contains(table) || force) {
+                if (primaryTables.contains(primaryTable) || force) {
                     scripts.addAll(scriptGeneratorManager.getCreateScripts(foreignKey));
-                    foreignKeys.remove(table, foreignKey);
+                    foreignKeys.remove(primaryTable, foreignKey);
                 }
             }
         }
@@ -374,14 +365,12 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
     }
 
     protected void initScriptGeneratorContext(ScriptGeneratorManager scriptGeneratorManager) {
-        Map<String, Object> attributes = scriptGeneratorManager.getAttributes();
-        attributes.put(TABLES, newLinkedHashSet());
-        attributes.put(FOREIGN_KEYS, HashMultimap.create());
+        scriptGeneratorManager.addAttribute(TABLES, newLinkedHashSet());
+        scriptGeneratorManager.addAttribute(FOREIGN_KEYS, HashMultimap.create());
     }
 
     protected void releaseScriptGeneratorContext(ScriptGeneratorManager scriptGeneratorManager) {
-        Map<String, Object> attributes = scriptGeneratorManager.getAttributes();
-        attributes.remove(TABLES);
-        attributes.remove(FOREIGN_KEYS);
+        scriptGeneratorManager.removeAttribute(TABLES);
+        scriptGeneratorManager.removeAttribute(FOREIGN_KEYS);
     }
 }

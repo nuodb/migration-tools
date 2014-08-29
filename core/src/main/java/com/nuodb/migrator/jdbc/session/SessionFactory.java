@@ -30,6 +30,8 @@ package com.nuodb.migrator.jdbc.session;
 import java.sql.SQLException;
 import java.util.Map;
 
+import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
+
 /**
  * @author Sergey Bushik
  */

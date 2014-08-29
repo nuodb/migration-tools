@@ -73,6 +73,7 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         group.withOption(createMigrationModeGroup());
         group.withOption(createDataMigrationGroup());
         group.withOption(createSchemaMigrationGroup());
+        group.withOption(createExecutorGroup());
         return group.build();
     }
 
@@ -97,7 +98,6 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         group.withOption(createTableGroup());
         group.withOption(createQueryGroup());
         group.withOption(createTimeZoneOption());
-        group.withOption(createThreadsOption());
         group.withOption(createQueryLimitOption());
         return group.build();
     }
@@ -139,23 +139,11 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
         return group.build();
     }
 
-    protected Option createThreadsOption() {
-        return newBasicOptionBuilder().
-                withName(THREADS).
-                withAlias(THREADS_SHORT, OptionFormat.SHORT).
-                withDescription(getMessage(THREADS_OPTION_DESCRIPTION)).
-                withArgument(
-                        newArgumentBuilder().
-                                withName(getMessage(THREADS_ARGUMENT_NAME)).build()
-                ).build();
-    }
-
     protected Option createQueryGroup() {
         GroupBuilder group = newGroupBuilder().withName(getMessage(QUERY_GROUP_NAME)).withMaximum(MAX_VALUE);
 
         OptionFormat optionFormat = new OptionFormat(getOptionFormat());
         optionFormat.setValuesSeparator(null);
-
         Option query = newBasicOptionBuilder().
                 withName(QUERY).
                 withDescription(getMessage(QUERY_OPTION_DESCRIPTION)).
@@ -213,11 +201,6 @@ public class CliDumpJob extends CliJob<DumpJobSpec> {
             querySpecs.add(new QuerySpec(query));
         }
         return querySpecs;
-    }
-
-    protected Integer parseThreadsOption(OptionSet optionSet, Option option) {
-        String threadsValue = (String) optionSet.getValue(THREADS);
-        return !isEmpty(threadsValue) ? parseInt(threadsValue) : null;
     }
 
     protected QueryLimit parseQueryLimitOption(OptionSet optionSet, Option option) {

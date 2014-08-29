@@ -73,7 +73,7 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
 
     @Override
     public Field getField() {
-        return field.asField();
+        return field.toField();
     }
 
     @Override

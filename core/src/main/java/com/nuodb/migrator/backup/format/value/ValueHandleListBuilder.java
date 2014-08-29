@@ -187,15 +187,12 @@ public abstract class ValueHandleListBuilder {
         return this;
     }
 
-    static class SimpleValueHandle extends SimpleField implements ValueHandle {
+    private static class SimpleValueHandle extends SimpleField implements ValueHandle {
 
         private ValueType valueType;
         private ValueFormat valueFormat;
         private JdbcValueAccess jdbcValueAccess;
         private Map<String, Object> jdbcValueAccessOptions;
-
-        public SimpleValueHandle() {
-        }
 
         public SimpleValueHandle(Field field) {
             super(field);
@@ -242,6 +239,6 @@ public abstract class ValueHandleListBuilder {
         }
     }
 
-    static class SimpleValueHandleList extends SimpleFieldList<ValueHandle> implements ValueHandleList {
+    private static class SimpleValueHandleList extends SimpleFieldList<ValueHandle> implements ValueHandleList {
     }
 }

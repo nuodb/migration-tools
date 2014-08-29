@@ -102,9 +102,6 @@ public class PropertiesConfigLoader {
     private static InputStream getConfigFromProperty() {
         InputStream stream;
         try {
-            if (logger.isDebugEnabled()) {
-                logger.debug(format("Looking for custom config path under %s property", CONFIG));
-            }
             String config = getProperty(CONFIG);
             if (config != null) {
                 if (logger.isDebugEnabled()) {
@@ -127,9 +124,6 @@ public class PropertiesConfigLoader {
         File path = new File(new File(getHome(), CONFIG_DIR), DEFAULT_CONFIG);
         InputStream stream;
         try {
-            if (logger.isDebugEnabled()) {
-                logger.debug(format("Looking for config at %s", path));
-            }
             stream = new FileInputStream(path);
         } catch (Throwable t) {
             stream = null;
@@ -149,9 +143,6 @@ public class PropertiesConfigLoader {
     private static InputStream getDefaultConfig() {
         InputStream stream;
         try {
-            if (logger.isDebugEnabled()) {
-                logger.debug(format("Looking for default config at %s", DEFAULT_CONFIG));
-            }
             stream = PropertiesConfigLoader.class.getResourceAsStream(DEFAULT_CONFIG);
         } catch (Throwable throwable) {
             stream = null;

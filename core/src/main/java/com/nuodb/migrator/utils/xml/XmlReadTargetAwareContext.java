@@ -98,6 +98,15 @@ public class XmlReadTargetAwareContext<T> implements XmlReadContext {
         return target;
     }
 
+    public <T> T getTarget(int parent) {
+        XmlReadContext context = this;
+        for (int index = 0; context != null && index < parent; index++) {
+            context = context.getContext();
+        }
+        return context instanceof XmlReadTargetAwareContext ?
+                (T) ((XmlReadTargetAwareContext) context).getTarget() : null;
+    }
+
     public void setTarget(T target) {
         this.target = target;
     }

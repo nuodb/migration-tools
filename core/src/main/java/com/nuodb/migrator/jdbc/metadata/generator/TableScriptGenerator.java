@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.jdbc.metadata.generator;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.nuodb.migrator.jdbc.dialect.Dialect;
@@ -91,7 +92,7 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
                 buffer.append(' ');
                 buffer.append("NOT NULL");
             }
-            String defaultValue = dialect.getDefaultValue(scriptGeneratorManager.getSourceSession(), column);
+            String defaultValue = dialect.getDefaultValue(column, scriptGeneratorManager.getSourceSession());
             if (defaultValue != null) {
                 buffer.append(" DEFAULT ").append(defaultValue);
             }
@@ -214,16 +215,15 @@ public class TableScriptGenerator extends ScriptGeneratorBase<Table> {
             Collection<String> typeInfo = newArrayList();
             typeInfo.add(format("type name %s", column.getTypeName()));
             typeInfo.add(format("type code %s", column.getTypeCode()));
-            if (column.getSize() != null) {
-                typeInfo.add(format("length %d", column.getSize()));
-            }
+            typeInfo.add(format("length %d", column.getSize()));
             if (column.getPrecision() != null) {
                 typeInfo.add(format("precision %d", column.getPrecision()));
             }
             if (column.getScale() != null) {
                 typeInfo.add(format("scale %d", column.getScale()));
             }
-            throw new GeneratorException(format("Unsupported type on table %s column %s: %s",
+            throw new GeneratorException(
+                    format("Unsupported type on table %s column %s: %s",
                             tableName, columnName, join(typeInfo, ", ")));
         }
         return typeName;

@@ -28,6 +28,7 @@
 package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.Identifiable;
+import com.nuodb.migrator.jdbc.metadata.MetaData;
 
 /**
  * @author Sergey Bushik
@@ -41,8 +42,13 @@ public class SourceNamingStrategy<I extends Identifiable> extends IdentifiableNa
         super(typeClass);
     }
 
+    public SourceNamingStrategy(Class<? extends MetaData> objectClass,
+                                String prefix) {
+        super(objectClass, prefix);
+    }
+
     @Override
-    protected final String getNonPrefixedName(I object, ScriptGeneratorManager scriptGeneratorManager) {
+    protected String getNonPrefixedName(I object, ScriptGeneratorManager scriptGeneratorManager) {
         return object.getName();
     }
 }

@@ -38,6 +38,7 @@ public class SequenceAutoNamingStrategy extends LengthLimitNamingStrategy<Sequen
 
     public SequenceAutoNamingStrategy() {
         super(Sequence.class, LENGTH_LIMIT);
+        addNamingStrategy(new SequenceSourceNamingStrategy());
         addNamingStrategy(new SequenceQualifyNamingStrategy());
         addNamingStrategy(new SequenceHashNamingStrategy());
     }

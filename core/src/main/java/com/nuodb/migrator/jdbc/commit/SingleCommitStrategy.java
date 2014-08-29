@@ -32,11 +32,13 @@ import com.nuodb.migrator.utils.ObjectUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 
 /**
  * @author Sergey Bushik
  */
+@SuppressWarnings("unchecked")
 public class SingleCommitStrategy implements CommitStrategy {
 
     public static final CommitStrategy INSTANCE = new SingleCommitStrategy();
@@ -49,14 +51,25 @@ public class SingleCommitStrategy implements CommitStrategy {
     }
 
     @Override
-    public void execute(PreparedStatement statement, Query query) throws SQLException {
-        statement.execute();
-    }
+    public CommitExecutor createCommitExecutor(Statement statement, Query query) {
+        return new CommitExecutorBase(statement, query) {
 
-    @Override
-    public void finish(PreparedStatement statement, Query query) throws SQLException {
-    }
+            @Override
+            public boolean execute() throws SQLException {
+                if (statement instanceof PreparedStatement) {
+                    ((PreparedStatement)statement).execute();
+                } else {
+                    statement.execute(query.toString());
+                }
+                return true;
+            }
 
+            @Override
+            public void finish() throws SQLException {
+                statement.getConnection().commit();
+            }
+        };
+    }
     public String toString() {
         return ObjectUtils.toString(this);
     }

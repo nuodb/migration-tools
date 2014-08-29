@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.backup.BackupOps;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 

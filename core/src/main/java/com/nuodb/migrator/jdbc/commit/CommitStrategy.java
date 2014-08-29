@@ -29,8 +29,7 @@ package com.nuodb.migrator.jdbc.commit;
 
 import com.nuodb.migrator.jdbc.query.Query;
 
-import java.sql.SQLException;
-import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.Map;
 
 /**
@@ -38,9 +37,7 @@ import java.util.Map;
  */
 public interface CommitStrategy {
 
-  void setAttributes(Map<String, Object> attributes);
+    void setAttributes(Map<String, Object> attributes);
 
-  void execute(PreparedStatement statement, Query query) throws SQLException;
-
-  void finish(PreparedStatement statement, Query query) throws SQLException;
+    CommitExecutor createCommitExecutor(Statement statement, Query query);
 }

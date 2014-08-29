@@ -32,21 +32,21 @@ package com.nuodb.migrator.context;
  */
 public class ContextHolder {
 
-    private static ContextHolderStrategy migratorContextHolderStrategy;
+    private static ContextHolderStrategy contextHolderStrategy;
 
     static {
-        setMigratorContextHolderStrategy(new StaticContextHolderStrategy());
-    }
-
-    public static void setMigratorContextHolderStrategy(ContextHolderStrategy migratorContextHolderStrategy) {
-        ContextHolder.migratorContextHolderStrategy = migratorContextHolderStrategy;
+        setContextHolderStrategy(new StaticContextHolderStrategy());
     }
 
     public static Context getContext() {
-        return migratorContextHolderStrategy.getContext();
+        return contextHolderStrategy.getContext();
     }
 
     public static void setContext(Context context) {
-        migratorContextHolderStrategy.setContext(context);
+        contextHolderStrategy.setContext(context);
+    }
+
+    public static void setContextHolderStrategy(ContextHolderStrategy contextHolderStrategy) {
+        ContextHolder.contextHolderStrategy = contextHolderStrategy;
     }
 }

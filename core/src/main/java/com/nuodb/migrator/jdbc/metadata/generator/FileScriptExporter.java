@@ -61,8 +61,9 @@ public class FileScriptExporter extends StreamScriptExporterBase {
 
     @Override
     protected Writer openWriter() throws Exception {
+        File file = getFile();
         createParentDirs(file);
-        return new OutputStreamWriter(new FileOutputStream(getFile()), forName(getEncoding()));
+        return new OutputStreamWriter(new FileOutputStream(file), forName(getEncoding()));
     }
 
     public File getFile() {

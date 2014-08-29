@@ -35,7 +35,6 @@ import java.sql.SQLException;
 
 import static com.nuodb.migrator.jdbc.metadata.DefaultValue.valueOf;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.EMPTY;
-import static com.nuodb.migrator.jdbc.session.SessionUtils.createSession;
 
 /**
  * Utilities for use by test classes
@@ -47,24 +46,11 @@ public class TranslatorUtils {
     /**
      * Creates simple script from provided string script object & database dialect
      *
-     * @param script  source for the translation
-     * @param dialect of the translated string
-     * @return simple script object initialized with source script & database dialect
-     */
-    public static Script createScript(String script, Dialect dialect) throws SQLException {
-        return createScript(script, dialect, null);
-    }
-
-    /**
-     * Creates simple script from provided string script object & database dialect
-     *
-     * @param script  source for the translation
-     * @param dialect of the translated string
-     * @param url     connection url to a source database
+     * @param script source for the translation
      * @return simple script object initialized with source script, database dialect & connection url
      */
-    public static Script createScript(String script, Dialect dialect, String url) throws SQLException {
-        return new SimpleScript(script, createSession(dialect, url));
+    public static Script createScript(String script) throws SQLException {
+        return new SimpleScript(script);
     }
 
     /**
@@ -73,16 +59,15 @@ public class TranslatorUtils {
      * @param defaultValue column default value
      * @param typeCode     database type code
      * @param typeName     database type name
-     * @param session      session to the source database
      * @return fully initialized column script
      */
-    public static Script createScript(String defaultValue, int typeCode, String typeName, Session session) {
+    public static Script createScript(String defaultValue, int typeCode, String typeName) {
         Column column = new Column(EMPTY);
         column.setTypeCode(typeCode);
         column.setTypeName(typeName);
         column.setDefaultValue(valueOf(defaultValue));
         Table table = new Table(EMPTY);
         table.addColumn(column);
-        return new ColumnScript(column, session);
+        return new ColumnScript(column);
     }
 }

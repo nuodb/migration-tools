@@ -29,6 +29,9 @@ package com.nuodb.migrator.cli.run;
 
 import com.nuodb.migrator.Migrator;
 import com.nuodb.migrator.MigratorException;
+import com.nuodb.migrator.cli.parse.Option;
+import com.nuodb.migrator.cli.parse.OptionSet;
+import com.nuodb.migrator.cli.parse.option.OptionFormat;
 import com.nuodb.migrator.job.HasJobSpec;
 import com.nuodb.migrator.job.Job;
 import com.nuodb.migrator.job.JobExecutor;
@@ -37,7 +40,10 @@ import com.nuodb.migrator.spec.JobSpec;
 
 import java.util.Map;
 
+import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.job.JobExecutors.createJobExecutor;
+import static java.lang.Integer.parseInt;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Sergey Bushik

@@ -27,10 +27,14 @@
  */
 package com.nuodb.migrator.context;
 
+import org.slf4j.Logger;
+
 import static com.nuodb.migrator.config.Config.CONTEXT_CLASS;
 import static com.nuodb.migrator.config.Config.DEFAULT_CONTEXT_CLASS;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
+import static java.lang.String.format;
 import static java.lang.System.getProperty;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
@@ -38,6 +42,7 @@ import static java.lang.System.getProperty;
 public class StaticContextHolderStrategy implements ContextHolderStrategy {
 
     private volatile static Context context;
+    private final Logger logger = getLogger(getClass());
 
     @Override
     public Context getContext() {
@@ -52,7 +57,11 @@ public class StaticContextHolderStrategy implements ContextHolderStrategy {
     }
 
     protected Context createContext() {
-        return newInstance(getProperty(CONTEXT_CLASS, DEFAULT_CONTEXT_CLASS));
+        String contextClass = getProperty(CONTEXT_CLASS, DEFAULT_CONTEXT_CLASS);
+        if (logger.isInfoEnabled()) {
+            logger.info(format("Creating application context using %s", contextClass));
+        }
+        return newInstance(contextClass);
     }
 
     @Override

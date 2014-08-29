@@ -39,6 +39,8 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.nuodb.migrator.jdbc.metadata.Identifier.valueOf;
+import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getDropSchema;
+import static com.nuodb.migrator.jdbc.metadata.generator.SchemaScriptGeneratorUtils.getUseSchema;
 
 /**
  * @author Sergey Bushik
@@ -58,7 +60,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 schemaScripts.put(schema, scripts);
             }
         }
-        return getScripts(schemaScripts, scriptGeneratorManager);
+        return getScripts(schemaScripts, scriptGeneratorManager, false, true);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 schemaScripts.put(schema, scripts);
             }
         }
-        return getScripts(schemaScripts, scriptGeneratorManager);
+        return getScripts(schemaScripts, scriptGeneratorManager, false, true);
     }
 
     @Override
@@ -83,59 +85,58 @@ public class HasSchemasScriptGenerator extends HasTablesScriptGenerator<HasSchem
                 schemaScripts.put(schema, scripts);
             }
         }
-        return getScripts(schemaScripts, scriptGeneratorManager);
+        return getScripts(schemaScripts, scriptGeneratorManager, false, true);
     }
 
     protected Collection<String> getScripts(Map<Schema, Collection<String>> schemaScripts,
-                                            ScriptGeneratorManager context) {
+                                            ScriptGeneratorManager scriptGeneratorManager,
+                                            boolean dropSchema, boolean useSchema) {
         Collection<String> scripts = newArrayList();
-        Dialect dialect = context.getTargetDialect();
         if (schemaScripts.size() == 1) {
             Map.Entry<Schema, Collection<String>> schemaScript = schemaScripts.entrySet().iterator().next();
-            String useSpace = null;
-            if (context.getTargetSchema() != null) {
-                useSpace = dialect.getUseSchema(context.getTargetSchema(), true);
-            } else if (context.getTargetCatalog() != null) {
-                useSpace = dialect.getUseCatalog(context.getTargetCatalog(), true);
+            Schema schema = schemaScript.getKey();
+            if (dropSchema) {
+                scripts.add(getDropSchema(schema, scriptGeneratorManager));
             }
-            if (useSpace == null) {
-                Schema schema = schemaScript.getKey();
-                useSpace = schema.getIdentifier() != null ?
-                        dialect.getUseSchema(context.getName(schema)) :
-                        dialect.getUseCatalog(context.getName(schema.getCatalog()));
+            if (useSchema) {
+                scripts.add(getUseSchema(schema, scriptGeneratorManager));
             }
-            scripts.add(useSpace);
             scripts.addAll(schemaScript.getValue());
         } else {
             for (Map.Entry<Schema, Collection<String>> schemaScript : schemaScripts.entrySet()) {
                 Schema schema = schemaScript.getKey();
-                String useSpace = schema.getIdentifier() != null ?
-                        dialect.getUseSchema(context.getName(schema)) :
-                        dialect.getUseCatalog(context.getName(schema.getCatalog()));
-                scripts.add(useSpace);
+                Dialect dialect = scriptGeneratorManager.getTargetDialect();
+                if (dropSchema) {
+                    scripts.add(getDropSchema(schema, scriptGeneratorManager));
+                }
+                if (useSchema) {
+                    scripts.add(schema.getIdentifier() != null ?
+                            dialect.getUseSchema(scriptGeneratorManager.getName(schema)) :
+                            dialect.getUseSchema(scriptGeneratorManager.getName(schema.getCatalog())));
+                }
                 scripts.addAll(schemaScript.getValue());
             }
         }
         return scripts;
     }
 
-    protected Collection<Schema> getSchemas(HasSchemas hasSchemas, ScriptGeneratorManager context) {
+    protected Collection<Schema> getSchemas(HasSchemas hasSchemas, ScriptGeneratorManager scriptGeneratorManager) {
         Collection<Schema> schemas = newArrayList();
         for (Schema schema : hasSchemas.getSchemas()) {
-            if (addSchemaScripts(schema, context)) {
+            if (addSchemaScripts(schema, scriptGeneratorManager)) {
                 schemas.add(schema);
             }
         }
         return schemas;
     }
 
-    protected boolean addSchemaScripts(Schema schema, ScriptGeneratorManager context) {
+    protected boolean addSchemaScripts(Schema schema, ScriptGeneratorManager manager) {
         boolean generate = true;
-        Identifier catalogId = valueOf(context.getSourceCatalog());
+        Identifier catalogId = valueOf(manager.getSourceCatalog());
         if (catalogId != null) {
             generate = ObjectUtils.equals(catalogId, schema.getCatalog().getIdentifier());
         }
-        Identifier schemaId = valueOf(context.getSourceSchema());
+        Identifier schemaId = valueOf(manager.getSourceSchema());
         if (generate && schemaId != null) {
             generate = ObjectUtils.equals(schemaId, schema.getIdentifier());
         }

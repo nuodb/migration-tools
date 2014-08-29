@@ -29,6 +29,7 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.Index;
 
+import static com.nuodb.migrator.utils.StringUtils.*;
 import static java.lang.Integer.toHexString;
 
 /**
@@ -37,6 +38,15 @@ import static java.lang.Integer.toHexString;
 public class IndexHashNamingStrategy extends IndexQualifyNamingStrategy {
     @Override
     protected String getNonPrefixedName(Index index, ScriptGeneratorManager scriptGeneratorManager) {
-        return toHexString(super.getNonPrefixedName(index, scriptGeneratorManager).hashCode());
+        String nonPrefixedName = toHexString(super.getNonPrefixedName(index, scriptGeneratorManager).hashCode());
+        String tableName = scriptGeneratorManager.getName(index.getTable(), false);
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(nonPrefixedName);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(nonPrefixedName);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(nonPrefixedName);
+        }
+        return nonPrefixedName;
     }
 }

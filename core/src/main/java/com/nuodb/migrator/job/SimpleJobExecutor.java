@@ -27,29 +27,34 @@
  */
 package com.nuodb.migrator.job;
 
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newCopyOnWriteArrayList;
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Sergey Bushik
  */
 public class SimpleJobExecutor implements JobExecutor {
 
-    private transient final Logger logger = LoggerFactory.getLogger(getClass());
+    private transient final Logger logger = getLogger(getClass());
     private final Job job;
     private final SimpleJobStatus jobStatus;
-    private List<JobExecutionListener> listeners = Lists.newArrayList();
+    private Collection<JobExecutionListener> listeners = newCopyOnWriteArrayList();
 
     public SimpleJobExecutor(Job job) {
         this.job = job;
         this.jobStatus = new SimpleJobStatus();
+    }
+
+    @Override
+    public Job getJob() {
+        return job;
     }
 
     @Override
@@ -58,12 +63,12 @@ public class SimpleJobExecutor implements JobExecutor {
     }
 
     @Override
-    public void addJobExecutionListener(JobExecutionListener listener) {
+    public void addListener(JobExecutionListener listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void removeJobExecutionListener(JobExecutionListener listener) {
+    public void removeListener(JobExecutionListener listener) {
         listeners.remove(listener);
     }
 
@@ -103,7 +108,7 @@ public class SimpleJobExecutor implements JobExecutor {
         }
         JobExecution execution = createExecution(context);
         try {
-            fire(new JobExecutionEvent(execution));
+            onJobExecution(new JobExecutionEvent(execution));
 
             job.init(execution);
             job.execute();
@@ -112,7 +117,7 @@ public class SimpleJobExecutor implements JobExecutor {
                 jobStatus.setRunning(false);
             }
 
-            fire(new JobExecutionEvent(execution));
+            onJobExecution(new JobExecutionEvent(execution));
         } catch (Throwable failure) {
             if (logger.isDebugEnabled()) {
                 logger.debug(format("Job %s execution failed", job.getName()), failure);
@@ -122,13 +127,13 @@ public class SimpleJobExecutor implements JobExecutor {
                 jobStatus.setRunning(false);
                 jobStatus.setFailure(failure);
             }
-            fire(new JobExecutionEvent(execution));
+            onJobExecution(new JobExecutionEvent(execution));
         } finally {
             try {
-                job.release();
+                job.close();
             } catch (Exception exception) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug(format("Job release %s failure", job.getName()), exception);
+                    logger.debug(format("Job close %s failure", job.getName()), exception);
                 }
             }
         }
@@ -139,7 +144,7 @@ public class SimpleJobExecutor implements JobExecutor {
         return new SimpleJobExecution(job, jobStatus, context);
     }
 
-    protected void fire(JobExecutionEvent event) {
+    protected void onJobExecution(JobExecutionEvent event) {
         for (JobExecutionListener listener : listeners) {
             listener.onJobExecution(event);
         }
@@ -152,10 +157,5 @@ public class SimpleJobExecutor implements JobExecutor {
                 jobStatus.stop();
             }
         }
-    }
-
-    @Override
-    public Job getJob() {
-        return job;
     }
 }

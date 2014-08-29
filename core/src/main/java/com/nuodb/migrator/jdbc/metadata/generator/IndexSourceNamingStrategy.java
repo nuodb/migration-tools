@@ -29,12 +29,39 @@ package com.nuodb.migrator.jdbc.metadata.generator;
 
 import com.nuodb.migrator.jdbc.metadata.Index;
 
+import static com.nuodb.migrator.utils.StringUtils.*;
+
 /**
  * @author Sergey Bushik
  */
 public class IndexSourceNamingStrategy extends SourceNamingStrategy<Index> {
 
+    private static final String PREFIX = "IDX";
+
     public IndexSourceNamingStrategy() {
-        super(Index.class);
+        super(Index.class, PREFIX);
+    }
+
+    @Override
+    protected String getNonPrefixedName(Index index, ScriptGeneratorManager scriptGeneratorManager) {
+        if (index.getName() == null) {
+            return null;
+        }
+        StringBuilder buffer = new StringBuilder();
+        String tableName = scriptGeneratorManager.getName(index.getTable(), false);
+        buffer.append(tableName);
+        buffer.append(getDelimiter(index, scriptGeneratorManager));
+        buffer.append(index.getName());
+        String nonPrefixedName;
+        if (isLowerCase(tableName)) {
+            nonPrefixedName = lowerCase(buffer);
+        } else if (isCapitalizedCase(tableName)) {
+            nonPrefixedName = capitalizedCase(buffer);
+        } else if (isUpperCase(tableName)) {
+            nonPrefixedName = upperCase(buffer);
+        } else {
+            nonPrefixedName = buffer.toString();
+        }
+        return nonPrefixedName;
     }
 }
