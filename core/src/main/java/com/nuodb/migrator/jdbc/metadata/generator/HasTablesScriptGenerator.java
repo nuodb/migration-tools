@@ -291,18 +291,18 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                                          ScriptGeneratorManager scriptGeneratorManager) {
         Collection<MetaDataType> objectTypes = scriptGeneratorManager.getObjectTypes();
         if (objectTypes.contains(FOREIGN_KEY)) {
-            Collection<Table> generatedTables = (Collection<Table>) scriptGeneratorManager.getAttributes().get(TABLES);
+            Collection<Table> tables = (Collection<Table>) scriptGeneratorManager.getAttributes().get(TABLES);
             Multimap<Table, ForeignKey> foreignKeys =
                     (Multimap<Table, ForeignKey>) scriptGeneratorManager.getAttributes().get(FOREIGN_KEYS);
             for (ForeignKey foreignKey : newArrayList(foreignKeys.values())) {
-                Table primaryTable = foreignKey.getPrimaryTable();
-                if (!addTableScripts(primaryTable, scriptGeneratorManager) ||
+                Table table = foreignKey.getPrimaryTable();
+                if (!addTableScripts(table, scriptGeneratorManager) ||
                         !addTableScripts(foreignKey.getForeignTable(), scriptGeneratorManager)) {
                     continue;
                 }
-                if (generatedTables.contains(primaryTable) || force) {
+                if (tables.contains(table) || force) {
                     scripts.addAll(scriptGeneratorManager.getCreateScripts(foreignKey));
-                    foreignKeys.remove(primaryTable, foreignKey);
+                    foreignKeys.remove(table, foreignKey);
                 }
             }
         }
