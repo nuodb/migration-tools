@@ -36,6 +36,8 @@ import com.nuodb.migrator.jdbc.metadata.*;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
@@ -230,7 +232,10 @@ public class HasTablesScriptGenerator<H extends HasTables> extends ScriptGenerat
                                 return true;
                             }
                         })) {
-                    if (!addTableScripts(index.getTable(), scriptGeneratorManager) || index.isPrimary()) {
+                    boolean uniqueInCreateTable = index.isUnique() && size(index.getColumns()) == 1 &&
+                            !get(index.getColumns(), 0).isNullable() && dialect.supportsUniqueInCreateTable() && createTables;
+                    if (!addTableScripts(index.getTable(), scriptGeneratorManager) || index.isPrimary() ||
+                            uniqueInCreateTable) {
                         continue;
                     }
                     indexes.addAll(scriptGeneratorManager.getCreateScripts(index));
