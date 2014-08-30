@@ -95,10 +95,6 @@ public class BackupWriter {
     public static final String FORMAT = CsvFormat.TYPE;
     public static final int THREADS = getRuntime().availableProcessors();
     public static final Collection<MigrationMode> MIGRATION_MODES = newHashSet(MigrationMode.values());
-    /**
-     * The default row count, which triggers write row event per each chunk
-     */
-    public static final Long DELTA_ROW_COUNT = null;
 
     protected final transient Logger logger = getLogger(getClass());
 
