@@ -49,7 +49,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.indexOf;
@@ -85,8 +84,6 @@ public class WriteQueryWork extends WorkForkJoinTaskBase {
     private Collection<Chunk> chunks;
     private BackupWriterContext backupWriterContext;
     private ValueHandleList valueHandleList;
-
-    private static AtomicInteger i = new AtomicInteger();
 
     public WriteQueryWork(WriteQuery writeQuery, QuerySplit querySplit,
                           boolean hasNextQuerySplit, BackupWriterManager backupWriterManager) {
@@ -257,6 +254,6 @@ public class WriteQueryWork extends WorkForkJoinTaskBase {
     @Override
     public String toString() {
         return ObjectUtils.toString(this,
-                asList("queryDesc", "querySplit", "hasNextQuerySplit"));
+                asList("writeQuery", "querySplit", "hasNextQuerySplit"));
     }
 }

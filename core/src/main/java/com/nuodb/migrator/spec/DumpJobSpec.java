@@ -27,7 +27,7 @@
  */
 package com.nuodb.migrator.spec;
 
-import com.nuodb.migrator.backup.BackupOps;
+import com.nuodb.migrator.backup.writer.BackupWriterListener;
 import com.nuodb.migrator.jdbc.metadata.MetaDataType;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 
@@ -44,6 +44,7 @@ import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
  */
 public class DumpJobSpec extends JobSpecBase {
 
+    private Collection<BackupWriterListener> listeners = newArrayList();
     private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);
     private Integer threads;
     private TimeZone timeZone;
@@ -52,6 +53,18 @@ public class DumpJobSpec extends JobSpecBase {
     private MetaDataSpec metaDataSpec = new MetaDataSpec();
     private Collection<QuerySpec> querySpecs = newArrayList();
     private QueryLimit queryLimit;
+
+    public void addListener(BackupWriterListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(BackupWriterListener listener) {
+        listeners.remove(listener);
+    }
+
+    public Collection<BackupWriterListener> getListeners() {
+        return listeners;
+    }
 
     public Collection<MigrationMode> getMigrationModes() {
         return migrationModes;

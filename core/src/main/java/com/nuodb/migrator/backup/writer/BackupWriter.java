@@ -208,9 +208,8 @@ public class BackupWriter {
         listeners.remove(listener);
     }
 
-    public BackupWriterListener[] getListeners() {
-        int size = listeners.size();
-        return listeners.toArray(new BackupWriterListener[size]);
+    public Collection<BackupWriterListener> getListeners() {
+        return listeners;
     }
 
     public Backup write(String path) throws Exception {

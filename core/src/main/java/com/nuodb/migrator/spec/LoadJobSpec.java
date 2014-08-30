@@ -27,6 +27,7 @@
  */
 package com.nuodb.migrator.spec;
 
+import com.nuodb.migrator.backup.loader.BackupLoaderListener;
 import com.nuodb.migrator.backup.loader.Parallelizer;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.query.InsertType;
@@ -35,8 +36,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.nuodb.migrator.backup.loader.Parallelizers.TABLE_LEVEL;
+import static com.nuodb.migrator.jdbc.commit.BatchCommitStrategy.INSTANCE;
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 
@@ -45,15 +49,52 @@ import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
  */
 public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
-    private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);
-    private Integer threads;
-    private ConnectionSpec targetSpec;
-    private TimeZone timeZone;
+    private CommitStrategy commitStrategy = INSTANCE;
     private ResourceSpec inputSpec;
     private InsertType insertType;
-    private CommitStrategy commitStrategy;
+    private Collection<BackupLoaderListener> listeners = newArrayList();
+    private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);
+    private Parallelizer parallelizer = TABLE_LEVEL;
     private Map<String, InsertType> tableInsertTypes = newHashMap();
-    private Parallelizer parallelizer;
+    private ConnectionSpec targetSpec;
+    private TimeZone timeZone;
+    private Integer threads;
+
+    public CommitStrategy getCommitStrategy() {
+        return commitStrategy;
+    }
+
+    public void setCommitStrategy(CommitStrategy commitStrategy) {
+        this.commitStrategy = commitStrategy;
+    }
+
+    public ResourceSpec getInputSpec() {
+        return inputSpec;
+    }
+
+    public void setInputSpec(ResourceSpec inputSpec) {
+        this.inputSpec = inputSpec;
+    }
+
+    public InsertType getInsertType() {
+        return insertType;
+    }
+
+    public void setInsertType(InsertType insertType) {
+        this.insertType = insertType;
+    }
+
+    public void addListener(BackupLoaderListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(BackupLoaderListener listener) {
+        listeners.remove(listener);
+    }
+
+    public Collection<BackupLoaderListener> getListeners() {
+        return listeners;
+    }
 
     public Collection<MigrationMode> getMigrationModes() {
         return migrationModes;
@@ -61,14 +102,6 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
     public void setMigrationModes(Collection<MigrationMode> migrationModes) {
         this.migrationModes = migrationModes;
-    }
-
-    public Integer getThreads() {
-        return threads;
-    }
-
-    public void setThreads(Integer threads) {
-        this.threads = threads;
     }
 
     public ConnectionSpec getTargetSpec() {
@@ -87,28 +120,12 @@ public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
         this.timeZone = timeZone;
     }
 
-    public InsertType getInsertType() {
-        return insertType;
+    public Integer getThreads() {
+        return threads;
     }
 
-    public void setInsertType(InsertType insertType) {
-        this.insertType = insertType;
-    }
-
-    public CommitStrategy getCommitStrategy() {
-        return commitStrategy;
-    }
-
-    public void setCommitStrategy(CommitStrategy commitStrategy) {
-        this.commitStrategy = commitStrategy;
-    }
-
-    public ResourceSpec getInputSpec() {
-        return inputSpec;
-    }
-
-    public void setInputSpec(ResourceSpec inputSpec) {
-        this.inputSpec = inputSpec;
+    public void setThreads(Integer threads) {
+        this.threads = threads;
     }
 
     public Map<String, InsertType> getTableInsertTypes() {

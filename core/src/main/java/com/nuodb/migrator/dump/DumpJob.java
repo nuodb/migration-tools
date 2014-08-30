@@ -29,6 +29,7 @@ package com.nuodb.migrator.dump;
 
 import com.nuodb.migrator.MigratorException;
 import com.nuodb.migrator.backup.writer.BackupWriter;
+import com.nuodb.migrator.backup.writer.BackupWriterListener;
 import com.nuodb.migrator.jdbc.query.QueryLimit;
 import com.nuodb.migrator.jdbc.session.SessionFactory;
 import com.nuodb.migrator.job.HasServicesJobBase;
@@ -40,6 +41,7 @@ import com.nuodb.migrator.spec.QuerySpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -69,6 +71,9 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         super.init();
 
         BackupWriter backupWriter = new BackupWriter();
+        for (BackupWriterListener listener : getListeners()) {
+            backupWriter.addListener(listener);
+        }
         backupWriter.setFormat(getFormat());
         backupWriter.setFormatAttributes(getFormatAttributes());
         backupWriter.setFormatFactory(createFormatFactory());
@@ -121,6 +126,10 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
 
     public void setBackupWriter(BackupWriter backupWriter) {
         this.backupWriter = backupWriter;
+    }
+
+    protected Collection<BackupWriterListener> getListeners() {
+        return getJobSpec().getListeners();
     }
 
     protected String getFormat() {

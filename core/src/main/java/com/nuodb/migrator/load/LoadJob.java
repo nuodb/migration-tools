@@ -28,10 +28,8 @@
 package com.nuodb.migrator.load;
 
 import com.nuodb.migrator.MigratorException;
-import com.nuodb.migrator.backup.loader.BackupLoader;
-import com.nuodb.migrator.backup.loader.InsertTypeFactory;
-import com.nuodb.migrator.backup.loader.Parallelizer;
-import com.nuodb.migrator.backup.loader.SimpleInsertTypeFactory;
+import com.nuodb.migrator.backup.loader.*;
+import com.nuodb.migrator.backup.writer.BackupWriterListener;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.dialect.TranslationConfig;
 import com.nuodb.migrator.jdbc.query.InsertType;
@@ -67,6 +65,9 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
         super.init();
 
         BackupLoader backupLoader = new BackupLoader();
+        for (BackupLoaderListener listener : getListeners()) {
+            backupLoader.addListener(listener);
+        }
         backupLoader.setCommitStrategy(getCommitStrategy());
         backupLoader.setDialectResolver(createDialectResolver());
         backupLoader.setFormatAttributes(getFormatAttributes());
@@ -125,6 +126,10 @@ public class LoadJob extends ScriptGeneratorJobBase<LoadJobSpec> {
 
     protected void setBackupLoader(BackupLoader backupLoader) {
         this.backupLoader = backupLoader;
+    }
+
+    protected Collection<BackupLoaderListener> getListeners() {
+        return getJobSpec().getListeners();
     }
 
     protected CommitStrategy getCommitStrategy() {
