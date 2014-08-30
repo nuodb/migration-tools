@@ -28,6 +28,7 @@
 package com.nuodb.migrator.backup.writer;
 
 import com.nuodb.migrator.backup.Chunk;
+import com.nuodb.migrator.backup.Column;
 import com.nuodb.migrator.backup.QueryRowSet;
 import com.nuodb.migrator.backup.RowSet;
 import com.nuodb.migrator.backup.format.Output;
@@ -122,9 +123,11 @@ public class WriteQueryWork extends WorkForkJoinTaskBase {
 
         RowSet rowSet = writeQuery.getRowSet();
         if (isEmpty(rowSet.getColumns())) {
+            Collection<Column> columns = newArrayList();
             for (ValueHandle valueHandle : valueHandleList) {
-                rowSet.addColumn(valueHandle.getName(), valueHandle.getValueType());
+                columns.add(new Column(valueHandle.getName(), valueHandle.getValueType()));
             }
+            rowSet.setColumns(columns);
         }
 
         output = backupWriterContext.getFormatFactory().createOutput(
