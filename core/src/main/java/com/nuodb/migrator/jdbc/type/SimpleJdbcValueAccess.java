@@ -45,24 +45,24 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
     private ResultSet resultSet;
     private PreparedStatement statement;
     private Connection connection;
-    private int columnIndex;
+    private int index;
     private Field field;
 
     public SimpleJdbcValueAccess(JdbcValueGetter<T> jdbcValueGetter, Connection connection, ResultSet resultSet,
-                                 int columnIndex, Field field) throws SQLException {
+                                 int index, Field field) throws SQLException {
         this.jdbcValueGetter = jdbcValueGetter;
         this.connection = connection;
         this.resultSet = resultSet;
-        this.columnIndex = columnIndex;
+        this.index = index;
         this.field = field;
     }
 
     public SimpleJdbcValueAccess(JdbcValueSetter jdbcValueSetter, Connection connection,
-                                 PreparedStatement statement, int columnIndex, Field field) throws SQLException {
+                                 PreparedStatement statement, int index, Field field) throws SQLException {
         this.jdbcValueSetter = jdbcValueSetter;
         this.connection = connection;
         this.statement = statement;
-        this.columnIndex = columnIndex;
+        this.index = index;
         this.field = field;
     }
 
@@ -77,8 +77,8 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
     }
 
     @Override
-    public int getColumnIndex() {
-        return columnIndex;
+    public int getIndex() {
+        return index;
     }
 
     @Override
@@ -86,7 +86,7 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
         if (jdbcValueGetter == null) {
             throw new JdbcValueAccessException("Get value is not supported");
         }
-        return jdbcValueGetter.getValue(resultSet, connection, columnIndex, field, options);
+        return jdbcValueGetter.getValue(resultSet, connection, index, field, options);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
         if (jdbcValueGetter == null) {
             throw new JdbcValueAccessException("Get value is not supported");
         }
-        return jdbcValueGetter.getValue(resultSet, connection, columnIndex, field, valueClass, options);
+        return jdbcValueGetter.getValue(resultSet, connection, index, field, valueClass, options);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class SimpleJdbcValueAccess<T> implements JdbcValueAccess<T> {
         if (jdbcValueSetter == null) {
             throw new JdbcValueAccessException("Set value is not supported");
         }
-        jdbcValueSetter.setValue(statement, connection, columnIndex, field, value, options);
+        jdbcValueSetter.setValue(statement, connection, index, field, value, options);
     }
 
 }

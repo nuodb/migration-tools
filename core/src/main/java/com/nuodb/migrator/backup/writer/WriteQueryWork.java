@@ -129,15 +129,13 @@ public class WriteQueryWork extends WorkForkJoinTaskBase {
             }
             rowSet.setColumns(columns);
         }
+        rowSet.setName(getRowSetName());
 
         output = backupWriterContext.getFormatFactory().createOutput(
                 backupWriterContext.getFormat(), backupWriterContext.getFormatAttributes());
         output.setRowSet(rowSet);
 
         chunks = newArrayList();
-        if (rowSet.getName() == null) {
-            rowSet.setName(getRowSetName());
-        }
     }
 
     @Override

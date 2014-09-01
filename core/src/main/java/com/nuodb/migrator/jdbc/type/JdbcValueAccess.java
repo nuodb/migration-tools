@@ -40,7 +40,7 @@ public interface JdbcValueAccess<T> {
 
     Field getField();
 
-    int getColumnIndex();
+    int getIndex();
 
     Connection getConnection();
 
