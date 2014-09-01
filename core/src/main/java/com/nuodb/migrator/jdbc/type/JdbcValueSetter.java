@@ -39,6 +39,6 @@ import java.util.Map;
  */
 public interface JdbcValueSetter {
 
-    <X> void setValue(PreparedStatement statement, Connection connection, int columnIndex, Field field, X value,
+    <X> void setValue(PreparedStatement statement, Connection connection, int index, Field field, X value,
                       Map<String, Object> options) throws SQLException;
 }
