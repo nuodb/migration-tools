@@ -474,6 +474,7 @@ public class BackupLoader {
             Query query = createQuery(rowSet, table, backupLoaderContext);
             loadTables.addLoadTable(new LoadTable(rowSet, table, query));
         }
+        backupLoaderContext.setLoadTables(loadTables);
         for (LoadTable loadTable : loadTables) {
             loadTable.setThreads(backupLoaderContext.getParallelizer().
                     getThreads(loadTable, backupLoaderContext));
