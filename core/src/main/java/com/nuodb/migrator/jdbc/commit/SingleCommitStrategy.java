@@ -41,9 +41,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class SingleCommitStrategy implements CommitStrategy {
 
-    public static final CommitStrategy INSTANCE = new SingleCommitStrategy();
-
-    private SingleCommitStrategy() {
+    public SingleCommitStrategy() {
     }
 
     @Override

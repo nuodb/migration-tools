@@ -29,6 +29,8 @@ package com.nuodb.migrator.spec;
 
 import com.nuodb.migrator.backup.loader.BackupLoaderListener;
 import com.nuodb.migrator.backup.loader.Parallelizer;
+import com.nuodb.migrator.backup.loader.TableLevelParallelizer;
+import com.nuodb.migrator.jdbc.commit.BatchCommitStrategy;
 import com.nuodb.migrator.jdbc.commit.CommitStrategy;
 import com.nuodb.migrator.jdbc.query.InsertType;
 
@@ -39,8 +41,6 @@ import java.util.TimeZone;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.nuodb.migrator.backup.loader.Parallelizers.TABLE_LEVEL;
-import static com.nuodb.migrator.jdbc.commit.BatchCommitStrategy.INSTANCE;
 import static com.nuodb.migrator.spec.MigrationMode.DATA;
 import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
 
@@ -49,12 +49,12 @@ import static com.nuodb.migrator.spec.MigrationMode.SCHEMA;
  */
 public class LoadJobSpec extends ScriptGeneratorJobSpecBase {
 
-    private CommitStrategy commitStrategy = INSTANCE;
+    private CommitStrategy commitStrategy = new BatchCommitStrategy();
     private ResourceSpec inputSpec;
     private InsertType insertType;
     private Collection<BackupLoaderListener> listeners = newArrayList();
     private Collection<MigrationMode> migrationModes = newHashSet(DATA, SCHEMA);
-    private Parallelizer parallelizer = TABLE_LEVEL;
+    private Parallelizer parallelizer = new TableLevelParallelizer();
     private Map<String, InsertType> tableInsertTypes = newHashMap();
     private ConnectionSpec targetSpec;
     private TimeZone timeZone;

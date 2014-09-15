@@ -27,45 +27,31 @@
  */
 package com.nuodb.migrator.backup.loader;
 
-import com.nuodb.migrator.backup.BackupOps;
-import com.nuodb.migrator.utils.concurrent.ForkJoinPool;
+import com.nuodb.migrator.utils.ObjectUtils;
 
-import java.util.Iterator;
-
-import static java.lang.Math.*;
+import java.util.Map;
 
 /**
+ * Forking on table level, which means that one thread per table is used
+ *
  * @author Sergey Bushik
  */
-@SuppressWarnings("all")
-public class Parallelizers {
+public class TableLevelParallelizer implements Parallelizer {
 
-    /**
-     * Forking on table level, which means that one thread per table is used
-     */
-    public static Parallelizer TABLE_LEVEL = new Parallelizer() {
-        @Override
-        public int getThreads(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
-            return 1;
-        }
-    };
+    public TableLevelParallelizer() {
+    }
 
-    /**
-     * Forking on row level where the number of workers is based on the weight of row set to the total size of loaded
-     * tables. Notice row level parallelization may (and typically does) reorder of the rows in the loaded table.
-     */
-    public static Parallelizer ROW_LEVEL = new Parallelizer() {
-        @Override
-        public int getThreads(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
-            ForkJoinPool forkJoinPool = (ForkJoinPool) backupLoaderContext.getExecutorService();
-            BackupOps backupOps = backupLoaderContext.getBackupOps();
-            long rowSetSize = loadTable.getRowSet().getSize(backupOps);
-            long backupSize = 0L;
-            for (Iterator<LoadTable> iterator = backupLoaderContext.getLoadTables().iterator(); iterator.hasNext(); ) {
-                backupSize += iterator.next().getRowSet().getSize(backupOps);
-            }
-            int threads = forkJoinPool.getParallelism();
-            return (int) min(max(round(rowSetSize / (double) backupSize * threads), 1), threads);
-        }
-    };
+    @Override
+    public void setAttributes(Map<String, Object> attributes) {
+    }
+
+    @Override
+    public int getThreads(LoadTable loadTable, BackupLoaderContext backupLoaderContext) {
+        return 1;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this);
+    }
 }

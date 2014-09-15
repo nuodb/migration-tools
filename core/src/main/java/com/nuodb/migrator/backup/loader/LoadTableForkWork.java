@@ -90,7 +90,7 @@ public class LoadTableForkWork extends WorkForkJoinTaskBase {
         backupLoaderContext = backupLoaderManager.getBackupLoaderContext();
         statement = getSession().getConnection().prepareStatement(loadTable.getQuery().toString());
         CommitStrategy commitStrategy = backupLoaderContext.getCommitStrategy() != null ?
-                backupLoaderContext.getCommitStrategy() : BatchCommitStrategy.INSTANCE;
+                backupLoaderContext.getCommitStrategy() : new BatchCommitStrategy();
         commitExecutor = commitStrategy.createCommitExecutor(statement, loadTable.getQuery());
     }
 

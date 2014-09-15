@@ -349,7 +349,7 @@ public class CliRunSupport extends CliSupport {
 
     protected Map<String, CommitStrategy> createCommitStrategyMapping() {
         Map<String, CommitStrategy> commitStrategyMapping = new TreeMap<String, CommitStrategy>(CASE_INSENSITIVE_ORDER);
-        commitStrategyMapping.put(COMMIT_STRATEGY_SINGLE, SingleCommitStrategy.INSTANCE);
+        commitStrategyMapping.put(COMMIT_STRATEGY_SINGLE, new SingleCommitStrategy());
         commitStrategyMapping.put(COMMIT_STRATEGY_BATCH, new BatchCommitStrategy());
         return commitStrategyMapping;
     }

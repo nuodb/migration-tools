@@ -67,7 +67,6 @@ import org.slf4j.Logger;
 
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
@@ -75,9 +74,7 @@ import java.util.concurrent.ExecutorService;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.nuodb.migrator.backup.loader.Parallelizers.TABLE_LEVEL;
 import static com.nuodb.migrator.context.ContextUtils.createService;
 import static com.nuodb.migrator.jdbc.JdbcUtils.closeQuietly;
 import static com.nuodb.migrator.jdbc.metadata.DatabaseInfos.NUODB;
@@ -117,7 +114,7 @@ public class BackupLoader {
     private IdentifierNormalizer identifierNormalizer;
     private InsertTypeFactory insertTypeFactory;
     private InspectionManager inspectionManager;
-    private Parallelizer parallelizer = TABLE_LEVEL;
+    private Parallelizer parallelizer = new TableLevelParallelizer();
     private MetaDataSpec metaDataSpec;
     private Collection<MigrationMode> migrationModes = MIGRATION_MODES;
     private PrioritySet<NamingStrategy> namingStrategies;
@@ -361,7 +358,7 @@ public class BackupLoader {
         Database database = getDatabase();
         backupLoaderContext.setDatabase(database != null ? database :
                 openDatabase(backupLoaderContext.getTargetSession()));
-        backupLoaderContext.setLoadTables(createLoadTables(backupLoaderContext));
+        initLoadTables(backupLoaderContext);
         executeWork(new LoadTablesWork(backupLoaderManager), backupLoaderManager);
     }
 
@@ -460,6 +457,15 @@ public class BackupLoader {
         return new LoadConstraintWork(loadConstraint, backupLoaderManager);
     }
 
+    protected void initLoadTables(BackupLoaderContext backupLoaderContext) {
+        LoadTables loadTables = createLoadTables(backupLoaderContext);
+        backupLoaderContext.setLoadTables(loadTables);
+        for (LoadTable loadTable : loadTables) {
+            loadTable.setThreads(backupLoaderContext.getParallelizer().
+                    getThreads(loadTable, backupLoaderContext));
+        }
+    }
+
     protected LoadTables createLoadTables(BackupLoaderContext backupLoaderContext) {
         LoadTables loadTables = new LoadTables();
         for (RowSet rowSet : backupLoaderContext.getBackup().getRowSets()) {
@@ -473,11 +479,6 @@ public class BackupLoader {
             }
             Query query = createQuery(rowSet, table, backupLoaderContext);
             loadTables.addLoadTable(new LoadTable(rowSet, table, query));
-        }
-        backupLoaderContext.setLoadTables(loadTables);
-        for (LoadTable loadTable : loadTables) {
-            loadTable.setThreads(backupLoaderContext.getParallelizer().
-                    getThreads(loadTable, backupLoaderContext));
         }
         return loadTables;
     }

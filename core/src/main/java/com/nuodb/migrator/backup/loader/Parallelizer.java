@@ -27,12 +27,21 @@
  */
 package com.nuodb.migrator.backup.loader;
 
+import java.util.Map;
+
 /**
  * Contract for load table parallelization
  *
  * @author Sergey Bushik
  */
 public interface Parallelizer {
+
+    /**
+     * Sets parallelizer map of attributes
+     *
+     * @param attributes
+     */
+    void setAttributes(Map<String, Object> attributes);
 
     /**
      * Returns number of worker threads to load this table with

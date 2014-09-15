@@ -44,7 +44,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  */
 public class BatchCommitStrategy implements CommitStrategy {
 
-    public static final CommitStrategy INSTANCE = new BatchCommitStrategy();
     public static final String ATTRIBUTE_BATCH_SIZE = "batch.size";
 
     public static final long BATCH_SIZE = 1000;
@@ -120,6 +119,7 @@ public class BatchCommitStrategy implements CommitStrategy {
         return (int) (batchSize ^ (batchSize >>> 32));
     }
 
+    @Override
     public String toString() {
         return ObjectUtils.toString(this);
     }
