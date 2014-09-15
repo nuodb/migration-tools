@@ -103,6 +103,8 @@ public interface CliMessages {
     final String THREADS_ARGUMENT_NAME = "com.nuodb.migrator.threads.argument.name";
     final String PARALLELIZER_OPTION_DESCRIPTION = "com.nuodb.migrator.parallelizer.option.description";
     final String PARALLELIZER_ARGUMENT_NAME = "com.nuodb.migrator.parallelizer.argument.name";
+    final String PARALLELIZER_ATTRIBUTES_OPTION_DESCRIPTION = "com.nuodb.migrator.parallelizer.attributes.option.description";
+    final String PARALLELIZER_ATTRIBUTES_ARGUMENT_NAME = "com.nuodb.migrator.parallelizer.attributes.argument.name";
 
     final String QUERY_LIMIT_OPTION_DESCRIPTION = "com.nuodb.migrator.query.limit.option.description";
     final String QUERY_LIMIT_ARGUMENT_NAME = "com.nuodb.migrator.query.limit.argument.name";

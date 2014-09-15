@@ -29,6 +29,8 @@ package com.nuodb.migrator.cli.run;
 
 import com.google.common.collect.Maps;
 import com.nuodb.migrator.backup.loader.Parallelizer;
+import com.nuodb.migrator.backup.loader.RowLevelParallelizer;
+import com.nuodb.migrator.backup.loader.TableLevelParallelizer;
 import com.nuodb.migrator.cli.parse.Option;
 import com.nuodb.migrator.cli.parse.OptionSet;
 import com.nuodb.migrator.cli.parse.option.GroupBuilder;
@@ -39,11 +41,10 @@ import com.nuodb.migrator.spec.LoadJobSpec;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static com.nuodb.migrator.backup.loader.Parallelizers.ROW_LEVEL;
-import static com.nuodb.migrator.backup.loader.Parallelizers.TABLE_LEVEL;
 import static com.nuodb.migrator.context.ContextUtils.getMessage;
 import static com.nuodb.migrator.utils.Priority.LOW;
 import static com.nuodb.migrator.utils.ReflectionUtils.newInstance;
+import static java.lang.Integer.MAX_VALUE;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 /**
@@ -133,6 +134,20 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
                                 withName(getMessage(PARALLELIZER_ARGUMENT_NAME)).build()
                 ).build();
         group.withOption(parallelizer);
+
+        OptionFormat optionFormat = new OptionFormat(getOptionFormat());
+        optionFormat.setValuesSeparator(null);
+
+        Option parallelizerAttributes = newRegexOptionBuilder().
+                withName(PARALLELIZER_ATTRIBUTES).
+                withDescription(getMessage(PARALLELIZER_ATTRIBUTES_OPTION_DESCRIPTION)).
+                withRegex(PARALLELIZER_ATTRIBUTES, 1, LOW).
+                withArgument(
+                        newArgumentBuilder().
+                                withName(getMessage(PARALLELIZER_ATTRIBUTES_ARGUMENT_NAME)).
+                                withOptionFormat(optionFormat).withMinimum(1).withMaximum(MAX_VALUE).build()
+                ).build();
+        group.withOption(parallelizerAttributes);
     }
 
     protected void parseDataMigrationGroup(OptionSet optionSet, LoadJobSpec jobSpec) {
@@ -161,14 +176,18 @@ public class CliLoadJob extends CliJob<LoadJobSpec> {
         if (parallelizer == null) {
             parallelizer = newInstance(parallelizerValue);
         }
+        parallelizer.setAttributes(parseAttributes(
+                optionSet.<String>getValues(PARALLELIZER_ATTRIBUTES),
+                optionSet.getOption(PARALLELIZER_ATTRIBUTES)));
         jobSpec.setParallelizer(parallelizer);
     }
+
 
     protected Map<String, Parallelizer> createParallelizerMapping() {
         Map<String, Parallelizer> parallelizerMapping =
                 new TreeMap<String, Parallelizer>(CASE_INSENSITIVE_ORDER);
-        parallelizerMapping.put(PARALLELIZER_TABLE_LEVEL, TABLE_LEVEL);
-        parallelizerMapping.put(PARALLELIZER_ROW_LEVEL, ROW_LEVEL);
+        parallelizerMapping.put(PARALLELIZER_TABLE_LEVEL, new TableLevelParallelizer());
+        parallelizerMapping.put(PARALLELIZER_ROW_LEVEL, new RowLevelParallelizer());
         return parallelizerMapping;
     }
 }

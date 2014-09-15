@@ -103,6 +103,7 @@ public interface CliOptions {
     final String COMMIT_STRATEGY = "commit.strategy";
     final String COMMIT_STRATEGY_ATTRIBUTES = "commit.*";
     final String PARALLELIZER = "parallelizer";
+    final String PARALLELIZER_ATTRIBUTES = "parallelizer.*";
     final String PARALLELIZER_SHORT = "p";
 
     final String INPUT = "input.*";

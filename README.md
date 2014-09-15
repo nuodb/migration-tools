@@ -110,6 +110,7 @@ This tool is designed to assist you in migrating data from supported SQL databas
         [executor options, optional]
             [--threads (-t)=[threads]]                                  Number of worker threads, defaults to a number of available processors
             [--parallelizer (-p)=[parallelizer]]                        Parallelization strategy name, either table.level (default), row.level or fully classified class name of a custom parallelizer implementing com.nuodb.migrator.backup.loader.Parallelizer. Table level parallelization activates 1 worker thread per table at max, while row level enables forking with more than 1 thread, where the number of worker threads is based on the weight of the loaded row set to the size of loaded tables. Notice row level forking may (and typically does) reorder the rows in the target table.
+            [--parallelizer.*=[parallelizer attributes]]                Parallelizer attributes, such as min.rows.per.thread and max.rows.per.thread which are min possible and max allowed number of rows per thread, default are 100000 and 0 (unlimited) correspondingly
 
 ### Generate a schema for a target NuoDB database ###
 
