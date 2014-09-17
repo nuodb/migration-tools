@@ -66,7 +66,7 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
     protected void init(Reader reader) {
         try {
             bsonReader = createBsonFactory().createJsonParser(reader);
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             throw new InputFormatException(exception);
         }
     }
@@ -75,7 +75,7 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
     protected void init(InputStream inputStream) {
         try {
             bsonReader = createBsonFactory().createJsonParser(inputStream);
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             throw new InputFormatException(exception);
         }
     }
@@ -155,10 +155,13 @@ public class BsonInputFormat extends InputFormatBase implements BsonAttributes {
 
     @Override
     public void close() {
-        try {
-            bsonReader.close();
-        } catch (IOException exception) {
-            throw new InputFormatException(exception);
+        if (bsonReader != null) {
+            try {
+                bsonReader.close();
+            } catch (IOException exception) {
+                throw new InputFormatException(exception);
+            }
+            bsonReader = null;
         }
     }
 }
