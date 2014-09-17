@@ -61,10 +61,10 @@ public class BsonOutput extends OutputBase implements BsonFormat {
     }
 
     @Override
-    protected void init(OutputStream outputStream) {
+    protected void init(OutputStream output) {
         try {
-            bsonWriter = createBsonFactory().createJsonGenerator(outputStream);
-        } catch (IOException exception) {
+            bsonWriter = createBsonFactory().createJsonGenerator(output);
+        } catch (Exception exception) {
             throw new OutputException(exception);
         }
     }
@@ -73,7 +73,7 @@ public class BsonOutput extends OutputBase implements BsonFormat {
     protected void init(Writer writer) {
         try {
             bsonWriter = createBsonFactory().createJsonGenerator(writer);
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             throw new OutputException(exception);
         }
     }
