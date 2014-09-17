@@ -66,16 +66,16 @@ public class BsonInput extends InputBase implements BsonFormat {
     protected void init(Reader reader) {
         try {
             bsonReader = createBsonFactory().createJsonParser(reader);
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             throw new InputException(exception);
         }
     }
 
     @Override
-    protected void init(InputStream inputStream) {
+    protected void init(InputStream input) {
         try {
-            bsonReader = createBsonFactory().createJsonParser(inputStream);
-        } catch (IOException exception) {
+            bsonReader = createBsonFactory().createJsonParser(input);
+        } catch (Exception exception) {
             throw new InputException(exception);
         }
     }
