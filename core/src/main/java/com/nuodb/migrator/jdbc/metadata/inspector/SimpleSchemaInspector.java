@@ -38,7 +38,6 @@ import java.sql.SQLException;
 
 import static com.nuodb.migrator.jdbc.metadata.MetaDataType.SCHEMA;
 import static com.nuodb.migrator.jdbc.metadata.inspector.InspectionResultsUtils.addSchema;
-import static com.nuodb.migrator.jdbc.model.FieldFactory.newFieldList;
 
 /**
  * @author Sergey Bushik

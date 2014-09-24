@@ -29,7 +29,6 @@ package com.nuodb.migrator.jdbc.metadata.inspector;
 
 import com.nuodb.migrator.jdbc.metadata.Schema;
 import com.nuodb.migrator.jdbc.metadata.Table;
-import com.nuodb.migrator.utils.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
