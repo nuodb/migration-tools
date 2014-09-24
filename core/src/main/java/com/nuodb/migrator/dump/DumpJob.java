@@ -41,7 +41,6 @@ import com.nuodb.migrator.spec.QuerySpec;
 import com.nuodb.migrator.spec.ResourceSpec;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -79,6 +78,7 @@ public class DumpJob extends HasServicesJobBase<DumpJobSpec> {
         backupWriter.setFormatFactory(createFormatFactory());
         backupWriter.setInspectionManager(createInspectionManager());
         backupWriter.setMetaDataSpec(getMetaDataSpec());
+        backupWriter.setMigrationModes(getMigrationModes());
         backupWriter.setQueryLimit(getQueryLimit());
         backupWriter.setQuerySpecs(getQuerySpecs());
         backupWriter.setSourceSpec(getSourceSpec());
